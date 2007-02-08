@@ -1,0 +1,27 @@
+<!ENTITY optionsWindow.title         "Brief options">
+<!ENTITY optionsWindow.dimensions    "width: 30em; height: 40em;">
+
+<!-- Main pane -->
+<!ENTITY mainPane.label              "Main">
+<!ENTITY selectFolder.label          "Select folder">
+<!ENTITY updateGroup.caption         "Updating">
+<!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
+<!ENTITY checkForUpdatesAfter.label  "minutes">
+<!ENTITY updateAtStartup.label       "Update feeds at startup">
+<!ENTITY showNotification.label      "Show notification when updates are found">
+
+<!-- Feed display pane -->
+<!ENTITY displayPane.label           "Display">
+<!ENTITY showStatusbarIcon.label     "Show statusbar icon">
+<!ENTITY showFavicons.label          "Show favicons">
+
+<!ENTITY entriesPerPageBefore.label  "Show">
+<!ENTITY entriesPerPageAfter.label   "entries per page">
+<!ENTITY feedViewGroup.caption       "Feed Content">
+<!ENTITY enableCustomStyle.label     "Use custom style of the feed content">
+<!ENTITY browseCustomStyle.label     "Browse">
+
+<!-- Select Live Bookmarks folder dialog -->
+<!ENTITY selectFolderDialog.title    "Select folder">
+<!ENTITY folderTree.label            "Select folder containing your Live Bookmarks:">
+

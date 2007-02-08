@@ -1,0 +1,192 @@
+#left-pane {
+  width: 22em;
+}
+
+
+#feed-list > treechildren {
+  -moz-binding: url('chrome://brief/content/bindings.xml#feedlist-treebody');
+  }
+  
+treechildren::-moz-tree-line {
+  visibility: hidden;
+  }
+  
+treechildren::-moz-tree-twisty {
+  width: 0 !important;
+  height: 0 !important;
+  }  
+  
+treechildren::-moz-tree-row {
+  height: 1.6em;
+  }
+
+treechildren::-moz-tree-cell-text(bold) {
+  font-weight: bold;
+  }
+
+treechildren::-moz-tree-image {
+  padding-right: 4px;
+  }
+  
+treechildren::-moz-tree-image(container) {
+  list-style-image: url('chrome://global/skin/icons/folder-item.png') !important;
+  -moz-image-region: rect(0px, 32px, 16px, 16px);
+  }
+
+treechildren::-moz-tree-image(open) {
+  -moz-image-region: rect(16px, 32px, 32px, 16px);
+  }
+  
+treechildren::-moz-tree-image(feed-item) {
+  list-style-image: url('chrome://browser/skin/livemark-folder.png') !important;
+  -moz-image-region: rect(0px, 16px, 16px, 0px) !important;
+  width: 16px;
+  height: 16px;
+  }
+  
+treechildren::-moz-tree-image(feed-item bold) {
+  list-style-image: url('chrome://browser/skin/livemark-folder.png') !important;
+  -moz-image-region: rect(16px, 16px, 32px, 0px) !important;
+  }
+
+treechildren::-moz-tree-image(unreadFolder) {
+  list-style-image: url('chrome://brief/skin/icons/unreadFolder.png') !important;
+  }
+  
+treechildren::-moz-tree-image(trashFolder) {
+  list-style-image: url('chrome://brief/skin/icons/trash.png') !important;
+  }
+  
+treechildren::-moz-tree-image(starredFolder) {
+  list-style-image: url('chrome://brief/skin/icons/starredFolder.png') !important;
+  }
+
+#pick-folder-button {
+  padding-top: 5em;
+  -moz-box-orient: vertical;
+  list-style-image: url('chrome://brief/skin/folder.png');
+  }
+
+
+/*        Toolbars          */
+
+toolbar, toolbaritem {
+  -moz-box-align: center;
+  }
+
+toolbarbutton {
+  padding: 4px;
+  }
+
+#feed-list-toolbar {
+  padding-left: 5px;
+  }
+  
+#feed-view-toolbar {
+  padding: 0 20px 0 10px;
+  }
+
+#searchbar-container {
+  margin-right: 10px;
+  }
+  
+#searchbar {
+  -moz-binding: url('chrome://brief/content/bindings.xml#searchbar');
+  }
+  
+#update-button {
+  list-style-image: url('toolbar/updateFeeds.png');
+  }
+
+#options-button {
+  list-style-image: url('toolbar/options.png');
+  }
+
+#mark-view-read {
+  list-style-image: url('toolbar/markViewRead.png');
+  }
+
+#mark-view-unread {
+  list-style-image: url('toolbar/markViewUnread.png');
+  }
+  
+#view-constraint-box {
+  margin-right: 10px;
+  }
+
+#prev-page {
+  list-style-image: url('toolbar/previousPage.png');
+  }
+  
+#prev-page[disabled='true'] {
+  list-style-image: url('toolbar/previousPage-disabled.png');
+  }
+
+#next-page {
+  list-style-image: url('toolbar/nextPage.png');
+  }
+  
+#next-page[disabled='true'] {
+  list-style-image: url('toolbar/nextPage-disabled.png');
+  }
+
+#update-progress {
+  height: 25px;
+  }
+
+
+#searchbar {
+  width: 180px;
+  }
+  
+
+#searchbar[showingDescription]  {
+  color: GrayText;
+  }
+
+.search-scope-button {
+  -moz-appearance: none;
+  -moz-binding: none;
+  cursor: default;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  -moz-margin-start: 0px;
+  -moz-margin-end: 4px;
+  -moz-user-focus: none;
+  }
+
+.searchbar-button-image {
+  margin: 0px;
+  list-style-image: url('chrome://brief/skin/icons/search.png');
+  }
+
+.searchbar-button-dropmarker {
+  -moz-margin-start: 12px;
+  margin-top: 13px;
+  list-style-image: url('chrome://brief/skin/icons/dropmarker.png');
+  }
+
+.searchbar-clearbutton {
+  -moz-appearance: none;
+  border: none !important;
+  cursor: default;
+  list-style-image: url('chrome://brief/skin/icons/quick-search-clear.png');
+  -moz-image-region: rect(0px, 16px, 16px, 0px);
+  -moz-margin-start: 4px;
+  -moz-margin-end: 2px;
+  padding: 0px !important;
+  }
+
+.searchbar-clearbutton > .toolbarbutton-icon {
+  -moz-margin-end: 0px; /* override toolkit's default value */
+  }
+
+.searchbar-clearbutton:hover {
+  -moz-image-region: rect(0px, 32px, 16px, 16px);
+  padding: 0px !important;
+  }
+
+.searchbar-clearbutton:hover:active {
+  -moz-image-region: rect(0px, 48px, 16px, 32px);
+  padding: 0px !important;
+  }

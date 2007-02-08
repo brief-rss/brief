@@ -1,0 +1,31 @@
+<!ENTITY pickFolder.label          "Choose Live Bookmarks Folder">
+<!ENTITY updateButton.tooltip      "Check all feeds for updates">
+<!ENTITY showOptions.tooltip       "Open Brief options">
+<!ENTITY markViewRead.tooltip      "Mark currently viewed entries as read">
+<!ENTITY markViewUnread.tooltip    "Mark currently viewed entries as unread">
+<!ENTITY searchBox.label           "Search:">
+<!ENTITY searchCurrentView.label   "Search current view">
+<!ENTITY searchAllFeeds.label      "Search all feeds">
+<!ENTITY viewConstraintList.label  "View:">
+<!ENTITY viewAll.label             "All">
+<!ENTITY viewUnread.label          "Unread">
+<!ENTITY viewStarred.label         "Starred">
+<!ENTITY previousPage.tooltip      "Show newer entries">
+<!ENTITY nextPage.tooltip          "Show older entries">
+
+<!ENTITY unreadFolder.label        "Unread">
+<!ENTITY starredFolder.label       "Starred">
+<!ENTITY trashFolder.label         "Trash">
+
+<!-- Feed list context menu -->
+<!ENTITY ctxMarkRead.label        "Mark As Read" >
+<!ENTITY ctxUpdateFeed.label      "Update Feed">
+<!ENTITY ctxOpenWebsite.label     "Open website">
+<!ENTITY ctxEmptyTrash.label      "Empty Trash">
+
+
+<!-- Feedview -->
+<!ENTITY deleteEntry.label   "Delete entry">
+<!ENTITY restoreEntry.label  "Restore entry">
+<!ENTITY starEntry.label     "Star entry">
+<!ENTITY unstarEntry.label   "Unstar entry"> 
