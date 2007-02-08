@@ -1,0 +1,166 @@
+body {
+  background: #f7fbfc;
+  font-size: 62.5%;
+  margin: 0;
+  padding: 0;
+  }
+		
+/* ----------------  Header ----------------- */
+
+#header {
+	background: #1d272d;
+  border-bottom: 10px solid #646664;
+  color: #eaeaea;
+  display: block;
+  font-family: Verdana, sans-serif;
+  padding: 1em 5% 3px;
+  text-decoration: none;
+  }
+
+#feed-image {
+  border: none;
+  float: left;
+  }
+
+#feed-title {
+  clear: both;
+  color: #eaeaea;
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 0;
+  padding-top: 0;
+  text-align: center;
+  }
+
+#feed-subtitle {
+	margin-top: 0.5em;
+  font-size: 1.4em;
+  font-weight: normal;
+  text-align: left;
+  }
+  
+#feed-content {
+  margin: 2em auto 0 auto;
+  max-width: 80em;
+  }
+  
+/* ----------------  Article ----------------- */
+
+.article-container {
+	-moz-binding: url('chrome://brief/content/bindings.xml#feedentry');
+  background-color: #fdfdfd;
+  border: 1px #bcc8cb solid;
+  -moz-border-radius: 2px;
+  margin: 0 1em 2em;
+  overflow: auto;
+  }
+  
+  
+/*               Article header               */
+.article-header {
+  background: #fdfdfd url('chrome://brief/skin/unreadEntryBackground.png') repeat-x;
+  padding: 0.5em;
+  height: 3em;
+  }
+  
+.article-container[read='true'] .article-header {
+  background: #fdfdfd url('chrome://brief/skin/readEntryBackground.png') repeat-x;
+  }
+  
+.article-title-link {
+  font-family: Verdana, sans-serif;
+  font-size: 1.4em;
+  font-weight: bold;
+  text-decoration: none;
+  color: #0f0f0f;
+  }
+  
+.article-container[read='true'] .article-title-link { 
+  font-weight: normal;
+  }
+  
+.star-image {
+  float: left;
+  margin-right: 3px;
+  }
+  
+.article-container:not([starred='true']) .star-image {
+  display: none;
+  }
+ 
+
+
+/*          Article controls             */
+
+.article-controls  {
+  display: table-cell;
+  float: right;
+  font-size: 1.2em;
+  margin-top: -0.2em;
+  }
+
+.article-controls > * {
+  vertical-align: middle;
+  }  
+
+.mark-read  {
+  padding: 0 2px;
+  }
+  
+.actions-button {
+  min-width: 0;
+  list-style-image: url('chrome://brief/skin/icons/actions-list.png');
+  }
+
+.star-entry {
+  list-style-image: url('chrome://brief/skin/icons/star.png');
+  }
+
+.delete-entry {
+  list-style-image: url('chrome://brief/skin/icons/delete-entry.png');
+  }
+  
+#feed-content[trash] .delete-entry {
+  display: none;
+  }
+  
+.article-container[starred] .star-entry {
+  list-style-image: url('chrome://brief/skin/icons/unstar.png');
+  }
+  
+#feed-content:not([trash]) .restore-entry {
+  display: none;
+  }
+
+
+/*        Article main area              */
+  
+.article-main {
+  padding: 0 2em;
+  }
+
+.article-date {
+	color: #8f8f8f;
+	font-size: 1.4em;
+  font-family: Arial, serif;
+	margin: 0.5em 0 0 0;
+  text-align: right;
+  }
+  
+.article-content {
+	color: #101d27;
+  font-family: Times New Roman, serif;
+  font-size: 1.4em;
+  margin: 0.5em 0 1.5em 0;
+  }
+  
+.article-content a { 
+	border-bottom: 1px solid #0c2845;
+	color: #0c2845; 
+  text-decoration: none; 
+  }
+
+.article-content a:visited	{ 
+  border-color: #3f5476;
+	color: #3f5476;
+  }

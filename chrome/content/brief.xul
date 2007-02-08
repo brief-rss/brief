@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
+
+<window id="brief-window"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="Brief"
+        onload="brief.init();"
+        onunload="brief.unload();">
+
+    <script type="application/x-javascript" src="brief.js"/>
+    <script type="application/x-javascript" src="feedlist.js"/>
+    <script type="application/x-javascript" src="feedview.js"/>
+    
+    <popupset id="main-popupset">
+        <menupopup id="feed-list-popup"
+                   onpopupshowing="feedList.createContextMenu(event);">
+            <menuitem id="ctx-mark-feed-read"
+                      label="&ctxMarkRead.label;"
+                      oncommand="brief.ctx_markItemRead(event);"/>
+            <menuitem id="ctx-update-feed"
+                      label="&ctxUpdateFeed.label;"
+                      oncommand="brief.ctx_updateFeed(event);"/>
+            <menuitem id="ctx-open-website"
+                      label="&ctxOpenWebsite.label;"
+                      oncommand="brief.ctx_openWebsite(event);"/>
+            <menuitem id="ctx-empty-trash"
+                      label="&ctxEmptyTrash.label;"
+                      oncommand="brief.ctx_emptyTrash(event);"/>
+        </menupopup>
+    </popupset>
+    
+    <stringbundleset id="string-bundles">
+        <stringbundle id="main-bundle" 
+                      src="chrome://brief/locale/brief.properties"/>
+    </stringbundleset>
+    
+    <hbox id="main-box" flex="1">
+        <vbox id="left-pane" persist="width">  
+            <toolbox>
+                <toolbar id="feed-list-toolbar">
+                    <toolbarbutton id="update-button"
+                                   tooltiptext="&updateButton.tooltip;"
+                                   oncommand="brief.updateAllFeeds();"/>
+                                        <toolbaritem id="searchbar-container">
+                        <textbox id="searchbar"
+                                 type="timed"
+                                 timeout="500"
+                                 searchScope="1"
+                                 persist="searchScope"
+                                 />
+                    </toolbaritem>
+                    <spacer flex="1"/>
+                    <toolbarbutton id="options-button"
+                                   tooltiptext="&showOptions.tooltip;"
+                                   oncommand="brief.openOptions();"/>
+                </toolbar>
+            </toolbox>
+            <deck id="feed-list-deck" selectedIndex="0" flex="1">
+                <tree id="feed-list" flex="1" 
+                      hidecolumnpicker="true"
+                      seltype="single"
+                      onselect="feedList.onselect(event);"
+                      contextmenu="feed-list-popup">
+                
+                    <treecols>
+                        <treecol id="name"
+                                 primary="true" flex="1"
+                                 hideheader="true"/>
+                    </treecols>
+                    
+                    <treechildren id="top-level-children">
+                        <treeitem>
+                            <treerow>
+                                <treecell id="unread-folder"
+                                          label="&unreadFolder.label;"
+                                          specialView="true"
+                                          properties="unreadFolder "/>
+                            </treerow>
+                        </treeitem>
+                        <treeitem>
+                            <treerow>
+                                <treecell id="starred-folder"
+                                          label="&starredFolder.label;"
+                                          specialView="true"
+                                          properties="starredFolder "/>
+                            </treerow>
+                        </treeitem>
+                        <treeitem>
+                            <treerow>
+                                <treecell id="trash-folder"
+                                          label="&trashFolder.label;"
+                                          specialView="true"
+                                          properties="trashFolder "/>
+                            </treerow>
+                        </treeitem>
+                        <treeseparator id="special-folders-separator"/>
+                    </treechildren>
+                </tree>
+                <toolbarbutton id="pick-folder-button"
+                               label="&pickFolder.label;"
+                               oncommand="brief.openOptions('mainPane');"/>
+            </deck>
+            <progressmeter id="update-progress"
+                           mode="determined"
+                           hidden="true"/>
+        </vbox>
+        <splitter/>
+        <vbox flex="1">
+            <toolbox>
+                <toolbar id="feed-view-toolbar"
+                         hidden="true">
+                    <toolbarbutton id="mark-view-read"
+                                   tooltiptext="&markViewRead.tooltip;"
+                                   oncommand="brief.markCurrentViewRead(true);"/>
+                    <toolbarbutton id="mark-view-unread"
+                                   tooltiptext="&markViewUnread.tooltip;"
+                                   oncommand="brief.markCurrentViewRead(false);"/>
+                    <spacer flex="1"/>
+                    <toolbaritem id="view-constraint-box">
+                        <label value="&viewConstraintList.label;"/>
+                        <menulist id="view-constraint-list"
+                                  oncommand="brief.onConstraintListCmd(event);">
+                            <menupopup>
+                                <menuitem id="show-all"
+                                          label="&viewAll.label;"/>
+                                <menuitem id="show-unread"
+                                          label="&viewUnread.label;"/>
+                                <menuitem id="show-starred"
+                                          label="&viewStarred.label;"/>
+                            </menupopup>
+                        </menulist>
+                    </toolbaritem>          
+                    <toolbaritem id="navigation-box">
+                        <toolbarbutton id="prev-page"
+                                       tooltiptext="&previousPage.tooltip;"
+                                       oncommand="brief.showPrevPage();"/>
+                        <description id="page-desc"/>
+                        <toolbarbutton id="next-page"
+                                       tooltiptext="&nextPage.tooltip;"
+                                       oncommand="brief.showNextPage();"/>
+                    </toolbaritem>
+                </toolbar>
+            </toolbox>
+            <browser id="feed-view" flex="1"
+                     type="content"/>
+        </vbox>
+    </hbox>
+
+</window>

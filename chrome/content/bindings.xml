@@ -1,0 +1,461 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE bindings SYSTEM "chrome://brief/locale/brief.dtd">
+
+<bindings id="brief"
+          xmlns="http://www.mozilla.org/xbl"
+          xmlns:xbl="http://www.mozilla.org/xbl"
+          xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+          xmlns:html="http://www.w3.org/1999/xhtml">
+  
+  <binding id="feedentry">
+    <content>
+      <html:div class="article-header">
+        <html:img class="star-image"
+                  src="chrome://brief/skin/icons/star.png"/>
+        
+        <html:div class="article-controls">
+          <xul:button anonid="mark-read" class="mark-read"/>
+          <xul:button class="actions-button" type="menu" popup="_child">
+            <xul:menupopup class="actions-popup">
+                <xul:menuitem anonid="star-entry" 
+                              class="star-entry menuitem-iconic"/>
+                <xul:menuseparator/>
+                <xul:menuitem anonid="delete-entry"
+                              class="delete-entry menuitem-iconic"
+                              label="&deleteEntry.label;"/>
+                <xul:menuitem anonid="restore-entry"
+                              class="restore-entry menuitem-iconic"
+                              label="&restoreEntry.label;"/>
+               </xul:menupopup>
+          </xul:button>
+        </html:div>
+        <html:a class="article-title-link"/>
+      </html:div>
+      
+      <html:div class="article-main">
+        <html:div class="article-date"/>
+        <html:div class="article-content"/>
+      </html:div>
+      
+      <children/>
+    </content>
+
+    <implementation>
+      <constructor>
+        <![CDATA[
+        XMLHttpRequest = null;
+        
+        // Get the data passed to us through attributes
+        var entryURL  = this.getAttribute('entryURL');
+        var title     = this.getAttribute('title');
+        var summary   = this.getAttribute('summary');
+        var content   = this.getAttribute('content');
+        var date      = new Date(parseInt(this.getAttribute('date')));
+        var isRead    = this.getAttribute('read');
+        var isStarred = this.getAttribute('starred'); 
+
+        // Find elements
+        var titleElem = 
+         document.getAnonymousElementByAttribute(this, 'class', 'article-title-link');
+        var dateElem = 
+         document.getAnonymousElementByAttribute(this, 'class', 'article-date');
+        var contentElem = 
+         document.getAnonymousElementByAttribute(this, 'class', 'article-content');
+        var markReadButton = 
+         document.getAnonymousElementByAttribute(this, 'class', 'mark-read');
+        var starEntryItem = 
+         document.getAnonymousElementByAttribute(this, 'anonid', 'star-entry');
+        
+        // Construct elements contents from feed entry data 
+        titleElem.setAttribute('href', entryURL);
+        titleElem.textContent = title;
+        dateElem.textContent = date.toLocaleString();
+        contentElem.innerHTML = content ? content : summary;
+        
+        var feedContentDiv = document.getElementById('feed-content');
+        if (isRead)
+          markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
+        else 
+          markReadButton.label = feedContentDiv.getAttribute('markReadString');
+        if (isStarred)
+          starEntryItem.label = feedContentDiv.getAttribute('unstarString');
+        else
+          starEntryItem.label = feedContentDiv.getAttribute('starString'); 
+        
+        // Remove no longer needed attributes
+        this.removeAttribute('entryURL');
+        this.removeAttribute('title');
+        this.removeAttribute('summary');
+        this.removeAttribute('content');
+        this.removeAttribute('date');
+        ]]>
+      </constructor>
+      
+      <method name="toggleReadStatus">
+        <body>
+          <![CDATA[
+          if (this.hasAttribute('read'))
+            this.removeAttribute('read');
+          else
+            this.setAttribute('read', 'true');
+         
+          var evt = document.createEvent('Events');
+          evt.initEvent('MarkEntryRead', false, false);
+          this.dispatchEvent(evt);
+          ]]>
+        </body>
+      </method>
+      
+    </implementation>
+    
+    <handlers>
+      <handler event="command">
+        <![CDATA[
+        var anonid = event.originalTarget.getAttribute('anonid');
+        switch (anonid) {
+          case 'mark-read':
+            this.toggleReadStatus();
+            break;
+        
+          case 'delete-entry':
+            var evt = document.createEvent('Events');
+            evt.initEvent('DeleteEntry', false, false);
+            this.dispatchEvent(evt);
+            break;
+            
+          case 'restore-entry':
+            var evt = document.createEvent('Events');
+            evt.initEvent('RestoreEntry', false, false);
+            this.dispatchEvent(evt);
+            break;
+            
+          case 'star-entry':
+            var evt = document.createEvent('Events');
+            evt.initEvent('StarEntry', false, false);
+            this.dispatchEvent(evt);
+            
+            var starEntryItem = document.
+                   getAnonymousElementByAttribute(this, 'anonid', 'star-entry');
+            if (this.hasAttribute('starred')) {
+              this.removeAttribute('starred');
+              starEntryItem.label = 'Star Entry';
+            }
+            else {
+              this.setAttribute('starred', 'true');
+              starEntryItem.label = 'Unstar Entry';
+            }
+            break;
+        }
+        ]]>
+      </handler>
+      
+      <handler event="click" button="0" clickcount="2">
+        <![CDATA[
+         var target = event.originalTarget;
+         var bindingParent = document.getBindingParent(event.originalTarget);
+         
+         // If double-click happened in the article controls are, do nothing
+         // since it's too easy to trigger that accidentally.
+         while (target != bindingParent) {
+           if (target.className == 'article-controls')
+             return;
+           target = target.parentNode;
+         }
+         
+         bindingParent.toggleReadStatus();
+        ]]>
+      </handler>
+      
+      <handler event="DOMAttrModified">
+        <![CDATA[
+        if (event.attrName == "read") {
+          var markReadButton = 
+            document.getAnonymousElementByAttribute(this, 'class', 'mark-read');
+          var feedContentDiv = document.getElementById('feed-content');
+          
+          if (event.newValue == 'true')
+            markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
+          else
+            markReadButton.label = feedContentDiv.getAttribute('markReadString');
+        }
+        ]]>
+      </handler>
+    </handlers>
+  </binding>
+  
+  <!-- Taken from mail/base/content/search.xml -->  
+  <binding id="searchbar" 
+           extends="chrome://global/content/bindings/textbox.xml#timed-textbox">
+    <content> 
+      <children/>
+      <xul:hbox class="searchbar-textbox textbox-input-box" flex="1">
+
+        <xul:button class="search-scope-button" popup="_child">
+          <xul:menupopup anonid="searchbar-popup" position="after_start">
+            <xul:menuitem anonid="search-all"
+                          label="&searchAllFeeds.label;"
+                          type="radio"
+                          value="1"/>
+            <xul:menuitem anonid="search-current"
+                          label="&searchCurrentView.label;"
+                          type="radio"
+                          value="0"/>
+          </xul:menupopup>
+          
+          <xul:stack flex="1">
+            <xul:hbox align="center">
+              <xul:image class="searchbar-button-image"/>
+            </xul:hbox>
+            <xul:hbox align="center">
+              <xul:image class="searchbar-button-dropmarker"/>
+            </xul:hbox>
+          </xul:stack>
+
+        </xul:button>
+        
+        <html:input class="searchbar-textbox textbox-input" anonid="input" 
+                    allowevents="true"
+                    flex="1"
+                    xbl:inherits="onfocus,onblur,value,type,maxlength,disabled,size,readonly,tabindex,accesskey"/>
+      </xul:hbox>
+      
+      <xul:toolbarbutton anonid="searchbar-clearbutton" 
+                         class="searchbar-clearbutton"
+                         hidden="true"/>
+    </content>
+    <implementation>
+      <constructor>
+        <![CDATA[
+        this.clearButton = document.getAnonymousElementByAttribute(this, 'anonid', 
+                                                       'searchbar-clearbutton');
+        var menuitem = document.getAnonymousElementByAttribute(this, 'value',
+                                                   this.searchScope.toString());
+        menuitem.setAttribute('checked', true);
+        this.setAttribute('showingDescription', true);
+        ]]>
+      </constructor>
+      
+      <field name="clearButton">
+        null
+      </field>
+      <property name="searchScope"
+                onget="return this.getAttribute('searchScope');">
+        <setter>
+          <![CDATA[
+          if (val != this.searchScope) {
+            this.setAttribute('searchScope', val.toString());
+            if (!this.hasAttribute('showingDescription') && this.value)
+              brief.performSearch();
+          }
+          return val;
+          ]]>
+        </setter>
+      </property>
+    </implementation>
+    
+    <handlers>
+      <handler event="command">
+        <![CDATA[
+        var target = event.originalTarget;
+        var textbox = document.getBindingParent(target); 
+        
+        if (target.getAttribute('anonid') == 'search-current' ||
+            target.getAttribute('anonid') == 'search-all') {
+          if (textbox.hasAttribute('showingDescription'))
+            textbox.value = target.label;
+          textbox.searchScope = target.value;
+        }
+        
+        else if (target.id == 'searchbar') {
+          brief.performSearch(event);
+        }
+        
+        else if (target.getAttribute('anonid') == 'searchbar-clearbutton') {
+          this.value = '';
+          this.clearButton.hidden = true;
+          brief.performSearch(event);
+          this.blur();
+        }
+        ]]>
+      </handler>
+      <handler event="focus" phase="capturing">
+        <![CDATA[
+        if (event.target.hasAttribute('showingDescription'))
+          event.target.removeAttribute('showingDescription');
+        ]]>
+      </handler>
+      <handler event="blur" phase="capturing">
+        <![CDATA[
+        var target = event.target;
+        if (!target.value)
+          target.setAttribute('showingDescription', true);
+        ]]>
+      </handler>
+      <handler event="input">
+        <![CDATA[
+        this.clearButton.hidden = !this.value;
+        ]]>
+      </handler>
+      <handler event="DOMAttrModified">
+        <![CDATA[
+        if (event.attrName == 'showingDescription') {
+          if (event.target.hasAttribute('showingDescription')) {
+            var menuitem = document.getAnonymousElementByAttribute(this, 'value', 
+                                                   this.searchScope.toString());
+            this.value = menuitem.label;
+            this.clearButton.hidden = true;
+          }
+          else
+            event.target.value = '';
+        }
+        ]]>
+      </handler>
+    </handlers>
+  </binding>
+  
+  
+  <!-- Copied over from tree.xml. We have to copy the entire binding just to
+       overwrite the mousedown handler. -->
+  <binding id="feedlist-treebody" 
+           extends="chrome://global/content/bindings/tree.xml#tree-base">
+    <implementation>
+      <constructor>
+        if ("_ensureColumnOrder" in this.parentNode)
+          this.parentNode._ensureColumnOrder();
+      </constructor>
+
+      <field name="_lastSelectedRow">
+        -1
+      </field>
+    </implementation>
+    <handlers>
+      <!-- If there is no modifier key, we select on mousedown, not
+           click, so that drags work correctly. -->
+      <handler event="mousedown" clickcount="1">
+      <![CDATA[
+         if (event.button == 0) {
+           var row = {};
+           var col = {};
+           var obj = {};
+           var b = this.parentNode.treeBoxObject;
+           b.getCellAt(event.clientX, event.clientY, row, col, obj);
+
+           // save off the last selected row
+           this._lastSelectedRow = row.value;
+           if (row.value == -1)
+             return;
+             
+          var item = this.parentNode.view.getItemAtIndex(row.value);
+          if (item.localName == 'treeseparator')
+            return;
+
+           if (col.value && obj.value != "twisty") {
+             if (col.value.cycler)
+               b.view.cycleCell(row.value, col.value);
+             else if (col.value.type == Components.interfaces.nsITreeColumn.TYPE_CHECKBOX) {
+               if (this.parentNode.editable && col.value.editable &&
+                   b.view.isEditable(row.value, col.value)) {
+                 var value = b.view.getCellValue(row.value, col.value);
+                 value = value == "true" ? "false" : "true";
+                 b.view.setCellValue(row.value, col.value, value);
+               }
+             }
+             else
+               if (!b.view.selection.isSelected(row.value)) {
+                 b.view.selection.select(row.value);
+                 b.ensureRowIsVisible(row.value);
+               }
+           }
+         }
+      ]]>
+      </handler>
+
+      <!-- On a click (up+down on the same item), deselect everything
+           except this item. -->
+      <handler event="click" button="0" clickcount="1">
+      <![CDATA[
+        var row = {};
+        var col = {};
+        var obj = {};
+        var b = this.parentNode.treeBoxObject;
+        b.getCellAt(event.clientX, event.clientY, row, col, obj);
+
+        if (row.value == -1)
+          return;
+        
+        var item = this.parentNode.view.getItemAtIndex(row.value);
+        if (item.localName == 'treeseparator')
+          return;
+        
+        if (obj.value == "twisty") {
+          if (b.view.selection.currentIndex >= 0 &&
+              b.view.isContainerOpen(row.value)) {
+            var parentIndex = b.view.getParentIndex(b.view.selection.currentIndex);
+            while (parentIndex >= 0 && parentIndex != row.value)
+              parentIndex = b.view.getParentIndex(parentIndex);
+            if (parentIndex == row.value)
+              b.view.selection.select(parentIndex);
+          }
+          this.parentNode.changeOpenState(row.value);
+          return;
+        }
+
+        if (! b.view.selection.single) {
+          var augment = this._isAccelPressed(event);
+          if (event.shiftKey) {
+            b.view.selection.rangedSelect(-1, row.value, augment);
+            b.ensureRowIsVisible(row.value);
+            return;
+          }
+          if (augment) {
+            b.view.selection.toggleSelect(row.value);
+            b.ensureRowIsVisible(row.value);
+            b.view.selection.currentIndex = row.value;
+            return;
+          }
+        }
+
+        /* We want to deselect all the selected items except what was
+          clicked, UNLESS it was a right-click.  We have to do this
+          in click rather than mousedown so that you can drag a
+          selected group of items */
+
+        if (!col.value) return;
+
+        // if the last row has changed in between the time we 
+        // mousedown and the time we click, don't fire the select handler.
+        // see bug #92366
+        if (!col.value.cycler && this._lastSelectedRow == row.value &&
+            col.value.type != Components.interfaces.nsITreeColumn.TYPE_CHECKBOX) {
+          b.view.selection.select(row.value);  
+          b.ensureRowIsVisible(row.value);
+        }
+      ]]>
+      </handler>
+
+      <!-- double-click -->
+      <handler event="click" clickcount="2">
+      <![CDATA[
+        var b = this.parentNode.treeBoxObject;
+        var row = b.view.selection.currentIndex;
+        if (row == -1 || !b.view.isContainer(row))
+          return;
+
+         var col = {};
+         var obj = {};
+         b.getCellAt(event.clientX, event.clientY, {}, col, obj);
+
+         // Cyclers and twisties respond to single clicks, not double clicks
+         if (!col.value.cycler && obj.value != "twisty")
+           this.parentNode.changeOpenState(row);
+      ]]>
+      </handler>
+      
+    </handlers>
+  </binding>
+
+ 
+
+  
+</bindings>

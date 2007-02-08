@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://brief/skin/overlay.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://brief/locale/brief-overlay.dtd">
+
+<overlay id="brief-overlay" 
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  
+    <script type="application/x-javascript" src="brief-overlay.js"/>
+
+	<toolbarpalette id="BrowserToolbarPalette">
+        <toolbarbutton id="brief-button"
+		               class="toolbarbutton-1"
+					   label="Brief"
+					   onclick="gBrief.openBrief(event);"/>
+    </toolbarpalette>
+    
+    <statusbar id="status-bar">
+        <statusbarpanel id="brief-status"
+                        context="brief-status-context"
+                        hidden="true"
+                        onclick="gBrief.openBrief(event);"
+                        tooltip="brief-status-tooltip"
+                        insertafter="statusbar-resizerpanel">
+            
+            <image id="brief-status-image"/>
+            <label id="brief-status-counter"/>
+            <tooltip id="brief-status-tooltip"/>
+        
+        </statusbarpanel>
+    </statusbar>
+    
+    <popupset id="mainPopupSet">
+        <popup id="brief-status-context">
+            <menuitem id="brief-ctx-update-feeds"
+                      label="&ctxUpdateFeeds.label;"
+                      oncommand="gBrief.updateFeeds();"/>
+        </popup>
+    </popupset>
+    
+</overlay>

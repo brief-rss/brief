@@ -1,0 +1,23 @@
+#brief-button {
+  list-style-image: url("chrome://brief/skin/toolbarbutton.png");
+	}
+	
+#brief-button:hover {
+  list-style-image: url("chrome://brief/skin/toolbarbutton-hover.png");
+	}
+	
+toolbar[iconsize="small"] #brief-button {
+  list-style-image: url("chrome://brief/skin/feed-icon-16x16.png");
+  }
+  
+#brief-status-image {
+  list-style-image: url("chrome://brief/skin/feed-icon-16x16-gray.png");
+  }
+  
+#brief-status[unread="true"] #brief-status-image {
+  list-style-image: url("chrome://brief/skin/feed-icon-16x16.png");
+  }
+  
+#brief-status[unread="false"] > #brief-status-counter {
+  display: none;
+  }

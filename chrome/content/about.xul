@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?> 
+<?xml-stylesheet href="chrome://mozapps/skin/extensions/about.css" type="text/css"?> 
+
+<dialog id="brief-about"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml"
+        buttons="accept"
+        style="max-width: 30em;">
+
+  <vbox id="clientBox" flex="1">
+    <hbox class="indent" align="center">
+      <image src="chrome://brief/skin/icon.png"/>
+      <label id="extensionName">
+        Brief <html:span id="extensionVersion">0.4</html:span>
+      </label>
+    </hbox>
+    
+    <description id="extensionDescription" class="indent">
+      A feed reading extension
+    </description>
+
+    <label id="extensionCreatorLabel" class="sectionTitle">Created by:</label>
+    <hbox id="creatorBox" class="indent">
+      <label id="extensionCreator" flex="1">Adam Kowalczyk</label>
+    </hbox>
+
+    <spacer height="10"/>
+    <label class="sectionTitle">Credits</label>
+    <vbox flex="1" id="contributorsBox" class="indent"/>
+       <description>
+         Thanks to all the guys on #extdev at irc.mozilla.org whose
+         advice and patience allowed this extension to happen:
+       </description>
+       <description>
+         Christian Biesinger, Mark Finkle, Mook, Nickolay Ponomarev, 
+         Doron Rosenberg, Dave Townsend, Mike Shaver
+       </description>
+       <spacer height="10"/>
+       <description>
+         Thanks to Stefan Plewako for testing.
+       </description> 
+    </vbox> 
+    
+  <separator id="groove" class="groove"/>
+
+</dialog>
+
+        
