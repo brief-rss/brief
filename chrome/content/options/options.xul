@@ -40,14 +40,14 @@
         <separator class="thin"/>
         <bookmarks-tree id="folders-tree" flex="1" type="folders"
                         onselect="gMainPane.onFolderSelected(event);"/>
-        <groupbox>
+        <groupbox flex="1">
             <caption label="&updateGroup.caption;"/>
             <hbox align="center">
                 <checkbox id="checkForUpdates"
                           label="&checkForUpdatesBefore.label;"
                           oncommand="gMainPane.onChangeCheckForUpdates();"/>
-                <textbox id="updateInterval" size="3"/>
-                <label>&checkForUpdatesAfter.label;</label>
+                <textbox id="updateInterval" size="2"/>
+                <label value="&checkForUpdatesAfter.label;"/>
             </hbox>
             <checkbox id="updateAtStartup"
                       label="&updateAtStartup.label;"
@@ -79,11 +79,10 @@
                         type="unichar"/>                        
         </preferences>
         
-        <groupbox>
+        <groupbox flex="1">
             <checkbox id="show-statusbar-icon"
                       label="&showStatusbarIcon.label;"
                       preference="extensions.brief.showStatusbarIcon"/>
-            <separator class="thin"/>
             <checkbox id="favicons-checkbox"
                       label="&showFavicons.label;"
                       preference="extensions.brief.showFavicons"/>
@@ -91,10 +90,9 @@
         
         <separator class="thin"/>
         
-        <groupbox>
+        <groupbox flex="1">
             <caption label="&feedViewGroup.caption;"/>
             <hbox align="center">
-                <separator class="thin"/>
                 <label value="&entriesPerPageBefore.label;"/>
                 <textbox id="entriesPerPage"
                          preference="extensions.brief.entriesPerPage"
