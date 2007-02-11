@@ -23,5 +23,5 @@
 
 <!-- Select Live Bookmarks folder dialog -->
 <!ENTITY selectFolderDialog.title    "Select folder">
-<!ENTITY folderTree.label            "Select folder containing your Live Bookmarks:">
+<!ENTITY folderTree.label            "Folder containing your Live Bookmarks:">
 

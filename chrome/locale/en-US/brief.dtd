@@ -20,12 +20,15 @@
 <!-- Feed list context menu -->
 <!ENTITY ctxMarkRead.label        "Mark As Read" >
 <!ENTITY ctxUpdateFeed.label      "Update Feed">
-<!ENTITY ctxOpenWebsite.label     "Open website">
+<!ENTITY ctxOpenWebsite.label     "Open Website">
 <!ENTITY ctxEmptyTrash.label      "Empty Trash">
 
-
 <!-- Feedview -->
-<!ENTITY deleteEntry.label   "Delete entry">
-<!ENTITY restoreEntry.label  "Restore entry">
-<!ENTITY starEntry.label     "Star entry">
-<!ENTITY unstarEntry.label   "Unstar entry"> 
+<!ENTITY deleteEntry.label   "Delete Entry">
+<!ENTITY restoreEntry.label  "Restore Entry">
+<!ENTITY starEntry.label     "Star Entry">
+<!ENTITY unstarEntry.label   "Unstar Entry">
+
+<!-- Main Fx window overlay -->
+<!ENTITY ctxUpdateFeeds.label "Update Feeds Now">
+
