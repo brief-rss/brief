@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://brief/skin/overlay.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://brief/locale/brief-overlay.dtd">
+<!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
 <overlay id="brief-overlay" 
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -12,14 +12,16 @@
         <toolbarbutton id="brief-button"
 		               class="toolbarbutton-1"
 					   label="Brief"
-					   onclick="gBrief.openBrief(event);"/>
+					   type="checkbox"
+					   autoCheck="false"
+					   onclick="gBrief.onBriefButtonClick(event);"/>
     </toolbarpalette>
     
     <statusbar id="status-bar">
         <statusbarpanel id="brief-status"
                         context="brief-status-context"
                         hidden="true"
-                        onclick="gBrief.openBrief(event);"
+                        onclick="gBrief.onBriefButtonClick(event);"
                         tooltip="brief-status-tooltip"
                         insertafter="statusbar-resizerpanel">
             

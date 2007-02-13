@@ -31,13 +31,15 @@
     <vbox flex="1" id="contributorsBox" class="indent"/>
        <description>
          Thanks to all the guys on #extdev at irc.mozilla.org whose
-         advice and patience allowed this extension to happen:
-       </description>
-       <description>
+         advice and patience allowed this extension to happen:<html:br/>
          Christian Biesinger, Mark Finkle, Mook, Nickolay Ponomarev, 
          Doron Rosenberg, Dave Townsend, Mike Shaver
        </description>
-       <spacer height="10"/>
+       <spacer height="5"/>
+       <description>
+         Some of the icons courtesy of the talented Arvid Axelsson.
+       </description>
+       <spacer height="5"/>
        <description>
          Thanks to Stefan Plewako for testing.
        </description> 

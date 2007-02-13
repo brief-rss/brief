@@ -26,6 +26,7 @@
     <name>Brief</name>
     <description>A feed reading extension</description>
     <creator>Adam Kowalczyk</creator>
+    <contributor>Leszek (teo) Życzkowski</contributor>
     <homepageURL>http://brief.mozdev.org/</homepageURL>
     
   </rdf:Description>      

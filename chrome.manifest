@@ -6,3 +6,4 @@ style	    chrome://global/content/customizeToolbar.xul	chrome://brief/skin/overl
 
 
 locale	brief 	en-US  chrome/locale/en-US/
+locale	brief 	pl-PL  chrome/locale/pl-PL/

@@ -18,8 +18,11 @@
         <menupopup id="feed-list-popup"
                    onpopupshowing="feedList.createContextMenu(event);">
             <menuitem id="ctx-mark-feed-read"
-                      label="&ctxMarkRead.label;"
-                      oncommand="brief.ctx_markItemRead(event);"/>
+                      label="&ctxMarkFeedRead.label;"
+                      oncommand="brief.ctx_markFeedRead(event);"/>
+            <menuitem id="ctx-mark-folder-read"
+                      label="&ctxMarkFolderRead.label;"
+                      oncommand="brief.ctx_markFolderRead(event);"/>
             <menuitem id="ctx-update-feed"
                       label="&ctxUpdateFeed.label;"
                       oncommand="brief.ctx_updateFeed(event);"/>
@@ -44,15 +47,14 @@
                     <toolbarbutton id="update-button"
                                    tooltiptext="&updateButton.tooltip;"
                                    oncommand="brief.updateAllFeeds();"/>
-                                        <toolbaritem id="searchbar-container">
+                    <toolbaritem id="searchbar-container" flex="1">
                         <textbox id="searchbar"
+                                 flex="1"
                                  type="timed"
                                  timeout="500"
                                  searchScope="1"
-                                 persist="searchScope"
-                                 />
+                                 persist="searchScope"/>
                     </toolbaritem>
-                    <spacer flex="1"/>
                     <toolbarbutton id="options-button"
                                    tooltiptext="&showOptions.tooltip;"
                                    oncommand="brief.openOptions();"/>

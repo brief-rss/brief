@@ -172,6 +172,12 @@ var feedList = {
                           row : row.firstChild.firstChild;
      
     // Set visibility of menuitems
+    var markFeedRead = document.getElementById('ctx-mark-feed-read');
+    markFeedRead.hidden = !this.ctx_targetItem.hasAttribute('feedId');
+    
+    var markFolderRead = document.getElementById('ctx-mark-folder-read');
+    markFolderRead.hidden = this.ctx_targetItem.hasAttribute('feedId');
+    
     var updateFeed = document.getElementById('ctx-update-feed');
     updateFeed.hidden = !this.ctx_targetItem.hasAttribute('feedId');
     

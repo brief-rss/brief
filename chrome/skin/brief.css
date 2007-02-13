@@ -50,21 +50,21 @@ treechildren::-moz-tree-image(feed-item bold) {
   }
 
 treechildren::-moz-tree-image(unreadFolder) {
-  list-style-image: url('chrome://brief/skin/icons/unreadFolder.png') !important;
+  list-style-image: url('icons/unreadFolder.png') !important;
   }
   
 treechildren::-moz-tree-image(trashFolder) {
-  list-style-image: url('chrome://brief/skin/icons/trash.png') !important;
+  list-style-image: url('icons/trash.png') !important;
   }
   
 treechildren::-moz-tree-image(starredFolder) {
-  list-style-image: url('chrome://brief/skin/icons/starredFolder.png') !important;
+  list-style-image: url('icons/starredFolder.png') !important;
   }
 
 #pick-folder-button {
   padding-top: 5em;
   -moz-box-orient: vertical;
-  list-style-image: url('chrome://brief/skin/folder.png');
+  list-style-image: url('folder.png');
   }
 
 
@@ -75,7 +75,7 @@ toolbar, toolbaritem {
   }
 
 toolbarbutton {
-  padding: 4px;
+  padding: 5px 0 4px 4px;
   }
 
 #feed-list-toolbar {
@@ -87,7 +87,8 @@ toolbarbutton {
   }
 
 #searchbar-container {
-  margin-right: 10px;
+  min-width: 10em;
+  max-width: 20em;
   }
   
 #searchbar {
@@ -131,14 +132,8 @@ toolbarbutton {
   }
 
 #update-progress {
-  height: 25px;
+  height: 20px;
   }
-
-
-#searchbar {
-  width: 180px;
-  }
-  
 
 #searchbar[showingDescription]  {
   color: GrayText;
@@ -147,6 +142,7 @@ toolbarbutton {
 .search-scope-button {
   -moz-appearance: none;
   -moz-binding: none;
+  -moz-box-align: center;
   cursor: default;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -157,20 +153,14 @@ toolbarbutton {
 
 .searchbar-button-image {
   margin: 0px;
-  list-style-image: url('chrome://brief/skin/icons/search.png');
-  }
-
-.searchbar-button-dropmarker {
-  -moz-margin-start: 12px;
-  margin-top: 13px;
-  list-style-image: url('chrome://brief/skin/icons/dropmarker.png');
+  list-style-image: url('icons/search.png');
   }
 
 .searchbar-clearbutton {
   -moz-appearance: none;
   border: none !important;
   cursor: default;
-  list-style-image: url('chrome://brief/skin/icons/quick-search-clear.png');
+  list-style-image: url('icons/searchbar-clear.png');
   -moz-image-region: rect(0px, 16px, 16px, 0px);
   -moz-margin-start: 4px;
   -moz-margin-end: 2px;
