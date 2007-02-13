@@ -124,6 +124,11 @@ FeedView.prototype = {
     doc.addEventListener('DeleteEntry', brief.onDeleteEntry, true);
     doc.addEventListener('RestoreEntry', brief.onRestoreEntry, true);
     
+    // This is for marking entry read when user follows the link. We can't do it
+    // by dispatching custom events as we do above, because for whatever reason
+    // the binding handlers don't catch middle-clicks.
+    doc.addEventListener('click', brief.onFeedViewClick, true);
+    
     // Apply the CSS.
     var style = doc.getElementsByTagName('style')[0];
     style.textContent = brief.feedViewStyle;

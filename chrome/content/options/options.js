@@ -30,12 +30,12 @@ var gMainPane = {
   },  
   
   setUpFoldersTree: function() {
-    var folderID = Cc['@mozilla.org/preferences-service;1']
-                   .getService(Ci.nsIPrefBranch)
-                   .getCharPref('extensions.brief.liveBookmarksFolder');
+    var folderID = Cc['@mozilla.org/preferences-service;1'].
+                   getService(Ci.nsIPrefBranch).
+                   getCharPref('extensions.brief.liveBookmarksFolder');
     if (folderID) {
-      var rdfService = Cc['@mozilla.org/rdf/rdf-service;1']
-                       .getService(Ci.nsIRDFService);
+      var rdfService = Cc['@mozilla.org/rdf/rdf-service;1'].
+                       getService(Ci.nsIRDFService);
       var folder = rdfService.GetResource(folderID);
   
     
@@ -98,26 +98,28 @@ var gDisplayPane = {
   
   
   browseCustomStyle: function() {
-    var picker = Cc['@mozilla.org/filepicker;1'].
-					       createInstance(Ci.nsIFilePicker);
-	  picker.init(window, 'Pick the CSS file', picker.modeOpen);
-	  picker.appendFilter('CSS file (*.css)', '*.css');
-	  picker.appendFilters(picker.filterAll);
+    var picker = Cc['@mozilla.org/filepicker;1'].createInstance(Ci.nsIFilePicker);
+    var stringbundle = document.getElementById('main-bundle');
+    var pickerTitle = stringbundle.getString('stylePickerTitle');
+    var pickerFilterName = stringbundle.getString('stylePickerExtFilterName');
+    picker.init(window, pickerTitle, picker.modeOpen);
+    picker.appendFilter(pickerFilterName, '*.css');
+    picker.appendFilters(picker.filterAll);
 
-	  var result = picker.show();
-	  if (result == picker.returnOK) {
-		  var pathTextbox = document.getElementById('custom-style-path');
+    var result = picker.show();
+    if (result == picker.returnOK) {
+      var pathTextbox = document.getElementById('custom-style-path');
       pathTextbox.value = picker.file.path;
       var pref = document.getElementById('extensions.brief.customStylePath');
       pref.value = pathTextbox.value;
-		}
+    }
   }
   
 }
 
 
 function dump(aMessage) {
-	var consoleService = Cc['@mozilla.org/consoleservice;1']
-	                     .getService(Ci.nsIConsoleService);
-	consoleService.logStringMessage('Brief:\n ' + aMessage);
+  var consoleService = Cc['@mozilla.org/consoleservice;1'].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage('Brief:\n ' + aMessage);
 };

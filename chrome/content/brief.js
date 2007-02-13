@@ -280,6 +280,18 @@ var brief = {
     gStorage.starEntry(entryID, newStatus);
   },
   
+  onFeedViewClick: function(aEvent) {
+    var target = aEvent.originalTarget.getAttribute('anonid');
+    var entry = aEvent.target;
+    if (target == 'article-title-link' && !entry.hasAttribute('read') &&
+        (aEvent.button == 0 || aEvent.button == 1)) {
+      if (gPrefs.getBoolPref('linkMarksRead')) {
+        entry.setAttribute('read', true);
+        var id = entry.getAttribute('id');
+        gStorage.markEntriesRead(true, id, null, null);
+      } 
+    }
+  },  
 
 // Toolbar commands
   
@@ -288,7 +300,7 @@ var brief = {
   },
     
   openOptions: function(aPaneID) {
-    var features = 'chrome,titlebar,toolbar,centerscreen,modal';
+    var features = 'chrome,titlebar,toolbar,centerscreen,modal,resizable';
     window.openDialog('chrome://brief/content/options/options.xul', null, 
                       features, aPaneID);
   },
@@ -355,27 +367,26 @@ var brief = {
 
 // Feed list context menu commands
     
-  ctx_markItemRead: function(aEvent) {
+  ctx_markFeedRead: function(aEvent) {
     var item = feedList.ctx_targetItem;
-    
+    var feedId = feedList.ctx_targetItem.getAttribute('feedId');
+    gStorage.markEntriesRead(true, null, feedId, null);
+  },
+  
+  ctx_markFolderRead: function(aEvent) {
+    var item = feedList.ctx_targetItem;
+
     if (item.hasAttribute('specialView')) {
       var rule = item.id == 'unread-folder' ? 'unread' :
                  item.id == 'starred-folder' ? 'starred' : 'trashed';
       gStorage.markEntriesRead(true, null, null, rule);
     }
-    
-    else if (item.hasAttribute('container')) {
+    else {
       var feedItems = item.getElementsByTagName('treecell');
       var feedIds = '';
       for (var i = 0; i < feedItems.length; i++)
-        feedIds += feedItems[i].getAttribute('feedId'); 
+        feedIds += feedItems[i].getAttribute('feedId') + ' '; 
       gStorage.markEntriesRead(true, null, feedIds, null);
-    }
-    
-    // If the item is neither a folder or special folder, it's a feed. 
-    else {
-      var feedId = feedList.ctx_targetItem.getAttribute('feedId');
-      gStorage.markEntriesRead(true, null, feedId, null);
     }
   },
   

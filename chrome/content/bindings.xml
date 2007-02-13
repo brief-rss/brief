@@ -11,8 +11,7 @@
   <binding id="feedentry">
     <content>
       <html:div class="article-header">
-        <html:img class="star-image"
-                  src="chrome://brief/skin/icons/star.png"/>
+        <html:img class="star-image" src="chrome://brief/skin/icons/star.png"/>
         
         <html:div class="article-controls">
           <xul:button anonid="mark-read" class="mark-read"/>
@@ -30,7 +29,7 @@
                </xul:menupopup>
           </xul:button>
         </html:div>
-        <html:a class="article-title-link"/>
+        <html:a anonid="article-title-link" class="article-title-link"/>
       </html:div>
       
       <html:div class="article-main">
@@ -76,7 +75,7 @@
         var feedContentDiv = document.getElementById('feed-content');
         if (isRead)
           markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
-        else 
+        else
           markReadButton.label = feedContentDiv.getAttribute('markReadString');
         if (isStarred)
           starEntryItem.label = feedContentDiv.getAttribute('unstarString');
@@ -139,31 +138,31 @@
                    getAnonymousElementByAttribute(this, 'anonid', 'star-entry');
             if (this.hasAttribute('starred')) {
               this.removeAttribute('starred');
-              starEntryItem.label = 'Star Entry';
+              starEntryItem.label = feedContentDiv.getAttribute('starString');
             }
             else {
               this.setAttribute('starred', 'true');
-              starEntryItem.label = 'Unstar Entry';
+              starEntryItem.label = feedContentDiv.getAttribute('unstarString');
             }
             break;
         }
         ]]>
       </handler>
       
+      <!-- Double-click marks the entry as read/unread -->
       <handler event="click" button="0" clickcount="2">
         <![CDATA[
          var target = event.originalTarget;
-         var bindingParent = document.getBindingParent(event.originalTarget);
          
          // If double-click happened in the article controls are, do nothing
          // since it's too easy to trigger that accidentally.
-         while (target != bindingParent) {
+         while (target != this) {
            if (target.className == 'article-controls')
              return;
            target = target.parentNode;
          }
          
-         bindingParent.toggleReadStatus();
+         this.toggleReadStatus();
         ]]>
       </handler>
       
@@ -184,7 +183,7 @@
     </handlers>
   </binding>
   
-  <!-- Taken from mail/base/content/search.xml -->  
+  
   <binding id="searchbar" 
            extends="chrome://global/content/bindings/textbox.xml#timed-textbox">
     <content> 
@@ -203,15 +202,7 @@
                           value="0"/>
           </xul:menupopup>
           
-          <xul:stack flex="1">
-            <xul:hbox align="center">
-              <xul:image class="searchbar-button-image"/>
-            </xul:hbox>
-            <xul:hbox align="center">
-              <xul:image class="searchbar-button-dropmarker"/>
-            </xul:hbox>
-          </xul:stack>
-
+          <xul:image class="searchbar-button-image"/>
         </xul:button>
         
         <html:input class="searchbar-textbox textbox-input" anonid="input" 
