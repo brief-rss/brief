@@ -192,14 +192,14 @@
 
         <xul:button class="search-scope-button" popup="_child">
           <xul:menupopup anonid="searchbar-popup" position="after_start">
-            <xul:menuitem anonid="search-all"
-                          label="&searchAllFeeds.label;"
-                          type="radio"
-                          value="1"/>
             <xul:menuitem anonid="search-current"
                           label="&searchCurrentView.label;"
                           type="radio"
                           value="0"/>
+            <xul:menuitem anonid="search-all"
+                          label="&searchAllFeeds.label;"
+                          type="radio"
+                          value="1"/>
           </xul:menupopup>
           
           <xul:image class="searchbar-button-image"/>

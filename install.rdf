@@ -5,13 +5,12 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>0.4</version>
+    <version>0.4.1</version>
     <type>2</type>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
     <iconURL>chrome://brief/skin/icon.png</iconURL>
-    <aboutURL>chrome://brief/content/about.xul</aboutURL>
+    <aboutURL>chrome://brief/content/about/about.xul</aboutURL>
 
-   
     <!-- Target Application this extension can install into, 
          with minimum and maximum supported versions. --> 
     <targetApplication>
@@ -24,7 +23,7 @@
    
     <!-- Front End MetaData -->
     <name>Brief</name>
-    <description>A feed reading extension</description>
+    <description>A feed reading extension.</description>
     <creator>Adam Kowalczyk</creator>
     <contributor>Leszek (teo) Życzkowski</contributor>
     <homepageURL>http://brief.mozdev.org/</homepageURL>
