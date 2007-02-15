@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline       "Created by">
+<!ENTITY  homepage.label          "Visit Home Page">
+<!ENTITY contributors.headline    "Contributors">
+<!ENTITY credits.headline         "Credits">
+<!ENTITY translators.headline     "Translators">
+<!ENTITY extdevThanks.paragraph   "Thanks to all the great people from #extdev at irc.mozilla.org:">
+<!ENTITY iconsThanks.paragraph    "Some of the icons courtesy of the talented Arvid Axelsson.">
+<!ENTITY testingThanks.paragraph  "Thanks to Stefan Plewako for testing.">
