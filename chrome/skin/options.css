@@ -1,13 +1,12 @@
-
 radio[pane=mainPane] {
   list-style-image: url('chrome://brief/skin/icons/prefPane-main.png');
  }
  
-radio[pane=displayPane] {
-  list-style-image: url('chrome://brief/skin/icons/prefPane-display.png');
+radio[pane=feedsPane] {
+  list-style-image: url('chrome://brief/skin/icons/prefPane-feeds.png');
   }
   
 #folders-tree {
-  height: 10em;
+  height: 15em;
   margin-bottom: 1em;
-}
+  }

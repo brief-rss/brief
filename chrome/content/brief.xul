@@ -48,11 +48,10 @@
                                    tooltiptext="&updateButton.tooltip;"
                                    oncommand="brief.updateAllFeeds();"/>
                     <toolbaritem id="searchbar-container" flex="1">
-                        <textbox id="searchbar"
-                                 flex="1"
+                        <textbox id="searchbar" flex="1"
                                  type="timed"
                                  timeout="500"
-                                 searchScope="1"
+                                 searchScope="0"
                                  persist="searchScope"/>
                     </toolbaritem>
                     <toolbarbutton id="options-button"
@@ -60,6 +59,9 @@
                                    oncommand="brief.openOptions();"/>
                 </toolbar>
             </toolbox>
+            <progressmeter id="update-progress"
+                           mode="determined"
+                           hidden="true"/>
             <deck id="feed-list-deck" selectedIndex="0" flex="1">
                 <tree id="feed-list" flex="1" 
                       hidecolumnpicker="true"
@@ -68,8 +70,8 @@
                       contextmenu="feed-list-popup">
                 
                     <treecols>
-                        <treecol id="name"
-                                 primary="true" flex="1"
+                        <treecol id="name" flex="1"
+                                 primary="true" 
                                  hideheader="true"/>
                     </treecols>
                     
@@ -105,9 +107,6 @@
                                label="&pickFolder.label;"
                                oncommand="brief.openOptions('mainPane');"/>
             </deck>
-            <progressmeter id="update-progress"
-                           mode="determined"
-                           hidden="true"/>
         </vbox>
         <splitter/>
         <vbox flex="1">
@@ -139,7 +138,7 @@
                         <toolbarbutton id="prev-page"
                                        tooltiptext="&previousPage.tooltip;"
                                        oncommand="brief.showPrevPage();"/>
-                        <description id="page-desc"/>
+                        <label id="page-desc"/>
                         <toolbarbutton id="next-page"
                                        tooltiptext="&nextPage.tooltip;"
                                        oncommand="brief.showNextPage();"/>

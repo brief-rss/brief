@@ -99,11 +99,6 @@ body {
   font-family: Arial, sans-serif;
   font-size: 1.2em;
   margin-top: -0.2em;
-  opacity: 0.8;
-  }
-  
-.article-controls:hover {
-  opacity: 1.0;
   }
 
 .article-controls > * {
@@ -113,6 +108,19 @@ body {
 .actions-button {
   min-width: 0;
   list-style-image: url('chrome://brief/skin/icons/actions-list.png');
+  opacity: 0.8;  
+  }
+
+.actions-button:hover {
+  opacity: 1.0;
+  }
+
+.mark-read {
+  opacity: 0.8;
+  }    
+
+.mark-read:hover {
+  opacity: 1.0;
   }
 
 .star-entry {

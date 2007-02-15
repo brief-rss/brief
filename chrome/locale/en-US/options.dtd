@@ -3,20 +3,20 @@
 <!-- Main pane -->
 <!ENTITY mainPane.label              "Main">
 <!ENTITY folderTree.label            "Folder containing your Live Bookmarks:">
+<!ENTITY showStatusbarIcon.label     "Show statusbar icon">
+<!ENTITY openInNewTab.label          "Open Brief in a new tab">
+
+<!-- Feeds pane -->
+<!ENTITY feedsPane.label             "Feeds">
 <!ENTITY updateGroup.caption         "Updating">
 <!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
 <!ENTITY checkForUpdatesAfter.label  "minutes">
 <!ENTITY updateAtStartup.label       "Update feeds at startup">
 <!ENTITY showNotification.label      "Show notification when updates are found">
 
-<!-- Display pane -->
-<!ENTITY displayPane.label           "Display">
-<!ENTITY showStatusbarIcon.label     "Show statusbar icon">
-<!ENTITY showFavicons.label          "Show favicons">
-<!ENTITY openInNewTab.label          "Open Brief in a new tab">
-
-<!ENTITY feedViewGroup.caption       "Feed Content">
+<!ENTITY feedViewGroup.caption       "View">
 <!ENTITY entriesPerPageBefore.label  "Show">
 <!ENTITY entriesPerPageAfter.label   "entries per page">
+<!ENTITY showFavicons.label          "Show favicons">
 <!ENTITY enableCustomStyle.label     "Use custom style of the feed content">
 <!ENTITY browseCustomStyle.label     "Browse">
