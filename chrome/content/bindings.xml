@@ -134,6 +134,7 @@
             evt.initEvent('StarEntry', false, false);
             this.dispatchEvent(evt);
             
+            var feedContentDiv = document.getElementById('feed-content');
             var starEntryItem = document.
                    getAnonymousElementByAttribute(this, 'anonid', 'star-entry');
             if (this.hasAttribute('starred')) {

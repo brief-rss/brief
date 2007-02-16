@@ -101,18 +101,24 @@ body {
   margin-top: -0.2em;
   }
 
-.article-controls > * {
+.article-controls > button {
   vertical-align: middle;
   }  
   
 .actions-button {
   min-width: 0;
-  list-style-image: url('chrome://brief/skin/icons/actions-list.png');
-  opacity: 0.8;  
+  list-style-image: url('chrome://brief/skin/icons/actionsButtonDropmarker.png');
+  padding: 3px 0 2px 0;
+  opacity: 0.8;
+  -moz-user-focus: none;
   }
 
 .actions-button:hover {
   opacity: 1.0;
+  }
+  
+.actions-button .button-menu-dropmarker {
+  display: none;
   }
 
 .mark-read {
