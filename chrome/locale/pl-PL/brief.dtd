@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label          "Wybierz folder dynamicznych zakładek">
+<!ENTITY updateButton.tooltip      "Pobierz nowe wiadomości ze wszystkich kanałów">
+<!ENTITY showOptions.tooltip       "Otwórz opcje rozszerzenia">
+<!ENTITY markViewRead.tooltip      "Oznacz wyświetlone wiadomości jako przeczytane">
+<!ENTITY markViewUnread.tooltip    "Oznacz wyświetlone wiadomości jako nieprzeczytane">
+<!ENTITY searchBox.label           "Szukaj:">
+<!ENTITY searchCurrentView.label   "Szukaj w aktywnym kanale">
+<!ENTITY searchAllFeeds.label      "Szukaj we wszystkich kanałach">
+<!ENTITY viewConstraintList.label  "Wyświetl:">
+<!ENTITY viewAll.label             "Wszystkie">
+<!ENTITY viewUnread.label          "Nieprzeczytane">
+<!ENTITY viewStarred.label         "Zaznaczone">
+<!ENTITY previousPage.tooltip      "Wyświetl nowsze wiadomości">
+<!ENTITY nextPage.tooltip          "Wyświetl starsze wiadomości">
+
+<!ENTITY unreadFolder.label        "Nieprzeczytane">
+<!ENTITY starredFolder.label       "Zaznaczone">
+<!ENTITY trashFolder.label         "Kosz">
+
+<!-- Feed list context menu -->
+<!ENTITY ctxMarkFeedRead.label    "Oznacz kanał jako przeczytany">
+<!ENTITY ctxMarkFolderRead.label  "Oznacz folder jako przeczytany">
+<!ENTITY ctxUpdateFeed.label      "Aktualizuj kanał">
+<!ENTITY ctxOpenWebsite.label     "Otwórz witrynę">
+<!ENTITY ctxEmptyTrash.label      "Opróżnij kosz">
+
+<!-- Feedview -->
+<!ENTITY deleteEntry.label        "Usuń wiadomość">
+<!ENTITY restoreEntry.label       "Odtwórz wiadomość">
+<!ENTITY starEntry.label          "Zaznacz wiadomość">
+<!ENTITY unstarEntry.label        "Usuń znaczenie"> 
+
+<!-- Main Fx window overlay -->
+<!ENTITY ctxUpdateFeeds.label     "Aktualizuj kanały">

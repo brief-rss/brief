@@ -22,12 +22,10 @@
                         context="brief-status-context"
                         hidden="true"
                         onclick="gBrief.onBriefButtonClick(event);"
-                        tooltip="brief-status-tooltip"
                         insertafter="statusbar-resizerpanel">
             
             <image id="brief-status-image"/>
             <label id="brief-status-counter"/>
-            <tooltip id="brief-status-tooltip"/>
         
         </statusbarpanel>
     </statusbar>
