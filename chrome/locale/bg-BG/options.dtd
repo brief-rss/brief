@@ -1,0 +1,17 @@
+<!ENTITY optionsWindow.title "Брийф опции">
+<!ENTITY mainPane.label "Главно">
+<!ENTITY folderTree.label "Папка с вашите Живи Отметки">
+<!ENTITY showStatusbarIcon.label "Показвай статусбар икона">
+<!ENTITY openInNewTab.label "Отвори Брийф във нов подпрозорец">
+<!ENTITY feedsPane.label "Фийдове">
+<!ENTITY updateGroup.caption "Ъпдейтване">
+<!ENTITY checkForUpdatesBefore.label "Проверявай фийдовете за ъпдейти на всеки">
+<!ENTITY checkForUpdatesAfter.label "минути">
+<!ENTITY updateAtStartup.label "Ъпдейтвай фийдовете при стартиране на Firefox">
+<!ENTITY showNotification.label "Извести ме при намерени ъпдейти">
+<!ENTITY feedViewGroup.caption "Разгледай">
+<!ENTITY entriesPerPageBefore.label "Покажи">
+<!ENTITY entriesPerPageAfter.label "промени на страница">
+<!ENTITY showFavicons.label "Показвай фавикони">
+<!ENTITY enableCustomStyle.label "Използвай друг стил за фийдовете">
+<!ENTITY browseCustomStyle.label "Разгледай">
