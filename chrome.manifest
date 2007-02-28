@@ -6,4 +6,19 @@ style	    chrome://global/content/customizeToolbar.xul	chrome://brief/skin/overl
 
 
 locale	brief 	en-US  chrome/locale/en-US/
+locale	brief 	bg-BG  chrome/locale/bg-BG/
+locale	brief 	da-DK  chrome/locale/da-DK/
+locale	brief 	de-DE  chrome/locale/de-DE/
+locale	brief 	el-GR  chrome/locale/el-GR/
+locale	brief 	en-GB  chrome/locale/en-GB/
+locale	brief 	es-AR  chrome/locale/es-AR/
+locale	brief 	es-ES  chrome/locale/es-ES/
+locale	brief 	fr-FR  chrome/locale/fr-FR/
+locale	brief 	hr-HR  chrome/locale/hr-HR/
+locale	brief 	it-IT  chrome/locale/it-IT/
+locale	brief 	nb-NO  chrome/locale/nb-NO/
+locale	brief 	nl-NL  chrome/locale/nl-NL/
 locale	brief 	pl-PL  chrome/locale/pl-PL/
+locale	brief 	ru-RU  chrome/locale/ru-RU/
+locale	brief 	sk-SK  chrome/locale/sk-SK/
+locale	brief 	zh-TW  chrome/locale/zh-TW/

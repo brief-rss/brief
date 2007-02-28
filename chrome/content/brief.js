@@ -5,19 +5,15 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 var gFeedView;
-var gUpdateService;
 var gStorage;
-var gStringbundle;
 var gTemplateURL;
+var gFeedViewStyle;
 
 var brief = {
-  
-  briefLoaded:     false,
-  observerService: null,
-  templateURL:     '',
-  feedViewStyle:   '',
-	
-	init: function(aEvent) {
+
+  briefLoaded: false,
+
+  init: function(aEvent) {
     if (this.briefLoaded)
       return;
     this.briefLoaded = true;
@@ -25,64 +21,62 @@ var brief = {
     // Get the global services
     gStorage = Cc['@mozilla.org/brief/storage;1'].
                createInstance(Ci.nsIBriefStorage);
-    gUpdateService = Cc['@mozilla.org/brief/updateservice;1'].
-                     createInstance(Ci.nsIBriefUpdateService);
-    gStringbundle = document.getElementById('main-bundle');
     gPrefs.register();
-    this.feedViewStyle = this.getFeedViewStyle();
-    
+    gFeedViewStyle = this.getFeedViewStyle();
+
     // Get the extension's directory
     var extensionDir = Cc['@mozilla.org/extensions/manager;1'].
                        getService(Ci.nsIExtensionManager).
                        getInstallLocation(EXT_ID).
                        getItemLocation(EXT_ID).
                        path;
-    // Replace backslashes with slashes
+    // Replace backslashes with slashes.
     var regexp = new RegExp('%5C', 'g');
     extensionDir = escape(extensionDir).replace(regexp, '/');
-    // Construct the final URL 
+    // Construct the final URL.
     gTemplateURL = 'file:///' + extensionDir + TEMPLATE_PATH;
     gTemplateURL = unescape(gTemplateURL);
-    
-    // Initiate the feed list 
+
+    // Initiate the feed list.
     var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
     if (liveBookmarksFolder) {
       gStorage.syncWithBookmarks();
-      feedList.rebuild();      
+      feedList.rebuild();
     }
     // If no Live Bookmarks folder has been picked yet, offer a button to do it
-    else {   
+    else {
       var deck = document.getElementById('feed-list-deck');
       deck.selectedIndex = 1;
     }
-    
+
     var viewConstraintList = document.getElementById('view-constraint-list');
     viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
                                        gPrefs.shownEntries == 'unread' ? 1 : 2;
-    
-    // Register observers
-    this.observerService = Cc["@mozilla.org/observer-service;1"].
-                           getService(Ci.nsIObserverService);
-    this.observerService.addObserver(this, 'brief:feed-updated', false);
-    this.observerService.addObserver(this, 'brief:feed-loading', false);
-    this.observerService.addObserver(this, 'brief:feed-error', false);
-    this.observerService.addObserver(this, 'brief:entry-status-changed', false);
-    this.observerService.addObserver(this, 'brief:sync-to-livemarks', false);
-    this.observerService.addObserver(this, 'brief:batch-update-started', false);
-	},
-  
-  
+
+    var observerService = Cc["@mozilla.org/observer-service;1"].
+                          getService(Ci.nsIObserverService);
+    observerService.addObserver(this, 'brief:feed-updated', false);
+    observerService.addObserver(this, 'brief:feed-loading', false);
+    observerService.addObserver(this, 'brief:feed-error', false);
+    observerService.addObserver(this, 'brief:entry-status-changed', false);
+    observerService.addObserver(this, 'brief:sync-to-livemarks', false);
+    observerService.addObserver(this, 'brief:batch-update-started', false);
+  },
+
+
   unload: function() {
-    this.observerService.removeObserver(this, 'brief:feed-updated');
-    this.observerService.removeObserver(this, 'brief:feed-loading');
-    this.observerService.removeObserver(this, 'brief:feed-error');
-    this.observerService.removeObserver(this, 'brief:sync-to-livemarks');
-    this.observerService.removeObserver(this, 'brief:entry-status-changed'); 
-    this.observerService.removeObserver(this, 'brief:batch-update-started');
+    var observerService = Cc["@mozilla.org/observer-service;1"].
+                          getService(Ci.nsIObserverService);
+    observerService.removeObserver(this, 'brief:feed-updated');
+    observerService.removeObserver(this, 'brief:feed-loading');
+    observerService.removeObserver(this, 'brief:feed-error');
+    observerService.removeObserver(this, 'brief:sync-to-livemarks');
+    observerService.removeObserver(this, 'brief:entry-status-changed');
+    observerService.removeObserver(this, 'brief:batch-update-started');
     gPrefs.unregister();
   },
 
-  
+
   // Storage and UpdateService components communicate with us through global
   // notifications.
   observe: function(aSubject, aTopic, aData) {
@@ -96,15 +90,15 @@ var brief = {
         this.finishedFeeds++;
         this.updateProgressMeter();
 
-        if (aSubject.QueryInterface(Ci.nsIVariant) > 0) { 
+        if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
           feedList.refreshSpecialTreeitem('unread-folder');
-        
-          // If the the updated feed is currently being displayed, 
-          // refresh the feed view
-          if (gFeedView && gFeedView.feedViewActive && 
+
+          // If the the updated feed is currently being displayed,
+          // refresh the feed view.
+          if (gFeedView && gFeedView.feedViewActive &&
               ( (!gFeedView.feedId && gFeedView.rules == 'unread') ||
                 (gFeedView.feedId && gFeedView.feedId.match(feedId))  ))
-            gFeedView.refresh();    
+            gFeedView.refresh();
         }
         break;
 
@@ -113,7 +107,7 @@ var brief = {
         item.setAttribute('loading', true);
         feedList.refreshFeedTreeitem(aData, item);
         break;
-        
+
       case 'brief:feed-error':
         var feedId = aData;
         var item = feedList.getTreeitemForFeed(feedId);
@@ -123,27 +117,27 @@ var brief = {
         this.finishedFeeds++;
         this.updateProgressMeter();
         break;
-        
+
       case 'brief:sync-to-livemarks':
         feedList.rebuild();
         var deck = document.getElementById('feed-list-deck');
         deck.selectedIndex = 0;
         break;
-        
+
       case 'brief:batch-update-started':
         var progressmeter = document.getElementById('update-progress');
         progressmeter.hidden = false;
         progressmeter.value = 0;
         this.totalFeeds = gStorage.getAllFeeds({}).length;
         this.finishedFeeds = 0;
-        break;        
-        
+        break;
+
       case 'brief:entry-status-changed':
         aSubject.QueryInterface(Ci.nsIWritablePropertyBag2);
         var changedFeeds = aSubject.getPropertyAsAUTF8String('feedIdList');
         var changedEntries = aSubject.getPropertyAsAUTF8String('entryIdList');
-        
-        // We break down the list of feeds which changed entries belong 
+
+        // We break down the list of feeds which changed entries belong
         // to and update their treeitems.
         var changedFeedsArray = changedFeeds.match(/[^ ]+/g);
         var changedEntriesArray = changedEntries.match(/[^ ]+/g);
@@ -153,7 +147,7 @@ var brief = {
           case 'read':
             // If view is set to show only unread entries, we need to refresh it
             // if any of the shown entries have been marked read.
-            if (gFeedView && gFeedView.feedViewActive && 
+            if (gFeedView && gFeedView.feedViewActive &&
                 gFeedView.rules == 'unread') {
               var viewedEntriesList = escape(gFeedView.entryIdList);
               for (var i = 0; i < changedEntriesArray.length; i++) {
@@ -182,15 +176,15 @@ var brief = {
             for (var i = 0; i < changedFeedsArray.length; i++)
               feedList.refreshFeedTreeitem(changedFeedsArray[i])
 
-            // We can't know if any those have been changed, so we have to
-            // update all of them.
+            // We can't know if any of those need updating, so we have to
+            // update them all.
             feedList.refreshSpecialTreeitem('unread-folder');
             feedList.refreshSpecialTreeitem('starred-folder');
             feedList.refreshSpecialTreeitem('trash-folder');
             break;
-          
+
           case 'starred':
-            if (gFeedView && gFeedView.feedViewActive && 
+            if (gFeedView && gFeedView.feedViewActive &&
                 gFeedView.rules == 'starred') {
               var viewedEntriesList = escape(gFeedView.entryIdList);
               for (var i = 0; i < changedEntriesArray.length; i++) {
@@ -203,7 +197,7 @@ var brief = {
             }
             feedList.refreshSpecialTreeitem('starred-folder');
             break;
-          
+
           case 'deleted':
             if (gFeedView && gFeedView.feedViewActive) {
               var viewedEntriesList = escape(gFeedView.entryIdList);
@@ -215,11 +209,11 @@ var brief = {
                 }
               }
             }
-            
+
             var changedFeedsArray = changedFeeds.match(/[^ ]+/, 'g');
             for (var i = 0; i < changedFeedsArray.length; i++)
               feedList.refreshFeedTreeitem(changedFeedsArray[i])
-            
+
             feedList.refreshSpecialTreeitem('unread-folder');
             feedList.refreshSpecialTreeitem('starred-folder');
             feedList.refreshSpecialTreeitem('trash-folder');
@@ -227,8 +221,9 @@ var brief = {
         }
     }
   },
-  
-  
+
+
+  // Returns a string containing the style of the feed view.
   getFeedViewStyle: function() {
     if (gPrefs.getBoolPref('useCustomStyle')) {
       var pref = gPrefs.getComplexValue('customStylePath', Ci.nsISupportsString);
@@ -243,43 +238,43 @@ var brief = {
 
     return request.responseText;
   },
-  
-  
+
+
   updateProgressMeter: function() {
     var progressmeter = document.getElementById('update-progress');
     var percentage = 100 * this.finishedFeeds / this.totalFeeds;
     progressmeter.value = percentage;
-    
+
     if (percentage == 100)
-      progressmeter.hidden = true;     
+      progressmeter.hidden = true;
   },
-  
-  
-// Listeners for actions performed in the feed view
+
+
+// Listeners for actions performed in the feed view.
 
   onMarkEntryRead: function(aEvent) {
     var entryID = aEvent.target.getAttribute('id');
     var readStatus = aEvent.target.hasAttribute('read') ? true : false;
     gStorage.markEntriesRead(readStatus, entryID, null, null);
   },
-  
+
   onDeleteEntry: function(aEvent) {
     var entryID = aEvent.target.getAttribute('id');
     gStorage.deleteEntries(entryID, 1);
   },
-  
+
   onRestoreEntry: function(aEvent) {
     var entryID = aEvent.target.getAttribute('id');
     gStorage.deleteEntries(entryID, 0);
   },
-  
+
   onStarEntry: function(aEvent) {
     var entryID = aEvent.target.getAttribute('id');
     var isStarred = aEvent.target.hasAttribute('starred');
     var newStatus = isStarred ? false : true;
     gStorage.starEntry(entryID, newStatus);
   },
-  
+
   onFeedViewClick: function(aEvent) {
     var target = aEvent.originalTarget.getAttribute('anonid');
     var entry = aEvent.target;
@@ -289,26 +284,48 @@ var brief = {
         entry.setAttribute('read', true);
         var id = entry.getAttribute('id');
         gStorage.markEntriesRead(true, id, null, null);
-      } 
+      }
     }
-  },  
-
-// Toolbar commands
-  
-  updateAllFeeds: function() {
-    gUpdateService.fetchAllFeeds();
   },
-    
+
+
+// Toolbar commands.
+
+  updateAllFeeds: function() {
+    var updateService = Cc['@mozilla.org/brief/updateservice;1'].
+                        createInstance(Ci.nsIBriefUpdateService);
+    updateService.fetchAllFeeds();
+  },
+
   openOptions: function(aPaneID) {
     var features = 'chrome,titlebar,toolbar,centerscreen,modal,resizable';
-    window.openDialog('chrome://brief/content/options/options.xul', null, 
+    window.openDialog('chrome://brief/content/options/options.xul', null,
                       features, aPaneID);
   },
-    
-  
+
+  showNextPage: function() {
+    gFeedView.currentPage++;
+    gFeedView.refresh();
+  },
+
+  showPrevPage: function() {
+    gFeedView.currentPage--;
+    gFeedView.refresh();
+  },
+
+  onConstraintListCmd: function(aEvent) {
+    var choice = aEvent.target.id;
+    var prefValue = choice == 'show-all' ? 'all' :
+                    choice == 'show-unread' ? 'unread' : 'starred';
+
+    gPrefs.setCharPref('shownEntries', prefValue);
+    gFeedView.refresh();
+  },
+
+
   markCurrentViewRead: function(aNewStatus) {
     // Optimization not to call markEntriesRead when there's nothing to mark.
-    // We check the number of entries that need to be marked.    
+    // We check the number of entries that need to be marked.
     var oldStatus = aNewStatus ? 'unread' : 'read';
     var rules = gFeedView.rules + ' ' + oldStatus;
     var entriesToMarkCount = gStorage.getEntriesCount(gFeedView.feedId, rules,
@@ -317,24 +334,24 @@ var brief = {
       gStorage.markEntriesRead(aNewStatus, null, gFeedView.feedId,
                                gFeedView.rules);
   },
-  
-  
+
+
   performSearch: function(aEvent) {
     var searchbar = document.getElementById('searchbar');
-    
-    // For a global search we create a new FeedView. So let's do it if it 
-    // doesn't exist yet.    
-    if (searchbar.searchScope == 1 && 
+
+    // For a global search we create a new FeedView, so let's do it if we didn't
+    // yet.
+    if (searchbar.searchScope == 1 &&
         (!gFeedView || !gFeedView.isGlobalSearchView)) {
-      
+
       // We need to suppress selection so that feedList.onselect() doesn't fire.
       // nsITreeSelection.selectEventsSuppressed doesn't seem to work here, so
       // we have to set our own flag which we will check in onselect().
       var selection = feedList.tree.view.selection;
-      feedList.selectEventsSuppressed = true; 
+      feedList.selectEventsSuppressed = true;
       selection.clearSelection();
       feedList.selectEventsSuppressed = false;
-      
+
       gFeedView = new FeedView(null, null, searchbar.value);
       gFeedView.isGlobalSearchView = true;
     }
@@ -343,36 +360,16 @@ var brief = {
       gFeedView.refresh();
     }
   },
-  
-  
-  showNextPage: function() {
-    gFeedView.currentPage++;
-    gFeedView.refresh();
-  },
-  
-  showPrevPage: function() {
-    gFeedView.currentPage--;
-    gFeedView.refresh();
-  },
-  
-  onConstraintListCmd: function(aEvent) {
-    var choice = aEvent.target.id;
-    var prefValue = choice == 'show-all' ? 'all' :
-                    choice == 'show-unread' ? 'unread' : 'starred'; 
-      
-    gPrefs.setCharPref('shownEntries', prefValue);
-    gFeedView.refresh();
-  },
-  
 
-// Feed list context menu commands
-    
+
+// Feed list context menu commands.
+
   ctx_markFeedRead: function(aEvent) {
     var item = feedList.ctx_targetItem;
     var feedId = feedList.ctx_targetItem.getAttribute('feedId');
     gStorage.markEntriesRead(true, null, feedId, null);
   },
-  
+
   ctx_markFolderRead: function(aEvent) {
     var item = feedList.ctx_targetItem;
 
@@ -385,16 +382,18 @@ var brief = {
       var feedItems = item.getElementsByTagName('treecell');
       var feedIds = '';
       for (var i = 0; i < feedItems.length; i++)
-        feedIds += feedItems[i].getAttribute('feedId') + ' '; 
+        feedIds += feedItems[i].getAttribute('feedId') + ' ';
       gStorage.markEntriesRead(true, null, feedIds, null);
     }
   },
-  
+
   ctx_updateFeed: function(aEvent) {
     var feedId = feedList.ctx_targetItem.getAttribute('feedId');
-    gUpdateService.fetchFeed(feedId);
+    var updateService = Cc['@mozilla.org/brief/updateservice;1'].
+                        createInstance(Ci.nsIBriefUpdateService);
+    updateService.fetchFeed(feedId);
   },
-  
+
   ctx_openWebsite: function(aEvent) {
     var feedId = feedList.ctx_targetItem.getAttribute('feedId');
     var url = gStorage.getFeed(feedId).websiteURL;
@@ -406,7 +405,7 @@ var brief = {
                             getInterface(Ci.nsIDOMWindow);
     mainWindow.gBrowser.loadOneTab(url);
   },
-  
+
   ctx_emptyTrash: function(aEvent) {
     var trashedEntries = gStorage.
                          getSerializedEntries(null, null, 'trashed', null).
@@ -414,9 +413,8 @@ var brief = {
     if (trashedEntries)
       gStorage.deleteEntries(trashedEntries, 2);
   }
-  
-};
 
+}
 
 
 var gPrefs = {
@@ -424,32 +422,33 @@ var gPrefs = {
   register: function() {
     this._branch = Cc['@mozilla.org/preferences-service;1'].
                    getService(Ci.nsIPrefService).
-                   getBranch('extensions.brief.'),
-    
+                   getBranch('extensions.brief.').
+		   QueryInterface(Ci.nsIPrefBranch2);
+
     this.getIntPref = this._branch.getIntPref;
     this.getBoolPref = this._branch.getBoolPref;
     this.getCharPref = this._branch.getCharPref;
     this.getComplexValue = this._branch.getComplexValue;
-  
+
     this.setIntPref = this._branch.setIntPref;
     this.setBoolPref = this._branch.setBoolPref;
     this.setCharPref = this._branch.setCharPref;
-    
-    // cache frequently accessed prefs
+
+    // Cache the frequently accessed prefs
     this.entriesPerPage = this.getIntPref('entriesPerPage');
     this.shownEntries = this.getCharPref('shownEntries');
-    
-    this._branch.QueryInterface(Ci.nsIPrefBranch2).addObserver('', this, false);
+
+    this._branch.addObserver('', this, false);
   },
 
-    
+
   unregister: function() {
     this._branch.removeObserver('', this);
   },
 
-  
+
   observe: function(aSubject, aTopic, aData) {
-    if (aTopic != 'nsPref:changed') 
+    if (aTopic != 'nsPref:changed')
       return;
     switch (aData) {
       case 'showFavicons':
@@ -457,32 +456,32 @@ var gPrefs = {
         for (var i = 0; i < feeds.length; i++)
           feedList.refreshFeedTreeitem(feeds[i].feedId);
         break;
-        
+
       case 'customStylePath':
         if (this.getBoolPref('useCustomStyle'))
-          brief.feedViewStyle = brief.getFeedViewStyle();
+          gFeedViewStyle = brief.getFeedViewStyle();
         break;
-        
-             
+
+
       case 'useCustomStyle':
-        brief.feedViewStyle = brief.getFeedViewStyle();
+        gFeedViewStyle = brief.getFeedViewStyle();
         break;
-      
+
       // Observers to keep the cached prefs up to date
       case 'entriesPerPage':
         this.entriesPerPage = this.getIntPref('entriesPerPage');
         break;
-      
+
       case 'shownEntries':
        this.shownEntries = this.getCharPref('shownEntries');
        break;
     }
   }
 
-};
+}
 
 function dump(aMessage) {
-	var consoleService = Cc['@mozilla.org/consoleservice;1'].
-	                     getService(Ci.nsIConsoleService);
-	consoleService.logStringMessage('Brief:\n ' + aMessage);
+  var consoleService = Cc['@mozilla.org/consoleservice;1'].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage('Brief:\n ' + aMessage);
 }

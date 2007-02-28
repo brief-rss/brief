@@ -5,7 +5,7 @@ interface nsIWritablePropertyBag2;
 
 /**
  * This interface is intended be implemented as a service. It provides access
- * to the the feed database. Feeds in the database are always taken from user's 
+ * to the the feed database. Feeds in the database are always taken from user's
  * Live Bookmarks from the folder specified by extensions.brief.liveBookmarksFolder
  * pref.
  */
@@ -14,67 +14,67 @@ interface nsIBriefStorage : nsISupports {
 
   /**
    * Get a feed by its URL, without entries.
-   * 
+   *
    * @param feedURL URL identifying the feed
-   * @returns nsIBriefFeed object containing the feed.   
+   * @returns nsIBriefFeed object containing the feed.
    */
-  nsIBriefFeed getFeed(in string feedId);  
+  nsIBriefFeed getFeed(in string feedId);
 
   /**
    * Get all feeds, without entries.
    *
-   * @param feedCount Empty object (required by XPConnect to return an array).    
-   *   
+   * @param feedCount Empty object (required by XPConnect to return an array).
+   *
    * @returns array of nsIBriefFeed objects
    */
   void getAllFeeds(out unsigned long feedCount,
                   [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
-  
+
   /**
-   * Get array of entries matching specified constraints sorted descending by 
+   * Get array of entries matching specified constraints sorted descending by
    * date.
    *
-   * @param entryId      Space-separated list of ids of entries to select.  
-   * @param feedId       Space-separated list of URLs identifying the feeds 
+   * @param entryId      Space-separated list of ids of entries to select.
+   * @param feedId       Space-separated list of URLs identifying the feeds
    *                     whose entries to select.
-   * @param rules        Space-separated list of rules which selected 
+   * @param rules        Space-separated list of rules which selected
    *                     entries must match. Possible rules:
    *                     'read', 'unread', 'starred', 'unstarred', 'trashed'.
    * @param searchTerms  String that either title, summary or content of the
-   *                     entry must containt.   
+   *                     entry must containt.
    * @param offset       Index of the first entry to get (as sorted by date).
    * @param limit        Number of entries to get.
-   * @param entryCount   Empty object (required by XPConnect to return an array).   
-   * 
+   * @param entryCount   Empty object (required by XPConnect to return an array).
+   *
    * @returns Array of nsIBriefFeedEntry objects.
    */
   void getEntries(in string entryId,
-                  in string feedId, 
+                  in string feedId,
                   in string rules,
                   in AUTF8String searchTerms,
-                  in unsigned long offset, 
+                  in unsigned long offset,
                   in unsigned long limit,
                   out unsigned long entryCount,
-                  [retval, array, size_is(entryCount)] 
+                  [retval, array, size_is(entryCount)]
                   out nsIBriefFeedEntry entries);
-  
+
   /**
-   * This function gets a space-separated entry id list of entries matching 
+   * This function gets a space-separated entry id list of entries matching
    * specified rules constraints.
-   * 
+   *
    * @param entryId      See getEntries().
    * @param feedId       See getEntries().
    * @param rules        See getEntries().
-   * @param searchTerms  See getEntries().  
-   * 
-   * @returns Property bag containing "entryIdList" and "feedURLList" 
-   *          AUTF8String properties.         
+   * @param searchTerms  See getEntries().
+   *
+   * @returns Property bag containing "entryIdList" and "feedURLList"
+   *          AUTF8String properties.
    */
   nsIWritablePropertyBag2 getSerializedEntries(in string entryId,
-                                               in string feedId, 
+                                               in string feedId,
                                                in string rules,
-                                               in AUTF8String searchTerms);
-  
+                                               in AString searchTerms);
+
   /**
    * Returns number of entries matching specified constraints.
    *
@@ -82,48 +82,48 @@ interface nsIBriefStorage : nsISupports {
    * @param rules        See getEntries().
    * @param searchTerms  See getEntries().
    */
-  unsigned long getEntriesCount(in string feedId, 
+  unsigned long getEntriesCount(in string feedId,
                                 in string rules,
-                                in AUTF8String searchTerms);
-  
+                                in AString searchTerms);
+
   /**
-   * Synchronize database with Live Bookmarks in folder which RDF id is 
-   * specified by extensions.brief.liveBookmarksFolder. 
-   * Previously added feeds that aren't in the current folder anymore are 
+   * Synchronize database with Live Bookmarks in folder which RDF id is
+   * specified by extensions.brief.liveBookmarksFolder.
+   * Previously added feeds that aren't in the current folder anymore are
    * hidden, so the data is preserved if they are added again.
    */
   void syncWithBookmarks();
-  
+
   /**
    * Update feed with new entries. This can be called asynchronously.
    *
    * @param feed Contains the feed with which to update the database.
    */
   void updateFeed(in nsIBriefFeed feed);
-  
+
   /**
    * Mark entries as read/unread.
    *
    * @param newStatus New status of the entry (false for unread, true for read).
    * @param entryId   See getEntries().
    * @param feedId    See getEntries().
-   * @param rules     See getEntries(). 
+   * @param rules     See getEntries().
    */
-  void markEntriesRead(in boolean newStatus, 
-                       in string entryId, 
+  void markEntriesRead(in boolean newStatus,
+                       in string entryId,
                        in string feedId,
                        in string rules);
-  
+
   /**
-   * Change the entries' deleted status. Note that deleting doesn't it doesn't 
+   * Change the entries' deleted status. Note that deleting doesn't it doesn't
    * actually remove the data, it only sets a flag on the entry.
-   * 
+   *
    * @param entryId    Space-separated list of ids of the entries to change.
    * @param newStatus  Deleted status to set. 0 - default, 1 - moved to trash,
-   *                   2 - deleted.   
+   *                   2 - deleted.
    */
-  void deleteEntries(in string entryId, in octet newStatus);  
-  
-  void starEntry(in string entryId, in boolean newStatus);  
-  
+  void deleteEntries(in string entryId, in octet newStatus);
+
+  void starEntry(in string entryId, in boolean newStatus);
+
 };

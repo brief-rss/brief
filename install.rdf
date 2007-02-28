@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 
-<rdf:RDF xmlns="http://www.mozilla.org/2004/em-rdf#" 
+<rdf:RDF xmlns="http://www.mozilla.org/2004/em-rdf#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>0.5</version>
+    <version>0.5.1</version>
     <type>2</type>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
     <iconURL>chrome://brief/skin/icon.png</iconURL>
     <aboutURL>chrome://brief/content/about/about.xul</aboutURL>
 
-    <!-- Target Application this extension can install into, 
-         with minimum and maximum supported versions. --> 
+    <!-- Target Application this extension can install into,
+         with minimum and maximum supported versions. -->
     <targetApplication>
       <rdf:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
@@ -20,13 +20,30 @@
         <maxVersion>2.0.0.*</maxVersion>
       </rdf:Description>
     </targetApplication>
-   
+
     <!-- Front End MetaData -->
     <name>Brief</name>
     <description>A feed reading extension.</description>
     <creator>Adam Kowalczyk</creator>
-    <contributor>Leszek (teo) Życzkowski</contributor>
     <homepageURL>http://brief.mozdev.org/</homepageURL>
-    
-  </rdf:Description>      
+
+    <contributor>Leszek (teo) Życzkowski</contributor>
+
+    <translator>Hawksthorne (bg-BG)</translator>
+    <translator>AlleyKat (da-DK)</translator>
+    <translator>Fenian (de-DE)</translator>
+    <translator>ReinekeFux (de-DE)</translator>
+    <translator>Sonickydon (el-GR)</translator>
+    <translator>Static_Rage (en-GB)</translator>
+    <translator>ZuGro (es-ES, es-AR)</translator>
+    <translator>nico@nc (fr-FR)</translator>
+    <translator>MatrixIsAllOver (it-IT)</translator>
+    <translator>Krcko (hr-HR)</translator>
+    <translator>gandhi2 (nb-NO)</translator>
+    <translator>markh (nl-NL)</translator>
+    <translator>Modex (ru-RU)</translator>
+    <translator>Jacen (sk-SK)</translator>
+    <translator>winiah (zh-TW)</translator>
+
+  </rdf:Description>
 </rdf:RDF>
