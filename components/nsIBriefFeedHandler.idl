@@ -4,102 +4,102 @@ interface nsIFeed;
 interface nsIFeedEntry;
 
 /**
- * This interface represents a feed entry. It stores entry's data as well as 
- * some additional information about it stored in the database.  
+ * This interface represents a feed entry. It stores entry's data as well as
+ * some additional information about it stored in the database.
  */
 [scriptable, uuid(8992831E-7F1D-11DB-B61C-02D955D89593)]
 interface nsIBriefFeedEntry : nsISupports {
-  
+
  /**
   * These attributes contain entry's data.
-  */ 
+  */
   attribute string feedId;
-  
+
   attribute string id;
-  
+
   attribute AUTF8String entryURL;
-  
-  attribute AUTF8String title;
-  
-  attribute AUTF8String summary;
-  
-  attribute AUTF8String content;
-  
+
+  attribute AString title;
+
+  attribute AString summary;
+
+  attribute AString content;
+
   attribute unsigned long long date;
-  
+
  /**
   * These attributes contain additional information about the entry stored in
   * the database.
-  */        
+  */
   attribute boolean read;
-  
+
   attribute boolean starred;
-  
+
  /**
   * Wraps an instance of nsIFeedEntry, mapping some of its selected properties
-  * for easier access.    
-  * 
+  * for easier access.
+  *
   * @param  feed  nsIFeedEntry object to wrap.
-  */  
+  */
   void wrapEntry(in nsIFeedEntry entry);
-  
+
 };
 
 
 /**
- * This interface represents a feed. It stores feed's data as well as some 
- * additional information about the feed stored in the database.  
- */  
+ * This interface represents a feed. It stores feed's data as well as some
+ * additional information about the feed stored in the database.
+ */
 [scriptable, uuid(8308ABD6-7F1D-11DB-A716-FFD855D89593)]
 interface nsIBriefFeed : nsISupports {
-  
+
  /**
   * These attributes contain feed's data.
-  */     
-  attribute string feedId;  
-  
+  */
+  attribute string feedId;
+
   attribute AUTF8String feedURL;
-  
+
   attribute AUTF8String websiteURL;
-  
-  attribute AUTF8String title;
-    
-  attribute AUTF8String subtitle;
-  
+
+  attribute AString title;
+
+  attribute AString subtitle;
+
   attribute AUTF8String imageURL;
-  
+
   attribute AUTF8String imageLink;
-  
-  attribute AUTF8String imageTitle;
-  
- 
+
+  attribute AString imageTitle;
+
+
  /**
-  * base64-encoded data: URI of the favicon of the site under websiteURL.   
+  * base64-encoded data: URI of the favicon of the site under websiteURL.
   */
   attribute string favicon;
-  
+
  /**
   * This flag indicates if the stored feed was ever updated. You can set this
-  * flag when reading the feed from the database.   
-  */     
+  * flag when reading the feed from the database.
+  */
   attribute boolean everUpdated;
-  
+
  /**
-  * Get the feed's entries. Since there is no method in this interface to 
+  * Get the feed's entries. Since there is no method in this interface to
   * attach entries directly, they can come only from wrapping an nsIFeed (see
   * wrapFeed()).
-  * 
-  * @param  entryCount  Empty object (required by XPConnect to return an array).    
+  *
+  * @param  entryCount  Empty object (required by XPConnect to return an array).
   * @returns  Array of nsIBriefFeedEntry objects.
-  */       
-  void getEntries(out unsigned long entryCount, 
-                  [retval, array, size_is(entryCount)] 
+  */
+  void getEntries(out unsigned long entryCount,
+                  [retval, array, size_is(entryCount)]
                   out nsIBriefFeedEntry entries);
-  
+
  /**
-  * Wraps an instance of nsIFeed, mapping some of its selected properties for 
+  * Wraps an instance of nsIFeed, mapping some of its selected properties for
   * easier access.
-  * 
+  *
   * @param  feed  nsIFeed object to wrap.
   */
   void wrapFeed(in nsIFeed feed);

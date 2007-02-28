@@ -5,46 +5,50 @@ body {
   margin: 0;
   padding: 0;
   }
-		
+
 /* ----------------  Header ----------------- */
 
 #header {
   background: #1d272d;
-  border-bottom: 10px solid #646664;
+  border-bottom: 7px solid #646664;
   color: #eaeaea;
   display: block;
   font-family: Arial, sans-serif;
-  padding: 1em 5% 3px;
+  padding: 5px 5% 3px;
   text-decoration: none;
   }
 
 #feed-image {
   border: none;
-  float: left;
+  float: right;
+  margin: 0 10px 10px;
   }
 
 #feed-title {
-  clear: both;
   color: #eaeaea;
   font-size: 2.2em;
   font-weight: bold;
-  margin-top: 0;
-  padding-top: 0;
-  text-align: center;
+  margin: 0 0;
+  padding: 0;
   }
 
 #feed-subtitle {
-  margin-top: 0.5em;
   font-size: 1.4em;
   font-weight: normal;
+  margin: 3px 0 0;
+  padding: 0;
   text-align: left;
   }
-  
+
+#clear {
+  clear: both;
+  }
+
 #feed-content {
   margin: 2em auto 0 auto;
   max-width: 80em;
   }
-  
+
 /* ----------------  Article ----------------- */
 
 .article-container {
@@ -55,19 +59,19 @@ body {
   margin: 0 1em 2em;
   overflow: auto;
   }
-  
-  
+
+
 /*               Article header               */
 .article-header {
   background: #fdfdfd url('chrome://brief/skin/unreadEntryBackground.png') repeat-x;
   padding: 0.5em;
   height: 3em;
   }
-  
+
 .article-container[read='true'] .article-header {
   background: #fdfdfd url('chrome://brief/skin/readEntryBackground.png') repeat-x;
   }
-  
+
 .article-title-link {
   font-family: Arial, sans-serif;
   font-size: 1.5em;
@@ -75,20 +79,20 @@ body {
   text-decoration: none;
   color: #0f0f0f;
   }
-  
-.article-container[read='true'] .article-title-link { 
+
+.article-container[read='true'] .article-title-link {
   font-weight: normal;
   }
-  
+
 .star-image {
   float: left;
   margin-right: 3px;
   }
-  
+
 .article-container:not([starred='true']) .star-image {
   display: none;
   }
- 
+
 
 
 /*          Article controls             */
@@ -103,12 +107,11 @@ body {
 
 .article-controls > button {
   vertical-align: middle;
-  }  
-  
+  }
+
 .actions-button {
   min-width: 0;
   list-style-image: url('chrome://brief/skin/icons/actionsButtonDropmarker.png');
-  padding: 3px 0 2px 0;
   opacity: 0.8;
   -moz-user-focus: none;
   }
@@ -116,14 +119,14 @@ body {
 .actions-button:hover {
   opacity: 1.0;
   }
-  
+
 .actions-button .button-menu-dropmarker {
   display: none;
   }
 
 .mark-read {
   opacity: 0.8;
-  }    
+  }
 
 .mark-read:hover {
   opacity: 1.0;
@@ -136,15 +139,15 @@ body {
 .delete-entry {
   list-style-image: url('chrome://brief/skin/icons/delete-entry.png');
   }
-  
+
 #feed-content[trash] .delete-entry {
   display: none;
   }
-  
+
 .article-container[starred] .star-entry {
   list-style-image: url('chrome://brief/skin/icons/unstar.png');
   }
-  
+
 #feed-content:not([trash]) .restore-entry {
   display: none;
   }
@@ -163,20 +166,20 @@ body {
   margin: 0.5em 0 0 0;
   text-align: right;
   }
-  
+
 .article-content {
 	color: #101d27;
   font-size: 1.2em;
   margin: 0.5em 0 1.5em 0;
   }
-  
-.article-content a { 
+
+.article-content a {
   border-bottom: 1px solid #0c2845;
-  color: #0c2845; 
-  text-decoration: none; 
+  color: #0c2845;
+  text-decoration: none;
   }
 
-.article-content a:visited	{ 
+.article-content a:visited	{
   border-color: #3f5476;
   color: #3f5476;
   }
@@ -184,4 +187,4 @@ body {
 .article-content pre {
   font-family: "Courier New", Courier, monospace;
   font-size: 1em;
-  } 
+  }

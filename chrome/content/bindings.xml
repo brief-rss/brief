@@ -7,44 +7,45 @@
           xmlns:xbl="http://www.mozilla.org/xbl"
           xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
           xmlns:html="http://www.w3.org/1999/xhtml">
-  
+
   <binding id="feedentry">
     <content>
       <html:div class="article-header">
         <html:img class="star-image" src="chrome://brief/skin/icons/star.png"/>
-        
+
         <html:div class="article-controls">
           <xul:button anonid="mark-read" class="mark-read"/>
           <xul:button class="actions-button" type="menu" popup="_child">
-            <xul:menupopup class="actions-popup">
-                <xul:menuitem anonid="star-entry" 
-                              class="star-entry menuitem-iconic"/>
-                <xul:menuseparator/>
-                <xul:menuitem anonid="delete-entry"
-                              class="delete-entry menuitem-iconic"
-                              label="&deleteEntry.label;"/>
-                <xul:menuitem anonid="restore-entry"
-                              class="restore-entry menuitem-iconic"
-                              label="&restoreEntry.label;"/>
-               </xul:menupopup>
+            <xul:menupopup class="actions-popup" position="after_end">
+              <xul:menuitem anonid="star-entry"
+                            class="star-entry menuitem-iconic"/>
+              <xul:menuseparator/>
+              <xul:menuitem anonid="delete-entry"
+                            class="delete-entry menuitem-iconic"
+                            label="&deleteEntry.label;"/>
+              <xul:menuitem anonid="restore-entry"
+                            class="restore-entry menuitem-iconic"
+                            label="&restoreEntry.label;"/>
+            </xul:menupopup>
           </xul:button>
         </html:div>
         <html:a anonid="article-title-link" class="article-title-link"/>
       </html:div>
-      
+
       <html:div class="article-main">
         <html:div class="article-date"/>
         <html:div class="article-content"/>
       </html:div>
-      
+
       <children/>
     </content>
 
     <implementation>
       <constructor>
         <![CDATA[
-        XMLHttpRequest = null;
-        
+        // See comment in FeedView.buildFeedView() in feedview.js.
+        window.XMLHttpRequest = null;
+
         // Get the data passed to us through attributes
         var entryURL  = this.getAttribute('entryURL');
         var title     = this.getAttribute('title');
@@ -52,26 +53,26 @@
         var content   = this.getAttribute('content');
         var date      = new Date(parseInt(this.getAttribute('date')));
         var isRead    = this.getAttribute('read');
-        var isStarred = this.getAttribute('starred'); 
+        var isStarred = this.getAttribute('starred');
 
         // Find elements
-        var titleElem = 
+        var titleElem =
          document.getAnonymousElementByAttribute(this, 'class', 'article-title-link');
-        var dateElem = 
+        var dateElem =
          document.getAnonymousElementByAttribute(this, 'class', 'article-date');
-        var contentElem = 
+        var contentElem =
          document.getAnonymousElementByAttribute(this, 'class', 'article-content');
-        var markReadButton = 
+        var markReadButton =
          document.getAnonymousElementByAttribute(this, 'class', 'mark-read');
-        var starEntryItem = 
+        var starEntryItem =
          document.getAnonymousElementByAttribute(this, 'anonid', 'star-entry');
-        
-        // Construct elements contents from feed entry data 
+
+        // Construct elements contents from feed entry data
         titleElem.setAttribute('href', entryURL);
         titleElem.textContent = title;
         dateElem.textContent = date.toLocaleString();
         contentElem.innerHTML = content ? content : summary;
-        
+
         var feedContentDiv = document.getElementById('feed-content');
         if (isRead)
           markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
@@ -80,8 +81,8 @@
         if (isStarred)
           starEntryItem.label = feedContentDiv.getAttribute('unstarString');
         else
-          starEntryItem.label = feedContentDiv.getAttribute('starString'); 
-        
+          starEntryItem.label = feedContentDiv.getAttribute('starString');
+
         // Remove no longer needed attributes
         this.removeAttribute('entryURL');
         this.removeAttribute('title');
@@ -90,7 +91,7 @@
         this.removeAttribute('date');
         ]]>
       </constructor>
-      
+
       <method name="toggleReadStatus">
         <body>
           <![CDATA[
@@ -98,16 +99,16 @@
             this.removeAttribute('read');
           else
             this.setAttribute('read', 'true');
-         
+
           var evt = document.createEvent('Events');
           evt.initEvent('MarkEntryRead', false, false);
           this.dispatchEvent(evt);
           ]]>
         </body>
       </method>
-      
+
     </implementation>
-    
+
     <handlers>
       <handler event="command">
         <![CDATA[
@@ -116,24 +117,24 @@
           case 'mark-read':
             this.toggleReadStatus();
             break;
-        
+
           case 'delete-entry':
             var evt = document.createEvent('Events');
             evt.initEvent('DeleteEntry', false, false);
             this.dispatchEvent(evt);
             break;
-            
+
           case 'restore-entry':
             var evt = document.createEvent('Events');
             evt.initEvent('RestoreEntry', false, false);
             this.dispatchEvent(evt);
             break;
-            
+
           case 'star-entry':
             var evt = document.createEvent('Events');
             evt.initEvent('StarEntry', false, false);
             this.dispatchEvent(evt);
-            
+
             var feedContentDiv = document.getElementById('feed-content');
             var starEntryItem = document.
                    getAnonymousElementByAttribute(this, 'anonid', 'star-entry');
@@ -149,12 +150,12 @@
         }
         ]]>
       </handler>
-      
+
       <!-- Double-click marks the entry as read/unread -->
       <handler event="click" button="0" clickcount="2">
         <![CDATA[
          var target = event.originalTarget;
-         
+
          // If double-click happened in the article controls are, do nothing
          // since it's too easy to trigger that accidentally.
          while (target != this) {
@@ -162,18 +163,18 @@
              return;
            target = target.parentNode;
          }
-         
+
          this.toggleReadStatus();
         ]]>
       </handler>
-      
+
       <handler event="DOMAttrModified">
         <![CDATA[
         if (event.attrName == "read") {
-          var markReadButton = 
+          var markReadButton =
             document.getAnonymousElementByAttribute(this, 'class', 'mark-read');
           var feedContentDiv = document.getElementById('feed-content');
-          
+
           if (event.newValue == 'true')
             markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
           else
@@ -183,11 +184,11 @@
       </handler>
     </handlers>
   </binding>
-  
-  
-  <binding id="searchbar" 
+
+
+  <binding id="searchbar"
            extends="chrome://global/content/bindings/textbox.xml#timed-textbox">
-    <content> 
+    <content>
       <children/>
       <xul:hbox class="searchbar-textbox textbox-input-box" flex="1">
 
@@ -202,24 +203,24 @@
                           type="radio"
                           value="1"/>
           </xul:menupopup>
-          
+
           <xul:image class="searchbar-button-image"/>
         </xul:button>
-        
-        <html:input class="searchbar-textbox textbox-input" anonid="input" 
+
+        <html:input class="searchbar-textbox textbox-input" anonid="input"
                     allowevents="true"
                     flex="1"
                     xbl:inherits="onfocus,onblur,value,type,maxlength,disabled,size,readonly,tabindex,accesskey"/>
       </xul:hbox>
-      
-      <xul:toolbarbutton anonid="searchbar-clearbutton" 
+
+      <xul:toolbarbutton anonid="searchbar-clearbutton"
                          class="searchbar-clearbutton"
                          hidden="true"/>
     </content>
     <implementation>
       <constructor>
         <![CDATA[
-        this.clearButton = document.getAnonymousElementByAttribute(this, 'anonid', 
+        this.clearButton = document.getAnonymousElementByAttribute(this, 'anonid',
                                                        'searchbar-clearbutton');
         var menuitem = document.getAnonymousElementByAttribute(this, 'value',
                                                    this.searchScope.toString());
@@ -227,7 +228,7 @@
         this.setAttribute('showingDescription', true);
         ]]>
       </constructor>
-      
+
       <field name="clearButton">
         null
       </field>
@@ -245,24 +246,24 @@
         </setter>
       </property>
     </implementation>
-    
+
     <handlers>
       <handler event="command">
         <![CDATA[
         var target = event.originalTarget;
-        var textbox = document.getBindingParent(target); 
-        
+        var textbox = document.getBindingParent(target);
+
         if (target.getAttribute('anonid') == 'search-current' ||
             target.getAttribute('anonid') == 'search-all') {
           if (textbox.hasAttribute('showingDescription'))
             textbox.value = target.label;
           textbox.searchScope = target.value;
         }
-        
+
         else if (target.id == 'searchbar') {
           brief.performSearch(event);
         }
-        
+
         else if (target.getAttribute('anonid') == 'searchbar-clearbutton') {
           this.value = '';
           this.clearButton.hidden = true;
@@ -293,7 +294,7 @@
         <![CDATA[
         if (event.attrName == 'showingDescription') {
           if (event.target.hasAttribute('showingDescription')) {
-            var menuitem = document.getAnonymousElementByAttribute(this, 'value', 
+            var menuitem = document.getAnonymousElementByAttribute(this, 'value',
                                                    this.searchScope.toString());
             this.value = menuitem.label;
             this.clearButton.hidden = true;
@@ -305,11 +306,11 @@
       </handler>
     </handlers>
   </binding>
-  
-  
+
+
   <!-- Copied over from tree.xml. We have to copy the entire binding just to
        overwrite the mousedown handler. -->
-  <binding id="feedlist-treebody" 
+  <binding id="feedlist-treebody"
            extends="chrome://global/content/bindings/tree.xml#tree-base">
     <implementation>
       <constructor>
@@ -337,7 +338,7 @@
            this._lastSelectedRow = row.value;
            if (row.value == -1)
              return;
-             
+
           var item = this.parentNode.view.getItemAtIndex(row.value);
           if (item.localName == 'treeseparator')
             return;
@@ -375,11 +376,11 @@
 
         if (row.value == -1)
           return;
-        
+
         var item = this.parentNode.view.getItemAtIndex(row.value);
         if (item.localName == 'treeseparator')
           return;
-        
+
         if (obj.value == "twisty") {
           if (b.view.selection.currentIndex >= 0 &&
               b.view.isContainerOpen(row.value)) {
@@ -415,12 +416,12 @@
 
         if (!col.value) return;
 
-        // if the last row has changed in between the time we 
+        // if the last row has changed in between the time we
         // mousedown and the time we click, don't fire the select handler.
         // see bug #92366
         if (!col.value.cycler && this._lastSelectedRow == row.value &&
             col.value.type != Components.interfaces.nsITreeColumn.TYPE_CHECKBOX) {
-          b.view.selection.select(row.value);  
+          b.view.selection.select(row.value);
           b.ensureRowIsVisible(row.value);
         }
       ]]>
@@ -443,11 +444,8 @@
            this.parentNode.changeOpenState(row);
       ]]>
       </handler>
-      
+
     </handlers>
   </binding>
 
- 
-
-  
 </bindings>

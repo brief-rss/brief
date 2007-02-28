@@ -3,33 +3,33 @@
 
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
-<overlay id="brief-overlay" 
+<overlay id="brief-overlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  
+
     <script type="application/x-javascript" src="brief-overlay.js"/>
 
-	<toolbarpalette id="BrowserToolbarPalette">
+    <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="brief-button"
-		               class="toolbarbutton-1"
-					   label="Brief"
-					   type="checkbox"
-					   autoCheck="false"
-					   onclick="gBrief.onBriefButtonClick(event);"/>
+                       class="toolbarbutton-1"
+                       label="Brief"
+                       type="checkbox"
+                       autoCheck="false"
+                       onclick="gBrief.onBriefButtonClick(event);"/>
     </toolbarpalette>
-    
+
     <statusbar id="status-bar">
         <statusbarpanel id="brief-status"
                         context="brief-status-context"
                         hidden="true"
                         onclick="gBrief.onBriefButtonClick(event);"
                         insertafter="statusbar-resizerpanel">
-            
+
             <image id="brief-status-image"/>
             <label id="brief-status-counter"/>
-        
+
         </statusbarpanel>
     </statusbar>
-    
+
     <popupset id="mainPopupSet">
         <popup id="brief-status-context">
             <menuitem id="brief-ctx-update-feeds"
@@ -37,5 +37,5 @@
                       oncommand="gBrief.updateFeeds();"/>
         </popup>
     </popupset>
-    
+
 </overlay>
