@@ -1,0 +1,27 @@
+<!ENTITY pickFolder.label "Избери Папка за Живи Отметки">
+<!ENTITY updateButton.tooltip "Провери всички фийдове за ъпдейти">
+<!ENTITY showOptions.tooltip "Отвори Брийф настроиките">
+<!ENTITY markViewRead.tooltip "Маркирай гледаните в момента фийдове като прочетени">
+<!ENTITY markViewUnread.tooltip "Маркирай гледаните в момента фийдове като непрочетени">
+<!ENTITY searchBox.label "Търси:">
+<!ENTITY searchCurrentView.label "Търси в сегашния фийд">
+<!ENTITY searchAllFeeds.label "Търси във всички фийдове">
+<!ENTITY viewConstraintList.label "Разгледай:">
+<!ENTITY viewAll.label "Всички">
+<!ENTITY viewUnread.label "Непрочетени">
+<!ENTITY viewStarred.label "Позвездени">
+<!ENTITY previousPage.tooltip "Покажи обновените фийдове">
+<!ENTITY nextPage.tooltip "Покажи старите фийдове">
+<!ENTITY unreadFolder.label "Непрочетено">
+<!ENTITY starredFolder.label "Позвездено">
+<!ENTITY trashFolder.label "Боклук">
+<!ENTITY ctxMarkFeedRead.label "Марирай Фийда като Прочетен">
+<!ENTITY ctxMarkFolderRead.label "Марирай Папката като Прочетена">
+<!ENTITY ctxUpdateFeed.label "Ъпдейтни Фийда">
+<!ENTITY ctxOpenWebsite.label "Отвори Уеб-сайта">
+<!ENTITY ctxEmptyTrash.label "Изчисти Боклука">
+<!ENTITY deleteEntry.label "Изтрий">
+<!ENTITY restoreEntry.label "Възвърни">
+<!ENTITY starEntry.label "Добави Звезда">
+<!ENTITY unstarEntry.label "Махни Звезда">
+<!ENTITY ctxUpdateFeeds.label "Ъпдейтни Фийдовете Сега">
