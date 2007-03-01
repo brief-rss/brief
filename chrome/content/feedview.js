@@ -164,7 +164,7 @@ FeedView.prototype = {
       // Create feed title.
       if (feed.title) {
         var title = doc.getElementById('feed-title');
-        var text = document.createTextNode(feed.title);
+        var text = doc.createTextNode(feed.title);
         title.appendChild(text);
       }
 
