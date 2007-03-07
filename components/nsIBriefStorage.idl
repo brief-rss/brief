@@ -112,9 +112,10 @@ interface nsIBriefStorage : nsISupports {
   /**
    * Deletes a entries.
    *
-   * @param action 0 - restore from trash,
-   *               1 - move to trash,
-   *               2 - delete.
+   * @param action 0 - restore from trash
+   *               1 - move to trash
+   *               2 - delete (still only a flag)
+   *               3 - remove from database
    *
    * For the rest of the parameters see getEntries().
    */
