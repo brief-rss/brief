@@ -8,18 +8,17 @@ const Ci = Components.interfaces;
 const NC_NAME          = 'http://home.netscape.com/NC-rdf#Name';
 const NC_FEEDURL       = 'http://home.netscape.com/NC-rdf#FeedURL';
 const NC_LIVEMARK      = 'http://home.netscape.com/NC-rdf#Livemark';
-
 const RDF_NEXT_VAL     = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nextVal';
 const RDF_INSTANCE_OF  = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#instanceOf';
 const RDF_SEQ_INSTANCE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq';
 const RDF_SEQ          = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#_';
 const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
-// Constructors for nsIBriefFeed and nsIBriefFeedEntry
-var Feed = null;
-var FeedEntry = null;
-
-var gBriefStorage = null;
+// How often to delete entries that are have expired or exceed the max number of entries
+// per feed.
+const DELETE_REDUNDANT_INTERVAL = 3600000*24; // 1 day
+// How often to permanently remove deleted entries and VACUUM the database.
+const PURGE_DELETED_INTERVAL = 3600000*24*3; // 3 days
 
 function logDBError(aException) {
     var error = gBriefStorage.dBConnection.lastErrorString;
@@ -30,6 +29,7 @@ function logDBError(aException) {
                                     + aException);
 }
 
+var gBriefStorage = null;
 
 function BriefStorage() {
     var file = Cc['@mozilla.org/file/directory_service;1'].
@@ -75,15 +75,17 @@ function BriefStorage() {
                               'deleted  INTEGER DEFAULT 0          ' +
                               ')');
     }
+    try {
+        this.dBConnection.
+        executeSimpleSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
+    } catch (e) {}
 
     this.startDummyStatement();
     this.dBConnection.preload();
 
-    Feed = new Components.Constructor('@mozilla.org/brief/feed;1','nsIBriefFeed');
-    FeedEntry = new Components.Constructor('@mozilla.org/brief/feedentry;1',
-                                           'nsIBriefFeedEntry');
     this.observerService = Cc['@mozilla.org/observer-service;1'].
                            getService(Ci.nsIObserverService);
+    this.observerService.addObserver(this, 'quit-application', null);
     this.prefs = Cc["@mozilla.org/preferences-service;1"].
                  getService(Ci.nsIPrefService).
                  getBranch('extensions.brief.').
@@ -95,6 +97,7 @@ BriefStorage.prototype = {
 
     observerService: null,
     briefPrefs:      null,
+    purgeTimer:      null,
     dBConnection:    null,
     feedsCache:      null, //without entries
 
@@ -111,19 +114,20 @@ BriefStorage.prototype = {
 
     // nsIBriefStorage
     getAllFeeds: function(feedCount) {
+        this.observerService.addObserver(this, 'profile-after-change', null);
         if (!this.feedsCache) {
             this.feedsCache = new Array();
             var select = this.dBConnection.
-                createStatement('SELECT                                    ' +
-                                'feedId, feedURL, websiteURL, title,       ' +
-                                'subtitle, imageURL, imageLink, imageTitle,' +
-                                'favicon, everUpdated,                     ' +
-                                'UPPER(title) AS uctitle                   ' +
-                                'FROM feeds                                ' +
-                                'WHERE hidden=0 ORDER BY uctitle           ');
+                createStatement('SELECT                                         ' +
+                                'feedId, feedURL, websiteURL, title,            ' +
+                                'subtitle, imageURL, imageLink, imageTitle,     ' +
+                                'favicon, everUpdated, oldestAvailableEntryDate ' +
+                                'FROM feeds                                     ' +
+                                'WHERE hidden=0                                 ');
             try {
                 while (select.executeStep()) {
-                    var feed = new Feed();
+                    var feed = Cc['@mozilla.org/brief/feed;1'].
+                               createInstance(Ci.nsIBriefFeed);
                     feed.feedId = select.getString(0);
                     feed.feedURL = select.getString(1);
                     feed.websiteURL = select.getString(2);
@@ -134,6 +138,7 @@ BriefStorage.prototype = {
                     feed.imageTitle = select.getString(7);
                     feed.favicon = select.getString(8);
                     feed.everUpdated = select.getInt32(9);
+                    feed.oldestAvailableEntryDate = select.getInt64(10);
                     this.feedsCache.push(feed);
                 }
             }
@@ -167,12 +172,13 @@ BriefStorage.prototype = {
             statement += ' LIMIT ' + aLimit;
         if (aOffset)
             statement += ' OFFSET ' + aOffset;
-        logDBError(statement);
+
         var select = this.dBConnection.createStatement(statement);
         var entries = new Array();
         try {
             while (select.executeStep()) {
-                var entry = new FeedEntry();
+                var entry = Cc['@mozilla.org/brief/feedentry;1'].
+                            createInstance(Ci.nsIBriefFeedEntry);
                 entry.id = select.getString(0);
                 entry.feedId = select.getString(1);
                 entry.entryURL = select.getString(2);
@@ -308,6 +314,7 @@ BriefStorage.prototype = {
 
         var hasher = Cc['@mozilla.org/security/hash;1'].
                      createInstance(Ci.nsICryptoHash);
+        var oldestEntryDate = Date.now();
 
         var insertIntoEntries = this.dBConnection.
             createStatement('INSERT OR IGNORE INTO entries (        ' +
@@ -336,25 +343,31 @@ BriefStorage.prototype = {
                                                                    : Date.now());
                 insertIntoEntries.bindInt32Parameter(7, 0);
                 insertIntoEntries.execute();
+
+                if (entry.date && entry.date < oldestEntryDate)
+                    oldestEntryDate = entry.date;
             }
 
             // Do not update title, so that it is always taken from the Live Bookmark
-            var update = this.dBConnection.createStatement('UPDATE feeds SET    ' +
-                                                           'websiteURL  = ?1,   ' +
-                                                           'subtitle    = ?2,   ' +
-                                                           'imageURL    = ?3,   ' +
-                                                           'imageLink   = ?4,   ' +
-                                                           'imageTitle  = ?5,   ' +
-                                                           'favicon     = ?6,   ' +
-                                                           'everUpdated = 1     ' +
-                                                           'WHERE feedId = ?7   ');
+            var update = this.dBConnection.
+                              createStatement('UPDATE feeds SET               ' +
+                                              'websiteURL  = ?1,              ' +
+                                              'subtitle    = ?2,              ' +
+                                              'imageURL    = ?3,              ' +
+                                              'imageLink   = ?4,              ' +
+                                              'imageTitle  = ?5,              ' +
+                                              'favicon     = ?6,              ' +
+                                              'oldestAvailableEntryDate = ?7, ' +
+                                              'everUpdated = 1                ' +
+                                              'WHERE feedId = ?8              ');
             update.bindStringParameter(0, aFeed.websiteURL);
             update.bindStringParameter(1, aFeed.subtitle);
             update.bindStringParameter(2, aFeed.imageURL);
             update.bindStringParameter(3, aFeed.imageLink);
             update.bindStringParameter(4, aFeed.imageTitle);
             update.bindStringParameter(5, aFeed.favicon);
-            update.bindStringParameter(6, aFeed.feedId);
+            update.bindInt64Parameter(6,  oldestEntryDate);
+            update.bindStringParameter(7, aFeed.feedId);
             update.execute();
         }
         finally {
@@ -372,7 +385,7 @@ BriefStorage.prototype = {
     },
 
 
-  // nsIBriefStorage
+    // nsIBriefStorage
     markEntriesRead: function(aNewStatus, aEntryId, aFeedId, aRules, aSearchString) {
         var statement = 'UPDATE entries SET read = ? WHERE ';
         statement += this.createCommonConditions(aEntryId, aFeedId, aRules, aSearchString);
@@ -405,9 +418,10 @@ BriefStorage.prototype = {
         switch (aAction) {
             case 0:
             case 1:
+            case 2:
                 var statementString = 'UPDATE entries SET deleted = ' + aAction + ' WHERE ';
                 break;
-            case 2:
+            case 3:
                 var statementString = 'DELETE FROM entries WHERE ';
                 break;
             default:
@@ -454,14 +468,105 @@ BriefStorage.prototype = {
     },
 
 
+    //  Deletes entries that are outdated or exceed the max number per feed based.
+    deleteRedundantEntries: function() {
+        var expireEntries = this.prefs.getBoolPref('database.expireEntries');
+        var useStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
+        var expirationAge = this.prefs.getIntPref('database.entryExpirationAge');
+        var maxEntries = this.prefs.getIntPref('database.maxStoredEntries');
+
+        var edgeDate = Date.now() - expirationAge * 3600000;
+        var feeds = this.getAllFeeds({});
+
+        var deleteOutdated = this.dBConnection.
+            createStatement('UPDATE entries SET deleted=2 WHERE starred = 0 AND date < ?');
+
+        var getEntriesCountForFeed = this.dBConnection.
+            createStatement('SELECT COUNT(1) FROM entries     ' +
+                            'WHERE starred = 0 AND feedId = ? ');
+
+        var deleteExcessive = this.dBConnection.
+            createStatement('UPDATE entries SET deleted = 2                 ' +
+                            'WHERE id IN (SELECT id FROM entries            ' +
+                            '             WHERE starred = 0 AND feedId = ?  ' +
+                            '             ORDER BY date ASC LIMIT ?)        ');
+
+        this.dBConnection.beginTransaction();
+        try {
+            if (expireEntries) {
+                deleteOutdated.bindInt64Parameter(0, edgeDate);
+                deleteOutdated.execute();
+            }
+
+            if (useStoreLimit) {
+                var feedId, entryCount, difference;
+                for (var i = 0; i < feeds.length; i++) {
+                    feedId = feeds[i].feedId;
+
+                    getEntriesCountForFeed.bindStringParameter(0, feedId);
+                    getEntriesCountForFeed.executeStep()
+                    entryCount = getEntriesCountForFeed.getInt32(0);
+                    getEntriesCountForFeed.reset();
+
+                    difference = entryCount - maxEntries;
+                    if (difference > 0) {
+                        deleteExcessive.bindStringParameter(0, feedId);
+                        deleteExcessive.bindInt64Parameter(1, difference);
+                        deleteExcessive.execute();
+                    }
+                }
+            }
+        }
+        finally {
+            this.dBConnection.commitTransaction();
+        }
+        this.prefs.setIntPref('database.lastDeletedRedundantTime', Date.now());
+    },
+
+
+    // Permanently remove the deleted entries from database and VACUUM it. Should only
+    // be run on shutdown.
+    purgeDeletedEntries: function() {
+        var remove = this.dBConnection.
+            createStatement('DELETE FROM entries                                 ' +
+                            'WHERE id IN                                         ' +
+                            '  (SELECT entries.id FROM entries INNER JOIN feeds  ' +
+                            '   ON entries.feedId = feeds.feedId  WHERE          ' +
+                            '   entries.deleted = 2 AND                          ' +
+                            '   feeds.oldestAvailableEntryDate > entries.date)   ');
+        remove.execute();
+        this.stopDummyStatement();
+        this.dBConnection.executeSimpleSQL('VACUUM');
+        this.prefs.setIntPref('database.lastPurgeTime', Date.now());
+    },
+
+
     // nsIObserver
     observe: function(aSubject, aTopic, aData) {
-        if (aTopic != 'nsPref:changed')
-            return;
-        switch (aData) {
-            case 'liveBookmarksFolder':
-                this.syncWithBookmarks();
+        switch (aTopic) {
+
+            case 'quit-application':
+                var lastTime = this.prefs.getIntPref('database.lastDeletedRedundantTime');
+                var expireEntries = this.prefs.getBoolPref('database.expireEntries');
+                var useStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
+                if (Date.now() - lastTime > DELETE_REDUNDANT_INTERVAL &&
+                    (expireEntries || useStoreLimit)){
+                    this.deleteRedundantEntries();
+                }
+
+                lastTime = this.prefs.getIntPref('database.lastPurgeTime');
+                if (Date.now() - lastTime > PURGE_DELETED_INTERVAL)
+                    this.purgeDeletedEntries();
+
                 break;
+
+            case 'nsPref:changed':
+                switch (aData) {
+                    case 'liveBookmarksFolder':
+                        this.syncWithBookmarks();
+                        break;
+                }
+            break;
         }
     },
 
@@ -592,7 +697,7 @@ BriefStorage.prototype = {
      * When a statement is open on a database, it is disallowed to change the
      * schema of the database (add or modify tables or indices).
      */
-     startDummyStatement: function() {
+    startDummyStatement: function() {
         // Make sure the dummy table exists.
         if (!this.dBConnection.tableExists('dummy_table')) {
             this.dBConnection.
@@ -604,12 +709,22 @@ BriefStorage.prototype = {
         this.dBConnection.
              executeSimpleSQL('INSERT OR IGNORE INTO dummy_table VALUES (1)');
 
-        var dummyStatement = this.dummyDBConnection.
-                             createStatement('SELECT id FROM dummy_table LIMIT 1');
+        this.dummyStatement = this.dummyDBConnection.
+                                   createStatement('SELECT id FROM dummy_table LIMIT 1');
 
         // We have to step the dummy statement so that it will hold a lock on the DB
-        dummyStatement.executeStep();
-     },
+        this.dummyStatement.executeStep();
+    },
+
+
+    stopDummyStatement: function() {
+        // Do nothing if the dummy statement isn't running
+        if (!this.dummyStatement)
+            return;
+
+        this.dummyStatement.reset();
+        this.dummyStatement = null;
+    },
 
 
     hashString: function(aString) {
@@ -641,7 +756,8 @@ BriefStorage.prototype = {
     QueryInterface: function(aIID) {
         if (!aIID.equals(Components.interfaces.nsIBriefStorage) &&
             !aIID.equals(Components.interfaces.nsISupports) &&
-            !aIID.equals(Components.interfaces.nsIObserver))
+            !aIID.equals(Components.interfaces.nsIObserver) &&
+            !aIId.equals(Components.inerfaces.nsITimerCallback))
             throw Components.results.NS_ERROR_NO_INTERFACE;
         return this;
     }
@@ -667,30 +783,30 @@ var Factory = {
 
 //module definition (xpcom registration)
 var Module = {
-  _firstTime: true,
+    _firstTime: true,
 
-  registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
-    aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-    aCompMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID,
-                                     aFileSpec, aLocation, aType);
-  },
+    registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
+        aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
+        aCompMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID,
+                                         aFileSpec, aLocation, aType);
+    },
 
-  unregisterSelf: function(aCompMgr, aLocation, aType) {
-    aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-    aCompMgr.unregisterFactoryLocation(CLASS_ID, aLocation);
-  },
+    unregisterSelf: function(aCompMgr, aLocation, aType) {
+        aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
+        aCompMgr.unregisterFactoryLocation(CLASS_ID, aLocation);
+    },
 
-  getClassObject: function(aCompMgr, aCID, aIID) {
-    if (!aIID.equals(Components.interfaces.nsIFactory))
-      throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
+    getClassObject: function(aCompMgr, aCID, aIID) {
+        if (!aIID.equals(Components.interfaces.nsIFactory))
+            throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
 
-    if (aCID.equals(CLASS_ID))
-      return Factory;
+        if (aCID.equals(CLASS_ID))
+            return Factory;
 
-    throw Components.results.NS_ERROR_NO_INTERFACE;
-  },
+        throw Components.results.NS_ERROR_NO_INTERFACE;
+    },
 
-  canUnload: function(aCompMgr) { return true; }
+    canUnload: function(aCompMgr) { return true; }
 
 }
 
