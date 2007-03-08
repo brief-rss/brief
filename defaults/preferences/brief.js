@@ -1,20 +1,29 @@
-pref("extensions.brief.shownEntries", 'all');
-pref("extensions.brief.entriesPerPage", 10);
-pref("extensions.brief.showFavicons", true);
-pref("extensions.brief.showStatusbarIcon", true);
-pref("extensions.brief.customStylePath", '');
-pref("extensions.brief.useCustomStyle", false);
-pref("extensions.brief.openInNewTab", false);
-pref("extensions.brief.linkMarksRead", true);
-
-pref("extensions.brief.update.interval", 60);
-pref("extensions.brief.update.interval_mirror", 60);
-pref("extensions.brief.update.showNotification", true);
-pref("extensions.brief.update.performAtStartup", false);
-
 pref("extensions.brief.liveBookmarksFolder", '');
+pref("extensions.brief.showStatusbarIcon", true);
+pref("extensions.brief.openInNewTab", false);
+pref("extensions.brief.showFavicons", true);
 pref("extensions.brief.firstRun", true);
-pref("extensions.brief@mozdev.org.description", 
+pref("extensions.brief@mozdev.org.description",
      "chrome://brief/locale/brief.properties");
 
+pref("extensions.brief.feedview.shownEntries", 'all');
+pref("extensions.brief.feedview.entriesPerPage", 10);
+pref("extensions.brief.feedview.customStylePath", '');
+pref("extensions.brief.feedview.useCustomStyle", false);
+pref("extensions.brief.feedview.openEntriesInTabs", false);
+pref("extensions.brief.feedview.doubleClickMarks", true);
+pref("extensions.brief.feedview.linkMarksRead", true);
 
+pref("extensions.brief.update.interval", 60);
+pref("extensions.brief.update.enableAutoUpdate", true);
+pref("extensions.brief.update.performAtStartup", false);
+pref("extensions.brief.update.showNotification", true);
+pref("extensions.brief.update.defaultFetchDelay", 250);
+pref("extensions.brief.update.backgroundFetchDelay", 2000);
+
+pref("extensions.brief.database.expireEntries", false);
+pref("extensions.brief.database.entryExpirationAge", 60);
+pref("extensions.brief.database.limitStoredEntries", false);
+pref("extensions.brief.database.maxStoredEntries", 200);
+pref("extensions.brief.database.lastDeletedRedundantTime", 0);
+pref("extensions.brief.database.lastPurgeTime", 0);
