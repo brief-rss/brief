@@ -13,10 +13,15 @@
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
-    
+
+    <stringbundleset id="string-bundles">
+        <stringbundle id="main-bundle"
+                      src="chrome://brief/locale/brief.properties"/>
+    </stringbundleset>
+
     <popupset id="main-popupset">
         <menupopup id="feed-list-popup"
-                   onpopupshowing="feedList.createContextMenu(event);">
+                   onpopupshowing="gFeedList.createContextMenu(event);">
             <menuitem id="ctx-mark-feed-read"
                       label="&ctxMarkFeedRead.label;"
                       oncommand="brief.ctx_markFeedRead(event);"/>
@@ -29,19 +34,24 @@
             <menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
                       oncommand="brief.ctx_openWebsite(event);"/>
+            <menuitem id="ctx-restore-trashed"
+                      label="&ctxRestoreTrashed.label;"
+                      oncommand="brief.ctx_restoreTrashed(event);"/>
+            <menuseparator id="ctx-separator"/>
+            <menuitem id="ctx-empty-feed"
+                      label="&ctxEmptyFeed.label;"
+                      oncommand="brief.ctx_emptyFeed(event);"/>
+            <menuitem id="ctx-empty-folder"
+                      label="&ctxEmptyFolder.label;"
+                      oncommand="brief.ctx_emptyFolder(event);"/>
             <menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
                       oncommand="brief.ctx_emptyTrash(event);"/>
         </menupopup>
     </popupset>
-    
-    <stringbundleset id="string-bundles">
-        <stringbundle id="main-bundle" 
-                      src="chrome://brief/locale/brief.properties"/>
-    </stringbundleset>
-    
+
     <hbox id="main-box" flex="1">
-        <vbox id="left-pane" persist="width">  
+        <vbox id="left-pane" persist="width">
             <toolbox>
                 <toolbar id="feed-list-toolbar">
                     <toolbarbutton id="update-button"
@@ -49,6 +59,7 @@
                                    oncommand="brief.updateAllFeeds();"/>
                     <toolbaritem id="searchbar-container" flex="1">
                         <textbox id="searchbar" flex="1"
+                                 spellcheck="false"
                                  type="timed"
                                  timeout="500"
                                  searchScope="0"
@@ -63,18 +74,20 @@
                            mode="determined"
                            hidden="true"/>
             <deck id="feed-list-deck" selectedIndex="0" flex="1">
-                <tree id="feed-list" flex="1" 
+                <tree id="feed-list" flex="1"
                       hidecolumnpicker="true"
                       seltype="single"
-                      onselect="feedList.onselect(event);"
-                      contextmenu="feed-list-popup">
-                
+                      contextmenu="feed-list-popup"
+                      persist="closedFolders"
+                      onselect="gFeedList.onselect(event);"
+                      ondblclick="gFeedList.onDoubleClick(event);">
+
                     <treecols>
                         <treecol id="name" flex="1"
-                                 primary="true" 
+                                 primary="true"
                                  hideheader="true"/>
                     </treecols>
-                    
+
                     <treechildren id="top-level-children">
                         <treeitem>
                             <treerow>
@@ -133,7 +146,7 @@
                                           label="&viewStarred.label;"/>
                             </menupopup>
                         </menulist>
-                    </toolbaritem>          
+                    </toolbaritem>
                     <toolbaritem id="navigation-box">
                         <toolbarbutton id="prev-page"
                                        tooltiptext="&previousPage.tooltip;"
