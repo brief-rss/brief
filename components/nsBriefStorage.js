@@ -97,7 +97,6 @@ BriefStorage.prototype = {
 
     observerService: null,
     briefPrefs:      null,
-    purgeTimer:      null,
     dBConnection:    null,
     feedsCache:      null, //without entries
 
@@ -114,7 +113,6 @@ BriefStorage.prototype = {
 
     // nsIBriefStorage
     getAllFeeds: function(feedCount) {
-        this.observerService.addObserver(this, 'profile-after-change', null);
         if (!this.feedsCache) {
             this.feedsCache = new Array();
             var select = this.dBConnection.
@@ -312,8 +310,6 @@ BriefStorage.prototype = {
         // Invalidate cache since feeds table is about to change.
         this.feedsCache = null;
 
-        var hasher = Cc['@mozilla.org/security/hash;1'].
-                     createInstance(Ci.nsICryptoHash);
         var oldestEntryDate = Date.now();
 
         var insertIntoEntries = this.dBConnection.
@@ -328,15 +324,16 @@ BriefStorage.prototype = {
                             'read)                                  ' +
                             'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) ');
         this.dBConnection.beginTransaction();
-        var oldUnreadCount = this.getEntriesCount(aFeed.feedId, 'unread');
+        var prevUnreadCount = this.getEntriesCount(aFeed.feedId, 'unread');
         try {
             for each (entry in aFeed.getEntries({})) {
                 var id = this.hashString(entry.entryURL + entry.title + entry.date);
+                var title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
 
                 insertIntoEntries.bindStringParameter(0, aFeed.feedId);
                 insertIntoEntries.bindStringParameter(1, id);
                 insertIntoEntries.bindStringParameter(2, entry.entryURL);
-                insertIntoEntries.bindStringParameter(3, entry.title);
+                insertIntoEntries.bindStringParameter(3, title);
                 insertIntoEntries.bindStringParameter(4, entry.summary);
                 insertIntoEntries.bindStringParameter(5, entry.content);
                 insertIntoEntries.bindInt64Parameter(6, entry.date ? entry.date
@@ -348,7 +345,7 @@ BriefStorage.prototype = {
                     oldestEntryDate = entry.date;
             }
 
-            // Do not update title, so that it is always taken from the Live Bookmark
+            // Do not update title, so that it is always taken from the Live Bookmark.
             var update = this.dBConnection.
                               createStatement('UPDATE feeds SET               ' +
                                               'websiteURL  = ?1,              ' +
@@ -374,14 +371,11 @@ BriefStorage.prototype = {
           this.dBConnection.commitTransaction();
         }
 
-        // Notify if there were any updates to the feed
         var newUnreadCount = this.getEntriesCount(aFeed.feedId, 'unread');
-        var newEntriesCount = newUnreadCount - oldUnreadCount;
-        var subject = Cc["@mozilla.org/variant;1"].
-                      createInstance(Ci.nsIWritableVariant);
+        var newEntriesCount = newUnreadCount - prevUnreadCount;
+        var subject = Cc["@mozilla.org/variant;1"].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
-        this.observerService.notifyObservers(subject, 'brief:feed-updated',
-                                             aFeed.feedId);
+        this.observerService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedId);
     },
 
 
