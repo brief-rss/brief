@@ -84,6 +84,14 @@ interface nsIBriefFeed : nsISupports {
   */
   attribute boolean everUpdated;
 
+  /**
+   * This flag indicates what was the date of the oldest entry last time when the feed
+   * was downloaded. This is used to determing which entries that user deleted can be
+   * permanently removed from the database without the risk of them being downloaded
+   * again.
+   */
+  attribute unsigned long long oldestAvailableEntryDate;
+
  /**
   * Get the feed's entries. Since there is no method in this interface to
   * attach entries directly, they can come only from wrapping an nsIFeed (see
@@ -93,8 +101,7 @@ interface nsIBriefFeed : nsISupports {
   * @returns  Array of nsIBriefFeedEntry objects.
   */
   void getEntries(out unsigned long entryCount,
-                  [retval, array, size_is(entryCount)]
-                  out nsIBriefFeedEntry entries);
+                  [retval, array, size_is(entryCount)] out nsIBriefFeedEntry entries);
 
  /**
   * Wraps an instance of nsIFeed, mapping some of its selected properties for
