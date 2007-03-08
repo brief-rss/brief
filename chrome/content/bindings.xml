@@ -70,7 +70,8 @@
         // Construct elements contents from feed entry data
         titleElem.setAttribute('href', entryURL);
         titleElem.textContent = title;
-        dateElem.textContent = date.toLocaleString();
+        if (date > 0)
+            dateElem.textContent = date.toLocaleString();
         contentElem.innerHTML = content ? content : summary;
 
         var feedContentDiv = document.getElementById('feed-content');
@@ -84,7 +85,6 @@
           starEntryItem.label = feedContentDiv.getAttribute('starString');
 
         // Remove no longer needed attributes
-        this.removeAttribute('entryURL');
         this.removeAttribute('title');
         this.removeAttribute('summary');
         this.removeAttribute('content');
@@ -131,13 +131,10 @@
             break;
 
           case 'star-entry':
-            var evt = document.createEvent('Events');
-            evt.initEvent('StarEntry', false, false);
-            this.dispatchEvent(evt);
-
             var feedContentDiv = document.getElementById('feed-content');
             var starEntryItem = document.
                    getAnonymousElementByAttribute(this, 'anonid', 'star-entry');
+
             if (this.hasAttribute('starred')) {
               this.removeAttribute('starred');
               starEntryItem.label = feedContentDiv.getAttribute('starString');
@@ -146,6 +143,10 @@
               this.setAttribute('starred', 'true');
               starEntryItem.label = feedContentDiv.getAttribute('unstarString');
             }
+
+            var evt = document.createEvent('Events');
+            evt.initEvent('StarEntry', false, false);
+            this.dispatchEvent(evt);
             break;
         }
         ]]>
@@ -154,17 +155,19 @@
       <!-- Double-click marks the entry as read/unread -->
       <handler event="click" button="0" clickcount="2">
         <![CDATA[
-         var target = event.originalTarget;
+        var feedContentDiv = document.getElementById('feed-content');
+        if (!feedContentDiv.hasAttribute('doubleClickMarks'))
+          return;
 
-         // If double-click happened in the article controls are, do nothing
-         // since it's too easy to trigger that accidentally.
-         while (target != this) {
-           if (target.className == 'article-controls')
-             return;
-           target = target.parentNode;
-         }
-
-         this.toggleReadStatus();
+        var target = event.originalTarget;
+        while (target != this) {
+          // If double-click happened in the article controls are, do nothing
+          // since it's too easy to trigger that accidentally.
+          if (target.className == 'article-controls')
+            return;
+          target = target.parentNode;
+        }
+        this.toggleReadStatus();
         ]]>
       </handler>
 
