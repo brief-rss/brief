@@ -14,14 +14,14 @@
     <prefpane id="mainPane" label="&mainPane.label;">
 
         <script type="application/x-javascript" src="options.js"/>
-        <script type="application/x-javascript" 
+        <script type="application/x-javascript"
                 src="chrome://browser/content/bookmarks/bookmarks.js"/>
 
         <stringbundleset id="string-bundles">
             <stringbundle id="main-bundle"
                           src="chrome://brief/locale/brief.properties"/>
         </stringbundleset>
-        
+
         <preferences id="main-preferences">
             <preference id="extensions.brief.liveBookmarksFolder"
                         name="extensions.brief.liveBookmarksFolder"
@@ -33,12 +33,12 @@
                         name="extensions.brief.showStatusbarIcon"
                         type="bool"/>
         </preferences>
-        
+
         <label value="&folderTree.label;"/>
         <separator class="thin"/>
         <bookmarks-tree id="folders-tree" flex="1" type="folders"
                         onselect="gMainPane.onFolderSelected(event);"/>
-        
+
         <groupbox flex="1">
             <checkbox id="show-statusbar-icon"
                       label="&showStatusbarIcon.label;"
@@ -49,34 +49,37 @@
         </groupbox>
 
     </prefpane>
-  
+
     <prefpane id="feedsPane" label="&feedsPane.label;">
-        
+
         <preferences id="displayPreferences">
             <preference id="extensions.brief.update.interval"
                         name="extensions.brief.update.interval"
                         type="int"/>
-            <preference id="extensions.brief.update.interval_mirror"
-                        name="extensions.brief.update.interval_mirror"
-                        type="int"/>
-            <preference id="extensions.brief.update.showNotification"
-                        name="extensions.brief.update.showNotification"
+            <preference id="extensions.brief.update.enableAutoUpdate"
+                        name="extensions.brief.update.enableAutoUpdate"
                         type="bool"/>
             <preference id="extensions.brief.update.performAtStartup"
                         name="extensions.brief.update.performAtStartup"
                         type="bool"/>
-            <preference id="extensions.brief.entriesPerPage"
-                        name="extensions.brief.entriesPerPage"
+            <preference id="extensions.brief.feedview.openEntriesInTabs"
+                        name="extensions.brief.ofeedview.penEntriesInTabs"
+                        type="bool"/>
+            <preference id="extensions.brief.feedview.doubleClickMarks"
+                        name="extensions.brief.feedview.doubleClickMarks"
+                        type="bool"/>
+            <preference id="extensions.brief.database.expireEntries"
+                        name="extensions.brief.database.expireEntries"
+                        type="bool"/>
+            <preference id="extensions.brief.database.entryExpirationAge"
+                        name="extensions.brief.database.entryExpirationAge"
                         type="int"/>
-            <preference id="extensions.brief.showFavicons"
-                        name="extensions.brief.showFavicons"
+            <preference id="extensions.brief.database.limitStoredEntries"
+                        name="extensions.brief.database.limitStoredEntries"
                         type="bool"/>
-            <preference id="extensions.brief.useCustomStyle"
-                        name="extensions.brief.useCustomStyle"
-                        type="bool"/>
-            <preference id="extensions.brief.customStylePath"
-                        name="extensions.brief.customStylePath"
-                        type="unichar"/>
+            <preference id="extensions.brief.database.maxStoredEntries"
+                        name="extensions.brief.database.maxStoredEntries"
+                        type="int"/>
         </preferences>
 
         <groupbox flex="1">
@@ -84,26 +87,74 @@
             <hbox align="center">
                 <checkbox id="checkForUpdates"
                           label="&checkForUpdatesBefore.label;"
-                          oncommand="gMainPane.onChangeCheckForUpdates();"/>
-                <textbox id="updateInterval" size="2"/>
+                          preference="extensions.brief.update.enableAutoUpdate"
+                          oncommand="gFeedsPane.updateIntervalDisabledState();"/>
+                <textbox id="updateInterval" size="2"
+                         preference="extensions.brief.update.interval"/>
                 <label value="&checkForUpdatesAfter.label;"/>
             </hbox>
             <checkbox id="updateAtStartup"
                       label="&updateAtStartup.label;"
                       preference="extensions.brief.update.performAtStartup"/>
-            <checkbox id="showNotification"
-                      label="&showNotification.label;"
-                      preference="extensions.brief.update.showNotification"/>
         </groupbox>
-        
+
         <separator class="thin"/>
-        
+
         <groupbox flex="1">
-            <caption label="&feedViewGroup.caption;"/>
+            <caption label="&storeGroup.caption;"/>
+            <hbox align="center">
+                <checkbox id="expiration-checkbox"
+                          label="&expirationBefore.label;"
+                          preference="extensions.brief.database.expireEntries"
+                          oncommand="gFeedsPane.updateExpirationDisabledState();"/>
+                <textbox id="expiration-textbox" size="3"
+                         preference="extensions.brief.database.entryExpirationAge"/>
+                <label value="&expirationAfter.label;"/>
+            </hbox>
+            <hbox align="center">
+                <checkbox id="stored-entries-checkbox"
+                          label="&storedEntriesBefore.label;"
+                          preference="extensions.brief.database.limitStoredEntries"
+                          oncommand="gFeedsPane.updateStoredEntriesDisabledState();"/>
+                <textbox id="stored-entries-textbox" size="3"
+                         preference="extensions.brief.database.maxStoredEntries"/>
+                <label value="&storedEntriesAfter.label;"/>
+            </hbox>
+        </groupbox>
+
+        <separator class="thin"/>
+
+        <groupbox>
+            <checkbox label="&openEntriesInTabs.label;"
+                      preference="extensions.brief.feedview.openEntriesInTabs"/>
+            <checkbox label="&doubleClickMarks.label;"
+                      preference="extensions.brief.feedview.doubleClickMarks"/>
+        </groupbox>
+
+    </prefpane>
+
+    <prefpane id="displayPane" label="&displayPane.label;">
+
+        <preferences>
+            <preference id="extensions.brief.feedview.entriesPerPage"
+                        name="extensions.brief.feedview.entriesPerPage"
+                        type="int"/>
+            <preference id="extensions.brief.showFavicons"
+                        name="extensions.brief.showFavicons"
+                        type="bool"/>
+            <preference id="extensions.brief.feedview.useCustomStyle"
+                        name="extensions.brief.feedview.useCustomStyle"
+                        type="bool"/>
+            <preference id="extensions.brief.feedview.customStylePath"
+                        name="extensions.brief.feedview.customStylePath"
+                        type="unichar"/>
+        </preferences>
+
+        <groupbox flex="1">
             <hbox align="center">
                 <label value="&entriesPerPageBefore.label;"/>
                 <textbox id="entriesPerPage"
-                         preference="extensions.brief.entriesPerPage"
+                         preference="extensions.brief.feedview.entriesPerPage"
                          size="2"/>
                 <label value="&entriesPerPageAfter.label;"/>
             </hbox>
@@ -112,20 +163,20 @@
                       label="&showFavicons.label;"
                       preference="extensions.brief.showFavicons"/>
             <vbox>
-                <checkbox id="custom-style-checkbox" 
-                          label="&enableCustomStyle.label;" 
-                          preference="extensions.brief.useCustomStyle"
+                <checkbox id="custom-style-checkbox"
+                          label="&enableCustomStyle.label;"
+                          preference="extensions.brief.feedview.useCustomStyle"
                           oncommand="gDisplayPane.updateCustomStyleDisabledState();"/>
                 <hbox align="center">
                     <textbox id="custom-style-path" flex="1"
-                             preference="extensions.brief.customStylePath"/>
-                    <button id="browse-custom-style" 
+                             preference="extensions.brief.feedview.customStylePath"/>
+                    <button id="browse-custom-style"
                             label="&browseCustomStyle.label;"
                             oncommand="gDisplayPane.browseCustomStyle();"/>
                 </hbox>
             </vbox>
         </groupbox>
-        
+
     </prefpane>
 
 </prefwindow>
