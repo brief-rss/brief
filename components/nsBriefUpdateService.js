@@ -62,6 +62,7 @@ UpdateService.prototype = {
             throw('Brief: update service is already running.')
         this.updateServiceRunning = true;
 
+        this.notify();
         this.updateTimer.initWithCallback(this, UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
     },
 
@@ -77,7 +78,7 @@ UpdateService.prototype = {
 
 
     // nsITimerCallback
-    notify: function() {
+    notify: function(aTimer) {
         var interval = this.prefs.getIntPref('update.interval');
         var lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime');
         var now = Math.round(Date.now() / 1000);
@@ -164,10 +165,9 @@ UpdateService.prototype = {
             // so that the preferences are already initialized.
             case 'profile-after-change':
                 if (aData == 'startup') {
-                    if (this.prefs.getBoolPref('update.performAtStartup'))
-                        this.fetchAllFeeds(true);
                     if (this.prefs.getBoolPref('update.enableAutoUpdate'))
                         this.startUpdateService();
+
                     // We add the observer here instead of in the constructor as prefs
                     // are changed during startup when assuming their user-set values.
                     this.prefs.addObserver('', this, false);
