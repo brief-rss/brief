@@ -1,44 +1,43 @@
 #include "nsISupports.idl"
 
 /**
- * nsIBriefUpdateService is responsible for downloading and parsing feeds. It 
+ * nsIBriefUpdateService is responsible for downloading and parsing feeds. It
  * interacts with nsIBriefStorage service to subsequently update the database
  * with the obtained data.
- */    
+ */
 [scriptable, uuid(76607B92-7E83-11DB-9369-10F955D89593)]
 interface nsIBriefUpdateService : nsISupports {
-  
+
   /**
    * Specifies whether the autoupdate timer is running.
-   */      
+   */
   readonly attribute boolean updateServiceRunning;
-  
+
   /**
    * Start the autoupdate timer.
-   * 
-   * @throws if autoupdate already started.
-   * @throws if updating is preffed off   
+   *
+   * @throws if autoupdate is already started.
    */
   void startUpdateService();
-  
+
   /**
    * Stop the autoupdate timer.
-   * 
+   *
    * @throws if autoupdate isn't running.
    */
-  void stopUpdateService();  
-  
+  void stopUpdateService();
+
   /**
    * Download a feed and check it for updates. The must already be in the
-   * database.   
-   * 
+   * database.
+   *
    * @param aFeedURL URL from which to download the feed
-   */   
+   */
   void fetchFeed(in string feedId);
-  
+
   /**
    * Download and check for updates all the feeds in the database.
-   */   
+   */
   void fetchAllFeeds();
 
 };
