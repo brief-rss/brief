@@ -1,5 +1,6 @@
 const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_PATH = '/defaults/data/feedview-template.html';
+const JQUERY_PATH = '/defaults/data/jquery.js';
 const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -153,7 +154,7 @@ var brief = {
         }
     },
 
-    // Update the approperiate treeitems in the feed list and refresh the feedview
+    // Updates the approperiate treeitems in the feed list and refreshes the feedview
     // when necessary.
     onEntryStatusChanged: function(aChangedItems, aChangeType) {
         aChangedItems.QueryInterface(Ci.nsIWritablePropertyBag2);
@@ -268,8 +269,7 @@ var brief = {
 
     onStarEntry: function(aEvent) {
         var entryID = aEvent.target.getAttribute('id');
-        var isStarred = aEvent.target.hasAttribute('starred');
-        var newStatus = isStarred ? false : true;
+        var newStatus = aEvent.target.hasAttribute('starred');
         gStorage.starEntry(entryID, newStatus);
     },
 
@@ -288,13 +288,19 @@ var brief = {
             if (!targetEntry.hasAttribute('read') &&
                 gPrefs.getBoolPref('feedview.linkMarksRead')) {
                 targetEntry.setAttribute('read', true);
-                var id = entry.getAttribute('id');
+                var id = targetEntry.getAttribute('id');
                 gStorage.markEntriesRead(true, id, null, null, null);
             }
         }
     },
 
 // Toolbar commands.
+
+    toggleLeftPane: function(aEvent) {
+        var pane = document.getElementById('left-pane');
+        var splitter = document.getElementById('left-pane-splitter');
+        pane.hidden = splitter.hidden = !pane.hidden;
+    },
 
     updateAllFeeds: function() {
         var updateService = Cc['@mozilla.org/brief/updateservice;1'].
@@ -303,9 +309,8 @@ var brief = {
     },
 
     openOptions: function(aPaneID) {
-        var features = 'chrome,titlebar,toolbar,centerscreen,modal,resizable';
-        window.openDialog('chrome://brief/content/options/options.xul', null,
-                        features, aPaneID);
+        var features = 'toolbar,centerscreen,modal,resizable';
+        window.openDialog('chrome://brief/content/options/options.xul', null, features);
     },
 
     showNextPage: function() {
