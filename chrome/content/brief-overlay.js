@@ -1,10 +1,13 @@
 const BRIEF_URL = 'chrome://brief/content/brief.xul';
+const FAVICON_URL = 'chrome://brief/skin/feed-icon-16x16.png';
 
 var gBrief = {
 
-  tab: null,        // Tab in which Brief is loaded
-  statusIcon: null, // Statusbar panel
-  button: null,     // Toolbar button
+  tab: null,           // Tab in which Brief is loaded
+  statusIcon: null,    // Statusbar panel
+  toolbarbutton: null, // Toolbar button
+
+  prefs: null,
 
   openBrief: function(aNewTab) {
     // If Brief is already open then select the existing tab.
@@ -22,8 +25,8 @@ var gBrief = {
       browser.addEventListener('load', this.onBriefTabLoad, true);
     }
 
-    if (this.button)
-      this.button.checked = true;
+    if (this.toolbarbutton)
+      this.toolbarbutton.checked = true;
   },
 
 
@@ -67,10 +70,12 @@ var gBrief = {
   },
 
   onBriefTabLoad: function(aEvent) {
-    if (this.currentURI.spec != BRIEF_URL) {
+    if (this.currentURI.spec == BRIEF_URL)
+      setTimeout(function(){ gBrief.tab.setAttribute('image', FAVICON_URL); }, 0);
+    else {
       gBrief.tab = null;
-      if (gBrief.button)
-        gBrief.button.checked = false;
+      if (gBrief.toolbarbutton)
+        gBrief.toolbarbutton.checked = false;
       this.removeEventListener('load', gBrief.onBriefTabLoad, true);
     }
   },
@@ -81,8 +86,8 @@ var gBrief = {
   },
 
   onTabSelect: function(aEvent) {
-    if (gBrief.button)
-      gBrief.button.checked = (aEvent.originalTarget == gBrief.tab);
+    if (gBrief.toolbarbutton)
+      gBrief.toolbarbutton.checked = (aEvent.originalTarget == gBrief.tab);
   },
 
   onTabRestored: function(aEvent) {
@@ -90,7 +95,12 @@ var gBrief = {
     var browser = gBrowser.getBrowserForTab(restoredTab);
     if (browser.currentURI.spec == BRIEF_URL) {
       gBrief.tab = restoredTab;
-      gBrief.button.checked = (gBrowser.selectedTab == restoredTab);
+      var browser = gBrowser.getBrowserForTab(gBrief.tab);
+      browser.addEventListener('load', gBrief.onBriefTabLoad, true);
+      if (gBrief.toolbarbutton)
+        gBrief.toolbarbutton.checked = (gBrowser.selectedTab == restoredTab);
+
+      setTimeout(function(){ gBrief.tab.setAttribute('image', FAVICON_URL); }, 0);
     }
   },
 
@@ -100,7 +110,7 @@ var gBrief = {
         window.removeEventListener('load', this, false);
 
         // Cache frequently used elements.
-        this.button = document.getElementById('brief-button');
+        this.toolbarbutton = document.getElementById('brief-button');
         this.statusIcon = document.getElementById('brief-status');
 
         this.prefs = Cc["@mozilla.org/preferences-service;1"].
@@ -112,8 +122,8 @@ var gBrief = {
         var firstRun = this.prefs.getBoolPref('firstRun');
         if (firstRun)
           // The timeout is necessary to avoid adding the button while
-          // initialization of various stuff is still in progress. Changing the
-          // content of toolbar may interfere with it.
+          // initialization of various other stuff is still in progress because
+          // changing content of the toolbar may interfere with that.
           setTimeout(this.onFirstRun, 0);
 
         var showStatusIcon = this.prefs.getBoolPref('showStatusbarIcon');
