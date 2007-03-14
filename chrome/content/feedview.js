@@ -5,13 +5,15 @@ const XUL_NS = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
  * This object represents the main feed display. It stores and manages
  * the display parameters.
  *
+ * @param aTitle        Title of the view which will be shown in the header
  * @param aFeedURL      Space-separated list of URLs identifying the feeds whose
  *                      entries to display.
  * @param aRules        Rules to which this view is tied to, overriding rules
  *                      specified in shownEntries preference is used.
- * @param aSearchString Strings which the displayed entries must contain.
- */
-function FeedView(aFeedId, aRules, aSearchString) {
+ * @param aSearchString String which the displayed entries must contain.
+  */
+function FeedView(aTitle, aFeedId, aRules, aSearchString) {
+    this.title = aTitle;
     this.feedId = aFeedId;
     this.baseRules = aRules;
     this.searchString = aSearchString;
@@ -25,9 +27,6 @@ function FeedView(aFeedId, aRules, aSearchString) {
     // Cache various elements for later use
     this.browser = document.getElementById('feed-view');
     this.document = this.browser.contentDocument;
-    this.pageDesc = document.getElementById('page-desc');
-    this.prevPageButton = document.getElementById('prev-page');
-    this.nextPageButton = document.getElementById('next-page');
 
     // If view is tied to specified baseRules (e.g. special "Unread" view), hide
     // the UI to pick the rules from the user.
@@ -44,36 +43,35 @@ function FeedView(aFeedId, aRules, aSearchString) {
         updateService.fetchFeed(this.feedId);
     }
 
-    this.refresh();
+    this._refresh();
 }
 
 
 FeedView.prototype = {
+
+    title: '',
 
     // Below are parameters determining which entries are displayed.
     feedId:          '', // Space-separated list of feed ids.
     baseRules:       '', // Rules to which the view is tied to.
     searchString:    '', // Only display entries containing this string.
 
-    // Space-separated list of ids of displayed entries. This isn't used to
-    // specify which entries are displayed but computed post-factum and used
-    // for determining if refresh is needed when the database changes.
+    // Array of ids of displayed entries. This isn't used to specify which entries are
+    // displayed but computed post-factum and used for determining if the view needs
+    // to be refreshed when the database changes.
     _entries:        '',
 
-    currentPage:     0,
-    pageCount:       0,
-    entriesCount:    0,
+    currentPage:   0,
+    pageCount:     0,
+    entriesCount:  0,
 
-    // Cached frequently used elements.
-    browser:         null,
-    document:        null,
-    prevPageButton:  null,
-    nextPageButton:  null,
-    pageDesc:        null,
-    feedContentDiv:  null,
+    // Key elements.
+    browser:      null,
+    document:     null,
+    feedContent:  null,
 
     // Indicates whether the feed view is currently displayed in the browser.
-    get feedViewActive() {
+    get active() {
         return (unescape(this.browser.currentURI.spec) == gTemplateURL);
     },
 
@@ -83,8 +81,69 @@ FeedView.prototype = {
     },
 
 
+    ensure: function() {
+        if (!this.active)
+            return true;
+
+        // Get arrays of previously viewed entries and the ones that should be viewed now.
+        var prevEntries = this._entries;
+        var currentEntries =
+                   gStorage.
+                   getSerializedEntries(null, this.feedId, this.rules, this.searchString).
+                   getPropertyAsAUTF8String('entryIdList').
+                   match(/[^ ]+/g);
+
+        // We need to perform a full refresh if any entries were added or when more than
+        // one entry was removed. Because currently there can be no situation when some
+        // entries are added and some removed at the same time, comparing the number of
+        // entries is enough to check for those cases.
+        if (prevEntries && currentEntries && prevEntries.length == currentEntries.length)
+            return true;
+
+        if (!prevEntries || !currentEntries || prevEntries.length < currentEntries.length ||
+           currenEntries.length - prevEntries.length > 1) {
+            this._refresh();
+            return false;
+        }
+
+        // Now we now that only one entry was changed and that it was removed. Find out
+        // which one.
+        var removedEntry = '';
+        for (i = 0; i < prevEntries.length; i++) {
+            if (currentEntries.indexOf(prevEntries[i]) == -1) {
+                var removedEntry = prevEntries[i];
+                break;
+            }
+        }
+
+        // If there are no more entries on this page and it the last page, perform full refresh.
+        if (removedEntry && this.feedContent.childNodes.length == 1 &&
+           this.currentPage == this.pageCount) {
+            this._refresh();
+            return false;
+        }
+
+        // If the removed entry is on a different page than the currently shown one,
+        // preform full refresh.
+        var firstIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
+        var lastIndex = firstIndex + gPrefs.entriesPerPage;
+        if (prevEntries.indexOf(removedEntry) < firstIndex ||
+           prevEntries.indexOf(removedEntry) > lastIndex) {
+            this._refresh();
+            return false;
+        }
+
+        if (removedEntry) {
+            this._refreshIncrementally(removedEntry);
+            return false;
+        }
+
+        return true;
+    },
+
+
     // Refreshes the feed view from scratch.
-    refresh: function() {
+    _refresh: function() {
         this.browser.style.cursor = 'wait';
 
         this._computePages();
@@ -95,50 +154,35 @@ FeedView.prototype = {
 
         // Store a list of ids of displayed entries. It is used to determine if
         // the view needs to be refreshed when database changes.
-        this._entries = gStorage.
-                        getSerializedEntries(null, this.feedId, this.rules, null).
-                        getPropertyAsAUTF8String('entryIdList');
-    },
-
-
-    refreshWhenEntriesRemoved: function(aEntries) {
-        for (var i = 0; i < aEntries.length; i++) {
-            if (this._entries.match(aEntries[i])) {
-                if (aEntries.length == 1)
-                    gFeedView._refreshIncrementally(aEntries[0]);
-                else
-                    gFeedView.refresh();
-                break;
-            }
-        }
+        this._entries =
+                   gStorage.
+                   getSerializedEntries(null, this.feedId, this.rules, this.searchString).
+                   getPropertyAsAUTF8String('entryIdList').
+                   match(/[^ ]+/g);
     },
 
 
     _refreshIncrementally: function(aEntryId) {
         // Find the entry that has to be removed and remove it.
-        var entry = this.feedContentDiv.firstChild;
-        while (entry.getAttribute('id') != aEntryId)
+        var entry = this.feedContent.firstChild;
+        while (entry.id != aEntryId)
             entry = entry.nextSibling;
-        this.feedContentDiv.removeChild(entry);
-
-        // If there are no more entries on this page and it the last one, we have to
-        // perform full refresh.
-        if (!this.feedContentDiv.childNodes.length && this.currentPage == this.pageCount) {
-            this.refresh();
-            return;
-        }
+        var evt = document.createEvent('Events');
+        evt.initEvent('RemoveEntry', false, false);
+        entry.dispatchEvent(evt);
 
         this._computePages();
-        var offset = gPrefs.entriesPerPage * this.currentPage;
+        var offset = gPrefs.entriesPerPage * this.currentPage - 1;
         var entry = gStorage.getEntries(null, this.feedId, this.rules, this.searchString,
                                         offset, 1, {})[0];
         if (entry)
             this._appendEntry(entry);
 
-
-        this._entries = gStorage.
-                        getSerializedEntries(null, this.feedId, this.rules, null).
-                        getPropertyAsAUTF8String('entryIdList');
+        this._entries =
+                   gStorage.
+                   getSerializedEntries(null, this.feedId, this.rules, this.searchString).
+                   getPropertyAsAUTF8String('entryIdList').
+                   match(/[^ ]+/g);
     },
 
 
@@ -155,11 +199,15 @@ FeedView.prototype = {
             this.currentPage = 1;
 
         // Update the page commands and description
-        this.prevPageButton.setAttribute('disabled', this.currentPage <= 1);
-        this.nextPageButton.setAttribute('disabled', this.currentPage == this.pageCount);
+        var pageLabel = document.getElementById('page-desc');
+        var prevPageButton = document.getElementById('prev-page');
+        var nextPageButton = document.getElementById('next-page');
+
+        prevPageButton.setAttribute('disabled', this.currentPage <= 1);
+        nextPageButton.setAttribute('disabled', this.currentPage == this.pageCount);
         var stringbundle = document.getElementById('main-bundle');
-        this.pageDesc.value = stringbundle.getFormattedString('pageNumberDescription',
-                                                [this.currentPage, this.pageCount]);
+        var params = [this.currentPage, this.pageCount];
+        pageLabel.value = stringbundle.getFormattedString('pageNumberLabel', params);
     },
 
 
@@ -167,7 +215,7 @@ FeedView.prototype = {
     // well as hides/unhides the feed view toolbar.
     _onLoad: function(aEvent) {
         var feedViewToolbar = document.getElementById('feed-view-toolbar');
-        if (gFeedView.feedViewActive) {
+        if (gFeedView.active) {
             feedViewToolbar.hidden = false;
             gFeedView._buildFeedView();
         }
@@ -209,20 +257,18 @@ FeedView.prototype = {
         var style = doc.getElementsByTagName('style')[0];
         style.textContent = gFeedViewStyle;
 
-        // Build the feed header if the view contains a single feed, otherwise hide
-        // it.
-        var feed = this.specialView ? null : gStorage.getFeed(this.feedId);
-        if (feed) {
+        // Build the header.
+        var titleElement = doc.getElementById('feed-title');
+        var textNode = doc.createTextNode(this.title);
+        titleElement.appendChild(textNode);
+
+        // When a single, unfiltered feed is viewed, construct the feed's header.
+        var feed = gStorage.getFeed(this.feedId);
+        if (feed && !this.searchString) {
+
             // Create the link.
             var header = doc.getElementById('header');
-            header.setAttribute('href', feed.websiteURL ? feed.websiteURL
-                                                        : feed.feedURL);
-            // Create feed title.
-            if (feed.title) {
-                var title = doc.getElementById('feed-title');
-                var text = doc.createTextNode(feed.title);
-                title.appendChild(text);
-            }
+            header.setAttribute('href', feed.websiteURL ? feed.websiteURL : feed.feedURL);
 
             // Create feed image.
             if (feed.imageURL) {
@@ -236,38 +282,34 @@ FeedView.prototype = {
             if (feed.subtitle)
                 doc.getElementById('feed-subtitle').textContent = feed.subtitle;
         }
-        else
-            doc.getElementById('header').style.display = 'none';
 
-        this.feedContentDiv = doc.getElementById('feed-content');
+        this.feedContent = doc.getElementById('feed-content');
 
-        // If the trash folder is displayed, set an attribute based on which we
-        // adjust the available items in the entry controls popup.
-        if (!this.feedId && this.rules == 'trashed')
-            this.feedContentDiv.setAttribute('trash', true);
+        // If the trash folder is displayed this attribute adjusts the visibility of the
+        // button in article controls.
+        if (this.type == 'specialFolder' && this.rules == 'trashed')
+            this.feedContent.setAttribute('trash', true);
+
+        if (!feed)
+            this.feedContent.setAttribute('showFeedNames', true);
 
         // Pass the value of the pref.
         if (gPrefs.doubleClickMarks)
-            this.feedContentDiv.setAttribute('doubleClickMarks', true);
+            this.feedContent.setAttribute('doubleClickMarks', true);
 
         // We have to hand the strings because stringbundles don't work with
         // unprivileged script.
         var stringbundle = document.getElementById('main-bundle');
         var markReadString = stringbundle.getString('markEntryAsRead');
-        this.feedContentDiv.setAttribute('markReadString', markReadString);
+        this.feedContent.setAttribute('markReadString', markReadString);
         var markEntryAsUnread = stringbundle.getString('markEntryAsUnread');
-        this.feedContentDiv.setAttribute('markUnreadString', markEntryAsUnread);
-        var starEntry = stringbundle.getString('starEntry');
-        this.feedContentDiv.setAttribute('starString', starEntry);
-        var unstarEntry = stringbundle.getString('unstarEntry');
-        this.feedContentDiv.setAttribute('unstarString', unstarEntry);
+        this.feedContent.setAttribute('markUnreadString', markEntryAsUnread);
 
-        // Get the entries
+        // Get the entries data and append them.
         var offset = gPrefs.entriesPerPage * (this.currentPage - 1);
         var entries = gStorage.getEntries(null, this.feedId, this.rules,
                                           this.searchString, offset,
                                           gPrefs.entriesPerPage, {});
-
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
@@ -278,9 +320,7 @@ FeedView.prototype = {
 
 
     _appendEntry: function(aEntry) {
-        var doc = this.document;
-
-        var articleContainer = doc.createElementNS(XHTML_NS, 'div');
+        var articleContainer = this.document.createElementNS(XHTML_NS, 'div');
         articleContainer.className = 'article-container';
 
         // Safely pass the data so that binding constructor can use it.
@@ -295,12 +335,21 @@ FeedView.prototype = {
         if (aEntry.starred)
             articleContainer.setAttribute('starred', true);
 
-        // This is for when we're displaying entries from multiple feeds.
-        articleContainer.setAttribute('feedId', aEntry.feedId);
-        var feedTitle = gStorage.getFeed(aEntry.feedId).title;
-        articleContainer.setAttribute('feedTitle', feedTitle);
+        var feedName = gStorage.getFeed(aEntry.feedId).title;
+        articleContainer.setAttribute('feedName', feedName);
 
-        this.feedContentDiv.appendChild(articleContainer);
+        this.feedContent.appendChild(articleContainer);
+    },
+
+
+    showNextPage: function() {
+        gFeedView.currentPage++;
+        gFeedView._refresh();
+    },
+
+    showPrevPage: function() {
+        gFeedView.currentPage--;
+        gFeedView._refresh();
     }
 
 }
