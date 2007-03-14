@@ -10,6 +10,7 @@ const RDF_SEQ          = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#_';
 const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
 const THROBBER_URL = 'chrome://global/skin/throbber/Throbber-small.gif';
+const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
 var gFeedList = {
 
@@ -83,9 +84,9 @@ var gFeedList = {
 
     getTreeitemForFeed: function(aFeedId) {
         var item = null;
-        for (var i = 0; i < this.feedItems.length; i++) {
-            if (this.feedItems[i].getAttribute('feedId') == aFeedId) {
-                item = this.feedItems[i];
+        for (var i = 0; i < this.items.length; i++) {
+            if (this.items[i].getAttribute('feedId') == aFeedId) {
+                item = this.items[i];
                 break;
             }
         }
@@ -137,22 +138,26 @@ var gFeedList = {
         if (item.hasAttribute('specialView')) {
             var rule = item.id == 'unread-folder' ? 'unread' :
                        item.id == 'starred-folder' ? 'starred' : 'trashed';
-            gFeedView = new FeedView(null, rule);
+            var title = item.getAttribute('title');
+            gFeedView = new FeedView(title, null, rule);
         }
 
         else if (item.hasAttribute('container')) {
+            var title = item.getAttribute('label');
             var feedItems = item.getElementsByTagName('treecell');
             var feedIds = '';
             for (var i = 0; i < feedItems.length; i++)
                 feedIds += feedItems[i].getAttribute('feedId') + ' ';
+
             if (feedIds)
-                gFeedView = new FeedView(feedIds);
+                gFeedView = new FeedView(title, feedIds);
         }
 
         else {
             var feedId = gFeedList.selectedItem.getAttribute('feedId');
+            var title = gStorage.getFeed(feedId).title;
             if (feedId)
-                gFeedView = new FeedView(feedId);
+                gFeedView = new FeedView(title, feedId);
         }
     },
 
@@ -313,11 +318,11 @@ var gFeedList = {
         // Build the rest of the children recursively
         this._buildChildLivemarks(this.rootFolder);
 
-        this.feedItems = new Array();
+        this.items = new Array();
         var items = this.tree.getElementsByTagName('treecell');
         for (var i = 0; i < items.length; i++) {
             if (items[i].hasAttribute('url'))
-                this.feedItems.push(items[i]);
+                this.items.push(items[i]);
         }
     },
 
