@@ -22,7 +22,7 @@
                           src="chrome://brief/locale/brief.properties"/>
         </stringbundleset>
 
-        <preferences id="main-preferences">
+        <preferences>
             <preference id="extensions.brief.liveBookmarksFolder"
                         name="extensions.brief.liveBookmarksFolder"
                         type="string"/>
@@ -52,15 +52,12 @@
 
     <prefpane id="feedsPane" label="&feedsPane.label;">
 
-        <preferences id="displayPreferences">
+        <preferences>
             <preference id="extensions.brief.update.interval"
                         name="extensions.brief.update.interval"
                         type="int"/>
             <preference id="extensions.brief.update.enableAutoUpdate"
                         name="extensions.brief.update.enableAutoUpdate"
-                        type="bool"/>
-            <preference id="extensions.brief.update.performAtStartup"
-                        name="extensions.brief.update.performAtStartup"
                         type="bool"/>
             <preference id="extensions.brief.feedview.openEntriesInTabs"
                         name="extensions.brief.ofeedview.penEntriesInTabs"
@@ -93,21 +90,12 @@
                          preference="extensions.brief.update.interval"/>
                 <label value="&checkForUpdatesAfter.label;"/>
             </hbox>
-            <checkbox id="updateAtStartup"
-                      label="&updateAtStartup.label;"
-                      preference="extensions.brief.update.performAtStartup"/>
-        </groupbox>
-
-        <separator class="thin"/>
-
-        <groupbox flex="1">
-            <caption label="&storeGroup.caption;"/>
             <hbox align="center">
                 <checkbox id="expiration-checkbox"
                           label="&expirationBefore.label;"
                           preference="extensions.brief.database.expireEntries"
                           oncommand="gFeedsPane.updateExpirationDisabledState();"/>
-                <textbox id="expiration-textbox" size="3"
+                <textbox id="expiration-textbox" size="2"
                          preference="extensions.brief.database.entryExpirationAge"/>
                 <label value="&expirationAfter.label;"/>
             </hbox>
@@ -116,7 +104,7 @@
                           label="&storedEntriesBefore.label;"
                           preference="extensions.brief.database.limitStoredEntries"
                           oncommand="gFeedsPane.updateStoredEntriesDisabledState();"/>
-                <textbox id="stored-entries-textbox" size="3"
+                <textbox id="stored-entries-textbox" size="2"
                          preference="extensions.brief.database.maxStoredEntries"/>
                 <label value="&storedEntriesAfter.label;"/>
             </hbox>
@@ -139,9 +127,6 @@
             <preference id="extensions.brief.feedview.entriesPerPage"
                         name="extensions.brief.feedview.entriesPerPage"
                         type="int"/>
-            <preference id="extensions.brief.showFavicons"
-                        name="extensions.brief.showFavicons"
-                        type="bool"/>
             <preference id="extensions.brief.feedview.useCustomStyle"
                         name="extensions.brief.feedview.useCustomStyle"
                         type="bool"/>
@@ -159,9 +144,6 @@
                 <label value="&entriesPerPageAfter.label;"/>
             </hbox>
             <spacer height="10"/>
-            <checkbox id="favicons-checkbox"
-                      label="&showFavicons.label;"
-                      preference="extensions.brief.showFavicons"/>
             <vbox>
                 <checkbox id="custom-style-checkbox"
                           label="&enableCustomStyle.label;"
