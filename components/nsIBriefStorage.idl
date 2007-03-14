@@ -85,7 +85,9 @@ interface nsIBriefStorage : nsISupports {
    * Synchronize database with Live Bookmarks in folder which RDF id is
    * specified by extensions.brief.liveBookmarksFolder.
    * Previously added feeds that aren't in the current folder anymore are
-   * hidden, so the data is preserved if they are added again.
+   * hidden, so the data is restored if they are added again.
+   *
+   * @throws if extensions.brief.liveBookmarksFolder is empty.
    */
   void syncWithBookmarks();
 
@@ -116,8 +118,9 @@ interface nsIBriefStorage : nsISupports {
    *               1 - move to trash
    *               2 - delete (still only a flag)
    *               3 - remove from database
-   *
    * For the rest of the parameters see getEntries().
+   *
+   * @throws on invalid action parameter.
    */
   void deleteEntries(in octet action,
                      in string entryId,

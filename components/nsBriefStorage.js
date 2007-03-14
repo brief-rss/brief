@@ -16,9 +16,9 @@ const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
 // How often to delete entries that are have expired or exceed the max number of entries
 // per feed.
-const DELETE_REDUNDANT_INTERVAL = 3600000*24; // 1 day
+const DELETE_REDUNDANT_INTERVAL = 3600*24; // 1 day
 // How often to permanently remove deleted entries and VACUUM the database.
-const PURGE_DELETED_INTERVAL = 3600000*24*3; // 3 days
+const PURGE_DELETED_INTERVAL = 3600*24*3; // 3 days
 
 function logDBError(aException) {
     var error = gBriefStorage.dBConnection.lastErrorString;
@@ -78,6 +78,10 @@ function BriefStorage() {
     try {
         this.dBConnection.
         executeSimpleSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
+    } catch (e) {}
+    try {
+        this.dBConnection.
+        executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
     } catch (e) {}
 
     this.startDummyStatement();
@@ -262,7 +266,7 @@ BriefStorage.prototype = {
 
     /**
      * This function creates the part of a statement that is most commonly shared by when
-     * performing various actions, that is the conditions following the WHERE clause.
+     * performing various actions, i.e. the conditions following the WHERE clause.
      */
      createCommonConditions: function(aEntryId, aFeedId, aRules, aSearchString) {
         var conditions = '';
@@ -296,9 +300,9 @@ BriefStorage.prototype = {
             conditions += ' AND entries.title || entries.summary || entries.content' +
                          ' LIKE "%" || "' + aSearchString + '" || "%" ';
 
-        // When appending conditions we don't know if any others were already appended
-        // so we prepend every condition with AND. If there turns redundant AND at the
-        // beginning we trim it here.
+        // When appending conditions we don't know if any others were already appended,
+        // so we prepend every condition with AND. If there turns out to be a redundant
+        // AND at the beginning we trim it here.
         var conditions = conditions.replace(/^ AND/, '');
 
         return conditions;
@@ -310,42 +314,44 @@ BriefStorage.prototype = {
         // Invalidate cache since feeds table is about to change.
         this.feedsCache = null;
 
-        var oldestEntryDate = Date.now();
+        var now = Date.now();
+        var oldestEntryDate = now;
 
         var insertIntoEntries = this.dBConnection.
-            createStatement('INSERT OR IGNORE INTO entries (        ' +
-                            'feedId,                                ' +
-                            'id,                                    ' +
-                            'entryURL,                              ' +
-                            'title,                                 ' +
-                            'summary,                               ' +
-                            'content,                               ' +
-                            'date,                                  ' +
-                            'read)                                  ' +
-                            'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) ');
+            createStatement('INSERT OR IGNORE INTO entries (            ' +
+                            'feedId,                                    ' +
+                            'id,                                        ' +
+                            'providedId,                                ' +
+                            'entryURL,                                  ' +
+                            'title,                                     ' +
+                            'summary,                                   ' +
+                            'content,                                   ' +
+                            'date,                                      ' +
+                            'read)                                      ' +
+                            'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ');
         this.dBConnection.beginTransaction();
         var prevUnreadCount = this.getEntriesCount(aFeed.feedId, 'unread');
         try {
             for each (entry in aFeed.getEntries({})) {
-                var id = this.hashString(entry.entryURL + entry.title + entry.date);
                 var title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
+                var hash = this.hashString(aFeed.feedId + entry.entryURL + entry.id + title);
 
                 insertIntoEntries.bindStringParameter(0, aFeed.feedId);
-                insertIntoEntries.bindStringParameter(1, id);
-                insertIntoEntries.bindStringParameter(2, entry.entryURL);
-                insertIntoEntries.bindStringParameter(3, title);
-                insertIntoEntries.bindStringParameter(4, entry.summary);
-                insertIntoEntries.bindStringParameter(5, entry.content);
-                insertIntoEntries.bindInt64Parameter(6, entry.date ? entry.date
-                                                                   : Date.now());
-                insertIntoEntries.bindInt32Parameter(7, 0);
+                insertIntoEntries.bindStringParameter(1, hash);
+                insertIntoEntries.bindStringParameter(2, entry.id);
+                insertIntoEntries.bindStringParameter(3, entry.entryURL);
+                insertIntoEntries.bindStringParameter(4, title);
+                insertIntoEntries.bindStringParameter(5, entry.summary);
+                insertIntoEntries.bindStringParameter(6, entry.content);
+                insertIntoEntries.bindInt64Parameter(7, entry.date ? entry.date : now);
+                insertIntoEntries.bindInt32Parameter(8, 0);
                 insertIntoEntries.execute();
 
                 if (entry.date && entry.date < oldestEntryDate)
                     oldestEntryDate = entry.date;
             }
 
-            // Do not update title, so that it is always taken from the Live Bookmark.
+            // Do not update the title, so that it is always taken from the Live Bookmark.
             var update = this.dBConnection.
                               createStatement('UPDATE feeds SET               ' +
                                               'websiteURL  = ?1,              ' +
@@ -390,7 +396,7 @@ BriefStorage.prototype = {
         this.dBConnection.beginTransaction();
         try {
             // Get the list of entries which are about to change, so the notification
-            // can provide it.
+            // can include it.
             var rule = aNewStatus ? 'unread' : 'read';
             var changedEntries = this.getSerializedEntries(aEntryId, aFeedId,
                                                            aRules + ' ' + rule,
@@ -408,7 +414,6 @@ BriefStorage.prototype = {
 
     // nsIBriefStorage
     deleteEntries: function(aAction, aEntryId, aFeedId, aRules, aSearchString) {
-
         switch (aAction) {
             case 0:
             case 1:
@@ -456,8 +461,7 @@ BriefStorage.prototype = {
             this.dBConnection.commitTransaction();
         }
 
-        this.observerService.notifyObservers(changedEntries,
-                                             'brief:entry-status-changed',
+        this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
                                              'starred');
     },
 
@@ -514,7 +518,8 @@ BriefStorage.prototype = {
         finally {
             this.dBConnection.commitTransaction();
         }
-        this.prefs.setIntPref('database.lastDeletedRedundantTime', Date.now());
+        var now = Math.round(Date.now() / 1000);
+        this.prefs.setIntPref('database.lastDeletedRedundantTime', now);
     },
 
 
@@ -531,7 +536,8 @@ BriefStorage.prototype = {
         remove.execute();
         this.stopDummyStatement();
         this.dBConnection.executeSimpleSQL('VACUUM');
-        this.prefs.setIntPref('database.lastPurgeTime', Date.now());
+        var now = Math.round(Date.now() / 1000);
+        this.prefs.setIntPref('database.lastPurgeTime', now);
     },
 
 
@@ -543,13 +549,14 @@ BriefStorage.prototype = {
                 var lastTime = this.prefs.getIntPref('database.lastDeletedRedundantTime');
                 var expireEntries = this.prefs.getBoolPref('database.expireEntries');
                 var useStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
-                if (Date.now() - lastTime > DELETE_REDUNDANT_INTERVAL &&
-                    (expireEntries || useStoreLimit)){
+                var now = Math.round(Date.now() / 1000);
+                if (now - lastTime > DELETE_REDUNDANT_INTERVAL &&
+                   (expireEntries || useStoreLimit)) {
                     this.deleteRedundantEntries();
                 }
 
                 lastTime = this.prefs.getIntPref('database.lastPurgeTime');
-                if (Date.now() - lastTime > PURGE_DELETED_INTERVAL)
+                if (now - lastTime > PURGE_DELETED_INTERVAL)
                     this.purgeDeletedEntries();
 
                 break;
@@ -575,7 +582,7 @@ BriefStorage.prototype = {
         // Get the current Live Bookmarks
         var rootID = this.prefs.getCharPref('liveBookmarksFolder');
         if (!rootID)
-            return;
+            throw('No Live Bookmarks folder specified (extensions.brief.liveBookmarksFolder is empty)');
         var root = this.rdfs.GetResource(rootID);
         this.getLivemarks(root);
 
