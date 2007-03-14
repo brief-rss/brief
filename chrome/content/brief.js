@@ -102,13 +102,8 @@ var brief = {
 
                 if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
                   gFeedList.refreshSpecialTreeitem('unread-folder');
-
-                  // If the the updated feed is currently being displayed,
-                  // refresh the feed view.
-                  if (gFeedView && gFeedView.feedViewActive &&
-                      ( (!gFeedView.feedId && gFeedView.rules == 'unread') ||
-                        (gFeedView.feedId && gFeedView.feedId.match(feedId))  ))
-                    gFeedView.refresh();
+                  if (gFeedView)
+                    gFeedView.ensure();
                 }
                 break;
 
@@ -158,31 +153,21 @@ var brief = {
     // when necessary.
     onEntryStatusChanged: function(aChangedItems, aChangeType) {
         aChangedItems.QueryInterface(Ci.nsIWritablePropertyBag2);
-        var changedFeeds = aChangedItems.getPropertyAsAUTF8String('feedIdList');
-        var changedEntries = aChangedItems.getPropertyAsAUTF8String('entryIdList');
+        var changedFeeds = aChangedItems.getPropertyAsAUTF8String('feedIdList').
+                                         match(/[^ ]+/g);
+        var changedEntries = aChangedItems.getPropertyAsAUTF8String('entryIdList').
+                                           match(/[^ ]+/g);
 
-        // We break down the list of feeds which changed entries belong to and
-        // update their treeitems.
-        var feeds = changedFeeds.match(/[^ ]+/g);
-        var entries = changedEntries.match(/[^ ]+/g);
+        var viewIsCool = gFeedView.ensure();
 
         switch (aChangeType) {
             case 'unread':
             case 'read':
-                // If view is set to show only unread entries, we need to refresh it if
-                // any of the shown entries have been marked as read.
-                // We take advantage of the fact that when only unread entries are shown
-                // it is impossible to mark any entry as unread. Thus, entries can never
-                // be added to such view which simplifies a lot. See analogical situation
-                // when only starred entries are shown.
-                if (gFeedView && gFeedView.feedViewActive && gFeedView.rules == 'unread')
-                    gFeedView.refreshWhenEntriesRemoved(entries);
-
-                // Otherwise, we just visually mark the changed entries as read/unread.
-                else if (gFeedView && gFeedView.feedViewActive) {
-                    var nodes = gFeedView.feedContentDiv.childNodes;
-                    for (var i = 0; i < nodes.length; i++) {
-                        if (changedEntries.match(entries[i])) {
+                // Just visually mark the changed entries as read/unread.
+                if (gFeedView && gFeedView.active && viewIsCool) {
+                    var nodes = gFeedView.feedContent.childNodes;
+                    for (i = 0; i < nodes.length; i++) {
+                        if (changedEntries.indexOf(nodes[i].id) != -1) {
                             if (aChangeType == 'read')
                                 nodes[i].setAttribute('read', 'true');
                             else
@@ -191,8 +176,8 @@ var brief = {
                     }
                 }
 
-                for (var i = 0; i < feeds.length; i++)
-                    gFeedList.refreshFeedTreeitem(feeds[i])
+                for (i = 0; i < changedFeeds.length; i++)
+                    gFeedList.refreshFeedTreeitem(changedFeeds[i])
 
                 // We can't know if any of those need updating, so we have to
                 // update them all.
@@ -202,17 +187,12 @@ var brief = {
                 break;
 
             case 'starred':
-                if (gFeedView && gFeedView.feedViewActive && gFeedView.rules == 'starred')
-                    gFeedView.refreshWhenEntriesRemoved(entries);
                 gFeedList.refreshSpecialTreeitem('starred-folder');
                 break;
 
             case 'deleted':
-                if (gFeedView && gFeedView.feedViewActive)
-                    gFeedView.refreshWhenEntriesRemoved(entries);
-
-                for (var i = 0; i < feeds.length; i++)
-                    gFeedList.refreshFeedTreeitem(feeds[i])
+                for (var i = 0; i < changedFeeds.length; i++)
+                    gFeedList.refreshFeedTreeitem(changedFeeds[i])
 
                 gFeedList.refreshSpecialTreeitem('unread-folder');
                 gFeedList.refreshSpecialTreeitem('starred-folder');
@@ -313,23 +293,13 @@ var brief = {
         window.openDialog('chrome://brief/content/options/options.xul', null, features);
     },
 
-    showNextPage: function() {
-        gFeedView.currentPage++;
-        gFeedView.refresh();
-    },
-
-    showPrevPage: function() {
-        gFeedView.currentPage--;
-        gFeedView.refresh();
-    },
-
     onConstraintListCmd: function(aEvent) {
         var choice = aEvent.target.id;
         var prefValue = choice == 'show-all' ? 'all' :
                         choice == 'show-unread' ? 'unread' : 'starred';
 
         gPrefs.setCharPref('feedview.shownEntries', prefValue);
-        gFeedView.refresh();
+        gFeedView.ensure();
     },
 
 
@@ -345,27 +315,62 @@ var brief = {
                                      gFeedView.searchString);
     },
 
-
+    // Creates and manages the FeedView displaying the search results, based on data from
+    // the searchbar (the current input string and the search scope).
     performSearch: function(aEvent) {
         var searchbar = document.getElementById('searchbar');
+        var bundle = document.getElementById('main-bundle');
+        var title = bundle.getFormattedString('searchResults', [searchbar.value]);
 
-        // For a global search we create a new FeedView, so let's do it if we didn't yet.
-        if (searchbar.searchScope == 1 && (!gFeedView || !gFeedView.isGlobalSearchView)) {
+        // A new search is being started.
+        if (searchbar.value && gFeedView && !gFeedView.searchString) {
+            // Remember the old view to restore it after the search is finished.
+            this.previousView = gFeedView || null;
 
+            // For a global search we deselect items in the feed list.
             // We need to suppress selection so that gFeedList.onselect() isn't used.
             // nsITreeSelection.selectEventsSuppressed doesn't seem to work here, so
             // we have to set our own flag which we will check in onselect().
-            var selection = gFeedList.tree.view.selection;
-            gFeedList.selectEventsSuppressed = true;
-            selection.clearSelection();
-            gFeedList.selectEventsSuppressed = false;
+            if (searchbar.searchScope == 1) {
+                var selection = gFeedList.tree.view.selection;
+                gFeedList.selectEventsSuppressed = true;
+                selection.clearSelection();
+                gFeedList.selectEventsSuppressed = false;
+            }
+        }
 
-            gFeedView = new FeedView(null, null, searchbar.value);
-            gFeedView.isGlobalSearchView = true;
+        // The search is has finished.
+        if (!searchbar.value && gFeedView && gFeedView.searchString) {
+            if (this.previousView) {
+                gFeedView = this.previousView;
+                gFeedView._refresh();
+            }
+            else {
+                gFeedView.searchString = '';
+                gFeedView.ensure();
+            }
+            return;
+        }
+
+        // Create a new view for the search. We've got to check for it every time (not
+        // only at the beginning), because the user can change the search scope at any
+        // time, which forces a new FeedView to be created.
+        var isGlobalSearch = (gFeedView && !gFeedView.feedId && !gFeedView.rules &&
+                              gFeedView.searchString);
+        var isViewSearch = (gFeedView && (gFeedView.feedId || gFeedView.rules) &&
+                            gFeedView.searchString);
+
+        if (searchbar.searchScope == 1 && !isGlobalSearch) {
+            gFeedView = new FeedView(title, null, null, searchbar.value);
+        }
+        else if (gFeedView && searchbar.searchScope == 0 && !isViewSearch) {
+            gFeedView = new FeedView(title, gFeedView.feedId, gFeedView.baseRules,
+                                     searchbar.value);
         }
         else if (gFeedView) {
             gFeedView.searchString = searchbar.value;
-            gFeedView.refresh();
+            gFeedView.title = title;
+            gFeedView.ensure();
         }
     },
 
@@ -498,5 +503,5 @@ var gPrefs = {
 function dump(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].
                        getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage('Brief:\n ' + aMessage);
+  consoleService.logStringMessage(aMessage);
 }
