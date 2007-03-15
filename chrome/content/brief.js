@@ -1,6 +1,5 @@
 const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_PATH = '/defaults/data/feedview-template.html';
-const JQUERY_PATH = '/defaults/data/jquery.js';
 const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -13,6 +12,7 @@ var gFeedViewStyle;
 var brief = {
 
     briefLoaded: false,
+    browserWindow: null,
 
     init: function(aEvent) {
         if (this.briefLoaded)
@@ -158,7 +158,9 @@ var brief = {
         var changedEntries = aChangedItems.getPropertyAsAUTF8String('entryIdList').
                                            match(/[^ ]+/g);
 
-        var viewIsCool = gFeedView.ensure();
+        var viewIsCool = true;
+        if (gFeedView)
+            viewIsCool = gFeedView.ensure();
 
         switch (aChangeType) {
             case 'unread':
@@ -304,15 +306,8 @@ var brief = {
 
 
     markCurrentViewRead: function(aNewStatus) {
-        // Optimization not to call markEntriesRead when there's nothing to mark.
-        // We check the number of entries that need to be marked.
-        var oldStatus = aNewStatus ? 'unread' : 'read';
-        var rules = gFeedView.rules + ' ' + oldStatus;
-        var entriesToMarkCount = gStorage.getEntriesCount(gFeedView.feedId, rules,
-                                                          gFeedView.searchString);
-        if (entriesToMarkCount)
-            gStorage.markEntriesRead(aNewStatus, null, gFeedView.feedId, gFeedView.rules,
-                                     gFeedView.searchString);
+        gStorage.markEntriesRead(aNewStatus, null, gFeedView.feedId, gFeedView.rules,
+                                 gFeedView.searchString);
     },
 
     // Creates and manages the FeedView displaying the search results, based on data from
@@ -341,14 +336,11 @@ var brief = {
 
         // The search is has finished.
         if (!searchbar.value && gFeedView && gFeedView.searchString) {
-            if (this.previousView) {
+            if (this.previousView)
                 gFeedView = this.previousView;
-                gFeedView._refresh();
-            }
-            else {
+            else
                 gFeedView.searchString = '';
-                gFeedView.ensure();
-            }
+            gFeedView._refresh();
             return;
         }
 
@@ -370,7 +362,7 @@ var brief = {
         else if (gFeedView) {
             gFeedView.searchString = searchbar.value;
             gFeedView.title = title;
-            gFeedView.ensure();
+            gFeedView._refresh();
         }
     },
 
