@@ -212,6 +212,7 @@ BriefStorage.prototype = {
                         'feeds.hidden = 0 AND              ' ;
         statement += this.createCommonConditions(aEntryId, aFeedId, aRules, aSearchString);
         statement = statement.replace(/AND\s*$/, ''); // Trim any trailing ANDs.
+        statement += ' ORDER BY date DESC ';
 
         var select = this.dBConnection.createStatement(statement);
         var entryIdList = '';
@@ -387,9 +388,13 @@ BriefStorage.prototype = {
 
     // nsIBriefStorage
     markEntriesRead: function(aNewStatus, aEntryId, aFeedId, aRules, aSearchString) {
-        var statement = 'UPDATE entries SET read = ? WHERE ';
-        statement += this.createCommonConditions(aEntryId, aFeedId, aRules, aSearchString);
+        // Make sure not to select entries which already have the desired status.
+        var prevStatus = aNewStatus ? 'unread' : 'read';
+        var optimizedRules = aRules + ' ' + prevStatus;
 
+        var statement = 'UPDATE entries SET read = ? WHERE ';
+        statement += this.createCommonConditions(aEntryId, aFeedId, optimizedRules,
+                                                 aSearchString);
         var update = this.dBConnection.createStatement(statement)
         update.bindInt32Parameter(0, aNewStatus ? 1 : 0);
 
@@ -397,9 +402,8 @@ BriefStorage.prototype = {
         try {
             // Get the list of entries which are about to change, so the notification
             // can include it.
-            var rule = aNewStatus ? 'unread' : 'read';
             var changedEntries = this.getSerializedEntries(aEntryId, aFeedId,
-                                                           aRules + ' ' + rule,
+                                                           optimizedRules,
                                                            aSearchString);
             update.execute();
         }
@@ -407,8 +411,10 @@ BriefStorage.prototype = {
             this.dBConnection.commitTransaction();
         }
 
-        this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                             aNewStatus ? 'read' : 'unread');
+        // If any entries were marked, dispatch the notifiaction.
+        if (changedEntries.getPropertyAsAUTF8String('entryIdList'))
+            this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                                 aNewStatus ? 'read' : 'unread');
     },
 
 
