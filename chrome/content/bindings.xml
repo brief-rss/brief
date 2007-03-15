@@ -266,8 +266,8 @@
                 else if (target.getAttribute('anonid') == 'searchbar-clearbutton') {
                     this.value = '';
                     this.clearButton.hidden = true;
-                    brief.performSearch(event);
-                    this.blur();
+                    brief.performSearch();
+                    this.inputField.blur();
                 }
             ]]>
             </handler>
