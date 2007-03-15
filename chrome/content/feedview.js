@@ -23,7 +23,7 @@ function FeedView(aTitle, aFeedId, aRules, aSearchString) {
         var searchbar = document.getElementById('searchbar');
         searchbar.setAttribute('showingDescription', true);
     }
-
+    dump('new feed view');
     // Cache various elements for later use
     this.browser = document.getElementById('feed-view');
     this.document = this.browser.contentDocument;
@@ -101,7 +101,7 @@ FeedView.prototype = {
             return true;
 
         if (!prevEntries || !currentEntries || prevEntries.length < currentEntries.length ||
-           currenEntries.length - prevEntries.length > 1) {
+           prevEntries.length - currentEntries.length > 1) {
             this._refresh();
             return false;
         }
@@ -287,7 +287,7 @@ FeedView.prototype = {
 
         // If the trash folder is displayed this attribute adjusts the visibility of the
         // button in article controls.
-        if (this.type == 'specialFolder' && this.rules == 'trashed')
+        if (this.rules == 'trashed')
             this.feedContent.setAttribute('trash', true);
 
         if (!feed)
