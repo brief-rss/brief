@@ -1,12 +1,12 @@
 const EXT_ID = 'brief@mozdev.org';
-const TEMPLATE_PATH = '/defaults/data/feedview-template.html';
+const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 var gFeedView;
 var gStorage;
-var gTemplateURL;
+var gTemplateURI;
 var gFeedViewStyle;
 
 var brief = {
@@ -25,17 +25,16 @@ var brief = {
         gFeedViewStyle = this.getFeedViewStyle();
 
         // Get the extension's directory.
-        var extensionDir = Cc['@mozilla.org/extensions/manager;1'].
+        var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
                            getService(Ci.nsIExtensionManager).
                            getInstallLocation(EXT_ID).
-                           getItemLocation(EXT_ID).
-                           path;
-        // Replace backslashes with slashes.
-        var regexp = new RegExp('%5C', 'g');
-        extensionDir = escape(extensionDir).replace(regexp, '/');
-        // Construct the final URL.
-        gTemplateURL = 'file:///' + extensionDir + TEMPLATE_PATH;
-        gTemplateURL = unescape(gTemplateURL);
+                           getItemLocation(EXT_ID);
+        itemLocation.append('defaults');
+        itemLocation.append('data');
+        itemLocation.append(TEMPLATE_FILENAME);
+        gTemplateURI = Cc['@mozilla.org/network/protocol;1?name=file'].
+                       getService(Ci.nsIFileProtocolHandler).
+                       newFileURI(itemLocation);
 
         // Initiate the feed list.
         var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
