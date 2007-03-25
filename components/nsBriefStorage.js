@@ -75,6 +75,8 @@ function BriefStorage() {
                               'deleted  INTEGER DEFAULT 0          ' +
                               ')');
     }
+    // Columns that were added in the later versions have to be added separately for
+    // compatibility.
     try {
         this.dBConnection.
         executeSimpleSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
@@ -100,9 +102,9 @@ function BriefStorage() {
 BriefStorage.prototype = {
 
     observerService: null,
-    briefPrefs:      null,
+    prefs:           null,
     dBConnection:    null,
-    feedsCache:      null, //without entries
+    feedsCache:      null, // without entries
 
     // nsIBriefStorage
     getFeed: function(aFeedId) {
@@ -205,7 +207,7 @@ BriefStorage.prototype = {
     // nsIBriefStorage
     getSerializedEntries: function(aEntryId, aFeedId, aRules, aSearchString) {
         var statement = 'SELECT                            ' +
-                        'entries.id, entries.feedId       ' +
+                        'entries.id, entries.feedId        ' +
                         'FROM entries INNER JOIN feeds     ' +
                         'ON entries.feedId = feeds.feedId  ' +
                         'WHERE                             ' +
@@ -219,13 +221,8 @@ BriefStorage.prototype = {
         var feedIdList = '';
         try {
             while (select.executeStep()) {
-                var id = select.getString(0);
-                if (!entryIdList.match(id))
-                    entryIdList += id + ' ';
-
-                var feedId = select.getString(1);
-                if (!feedIdList.match(feedId))
-                    feedIdList += feedId + ' ';
+                entryIdList += select.getString(0) + ' ';
+                feedIdList += select.getString(1) + ' ';
             }
         }
         finally {
@@ -299,7 +296,7 @@ BriefStorage.prototype = {
 
         if (aSearchString)
             conditions += ' AND entries.title || entries.summary || entries.content' +
-                         ' LIKE "%" || "' + aSearchString + '" || "%" ';
+                          ' LIKE "%" || "' + aSearchString + '" || "%" ';
 
         // When appending conditions we don't know if any others were already appended,
         // so we prepend every condition with AND. If there turns out to be a redundant
@@ -479,7 +476,7 @@ BriefStorage.prototype = {
         var expirationAge = this.prefs.getIntPref('database.entryExpirationAge');
         var maxEntries = this.prefs.getIntPref('database.maxStoredEntries');
 
-        var edgeDate = Date.now() - expirationAge * 3600000;
+        var edgeDate = Date.now() - expirationAge * 86400000; // expirationAge is in days
         var feeds = this.getAllFeeds({});
 
         var deleteOutdated = this.dBConnection.
@@ -652,7 +649,7 @@ BriefStorage.prototype = {
 
 
     /**
-     * This function recursively reads livemarks from a folder and its subfolders
+     * Recursively reads livemarks from a folder and its subfolders
      * and stores them as an array in |livemark| member property.
      *
      * @param aRoot RDF URI of the folder containing the livemarks.
