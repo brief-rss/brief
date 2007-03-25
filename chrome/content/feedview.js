@@ -23,7 +23,7 @@ function FeedView(aTitle, aFeedId, aRules, aSearchString) {
         var searchbar = document.getElementById('searchbar');
         searchbar.setAttribute('showingDescription', true);
     }
-    dump('new feed view');
+
     // Cache various elements for later use
     this.browser = document.getElementById('feed-view');
     this.document = this.browser.contentDocument;
@@ -72,14 +72,13 @@ FeedView.prototype = {
 
     // Indicates whether the feed view is currently displayed in the browser.
     get active() {
-        return (unescape(this.browser.currentURI.spec) == gTemplateURL);
+        return (this.browser.currentURI.spec == gTemplateURI.spec);
     },
 
     // Actual rules used by the view.
     get rules() {
         return this.baseRules ? this.baseRules : gPrefs.shownEntries;
     },
-
 
     ensure: function() {
         if (!this.active)
@@ -150,7 +149,7 @@ FeedView.prototype = {
 
         // Load the template. The actual content building happens when the template
         // page is loaded - see _onLoad below.
-        this.browser.loadURI(gTemplateURL);
+        this.browser.loadURI(gTemplateURI.spec);
 
         // Store a list of ids of displayed entries. It is used to determine if
         // the view needs to be refreshed when database changes.
