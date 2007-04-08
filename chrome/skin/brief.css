@@ -6,7 +6,6 @@
   overflow: hidden;
   }
 
-
 #feed-list > treechildren {
   -moz-binding: url('chrome://brief/content/bindings.xml#feedlist-treebody');
   }
@@ -25,9 +24,14 @@ treechildren::-moz-tree-line {
   }
 
 treechildren::-moz-tree-twisty {
-  width: 0 !important;
-  height: 0 !important;
+  list-style-image: url('icons/tree-dropmarker.png');
+  width: 11px;
+  height: 11px;
   }
+
+treechildren::-moz-tree-twisty(open) {
+  list-style-image: url('icons/tree-dropmarker-open.png');
+}
 
 treechildren::-moz-tree-row {
   height: 1.6em;
@@ -37,13 +41,10 @@ treechildren::-moz-tree-cell-text(bold) {
   font-weight: bold;
   }
 
-treechildren::-moz-tree-image {
-  padding-right: 4px;
-  }
-
 treechildren::-moz-tree-image(container) {
   list-style-image: url('chrome://global/skin/icons/folder-item.png') !important;
   -moz-image-region: rect(0px, 32px, 16px, 16px);
+  padding-right: 4px;
   }
 
 treechildren::-moz-tree-image(open) {
@@ -55,6 +56,7 @@ treechildren::-moz-tree-image(feed-item) {
   -moz-image-region: rect(0px, 16px, 16px, 0px) !important;
   width: 16px;
   height: 16px;
+  padding-right: 4px;
   }
 
 treechildren::-moz-tree-image(feed-item bold) {
@@ -65,16 +67,19 @@ treechildren::-moz-tree-image(feed-item bold) {
 treechildren::-moz-tree-image(unreadFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(0px, 16px, 16px, 0px);
+  padding-right: 4px;
   }
 
 treechildren::-moz-tree-image(trashFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(32px, 16px, 48px, 0px);
+  padding-right: 4px;
   }
 
 treechildren::-moz-tree-image(starredFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(16px, 16px, 32px, 0px);
+  padding-right: 4px;
   }
 
 #pick-folder-button {
@@ -100,10 +105,6 @@ toolbar, toolbaritem {
 
 toolbarbutton {
   padding: 5px 0 4px 4px;
-  }
-
-#feed-list-toolbar {
-  padding-left: 5px;
   }
 
 #feed-view-toolbar {
