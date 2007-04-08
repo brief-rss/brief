@@ -14,7 +14,7 @@ const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
 var gFeedList = {
 
-    _initiated: false,
+    initiated: false,
 
     tree:  null,
     items: null, // treecell elements of all the feeds
@@ -53,7 +53,7 @@ var gFeedList = {
         this.sequence = this.rdfs.GetResource(RDF_SEQ_INSTANCE);
         this.livemarkType = this.rdfs.GetResource(NC_LIVEMARK);
 
-        this._initiated = true;
+        this.initiated = true;
     },
 
 
@@ -162,25 +162,6 @@ var gFeedList = {
     },
 
 
-    onDoubleClick: function(aEvent) {
-        var rowIndex = {};
-        this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
-        if (rowIndex.value == -1)
-            return;
-        var item = this.tree.view.getItemAtIndex(rowIndex.value);
-
-        if (item.hasAttribute('container')) {
-            var uri = item.getAttribute('uri');
-            var closedFolders = gFeedList.tree.getAttribute('closedFolders');
-            if (item.getAttribute('open') == 'true')
-                closedFolders = closedFolders.replace(uri, '');
-            else
-                closedFolders += uri + ' ';
-            gFeedList.tree.setAttribute('closedFolders', closedFolders);
-        }
-    },
-
-
     createContextMenu: function(aEvent) {
         // Get the row which was the target of the right-click
         var rowIndex = {};
@@ -215,13 +196,14 @@ var gFeedList = {
 
         var separator = document.getElementById('ctx-separator');
         separator.hidden = this.ctx_targetItem.hasAttribute('specialView') &&
-                           this.ctx_targetItem.id != 'trash-folder';
+                           this.ctx_targetItem.id == 'starred-folder';
 
         var emptyFeed = document.getElementById('ctx-empty-feed');
         emptyFeed.hidden = !this.ctx_targetItem.hasAttribute('feedId');
 
         var emptyFolder = document.getElementById('ctx-empty-folder');
-        emptyFolder.hidden = !this.ctx_targetItem.hasAttribute('container');
+        emptyFolder.hidden = !(this.ctx_targetItem.hasAttribute('container') ||
+                               this.ctx_targetItem.id == 'unread-folder');
 
         var restoreTrashed = document.getElementById('ctx-restore-trashed');
         restoreTrashed.hidden = this.ctx_targetItem.id != 'trash-folder';
@@ -296,7 +278,7 @@ var gFeedList = {
      * Rebuilds the feed list tree.
      */
     rebuild: function() {
-        if (!this._initiated)
+        if (!this.initiated)
             this._init();
 
         this.refreshSpecialTreeitem('unread-folder');
