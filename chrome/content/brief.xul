@@ -13,11 +13,9 @@
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
-    <script type="application/x-javascript" src="jquery.js"/>
 
     <stringbundleset id="string-bundles">
-        <stringbundle id="main-bundle"
-                      src="chrome://brief/locale/brief.properties"/>
+        <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
     </stringbundleset>
 
     <popupset id="main-popupset">
@@ -82,8 +80,7 @@
                       seltype="single"
                       contextmenu="feed-list-popup"
                       persist="closedFolders"
-                      onselect="gFeedList.onselect(event);"
-                      ondblclick="gFeedList.onDoubleClick(event);">
+                      onselect="gFeedList.onselect(event);">
 
                     <treecols>
                         <treecol id="name" flex="1"
@@ -139,6 +136,7 @@
                     <toolbaritem id="view-constraint-box">
                         <label value="&viewConstraintList.label;"/>
                         <menulist id="view-constraint-list"
+                                  tooltiptext="&viewConstraintList.tooltip;"
                                   oncommand="brief.onConstraintListCmd(event);">
                             <menupopup>
                                 <menuitem id="show-all"
