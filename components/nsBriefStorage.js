@@ -222,7 +222,10 @@ BriefStorage.prototype = {
         try {
             while (select.executeStep()) {
                 entryIdList += select.getString(0) + ' ';
-                feedIdList += select.getString(1) + ' ';
+
+                var feedId = select.getString(1);
+                if (!feedIdList.match(feedId))
+                    feedIdList += feedId + ' ';
             }
         }
         finally {
