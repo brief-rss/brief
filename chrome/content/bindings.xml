@@ -192,7 +192,8 @@
         <content>
             <children/>
             <xul:hbox class="searchbar-textbox textbox-input-box" flex="1">
-                <xul:button class="search-scope-button" popup="_child">
+                <xul:button class="search-scope-button" popup="_child"
+                            tooltiptext="&searchScopeButton.tooltip;">
                     <xul:menupopup anonid="searchbar-popup" position="after_start">
                           <xul:menuitem anonid="search-current"
                                         label="&searchCurrentView.label;"
@@ -253,7 +254,7 @@
                 var textbox = document.getBindingParent(target);
 
                 if (target.getAttribute('anonid') == 'search-current' ||
-                    target.getAttribute('anonid') == 'search-all') {
+                   target.getAttribute('anonid') == 'search-all') {
                     if (textbox.hasAttribute('showingDescription'))
                         textbox.value = target.label;
                     textbox.searchScope = target.value;
