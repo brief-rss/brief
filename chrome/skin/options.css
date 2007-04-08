@@ -1,16 +1,24 @@
+radio[pane] {
+  list-style-image: url('icons/prefpane-icons.png');
+}
+
 radio[pane=mainPane] {
-  list-style-image: url('chrome://brief/skin/icons/prefPane-main.png');
+  -moz-image-region: rect(0px, 32px, 32px, 0px);
  }
 
 radio[pane=displayPane] {
-  list-style-image: url('chrome://brief/skin/icons/prefPane-display.png');
+  -moz-image-region: rect(32px, 32px, 64px, 0px);
   }
 
 radio[pane=feedsPane] {
-  list-style-image: url('chrome://brief/skin/icons/prefPane-feeds.png');
+  -moz-image-region: rect(64px, 32px, 96px, 0px);
   }
 
 #folders-tree {
-  height: 15em;
+  height: 12em;
   margin-bottom: 1em;
   }
+
+groupbox {
+  -moz-box-flex: 1;
+}
