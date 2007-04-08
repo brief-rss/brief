@@ -18,8 +18,7 @@
                 src="chrome://browser/content/bookmarks/bookmarks.js"/>
 
         <stringbundleset id="string-bundles">
-            <stringbundle id="main-bundle"
-                          src="chrome://brief/locale/brief.properties"/>
+            <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
         </stringbundleset>
 
         <preferences>
@@ -39,7 +38,7 @@
         <bookmarks-tree id="folders-tree" flex="1" type="folders"
                         onselect="gMainPane.onFolderSelected(event);"/>
 
-        <groupbox flex="1">
+        <groupbox>
             <checkbox id="show-statusbar-icon"
                       label="&showStatusbarIcon.label;"
                       preference="extensions.brief.showStatusbarIcon"/>
@@ -60,7 +59,7 @@
                         name="extensions.brief.update.enableAutoUpdate"
                         type="bool"/>
             <preference id="extensions.brief.feedview.openEntriesInTabs"
-                        name="extensions.brief.ofeedview.penEntriesInTabs"
+                        name="extensions.brief.feedview.openEntriesInTabs"
                         type="bool"/>
             <preference id="extensions.brief.feedview.doubleClickMarks"
                         name="extensions.brief.feedview.doubleClickMarks"
@@ -77,9 +76,12 @@
             <preference id="extensions.brief.database.maxStoredEntries"
                         name="extensions.brief.database.maxStoredEntries"
                         type="int"/>
+            <preference id="extensions.brief.update.showNotification"
+                        name="extensions.brief.update.showNotification"
+                        type="bool"/>
         </preferences>
 
-        <groupbox flex="1">
+        <groupbox>
             <caption label="&updateGroup.caption;"/>
             <hbox align="center">
                 <checkbox id="checkForUpdates"
@@ -90,6 +92,12 @@
                          preference="extensions.brief.update.interval"/>
                 <label value="&checkForUpdatesAfter.label;"/>
             </hbox>
+            <checkbox label="&showNotification.label;"
+                      preference="extensions.brief.update.showNotification"/>
+        </groupbox>
+
+        <groupbox>
+            <caption label="&storingGroup.caption;"/>
             <hbox align="center">
                 <checkbox id="expiration-checkbox"
                           label="&expirationBefore.label;"
@@ -110,9 +118,8 @@
             </hbox>
         </groupbox>
 
-        <separator class="thin"/>
-
         <groupbox>
+            <caption label="&behaviorGroup.caption;"/>
             <checkbox label="&openEntriesInTabs.label;"
                       preference="extensions.brief.feedview.openEntriesInTabs"/>
             <checkbox label="&doubleClickMarks.label;"
@@ -135,7 +142,7 @@
                         type="unichar"/>
         </preferences>
 
-        <groupbox flex="1">
+        <groupbox>
             <hbox align="center">
                 <label value="&entriesPerPageBefore.label;"/>
                 <textbox id="entriesPerPage"
