@@ -8,10 +8,38 @@
 
     <script type="application/x-javascript" src="brief-overlay.js"/>
 
+    <popupset id="mainPopupSet">
+        <popup id="brief-status-context">
+            <menuitem id="brief-ctx-update-feeds"
+                      label="&ctxUpdateFeeds.label;"
+                      oncommand="gBrief.updateFeeds();"/>
+        </popup>
+
+        <tooltip id="brief-tooltip"
+                 orient="vertical"
+                 onpopupshowing="gBrief.constructTooltip(event);">
+            <label id="brief-tooltip-last-updated"/>
+            <label id="brief-tooltip-no-unread"/>
+            <grid>
+                <columns>
+                    <column id="brief-tooltip-feed-name"/>
+                    <column id="brief-tooltip-unread-count"/>
+                    <column id="brief-tooltip-unread-desc"/>
+                </columns>
+                <rows id="brief-tooltip-rows"/>
+            </grid>
+        </tooltip>
+    </popupset>
+
+    <stringbundleset id="stringbundleset">
+        <stringbundle id="brief-bundle" src="chrome://brief/locale/brief.properties"/>
+    </stringbundleset>
+
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="brief-button"
                        class="toolbarbutton-1"
                        label="Brief"
+                       tooltip="brief-tooltip"
                        type="checkbox"
                        autoCheck="false"
                        onclick="gBrief.onBriefButtonClick(event);"/>
@@ -19,6 +47,7 @@
 
     <statusbar id="status-bar">
         <statusbarpanel id="brief-status"
+                        tooltip="brief-tooltip"
                         context="brief-status-context"
                         hidden="true"
                         onclick="gBrief.onBriefButtonClick(event);"
@@ -29,13 +58,5 @@
 
         </statusbarpanel>
     </statusbar>
-
-    <popupset id="mainPopupSet">
-        <popup id="brief-status-context">
-            <menuitem id="brief-ctx-update-feeds"
-                      label="&ctxUpdateFeeds.label;"
-                      oncommand="gBrief.updateFeeds();"/>
-        </popup>
-    </popupset>
 
 </overlay>
