@@ -1,6 +1,8 @@
 const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
+const LAST_MAJOR_VERSION = 0.7;
+const RELEASE_NOTES_PAGE_URL = 'http://brief.mozdev.org/newversion.html';
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -32,14 +34,28 @@ var brief = {
         itemLocation.append('defaults');
         itemLocation.append('data');
         itemLocation.append(TEMPLATE_FILENAME);
+        // Create URI of the template file.
         gTemplateURI = Cc['@mozilla.org/network/protocol;1?name=file'].
                        getService(Ci.nsIFileProtocolHandler).
                        newFileURI(itemLocation);
 
+        // Check if we should load the new version page
+        var prevLastMajorVersion = gPrefs.getCharPref('lastMajorVersion');
+        if (parseFloat(prevLastMajorVersion) < LAST_MAJOR_VERSION) {
+            var browser = document.getElementById('feed-view');
+            browser.loadURI(RELEASE_NOTES_PAGE_URL);
+            gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
+        }
+
         // Initiate the feed list.
         var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
         if (liveBookmarksFolder) {
-            gStorage.syncWithBookmarks();
+            // If Brief is set as the homepage, it's loaded before delayedStartup() is
+            // run and encounters an exception when synchronizing. Hence the timeout.
+            setTimeout(function(){ gStorage.syncWithBookmarks(); }, 500);
+
+            // This timeout causes the Brief window to be displayed a lot sooner and to
+            // populate the feed list afterwards.
             setTimeout(function(){ gFeedList.rebuild(); }, 0);
         }
         else {
@@ -260,14 +276,14 @@ var brief = {
 
         if (anonid == 'article-title-link' && (aEvent.button == 0 || aEvent.button == 1)) {
 
-            if (gPrefs.getBoolPref('feedview.openEntriesInTabs')) {
+            if (aEvent.button == 0 && gPrefs.getBoolPref('feedview.openEntriesInTabs')) {
                 aEvent.preventDefault();
                 var url = targetEntry.getAttribute('entryURL');
                 brief.browserWindow.gBrowser.loadOneTab(url);
             }
 
             if (!targetEntry.hasAttribute('read') &&
-                gPrefs.getBoolPref('feedview.linkMarksRead')) {
+               gPrefs.getBoolPref('feedview.linkMarksRead')) {
                 targetEntry.setAttribute('read', true);
                 var id = targetEntry.getAttribute('id');
                 gStorage.markEntriesRead(true, id, null, null, null);
@@ -290,8 +306,8 @@ var brief = {
     },
 
     openOptions: function(aPaneID) {
-        var features = 'toolbar,centerscreen,modal,resizable';
-        window.openDialog('chrome://brief/content/options/options.xul', null, features);
+        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
+                          'chrome,titlebar,toolbar,centerscreen,modal,resizable');
     },
 
     onConstraintListCmd: function(aEvent) {
@@ -309,8 +325,8 @@ var brief = {
                                  gFeedView.searchString);
     },
 
-    // Creates and manages the FeedView displaying the search results, based on data from
-    // the searchbar (the current input string and the search scope).
+    // Creates and manages the FeedView displaying the search results, based the current
+    // input string and the search scope.
     performSearch: function(aEvent) {
         var searchbar = document.getElementById('searchbar');
         var bundle = document.getElementById('main-bundle');
@@ -319,7 +335,7 @@ var brief = {
         // A new search is being started.
         if (searchbar.value && gFeedView && !gFeedView.searchString) {
             // Remember the old view to restore it after the search is finished.
-            this.previousView = gFeedView || null;
+            this.previousView = gFeedView;
 
             // For a global search we deselect items in the feed list.
             // We need to suppress selection so that gFeedList.onselect() isn't used.
@@ -338,7 +354,7 @@ var brief = {
             if (this.previousView)
                 gFeedView = this.previousView;
             else
-                gFeedView.searchString = '';
+                gFeedView.searchString = gFeedView.title = '';
             gFeedView._refresh();
             return;
         }
@@ -405,7 +421,7 @@ var brief = {
 
     ctx_emptyFeed: function(aEvent) {
         var feedId = gFeedList.ctx_targetItem.getAttribute('feedId');
-        gStorage.deleteEntries(1, null, feedId, null, null);
+        gStorage.deleteEntries(1, null, feedId, 'unstarred', null);
     },
 
     ctx_emptyFolder: function(aEvent) {
@@ -414,7 +430,7 @@ var brief = {
         var feedIds = '';
         for (var i = 0; i < feedItems.length; i++)
             feedIds += feedItems[i].getAttribute('feedId') + ' ';
-        gStorage.deleteEntries(1, null, feedIds, null, null);
+        gStorage.deleteEntries(1, null, feedIds, 'unstarred', null);
     },
 
     ctx_restoreTrashed: function(aEvent) {
