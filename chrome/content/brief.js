@@ -1,7 +1,7 @@
 const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
-const LAST_MAJOR_VERSION = 0.7;
+const LAST_MAJOR_VERSION = 0.6;
 const RELEASE_NOTES_PAGE_URL = 'http://brief.mozdev.org/newversion.html';
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -39,14 +39,6 @@ var brief = {
                        getService(Ci.nsIFileProtocolHandler).
                        newFileURI(itemLocation);
 
-        // Check if we should load the new version page
-        var prevLastMajorVersion = gPrefs.getCharPref('lastMajorVersion');
-        if (parseFloat(prevLastMajorVersion) < LAST_MAJOR_VERSION) {
-            var browser = document.getElementById('feed-view');
-            browser.loadURI(RELEASE_NOTES_PAGE_URL);
-            gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
-        }
-
         // Initiate the feed list.
         var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
         if (liveBookmarksFolder) {
@@ -83,6 +75,17 @@ var brief = {
         observerService.addObserver(this, 'brief:entry-status-changed', false);
         observerService.addObserver(this, 'brief:sync-to-livemarks', false);
         observerService.addObserver(this, 'brief:batch-update-started', false);
+
+        // Load the initial Unread view or the new version page.
+        var prevLastMajorVersion = gPrefs.getCharPref('lastMajorVersion');
+        if (parseFloat(prevLastMajorVersion) < LAST_MAJOR_VERSION) {
+            var browser = document.getElementById('feed-view');
+            browser.loadURI(RELEASE_NOTES_PAGE_URL);
+            gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
+        }
+        else if (gPrefs.getBoolPref('showHomeView')) {
+            setTimeout(function() { gFeedList.tree.view.selection.select(0); }, 0);
+        }
     },
 
 
@@ -96,6 +99,19 @@ var brief = {
         observerService.removeObserver(this, 'brief:entry-status-changed');
         observerService.removeObserver(this, 'brief:batch-update-started');
         gPrefs.unregister();
+
+        // Persist the folders open/closed state.
+        if (gFeedList.initiated) {
+            var items = gFeedList.tree.getElementsByTagName('treeitem');
+            var closedFolders = '';
+
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
+                    closedFolders += item.getAttribute('uri');
+            }
+            gFeedList.tree.setAttribute('closedFolders', closedFolders);
+        }
     },
 
 
@@ -103,64 +119,65 @@ var brief = {
     // notifications.
     observe: function(aSubject, aTopic, aData) {
         switch (aTopic) {
-            // A feed update was finished and new entries are available. Restore the
-            // favicon instead of the throbber (or error icon), refresh the feed treeitem
-            // and the feedview if necessary.
-            case 'brief:feed-updated':
-                var feedId = aData;
-                var item = gFeedList.getTreeitemForFeed(feedId);
-                item.removeAttribute('error');
-                item.removeAttribute('loading');
-                gFeedList.refreshFeedTreeitem(feedId, item);
-                this.finishedFeeds++;
-                this.updateProgressMeter();
+        // A feed update was finished and new entries are available. Restore the
+        // favicon instead of the throbber (or error icon), refresh the feed treeitem
+        // and the feedview if necessary.
+        case 'brief:feed-updated':
+            var feedId = aData;
+            var item = gFeedList.getTreeitemForFeed(feedId);
+            item.removeAttribute('error');
+            item.removeAttribute('loading');
+            gFeedList.refreshFeedTreeitem(feedId, item);
+            this.finishedFeeds++;
+            this.updateProgressMeter();
 
-                if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
-                  gFeedList.refreshSpecialTreeitem('unread-folder');
-                  if (gFeedView)
-                    gFeedView.ensure();
-                }
-                break;
+            if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
+              gFeedList.refreshSpecialTreeitem('unread-folder');
+              if (gFeedView)
+                gFeedView.ensure();
+            }
+            break;
 
-            // A feed was requested, show throbber as its icon.
-            case 'brief:feed-loading':
-                var item = gFeedList.getTreeitemForFeed(aData);
-                item.setAttribute('loading', true);
-                gFeedList.refreshFeedTreeitem(aData, item);
-                break;
+        // A feed was requested, show throbber as its icon.
+        case 'brief:feed-loading':
+            var item = gFeedList.getTreeitemForFeed(aData);
+            item.setAttribute('loading', true);
+            gFeedList.refreshFeedTreeitem(aData, item);
+            break;
 
-            // An error occured when downloading or parsing a feed, show error icon.
-            case 'brief:feed-error':
-                var feedId = aData;
-                var item = gFeedList.getTreeitemForFeed(feedId);
-                gFeedList.removeProperty(item, 'loading');
-                item.setAttribute('error', true);
-                gFeedList.refreshFeedTreeitem(feedId, item);
-                this.finishedFeeds++;
-                this.updateProgressMeter();
-                break;
+        // An error occured when downloading or parsing a feed, show error icon.
+        case 'brief:feed-error':
+            var feedId = aData;
+            var item = gFeedList.getTreeitemForFeed(feedId);
+            gFeedList.removeProperty(item, 'loading');
+            item.setAttribute('error', true);
+            gFeedList.refreshFeedTreeitem(feedId, item);
+            this.finishedFeeds++;
+            this.updateProgressMeter();
+            break;
 
-            // The Live Bookmarks stored is user's folder of choice were read and the
-            // in-database list of feeds was synchronized. Rebuild the feed list as it
-            // may have changed.
-            case 'brief:sync-to-livemarks':
-                gFeedList.rebuild();
-                var deck = document.getElementById('feed-list-deck');
-                deck.selectedIndex = 0;
-                break;
+        // The Live Bookmarks stored is user's folder of choice were read and the
+        // in-database list of feeds was synchronized. Rebuild the feed list as it
+        // may have changed.
+        case 'brief:sync-to-livemarks':
+            gFeedList.rebuild();
+            var deck = document.getElementById('feed-list-deck');
+            deck.selectedIndex = 0;
+            break;
 
-            // Sets up the updating progressmeter.
-            case 'brief:batch-update-started':
-                var progressmeter = document.getElementById('update-progress');
-                progressmeter.hidden = false;
-                progressmeter.value = 0;
-                this.totalFeeds = gStorage.getAllFeeds({}).length;
-                this.finishedFeeds = 0;
-                break;
+        // Sets up the updating progressmeter.
+        case 'brief:batch-update-started':
+            var progressmeter = document.getElementById('update-progress');
+            progressmeter.hidden = false;
+            progressmeter.value = 0;
+            this.totalFeeds = gStorage.getAllFeeds({}).length;
+            this.finishedFeeds = 0;
+            break;
 
-            // Entries were marked as read/unread, starred, trashed, restored, or deleted.
-            case 'brief:entry-status-changed':
-                this.onEntryStatusChanged(aSubject, aData);
+        // Entries were marked as read/unread, starred, trashed, restored, or deleted.
+        case 'brief:entry-status-changed':
+            this.onEntryStatusChanged(aSubject, aData);
+            break;
         }
     },
 
@@ -178,43 +195,43 @@ var brief = {
             viewIsCool = gFeedView.ensure();
 
         switch (aChangeType) {
-            case 'unread':
-            case 'read':
-                // Just visually mark the changed entries as read/unread.
-                if (gFeedView && gFeedView.active && viewIsCool) {
-                    var nodes = gFeedView.feedContent.childNodes;
-                    for (i = 0; i < nodes.length; i++) {
-                        if (changedEntries.indexOf(nodes[i].id) != -1) {
-                            if (aChangeType == 'read')
-                                nodes[i].setAttribute('read', 'true');
-                            else
-                                nodes[i].removeAttribute('read');
-                        }
+        case 'unread':
+        case 'read':
+            // Just visually mark the changed entries as read/unread.
+            if (gFeedView && gFeedView.active && viewIsCool) {
+                var nodes = gFeedView.feedContent.childNodes;
+                for (i = 0; i < nodes.length; i++) {
+                    if (changedEntries.indexOf(nodes[i].id) != -1) {
+                        if (aChangeType == 'read')
+                            nodes[i].setAttribute('read', 'true');
+                        else
+                            nodes[i].removeAttribute('read');
                     }
                 }
+            }
 
-                for (i = 0; i < changedFeeds.length; i++)
-                    gFeedList.refreshFeedTreeitem(changedFeeds[i])
+            for (i = 0; i < changedFeeds.length; i++)
+                gFeedList.refreshFeedTreeitem(changedFeeds[i])
 
-                // We can't know if any of those need updating, so we have to
-                // update them all.
-                gFeedList.refreshSpecialTreeitem('unread-folder');
-                gFeedList.refreshSpecialTreeitem('starred-folder');
-                gFeedList.refreshSpecialTreeitem('trash-folder');
-                break;
+            // We can't know if any of those need updating, so we have to
+            // update them all.
+            gFeedList.refreshSpecialTreeitem('unread-folder');
+            gFeedList.refreshSpecialTreeitem('starred-folder');
+            gFeedList.refreshSpecialTreeitem('trash-folder');
+            break;
 
-            case 'starred':
-                gFeedList.refreshSpecialTreeitem('starred-folder');
-                break;
+        case 'starred':
+            gFeedList.refreshSpecialTreeitem('starred-folder');
+            break;
 
-            case 'deleted':
-                for (var i = 0; i < changedFeeds.length; i++)
-                    gFeedList.refreshFeedTreeitem(changedFeeds[i])
+        case 'deleted':
+            for (var i = 0; i < changedFeeds.length; i++)
+                gFeedList.refreshFeedTreeitem(changedFeeds[i])
 
-                gFeedList.refreshSpecialTreeitem('unread-folder');
-                gFeedList.refreshSpecialTreeitem('starred-folder');
-                gFeedList.refreshSpecialTreeitem('trash-folder');
-                break;
+            gFeedList.refreshSpecialTreeitem('unread-folder');
+            gFeedList.refreshSpecialTreeitem('starred-folder');
+            gFeedList.refreshSpecialTreeitem('trash-folder');
+            break;
         }
     },
 
@@ -426,11 +443,16 @@ var brief = {
 
     ctx_emptyFolder: function(aEvent) {
         var item = gFeedList.ctx_targetItem;
-        var feedItems = item.getElementsByTagName('treecell');
-        var feedIds = '';
-        for (var i = 0; i < feedItems.length; i++)
-            feedIds += feedItems[i].getAttribute('feedId') + ' ';
-        gStorage.deleteEntries(1, null, feedIds, 'unstarred', null);
+        if (item.id == 'unread-folder') {
+            gStorage.deleteEntries(1, null, null, 'unstarred unread', null);
+        }
+        else {
+            var feedItems = item.getElementsByTagName('treecell');
+            var feedIds = '';
+            for (var i = 0; i < feedItems.length; i++)
+                feedIds += feedItems[i].getAttribute('feedId') + ' ';
+            gStorage.deleteEntries(1, null, feedIds, 'unstarred', null);
+        }
     },
 
     ctx_restoreTrashed: function(aEvent) {
