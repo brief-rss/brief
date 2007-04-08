@@ -11,6 +11,15 @@
   -moz-binding: url('chrome://brief/content/bindings.xml#feedlist-treebody');
   }
 
+#feed-list {
+  border-right: 0;
+  margin: 0;
+}
+
+splitter {
+  border-left: 0;
+}
+
 treechildren::-moz-tree-line {
   visibility: hidden;
   }
@@ -54,15 +63,18 @@ treechildren::-moz-tree-image(feed-item bold) {
   }
 
 treechildren::-moz-tree-image(unreadFolder) {
-  list-style-image: url('icons/unreadFolder.png') !important;
+  list-style-image: url('icons/folders.png') !important;
+  -moz-image-region: rect(0px, 16px, 16px, 0px);
   }
 
 treechildren::-moz-tree-image(trashFolder) {
-  list-style-image: url('icons/trash.png') !important;
+  list-style-image: url('icons/folders.png') !important;
+  -moz-image-region: rect(32px, 16px, 48px, 0px);
   }
 
 treechildren::-moz-tree-image(starredFolder) {
-  list-style-image: url('icons/starredFolder.png') !important;
+  list-style-image: url('icons/folders.png') !important;
+  -moz-image-region: rect(16px, 16px, 32px, 0px);
   }
 
 #pick-folder-button {
@@ -71,6 +83,14 @@ treechildren::-moz-tree-image(starredFolder) {
   list-style-image: url('folder.png');
   }
 
+#left-pane-grippy {
+  -moz-binding: none;
+  width: 4px;
+}
+
+#left-pane-grippy:hover {
+  background-color: #f17373;
+}
 
 /*        Toolbars          */
 
