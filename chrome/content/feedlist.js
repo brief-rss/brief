@@ -165,6 +165,8 @@ var gFeedList = {
     onDoubleClick: function(aEvent) {
         var rowIndex = {};
         this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
+        if (rowIndex.value == -1)
+            return;
         var item = this.tree.view.getItemAtIndex(rowIndex.value);
 
         if (item.hasAttribute('container')) {
@@ -183,6 +185,11 @@ var gFeedList = {
         // Get the row which was the target of the right-click
         var rowIndex = {};
         this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
+        // If the target was empty space, don't show any context menu;
+        if (rowIndex.value == -1) {
+            aEvent.preventDefault();
+            return;
+        }
         var row = this.tree.view.getItemAtIndex(rowIndex.value);
 
         this.ctx_targetItem = row.hasAttribute('container') ? row
