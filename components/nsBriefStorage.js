@@ -14,8 +14,7 @@ const RDF_SEQ_INSTANCE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq';
 const RDF_SEQ          = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#_';
 const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
-// How often to delete entries that are have expired or exceed the max number of entries
-// per feed.
+// How often to delete entries that have expired or exceed the max number of entries per feed.
 const DELETE_REDUNDANT_INTERVAL = 3600*24; // 1 day
 // How often to permanently remove deleted entries and VACUUM the database.
 const PURGE_DELETED_INTERVAL = 3600*24*3; // 3 days
@@ -45,8 +44,7 @@ function BriefStorage() {
     //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
     //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
 
-    if (!this.dBConnection.tableExists('feeds') ||
-        !this.dBConnection.tableExists('entries')) {
+    if (!this.dBConnection.tableExists('feeds') || !this.dBConnection.tableExists('entries')) {
         this.dBConnection.
              executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
                               'feedId      TEXT UNIQUE,           ' +
@@ -59,32 +57,41 @@ function BriefStorage() {
                               'imageTitle  TEXT,                  ' +
                               'favicon     TEXT,                  ' +
                               'hidden      INTEGER DEFAULT 0,     ' +
-                              'everUpdated INTEGER DEFAULT 0      ' +
+                              'everUpdated INTEGER DEFAULT 0,     ' +
+                              'oldestAvailableEntryDate INTEGER   ' +
                               ')');
         this.dBConnection.
              executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
-                              'feedId   TEXT,                      ' +
-                              'id       TEXT UNIQUE,               ' +
-                              'entryURL TEXT,                      ' +
-                              'title    TEXT,                      ' +
-                              'summary  TEXT,                      ' +
-                              'content  TEXT,                      ' +
-                              'date     INTEGER,                   ' +
-                              'read     INTEGER DEFAULT 0,         ' +
-                              'starred  INTEGER DEFAULT 0,         ' +
-                              'deleted  INTEGER DEFAULT 0          ' +
+                              'feedId     TEXT,                    ' +
+                              'id         TEXT UNIQUE,             ' +
+                              'providedId TEXT,                    ' +
+                              'entryURL   TEXT,                    ' +
+                              'title      TEXT,                    ' +
+                              'summary    TEXT,                    ' +
+                              'content    TEXT,                    ' +
+                              'date       INTEGER,                 ' +
+                              'read       INTEGER DEFAULT 0,       ' +
+                              'starred    INTEGER DEFAULT 0,       ' +
+                              'deleted    INTEGER DEFAULT 0        ' +
                               ')');
     }
-    // Columns that were added in the later versions have to be added separately for
-    // compatibility.
+
+    // Columns added in 0.6.
     try {
-        this.dBConnection.
-        executeSimpleSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
-    } catch (e) {}
-    try {
-        this.dBConnection.
-        executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
-    } catch (e) {}
+        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN ' +
+                                           'oldestAvailableEntryDate INTEGER');
+        this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
+    }
+    catch (e) {}
+
+    this.dBConnection.executeSimpleSQL('CREATE UNIQUE INDEX IF NOT EXISTS       ' +
+                                       'entries_id_index ON entries (id)        ');
+    this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                       'entries_feedId_index ON entries (feedId)');
+    this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                       'entries_date_index ON entries (date)    ');
+    this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                       'entries_read_index ON entries (read)    ');
 
     this.startDummyStatement();
     this.dBConnection.preload();
@@ -524,6 +531,7 @@ BriefStorage.prototype = {
         finally {
             this.dBConnection.commitTransaction();
         }
+        // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
         this.prefs.setIntPref('database.lastDeletedRedundantTime', now);
     },
@@ -542,6 +550,7 @@ BriefStorage.prototype = {
         remove.execute();
         this.stopDummyStatement();
         this.dBConnection.executeSimpleSQL('VACUUM');
+        // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
         this.prefs.setIntPref('database.lastPurgeTime', now);
     },
@@ -555,6 +564,8 @@ BriefStorage.prototype = {
                 var lastTime = this.prefs.getIntPref('database.lastDeletedRedundantTime');
                 var expireEntries = this.prefs.getBoolPref('database.expireEntries');
                 var useStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
+
+                // Integer prefs are longs while Date is a long long.
                 var now = Math.round(Date.now() / 1000);
                 if (now - lastTime > DELETE_REDUNDANT_INTERVAL &&
                    (expireEntries || useStoreLimit)) {
