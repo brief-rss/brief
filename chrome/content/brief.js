@@ -44,8 +44,8 @@ var brief = {
         if (liveBookmarksFolder) {
             // If Brief is set as the homepage, it's loaded before delayedStartup() is
             // run and encounters an exception when synchronizing. Hence the timeout.
-            setTimeout(function(){ gStorage.syncWithBookmarks(); }, 500);
-
+            //setTimeout(function(){ gStorage.syncWithBookmarks(); }, 500);
+            gStorage.syncWithBookmarks();
             // This timeout causes the Brief window to be displayed a lot sooner and to
             // populate the feed list afterwards.
             setTimeout(function(){ gFeedList.rebuild(); }, 0);
@@ -108,7 +108,7 @@ var brief = {
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
                 if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
-                    closedFolders += item.getAttribute('uri');
+                    closedFolders += item.getAttribute('feedId');
             }
             gFeedList.tree.setAttribute('closedFolders', closedFolders);
         }

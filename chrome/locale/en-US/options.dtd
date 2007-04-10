@@ -1,22 +1,23 @@
-<!ENTITY optionsWindow.title         "Brief options">
-
-<!-- Main pane -->
-<!ENTITY mainPane.label              "Main">
-<!ENTITY folderTree.label            "Folder containing your Live Bookmarks:">
-<!ENTITY showStatusbarIcon.label     "Show statusbar icon">
-<!ENTITY openInNewTab.label          "Open Brief in a new tab">
-
-<!-- Feeds pane -->
-<!ENTITY feedsPane.label             "Feeds">
-<!ENTITY updateGroup.caption         "Updating">
+<!ENTITY optionsWindow.title "Brief options">
+<!ENTITY mainPane.label "Main">
+<!ENTITY folderTree.label "Folder containing your Live Bookmarks:">
+<!ENTITY showStatusbarIcon.label "Show statusbar icon">
+<!ENTITY openInNewTab.label "Open Brief in a new tab">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY updateGroup.caption "Updating">
 <!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
-<!ENTITY checkForUpdatesAfter.label  "minutes">
-<!ENTITY updateAtStartup.label       "Update feeds at startup">
-<!ENTITY showNotification.label      "Show notification when updates are found">
-
-<!ENTITY feedViewGroup.caption       "View">
-<!ENTITY entriesPerPageBefore.label  "Show">
-<!ENTITY entriesPerPageAfter.label   "entries per page">
-<!ENTITY showFavicons.label          "Show favicons">
-<!ENTITY enableCustomStyle.label     "Use custom style of the feed content">
-<!ENTITY browseCustomStyle.label     "Browse">
+<!ENTITY checkForUpdatesAfter.label "minutes">
+<!ENTITY showNotification.label "Show notification when updates are found">
+<!ENTITY storingGroup.caption "Storing">
+<!ENTITY expirationBefore.label "Store downloaded entries for">
+<!ENTITY expirationAfter.label "days">
+<!ENTITY storedEntriesBefore.label "Store up to">
+<!ENTITY storedEntriesAfter.label "entries per feed">
+<!ENTITY behaviorGroup.caption "Behavior">
+<!ENTITY openEntriesInTabs.label "Open entries in new tabs">
+<!ENTITY doubleClickMarks.label "Mark entries as read when double-clicking on them">
+<!ENTITY displayPane.label "Display">
+<!ENTITY entriesPerPageBefore.label "Show">
+<!ENTITY entriesPerPageAfter.label "entries per page">
+<!ENTITY enableCustomStyle.label "Use custom style of the feed content">
+<!ENTITY browseCustomStyle.label "Browse">

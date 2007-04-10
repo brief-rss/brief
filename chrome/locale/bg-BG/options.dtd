@@ -7,11 +7,17 @@
 <!ENTITY updateGroup.caption "Ъпдейтване">
 <!ENTITY checkForUpdatesBefore.label "Проверявай фийдовете за ъпдейти на всеки">
 <!ENTITY checkForUpdatesAfter.label "минути">
-<!ENTITY updateAtStartup.label "Ъпдейтвай фийдовете при стартиране на Firefox">
 <!ENTITY showNotification.label "Извести ме при намерени ъпдейти">
-<!ENTITY feedViewGroup.caption "Разгледай">
+<!ENTITY storingGroup.caption "Запазване">
+<!ENTITY expirationBefore.label "Запази изтеглените добавки за">
+<!ENTITY expirationAfter.label "дни">
+<!ENTITY storedEntriesBefore.label "Запазвай до">
+<!ENTITY storedEntriesAfter.label "добавки за фийд">
+<!ENTITY behaviorGroup.caption "Поведение">
+<!ENTITY openEntriesInTabs.label "Отваряй добавките в нови подпрозорци">
+<!ENTITY doubleClickMarks.label "Маркирай добавките като прочетени при двойно кликване върху тях.">
+<!ENTITY displayPane.label "Дисплей">
 <!ENTITY entriesPerPageBefore.label "Покажи">
 <!ENTITY entriesPerPageAfter.label "промени на страница">
-<!ENTITY showFavicons.label "Показвай фавикони">
 <!ENTITY enableCustomStyle.label "Използвай друг стил за фийдовете">
 <!ENTITY browseCustomStyle.label "Разгледай">

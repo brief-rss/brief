@@ -1,22 +1,23 @@
-<!ENTITY optionsWindow.title         "Brief - opcje">
-
-<!-- Main pane -->
-<!ENTITY mainPane.label              "Ogólne">
-<!ENTITY folderTree.label            "Folder zawierający dynamiczne zakładki:">
-<!ENTITY showStatusbarIcon.label     "Wyświetlaj ikonę rozszerzenia na pasku stanu">
-<!ENTITY openInNewTab.label          "Otwieraj Brief w nowej karcie">
-
-<!-- Feeds pane -->
-<!ENTITY feedsPane.label             "Kanały">
-<!ENTITY updateGroup.caption         "Aktualizacje">
+<!ENTITY optionsWindow.title "Brief - opcje">
+<!ENTITY mainPane.label "Ogólne">
+<!ENTITY folderTree.label "Folder zawierający dynamiczne zakładki:">
+<!ENTITY showStatusbarIcon.label "Wyświetlaj ikonę rozszerzenia na pasku stanu">
+<!ENTITY openInNewTab.label "Otwieraj Brief w nowej karcie">
+<!ENTITY feedsPane.label "Kanały">
+<!ENTITY updateGroup.caption "Aktualizacje">
 <!ENTITY checkForUpdatesBefore.label "Sprawdzaj kanały co">
-<!ENTITY checkForUpdatesAfter.label  "min">
-<!ENTITY updateAtStartup.label       "Aktualizuj kanały w trakcie uruchamiania Firefoksa">
-<!ENTITY showNotification.label      "Wyświetlaj powiadomienie o nowych wiadomościach">
-
-<!ENTITY feedViewGroup.caption       "Widok">
-<!ENTITY entriesPerPageBefore.label  "Wyświetlaj">
-<!ENTITY entriesPerPageAfter.label   "wiadomości na jednej stronie">
-<!ENTITY showFavicons.label          "Wyświetlaj ikony kanałów">
-<!ENTITY enableCustomStyle.label     "Używaj zewnętrznego stylu wyświetlania kanału">
-<!ENTITY browseCustomStyle.label     "Przeglądaj">
+<!ENTITY checkForUpdatesAfter.label "min">
+<!ENTITY showNotification.label "Wyświetlaj powiadomienie o nowych wiadomościach">
+<!ENTITY storingGroup.caption "Przechowywanie">
+<!ENTITY expirationBefore.label "Przechowuj pobrane wiadomości przez">
+<!ENTITY expirationAfter.label "dni">
+<!ENTITY storedEntriesBefore.label "Przechowuj do">
+<!ENTITY storedEntriesAfter.label "wiadomości w kanale">
+<!ENTITY behaviorGroup.caption "Zachowanie">
+<!ENTITY openEntriesInTabs.label "Otwieraj wiadomości w nowej karcie">
+<!ENTITY doubleClickMarks.label "Oznacz wiadomość jako przeczytaną po kliknięciu na niej dwukrotnie">
+<!ENTITY displayPane.label "Widok">
+<!ENTITY entriesPerPageBefore.label "Wyświetlaj">
+<!ENTITY entriesPerPageAfter.label "wiadomości na jednej stronie">
+<!ENTITY enableCustomStyle.label "Używaj zewnętrznego stylu widoku kanału">
+<!ENTITY browseCustomStyle.label "Przeglądaj">

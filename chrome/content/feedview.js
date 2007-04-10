@@ -1,5 +1,4 @@
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
-const XUL_NS = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
 
 /**
  * This object represents the main feed display. It stores and manages
@@ -11,7 +10,7 @@ const XUL_NS = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
  * @param aRules        Rules to which this view is tied to, overriding rules
  *                      specified in shownEntries preference is used.
  * @param aSearchString String which the displayed entries must contain.
-  */
+ */
 function FeedView(aTitle, aFeedId, aRules, aSearchString) {
     this.title = aTitle;
     this.feedId = aFeedId;
@@ -52,9 +51,9 @@ FeedView.prototype = {
     title: '',
 
     // Below are parameters determining which entries are displayed.
-    feedId:          '', // Space-separated list of feed ids.
-    baseRules:       '', // Rules to which the view is tied to.
-    searchString:    '', // Only display entries containing this string.
+    feedId:        '', // Space-separated list of feed ids.
+    baseRules:     '', // Rules to which the view is tied to.
+    searchString:  '', // Only display entries containing this string.
 
     // Array of ids of displayed entries. This isn't used to specify which entries are
     // displayed but computed post-factum and used for determining if the view needs

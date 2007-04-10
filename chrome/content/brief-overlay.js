@@ -55,6 +55,7 @@ var gBrief = {
         var rows = document.getElementById('brief-tooltip-rows');
         var tooltip = aEvent.target;
 
+        // Integer prefs are longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
         var lastUpdateTime = gBrief.prefs.getIntPref('update.lastUpdateTime');
         var elapsedTime = now - lastUpdateTime;
@@ -98,8 +99,7 @@ var gBrief = {
             label.setAttribute('value', feedName);
             row.appendChild(label);
 
-            var unreadCount = storageService.
-                              getEntriesCount(unreadFeeds[i], 'unread', null);
+            var unreadCount = storageService.getEntriesCount(unreadFeeds[i], 'unread', null);
             label = document.createElement('label');
             label.setAttribute('class', 'unread-entries-count');
             label.setAttribute('value', unreadCount);
@@ -125,12 +125,10 @@ var gBrief = {
 
         var openInNewTab = this.prefs.getBoolPref('openInNewTab');
 
-        if ((aEvent.button == 0 && !openInNewTab) ||
-           (aEvent.button == 1 && openInNewTab))
+        if ((aEvent.button == 0 && !openInNewTab) || (aEvent.button == 1 && openInNewTab))
             gBrief.openBrief(false);
 
-        else if ((aEvent.button == 0 && openInNewTab) ||
-                 (aEvent.button == 1 && !openInNewTab))
+        else if ((aEvent.button == 0 && openInNewTab) || (aEvent.button == 1 && !openInNewTab))
             gBrief.openBrief(true);
     },
 

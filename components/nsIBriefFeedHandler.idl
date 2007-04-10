@@ -92,6 +92,12 @@ interface nsIBriefFeed : nsISupports {
    */
   attribute unsigned long long oldestAvailableEntryDate;
 
+  attribute unsigned long rowIndex;
+
+  attribute boolean isFolder;
+
+  attribute string parent;
+
  /**
   * Get the feed's entries. Since there is no method in this interface to
   * attach entries directly, they can come only from wrapping an nsIFeed (see

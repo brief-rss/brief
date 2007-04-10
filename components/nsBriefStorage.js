@@ -28,6 +28,12 @@ function logDBError(aException) {
                                     + aException);
 }
 
+function dump(aMessage) {
+  var consoleService = Cc["@mozilla.org/consoleservice;1"].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage('Brief:\n' + aMessage);
+}
+
 var gBriefStorage = null;
 
 function BriefStorage() {
@@ -44,43 +50,48 @@ function BriefStorage() {
     //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
     //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
 
-    if (!this.dBConnection.tableExists('feeds') || !this.dBConnection.tableExists('entries')) {
-        this.dBConnection.
-             executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
-                              'feedId      TEXT UNIQUE,           ' +
-                              'feedURL     TEXT,                  ' +
-                              'websiteURL  TEXT,                  ' +
-                              'title       TEXT,                  ' +
-                              'subtitle    TEXT,                  ' +
-                              'imageURL    TEXT,                  ' +
-                              'imageLink   TEXT,                  ' +
-                              'imageTitle  TEXT,                  ' +
-                              'favicon     TEXT,                  ' +
-                              'hidden      INTEGER DEFAULT 0,     ' +
-                              'everUpdated INTEGER DEFAULT 0,     ' +
-                              'oldestAvailableEntryDate INTEGER   ' +
-                              ')');
-        this.dBConnection.
-             executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
-                              'feedId     TEXT,                    ' +
-                              'id         TEXT UNIQUE,             ' +
-                              'providedId TEXT,                    ' +
-                              'entryURL   TEXT,                    ' +
-                              'title      TEXT,                    ' +
-                              'summary    TEXT,                    ' +
-                              'content    TEXT,                    ' +
-                              'date       INTEGER,                 ' +
-                              'read       INTEGER DEFAULT 0,       ' +
-                              'starred    INTEGER DEFAULT 0,       ' +
-                              'deleted    INTEGER DEFAULT 0        ' +
-                              ')');
-    }
-
+    this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
+                                       'feedId      TEXT UNIQUE,           ' +
+                                       'feedURL     TEXT,                  ' +
+                                       'websiteURL  TEXT,                  ' +
+                                       'title       TEXT,                  ' +
+                                       'subtitle    TEXT,                  ' +
+                                       'imageURL    TEXT,                  ' +
+                                       'imageLink   TEXT,                  ' +
+                                       'imageTitle  TEXT,                  ' +
+                                       'favicon     TEXT,                  ' +
+                                       'hidden      INTEGER DEFAULT 0,     ' +
+                                       'everUpdated INTEGER DEFAULT 0,     ' +
+                                       'oldestAvailableEntryDate INTEGER,  ' +
+                                       'rowIndex    INTEGER,               ' +
+                                       'parent      TEXT,                  ' +
+                                       'isFolder    INTEGER                ' +
+                                       ')');
+    this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
+                                       'feedId     TEXT,                    ' +
+                                       'id         TEXT UNIQUE,             ' +
+                                       'providedId TEXT,                    ' +
+                                       'entryURL   TEXT,                    ' +
+                                       'title      TEXT,                    ' +
+                                       'summary    TEXT,                    ' +
+                                       'content    TEXT,                    ' +
+                                       'date       INTEGER,                 ' +
+                                       'read       INTEGER DEFAULT 0,       ' +
+                                       'starred    INTEGER DEFAULT 0,       ' +
+                                       'deleted    INTEGER DEFAULT 0        ' +
+                                       ')');
     // Columns added in 0.6.
     try {
         this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN ' +
                                            'oldestAvailableEntryDate INTEGER');
         this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
+    }
+    catch (e) {}
+    // Columns added in 0.7.
+    try {
+        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
+        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
+        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
     }
     catch (e) {}
 
@@ -108,61 +119,90 @@ function BriefStorage() {
 
 BriefStorage.prototype = {
 
-    observerService: null,
-    prefs:           null,
-    dBConnection:    null,
-    feedsCache:      null, // without entries
+    observerService:      null,
+    prefs:                null,
+    dBConnection:         null,
+    feedsAndFoldersCache: null,
+    feedsCache:           null,
 
     // nsIBriefStorage
     getFeed: function(aFeedId) {
         var foundFeed = null;
-        for each (feed in this.getAllFeeds({})) {
-            if (feed.feedId == aFeedId)
-                foundFeed = feed;
+        var feeds = this.getFeedsAndFolders({});
+        for (var i = 0; i < feeds.length; i++) {
+            if (feeds[i].feedId == aFeedId) {
+                foundFeed = feeds[i];
+                break;
+            }
         }
         return foundFeed;
     },
 
 
     // nsIBriefStorage
-    getAllFeeds: function(feedCount) {
-        if (!this.feedsCache) {
-            this.feedsCache = new Array();
-            var select = this.dBConnection.
-                createStatement('SELECT                                         ' +
-                                'feedId, feedURL, websiteURL, title,            ' +
-                                'subtitle, imageURL, imageLink, imageTitle,     ' +
-                                'favicon, everUpdated, oldestAvailableEntryDate ' +
-                                'FROM feeds                                     ' +
-                                'WHERE hidden=0                                 ');
-            try {
-                while (select.executeStep()) {
-                    var feed = Cc['@mozilla.org/brief/feed;1'].
-                               createInstance(Ci.nsIBriefFeed);
-                    feed.feedId = select.getString(0);
-                    feed.feedURL = select.getString(1);
-                    feed.websiteURL = select.getString(2);
-                    feed.title = select.getString(3);
-                    feed.subtitle = select.getString(4);
-                    feed.imageURL = select.getString(5);
-                    feed.imageLink = select.getString(6);
-                    feed.imageTitle = select.getString(7);
-                    feed.favicon = select.getString(8);
-                    feed.everUpdated = select.getInt32(9);
-                    feed.oldestAvailableEntryDate = select.getInt64(10);
-                    this.feedsCache.push(feed);
-                }
-            }
-            finally {
-                select.reset();
-            }
-        }
+    getAllFeeds: function(aLength) {
+        if (!this.feedsCache)
+            this.buildFeedsCache();
+
         // Set the |value| property of the out parameter object. XPConnect needs
         // this in order to return a array.
-        feedCount.value = this.feedsCache.length;
+        aLength.value = this.feedsCache.length;
         return this.feedsCache;
     },
 
+
+    // nsIBriefStorage
+    getFeedsAndFolders: function(aLength) {
+        if (!this.feedsAndFoldersCache)
+            this.buildFeedsCache();
+
+        // Set the |value| property of the out parameter object. XPConnect needs
+        // this in order to return a array.
+        aLength.value = this.feedsAndFoldersCache.length;
+        return this.feedsAndFoldersCache;
+    },
+
+
+    buildFeedsCache: function() {
+        this.feedsCache = [];
+        this.feedsAndFoldersCache = [];
+
+        var select = this.dBConnection.
+            createStatement('SELECT                                          ' +
+                            'feedId, feedURL, websiteURL, title,             ' +
+                            'subtitle, imageURL, imageLink, imageTitle,      ' +
+                            'favicon, everUpdated, oldestAvailableEntryDate, ' +
+                            'rowIndex, parent, isFolder                      ' +
+                            'FROM feeds                                      ' +
+                            'WHERE hidden=0 ORDER BY rowIndex ASC            ');
+        try {
+            while (select.executeStep()) {
+                var feed = Cc['@mozilla.org/brief/feed;1'].
+                           createInstance(Ci.nsIBriefFeed);
+                feed.feedId = select.getString(0);
+                feed.feedURL = select.getString(1);
+                feed.websiteURL = select.getString(2);
+                feed.title = select.getString(3);
+                feed.subtitle = select.getString(4);
+                feed.imageURL = select.getString(5);
+                feed.imageLink = select.getString(6);
+                feed.imageTitle = select.getString(7);
+                feed.favicon = select.getString(8);
+                feed.everUpdated = select.getInt32(9);
+                feed.oldestAvailableEntryDate = select.getInt64(10);
+                feed.rowIndex = select.getInt32(11);
+                feed.parent = select.getString(12);
+                feed.isFolder = select.getInt32(13) == 1;
+
+                this.feedsAndFoldersCache.push(feed);
+                if (!feed.isFolder)
+                    this.feedsCache.push(feed);
+            }
+        }
+        finally {
+            select.reset();
+        }
+    },
 
     // nsIBriefStorage
     getEntries: function(aEntryId, aFeedId, aRules, aSearchString, aOffset,
@@ -479,7 +519,7 @@ BriefStorage.prototype = {
     },
 
 
-    //  Deletes entries that are outdated or exceed the max number per feed based.
+    // Deletes entries that are outdated or exceed the max number per feed based.
     deleteRedundantEntries: function() {
         var expireEntries = this.prefs.getBoolPref('database.expireEntries');
         var useStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
@@ -594,50 +634,120 @@ BriefStorage.prototype = {
         if (!this.livemarksInitiated)
             this.initLivemarks();
 
-        this.livemarks = new Array();
+        this.bookmarkItems = [];
 
         // Get the current Live Bookmarks
-        var rootID = this.prefs.getCharPref('liveBookmarksFolder');
-        if (!rootID)
+        this.rootURI = this.prefs.getCharPref('liveBookmarksFolder');
+        if (!this.rootURI)
             throw('No Live Bookmarks folder specified (extensions.brief.liveBookmarksFolder is empty)');
-        var root = this.rdfs.GetResource(rootID);
+
+        root = this.rdfs.GetResource(this.rootURI);
         this.getLivemarks(root);
 
         // Invalidate cache since feeds table is about to change
         this.feedsCache = null;
 
+        var feedListChanged = false;
         this.dBConnection.beginTransaction();
         try {
             // Insert any new livemarks into the feeds database
-            var insert = this.dBConnection.
-                              createStatement('INSERT OR IGNORE INTO feeds ' +
-                                              '(feedId, feedURL, title)    ' +
-                                              'VALUES (?1, ?2, ?3)         ');
-            for each (livemark in this.livemarks) {
-                insert.bindStringParameter(0, livemark.feedId);
-                insert.bindStringParameter(1, livemark.feedURL);
-                insert.bindStringParameter(2, livemark.title);
-                insert.execute();
+            var selectAll = this.dBConnection.
+                createStatement('SELECT feedId, title, rowIndex, isFolder, parent ' +
+                                'FROM feeds');
+
+            var insertItem = this.dBConnection.
+                createStatement('INSERT INTO feeds                                    ' +
+                                '(feedId, feedURL, title, rowIndex, isFolder, parent) ' +
+                                'VALUES (?1, ?2, ?3, ?4, ?5, ?6)                      ');
+            var updateFeed = this.dBConnection.
+                createStatement('UPDATE feeds SET                                  ' +
+                                'title = ?, rowIndex = ?, parent = ?, hidden = 0   ' +
+                                'WHERE feedId = ?                                  ');
+            var removeFeed = this.dBConnection.
+                createStatement('DELETE FROM feeds WHERE feedId = ?');
+            var hideFeed = this.dBConnection.
+                createStatement('UPDATE feeds SET hidden = 1 WHERE feedId =?');
+
+            // Get all feeds currently in the database.
+            var feeds = [];
+            while (selectAll.executeStep()) {
+                var feed = {};
+                feed.feedId= selectAll.getString(0);
+                feed.title = selectAll.getString(1);
+                feed.rowIndex = selectAll.getInt32(2);
+                feed.isFolder = selectAll.getInt32(3) == 1;
+                feed.parent = selectAll.getString(4);
+                feeds.push(feed);
             }
 
-            // Mark all feeds as hidden
-            this.dBConnection.executeSimpleSQL('UPDATE feeds SET hidden=1');
+            // Check if there are any new bookmarks and add them.
+            var item, feed, found;
+            //dump('this.bookmarkItems.length: ' + this.bookmarkItems.length);
+            for (var i = 0; i < this.bookmarkItems.length; i++) {
+                item = this.bookmarkItems[i];
+                found = false;
 
-            // Unhide only those feeds that match the current user's livemarks
-            // and update their titles
-            var update = this.dBConnection.
-                createStatement('UPDATE feeds SET hidden=0, title=?1 WHERE feedId=?2');
-            for each (livemark in this.livemarks) {
-                update.bindStringParameter(0, livemark.title);
-                update.bindStringParameter(1, livemark.feedId);
-                update.execute();
+                for (var j = 0; j < feeds.length; j++) {
+                    feed = feeds[j];
+                    if (feed.feedId == item.feedId) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                //dump('found: ' + found);
+                if (!found) {
+                    insertItem.bindStringParameter(0, item.feedId);
+                    insertItem.bindStringParameter(1, item.feedURL || null);
+                    insertItem.bindStringParameter(2, item.title);
+                    insertItem.bindInt32Parameter(3, item.rowIndex)
+                    insertItem.bindInt32Parameter(4, item.isFolder ? 1 : 0);
+                    insertItem.bindStringParameter(5, item.parent);
+                    insertItem.execute();
+                    feedListChanged = true;
+                }
+                else {
+                    feed.isInBookmarks = true;
+                    //dump(item.rowIndex != feed.rowIndex);
+                    if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
+                       item.title != feed.title) {
+
+                        updateFeed.bindStringParameter(0, item.title);
+                        updateFeed.bindInt32Parameter(1, item.rowIndex);
+                        updateFeed.bindStringParameter(2, item.parent);
+                        updateFeed.bindStringParameter(3, item.feedId);
+                        updateFeed.execute();
+
+                        if (item.title != feed.title) {
+                            this.observerService.
+                                 notifyObservers(null, 'brief:feed-title-changed', item.feedId);
+                        }
+                        else {
+                            feedListChanged = true;
+                        }
+                    }
+                }
+            }
+
+            for (i = 0; i < feeds.length; i++) {
+                feed = feeds[i];
+                if (!feed.isInBookmarks) {
+                    if (feed.isFolder) {
+                        removeFeed.bindStringParameter(0, feed.feedId);
+                        removeFeed.execute();
+                    }
+                    else {
+                        hideFeed.bindStringParameter(0, feed.feedId);
+                        hideFeed.execute();
+                    }
+                }
             }
         }
         finally {
             this.dBConnection.commitTransaction();
+            if (feedListChanged)
+                this.observerService.notifyObservers(null, 'brief:feedlist-changed', '');
         }
-
-        this.observerService.notifyObservers(null, 'brief:sync-to-livemarks', '');
     },
 
 
@@ -671,32 +781,51 @@ BriefStorage.prototype = {
      getLivemarks: function(aRoot) {
         var nextVal = this.bmds.GetTarget(aRoot, this.nextValArc, true);
         var length = nextVal.QueryInterface(Ci.nsIRDFLiteral).Value - 1;
-
+        //dump('rootFolderURI: ' + this.rootFolderURI)
         for (var i = 1; i <= length; i++) {
             var seqArc = this.rdfs.GetResource(RDF_SEQ + i);
             var child = this.bmds.GetTarget(aRoot, seqArc, true);
 
             // XXX Workaround a situation when nextVal value is incorrect after
-            // sorting or removing bookmarks. Don't know why this happens.
+            // sorting or removing bookmarks and can point to non-existent items.
             if (!child)
                 continue;
+
             var type = this.bmds.GetTarget(child, this.typeArc, true);
+            var instance = this.bmds.GetTarget(child, this.instanceOfArc, true);
+
             if (type == this.livemarkType) {
-                var livemark = new Object();
-                livemark.feedURL = this.bmds.GetTarget(child, this.feedUrlArc, true).
-                                             QueryInterface(Ci.nsIRDFLiteral).
-                                             Value;
-                livemark.feedId = this.hashString(livemark.feedURL);
-                livemark.title = this.bmds.GetTarget(child, this.nameArc, true).
-                                           QueryInterface(Ci.nsIRDFLiteral).
-                                           Value;
-                livemark.uri = child.QueryInterface(Ci.nsIRDFResource).ValueUTF8;
-                this.livemarks.push(livemark);
+                var item = {};
+                item.feedURL = this.bmds.GetTarget(child, this.feedUrlArc, true).
+                                         QueryInterface(Ci.nsIRDFLiteral).
+                                         Value;
+                item.feedId = this.hashString(item.feedURL);
+                item.title = this.bmds.GetTarget(child, this.nameArc, true).
+                                       QueryInterface(Ci.nsIRDFLiteral).
+                                       Value;
+                item.rowIndex = this.bookmarkItems.length;
+                item.isFolder = false;
+                var parentURI = aRoot.QueryInterface(Ci.nsIRDFResource).Value;
+                item.parent = parentURI == this.rootURI ? 'root'
+                                                        : this.hashString(parentURI);
+                this.bookmarkItems.push(item);
             }
-            else {
-                var instance = this.bmds.GetTarget(child, this.instanceOfArc, true);
-                if (instance == this.sequence)
-                    this.getLivemarks(child);
+            else if (instance == this.sequence) {
+                var item = {};
+                item.title = this.bmds.GetTarget(child, this.nameArc, true).
+                                       QueryInterface(Ci.nsIRDFLiteral).
+                                       Value;
+                var uri = child.QueryInterface(Ci.nsIRDFResource).Value;
+                item.feedId = this.hashString(uri);
+                item.rowIndex = this.bookmarkItems.length;
+                item.isFolder = true;
+                var parentURI = aRoot.QueryInterface(Ci.nsIRDFResource).Value;
+                //dump('parentURI: ' + parentURI)
+                item.parent = parentURI == this.rootURI ? 'root'
+                                                        : this.hashString(parentURI);
+                this.bookmarkItems.push(item);
+
+                this.getLivemarks(child);
             }
         }
      },
@@ -724,8 +853,7 @@ BriefStorage.prototype = {
 
         // This table is guaranteed to have something in it and will keep the dummy
         // statement open. If the table is empty, it won't hold the statement open.
-        this.dBConnection.
-             executeSimpleSQL('INSERT OR IGNORE INTO dummy_table VALUES (1)');
+        this.dBConnection.executeSimpleSQL('INSERT OR IGNORE INTO dummy_table VALUES (1)');
 
         this.dummyStatement = this.dummyDBConnection.
                                    createStatement('SELECT id FROM dummy_table LIMIT 1');
