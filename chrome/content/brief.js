@@ -407,18 +407,20 @@ var brief = {
     },
 
     ctx_markFolderRead: function(aEvent) {
-        var item = gFeedList.ctx_targetItem;
+        var targetItem = gFeedList.ctx_targetItem;
 
-        if (item.hasAttribute('specialView')) {
-            var rule = item.id == 'unread-folder' ? 'unread' :
-                       item.id == 'starred-folder' ? 'starred' : 'trashed';
+        if (targetItem.hasAttribute('specialFolder')) {
+            var rule = targetItem.id == 'unread-folder' ? 'unread' :
+                       targetItem.id == 'starred-folder' ? 'starred' : 'trashed';
             gStorage.markEntriesRead(true, null, null, rule, null);
         }
         else {
-            var feedItems = item.getElementsByTagName('treecell');
+            var treeitems = targetItem.getElementsByTagName('treeitem');
             var feedIds = '';
-            for (var i = 0; i < feedItems.length; i++)
-                feedIds += feedItems[i].getAttribute('feedId') + ' ';
+            for (var i = 0; i < treeitems.length; i++) {
+                if (treeitems[i].hasAttribute('url'))
+                    feedIds += treeitems[i].getAttribute('feedId') + ' ';
+            }
             gStorage.markEntriesRead(true, null, feedIds, null, null);
         }
     },
@@ -442,15 +444,17 @@ var brief = {
     },
 
     ctx_emptyFolder: function(aEvent) {
-        var item = gFeedList.ctx_targetItem;
-        if (item.id == 'unread-folder') {
+        var targetItem = gFeedList.ctx_targetItem;
+        if (targetItem.id == 'unread-folder') {
             gStorage.deleteEntries(1, null, null, 'unstarred unread', null);
         }
         else {
-            var feedItems = item.getElementsByTagName('treecell');
+            var treeitems = targetItem.getElementsByTagName('treeitem');
             var feedIds = '';
-            for (var i = 0; i < feedItems.length; i++)
-                feedIds += feedItems[i].getAttribute('feedId') + ' ';
+            for (var i = 0; i < treeitems.length; i++) {
+                if (treeitems[i].hasAttribute('url'))
+                    feedIds += treeitems[i].getAttribute('feedId') + ' ';
+            }
             gStorage.deleteEntries(1, null, feedIds, 'unstarred', null);
         }
     },

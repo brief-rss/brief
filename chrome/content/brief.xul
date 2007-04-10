@@ -89,28 +89,25 @@
                     </treecols>
 
                     <treechildren id="top-level-children">
-                        <treeitem>
+                        <treeitem id="unread-folder"
+                                  specialFolder="true"
+                                  title="&unreadFolder.label;">
                             <treerow>
-                                <treecell id="unread-folder"
-                                          label="&unreadFolder.label;"
-                                          specialView="true"
-                                          properties="unreadFolder "/>
+                                <treecell properties="unreadFolder "/>
                             </treerow>
                         </treeitem>
-                        <treeitem>
+                        <treeitem id="starred-folder"
+                                  specialFolder="true"
+                                  title="&starredFolder.label;">
                             <treerow>
-                                <treecell id="starred-folder"
-                                          label="&starredFolder.label;"
-                                          specialView="true"
-                                          properties="starredFolder "/>
+                                <treecell properties="starredFolder "/>
                             </treerow>
                         </treeitem>
-                        <treeitem>
+                        <treeitem id="trash-folder"
+                                  specialFolder="true"
+                                  title="&trashFolder.label;">
                             <treerow>
-                                <treecell id="trash-folder"
-                                          label="&trashFolder.label;"
-                                          specialView="true"
-                                          properties="trashFolder "/>
+                                <treecell properties="trashFolder "/>
                             </treerow>
                         </treeitem>
                         <treeseparator id="special-folders-separator"/>
