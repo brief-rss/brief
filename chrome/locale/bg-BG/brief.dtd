@@ -1,15 +1,16 @@
 <!ENTITY pickFolder.label "Избери Папка за Живи Отметки">
-<!ENTITY updateButton.tooltip "Провери всички фийдове за ъпдейти">
-<!ENTITY showOptions.tooltip "Отвори Брийф настроиките">
-<!ENTITY markViewRead.tooltip "Маркирай гледаните в момента фийдове като прочетени">
-<!ENTITY markViewUnread.tooltip "Маркирай гледаните в момента фийдове като непрочетени">
-<!ENTITY searchBox.label "Търси:">
 <!ENTITY searchCurrentView.label "Търси в сегашния фийд">
 <!ENTITY searchAllFeeds.label "Търси във всички фийдове">
 <!ENTITY viewConstraintList.label "Разгледай:">
 <!ENTITY viewAll.label "Всички">
 <!ENTITY viewUnread.label "Непрочетени">
 <!ENTITY viewStarred.label "Позвездени">
+<!ENTITY updateButton.tooltip "Провери всички фийдове за ъпдейти">
+<!ENTITY searchScopeButton.tooltip "Промени начина на търсене">
+<!ENTITY showOptions.tooltip "Отвори Брийф настроиките">
+<!ENTITY markViewRead.tooltip "Маркирай гледаните в момента фийдове като прочетени">
+<!ENTITY markViewUnread.tooltip "Маркирай гледаните в момента фийдове като непрочетени">
+<!ENTITY viewConstraintList.tooltip "Избери какво да бъде показвано">
 <!ENTITY previousPage.tooltip "Покажи обновените фийдове">
 <!ENTITY nextPage.tooltip "Покажи старите фийдове">
 <!ENTITY unreadFolder.label "Непрочетено">
@@ -19,9 +20,8 @@
 <!ENTITY ctxMarkFolderRead.label "Марирай Папката като Прочетена">
 <!ENTITY ctxUpdateFeed.label "Ъпдейтни Фийда">
 <!ENTITY ctxOpenWebsite.label "Отвори Уеб-сайта">
+<!ENTITY ctxEmptyFeed.label "Празен Фийд">
+<!ENTITY ctxEmptyFolder.label "Празна Папка">
+<!ENTITY ctxRestoreTrashed.label "Възстанови Изтритите Фийдове">
 <!ENTITY ctxEmptyTrash.label "Изчисти Боклука">
-<!ENTITY deleteEntry.label "Изтрий">
-<!ENTITY restoreEntry.label "Възвърни">
-<!ENTITY starEntry.label "Добави Звезда">
-<!ENTITY unstarEntry.label "Махни Звезда">
 <!ENTITY ctxUpdateFeeds.label "Ъпдейтни Фийдовете Сега">

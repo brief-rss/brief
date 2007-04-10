@@ -30,6 +30,9 @@ interface nsIBriefStorage : nsISupports {
   void getAllFeeds(out unsigned long feedCount,
                   [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
 
+  void getFeedsAndFolders(out unsigned long feedCount,
+                          [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
+
   /**
    * Get array of entries matching specified constraints sorted descending by
    * date.

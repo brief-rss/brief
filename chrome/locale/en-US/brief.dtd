@@ -1,34 +1,27 @@
-<!ENTITY pickFolder.label          "Choose Live Bookmarks Folder">
-<!ENTITY updateButton.tooltip      "Check all feeds for updates">
-<!ENTITY showOptions.tooltip       "Open Brief options">
-<!ENTITY markViewRead.tooltip      "Mark currently viewed entries as read">
-<!ENTITY markViewUnread.tooltip    "Mark currently viewed entries as unread">
-<!ENTITY searchBox.label           "Search:">
-<!ENTITY searchCurrentView.label   "Search current view">
-<!ENTITY searchAllFeeds.label      "Search all feeds">
-<!ENTITY viewConstraintList.label  "View:">
-<!ENTITY viewAll.label             "All">
-<!ENTITY viewUnread.label          "Unread">
-<!ENTITY viewStarred.label         "Starred">
-<!ENTITY previousPage.tooltip      "Show newer entries">
-<!ENTITY nextPage.tooltip          "Show older entries">
-
-<!ENTITY unreadFolder.label        "Unread">
-<!ENTITY starredFolder.label       "Starred">
-<!ENTITY trashFolder.label         "Trash">
-
-<!-- Feed list context menu -->
-<!ENTITY ctxMarkFeedRead.label    "Mark Feed As Read">
-<!ENTITY ctxMarkFolderRead.label  "Mark Folder As Read">
-<!ENTITY ctxUpdateFeed.label      "Update Feed">
-<!ENTITY ctxOpenWebsite.label     "Open Website">
-<!ENTITY ctxEmptyTrash.label      "Empty Trash">
-
-<!-- Feedview -->
-<!ENTITY deleteEntry.label        "Delete Entry">
-<!ENTITY restoreEntry.label       "Restore Entry">
-<!ENTITY starEntry.label          "Star Entry">
-<!ENTITY unstarEntry.label        "Unstar Entry">
-
-<!-- Main Fx window overlay -->
-<!ENTITY ctxUpdateFeeds.label     "Update Feeds Now">
+<!ENTITY pickFolder.label "Choose Live Bookmarks Folder">
+<!ENTITY searchCurrentView.label "Search current view">
+<!ENTITY searchAllFeeds.label "Search all feeds">
+<!ENTITY viewConstraintList.label "View:">
+<!ENTITY viewAll.label "All">
+<!ENTITY viewUnread.label "Unread">
+<!ENTITY viewStarred.label "Starred">
+<!ENTITY updateButton.tooltip "Check all feeds for updates">
+<!ENTITY searchScopeButton.tooltip "Change the search scope">
+<!ENTITY showOptions.tooltip "Open Brief options">
+<!ENTITY markViewRead.tooltip "Mark currently viewed entries as read">
+<!ENTITY markViewUnread.tooltip "Mark currently viewed entries as unread">
+<!ENTITY viewConstraintList.tooltip "Choose what kind of entries to display">
+<!ENTITY previousPage.tooltip "Show newer entries">
+<!ENTITY nextPage.tooltip "Show older entries">
+<!ENTITY unreadFolder.label "Unread">
+<!ENTITY starredFolder.label "Starred">
+<!ENTITY trashFolder.label "Trash">
+<!ENTITY ctxMarkFeedRead.label "Mark Feed As Read">
+<!ENTITY ctxMarkFolderRead.label "Mark Folder As Read">
+<!ENTITY ctxUpdateFeed.label "Update Feed">
+<!ENTITY ctxOpenWebsite.label "Open Website">
+<!ENTITY ctxEmptyFeed.label "Empty Feed">
+<!ENTITY ctxEmptyFolder.label "Empty Folder">
+<!ENTITY ctxRestoreTrashed.label "Restore Trashed Entries">
+<!ENTITY ctxEmptyTrash.label "Empty Trash">
+<!ENTITY ctxUpdateFeeds.label "Update Feeds Now">

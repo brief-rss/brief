@@ -24,6 +24,9 @@ Feed.prototype = {
     imageTitle:   '',
     favicon:      '',
     everUpdated:  false,
+    rowIndex:     0,
+    isFolder:     false,
+    parent:       '',
     items:        null,
     oldestAvailableEntryDate: 0,
 

@@ -1,14 +1,3 @@
-const NC_NAME          = 'http://home.netscape.com/NC-rdf#Name';
-const NC_FEEDURL       = 'http://home.netscape.com/NC-rdf#FeedURL';
-const NC_LIVEMARK      = 'http://home.netscape.com/NC-rdf#Livemark';
-const NC_DESCRIPTION   = 'http://home.netscape.com/NC-rdf#Description';
-
-const RDF_NEXT_VAL     = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nextVal';
-const RDF_INSTANCE_OF  = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#instanceOf';
-const RDF_SEQ_INSTANCE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq';
-const RDF_SEQ          = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#_';
-const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
-
 const THROBBER_URL = 'chrome://global/skin/throbber/Throbber-small.gif';
 const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
@@ -20,7 +9,6 @@ var gFeedList = {
     items: null, // treecell elements of all the feeds
 
     _topLevelChildren: null, // the topmost <treechildren>
-    _levelParentNodes: [],   // see the comment in rebuild()
 
     _init: function() {
         this.tree = document.getElementById('feed-list');
@@ -37,21 +25,6 @@ var gFeedList = {
         var trashFolder = document.getElementById('trash-folder');
         trashFolder.setAttribute('title', trashFolder.getAttribute('label'));
         this.refreshSpecialTreeitem('trash-folder');
-
-        // Initialize tree builder
-        this.rdfs = Cc['@mozilla.org/rdf/rdf-service;1'].getService(Ci.nsIRDFService);
-        this.bmds = this.rdfs.GetDataSource('rdf:bookmarks');
-
-        // Predicates
-        this.nextValArc = this.rdfs.GetResource(RDF_NEXT_VAL);
-        this.instanceOfArc = this.rdfs.GetResource(RDF_INSTANCE_OF);
-        this.typeArc = this.rdfs.GetResource(RDF_TYPE);
-        this.nameArc = this.rdfs.GetResource(NC_NAME);
-        this.feedUrlArc = this.rdfs.GetResource(NC_FEEDURL);
-
-        // Common resources
-        this.sequence = this.rdfs.GetResource(RDF_SEQ_INSTANCE);
-        this.livemarkType = this.rdfs.GetResource(NC_LIVEMARK);
 
         this.initiated = true;
     },
@@ -166,7 +139,7 @@ var gFeedList = {
         // Get the row which was the target of the right-click
         var rowIndex = {};
         this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
-        // If the target was empty space, don't show any context menu;
+        // If the target was empty space, don't show any context menu.
         if (rowIndex.value == -1) {
             aEvent.preventDefault();
             return;
@@ -285,9 +258,6 @@ var gFeedList = {
         this.refreshSpecialTreeitem('starred-folder');
         this.refreshSpecialTreeitem('trash-folder');
 
-        var rootID = gPrefs.getCharPref('liveBookmarksFolder');
-        this.rootFolder = this.rdfs.GetResource(rootID);
-
         // Clear existing tree
         while (this._topLevelChildren.lastChild) {
             var lastChild = this._topLevelChildren.lastChild;
@@ -295,6 +265,8 @@ var gFeedList = {
                 break;
             this._topLevelChildren.removeChild(lastChild);
         }
+
+        this.feeds = gStorage.getFeedsAndFolders({});
 
         // This array stores all container nodes from the direct parent container of
         // the currently processed item up until the root.
@@ -305,7 +277,7 @@ var gFeedList = {
         this._levelParentNodes.push(this._topLevelChildren);
 
         // Build the rest of the children recursively
-        this._buildChildLivemarks(this.rootFolder);
+        this._buildChildLivemarks('root');
 
         this.items = new Array();
         var items = this.tree.getElementsByTagName('treecell');
@@ -320,34 +292,32 @@ var gFeedList = {
      * Recursively reads Live Bookmarks from a specified folder
      * and its subfolders and builds a tree.
      *
-     * @param aParentFolder RDF resource id of the folder.
+     * @param aParentFolder feedId of the folder.
      */
     _buildChildLivemarks: function(aParentFolder) {
-        // Get the number of container's children
-        var nextVal = this.bmds.GetTarget(aParentFolder, this.nextValArc, true);
-        var length = nextVal.QueryInterface(Ci.nsIRDFLiteral).Value - 1;
-
         // Iterate over all the children
-        for (var i = 1; i <= length; i++) {
-            var seqArc = this.rdfs.GetResource(RDF_SEQ + i);
-            var child = this.bmds.GetTarget(aParentFolder, seqArc, true);
+        for (var i = 0; i < this.feeds.length; i++) {
+            var feed = this.feeds[i];
+            if (feed.isFolder && feed.parent == aParentFolder) {
+                var prevParent = this._levelParentNodes[this._levelParentNodes.length - 1];
+                var closedFolders = this.tree.getAttribute('closedFolders');
+                var state = escape(closedFolders).match(escape(feed.feedId));
 
-            // XXX Workaround to a situation when nexVal value is incorrect after
-            // sorting or removing bookmarks. Don't know why this happens.
-            if (!child)
-                continue;
+                var treeitem = document.createElement('treeitem');
+                treeitem.setAttribute('container', 'true');
+                treeitem.setAttribute('open', !state);
+                treeitem.setAttribute('feedId', feed.feedId);
+                treeitem.setAttribute('label', feed.title);
+                treeitem = prevParent.appendChild(treeitem);
 
-            // If the child is a livemark, add to the tree
-            var type = this.bmds.GetTarget(child, this.typeArc, true);
-            if (type == this.livemarkType) {
-                var feedURL = this.bmds.GetTarget(child, this.feedUrlArc, true).
-                                        QueryInterface(Ci.nsIRDFLiteral).
-                                        Value;
-                var feedId = hashString(feedURL);
-                var title = this.bmds.GetTarget(child, this.nameArc, true).
-                                      QueryInterface(Ci.nsIRDFLiteral).
-                                      Value;
+                var treechildren = document.createElement('treechildren');
+                treechildren = treeitem.appendChild(treechildren);
 
+                this._levelParentNodes.push(treechildren);
+
+                this._buildChildLivemarks(feed.feedId);
+            }
+            else if (feed.parent == aParentFolder) {
                 var parent = this._levelParentNodes[this._levelParentNodes.length - 1];
 
                 var treeitem = document.createElement('treeitem');
@@ -357,71 +327,16 @@ var gFeedList = {
                 treerow = treeitem.appendChild(treerow);
 
                 var treecell = document.createElement('treecell');
-                treecell.setAttribute('label', title);
-                treecell.setAttribute('feedId', feedId);
-                treecell.setAttribute('url', feedURL);
-                treecell.setAttribute('title', title);
+                treecell.setAttribute('feedId', feed.feedId);
+                treecell.setAttribute('url', feed.feedURL);
+                treecell.setAttribute('title', feed.title);
                 treecell.setAttribute('properties', 'feed-item '); // Mind the whitespace
                 treecell = treerow.appendChild(treecell);
 
-                this.refreshFeedTreeitem(feedId, treecell);
-            }
-            else {
-                // If the child is a container, add it to the tree and recursively
-                // read its children
-                var instance = this.bmds.GetTarget(child, this.instanceOfArc, true);
-                if (instance == this.sequence) {
-                    var title = this.bmds.GetTarget(child, this.nameArc, true).
-                                          QueryInterface(Ci.nsIRDFLiteral).
-                                          Value;
-                    var uri = child.QueryInterface(Ci.nsIRDFResource).Value;
-
-                    var prevParent = this._levelParentNodes[this._levelParentNodes.length - 1];
-                    var closedFolders = this.tree.getAttribute('closedFolders');
-                    var state = escape(closedFolders).match(escape(uri));
-
-                    var treeitem = document.createElement('treeitem');
-                    treeitem.setAttribute('container', 'true');
-                    treeitem.setAttribute('open', !state);
-                    treeitem.setAttribute('uri', uri);
-                    treeitem.setAttribute('label', title);
-                    treeitem = prevParent.appendChild(treeitem);
-
-                    var treechildren = document.createElement('treechildren');
-                    treechildren = treeitem.appendChild(treechildren);
-
-                    this._levelParentNodes.push(treechildren);
-
-                    this._buildChildLivemarks(child);
-                }
+                this.refreshFeedTreeitem(feed.feedId, treecell);
             }
         }
         this._levelParentNodes.pop();
     }
 
-}
-
-// XXX Copied from nsBriefStorage, a better solution avoiding code duplication is needed.
-function hashString(aString) {
-    var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
-
-    // nsICryptoHash can read the data either from an array or a stream.
-    // Creating a stream ought to be faster than converting a long string
-    // into an array using JS.
-    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
-                       createInstance(Ci.nsIStringInputStream);
-    stringStream.setData(aString, aString.length);
-
-    hasher.init(Ci.nsICryptoHash.MD5);
-    hasher.updateFromStream(stringStream, stringStream.available());
-    var hash = hasher.finish(false);
-
-    // Convert the hash to a hex-encoded string.
-    var hexchars = '0123456789ABCDEF';
-    var hexrep = new Array(hash.length * 2);
-    for (var i = 0; i < hash.length; ++i) {
-        hexrep[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 15);
-        hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
-    }
-    return hexrep.join('');
 }
