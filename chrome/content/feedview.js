@@ -278,7 +278,7 @@ FeedView.prototype = {
 
             // Create feed subtitle.
             if (feed.subtitle)
-                doc.getElementById('feed-subtitle').textContent = feed.subtitle;
+                doc.getElementById('feed-subtitle').innerHTML = feed.subtitle;
         }
 
         this.feedContent = doc.getElementById('feed-content');

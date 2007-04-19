@@ -64,7 +64,9 @@
                     subheader.appendChild(text);
                 }
                 titleElement.setAttribute('href', entryURL);
-                titleElement.textContent = title;
+                // We have to use innerHTML instead of textContent, so that the entities
+                // are resolved.
+                titleElement.innerHTML = title;
                 if (date > 0)
                     dateElement.textContent = date.toLocaleString();
                 contentElement.innerHTML = content ? content : summary;
