@@ -4,6 +4,127 @@ interface nsIBriefFeedEntry;
 interface nsIWritablePropertyBag2;
 
 /**
+ * This interface represents a query to the Brief's database. Its attributes are
+ * conditions specifying which entries are selected. The conditions are ANDed.
+ */
+[scriptable, uuid(be536868-2db5-408e-9622-42be8d0d00d5)]
+interface nsIBriefQuery : nsISupports {
+
+    /**
+     * Space-separated list of ids of entries to be selected.
+     */
+    attribute string entries;
+
+    /**
+     * Space-separated lists of ids of feeds containing the entries to be selected.
+     */
+    attribute string feeds;
+
+    /**
+     * Space-separated lists of ids of folders containing the entries to be selected.
+     */
+    attribute string folders;
+
+    /**
+     * The following attributes represent entry status flags. If one of these attributes
+     * is TRUE then the respective flag must be present on selected entries.
+     */
+    attribute boolean read;
+
+    attribute boolean unread;
+
+    attribute boolean starred;
+
+    attribute boolean unstarred;
+
+    /**
+     * Deleted state of entries to be selected. Must be one of the below constants.
+     *
+     * @default value is ENTRY_STATE_NORMAL.
+     */
+    const short ENTRY_STATE_NORMAL = 0;
+    const short ENTRY_STATE_TRASHED = 1;
+    const short ENTRY_STATE_DELETED = 2;
+    const short ENTRY_STATE_ANY = 3;
+
+    attribute short deleted;
+
+    /**
+     * String that must be contained by either title, summary or content of the selected
+     * entries.
+     */
+    attribute AString searchString;
+
+    /**
+     * Date range for the selected entries.
+     */
+    attribute long long startDate;
+
+    attribute long long endDate;
+
+    /**
+     * Maximum number of entries to be selected.
+     *
+     * @default value is 0 (unlimited).
+     */
+    attribute unsigned long limit;
+
+    /**
+     * Specifies how many result entries to skip at the beggining of the result set.
+     *
+     * @default value is 1.
+     */
+    attribute unsigned long offset;
+
+    /**
+     * Include hidden (no longer in Live Bookmarks) feeds.
+     *
+     * @default value is FALSE
+     */
+    attribute boolean includeHiddenFeeds;
+
+    /**
+     * By which column to sort the results. Must be one of the below constants.
+
+     * @default is NO_SORT.
+     */
+    const short NO_SORT = 0;
+    const short SORT_BY_DATE = 1;
+    const short SORT_BY_TITLE = 2;
+
+    attribute short sortOrder;
+
+    /**
+     * Direction in which to sort the results. Must be one of the below constants.
+     *
+     * @default is SORT_DESCENDING.
+     */
+    const short SORT_DESCENDING = 0;
+    const short SORT_ASCENDING = 1;
+
+    attribute short sortDirection;
+
+    /**
+     * Convenience function to set the most common constraint conditions all at once.
+     */
+    void setConditions(in string feeds, in string entries, in boolean unread);
+
+    /**
+     * Returns the computed SQL query string.
+     */
+    AString getQueryText();
+
+    /**
+     * The sort order clause is different in that it doesn't actually tell which entries
+     * to select. Not every consumer may want it (for example it can't be used in an
+     * UPDATE statement), so it is retrieved separately.
+     */
+    AString getSortClause();
+
+};
+
+
+/**
  * This interface is intended be implemented as a service. It provides access
  * to the the feed database. Feeds in the database are always taken from user's
  * Live Bookmarks from the folder specified by extensions.brief.liveBookmarksFolder
@@ -15,7 +136,7 @@ interface nsIBriefStorage : nsISupports {
   /**
    * Get a feed by its URL, without entries.
    *
-   * @param feedURL URL identifying the feed
+   * @param   feedURL URL identifying the feed
    * @returns nsIBriefFeed object containing the feed.
    */
   nsIBriefFeed getFeed(in string feedId);
@@ -23,7 +144,7 @@ interface nsIBriefStorage : nsISupports {
   /**
    * Get all feeds, without entries.
    *
-   * @param feedCount Empty object (required by XPConnect to return an array).
+   * @param  feedCount  Empty object (required by XPConnect to return an array).
    *
    * @returns array of nsIBriefFeed objects
    */
@@ -37,52 +158,32 @@ interface nsIBriefStorage : nsISupports {
    * Get array of entries matching specified constraints sorted descending by
    * date.
    *
-   * @param entryId       Space-separated list of ids of entries to select.
-   * @param feedId        Space-separated list of URLs identifying the feeds
-   *                      whose entries to select.
-   * @param rules         Space-separated list of rules which selected
-   *                      entries must match. Possible rules:
-   *                      'read', 'unread', 'starred', 'unstarred', 'trashed'.
-   * @param searchString  String that either title, summary or content of the
-   *                      entry must containt.
-   * @param offset        Index of the first entry to get (as sorted by date).
-   * @param limit         Number of entries to get.
-   * @param entryCount    Empty object (required by XPConnect to return an array).
+   * @param query      Query selecting the entries.
+   * @param entryCount Empty object (required by XPConnect to return an array).
    *
    * @returns Array of nsIBriefFeedEntry objects.
    */
-  void getEntries(in string entryId,
-                  in string feedId,
-                  in string rules,
-                  in AUTF8String searchString,
-                  in unsigned long offset,
-                  in unsigned long limit,
+  void getEntries(in nsIBriefQuery query,
                   out unsigned long entryCount,
-                  [retval, array, size_is(entryCount)]
-                  out nsIBriefFeedEntry entries);
+                  [retval, array, size_is(entryCount)] out nsIBriefFeedEntry entries);
 
   /**
    * This function gets a space-separated entry id list of entries matching
    * specified rules constraints.
    *
-   * For the parameters see getEntries().
+   * @param  query  Query selecting the entries.
    *
    * @returns Property bag containing "entryIdList" and "feedURLList"
    *          AUTF8String properties.
    */
-  nsIWritablePropertyBag2 getSerializedEntries(in string entryId,
-                                               in string feedId,
-                                               in string rules,
-                                               in AString searchString);
+  nsIWritablePropertyBag2 getSerializedEntries(in nsIBriefQuery query);
 
   /**
-   * Returns number of entries matching specified constraints.
+   * Returns number of entries.
    *
-   * For the parameters see getEntries().
+   * @param  query  Query selecting the entries to be counted.
    */
-  unsigned long getEntriesCount(in string feedId,
-                                in string rules,
-                                in AString searchString);
+  unsigned long getEntriesCount(in nsIBriefQuery query);
 
   /**
    * Synchronize database with Live Bookmarks in folder which RDF id is
@@ -90,7 +191,7 @@ interface nsIBriefStorage : nsISupports {
    * Previously added feeds that aren't in the current folder anymore are
    * hidden, so the data is restored if they are added again.
    *
-   * @throws if extensions.brief.liveBookmarksFolder is empty.
+   * @throws if extensions.brief.liveBookmarksFolder preference is empty.
    */
   void syncWithBookmarks();
 
@@ -102,35 +203,35 @@ interface nsIBriefStorage : nsISupports {
   void updateFeed(in nsIBriefFeed feed);
 
   /**
-   * Mark entries as read/unread.
+   * Marks entries as read/unread.
    *
-   * @param newStatus New status of the entry (false for unread, true for read).
-   *
-   * For the rest of the parameters see getEntries().
+   * @param  status  New status of entries (TRUE for read, FALSE for unread).
+   * @param  query   Query selecting the entries to be processed.
    */
-  void markEntriesRead(in boolean newStatus,
-                       in string entryId,
-                       in string feedId,
-                       in string rules,
-                       in Astring searchString);
+  void markEntriesRead(in boolean status, in nsIBriefQuery query);
 
   /**
-   * Deletes a entries.
+   * Mark entries as starred/unstarred.
    *
-   * @param action 0 - restore from trash
-   *               1 - move to trash
-   *               2 - delete (still only a flag)
-   *               3 - remove from database
-   * For the rest of the parameters see getEntries().
-   *
-   * @throws on invalid action parameter.
+   * @param  status  New status of entries (TRUE for starred, FALSE for not starred).
+   * @param  query   Query selecting the entries to be processed.
    */
-  void deleteEntries(in octet action,
-                     in string entryId,
-                     in string feedId,
-                     in string rules,
-                     in Astring searchString);
+  void starEntries(in boolean status, in nsIBriefQuery query);
 
-  void starEntry(in string entryId, in boolean newStatus);
+  /**
+   * Sets the entries' deleted state or removes them from the database..
+   *
+   * @param  state  The new deleted state or instruction to remove the entries from the
+   *                database. Must be one of the below constants.
+   * @param  query  Query selecting the entries to be processed.
+   *
+   * @throws on invalid |state| parameter.
+   */
+  void deleteEntries(in short state, in nsIBriefQuery query);
+
+  const short ENTRY_STATE_NORMAL = 0;
+  const short ENTRY_STATE_TRASHED = 1;
+  const short ENTRY_STATE_DELETED = 2;
+  const short REMOVE_FROM_DATABASE = 3;
 
 };

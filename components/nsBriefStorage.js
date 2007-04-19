@@ -1,6 +1,10 @@
-const CLASS_ID = Components.ID("{4C468DA8-7F30-11DB-A690-EBF455D89593}");
-const CLASS_NAME = "Provides storage for feeds";
-const CONTRACT_ID = "@mozilla.org/brief/storage;1";
+const STORAGE_CLASS_ID = Components.ID('{4C468DA8-7F30-11DB-A690-EBF455D89593}');
+const STORAGE_CLASS_NAME = 'mozStorage database component for the Brief extension';
+const STORAGE_CONTRACT_ID = '@ancestor/brief/storage;1';
+
+const QUERY_CLASS_ID = Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}');
+const QUERY_CLASS_NAME = 'Query to database of the Brief extension';
+const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -19,14 +23,6 @@ const DELETE_REDUNDANT_INTERVAL = 3600*24; // 1 day
 // How often to permanently remove deleted entries and VACUUM the database.
 const PURGE_DELETED_INTERVAL = 3600*24*3; // 3 days
 
-function logDBError(aException) {
-    var error = gBriefStorage.dBConnection.lastErrorString;
-
-    var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                         getService(Ci.nsIConsoleService);
-    consoleService.logStringMessage('Brief - database error:\n ' + error + '\n\n '
-                                    + aException);
-}
 
 function dump(aMessage) {
   var consoleService = Cc["@mozilla.org/consoleservice;1"].
@@ -34,9 +30,7 @@ function dump(aMessage) {
   consoleService.logStringMessage('Brief:\n' + aMessage);
 }
 
-var gBriefStorage = null;
-
-function BriefStorage() {
+function BriefStorageService() {
     var file = Cc['@mozilla.org/file/directory_service;1'].
                getService(Ci.nsIProperties).
                get('ProfD', Ci.nsIFile);
@@ -87,6 +81,7 @@ function BriefStorage() {
         this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
     }
     catch (e) {}
+
     // Columns added in 0.7.
     try {
         this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
@@ -117,7 +112,7 @@ function BriefStorage() {
     this.prefs.addObserver('', this, false);
 }
 
-BriefStorage.prototype = {
+BriefStorageService.prototype = {
 
     observerService:      null,
     prefs:                null,
@@ -177,8 +172,7 @@ BriefStorage.prototype = {
                             'WHERE hidden=0 ORDER BY rowIndex ASC            ');
         try {
             while (select.executeStep()) {
-                var feed = Cc['@mozilla.org/brief/feed;1'].
-                           createInstance(Ci.nsIBriefFeed);
+                var feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
                 feed.feedId = select.getString(0);
                 feed.feedURL = select.getString(1);
                 feed.websiteURL = select.getString(2);
@@ -204,31 +198,21 @@ BriefStorage.prototype = {
         }
     },
 
+
     // nsIBriefStorage
-    getEntries: function(aEntryId, aFeedId, aRules, aSearchString, aOffset,
-                         aLimit, entryCount) {
+    getEntries: function(aQuery, entryCount) {
         var statement = 'SELECT                                            ' +
                         'entries.id,    entries.feedId,  entries.entryURL, ' +
                         'entries.title, entries.summary, entries.content,  ' +
                         'entries.date,  entries.read,    entries.starred   ' +
-                        'FROM entries INNER JOIN feeds                     ' +
-                        'ON entries.feedId = feeds.feedId                  ' +
-                        'WHERE                                             ' +
-                        'feeds.hidden = 0 AND                              ' ;
-        statement += this.createCommonConditions(aEntryId, aFeedId, aRules, aSearchString);
-        statement = statement.replace(/AND\s*$/, ''); // Trim any trailing ANDs.
-        statement += ' ORDER BY date DESC ';
-
-        if (aLimit)
-            statement += ' LIMIT ' + aLimit;
-        if (aOffset)
-            statement += ' OFFSET ' + aOffset;
-
+                        'FROM entries WHERE id IN '
+                        + aQuery.getQueryText() + aQuery.getSortClause();
         var select = this.dBConnection.createStatement(statement);
+
         var entries = new Array();
         try {
             while (select.executeStep()) {
-                var entry = Cc['@mozilla.org/brief/feedentry;1'].
+                var entry = Cc['@ancestor/brief/feedentry;1'].
                             createInstance(Ci.nsIBriefFeedEntry);
                 entry.id = select.getString(0);
                 entry.feedId = select.getString(1);
@@ -252,27 +236,20 @@ BriefStorage.prototype = {
 
 
     // nsIBriefStorage
-    getSerializedEntries: function(aEntryId, aFeedId, aRules, aSearchString) {
-        var statement = 'SELECT                            ' +
-                        'entries.id, entries.feedId        ' +
-                        'FROM entries INNER JOIN feeds     ' +
-                        'ON entries.feedId = feeds.feedId  ' +
-                        'WHERE                             ' +
-                        'feeds.hidden = 0 AND              ' ;
-        statement += this.createCommonConditions(aEntryId, aFeedId, aRules, aSearchString);
-        statement = statement.replace(/AND\s*$/, ''); // Trim any trailing ANDs.
-        statement += ' ORDER BY date DESC ';
+    getSerializedEntries: function(aQuery) {
+        var statement = 'SELECT entries.id, entries.feedId FROM entries WHERE id IN '
+                        + aQuery.getQueryText() + aQuery.getSortClause();;
 
         var select = this.dBConnection.createStatement(statement);
-        var entryIdList = '';
-        var feedIdList = '';
+        var entries = '';
+        var feeds = '';
         try {
             while (select.executeStep()) {
-                entryIdList += select.getString(0) + ' ';
+                entries += select.getString(0) + ' ';
 
                 var feedId = select.getString(1);
-                if (!feedIdList.match(feedId))
-                    feedIdList += feedId + ' ';
+                if (!feeds.match(feedId))
+                    feeds += feedId + ' ';
             }
         }
         finally {
@@ -281,29 +258,22 @@ BriefStorage.prototype = {
 
         var bag = Cc['@mozilla.org/hash-property-bag;1'].
                   createInstance(Ci.nsIWritablePropertyBag2);
-        bag.setPropertyAsAUTF8String('entryIdList', entryIdList);
-        bag.setPropertyAsAUTF8String('feedIdList', feedIdList);
+        bag.setPropertyAsAUTF8String('entryIdList', entries);
+        bag.setPropertyAsAUTF8String('feedIdList', feeds);
 
         return bag;
     },
 
 
     // nsIBriefStorage
-    getEntriesCount: function(aFeedId, aRules, aSearchString) {
-        var statement = 'SELECT COUNT(1)                   ' +
-                        'FROM entries INNER JOIN feeds     ' +
-                        'ON entries.feedId = feeds.feedId  ' +
-                        'WHERE                             ' +
-                        'feeds.hidden = 0 AND              ' ;
-        statement += this.createCommonConditions(null, aFeedId, aRules, aSearchString);
-        statement = statement.replace(/AND\s*$/, ''); // Trim any trailing ANDs.
-
+    getEntriesCount: function(aQuery) {
+        var statement = 'SELECT COUNT(1) FROM entries WHERE id IN ' + aQuery.getQueryText();
         var select = this.dBConnection.createStatement(statement);
 
         var count = 0;
         try {
-            while (select.executeStep())
-                var count = select.getInt32(0);
+            select.executeStep();
+            var count = select.getInt32(0);
         }
         finally {
             select.reset();
@@ -312,55 +282,10 @@ BriefStorage.prototype = {
     },
 
 
-    /**
-     * This function creates the part of a statement that is most commonly shared by when
-     * performing various actions, i.e. the conditions following the WHERE clause.
-     */
-     createCommonConditions: function(aEntryId, aFeedId, aRules, aSearchString) {
-        var conditions = '';
-
-        if (aEntryId)
-            conditions += ' "' + aEntryId + '" LIKE "%" || entries.id || "%" ';
-        if (aFeedId)
-            conditions += ' AND "' + aFeedId + '" LIKE "%" || entries.feedId || "%" ';
-
-        // If ids were specified, get the entries regardless of their deleted status.
-        // Otherwise get only untrashed entries by default.
-        if (!aEntryId)
-          conditions += ' AND entries.deleted = 0 ';
-
-        if (aRules) {
-            if (aRules.match('unread'))
-                conditions += ' AND entries.read = 0 ';
-            if (aRules.match(/ read|^read/))
-                conditions += ' AND entries.read = 1 ';
-
-            if (aRules.match('unstarred'))
-                conditions += ' AND entries.starred = 0 ';
-            if (aRules.match(/ starred|^starred/))
-                conditions += ' AND entries.starred = 1 ';
-
-            if (aRules.match('trashed'))
-                conditions = conditions.replace('deleted = 0', 'deleted = 1');
-        }
-
-        if (aSearchString)
-            conditions += ' AND entries.title || entries.summary || entries.content' +
-                          ' LIKE "%" || "' + aSearchString + '" || "%" ';
-
-        // When appending conditions we don't know if any others were already appended,
-        // so we prepend every condition with AND. If there turns out to be a redundant
-        // AND at the beginning we trim it here.
-        var conditions = conditions.replace(/^ AND/, '');
-
-        return conditions;
-    },
-
-
     // nsIBriefStorage
     updateFeed: function(aFeed) {
         // Invalidate cache since feeds table is about to change.
-        this.feedsCache = null;
+        this.feedsCache = this.feedsAndFoldersCache = null;
 
         var now = Date.now();
         var oldestEntryDate = now;
@@ -378,7 +303,10 @@ BriefStorage.prototype = {
                             'read)                                      ' +
                             'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ');
         this.dBConnection.beginTransaction();
-        var prevUnreadCount = this.getEntriesCount(aFeed.feedId, 'unread');
+        var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
+                                 createInstance(Ci.nsIBriefQuery);
+        unreadEntriesQuery.setConditions(aFeed.feedId, null, true);
+        var prevUnreadCount = this.getEntriesCount(unreadEntriesQuery);
         try {
             for each (entry in aFeed.getEntries({})) {
                 var title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
@@ -425,7 +353,7 @@ BriefStorage.prototype = {
           this.dBConnection.commitTransaction();
         }
 
-        var newUnreadCount = this.getEntriesCount(aFeed.feedId, 'unread');
+        var newUnreadCount = this.getEntriesCount(unreadEntriesQuery);
         var newEntriesCount = newUnreadCount - prevUnreadCount;
         var subject = Cc["@mozilla.org/variant;1"].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
@@ -434,59 +362,61 @@ BriefStorage.prototype = {
 
 
     // nsIBriefStorage
-    markEntriesRead: function(aNewStatus, aEntryId, aFeedId, aRules, aSearchString) {
+    markEntriesRead: function(aStatus, aQuery) {
         // Make sure not to select entries which already have the desired status.
-        var prevStatus = aNewStatus ? 'unread' : 'read';
-        var optimizedRules = aRules + ' ' + prevStatus;
+        prevUnreadFlag = aQuery.unread;
+        prevReadFlag = aQuery.read;
+        if (aStatus)
+            aQuery.unread = true;
+        else
+            aQuery.read = true;
 
-        var statement = 'UPDATE entries SET read = ? WHERE ';
-        statement += this.createCommonConditions(aEntryId, aFeedId, optimizedRules,
-                                                 aSearchString);
+        var statement = 'UPDATE entries SET read = ? WHERE id IN ' + aQuery.getQueryText();
         var update = this.dBConnection.createStatement(statement)
-        update.bindInt32Parameter(0, aNewStatus ? 1 : 0);
+        update.bindInt32Parameter(0, aStatus ? 1 : 0);
 
         this.dBConnection.beginTransaction();
         try {
             // Get the list of entries which are about to change, so the notification
             // can include it.
-            var changedEntries = this.getSerializedEntries(aEntryId, aFeedId,
-                                                           optimizedRules,
-                                                           aSearchString);
+            var changedEntries = this.getSerializedEntries(aQuery);
             update.execute();
         }
         finally {
             this.dBConnection.commitTransaction();
+            aQuery.unread = prevUnreadFlag;
+            aQuery.read = prevReadFlag;
         }
 
         // If any entries were marked, dispatch the notifiaction.
-        if (changedEntries.getPropertyAsAUTF8String('entryIdList'))
+        if (changedEntries.getPropertyAsAUTF8String('entryIdList')) {
             this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                                 aNewStatus ? 'read' : 'unread');
+                                                 aStatus ? 'read' : 'unread');
+        }
     },
 
 
     // nsIBriefStorage
-    deleteEntries: function(aAction, aEntryId, aFeedId, aRules, aSearchString) {
-        switch (aAction) {
+    deleteEntries: function(aState, aQuery) {
+        switch (aState) {
             case 0:
             case 1:
             case 2:
-                var statementString = 'UPDATE entries SET deleted = ' + aAction + ' WHERE ';
+                var statementString = 'UPDATE entries SET deleted = ' + aState +
+                                      ' WHERE id IN ' + aQuery.getQueryText();
                 break;
             case 3:
-                var statementString = 'DELETE FROM entries WHERE ';
+                var statementString =
+                               'DELETE FROM entries WHERE id IN ' + aQuery.getQueryText();
                 break;
             default:
-                throw('Invalid action specified when deleting entries.');
+                throw('Invalid deleted state.');
         }
-        statementString += this.createCommonConditions(aEntryId, aFeedId, aRules,
-                                                       aSearchString);
 
         var statement = this.dBConnection.createStatement(statementString)
         this.dBConnection.beginTransaction();
         try {
-            var changedEntries = this.getSerializedEntries(aEntryId, aFeedId, aRules,
-                                                           aSearchString);
+            var changedEntries = this.getSerializedEntries(aQuery);
             statement.execute();
         }
         finally {
@@ -499,15 +429,14 @@ BriefStorage.prototype = {
 
 
     // nsIBriefStorage
-    starEntry: function(aEntryId, aNewStatus) {
-        var update = this.dBConnection.
-                          createStatement('UPDATE entries SET starred = ? WHERE id = ?');
-        update.bindInt32Parameter(0, aNewStatus ? 1 : 0);
-        update.bindStringParameter(1, aEntryId);
+    starEntries: function(aStatus, aQuery) {
+        var statement = 'UPDATE entries SET starred = ? WHERE id IN ' + aQuery.getQueryText();
+        var update = this.dBConnection.createStatement(statement);
+        update.bindInt32Parameter(0, aStatus ? 1 : 0);
 
         this.dBConnection.beginTransaction();
         try {
-            var changedEntries = this.getSerializedEntries(aEntryId);
+            var changedEntries = this.getSerializedEntries(aQuery);
             update.execute();
         }
         finally {
@@ -642,21 +571,18 @@ BriefStorage.prototype = {
             throw('No Live Bookmarks folder specified (extensions.brief.liveBookmarksFolder is empty)');
 
         root = this.rdfs.GetResource(this.rootURI);
-        this.getLivemarks(root);
-
-        // Invalidate cache since feeds table is about to change
-        this.feedsCache = null;
+        this.traverseLivemarks(root);
 
         var feedListChanged = false;
         this.dBConnection.beginTransaction();
         try {
             // Insert any new livemarks into the feeds database
             var selectAll = this.dBConnection.
-                createStatement('SELECT feedId, title, rowIndex, isFolder, parent ' +
+                createStatement('SELECT feedId, title, rowIndex, isFolder, parent, hidden ' +
                                 'FROM feeds');
 
             var insertItem = this.dBConnection.
-                createStatement('INSERT INTO feeds                                    ' +
+                createStatement('INSERT OR IGNORE INTO feeds                          ' +
                                 '(feedId, feedURL, title, rowIndex, isFolder, parent) ' +
                                 'VALUES (?1, ?2, ?3, ?4, ?5, ?6)                      ');
             var updateFeed = this.dBConnection.
@@ -677,26 +603,32 @@ BriefStorage.prototype = {
                 feed.rowIndex = selectAll.getInt32(2);
                 feed.isFolder = selectAll.getInt32(3) == 1;
                 feed.parent = selectAll.getString(4);
+                feed.hidden = selectAll.getInt32(5);
                 feeds.push(feed);
             }
 
-            // Check if there are any new bookmarks and add them.
+            // Check if there are any new bookmarks among the just retrieved ones and add
+            // them.
             var item, feed, found;
-            //dump('this.bookmarkItems.length: ' + this.bookmarkItems.length);
+            var invalidateFeedList = false;
             for (var i = 0; i < this.bookmarkItems.length; i++) {
                 item = this.bookmarkItems[i];
                 found = false;
 
+                // Search for the bookmark by iterating over all the feeds in the database.
                 for (var j = 0; j < feeds.length; j++) {
                     feed = feeds[j];
                     if (feed.feedId == item.feedId) {
+                        // Found it, the bookmark is already in the database.
                         found = true;
                         break;
                     }
                 }
 
-                //dump('found: ' + found);
+                // If the bookmark wasn't found in the database, add it.
                 if (!found) {
+                    // Invalidate cache since feeds table is about to change
+                    this.feedsCache = this.feedsAndFoldersCache = null;
                     insertItem.bindStringParameter(0, item.feedId);
                     insertItem.bindStringParameter(1, item.feedURL || null);
                     insertItem.bindStringParameter(2, item.title);
@@ -707,10 +639,15 @@ BriefStorage.prototype = {
                     feedListChanged = true;
                 }
                 else {
+                    // Mark that the feed is still in bookmarks.
                     feed.isInBookmarks = true;
-                    //dump(item.rowIndex != feed.rowIndex);
+
+                    // If the bookmark was found in the database then check if its row is
+                    // up-to-date.
                     if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
-                       item.title != feed.title) {
+                       item.title != feed.title || feed.hidden == 1) {
+                        // Invalidate cache since feeds table is about to change
+                        this.feedsCache = this.feedsAndFoldersCache = null;
 
                         updateFeed.bindStringParameter(0, item.title);
                         updateFeed.bindInt32Parameter(1, item.rowIndex);
@@ -718,20 +655,31 @@ BriefStorage.prototype = {
                         updateFeed.bindStringParameter(3, item.feedId);
                         updateFeed.execute();
 
-                        if (item.title != feed.title) {
-                            this.observerService.
-                                 notifyObservers(null, 'brief:feed-title-changed', item.feedId);
+                        if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
+                           feed.hidden == 1) {
+                            // If it has been row index, parent or hidden state that
+                            // changed, then the whole feed list tree in the Brief window
+                            // has to be rebuilt, so we need to notify about it.
+                            invalidateFeedList = true;
                         }
                         else {
-                            feedListChanged = true;
+                            // If only the title has changed, the feed list can be updated
+                            // incrementally, so we send a different notification.
+                            this.observerService.
+                            notifyObservers(null,'brief:feed-title-changed', item.feedId);
                         }
                     }
                 }
             }
 
+            // Finally, remove any feeds that are no longer bookmarked.
             for (i = 0; i < feeds.length; i++) {
                 feed = feeds[i];
                 if (!feed.isInBookmarks) {
+                    // Invalidate cache since feeds table is about to change
+                    this.feedsCache = this.feedsAndFoldersCache = null;
+                    invalidateFeedList = true;
+
                     if (feed.isFolder) {
                         removeFeed.bindStringParameter(0, feed.feedId);
                         removeFeed.execute();
@@ -745,14 +693,14 @@ BriefStorage.prototype = {
         }
         finally {
             this.dBConnection.commitTransaction();
-            if (feedListChanged)
-                this.observerService.notifyObservers(null, 'brief:feedlist-changed', '');
+            if (invalidateFeedList)
+                this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
         }
     },
 
 
     // Separate function to initialize RDF resources to avoid doing it on every
-    // getLivemarks() call.
+    // traverseLivemarks() call.
     initLivemarks: function() {
         this.rdfs = Cc['@mozilla.org/rdf/rdf-service;1'].getService(Ci.nsIRDFService);
         this.bmds = this.rdfs.GetDataSource('rdf:bookmarks');
@@ -776,17 +724,16 @@ BriefStorage.prototype = {
      * Recursively reads livemarks from a folder and its subfolders
      * and stores them as an array in |livemark| member property.
      *
-     * @param aRoot RDF URI of the folder containing the livemarks.
+     * @param aFolder RDF URI of the folder containing the livemarks.
      */
-     getLivemarks: function(aRoot) {
-        var nextVal = this.bmds.GetTarget(aRoot, this.nextValArc, true);
+     traverseLivemarks: function(aFolder) {
+        var nextVal = this.bmds.GetTarget(aFolder, this.nextValArc, true);
         var length = nextVal.QueryInterface(Ci.nsIRDFLiteral).Value - 1;
-        //dump('rootFolderURI: ' + this.rootFolderURI)
         for (var i = 1; i <= length; i++) {
             var seqArc = this.rdfs.GetResource(RDF_SEQ + i);
-            var child = this.bmds.GetTarget(aRoot, seqArc, true);
+            var child = this.bmds.GetTarget(aFolder, seqArc, true);
 
-            // XXX Workaround a situation when nextVal value is incorrect after
+            // Workaround a situation when nextVal value is incorrect after
             // sorting or removing bookmarks and can point to non-existent items.
             if (!child)
                 continue;
@@ -805,7 +752,7 @@ BriefStorage.prototype = {
                                        Value;
                 item.rowIndex = this.bookmarkItems.length;
                 item.isFolder = false;
-                var parentURI = aRoot.QueryInterface(Ci.nsIRDFResource).Value;
+                var parentURI = aFolder.QueryInterface(Ci.nsIRDFResource).Value;
                 item.parent = parentURI == this.rootURI ? 'root'
                                                         : this.hashString(parentURI);
                 this.bookmarkItems.push(item);
@@ -819,13 +766,12 @@ BriefStorage.prototype = {
                 item.feedId = this.hashString(uri);
                 item.rowIndex = this.bookmarkItems.length;
                 item.isFolder = true;
-                var parentURI = aRoot.QueryInterface(Ci.nsIRDFResource).Value;
-                //dump('parentURI: ' + parentURI)
+                var parentURI = aFolder.QueryInterface(Ci.nsIRDFResource).Value;
                 item.parent = parentURI == this.rootURI ? 'root'
                                                         : this.hashString(parentURI);
                 this.bookmarkItems.push(item);
 
-                this.getLivemarks(child);
+                this.traverseLivemarks(child);
             }
         }
      },
@@ -846,10 +792,8 @@ BriefStorage.prototype = {
      */
     startDummyStatement: function() {
         // Make sure the dummy table exists.
-        if (!this.dBConnection.tableExists('dummy_table')) {
-            this.dBConnection.
-                 executeSimpleSQL('CREATE TABLE dummy_table (id INTEGER PRIMARY KEY)');
-        }
+        this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS ' +
+                                           'dummy_table (id INTEGER PRIMARY KEY)');
 
         // This table is guaranteed to have something in it and will keep the dummy
         // statement open. If the table is empty, it won't hold the statement open.
@@ -874,15 +818,21 @@ BriefStorage.prototype = {
 
 
     hashString: function(aString) {
-        var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
 
         // nsICryptoHash can read the data either from an array or a stream.
         // Creating a stream ought to be faster than converting a long string
         // into an array using JS.
+        // XXX nsIStringInputStream doesn't work well with UTF-16 strings; it's lossy, so
+        // it increases the risk of collision.
+        // nsIScriptableUnicodeConverter.convertToInputStream should be used instead but
+        // it would result in different hashes and therefore duplicate entries for users
+        // of older versions. For now, I have decided that the risk of collision isn't
+        // big enough and it's not worth changing the method.
         var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
                            createInstance(Ci.nsIStringInputStream);
         stringStream.setData(aString, aString.length);
 
+        var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
         hasher.init(Ci.nsICryptoHash.MD5);
         hasher.updateFromStream(stringStream, stringStream.available());
         var hash = hasher.finish(false);
@@ -898,43 +848,185 @@ BriefStorage.prototype = {
     },
 
 
+    logDatabaseError: function(aException) {
+        var error = this.dBConnection.lastErrorString;
+        var consoleService = Cc['@mozilla.org/consoleservice;1'].
+                             getService(Ci.nsIConsoleService);
+        consoleService.logStringMessage('Brief database error:\n ' + error + '\n\n ' +
+                                        aException);
+    },
+
+
     // nsISupports
     QueryInterface: function(aIID) {
         if (!aIID.equals(Components.interfaces.nsIBriefStorage) &&
-            !aIID.equals(Components.interfaces.nsISupports) &&
-            !aIID.equals(Components.interfaces.nsIObserver) &&
-            !aIId.equals(Components.inerfaces.nsITimerCallback))
+           !aIID.equals(Components.interfaces.nsIObserver) &&
+           !aIID.equals(Components.interfaces.nsISupports)) {
             throw Components.results.NS_ERROR_NO_INTERFACE;
+        }
         return this;
     }
 
 }
 
+function BriefQuery() { }
 
-var Factory = {
+BriefQuery.prototype = {
+
+    entries: '',
+    feeds:   '',
+    folders: '',
+
+    read:      false,
+    unread:    false,
+    starred:   false,
+    unstarred: false,
+    deleted:   Components.interfaces.nsIBriefQuery.ENTRY_STATE_NORMAL,
+
+    searchString: '',
+
+    startDate: 0,
+    endDate:   0,
+
+    limit:  0,
+    offset: 1,
+
+    sortOrder: Components.interfaces.nsIBriefQuery.DONT_SORT,
+    sortDirection: Components.interfaces.nsIBriefQuery.SORT_DESCENDING,
+
+    includeHiddenFeeds: false,
+
+    setConditions: function(aFeeds, aEntries, aUnread) {
+        this.feeds = aFeeds;
+        this.entries = aEntries;
+        this.unread = aUnread;
+    },
+
+
+    getQueryText: function() {
+        var text = '(SELECT entries.id FROM entries INNER JOIN feeds ' +
+                   'ON entries.feedId = feeds.feedId WHERE ';
+
+        if (this.folders) {
+            this._effectiveFolders = this.folders;
+            this._items = Components.classes['@ancestor/brief/storage;1'].
+                                     getService(Components.interfaces.nsIBriefStorage).
+                                     getFeedsAndFolders({});
+            this._traverseChildren('root');
+            text += 'feeds.parent LIKE "%" || "' + this._effectiveFolders + '" || "%" AND ';
+        }
+        if (this.feeds) {
+            text += 'entries.feedId LIKE "%" || "' + this.feeds + '" || "%" AND ';
+        }
+        if (this.entries) {
+            text += 'entries.id LIKE "%" || "' + this.entries + '" || "%" AND ';
+        }
+        if (this.searchString) {
+            text += 'entries.title || entries.summary || entries.content ' +
+                    'LIKE "%" || "' + this.searchString + '" || "%" AND ';
+        }
+
+        if (this.read)
+            text += 'entries.read = 1 AND ';
+        if (this.unread)
+            text += 'entries.read = 0 AND ';
+        if (this.starred)
+            text += 'entries.starred = 1 AND ';
+        if (this.unstarred)
+            text += 'entries.starred = 0 AND ';
+
+        var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
+        if (this.deleted != nsIBriefQuery.ENTRY_STATE_ANY)
+            text += 'entries.deleted = ' + this.deleted + ' AND ';
+
+        if (this.startDate > 0)
+            text += 'entries.date >= ' + this.startDate + ' AND ';
+        if (this.endDate > 0)
+            text += 'entries.date <= ' + this.endDate + ' AND ';
+
+        if (!this.includeHiddenFeeds)
+            text += 'feeds.hidden = 0 ';
+
+        // Trim the trailing AND, if there is one
+        text = text.replace(/AND $/, '');
+
+        if (this.limit)
+            text += ' LIMIT ' + this.limit;
+        if (this.offset > 1)
+            text += ' OFFSET ' + this.offset;
+
+        text += ')';
+
+        return text;
+    },
+
+    getSortClause: function() {
+        var text = ' ';
+        var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
+
+        if (this.sortOrder != nsIBriefQuery.NO_SORT) {
+
+            var sortOrder = this.sortOrder == nsIBriefQuery.SORT_BY_TITLE ? 'entries.title'
+                                                                          : 'entries.date';
+            var sortDir = this.sortDirection == nsIBriefQuery.SORT_ASCENDING ? 'ASC'
+                                                                             : 'DESC';
+            text += 'ORDER BY ' + sortOrder + ' ' + sortDir;
+        }
+
+        return text;
+    },
+
+    _traverseChildren: function(aFolder) {
+        var isEffectiveFolder = this._effectiveFolders.match(aFolder) ? true : false;
+        var item, i;
+        for (i = 0; i < this._items.length; i++) {
+            item = this._items[i];
+            if (item.parent == aFolder && item.isFolder) {
+                if (isEffectiveFolder)
+                    this._effectiveFolders += ' ' + aFolder;
+                this._traverseChildren(item.feedId);
+            }
+        }
+    },
+
+    // nsISupports
+    QueryInterface: function(aIID) {
+        if (!aIID.equals(Components.interfaces.nsIBriefQuery) &&
+           !aIID.equals(Components.interfaces.nsISupports)) {
+            throw Components.results.NS_ERROR_NO_INTERFACE;
+        }
+        return this;
+    }
+
+
+}
+
+
+function Factory(aClassObject) {
+    this._classObject = aClassObject;
+}
+
+Factory.prototype = {
+
     createInstance: function(aOuter, aIID) {
         if (aOuter != null)
             throw Components.results.NS_ERROR_NO_AGGREGATION;
-        if (!gBriefStorage)
-            gBriefStorage = new BriefStorage();
-        return gBriefStorage.QueryInterface(aIID);
-    },
 
-    getService: function(aIID) {
-        if (!gBriefStorage)
-            gBriefStorage = new BriefStorage();
-        return gBriefStorage.QueryInterface(Components.interfaces.nsIBriefStorage);
+        return (new this._classObject()).QueryInterface(aIID);
     }
+
 }
 
-//module definition (xpcom registration)
+// module definition (xpcom registration)
 var Module = {
     _firstTime: true,
 
     registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
         aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-        aCompMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID,
-                                         aFileSpec, aLocation, aType);
+        aCompMgr.registerFactoryLocation(STORAGE_CLASS_ID, STORAGE_CLASS_NAME,
+                                         STORAGE_CONTRACT_ID, aFileSpec, aLocation, aType);
+        aCompMgr.registerFactoryLocation(QUERY_CLASS_ID, QUERY_CLASS_NAME,
+                                         QUERY_CONTRACT_ID, aFileSpec, aLocation, aType);
     },
 
     unregisterSelf: function(aCompMgr, aLocation, aType) {
@@ -946,8 +1038,10 @@ var Module = {
         if (!aIID.equals(Components.interfaces.nsIFactory))
             throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
 
-        if (aCID.equals(CLASS_ID))
-            return Factory;
+        if (aCID.equals(STORAGE_CLASS_ID))
+            return new Factory(BriefStorageService);
+        if (aCID.equals(QUERY_CLASS_ID))
+            return new Factory(BriefQuery);
 
         throw Components.results.NS_ERROR_NO_INTERFACE;
     },
@@ -956,5 +1050,5 @@ var Module = {
 
 }
 
-//module initialization
+// module initialization
 function NSGetModule(aCompMgr, aFileSpec) { return Module; }
