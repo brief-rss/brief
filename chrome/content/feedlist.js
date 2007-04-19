@@ -6,8 +6,6 @@ var gFeedList = {
     tree:  null,
     items: null, // treecell elements of all the feeds
 
-    _topLevelChildren: null, // the topmost <treechildren>
-
     /**
      * Currently selected item. Returns the treeitem if a folder is selected or
      * the treecell if a feed is selected.
@@ -79,30 +77,30 @@ var gFeedList = {
             return;
 
         if (selectedItem.hasAttribute('specialFolder')) {
-            var rule = selectedItem.id == 'unread-folder' ? 'unread' :
-                       selectedItem.id == 'starred-folder' ? 'starred' : 'trashed';
             var title = selectedItem.getAttribute('title');
-            gFeedView = new FeedView(title, null, rule);
+            var query = new Query();
+
+            query.unread = selectedItem.id == 'unread-folder';
+            query.starred = selectedItem.id == 'starred-folder';
+            query.deleted = selectedItem.id == 'trash-folder' ? ENTRY_STATE_TRASHED
+                                                              : ENTRY_STATE_NORMAL;
+            gFeedView = new FeedView(title, query);
         }
 
         else if (selectedItem.hasAttribute('container')) {
             var title = selectedItem.getAttribute('label');
-            var treeitems = selectedItem.getElementsByTagName('treeitem');
-            var feedIds = '';
-            for (var i = 0; i < treeitems.length; i++) {
-                if (treeitems[i].hasAttribute('url'))
-                    feedIds += treeitems[i].getAttribute('feedId') + ' ';
-            }
-
-            if (feedIds)
-                gFeedView = new FeedView(title, feedIds);
+            var folder = selectedItem.getAttribute('feedId');
+            var query = new Query();
+            query.folders = folder;
+            gFeedView = new FeedView(title, query);
         }
 
         else {
             var feedId = selectedItem.getAttribute('feedId');
             var title = gStorage.getFeed(feedId).title;
+            var query = new QuerySH(feedId, null, null);
             if (feedId)
-                gFeedView = new FeedView(title, feedId);
+                gFeedView = new FeedView(title, query);
         }
     },
 
@@ -160,10 +158,12 @@ var gFeedList = {
         var treeitem = document.getElementById(aSpecialItem);
         var treecell = treeitem.firstChild.firstChild;
 
-        var rule = aSpecialItem == 'unread-folder' ? 'unread' :
-                   aSpecialItem == 'starred-folder' ? 'unread starred' :
-                                                      'unread trashed' ;
-        var unreadCount = gStorage.getEntriesCount(null, rule, null);
+        var query = new QuerySH(null, null, true);
+        if (aSpecialItem == 'starred-folder')
+            query.starred = true;
+        else if (aSpecialItem == 'trash-folder')
+            query.deleted = ENTRY_STATE_TRASHED;
+        var unreadCount = gStorage.getEntriesCount(query);
 
         var title = treeitem.getAttribute('title');
         if (unreadCount > 0) {
@@ -191,7 +191,8 @@ var gFeedList = {
         var treecell = treeitem.firstChild.firstChild;
 
         // Update the label
-        var unreadCount = gStorage.getEntriesCount(aFeedId, 'unread', null);
+        var query = new QuerySH(aFeedId, null, true);
+        var unreadCount = gStorage.getEntriesCount(query);
         var title = treeitem.getAttribute('title');
         if (unreadCount > 0) {
             var label = title + ' (' + unreadCount +')';
@@ -231,17 +232,17 @@ var gFeedList = {
      */
     rebuild: function() {
         this.tree = document.getElementById('feed-list');
-        this._topLevelChildren = document.getElementById('top-level-children');
+        var topLevelChildren = document.getElementById('top-level-children');
 
         this.refreshSpecialTreeitem('unread-folder');
         this.refreshSpecialTreeitem('starred-folder');
         this.refreshSpecialTreeitem('trash-folder');
 
         // Clear existing tree
-        var lastChild = this._topLevelChildren.lastChild;
-        while (lastChild.id == 'special-folders-separator') {
-            this._topLevelChildren.removeChild(lastChild);
-            lastChild = this._topLevelChildren.lastChild
+        var lastChild = topLevelChildren.lastChild;
+        while (lastChild.id != 'special-folders-separator') {
+            topLevelChildren.removeChild(lastChild);
+            lastChild = topLevelChildren.lastChild
         }
 
         this.feeds = gStorage.getFeedsAndFolders({});
@@ -251,7 +252,7 @@ var gFeedList = {
         // We always append items to the last container in this array (i.e. the most
         // nested container). If a new container is encountered, it's pushed to the
         // array. After we're done reading container's children we pop it.
-        this._levelParentNodes = [this._topLevelChildren];
+        this._levelParentNodes = [topLevelChildren];
 
         // Build the rest of the children recursively
         this._buildChildLivemarks('root');
@@ -275,10 +276,11 @@ var gFeedList = {
         // Iterate over all the children.
         for (var i = 0; i < this.feeds.length; i++) {
             var feed = this.feeds[i];
+
             if (feed.isFolder && feed.parent == aParentFolder) {
                 var prevParent = this._levelParentNodes[this._levelParentNodes.length - 1];
                 var closedFolders = this.tree.getAttribute('closedFolders');
-                var state = escape(closedFolders).match(escape(feed.feedId));
+                var state = closedFolders.match(feed.feedId) ? true : false;
 
                 var treeitem = document.createElement('treeitem');
                 treeitem.setAttribute('container', 'true');

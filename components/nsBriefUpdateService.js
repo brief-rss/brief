@@ -1,6 +1,6 @@
 const CLASS_ID    = Components.ID('{13A031E4-7EE9-11DB-8E2E-A58155D89593}');
-const CLASS_NAME  = 'Service responsible for updating feed data';
-const CONTRACT_ID = '@mozilla.org/brief/updateservice;1';
+const CLASS_NAME  = 'Feed updating service for the Brief extension';
+const CONTRACT_ID = '@ancestor/brief/updateservice;1';
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -12,15 +12,11 @@ const ICON_DATAURL_PREFIX   = 'data:image/x-icon;base64,';
 const FEED_ICON_URL         = 'chrome://brief/skin/icon.png';
 const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
 
-var gUpdateService = null;
-
 
 // Class definition
-function UpdateService() {
+function BriefUpdateService() {
     this.updateTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
     this.fetchDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-    this.observerService = Cc['@mozilla.org/observer-service;1'].
-                           getService(Ci.nsIObserverService);
     this.prefs = Cc['@mozilla.org/preferences-service;1'].
                  getService(Ci.nsIPrefService).
                  getBranch('extensions.brief.').
@@ -32,17 +28,17 @@ function UpdateService() {
                              getService(Ci.nsIAlertsService);
     }
 
-    this.observerService.addObserver(this, 'brief:feed-updated', false);
-    this.observerService.addObserver(this, 'brief:feed-error', false);
-    this.observerService.addObserver(this, 'profile-after-change', false);
+    var observerService = Cc['@mozilla.org/observer-service;1'].
+                          getService(Ci.nsIObserverService);
+    observerService.addObserver(this, 'brief:feed-updated', false);
+    observerService.addObserver(this, 'brief:feed-error', false);
+    observerService.addObserver(this, 'profile-after-change', false);
 }
 
-UpdateService.prototype = {
+BriefUpdateService.prototype = {
 
     updateTimer:     null,
     fetchDelayTimer: null,
-    storage:         null,
-    observerService: null,
     prefs:           null,
 
     // Members specific to a single fetchAllFeeds call
@@ -90,8 +86,7 @@ UpdateService.prototype = {
 
     // nsIBriefUpdateService
     fetchAllFeeds: function(aUpdateInBackground) {
-        var storage = Cc['@mozilla.org/brief/storage;1'].
-                      createInstance(Ci.nsIBriefStorage);
+        var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
         this.feeds = storage.getAllFeeds({});
 
         // Prevent initiating more than one update at a time. If background update
@@ -104,7 +99,9 @@ UpdateService.prototype = {
         }
 
         if (!aUpdateInBackground) {
-            this.observerService.notifyObservers(null, 'brief:batch-update-started', '');
+            var observerService = Cc['@mozilla.org/observer-service;1'].
+                                  getService(Ci.nsIObserverService);
+            observerService.notifyObservers(null, 'brief:batch-update-started', '');
             if (this.batchUpdateInProgress == 2)
                 this.fetchDelayTimer.cancel();
         }
@@ -132,7 +129,8 @@ UpdateService.prototype = {
     fetchDelayCallback: {
 
         notify: function(aTimer) {
-            var self = gUpdateService;
+            // XXX We should find a better way to obtain the component object.
+            var self = Factory.sigleton;
 
             var currentFeed = self.feeds[self.currentFeedIndex];
             new FeedFetcher(currentFeed);
@@ -149,8 +147,7 @@ UpdateService.prototype = {
     // nsIBriefUpdateService
     fetchFeed: function(aFeedId) {
         if (this.batchUpdateInProgress != 1) {
-            var storage = Cc['@mozilla.org/brief/storage;1'].
-                          createInstance(Ci.nsIBriefStorage);
+            var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
             var feed = storage.getFeed(aFeedId);
             new FeedFetcher(feed);
         }
@@ -322,7 +319,7 @@ FeedFetcher.prototype = {
 
         var feed = result.doc.QueryInterface(Ci.nsIFeed);
 
-        var wrappedFeed = Cc['@mozilla.org/brief/feed;1'].
+        var wrappedFeed = Cc['@ancestor/brief/feed;1'].
                           createInstance(Ci.nsIBriefFeed);
         wrappedFeed.wrapFeed(feed);
         wrappedFeed.feedURL = this.feedURL;
@@ -359,7 +356,7 @@ FeedFetcher.prototype = {
 
     passDataToStorage: function() {
         this.downloadedFeed.favicon = this.favicon;
-        storage = Cc['@mozilla.org/brief/storage;1'].createInstance(Ci.nsIBriefStorage);
+        var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
         storage.updateFeed(this.downloadedFeed);
     }
 
@@ -530,12 +527,15 @@ FaviconFetcher.prototype = {
 
 
 var Factory = {
+
+    sigleton: null,
+
     createInstance: function (aOuter, aIID) {
         if (aOuter != null)
             throw Components.results.NS_ERROR_NO_AGGREGATION;
-        if (!gUpdateService)
-            gUpdateService = new UpdateService();
-        return gUpdateService.QueryInterface(aIID);
+        if (this.sigleton === null)
+            this.sigleton = new BriefUpdateService();
+        return this.sigleton.QueryInterface(aIID);
     }
 }
 

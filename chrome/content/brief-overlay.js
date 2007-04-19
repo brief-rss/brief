@@ -1,5 +1,7 @@
 const BRIEF_URL = 'chrome://brief/content/brief.xul';
-const FAVICON_URL = 'chrome://brief/skin/feed-icon-16x16.png';
+const BRIEF_FAVICON_URL = 'chrome://brief/skin/feed-icon-16x16.png';
+var BriefQuery = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery',
+                                        'setConditions');
 
 var gBrief = {
 
@@ -31,8 +33,8 @@ var gBrief = {
 
 
     updateFeeds: function() {
-        var updateService = Cc['@mozilla.org/brief/updateservice;1'].
-                            createInstance(Ci.nsIBriefUpdateService);
+        var updateService = Cc['@ancestor/brief/updateservice;1'].
+                            getService(Ci.nsIBriefUpdateService);
         updateService.fetchAllFeeds();
     },
 
@@ -41,9 +43,10 @@ var gBrief = {
         var counter = document.getElementById('brief-status-counter');
         var panel = document.getElementById('brief-status');
 
-        var storageService = Cc['@mozilla.org/brief/storage;1'].
-                             createInstance(Ci.nsIBriefStorage);
-        var unreadEntriesCount = storageService.getEntriesCount(null, 'unread', null);
+        var query = new BriefQuery(null, null, true);
+        var storageService = Cc['@ancestor/brief/storage;1'].
+                             getService(Ci.nsIBriefStorage);
+        var unreadEntriesCount = storageService.getEntriesCount(query);
 
         counter.value = unreadEntriesCount;
         panel.setAttribute('unread', unreadEntriesCount > 0);
@@ -63,22 +66,20 @@ var gBrief = {
         var minutes = Math.floor((elapsedTime - hours*3600) / 60);
 
         var label = document.getElementById('brief-tooltip-last-updated');
-        if (hours > 1) {
+        if (hours > 1)
             label.value = bundle.getFormattedString('lastUpdatedWithHours', [hours, minutes]);
-        }
-        else if (hours == 1) {
+        else if (hours == 1)
             label.value = bundle.getFormattedString('lastUpdatedOneHour', [minutes]);
-        }
-        else {
+        else
             label.value = bundle.getFormattedString('lastUpdatedOnlyMinutes', [minutes]);
-        }
 
         while (rows.lastChild)
             rows.removeChild(rows.lastChild);
 
-        var storageService = Cc['@mozilla.org/brief/storage;1'].
-                             createInstance(Ci.nsIBriefStorage);
-        var unreadFeeds = storageService.getSerializedEntries(null, null, 'unread', null).
+        var query = new BriefQuery(null, null, true);
+        var storageService = Cc['@ancestor/brief/storage;1'].
+                             getService(Ci.nsIBriefStorage);
+        var unreadFeeds = storageService.getSerializedEntries(query).
                                          getPropertyAsAUTF8String('feedIdList').
                                          match(/[^ ]+/g);
 
@@ -99,7 +100,8 @@ var gBrief = {
             label.setAttribute('value', feedName);
             row.appendChild(label);
 
-            var unreadCount = storageService.getEntriesCount(unreadFeeds[i], 'unread', null);
+            var query = new BriefQuery(unreadFeeds[i], null, true);
+            var unreadCount = storageService.getEntriesCount(query);
             label = document.createElement('label');
             label.setAttribute('class', 'unread-entries-count');
             label.setAttribute('value', unreadCount);
@@ -134,7 +136,7 @@ var gBrief = {
 
     onBriefTabLoad: function(aEvent) {
         if (this.currentURI.spec == BRIEF_URL)
-            setTimeout(function(){ gBrief.tab.setAttribute('image', FAVICON_URL); }, 0);
+            setTimeout(function(){ gBrief.tab.setAttribute('image', BRIEF_FAVICON_URL); }, 0);
         else {
             gBrief.tab = null;
             if (gBrief.toolbarbutton)
@@ -163,7 +165,7 @@ var gBrief = {
             if (gBrief.toolbarbutton)
                 gBrief.toolbarbutton.checked = (gBrowser.selectedTab == restoredTab);
 
-            setTimeout(function(){ gBrief.tab.setAttribute('image', FAVICON_URL); }, 0);
+            setTimeout(function(){ gBrief.tab.setAttribute('image', BRIEF_FAVICON_URL); }, 0);
         }
     },
 
@@ -176,9 +178,9 @@ var gBrief = {
           this.toolbarbutton = document.getElementById('brief-button');
           this.statusIcon = document.getElementById('brief-status');
 
-          this.prefs = Cc["@mozilla.org/preferences-service;1"].
+          this.prefs = Cc['@mozilla.org/preferences-service;1'].
                        getService(Ci.nsIPrefService).
-                       getBranch("extensions.brief.").
+                       getBranch('extensions.brief.').
                        QueryInterface(Ci.nsIPrefBranch2);
           this.prefs.addObserver('', this, false);
 

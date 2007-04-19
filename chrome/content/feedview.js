@@ -4,41 +4,38 @@ const XHTML_NS = 'http://www.w3.org/1999/xhtml';
  * This object represents the main feed display. It stores and manages
  * the display parameters.
  *
- * @param aTitle        Title of the view which will be shown in the header
- * @param aFeedURL      Space-separated list of URLs identifying the feeds whose
- *                      entries to display.
- * @param aRules        Rules to which this view is tied to, overriding rules
- *                      specified in shownEntries preference is used.
- * @param aSearchString String which the displayed entries must contain.
+ * @param aTitle  Title of the view which will be shown in the header.
+ * @param aQuery  Query selecting entries to be displayed.
  */
-function FeedView(aTitle, aFeedId, aRules, aSearchString) {
+function FeedView(aTitle, aQuery) {
     this.title = aTitle;
-    this.feedId = aFeedId;
-    this.baseRules = aRules;
-    this.searchString = aSearchString;
 
-    // Clear the searchbar
-    if (!aSearchString) {
+    this._flagsAreIntrinsic = aQuery.read || aQuery.unread || aQuery.starred ||
+                              aQuery.unstarred || aQuery.deleted != ENTRY_STATE_NORMAL;
+    this.query = aQuery;
+    this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
+
+    // Clear the searchbar.
+    if (!aQuery.searchString) {
         var searchbar = document.getElementById('searchbar');
         searchbar.setAttribute('showingDescription', true);
     }
 
-    // Cache various elements for later use
     this.browser = document.getElementById('feed-view');
     this.document = this.browser.contentDocument;
 
-    // If view is tied to specified baseRules (e.g. special "Unread" view), hide
-    // the UI to pick the rules from the user.
+    // If view is tied to specified intrinsic flags (e.g. special "Unread" view), hide
+    // the UI to pick the flags from the user.
     var viewConstraintBox = document.getElementById('view-constraint-box');
-    viewConstraintBox.hidden = this.baseRules ? true : false;
+    viewConstraintBox.hidden = this._flagsAreIntrinsic;
 
     this.browser.addEventListener('load', this._onLoad, false);
 
     // If the feed wasn't updated yet, do it now.
-    var feed = gStorage.getFeed(this.feedId);
+    var feed = gStorage.getFeed(aQuery.feeds);
     if (feed && !feed.everUpdated) {
-        var updateService = Cc['@mozilla.org/brief/updateservice;1'].
-                            createInstance(Ci.nsIBriefUpdateService);
+        var updateService = Cc['@ancestor/brief/updateservice;1'].
+                            getService(Ci.nsIBriefUpdateService);
         updateService.fetchFeed(this.feedId);
     }
 
@@ -48,17 +45,21 @@ function FeedView(aTitle, aFeedId, aRules, aSearchString) {
 
 FeedView.prototype = {
 
+    // Title of the view which is displayed in the header.
     title: '',
 
-    // Below are parameters determining which entries are displayed.
-    feedId:        '', // Space-separated list of feed ids.
-    baseRules:     '', // Rules to which the view is tied to.
-    searchString:  '', // Only display entries containing this string.
+    // This property is used to temporarily override the title without losing the old one.
+    // It used for searching, when the search string is displayed in place of the title.
+    titleOverride: '',
+
+    // Indicates if the view was created with intrinsic flags which override the
+    // feedview.shownEntries preference.
+    _flagsAreIntrinsic: false,
 
     // Array of ids of displayed entries. This isn't used to specify which entries are
     // displayed but computed post-factum and used for determining if the view needs
-    // to be refreshed when the database changes.
-    _entries:        '',
+    // to be refreshed.
+    _entries: '',
 
     currentPage:   0,
     pageCount:     0,
@@ -69,70 +70,113 @@ FeedView.prototype = {
     document:     null,
     feedContent:  null,
 
+    // Query that selects entries contained by the view. It is the query to pull ALL the
+    // entries, not only the ones displayed on the current page.
+    set query(aQuery) {
+        this.__query = aQuery;
+        return aQuery;
+    },
+
+    get query() {
+        if (!this._flagsAreIntrinsic) {
+            this.__query.unread = gPrefs.shownEntries == 'unread';
+            this.__query.starred = gPrefs.shownEntries == 'starred';
+            this.__query.deleted = gPrefs.shownEntries == 'trashed' ? ENTRY_STATE_TRASHED
+                                                                    : ENTRY_STATE_NORMAL;
+        }
+        // XXX We should not have to reset the offset and limit every time.
+        this.__query.limit = 0;
+        this.__query.offset = 1;
+
+        return this.__query;
+    },
+
     // Indicates whether the feed view is currently displayed in the browser.
-    get active() {
+    get isActive() {
         return (this.browser.currentURI.spec == gTemplateURI.spec);
     },
 
-    // Actual rules used by the view.
-    get rules() {
-        return this.baseRules ? this.baseRules : gPrefs.shownEntries;
+    get isGlobalSearch() {
+        return !this.query.folders && !this.query.feeds && !this._flagsAreIntrinsic &&
+               this.query.searchString;
+    },
+
+    get isViewSearch() {
+        return (this.query.folders || this.query.feeds || this._flagsAreIntrinsic) &&
+                gFeedView.query.searchString;
     },
 
     ensure: function() {
-        if (!this.active)
+        if (!this.isActive)
             return true;
 
         // Get arrays of previously viewed entries and the ones that should be viewed now.
         var prevEntries = this._entries;
-        var currentEntries =
-                   gStorage.
-                   getSerializedEntries(null, this.feedId, this.rules, this.searchString).
-                   getPropertyAsAUTF8String('entryIdList').
-                   match(/[^ ]+/g);
+        var currentEntries = gStorage.getSerializedEntries(this.query).
+                                      getPropertyAsAUTF8String('entryIdList').
+                                      match(/[^ ]+/g);
 
-        // We need to perform a full refresh if any entries were added or when more than
-        // one entry was removed. Because currently there can be no situation when some
-        // entries are added and some removed at the same time, comparing the number of
-        // entries is enough to check for those cases.
-        if (prevEntries && currentEntries && prevEntries.length == currentEntries.length)
-            return true;
-
-        if (!prevEntries || !currentEntries || prevEntries.length < currentEntries.length ||
-           prevEntries.length - currentEntries.length > 1) {
+        if (!prevEntries || !currentEntries) {
             this._refresh();
             return false;
         }
 
-        // Now we now that only one entry was changed and that it was removed. Find out
-        // which one.
-        var removedEntry = '';
-        for (i = 0; i < prevEntries.length; i++) {
+        // We need to perform a full refresh if entries were added or more than one entry
+        // was removed. We optimize for the common case when only one entry is removed and
+        // in such case we refresh incrementally.
+        // Because it is possible for some entries to be added and some removed at the
+        // same time, simply comparing overall numbers is not enough and we need to check
+        // all of them one by one.
+        // First, let's see if any entries were removed.
+        var removedEntry = null;
+        var removedEntryIndex;
+        for (var i = 0; i < prevEntries.length; i++) {
             if (currentEntries.indexOf(prevEntries[i]) == -1) {
-                var removedEntry = prevEntries[i];
-                break;
+                if (removedEntry) {
+                    // One missing entry was already found and this is the second one,
+                    // so we need to do a full refresh.
+                    this._refresh();
+                    return false;
+                }
+                removedEntry = prevEntries[i];
+                removedEntryIndex = i;
             }
         }
 
-        // If there are no more entries on this page and it the last page, perform full refresh.
-        if (removedEntry && this.feedContent.childNodes.length == 1 &&
-           this.currentPage == this.pageCount) {
-            this._refresh();
-            return false;
-        }
-
-        // If the removed entry is on a different page than the currently shown one,
-        // preform full refresh.
-        var firstIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
-        var lastIndex = firstIndex + gPrefs.entriesPerPage;
-        if (prevEntries.indexOf(removedEntry) < firstIndex ||
-           prevEntries.indexOf(removedEntry) > lastIndex) {
-            this._refresh();
-            return false;
+        // Let's see if any entries were added.
+        for (i = 0; i < currentEntries.length; i++) {
+            if (prevEntries.indexOf(currentEntries[i]) == -1) {
+                this._refresh();
+                return false;
+            }
         }
 
         if (removedEntry) {
+            // If there are no more entries on this page and it the last page then perform
+            // a full refresh.
+            if (this.feedContent.childNodes.length == 1 && this.currentPage == this.pageCount) {
+                this._refresh();
+                return false;
+            }
+
+            // If the removed entry is on a different page than the currently shown one,
+            // perform full refresh.
+            var firstIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
+            var lastIndex = firstIndex + gPrefs.entriesPerPage;
+            if (removedEntryIndex < firstIndex || removedEntryIndex > lastIndex) {
+                this._refresh();
+                return false;
+            }
+
             this._refreshIncrementally(removedEntry);
+            return false;
+        }
+
+        // Update the title.
+        var title = this.titleOverride || this.title;
+        var titleElement = this.document.getElementById('feed-title');
+        if (titleElement.textContent != title) {
+            titleElement.textContent = title;
             return false;
         }
 
@@ -152,45 +196,51 @@ FeedView.prototype = {
 
         // Store a list of ids of displayed entries. It is used to determine if
         // the view needs to be refreshed when database changes.
-        this._entries =
-                   gStorage.
-                   getSerializedEntries(null, this.feedId, this.rules, this.searchString).
-                   getPropertyAsAUTF8String('entryIdList').
-                   match(/[^ ]+/g);
+        this._entries = gStorage.getSerializedEntries(this.query).
+                                 getPropertyAsAUTF8String('entryIdList').
+                                 match(/[^ ]+/g);
     },
 
 
+    // Refreshes the view when one entry is removed from the currently displayed page.
     _refreshIncrementally: function(aEntryId) {
-        // Find the entry that has to be removed and remove it.
+
+        // Find the entry that be removed.
         var entry = this.feedContent.firstChild;
         while (entry.id != aEntryId)
             entry = entry.nextSibling;
+
+        // Remove the entry. We don't do it directly, because we want to use jQuery
+        // to to fade it gracefully and we can call it from here, because it's untrusted.
         var evt = document.createEvent('Events');
         evt.initEvent('RemoveEntry', false, false);
         entry.dispatchEvent(evt);
 
         this._computePages();
-        var offset = gPrefs.entriesPerPage * this.currentPage - 1;
-        var entry = gStorage.getEntries(null, this.feedId, this.rules, this.searchString,
-                                        offset, 1, {})[0];
+
+        // Pull the one entry (previously the first entry on the next page).
+        var query = this.query;
+        query.offset = gPrefs.entriesPerPage * this.currentPage - 1;
+        query.limit = 1;
+        var entry = gStorage.getEntries(query, {})[0];
+
+        // Append the entry. If we're on the last page then there may have been no
+        // futher entries to pull.
         if (entry)
             this._appendEntry(entry);
 
-        this._entries =
-                   gStorage.
-                   getSerializedEntries(null, this.feedId, this.rules, this.searchString).
-                   getPropertyAsAUTF8String('entryIdList').
-                   match(/[^ ]+/g);
+        this._entries = gStorage.getSerializedEntries(this.query).
+                                 getPropertyAsAUTF8String('entryIdList').
+                                 match(/[^ ]+/g);
     },
 
 
     _computePages: function() {
-        this.entriesCount = gStorage.getEntriesCount(this.feedId, this.rules,
-                                                     this.searchString);
+        this.entriesCount = gStorage.getEntriesCount(this.query);
         this.pageCount = Math.ceil(this.entriesCount / gPrefs.entriesPerPage);
 
         // This may happen for example when you are on the last page, and the
-        // number of entries decreases (e.g. they are deleted)
+        // number of entries decreases (e.g. they are deleted).
         if (this.currentPage > this.pageCount)
             this.currentPage = this.pageCount;
         else if (this.currentPage == 0 && this.pageCount > 0)
@@ -213,12 +263,13 @@ FeedView.prototype = {
     // well as hides/unhides the feed view toolbar.
     _onLoad: function(aEvent) {
         var feedViewToolbar = document.getElementById('feed-view-toolbar');
-        if (gFeedView.active) {
+        if (gFeedView.isActive) {
             feedViewToolbar.hidden = false;
             gFeedView._buildFeedView();
         }
-        else
-          feedViewToolbar.hidden = true;
+        else {
+            feedViewToolbar.hidden = true;
+        }
     },
 
 
@@ -257,11 +308,10 @@ FeedView.prototype = {
 
         // Build the header.
         var titleElement = doc.getElementById('feed-title');
-        var textNode = doc.createTextNode(this.title);
-        titleElement.appendChild(textNode);
+        titleElement.textContent = this.titleOverride || this.title;
 
         // When a single, unfiltered feed is viewed, construct the feed's header.
-        var feed = gStorage.getFeed(this.feedId);
+        var feed = gStorage.getFeed(this.query.feeds);
         if (feed && !this.searchString) {
 
             // Create the link.
@@ -285,7 +335,7 @@ FeedView.prototype = {
 
         // If the trash folder is displayed this attribute adjusts the visibility of the
         // button in article controls.
-        if (this.rules == 'trashed')
+        if (this.query.deleted == ENTRY_STATE_TRASHED)
             this.feedContent.setAttribute('trash', true);
 
         if (!feed)
@@ -303,11 +353,12 @@ FeedView.prototype = {
         var markEntryAsUnread = stringbundle.getString('markEntryAsUnread');
         this.feedContent.setAttribute('markUnreadString', markEntryAsUnread);
 
-        // Get the entries data and append them.
-        var offset = gPrefs.entriesPerPage * (this.currentPage - 1);
-        var entries = gStorage.getEntries(null, this.feedId, this.rules,
-                                          this.searchString, offset,
-                                          gPrefs.entriesPerPage, {});
+        // Get the entries and append them.
+        var query = this.query;
+        query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
+        query.limit = gPrefs.entriesPerPage;
+
+        var entries = gStorage.getEntries(query, {});
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
