@@ -115,11 +115,10 @@ interface nsIBriefQuery : nsISupports {
     AString getQueryText();
 
     /**
-     * The sort order clause is different in that it doesn't actually tell which entries
-     * to select. Not every consumer may want it (for example it can't be used in an
-     * UPDATE statement), so it is retrieved separately.
+     * Return the cumputed SQL query string including the clauses that may be used only
+     * with SELECT statement.
      */
-    AString getSortClause();
+    AString getQueryTextForSelect();
 
 };
 

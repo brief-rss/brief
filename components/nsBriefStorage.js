@@ -206,7 +206,7 @@ BriefStorageService.prototype = {
                         'entries.title, entries.summary, entries.content,  ' +
                         'entries.date,  entries.read,    entries.starred   ' +
                         'FROM entries WHERE id IN '
-                        + aQuery.getQueryText() + aQuery.getSortClause();
+                        + aQuery.getQueryTextForSelect();
         var select = this.dBConnection.createStatement(statement);
 
         var entries = new Array();
@@ -238,7 +238,7 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     getSerializedEntries: function(aQuery) {
         var statement = 'SELECT entries.id, entries.feedId FROM entries WHERE id IN '
-                        + aQuery.getQueryText() + aQuery.getSortClause();;
+                        + aQuery.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
         var entries = '';
@@ -267,7 +267,8 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     getEntriesCount: function(aQuery) {
-        var statement = 'SELECT COUNT(1) FROM entries WHERE id IN ' + aQuery.getQueryText();
+        var statement = 'SELECT COUNT(1) FROM entries WHERE id IN '
+                        + aQuery.getQueryTextForSelect();
         var select = this.dBConnection.createStatement(statement);
 
         var count = 0;
@@ -903,7 +904,7 @@ BriefQuery.prototype = {
     },
 
 
-    getQueryText: function() {
+    getQueryText: function(aForSelect) {
         var text = '(SELECT entries.id FROM entries INNER JOIN feeds ' +
                    'ON entries.feedId = feeds.feedId WHERE ';
 
@@ -950,22 +951,10 @@ BriefQuery.prototype = {
         // Trim the trailing AND, if there is one
         text = text.replace(/AND $/, '');
 
-        if (this.limit)
-            text += ' LIMIT ' + this.limit;
-        if (this.offset > 1)
-            text += ' OFFSET ' + this.offset;
-
-        text += ')';
-
-        return text;
-    },
-
-    getSortClause: function() {
-        var text = ' ';
-        var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
+        if (!aForSelect)
+            return text;
 
         if (this.sortOrder != nsIBriefQuery.NO_SORT) {
-
             var sortOrder = this.sortOrder == nsIBriefQuery.SORT_BY_TITLE ? 'entries.title'
                                                                           : 'entries.date';
             var sortDir = this.sortDirection == nsIBriefQuery.SORT_ASCENDING ? 'ASC'
@@ -973,7 +962,16 @@ BriefQuery.prototype = {
             text += 'ORDER BY ' + sortOrder + ' ' + sortDir;
         }
 
+        if (this.limit)
+            text += ' LIMIT ' + this.limit;
+        if (this.offset > 1)
+            text += ' OFFSET ' + this.offset;
+
         return text;
+    },
+
+    getQueryTextForSelect: function BQ_getQueryTextForSelect() {
+        return this.getQueryText(true);
     },
 
     _traverseChildren: function(aFolder) {
