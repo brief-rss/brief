@@ -22,16 +22,16 @@ var gFeedList = {
 
     get selectedFeed() {
         var feed = null;
-        var feedId = this.selectedItem.getAttribute('feedId');
-        if (feedId)
-            feed = gStorage.getFeed(feedId);
+        var feedID = this.selectedItem.getAttribute('feedID');
+        if (feedID)
+            feed = gStorage.getFeed(feedID);
         return feed;
     },
 
-    getTreeitem: function(aFeedId) {
+    getTreeitem: function gFeedList_getTreeitem(aFeedID) {
         var item = null;
         for (var i = 0; i < this.items.length; i++) {
-            if (this.items[i].getAttribute('feedId') == aFeedId) {
+            if (this.items[i].getAttribute('feedID') == aFeedID) {
                 item = this.items[i];
                 break;
             }
@@ -39,44 +39,10 @@ var gFeedList = {
         return item;
     },
 
-
-    /**
-     * Sets a property on a content tree item.
-     *
-     * Trees cannot be styled using normal DOM attributes, "properties" attribute
-     * whose value contains space-separated pseudo-attributes has to be used
-     * instead. This is a convenience function to make setting a property work
-     * the same and be as easy as setting an attribute.
-     *
-     * @param aItem     Subject tree element
-     * @param aProperty Property to be set
-     */
-    setProperty: function(aItem, aProperty) {
-        var properties = aItem.getAttribute('properties');
-        if (!properties.match(aProperty + ' '))
-            aItem.setAttribute('properties', properties + aProperty + ' ');
-    },
-
-    // Cf. with |setProperty|
-    removeProperty: function(aItem, aProperty) {
-        var properties = aItem.getAttribute('properties');
-        if (properties.match(aProperty)) {
-            properties = properties.replace(aProperty + ' ', '');
-            aItem.setAttribute('properties', properties);
-        }
-    },
-
-    // Cf. with |setProperty|
-    hasProperty: function(aItem, aProperty) {
-        var properties = aItem.getAttribute('properties');
-        return properties.match(aProperty) ? true : false;
-    },
-
-
-    getFoldersForFeeds: function(aFeedIds) {
+    getFoldersForFeeds: function gFeedList_getFoldersForFeeds(aFeedIDs) {
         var folders = [];
-        for (var i = 0; i < aFeedIds.length; i++) {
-            var parent = gStorage.getFeed(aFeedIds[i]).parent;
+        for (var i = 0; i < aFeedIDs.length; i++) {
+            var parent = gStorage.getFeed(aFeedIDs[i]).parent;
             while (parent != 'root') {
                 if (folders.indexOf(parent) == -1)
                     folders.push(parent);
@@ -87,7 +53,7 @@ var gFeedList = {
     },
 
 
-    onselect: function(aEvent) {
+    onselect: function gFeedList_onselect(aEvent) {
         var selectedItem = gFeedList.selectedItem;
 
         if (!selectedItem || this.selectEventsSuppressed ||
@@ -112,22 +78,22 @@ var gFeedList = {
 
         else if (selectedItem.hasAttribute('container')) {
             var title = this.selectedFeed.title;
-            var folder = selectedItem.getAttribute('feedId');
+            var folder = selectedItem.getAttribute('feedID');
             var query = new Query();
             query.folders = folder;
             gFeedView = new FeedView(title, query);
         }
 
         else {
-            var feedId = selectedItem.getAttribute('feedId');
-            var title = gStorage.getFeed(feedId).title;
-            var query = new QuerySH(feedId, null, null);
-            if (feedId)
+            var feedID = selectedItem.getAttribute('feedID');
+            var title = gStorage.getFeed(feedID).title;
+            var query = new QuerySH(feedID, null, null);
+            if (feedID)
                 gFeedView = new FeedView(title, query);
         }
     },
 
-    onClick: function(aEvent) {
+    onClick: function gFeedList_onClick(aEvent) {
         var rowIndex = {};
         this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
         if (rowIndex.value != -1) {
@@ -137,7 +103,7 @@ var gFeedList = {
         }
     },
 
-    onKeyUp: function(aEvent) {
+    onKeyUp: function gFeedList_onKeyUp(aEvent) {
         if (aEvent.keyCode == aEvent.DOM_VK_RETURN) {
             var selectedItem = this.selectedItem;
             if (selectedItem.hasAttribute('container'))
@@ -145,57 +111,8 @@ var gFeedList = {
         }
     },
 
-    
-    createContextMenu: function(aEvent) {
-        // Get the row which was the target of the right-click
-        var rowIndex = {};
-        this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
-        // If the target was empty space, don't show any context menu.
-        if (rowIndex.value == -1) {
-            aEvent.preventDefault();
-            return;
-        }
 
-        this.ctx_targetItem = this.tree.view.getItemAtIndex(rowIndex.value);
-
-        // Set visibility of menuitems
-        var markFeedRead = document.getElementById('ctx-mark-feed-read');
-        markFeedRead.hidden = !this.ctx_targetItem.hasAttribute('url');
-
-        var markFolderRead = document.getElementById('ctx-mark-folder-read');
-        markFolderRead.hidden = this.ctx_targetItem.hasAttribute('url');
-
-        var updateFeed = document.getElementById('ctx-update-feed');
-        updateFeed.hidden = !this.ctx_targetItem.hasAttribute('url');
-
-        var openWebsite = document.getElementById('ctx-open-website');
-        openWebsite.hidden = !this.ctx_targetItem.hasAttribute('url');
-        if (this.ctx_targetItem.hasAttribute('url')) {
-            // Disable openWebsite if no websiteURL is available
-            var feedId = this.ctx_targetItem.getAttribute('feedId');
-            openWebsite.disabled = !gStorage.getFeed(feedId).websiteURL;
-        }
-
-        var separator = document.getElementById('ctx-separator');
-        separator.hidden = this.ctx_targetItem.hasAttribute('specialFolder') &&
-                           this.ctx_targetItem.id == 'starred-folder';
-
-        var emptyFeed = document.getElementById('ctx-empty-feed');
-        emptyFeed.hidden = !this.ctx_targetItem.hasAttribute('url');
-
-        var emptyFolder = document.getElementById('ctx-empty-folder');
-        emptyFolder.hidden = !(this.ctx_targetItem.hasAttribute('container') ||
-                               this.ctx_targetItem.id == 'unread-folder');
-
-        var restoreTrashed = document.getElementById('ctx-restore-trashed');
-        restoreTrashed.hidden = this.ctx_targetItem.id != 'trash-folder';
-
-        var emptyTrash = document.getElementById('ctx-empty-trash');
-        emptyTrash.hidden = this.ctx_targetItem.id != 'trash-folder';
-    },
-
-
-    refreshSpecialTreeitem: function(aSpecialItem) {
+    refreshSpecialTreeitem: function gFeedList_refreshSpecialTreeitem(aSpecialItem) {
         var treeitem = document.getElementById(aSpecialItem);
         var treecell = treeitem.firstChild.firstChild;
 
@@ -221,10 +138,10 @@ var gFeedList = {
     /**
      * Refresh the folder's label.
      *
-     * @param aFeeds  nsIBriefFeed object, feedId string, treeitem XUL element, or an
+     * @param aFeeds  nsIBriefFeed object, feedID string, treeitem XUL element, or an
      *                array of either of them.
      */
-    refreshFolderTreeitems: function(aFolders) {
+    refreshFolderTreeitems: function gFeedList_refreshFolderTreeitems(aFolders) {
         var treeitem, treecell, folder, query, unreadCount, label;
         var folders = aFolders instanceof Array ? aFolders : [aFolders];
 
@@ -232,14 +149,14 @@ var gFeedList = {
 
             if (typeof folders[i] == 'string') {
                 folder = gStorage.getFeed(folders[i]);
-                treeitem = this.getTreeitem(folder.feedId);
+                treeitem = this.getTreeitem(folder.feedID);
             }
             else if (folders[i] instanceof Ci.nsIBriefFeed) {
                 folder = folders[i];
-                treeitem = this.getTreeitem(folder.feedId);
+                treeitem = this.getTreeitem(folder.feedID);
             }
             else if (folders[i] instanceof XULElement) {
-                folder = gStorage.getFeed(folders[i].getAttribute('feedId'));
+                folder = gStorage.getFeed(folders[i].getAttribute('feedID'));
                 treeitem = folders[i];
             }
             else {
@@ -253,7 +170,7 @@ var gFeedList = {
             }
             else {
                 query = new Query();
-                query.folders = folder.feedId;
+                query.folders = folder.feedID;
                 query.unread = true;
                 unreadCount = gStorage.getEntriesCount(query);
 
@@ -273,10 +190,10 @@ var gFeedList = {
     /**
      * Refresh the feed treeitem's label and favicon.
      *
-     * @param aFeeds  nsIBriefFeed object, feedId string, treeitem XUL element, or an
+     * @param aFeeds  nsIBriefFeed object, feedID string, treeitem XUL element, or an
      *                array of either of them.
      */
-    refreshFeedTreeitems: function(aFeeds) {
+    refreshFeedTreeitems: function gFeedList_refreshFeedTreeitems(aFeeds) {
         var feed, treeitem, treecell, query, unreadCount, label, iconURL, favicon;
         var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
 
@@ -284,14 +201,14 @@ var gFeedList = {
 
             if (typeof feeds[i] == 'string') {
                 feed = gStorage.getFeed(feeds[i]);
-                treeitem = this.getTreeitem(feed.feedId);
+                treeitem = this.getTreeitem(feed.feedID);
             }
             else if (feeds[i] instanceof Ci.nsIBriefFeed) {
                 feed = feeds[i];
-                treeitem = this.getTreeitem(feed.feedId);
+                treeitem = this.getTreeitem(feed.feedID);
             }
             else if (feeds[i] instanceof XULElement) {
-                feed = gStorage.getFeed(feeds[i].getAttribute('feedId'));
+                feed = gStorage.getFeed(feeds[i].getAttribute('feedID'));
                 treeitem = feeds[i];
             }
             else {
@@ -300,7 +217,7 @@ var gFeedList = {
             treecell = treeitem.firstChild.firstChild;
 
             // Update the label.
-            query = new QuerySH(feed.feedId, null, true);
+            query = new QuerySH(feed.feedID, null, true);
             unreadCount = gStorage.getEntriesCount(query);
             if (unreadCount > 0) {
                 label = feed.title + ' (' + unreadCount +')';
@@ -343,9 +260,90 @@ var gFeedList = {
 
 
     /**
+     * Sets a property on a content tree item.
+     *
+     * Trees cannot be styled using normal DOM attributes, "properties" attribute
+     * whose value contains space-separated pseudo-attributes has to be used
+     * instead. This is a convenience function to make setting a property work
+     * the same and be as easy as setting an attribute.
+     *
+     * @param aItem     Subject tree element
+     * @param aProperty Property to be set
+     */
+    setProperty: function gFeedList_setProperty(aItem, aProperty) {
+        var properties = aItem.getAttribute('properties');
+        if (!properties.match(aProperty + ' '))
+            aItem.setAttribute('properties', properties + aProperty + ' ');
+    },
+
+    // Cf. with |setProperty|
+    removeProperty: function gFeedList_removeProperty(aItem, aProperty) {
+        var properties = aItem.getAttribute('properties');
+        if (properties.match(aProperty)) {
+            properties = properties.replace(aProperty + ' ', '');
+            aItem.setAttribute('properties', properties);
+        }
+    },
+
+    // Cf. with |setProperty|
+    hasProperty: function gFeedList_hasProperty(aItem, aProperty) {
+        var properties = aItem.getAttribute('properties');
+        return properties.match(aProperty) ? true : false;
+    },
+
+
+    createContextMenu: function gFeedList_createContextMenu(aEvent) {
+        // Get the row which was the target of the right-click
+        var rowIndex = {};
+        this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
+        // If the target was empty space, don't show any context menu.
+        if (rowIndex.value == -1) {
+            aEvent.preventDefault();
+            return;
+        }
+
+        this.ctx_targetItem = this.tree.view.getItemAtIndex(rowIndex.value);
+
+        // Set visibility of menuitems
+        var markFeedRead = document.getElementById('ctx-mark-feed-read');
+        markFeedRead.hidden = !this.ctx_targetItem.hasAttribute('url');
+
+        var markFolderRead = document.getElementById('ctx-mark-folder-read');
+        markFolderRead.hidden = this.ctx_targetItem.hasAttribute('url');
+
+        var updateFeed = document.getElementById('ctx-update-feed');
+        updateFeed.hidden = !this.ctx_targetItem.hasAttribute('url');
+
+        var openWebsite = document.getElementById('ctx-open-website');
+        openWebsite.hidden = !this.ctx_targetItem.hasAttribute('url');
+        if (this.ctx_targetItem.hasAttribute('url')) {
+            // Disable openWebsite if no websiteURL is available
+            var feedID = this.ctx_targetItem.getAttribute('feedID');
+            openWebsite.disabled = !gStorage.getFeed(feedID).websiteURL;
+        }
+
+        var separator = document.getElementById('ctx-separator');
+        separator.hidden = this.ctx_targetItem.hasAttribute('specialFolder') &&
+                           this.ctx_targetItem.id == 'starred-folder';
+
+        var emptyFeed = document.getElementById('ctx-empty-feed');
+        emptyFeed.hidden = !this.ctx_targetItem.hasAttribute('url');
+
+        var emptyFolder = document.getElementById('ctx-empty-folder');
+        emptyFolder.hidden = !(this.ctx_targetItem.hasAttribute('container') ||
+                               this.ctx_targetItem.id == 'unread-folder');
+
+        var restoreTrashed = document.getElementById('ctx-restore-trashed');
+        restoreTrashed.hidden = this.ctx_targetItem.id != 'trash-folder';
+
+        var emptyTrash = document.getElementById('ctx-empty-trash');
+        emptyTrash.hidden = this.ctx_targetItem.id != 'trash-folder';
+    },
+
+    /**
      * Rebuilds the feed list tree.
      */
-    rebuild: function() {
+    rebuild: function gFeedList_rebuild() {
         this.tree = document.getElementById('feed-list');
         var topLevelChildren = document.getElementById('top-level-children');
 
@@ -380,9 +378,9 @@ var gFeedList = {
      * Recursively reads Live Bookmarks from a specified folder
      * and its subfolders and builds a tree.
      *
-     * @param aParentFolder feedId of the folder.
+     * @param aParentFolder feedID of the folder.
      */
-    _buildChildLivemarks: function(aParentFolder) {
+    _buildChildLivemarks: function gFeedList__buildChildLivemarks(aParentFolder) {
         // Iterate over all the children.
         for (var i = 0; i < this.feeds.length; i++) {
             var feed = this.feeds[i];
@@ -390,12 +388,12 @@ var gFeedList = {
             if (feed.isFolder && feed.parent == aParentFolder) {
                 var prevParent = this._levelParentNodes[this._levelParentNodes.length - 1];
                 var closedFolders = this.tree.getAttribute('closedFolders');
-                var state = closedFolders.match(feed.feedId) ? true : false;
+                var state = closedFolders.match(feed.feedID) ? true : false;
 
                 var treeitem = document.createElement('treeitem');
                 treeitem.setAttribute('container', 'true');
                 treeitem.setAttribute('open', !state);
-                treeitem.setAttribute('feedId', feed.feedId);
+                treeitem.setAttribute('feedID', feed.feedID);
                 treeitem = prevParent.appendChild(treeitem);
 
                 var treerow = document.createElement('treerow');
@@ -411,13 +409,13 @@ var gFeedList = {
 
                 this._levelParentNodes.push(treechildren);
 
-                this._buildChildLivemarks(feed.feedId);
+                this._buildChildLivemarks(feed.feedID);
             }
             else if (feed.parent == aParentFolder) {
                 var parent = this._levelParentNodes[this._levelParentNodes.length - 1];
 
                 var treeitem = document.createElement('treeitem');
-                treeitem.setAttribute('feedId', feed.feedId);
+                treeitem.setAttribute('feedID', feed.feedID);
                 treeitem.setAttribute('url', feed.feedURL);
                 treeitem = parent.appendChild(treeitem);
 
