@@ -80,7 +80,9 @@
                       seltype="single"
                       contextmenu="feed-list-popup"
                       persist="closedFolders"
-                      onselect="gFeedList.onselect(event);">
+                      onselect="gFeedList.onselect(event);"
+                      onclick="gFeedList.onClick(event);"
+                      onkeyup="gFeedList.onKeyUp(event);">
 
                     <treecols>
                         <treecol id="name" flex="1"
