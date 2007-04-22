@@ -132,7 +132,7 @@ var brief = {
             var item = gFeedList.getTreeitemForFeed(feedId);
             item.removeAttribute('error');
             item.removeAttribute('loading');
-            gFeedList.refreshFeedTreeitem(feedId, item);
+            gFeedList.refreshFeedTreeitems(item);
             this.finishedFeeds++;
             this.updateProgressMeter();
 
@@ -147,7 +147,7 @@ var brief = {
         case 'brief:feed-loading':
             var item = gFeedList.getTreeitemForFeed(aData);
             item.setAttribute('loading', true);
-            gFeedList.refreshFeedTreeitem(aData, item);
+            gFeedList.refreshFeedTreeitems(item);
             break;
 
         // An error occured when downloading or parsing a feed, show error icon.
@@ -156,7 +156,7 @@ var brief = {
             var item = gFeedList.getTreeitemForFeed(feedId);
             gFeedList.removeProperty(item, 'loading');
             item.setAttribute('error', true);
-            gFeedList.refreshFeedTreeitem(feedId, item);
+            gFeedList.refreshFeedTreeitems(item);
             this.finishedFeeds++;
             this.updateProgressMeter();
             break;
@@ -215,8 +215,7 @@ var brief = {
                 }
             }
 
-            for (i = 0; i < changedFeeds.length; i++)
-                gFeedList.refreshFeedTreeitem(changedFeeds[i])
+            gFeedList.refreshFeedTreeitems(changedFeeds);
 
             // We can't know if any of those need updating, so we have to
             // update them all.
@@ -230,8 +229,7 @@ var brief = {
             break;
 
         case 'deleted':
-            for (var i = 0; i < changedFeeds.length; i++)
-                gFeedList.refreshFeedTreeitem(changedFeeds[i])
+            gFeedList.refreshFeedTreeitems(changedFeeds);
 
             gFeedList.refreshSpecialTreeitem('unread-folder');
             gFeedList.refreshSpecialTreeitem('starred-folder');

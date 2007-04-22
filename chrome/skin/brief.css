@@ -37,7 +37,7 @@ treechildren::-moz-tree-row {
   height: 1.6em;
   }
 
-treechildren::-moz-tree-cell-text(bold) {
+treechildren::-moz-tree-cell-text(unread) {
   font-weight: bold;
   }
 
@@ -47,7 +47,7 @@ treechildren::-moz-tree-image(container) {
   padding-right: 4px;
   }
 
-treechildren::-moz-tree-image(open) {
+treechildren::-moz-tree-image(container, open) {
   -moz-image-region: rect(16px, 32px, 32px, 16px);
   }
 
@@ -59,7 +59,7 @@ treechildren::-moz-tree-image(feed-item) {
   padding-right: 4px;
   }
 
-treechildren::-moz-tree-image(feed-item bold) {
+treechildren::-moz-tree-image(feed-item, unread) {
   list-style-image: url('chrome://browser/skin/livemark-folder.png') !important;
   -moz-image-region: rect(16px, 16px, 32px, 0px) !important;
   }
