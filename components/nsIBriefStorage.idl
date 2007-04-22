@@ -91,6 +91,7 @@ interface nsIBriefQuery : nsISupports {
     const short NO_SORT = 0;
     const short SORT_BY_DATE = 1;
     const short SORT_BY_TITLE = 2;
+    const short SORT_BY_FEED_ROW_INDEX = 3;
 
     attribute short sortOrder;
 

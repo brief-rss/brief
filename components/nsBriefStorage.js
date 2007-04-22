@@ -201,12 +201,13 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     getEntries: function BriefStorage_getEntries(aQuery, entryCount) {
-        var statement = 'SELECT                                            ' +
-                        'entries.id,    entries.feedID,  entries.entryURL, ' +
-                        'entries.title, entries.summary, entries.content,  ' +
-                        'entries.date,  entries.read,    entries.starred   ' +
-                        'FROM entries WHERE id IN '
-                        + aQuery.getQueryTextForSelect();
+        var statement = 'SELECT                                                         ' +
+                        'entries.id,    entries.feedID,  entries.entryURL,              ' +
+                        'entries.title, entries.summary, entries.content,               ' +
+                        'entries.date,  entries.read,    entries.starred                ' +
+                        'FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                         aQuery.getQueryTextForSelect();
+
         var select = this.dBConnection.createStatement(statement);
 
         var entries = new Array();
@@ -237,10 +238,12 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     getSerializedEntries: function BriefStorage_getSerializedEntries(aQuery) {
-        var statement = 'SELECT entries.id, entries.feedID FROM entries WHERE id IN '
-                        + aQuery.getQueryTextForSelect();
+        var statement = 'SELECT entries.id, entries.feedID FROM                    ' +
+                        'entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                         aQuery.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
+
         var entries = '';
         var feeds = '';
         try {
@@ -267,8 +270,9 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     getEntriesCount: function BriefStorage_getEntriesCount(aQuery) {
-        var statement = 'SELECT COUNT(1) FROM entries WHERE id IN '
-                        + aQuery.getQueryTextForSelect();
+        var statement = 'SELECT COUNT(1) FROM entries                      ' +
+                        'INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                         aQuery.getQueryTextForSelect();
         var select = this.dBConnection.createStatement(statement);
 
         var count = 0;
@@ -372,7 +376,8 @@ BriefStorageService.prototype = {
         else
             aQuery.read = true;
 
-        var statement = 'UPDATE entries SET read = ? WHERE id IN ' + aQuery.getQueryText();
+        var statement = 'UPDATE entries SET read = ? ' + aQuery.getQueryText();
+
         var update = this.dBConnection.createStatement(statement)
         update.bindInt32Parameter(0, aStatus ? 1 : 0);
 
@@ -399,16 +404,17 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     deleteEntries: function BriefStorage_deleteEntries(aState, aQuery) {
+
+        var statementString;
         switch (aState) {
-            case 0:
-            case 1:
-            case 2:
-                var statementString = 'UPDATE entries SET deleted = ' + aState +
-                                      ' WHERE id IN ' + aQuery.getQueryText();
+            case Ci.nsIBriefStorage.ENTRY_STATE_NORMAL:
+            case Ci.nsIBriefStorage.ENTRY_STATE_TRASHED:
+            case Ci.nsIBriefStorage.ENTRY_STATE_DELETED:
+                statementString = 'UPDATE entries SET deleted = ' + aState +
+                                   aQuery.getQueryText();
                 break;
-            case 3:
-                var statementString =
-                               'DELETE FROM entries WHERE id IN ' + aQuery.getQueryText();
+            case Ci.nsIBriefStorage.REMOVE_FROM_DATABASE:
+                statementString = 'DELETE FROM entries ' + aQuery.getQueryText();
                 break;
             default:
                 throw('Invalid deleted state.');
@@ -431,7 +437,7 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     starEntries: function BriefStorage_starEntries(aStatus, aQuery) {
-        var statement = 'UPDATE entries SET starred = ? WHERE id IN ' + aQuery.getQueryText();
+        var statement = 'UPDATE entries SET starred = ? ' + aQuery.getQueryText();
         var update = this.dBConnection.createStatement(statement);
         update.bindInt32Parameter(0, aStatus ? 1 : 0);
 
@@ -892,7 +898,7 @@ BriefQuery.prototype = {
     limit:  0,
     offset: 1,
 
-    sortOrder: Components.interfaces.nsIBriefQuery.DONT_SORT,
+    sortOrder: Components.interfaces.nsIBriefQuery.NO_SORT,
     sortDirection: Components.interfaces.nsIBriefQuery.SORT_DESCENDING,
 
     includeHiddenFeeds: false,
@@ -905,8 +911,13 @@ BriefQuery.prototype = {
 
 
     getQueryText: function BriefQuery_getQueryText(aForSelect) {
-        var text = '(SELECT entries.id FROM entries INNER JOIN feeds ' +
-                   'ON entries.feedID = feeds.feedID WHERE ';
+        if (aForSelect) {
+            var text = 'WHERE '
+        }
+        else {
+            var text = 'WHERE entries.id IN (SELECT entries.id FROM ' +
+                       'entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE ';
+        }
 
         if (this.folders) {
             this._effectiveFolders = this.folders;
@@ -951,17 +962,28 @@ BriefQuery.prototype = {
         // Trim the trailing AND, if there is one
         text = text.replace(/AND $/, '');
 
-        text += ') ';
-
         if (!aForSelect)
-            return text;
+            return text += ') ';
 
         if (this.sortOrder != nsIBriefQuery.NO_SORT) {
-            var sortOrder = this.sortOrder == nsIBriefQuery.SORT_BY_TITLE ? 'entries.title'
-                                                                          : 'entries.date';
-            var sortDir = this.sortDirection == nsIBriefQuery.SORT_ASCENDING ? 'ASC'
-                                                                             : 'DESC';
-            text += 'ORDER BY ' + sortOrder + ' ' + sortDir;
+
+            var sortOrder;
+            switch (this.sortOrder) {
+            case nsIBriefQuery.SORT_BY_FEED_ROW_INDEX:
+                sortOrder = 'feeds.rowIndex ';
+                break;
+            case nsIBriefQuery.SORT_BY_DATE:
+                sortOrder = 'entries.date ';
+                break;
+            case nsIBriefQuery.SORT_BY_TITLE:
+                sortOrder = 'entries.title ';
+                break;
+            default:
+                throw('BriefQuery: wrong sort order, use one the defined constants.');
+            }
+
+            var sortDir = this.sortDirection == nsIBriefQuery.SORT_ASCENDING ? 'ASC' : 'DESC';
+            text += 'ORDER BY ' + sortOrder + sortDir;
         }
 
         if (this.limit)
