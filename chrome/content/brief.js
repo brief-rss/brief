@@ -25,7 +25,7 @@ var brief = {
     briefLoaded: false,
     browserWindow: null,
 
-    init: function(aEvent) {
+    init: function brief_init(aEvent) {
         if (this.briefLoaded)
             return;
         this.briefLoaded = true;
@@ -97,7 +97,7 @@ var brief = {
     },
 
 
-    unload: function() {
+    unload: function brief_unload() {
         var observerService = Cc["@mozilla.org/observer-service;1"].
                               getService(Ci.nsIObserverService);
         observerService.removeObserver(this, 'brief:feed-updated');
@@ -114,7 +114,7 @@ var brief = {
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
             if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
-                closedFolders += item.getAttribute('feedId');
+                closedFolders += item.getAttribute('feedID');
         }
         gFeedList.tree.setAttribute('closedFolders', closedFolders);
     },
@@ -122,14 +122,14 @@ var brief = {
 
     // Storage and UpdateService components communicate with us through global
     // notifications.
-    observe: function(aSubject, aTopic, aData) {
+    observe: function brief_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
         // A feed update was finished and new entries are available. Restore the
         // favicon instead of the throbber (or error icon), refresh the feed treeitem
         // and the feedview if necessary.
         case 'brief:feed-updated':
-            var feedId = aData;
-            var item = gFeedList.getTreeitemForFeed(feedId);
+            var feedID = aData;
+            var item = gFeedList.getTreeitem(feedID);
             item.removeAttribute('error');
             item.removeAttribute('loading');
             gFeedList.refreshFeedTreeitems(item);
@@ -145,15 +145,15 @@ var brief = {
 
         // A feed was requested, show throbber as its icon.
         case 'brief:feed-loading':
-            var item = gFeedList.getTreeitemForFeed(aData);
+            var item = gFeedList.getTreeitem(aData);
             item.setAttribute('loading', true);
             gFeedList.refreshFeedTreeitems(item);
             break;
 
         // An error occured when downloading or parsing a feed, show error icon.
         case 'brief:feed-error':
-            var feedId = aData;
-            var item = gFeedList.getTreeitemForFeed(feedId);
+            var feedID = aData;
+            var item = gFeedList.getTreeitem(feedID);
             gFeedList.removeProperty(item, 'loading');
             item.setAttribute('error', true);
             gFeedList.refreshFeedTreeitems(item);
@@ -188,11 +188,11 @@ var brief = {
 
     // Updates the approperiate treeitems in the feed list and refreshes the feedview
     // when necessary.
-    onEntryStatusChanged: function(aChangedItems, aChangeType) {
+    onEntryStatusChanged: function brief_onEntryStatusChanged(aChangedItems, aChangeType) {
         aChangedItems.QueryInterface(Ci.nsIWritablePropertyBag2);
-        var changedFeeds = aChangedItems.getPropertyAsAUTF8String('feedIdList').
+        var changedFeeds = aChangedItems.getPropertyAsAString('feeds').
                                          match(/[^ ]+/g);
-        var changedEntries = aChangedItems.getPropertyAsAUTF8String('entryIdList').
+        var changedEntries = aChangedItems.getPropertyAsAString('entries').
                                            match(/[^ ]+/g);
 
         var viewIsCool = true;
@@ -229,7 +229,7 @@ var brief = {
             break;
 
         case 'deleted':
-            gFeedList.refreshFeedTreeitems(changedFeeds);
+            gFeedList.refreshFeedTreeitems(changedFeeds)
 
             gFeedList.refreshSpecialTreeitem('unread-folder');
             gFeedList.refreshSpecialTreeitem('starred-folder');
@@ -240,7 +240,7 @@ var brief = {
 
 
     // Returns a string containing the style of the feed view.
-    getFeedViewStyle: function() {
+    getFeedViewStyle: function brief_getFeedViewStyle() {
         if (gPrefs.getBoolPref('feedview.useCustomStyle')) {
             var pref = gPrefs.getComplexValue('feedview.customStylePath',
                                               Ci.nsISupportsString);
@@ -258,7 +258,7 @@ var brief = {
     },
 
 
-    updateProgressMeter: function() {
+    updateProgressMeter: function brief_updateProgressMeter( ) {
         var progressmeter = document.getElementById('update-progress');
         var percentage = 100 * this.finishedFeeds / this.totalFeeds;
         progressmeter.value = percentage;
@@ -269,33 +269,33 @@ var brief = {
 
 // Listeners for actions performed in the feed view.
 
-    onMarkEntryRead: function(aEvent) {
+    onMarkEntryRead: function brief_onMarkEntryRead( aEvent) {
         var entryID = aEvent.target.getAttribute('id');
         var readStatus = aEvent.target.hasAttribute('read');
         var query = new QuerySH(null, entryID, null);
         gStorage.markEntriesRead(readStatus, query);
     },
 
-    onDeleteEntry: function(aEvent) {
+    onDeleteEntry: function brief_onDeleteEntry(aEvent) {
         var entryID = aEvent.target.getAttribute('id');
         var query = new QuerySH(null, entryID, null);
         gStorage.deleteEntries(1, query);
     },
 
-    onRestoreEntry: function(aEvent) {
+    onRestoreEntry: function brief_onRestoreEntry(aEvent) {
         var entryID = aEvent.target.getAttribute('id');
         var query = new QuerySH(null, entryID, null);
         gStorage.deleteEntries(0, query);
     },
 
-    onStarEntry: function(aEvent) {
+    onStarEntry: function brief_onStarEntry( aEvent) {
         var entryID = aEvent.target.getAttribute('id');
         var newStatus = aEvent.target.hasAttribute('starred');
         var query = new QuerySH(null, entryID, null);
         gStorage.starEntries(newStatus, query);
     },
 
-    onFeedViewClick: function(aEvent) {
+    onFeedViewClick: function brief_onFeedViewClick(aEvent) {
         var anonid = aEvent.originalTarget.getAttribute('anonid');
         var targetEntry = aEvent.target;
 
@@ -319,24 +319,24 @@ var brief = {
 
 // Toolbar commands.
 
-    toggleLeftPane: function(aEvent) {
+    toggleLeftPane: function brief_toggleLeftPane(aEvent) {
         var pane = document.getElementById('left-pane');
         var splitter = document.getElementById('left-pane-splitter');
         pane.hidden = splitter.hidden = !pane.hidden;
     },
 
-    updateAllFeeds: function() {
+    updateAllFeeds: function brief_updateAllFeeds() {
         var updateService = Cc['@ancestor/brief/updateservice;1'].
                             getService(Ci.nsIBriefUpdateService);
         updateService.fetchAllFeeds();
     },
 
-    openOptions: function(aPaneID) {
+    openOptions: function brief_openOptions(aPaneID) {
         window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
                           'chrome,titlebar,toolbar,centerscreen,modal,resizable');
     },
 
-    onConstraintListCmd: function(aEvent) {
+    onConstraintListCmd: function brief_onConstraintListCmd(aEvent) {
         var choice = aEvent.target.id;
         var prefValue = choice == 'show-all' ? 'all' :
                         choice == 'show-unread' ? 'unread' : 'starred';
@@ -345,14 +345,13 @@ var brief = {
         gFeedView.ensure();
     },
 
-
-    markCurrentViewRead: function(aNewStatus) {
+    markCurrentViewRead: function brief_markCurrentViewRead(aNewStatus) {
         gStorage.markEntriesRead(aNewStatus, gFeedView.query);
     },
 
     // Creates and manages the FeedView displaying the search results, based the current
     // input string and the search scope.
-    performSearch: function(aEvent) {
+    performSearch: function brief_performSearch(aEvent) {
         var searchbar = document.getElementById('searchbar');
         var bundle = document.getElementById('main-bundle');
         var title = bundle.getFormattedString('searchResults', [searchbar.value]);
@@ -382,8 +381,9 @@ var brief = {
         if (!searchbar.value && gFeedView && gFeedView.query.searchString) {
             if (this.previousView)
                 gFeedView = this.previousView;
+
             gFeedView.query.searchString = gFeedView.titleOverride = '';
-            gFeedView.ensure();
+            gFeedView._refresh();
             return;
         }
 
@@ -404,14 +404,14 @@ var brief = {
 
 // Feed list context menu commands.
 
-    ctx_markFeedRead: function(aEvent) {
+    ctx_markFeedRead: function brief_ctx_markFeedRead(aEvent) {
         var item = gFeedList.ctx_targetItem;
-        var feedId = gFeedList.ctx_targetItem.getAttribute('feedId');
-        var query = new QuerySH(feedId, null, null);
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var query = new QuerySH(feedID, null, null);
         gStorage.markEntriesRead(true, query);
     },
 
-    ctx_markFolderRead: function(aEvent) {
+    ctx_markFolderRead: function brief_ctx_markFolderRead(aEvent) {
         var targetItem = gFeedList.ctx_targetItem;
 
         if (targetItem.hasAttribute('specialFolder')) {
@@ -426,32 +426,32 @@ var brief = {
         }
         else {
             var query = new Query();
-            query.folders = targetItem.getAttribute('feedId');
+            query.folders = targetItem.getAttribute('feedID');
             gStorage.markEntriesRead(true, query);
         }
     },
 
-    ctx_updateFeed: function(aEvent) {
-        var feedId = gFeedList.ctx_targetItem.getAttribute('feedId');
+    ctx_updateFeed: function brief_ctx_updateFeed(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
         var updateService = Cc['@ancestor/brief/updateservice;1'].
                             getService(Ci.nsIBriefUpdateService);
-        updateService.fetchFeed(feedId);
+        updateService.fetchFeed(feedID);
     },
 
-    ctx_openWebsite: function(aEvent) {
-        var feedId = gFeedList.ctx_targetItem.getAttribute('feedId');
-        var url = gStorage.getFeed(feedId).websiteURL;
+    ctx_openWebsite: function brief_ctx_openWebsite(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var url = gStorage.getFeed(feedID).websiteURL;
         brief.browserWindow.gBrowser.loadOneTab(url);
     },
 
-    ctx_emptyFeed: function(aEvent) {
-        var feedId = gFeedList.ctx_targetItem.getAttribute('feedId');
-        var query = new QuerySH(feedId, null, null);
+    ctx_emptyFeed: function brief_ctx_emptyFeed(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var query = new QuerySH(feedID, null, null);
         query.unstarred = true;
         gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
     },
 
-    ctx_emptyFolder: function(aEvent) {
+    ctx_emptyFolder: function brief_ctx_emptyFolder(aEvent) {
         var targetItem = gFeedList.ctx_targetItem;
 
         if (targetItem.id == 'unread-folder') {
@@ -462,21 +462,21 @@ var brief = {
         }
         else {
             var query = new Query();
-            query.folders = targetItem.getAttribute('feedId');
+            query.folders = targetItem.getAttribute('feedID');
             query.unstarred = true;
             gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
         }
     },
 
-    ctx_restoreTrashed: function(aEvent) {
+    ctx_restoreTrashed: function brief_ctx_restoreTrashed(aEvent) {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
         gStorage.deleteEntries(ENTRY_STATE_NORMAL, query);
     },
 
-    ctx_emptyTrash: function(aEvent) {
+    ctx_emptyTrash: function brief_ctx_emptyTrash(aEvent) {
         var query = new Query();
-        query.trashed = true;
+        query.deleted = ENTRY_STATE_TRASHED;
         gStorage.deleteEntries(ENTRY_STATE_DELETED, query);
     }
 
@@ -485,7 +485,7 @@ var brief = {
 
 var gPrefs = {
 
-    register: function() {
+    register: function gPrefs_register() {
         this._branch = Cc['@mozilla.org/preferences-service;1'].
                        getService(Ci.nsIPrefService).
                        getBranch('extensions.brief.').
@@ -508,18 +508,17 @@ var gPrefs = {
         this._branch.addObserver('', this, false);
     },
 
-    unregister: function() {
+    unregister: function gPrefs_unregister() {
         this._branch.removeObserver('', this);
     },
 
-    observe: function(aSubject, aTopic, aData) {
+    observe: function gPrefs_observe(aSubject, aTopic, aData) {
         if (aTopic != 'nsPref:changed')
             return;
         switch (aData) {
             case 'showFavicons':
                 var feeds = gStorage.getAllFeeds({});
-                for (var i = 0; i < feeds.length; i++)
-                    gFeedList.refreshFeedTreeitem(feeds[i].feedId);
+                gFeedList.refreshFeedTreeitems(feeds);
                 break;
 
             case 'feedview.customStylePath':

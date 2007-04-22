@@ -33,7 +33,7 @@ interface nsIBriefUpdateService : nsISupports {
    *
    * @param aFeedURL URL from which to download the feed
    */
-  void fetchFeed(in string feedId);
+  void fetchFeed(in string feedID);
 
   /**
    * Download and check for updates all the feeds in the database.

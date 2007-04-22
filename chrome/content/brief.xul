@@ -4,7 +4,7 @@
 
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
-<window id="brief-window"
+<page id="brief-window"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         title="Brief"
         onload="brief.init();"
@@ -163,4 +163,4 @@
         </vbox>
     </hbox>
 
-</window>
+</page>

@@ -133,15 +133,15 @@ interface nsIBriefQuery : nsISupports {
 interface nsIBriefStorage : nsISupports {
 
   /**
-   * Get a feed by its URL, without entries.
+   * Gets a feed (or a folder) by its ID.
    *
-   * @param   feedURL URL identifying the feed
-   * @returns nsIBriefFeed object containing the feed.
+   * @param feedID
+   * @returns nsIBriefFeed object containing the feed (without the entries).
    */
-  nsIBriefFeed getFeed(in string feedId);
+  nsIBriefFeed getFeed(in string feedID);
 
   /**
-   * Get all feeds, without entries.
+   * Gets all feeds, without entries.
    *
    * @param  feedCount  Empty object (required by XPConnect to return an array).
    *
@@ -172,8 +172,7 @@ interface nsIBriefStorage : nsISupports {
    *
    * @param  query  Query selecting the entries.
    *
-   * @returns Property bag containing "entryIdList" and "feedURLList"
-   *          AUTF8String properties.
+   * @returns Property bag containing "entries" and "feeds" string properties.
    */
   nsIWritablePropertyBag2 getSerializedEntries(in nsIBriefQuery query);
 
@@ -226,11 +225,11 @@ interface nsIBriefStorage : nsISupports {
    *
    * @throws on invalid |state| parameter.
    */
-  void deleteEntries(in short state, in nsIBriefQuery query);
-
   const short ENTRY_STATE_NORMAL = 0;
   const short ENTRY_STATE_TRASHED = 1;
   const short ENTRY_STATE_DELETED = 2;
   const short REMOVE_FROM_DATABASE = 3;
+
+  void deleteEntries(in short state, in nsIBriefQuery query);
 
 };

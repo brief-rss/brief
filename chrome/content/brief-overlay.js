@@ -11,7 +11,7 @@ var gBrief = {
 
     prefs: null,
 
-    openBrief: function(aNewTab) {
+    openBrief: function gBrief_openBrief(aNewTab) {
         // If Brief is already open then select the existing tab.
         if (this.tab)
             gBrowser.selectedTab = this.tab;
@@ -32,14 +32,14 @@ var gBrief = {
     },
 
 
-    updateFeeds: function() {
+    updateFeeds: function gBrief_updateFeeds() {
         var updateService = Cc['@ancestor/brief/updateservice;1'].
                             getService(Ci.nsIBriefUpdateService);
         updateService.fetchAllFeeds();
     },
 
 
-    updateStatuspanel: function() {
+    updateStatuspanel: function gBrief_updateStatuspanel() {
         var counter = document.getElementById('brief-status-counter');
         var panel = document.getElementById('brief-status');
 
@@ -53,7 +53,7 @@ var gBrief = {
     },
 
 
-    constructTooltip: function(aEvent) {
+    constructTooltip: function gBrief_constructTooltip(aEvent) {
         var bundle = document.getElementById('brief-bundle');
         var rows = document.getElementById('brief-tooltip-rows');
         var tooltip = aEvent.target;
@@ -80,7 +80,7 @@ var gBrief = {
         var storageService = Cc['@ancestor/brief/storage;1'].
                              getService(Ci.nsIBriefStorage);
         var unreadFeeds = storageService.getSerializedEntries(query).
-                                         getPropertyAsAUTF8String('feedIdList').
+                                         getPropertyAsAUTF8String('feeds').
                                          match(/[^ ]+/g);
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
@@ -117,7 +117,7 @@ var gBrief = {
     },
 
 
-    onBriefButtonClick: function(aEvent) {
+    onBriefButtonClick: function gBrief_onBriefButtonClick(aEvent) {
         // Clicking the button when Brief is open in current tab "unpresses" it and
         // closes Brief.
         if (gBrowser.selectedTab == this.tab && aEvent.button == 0) {
@@ -134,7 +134,7 @@ var gBrief = {
             gBrief.openBrief(true);
     },
 
-    onBriefTabLoad: function(aEvent) {
+    onBriefTabLoad: function gBrief_onBriefTabLoad(aEvent) {
         if (this.currentURI.spec == BRIEF_URL)
             setTimeout(function(){ gBrief.tab.setAttribute('image', BRIEF_FAVICON_URL); }, 0);
         else {
@@ -145,17 +145,17 @@ var gBrief = {
         }
     },
 
-    onTabClose: function(aEvent) {
+    onTabClose: function gBrief_onTabClose(aEvent) {
         if (aEvent.originalTarget == gBrief.tab)
             gBrief.tab = null;
     },
 
-    onTabSelect: function(aEvent) {
+    onTabSelect: function gBrief_onTabSelect(aEvent) {
         if (gBrief.toolbarbutton)
             gBrief.toolbarbutton.checked = (aEvent.originalTarget == gBrief.tab);
     },
 
-    onTabRestored: function(aEvent) {
+    onTabRestored: function gBrief_onTabRestored(aEvent) {
         var restoredTab = aEvent.originalTarget;
         var browser = gBrowser.getBrowserForTab(restoredTab);
         if (browser.currentURI.spec == BRIEF_URL) {
@@ -169,7 +169,7 @@ var gBrief = {
         }
     },
 
-    handleEvent: function(aEvent) {
+    handleEvent: function gBrief_handleEvent(aEvent) {
       switch (aEvent.type) {
         case 'load':
           window.removeEventListener('load', this, false);
@@ -229,7 +229,7 @@ var gBrief = {
     },
 
 
-    onFirstRun: function() {
+    onFirstRun: function gBrief_onFirstRun() {
         // Add the toolbar button to the Navigation Bar.
         var navbar = document.getElementById('nav-bar');
         var newset = navbar.currentSet.replace('urlbar-container,',
@@ -243,7 +243,7 @@ var gBrief = {
     },
 
 
-    observe: function(aSubject, aTopic, aData) {
+    observe: function gBrief_observe(aSubject, aTopic, aData) {
       switch (aTopic) {
         case 'brief:sync-to-livemarks':
           if (!this.statusIcon.hidden)

@@ -53,7 +53,7 @@ BriefUpdateService.prototype = {
 
 
     // See nsIBriefUpdateService
-    startUpdateService: function() {
+    startUpdateService: function BUS_startUpdateService() {
         if (this.updateServiceRunning)
             throw('Brief: update service is already running.')
         this.updateServiceRunning = true;
@@ -64,7 +64,7 @@ BriefUpdateService.prototype = {
 
 
     // See nsIBriefUpdateService
-    stopUpdateService: function() {
+    stopUpdateService: function BUS_stopUpdateService() {
         if (!this.updateServiceRunning)
             throw('Brief: update service is not running.');
 
@@ -74,7 +74,7 @@ BriefUpdateService.prototype = {
 
 
     // nsITimerCallback
-    notify: function(aTimer) {
+    notify: function BUS_notify(aTimer) {
         var interval = this.prefs.getIntPref('update.interval');
         var lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime');
         var now = Math.round(Date.now() / 1000);
@@ -85,7 +85,7 @@ BriefUpdateService.prototype = {
 
 
     // nsIBriefUpdateService
-    fetchAllFeeds: function(aUpdateInBackground) {
+    fetchAllFeeds: function BUS_fetchAllFeeds(aUpdateInBackground) {
         var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
         this.feeds = storage.getAllFeeds({});
 
@@ -128,7 +128,7 @@ BriefUpdateService.prototype = {
     // Subclass implementing nsITimerCallback
     fetchDelayCallback: {
 
-        notify: function(aTimer) {
+        notify: function BUS_fetchDelayCallback_notify(aTimer) {
             // XXX We should find a better way to obtain the component object.
             var self = Factory.sigleton;
 
@@ -145,17 +145,17 @@ BriefUpdateService.prototype = {
 
 
     // nsIBriefUpdateService
-    fetchFeed: function(aFeedId) {
+    fetchFeed: function BUS_fetchFeed(aFeedID) {
         if (this.batchUpdateInProgress != 1) {
             var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-            var feed = storage.getFeed(aFeedId);
+            var feed = storage.getFeed(aFeedID);
             new FeedFetcher(feed);
         }
     },
 
 
     // nsIObserver
-    observe: function(aSubject, aTopic, aData) {
+    observe: function BUS_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
 
             // Startup initialization. We use this instead of app-startup,
@@ -240,7 +240,7 @@ BriefUpdateService.prototype = {
 
 
     // nsISupports
-    QueryInterface: function(aIID) {
+    QueryInterface: function BUS_QueryInterface(aIID) {
         if (!aIID.equals(Components.interfaces.nsIBriefUpdateService) &&
             !aIID.equals(Components.interfaces.nsISupports) &&
             !aIID.equals(Components.interfaces.nsITimerCallback) &&
@@ -259,12 +259,12 @@ BriefUpdateService.prototype = {
  */
 function FeedFetcher(aFeed) {
     this.feedURL = aFeed.feedURL;
-    this.feedId = aFeed.feedId;
+    this.feedID = aFeed.feedID;
     this.favicon = aFeed.favicon;
 
     this.observerService = Cc['@mozilla.org/observer-service;1'].
                            getService(Ci.nsIObserverService);
-    this.observerService.notifyObservers(null, 'brief:feed-loading', this.feedId);
+    this.observerService.notifyObservers(null, 'brief:feed-loading', this.feedID);
 
     this.requestFeed();
 }
@@ -272,15 +272,15 @@ function FeedFetcher(aFeed) {
 FeedFetcher.prototype = {
 
     feedURL: '',
-    feedId:  '',
+    feedID:  '',
     favicon: '',
     downloadedFeed: null,
 
-    requestFeed: function() {
+    requestFeed: function FeedFetcher_requestFeed() {
         var self = this;
 
         function onRequestError() {
-            self.observerService.notifyObservers(null, 'brief:feed-error', self.feedId);
+            self.observerService.notifyObservers(null, 'brief:feed-error', self.feedID);
             //throw('Brief: connection error\n\n');
         }
 
@@ -295,7 +295,7 @@ FeedFetcher.prototype = {
                 parser.parseFromString(request.responseText, uri);
             }
             catch(e) {
-                self.observerService.notifyObservers(null, 'brief:feed-error', self.feedId);
+                self.observerService.notifyObservers(null, 'brief:feed-error', self.feedID);
                 //throw('Brief: feed parser error\n\n' + e);
             }
         }
@@ -311,9 +311,9 @@ FeedFetcher.prototype = {
 
 
     // nsIFeedResultListener
-    handleResult: function(result) {
+    handleResult: function FeedFetcher_handleResult(result) {
         if (!result || !result.doc) {
-            this.observerService.notifyObservers(null, 'brief:feed-error', this.feedId);
+            this.observerService.notifyObservers(null, 'brief:feed-error', this.feedID);
             return;
         }
 
@@ -323,7 +323,7 @@ FeedFetcher.prototype = {
                           createInstance(Ci.nsIBriefFeed);
         wrappedFeed.wrapFeed(feed);
         wrappedFeed.feedURL = this.feedURL;
-        wrappedFeed.feedId = this.feedId;
+        wrappedFeed.feedID = this.feedID;
         this.downloadedFeed = wrappedFeed;
 
         // Now that we have the feed we can download the favicon if necessary. We
@@ -340,7 +340,7 @@ FeedFetcher.prototype = {
     },
 
 
-    getFavicon: function() {
+    getFavicon: function FeedFetcher_getFavicon() {
         if (!this.downloadedFeed.websiteURL) {
             this.favicon = 'no-favicon';
             this.passDataToStorage();
@@ -354,7 +354,7 @@ FeedFetcher.prototype = {
     },
 
 
-    passDataToStorage: function() {
+    passDataToStorage: function FeedFetcher_passDataToStorage() {
         this.downloadedFeed.favicon = this.favicon;
         var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
         storage.updateFeed(this.downloadedFeed);
@@ -390,7 +390,7 @@ FaviconFetcher.prototype = {
     _countRead: 0,
     _stream:    null,
 
-    QueryInterface: function FW_IDUG_loadQI(aIID) {
+    QueryInterface: function FaviconFetcher_loadQI(aIID) {
         if (aIID.equals(Ci.nsISupports)           ||
             aIID.equals(Ci.nsIRequestObserver)    ||
             aIID.equals(Ci.nsIStreamListener)     ||
@@ -410,12 +410,12 @@ FaviconFetcher.prototype = {
     },
 
     // nsIRequestObserver
-    onStartRequest: function FW_IDUG_loadStartR(aRequest, aContext) {
+    onStartRequest: function FaviconFetcher_loadStartR(aRequest, aContext) {
         this._stream = Cc["@mozilla.org/binaryinputstream;1"].
                        createInstance(Ci.nsIBinaryInputStream);
     },
 
-    onStopRequest: function FW_IDUG_loadStopR(aRequest, aContext, aStatusCode) {
+    onStopRequest: function FaviconFetcher_loadStopR(aRequest, aContext, aStatusCode) {
         var requestFailed = !Components.isSuccessCode(aStatusCode);
         if (!requestFailed && (aRequest instanceof Ci.nsIHttpChannel))
             requestFailed = !aRequest.requestSucceeded;
@@ -435,7 +435,8 @@ FaviconFetcher.prototype = {
     },
 
     // nsIStreamListener
-    onDataAvailable: function(aRequest, aContext, aInputStream, aOffset, aCount) {
+    onDataAvailable: function FaviconFetcher_onDataAvailable(aRequest, aContext,
+                                                             aInputStream, aOffset, aCount) {
         this._stream.setInputStream(aInputStream);
 
         // Get a byte array of the data
@@ -444,7 +445,8 @@ FaviconFetcher.prototype = {
     },
 
     // nsIChannelEventSink
-    onChannelRedirect: function(aOldChannel, aNewChannel, aFlags) {
+    onChannelRedirect: function FaviconFetcher_onChannelRedirect(aOldChannel, aNewChannel,
+                                                                 aFlags) {
         this._channel = aNewChannel;
     },
 
@@ -477,7 +479,7 @@ FaviconFetcher.prototype = {
     onStatus: function(aRequest, aContext, aStatus, aStatusArg) { },
 
     // copied over from nsSearchService.js
-    _b64: function(aBytes) {
+    _b64: function FaviconFetcher_b64(aBytes) {
         const B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
         var index = 0;

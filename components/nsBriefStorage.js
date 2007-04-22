@@ -45,7 +45,7 @@ function BriefStorageService() {
     //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
 
     this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
-                                       'feedId      TEXT UNIQUE,           ' +
+                                       'feedID      TEXT UNIQUE,           ' +
                                        'feedURL     TEXT,                  ' +
                                        'websiteURL  TEXT,                  ' +
                                        'title       TEXT,                  ' +
@@ -62,7 +62,7 @@ function BriefStorageService() {
                                        'isFolder    INTEGER                ' +
                                        ')');
     this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
-                                       'feedId     TEXT,                    ' +
+                                       'feedID     TEXT,                    ' +
                                        'id         TEXT UNIQUE,             ' +
                                        'providedId TEXT,                    ' +
                                        'entryURL   TEXT,                    ' +
@@ -93,7 +93,7 @@ function BriefStorageService() {
     this.dBConnection.executeSimpleSQL('CREATE UNIQUE INDEX IF NOT EXISTS       ' +
                                        'entries_id_index ON entries (id)        ');
     this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                       'entries_feedId_index ON entries (feedId)');
+                                       'entries_feedID_index ON entries (feedID)');
     this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
                                        'entries_date_index ON entries (date)    ');
     this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
@@ -121,11 +121,11 @@ BriefStorageService.prototype = {
     feedsCache:           null,
 
     // nsIBriefStorage
-    getFeed: function(aFeedId) {
+    getFeed: function BriefStorage_getFeed(aFeedID) {
         var foundFeed = null;
         var feeds = this.getFeedsAndFolders({});
         for (var i = 0; i < feeds.length; i++) {
-            if (feeds[i].feedId == aFeedId) {
+            if (feeds[i].feedID == aFeedID) {
                 foundFeed = feeds[i];
                 break;
             }
@@ -135,7 +135,7 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    getAllFeeds: function(aLength) {
+    getAllFeeds: function BriefStorage_getAllFeeds(aLength) {
         if (!this.feedsCache)
             this.buildFeedsCache();
 
@@ -147,7 +147,7 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    getFeedsAndFolders: function(aLength) {
+    getFeedsAndFolders: function BriefStorage_getFeedsAndFolders(aLength) {
         if (!this.feedsAndFoldersCache)
             this.buildFeedsCache();
 
@@ -158,13 +158,13 @@ BriefStorageService.prototype = {
     },
 
 
-    buildFeedsCache: function() {
+    buildFeedsCache: function BriefStorage_buildFeedsCache() {
         this.feedsCache = [];
         this.feedsAndFoldersCache = [];
 
         var select = this.dBConnection.
             createStatement('SELECT                                          ' +
-                            'feedId, feedURL, websiteURL, title,             ' +
+                            'feedID, feedURL, websiteURL, title,             ' +
                             'subtitle, imageURL, imageLink, imageTitle,      ' +
                             'favicon, everUpdated, oldestAvailableEntryDate, ' +
                             'rowIndex, parent, isFolder                      ' +
@@ -173,7 +173,7 @@ BriefStorageService.prototype = {
         try {
             while (select.executeStep()) {
                 var feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
-                feed.feedId = select.getString(0);
+                feed.feedID = select.getString(0);
                 feed.feedURL = select.getString(1);
                 feed.websiteURL = select.getString(2);
                 feed.title = select.getString(3);
@@ -200,9 +200,9 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    getEntries: function(aQuery, entryCount) {
+    getEntries: function BriefStorage_getEntries(aQuery, entryCount) {
         var statement = 'SELECT                                            ' +
-                        'entries.id,    entries.feedId,  entries.entryURL, ' +
+                        'entries.id,    entries.feedID,  entries.entryURL, ' +
                         'entries.title, entries.summary, entries.content,  ' +
                         'entries.date,  entries.read,    entries.starred   ' +
                         'FROM entries WHERE id IN '
@@ -215,7 +215,7 @@ BriefStorageService.prototype = {
                 var entry = Cc['@ancestor/brief/feedentry;1'].
                             createInstance(Ci.nsIBriefFeedEntry);
                 entry.id = select.getString(0);
-                entry.feedId = select.getString(1);
+                entry.feedID = select.getString(1);
                 entry.entryURL = select.getString(2);
                 entry.title = select.getString(3);
                 entry.summary = select.getString(4);
@@ -236,8 +236,8 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    getSerializedEntries: function(aQuery) {
-        var statement = 'SELECT entries.id, entries.feedId FROM entries WHERE id IN '
+    getSerializedEntries: function BriefStorage_getSerializedEntries(aQuery) {
+        var statement = 'SELECT entries.id, entries.feedID FROM entries WHERE id IN '
                         + aQuery.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
@@ -247,9 +247,9 @@ BriefStorageService.prototype = {
             while (select.executeStep()) {
                 entries += select.getString(0) + ' ';
 
-                var feedId = select.getString(1);
-                if (!feeds.match(feedId))
-                    feeds += feedId + ' ';
+                var feedID = select.getString(1);
+                if (!feeds.match(feedID))
+                    feeds += feedID + ' ';
             }
         }
         finally {
@@ -258,15 +258,15 @@ BriefStorageService.prototype = {
 
         var bag = Cc['@mozilla.org/hash-property-bag;1'].
                   createInstance(Ci.nsIWritablePropertyBag2);
-        bag.setPropertyAsAUTF8String('entryIdList', entries);
-        bag.setPropertyAsAUTF8String('feedIdList', feeds);
+        bag.setPropertyAsAString('entries', entries);
+        bag.setPropertyAsAString('feeds', feeds);
 
         return bag;
     },
 
 
     // nsIBriefStorage
-    getEntriesCount: function(aQuery) {
+    getEntriesCount: function BriefStorage_getEntriesCount(aQuery) {
         var statement = 'SELECT COUNT(1) FROM entries WHERE id IN '
                         + aQuery.getQueryTextForSelect();
         var select = this.dBConnection.createStatement(statement);
@@ -284,7 +284,7 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    updateFeed: function(aFeed) {
+    updateFeed: function BriefStorage_updateFeed(aFeed) {
         // Invalidate cache since feeds table is about to change.
         this.feedsCache = this.feedsAndFoldersCache = null;
 
@@ -293,7 +293,7 @@ BriefStorageService.prototype = {
 
         var insertIntoEntries = this.dBConnection.
             createStatement('INSERT OR IGNORE INTO entries (            ' +
-                            'feedId,                                    ' +
+                            'feedID,                                    ' +
                             'id,                                        ' +
                             'providedId,                                ' +
                             'entryURL,                                  ' +
@@ -306,14 +306,14 @@ BriefStorageService.prototype = {
         this.dBConnection.beginTransaction();
         var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
                                  createInstance(Ci.nsIBriefQuery);
-        unreadEntriesQuery.setConditions(aFeed.feedId, null, true);
+        unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
         var prevUnreadCount = this.getEntriesCount(unreadEntriesQuery);
         try {
             for each (entry in aFeed.getEntries({})) {
                 var title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
-                var hash = this.hashString(aFeed.feedId + entry.entryURL + entry.id + title);
+                var hash = this.hashString(aFeed.feedID + entry.entryURL + entry.id + title);
 
-                insertIntoEntries.bindStringParameter(0, aFeed.feedId);
+                insertIntoEntries.bindStringParameter(0, aFeed.feedID);
                 insertIntoEntries.bindStringParameter(1, hash);
                 insertIntoEntries.bindStringParameter(2, entry.id);
                 insertIntoEntries.bindStringParameter(3, entry.entryURL);
@@ -339,7 +339,7 @@ BriefStorageService.prototype = {
                                               'favicon     = ?6,              ' +
                                               'oldestAvailableEntryDate = ?7, ' +
                                               'everUpdated = 1                ' +
-                                              'WHERE feedId = ?8              ');
+                                              'WHERE feedID = ?8              ');
             update.bindStringParameter(0, aFeed.websiteURL);
             update.bindStringParameter(1, aFeed.subtitle);
             update.bindStringParameter(2, aFeed.imageURL);
@@ -347,7 +347,7 @@ BriefStorageService.prototype = {
             update.bindStringParameter(4, aFeed.imageTitle);
             update.bindStringParameter(5, aFeed.favicon);
             update.bindInt64Parameter(6,  oldestEntryDate);
-            update.bindStringParameter(7, aFeed.feedId);
+            update.bindStringParameter(7, aFeed.feedID);
             update.execute();
         }
         finally {
@@ -358,12 +358,12 @@ BriefStorageService.prototype = {
         var newEntriesCount = newUnreadCount - prevUnreadCount;
         var subject = Cc["@mozilla.org/variant;1"].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
-        this.observerService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedId);
+        this.observerService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
     },
 
 
     // nsIBriefStorage
-    markEntriesRead: function(aStatus, aQuery) {
+    markEntriesRead: function BriefStorage_markEntriesRead(aStatus, aQuery) {
         // Make sure not to select entries which already have the desired status.
         prevUnreadFlag = aQuery.unread;
         prevReadFlag = aQuery.read;
@@ -390,7 +390,7 @@ BriefStorageService.prototype = {
         }
 
         // If any entries were marked, dispatch the notifiaction.
-        if (changedEntries.getPropertyAsAUTF8String('entryIdList')) {
+        if (changedEntries.getPropertyAsAString('entries')) {
             this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
                                                  aStatus ? 'read' : 'unread');
         }
@@ -398,7 +398,7 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    deleteEntries: function(aState, aQuery) {
+    deleteEntries: function BriefStorage_deleteEntries(aState, aQuery) {
         switch (aState) {
             case 0:
             case 1:
@@ -430,7 +430,7 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    starEntries: function(aStatus, aQuery) {
+    starEntries: function BriefStorage_starEntries(aStatus, aQuery) {
         var statement = 'UPDATE entries SET starred = ? WHERE id IN ' + aQuery.getQueryText();
         var update = this.dBConnection.createStatement(statement);
         update.bindInt32Parameter(0, aStatus ? 1 : 0);
@@ -450,7 +450,7 @@ BriefStorageService.prototype = {
 
 
     // Deletes entries that are outdated or exceed the max number per feed based.
-    deleteRedundantEntries: function() {
+    deleteRedundantEntries: function BriefStorage_deleteRedundantEntries() {
         var expireEntries = this.prefs.getBoolPref('database.expireEntries');
         var useStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
         var expirationAge = this.prefs.getIntPref('database.entryExpirationAge');
@@ -464,12 +464,12 @@ BriefStorageService.prototype = {
 
         var getEntriesCountForFeed = this.dBConnection.
             createStatement('SELECT COUNT(1) FROM entries     ' +
-                            'WHERE starred = 0 AND feedId = ? ');
+                            'WHERE starred = 0 AND feedID = ? ');
 
         var deleteExcessive = this.dBConnection.
             createStatement('UPDATE entries SET deleted = 2                 ' +
                             'WHERE id IN (SELECT id FROM entries            ' +
-                            '             WHERE starred = 0 AND feedId = ?  ' +
+                            '             WHERE starred = 0 AND feedID = ?  ' +
                             '             ORDER BY date ASC LIMIT ?)        ');
 
         this.dBConnection.beginTransaction();
@@ -480,18 +480,18 @@ BriefStorageService.prototype = {
             }
 
             if (useStoreLimit) {
-                var feedId, entryCount, difference;
+                var feedID, entryCount, difference;
                 for (var i = 0; i < feeds.length; i++) {
-                    feedId = feeds[i].feedId;
+                    feedID = feeds[i].feedID;
 
-                    getEntriesCountForFeed.bindStringParameter(0, feedId);
+                    getEntriesCountForFeed.bindStringParameter(0, feedID);
                     getEntriesCountForFeed.executeStep()
                     entryCount = getEntriesCountForFeed.getInt32(0);
                     getEntriesCountForFeed.reset();
 
                     difference = entryCount - maxEntries;
                     if (difference > 0) {
-                        deleteExcessive.bindStringParameter(0, feedId);
+                        deleteExcessive.bindStringParameter(0, feedID);
                         deleteExcessive.bindInt64Parameter(1, difference);
                         deleteExcessive.execute();
                     }
@@ -509,12 +509,12 @@ BriefStorageService.prototype = {
 
     // Permanently remove the deleted entries from database and VACUUM it. Should only
     // be run on shutdown.
-    purgeDeletedEntries: function() {
+    purgeDeletedEntries: function BriefStorage_purgeDeletedEntries() {
         var remove = this.dBConnection.
             createStatement('DELETE FROM entries                                 ' +
                             'WHERE id IN                                         ' +
                             '  (SELECT entries.id FROM entries INNER JOIN feeds  ' +
-                            '   ON entries.feedId = feeds.feedId  WHERE          ' +
+                            '   ON entries.feedID = feeds.feedID  WHERE          ' +
                             '   entries.deleted = 2 AND                          ' +
                             '   feeds.oldestAvailableEntryDate > entries.date)   ');
         remove.execute();
@@ -527,7 +527,7 @@ BriefStorageService.prototype = {
 
 
     // nsIObserver
-    observe: function(aSubject, aTopic, aData) {
+    observe: function BriefStorage_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
 
             case 'quit-application':
@@ -560,7 +560,7 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    syncWithBookmarks: function() {
+    syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         if (!this.livemarksInitiated)
             this.initLivemarks();
 
@@ -579,27 +579,27 @@ BriefStorageService.prototype = {
         try {
             // Insert any new livemarks into the feeds database
             var selectAll = this.dBConnection.
-                createStatement('SELECT feedId, title, rowIndex, isFolder, parent, hidden ' +
+                createStatement('SELECT feedID, title, rowIndex, isFolder, parent, hidden ' +
                                 'FROM feeds');
 
             var insertItem = this.dBConnection.
                 createStatement('INSERT OR IGNORE INTO feeds                          ' +
-                                '(feedId, feedURL, title, rowIndex, isFolder, parent) ' +
+                                '(feedID, feedURL, title, rowIndex, isFolder, parent) ' +
                                 'VALUES (?1, ?2, ?3, ?4, ?5, ?6)                      ');
             var updateFeed = this.dBConnection.
                 createStatement('UPDATE feeds SET                                  ' +
                                 'title = ?, rowIndex = ?, parent = ?, hidden = 0   ' +
-                                'WHERE feedId = ?                                  ');
+                                'WHERE feedID = ?                                  ');
             var removeFeed = this.dBConnection.
-                createStatement('DELETE FROM feeds WHERE feedId = ?');
+                createStatement('DELETE FROM feeds WHERE feedID = ?');
             var hideFeed = this.dBConnection.
-                createStatement('UPDATE feeds SET hidden = 1 WHERE feedId =?');
+                createStatement('UPDATE feeds SET hidden = 1 WHERE feedID =?');
 
             // Get all feeds currently in the database.
             var feeds = [];
             while (selectAll.executeStep()) {
                 var feed = {};
-                feed.feedId= selectAll.getString(0);
+                feed.feedID= selectAll.getString(0);
                 feed.title = selectAll.getString(1);
                 feed.rowIndex = selectAll.getInt32(2);
                 feed.isFolder = selectAll.getInt32(3) == 1;
@@ -619,7 +619,7 @@ BriefStorageService.prototype = {
                 // Search for the bookmark by iterating over all the feeds in the database.
                 for (var j = 0; j < feeds.length; j++) {
                     feed = feeds[j];
-                    if (feed.feedId == item.feedId) {
+                    if (feed.feedID == item.feedID) {
                         // Found it, the bookmark is already in the database.
                         found = true;
                         break;
@@ -630,7 +630,7 @@ BriefStorageService.prototype = {
                 if (!found) {
                     // Invalidate cache since feeds table is about to change
                     this.feedsCache = this.feedsAndFoldersCache = null;
-                    insertItem.bindStringParameter(0, item.feedId);
+                    insertItem.bindStringParameter(0, item.feedID);
                     insertItem.bindStringParameter(1, item.feedURL || null);
                     insertItem.bindStringParameter(2, item.title);
                     insertItem.bindInt32Parameter(3, item.rowIndex)
@@ -653,7 +653,7 @@ BriefStorageService.prototype = {
                         updateFeed.bindStringParameter(0, item.title);
                         updateFeed.bindInt32Parameter(1, item.rowIndex);
                         updateFeed.bindStringParameter(2, item.parent);
-                        updateFeed.bindStringParameter(3, item.feedId);
+                        updateFeed.bindStringParameter(3, item.feedID);
                         updateFeed.execute();
 
                         if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
@@ -667,7 +667,7 @@ BriefStorageService.prototype = {
                             // If only the title has changed, the feed list can be updated
                             // incrementally, so we send a different notification.
                             this.observerService.
-                            notifyObservers(null,'brief:feed-title-changed', item.feedId);
+                            notifyObservers(null,'brief:feed-title-changed', item.feedID);
                         }
                     }
                 }
@@ -682,11 +682,11 @@ BriefStorageService.prototype = {
                     invalidateFeedList = true;
 
                     if (feed.isFolder) {
-                        removeFeed.bindStringParameter(0, feed.feedId);
+                        removeFeed.bindStringParameter(0, feed.feedID);
                         removeFeed.execute();
                     }
                     else {
-                        hideFeed.bindStringParameter(0, feed.feedId);
+                        hideFeed.bindStringParameter(0, feed.feedID);
                         hideFeed.execute();
                     }
                 }
@@ -702,7 +702,7 @@ BriefStorageService.prototype = {
 
     // Separate function to initialize RDF resources to avoid doing it on every
     // traverseLivemarks() call.
-    initLivemarks: function() {
+    initLivemarks: function BriefStorage_initLivemarks() {
         this.rdfs = Cc['@mozilla.org/rdf/rdf-service;1'].getService(Ci.nsIRDFService);
         this.bmds = this.rdfs.GetDataSource('rdf:bookmarks');
 
@@ -727,7 +727,7 @@ BriefStorageService.prototype = {
      *
      * @param aFolder RDF URI of the folder containing the livemarks.
      */
-     traverseLivemarks: function(aFolder) {
+     traverseLivemarks: function BriefStorage_traverseLivemarks(aFolder) {
         var nextVal = this.bmds.GetTarget(aFolder, this.nextValArc, true);
         var length = nextVal.QueryInterface(Ci.nsIRDFLiteral).Value - 1;
         for (var i = 1; i <= length; i++) {
@@ -747,7 +747,7 @@ BriefStorageService.prototype = {
                 item.feedURL = this.bmds.GetTarget(child, this.feedUrlArc, true).
                                          QueryInterface(Ci.nsIRDFLiteral).
                                          Value;
-                item.feedId = this.hashString(item.feedURL);
+                item.feedID = this.hashString(item.feedURL);
                 item.title = this.bmds.GetTarget(child, this.nameArc, true).
                                        QueryInterface(Ci.nsIRDFLiteral).
                                        Value;
@@ -764,7 +764,7 @@ BriefStorageService.prototype = {
                                        QueryInterface(Ci.nsIRDFLiteral).
                                        Value;
                 var uri = child.QueryInterface(Ci.nsIRDFResource).Value;
-                item.feedId = this.hashString(uri);
+                item.feedID = this.hashString(uri);
                 item.rowIndex = this.bookmarkItems.length;
                 item.isFolder = true;
                 var parentURI = aFolder.QueryInterface(Ci.nsIRDFResource).Value;
@@ -791,7 +791,7 @@ BriefStorageService.prototype = {
      * When a statement is open on a database, it is disallowed to change the
      * schema of the database (add or modify tables or indices).
      */
-    startDummyStatement: function() {
+    startDummyStatement: function BriefStorage_startDummyStatement() {
         // Make sure the dummy table exists.
         this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS ' +
                                            'dummy_table (id INTEGER PRIMARY KEY)');
@@ -808,7 +808,7 @@ BriefStorageService.prototype = {
     },
 
 
-    stopDummyStatement: function() {
+    stopDummyStatement: function BriefStorage_stopDummyStatement() {
         // Do nothing if the dummy statement isn't running
         if (!this.dummyStatement)
             return;
@@ -818,7 +818,7 @@ BriefStorageService.prototype = {
     },
 
 
-    hashString: function(aString) {
+    hashString: function BriefStorage_hashString(aString) {
 
         // nsICryptoHash can read the data either from an array or a stream.
         // Creating a stream ought to be faster than converting a long string
@@ -849,7 +849,7 @@ BriefStorageService.prototype = {
     },
 
 
-    logDatabaseError: function(aException) {
+    logDatabaseError: function BriefStorage_logDatabaseError(aException) {
         var error = this.dBConnection.lastErrorString;
         var consoleService = Cc['@mozilla.org/consoleservice;1'].
                              getService(Ci.nsIConsoleService);
@@ -859,7 +859,7 @@ BriefStorageService.prototype = {
 
 
     // nsISupports
-    QueryInterface: function(aIID) {
+    QueryInterface: function BriefStorage_QueryInterface(aIID) {
         if (!aIID.equals(Components.interfaces.nsIBriefStorage) &&
            !aIID.equals(Components.interfaces.nsIObserver) &&
            !aIID.equals(Components.interfaces.nsISupports)) {
@@ -897,16 +897,16 @@ BriefQuery.prototype = {
 
     includeHiddenFeeds: false,
 
-    setConditions: function(aFeeds, aEntries, aUnread) {
+    setConditions: function BriefQuery_setConditions(aFeeds, aEntries, aUnread) {
         this.feeds = aFeeds;
         this.entries = aEntries;
         this.unread = aUnread;
     },
 
 
-    getQueryText: function(aForSelect) {
+    getQueryText: function BriefQuery_getQueryText(aForSelect) {
         var text = '(SELECT entries.id FROM entries INNER JOIN feeds ' +
-                   'ON entries.feedId = feeds.feedId WHERE ';
+                   'ON entries.feedID = feeds.feedID WHERE ';
 
         if (this.folders) {
             this._effectiveFolders = this.folders;
@@ -917,7 +917,7 @@ BriefQuery.prototype = {
             text += 'feeds.parent LIKE "%" || "' + this._effectiveFolders + '" || "%" AND ';
         }
         if (this.feeds) {
-            text += 'entries.feedId LIKE "%" || "' + this.feeds + '" || "%" AND ';
+            text += 'entries.feedID LIKE "%" || "' + this.feeds + '" || "%" AND ';
         }
         if (this.entries) {
             text += 'entries.id LIKE "%" || "' + this.entries + '" || "%" AND ';
@@ -951,6 +951,8 @@ BriefQuery.prototype = {
         // Trim the trailing AND, if there is one
         text = text.replace(/AND $/, '');
 
+        text += ') ';
+
         if (!aForSelect)
             return text;
 
@@ -970,11 +972,11 @@ BriefQuery.prototype = {
         return text;
     },
 
-    getQueryTextForSelect: function BQ_getQueryTextForSelect() {
+    getQueryTextForSelect: function BriefQuery_getQueryTextForSelect() {
         return this.getQueryText(true);
     },
 
-    _traverseChildren: function(aFolder) {
+    _traverseChildren: function BriefQuery__traverseChildren(aFolder) {
         var isEffectiveFolder = this._effectiveFolders.match(aFolder) ? true : false;
         var item, i;
         for (i = 0; i < this._items.length; i++) {
@@ -982,13 +984,13 @@ BriefQuery.prototype = {
             if (item.parent == aFolder && item.isFolder) {
                 if (isEffectiveFolder)
                     this._effectiveFolders += ' ' + aFolder;
-                this._traverseChildren(item.feedId);
+                this._traverseChildren(item.feedID);
             }
         }
     },
 
     // nsISupports
-    QueryInterface: function(aIID) {
+    QueryInterface: function BriefQuery_QueryInterface(aIID) {
         if (!aIID.equals(Components.interfaces.nsIBriefQuery) &&
            !aIID.equals(Components.interfaces.nsISupports)) {
             throw Components.results.NS_ERROR_NO_INTERFACE;

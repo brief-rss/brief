@@ -14,7 +14,7 @@ function Feed() { }
 
 Feed.prototype = {
 
-    feedId:       '',
+    feedID:       '',
     feedURL:      '',
     websiteURL:   '',
     title:        '',
@@ -30,12 +30,12 @@ Feed.prototype = {
     items:        null,
     oldestAvailableEntryDate: 0,
 
-    getEntries: function(entryCount) {
+    getEntries: function BriefFeed_getEntries(entryCount) {
         entryCount.value = this.items.length;
         return this.items;
     },
 
-    wrapFeed: function(aFeed) {
+    wrapFeed: function BriefFeed_wrapFeed(aFeed) {
         if (aFeed.title)
             this.title = aFeed.title.text;
         if (aFeed.link)
@@ -63,7 +63,7 @@ Feed.prototype = {
         }
     },
 
-    QueryInterface: function(aIID) {
+    QueryInterface: function BriefFeed_QueryInterface(aIID) {
         if (!aIID.equals(Components.interfaces.nsIBriefFeed) &&
             !aIID.equals(Components.interfaces.nsISupports))
             throw Components.results.NS_ERROR_NO_INTERFACE;
@@ -78,7 +78,7 @@ function FeedEntry() { }
 
 FeedEntry.prototype = {
 
-    feedId:   '',
+    feedID:   '',
     id:       '',
     entryURL: '',
     title:    '',
@@ -88,7 +88,7 @@ FeedEntry.prototype = {
     read:     false,
     starred:  false,
 
-    wrapEntry: function(aEntry) {
+    wrapEntry: function BriefFeedEntry_wrapEntry(aEntry) {
         if (aEntry.id)
             this.id = aEntry.id;
 
@@ -111,7 +111,7 @@ FeedEntry.prototype = {
             this.date = new Date(aEntry.published).getTime();
     },
 
-    QueryInterface: function(aIID) {
+    QueryInterface: function BriefFeedEntry_QueryInterface(aIID) {
       if (!aIID.equals(Components.interfaces.nsIBriefFeedEntry) &&
           !aIID.equals(Components.interfaces.nsISupports))
           throw Components.results.NS_ERROR_NO_INTERFACE;
