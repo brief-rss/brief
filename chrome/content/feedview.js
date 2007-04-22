@@ -36,7 +36,7 @@ function FeedView(aTitle, aQuery) {
     if (feed && !feed.everUpdated) {
         var updateService = Cc['@ancestor/brief/updateservice;1'].
                             getService(Ci.nsIBriefUpdateService);
-        updateService.fetchFeed(this.feedId);
+        updateService.fetchFeed(aQuery.feeds);
     }
 
     this._refresh();
@@ -106,14 +106,20 @@ FeedView.prototype = {
                 gFeedView.query.searchString;
     },
 
-    ensure: function() {
+    /**
+     * Checks if the view is up-to-date (contains all the right entries nad has the
+     * right title) and refreshes it if necessary.
+     *
+     * @returns TRUE if the view was up-to-date, FALSE if it needed refreshing.
+     */
+    ensure: function FeedView_ensure() {
         if (!this.isActive)
             return true;
 
         // Get arrays of previously viewed entries and the ones that should be viewed now.
         var prevEntries = this._entries;
         var currentEntries = gStorage.getSerializedEntries(this.query).
-                                      getPropertyAsAUTF8String('entryIdList').
+                                      getPropertyAsAString('entries').
                                       match(/[^ ]+/g);
 
         if (!prevEntries || !currentEntries) {
@@ -185,7 +191,7 @@ FeedView.prototype = {
 
 
     // Refreshes the feed view from scratch.
-    _refresh: function() {
+    _refresh: function FeedView__refresh() {
         this.browser.style.cursor = 'wait';
 
         this._computePages();
@@ -197,13 +203,13 @@ FeedView.prototype = {
         // Store a list of ids of displayed entries. It is used to determine if
         // the view needs to be refreshed when database changes.
         this._entries = gStorage.getSerializedEntries(this.query).
-                                 getPropertyAsAUTF8String('entryIdList').
+                                 getPropertyAsAString('entries').
                                  match(/[^ ]+/g);
     },
 
 
     // Refreshes the view when one entry is removed from the currently displayed page.
-    _refreshIncrementally: function(aEntryId) {
+    _refreshIncrementally: function FeedView__refreshIncrementally(aEntryId) {
 
         // Find the entry that be removed.
         var entry = this.feedContent.firstChild;
@@ -230,12 +236,14 @@ FeedView.prototype = {
             this._appendEntry(entry);
 
         this._entries = gStorage.getSerializedEntries(this.query).
-                                 getPropertyAsAUTF8String('entryIdList').
+                                 getPropertyAsAString('entries').
                                  match(/[^ ]+/g);
     },
 
 
-    _computePages: function() {
+    // Computes the current entries count, page counter, current page ordinal and
+    // refreshes the navigation UI.
+    _computePages: function FeedView__computePages() {
         this.entriesCount = gStorage.getEntriesCount(this.query);
         this.pageCount = Math.ceil(this.entriesCount / gPrefs.entriesPerPage);
 
@@ -261,7 +269,7 @@ FeedView.prototype = {
 
     // Listens to load events and builds the feed view page when necessary as
     // well as hides/unhides the feed view toolbar.
-    _onLoad: function(aEvent) {
+    _onLoad: function FeedView__onLoad(aEvent) {
         var feedViewToolbar = document.getElementById('feed-view-toolbar');
         if (gFeedView.isActive) {
             feedViewToolbar.hidden = false;
@@ -277,7 +285,7 @@ FeedView.prototype = {
     // content in it (the entries are not served in plain text but in full HTML
     // markup) this page needs to be have a file:// URI to be unprivileged.
     // It is untrusted and all the interaction respects XPCNativeWrappers.
-    _buildFeedView: function() {
+    _buildFeedView: function FeedView__buildFeedView() {
         var doc = this.document = this.browser.contentDocument;
 
         // All file:// URIs are treated as same-origin which allows a script
@@ -368,7 +376,7 @@ FeedView.prototype = {
     },
 
 
-    _appendEntry: function(aEntry) {
+    _appendEntry: function FeedView__appendEntry(aEntry) {
         var articleContainer = this.document.createElementNS(XHTML_NS, 'div');
         articleContainer.className = 'article-container';
 
@@ -384,19 +392,19 @@ FeedView.prototype = {
         if (aEntry.starred)
             articleContainer.setAttribute('starred', true);
 
-        var feedName = gStorage.getFeed(aEntry.feedId).title;
+        var feedName = gStorage.getFeed(aEntry.feedID).title;
         articleContainer.setAttribute('feedName', feedName);
 
         this.feedContent.appendChild(articleContainer);
     },
 
 
-    showNextPage: function() {
+    showNextPage: function FeedView_showNextPage() {
         gFeedView.currentPage++;
         gFeedView._refresh();
     },
 
-    showPrevPage: function() {
+    showPrevPage: function FeedView_showPrevPage() {
         gFeedView.currentPage--;
         gFeedView._refresh();
     }
