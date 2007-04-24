@@ -19,7 +19,7 @@ const RDF_SEQ          = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#_';
 const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
 // How often to delete entries that have expired or exceed the max number of entries per feed.
-const DELETE_REDUNDANT_INTERVAL = 3600*24; // 1 day
+const DELETE_REDUNDANT_ENTRIES_INTERVAL = 3600*24; // 1 day
 // How often to permanently remove deleted entries and VACUUM the database.
 const PURGE_DELETED_ENTRIES_INTERVAL = 3600*24*3; // 3 days
 // How long to keep entries from feeds no longer in the home folder.
@@ -560,13 +560,13 @@ BriefStorageService.prototype = {
 
                 // Integer prefs are longs while Date is a long long.
                 var now = Math.round(Date.now() / 1000);
-                if (now - lastTime > DELETE_REDUNDANT_INTERVAL &&
+                if (now - lastTime > DELETE_REDUNDANT_ENTRIES_INTERVAL &&
                    (expireEntries || useStoreLimit)) {
                     this.deleteRedundantEntries();
                 }
 
                 lastTime = this.prefs.getIntPref('database.lastPurgeTime');
-                if (now - lastTime > PURGE_DELETED_INTERVAL)
+                if (now - lastTime > PURGE_DELETED_ENTRIES_INTERVAL)
                     this.purgeDeletedEntries();
 
                 break;
