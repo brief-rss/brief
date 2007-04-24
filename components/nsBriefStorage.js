@@ -21,7 +21,9 @@ const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 // How often to delete entries that have expired or exceed the max number of entries per feed.
 const DELETE_REDUNDANT_INTERVAL = 3600*24; // 1 day
 // How often to permanently remove deleted entries and VACUUM the database.
-const PURGE_DELETED_INTERVAL = 3600*24*3; // 3 days
+const PURGE_DELETED_ENTRIES_INTERVAL = 3600*24*3; // 3 days
+// How long to keep entries from feeds no longer in the home folder.
+const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // One week
 
 
 function dump(aMessage) {
@@ -519,16 +521,28 @@ BriefStorageService.prototype = {
     // Permanently remove the deleted entries from database and VACUUM it. Should only
     // be run on shutdown.
     purgeDeletedEntries: function BriefStorage_purgeDeletedEntries() {
-        var remove = this.dBConnection.
-            createStatement('DELETE FROM entries                                 ' +
-                            'WHERE id IN                                         ' +
-                            '  (SELECT entries.id FROM entries INNER JOIN feeds  ' +
-                            '   ON entries.feedID = feeds.feedID  WHERE          ' +
-                            '   entries.deleted = 2 AND                          ' +
-                            '   feeds.oldestAvailableEntryDate > entries.date)   ');
-        remove.execute();
+        var removeEntries = this.dBConnection.createStatement(
+            'DELETE FROM entries WHERE id IN                                           ' +
+            '(                                                                         ' +
+            '   SELECT entries.id FROM entries INNER JOIN feeds                        ' +
+            '   ON entries.feedID = feeds.feedID  WHERE                                ' +
+            '   (entries.deleted = 2 AND feeds.oldestAvailableEntryDate > entries.date)' +
+            '   OR                                                                     ' +
+            '   (? - feeds.hidden > ? AND feeds.hidden != 0)                           ' +
+            ')                                                                         ');
+        removeEntries.bindInt64Parameter(0, Date.now());
+        removeEntries.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
+        removeEntries.execute();
+
+        var removeFeeds = this.dBConnection.createStatement(
+            'DELETE FROM feeds WHERE (? - feeds.hidden > ? AND feeds.hidden != 0)');
+        removeFeeds.bindInt64Parameter(0, Date.now());
+        removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
+        removeFeeds.execute();
+
         this.stopDummyStatement();
         this.dBConnection.executeSimpleSQL('VACUUM');
+
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
         this.prefs.setIntPref('database.lastPurgeTime', now);
@@ -602,7 +616,7 @@ BriefStorageService.prototype = {
             var removeFeed = this.dBConnection.
                 createStatement('DELETE FROM feeds WHERE feedID = ?');
             var hideFeed = this.dBConnection.
-                createStatement('UPDATE feeds SET hidden = 1 WHERE feedID =?');
+                createStatement('UPDATE feeds SET hidden = ? WHERE feedID =?');
 
             // Get all feeds currently in the database.
             var feeds = [];
@@ -614,7 +628,7 @@ BriefStorageService.prototype = {
                 feed.isFolder = selectAll.getInt32(3) == 1;
                 feed.parent = selectAll.getString(4);
                 feed.rdf_uri = selectAll.getString(5);
-                feed.hidden = selectAll.getInt32(6);
+                feed.hidden = selectAll.getInt64(6);
                 feeds.push(feed);
             }
 
@@ -657,7 +671,7 @@ BriefStorageService.prototype = {
                     // If the bookmark was found in the database then check if its row is
                     // up-to-date.
                     if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
-                       item.title != feed.title || item.uri != feed.rdf_uri || feed.hidden == 1) {
+                       item.title != feed.title || item.uri != feed.rdf_uri || feed.hidden > 0) {
                         // Invalidate cache since feeds table is about to change
                         this.feedsCache = this.feedsAndFoldersCache = null;
 
@@ -669,7 +683,7 @@ BriefStorageService.prototype = {
                         updateFeed.execute();
 
                         if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
-                           feed.hidden == 1) {
+                           feed.hidden > 0) {
                             // If it has been row index, parent or hidden state that
                             // changed, then the whole feed list tree in the Brief window
                             // has to be rebuilt, so we need to notify about it.
@@ -698,7 +712,8 @@ BriefStorageService.prototype = {
                         removeFeed.execute();
                     }
                     else {
-                        hideFeed.bindStringParameter(0, feed.feedID);
+                        hideFeed.bindInt64Parameter(0, Date.now());
+                        hideFeed.bindStringParameter(1, feed.feedID);
                         hideFeed.execute();
                     }
                 }
