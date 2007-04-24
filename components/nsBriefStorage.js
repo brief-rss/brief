@@ -46,6 +46,7 @@ function BriefStorageService() {
 
     this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
                                        'feedID      TEXT UNIQUE,           ' +
+                                       'RDF_URI     TEXT,                  ' +
                                        'feedURL     TEXT,                  ' +
                                        'websiteURL  TEXT,                  ' +
                                        'title       TEXT,                  ' +
@@ -76,7 +77,7 @@ function BriefStorageService() {
                                        ')');
     // Columns added in 0.6.
     try {
-        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN ' +
+        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN    ' +
                                            'oldestAvailableEntryDate INTEGER');
         this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
     }
@@ -87,6 +88,7 @@ function BriefStorageService() {
         this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
         this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
         this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
+        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
     }
     catch (e) {}
 
@@ -167,7 +169,7 @@ BriefStorageService.prototype = {
                             'feedID, feedURL, websiteURL, title,             ' +
                             'subtitle, imageURL, imageLink, imageTitle,      ' +
                             'favicon, everUpdated, oldestAvailableEntryDate, ' +
-                            'rowIndex, parent, isFolder                      ' +
+                            'rowIndex, parent, isFolder, RDF_URI             ' +
                             'FROM feeds                                      ' +
                             'WHERE hidden=0 ORDER BY rowIndex ASC            ');
         try {
@@ -187,6 +189,7 @@ BriefStorageService.prototype = {
                 feed.rowIndex = select.getInt32(11);
                 feed.parent = select.getString(12);
                 feed.isFolder = select.getInt32(13) == 1;
+                feed.rdf_uri = select.getString(14);
 
                 this.feedsAndFoldersCache.push(feed);
                 if (!feed.isFolder)
@@ -585,17 +588,17 @@ BriefStorageService.prototype = {
         try {
             // Insert any new livemarks into the feeds database
             var selectAll = this.dBConnection.
-                createStatement('SELECT feedID, title, rowIndex, isFolder, parent, hidden ' +
-                                'FROM feeds');
+                createStatement('SELECT feedID, title, rowIndex, isFolder, parent, ' +
+                                'RDF_URI, hidden FROM feeds                        ');
 
             var insertItem = this.dBConnection.
                 createStatement('INSERT OR IGNORE INTO feeds                          ' +
-                                '(feedID, feedURL, title, rowIndex, isFolder, parent) ' +
-                                'VALUES (?1, ?2, ?3, ?4, ?5, ?6)                      ');
+                                '(feedID, feedURL, title, rowIndex, isFolder, parent, ' +
+                                'RDF_URI) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)         ');
             var updateFeed = this.dBConnection.
                 createStatement('UPDATE feeds SET                                  ' +
-                                'title = ?, rowIndex = ?, parent = ?, hidden = 0   ' +
-                                'WHERE feedID = ?                                  ');
+                                'title = ?, rowIndex = ?, parent = ?, RDF_URI = ?, ' +
+                                'hidden = 0  WHERE feedID = ?                      ');
             var removeFeed = this.dBConnection.
                 createStatement('DELETE FROM feeds WHERE feedID = ?');
             var hideFeed = this.dBConnection.
@@ -610,7 +613,8 @@ BriefStorageService.prototype = {
                 feed.rowIndex = selectAll.getInt32(2);
                 feed.isFolder = selectAll.getInt32(3) == 1;
                 feed.parent = selectAll.getString(4);
-                feed.hidden = selectAll.getInt32(5);
+                feed.rdf_uri = selectAll.getString(5);
+                feed.hidden = selectAll.getInt32(6);
                 feeds.push(feed);
             }
 
@@ -642,6 +646,7 @@ BriefStorageService.prototype = {
                     insertItem.bindInt32Parameter(3, item.rowIndex)
                     insertItem.bindInt32Parameter(4, item.isFolder ? 1 : 0);
                     insertItem.bindStringParameter(5, item.parent);
+                    insertItem.bindStringParameter(6, item.uri);
                     insertItem.execute();
                     feedListChanged = true;
                 }
@@ -652,14 +657,15 @@ BriefStorageService.prototype = {
                     // If the bookmark was found in the database then check if its row is
                     // up-to-date.
                     if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
-                       item.title != feed.title || feed.hidden == 1) {
+                       item.title != feed.title || item.uri != feed.rdf_uri || feed.hidden == 1) {
                         // Invalidate cache since feeds table is about to change
                         this.feedsCache = this.feedsAndFoldersCache = null;
 
                         updateFeed.bindStringParameter(0, item.title);
                         updateFeed.bindInt32Parameter(1, item.rowIndex);
                         updateFeed.bindStringParameter(2, item.parent);
-                        updateFeed.bindStringParameter(3, item.feedID);
+                        updateFeed.bindStringParameter(3, item.uri);
+                        updateFeed.bindStringParameter(4, item.feedID);
                         updateFeed.execute();
 
                         if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
@@ -754,6 +760,7 @@ BriefStorageService.prototype = {
                                          QueryInterface(Ci.nsIRDFLiteral).
                                          Value;
                 item.feedID = this.hashString(item.feedURL);
+                item.uri = child.QueryInterface(Ci.nsIRDFResource).Value;
                 item.title = this.bmds.GetTarget(child, this.nameArc, true).
                                        QueryInterface(Ci.nsIRDFLiteral).
                                        Value;
@@ -770,6 +777,7 @@ BriefStorageService.prototype = {
                                        QueryInterface(Ci.nsIRDFLiteral).
                                        Value;
                 var uri = child.QueryInterface(Ci.nsIRDFResource).Value;
+                item.uri = uri;
                 item.feedID = this.hashString(uri);
                 item.rowIndex = this.bookmarkItems.length;
                 item.isFolder = true;

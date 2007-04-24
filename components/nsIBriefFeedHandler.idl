@@ -98,6 +98,8 @@ interface nsIBriefFeed : nsISupports {
 
   attribute string parent;
 
+  attribute string rdf_uri;
+
  /**
   * Get the feed's entries. Since there is no method in this interface to
   * attach entries directly, they can come only from wrapping an nsIFeed (see
