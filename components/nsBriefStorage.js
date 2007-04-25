@@ -206,11 +206,10 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     getEntries: function BriefStorage_getEntries(aQuery, entryCount) {
-        var statement = 'SELECT                                                         ' +
-                        'entries.id,    entries.feedID,  entries.entryURL,              ' +
-                        'entries.title, entries.summary, entries.content,               ' +
-                        'entries.date,  entries.read,    entries.starred                ' +
-                        'FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+        var statement = 'SELECT                                            ' +
+                        'entries.id,    entries.feedID,  entries.entryURL, ' +
+                        'entries.title, entries.summary, entries.content,  ' +
+                        'entries.date,  entries.read,    entries.starred   ' +
                          aQuery.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
@@ -243,10 +242,7 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     getSerializedEntries: function BriefStorage_getSerializedEntries(aQuery) {
-        var statement = 'SELECT entries.id, entries.feedID FROM                    ' +
-                        'entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                         aQuery.getQueryTextForSelect();
-
+        var statement = 'SELECT entries.id, entries.feedID ' + aQuery.getQueryTextForSelect();
         var select = this.dBConnection.createStatement(statement);
 
         var entries = '';
@@ -275,11 +271,9 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     getEntriesCount: function BriefStorage_getEntriesCount(aQuery) {
-        var statement = 'SELECT COUNT(1) FROM entries                      ' +
-                        'INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                         aQuery.getQueryTextForSelect();
+        var statement = 'SELECT COUNT(1) ' + aQuery.getQueryTextForSelect();
         var select = this.dBConnection.createStatement(statement);
-
+        dump(statement);
         var count = 0;
         try {
             select.executeStep();
@@ -317,10 +311,13 @@ BriefStorageService.prototype = {
                                  createInstance(Ci.nsIBriefQuery);
         unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
         var prevUnreadCount = this.getEntriesCount(unreadEntriesQuery);
+        var entries = aFeed.getEntries({});
         try {
-            for each (entry in aFeed.getEntries({})) {
-                var title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
-                var hash = this.hashString(aFeed.feedID + entry.entryURL + entry.id + title);
+            var entry, title, trash;
+            for (var i = 0; i < entries.length; i++) {
+                entry = entries[i];
+                title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
+                hash = this.hashString(aFeed.feedID + entry.entryURL + entry.id + title);
 
                 insertIntoEntries.bindStringParameter(0, aFeed.feedID);
                 insertIntoEntries.bindStringParameter(1, hash);
@@ -935,10 +932,10 @@ BriefQuery.prototype = {
 
     getQueryText: function BriefQuery_getQueryText(aForSelect) {
         if (aForSelect) {
-            var text = 'WHERE '
+            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE '
         }
         else {
-            var text = 'WHERE entries.id IN (SELECT entries.id FROM ' +
+            var text = ' WHERE entries.id IN (SELECT entries.id FROM ' +
                        'entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE ';
         }
 
@@ -948,13 +945,14 @@ BriefQuery.prototype = {
                                      getService(Components.interfaces.nsIBriefStorage).
                                      getFeedsAndFolders({});
             this._traverseChildren('root');
-            text += 'feeds.parent LIKE "%" || "' + this._effectiveFolders + '" || "%" AND ';
+
+            text += '"' + this._effectiveFolders + '" LIKE "%" || feeds.parent || "%" AND ';
         }
         if (this.feeds) {
-            text += 'entries.feedID LIKE "%" || "' + this.feeds + '" || "%" AND ';
+            text += '"' + this.feeds + '"LIKE "%" || entries.feedID || "%" AND ';
         }
         if (this.entries) {
-            text += 'entries.id LIKE "%" || "' + this.entries + '" || "%" AND ';
+            text += '"' + this.entries + '" LIKE "%" || entries.id || "%" AND ';
         }
         if (this.searchString) {
             text += 'entries.title || entries.summary || entries.content ' +
@@ -1028,7 +1026,7 @@ BriefQuery.prototype = {
             item = this._items[i];
             if (item.parent == aFolder && item.isFolder) {
                 if (isEffectiveFolder)
-                    this._effectiveFolders += ' ' + aFolder;
+                    this._effectiveFolders += ' ' + item.feedID;
                 this._traverseChildren(item.feedID);
             }
         }
