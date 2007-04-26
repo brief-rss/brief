@@ -4,14 +4,18 @@ const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 var gFeedList = {
 
     tree:  null,
-    items: null, // treecell elements of all the feeds
 
-    selectEventsSuppressed: false,
+    // All treeitems in the tree.
+    items: null,
 
-    /**
-     * Currently selected item. Returns the treeitem if a folder is selected or
-     * the treecell if a feed is selected.
-     */
+    // Last target item of the context menu
+    ctx_targetItem: null,
+
+    // If TRUE, prevents the onSelect function from running when "select" event is occurs.
+    ignoreSelectEvent: false,
+
+    // Currently selected item. Returns the treeitem if a folder is selected or
+    // the treecell if a feed is selected.
     get selectedItem() {
         var item = null;
         var currentIndex = this.tree.currentIndex;
@@ -20,6 +24,7 @@ var gFeedList = {
         return item;
     },
 
+    // nsIBriefFeed object of the the currently selected feed, or null.
     get selectedFeed() {
         var feed = null;
         var feedID = this.selectedItem.getAttribute('feedID');
@@ -28,10 +33,46 @@ var gFeedList = {
         return feed;
     },
 
-    getTreeitem: function gFeedList_getTreeitem(aFeedID) {
+    /**
+     * Gets nsIBriefFeed representation of a given feed. We've got feeds floating around
+     * represented in at least 3 different ways (nsIBriefFeed's, ID's of feeds, or their
+     * treeitems). This function allows us to ensure that the argument is of nsIBriefFeed
+     * type, whenever we need it. It also makes it easy for other methods of gFeedList to
+     * accept any kind of representation as their arguments.
+     *
+     * @param  aFeed  nsIBriefFeed object, feedID string, or treeitem XULElement.
+     */
+    getBriefFeed: function gFeedList_getBriefFeed(aFeed) {
+        if (aFeed instanceof Ci.nsIBriefFeed)
+            return aFeed;
+
+        var feedID;
+        if (typeof aFeed == 'string')
+            feedID = aFeed;
+        else if (aFeed instanceof XULElement)
+            feedID = aFeed.getAttribute('feedID');
+
+        return gStorage.getFeed(feedID);
+    },
+
+    /**
+     * Cf. |getBriefFeed|.
+     *
+     * @param  aFeed  nsIBriefFeed object, feedID string, or treeitem XULElement.
+     */
+    getTreeitem: function gFeedList_getTreeitem(aFeed) {
+        if (aFeed instanceof XULElement)
+            return aFeed;
+
+        var feedID;
+        if (aFeed instanceof Ci.nsIBriefFeed)
+            feedID = aFeed.feedID;
+        else if (typeof aFeed == 'string')
+            feedID = aFeed;
+
         var item = null;
         for (var i = 0; i < this.items.length; i++) {
-            if (this.items[i].getAttribute('feedID') == aFeedID) {
+            if (this.items[i].getAttribute('feedID') == feedID) {
                 item = this.items[i];
                 break;
             }
@@ -39,27 +80,160 @@ var gFeedList = {
         return item;
     },
 
-    getFoldersForFeeds: function gFeedList_getFoldersForFeeds(aFeedIDs) {
+    /**
+     * Returns an array of feedID's of all folders in the the parent chain of any of the
+     * given feeds.
+     *
+     * @param  aFeeds  Either a single feed or an array of them, represented by
+     *                 nsIBriefFeed object, feedID string, or treeitem XULElement.
+     */
+    getFoldersForFeeds: function gFeedList_getFoldersForFeeds(aFeeds) {
+        var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
         var folders = [];
-        for (var i = 0; i < aFeedIDs.length; i++) {
-            var parent = gStorage.getFeed(aFeedIDs[i]).parent;
-            while (parent != 'root') {
-                if (folders.indexOf(parent) == -1)
-                    folders.push(parent);
-                parent = gStorage.getFeed(parent).parent;
+        for (var i = 0; i < feeds.length; i++) {
+            var feed = this.getBriefFeed(feeds[i]);
+            var parentID = feed.parent;
+            while (parentID != 'root') {
+                if (folders.indexOf(parentID) == -1)
+                    folders.push(parentID);
+                parentID = gStorage.getFeed(parentID).parent;
             }
         }
         return folders;
     },
 
+    /**
+     * Refreshes the label of a special folder.
+     *
+     * @param  aSpecialItem  Id if the special folder's treeitem.
+     */
+    refreshSpecialTreeitem: function gFeedList_refreshSpecialTreeitem(aSpecialItem) {
+        var treeitem = document.getElementById(aSpecialItem);
+        var treecell = treeitem.firstChild.firstChild;
 
-    onselect: function gFeedList_onselect(aEvent) {
+        var query = new QuerySH(null, null, true);
+        if (aSpecialItem == 'starred-folder')
+            query.starred = true;
+        else if (aSpecialItem == 'trash-folder')
+            query.deleted = ENTRY_STATE_TRASHED;
+        var unreadCount = gStorage.getEntriesCount(query);
+
+        var title = treeitem.getAttribute('title');
+        if (unreadCount > 0) {
+            var label = title + ' (' + unreadCount +')';
+            this.setProperty(treecell, 'unread');
+        }
+        else {
+            label = title;
+            this.removeProperty(treecell, 'unread');
+        }
+        treecell.setAttribute('label', label);
+    },
+
+    /**
+     * Refresh the folder's label.
+     *
+     * @param  aFolders  Either a single folder or an array of them, represented by
+     *                   nsIBriefFeed object, feedID string, or treeitem XULElement.
+     */
+    refreshFolderTreeitems: function gFeedList_refreshFolderTreeitems(aFolders) {
+        var treeitem, treecell, folder, query, unreadCount, label;
+        var folders = aFolders instanceof Array ? aFolders : [aFolders];
+
+        for (var i = 0; i < folders.length; i++) {
+            folder = this.getBriefFeed(folders[i]);
+            treeitem = this.getTreeitem(folders[i]);
+            treecell = treeitem.firstChild.firstChild;
+
+            if (treeitem.getAttribute('open') == 'true') {
+                label = folder.title;
+                this.removeProperty(treecell, 'unread');
+            }
+            else {
+                query = new Query();
+                query.folders = folder.feedID;
+                query.unread = true;
+                unreadCount = gStorage.getEntriesCount(query);
+
+                if (unreadCount > 0) {
+                    label = folder.title + ' (' + unreadCount +')';
+                    this.setProperty(treecell, 'unread');
+                }
+                else {
+                    label = folder.title;
+                    this.removeProperty(treecell, 'unread');
+                }
+            }
+            treecell.setAttribute('label', label);
+        }
+    },
+
+    /**
+     * Refresh the feed treeitem's label and favicon. Also refreshes folders in the feed's
+     * parent chain.
+     *
+     * @param  aFeeds  Either a single feed or an array of them, represented by
+     *                 nsIBriefFeed object, feedID string, or treeitem XULElement.
+     */
+    refreshFeedTreeitems: function gFeedList_refreshFeedTreeitems(aFeeds) {
+        var feed, treeitem, treecell, query, unreadCount, label, iconURL, favicon;
+        var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
+
+        for (var i = 0; i < feeds.length; i++) {
+            feed = this.getBriefFeed(feeds[i]);
+            treeitem = this.getTreeitem(feeds[i]);
+            treecell = treeitem.firstChild.firstChild;
+
+            // Update the label.
+            query = new QuerySH(feed.feedID, null, true);
+            unreadCount = gStorage.getEntriesCount(query);
+            if (unreadCount > 0) {
+                label = feed.title + ' (' + unreadCount +')';
+                this.setProperty(treecell, 'unread');
+            }
+            else {
+                label = feed.title;
+                this.removeProperty(treecell, 'unread');
+            }
+            treecell.setAttribute('label', label);
+
+            // Update the favicon
+            if (treeitem.hasAttribute('loading')) {
+                iconURL = THROBBER_URL;
+            }
+            else if (treeitem.hasAttribute('error')) {
+                iconURL = ERROR_ICON_URL;
+            }
+            else {
+                favicon = feed.favicon;
+                if (favicon != 'no-favicon' && gPrefs.getBoolPref('showFavicons'))
+                    iconURL = favicon;
+            }
+
+            if (iconURL)
+                treecell.setAttribute('src', iconURL);
+            // Otherwise just use the default icon applied by CSS
+            else
+                treecell.removeAttribute('src');
+        }
+
+        // |this.items| is null before the tree finishes building. We don't need to
+        // refresh the parent folders then, anyway, because _buildFolderChildren refreshes
+        // them itself.
+        if (this.items) {
+            var folders = this.getFoldersForFeeds(aFeeds);
+            this.refreshFolderTreeitems(folders);
+        }
+    },
+
+
+    onSelect: function gFeedList_onSelect(aEvent) {
         var selectedItem = gFeedList.selectedItem;
 
-        if (!selectedItem || this.selectEventsSuppressed ||
-           this._prevSelectedItem == selectedItem) {
+        if (!selectedItem || this.ignoreSelectEvent || this._prevSelectedItem == selectedItem) {
             return;
         }
+
         // Clicking the twisty also triggers the select event, although the selection
         // doesn't change. We remember the previous selected item and do nothing when
         // the new selected item is the same.
@@ -93,6 +267,7 @@ var gFeedList = {
         }
     },
 
+    // This is used for detecting when a folder is open/closed and refreshes its label.
     onClick: function gFeedList_onClick(aEvent) {
         var rowIndex = {};
         this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
@@ -103,158 +278,12 @@ var gFeedList = {
         }
     },
 
+    // See onClick.
     onKeyUp: function gFeedList_onKeyUp(aEvent) {
         if (aEvent.keyCode == aEvent.DOM_VK_RETURN) {
             var selectedItem = this.selectedItem;
             if (selectedItem.hasAttribute('container'))
                 this.refreshFolderTreeitems(selectedItem);
-        }
-    },
-
-
-    refreshSpecialTreeitem: function gFeedList_refreshSpecialTreeitem(aSpecialItem) {
-        var treeitem = document.getElementById(aSpecialItem);
-        var treecell = treeitem.firstChild.firstChild;
-
-        var query = new QuerySH(null, null, true);
-        if (aSpecialItem == 'starred-folder')
-            query.starred = true;
-        else if (aSpecialItem == 'trash-folder')
-            query.deleted = ENTRY_STATE_TRASHED;
-        var unreadCount = gStorage.getEntriesCount(query);
-
-        var title = treeitem.getAttribute('title');
-        if (unreadCount > 0) {
-            var label = title + ' (' + unreadCount +')';
-            this.setProperty(treecell, 'unread');
-        }
-        else {
-            label = title;
-            this.removeProperty(treecell, 'unread');
-        }
-        treecell.setAttribute('label', label);
-    },
-
-    /**
-     * Refresh the folder's label.
-     *
-     * @param aFeeds  nsIBriefFeed object, feedID string, treeitem XUL element, or an
-     *                array of either of them.
-     */
-    refreshFolderTreeitems: function gFeedList_refreshFolderTreeitems(aFolders) {
-        var treeitem, treecell, folder, query, unreadCount, label;
-        var folders = aFolders instanceof Array ? aFolders : [aFolders];
-
-        for (var i = 0; i < folders.length; i++) {
-
-            if (typeof folders[i] == 'string') {
-                folder = gStorage.getFeed(folders[i]);
-                treeitem = this.getTreeitem(folder.feedID);
-            }
-            else if (folders[i] instanceof Ci.nsIBriefFeed) {
-                folder = folders[i];
-                treeitem = this.getTreeitem(folder.feedID);
-            }
-            else if (folders[i] instanceof XULElement) {
-                folder = gStorage.getFeed(folders[i].getAttribute('feedID'));
-                treeitem = folders[i];
-            }
-            else {
-                throw('Invalid argument type, must be nsIBriefFeed, XULElement or string');
-            }
-            treecell = treeitem.firstChild.firstChild;
-
-            if (treeitem.getAttribute('open') == 'true') {
-                label = folder.title;
-                this.removeProperty(treecell, 'unread');
-            }
-            else {
-                query = new Query();
-                query.folders = folder.feedID;
-                query.unread = true;
-                unreadCount = gStorage.getEntriesCount(query);
-
-                if (unreadCount > 0) {
-                    label = folder.title + ' (' + unreadCount +')';
-                    this.setProperty(treecell, 'unread');
-                }
-                else {
-                    label = folder.title;
-                    this.removeProperty(treecell, 'unread');
-                }
-            }
-            treecell.setAttribute('label', label);
-        }
-    },
-
-    /**
-     * Refresh the feed treeitem's label and favicon.
-     *
-     * @param aFeeds  nsIBriefFeed object, feedID string, treeitem XUL element, or an
-     *                array of either of them.
-     */
-    refreshFeedTreeitems: function gFeedList_refreshFeedTreeitems(aFeeds) {
-        var feed, treeitem, treecell, query, unreadCount, label, iconURL, favicon;
-        var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
-
-        for (var i = 0; i < feeds.length; i++) {
-
-            if (typeof feeds[i] == 'string') {
-                feed = gStorage.getFeed(feeds[i]);
-                treeitem = this.getTreeitem(feed.feedID);
-            }
-            else if (feeds[i] instanceof Ci.nsIBriefFeed) {
-                feed = feeds[i];
-                treeitem = this.getTreeitem(feed.feedID);
-            }
-            else if (feeds[i] instanceof XULElement) {
-                feed = gStorage.getFeed(feeds[i].getAttribute('feedID'));
-                treeitem = feeds[i];
-            }
-            else {
-                throw('Invalid argument type, must be nsIBriefFeed, XULElement or string');
-            }
-            treecell = treeitem.firstChild.firstChild;
-
-            // Update the label.
-            query = new QuerySH(feed.feedID, null, true);
-            unreadCount = gStorage.getEntriesCount(query);
-            if (unreadCount > 0) {
-                label = feed.title + ' (' + unreadCount +')';
-                this.setProperty(treecell, 'unread');
-            }
-            else {
-                label = feed.title;
-                this.removeProperty(treecell, 'unread');
-            }
-            treecell.setAttribute('label', label);
-
-
-            // Update the favicon
-            if (treeitem.hasAttribute('loading')) {
-                iconURL = THROBBER_URL;
-            }
-            else if (treeitem.hasAttribute('error')) {
-                iconURL = ERROR_ICON_URL;
-            }
-            else {
-                favicon = feed.favicon;
-                if (favicon != 'no-favicon' && gPrefs.getBoolPref('showFavicons'))
-                    iconURL = favicon;
-            }
-
-            if (iconURL)
-                treecell.setAttribute('src', iconURL);
-            // Otherwise just use the default icon applied by CSS
-            else
-                treecell.removeAttribute('src');
-        }
-        // Don't refresh the parent folders if we are called during building the tree.
-        // 1) The item list is not ready 2) _buildChildLivemarks refreshes each item
-        // anyway.
-        if (this.items) {
-            var folders = this.getFoldersForFeeds(aFeeds);
-            this.refreshFolderTreeitems(folders);
         }
     },
 
@@ -292,57 +321,85 @@ var gFeedList = {
     },
 
 
+    // Sets the visibility of context menuitem depending on the target.
     createContextMenu: function gFeedList_createContextMenu(aEvent) {
+
         // Get the row which was the target of the right-click
         var rowIndex = {};
         this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
-        // If the target was empty space, don't show any context menu.
+
+        // If the target was empty space, don't show context menu.
         if (rowIndex.value == -1) {
+            this.ctx_targetItem = null;
             aEvent.preventDefault();
             return;
         }
 
         this.ctx_targetItem = this.tree.view.getItemAtIndex(rowIndex.value);
 
-        // Set visibility of menuitems
+        // Convenience variables telling what kind the target is.
+        var targetIsFeed = this.ctx_targetItem.hasAttribute('url');
+        var targetIsContainer = this.ctx_targetItem.hasAttribute('container');
+        var targetIsUnreadFolder = this.ctx_targetItem.id == 'unread-folder';
+        var targetIsStarredFolder = this.ctx_targetItem.id == 'starred-folder';
+        var targetIsTrashFolder = this.ctx_targetItem.id == 'trash-folder';
+        var targetIsSpecialFolder = targetIsUnreadFolder || targetIsStarredFolder ||
+                                    targetIsTrashFolder;
+
         var markFeedRead = document.getElementById('ctx-mark-feed-read');
-        markFeedRead.hidden = !this.ctx_targetItem.hasAttribute('url');
+        markFeedRead.hidden = !targetIsFeed;
 
         var markFolderRead = document.getElementById('ctx-mark-folder-read');
-        markFolderRead.hidden = this.ctx_targetItem.hasAttribute('url');
+        markFolderRead.hidden = !(targetIsContainer || targetIsSpecialFolder);
 
         var updateFeed = document.getElementById('ctx-update-feed');
-        updateFeed.hidden = !this.ctx_targetItem.hasAttribute('url');
+        updateFeed.hidden = !targetIsFeed;
 
         var openWebsite = document.getElementById('ctx-open-website');
-        openWebsite.hidden = !this.ctx_targetItem.hasAttribute('url');
-        if (this.ctx_targetItem.hasAttribute('url')) {
-            // Disable openWebsite if no websiteURL is available
+        openWebsite.hidden = !targetIsFeed;
+
+        // Disable openWebsite if no websiteURL is available.
+        if (targetIsFeed) {
             var feedID = this.ctx_targetItem.getAttribute('feedID');
             openWebsite.disabled = !gStorage.getFeed(feedID).websiteURL;
         }
 
-        var separator = document.getElementById('ctx-separator');
-        separator.hidden = this.ctx_targetItem.hasAttribute('specialFolder') &&
-                           this.ctx_targetItem.id == 'starred-folder';
+        var propertiesSeparator = document.getElementById('ctx-properties-separator');
+        propertiesSeparator.hidden = !targetIsFeed;
 
+        var showProperties = document.getElementById('ctx-feed-properties');
+        showProperties.hidden = !targetIsFeed;
+
+
+        // Menuitems relating to deleting feeds and folders
+        var dangerousSeparator = document.getElementById('ctx-dangerous-cmds-separator');
+        dangerousSeparator.hidden = !(targetIsFeed || targetIsContainer ||
+                                      targetIsUnreadFolder || targetIsTrashFolder);
+
+        var deleteFeed = document.getElementById('ctx-delete-feed');
+        deleteFeed.hidden = !targetIsFeed;
+
+        var deleteFolder = document.getElementById('ctx-delete-folder');
+        deleteFolder.hidden = !targetIsContainer;
+
+
+        // Menuitems related to emptying feeds and folders
         var emptyFeed = document.getElementById('ctx-empty-feed');
-        emptyFeed.hidden = !this.ctx_targetItem.hasAttribute('url');
+        emptyFeed.hidden = !targetIsFeed;
 
         var emptyFolder = document.getElementById('ctx-empty-folder');
-        emptyFolder.hidden = !(this.ctx_targetItem.hasAttribute('container') ||
-                               this.ctx_targetItem.id == 'unread-folder');
+        emptyFolder.hidden = !(targetIsContainer || targetIsUnreadFolder);
 
         var restoreTrashed = document.getElementById('ctx-restore-trashed');
-        restoreTrashed.hidden = this.ctx_targetItem.id != 'trash-folder';
+        restoreTrashed.hidden = !targetIsTrashFolder;
 
         var emptyTrash = document.getElementById('ctx-empty-trash');
-        emptyTrash.hidden = this.ctx_targetItem.id != 'trash-folder';
+        emptyTrash.hidden = !targetIsTrashFolder;
+
     },
 
-    /**
-     * Rebuilds the feed list tree.
-     */
+
+    // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
         this.tree = document.getElementById('feed-list');
         var topLevelChildren = document.getElementById('top-level-children');
@@ -351,7 +408,7 @@ var gFeedList = {
         this.refreshSpecialTreeitem('starred-folder');
         this.refreshSpecialTreeitem('trash-folder');
 
-        // Clear existing tree
+        // Clear existing tree.
         var lastChild = topLevelChildren.lastChild;
         while (lastChild.id != 'special-folders-separator') {
             topLevelChildren.removeChild(lastChild);
@@ -360,33 +417,33 @@ var gFeedList = {
 
         this.feeds = gStorage.getFeedsAndFolders({});
 
-        // This array stores all container nodes from the direct parent container of
-        // the currently processed item up until the root.
-        // We always append items to the last container in this array (i.e. the most
-        // nested container). If a new container is encountered, it's pushed to the
-        // array. After we're done reading container's children we pop it.
-        this._levelParentNodes = [topLevelChildren];
+        // This a helper array used by _buildFolderChildren. As the function recurses,
+        // the array stores the <treechildren> elements of all folders in the parent chain
+        // of the currently processed folder. This is how it tracks where to append the
+        // items.
+        this._folderParentChain = [topLevelChildren];
 
-        // Build the rest of the children recursively
-        this._buildChildLivemarks('root');
+        this._buildFolderChildren('root');
 
+        // Fill the items cache.
         this.items = this.tree.getElementsByTagName('treeitem');
     },
 
 
     /**
-     * Recursively reads Live Bookmarks from a specified folder
-     * and its subfolders and builds a tree.
+     * Recursively reads feeds from the database and builds the tree, starting from the
+     * given folder.
      *
      * @param aParentFolder feedID of the folder.
      */
-    _buildChildLivemarks: function gFeedList__buildChildLivemarks(aParentFolder) {
+    _buildFolderChildren: function gFeedList__buildFolderChildren(aParentFolder) {
+
         // Iterate over all the children.
         for (var i = 0; i < this.feeds.length; i++) {
             var feed = this.feeds[i];
 
             if (feed.isFolder && feed.parent == aParentFolder) {
-                var prevParent = this._levelParentNodes[this._levelParentNodes.length - 1];
+                var prevParent = this._folderParentChain[this._folderParentChain.length - 1];
                 var closedFolders = this.tree.getAttribute('closedFolders');
                 var state = closedFolders.match(feed.feedID) ? true : false;
 
@@ -407,12 +464,12 @@ var gFeedList = {
                 var treechildren = document.createElement('treechildren');
                 treechildren = treeitem.appendChild(treechildren);
 
-                this._levelParentNodes.push(treechildren);
+                this._folderParentChain.push(treechildren);
 
-                this._buildChildLivemarks(feed.feedID);
+                this._buildFolderChildren(feed.feedID);
             }
             else if (feed.parent == aParentFolder) {
-                var parent = this._levelParentNodes[this._levelParentNodes.length - 1];
+                var parent = this._folderParentChain[this._folderParentChain.length - 1];
 
                 var treeitem = document.createElement('treeitem');
                 treeitem.setAttribute('feedID', feed.feedID);
@@ -429,7 +486,7 @@ var gFeedList = {
                 this.refreshFeedTreeitems(treeitem);
             }
         }
-        this._levelParentNodes.pop();
+        this._folderParentChain.pop();
     }
 
 }
