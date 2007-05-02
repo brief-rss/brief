@@ -12,117 +12,131 @@ const Ci = Components.interfaces;
 const NC_NAME          = 'http://home.netscape.com/NC-rdf#Name';
 const NC_FEEDURL       = 'http://home.netscape.com/NC-rdf#FeedURL';
 const NC_LIVEMARK      = 'http://home.netscape.com/NC-rdf#Livemark';
-const RDF_NEXT_VAL     = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#nextVal';
-const RDF_INSTANCE_OF  = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#instanceOf';
-const RDF_SEQ_INSTANCE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq';
-const RDF_SEQ          = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#_';
 const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
 // How often to delete entries that have expired or exceed the max number of entries per feed.
 const DELETE_REDUNDANT_ENTRIES_INTERVAL = 3600*24; // 1 day
+
 // How often to permanently remove deleted entries and VACUUM the database.
 const PURGE_DELETED_ENTRIES_INTERVAL = 3600*24*3; // 3 days
+
 // How long to keep entries from feeds no longer in the home folder.
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // One week
 
+const RDF_OBSERVER_DELAY = 250;
 
-function dump(aMessage) {
-  var consoleService = Cc["@mozilla.org/consoleservice;1"].
-                       getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage('Brief:\n' + aMessage);
-}
 
 function BriefStorageService() {
-    var file = Cc['@mozilla.org/file/directory_service;1'].
-               getService(Ci.nsIProperties).
-               get('ProfD', Ci.nsIFile);
-    file.append('brief.sqlite');
-
-    var storageService = Cc['@mozilla.org/storage/service;1'].
-                         getService(Ci.mozIStorageService);
-    this.dBConnection = storageService.openDatabase(file);
-    this.dummyDBConnection = storageService.openDatabase(file);
-
-    //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
-    //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
-
-    this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
-                                       'feedID      TEXT UNIQUE,           ' +
-                                       'RDF_URI     TEXT,                  ' +
-                                       'feedURL     TEXT,                  ' +
-                                       'websiteURL  TEXT,                  ' +
-                                       'title       TEXT,                  ' +
-                                       'subtitle    TEXT,                  ' +
-                                       'imageURL    TEXT,                  ' +
-                                       'imageLink   TEXT,                  ' +
-                                       'imageTitle  TEXT,                  ' +
-                                       'favicon     TEXT,                  ' +
-                                       'hidden      INTEGER DEFAULT 0,     ' +
-                                       'everUpdated INTEGER DEFAULT 0,     ' +
-                                       'oldestAvailableEntryDate INTEGER,  ' +
-                                       'rowIndex    INTEGER,               ' +
-                                       'parent      TEXT,                  ' +
-                                       'isFolder    INTEGER                ' +
-                                       ')');
-    this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
-                                       'feedID     TEXT,                    ' +
-                                       'id         TEXT UNIQUE,             ' +
-                                       'providedId TEXT,                    ' +
-                                       'entryURL   TEXT,                    ' +
-                                       'title      TEXT,                    ' +
-                                       'summary    TEXT,                    ' +
-                                       'content    TEXT,                    ' +
-                                       'date       INTEGER,                 ' +
-                                       'read       INTEGER DEFAULT 0,       ' +
-                                       'starred    INTEGER DEFAULT 0,       ' +
-                                       'deleted    INTEGER DEFAULT 0        ' +
-                                       ')');
-    // Columns added in 0.6.
-    try {
-        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN    ' +
-                                           'oldestAvailableEntryDate INTEGER');
-        this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
-    }
-    catch (e) {}
-
-    // Columns added in 0.7.
-    try {
-        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
-        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
-        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
-        this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
-    }
-    catch (e) {}
-
-    this.dBConnection.executeSimpleSQL('CREATE UNIQUE INDEX IF NOT EXISTS       ' +
-                                       'entries_id_index ON entries (id)        ');
-    this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                       'entries_feedID_index ON entries (feedID)');
-    this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                       'entries_date_index ON entries (date)    ');
-    this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                       'entries_read_index ON entries (read)    ');
-
-    this.startDummyStatement();
-    this.dBConnection.preload();
-
     this.observerService = Cc['@mozilla.org/observer-service;1'].
                            getService(Ci.nsIObserverService);
-    this.observerService.addObserver(this, 'quit-application', null);
-    this.prefs = Cc["@mozilla.org/preferences-service;1"].
-                 getService(Ci.nsIPrefService).
-                 getBranch('extensions.brief.').
-                 QueryInterface(Ci.nsIPrefBranch2);
-    this.prefs.addObserver('', this, false);
+
+    // The instantiation can't be done on app-startup, because the directory service
+    // doesn't work yet, so we perform it on profile-after-change.
+    this.observerService.addObserver(this, 'profile-after-change', false);
 }
 
 BriefStorageService.prototype = {
 
-    observerService:      null,
-    prefs:                null,
-    dBConnection:         null,
-    feedsAndFoldersCache: null,
-    feedsCache:           null,
+    dBConnection:          null,
+    feedsAndFoldersCache:  null,
+    feedsCache:            null,
+
+    observerService:       null,
+    prefs:                 null,
+    rdfService:            null,
+    bookmarksService:      null,
+    rdfContainerUtils:     null,
+    bookmarksDataSource:   null,
+
+    rdfObserverDelayTimer: null,
+    rdfObserverTimerIsRunning: false,
+
+
+    instantiate: function BriefStorage_instantiate() {
+        var file = Cc['@mozilla.org/file/directory_service;1'].
+                   getService(Ci.nsIProperties).
+                   get('ProfD', Ci.nsIFile);
+        file.append('brief.sqlite');
+
+        var storageService = Cc['@mozilla.org/storage/service;1'].
+                             getService(Ci.mozIStorageService);
+        this.dBConnection = storageService.openDatabase(file);
+        this.dummyDBConnection = storageService.openDatabase(file);
+
+        //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
+        //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
+
+        this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
+                                           'feedID      TEXT UNIQUE,           ' +
+                                           'RDF_URI     TEXT,                  ' +
+                                           'feedURL     TEXT,                  ' +
+                                           'websiteURL  TEXT,                  ' +
+                                           'title       TEXT,                  ' +
+                                           'subtitle    TEXT,                  ' +
+                                           'imageURL    TEXT,                  ' +
+                                           'imageLink   TEXT,                  ' +
+                                           'imageTitle  TEXT,                  ' +
+                                           'favicon     TEXT,                  ' +
+                                           'hidden      INTEGER DEFAULT 0,     ' +
+                                           'everUpdated INTEGER DEFAULT 0,     ' +
+                                           'oldestAvailableEntryDate INTEGER,  ' +
+                                           'rowIndex    INTEGER,               ' +
+                                           'parent      TEXT,                  ' +
+                                           'isFolder    INTEGER                ' +
+                                           ')');
+        this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
+                                           'feedID     TEXT,                    ' +
+                                           'id         TEXT UNIQUE,             ' +
+                                           'providedId TEXT,                    ' +
+                                           'entryURL   TEXT,                    ' +
+                                           'title      TEXT,                    ' +
+                                           'summary    TEXT,                    ' +
+                                           'content    TEXT,                    ' +
+                                           'date       INTEGER,                 ' +
+                                           'read       INTEGER DEFAULT 0,       ' +
+                                           'starred    INTEGER DEFAULT 0,       ' +
+                                           'deleted    INTEGER DEFAULT 0        ' +
+                                           ')');
+        // Columns added in 0.6.
+        try {
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN    ' +
+                                               'oldestAvailableEntryDate INTEGER');
+            this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
+        }
+        catch (e) {}
+
+        // Columns added in 0.7.
+        try {
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
+        }
+        catch (e) {}
+
+        this.dBConnection.executeSimpleSQL('CREATE UNIQUE INDEX IF NOT EXISTS       ' +
+                                           'entries_id_index ON entries (id)        ');
+        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                           'entries_feedID_index ON entries (feedID)');
+        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                           'entries_date_index ON entries (date)    ');
+        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                           'entries_read_index ON entries (read)    ');
+
+        this.startDummyStatement();
+        this.dBConnection.preload();
+
+        this.prefs = Cc["@mozilla.org/preferences-service;1"].
+                     getService(Ci.nsIPrefService).
+                     getBranch('extensions.brief.').
+                     QueryInterface(Ci.nsIPrefBranch2);
+        this.prefs.addObserver('', this, false);
+
+        this.initBookmarks();
+
+        this.observerService.addObserver(this, 'quit-application', false);
+    },
+
 
     // nsIBriefStorage
     getFeed: function BriefStorage_getFeed(aFeedID) {
@@ -273,7 +287,7 @@ BriefStorageService.prototype = {
     getEntriesCount: function BriefStorage_getEntriesCount(aQuery) {
         var statement = 'SELECT COUNT(1) ' + aQuery.getQueryTextForSelect();
         var select = this.dBConnection.createStatement(statement);
-        dump(statement);
+
         var count = 0;
         try {
             select.executeStep();
@@ -317,7 +331,7 @@ BriefStorageService.prototype = {
             for (var i = 0; i < entries.length; i++) {
                 entry = entries[i];
                 title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
-                hash = this.hashString(aFeed.feedID + entry.entryURL + entry.id + title);
+                hash = hashString(aFeed.feedID + entry.entryURL + entry.id + title);
 
                 insertIntoEntries.bindStringParameter(0, aFeed.feedID);
                 insertIntoEntries.bindStringParameter(1, hash);
@@ -549,6 +563,9 @@ BriefStorageService.prototype = {
     // nsIObserver
     observe: function BriefStorage_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
+            case 'profile-after-change':
+                this.instantiate();
+                break;
 
             case 'quit-application':
                 var lastTime = this.prefs.getIntPref('database.lastDeletedRedundantTime');
@@ -566,6 +583,12 @@ BriefStorageService.prototype = {
                 if (now - lastTime > PURGE_DELETED_ENTRIES_INTERVAL)
                     this.purgeDeletedEntries();
 
+                this.bookmarksDataSource.RemoveObserver(this);
+                break;
+
+            case 'timer-callback':
+                this.rdfObserverTimerIsRunning = false;
+                this.syncWithBookmarks();
                 break;
 
             case 'nsPref:changed':
@@ -581,9 +604,6 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
-        if (!this.livemarksInitiated)
-            this.initLivemarks();
-
         this.bookmarkItems = [];
 
         // Get the current Live Bookmarks
@@ -591,10 +611,9 @@ BriefStorageService.prototype = {
         if (!this.rootURI)
             throw('No Live Bookmarks folder specified (extensions.brief.liveBookmarksFolder is empty)');
 
-        root = this.rdfs.GetResource(this.rootURI);
+        root = this.rdfService.GetResource(this.rootURI);
         this.traverseLivemarks(root);
 
-        var feedListChanged = false;
         this.dBConnection.beginTransaction();
         try {
             // Insert any new livemarks into the feeds database
@@ -651,6 +670,7 @@ BriefStorageService.prototype = {
                 if (!found) {
                     // Invalidate cache since feeds table is about to change
                     this.feedsCache = this.feedsAndFoldersCache = null;
+
                     insertItem.bindStringParameter(0, item.feedID);
                     insertItem.bindStringParameter(1, item.feedURL || null);
                     insertItem.bindStringParameter(2, item.title);
@@ -659,7 +679,9 @@ BriefStorageService.prototype = {
                     insertItem.bindStringParameter(5, item.parent);
                     insertItem.bindStringParameter(6, item.uri);
                     insertItem.execute();
-                    feedListChanged = true;
+
+                    this.observerService.
+                         notifyObservers(null,'brief:feed-added', item.feedID);
                 }
                 else {
                     // Mark that the feed is still in bookmarks.
@@ -683,7 +705,7 @@ BriefStorageService.prototype = {
                            feed.hidden > 0) {
                             // If it has been row index, parent or hidden state that
                             // changed, then the whole feed list tree in the Brief window
-                            // has to be rebuilt, so we need to notify about it.
+                            // has to be rebuilt.
                             invalidateFeedList = true;
                         }
                         else {
@@ -699,10 +721,9 @@ BriefStorageService.prototype = {
             // Finally, remove any feeds that are no longer bookmarked.
             for (i = 0; i < feeds.length; i++) {
                 feed = feeds[i];
-                if (!feed.isInBookmarks) {
+                if (!feed.isInBookmarks && feed.hidden == 0) {
                     // Invalidate cache since feeds table is about to change
                     this.feedsCache = this.feedsAndFoldersCache = null;
-                    invalidateFeedList = true;
 
                     if (feed.isFolder) {
                         removeFeed.bindStringParameter(0, feed.feedID);
@@ -713,6 +734,9 @@ BriefStorageService.prototype = {
                         hideFeed.bindStringParameter(1, feed.feedID);
                         hideFeed.execute();
                     }
+
+                    this.observerService.
+                         notifyObservers(null,'brief:feed-removed', item.feedID);
                 }
             }
         }
@@ -724,84 +748,157 @@ BriefStorageService.prototype = {
     },
 
 
-    // Separate function to initialize RDF resources to avoid doing it on every
-    // traverseLivemarks() call.
-    initLivemarks: function BriefStorage_initLivemarks() {
-        this.rdfs = Cc['@mozilla.org/rdf/rdf-service;1'].getService(Ci.nsIRDFService);
-        this.bmds = this.rdfs.GetDataSource('rdf:bookmarks');
+    // Initializes RDF services and resources.
+    initBookmarks: function BriefStorage_initLivemarks() {
+        this.rdfService = Cc['@mozilla.org/rdf/rdf-service;1'].
+                          getService(Ci.nsIRDFService);
+        this.bookmarksDataSource = this.rdfService.GetDataSource('rdf:bookmarks');
+        this.bookmarksDataSource.AddObserver(this);
+
+        this.bookmarksService = this.bookmarksDataSource.
+                                     QueryInterface(Ci.nsIBookmarksService);
+        this.rdfContainerUtils = Cc['@mozilla.org/rdf/container-utils;1'].
+                                 getService(Ci.nsIRDFContainerUtils);
+
+        this.rdfObserverDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
         // Predicates
-        this.nextValArc = this.rdfs.GetResource(RDF_NEXT_VAL);
-        this.instanceOfArc = this.rdfs.GetResource(RDF_INSTANCE_OF);
-        this.typeArc = this.rdfs.GetResource(RDF_TYPE);
-        this.nameArc = this.rdfs.GetResource(NC_NAME);
-        this.feedUrlArc = this.rdfs.GetResource(NC_FEEDURL);
+        this.typeArc = this.rdfService.GetResource(RDF_TYPE);
+        this.nameArc = this.rdfService.GetResource(NC_NAME);
+        this.feedUrlArc = this.rdfService.GetResource(NC_FEEDURL);
 
-        // Common resources
-        this.sequence = this.rdfs.GetResource(RDF_SEQ_INSTANCE);
-        this.livemarkType = this.rdfs.GetResource(NC_LIVEMARK);
-
-        this.livemarksInitiated = true;
+        // Common targets
+        this.livemarkType = this.rdfService.GetResource(NC_LIVEMARK);
     },
 
 
     /**
-     * Recursively reads livemarks from a folder and its subfolders
-     * and stores them as an array in |livemark| member property.
+     * Recursively reads livemarks and folders and stores them in the |bookmarkItems|
+     * array.
      *
-     * @param aFolder RDF URI of the folder containing the livemarks.
+     * @param  aFolder  An RDF resource - the folder to be traversed.
      */
      traverseLivemarks: function BriefStorage_traverseLivemarks(aFolder) {
-        var nextVal = this.bmds.GetTarget(aFolder, this.nextValArc, true);
-        var length = nextVal.QueryInterface(Ci.nsIRDFLiteral).Value - 1;
-        for (var i = 1; i <= length; i++) {
-            var seqArc = this.rdfs.GetResource(RDF_SEQ + i);
-            var child = this.bmds.GetTarget(aFolder, seqArc, true);
 
-            // Workaround a situation when nextVal value is incorrect after
-            // sorting or removing bookmarks and can point to non-existent items.
-            if (!child)
-                continue;
+        var folderURI = aFolder.QueryInterface(Ci.nsIRDFResource).Value;
+        var folderFeedID = hashString(folderURI);
 
-            var type = this.bmds.GetTarget(child, this.typeArc, true);
-            var instance = this.bmds.GetTarget(child, this.instanceOfArc, true);
+        var container = Cc['@mozilla.org/rdf/container;1'].
+                        createInstance(Ci.nsIRDFContainer);
+        container.Init(this.bookmarksDataSource, aFolder);
+        var children = container.GetElements();
 
+        var child, type, item, uri;
+        while (children.hasMoreElements()) {
+
+            child = children.getNext();
+            type = this.bookmarksDataSource.GetTarget(child, this.typeArc, true);
+
+            // The child is a Live Bookmark.
             if (type == this.livemarkType) {
-                var item = {};
-                item.feedURL = this.bmds.GetTarget(child, this.feedUrlArc, true).
-                                         QueryInterface(Ci.nsIRDFLiteral).
-                                         Value;
-                item.feedID = this.hashString(item.feedURL);
+                item = {};
+                item.feedURL = this.bookmarksDataSource.GetTarget(child, this.feedUrlArc, true).
+                                                        QueryInterface(Ci.nsIRDFLiteral).
+                                                        Value;
+                item.feedID = hashString(item.feedURL);
                 item.uri = child.QueryInterface(Ci.nsIRDFResource).Value;
-                item.title = this.bmds.GetTarget(child, this.nameArc, true).
-                                       QueryInterface(Ci.nsIRDFLiteral).
-                                       Value;
+                item.title = this.bookmarksDataSource.GetTarget(child, this.nameArc, true).
+                                                      QueryInterface(Ci.nsIRDFLiteral).
+                                                      Value;
                 item.rowIndex = this.bookmarkItems.length;
                 item.isFolder = false;
-                var parentURI = aFolder.QueryInterface(Ci.nsIRDFResource).Value;
-                item.parent = parentURI == this.rootURI ? 'root'
-                                                        : this.hashString(parentURI);
+                item.parent = folderFeedID;
+
                 this.bookmarkItems.push(item);
             }
-            else if (instance == this.sequence) {
-                var item = {};
-                item.title = this.bmds.GetTarget(child, this.nameArc, true).
-                                       QueryInterface(Ci.nsIRDFLiteral).
-                                       Value;
-                var uri = child.QueryInterface(Ci.nsIRDFResource).Value;
-                item.uri = uri;
-                item.feedID = this.hashString(uri);
+
+            // The child is a folder.
+            else if (this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, child)) {
+                item = {};
+                item.title = this.bookmarksDataSource.GetTarget(child, this.nameArc, true).
+                                                      QueryInterface(Ci.nsIRDFLiteral).
+                                                      Value;
+                item.uri = child.QueryInterface(Ci.nsIRDFResource).Value;
+                item.feedID = hashString(item.uri);
                 item.rowIndex = this.bookmarkItems.length;
                 item.isFolder = true;
-                var parentURI = aFolder.QueryInterface(Ci.nsIRDFResource).Value;
-                item.parent = parentURI == this.rootURI ? 'root'
-                                                        : this.hashString(parentURI);
+                item.parent = folderFeedID;
+
                 this.bookmarkItems.push(item);
 
+                // Recurse...
                 this.traverseLivemarks(child);
             }
         }
-     },
+    },
+
+    onAssert: function BriefStorage_onAssert(aDataSource, aSource, aProperty, aTarget) {
+        // Because we only care about livemarks and folders, check if the assertion
+        // target is even a resource, for optimization.
+        if (!(aTarget instanceof Ci.nsIRDFResource))
+            return;
+
+        // Check if the target item is an RDF sequence (i.e. livemark or folder) and if
+        // it is in the home folder.
+        var isFolder = this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, aTarget);
+        if (isFolder && this.resourceIsInHomeFolder(aTarget))
+            this.delayedBookmarksSync();
+    },
+
+
+    onUnassert: function BriefStorage_onUnassert(aDataSource, aSource, aProperty, aTarget) {
+
+        if (!(aTarget instanceof Ci.nsIRDFResource) ||
+           !this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, aTarget)) {
+            return;
+        }
+
+        var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
+
+        // We need to check if the home folder is in the removed item's (i.e. the
+        // assertion target's) parent chain. Because the target is already detached and
+        // has no parent, we need to examine the parent chain of the assertion source
+        // instead. But the source itself can be the home folder, so let's check that, too.
+        if (aSource.Value == homeFolderURI || this.resourceIsInHomeFolder(aSource))
+            this.delayedBookmarksSync();
+    },
+
+
+    onChange: function BriefStorage_onChange(aDataSource, aSource, aProperty, aOldTarget,
+                                             aNewTarget) {
+
+        if ((aProperty == this.nameArc || aProperty == this.feedUrlArc) &&
+           this.resourceIsInHomeFolder(aSource)) {
+            this.delayedBookmarksSync();
+        }
+
+    },
+
+    onMove: function BriefStorage_onMove(aDataSource, aOldSource, aNewSource, aProperty, aTarget) { },
+    onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch(aDataSource) { },
+    onEndUpdateBatch: function BriefStorage_onEndUpdateBatch(aDataSource) { },
+
+    resourceIsInHomeFolder: function BriefStorage_resourceIsInHomeFolder(aResource) {
+        var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
+
+        var parentChain = this.bookmarksService.getParentChain(aResource);
+        var length = parentChain.length;
+        for (var i = 0; i < length; i++) {
+            var node = parentChain.queryElementAt(i, Ci.nsIRDFResource);
+            if (node.Value == homeFolderURI)
+                return true;
+        }
+
+        return false;
+    },
+
+    delayedBookmarksSync: function BriefStorage_delayedBookmarksSync() {
+        if (this.rdfObserverTimerIsRunning)
+            this.rdfObserverDelayTimer.cancel();
+
+        this.rdfObserverDelayTimer.init(this, RDF_OBSERVER_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
+        this.rdfObserverTimerIsRunning = true;
+    },
 
 
     /**
@@ -844,37 +941,6 @@ BriefStorageService.prototype = {
     },
 
 
-    hashString: function BriefStorage_hashString(aString) {
-
-        // nsICryptoHash can read the data either from an array or a stream.
-        // Creating a stream ought to be faster than converting a long string
-        // into an array using JS.
-        // XXX nsIStringInputStream doesn't work well with UTF-16 strings; it's lossy, so
-        // it increases the risk of collision.
-        // nsIScriptableUnicodeConverter.convertToInputStream should be used instead but
-        // it would result in different hashes and therefore duplicate entries for users
-        // of older versions. For now, I have decided that the risk of collision isn't
-        // big enough and it's not worth changing the method.
-        var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
-                           createInstance(Ci.nsIStringInputStream);
-        stringStream.setData(aString, aString.length);
-
-        var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
-        hasher.init(Ci.nsICryptoHash.MD5);
-        hasher.updateFromStream(stringStream, stringStream.available());
-        var hash = hasher.finish(false);
-
-        // Convert the hash to a hex-encoded string.
-        var hexchars = '0123456789ABCDEF';
-        var hexrep = new Array(hash.length * 2);
-        for (var i = 0; i < hash.length; ++i) {
-            hexrep[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 15);
-            hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
-        }
-        return hexrep.join('');
-    },
-
-
     logDatabaseError: function BriefStorage_logDatabaseError(aException) {
         var error = this.dBConnection.lastErrorString;
         var consoleService = Cc['@mozilla.org/consoleservice;1'].
@@ -887,8 +953,9 @@ BriefStorageService.prototype = {
     // nsISupports
     QueryInterface: function BriefStorage_QueryInterface(aIID) {
         if (!aIID.equals(Components.interfaces.nsIBriefStorage) &&
-           !aIID.equals(Components.interfaces.nsIObserver) &&
-           !aIID.equals(Components.interfaces.nsISupports)) {
+            !aIID.equals(Components.interfaces.nsIObserver) &&
+            !aIID.equals(Components.interfaces.nsIRDFObserver) &&
+            !aIID.equals(Components.interfaces.nsISupports)) {
             throw Components.results.NS_ERROR_NO_INTERFACE;
         }
         return this;
@@ -944,7 +1011,10 @@ BriefQuery.prototype = {
             this._items = Components.classes['@ancestor/brief/storage;1'].
                                      getService(Components.interfaces.nsIBriefStorage).
                                      getFeedsAndFolders({});
-            this._traverseChildren('root');
+            var prefs = Cc["@mozilla.org/preferences-service;1"].
+                        getService(Ci.nsIPrefBranch);
+            var rootFolderURI = prefs.getCharPref('extensions.brief.liveBookmarksFolder');
+            this._traverseChildren(hashString(rootFolderURI));
 
             text += '"' + this._effectiveFolders + '" LIKE "%" || feeds.parent || "%" AND ';
         }
@@ -1041,21 +1111,68 @@ BriefQuery.prototype = {
         return this;
     }
 
+}
 
+function hashString(aString) {
+
+    // nsICryptoHash can read the data either from an array or a stream.
+    // Creating a stream ought to be faster than converting a long string
+    // into an array using JS.
+    // XXX nsIStringInputStream doesn't work well with UTF-16 strings; it's lossy, so
+    // it increases the risk of collision.
+    // nsIScriptableUnicodeConverter.convertToInputStream should be used instead but
+    // it would result in different hashes and therefore duplicate entries for users
+    // of older versions. For now, I have decided that the risk of collision isn't
+    // big enough and it's not worth changing the method.
+    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
+                       createInstance(Ci.nsIStringInputStream);
+    stringStream.setData(aString, aString.length);
+
+    var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
+    hasher.init(Ci.nsICryptoHash.MD5);
+    hasher.updateFromStream(stringStream, stringStream.available());
+    var hash = hasher.finish(false);
+
+    // Convert the hash to a hex-encoded string.
+    var hexchars = '0123456789ABCDEF';
+    var hexrep = new Array(hash.length * 2);
+    for (var i = 0; i < hash.length; ++i) {
+        hexrep[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 15);
+        hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
+    }
+    return hexrep.join('');
+}
+
+function dump(aMessage) {
+  var consoleService = Cc["@mozilla.org/consoleservice;1"].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage('Brief:\n' + aMessage);
 }
 
 
-function Factory(aClassObject) {
-    this._classObject = aClassObject;
-}
+var StorageServiceFactory = {
 
-Factory.prototype = {
+    _singleton: null,
 
     createInstance: function(aOuter, aIID) {
         if (aOuter != null)
             throw Components.results.NS_ERROR_NO_AGGREGATION;
 
-        return (new this._classObject()).QueryInterface(aIID);
+        if (!this._singleton)
+            this._singleton = new BriefStorageService();
+
+        return this._singleton.QueryInterface(aIID);
+    }
+
+}
+
+var QueryFactory = {
+
+    createInstance: function(aOuter, aIID) {
+        if (aOuter != null)
+            throw Components.results.NS_ERROR_NO_AGGREGATION;
+
+        return (new BriefQuery()).QueryInterface(aIID);
     }
 
 }
@@ -1070,11 +1187,20 @@ var Module = {
                                          STORAGE_CONTRACT_ID, aFileSpec, aLocation, aType);
         aCompMgr.registerFactoryLocation(QUERY_CLASS_ID, QUERY_CLASS_NAME,
                                          QUERY_CONTRACT_ID, aFileSpec, aLocation, aType);
+
+        var categoryManager = Components.classes['@mozilla.org/categorymanager;1'].
+                              getService(Components.interfaces.nsICategoryManager);
+        categoryManager.addCategoryEntry('app-startup', 'nsIBriefStorage',
+                                         STORAGE_CONTRACT_ID, true, true);
     },
 
     unregisterSelf: function(aCompMgr, aLocation, aType) {
         aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
         aCompMgr.unregisterFactoryLocation(CLASS_ID, aLocation);
+
+        var categoryManager = Components.classes['@mozilla.org/categorymanager;1'].
+                              getService(Components.interfaces.nsICategoryManager);
+        categoryManager.deleteCategoryEntry('app-startup', 'nsIBriefStorage', true);
     },
 
     getClassObject: function(aCompMgr, aCID, aIID) {
@@ -1082,9 +1208,9 @@ var Module = {
             throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
 
         if (aCID.equals(STORAGE_CLASS_ID))
-            return new Factory(BriefStorageService);
+            return StorageServiceFactory;
         if (aCID.equals(QUERY_CLASS_ID))
-            return new Factory(BriefQuery);
+            return QueryFactory;
 
         throw Components.results.NS_ERROR_NO_INTERFACE;
     },
