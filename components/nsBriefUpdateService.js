@@ -75,11 +75,27 @@ BriefUpdateService.prototype = {
 
     // nsITimerCallback
     notify: function BUS_notify(aTimer) {
-        var interval = this.prefs.getIntPref('update.interval');
-        var lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime');
-        var now = Math.round(Date.now() / 1000);
-        if (now - lastUpdateTime >= interval*60) {
-            this.fetchAllFeeds(true);
+        switch (aTimer) {
+
+        case this.updateTimer:
+            var interval = this.prefs.getIntPref('update.interval');
+            var lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime');
+            var now = Math.round(Date.now() / 1000);
+            if (now - lastUpdateTime >= interval*60)
+                this.fetchAllFeeds(true);
+            break;
+
+        case this.fetchDelayTimer:
+            var currentFeed = this.feeds[this.currentFeedIndex];
+            new FeedFetcher(currentFeed);
+            this.currentFeedIndex++;
+
+            // If all feeds have been already fetched, cancel the timer.
+            if (this.currentFeedIndex == this.feeds.length)
+                aTimer.cancel();
+
+            break;
+
         }
     },
 
@@ -115,32 +131,12 @@ BriefUpdateService.prototype = {
 
         // We will fetch feeds on an interval, so we don't choke when downloading
         // and processing all of them a once.
-        var callback = this.fetchDelayCallback;
-        var delay = aUpdateInBackground
-                    ? this.prefs.getIntPref('update.backgroundFetchDelay')
-                    : this.prefs.getIntPref('update.defaultFetchDelay');
-        this.fetchDelayTimer.initWithCallback(callback, delay, TIMER_TYPE_SLACK);
+        var delay = aUpdateInBackground ? this.prefs.getIntPref('update.backgroundFetchDelay')
+                                        : this.prefs.getIntPref('update.defaultFetchDelay');
+        this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
+
         var now = Math.round(Date.now() / 1000);
         this.prefs.setIntPref('update.lastUpdateTime', now);
-    },
-
-
-    // Subclass implementing nsITimerCallback
-    fetchDelayCallback: {
-
-        notify: function BUS_fetchDelayCallback_notify(aTimer) {
-            // XXX We should find a better way to obtain the component object.
-            var self = Factory.sigleton;
-
-            var currentFeed = self.feeds[self.currentFeedIndex];
-            new FeedFetcher(currentFeed);
-            self.currentFeedIndex++;
-
-            // Check if all feeds have been already fetched
-            if (self.currentFeedIndex == self.feeds.length)
-                aTimer.cancel();
-        }
-
     },
 
 
@@ -158,84 +154,85 @@ BriefUpdateService.prototype = {
     observe: function BUS_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
 
-            // Startup initialization. We use this instead of app-startup,
-            // so that the preferences are already initialized.
-            case 'profile-after-change':
-                if (aData == 'startup') {
-                    if (this.prefs.getBoolPref('update.enableAutoUpdate'))
-                        this.startUpdateService();
+        // Startup initialization. We use this instead of app-startup,
+        // so that the preferences are already initialized.
+        case 'profile-after-change':
+            if (aData == 'startup') {
+                if (this.prefs.getBoolPref('update.enableAutoUpdate'))
+                    this.startUpdateService();
 
-                    // We add the observer here instead of in the constructor as prefs
-                    // are changed during startup when assuming their user-set values.
-                    this.prefs.addObserver('', this, false);
+                // We add the observer here instead of in the constructor as prefs
+                // are changed during startup when assuming their user-set values.
+                this.prefs.addObserver('', this, false);
+            }
+            break;
+
+        // Count updated feeds, so we can show their number in the alert when
+        // updating is completed.
+        case 'brief:feed-error':
+        case 'brief:feed-updated':
+            if (this.batchUpdateInProgress == 0)
+                // This isn't a batch update, no need to count the feeds.
+                return;
+
+            this.finishedFeedsCount++;
+            if (aSubject && aSubject.QueryInterface(Ci.nsIVariant) > 0) {
+                this.newEntriesCount += aSubject.QueryInterface(Ci.nsIVariant);
+                this.updatedFeedsCount++;
+            }
+
+            if (this.finishedFeedsCount == this.feeds.length) {
+                // We're done, all feeds updated.
+                this.batchUpdateInProgress = 0;
+
+                var showNotification = this.prefs.getBoolPref('update.showNotification');
+                if (this.updatedFeedsCount > 0 && showNotification && this.alertsService) {
+
+                    var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
+                                 getService(Ci.nsIStringBundleService).
+                                 createBundle('chrome://brief/locale/brief.properties');
+                    var title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
+                    var params = [this.newEntriesCount, this.updatedFeedsCount];
+                    var text = bundle.formatStringFromName('updateAlertText', params, 2);
+
+                    this.alertsService.showAlertNotification(FEED_ICON_URL, title, text,
+                                                             true, null, this);
                 }
+            }
+            break;
+
+        // Notification from nsIAlertsService that user has clicked the link in
+        // the alert.
+        case 'alertclickcallback':
+            var window = Cc['@mozilla.org/appshell/window-mediator;1'].
+                         getService(Ci.nsIWindowMediator).
+                         getMostRecentWindow("navigator:browser");
+            if (window) {
+                window.gBrief.openBrief(true);
+                window.focus();
+            }
+            break;
+
+        case 'nsPref:changed':
+            switch (aData) {
+            case 'update.enableAutoUpdate':
+                var newValue = this.prefs.getBoolPref('update.enableAutoUpdate');
+                if (!newValue && this.updateServiceRunning)
+                    this.stopUpdateService();
+                if (newValue && !this.updateServiceRunning)
+                    this.startUpdateService();
                 break;
 
-            // Count updated feeds, so we can show their number in the alert when
-            // updating is completed.
-            case 'brief:feed-error':
-            case 'brief:feed-updated':
-                if (this.batchUpdateInProgress == 0)
-                    // This isn't a batch update, no need to count the feeds.
-                    return;
-
-                this.finishedFeedsCount++;
-                if (aSubject && aSubject.QueryInterface(Ci.nsIVariant) > 0) {
-                    this.newEntriesCount += aSubject.QueryInterface(Ci.nsIVariant);
-                    this.updatedFeedsCount++;
-                }
-
-                if (this.finishedFeedsCount == this.feeds.length) {
-                    // We're done, all feeds updated.
-                    this.batchUpdateInProgress = 0;
-
-                    var showNotification = this.prefs.getBoolPref('update.showNotification');
-                    if (this.updatedFeedsCount > 0 && showNotification && this.alertsService) {
-                        var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
-                                     getService(Ci.nsIStringBundleService).
-                                     createBundle('chrome://brief/locale/brief.properties');
-                        var title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
-                        var params = [this.newEntriesCount, this.updatedFeedsCount];
-                        var text = bundle.formatStringFromName('updateAlertText',
-                                                               params, 2);
-                        this.alertsService.showAlertNotification(FEED_ICON_URL, title,
-                                                                 text, true, null, this);
-                    }
-                }
+            case 'update.interval':
+                var updateEnabled = this.prefs.getBoolPref('update.enableAutoUpdate');
+                if (this.updateServiceRunning)
+                    this.stopUpdateService();
+                if (updateEnabled)
+                    this.startUpdateService();
                 break;
-
-            // Notification from nsIAlertsService that user has clicked the link in
-            // the alert.
-            case 'alertclickcallback':
-                var window = Cc['@mozilla.org/appshell/window-mediator;1'].
-                             getService(Ci.nsIWindowMediator).
-                             getMostRecentWindow("navigator:browser");
-                if (window) {
-                    window.gBrief.openBrief(true);
-                    window.focus();
-                }
-                break;
-
-            case 'nsPref:changed':
-                switch (aData) {
-                    case 'update.enableAutoUpdate':
-                        var newValue = this.prefs.getBoolPref('update.enableAutoUpdate');
-                        if (!newValue && this.updateServiceRunning)
-                            this.stopUpdateService();
-                        if (newValue && !this.updateServiceRunning)
-                            this.startUpdateService();
-                        break;
-
-                    case 'update.interval':
-                        var updateEnabled = this.prefs.getBoolPref('update.enableAutoUpdate');
-                        if (this.updateServiceRunning)
-                            this.stopUpdateService();
-                        if (updateEnabled)
-                            this.startUpdateService();
-                        break;
-                }
-                break;
-        }
+            }
+            break;
+    }
     },
 
 
