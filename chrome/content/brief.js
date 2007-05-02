@@ -77,12 +77,15 @@ var brief = {
 
         var observerService = Cc["@mozilla.org/observer-service;1"].
                               getService(Ci.nsIObserverService);
+
         observerService.addObserver(this, 'brief:feed-updated', false);
         observerService.addObserver(this, 'brief:feed-loading', false);
         observerService.addObserver(this, 'brief:feed-error', false);
         observerService.addObserver(this, 'brief:entry-status-changed', false);
-        observerService.addObserver(this, 'brief:invalidate-feedlist', false);
         observerService.addObserver(this, 'brief:batch-update-started', false);
+
+        observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
+        observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
         // Load the initial Unread view or the new version page.
         var prevLastMajorVersion = gPrefs.getCharPref('lastMajorVersion');
@@ -94,6 +97,9 @@ var brief = {
         else if (gPrefs.getBoolPref('showHomeView')) {
             setTimeout(function() { gFeedList.tree.view.selection.select(0); }, 0);
         }
+
+        // Init stuff in bookmarks.js
+        setTimeout(function() { initServices(); initBMService(); }, 100);
     },
 
 
@@ -103,9 +109,12 @@ var brief = {
         observerService.removeObserver(this, 'brief:feed-updated');
         observerService.removeObserver(this, 'brief:feed-loading');
         observerService.removeObserver(this, 'brief:feed-error');
-        observerService.removeObserver(this, 'brief:invalidate-feedlist');
         observerService.removeObserver(this, 'brief:entry-status-changed');
         observerService.removeObserver(this, 'brief:batch-update-started');
+
+        observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
+        observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
+
         gPrefs.unregister();
 
         // Persist the folders open/closed state.
@@ -124,6 +133,7 @@ var brief = {
     // notifications.
     observe: function brief_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
+
         // A feed update was finished and new entries are available. Restore the
         // favicon instead of the throbber (or error icon), refresh the feed treeitem
         // and the feedview if necessary.
@@ -143,14 +153,14 @@ var brief = {
             }
             break;
 
-        // A feed was requested, show throbber as its icon.
+        // A feed was requested; show throbber as its icon.
         case 'brief:feed-loading':
             var item = gFeedList.getTreeitem(aData);
             item.setAttribute('loading', true);
             gFeedList.refreshFeedTreeitems(item);
             break;
 
-        // An error occured when downloading or parsing a feed, show error icon.
+        // An error occured when downloading or parsing a feed; show error icon.
         case 'brief:feed-error':
             var feedID = aData;
             var item = gFeedList.getTreeitem(feedID);
@@ -159,15 +169,6 @@ var brief = {
             gFeedList.refreshFeedTreeitems(item);
             this.finishedFeeds++;
             this.updateProgressMeter();
-            break;
-
-        // The Live Bookmarks stored is user's folder of choice were read and the
-        // in-database list of feeds was synchronized. Rebuild the feed list as it
-        // may have changed.
-        case 'brief:feedlist-invalidate':
-            gFeedList.rebuild();
-            var deck = document.getElementById('feed-list-deck');
-            deck.selectedIndex = 0;
             break;
 
         // Sets up the updating progressmeter.
@@ -229,7 +230,7 @@ var brief = {
             break;
 
         case 'deleted':
-            gFeedList.refreshFeedTreeitems(changedFeeds)
+            gFeedList.refreshFeedTreeitems(changedFeeds);
 
             gFeedList.refreshSpecialTreeitem('unread-folder');
             gFeedList.refreshSpecialTreeitem('starred-folder');
@@ -285,6 +286,7 @@ var brief = {
     onRestoreEntry: function brief_onRestoreEntry(aEvent) {
         var entryID = aEvent.target.getAttribute('id');
         var query = new QuerySH(null, entryID, null);
+        query.deleted = ENTRY_STATE_TRASHED;
         gStorage.deleteEntries(0, query);
     },
 
@@ -366,14 +368,14 @@ var brief = {
             this.previousView = gFeedView;
 
             // For a global search we deselect items in the feed list.
-            // We need to suppress selection so that gFeedList.onselect() isn't used.
-            // nsITreeSelection.selectEventsSuppressed doesn't seem to work here, so
-            // we have to set our own flag which we will check in onselect().
+            // We need to suppress selection so that gFeedList.onSelect() isn't used.
+            // nsITreeSelection.ignoreSelectEvent doesn't seem to work here, so
+            // we have to set our own flag which we will check in onSelect().
             if (searchbar.searchScope == 1) {
                 var selection = gFeedList.tree.view.selection;
-                gFeedList.selectEventsSuppressed = true;
+                gFeedList.ignoreSelectEvent = true;
                 selection.clearSelection();
-                gFeedList.selectEventsSuppressed = false;
+                gFeedList.ignoreSelectEvent = false;
             }
         }
 
@@ -478,6 +480,86 @@ var brief = {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
         gStorage.deleteEntries(ENTRY_STATE_DELETED, query);
+    },
+
+    ctx_deleteFeed: function brief_ctx_deleteFeed(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var feed = gStorage.getFeed(feedID);
+
+        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                            getService(Ci.nsIPromptService);
+        var stringbundle = document.getElementById('main-bundle');
+        var title = stringbundle.getString('confirmFeedDeletionTitle');
+        var text = stringbundle.getFormattedString('confirmFeedDeletionText', [feed.title]);
+        var weHaveAGo = promptService.confirm(window, title, text);
+
+        if (weHaveAGo) {
+            var node = RDF.GetResource(feed.rdf_uri);
+            var parent = BMSVC.getParent(node);
+            RDFC.Init(BMDS, parent);
+            var index = RDFC.IndexOf(node);
+            var propertiesArray = new Array(gBmProperties.length);
+            BookmarksUtils.getAllChildren(node, propertiesArray);
+
+            gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
+                                           'delete', node, index, parent,
+                                           propertiesArray.length, propertiesArray);
+            BookmarksUtils.flushDataSource();
+        }
+    },
+
+    ctx_deleteFolder: function brief_ctx_deleteFolder(aEvent) {
+        var folderFeedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var folder = gStorage.getFeed(folderFeedID);
+
+        // Ask for confirmation.
+        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                            getService(Ci.nsIPromptService);
+        var stringbundle = document.getElementById('main-bundle');
+        var title = stringbundle.getString('confirmFolderDeletionTitle');
+        var text = stringbundle.getFormattedString('confirmFolderDeletionText', [folder.title]);
+        var weHaveAGo = promptService.confirm(window, title, text);
+
+        if (weHaveAGo) {
+            var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
+
+            gBkmkTxnSvc.startBatch();
+
+            // Delete all the descendant feeds and folder.
+            var feedID, feed, node, parent, index, propertiesArray;
+            for (var i = 0; i < treeitems.length; i++) {
+                feedID = treeitems[i].getAttribute('feedID');
+                feed = gStorage.getFeed(feedID);
+
+                node = RDF.GetResource(feed.rdf_uri);
+                parent = BMSVC.getParent(node);
+                RDFC.Init(BMDS, parent);
+                index = RDFC.IndexOf(node);
+                propertiesArray = new Array(gBmProperties.length);
+                BookmarksUtils.getAllChildren(node, propertiesArray);
+                gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
+                                               'delete', node, index, parent,
+                                               propertiesArray.length, propertiesArray);
+            }
+
+            // Delete the target folder.
+            node = RDF.GetResource(feed.rdf_uri);
+            parent = BMSVC.getParent(node);
+            RDFC.Init(BMDS, parent);
+            index = RDFC.IndexOf(node);
+            propertiesArray = new Array(gBmProperties.length);
+            BookmarksUtils.getAllChildren(node, propertiesArray);
+            gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
+                                           'delete', node, index, parent,
+                                           propertiesArray.length, propertiesArray);
+
+            gBkmkTxnSvc.endBatch();
+            BookmarksUtils.flushDataSource();
+        }
+    },
+
+    ctx_showFeedProperties: function brief_ctx_showFeedProperties(aEvent) {
+
     }
 
 }

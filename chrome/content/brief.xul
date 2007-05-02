@@ -13,6 +13,8 @@
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
+    <script type="application/x-javascript"
+            src="chrome://browser/content/bookmarks/bookmarks.js"/>
 
     <stringbundleset id="string-bundles">
         <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
@@ -36,7 +38,13 @@
             <menuitem id="ctx-restore-trashed"
                       label="&ctxRestoreTrashed.label;"
                       oncommand="brief.ctx_restoreTrashed(event);"/>
-            <menuseparator id="ctx-separator"/>
+            <menuseparator id="ctx-dangerous-cmds-separator"/>
+            <menuitem id="ctx-delete-feed"
+                      label="&ctxDeleteFeed.label;"
+                      oncommand="brief.ctx_deleteFeed(event);"/>
+            <menuitem id="ctx-delete-folder"
+                      label="&ctxDeleteFolder.label;"
+                      oncommand="brief.ctx_deleteFolder(event);"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
                       oncommand="brief.ctx_emptyFeed(event);"/>
@@ -46,6 +54,10 @@
             <menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
                       oncommand="brief.ctx_emptyTrash(event);"/>
+            <menuseparator id="ctx-properties-separator"/>
+            <menuitem id="ctx-feed-properties"
+                      label="&ctxFeedProperties.label;"
+                      oncommand="brief.ctx_showFeedProperties(event);"/>
         </menupopup>
     </popupset>
 
@@ -71,16 +83,14 @@
                                    oncommand="brief.openOptions();"/>
                 </toolbar>
             </toolbox>
-            <progressmeter id="update-progress"
-                           mode="determined"
-                           hidden="true"/>
+            <progressmeter id="update-progress" hidden="true"/>
             <deck id="feed-list-deck" selectedIndex="0" flex="1">
                 <tree id="feed-list" flex="1"
                       hidecolumnpicker="true"
                       seltype="single"
                       contextmenu="feed-list-popup"
                       persist="closedFolders"
-                      onselect="gFeedList.onselect(event);"
+                      onselect="gFeedList.onSelect(event);"
                       onclick="gFeedList.onClick(event);"
                       onkeyup="gFeedList.onKeyUp(event);">
 
