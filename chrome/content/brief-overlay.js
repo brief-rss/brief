@@ -77,10 +77,11 @@ var gBrief = {
             rows.removeChild(rows.lastChild);
 
         var query = new BriefQuery(null, null, true);
+        query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
         var storageService = Cc['@ancestor/brief/storage;1'].
                              getService(Ci.nsIBriefStorage);
         var unreadFeeds = storageService.getSerializedEntries(query).
-                                         getPropertyAsAUTF8String('feeds').
+                                         getPropertyAsAString('feeds').
                                          match(/[^ ]+/g);
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
@@ -170,62 +171,70 @@ var gBrief = {
     },
 
     handleEvent: function gBrief_handleEvent(aEvent) {
-      switch (aEvent.type) {
+        switch (aEvent.type) {
         case 'load':
-          window.removeEventListener('load', this, false);
+            window.removeEventListener('load', this, false);
 
-          // Cache frequently used elements.
-          this.toolbarbutton = document.getElementById('brief-button');
-          this.statusIcon = document.getElementById('brief-status');
+            /*rdfObserver.initBookmarks();
+            Cc['@mozilla.org/rdf/rdf-service;1'].
+            getService(Ci.nsIRDFService).
+            GetDataSource('rdf:bookmarks').
+            AddObserver(rdfObserver);*/
 
-          this.prefs = Cc['@mozilla.org/preferences-service;1'].
-                       getService(Ci.nsIPrefService).
-                       getBranch('extensions.brief.').
-                       QueryInterface(Ci.nsIPrefBranch2);
-          this.prefs.addObserver('', this, false);
+            // Cache frequently used elements.
+            this.toolbarbutton = document.getElementById('brief-button');
+            this.statusIcon = document.getElementById('brief-status');
 
-          var firstRun = this.prefs.getBoolPref('firstRun');
-          if (firstRun)
-            // The timeout is necessary to avoid adding the button while
-            // initialization of various other stuff is still in progress because
-            // changing content of the toolbar may interfere with that.
-            setTimeout(this.onFirstRun, 0);
+            this.prefs = Cc['@mozilla.org/preferences-service;1'].
+                         getService(Ci.nsIPrefService).
+                         getBranch('extensions.brief.').
+                         QueryInterface(Ci.nsIPrefBranch2);
+            this.prefs.addObserver('', this, false);
 
-          var showStatusIcon = this.prefs.getBoolPref('showStatusbarIcon');
-          if (showStatusIcon) {
-            this.statusIcon.hidden = false;
-            this.updateStatuspanel();
-          }
+            var firstRun = this.prefs.getBoolPref('firstRun');
+            if (firstRun)
+                // The timeout is necessary to avoid adding the button while
+                // initialization of various other stuff is still in progress because
+                // changing content of the toolbar may interfere with that.
+                setTimeout(this.onFirstRun, 0);
 
-          // Observe changes to the feed database in order to keep the statusbar
-          // icon up-to-date.
-          var observerService = Cc["@mozilla.org/observer-service;1"].
-                                getService(Ci.nsIObserverService);
-          observerService.addObserver(this, 'brief:feed-updated', false);
-          observerService.addObserver(this, 'brief:sync-to-livemarks', false);
-          observerService.addObserver(this, 'brief:entry-status-changed', false);
+            var showStatusIcon = this.prefs.getBoolPref('showStatusbarIcon');
+            if (showStatusIcon) {
+                this.statusIcon.hidden = false;
+                this.updateStatuspanel();
+            }
 
-          // Stores the tab in which Brief is loaded so we can ensure only
-          // instance can be open at a time. This is a UI choice, not a technical
-          // limitation.
-          // These listeners are responsible for observing if and in which tab
-          // Brief is loaded as well as for maintaining correct checked state
-          // of the toolbarbutton.
-          window.addEventListener('TabClose', this.onTabClose, false);
-          window.addEventListener('TabSelect', this.onTabSelect, false);
-          window.addEventListener('SSTabRestored', this.onTabRestored, false);
-          window.addEventListener('unload', this, false);
-          break;
+            // Observe changes to the feed database in order to keep the statusbar
+            // icon up-to-date.
+            var observerService = Cc['@mozilla.org/observer-service;1'].
+                                  getService(Ci.nsIObserverService);
+            observerService.addObserver(this, 'brief:feed-updated', false);
+            observerService.addObserver(this, 'brief:sync-to-livemarks', false);
+            observerService.addObserver(this, 'brief:entry-status-changed', false);
+
+            // Stores the tab in which Brief is loaded so we can ensure only
+            // instance can be open at a time. This is a UI choice, not a technical
+            // limitation.
+            // These listeners are responsible for observing if and in which tab
+            // Brief is loaded as well as for maintaining correct checked state
+            // of the toolbarbutton.
+            window.addEventListener('TabClose', this.onTabClose, false);
+            window.addEventListener('TabSelect', this.onTabSelect, false);
+            window.addEventListener('SSTabRestored', this.onTabRestored, false);
+
+            window.addEventListener('unload', this, false);
+            break;
 
         case 'unload':
-          this.prefs.removeObserver('', this);
-          var observerService = Cc["@mozilla.org/observer-service;1"].
-                                getService(Ci.nsIObserverService);
-          observerService.removeObserver(this, 'brief:feed-updated');
-          observerService.removeObserver(this, 'brief:entry-status-changed');
-          observerService.removeObserver(this, 'brief:sync-to-livemarks');
-          break;
-      }
+            this.prefs.removeObserver('', this);
+
+            var observerService = Cc['@mozilla.org/observer-service;1'].
+                                  getService(Ci.nsIObserverService);
+            observerService.removeObserver(this, 'brief:feed-updated');
+            observerService.removeObserver(this, 'brief:entry-status-changed');
+            observerService.removeObserver(this, 'brief:sync-to-livemarks');
+            break;
+        }
     },
 
 
@@ -244,35 +253,36 @@ var gBrief = {
 
 
     observe: function gBrief_observe(aSubject, aTopic, aData) {
-      switch (aTopic) {
+        switch (aTopic) {
         case 'brief:sync-to-livemarks':
-          if (!this.statusIcon.hidden)
-            this.updateStatuspanel();
-          break;
+            if (!this.statusIcon.hidden)
+                this.updateStatuspanel();
+            break;
 
         case 'brief:feed-updated':
-          if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
-            this.updateStatuspanel();
-          break;
+            if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
+                this.updateStatuspanel();
+            break;
 
         case 'brief:entry-status-changed':
-          if ((aData == 'read' || aData == 'unread' || aData == 'deleted') &&
-              !this.statusIcon.hidden)
-            this.updateStatuspanel();
-          break;
+            if ((aData == 'read' || aData == 'unread' || aData == 'deleted') &&
+               !this.statusIcon.hidden) {
+                this.updateStatuspanel();
+            }
+            break;
 
         case 'nsPref:changed':
-          switch (aData) {
+            switch (aData) {
             case 'showStatusbarIcon':
-              var newValue = this.prefs.getBoolPref('showStatusbarIcon');
-              var statusIcon = document.getElementById('brief-status');
-              statusIcon.hidden = !newValue;
-              if (newValue)
-                this.updateStatuspanel();
-              break;
+                var newValue = this.prefs.getBoolPref('showStatusbarIcon');
+                var statusIcon = document.getElementById('brief-status');
+                statusIcon.hidden = !newValue;
+                if (newValue)
+                    this.updateStatuspanel();
+                break;
           }
-          break;
-      }
+            break;
+        }
     }
 
 }
@@ -283,5 +293,5 @@ window.addEventListener('load', gBrief, false);
 function dump(aMessage) {
     var consoleService = Cc['@mozilla.org/consoleservice;1']
                          .getService(Ci.nsIConsoleService);
-    consoleService.logStringMessage('Brief:\n ' + aMessage);
+    consoleService.logStringMessage('Brief:\n' + aMessage);
 }
