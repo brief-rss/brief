@@ -90,10 +90,14 @@ var gFeedList = {
     getFoldersForFeeds: function gFeedList_getFoldersForFeeds(aFeeds) {
         var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
         var folders = [];
+
+        var rootURI = gPrefs.getCharPref('liveBookmarksFolder');
+        var rootFolderID = hashString(rootURI);
+
         for (var i = 0; i < feeds.length; i++) {
             var feed = this.getBriefFeed(feeds[i]);
             var parentID = feed.parent;
-            while (parentID != 'root') {
+            while (parentID != rootFolderID) {
                 if (folders.indexOf(parentID) == -1)
                     folders.push(parentID);
                 parentID = gStorage.getFeed(parentID).parent;
@@ -288,6 +292,71 @@ var gFeedList = {
     },
 
 
+    observe: function gFeedList_observe(aSubject, aTopic, aData) {
+        switch (aTopic) {
+
+        // The Live Bookmarks stored is user's folder of choice were read and the
+        // in-database list of feeds was synchronized.
+        case 'brief:invalidate-feedlist':
+            this.rebuild();
+            var deck = document.getElementById('feed-list-deck');
+            deck.selectedIndex = 0;
+            break;
+
+        case 'brief:feed-title-changed':
+            var feed = gStorage.getFeed(aData);
+            if (feed.isFolder)
+                this.refreshFolderTreeitems(feed);
+            else
+                this.refreshFeedTreeitems(aData);
+            break;
+
+        case 'brief:feed-added':
+            var feed = gStorage.getFeed(aData);
+            var treechildren = this.getTreeitemForFeed(feed.parent).lastChild;
+            var nextChild = treechildren.childNodes[feed.rowIndex];
+
+            if (feed.isFolder) {
+                var closedFolders = this.tree.getAttribute('closedFolders');
+                var isOpen = !closedFolders.match(feed.feedID);
+
+                var treeitem = document.createElement('treeitem');
+                treeitem.setAttribute('container', 'true');
+                treeitem.setAttribute('open', isOpen);
+                treeitem.setAttribute('feedID', feed.feedID);
+                treeitem = prevParent.appendChild(treeitem);
+
+                var treerow = document.createElement('treerow');
+                treerow = treeitem.appendChild(treerow);
+
+                var treecell = document.createElement('treecell');
+                treecell = treerow.appendChild(treecell);
+
+                var treechildren = document.createElement('treechildren');
+                treechildren = treeitem.appendChild(treechildren);
+
+                this.refreshFolderTreeitems(treeitem);
+            }
+
+            else {
+                var treeitem = this._createFeed(feed.feedID, feed.feedURL);
+                var treeitem = document.createElement('treeitem');
+                treechildren.insertBefore(treeitem, nextChild);
+
+                this.refreshFeedTreeitems(treeitem);
+            }
+
+            break;
+
+        case 'brief:feed-removed':
+            var item = this.getTreeitemForFeed(aData);
+            item.parentNode.removeChild(item);
+            break;
+
+        }
+    },
+
+
     /**
      * Sets a property on a content tree item.
      *
@@ -327,15 +396,14 @@ var gFeedList = {
         // Get the row which was the target of the right-click
         var rowIndex = {};
         this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
+        this.ctx_targetItem = this.tree.view.getItemAtIndex(rowIndex.value);
 
-        // If the target was empty space, don't show context menu.
-        if (rowIndex.value == -1) {
+        // If the target was empty space or a separator, don't show context menu.
+        if (rowIndex.value == -1 || this.ctx_targetItem.localName == 'treeseparator') {
             this.ctx_targetItem = null;
             aEvent.preventDefault();
             return;
         }
-
-        this.ctx_targetItem = this.tree.view.getItemAtIndex(rowIndex.value);
 
         // Convenience variables telling what kind the target is.
         var targetIsFeed = this.ctx_targetItem.hasAttribute('url');
@@ -422,8 +490,10 @@ var gFeedList = {
         // of the currently processed folder. This is how it tracks where to append the
         // items.
         this._folderParentChain = [topLevelChildren];
+        dump('rebuild');
 
-        this._buildFolderChildren('root');
+        var rootURI = gPrefs.getCharPref('liveBookmarksFolder');
+        this._buildFolderChildren(hashString(rootURI));
 
         // Fill the items cache.
         this.items = this.tree.getElementsByTagName('treeitem');
@@ -442,14 +512,17 @@ var gFeedList = {
         for (var i = 0; i < this.feeds.length; i++) {
             var feed = this.feeds[i];
 
-            if (feed.isFolder && feed.parent == aParentFolder) {
+            if (feed.parent != aParentFolder)
+                continue;
+
+            if (feed.isFolder) {
                 var prevParent = this._folderParentChain[this._folderParentChain.length - 1];
                 var closedFolders = this.tree.getAttribute('closedFolders');
-                var state = closedFolders.match(feed.feedID) ? true : false;
+                var isOpen = !closedFolders.match(feed.feedID);
 
                 var treeitem = document.createElement('treeitem');
                 treeitem.setAttribute('container', 'true');
-                treeitem.setAttribute('open', !state);
+                treeitem.setAttribute('open', isOpen);
                 treeitem.setAttribute('feedID', feed.feedID);
                 treeitem = prevParent.appendChild(treeitem);
 
@@ -468,25 +541,57 @@ var gFeedList = {
 
                 this._buildFolderChildren(feed.feedID);
             }
-            else if (feed.parent == aParentFolder) {
+
+            else {
                 var parent = this._folderParentChain[this._folderParentChain.length - 1];
-
-                var treeitem = document.createElement('treeitem');
-                treeitem.setAttribute('feedID', feed.feedID);
-                treeitem.setAttribute('url', feed.feedURL);
-                treeitem = parent.appendChild(treeitem);
-
-                var treerow = document.createElement('treerow');
-                treerow = treeitem.appendChild(treerow);
-
-                var treecell = document.createElement('treecell');
-                treecell.setAttribute('properties', 'feed-item '); // Mind the whitespace
-                treecell = treerow.appendChild(treecell);
+                var treeitem = this._createFeed(feed.feedID, feed.feedURL);
+                parent.appendChild(treeitem);
 
                 this.refreshFeedTreeitems(treeitem);
             }
         }
         this._folderParentChain.pop();
+    },
+
+    _createFeed: function gFeedList__createFeed(aFeedID, aFeedURL) {
+        var treecell = document.createElement('treecell');
+        treecell.setAttribute('properties', 'feed-item '); // Mind the whitespace
+
+        var treerow = document.createElement('treerow');
+        treerow.appendChild(treecell);
+
+        var treeitem = document.createElement('treeitem');
+        treeitem.setAttribute('feedID', aFeedID);
+        treeitem.setAttribute('url', aFeedURL);
+        treeitem.appendChild(treerow);
+
+        return treeitem;
     }
 
+
+
+
+
+
+}
+
+function hashString(aString) {
+
+    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
+                       createInstance(Ci.nsIStringInputStream);
+    stringStream.setData(aString, aString.length);
+
+    var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
+    hasher.init(Ci.nsICryptoHash.MD5);
+    hasher.updateFromStream(stringStream, stringStream.available());
+    var hash = hasher.finish(false);
+
+    // Convert the hash to a hex-encoded string.
+    var hexchars = '0123456789ABCDEF';
+    var hexrep = new Array(hash.length * 2);
+    for (var i = 0; i < hash.length; ++i) {
+        hexrep[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 15);
+        hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
+    }
+    return hexrep.join('');
 }
