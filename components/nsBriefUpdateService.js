@@ -58,7 +58,7 @@ BriefUpdateService.prototype = {
             throw('Brief: update service is already running.')
         this.updateServiceRunning = true;
 
-        this.notify();
+        this.notify(this.updateTimer);
         this.updateTimer.initWithCallback(this, UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
     },
 
