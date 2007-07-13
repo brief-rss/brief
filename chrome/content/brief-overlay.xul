@@ -13,6 +13,9 @@
             <menuitem id="brief-ctx-update-feeds"
                       label="&ctxUpdateFeeds.label;"
                       oncommand="gBrief.updateFeeds();"/>
+            <menuitem id="brief-ctx-mark-read"
+                     label="&ctxMarkFeedsAsRead.label;"
+                     oncommand="gBrief.markFeedsAsRead();"/>
         </popup>
 
         <tooltip id="brief-tooltip"

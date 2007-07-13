@@ -38,6 +38,14 @@ var gBrief = {
         updateService.fetchAllFeeds();
     },
 
+    markFeedsAsRead: function gBrief_markFeedsAsRead() {
+        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+        query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
+        var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+
+        storageService.markEntriesRead(true, query);
+    },
+
 
     updateStatuspanel: function gBrief_updateStatuspanel() {
         var counter = document.getElementById('brief-status-counter');
