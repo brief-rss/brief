@@ -31,14 +31,6 @@ function FeedView(aTitle, aQuery) {
 
     this.browser.addEventListener('load', this._onLoad, false);
 
-    // If the feed wasn't updated yet, do it now.
-    var feed = gStorage.getFeed(aQuery.feeds);
-    if (feed && !feed.everUpdated) {
-        var updateService = Cc['@ancestor/brief/updateservice;1'].
-                            getService(Ci.nsIBriefUpdateService);
-        updateService.fetchFeed(aQuery.feeds);
-    }
-
     this._refresh();
 }
 
@@ -159,7 +151,7 @@ FeedView.prototype = {
 
         if (removedEntry) {
             // If there are no more entries on this page and it the last page then perform
-            // a full refresh.
+            // full refresh.
             if (this.feedContent.childNodes.length == 1 && this.currentPage == this.pageCount) {
                 this._refresh();
                 return false;
@@ -224,7 +216,7 @@ FeedView.prototype = {
 
         this._computePages();
 
-        // Pull the one entry (previously the first entry on the next page).
+        // Pull the entry (previously the first entry on the next page).
         var query = this.query;
         query.offset = gPrefs.entriesPerPage * this.currentPage - 1;
         query.limit = 1;

@@ -620,7 +620,7 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         this.bookmarkItems = [];
-        dump('syncWithBookmarks');
+        //dump('syncWithBookmarks');
         // Get the current Live Bookmarks
         this.rootURI = this.prefs.getCharPref('liveBookmarksFolder');
         if (!this.rootURI)
@@ -697,6 +697,11 @@ BriefStorageService.prototype = {
 
                     this.observerService.
                          notifyObservers(null,'brief:feed-added', item.feedID);
+
+                    // Pull the entries.
+                    var updateService = Cc['@ancestor/brief/updateservice;1'].
+                                        getService(Ci.nsIBriefUpdateService);
+                    updateService.fetchFeed(item.feedID);
                 }
                 else {
                     // Mark that the feed is still in bookmarks.
@@ -1118,7 +1123,7 @@ BriefQuery.prototype = {
         if (this.offset > 1)
             text += ' OFFSET ' + this.offset;
 
-        dump(text);
+        //dump(text);
         return text;
     },
 
