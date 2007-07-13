@@ -121,7 +121,7 @@ BriefStorageService.prototype = {
         this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
                                            'entries_date_index ON entries (date)    ');
         this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                           'entries_read_index ON entries (read)    ');
+                                           'feeds_feedID_index ON feeds (feedID)    ');
 
         this.startDummyStatement();
         this.dBConnection.preload();
@@ -302,9 +302,6 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     updateFeed: function BriefStorage_updateFeed(aFeed) {
-        // Invalidate cache since feeds table is about to change.
-        this.feedsCache = this.feedsAndFoldersCache = null;
-
         var now = Date.now();
         var oldestEntryDate = now;
 
@@ -321,12 +318,15 @@ BriefStorageService.prototype = {
                             'read)                                      ' +
                             'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ');
         this.dBConnection.beginTransaction();
+
+        // Count the unread entries, to compare their number later.
         var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
                                  createInstance(Ci.nsIBriefQuery);
         unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
-        var prevUnreadCount = this.getEntriesCount(unreadEntriesQuery);
-        var entries = aFeed.getEntries({});
+        var oldUnreadCount = this.getEntriesCount(unreadEntriesQuery);
+
         try {
+            var entries = aFeed.getEntries({});
             var entry, title, trash;
             for (var i = 0; i < entries.length; i++) {
                 entry = entries[i];
@@ -348,34 +348,48 @@ BriefStorageService.prototype = {
                     oldestEntryDate = entry.date;
             }
 
-            // Do not update the title, so that it is always taken from the Live Bookmark.
-            var update = this.dBConnection.
-                              createStatement('UPDATE feeds SET               ' +
-                                              'websiteURL  = ?1,              ' +
-                                              'subtitle    = ?2,              ' +
-                                              'imageURL    = ?3,              ' +
-                                              'imageLink   = ?4,              ' +
-                                              'imageTitle  = ?5,              ' +
-                                              'favicon     = ?6,              ' +
-                                              'oldestAvailableEntryDate = ?7, ' +
-                                              'everUpdated = 1                ' +
-                                              'WHERE feedID = ?8              ');
-            update.bindStringParameter(0, aFeed.websiteURL);
-            update.bindStringParameter(1, aFeed.subtitle);
-            update.bindStringParameter(2, aFeed.imageURL);
-            update.bindStringParameter(3, aFeed.imageLink);
-            update.bindStringParameter(4, aFeed.imageTitle);
-            update.bindStringParameter(5, aFeed.favicon);
-            update.bindInt64Parameter(6,  oldestEntryDate);
-            update.bindStringParameter(7, aFeed.feedID);
-            update.execute();
+            var currFeed = this.getFeed(aFeed.feedID);
+
+            // We could just update all feed properties without checking if anything
+            // has changed but we don't want to unnecessarily invalidate the feeds cache.
+            if (currFeed.websiteURL != aFeed.websiteURL || currFeed.subtitle != aFeed.subtitle ||
+               currFeed.imageURL != aFeed.imageURL || currFeed.imageLink != aFeed.imageLink ||
+               currFeed.imageTitle != aFeed.imageTitle || currFeed.favicon != aFeed.favicon ||
+               currFeed.everUpdated != 1 ||
+               currFeed.oldestAvailableEntryDate != aFeed.oldestAvailableEntryDate) {
+
+                // Invalidate cache since feeds table is about to change.
+                this.feedsCache = this.feedsAndFoldersCache = null;
+
+                // Do not update the title, so that it is always taken from the Live Bookmark.
+                var updateFeed = this.dBConnection.
+                                  createStatement('UPDATE feeds SET               ' +
+                                                  'websiteURL  = ?1,              ' +
+                                                  'subtitle    = ?2,              ' +
+                                                  'imageURL    = ?3,              ' +
+                                                  'imageLink   = ?4,              ' +
+                                                  'imageTitle  = ?5,              ' +
+                                                  'favicon     = ?6,              ' +
+                                                  'oldestAvailableEntryDate = ?7, ' +
+                                                  'everUpdated = 1                ' +
+                                                  'WHERE feedID = ?8              ');
+                updateFeed.bindStringParameter(0, aFeed.websiteURL);
+                updateFeed.bindStringParameter(1, aFeed.subtitle);
+                updateFeed.bindStringParameter(2, aFeed.imageURL);
+                updateFeed.bindStringParameter(3, aFeed.imageLink);
+                updateFeed.bindStringParameter(4, aFeed.imageTitle);
+                updateFeed.bindStringParameter(5, aFeed.favicon);
+                updateFeed.bindInt64Parameter(6,  oldestEntryDate);
+                updateFeed.bindStringParameter(7, aFeed.feedID);
+                updateFeed.execute();
+            }
         }
         finally {
           this.dBConnection.commitTransaction();
         }
 
         var newUnreadCount = this.getEntriesCount(unreadEntriesQuery);
-        var newEntriesCount = newUnreadCount - prevUnreadCount;
+        var newEntriesCount = newUnreadCount - oldUnreadCount;
         var subject = Cc["@mozilla.org/variant;1"].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
         this.observerService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
@@ -384,6 +398,7 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     markEntriesRead: function BriefStorage_markEntriesRead(aStatus, aQuery) {
+
         // Make sure not to select entries which already have the desired status.
         prevUnreadFlag = aQuery.unread;
         prevReadFlag = aQuery.read;
@@ -605,7 +620,7 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         this.bookmarkItems = [];
-
+        dump('syncWithBookmarks');
         // Get the current Live Bookmarks
         this.rootURI = this.prefs.getCharPref('liveBookmarksFolder');
         if (!this.rootURI)
@@ -638,7 +653,7 @@ BriefStorageService.prototype = {
             var feeds = [];
             while (selectAll.executeStep()) {
                 var feed = {};
-                feed.feedID= selectAll.getString(0);
+                feed.feedID = selectAll.getString(0);
                 feed.title = selectAll.getString(1);
                 feed.rowIndex = selectAll.getInt32(2);
                 feed.isFolder = selectAll.getInt32(3) == 1;
@@ -833,11 +848,12 @@ BriefStorageService.prototype = {
     },
 
     onAssert: function BriefStorage_onAssert(aDataSource, aSource, aProperty, aTarget) {
+        //dump('onAssert');
         // Because we only care about livemarks and folders, check if the assertion
         // target is even a resource, for optimization.
         if (!(aTarget instanceof Ci.nsIRDFResource))
             return;
-
+        //dump('onAssert - is resource');
         // Check if the target item is an RDF sequence (i.e. livemark or folder) and if
         // it is in the home folder.
         var isFolder = this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, aTarget);
@@ -990,6 +1006,10 @@ BriefQuery.prototype = {
 
     includeHiddenFeeds: false,
 
+    // We need to know the direct parent folders of the feeds to be matched, which are the
+    // ones from BriefQuery.folders and their subfolders.
+    _effectiveFolders: null,
+
     setConditions: function BriefQuery_setConditions(aFeeds, aEntries, aUnread) {
         this.feeds = aFeeds;
         this.entries = aEntries;
@@ -1007,19 +1027,35 @@ BriefQuery.prototype = {
         }
 
         if (this.folders) {
-            this._effectiveFolders = this.folders;
+            this._effectiveFolders = this.folders.match(/[^ ]+/g);
+
+            // Cache the items list to avoid retrieving it over and over when traversing.
             this._items = Components.classes['@ancestor/brief/storage;1'].
                                      getService(Components.interfaces.nsIBriefStorage).
                                      getFeedsAndFolders({});
-            var prefs = Cc["@mozilla.org/preferences-service;1"].
-                        getService(Ci.nsIPrefBranch);
-            var rootFolderURI = prefs.getCharPref('extensions.brief.liveBookmarksFolder');
+            var rootFolderURI = Cc["@mozilla.org/preferences-service;1"].
+                                getService(Ci.nsIPrefBranch).
+                                getCharPref('extensions.brief.liveBookmarksFolder');
             this._traverseChildren(hashString(rootFolderURI));
 
-            text += '"' + this._effectiveFolders + '" LIKE "%" || feeds.parent || "%" AND ';
+            text += '(';
+            for (var i = 0; i < this._effectiveFolders.length; i++) {
+                text += 'feeds.parent = "' + this._effectiveFolders[i] + '"';
+                if (i < this._effectiveFolders.length - 1)
+                    text += ' OR ';
+            }
+            text += ') AND ';
         }
         if (this.feeds) {
-            text += '"' + this.feeds + '"LIKE "%" || entries.feedID || "%" AND ';
+            var feeds = this.feeds.match(/[^ ]+/g);
+
+            text += '(';
+            for (var i = 0; i < feeds.length; i++) {
+                text += 'entries.feedID = "' + feeds[i] + '"';
+                if (i < feeds.length - 1)
+                    text += ' OR ';
+            }
+            text += ') AND ';
         }
         if (this.entries) {
             text += '"' + this.entries + '" LIKE "%" || entries.id || "%" AND ';
@@ -1082,6 +1118,7 @@ BriefQuery.prototype = {
         if (this.offset > 1)
             text += ' OFFSET ' + this.offset;
 
+        dump(text);
         return text;
     },
 
@@ -1090,13 +1127,13 @@ BriefQuery.prototype = {
     },
 
     _traverseChildren: function BriefQuery__traverseChildren(aFolder) {
-        var isEffectiveFolder = this._effectiveFolders.match(aFolder) ? true : false;
+        var isEffectiveFolder = this._effectiveFolders.indexOf(aFolder) != -1;
         var item, i;
         for (i = 0; i < this._items.length; i++) {
             item = this._items[i];
             if (item.parent == aFolder && item.isFolder) {
                 if (isEffectiveFolder)
-                    this._effectiveFolders += ' ' + item.feedID;
+                    this._effectiveFolders.push(item.feedID);
                 this._traverseChildren(item.feedID);
             }
         }
