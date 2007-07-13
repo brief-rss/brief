@@ -274,6 +274,7 @@ var brief = {
         var entryID = aEvent.target.getAttribute('id');
         var readStatus = aEvent.target.hasAttribute('read');
         var query = new QuerySH(null, entryID, null);
+        query.deleted = ENTRY_STATE_ANY;
         gStorage.markEntriesRead(readStatus, query);
     },
 
