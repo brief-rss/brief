@@ -7,16 +7,24 @@ var gBrief = {
 
     tab: null,           // Tab in which Brief is loaded
     statusIcon: null,    // Statusbar panel
-    toolbarbutton: null, // Toolbar button
+
+    // We can't cache it like statusIcon, because it may be removed or added via Customize
+    // Toolbar.
+    get toolbarbutton() {
+        return document.getElementById('brief-button');
+    },
 
     prefs: null,
 
     openBrief: function gBrief_openBrief(aNewTab) {
+        if (this.toolbarbutton)
+            this.toolbarbutton.checked = true;
+
         // If Brief is already open then select the existing tab.
         if (this.tab)
             gBrowser.selectedTab = this.tab;
         else if (aNewTab) {
-            this.tab = gBrowser.loadOneTab(BRIEF_URL, null, null, null, false);
+            this.tab = gBrowser.loadOneTab(BRIEF_URL, null, null, false, false);
             var browser = gBrowser.getBrowserForTab(this.tab);
             browser.addEventListener('load', this.onBriefTabLoad, true);
         }
@@ -27,8 +35,6 @@ var gBrief = {
             browser.addEventListener('load', this.onBriefTabLoad, true);
         }
 
-        if (this.toolbarbutton)
-            this.toolbarbutton.checked = true;
     },
 
 
@@ -130,17 +136,28 @@ var gBrief = {
         // Clicking the button when Brief is open in current tab "unpresses" it and
         // closes Brief.
         if (gBrowser.selectedTab == this.tab && aEvent.button == 0) {
+
+            // If tabbar is hidden and there's only one tab, tabbrowser binding won't let
+            // us close it, so we have to add a blank tab first.
+            if (gBrowser.tabContainer.childNodes.length == 1 &&
+               gPrefService.getBoolPref('browser.tabs.autoHide')) {
+                gBrowser.addTab('about:blank', null, null, null, null, false);
+            }
+
             gBrowser.removeCurrentTab();
             return;
         }
 
         var openInNewTab = this.prefs.getBoolPref('openInNewTab');
 
-        if ((aEvent.button == 0 && !openInNewTab) || (aEvent.button == 1 && openInNewTab))
+        // Check whether to load Brief in the current tab or in a new one.
+        if ((aEvent.button == 0 && !openInNewTab) || (aEvent.button == 1 && openInNewTab) ||
+           gBrowser.currentURI.spec == 'about:blank') {
             gBrief.openBrief(false);
-
-        else if ((aEvent.button == 0 && openInNewTab) || (aEvent.button == 1 && !openInNewTab))
+        }
+        else if ((aEvent.button == 0 && openInNewTab) || (aEvent.button == 1 && !openInNewTab)) {
             gBrief.openBrief(true);
+        }
     },
 
     onBriefTabLoad: function gBrief_onBriefTabLoad(aEvent) {
@@ -189,8 +206,6 @@ var gBrief = {
             GetDataSource('rdf:bookmarks').
             AddObserver(rdfObserver);*/
 
-            // Cache frequently used elements.
-            this.toolbarbutton = document.getElementById('brief-button');
             this.statusIcon = document.getElementById('brief-status');
 
             this.prefs = Cc['@mozilla.org/preferences-service;1'].
