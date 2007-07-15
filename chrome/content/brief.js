@@ -99,7 +99,7 @@ var brief = {
         }
 
         // Init stuff in bookmarks.js
-        setTimeout(function() { initServices(); initBMService(); }, 100);
+        setTimeout(function() { initServices(); initBMService(); }, 500);
     },
 
 
@@ -307,7 +307,17 @@ var brief = {
             if (aEvent.button == 0 && gPrefs.getBoolPref('feedview.openEntriesInTabs')) {
                 aEvent.preventDefault();
                 var url = targetEntry.getAttribute('entryURL');
-                brief.browserWindow.gBrowser.loadOneTab(url);
+
+                var prefBranch = Cc['@mozilla.org/preferences-service;1'].
+                                 getService(Ci.nsIPrefBranch);
+                var whereToOpen = prefBranch.getIntPref('browser.link.open_newwindow');
+                if (whereToOpen == 2) {
+                    openDialog('chrome://browser/content/browser.xul', '_blank',
+                               'chrome,all,dialog=no', url);
+                }
+                else {
+                    brief.browserWindow.gBrowser.loadOneTab(url);
+                }
             }
 
             if (!targetEntry.hasAttribute('read') &&
