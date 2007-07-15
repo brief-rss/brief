@@ -7,6 +7,7 @@ var gBrief = {
 
     tab: null,           // Tab in which Brief is loaded
     statusIcon: null,    // Statusbar panel
+    storageService: null,
 
     // We can't cache it like statusIcon, because it may be removed or added via Customize
     // Toolbar.
@@ -24,7 +25,7 @@ var gBrief = {
         if (this.tab)
             gBrowser.selectedTab = this.tab;
         else if (aNewTab) {
-            this.tab = gBrowser.loadOneTab(BRIEF_URL, null, null, false, false);
+            this.tab = gBrowser.loadOneTab(BRIEF_URL, null, null, null, false);
             var browser = gBrowser.getBrowserForTab(this.tab);
             browser.addEventListener('load', this.onBriefTabLoad, true);
         }
@@ -37,7 +38,6 @@ var gBrief = {
 
     },
 
-
     updateFeeds: function gBrief_updateFeeds() {
         var updateService = Cc['@ancestor/brief/updateservice;1'].
                             getService(Ci.nsIBriefUpdateService);
@@ -47,9 +47,8 @@ var gBrief = {
     markFeedsAsRead: function gBrief_markFeedsAsRead() {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
         query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
-        var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 
-        storageService.markEntriesRead(true, query);
+        this.storageService.markEntriesRead(true, query);
     },
 
 
@@ -58,9 +57,7 @@ var gBrief = {
         var panel = document.getElementById('brief-status');
 
         var query = new BriefQuery(null, null, true);
-        var storageService = Cc['@ancestor/brief/storage;1'].
-                             getService(Ci.nsIBriefStorage);
-        var unreadEntriesCount = storageService.getEntriesCount(query);
+        var unreadEntriesCount = this.storageService.getEntriesCount(query);
 
         counter.value = unreadEntriesCount;
         panel.setAttribute('unread', unreadEntriesCount > 0);
@@ -92,11 +89,9 @@ var gBrief = {
 
         var query = new BriefQuery(null, null, true);
         query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
-        var storageService = Cc['@ancestor/brief/storage;1'].
-                             getService(Ci.nsIBriefStorage);
-        var unreadFeeds = storageService.getSerializedEntries(query).
-                                         getPropertyAsAString('feeds').
-                                         match(/[^ ]+/g);
+        var unreadFeeds = this.storageService.getSerializedEntries(query).
+                                              getPropertyAsAString('feeds').
+                                              match(/[^ ]+/g);
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
         var value = bundle.getString('noUnreadFeedsTooltip');
@@ -108,7 +103,7 @@ var gBrief = {
             row.setAttribute('class', 'unread-feed-row');
             row = rows.appendChild(row);
 
-            var feedName = storageService.getFeed(unreadFeeds[i]).title;
+            var feedName = this.storageService.getFeed(unreadFeeds[i]).title;
             label = document.createElement('label');
             label.setAttribute('class', 'unread-feed-name');
             label.setAttribute('crop', 'right');
@@ -116,7 +111,7 @@ var gBrief = {
             row.appendChild(label);
 
             var query = new BriefQuery(unreadFeeds[i], null, true);
-            var unreadCount = storageService.getEntriesCount(query);
+            var unreadCount = this.storageService.getEntriesCount(query);
             label = document.createElement('label');
             label.setAttribute('class', 'unread-entries-count');
             label.setAttribute('value', unreadCount);
@@ -152,7 +147,7 @@ var gBrief = {
 
         // Check whether to load Brief in the current tab or in a new one.
         if ((aEvent.button == 0 && !openInNewTab) || (aEvent.button == 1 && openInNewTab) ||
-           gBrowser.currentURI.spec == 'about:blank') {
+           (gBrowser.currentURI.spec == 'about:blank' && (aEvent.button == 0 || aEvent.button == 1)) ) {
             gBrief.openBrief(false);
         }
         else if ((aEvent.button == 0 && openInNewTab) || (aEvent.button == 1 && !openInNewTab)) {
@@ -200,12 +195,6 @@ var gBrief = {
         case 'load':
             window.removeEventListener('load', this, false);
 
-            /*rdfObserver.initBookmarks();
-            Cc['@mozilla.org/rdf/rdf-service;1'].
-            getService(Ci.nsIRDFService).
-            GetDataSource('rdf:bookmarks').
-            AddObserver(rdfObserver);*/
-
             this.statusIcon = document.getElementById('brief-status');
 
             this.prefs = Cc['@mozilla.org/preferences-service;1'].
@@ -214,12 +203,16 @@ var gBrief = {
                          QueryInterface(Ci.nsIPrefBranch2);
             this.prefs.addObserver('', this, false);
 
+            this.storageService = Cc['@ancestor/brief/storage;1'].
+                                  getService(Ci.nsIBriefStorage);
+
             var firstRun = this.prefs.getBoolPref('firstRun');
-            if (firstRun)
+            if (firstRun) {
                 // The timeout is necessary to avoid adding the button while
                 // initialization of various other stuff is still in progress because
                 // changing content of the toolbar may interfere with that.
                 setTimeout(this.onFirstRun, 0);
+            }
 
             var showStatusIcon = this.prefs.getBoolPref('showStatusbarIcon');
             if (showStatusIcon) {
@@ -234,13 +227,13 @@ var gBrief = {
             observerService.addObserver(this, 'brief:feed-updated', false);
             observerService.addObserver(this, 'brief:sync-to-livemarks', false);
             observerService.addObserver(this, 'brief:entry-status-changed', false);
+            observerService.addObserver(this, 'brief:batch-update-started', false);
 
             // Stores the tab in which Brief is loaded so we can ensure only
-            // instance can be open at a time. This is a UI choice, not a technical
+            // instance can be open at a time. This is an UI choice, not a technical
             // limitation.
-            // These listeners are responsible for observing if and in which tab
-            // Brief is loaded as well as for maintaining correct checked state
-            // of the toolbarbutton.
+            // These listeners are responsible for observing in which tab Brief is loaded
+            // as well as for maintaining correct checked state of the toolbarbutton.
             window.addEventListener('TabClose', this.onTabClose, false);
             window.addEventListener('TabSelect', this.onTabSelect, false);
             window.addEventListener('SSTabRestored', this.onTabRestored, false);
@@ -256,22 +249,9 @@ var gBrief = {
             observerService.removeObserver(this, 'brief:feed-updated');
             observerService.removeObserver(this, 'brief:entry-status-changed');
             observerService.removeObserver(this, 'brief:sync-to-livemarks');
+            observerService.removeObserver(this, 'brief:batch-update-started');
             break;
         }
-    },
-
-
-    onFirstRun: function gBrief_onFirstRun() {
-        // Add the toolbar button to the Navigation Bar.
-        var navbar = document.getElementById('nav-bar');
-        var newset = navbar.currentSet.replace('urlbar-container,',
-                                               'brief-button,urlbar-container,');
-        navbar.currentSet = newset;
-        navbar.setAttribute('currentset', newset);
-        document.persist('nav-bar', 'currentset');
-        BrowserToolboxCustomizeDone(true);
-
-        gBrief.prefs.setBoolPref('firstRun', false);
     },
 
 
@@ -279,11 +259,6 @@ var gBrief = {
         switch (aTopic) {
         case 'brief:sync-to-livemarks':
             if (!this.statusIcon.hidden)
-                this.updateStatuspanel();
-            break;
-
-        case 'brief:feed-updated':
-            if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
                 this.updateStatuspanel();
             break;
 
@@ -303,9 +278,50 @@ var gBrief = {
                 if (newValue)
                     this.updateStatuspanel();
                 break;
-          }
+            }
             break;
+
+        case 'brief:batch-update-started':
+            var progressmeter = document.getElementById('brief-progressmeter');
+
+            // Only show the progressmeter if Brief isn't opened in the currently selected
+            // tab (no need to show to progressmeters on screen).
+            if (gBrowser.selectedTab != this.tab)
+                progressmeter.hidden = false;
+
+            progressmeter.value = 0;
+            this.totalFeeds = this.storageService.getAllFeeds({}).length;
+            this.finishedFeeds = 0;
+            break;
+
+        case 'brief:feed-updated':
+            this.finishedFeeds++;
+            var progressmeter = document.getElementById('brief-progressmeter');
+            var progress = 100 * this.finishedFeeds / this.totalFeeds;
+            progressmeter.value = progress;
+            dump('this.totalFeeds: ' + this.totalFeeds);
+            dump('this.finishedFeeds: ' + this.finishedFeeds);
+            dump('progress: ' + progress);
+            if (progress == 100)
+                setTimeout(function() {progressmeter.hidden = true}, 500);
+
+            if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
+                this.updateStatuspanel();
         }
+    },
+
+
+    onFirstRun: function gBrief_onFirstRun() {
+        // Add the toolbar button to the Navigation Bar.
+        var navbar = document.getElementById('nav-bar');
+        var newset = navbar.currentSet.replace('urlbar-container,',
+                                               'brief-button,urlbar-container,');
+        navbar.currentSet = newset;
+        navbar.setAttribute('currentset', newset);
+        document.persist('nav-bar', 'currentset');
+        BrowserToolboxCustomizeDone(true);
+
+        gBrief.prefs.setBoolPref('firstRun', false);
     }
 
 }
