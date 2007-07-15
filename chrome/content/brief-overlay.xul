@@ -58,6 +58,9 @@
 
             <image id="brief-status-image"/>
             <label id="brief-status-counter"/>
+            <progressmeter id="brief-progressmeter"
+                           mode="determined"
+                           hidden="true"/>
 
         </statusbarpanel>
     </statusbar>
