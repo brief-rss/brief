@@ -51,7 +51,7 @@ Feed.prototype = {
             catch (e) {}
         }
         if (aFeed.items) {
-            var entries = new Array();
+            var entries = [];
             for (var i = 0; i < aFeed.items.length; i++) {
                 var entry = aFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
                 var wrappedEntry = Cc['@ancestor/brief/feedentry;1'].
@@ -85,6 +85,7 @@ FeedEntry.prototype = {
     summary:  '',
     content:  '',
     date:     0,
+    authors:  '',
     read:     false,
     starred:  false,
 
@@ -109,6 +110,16 @@ FeedEntry.prototype = {
             this.date = new Date(aEntry.updated).getTime();
         else if (aEntry.published)
             this.date = new Date(aEntry.published).getTime();
+
+        if (aEntry.authors) {
+            var authors = [], author;
+            for (var i = 0; i < aEntry.authors.length; i++) {
+                author = aEntry.authors.queryElementAt(i, Ci.nsIFeedPerson).name;
+                authors.push(author);
+            }
+            this.authors = authors.join(', ');
+        }
+
     },
 
     QueryInterface: function BriefFeedEntry_QueryInterface(aIID) {
@@ -173,3 +184,9 @@ var Module = {
 
 // Module initialization
 function NSGetModule(aCompMgr, aFileSpec) { return Module; }
+
+function dump(aMessage) {
+  var consoleService = Cc["@mozilla.org/consoleservice;1"].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage('Brief:\n' + aMessage);
+}

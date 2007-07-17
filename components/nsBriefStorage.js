@@ -93,6 +93,7 @@ BriefStorageService.prototype = {
                                            'summary    TEXT,                    ' +
                                            'content    TEXT,                    ' +
                                            'date       INTEGER,                 ' +
+                                           'authors    TEXT,                    ' +
                                            'read       INTEGER DEFAULT 0,       ' +
                                            'starred    INTEGER DEFAULT 0,       ' +
                                            'deleted    INTEGER DEFAULT 0        ' +
@@ -107,6 +108,7 @@ BriefStorageService.prototype = {
 
         // Columns added in 0.7.
         try {
+            this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
             this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
             this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
             this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
@@ -223,8 +225,8 @@ BriefStorageService.prototype = {
         var statement = 'SELECT                                            ' +
                         'entries.id,    entries.feedID,  entries.entryURL, ' +
                         'entries.title, entries.summary, entries.content,  ' +
-                        'entries.date,  entries.read,    entries.starred   ' +
-                         aQuery.getQueryTextForSelect();
+                        'entries.date,  entries.authors, entries.read,     ' +
+                        'entries.starred ' + aQuery.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
 
@@ -240,8 +242,9 @@ BriefStorageService.prototype = {
                 entry.summary = select.getString(4);
                 entry.content = select.getString(5);
                 entry.date = select.getInt64(6);
-                entry.read = (select.getInt32(7) == 1);
-                entry.starred = (select.getInt32(8) == 1);
+                entry.authors = select.getString(7);
+                entry.read = (select.getInt32(8) == 1);
+                entry.starred = (select.getInt32(9) == 1);
 
                 entries.push(entry);
             }
@@ -306,17 +309,18 @@ BriefStorageService.prototype = {
         var oldestEntryDate = now;
 
         var insertIntoEntries = this.dBConnection.
-            createStatement('INSERT OR IGNORE INTO entries (            ' +
-                            'feedID,                                    ' +
-                            'id,                                        ' +
-                            'providedId,                                ' +
-                            'entryURL,                                  ' +
-                            'title,                                     ' +
-                            'summary,                                   ' +
-                            'content,                                   ' +
-                            'date,                                      ' +
-                            'read)                                      ' +
-                            'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) ');
+            createStatement('INSERT OR IGNORE INTO entries (                 ' +
+                            'feedID,                                         ' +
+                            'id,                                             ' +
+                            'providedId,                                     ' +
+                            'entryURL,                                       ' +
+                            'title,                                          ' +
+                            'summary,                                        ' +
+                            'content,                                        ' +
+                            'date,                                           ' +
+                            'authors,                                        ' +
+                            'read)                                           ' +
+                            'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) ');
         this.dBConnection.beginTransaction();
 
         // Count the unread entries, to compare their number later.
@@ -341,7 +345,8 @@ BriefStorageService.prototype = {
                 insertIntoEntries.bindStringParameter(5, entry.summary);
                 insertIntoEntries.bindStringParameter(6, entry.content);
                 insertIntoEntries.bindInt64Parameter(7, entry.date ? entry.date : now);
-                insertIntoEntries.bindInt32Parameter(8, 0);
+                insertIntoEntries.bindStringParameter(8, entry.authors);
+                insertIntoEntries.bindInt32Parameter(9, 0);
                 insertIntoEntries.execute();
 
                 if (entry.date && entry.date < oldestEntryDate)
