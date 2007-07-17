@@ -27,6 +27,8 @@ interface nsIBriefFeedEntry : nsISupports {
 
   attribute unsigned long long date;
 
+  attribute AString authors;
+
  /**
   * These attributes contain additional information about the entry stored in
   * the database.
