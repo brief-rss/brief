@@ -5,9 +5,10 @@ var BriefQuery = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuer
 
 var gBrief = {
 
-    tab: null,           // Tab in which Brief is loaded
-    statusIcon: null,    // Statusbar panel
+    tab: null,            // Tab in which Brief is loaded
+    statusIcon: null,     // Statusbar panel
     storageService: null,
+    updateService: null,
 
     // We can't cache it like statusIcon, because it may be removed or added via Customize
     // Toolbar.
@@ -36,12 +37,6 @@ var gBrief = {
             browser.addEventListener('load', this.onBriefTabLoad, true);
         }
 
-    },
-
-    updateFeeds: function gBrief_updateFeeds() {
-        var updateService = Cc['@ancestor/brief/updateservice;1'].
-                            getService(Ci.nsIBriefUpdateService);
-        updateService.fetchAllFeeds();
     },
 
     markFeedsAsRead: function gBrief_markFeedsAsRead() {
@@ -220,6 +215,9 @@ var gBrief = {
                 this.updateStatuspanel();
             }
 
+            this.updateService = Cc['@ancestor/brief/updateservice;1'].
+                                 getService(Ci.nsIBriefUpdateService);
+
             // Observe changes to the feed database in order to keep the statusbar
             // icon up-to-date.
             var observerService = Cc['@mozilla.org/observer-service;1'].
@@ -227,7 +225,7 @@ var gBrief = {
             observerService.addObserver(this, 'brief:feed-updated', false);
             observerService.addObserver(this, 'brief:sync-to-livemarks', false);
             observerService.addObserver(this, 'brief:entry-status-changed', false);
-            observerService.addObserver(this, 'brief:batch-update-started', false);
+            observerService.addObserver(this, 'brief:feed-update-queued', false);
 
             // Stores the tab in which Brief is loaded so we can ensure only
             // instance can be open at a time. This is an UI choice, not a technical
@@ -249,7 +247,7 @@ var gBrief = {
             observerService.removeObserver(this, 'brief:feed-updated');
             observerService.removeObserver(this, 'brief:entry-status-changed');
             observerService.removeObserver(this, 'brief:sync-to-livemarks');
-            observerService.removeObserver(this, 'brief:batch-update-started');
+            observerService.removeObserver(this, 'brief:feed-update-queued');
             break;
         }
     },
@@ -281,29 +279,32 @@ var gBrief = {
             }
             break;
 
-        case 'brief:batch-update-started':
+        case 'brief:feed-update-queued':
+            // Don't display progress for background updates.
+            if (aData == 'background')
+                return;
+
             var progressmeter = document.getElementById('brief-progressmeter');
 
             // Only show the progressmeter if Brief isn't opened in the currently selected
-            // tab (no need to show to progressmeters on screen).
+            // tab (no need to show two progressmeters on screen).
             if (gBrowser.selectedTab != this.tab)
                 progressmeter.hidden = false;
 
-            progressmeter.value = 0;
-            this.totalFeeds = this.storageService.getAllFeeds({}).length;
-            this.finishedFeeds = 0;
+            progressmeter.value = 100 * this.updateService.completedFeedsCount /
+                                        this.updateService.pendingFeedsCount;
             break;
 
+        case 'brief:feed-error':
         case 'brief:feed-updated':
-            this.finishedFeeds++;
             var progressmeter = document.getElementById('brief-progressmeter');
-            var progress = 100 * this.finishedFeeds / this.totalFeeds;
+            var progress = 100 * this.updateService.completedFeedsCount /
+                                 this.updateService.pendingFeedsCount;
             progressmeter.value = progress;
-            dump('this.totalFeeds: ' + this.totalFeeds);
-            dump('this.finishedFeeds: ' + this.finishedFeeds);
-            dump('progress: ' + progress);
-            if (progress == 100)
+
+            if (progress == 100) {
                 setTimeout(function() {progressmeter.hidden = true}, 500);
+            }
 
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
                 this.updateStatuspanel();

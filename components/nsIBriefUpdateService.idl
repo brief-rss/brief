@@ -1,4 +1,5 @@
 #include "nsISupports.idl"
+interface nsIBriefFeed;
 
 /**
  * nsIBriefUpdateService is responsible for downloading and parsing feeds. It
@@ -8,36 +9,57 @@
 [scriptable, uuid(76607B92-7E83-11DB-9369-10F955D89593)]
 interface nsIBriefUpdateService : nsISupports {
 
+  readonly attribute boolean autoUpdatingEnabled;
+
   /**
-   * Specifies whether the autoupdate timer is running.
+   * Indicates if a batch update is in progress and whether it is a normal or a
+   * background one.
    */
-  readonly attribute boolean updateServiceRunning;
+  const short NO_UPDATE = 0;
+  const short BACKGROUND_UPDATE = 1;
+  const short NORMAL_UPDATE = 2;
+
+  readonly attribute short updateInProgress;
+
+
+  readonly attribute unsigned long pendingFeedsCount;
+
+  readonly attribute unsigned long completedFeedsCount;
+
 
   /**
    * Start the autoupdate timer.
    *
-   * @throws if autoupdate is already started.
+   * @throws if autoupdating is already enabled.
    */
-  void startUpdateService();
+  void enableAutoUpdating();
 
   /**
    * Stop the autoupdate timer.
    *
-   * @throws if autoupdate isn't running.
+   * @throws if autoupdate is already disabled.
    */
-  void stopUpdateService();
+  void disableAutoUpdating();
 
   /**
-   * Download a feed and check it for updates. The must already be in the
+   * Download feeds and check them for updates. They must already be in the
    * database.
    *
-   * @param aFeedURL URL from which to download the feed
+   * @param feeds         Array of nsIBriefFeed's to be updated.
+   * @param feedCount     Length of the |feeds| array.
+   * @param inBackground  Fetch feeds with longer delay, designed for updating in the
+   *                      background.
    */
-  void fetchFeed(in string feedID);
+  void fetchFeeds([const, array, size_is(feedCount)] in nsIBriefFeed feeds,
+                  in unsigned long feedCount,
+                  in boolean inBackground);
 
   /**
    * Download and check for updates all the feeds in the database.
+   *
+   * @param inBackground  Fetch feeds with longer delay, designed for updating in the
+   *                      background.
    */
-  void fetchAllFeeds();
+  void fetchAllFeeds(in boolean inBackground);
 
 };
