@@ -3,8 +3,7 @@ interface nsIBriefFeed;
 
 /**
  * nsIBriefUpdateService is responsible for downloading and parsing feeds. It
- * interacts with nsIBriefStorage service to subsequently update the database
- * with the obtained data.
+ * interacts with nsIBriefStorage service to update the database with the obtained data.
  */
 [scriptable, uuid(76607B92-7E83-11DB-9369-10F955D89593)]
 interface nsIBriefUpdateService : nsISupports {
@@ -21,9 +20,15 @@ interface nsIBriefUpdateService : nsISupports {
 
   readonly attribute short updateInProgress;
 
+  /**
+   * Total number of feeds scheduled for current batch update (both completed and pending
+   * ones).
+   */
+  readonly attribute unsigned long totalFeedsCount;
 
-  readonly attribute unsigned long pendingFeedsCount;
-
+  /**
+   * Number of completed feed in the current batch update.
+   */
   readonly attribute unsigned long completedFeedsCount;
 
 

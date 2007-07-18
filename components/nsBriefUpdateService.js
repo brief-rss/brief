@@ -50,8 +50,8 @@ BriefUpdateService.prototype = {
     autoUpdatingEnabled: false,
 
     // nsIBriefUpdateService
-    get pendingFeedsCount() {
-        return this.updateQueue.length;
+    get totalFeedsCount() {
+        return this.scheduledFeeds.length;
     },
 
     // nsIBriefUpdateService
@@ -62,8 +62,9 @@ BriefUpdateService.prototype = {
     // nsIBriefUpdateService
     updateInProgress: NO_UPDATE,
 
-    updateQueue: [],        // array of nsIBriefFeed's to be updated
-    completedFeeds: [],     // array of nsIBriefFeed's already updated in the current batch
+    scheduledFeeds: [],  // feeds to be updated in the current job (array of nsIBriefFeed's)
+    updateQueue:    [],  // remaining feeds to be fetched
+    completedFeeds: [],  // feeds which have been fetched and parsed
 
     feedsWithNewEntriesCount: 0,  // number of updated feeds that have new entries
     newEntriesCount:          0,  // total number of new entries in all updated feeds
@@ -113,12 +114,10 @@ BriefUpdateService.prototype = {
         case this.fetchDelayTimer:
             var feed = this.updateQueue.shift();
 
-            // The update queue may be empty, because we don't cancel the timer until
-            // after the last feed is received and parsed.
-            if (feed) {
+            // All feeds in the update queue may have already been requested,
+            // because we don't cancel the timer until after all feeds are completed.
+            if (feed)
                 new FeedFetcher(feed);
-                this.completedFeeds.push(feed);
-            }
 
             break;
         }
@@ -135,7 +134,7 @@ BriefUpdateService.prototype = {
     },
 
 
-    fetchFeeds: function BUS_fetchFeeds(aFeeds, aInBackground) {
+    fetchFeeds: function BUS_fetchFeeds(aFeeds, aFeedsLength, aInBackground) {
         // If only one feed is to be updated, we just do it right away without maintaining
         // the update queue.
         if (this.updateInProgress == NO_UPDATE && aFeeds.length == 1) {
@@ -145,11 +144,13 @@ BriefUpdateService.prototype = {
 
         // Add feeds to the queue, but don't let the same feed to be added twice.
         var feed, i;
-        var oldLength = this.updateQueue.length;
+        var oldLength = this.scheduledFeeds.length;
         for (i = 0; i < aFeeds.length; i++) {
             feed = aFeeds[i];
-            if (this.updateQueue.indexOf(feed) == -1 && this.completedFeeds.indexOf(feed) == -1)
+            if (this.scheduledFeeds.indexOf(feed) == -1) {
+                this.scheduledFeeds.push(feed);
                 this.updateQueue.push(feed);
+            }
         }
 
         // Start updating if it isn't in progress yet.
@@ -172,7 +173,7 @@ BriefUpdateService.prototype = {
         if (this.updateInProgress != NORMAL_UPDATE)
             this.updateInProgress = aInBackground ? 1 : 2;
 
-        if (oldLength < this.updateQueue.length) {
+        if (oldLength < this.scheduledFeeds.length) {
             var data = this.updateInProgress == BACKGROUND_UPDATE ? 'background' : 'foreground';
             var observerService = Cc['@mozilla.org/observer-service;1'].
                                   getService(Ci.nsIObserverService);
@@ -213,7 +214,7 @@ BriefUpdateService.prototype = {
             }
 
             // We're done, all feeds updated.
-            if (this.updateQueue.length == 0) {
+            if (this.completedFeeds.length == this.scheduledFeeds.length) {
                 this.updateInProgress = NO_UPDATE;
                 this.fetchDelayTimer.cancel();
 
@@ -234,6 +235,7 @@ BriefUpdateService.prototype = {
                 // Reset the members after updating is finished.
                 this.newEntriesCount = this.feedsWithNewEntriesCount = 0;
                 this.completedFeeds = [];
+                this.scheduledFeeds = [];
             }
             break;
 
@@ -389,8 +391,17 @@ FeedFetcher.prototype = {
 
     passDataToStorage: function FeedFetcher_passDataToStorage() {
         this.downloadedFeed.favicon = this.favicon;
-        var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-        storage.updateFeed(this.downloadedFeed);
+        var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+
+        // XXX Argh, this is messy. We can't push the feed to the |completedFeeds| stack
+        // in brief:feed-updated observer in the main class, because we have to ensure
+        // this is done before any other observers receive this notification. Otherwise
+        // the progressmeters won't be refreshed properly, because of outdated count of
+        // completed feeds.
+        var feed = storageService.getFeed(this.feedID);
+        Factory.singleton.completedFeeds.push(feed);
+
+        storageService.updateFeed(this.downloadedFeed);
     }
 
 }
@@ -563,14 +574,14 @@ FaviconFetcher.prototype = {
 
 var Factory = {
 
-    sigleton: null,
+    singleton: null,
 
     createInstance: function (aOuter, aIID) {
         if (aOuter != null)
             throw Components.results.NS_ERROR_NO_AGGREGATION;
-        if (this.sigleton === null)
-            this.sigleton = new BriefUpdateService();
-        return this.sigleton.QueryInterface(aIID);
+        if (this.singleton === null)
+            this.singleton = new BriefUpdateService();
+        return this.singleton.QueryInterface(aIID);
     }
 }
 

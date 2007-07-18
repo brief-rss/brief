@@ -32,6 +32,9 @@
             <menuitem id="ctx-update-feed"
                       label="&ctxUpdateFeed.label;"
                       oncommand="brief.ctx_updateFeed(event);"/>
+            <menuitem id="ctx-update-folder"
+                      label="&ctxUpdateFolder.label;"
+                      oncommand="brief.ctx_updateFolder(event);"/>
             <menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
                       oncommand="brief.ctx_openWebsite(event);"/>

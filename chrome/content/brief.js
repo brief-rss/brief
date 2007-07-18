@@ -175,7 +175,7 @@ var brief = {
             var progressmeter = document.getElementById('update-progress');
             progressmeter.hidden = false;
             progressmeter.value = 100 * gUpdateService.completedFeedsCount /
-                                        gUpdateService.pendingFeedsCount;
+                                        gUpdateService.totalFeedsCount;
             break;
 
         // Entries were marked as read/unread, starred, trashed, restored, or deleted.
@@ -260,7 +260,7 @@ var brief = {
     updateProgressMeter: function brief_updateProgressMeter( ) {
         var progressmeter = document.getElementById('update-progress');
         var progress = 100 * gUpdateService.completedFeedsCount /
-                             gUpdateService.pendingFeedsCount;
+                             gUpdateService.totalFeedsCount;
         progressmeter.value = progress;
 
         if (progress == 100)
@@ -445,6 +445,19 @@ var brief = {
         var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
         var feed = gStorage.getFeed(feedID);
         gUpdateService.fetchFeeds([feed], 1, false);
+    },
+
+    ctx_updateFolder: function brief_ctx_updateFolder(aEvent) {
+        var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
+        var feedID, i, feeds = [];
+        for (i = 0; i < treeitems.length; i++) {
+            if (!treeitems[i].hasAttribute('container')) {
+                feedID = treeitems[i].getAttribute('feedID');
+                feeds.push(gStorage.getFeed(feedID));
+            }
+        }
+        debugger;
+        gUpdateService.fetchFeeds(feeds, feeds.length, false);
     },
 
     ctx_openWebsite: function brief_ctx_openWebsite(aEvent) {
