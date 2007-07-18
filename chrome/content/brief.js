@@ -8,6 +8,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+const gUpdateService = Cc['@ancestor/brief/updateservice;1'].getService(Ci.nsIBriefUpdateService);
 var QuerySH = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery', 'setConditions');
 var Query = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery');
 
@@ -50,10 +51,6 @@ var brief = {
         // Initiate the feed list.
         var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
         if (liveBookmarksFolder) {
-            // If Brief is set as the homepage, it's loaded before delayedStartup() is
-            // run and encounters an exception when synchronizing. Hence the timeout.
-            //setTimeout(function(){ gStorage.syncWithBookmarks(); }, 500);
-            gStorage.syncWithBookmarks();
             // This timeout causes the Brief window to be displayed a lot sooner and to
             // populate the feed list afterwards.
             setTimeout(function(){ gFeedList.rebuild(); }, 0);
@@ -82,7 +79,7 @@ var brief = {
         observerService.addObserver(this, 'brief:feed-loading', false);
         observerService.addObserver(this, 'brief:feed-error', false);
         observerService.addObserver(this, 'brief:entry-status-changed', false);
-        observerService.addObserver(this, 'brief:batch-update-started', false);
+        observerService.addObserver(this, 'brief:feed-update-queued', false);
 
         observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
         observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
@@ -110,7 +107,7 @@ var brief = {
         observerService.removeObserver(this, 'brief:feed-loading');
         observerService.removeObserver(this, 'brief:feed-error');
         observerService.removeObserver(this, 'brief:entry-status-changed');
-        observerService.removeObserver(this, 'brief:batch-update-started');
+        observerService.removeObserver(this, 'brief:feed-update-queued');
 
         observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
         observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
@@ -143,7 +140,6 @@ var brief = {
             item.removeAttribute('error');
             item.removeAttribute('loading');
             gFeedList.refreshFeedTreeitems(item);
-            this.finishedFeeds++;
             this.updateProgressMeter();
 
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
@@ -167,17 +163,19 @@ var brief = {
             gFeedList.removeProperty(item, 'loading');
             item.setAttribute('error', true);
             gFeedList.refreshFeedTreeitems(item);
-            this.finishedFeeds++;
             this.updateProgressMeter();
             break;
 
         // Sets up the updating progressmeter.
-        case 'brief:batch-update-started':
+        case 'brief:feed-update-queued':
+            // Don't display progress for background updates.
+            if (aData == 'background')
+                return;
+
             var progressmeter = document.getElementById('update-progress');
             progressmeter.hidden = false;
-            progressmeter.value = 0;
-            this.totalFeeds = gStorage.getAllFeeds({}).length;
-            this.finishedFeeds = 0;
+            progressmeter.value = 100 * gUpdateService.completedFeedsCount /
+                                        gUpdateService.pendingFeedsCount;
             break;
 
         // Entries were marked as read/unread, starred, trashed, restored, or deleted.
@@ -261,11 +259,12 @@ var brief = {
 
     updateProgressMeter: function brief_updateProgressMeter( ) {
         var progressmeter = document.getElementById('update-progress');
-        var percentage = 100 * this.finishedFeeds / this.totalFeeds;
-        progressmeter.value = percentage;
+        var progress = 100 * gUpdateService.completedFeedsCount /
+                             gUpdateService.pendingFeedsCount;
+        progressmeter.value = progress;
 
-        if (percentage == 100)
-            progressmeter.hidden = true;
+        if (progress == 100)
+            setTimeout(function() {progressmeter.hidden = true}, 500);
     },
 
 // Listeners for actions performed in the feed view.
@@ -339,9 +338,7 @@ var brief = {
     },
 
     updateAllFeeds: function brief_updateAllFeeds() {
-        var updateService = Cc['@ancestor/brief/updateservice;1'].
-                            getService(Ci.nsIBriefUpdateService);
-        updateService.fetchAllFeeds();
+        gUpdateService.fetchAllFeeds(false);
     },
 
     openOptions: function brief_openOptions(aPaneID) {
@@ -446,9 +443,8 @@ var brief = {
 
     ctx_updateFeed: function brief_ctx_updateFeed(aEvent) {
         var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-        var updateService = Cc['@ancestor/brief/updateservice;1'].
-                            getService(Ci.nsIBriefUpdateService);
-        updateService.fetchFeed(feedID);
+        var feed = gStorage.getFeed(feedID);
+        gUpdateService.fetchFeeds([feed], 1, false);
     },
 
     ctx_openWebsite: function brief_ctx_openWebsite(aEvent) {

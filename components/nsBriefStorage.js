@@ -357,14 +357,11 @@ BriefStorageService.prototype = {
 
             // We could just update all feed properties without checking if anything
             // has changed but we don't want to unnecessarily invalidate the feeds cache.
-            if (currFeed.websiteURL != aFeed.websiteURL || currFeed.subtitle != aFeed.subtitle ||
-               currFeed.imageURL != aFeed.imageURL || currFeed.imageLink != aFeed.imageLink ||
-               currFeed.imageTitle != aFeed.imageTitle || currFeed.favicon != aFeed.favicon ||
+            if (currFeed.websiteURL != aFeed.websiteURL || currFeed.subtitle  != aFeed.subtitle  ||
+               currFeed.imageURL    != aFeed.imageURL   || currFeed.imageLink != aFeed.imageLink ||
+               currFeed.imageTitle  != aFeed.imageTitle || currFeed.favicon   != aFeed.favicon   ||
                currFeed.everUpdated != 1 ||
                currFeed.oldestAvailableEntryDate != aFeed.oldestAvailableEntryDate) {
-
-                // Invalidate cache since feeds table is about to change.
-                this.feedsCache = this.feedsAndFoldersCache = null;
 
                 // Do not update the title, so that it is always taken from the Live Bookmark.
                 var updateFeed = this.dBConnection.
@@ -387,6 +384,15 @@ BriefStorageService.prototype = {
                 updateFeed.bindInt64Parameter(6,  oldestEntryDate);
                 updateFeed.bindStringParameter(7, aFeed.feedID);
                 updateFeed.execute();
+
+                currFeed.websiteURL = aFeed.websiteURL;
+                currFeed.subtitle = aFeed.subtitle;
+                currFeed.imageURL = aFeed.imageURL;
+                currFeed.imageLink = aFeed.imageLink;
+                currFeed.imageTitle = aFeed.imageTitle;
+                currFeed.favicon = aFeed.favicon;
+                currFeed.everUpdated = 1;
+                currFeed.oldestAvailableEntryDate = aFeed.oldestAvailableEntryDate;
             }
         }
         finally {

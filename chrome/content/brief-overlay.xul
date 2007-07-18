@@ -12,7 +12,7 @@
         <popup id="brief-status-context">
             <menuitem id="brief-ctx-update-feeds"
                       label="&ctxUpdateFeeds.label;"
-                      oncommand="gBrief.updateFeeds();"/>
+                      oncommand="gBrief.updateService.fetchAllFeeds(false);"/>
             <menuitem id="brief-ctx-mark-read"
                      label="&ctxMarkFeedsAsRead.label;"
                      oncommand="gBrief.markFeedsAsRead();"/>

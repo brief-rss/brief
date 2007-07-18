@@ -12,6 +12,15 @@ const ICON_DATAURL_PREFIX   = 'data:image/x-icon;base64,';
 const FEED_ICON_URL         = 'chrome://brief/skin/icon.png';
 const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
 
+NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
+NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
+BACKGROUND_UPDATE = Ci.nsIBriefUpdateService.BACKGROUND_UPDATE;
+
+function dump(aMessage) {
+  var consoleService = Cc["@mozilla.org/consoleservice;1"].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage('Brief:\n' + aMessage);
+}
 
 // Class definition
 function BriefUpdateService() {
@@ -37,39 +46,55 @@ function BriefUpdateService() {
 
 BriefUpdateService.prototype = {
 
+    // nsIBriefUpdateService
+    autoUpdatingEnabled: false,
+
+    // nsIBriefUpdateService
+    get pendingFeedsCount() {
+        return this.updateQueue.length;
+    },
+
+    // nsIBriefUpdateService
+    get completedFeedsCount() {
+        return this.completedFeeds.length;
+    },
+
+    // nsIBriefUpdateService
+    updateInProgress: NO_UPDATE,
+
+    updateQueue: [],        // array of nsIBriefFeed's to be updated
+    completedFeeds: [],     // array of nsIBriefFeed's already updated in the current batch
+
+    feedsWithNewEntriesCount: 0,  // number of updated feeds that have new entries
+    newEntriesCount:          0,  // total number of new entries in all updated feeds
+
     updateTimer:     null,
     fetchDelayTimer: null,
     prefs:           null,
 
-    // Members specific to a single fetchAllFeeds call
-    feeds:                 null, // array containing all feeds to be updated
-    currentFeedIndex:      0,    // index of next feed to be fetched
-    updatedFeedsCount:     0,    // number of updated feeds that have new entries
-    newEntriesCount:       0,    // total number of new entries in all updated feeds
-    batchUpdateInProgress: 0,    // 0 - no, 1 - normal update, 2 - background update
 
-    // See nsIBriefUpdateService
-    updateServiceRunning: false,
-
-
-    // See nsIBriefUpdateService
-    startUpdateService: function BUS_startUpdateService() {
-        if (this.updateServiceRunning)
+    // nsIBriefUpdateService
+    enableAutoUpdating: function BUS_enableAutoUpdating() {
+        if (this.autoUpdatingEnabled)
             throw('Brief: update service is already running.')
-        this.updateServiceRunning = true;
+        this.autoUpdatingEnabled = true;
 
+        // Notify the timer to immediately check if feeds need to be updated.
         this.notify(this.updateTimer);
+
+        // Start the update timer which is responsible of periodically checking if enough
+        // time has passed since last update.
         this.updateTimer.initWithCallback(this, UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
     },
 
 
-    // See nsIBriefUpdateService
-    stopUpdateService: function BUS_stopUpdateService() {
-        if (!this.updateServiceRunning)
+    // nsIBriefUpdateService
+    disableAutoUpdating: function BUS_disableAutoUpdating() {
+        if (!this.autoUpdatingEnabled)
             throw('Brief: update service is not running.');
 
         this.updateTimer.cancel();
-        this.updateServiceRunning = false;
+        this.autoUpdatingEnabled = false;
     },
 
 
@@ -86,66 +111,72 @@ BriefUpdateService.prototype = {
             break;
 
         case this.fetchDelayTimer:
-            var currentFeed = this.feeds[this.currentFeedIndex];
-            new FeedFetcher(currentFeed);
-            this.currentFeedIndex++;
+            var feed = this.updateQueue.shift();
 
-            // If all feeds have been already fetched, cancel the timer.
-            if (this.currentFeedIndex == this.feeds.length)
-                aTimer.cancel();
+            // The update queue may be empty, because we don't cancel the timer until
+            // after the last feed is received and parsed.
+            if (feed) {
+                new FeedFetcher(feed);
+                this.completedFeeds.push(feed);
+            }
 
             break;
-
         }
     },
 
 
     // nsIBriefUpdateService
-    fetchAllFeeds: function BUS_fetchAllFeeds(aUpdateInBackground) {
+    fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
         var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-        this.feeds = storage.getAllFeeds({});
-
-        // Prevent initiating more than one update at a time. If background update
-        // is in progress and foreground update is attempted, we stop the background
-        // update and restart. In all other cases attempting to start a new update
-        // while another is already running has no effect - we return early here.
-        if ((this.batchUpdateInProgress == 2 && aUpdateInBackground) ||
-             this.batchUpdateInProgress == 1 || this.feeds.length == 0) {
-            return;
-        }
-
-        if (!aUpdateInBackground) {
-            var observerService = Cc['@mozilla.org/observer-service;1'].
-                                  getService(Ci.nsIObserverService);
-            observerService.notifyObservers(null, 'brief:batch-update-started', '');
-            if (this.batchUpdateInProgress == 2)
-                this.fetchDelayTimer.cancel();
-        }
-
-        // Set up all the members for a new update.
-        this.batchUpdateInProgress = aUpdateInBackground ? 2 : 1;
-        this.currentFeedIndex = 0;
-        this.finishedFeedsCount = 0;
-        this.updatedFeedsCount = 0;
-        this.newEntriesCount = 0;
-
-        // We will fetch feeds on an interval, so we don't choke when downloading
-        // and processing all of them a once.
-        var delay = aUpdateInBackground ? this.prefs.getIntPref('update.backgroundFetchDelay')
-                                        : this.prefs.getIntPref('update.defaultFetchDelay');
-        this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
+        this.fetchFeeds(storage.getAllFeeds({}), aInBackground);
 
         var now = Math.round(Date.now() / 1000);
         this.prefs.setIntPref('update.lastUpdateTime', now);
     },
 
 
-    // nsIBriefUpdateService
-    fetchFeed: function BUS_fetchFeed(aFeedID) {
-        if (this.batchUpdateInProgress != 1) {
-            var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-            var feed = storage.getFeed(aFeedID);
-            new FeedFetcher(feed);
+    fetchFeeds: function BUS_fetchFeeds(aFeeds, aInBackground) {
+        // If only one feed is to be updated, we just do it right away without maintaining
+        // the update queue.
+        if (this.updateInProgress == NO_UPDATE && aFeeds.length == 1) {
+            new FeedFetcher(aFeeds[0]);
+            return;
+        }
+
+        // Add feeds to the queue, but don't let the same feed to be added twice.
+        var feed, i;
+        var oldLength = this.updateQueue.length;
+        for (i = 0; i < aFeeds.length; i++) {
+            feed = aFeeds[i];
+            if (this.updateQueue.indexOf(feed) == -1 && this.completedFeeds.indexOf(feed) == -1)
+                this.updateQueue.push(feed);
+        }
+
+        // Start updating if it isn't in progress yet.
+        if (this.updateInProgress == NO_UPDATE) {
+            // We will fetch feeds on an interval, so we don't choke when downloading
+            // and processing all of them a once.
+            var delay = aInBackground ? this.prefs.getIntPref('update.backgroundFetchDelay')
+                                      : this.prefs.getIntPref('update.defaultFetchDelay');
+            this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
+        }
+
+        // If background update is in progress and foreground update is attempted,
+        // we stop the background start continue with a foreground one.
+        if (this.updateInProgress == BACKGROUND_UPDATE && !aInBackground) {
+            this.fetchDelayTimer.cancel();
+            var delay = this.prefs.getIntPref('update.defaultFetchDelay');
+            this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
+        }
+
+        if (this.updateInProgress != NORMAL_UPDATE)
+            this.updateInProgress = aInBackground ? 1 : 2;
+
+        if (oldLength < this.updateQueue.length) {
+            var data = this.updateInProgress == BACKGROUND_UPDATE ? 'background' : 'foreground';
+            var observerService = Cc['@mozilla.org/observer-service;1'].
+                                  getService(Ci.nsIObserverService);
+            observerService.notifyObservers(null, 'brief:feed-update-queued', data);
         }
     },
 
@@ -159,7 +190,7 @@ BriefUpdateService.prototype = {
         case 'profile-after-change':
             if (aData == 'startup') {
                 if (this.prefs.getBoolPref('update.enableAutoUpdate'))
-                    this.startUpdateService();
+                    this.enableAutoUpdating();
 
                 // We add the observer here instead of in the constructor as prefs
                 // are changed during startup when assuming their user-set values.
@@ -171,19 +202,20 @@ BriefUpdateService.prototype = {
         // updating is completed.
         case 'brief:feed-error':
         case 'brief:feed-updated':
-            if (this.batchUpdateInProgress == 0)
-                // This isn't a batch update, no need to count the feeds.
+            // This was just a single feed, not a batch update, so don't show the
+            // notification.
+            if (this.updateInProgress == NO_UPDATE)
                 return;
 
-            this.finishedFeedsCount++;
             if (aSubject && aSubject.QueryInterface(Ci.nsIVariant) > 0) {
                 this.newEntriesCount += aSubject.QueryInterface(Ci.nsIVariant);
-                this.updatedFeedsCount++;
+                this.feedsWithNewEntriesCount++;
             }
 
-            if (this.finishedFeedsCount == this.feeds.length) {
-                // We're done, all feeds updated.
-                this.batchUpdateInProgress = 0;
+            // We're done, all feeds updated.
+            if (this.updateQueue.length == 0) {
+                this.updateInProgress = NO_UPDATE;
+                this.fetchDelayTimer.cancel();
 
                 var showNotification = this.prefs.getBoolPref('update.showNotification');
                 if (this.updatedFeedsCount > 0 && showNotification && this.alertsService) {
@@ -192,12 +224,16 @@ BriefUpdateService.prototype = {
                                  getService(Ci.nsIStringBundleService).
                                  createBundle('chrome://brief/locale/brief.properties');
                     var title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
-                    var params = [this.newEntriesCount, this.updatedFeedsCount];
+                    var params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
                     var text = bundle.formatStringFromName('updateAlertText', params, 2);
 
                     this.alertsService.showAlertNotification(FEED_ICON_URL, title, text,
                                                              true, null, this);
                 }
+
+                // Reset the members after updating is finished.
+                this.newEntriesCount = this.feedsWithNewEntriesCount = 0;
+                this.completedFeeds = [];
             }
             break;
 
@@ -217,18 +253,18 @@ BriefUpdateService.prototype = {
             switch (aData) {
             case 'update.enableAutoUpdate':
                 var newValue = this.prefs.getBoolPref('update.enableAutoUpdate');
-                if (!newValue && this.updateServiceRunning)
-                    this.stopUpdateService();
-                if (newValue && !this.updateServiceRunning)
-                    this.startUpdateService();
+                if (!newValue && this.autoUpdatingEnabled)
+                    this.disableAutoUpdating();
+                if (newValue && !this.autoUpdatingEnabled)
+                    this.enableAutoUpdating();
                 break;
 
             case 'update.interval':
                 var updateEnabled = this.prefs.getBoolPref('update.enableAutoUpdate');
-                if (this.updateServiceRunning)
-                    this.stopUpdateService();
+                if (this.autoUpdatingEnabled)
+                    this.disableAutoUpdating();
                 if (updateEnabled)
-                    this.startUpdateService();
+                    this.enableAutoUpdating();
                 break;
             }
             break;
