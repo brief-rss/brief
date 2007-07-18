@@ -292,14 +292,14 @@ var gBrief = {
                 progressmeter.hidden = false;
 
             progressmeter.value = 100 * this.updateService.completedFeedsCount /
-                                        this.updateService.pendingFeedsCount;
+                                        this.updateService.totalFeedsCount;
             break;
 
         case 'brief:feed-error':
         case 'brief:feed-updated':
             var progressmeter = document.getElementById('brief-progressmeter');
             var progress = 100 * this.updateService.completedFeedsCount /
-                                 this.updateService.pendingFeedsCount;
+                                 this.updateService.totalFeedsCount;
             progressmeter.value = progress;
 
             if (progress == 100) {

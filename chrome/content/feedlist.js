@@ -423,6 +423,9 @@ var gFeedList = {
         var updateFeed = document.getElementById('ctx-update-feed');
         updateFeed.hidden = !targetIsFeed;
 
+        var updateFolder = document.getElementById('ctx-update-folder');
+        updateFolder.hidden = !targetIsContainer;
+
         var openWebsite = document.getElementById('ctx-open-website');
         openWebsite.hidden = !targetIsFeed;
 
@@ -438,7 +441,6 @@ var gFeedList = {
         var showProperties = document.getElementById('ctx-feed-properties');
         showProperties.hidden = !targetIsFeed;
 
-
         // Menuitems relating to deleting feeds and folders
         var dangerousSeparator = document.getElementById('ctx-dangerous-cmds-separator');
         dangerousSeparator.hidden = !(targetIsFeed || targetIsContainer ||
@@ -449,7 +451,6 @@ var gFeedList = {
 
         var deleteFolder = document.getElementById('ctx-delete-folder');
         deleteFolder.hidden = !targetIsContainer;
-
 
         // Menuitems related to emptying feeds and folders
         var emptyFeed = document.getElementById('ctx-empty-feed');
@@ -490,7 +491,6 @@ var gFeedList = {
         // of the currently processed folder. This is how it tracks where to append the
         // items.
         this._folderParentChain = [topLevelChildren];
-        dump('rebuild');
 
         var rootURI = gPrefs.getCharPref('liveBookmarksFolder');
         this._buildFolderChildren(hashString(rootURI));
@@ -567,11 +567,6 @@ var gFeedList = {
 
         return treeitem;
     }
-
-
-
-
-
 
 }
 
