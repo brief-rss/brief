@@ -1,0 +1,11 @@
+.article-container {
+  -moz-binding: url('chrome://brief/content/bindings.xml#feedentry');
+}
+
+#feed-content[trash] .delete-entry {
+  display: none;
+  }
+
+#feed-content:not([trash]) .restore-entry {
+  display: none;
+  }
