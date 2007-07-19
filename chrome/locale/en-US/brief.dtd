@@ -9,6 +9,7 @@
 <!ENTITY viewStarred.label "Starred">
 
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
+<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY searchScopeButton.tooltip "Change the search scope">
 <!ENTITY showOptions.tooltip "Open Brief options">
 <!ENTITY markViewRead.tooltip "Mark currently viewed entries as read">

@@ -80,6 +80,7 @@ var brief = {
         observerService.addObserver(this, 'brief:feed-error', false);
         observerService.addObserver(this, 'brief:entry-status-changed', false);
         observerService.addObserver(this, 'brief:feed-update-queued', false);
+        observerService.addObserver(this, 'brief:feed-update-canceled', false);
 
         observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
         observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
@@ -108,6 +109,7 @@ var brief = {
         observerService.removeObserver(this, 'brief:feed-error');
         observerService.removeObserver(this, 'brief:entry-status-changed');
         observerService.removeObserver(this, 'brief:feed-update-queued');
+        observerService.removeObserver(this, 'brief:feed-update-canceled');
 
         observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
         observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
@@ -176,6 +178,20 @@ var brief = {
             progressmeter.hidden = false;
             progressmeter.value = 100 * gUpdateService.completedFeedsCount /
                                         gUpdateService.totalFeedsCount;
+            break;
+
+        case 'brief:feed-update-canceled':
+            var progressmeter = document.getElementById('update-progress');
+            progressmeter.hidden = true;
+            progressmeter.value = 0;
+
+            var items = gFeedList.items;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].hasAttribute('loading')) {
+                    items[i].removeAttribute('loading');
+                    gFeedList.refreshFeedTreeitems(items[i]);
+                }
+            }
             break;
 
         // Entries were marked as read/unread, starred, trashed, restored, or deleted.
@@ -263,8 +279,11 @@ var brief = {
                              gUpdateService.totalFeedsCount;
         progressmeter.value = progress;
 
-        if (progress == 100)
+        if (progress == 100) {
             setTimeout(function() {progressmeter.hidden = true}, 500);
+            var deck = document.getElementById('update-buttons-deck');
+            deck.selectedIndex = 0;
+        }
     },
 
 // Listeners for actions performed in the feed view.
@@ -339,6 +358,14 @@ var brief = {
 
     updateAllFeeds: function brief_updateAllFeeds() {
         gUpdateService.fetchAllFeeds(false);
+        var deck = document.getElementById('update-buttons-deck');
+        deck.selectedIndex = 1;
+    },
+
+    stopUpdating: function brief_stopUpdating() {
+        gUpdateService.stopFetching();
+        var deck = document.getElementById('update-buttons-deck');
+        deck.selectedIndex = 0;
     },
 
     openOptions: function brief_openOptions(aPaneID) {
@@ -456,8 +483,10 @@ var brief = {
                 feeds.push(gStorage.getFeed(feedID));
             }
         }
-        debugger;
+
         gUpdateService.fetchFeeds(feeds, feeds.length, false);
+        var deck = document.getElementById('update-buttons-deck');
+        deck.selectedIndex = 1;
     },
 
     ctx_openWebsite: function brief_ctx_openWebsite(aEvent) {

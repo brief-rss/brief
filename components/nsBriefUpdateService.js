@@ -22,6 +22,8 @@ function dump(aMessage) {
   consoleService.logStringMessage('Brief:\n' + aMessage);
 }
 
+var gBriefUpdateService = null;
+
 // Class definition
 function BriefUpdateService() {
     this.updateTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
@@ -66,6 +68,8 @@ BriefUpdateService.prototype = {
     updateQueue:    [],  // remaining feeds to be fetched
     completedFeeds: [],  // feeds which have been fetched and parsed
 
+    updateCanceled: false,
+
     feedsWithNewEntriesCount: 0,  // number of updated feeds that have new entries
     newEntriesCount:          0,  // total number of new entries in all updated feeds
 
@@ -96,31 +100,6 @@ BriefUpdateService.prototype = {
 
         this.updateTimer.cancel();
         this.autoUpdatingEnabled = false;
-    },
-
-
-    // nsITimerCallback
-    notify: function BUS_notify(aTimer) {
-        switch (aTimer) {
-
-        case this.updateTimer:
-            var interval = this.prefs.getIntPref('update.interval');
-            var lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime');
-            var now = Math.round(Date.now() / 1000);
-            if (now - lastUpdateTime >= interval*60)
-                this.fetchAllFeeds(true);
-            break;
-
-        case this.fetchDelayTimer:
-            var feed = this.updateQueue.shift();
-
-            // All feeds in the update queue may have already been requested,
-            // because we don't cancel the timer until after all feeds are completed.
-            if (feed)
-                new FeedFetcher(feed);
-
-            break;
-        }
     },
 
 
@@ -182,6 +161,67 @@ BriefUpdateService.prototype = {
     },
 
 
+    stopFetching: function BUS_stopFetching() {
+        this.finishUpdate();
+        this.updateCanceled = true;
+        var observerService = Cc['@mozilla.org/observer-service;1'].
+                              getService(Ci.nsIObserverService);
+        observerService.notifyObservers(null, 'brief:feed-update-canceled', '');
+    },
+
+
+    // nsITimerCallback
+    notify: function BUS_notify(aTimer) {
+        switch (aTimer) {
+
+        case this.updateTimer:
+            var interval = this.prefs.getIntPref('update.interval');
+            var lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime');
+            var now = Math.round(Date.now() / 1000);
+            if (now - lastUpdateTime >= interval*60)
+                this.fetchAllFeeds(true);
+            break;
+
+        case this.fetchDelayTimer:
+            var feed = this.updateQueue.shift();
+
+            // All feeds in the update queue may have already been requested,
+            // because we don't cancel the timer until after all feeds are completed.
+            if (feed)
+                new FeedFetcher(feed);
+
+            break;
+        }
+    },
+
+
+    finishUpdate: function BUS_finishUpdate() {
+        this.updateInProgress = NO_UPDATE;
+        this.fetchDelayTimer.cancel();
+
+        var showNotification = this.prefs.getBoolPref('update.showNotification');
+        if (this.updatedFeedsCount > 0 && showNotification && this.alertsService) {
+
+            var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
+                         getService(Ci.nsIStringBundleService).
+                         createBundle('chrome://brief/locale/brief.properties');
+            var title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
+            var params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
+            var text = bundle.formatStringFromName('updateAlertText', params, 2);
+
+            this.alertsService.showAlertNotification(FEED_ICON_URL, title, text,
+                                                     true, null, this);
+        }
+
+        // Reset the members after updating is finished.
+        this.newEntriesCount = this.feedsWithNewEntriesCount = 0;
+        this.completedFeeds = [];
+        this.scheduledFeeds = [];
+        this.updateQueue = [];
+        this.updateCanceled = false;
+    },
+
+
     // nsIObserver
     observe: function BUS_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
@@ -203,9 +243,9 @@ BriefUpdateService.prototype = {
         // updating is completed.
         case 'brief:feed-error':
         case 'brief:feed-updated':
-            // This was just a single feed, not a batch update, so don't show the
-            // notification.
-            if (this.updateInProgress == NO_UPDATE)
+            // If |updateInProgress| is NO_UPDATE then it means that a single feed was
+            // requested - nothing to do here as batch update wasn't started,
+            if (this.updateInProgress == NO_UPDATE || this.updateCanceled)
                 return;
 
             if (aSubject && aSubject.QueryInterface(Ci.nsIVariant) > 0) {
@@ -214,29 +254,9 @@ BriefUpdateService.prototype = {
             }
 
             // We're done, all feeds updated.
-            if (this.completedFeeds.length == this.scheduledFeeds.length) {
-                this.updateInProgress = NO_UPDATE;
-                this.fetchDelayTimer.cancel();
+            if (this.completedFeeds.length == this.scheduledFeeds.length)
+                this.finishUpdate();
 
-                var showNotification = this.prefs.getBoolPref('update.showNotification');
-                if (this.updatedFeedsCount > 0 && showNotification && this.alertsService) {
-
-                    var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
-                                 getService(Ci.nsIStringBundleService).
-                                 createBundle('chrome://brief/locale/brief.properties');
-                    var title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
-                    var params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
-                    var text = bundle.formatStringFromName('updateAlertText', params, 2);
-
-                    this.alertsService.showAlertNotification(FEED_ICON_URL, title, text,
-                                                             true, null, this);
-                }
-
-                // Reset the members after updating is finished.
-                this.newEntriesCount = this.feedsWithNewEntriesCount = 0;
-                this.completedFeeds = [];
-                this.scheduledFeeds = [];
-            }
             break;
 
         // Notification from nsIAlertsService that user has clicked the link in
@@ -300,6 +320,7 @@ function FeedFetcher(aFeed) {
     this.observerService = Cc['@mozilla.org/observer-service;1'].
                            getService(Ci.nsIObserverService);
     this.observerService.notifyObservers(null, 'brief:feed-loading', this.feedID);
+    this.observerService.addObserver(this, 'brief:feed-update-canceled', false);
 
     this.requestFeed();
 }
@@ -342,6 +363,8 @@ FeedFetcher.prototype = {
         request.onload = onRequestLoad;
         request.onerror = onRequestError;
         request.send(null);
+
+        this.request = request;
     },
 
 
@@ -393,15 +416,22 @@ FeedFetcher.prototype = {
         this.downloadedFeed.favicon = this.favicon;
         var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 
-        // XXX Argh, this is messy. We can't push the feed to the |completedFeeds| stack
-        // in brief:feed-updated observer in the main class, because we have to ensure
-        // this is done before any other observers receive this notification. Otherwise
-        // the progressmeters won't be refreshed properly, because of outdated count of
-        // completed feeds.
+        // We can't push the feed to the |completedFeeds| stack in brief:feed-updated
+        // observer in the main class, because we have to ensure this is done before any
+        // other observers receive this notification. Otherwise the progressmeters won't
+        // be refreshed properly, because of outdated count of completed feeds.
         var feed = storageService.getFeed(this.feedID);
-        Factory.singleton.completedFeeds.push(feed);
+        gBriefUpdateService.completedFeeds.push(feed);
 
         storageService.updateFeed(this.downloadedFeed);
+
+        this.observerService.removeObserver(this, 'brief:feed-update-canceled');
+        this.request = null;
+    },
+
+    observe: function FeedFetcher_observe(aSubject, aTopic, aData) {
+        if (aTopic == 'brief:feed-update-canceled')
+            this.request.abort();
     }
 
 }
@@ -411,7 +441,7 @@ FeedFetcher.prototype = {
  * Downloads a favicon of a webpage and b64-encodes it.
  *
  * @param aWebsiteURI  URI of webpage which favicon to download (not URI of the
- *                     favicon itself.
+ *                     favicon itself).
  * @param aFeedFetcher FeedFetcher to use for callback.
  */
 function FaviconFetcher(aWebsiteURI, aFeedFetcher) {
@@ -574,14 +604,12 @@ FaviconFetcher.prototype = {
 
 var Factory = {
 
-    singleton: null,
-
     createInstance: function (aOuter, aIID) {
         if (aOuter != null)
             throw Components.results.NS_ERROR_NO_AGGREGATION;
-        if (this.singleton === null)
-            this.singleton = new BriefUpdateService();
-        return this.singleton.QueryInterface(aIID);
+        if (gBriefUpdateService === null)
+            gBriefUpdateService = new BriefUpdateService();
+        return gBriefUpdateService.QueryInterface(aIID);
     }
 }
 

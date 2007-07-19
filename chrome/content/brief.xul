@@ -70,9 +70,14 @@
         <vbox id='left-pane' persist="width hidden">
             <toolbox>
                 <toolbar id="feed-list-toolbar">
-                    <toolbarbutton id="update-button"
-                                   tooltiptext="&updateButton.tooltip;"
-                                   oncommand="brief.updateAllFeeds();"/>
+                    <deck id="update-buttons-deck" selectedIndex="0">
+                        <toolbarbutton id="update-button"
+                                       tooltiptext="&updateButton.tooltip;"
+                                       oncommand="brief.updateAllFeeds();"/>
+                        <toolbarbutton id="stop-updating-button"
+                                       tooltiptext="&stopUpdatingButton.tooltip;"
+                                       oncommand="brief.stopUpdating();"/>
+                    </deck>
                     <toolbaritem id="searchbar-container" flex="1">
                         <textbox id="searchbar" flex="1"
                                  spellcheck="false"
