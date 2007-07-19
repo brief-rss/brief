@@ -124,6 +124,10 @@ toolbarbutton {
   list-style-image: url('toolbar/updateFeeds.png');
   }
 
+#stop-updating-button {
+  list-style-image: url('toolbar/stopUpdating.png');
+  }
+
 #options-button {
   list-style-image: url('toolbar/options.png');
   }
