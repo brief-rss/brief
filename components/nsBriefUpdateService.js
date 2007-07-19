@@ -105,11 +105,8 @@ BriefUpdateService.prototype = {
 
     // nsIBriefUpdateService
     fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
-        var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-        this.fetchFeeds(storage.getAllFeeds({}), aInBackground);
-
-        var now = Math.round(Date.now() / 1000);
-        this.prefs.setIntPref('update.lastUpdateTime', now);
+        var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+        this.fetchFeeds(storageService.getAllFeeds({}), aInBackground);
     },
 
 
@@ -211,6 +208,13 @@ BriefUpdateService.prototype = {
 
             this.alertsService.showAlertNotification(FEED_ICON_URL, title, text,
                                                      true, null, this);
+        }
+
+        // If it was a full update, set the pref.
+        var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+        if (this.scheduledFeeds.length == storageService.getAllFeeds({}).length) {
+            var now = Math.round(Date.now() / 1000);
+            this.prefs.setIntPref('update.lastUpdateTime', now);
         }
 
         // Reset the members after updating is finished.
@@ -367,7 +371,6 @@ FeedFetcher.prototype = {
         this.request = request;
     },
 
-
     // nsIFeedResultListener
     handleResult: function FeedFetcher_handleResult(result) {
         if (!result || !result.doc) {
@@ -397,7 +400,6 @@ FeedFetcher.prototype = {
             this.passDataToStorage();
     },
 
-
     getFavicon: function FeedFetcher_getFavicon() {
         if (!this.downloadedFeed.websiteURL) {
             this.favicon = 'no-favicon';
@@ -410,7 +412,6 @@ FeedFetcher.prototype = {
                   newURI(this.downloadedFeed.websiteURL, null, null);
         new FaviconFetcher(uri, this);
     },
-
 
     passDataToStorage: function FeedFetcher_passDataToStorage() {
         this.downloadedFeed.favicon = this.favicon;
@@ -432,6 +433,14 @@ FeedFetcher.prototype = {
     observe: function FeedFetcher_observe(aSubject, aTopic, aData) {
         if (aTopic == 'brief:feed-update-canceled')
             this.request.abort();
+    },
+
+    QueryInterface: function(aIID) {
+        if (aIID.equals(Ci.nsISupports) ||
+           aIID.equals(Ci.nsIObserver) ||
+           aIID.equals(Ci.nsIFeedResultListener))
+            return this;
+        throw Cr.NS_ERROR_NO_INTERFACE;
     }
 
 }
