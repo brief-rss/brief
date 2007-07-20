@@ -4,14 +4,11 @@ const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 var gFeedList = {
 
     tree:  null,
+    items: null,  // All treeitems in the tree.
+    ctx_targetItem: null,  // Last target item of the context menu
 
-    // All treeitems in the tree.
-    items: null,
-
-    // Last target item of the context menu
-    ctx_targetItem: null,
-
-    // If TRUE, prevents the onSelect function from running when "select" event is occurs.
+    // If TRUE, prevents the onSelect function from running when
+    // "select" event is occurs.
     ignoreSelectEvent: false,
 
     // Currently selected item. Returns the treeitem if a folder is selected or
@@ -35,10 +32,10 @@ var gFeedList = {
 
     /**
      * Gets nsIBriefFeed representation of a given feed. We've got feeds floating around
-     * represented in at least 3 different ways (nsIBriefFeed's, ID's of feeds, or their
+     * represented in at least 3 different ways: nsIBriefFeed's, ID's of feeds, and
      * treeitems). This function allows us to ensure that the argument is of nsIBriefFeed
      * type, whenever we need it. It also makes it easy for other methods of gFeedList to
-     * accept any kind of representation as their arguments.
+     * accept any arguments of any type.
      *
      * @param  aFeed  nsIBriefFeed object, feedID string, or treeitem XULElement.
      */
@@ -222,8 +219,8 @@ var gFeedList = {
         }
 
         // |this.items| is null before the tree finishes building. We don't need to
-        // refresh the parent folders then, anyway, because _buildFolderChildren refreshes
-        // them itself.
+        // refresh the parent folders then, anyway, because _buildFolderChildren does
+        // it itself.
         if (this.items) {
             var folders = this.getFoldersForFeeds(aFeeds);
             this.refreshFolderTreeitems(folders);
@@ -311,46 +308,10 @@ var gFeedList = {
                 this.refreshFeedTreeitems(aData);
             break;
 
-        case 'brief:feed-added':
-            var feed = gStorage.getFeed(aData);
-            var treechildren = this.getTreeitemForFeed(feed.parent).lastChild;
-            var nextChild = treechildren.childNodes[feed.rowIndex];
-
-            if (feed.isFolder) {
-                var closedFolders = this.tree.getAttribute('closedFolders');
-                var isOpen = !closedFolders.match(feed.feedID);
-
-                var treeitem = document.createElement('treeitem');
-                treeitem.setAttribute('container', 'true');
-                treeitem.setAttribute('open', isOpen);
-                treeitem.setAttribute('feedID', feed.feedID);
-                treeitem = prevParent.appendChild(treeitem);
-
-                var treerow = document.createElement('treerow');
-                treerow = treeitem.appendChild(treerow);
-
-                var treecell = document.createElement('treecell');
-                treecell = treerow.appendChild(treecell);
-
-                var treechildren = document.createElement('treechildren');
-                treechildren = treeitem.appendChild(treechildren);
-
-                this.refreshFolderTreeitems(treeitem);
-            }
-
-            else {
-                var treeitem = this._createFeed(feed.feedID, feed.feedURL);
-                var treeitem = document.createElement('treeitem');
-                treechildren.insertBefore(treeitem, nextChild);
-
-                this.refreshFeedTreeitems(treeitem);
-            }
-
-            break;
-
         case 'brief:feed-removed':
-            var item = this.getTreeitemForFeed(aData);
-            item.parentNode.removeChild(item);
+            var item = this.getTreeitem(aData);
+            if (item)
+                item.parentNode.removeChild(item);
             break;
 
         }
@@ -544,7 +505,18 @@ var gFeedList = {
 
             else {
                 var parent = this._folderParentChain[this._folderParentChain.length - 1];
-                var treeitem = this._createFeed(feed.feedID, feed.feedURL);
+
+                var treecell = document.createElement('treecell');
+                treecell.setAttribute('properties', 'feed-item '); // Mind the whitespace
+
+                var treerow = document.createElement('treerow');
+                treerow.appendChild(treecell);
+
+                var treeitem = document.createElement('treeitem');
+                treeitem.setAttribute('feedID', feed.feedID);
+                treeitem.setAttribute('url', feed.feedURL);
+                treeitem.appendChild(treerow);
+
                 parent.appendChild(treeitem);
 
                 this.refreshFeedTreeitems(treeitem);
@@ -552,21 +524,6 @@ var gFeedList = {
         }
         this._folderParentChain.pop();
     },
-
-    _createFeed: function gFeedList__createFeed(aFeedID, aFeedURL) {
-        var treecell = document.createElement('treecell');
-        treecell.setAttribute('properties', 'feed-item '); // Mind the whitespace
-
-        var treerow = document.createElement('treerow');
-        treerow.appendChild(treecell);
-
-        var treeitem = document.createElement('treeitem');
-        treeitem.setAttribute('feedID', aFeedID);
-        treeitem.setAttribute('url', aFeedURL);
-        treeitem.appendChild(treerow);
-
-        return treeitem;
-    }
 
 }
 
