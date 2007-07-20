@@ -379,6 +379,7 @@ FeedView.prototype = {
         articleContainer.setAttribute('summary', aEntry.summary);
         articleContainer.setAttribute('content', aEntry.content);
         articleContainer.setAttribute('date', aEntry.date);
+        articleContainer.setAttribute('authors', aEntry.authors);
         if (aEntry.read)
             articleContainer.setAttribute('read', true);
         if (aEntry.starred)

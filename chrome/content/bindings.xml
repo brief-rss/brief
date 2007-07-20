@@ -24,6 +24,8 @@
 
             <html:div class="article-subheader">
                 <html:div class="article-date"/>
+                <html:div class="article-authors"/>
+                <html:div class="feed-name"/>
             </html:div>
 
             <html:div class="article-content"/>
@@ -37,51 +39,46 @@
                 window.XMLHttpRequest = null;
 
                 // Get the data passed to us through attributes
-                var entryURL  = this.getAttribute('entryURL');
-                var title     = this.getAttribute('title');
-                var summary   = this.getAttribute('summary');
-                var content   = this.getAttribute('content');
-                var date      = new Date(parseInt(this.getAttribute('date')));
-                var isRead    = this.getAttribute('read');
-                var feedName  = this.getAttribute('feedName');
+                var entryURL = this.getAttribute('entryURL');
+                var title    = this.getAttribute('title');
+                var summary  = this.getAttribute('summary');
+                var content  = this.getAttribute('content');
+                var date     = new Date(parseInt(this.getAttribute('date')));
+                var isRead   = this.getAttribute('read');
+                var feedName = this.getAttribute('feedName');
+                var authors  = this.getAttribute('authors');
 
                 // Find elements
-                var feedContent = document.getElementById('feed-content');
-                var subheader =
-                    document.getAnonymousElementByAttribute(this, 'class', 'article-subheader');
+                var feedContentElement = document.getElementById('feed-content');
+                var feedNameElement =
+                    document.getAnonymousElementByAttribute(this, 'class', 'feed-name');
+                var authorsElement =
+                    document.getAnonymousElementByAttribute(this, 'class', 'article-authors');
                 var titleElement =
                     document.getAnonymousElementByAttribute(this, 'class', 'article-title-link');
                 var dateElement =
                     document.getAnonymousElementByAttribute(this, 'class', 'article-date');
-                var contentElement =
+                var articleContentElement =
                     document.getAnonymousElementByAttribute(this, 'class', 'article-content');
                 var markReadButton =
                     document.getAnonymousElementByAttribute(this, 'class', 'mark-read');
 
-                // Construct elements' contents from feed entry data
-                if (feedContent.hasAttribute('showFeedNames')) {
-                    var text = document.createTextNode(feedName);
-                    subheader.appendChild(text);
-                }
+                // Construct elements' contents from feed entry data. Use innerHTML
+                // instead of textContent, so that the entities are resolved.
                 titleElement.setAttribute('href', entryURL);
-                // We have to use innerHTML instead of textContent, so that the entities
-                // are resolved.
                 titleElement.innerHTML = title;
+
+                if (feedContentElement.hasAttribute('showFeedNames'))
+                    feedNameElement.innerHTML = feedName;
                 if (date > 0)
                     dateElement.textContent = date.toLocaleString();
-                contentElement.innerHTML = content ? content : summary;
+                if (authors)
+                    authorsElement.innerHTML = authors + ',';
 
-                var feedContentDiv = document.getElementById('feed-content');
-                if (isRead)
-                    markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
-                else
-                    markReadButton.label = feedContentDiv.getAttribute('markReadString');
+                articleContentElement.innerHTML = content ? content : summary;
 
-                // Remove no longer needed attributes
-                this.removeAttribute('title');
-                this.removeAttribute('summary');
-                this.removeAttribute('content');
-                this.removeAttribute('date');
+                markReadButton.label = isRead ? feedContentElement.getAttribute('markUnreadString')
+                                              : feedContentElement.getAttribute('markReadString');
             ]]>
             </constructor>
 
