@@ -115,8 +115,13 @@ body {
   padding: 0 2em 0 40px;
 }
 
-.article-date {
+.article-authors, .article-date {
   float: right;
+  margin-bottom: 1em;
+}
+
+.article-authors {
+  padding-right: 0.3em;
 }
 
 
