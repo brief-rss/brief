@@ -21,7 +21,7 @@ const DELETE_REDUNDANT_ENTRIES_INTERVAL = 3600*24; // 1 day
 const PURGE_DELETED_ENTRIES_INTERVAL = 3600*24*3; // 3 days
 
 // How long to keep entries from feeds no longer in the home folder.
-const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // One week
+const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const RDF_OBSERVER_DELAY = 250;
 
@@ -631,7 +631,7 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         this.bookmarkItems = [];
-        //dump('syncWithBookmarks');
+
         // Get the current Live Bookmarks
         this.rootURI = this.prefs.getCharPref('liveBookmarksFolder');
         if (!this.rootURI)
@@ -677,6 +677,7 @@ BriefStorageService.prototype = {
             // Check if there are any new bookmarks among the just retrieved ones and add
             // them.
             var item, feed, found;
+            var addedFeedIDs = [];
             var invalidateFeedList = false;
             for (var i = 0; i < this.bookmarkItems.length; i++) {
                 item = this.bookmarkItems[i];
@@ -706,13 +707,11 @@ BriefStorageService.prototype = {
                     insertItem.bindStringParameter(6, item.uri);
                     insertItem.execute();
 
-                    this.observerService.
-                         notifyObservers(null,'brief:feed-added', item.feedID);
+                    this.observerService.notifyObservers(null,'brief:feed-added', item.feedID);
+                    invalidateFeedList = true;
 
-                    // Pull the entries.
-                    var updateService = Cc['@ancestor/brief/updateservice;1'].
-                                        getService(Ci.nsIBriefUpdateService);
-                    updateService.fetchFeed(item.feedID);
+                    if (!item.isFolder)
+                        addedFeedIDs.push(item.feedID);
                 }
                 else {
                     // Mark that the feed is still in bookmarks.
@@ -722,7 +721,8 @@ BriefStorageService.prototype = {
                     // up-to-date.
                     if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
                        item.title != feed.title || item.uri != feed.rdf_uri || feed.hidden > 0) {
-                        // Invalidate cache since feeds table is about to change
+
+                        // Invalidate cache since feeds table is about to change.
                         this.feedsCache = this.feedsAndFoldersCache = null;
 
                         updateFeed.bindStringParameter(0, item.title);
@@ -749,11 +749,12 @@ BriefStorageService.prototype = {
                 }
             }
 
-            // Finally, remove any feeds that are no longer bookmarked.
+            // Finally, hide any feeds that are no longer bookmarked.
             for (i = 0; i < feeds.length; i++) {
                 feed = feeds[i];
                 if (!feed.isInBookmarks && feed.hidden == 0) {
-                    // Invalidate cache since feeds table is about to change
+
+                    // Invalidate cache since feeds table is about to change.
                     this.feedsCache = this.feedsAndFoldersCache = null;
 
                     if (feed.isFolder) {
@@ -766,8 +767,7 @@ BriefStorageService.prototype = {
                         hideFeed.execute();
                     }
 
-                    this.observerService.
-                         notifyObservers(null,'brief:feed-removed', item.feedID);
+                    this.observerService.notifyObservers(null, 'brief:feed-removed', feed.feedID);
                 }
             }
         }
@@ -776,6 +776,19 @@ BriefStorageService.prototype = {
             if (invalidateFeedList)
                 this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
         }
+
+        // Update newly addded feeds, if any
+        var addedFeeds = [], feed;
+        for (var i = 0; i < addedFeedIDs.length; i++) {
+            feed = this.getFeed(addedFeedIDs[i]);
+            addedFeeds.push(feed);
+        }
+        if (addedFeeds.length > 0) {
+            var updateService = Cc['@ancestor/brief/updateservice;1'].
+                                getService(Ci.nsIBriefUpdateService);
+            updateService.fetchFeeds(addedFeeds, addedFeeds.length, false);
+        }
+
     },
 
 
@@ -864,12 +877,12 @@ BriefStorageService.prototype = {
     },
 
     onAssert: function BriefStorage_onAssert(aDataSource, aSource, aProperty, aTarget) {
-        //dump('onAssert');
+
         // Because we only care about livemarks and folders, check if the assertion
         // target is even a resource, for optimization.
         if (!(aTarget instanceof Ci.nsIRDFResource))
             return;
-        //dump('onAssert - is resource');
+
         // Check if the target item is an RDF sequence (i.e. livemark or folder) and if
         // it is in the home folder.
         var isFolder = this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, aTarget);
@@ -1134,7 +1147,6 @@ BriefQuery.prototype = {
         if (this.offset > 1)
             text += ' OFFSET ' + this.offset;
 
-        //dump(text);
         return text;
     },
 
@@ -1172,7 +1184,7 @@ function hashString(aString) {
     // Creating a stream ought to be faster than converting a long string
     // into an array using JS.
     // XXX nsIStringInputStream doesn't work well with UTF-16 strings; it's lossy, so
-    // it increases the risk of collision.
+    // it increases the risk of collisions.
     // nsIScriptableUnicodeConverter.convertToInputStream should be used instead but
     // it would result in different hashes and therefore duplicate entries for users
     // of older versions. For now, I have decided that the risk of collision isn't
