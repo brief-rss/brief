@@ -6,15 +6,19 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
+const TIMER_TYPE_ONE_SHOT   = Ci.nsITimer.TYPE_ONE_SHOT;
 const TIMER_TYPE_PRECISE    = Ci.nsITimer.TYPE_REPEATING_PRECISE;
 const TIMER_TYPE_SLACK      = Ci.nsITimer.TYPE_REPEATING_SLACK;
+
 const ICON_DATAURL_PREFIX   = 'data:image/x-icon;base64,';
 const FEED_ICON_URL         = 'chrome://brief/skin/icon.png';
-const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
 
-NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
-NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
-BACKGROUND_UPDATE = Ci.nsIBriefUpdateService.BACKGROUND_UPDATE;
+const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
+const STARTUP_DELAY = 5000; // 5 seconds
+
+const NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
+const NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
+const BACKGROUND_UPDATE = Ci.nsIBriefUpdateService.BACKGROUND_UPDATE;
 
 function dump(aMessage) {
   var consoleService = Cc["@mozilla.org/consoleservice;1"].
@@ -147,7 +151,7 @@ BriefUpdateService.prototype = {
         }
 
         if (this.updateInProgress != NORMAL_UPDATE)
-            this.updateInProgress = aInBackground ? 1 : 2;
+            this.updateInProgress = aInBackground ? BACKGROUND_UPDATE : NORMAL_UPDATE;
 
         if (oldLength < this.scheduledFeeds.length) {
             var data = this.updateInProgress == BACKGROUND_UPDATE ? 'background' : 'foreground';
@@ -170,6 +174,11 @@ BriefUpdateService.prototype = {
     // nsITimerCallback
     notify: function BUS_notify(aTimer) {
         switch (aTimer) {
+
+        case this.startupDelayTimer:
+            this.enableAutoUpdating();
+            this.startupDelayTimer = null;
+            break;
 
         case this.updateTimer:
             var interval = this.prefs.getIntPref('update.interval');
@@ -197,7 +206,7 @@ BriefUpdateService.prototype = {
         this.fetchDelayTimer.cancel();
 
         var showNotification = this.prefs.getBoolPref('update.showNotification');
-        if (this.updatedFeedsCount > 0 && showNotification && this.alertsService) {
+        if (this.feedsWithNewEntriesCount > 0 && showNotification && this.alertsService) {
 
             var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
                          getService(Ci.nsIStringBundleService).
@@ -217,7 +226,7 @@ BriefUpdateService.prototype = {
             this.prefs.setIntPref('update.lastUpdateTime', now);
         }
 
-        // Reset the members after updating is finished.
+        // Reset the properties after updating is finished.
         this.newEntriesCount = this.feedsWithNewEntriesCount = 0;
         this.completedFeeds = [];
         this.scheduledFeeds = [];
@@ -234,8 +243,13 @@ BriefUpdateService.prototype = {
         // so that the preferences are already initialized.
         case 'profile-after-change':
             if (aData == 'startup') {
-                if (this.prefs.getBoolPref('update.enableAutoUpdate'))
-                    this.enableAutoUpdating();
+                if (this.prefs.getBoolPref('update.enableAutoUpdate')) {
+                    // Delay enabling autoupdate, so not to slow down the startup. Plus,
+                    // nsIBriefStorage is instantiated on profile-after-change.
+                    this.startupDelayTimer = Cc['@mozilla.org/timer;1'].
+                                             createInstance(Ci.nsITimer);
+                    this.startupDelayTimer.initWithCallback(this, STARTUP_DELAY, TIMER_TYPE_ONE_SHOT);
+                }
 
                 // We add the observer here instead of in the constructor as prefs
                 // are changed during startup when assuming their user-set values.
@@ -294,7 +308,7 @@ BriefUpdateService.prototype = {
                 break;
             }
             break;
-    }
+        }
     },
 
 
