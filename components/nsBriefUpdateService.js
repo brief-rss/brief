@@ -110,7 +110,8 @@ BriefUpdateService.prototype = {
     // nsIBriefUpdateService
     fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
         var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-        this.fetchFeeds(storageService.getAllFeeds({}), aInBackground);
+        var feeds = storageService.getAllFeeds({});
+        this.fetchFeeds(feeds, feeds.length, aInBackground);
     },
 
 
