@@ -100,7 +100,7 @@ var brief = {
         }
 
         // Init stuff in bookmarks.js
-        setTimeout(function() { initServices(); initBMService(); }, 500);
+        setTimeout(function() { initServices(); initBMService(); }, 1000);
     },
 
 
@@ -564,6 +564,18 @@ var brief = {
         var weHaveAGo = promptService.confirm(window, title, text);
 
         if (weHaveAGo) {
+            var item = gFeedList.getTreeitem(feedID);
+
+            // If the currently selected feed is being removed, select the next one.
+            if (gFeedList.selectedItem == item) {
+                var currentIndex = gFeedList.tree.view.selection.currentIndex;
+                gFeedList.tree.view.selection.select(currentIndex + 1);
+            }
+
+            // The treeitem would have been removed anyway thanks to RDFObserver,
+            // but we do it here to give faster visual feedback.
+            item.parentNode.removeChild(item);
+
             var node = RDF.GetResource(feed.rdf_uri);
             var parent = BMSVC.getParent(node);
             RDFC.Init(BMDS, parent);
@@ -591,6 +603,18 @@ var brief = {
         var weHaveAGo = promptService.confirm(window, title, text);
 
         if (weHaveAGo) {
+            var item = gFeedList.getTreeitem(folderFeedID);
+
+            // XXX If the currently selected item is being removed, we have to select
+            // another one. Ideally we would select the next sibling but I couldn't get
+            // it to work reliably, so for now the Unread folder gets selected.
+            if (gFeedList.selectedItem == item)
+                gFeedList.tree.view.selection.select(0);
+
+            // The treeitem would have been removed anyway thanks to RDFObserver,
+            // but we do it here to give faster visual feedback.
+            item.parentNode.removeChild(item);
+
             var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
 
             gBkmkTxnSvc.startBatch();
@@ -613,7 +637,7 @@ var brief = {
             }
 
             // Delete the target folder.
-            node = RDF.GetResource(feed.rdf_uri);
+            node = RDF.GetResource(folder.rdf_uri);
             parent = BMSVC.getParent(node);
             RDFC.Init(BMDS, parent);
             index = RDFC.IndexOf(node);
@@ -657,6 +681,7 @@ var gPrefs = {
         this.shownEntries = this.getCharPref('feedview.shownEntries');
         this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
         this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
+        this.showAuthors = this.getBoolPref('feedview.showAuthors');
 
         this._branch.addObserver('', this, false);
     },
@@ -696,7 +721,9 @@ var gPrefs = {
             case 'feedview.showHeadlinesOnly':
                 this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
                 break;
-
+            case 'feedview.showAuthors':
+                this.showAuthors = this.getBoolPref('feedview.showAuthors');
+                break;
         }
     }
 
