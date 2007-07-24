@@ -7,6 +7,7 @@ pref("extensions.brief.firstRun", true);
 pref("extensions.brief.lastMajorVersion", "0");
 pref("extensions.brief@mozdev.org.description", "chrome://brief/locale/brief.properties");
 
+pref("extensions.brief.feedview.showHeadlinesOnly", false);
 pref("extensions.brief.feedview.shownEntries", 'all');
 pref("extensions.brief.feedview.entriesPerPage", 10);
 pref("extensions.brief.feedview.customStylePath", '');
