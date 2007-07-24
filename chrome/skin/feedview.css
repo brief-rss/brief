@@ -1,5 +1,5 @@
 body {
-  background: #f7fbfc;
+  background: #fafcfc;
   font-family: Verdana, sans-serif;
   font-size: 62.5%;
   margin: 0;
@@ -53,16 +53,14 @@ body {
   background-color: #fdfdfd;
   border: 1px #bcc8cb solid;
   -moz-border-radius: 2px;
-  margin: 0 1em 2em;
-  overflow: auto;
-  padding-bottom: 1.5em;
+  margin: 0 1em 2em 40px;
+  overflow: visible;
   }
-
 
 
 /*               Article header               */
 .article-header {
-  background: #fdfdfd url('chrome://brief/skin/unreadEntryBackground.png') repeat-x;
+  background: url('chrome://brief/skin/unreadEntryBackground.png') repeat-x;
   margin-bottom: 5px;
   min-height: 3em;
   padding: 5px 5px 0;
@@ -143,8 +141,8 @@ body {
   vertical-align: middle;
   }
 
-.article-controls > button:hover {
-  opacity: 1.0;
+.article-controls button:hover {
+  opacity: 1.0 !important;
 }
 
 .delete-entry {
@@ -165,6 +163,22 @@ body {
   list-style-image: url('chrome://brief/skin/icons/unstar.png');
   }
 
+.expand-button {
+  background: url('chrome://brief/skin/icons/expand-button.png') no-repeat;
+  float: left;
+  height: 7em;
+  margin-left: -35px;
+  width: 30px;
+}
+
+.article-container:hover .expand-button {
+  background: url('chrome://brief/skin/icons/expand-button-hover.png') no-repeat;
+}
+
+#feed-content:not([showHeadlinesOnly]) .expand-button {
+  display: none;
+}
+
 
 /*        Article main area              */
 
@@ -172,7 +186,8 @@ body {
   color: #101d27;
   clear: both;
   font-size: 1.2em;
-  margin: 1em;
+  margin: 0 1em 1.5em;
+  overflow: auto;
   padding: 0 1.5em 0;
   }
 
@@ -195,3 +210,26 @@ body {
   font-family: "Courier New", Courier, monospace;
   font-size: 1em;
   }
+
+
+/*     Modifications for the article's "collapsed" state       */
+
+.article-container[collapsed] {
+  background: #fafcfc;
+  border-bottom: none;
+  border-right: none;
+  border-left: none;
+  clear: both;
+  margin-bottom: 0;
+  padding: 0 1px 2em 1px; /* Compensate the lack of border */
+}
+
+.article-container[collapsed] .star-container,
+.article-container[collapsed] .article-controls,
+.article-container[collapsed] .article-content {
+  display: none;
+}
+
+.article-container[collapsed]:hover .article-controls {
+  display: table-cell;
+}

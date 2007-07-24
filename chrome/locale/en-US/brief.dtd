@@ -3,6 +3,7 @@
 <!ENTITY searchCurrentView.label "Search current view">
 <!ENTITY searchAllFeeds.label "Search all feeds">
 
+<!ENTITY headlinesCheckbox.label "Show only headlines">
 <!ENTITY viewConstraintList.label "View:">
 <!ENTITY viewAll.label "All">
 <!ENTITY viewUnread.label "Unread">

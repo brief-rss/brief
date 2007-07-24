@@ -68,6 +68,8 @@ var brief = {
                                     QueryInterface(Ci.nsIInterfaceRequestor).
                                     getInterface(Ci.nsIDOMWindow);
 
+        var headlinesCheckbox = document.getElementById('headlines-checkbox');
+        headlinesCheckbox.checked = gPrefs.showHeadlinesOnly;
         var viewConstraintList = document.getElementById('view-constraint-list');
         viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
                                            gPrefs.shownEntries == 'unread' ? 1 : 2;
@@ -375,6 +377,23 @@ var brief = {
                           'chrome,titlebar,toolbar,centerscreen,modal,resizable');
     },
 
+    onHeadlinesCheckboxCmd: function brief_onHeadlinesCheckboxCmd(aEvent) {
+        var state = aEvent.target.checked;
+
+        if (state) {
+            gFeedView.feedContent.setAttribute('showHeadlinesOnly', true);
+            for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
+                gFeedView.feedContent.childNodes[i].setAttribute('collapsed', true);
+        }
+        else {
+            gFeedView.feedContent.removeAttribute('showHeadlinesOnly');
+            for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
+                gFeedView.feedContent.childNodes[i].removeAttribute('collapsed');
+        }
+
+        gPrefs.setBoolPref('feedview.showHeadlinesOnly', state);
+    },
+
     onConstraintListCmd: function brief_onConstraintListCmd(aEvent) {
         var choice = aEvent.target.id;
         var prefValue = choice == 'show-all' ? 'all' :
@@ -637,6 +656,7 @@ var gPrefs = {
         this.entriesPerPage = this.getIntPref('feedview.entriesPerPage');
         this.shownEntries = this.getCharPref('feedview.shownEntries');
         this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
+        this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
 
         this._branch.addObserver('', this, false);
     },
@@ -673,6 +693,10 @@ var gPrefs = {
             case 'feedview.doubleClickMarks':
                 this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
                 break;
+            case 'feedview.showHeadlinesOnly':
+                this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
+                break;
+
         }
     }
 

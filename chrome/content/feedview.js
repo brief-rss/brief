@@ -340,8 +340,8 @@ FeedView.prototype = {
 
         if (!feed)
             this.feedContent.setAttribute('showFeedNames', true);
-
-        // Pass the value of the pref.
+        if (gPrefs.showHeadlinesOnly)
+            this.feedContent.setAttribute('showHeadlinesOnly', true);
         if (gPrefs.doubleClickMarks)
             this.feedContent.setAttribute('doubleClickMarks', true);
 
@@ -387,6 +387,9 @@ FeedView.prototype = {
 
         var feedName = gStorage.getFeed(aEntry.feedID).title;
         articleContainer.setAttribute('feedName', feedName);
+
+        if (gPrefs.showHeadlinesOnly)
+            articleContainer.setAttribute('collapsed', true);
 
         this.feedContent.appendChild(articleContainer);
     },

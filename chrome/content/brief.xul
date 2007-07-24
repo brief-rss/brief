@@ -165,6 +165,11 @@
                             </menupopup>
                         </menulist>
                     </toolbaritem>
+                    <toolbaritem id="headlines-checkbox-container">
+                        <checkbox id="headlines-checkbox"
+                                  label="&headlinesCheckbox.label;"
+                                  oncommand="brief.onHeadlinesCheckboxCmd(event);"/>
+                    </toolbaritem>
                     <toolbaritem id="navigation-box">
                         <toolbarbutton id="prev-page"
                                        tooltiptext="&previousPage.tooltip;"

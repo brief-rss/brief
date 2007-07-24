@@ -11,6 +11,7 @@
     <binding id="feedentry">
         <content>
             <html:div class="article-header">
+                <html:div class="expand-button"/>
                 <html:div class="star-container">
                     <xul:image class="star-image"/>
                 </html:div>
@@ -125,6 +126,7 @@
             <handler event="click" button="0">
             <![CDATA[
                 var target = event.originalTarget;
+
                 if (target.className == 'star-container' || target.className == 'star-image') {
                     if (this.hasAttribute('starred'))
                         this.removeAttribute('starred');
@@ -134,6 +136,26 @@
                     var evt = document.createEvent('Events');
                     evt.initEvent('StarEntry', false, false);
                     this.dispatchEvent(evt);
+                    return;
+                }
+
+                var articleContent = document.getAnonymousElementByAttribute(this, 'class',
+                                                                      'article-content');
+                var feedContent = document.getElementById('feed-content');
+                if (this.hasAttribute('collapsed')) {
+                    if (target.className != 'article-title-link' &&
+                       target.className != 'article-controls' &&
+                       target.parentNode.className != 'article-controls') {
+                        $(articleContent).slideDown('fast');
+                        this.removeAttribute('collapsed');
+                    }
+                }
+                else {
+                    if (target.className == 'expand-button' || (target.className == 'article-header' &&
+                       feedContent.hasAttribute('showHeadlinesOnly'))) {
+                        var self = this;
+                        $(articleContent).slideUp('fast', function() {self.setAttribute('collapsed', true);} );
+                    }
                 }
             ]]>
             </handler>
@@ -161,7 +183,8 @@
 
             <handler event="DOMAttrModified">
             <![CDATA[
-                if (event.attrName == "read") {
+                switch (event.attrName) {
+                case 'read':
                     var markReadButton = document.
                                getAnonymousElementByAttribute(this, 'class', 'mark-read');
                     var feedContentDiv = document.getElementById('feed-content');
@@ -170,6 +193,16 @@
                         markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
                     else
                         markReadButton.label = feedContentDiv.getAttribute('markReadString');
+                    break;
+                case 'collapsed':
+                    var content = document.
+                                  getAnonymousElementByAttribute(this, 'class', 'article-content');
+                    if (event.newValue == 'true')
+                        $(content).hide();
+                    else
+                        $(content).show();
+
+                    break;
                 }
             ]]>
             </handler>
