@@ -131,6 +131,9 @@
     <prefpane id="displayPane" label="&displayPane.label;">
 
         <preferences>
+            <preference id="extensions.brief.feedview.showAuthors"
+                        name="extensions.brief.feedview.showAuthors"
+                        type="bool"/>
             <preference id="extensions.brief.feedview.entriesPerPage"
                         name="extensions.brief.feedview.entriesPerPage"
                         type="int"/>
@@ -143,6 +146,9 @@
         </preferences>
 
         <groupbox>
+            <checkbox id="authors-checkbox"
+                      label="&authorsCheckbox.label;"
+                      preference="extensions.brief.feedview.showAuthors"/>
             <hbox align="center">
                 <label value="&entriesPerPageBefore.label;"/>
                 <textbox id="entriesPerPage"
@@ -150,7 +156,10 @@
                          size="2"/>
                 <label value="&entriesPerPageAfter.label;"/>
             </hbox>
-            <spacer height="10"/>
+        </groupbox>
+
+        <groupbox>
+            <caption label="&styleGroup.caption;"/>
             <vbox>
                 <checkbox id="custom-style-checkbox"
                           label="&enableCustomStyle.label;"

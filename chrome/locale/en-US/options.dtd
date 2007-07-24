@@ -17,7 +17,9 @@
 <!ENTITY openEntriesInTabs.label "Open entries in new tabs">
 <!ENTITY doubleClickMarks.label "Mark entries as read when double-clicking on them">
 <!ENTITY displayPane.label "Display">
+<!ENTITY authorsCheckbox.label "Show authors of the entries">
 <!ENTITY entriesPerPageBefore.label "Show">
 <!ENTITY entriesPerPageAfter.label "entries per page">
+<!ENTITY styleGroup.caption "Feed content style">
 <!ENTITY enableCustomStyle.label "Use custom style of the feed content">
 <!ENTITY browseCustomStyle.label "Browse">
