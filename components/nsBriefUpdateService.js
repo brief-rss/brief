@@ -15,7 +15,7 @@ const FEED_ICON_URL       = 'chrome://brief/skin/icon.png';
 
 const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
 const STARTUP_DELAY = 5000; // 5 seconds
-const FEED_FETCHER_TIMEOUT = 5000; // 15 seconds
+const FEED_FETCHER_TIMEOUT = 15000; // 15 seconds
 
 const NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
 const NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
