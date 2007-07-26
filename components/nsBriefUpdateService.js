@@ -6,15 +6,16 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-const TIMER_TYPE_ONE_SHOT   = Ci.nsITimer.TYPE_ONE_SHOT;
-const TIMER_TYPE_PRECISE    = Ci.nsITimer.TYPE_REPEATING_PRECISE;
-const TIMER_TYPE_SLACK      = Ci.nsITimer.TYPE_REPEATING_SLACK;
+const TIMER_TYPE_ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
+const TIMER_TYPE_PRECISE  = Ci.nsITimer.TYPE_REPEATING_PRECISE;
+const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
 
-const ICON_DATAURL_PREFIX   = 'data:image/x-icon;base64,';
-const FEED_ICON_URL         = 'chrome://brief/skin/icon.png';
+const ICON_DATAURL_PREFIX = 'data:image/x-icon;base64,';
+const FEED_ICON_URL       = 'chrome://brief/skin/icon.png';
 
 const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
 const STARTUP_DELAY = 5000; // 5 seconds
+const FEED_FETCHER_TIMEOUT = 5000; // 15 seconds
 
 const NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
 const NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
@@ -134,10 +135,9 @@ BriefUpdateService.prototype = {
             }
         }
 
-        // Start updating if it isn't in progress yet.
+        // Start updating if it isn't in progress yet. We will fetch feeds on an interval,
+        // so we don't choke when downloading and processing all of them a once.
         if (this.updateInProgress == NO_UPDATE) {
-            // We will fetch feeds on an interval, so we don't choke when downloading
-            // and processing all of them a once.
             var delay = aInBackground ? this.prefs.getIntPref('update.backgroundFetchDelay')
                                       : this.prefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
@@ -263,7 +263,7 @@ BriefUpdateService.prototype = {
         case 'brief:feed-error':
         case 'brief:feed-updated':
             // If |updateInProgress| is NO_UPDATE then it means that a single feed was
-            // requested - nothing to do here as batch update wasn't started,
+            // requested - nothing to do here as batch update wasn't started.
             if (this.updateInProgress == NO_UPDATE || this.updateCanceled)
                 return;
 
@@ -332,75 +332,88 @@ BriefUpdateService.prototype = {
  * @param aFeed nsIFeed object representing the feed to be downloaded.
  */
 function FeedFetcher(aFeed) {
-    this.feedURL = aFeed.feedURL;
-    this.feedID = aFeed.feedID;
+    this.feed = aFeed;
     this.favicon = aFeed.favicon;
 
     this.observerService = Cc['@mozilla.org/observer-service;1'].
                            getService(Ci.nsIObserverService);
-    this.observerService.notifyObservers(null, 'brief:feed-loading', this.feedID);
+    this.observerService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
     this.observerService.addObserver(this, 'brief:feed-update-canceled', false);
+    this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
     this.requestFeed();
 }
 
 FeedFetcher.prototype = {
 
-    feedURL: '',
-    feedID:  '',
-    favicon: '',
+    // The passed feed, as currently stored in the database. Set in the constructor.
+    feed: null,
+
+    // The downloaded feed. Initially null.
     downloadedFeed: null,
+
+    // The feed's favicon. Initially set to what's currently in the database.
+    favicon: '',
+
+    request: null,
+    timeoutTimer: null,
+    observerService: null,
+
 
     requestFeed: function FeedFetcher_requestFeed() {
         var self = this;
 
         function onRequestError() {
-            self.observerService.notifyObservers(null, 'brief:feed-error', self.feedID);
-            //throw('Brief: connection error\n\n');
+            self.timeoutTimer.cancel();
+            self.finish();
+            self.observerService.notifyObservers(null, 'brief:feed-error', self.feed.feedID);
         }
 
         function onRequestLoad() {
-            var uri = Cc['@mozilla.org/network/io-service;1'].
-                      getService(Ci.nsIIOService).
-                      newURI(self.feedURL, null, null);
-            var parser = Cc['@mozilla.org/feed-processor;1'].
-                         createInstance(Ci.nsIFeedProcessor);
+            self.timeoutTimer.cancel();
+
+            var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+            var uri = ioService.newURI(self.feed.feedURL, null, null);
+            var parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
             parser.listener = self;
+
             try {
-                parser.parseFromString(request.responseText, uri);
+                parser.parseFromString(self.request.responseText, uri);
             }
             catch(e) {
-                self.observerService.notifyObservers(null, 'brief:feed-error', self.feedID);
-                //throw('Brief: feed parser error\n\n' + e);
+                self.finish();
+                self.observerService.notifyObservers(null, 'brief:feed-error', self.feed.feedID);
             }
         }
 
-        var request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1'].
-                      createInstance(Ci.nsIXMLHttpRequest);
-        request.open('GET', this.feedURL, true);
-        request.overrideMimeType('application/xml');
-        request.onload = onRequestLoad;
-        request.onerror = onRequestError;
-        request.send(null);
+        this.request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1'].
+                       createInstance(Ci.nsIXMLHttpRequest);
+        this.request.open('GET', this.feed.feedURL, true);
+        this.request.overrideMimeType('application/xml');
+        this.request.onload = onRequestLoad;
+        this.request.onerror = onRequestError;
+        this.request.send(null);
 
-        this.request = request;
+        this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
     },
 
     // nsIFeedResultListener
-    handleResult: function FeedFetcher_handleResult(result) {
-        if (!result || !result.doc) {
-            this.observerService.notifyObservers(null, 'brief:feed-error', this.feedID);
+    handleResult: function FeedFetcher_handleResult(aResult) {
+        if (!aResult || !aResult.doc) {
+            this.observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
             return;
         }
 
-        var feed = result.doc.QueryInterface(Ci.nsIFeed);
+        var feed = aResult.doc.QueryInterface(Ci.nsIFeed);
 
-        var wrappedFeed = Cc['@ancestor/brief/feed;1'].
-                          createInstance(Ci.nsIBriefFeed);
-        wrappedFeed.wrapFeed(feed);
-        wrappedFeed.feedURL = this.feedURL;
-        wrappedFeed.feedID = this.feedID;
-        this.downloadedFeed = wrappedFeed;
+        this.downloadedFeed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
+        this.downloadedFeed.wrapFeed(feed);
+
+        // The URI that we passed and aResult.uri (which is actual URI from which the data
+        // was fetched) may differ because of redirects. We want to use the former one
+        // here, because that's the one which is stored in the Live Bookmark.
+        this.downloadedFeed.feedURL = this.feed.feedURL;
+        this.downloadedFeed.feedID = this.feed.feedID;
 
         // Now that we have the feed we can download the favicon if necessary. We
         // couldn't download it earlier, because we may have had no websiteURL.
@@ -408,46 +421,58 @@ FeedFetcher.prototype = {
         // because many websites use services like Feedburner for generating their
         // feeds and we'd get the Feedburner's favicon instead of the website's
         // favicon.
-        if (!this.favicon)
-            this.getFavicon();
-        else
+        if (!this.favicon) {
+            if (!this.downloadedFeed.websiteURL) {
+                this.favicon = 'no-favicon';
+                this.passDataToStorage();
+                return;
+            }
+
+            var uri = Cc['@mozilla.org/network/io-service;1'].
+                      getService(Ci.nsIIOService).
+                      newURI(this.downloadedFeed.websiteURL, null, null);
+            new FaviconFetcher(uri, this);
+        }
+        else {
             // If we already have the favicon, we're ready to commit the data
             this.passDataToStorage();
-    },
-
-    getFavicon: function FeedFetcher_getFavicon() {
-        if (!this.downloadedFeed.websiteURL) {
-            this.favicon = 'no-favicon';
-            this.passDataToStorage();
-            return;
         }
-
-        var uri = Cc['@mozilla.org/network/io-service;1'].
-                  getService(Ci.nsIIOService).
-                  newURI(this.downloadedFeed.websiteURL, null, null);
-        new FaviconFetcher(uri, this);
     },
 
     passDataToStorage: function FeedFetcher_passDataToStorage() {
+        this.finish();
+
         this.downloadedFeed.favicon = this.favicon;
         var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+        storageService.updateFeed(this.downloadedFeed);
+    },
 
+    finish: function() {
         // We can't push the feed to the |completedFeeds| stack in brief:feed-updated
         // observer in the main class, because we have to ensure this is done before any
         // other observers receive this notification. Otherwise the progressmeters won't
         // be refreshed properly, because of outdated count of completed feeds.
-        var feed = storageService.getFeed(this.feedID);
-        gBriefUpdateService.completedFeeds.push(feed);
-
-        storageService.updateFeed(this.downloadedFeed);
+        gBriefUpdateService.completedFeeds.push(this.feed);
 
         this.observerService.removeObserver(this, 'brief:feed-update-canceled');
         this.request = null;
+        this.timeoutTimer = null;
     },
 
     observe: function FeedFetcher_observe(aSubject, aTopic, aData) {
-        if (aTopic == 'brief:feed-update-canceled')
+        switch (aTopic) {
+        case 'timer-callback':
             this.request.abort();
+            this.finish();
+            this.observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
+            break;
+
+        case 'brief:feed-update-canceled':
+            this.request.abort();
+            this.finish();
+            this.observerService.removeObserver(this, 'brief:feed-update-canceled');
+            break;
+        }
     },
 
     QueryInterface: function(aIID) {
