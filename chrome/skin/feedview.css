@@ -93,7 +93,7 @@ body {
 .article-title-link {
   color: #0f0f0f;
   font-family: "Lucida Grande", Arial, Helvetica, sans-serif;
-  font-size: 1.4em;
+  font-size: 1.3em;
   font-weight: bold;
   text-decoration: none;
   }
@@ -108,7 +108,7 @@ body {
 .article-subheader {
   color: #4f4f4f;
   font-family: "Lucida Grande", Arial, Helvetica, sans-serif;
-  font-size: 1.4em;
+  font-size: 1.3em;
   min-height: 1.4em;
   padding: 0 2em 0 40px;
 }
@@ -221,7 +221,7 @@ body {
   border-left: none;
   clear: both;
   margin-bottom: 0;
-  padding: 0 1px 2em 1px; /* Compensate the lack of border */
+  padding: 0 1px 1em 1px; /* Compensate the lack of border */
 }
 
 .article-container[collapsed] .star-container,
