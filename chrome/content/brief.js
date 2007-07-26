@@ -166,7 +166,7 @@ var brief = {
         case 'brief:feed-error':
             var feedID = aData;
             var item = gFeedList.getTreeitem(feedID);
-            gFeedList.removeProperty(item, 'loading');
+            item.removeAttribute('loading');
             item.setAttribute('error', true);
             gFeedList.refreshFeedTreeitems(item);
             this.updateProgressMeter();
