@@ -425,8 +425,10 @@ BriefStorageService.prototype = {
 
         this.dBConnection.beginTransaction();
         try {
-            // Get the list of entries which are about to change, so the notification
-            // can include it.
+            // Get the list of entries which we deleted, so we can pass it in the
+            // notification. Never include those from hidden feeds though - nobody care
+            // for them and, what's more, they don't expect to deal with them.
+            aQuery.includeHiddenFeeds = false;
             var changedEntries = this.getSerializedEntries(aQuery);
             update.execute();
         }
@@ -465,6 +467,8 @@ BriefStorageService.prototype = {
         var statement = this.dBConnection.createStatement(statementString)
         this.dBConnection.beginTransaction();
         try {
+            // See markEntriesRead.
+            aQuery.includeHiddenFeeds = false;
             var changedEntries = this.getSerializedEntries(aQuery);
             statement.execute();
         }
@@ -485,6 +489,8 @@ BriefStorageService.prototype = {
 
         this.dBConnection.beginTransaction();
         try {
+            // See markEntriesRead.
+            aQuery.includeHiddenFeeds = false;
             var changedEntries = this.getSerializedEntries(aQuery);
             update.execute();
         }
@@ -742,8 +748,9 @@ BriefStorageService.prototype = {
                         else {
                             // If only the title has changed, the feed list can be updated
                             // incrementally, so we send a different notification.
-                            this.observerService.
-                            notifyObservers(null,'brief:feed-title-changed', item.feedID);
+                            this.observerService.notifyObservers(null,
+                                                                 'brief:feed-title-changed',
+                                                                 item.feedID);
                         }
                     }
                 }
@@ -1035,8 +1042,10 @@ BriefQuery.prototype = {
 
     includeHiddenFeeds: false,
 
-    // We need to know the direct parent folders of the feeds to be matched, which are the
-    // ones from BriefQuery.folders and their subfolders.
+    // When |BriefQuery.folders| is set, it's not enough to take the feeds from these
+    // folders alone - we also have to consider their subfolders. And because feeds have
+    // no knowledge about the folders they are in besides their direct parent, we have
+    // to compute actual ("effective") folders list when creating the query.
     _effectiveFolders: null,
 
     setConditions: function BriefQuery_setConditions(aFeeds, aEntries, aUnread) {
@@ -1075,6 +1084,7 @@ BriefQuery.prototype = {
             }
             text += ') AND ';
         }
+
         if (this.feeds) {
             var feeds = this.feeds.match(/[^ ]+/g);
 
@@ -1086,9 +1096,19 @@ BriefQuery.prototype = {
             }
             text += ') AND ';
         }
+
         if (this.entries) {
-            text += '"' + this.entries + '" LIKE "%" || entries.id || "%" AND ';
+            var entries = this.entries.match(/[^ ]+/g);
+
+            text += '(';
+            for (var i = 0; i < entries.length; i++) {
+                text += 'entries.id = "' + entries[i] + '"';
+                if (i < entries.length - 1)
+                    text += ' OR ';
+            }
+            text += ') AND ';
         }
+
         if (this.searchString) {
             text += 'entries.title || entries.summary || entries.content ' +
                     'LIKE "%" || "' + this.searchString + '" || "%" AND ';
@@ -1117,6 +1137,9 @@ BriefQuery.prototype = {
 
         // Trim the trailing AND, if there is one
         text = text.replace(/AND $/, '');
+        // If the were no constraints (all entries are matched), we may end up with
+        // a dangling WHERE.
+        text = text.replace(/WHERE $/, '');
 
         if (!aForSelect)
             return text += ') ';
