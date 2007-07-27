@@ -160,10 +160,6 @@ toolbarbutton {
   list-style-image: url('toolbar/nextPage-disabled.png');
   }
 
-#update-progress {
-  height: 20px;
-  }
-
 #searchbar[showingDescription]  {
   color: GrayText;
   }
