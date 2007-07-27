@@ -9,17 +9,18 @@
 <!ENTITY checkForUpdatesAfter.label "minutes">
 <!ENTITY showNotification.label "Show notification when updates are found">
 <!ENTITY storingGroup.caption "Storing">
-<!ENTITY expirationBefore.label "Store downloaded entries for">
+<!-- Nowa --><!ENTITY expirationBefore.label "Remove downloaded entries after">
 <!ENTITY expirationAfter.label "days">
-<!ENTITY storedEntriesBefore.label "Store up to">
-<!ENTITY storedEntriesAfter.label "entries per feed">
+<!-- Nowa --><!ENTITY storedEntriesBefore.label "Store no more than">
+<!-- Nowa --><!ENTITY storedEntriesAfter.label "latest entries of each feed">
+<!-- Nowa --><!ENTITY clearAllEntriesButton.label "Clear All Entries">
 <!ENTITY behaviorGroup.caption "Behavior">
 <!ENTITY openEntriesInTabs.label "Open entries in new tabs">
 <!ENTITY doubleClickMarks.label "Mark entries as read when double-clicking on them">
 <!ENTITY displayPane.label "Display">
-<!ENTITY authorsCheckbox.label "Show authors of the entries">
+<!-- Nowa --><!ENTITY authorsCheckbox.label "Show authors of the entries">
 <!ENTITY entriesPerPageBefore.label "Show">
 <!ENTITY entriesPerPageAfter.label "entries per page">
-<!ENTITY styleGroup.caption "Feed content style">
+<!-- Nowa --><!ENTITY styleGroup.caption "Feed content style">
 <!ENTITY enableCustomStyle.label "Use custom style of the feed content">
 <!ENTITY browseCustomStyle.label "Browse">
