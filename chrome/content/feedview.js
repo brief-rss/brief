@@ -375,7 +375,7 @@ FeedView.prototype = {
         // Safely pass the data so that binding constructor can use it.
         articleContainer.setAttribute('id', aEntry.id);
         articleContainer.setAttribute('entryURL', aEntry.entryURL);
-        articleContainer.setAttribute('title', aEntry.title);
+        articleContainer.setAttribute('entryTitle', aEntry.title);
         articleContainer.setAttribute('summary', aEntry.summary);
         articleContainer.setAttribute('content', aEntry.content);
         articleContainer.setAttribute('date', aEntry.date);
