@@ -9,7 +9,7 @@
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             title="&optionsWindow.title;"
             persist="screenX screenY width height"
-            onload="init(); sizeToContent();">
+            onload="init();">
 
     <prefpane id="mainPane" label="&mainPane.label;">
 
@@ -97,6 +97,14 @@
         </groupbox>
 
         <groupbox>
+            <caption label="&behaviorGroup.caption;"/>
+            <checkbox label="&openEntriesInTabs.label;"
+                      preference="extensions.brief.feedview.openEntriesInTabs"/>
+            <checkbox label="&doubleClickMarks.label;"
+                      preference="extensions.brief.feedview.doubleClickMarks"/>
+        </groupbox>
+
+        <groupbox>
             <caption label="&storingGroup.caption;"/>
             <hbox align="center">
                 <checkbox id="expiration-checkbox"
@@ -116,14 +124,12 @@
                          preference="extensions.brief.database.maxStoredEntries"/>
                 <label value="&storedEntriesAfter.label;"/>
             </hbox>
-        </groupbox>
-
-        <groupbox>
-            <caption label="&behaviorGroup.caption;"/>
-            <checkbox label="&openEntriesInTabs.label;"
-                      preference="extensions.brief.feedview.openEntriesInTabs"/>
-            <checkbox label="&doubleClickMarks.label;"
-                      preference="extensions.brief.feedview.doubleClickMarks"/>
+            <spacer height="10"/>
+            <hbox align="right">
+                <button id="clear-all-entries"
+                        label="&clearAllEntriesButton.label;"
+                        oncommand="gFeedsPane.onClearAllEntriesCmd(event);"/>
+            </hbox>
         </groupbox>
 
     </prefpane>
@@ -160,19 +166,17 @@
 
         <groupbox>
             <caption label="&styleGroup.caption;"/>
-            <vbox>
-                <checkbox id="custom-style-checkbox"
-                          label="&enableCustomStyle.label;"
-                          preference="extensions.brief.feedview.useCustomStyle"
-                          oncommand="gDisplayPane.updateCustomStyleDisabledState();"/>
-                <hbox align="center">
-                    <textbox id="custom-style-path" flex="1"
-                             preference="extensions.brief.feedview.customStylePath"/>
-                    <button id="browse-custom-style"
-                            label="&browseCustomStyle.label;"
-                            oncommand="gDisplayPane.browseCustomStyle();"/>
-                </hbox>
-            </vbox>
+            <checkbox id="custom-style-checkbox"
+                      label="&enableCustomStyle.label;"
+                      preference="extensions.brief.feedview.useCustomStyle"
+                      oncommand="gDisplayPane.updateCustomStyleDisabledState();"/>
+            <hbox align="center">
+                <textbox id="custom-style-path" flex="1"
+                         preference="extensions.brief.feedview.customStylePath"/>
+                <button id="browse-custom-style"
+                        label="&browseCustomStyle.label;"
+                        oncommand="gDisplayPane.browseCustomStyle();"/>
+            </hbox>
         </groupbox>
 
     </prefpane>
