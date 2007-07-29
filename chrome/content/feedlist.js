@@ -565,13 +565,14 @@ var gFeedList = {
 
 function hashString(aString) {
 
-    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
-                       createInstance(Ci.nsIStringInputStream);
-    stringStream.setData(aString, aString.length);
+    var converter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].
+                       createInstance(Ci.nsIScriptableUnicodeConverter);
+    converter.charset = 'UTF-8';
+    var stream = converter.convertToInputStream(aString);
 
     var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
     hasher.init(Ci.nsICryptoHash.MD5);
-    hasher.updateFromStream(stringStream, stringStream.available());
+    hasher.updateFromStream(stream, stream.available());
     var hash = hasher.finish(false);
 
     // Convert the hash to a hex-encoded string.
