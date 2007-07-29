@@ -2,6 +2,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 function init() {
+    sizeToContent();
     setTimeout(gMainPane.setUpFoldersTree, 0);
 
     gFeedsPane.updateIntervalDisabledState();
@@ -66,6 +67,33 @@ var gFeedsPane = {
         var checkbox = document.getElementById('stored-entries-checkbox');
 
         textbox.disabled = !checkbox.checked;
+    },
+
+    onClearAllEntriesCmd: function(aEvent) {
+        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                            getService(Ci.nsIPromptService);
+        var prefBranch = Cc['@mozilla.org/preferences-service;1'].
+                         getService(Ci.nsIPrefBranch);
+        var keepStarred = prefBranch.getBoolPref('extensions.brief.database.keepStarredWhenClearing');
+
+        var stringbundle = document.getElementById('main-bundle');
+        var title = stringbundle.getString('confirmClearAllEntriesTitle');
+        var text = stringbundle.getString('confirmClearAllEntriesText');
+        var checkboxLabel = stringbundle.getString('confirmClearAllEntriesCheckbox');
+        var checked = { value: keepStarred };
+
+        var result = promptService.confirmCheck(window, title, text, checkboxLabel, checked);
+        if (result) {
+            var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+            query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
+            query.unstarred = checked.value;
+            query.includeHiddenFeeds = true;
+
+            var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+            storageService.deleteEntries(Ci.nsIBriefStorage.ENTRY_STATE_DELETED, query);
+
+            prefBranch.setBoolPref('extensions.brief.database.keepStarredWhenClearing', checked.value)
+        }
     }
 
 }
