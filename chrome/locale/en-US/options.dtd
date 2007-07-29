@@ -24,3 +24,11 @@
 <!-- Nowa --><!ENTITY styleGroup.caption "Feed content style">
 <!ENTITY enableCustomStyle.label "Use custom style of the feed content">
 <!ENTITY browseCustomStyle.label "Browse">
+
+<!-- Nowa --><!ENTITY feedName.label "Name">
+<!-- Nowa --><!ENTITY feedURL.label "Location">
+<!-- Nowa --><!ENTITY optionsGroupbox.caption "Feed settings">
+<!-- Nowa --><!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
+<!-- Nowa --><!ENTITY maxEntriesPerFeedAfter.label "latest entries">
+<!-- Nowa --><!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
+<!-- Nowa --><!ENTITY expireEntriesPerFeedAfter.label "days">

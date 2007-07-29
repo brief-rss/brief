@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://brief/locale/options.dtd">
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+
+<dialog id="feed-properties"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        persist="screenX screenY width height"
+        buttons="accept,cancel"
+        onload="onload();"
+        ondialogaccept="return OK();">
+
+    <script type="application/x-javascript" src="feed-properties.js"/>
+    <script type="application/x-javascript" src="chrome://browser/content/bookmarks/bookmarks.js"/>
+
+    <stringbundleset id="string-bundles">
+        <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
+    </stringbundleset>
+
+    <grid>
+        <columns>
+            <column/>
+            <column flex="3"/>
+        </columns>
+        <rows>
+            <row align="center">
+                <label value="&feedName.label;"/>
+                <textbox id="feed-name-textbox"/>
+            </row>
+            <row align="center">
+                <label value="&feedURL.label;"/>
+                <textbox id="feed-url-textbox"/>
+            </row>
+        </rows>
+    </grid>
+    <spacer height="15"/>
+    <groupbox>
+        <caption label="&optionsGroupbox.caption;"/>
+        <hbox align="center">
+            <checkbox id="expiration-checkbox"
+                      label="&expireEntriesPerFeedBefore.label;"
+                      oncommand="onExpirationCheckboxCmd(event);"/>
+            <textbox id="expiration-textbox" size="2"/>
+            <label value="&expireEntriesPerFeedAfter.label;"/>
+        </hbox>
+        <hbox align="center">
+            <checkbox id="max-entries-checkbox"
+                      label="&maxEntriesPerFeedBefore.label;"
+                      oncommand="onMaxEntriesCheckboxCmd(event);"/>
+            <textbox id="max-entries-textbox" size="2"/>
+            <label value="&maxEntriesPerFeedAfter.label;"/>
+        </hbox>
+        <spacer height="10"/>
+    </groupbox>
+
+</dialog>
