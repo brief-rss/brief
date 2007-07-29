@@ -375,6 +375,7 @@ var brief = {
     openOptions: function brief_openOptions(aPaneID) {
         window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
                           'chrome,titlebar,toolbar,centerscreen,modal,resizable');
+
     },
 
     onHeadlinesCheckboxCmd: function brief_onHeadlinesCheckboxCmd(aEvent) {
@@ -653,7 +654,10 @@ var brief = {
     },
 
     ctx_showFeedProperties: function brief_ctx_showFeedProperties(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
 
+        openDialog('chrome://brief/content/feed-properties.xul', 'FeedProperties',
+                   'chrome,titlebar,toolbar,centerscreen,modal,resizable', feedID);
     }
 
 }
