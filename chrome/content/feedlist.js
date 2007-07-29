@@ -6,6 +6,7 @@ var gFeedList = {
     tree:  null,
     items: null,  // All treeitems in the tree.
     ctx_targetItem: null,  // Last target item of the context menu
+    _prevSelectedItem: null,
 
     // If TRUE, prevents the onSelect function from running when
     // "select" event is occurs.
@@ -229,11 +230,10 @@ var gFeedList = {
 
 
     onSelect: function gFeedList_onSelect(aEvent) {
-        var selectedItem = gFeedList.selectedItem;
+        var selectedItem = this.selectedItem;
 
-        if (!selectedItem || this.ignoreSelectEvent || this._prevSelectedItem == selectedItem) {
+        if (!selectedItem || this.ignoreSelectEvent || this._prevSelectedItem == selectedItem)
             return;
-        }
 
         // Clicking the twisty also triggers the select event, although the selection
         // doesn't change. We remember the previous selected item and do nothing when
@@ -266,6 +266,19 @@ var gFeedList = {
             if (feedID)
                 gFeedView = new FeedView(title, query);
         }
+    },
+
+    onMouseDown: function gFeedList_onMouseDown(aEvent) {
+        var treeSelection = this.tree.view.selection;
+        var row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
+
+        var saveCurrentIndex = treeSelection.currentIndex;
+        treeSelection.selectEventsSuppressed = true;
+        treeSelection.select(row);
+        treeSelection.currentIndex = saveCurrentIndex;
+        treeSelection.selectEventsSuppressed = false;
+
+        aEvent.stopPropagation();
     },
 
     // This is used for detecting when a folder is open/closed and refreshes its label.
@@ -352,9 +365,8 @@ var gFeedList = {
 
 
     // Sets the visibility of context menuitem depending on the target.
-    createContextMenu: function gFeedList_createContextMenu(aEvent) {
-
-        // Get the row which was the target of the right-click
+    onContextMenuShowing: function gFeedList_onContextMenuShowing(aEvent) {
+        // Get the target row.
         var rowIndex = {};
         this.tree.treeBoxObject.getCellAt(aEvent.clientX, aEvent.clientY, rowIndex, {}, {});
         this.ctx_targetItem = this.tree.view.getItemAtIndex(rowIndex.value);
@@ -425,9 +437,14 @@ var gFeedList = {
 
         var emptyTrash = document.getElementById('ctx-empty-trash');
         emptyTrash.hidden = !targetIsTrashFolder;
-
     },
 
+    onContextMenuHiding: function gFeedList_onContextMenuHiding(aEvent) {
+        var treeSelection = this.tree.view.selection;
+        treeSelection.selectEventsSuppressed = true;
+        treeSelection.select(treeSelection.currentIndex);
+        treeSelection.selectEventsSuppressed = false;
+    },
 
     // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
@@ -523,7 +540,7 @@ var gFeedList = {
             }
         }
         this._folderParentChain.pop();
-    },
+    }
 
 }
 

@@ -5,16 +5,15 @@
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
 <page id="brief-window"
-        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        title="Brief"
-        onload="brief.init();"
-        onunload="brief.unload();">
+      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+      title="Brief"
+      onload="brief.init();"
+      onunload="brief.unload();">
 
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
-    <script type="application/x-javascript"
-            src="chrome://browser/content/bookmarks/bookmarks.js"/>
+    <script type="application/x-javascript" src="chrome://browser/content/bookmarks/bookmarks.js"/>
 
     <stringbundleset id="string-bundles">
         <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
@@ -22,7 +21,8 @@
 
     <popupset id="main-popupset">
         <menupopup id="feed-list-popup"
-                   onpopupshowing="gFeedList.createContextMenu(event);">
+                   onpopupshowing="gFeedList.onContextMenuShowing(event);"
+                   onpopuphiding="gFeedList.onContextMenuHiding(event);">
             <menuitem id="ctx-mark-feed-read"
                       label="&ctxMarkFeedRead.label;"
                       oncommand="brief.ctx_markFeedRead(event);"/>
@@ -99,6 +99,7 @@
                       contextmenu="feed-list-popup"
                       persist="closedFolders"
                       onselect="gFeedList.onSelect(event);"
+                      onmousedown="gFeedList.onMouseDown(event);"
                       onclick="gFeedList.onClick(event);"
                       onkeyup="gFeedList.onKeyUp(event);">
 
@@ -150,6 +151,11 @@
                                    tooltiptext="&markViewUnread.tooltip;"
                                    oncommand="brief.markCurrentViewRead(false);"/>
                     <spacer flex="1"/>
+                    <toolbaritem id="headlines-checkbox-container">
+                        <checkbox id="headlines-checkbox"
+                                  label="&headlinesCheckbox.label;"
+                                  oncommand="brief.onHeadlinesCheckboxCmd(event);"/>
+                    </toolbaritem>
                     <toolbaritem id="view-constraint-box">
                         <label value="&viewConstraintList.label;"/>
                         <menulist id="view-constraint-list"
@@ -164,11 +170,6 @@
                                           label="&viewStarred.label;"/>
                             </menupopup>
                         </menulist>
-                    </toolbaritem>
-                    <toolbaritem id="headlines-checkbox-container">
-                        <checkbox id="headlines-checkbox"
-                                  label="&headlinesCheckbox.label;"
-                                  oncommand="brief.onHeadlinesCheckboxCmd(event);"/>
                     </toolbaritem>
                     <toolbaritem id="navigation-box">
                         <toolbarbutton id="prev-page"
