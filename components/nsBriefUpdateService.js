@@ -346,27 +346,24 @@ function FeedFetcher(aFeed) {
 
 FeedFetcher.prototype = {
 
-    // The passed feed, as currently stored in the database. Set in the constructor.
-    feed: null,
-
-    // The downloaded feed. Initially null.
-    downloadedFeed: null,
-
-    // The feed's favicon. Initially set to what's currently in the database.
-    favicon: '',
+    feed: null,           // The passed feed, as currently stored in the database.
+    downloadedFeed: null, // The downloaded feed. Initially null.
+    favicon: '',          // The feed's favicon. Initially set to what's currently in the database.
 
     request: null,
     timeoutTimer: null,
     observerService: null,
+
+    // Indicates if the request has encountered an error (either a connection error or
+    // parsing error) and have sent 'brief:feed-error' notification.
+    inError: false,
 
 
     requestFeed: function FeedFetcher_requestFeed() {
         var self = this;
 
         function onRequestError() {
-            self.timeoutTimer.cancel();
-            self.finish();
-            self.observerService.notifyObservers(null, 'brief:feed-error', self.feed.feedID);
+            self.finish(false);
         }
 
         function onRequestLoad() {
@@ -381,8 +378,7 @@ FeedFetcher.prototype = {
                 parser.parseFromString(self.request.responseText, uri);
             }
             catch(e) {
-                self.finish();
-                self.observerService.notifyObservers(null, 'brief:feed-error', self.feed.feedID);
+                self.finish(false);
             }
         }
 
@@ -397,10 +393,11 @@ FeedFetcher.prototype = {
         this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
     },
 
+
     // nsIFeedResultListener
     handleResult: function FeedFetcher_handleResult(aResult) {
         if (!aResult || !aResult.doc) {
-            this.observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
+            this.finish(false);
             return;
         }
 
@@ -439,23 +436,39 @@ FeedFetcher.prototype = {
         }
     },
 
+
     passDataToStorage: function FeedFetcher_passDataToStorage() {
-        this.finish();
+        this.finish(true);
 
         this.downloadedFeed.favicon = this.favicon;
         var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
         storageService.updateFeed(this.downloadedFeed);
     },
 
-    finish: function() {
+
+    finish: function FeedFetcher_finish(aOK) {
+        // For whatever reason, if nsIFeedProcessor gets a parsing error it sometimes
+        // calls handleResult() twice. We check the inError flag to avoid doing finish()
+        // again, because it would seriously mess up the batch update by adding the
+        // feed to the completedFeeds stack twice.
+        if (this.inError)
+            return;
+
         // We can't push the feed to the |completedFeeds| stack in brief:feed-updated
         // observer in the main class, because we have to ensure this is done before any
-        // other observers receive this notification. Otherwise the progressmeters won't
+        // other observers receives this notification. Otherwise the progressmeters won't
         // be refreshed properly, because of outdated count of completed feeds.
         gBriefUpdateService.completedFeeds.push(this.feed);
 
+        if (!aOK) {
+            this.inError = true;
+            this.observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
+        }
+
+        // Clean up, so that we don't leak (hopefully).
         this.observerService.removeObserver(this, 'brief:feed-update-canceled');
         this.request = null;
+        this.timeoutTimer.cancel();
         this.timeoutTimer = null;
     },
 
@@ -463,19 +476,17 @@ FeedFetcher.prototype = {
         switch (aTopic) {
         case 'timer-callback':
             this.request.abort();
-            this.finish();
-            this.observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
+            this.finish(false);
             break;
 
         case 'brief:feed-update-canceled':
             this.request.abort();
-            this.finish();
-            this.observerService.removeObserver(this, 'brief:feed-update-canceled');
+            this.finish(true);
             break;
         }
     },
 
-    QueryInterface: function(aIID) {
+    QueryInterface: function FeedFetcher_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
            aIID.equals(Ci.nsIObserver) ||
            aIID.equals(Ci.nsIFeedResultListener))
