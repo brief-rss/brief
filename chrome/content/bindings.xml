@@ -41,7 +41,7 @@
 
                 // Get the data passed to us through attributes
                 var entryURL = this.getAttribute('entryURL');
-                var title    = this.getAttribute('title');
+                var title    = this.getAttribute('entryTitle');
                 var summary  = this.getAttribute('summary');
                 var content  = this.getAttribute('content');
                 var date     = new Date(parseInt(this.getAttribute('date')));
@@ -93,7 +93,8 @@
 
                     var evt = document.createEvent('Events');
                     evt.initEvent('MarkEntryRead', false, false);
-                    this.dispatchEvent(evt);
+                    var self = this;
+                    setTimeout(function() {self.dispatchEvent(evt)}, 0);
                 ]]>
                 </body>
             </method>
@@ -104,21 +105,21 @@
             <![CDATA[
                 var anonid = event.originalTarget.getAttribute('anonid');
                 switch (anonid) {
-                    case 'mark-read':
-                        this.toggleReadStatus();
-                        break;
+                case 'mark-read':
+                    this.toggleReadStatus();
+                    break;
 
-                    case 'delete-entry':
-                        var evt = document.createEvent('Events');
-                        evt.initEvent('DeleteEntry', false, false);
-                        this.dispatchEvent(evt);
-                        break;
+                case 'delete-entry':
+                    var evt = document.createEvent('Events');
+                    evt.initEvent('DeleteEntry', false, false);
+                    this.dispatchEvent(evt);
+                    break;
 
-                    case 'restore-entry':
-                      var evt = document.createEvent('Events');
-                        evt.initEvent('RestoreEntry', false, false);
-                        this.dispatchEvent(evt);
-                        break;
+                case 'restore-entry':
+                  var evt = document.createEvent('Events');
+                    evt.initEvent('RestoreEntry', false, false);
+                    this.dispatchEvent(evt);
+                    break;
                 }
             ]]>
             </handler>
