@@ -67,22 +67,24 @@ BriefStorageService.prototype = {
         //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
 
         this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
-                                           'feedID      TEXT UNIQUE,           ' +
-                                           'RDF_URI     TEXT,                  ' +
-                                           'feedURL     TEXT,                  ' +
-                                           'websiteURL  TEXT,                  ' +
-                                           'title       TEXT,                  ' +
-                                           'subtitle    TEXT,                  ' +
-                                           'imageURL    TEXT,                  ' +
-                                           'imageLink   TEXT,                  ' +
-                                           'imageTitle  TEXT,                  ' +
-                                           'favicon     TEXT,                  ' +
-                                           'hidden      INTEGER DEFAULT 0,     ' +
-                                           'everUpdated INTEGER DEFAULT 0,     ' +
-                                           'oldestAvailableEntryDate INTEGER,  ' +
-                                           'rowIndex    INTEGER,               ' +
-                                           'parent      TEXT,                  ' +
-                                           'isFolder    INTEGER                ' +
+                                           'feedID        TEXT UNIQUE,           ' +
+                                           'RDF_URI       TEXT,                  ' +
+                                           'feedURL       TEXT,                  ' +
+                                           'websiteURL    TEXT,                  ' +
+                                           'title         TEXT,                  ' +
+                                           'subtitle      TEXT,                  ' +
+                                           'imageURL      TEXT,                  ' +
+                                           'imageLink     TEXT,                  ' +
+                                           'imageTitle    TEXT,                  ' +
+                                           'favicon       TEXT,                  ' +
+                                           'hidden        INTEGER DEFAULT 0,     ' +
+                                           'everUpdated   INTEGER DEFAULT 0,     ' +
+                                           'oldestAvailableEntryDate INTEGER,    ' +
+                                           'rowIndex      INTEGER,               ' +
+                                           'parent        TEXT,                  ' +
+                                           'isFolder      INTEGER,               ' +
+                                           'entryAgeLimit INTEGER DEFAULT 0,     ' +
+                                           'maxEntries    INTEGER DEFAULT 0      ' +
                                            ')');
         this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
                                            'feedID     TEXT,                    ' +
@@ -100,14 +102,15 @@ BriefStorageService.prototype = {
                                            ')');
         // Columns added in 0.6.
         try {
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN    ' +
-                                               'oldestAvailableEntryDate INTEGER');
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
             this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
         }
         catch (e) {}
 
         // Columns added in 0.7.
         try {
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
             this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
             this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
             this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
@@ -183,13 +186,14 @@ BriefStorageService.prototype = {
         this.feedsAndFoldersCache = [];
 
         var select = this.dBConnection.
-            createStatement('SELECT                                          ' +
-                            'feedID, feedURL, websiteURL, title,             ' +
-                            'subtitle, imageURL, imageLink, imageTitle,      ' +
-                            'favicon, everUpdated, oldestAvailableEntryDate, ' +
-                            'rowIndex, parent, isFolder, RDF_URI             ' +
-                            'FROM feeds                                      ' +
-                            'WHERE hidden=0 ORDER BY rowIndex ASC            ');
+            createStatement('SELECT                                              ' +
+                            'feedID, feedURL, websiteURL, title,                 ' +
+                            'subtitle, imageURL, imageLink, imageTitle,          ' +
+                            'favicon, everUpdated, oldestAvailableEntryDate,     ' +
+                            'rowIndex, parent, isFolder, RDF_URI, entryAgeLimit, ' +
+                            'maxEntries                                          ' +
+                            'FROM feeds                                          ' +
+                            'WHERE hidden=0 ORDER BY rowIndex ASC                ');
         try {
             while (select.executeStep()) {
                 var feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
@@ -208,6 +212,8 @@ BriefStorageService.prototype = {
                 feed.parent = select.getString(12);
                 feed.isFolder = select.getInt32(13) == 1;
                 feed.rdf_uri = select.getString(14);
+                feed.entryAgeLimit = select.getInt32(15);
+                feed.maxEntries = select.getInt32(16);
 
                 this.feedsAndFoldersCache.push(feed);
                 if (!feed.isFolder)
@@ -407,6 +413,26 @@ BriefStorageService.prototype = {
     },
 
 
+    setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
+        var update = this.dBConnection.
+            createStatement('UPDATE feeds SET entryAgeLimit = ?, maxEntries = ? WHERE feedID = ?');
+
+        update.bindInt32Parameter(0, aFeed.entryAgeLimit);
+        update.bindInt32Parameter(1, aFeed.maxEntries);
+        update.bindStringParameter(2, aFeed.feedID);
+
+        update.execute();
+
+        // Update the cache if neccassary (it may not be if nsIBriefFeed instance that was
+        // passed to us was itself taken from the cache).
+        var feed = this.getFeed(aFeed.feedID);
+        if (feed != aFeed) {
+            feed.entryAgeLimit = aFeed.entryAgeLimit;
+            feed.maxEntries = aFeed.maxEntries;
+        }
+    },
+
+
     // nsIBriefStorage
     markEntriesRead: function BriefStorage_markEntriesRead(aStatus, aQuery) {
 
@@ -505,56 +531,87 @@ BriefStorageService.prototype = {
 
     // Deletes entries that are outdated or exceed the max number per feed based.
     deleteRedundantEntries: function BriefStorage_deleteRedundantEntries() {
-        var expireEntries = this.prefs.getBoolPref('database.expireEntries');
-        var useStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
-        var expirationAge = this.prefs.getIntPref('database.entryExpirationAge');
-        var maxEntries = this.prefs.getIntPref('database.maxStoredEntries');
+        var expireEntriesGlobal = this.prefs.getBoolPref('database.expireEntries');
+        var useGlobalStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
+        var globalExpirationAge = this.prefs.getIntPref('database.entryExpirationAge');
+        var globalMaxEntries = this.prefs.getIntPref('database.maxStoredEntries');
 
-        var edgeDate = Date.now() - expirationAge * 86400000; // expirationAge is in days
+        // globalExpirationAge is in days, convert it to miliseconds
+        var globalEdgeDate = Date.now() - globalExpirationAge * 86400000;
         var feeds = this.getAllFeeds({});
 
-        var deleteOutdated = this.dBConnection.
-            createStatement('UPDATE entries SET deleted=2 WHERE starred = 0 AND date < ?');
+        var deleteOutdatedGlobal = this.dBConnection.
+            createStatement('UPDATE entries SET deleted = 2 WHERE id IN                   ' +
+                            '(                                                            ' +
+                            '   SELECT entries.id FROM                                    ' +
+                            '   entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                            '   WHERE feeds.entryAgeLimit = 0 AND entries.starred = 0 AND ' +
+                            '   entries.date < ?                                          ' +
+                            ')                                                            ');
 
-        var getEntriesCountForFeed = this.dBConnection.
-            createStatement('SELECT COUNT(1) FROM entries     ' +
-                            'WHERE starred = 0 AND feedID = ? ');
+        var deleteOutdatedPerFeed = this.dBConnection.
+            createStatement('UPDATE entries SET deleted = 2 WHERE            ' +
+                            'feedID = ? AND starred = 0 AND entries.date < ? ');
 
         var deleteExcessive = this.dBConnection.
-            createStatement('UPDATE entries SET deleted = 2                 ' +
-                            'WHERE id IN (SELECT id FROM entries            ' +
-                            '             WHERE starred = 0 AND feedID = ?  ' +
-                            '             ORDER BY date ASC LIMIT ?)        ');
+            createStatement('UPDATE entries SET deleted = 2 WHERE id IN           ' +
+                            '(                                                    ' +
+                            '    SELECT entries.id FROM entries                   ' +
+                            '    WHERE entries.starred = 0 AND entries.feedID = ? ' +
+                            '    ORDER BY entries.date ASC LIMIT ?                ' +
+                            ')                                                    ');
+
+        var getEntriesCountForFeed = this.dBConnection.
+            createStatement('SELECT COUNT(1) FROM entries WHERE starred = 0 AND feedID = ? ');
 
         this.dBConnection.beginTransaction();
         try {
-            if (expireEntries) {
-                deleteOutdated.bindInt64Parameter(0, edgeDate);
-                deleteOutdated.execute();
+            // Delete outdated entries in feeds that don't have per-feed setting enabled.
+            if (expireEntriesGlobal) {
+                deleteOutdatedGlobal.bindInt64Parameter(0, globalEdgeDate);
+                deleteOutdatedGlobal.execute();
             }
 
-            if (useStoreLimit) {
-                var feedID, entryCount, difference;
-                for (var i = 0; i < feeds.length; i++) {
-                    feedID = feeds[i].feedID;
+            // Delete entries exceeding the max number. We have to do it feed by feed.
+            var entryCount, difference, i;
+            for (i = 0; i < feeds.length; i++) {
+                // Count the number of entries in the feed.
+                getEntriesCountForFeed.bindStringParameter(0, feeds[i].feedID);
+                getEntriesCountForFeed.executeStep()
+                entryCount = getEntriesCountForFeed.getInt32(0);
+                getEntriesCountForFeed.reset();
 
-                    getEntriesCountForFeed.bindStringParameter(0, feedID);
-                    getEntriesCountForFeed.executeStep()
-                    entryCount = getEntriesCountForFeed.getInt32(0);
-                    getEntriesCountForFeed.reset();
+                // Calculace the difference between the current number of entries and the
+                // limit specified in either the per-feed preferences stored in the
+                // database or the global preference.
+                difference = 0;
+                if (feeds[i].maxEntries > 0)
+                    difference = entryCount - feeds[i].maxEntries
+                else if (useGlobalStoreLimit)
+                    difference = entryCount - globalMaxEntries;
 
-                    difference = entryCount - maxEntries;
-                    if (difference > 0) {
-                        deleteExcessive.bindStringParameter(0, feedID);
-                        deleteExcessive.bindInt64Parameter(1, difference);
-                        deleteExcessive.execute();
-                    }
+                if (difference > 0) {
+                    deleteExcessive.bindStringParameter(0, feeds[i].feedID);
+                    deleteExcessive.bindInt64Parameter(1, difference);
+                    deleteExcessive.execute();
+                }
+            }
+
+            // Delete outdated entries based on the per-feed limit.
+            var edgeDate, i;
+            for (i = 0; i < feeds.length; i++) {
+                if (feeds[i].entryAgeLimit > 0) {
+                    edgeDate = Date.now() - feeds[i].entryAgeLimit * 86400000;
+                    deleteOutdatedPerFeed.bindStringParameter(0, feeds[i].feedID);
+                    deleteOutdatedPerFeed.bindInt64Parameter(1, edgeDate);
+                    deleteOutdatedPerFeed.execute();
                 }
             }
         }
         finally {
             this.dBConnection.commitTransaction();
         }
+
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
         this.prefs.setIntPref('database.lastDeletedRedundantTime', now);
@@ -600,22 +657,21 @@ BriefStorageService.prototype = {
                 break;
 
             case 'quit-application':
-                var lastTime = this.prefs.getIntPref('database.lastDeletedRedundantTime');
-                var expireEntries = this.prefs.getBoolPref('database.expireEntries');
-                var useStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
-
                 // Integer prefs are longs while Date is a long long.
                 var now = Math.round(Date.now() / 1000);
-                if (now - lastTime > DELETE_REDUNDANT_ENTRIES_INTERVAL &&
-                   (expireEntries || useStoreLimit)) {
+
+                var lastTime = this.prefs.getIntPref('database.lastDeletedRedundantTime');
+                if (now - lastTime > DELETE_REDUNDANT_ENTRIES_INTERVAL)
                     this.deleteRedundantEntries();
-                }
 
                 lastTime = this.prefs.getIntPref('database.lastPurgeTime');
                 if (now - lastTime > PURGE_DELETED_ENTRIES_INTERVAL)
                     this.purgeDeletedEntries();
 
                 this.bookmarksDataSource.RemoveObserver(this);
+                this.prefs.removeObserver('', this);
+                this.observerService.removeObserver(this, 'quit-application');
+                this.observerService.removeObserver(this, 'profile-after-change');
                 break;
 
             case 'timer-callback':
@@ -629,7 +685,7 @@ BriefStorageService.prototype = {
                         this.syncWithBookmarks();
                         break;
                 }
-            break;
+                break;
         }
     },
 
