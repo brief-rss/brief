@@ -13,8 +13,6 @@ interface nsIBriefFeedEntry : nsISupports {
  /**
   * These attributes contain entry's data.
   */
-  attribute string feedID;
-
   attribute string id;
 
   attribute AUTF8String entryURL;
@@ -30,8 +28,12 @@ interface nsIBriefFeedEntry : nsISupports {
   attribute AString authors;
 
  /**
-  * These attributes contain additional information about the entry stored in
-  * the database.
+  * Feed which the entry belongs to.
+  */
+  attribute string feedID;
+
+ /**
+  * Status information about the entry stored in the database.
   */
   attribute boolean read;
 
@@ -98,9 +100,22 @@ interface nsIBriefFeed : nsISupports {
 
   attribute boolean isFolder;
 
+  /**
+   * feedID of the parent folder.
+   */
   attribute string parent;
 
+  /**
+   * URI of the corresponding Live Bookmark in the bookmarks RDF datasource.
+   */
   attribute string rdf_uri;
+
+  /**
+   * The below attributes carry various per-feed preferences.
+   */
+  attribute unsigned long entryAgeLimit;
+
+  attribute unsigned long maxEntries;
 
  /**
   * Get the feed's entries. Since there is no method in this interface to

@@ -146,11 +146,14 @@ interface nsIBriefStorage : nsISupports {
    *
    * @param  feedCount  Empty object (required by XPConnect to return an array).
    *
-   * @returns array of nsIBriefFeed objects
+   * @returns array of nsIBriefFeed objects.
    */
   void getAllFeeds(out unsigned long feedCount,
                   [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
 
+  /**
+   * Similar to |getAllFeeds| but also includes folders.
+   */
   void getFeedsAndFolders(out unsigned long feedCount,
                           [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
 
@@ -168,8 +171,8 @@ interface nsIBriefStorage : nsISupports {
                   [retval, array, size_is(entryCount)] out nsIBriefFeedEntry entries);
 
   /**
-   * This function gets a space-separated entry id list of entries matching
-   * specified rules constraints.
+   * Returns a space-separated list of IDs of entries matching a given query
+   * and a similar list of IDs of feeds which these entries belong to.
    *
    * @param  query  Query selecting the entries.
    *
@@ -200,6 +203,14 @@ interface nsIBriefStorage : nsISupports {
    * @param feed Contains the feed with which to update the database.
    */
   void updateFeed(in nsIBriefFeed feed);
+
+  /**
+   * Sets field relating to various feed's settings (currently entryAgeLimit and maxEntries).
+   *
+   * @param  feed  nIBriefFeed object with whose properties to update the respective
+   *               fields in the database.
+   */
+  void setFeedOptions(in nsIBriefFeed feed);
 
   /**
    * Marks entries as read/unread.
