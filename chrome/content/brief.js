@@ -53,7 +53,8 @@ var brief = {
         if (liveBookmarksFolder) {
             // This timeout causes the Brief window to be displayed a lot sooner and to
             // populate the feed list afterwards.
-            setTimeout(function(){ gFeedList.rebuild(); }, 0);
+            setTimeout(function(){ gFeedList.rebuild() }, 0);
+            setTimeout(function(){ gStorage.syncWithBookmarks() }, 500);
         }
         else {
             // If no Live Bookmarks folder has been picked yet, offer a button to do it.
