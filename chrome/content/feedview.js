@@ -105,60 +105,45 @@ FeedView.prototype = {
      * @returns TRUE if the view was up-to-date, FALSE if it needed refreshing.
      */
     ensure: function FeedView_ensure() {
+        var isDirty = false;
+
         if (!this.isActive)
             return true;
 
-        // Get arrays of previously viewed entries and the ones that should be viewed now.
         var prevEntries = this._entries;
-        var currentEntries = gStorage.getSerializedEntries(this.query).
-                                      getPropertyAsAString('entries').
-                                      match(/[^ ]+/g);
+        var currentEntriesCount = gStorage.getEntriesCount(this.query);
 
-        if (!prevEntries || !currentEntries) {
-            this._refresh();
-            return false;
-        }
+        // If a single entry was removed is removed we do partial refresh, otherwise we
+        // refresh from scratch.
+        // Because as far as I can tell it is not possible to remove some entries and add
+        // some others with a single operation, the number of entries always changes when
+        // the entry set changes. This greatly simplifies things, because we don't
+        // have to check entries one by one and we can just compare their number.
+        if (this.entriesCount - currentEntriesCount == 1) {
+            var removedEntry = null;
+            var removedEntryIndex;
+            var currentEntries = gStorage.getSerializedEntries(this.query).
+                                          getPropertyAsAString('entries').
+                                          match(/[^ ]+/g);
 
-        // We need to perform a full refresh if entries were added or more than one entry
-        // was removed. We optimize for the common case when only one entry is removed and
-        // in such case we refresh incrementally.
-        // Because it is possible for some entries to be added and some removed at the
-        // same time, simply comparing overall numbers is not enough and we need to check
-        // all of them one by one.
-        // First, let's see if any entries were removed.
-        var removedEntry = null;
-        var removedEntryIndex;
-        for (var i = 0; i < prevEntries.length; i++) {
-            if (currentEntries.indexOf(prevEntries[i]) == -1) {
-                if (removedEntry) {
-                    // One missing entry was already found and this is the second one,
-                    // so we need to do a full refresh.
-                    this._refresh();
-                    return false;
+            // Find the removed entry.
+            for (var i = 0; i < prevEntries.length; i++) {
+                if (currentEntries.indexOf(prevEntries[i]) == -1) {
+                    removedEntry = prevEntries[i];
+                    removedEntryIndex = i;
+                    break;
                 }
-                removedEntry = prevEntries[i];
-                removedEntryIndex = i;
             }
-        }
 
-        // Let's see if any entries were added.
-        for (i = 0; i < currentEntries.length; i++) {
-            if (prevEntries.indexOf(currentEntries[i]) == -1) {
-                this._refresh();
-                return false;
-            }
-        }
-
-        if (removedEntry) {
-            // If there are no more entries on this page and it the last page then perform
-            // full refresh.
+            // If there are no more entries on this page and it the last
+            // page then perform full refresh.
             if (this.feedContent.childNodes.length == 1 && this.currentPage == this.pageCount) {
                 this._refresh();
                 return false;
             }
 
-            // If the removed entry is on a different page than the currently shown one,
-            // perform full refresh.
+            // If the removed entry is on a different page than the
+            // currently shown one then perform full refresh.
             var firstIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
             var lastIndex = firstIndex + gPrefs.entriesPerPage;
             if (removedEntryIndex < firstIndex || removedEntryIndex > lastIndex) {
@@ -167,6 +152,14 @@ FeedView.prototype = {
             }
 
             this._refreshIncrementally(removedEntry);
+
+            // Update this._entries here, so that this._refreshIncrementally()
+            // doesn't have to call gStorage.getSerializedEntries() again.
+            this._entries = currentEntries;
+            isDirty = true;
+        }
+        else if (this.entriesCount != currentEntriesCount) {
+            this._refresh();
             return false;
         }
 
@@ -175,10 +168,10 @@ FeedView.prototype = {
         var titleElement = this.document.getElementById('feed-title');
         if (titleElement.textContent != title) {
             titleElement.textContent = title;
-            return false;
+            isDirty = true;
         }
 
-        return true;
+        return !isDirty;
     },
 
 
@@ -193,43 +186,44 @@ FeedView.prototype = {
         this.browser.loadURI(gTemplateURI.spec);
 
         // Store a list of ids of displayed entries. It is used to determine if
-        // the view needs to be refreshed when database changes.
-        this._entries = gStorage.getSerializedEntries(this.query).
-                                 getPropertyAsAString('entries').
-                                 match(/[^ ]+/g);
+        // the view needs to be refreshed when database changes. This can be done
+        // after timeout, so not to delay the view creation any futher.
+        function setEntries() {
+            gFeedView._entries = gStorage.getSerializedEntries(gFeedView.query).
+                                          getPropertyAsAString('entries').
+                                          match(/[^ ]+/g);
+        }
+        setTimeout(setEntries, 500);
     },
 
 
     // Refreshes the view when one entry is removed from the currently displayed page.
     _refreshIncrementally: function FeedView__refreshIncrementally(aEntryId) {
-
         // Find the entry that be removed.
         var entry = this.feedContent.firstChild;
         while (entry.id != aEntryId)
             entry = entry.nextSibling;
 
-        // Remove the entry. We don't do it directly, because we want to use jQuery
-        // to to fade it gracefully and we can call it from here, because it's untrusted.
+        // Remove the entry. We don't do it directly, because we want to
+        // use jQuery to to fade it gracefully and we cannot call it from
+        // here, because it's untrusted.
         var evt = document.createEvent('Events');
         evt.initEvent('RemoveEntry', false, false);
         entry.dispatchEvent(evt);
 
         this._computePages();
 
-        // Pull the entry (previously the first entry on the next page).
+        // Pull the entry to be added to the current page, which happens
+        // to have been the first entry of the next page.
         var query = this.query;
         query.offset = gPrefs.entriesPerPage * this.currentPage - 1;
         query.limit = 1;
         var entry = gStorage.getEntries(query, {})[0];
 
-        // Append the entry. If we're on the last page then there may have been no
-        // futher entries to pull.
+        // Append the entry. If we're on the last page then there may
+        // have been no futher entries to pull.
         if (entry)
             this._appendEntry(entry);
-
-        this._entries = gStorage.getSerializedEntries(this.query).
-                                 getPropertyAsAString('entries').
-                                 match(/[^ ]+/g);
     },
 
 
