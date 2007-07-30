@@ -540,29 +540,33 @@ BriefStorageService.prototype = {
         var globalEdgeDate = Date.now() - globalExpirationAge * 86400000;
         var feeds = this.getAllFeeds({});
 
-        var deleteOutdatedGlobal = this.dBConnection.
-            createStatement('UPDATE entries SET deleted = 2 WHERE id IN                   ' +
-                            '(                                                            ' +
-                            '   SELECT entries.id FROM                                    ' +
-                            '   entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                            '   WHERE feeds.entryAgeLimit = 0 AND entries.starred = 0 AND ' +
-                            '   entries.date < ?                                          ' +
-                            ')                                                            ');
+        var deleteOutdatedGlobal = this.dBConnection.createStatement(
+            'UPDATE entries SET deleted = 2                                    ' +
+            'WHERE id IN                                                       ' +
+            '(                                                                 ' +
+            '   SELECT entries.id                                              ' +
+            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+            '   WHERE feeds.entryAgeLimit = 0 AND entries.starred = 0 AND      ' +
+            '         entries.date < ?                                         ' +
+            ')                                                                 ');
 
-        var deleteOutdatedPerFeed = this.dBConnection.
-            createStatement('UPDATE entries SET deleted = 2 WHERE            ' +
-                            'feedID = ? AND starred = 0 AND entries.date < ? ');
+        var deleteOutdatedPerFeed = this.dBConnection.createStatement(
+            'UPDATE entries SET deleted = 2                          ' +
+            'WHERE feedID = ? AND starred = 0 AND entries.date < ?   ');
 
-        var deleteExcessive = this.dBConnection.
-            createStatement('UPDATE entries SET deleted = 2 WHERE id IN           ' +
-                            '(                                                    ' +
-                            '    SELECT entries.id FROM entries                   ' +
-                            '    WHERE entries.starred = 0 AND entries.feedID = ? ' +
-                            '    ORDER BY entries.date ASC LIMIT ?                ' +
-                            ')                                                    ');
+        var deleteExcessive = this.dBConnection.createStatement(
+            'UPDATE entries SET deleted = 2                        ' +
+            'WHERE id IN                                           ' +
+            '(                                                     ' +
+            '    SELECT id                                         ' +
+            '    FROM entries                                      ' +
+            '    WHERE starred = 0 AND feedID = ?                  ' +
+            '    ORDER BY date ASC                                 ' +
+            '    LIMIT ?                                           ' +
+            ')                                                     ');
 
-        var getEntriesCountForFeed = this.dBConnection.
-            createStatement('SELECT COUNT(1) FROM entries WHERE starred = 0 AND feedID = ? ');
+        var getEntriesCountForFeed = this.dBConnection.createStatement(
+            'SELECT COUNT(1) FROM entries WHERE starred = 0 AND feedID = ? ');
 
         this.dBConnection.beginTransaction();
         try {
@@ -622,20 +626,20 @@ BriefStorageService.prototype = {
     // be run on shutdown.
     purgeDeletedEntries: function BriefStorage_purgeDeletedEntries() {
         var removeEntries = this.dBConnection.createStatement(
-            'DELETE FROM entries WHERE id IN                                           ' +
-            '(                                                                         ' +
-            '   SELECT entries.id FROM entries INNER JOIN feeds                        ' +
-            '   ON entries.feedID = feeds.feedID  WHERE                                ' +
-            '   (entries.deleted = 2 AND feeds.oldestAvailableEntryDate > entries.date)' +
-            '   OR                                                                     ' +
-            '   (? - feeds.hidden > ? AND feeds.hidden != 0)                           ' +
-            ')                                                                         ');
+            'DELETE FROM entries                                                              ' +
+            'WHERE id IN                                                                      ' +
+            '(                                                                                ' +
+            '   SELECT entries.id                                                             ' +
+            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID                ' +
+            '   WHERE (entries.deleted = 2 AND feeds.oldestAvailableEntryDate > entries.date) ' +
+            '         OR (? - feeds.hidden > ? AND feeds.hidden != 0)                         ' +
+            ')                                                                                ');
         removeEntries.bindInt64Parameter(0, Date.now());
         removeEntries.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
         removeEntries.execute();
 
         var removeFeeds = this.dBConnection.createStatement(
-            'DELETE FROM feeds WHERE (? - feeds.hidden > ? AND feeds.hidden != 0)');
+            'DELETE FROM feeds WHERE (? - feeds.hidden > ?) AND feeds.hidden != 0');
         removeFeeds.bindInt64Parameter(0, Date.now());
         removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
         removeFeeds.execute();
@@ -704,19 +708,21 @@ BriefStorageService.prototype = {
 
         this.dBConnection.beginTransaction();
         try {
-            // Insert any new livemarks into the feeds database
             var selectAll = this.dBConnection.
                 createStatement('SELECT feedID, title, rowIndex, isFolder, parent, ' +
-                                'RDF_URI, hidden FROM feeds                        ');
+                                '       RDF_URI, hidden                            ' +
+                                'FROM feeds                                        ');
 
             var insertItem = this.dBConnection.
-                createStatement('INSERT OR IGNORE INTO feeds                          ' +
-                                '(feedID, feedURL, title, rowIndex, isFolder, parent, ' +
-                                'RDF_URI) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)         ');
+                createStatement('INSERT OR IGNORE INTO feeds                                   ' +
+                                '(feedID, feedURL, title, rowIndex, isFolder, parent, RDF_URI) ' +
+                                'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                           ');
+
             var updateFeed = this.dBConnection.
-                createStatement('UPDATE feeds SET                                  ' +
-                                'title = ?, rowIndex = ?, parent = ?, RDF_URI = ?, ' +
-                                'hidden = 0  WHERE feedID = ?                      ');
+                createStatement('UPDATE feeds                                                     ' +
+                                'SET title = ?, rowIndex = ?, parent = ?, RDF_URI = ?, hidden = 0 ' +
+                                'WHERE feedID = ?                                                 ');
+
             var removeFeed = this.dBConnection.
                 createStatement('DELETE FROM feeds WHERE feedID = ?');
             var hideFeed = this.dBConnection.
@@ -840,7 +846,7 @@ BriefStorageService.prototype = {
                 this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
         }
 
-        // Update newly addded feeds, if any
+        // Update newly addded feeds, if any.
         var addedFeeds = [], feed;
         for (var i = 0; i < addedFeedIDs.length; i++) {
             feed = this.getFeed(addedFeedIDs[i]);
@@ -1024,8 +1030,8 @@ BriefStorageService.prototype = {
      */
     startDummyStatement: function BriefStorage_startDummyStatement() {
         // Make sure the dummy table exists.
-        this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS ' +
-                                           'dummy_table (id INTEGER PRIMARY KEY)');
+        this.dBConnection.executeSimpleSQL(
+                       'CREATE TABLE IF NOT EXISTS dummy_table (id INTEGER PRIMARY KEY)');
 
         // This table is guaranteed to have something in it and will keep the dummy
         // statement open. If the table is empty, it won't hold the statement open.
@@ -1034,13 +1040,13 @@ BriefStorageService.prototype = {
         this.dummyStatement = this.dummyDBConnection.
                                    createStatement('SELECT id FROM dummy_table LIMIT 1');
 
-        // We have to step the dummy statement so that it will hold a lock on the DB
+        // We have to step the dummy statement so that it will hold a lock on the DB.
         this.dummyStatement.executeStep();
     },
 
 
     stopDummyStatement: function BriefStorage_stopDummyStatement() {
-        // Do nothing if the dummy statement isn't running
+        // Do nothing if the dummy statement isn't running.
         if (!this.dummyStatement)
             return;
 
