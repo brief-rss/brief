@@ -268,15 +268,16 @@ BriefStorageService.prototype = {
         var statement = 'SELECT entries.id, entries.feedID ' + aQuery.getQueryTextForSelect();
         var select = this.dBConnection.createStatement(statement);
 
-        var entries = '';
-        var feeds = '';
+        var entries = [];
+        var feeds = [];
         try {
             while (select.executeStep()) {
-                entries += select.getString(0) + ' ';
+                // |array[array.length] = x| is faster than |array.push(x)| (bug 385393)
+                entries[entries.length] = select.getString(0);
 
                 var feedID = select.getString(1);
-                if (!feeds.match(feedID))
-                    feeds += feedID + ' ';
+                if (feeds.indexOf(feedID) == -1)
+                    feeds[feeds.length] = feedID;
             }
         }
         finally {
@@ -285,8 +286,8 @@ BriefStorageService.prototype = {
 
         var bag = Cc['@mozilla.org/hash-property-bag;1'].
                   createInstance(Ci.nsIWritablePropertyBag2);
-        bag.setPropertyAsAString('entries', entries);
-        bag.setPropertyAsAString('feeds', feeds);
+        bag.setPropertyAsAString('entries', entries.join(' '));
+        bag.setPropertyAsAString('feeds', feeds.join(' '));
 
         return bag;
     },
