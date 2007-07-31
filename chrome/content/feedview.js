@@ -113,12 +113,15 @@ FeedView.prototype = {
         var prevEntries = this._entries;
         var currentEntriesCount = gStorage.getEntriesCount(this.query);
 
-        // If a single entry was removed is removed we do partial refresh, otherwise we
+        if (!prevEntries || !currentEntriesCount)
+            this._refresh();
+
+        // If a single entry was removed we do partial refresh, otherwise we
         // refresh from scratch.
         // Because as far as I can tell it is not possible to remove some entries and add
         // some others with a single operation, the number of entries always changes when
         // the entry set changes. This greatly simplifies things, because we don't
-        // have to check entries one by one and we can just compare their number.
+        // have to check entries one by one and we can just compare their numbers.
         if (this.entriesCount - currentEntriesCount == 1) {
             var removedEntry = null;
             var removedEntryIndex;
