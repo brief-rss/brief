@@ -658,7 +658,7 @@ var brief = {
         var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
 
         openDialog('chrome://brief/content/feed-properties.xul', 'FeedProperties',
-                   'chrome,titlebar,toolbar,centerscreen,modal,resizable', feedID);
+                   'chrome,titlebar,toolbar,centerscreen,modal', feedID);
     }
 
 }

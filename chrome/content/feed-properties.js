@@ -12,6 +12,8 @@ function onload() {
     var expirationTextbox = document.getElementById('expiration-textbox');
     var maxEntriesCheckbox = document.getElementById('max-entries-checkbox');
     var maxEntriesTextbox = document.getElementById('max-entries-textbox');
+    var checkUpdatesCheckbox = document.getElementById('check-updates-checkbox');
+    var checkUpdatesTextbox = document.getElementById('check-updates-textbox');
 
     var feedID = window.arguments[0];
     gFeed = gStorageService.getFeed(feedID);
@@ -30,21 +32,35 @@ function onload() {
     maxEntriesCheckbox.checked = (gFeed.maxEntries > 0);
     maxEntriesTextbox.disabled = !maxEntriesCheckbox.checked;
     maxEntriesTextbox.value = maxEntriesTextbox.disabled ? '' : gFeed.maxEntries;
+
+    checkUpdatesCheckbox.checked = (gFeed.updateInterval > 0);
+    checkUpdatesTextbox.disabled = !checkUpdatesCheckbox.checked;
+    checkUpdatesTextbox.value = checkUpdatesTextbox.disabled ? '' : gFeed.updateInterval;
 }
 
 function onExpirationCheckboxCmd(aEvent) {
+    var expirationTextbox = document.getElementById('expiration-textbox');
     expirationTextbox.disabled = !aEvent.target.checked;
 }
 
 function onMaxEntriesCheckboxCmd(aEvent) {
+    var maxEntriesTextbox = document.getElementById('max-entries-textbox');
     maxEntriesTextbox.disabled = !aEvent.target.checked;
 }
+
+function onCheckUpdatesCheckboxCmd(aEvent) {
+    var checkUpdatesTextbox = document.getElementById('check-updates-textbox');
+    checkUpdatesTextbox.disabled = !aEvent.target.checked;
+}
+
 
 function OK() {
     var expirationCheckbox = document.getElementById('expiration-checkbox');
     var expirationTextbox = document.getElementById('expiration-textbox');
     var maxEntriesCheckbox = document.getElementById('max-entries-checkbox');
     var maxEntriesTextbox = document.getElementById('max-entries-textbox');
+    var checkUpdatesCheckbox = document.getElementById('check-updates-checkbox');
+    var checkUpdatesTextbox = document.getElementById('check-updates-textbox');
 
     if (expirationCheckbox.checked && expirationTextbox.value)
         gFeed.entryAgeLimit = expirationTextbox.value;
@@ -55,6 +71,11 @@ function OK() {
         gFeed.maxEntries = maxEntriesTextbox.value;
     else
         gFeed.maxEntries = 0;
+
+    if (checkUpdatesCheckbox.checked && checkUpdatesTextbox.value)
+        gFeed.updateInterval = checkUpdatesTextbox.value;
+    else
+        gFeed.updateInterval = 0;
 
     gStorageService.setFeedOptions(gFeed);
 
