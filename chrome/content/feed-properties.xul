@@ -36,6 +36,13 @@
     <groupbox>
         <caption label="&optionsGroupbox.caption;"/>
         <hbox align="center">
+            <checkbox id="check-updates-checkbox"
+                      label="&checkUpdatesPerFeedBefore.label;"
+                      oncommand="onCheckUpdatesCheckboxCmd(event);"/>
+            <textbox id="check-updates-textbox" size="2"/>
+            <label value="&checkUpdatesPerFeedAfter.label;"/>
+        </hbox>
+        <hbox align="center">
             <checkbox id="expiration-checkbox"
                       label="&expireEntriesPerFeedBefore.label;"
                       oncommand="onExpirationCheckboxCmd(event);"/>

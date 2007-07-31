@@ -32,3 +32,5 @@
 <!-- Nowa --><!ENTITY maxEntriesPerFeedAfter.label "latest entries">
 <!-- Nowa --><!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
 <!-- Nowa --><!ENTITY expireEntriesPerFeedAfter.label "days">
+<!-- Nowa --><!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">
+<!-- Nowa --><!ENTITY checkUpdatesPerFeedAfter.label "minutes">
