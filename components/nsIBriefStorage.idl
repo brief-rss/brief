@@ -205,7 +205,8 @@ interface nsIBriefStorage : nsISupports {
   void updateFeed(in nsIBriefFeed feed);
 
   /**
-   * Sets field relating to various feed's settings (currently entryAgeLimit and maxEntries).
+   * Sets field relating to various feed's settings (currently entryAgeLimit, maxEntries,
+   * and updateInterval).
    *
    * @param  feed  nIBriefFeed object with whose properties to update the respective
    *               fields in the database.

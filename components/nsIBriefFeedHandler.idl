@@ -82,12 +82,6 @@ interface nsIBriefFeed : nsISupports {
   */
   attribute string favicon;
 
- /**
-  * This flag indicates if the stored feed was ever updated. You can set this
-  * flag when reading the feed from the database.
-  */
-  attribute boolean everUpdated;
-
   /**
    * This flag indicates what was the date of the oldest entry last time when the feed
    * was downloaded. This is used to determing which entries that user deleted can be
@@ -116,6 +110,13 @@ interface nsIBriefFeed : nsISupports {
   attribute unsigned long entryAgeLimit;
 
   attribute unsigned long maxEntries;
+
+  attribute unsigned long long updateInterval;
+
+  /**
+   * The last time the feed was updated.
+   */
+  attribute unsigned long long lastUpdated;
 
  /**
   * Get the feed's entries. Since there is no method in this interface to

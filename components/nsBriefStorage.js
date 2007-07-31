@@ -66,25 +66,26 @@ BriefStorageService.prototype = {
         //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
         //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
 
-        this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ( ' +
-                                           'feedID        TEXT UNIQUE,           ' +
-                                           'RDF_URI       TEXT,                  ' +
-                                           'feedURL       TEXT,                  ' +
-                                           'websiteURL    TEXT,                  ' +
-                                           'title         TEXT,                  ' +
-                                           'subtitle      TEXT,                  ' +
-                                           'imageURL      TEXT,                  ' +
-                                           'imageLink     TEXT,                  ' +
-                                           'imageTitle    TEXT,                  ' +
-                                           'favicon       TEXT,                  ' +
-                                           'hidden        INTEGER DEFAULT 0,     ' +
-                                           'everUpdated   INTEGER DEFAULT 0,     ' +
-                                           'oldestAvailableEntryDate INTEGER,    ' +
-                                           'rowIndex      INTEGER,               ' +
-                                           'parent        TEXT,                  ' +
-                                           'isFolder      INTEGER,               ' +
-                                           'entryAgeLimit INTEGER DEFAULT 0,     ' +
-                                           'maxEntries    INTEGER DEFAULT 0      ' +
+        this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds (    ' +
+                                           'feedID         TEXT UNIQUE,           ' +
+                                           'RDF_URI        TEXT,                  ' +
+                                           'feedURL        TEXT,                  ' +
+                                           'websiteURL     TEXT,                  ' +
+                                           'title          TEXT,                  ' +
+                                           'subtitle       TEXT,                  ' +
+                                           'imageURL       TEXT,                  ' +
+                                           'imageLink      TEXT,                  ' +
+                                           'imageTitle     TEXT,                  ' +
+                                           'favicon        TEXT,                  ' +
+                                           'hidden         INTEGER DEFAULT 0,     ' +
+                                           'oldestAvailableEntryDate INTEGER,     ' +
+                                           'rowIndex       INTEGER,               ' +
+                                           'parent         TEXT,                  ' +
+                                           'isFolder       INTEGER,               ' +
+                                           'entryAgeLimit  INTEGER DEFAULT 0,     ' +
+                                           'maxEntries     INTEGER DEFAULT 0,     ' +
+                                           'updateInterval INTEGER DEFAULT 0,     ' +
+                                           'lastUpdated    INTEGER DEFAULT 0      ' +
                                            ')');
         this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
                                            'feedID     TEXT,                    ' +
@@ -109,6 +110,8 @@ BriefStorageService.prototype = {
 
         // Columns added in 0.7.
         try {
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
+            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
             this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
             this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
             this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
@@ -186,14 +189,14 @@ BriefStorageService.prototype = {
         this.feedsAndFoldersCache = [];
 
         var select = this.dBConnection.
-            createStatement('SELECT                                              ' +
-                            'feedID, feedURL, websiteURL, title,                 ' +
-                            'subtitle, imageURL, imageLink, imageTitle,          ' +
-                            'favicon, everUpdated, oldestAvailableEntryDate,     ' +
-                            'rowIndex, parent, isFolder, RDF_URI, entryAgeLimit, ' +
-                            'maxEntries                                          ' +
-                            'FROM feeds                                          ' +
-                            'WHERE hidden=0 ORDER BY rowIndex ASC                ');
+            createStatement('SELECT  feedID, feedURL, websiteURL, title,               ' +
+                            '        subtitle, imageURL, imageLink, imageTitle,        ' +
+                            '        favicon, lastUpdated, oldestAvailableEntryDate,   ' +
+                            '        rowIndex, parent, isFolder, RDF_URI,              ' +
+                            '        entryAgeLimit, maxEntries, updateInterval         ' +
+                            'FROM feeds                                                ' +
+                            'WHERE hidden = 0                                          ' +
+                            'ORDER BY rowIndex ASC                                     ');
         try {
             while (select.executeStep()) {
                 var feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
@@ -206,7 +209,7 @@ BriefStorageService.prototype = {
                 feed.imageLink = select.getString(6);
                 feed.imageTitle = select.getString(7);
                 feed.favicon = select.getString(8);
-                feed.everUpdated = select.getInt32(9);
+                feed.lastUpdated = select.getInt64(9);
                 feed.oldestAvailableEntryDate = select.getInt64(10);
                 feed.rowIndex = select.getInt32(11);
                 feed.parent = select.getString(12);
@@ -214,6 +217,7 @@ BriefStorageService.prototype = {
                 feed.rdf_uri = select.getString(14);
                 feed.entryAgeLimit = select.getInt32(15);
                 feed.maxEntries = select.getInt32(16);
+                feed.updateInterval = select.getInt64(17);
 
                 this.feedsAndFoldersCache.push(feed);
                 if (!feed.isFolder)
@@ -315,19 +319,12 @@ BriefStorageService.prototype = {
         var now = Date.now();
         var oldestEntryDate = now;
 
-        var insertIntoEntries = this.dBConnection.
-            createStatement('INSERT OR IGNORE INTO entries (                 ' +
-                            'feedID,                                         ' +
-                            'id,                                             ' +
-                            'providedId,                                     ' +
-                            'entryURL,                                       ' +
-                            'title,                                          ' +
-                            'summary,                                        ' +
-                            'content,                                        ' +
-                            'date,                                           ' +
-                            'authors,                                        ' +
-                            'read)                                           ' +
-                            'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) ');
+        var insertIntoEntries = this.dBConnection.createStatement(
+                                'INSERT OR IGNORE INTO entries (                 ' +
+                                'feedID,   id,       providedId,   entryURL,     ' +
+                                'title,    summary,  content,      date,         ' +
+                                'authors,  read)                                 ' +
+                                'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) ');
         this.dBConnection.beginTransaction();
 
         // Count the unread entries, to compare their number later.
@@ -367,21 +364,21 @@ BriefStorageService.prototype = {
             if (currFeed.websiteURL != aFeed.websiteURL || currFeed.subtitle  != aFeed.subtitle  ||
                currFeed.imageURL    != aFeed.imageURL   || currFeed.imageLink != aFeed.imageLink ||
                currFeed.imageTitle  != aFeed.imageTitle || currFeed.favicon   != aFeed.favicon   ||
-               currFeed.everUpdated != 1 ||
+               currFeed.lastUpdated == 0 ||
                currFeed.oldestAvailableEntryDate != aFeed.oldestAvailableEntryDate) {
 
                 // Do not update the title, so that it is always taken from the Live Bookmark.
-                var updateFeed = this.dBConnection.
-                                  createStatement('UPDATE feeds SET               ' +
-                                                  'websiteURL  = ?1,              ' +
-                                                  'subtitle    = ?2,              ' +
-                                                  'imageURL    = ?3,              ' +
-                                                  'imageLink   = ?4,              ' +
-                                                  'imageTitle  = ?5,              ' +
-                                                  'favicon     = ?6,              ' +
-                                                  'oldestAvailableEntryDate = ?7, ' +
-                                                  'everUpdated = 1                ' +
-                                                  'WHERE feedID = ?8              ');
+                var updateFeed = this.dBConnection.createStatement(
+                                 'UPDATE feeds                        ' +
+                                 'SET websiteURL  = ?1,               ' +
+                                 '    subtitle    = ?2,               ' +
+                                 '    imageURL    = ?3,               ' +
+                                 '    imageLink   = ?4,               ' +
+                                 '    imageTitle  = ?5,               ' +
+                                 '    favicon     = ?6,               ' +
+                                 '    oldestAvailableEntryDate = ?7,  ' +
+                                 '    lastUpdated = ?8                ' +
+                                 'WHERE feedID = ?9                   ');
                 updateFeed.bindStringParameter(0, aFeed.websiteURL);
                 updateFeed.bindStringParameter(1, aFeed.subtitle);
                 updateFeed.bindStringParameter(2, aFeed.imageURL);
@@ -389,7 +386,8 @@ BriefStorageService.prototype = {
                 updateFeed.bindStringParameter(4, aFeed.imageTitle);
                 updateFeed.bindStringParameter(5, aFeed.favicon);
                 updateFeed.bindInt64Parameter(6,  oldestEntryDate);
-                updateFeed.bindStringParameter(7, aFeed.feedID);
+                updateFeed.bindInt64Parameter(7,  now);
+                updateFeed.bindStringParameter(8, aFeed.feedID);
                 updateFeed.execute();
 
                 currFeed.websiteURL = aFeed.websiteURL;
@@ -398,7 +396,7 @@ BriefStorageService.prototype = {
                 currFeed.imageLink = aFeed.imageLink;
                 currFeed.imageTitle = aFeed.imageTitle;
                 currFeed.favicon = aFeed.favicon;
-                currFeed.everUpdated = 1;
+                currFeed.lastUpdated = now;
                 currFeed.oldestAvailableEntryDate = aFeed.oldestAvailableEntryDate;
             }
         }
@@ -416,11 +414,16 @@ BriefStorageService.prototype = {
 
     setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
         var update = this.dBConnection.
-            createStatement('UPDATE feeds SET entryAgeLimit = ?, maxEntries = ? WHERE feedID = ?');
+            createStatement('UPDATE feeds            ' +
+                            'SET entryAgeLimit  = ?, ' +
+                            '    maxEntries     = ?, ' +
+                            '    updateInterval = ?  ' +
+                            'WHERE feedID = ?');
 
         update.bindInt32Parameter(0, aFeed.entryAgeLimit);
         update.bindInt32Parameter(1, aFeed.maxEntries);
-        update.bindStringParameter(2, aFeed.feedID);
+        update.bindInt64Parameter(2, aFeed.updateInterval);
+        update.bindStringParameter(3, aFeed.feedID);
 
         update.execute();
 
@@ -430,6 +433,7 @@ BriefStorageService.prototype = {
         if (feed != aFeed) {
             feed.entryAgeLimit = aFeed.entryAgeLimit;
             feed.maxEntries = aFeed.maxEntries;
+            feed.updateInterval = aFeed.updateInterval;
         }
     },
 

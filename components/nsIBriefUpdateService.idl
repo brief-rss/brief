@@ -8,8 +8,6 @@ interface nsIBriefFeed;
 [scriptable, uuid(76607B92-7E83-11DB-9369-10F955D89593)]
 interface nsIBriefUpdateService : nsISupports {
 
-  readonly attribute boolean autoUpdatingEnabled;
-
   /**
    * Indicates if a batch update is in progress and whether it is a normal or a
    * background one.
@@ -30,21 +28,6 @@ interface nsIBriefUpdateService : nsISupports {
    * Number of completed feed in the current batch update.
    */
   readonly attribute unsigned long completedFeedsCount;
-
-
-  /**
-   * Start the autoupdate timer.
-   *
-   * @throws if autoupdating is already enabled.
-   */
-  void enableAutoUpdating();
-
-  /**
-   * Stop the autoupdate timer.
-   *
-   * @throws if autoupdate is already disabled.
-   */
-  void disableAutoUpdating();
 
   /**
    * Download feeds and check them for updates. They must already be in the
