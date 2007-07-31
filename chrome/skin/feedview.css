@@ -171,18 +171,20 @@ body {
   font-size: 1.2em;
   margin: 0 1em 1.5em;
   overflow: auto;
-  padding: 0 1.5em 0;
+  /* The 1px bottom padding is necessary to avoid scrollbar showing up when
+  the last element is a link (because links have 1px bottom border) */
+  padding: 0 1.5em 1px;
   }
 
 .article-content a {
-  border-bottom: 1px solid #0c2845;
-  color: #0c2845;
+  border-bottom: 1px solid #0a1f72;
+  color: #0a1f72;
   text-decoration: none;
   }
 
 .article-content a:visited	{
-  border-color: #3f5476;
-  color: #3f5476;
+  border-color: #444b66;
+  color: #444b66;
   }
 
 .article-content > *:first-child {
