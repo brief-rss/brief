@@ -14,22 +14,30 @@ function Feed() { }
 
 Feed.prototype = {
 
-    feedID:        '',
-    feedURL:       '',
-    websiteURL:    '',
-    title:         '',
-    subtitle:      '',
-    imageURL:      '',
-    imageLink:     '',
-    imageTitle:    '',
-    favicon:       '',
-    everUpdated:   false,
-    rowIndex:      0,
-    isFolder:      false,
-    parent:        '',
-    items:         null,
-    entryAgeLimit: 0,
-    maxEntries:    0,
+    feedID:  '',
+    feedURL: '',
+
+    websiteURL: '',
+    title:      '',
+    subtitle:   '',
+    imageURL:   '',
+    imageLink:  '',
+    imageTitle: '',
+
+    favicon: '',
+
+    lastUpdated: 0,
+
+    rowIndex: 0,
+    isFolder: false,
+    parent:   '',
+
+    items: null,
+
+    entryAgeLimit:  0,
+    maxEntries:     0,
+    updateInterval: 0,
+
     oldestAvailableEntryDate: 0,
 
     getEntries: function BriefFeed_getEntries(entryCount) {

@@ -33,6 +33,8 @@ var gBriefUpdateService = null;
 function BriefUpdateService() {
     this.updateTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
     this.fetchDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+    this.startupDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+
     this.prefs = Cc['@mozilla.org/preferences-service;1'].
                  getService(Ci.nsIPrefService).
                  getBranch('extensions.brief.').
@@ -52,9 +54,6 @@ function BriefUpdateService() {
 }
 
 BriefUpdateService.prototype = {
-
-    // nsIBriefUpdateService
-    autoUpdatingEnabled: false,
 
     // nsIBriefUpdateService
     get totalFeedsCount() {
@@ -82,40 +81,17 @@ BriefUpdateService.prototype = {
     fetchDelayTimer: null,
     prefs:           null,
 
-
-    // nsIBriefUpdateService
-    enableAutoUpdating: function BUS_enableAutoUpdating() {
-        if (this.autoUpdatingEnabled)
-            throw('Brief: update service is already running.')
-        this.autoUpdatingEnabled = true;
-
-        // Notify the timer to immediately check if feeds need to be updated.
-        this.notify(this.updateTimer);
-
-        // Start the update timer which is responsible of periodically checking if enough
-        // time has passed since last update.
-        this.updateTimer.initWithCallback(this, UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
-    },
-
-
-    // nsIBriefUpdateService
-    disableAutoUpdating: function BUS_disableAutoUpdating() {
-        if (!this.autoUpdatingEnabled)
-            throw('Brief: update service is not running.');
-
-        this.updateTimer.cancel();
-        this.autoUpdatingEnabled = false;
-    },
-
-
     // nsIBriefUpdateService
     fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
         var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
         var feeds = storageService.getAllFeeds({});
         this.fetchFeeds(feeds, feeds.length, aInBackground);
+
+        var roundedNow = Math.round(Date.now() / 1000);
+        this.prefs.setIntPref('update.lastUpdateTime', roundedNow);
     },
 
-
+    // nsIBriefUpdateService
     fetchFeeds: function BUS_fetchFeeds(aFeeds, aFeedsLength, aInBackground) {
         // If only one feed is to be updated, we just do it right away without maintaining
         // the update queue.
@@ -124,7 +100,7 @@ BriefUpdateService.prototype = {
             return;
         }
 
-        // Add feeds to the queue, but don't let the same feed to be added twice.
+        // Add feeds to the queue, but don't let the same feed be added twice.
         var feed, i;
         var oldLength = this.scheduledFeeds.length;
         for (i = 0; i < aFeeds.length; i++) {
@@ -177,16 +153,41 @@ BriefUpdateService.prototype = {
         switch (aTimer) {
 
         case this.startupDelayTimer:
-            this.enableAutoUpdating();
+            this.updateTimer.initWithCallback(this, UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
             this.startupDelayTimer = null;
             break;
 
         case this.updateTimer:
-            var interval = this.prefs.getIntPref('update.interval');
-            var lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime');
-            var now = Math.round(Date.now() / 1000);
-            if (now - lastUpdateTime >= interval*60)
-                this.fetchAllFeeds(true);
+            var globalUpdatingEnabled = this.prefs.getBoolPref('update.enableAutoUpdate');
+            // update.interval is in minutes
+            var globalInterval = this.prefs.getIntPref('update.interval') * 60000;
+            // update.lastUpdateTime is in seconds, because prefs only store 32 bit integers
+            var lastGlobalUpdateTime = this.prefs.getIntPref('update.lastUpdateTime') * 1000;
+            var now = Date.now();
+
+            var itsGlobalUpdateTime = globalUpdatingEnabled &&
+                                      now - lastGlobalUpdateTime > globalInterval;
+
+            var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+            var feeds = storageService.getAllFeeds({});
+
+            var feed, i, feedsToUpdate = [];
+            for (i = 0; i < feeds.length; i++) {
+                feed = feeds[i];
+                if ((feed.updateInterval > 0 && now - feed.lastUpdated > feed.updateInterval) ||
+                   (feed.updateInterval == 0 && itsGlobalUpdateTime))
+                    feedsToUpdate.push(feed);
+            }
+
+            if (feedsToUpdate.length)
+                this.fetchFeeds(feedsToUpdate, feedsToUpdate.length, true);
+
+            if (itsGlobalUpdateTime) {
+                // Preferences can only store 32 bit integers, so round to seconds.
+                var roundedNow = Math.round(now / 1000);
+                this.prefs.setIntPref('update.lastUpdateTime', roundedNow);
+            }
+
             break;
 
         case this.fetchDelayTimer:
@@ -220,13 +221,6 @@ BriefUpdateService.prototype = {
                                                      true, null, this);
         }
 
-        // If it was a full update, set the pref.
-        var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-        if (this.scheduledFeeds.length == storageService.getAllFeeds({}).length) {
-            var now = Math.round(Date.now() / 1000);
-            this.prefs.setIntPref('update.lastUpdateTime', now);
-        }
-
         // Reset the properties after updating is finished.
         this.newEntriesCount = this.feedsWithNewEntriesCount = 0;
         this.completedFeeds = [];
@@ -244,13 +238,9 @@ BriefUpdateService.prototype = {
         // so that the preferences are already initialized.
         case 'profile-after-change':
             if (aData == 'startup') {
-                if (this.prefs.getBoolPref('update.enableAutoUpdate')) {
-                    // Delay enabling autoupdate, so not to slow down the startup. Plus,
-                    // nsIBriefStorage is instantiated on profile-after-change.
-                    this.startupDelayTimer = Cc['@mozilla.org/timer;1'].
-                                             createInstance(Ci.nsITimer);
-                    this.startupDelayTimer.initWithCallback(this, STARTUP_DELAY, TIMER_TYPE_ONE_SHOT);
-                }
+                // Delay enabling autoupdate, so not to slow down the startup. Plus,
+                // nsIBriefStorage is instantiated on profile-after-change.
+                this.startupDelayTimer.initWithCallback(this, STARTUP_DELAY, TIMER_TYPE_ONE_SHOT);
 
                 // We add the observer here instead of in the constructor as prefs
                 // are changed during startup when assuming their user-set values.
@@ -292,20 +282,12 @@ BriefUpdateService.prototype = {
 
         case 'nsPref:changed':
             switch (aData) {
-            case 'update.enableAutoUpdate':
-                var newValue = this.prefs.getBoolPref('update.enableAutoUpdate');
-                if (!newValue && this.autoUpdatingEnabled)
-                    this.disableAutoUpdating();
-                if (newValue && !this.autoUpdatingEnabled)
-                    this.enableAutoUpdating();
-                break;
 
+            // Force checking if we should update when the prefs are changed,
+            // so that the effects are visible immediately.
+            case 'update.enableAutoUpdate':
             case 'update.interval':
-                var updateEnabled = this.prefs.getBoolPref('update.enableAutoUpdate');
-                if (this.autoUpdatingEnabled)
-                    this.disableAutoUpdating();
-                if (updateEnabled)
-                    this.enableAutoUpdating();
+                this.notify(this.updateTimer);
                 break;
             }
             break;
