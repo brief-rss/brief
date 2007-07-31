@@ -155,7 +155,6 @@ BriefUpdateService.prototype = {
         case this.startupDelayTimer:
             this.updateTimer.initWithCallback(this, UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
             this.startupDelayTimer = null;
-            break;
 
         case this.updateTimer:
             var globalUpdatingEnabled = this.prefs.getBoolPref('update.enableAutoUpdate');
