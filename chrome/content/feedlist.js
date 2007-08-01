@@ -152,18 +152,20 @@ var gFeedList = {
             var treeSelection = this.tree.view.selection;
             var row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
 
-            // Don't highlight separators.
-            if (row != -1) {
+            if (row >= 0 && !treeSelection.isSelected(row)) {
+
+                // Don't highlight separators.
                 var targetItem = this.tree.view.getItemAtIndex(row);
                 if (targetItem.localName == 'treeseparator')
                     return;
-            }
 
-            var saveCurrentIndex = treeSelection.currentIndex;
-            treeSelection.selectEventsSuppressed = true;
-            treeSelection.select(row);
-            treeSelection.currentIndex = saveCurrentIndex;
-            treeSelection.selectEventsSuppressed = false;
+                var saveCurrentIndex = treeSelection.currentIndex;
+                treeSelection.selectEventsSuppressed = true;
+                treeSelection.select(row);
+                treeSelection.currentIndex = saveCurrentIndex;
+                this.tree.treeBoxObject.ensureRowIsVisible(row);
+                treeSelection.selectEventsSuppressed = false;
+            }
 
             aEvent.stopPropagation();
         }
