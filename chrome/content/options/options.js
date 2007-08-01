@@ -5,11 +5,16 @@ function init() {
     sizeToContent();
     setTimeout(gMainPane.setUpFoldersTree, 0);
 
-    gFeedsPane.updateIntervalDisabledState();
+    gFeedsPane.initUpdateIntervalControls();
     gFeedsPane.updateExpirationDisabledState();
     gFeedsPane.updateStoredEntriesDisabledState();
     gDisplayPane.updateCustomStyleDisabledState();
 }
+
+function unload() {
+    gFeedsPane.saveUpdateIntervalPref();
+}
+
 
 var gMainPane = {
 
@@ -49,10 +54,63 @@ var gMainPane = {
 var gFeedsPane = {
 
     updateIntervalDisabledState: function() {
-        var textbox = document.getElementById("updateInterval");
-        var checkbox = document.getElementById("checkForUpdates");
+        var textbox = document.getElementById('updateInterval');
+        var checkbox = document.getElementById('checkForUpdates');
+        var menulist = document.getElementById('update-time-menulist');
 
-        textbox.disabled = !checkbox.checked;
+        textbox.disabled = menulist.disabled = !checkbox.checked;
+    },
+
+    initUpdateIntervalControls: function() {
+        var pref = document.getElementById('extensions.brief.update.interval').value;
+        var menulist = document.getElementById('update-time-menulist');
+        var textbox = document.getElementById('updateInterval');
+
+        var toDays = pref / (60*60*24);
+        var toHours = pref / (60*60);
+        var toMinutes = pref / 60;
+
+        switch (true) {
+            // The pref value is in seconds. If it is dividable by days then use the
+            // number of days as the textbox value and select Days in the menulist.
+            case Math.ceil(toDays) == toDays:
+                menulist.selectedIndex = 2;
+                textbox.value = toDays;
+                break;
+            // Analogically for hours...
+            case Math.ceil(toHours) == toHours:
+                menulist.selectedIndex = 1;
+                textbox.value = toHours;
+                break;
+            // Otherwise use minutes, ceiling to the nearest integer if necessary.
+            default:
+                menulist.selectedIndex = 0;
+                textbox.value = Math.ceil(toMinutes);
+                break;
+        }
+
+        this.updateIntervalDisabledState();
+    },
+
+    saveUpdateIntervalPref: function() {
+        var pref = document.getElementById('extensions.brief.update.interval');
+        var textbox = document.getElementById('updateInterval');
+        var menulist = document.getElementById('update-time-menulist');
+
+        var intervalInSeconds;
+        switch (menulist.selectedIndex) {
+            case 0:
+                intervalInSeconds = textbox.value * 60; // textbox.value is in minutes
+                break;
+            case 1:
+                intervalInSeconds = textbox.value * 60*60; // textbox.value is in hours
+                break;
+            case 2:
+                intervalInSeconds = textbox.value * 60*60*24; // textbox.value is in days
+                break;
+        }
+
+        pref.valueFromPreferences = intervalInSeconds;
     },
 
     updateExpirationDisabledState: function() {
@@ -128,4 +186,10 @@ var gDisplayPane = {
         }
     }
 
+}
+
+function dump(aMessage) {
+  var consoleService = Cc['@mozilla.org/consoleservice;1'].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage(aMessage);
 }

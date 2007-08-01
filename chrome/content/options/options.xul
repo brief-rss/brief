@@ -9,7 +9,8 @@
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             title="&optionsWindow.title;"
             persist="screenX screenY width height"
-            onload="init();">
+            onload="init();"
+            onunload="unload();">
 
     <prefpane id="mainPane" label="&mainPane.label;">
 
@@ -88,9 +89,14 @@
                           label="&checkForUpdatesBefore.label;"
                           preference="extensions.brief.update.enableAutoUpdate"
                           oncommand="gFeedsPane.updateIntervalDisabledState();"/>
-                <textbox id="updateInterval" size="2"
-                         preference="extensions.brief.update.interval"/>
-                <label value="&checkForUpdatesAfter.label;"/>
+                <textbox id="updateInterval" size="2"/>
+                <menulist id="update-time-menulist">
+                    <menupopup>
+                        <menuitem label="&updateIntervalMinutes.label;"/>
+                        <menuitem label="&updateIntervalHours.label;"/>
+                        <menuitem label="&updateIntervalDays.label;"/>
+                    </menupopup>
+                </menulist>
             </hbox>
             <checkbox label="&showNotification.label;"
                       preference="extensions.brief.update.showNotification"/>

@@ -40,7 +40,13 @@
                       label="&checkUpdatesPerFeedBefore.label;"
                       oncommand="onCheckUpdatesCheckboxCmd(event);"/>
             <textbox id="check-updates-textbox" size="2"/>
-            <label value="&checkUpdatesPerFeedAfter.label;"/>
+            <menulist id="update-time-menulist">
+                <menupopup>
+                    <menuitem label="&updateIntervalMinutes.label;"/>
+                    <menuitem label="&updateIntervalHours.label;"/>
+                    <menuitem label="&updateIntervalDays.label;"/>
+                </menupopup>
+            </menulist>
         </hbox>
         <hbox align="center">
             <checkbox id="expiration-checkbox"
