@@ -32,6 +32,7 @@ Feed.prototype = {
     isFolder: false,
     parent:   '',
 
+    wrappedFeed: null,
     items: null,
 
     entryAgeLimit:  0,
@@ -46,6 +47,8 @@ Feed.prototype = {
     },
 
     wrapFeed: function BriefFeed_wrapFeed(aFeed) {
+        this.wrappedFeed = aFeed;
+
         if (aFeed.title)
             this.title = aFeed.title.text;
         if (aFeed.link)
@@ -99,7 +102,11 @@ FeedEntry.prototype = {
     read:     false,
     starred:  false,
 
+    wrappedEntry: null,
+
     wrapEntry: function BriefFeedEntry_wrapEntry(aEntry) {
+        this.wrappedEntry = aEntry;
+
         if (aEntry.id)
             this.id = aEntry.id;
 
