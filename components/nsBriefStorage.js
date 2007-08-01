@@ -333,13 +333,24 @@ BriefStorageService.prototype = {
         unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
         var oldUnreadCount = this.getEntriesCount(unreadEntriesQuery);
 
+        var isMediaWikiFeed = aFeed.wrappedFeed.generator &&
+                              aFeed.wrappedFeed.generator.agent.match('MediaWiki');
+
         try {
             var entries = aFeed.getEntries({});
-            var entry, title, trash;
+            var entry, title;
             for (var i = 0; i < entries.length; i++) {
                 entry = entries[i];
                 title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
-                hash = hashString(aFeed.feedID + entry.entryURL + entry.id + title);
+
+                // Special case for MediaWiki feeds: include date in the hash. In
+                // "Recent changes" feeds, entries for subsequent edits of a page
+                // differ only in date.
+                if (isMediaWikiFeed)
+                    hash = hashString(aFeed.feedID + entry.entryURL + entry.id + title + entry.date);
+                else
+                    hash = hashString(aFeed.feedID + entry.entryURL + entry.id + title);
+
 
                 insertIntoEntries.bindStringParameter(0, aFeed.feedID);
                 insertIntoEntries.bindStringParameter(1, hash);
@@ -357,51 +368,42 @@ BriefStorageService.prototype = {
                     oldestEntryDate = entry.date;
             }
 
-            var currFeed = this.getFeed(aFeed.feedID);
+            // Do not update the title, so that it is always taken from the Live Bookmark.
+            var updateFeed = this.dBConnection.createStatement(
+                             'UPDATE feeds                        ' +
+                             'SET websiteURL  = ?1,               ' +
+                             '    subtitle    = ?2,               ' +
+                             '    imageURL    = ?3,               ' +
+                             '    imageLink   = ?4,               ' +
+                             '    imageTitle  = ?5,               ' +
+                             '    favicon     = ?6,               ' +
+                             '    oldestAvailableEntryDate = ?7,  ' +
+                             '    lastUpdated = ?8                ' +
+                             'WHERE feedID = ?9                   ');
+            updateFeed.bindStringParameter(0, aFeed.websiteURL);
+            updateFeed.bindStringParameter(1, aFeed.subtitle);
+            updateFeed.bindStringParameter(2, aFeed.imageURL);
+            updateFeed.bindStringParameter(3, aFeed.imageLink);
+            updateFeed.bindStringParameter(4, aFeed.imageTitle);
+            updateFeed.bindStringParameter(5, aFeed.favicon);
+            updateFeed.bindInt64Parameter(6,  oldestEntryDate);
+            updateFeed.bindInt64Parameter(7,  now);
+            updateFeed.bindStringParameter(8, aFeed.feedID);
+            updateFeed.execute();
 
-            // We could just update all feed properties without checking if anything
-            // has changed but we don't want to unnecessarily invalidate the feeds cache.
-            if (currFeed.websiteURL != aFeed.websiteURL || currFeed.subtitle  != aFeed.subtitle  ||
-               currFeed.imageURL    != aFeed.imageURL   || currFeed.imageLink != aFeed.imageLink ||
-               currFeed.imageTitle  != aFeed.imageTitle || currFeed.favicon   != aFeed.favicon   ||
-               currFeed.lastUpdated == 0 ||
-               currFeed.oldestAvailableEntryDate != aFeed.oldestAvailableEntryDate) {
-
-                // Do not update the title, so that it is always taken from the Live Bookmark.
-                var updateFeed = this.dBConnection.createStatement(
-                                 'UPDATE feeds                        ' +
-                                 'SET websiteURL  = ?1,               ' +
-                                 '    subtitle    = ?2,               ' +
-                                 '    imageURL    = ?3,               ' +
-                                 '    imageLink   = ?4,               ' +
-                                 '    imageTitle  = ?5,               ' +
-                                 '    favicon     = ?6,               ' +
-                                 '    oldestAvailableEntryDate = ?7,  ' +
-                                 '    lastUpdated = ?8                ' +
-                                 'WHERE feedID = ?9                   ');
-                updateFeed.bindStringParameter(0, aFeed.websiteURL);
-                updateFeed.bindStringParameter(1, aFeed.subtitle);
-                updateFeed.bindStringParameter(2, aFeed.imageURL);
-                updateFeed.bindStringParameter(3, aFeed.imageLink);
-                updateFeed.bindStringParameter(4, aFeed.imageTitle);
-                updateFeed.bindStringParameter(5, aFeed.favicon);
-                updateFeed.bindInt64Parameter(6,  oldestEntryDate);
-                updateFeed.bindInt64Parameter(7,  now);
-                updateFeed.bindStringParameter(8, aFeed.feedID);
-                updateFeed.execute();
-
-                currFeed.websiteURL = aFeed.websiteURL;
-                currFeed.subtitle = aFeed.subtitle;
-                currFeed.imageURL = aFeed.imageURL;
-                currFeed.imageLink = aFeed.imageLink;
-                currFeed.imageTitle = aFeed.imageTitle;
-                currFeed.favicon = aFeed.favicon;
-                currFeed.lastUpdated = now;
-                currFeed.oldestAvailableEntryDate = aFeed.oldestAvailableEntryDate;
-            }
+            // Update the cache.
+            var cachedFeed = this.getFeed(aFeed.feedID);
+            cachedFeed.websiteURL = aFeed.websiteURL;
+            cachedFeed.subtitle = aFeed.subtitle;
+            cachedFeed.imageURL = aFeed.imageURL;
+            cachedFeed.imageLink = aFeed.imageLink;
+            cachedFeed.imageTitle = aFeed.imageTitle;
+            cachedFeed.favicon = aFeed.favicon;
+            cachedFeed.lastUpdated = now;
+            cachedFeed.oldestAvailableEntryDate = oldestEntryDate;
         }
         finally {
-          this.dBConnection.commitTransaction();
+            this.dBConnection.commitTransaction();
         }
 
         var newUnreadCount = this.getEntriesCount(unreadEntriesQuery);
