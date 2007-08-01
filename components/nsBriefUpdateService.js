@@ -158,9 +158,8 @@ BriefUpdateService.prototype = {
 
         case this.updateTimer:
             var globalUpdatingEnabled = this.prefs.getBoolPref('update.enableAutoUpdate');
-            // update.interval is in minutes
-            var globalInterval = this.prefs.getIntPref('update.interval') * 60000;
-            // update.lastUpdateTime is in seconds, because prefs only store 32 bit integers
+            // Preferencos are in seconds, because they can only store 32 bit integers.
+            var globalInterval = this.prefs.getIntPref('update.interval') * 1000;
             var lastGlobalUpdateTime = this.prefs.getIntPref('update.lastUpdateTime') * 1000;
             var now = Date.now();
 

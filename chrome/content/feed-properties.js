@@ -14,6 +14,7 @@ function onload() {
     var maxEntriesTextbox = document.getElementById('max-entries-textbox');
     var checkUpdatesCheckbox = document.getElementById('check-updates-checkbox');
     var checkUpdatesTextbox = document.getElementById('check-updates-textbox');
+    var checkUpdatesMenulist = document.getElementById('update-time-menulist');
 
     var feedID = window.arguments[0];
     gFeed = gStorageService.getFeed(feedID);
@@ -34,23 +35,58 @@ function onload() {
     maxEntriesTextbox.value = maxEntriesTextbox.disabled ? '' : gFeed.maxEntries;
 
     checkUpdatesCheckbox.checked = (gFeed.updateInterval > 0);
-    checkUpdatesTextbox.disabled = !checkUpdatesCheckbox.checked;
+    checkUpdatesTextbox.disabled = checkUpdatesMenulist.disabled = !checkUpdatesCheckbox.checked;
     checkUpdatesTextbox.value = checkUpdatesTextbox.disabled ? '' : gFeed.updateInterval;
+
+    initUpdateIntervalControls();
+}
+
+function initUpdateIntervalControls() {
+    var interval = gFeed.updateInterval;
+    if (interval == 0)
+        return;
+
+    var menulist = document.getElementById('update-time-menulist');
+    var textbox = document.getElementById('check-updates-textbox');
+
+    var toDays = interval / (60*60*24);
+    var toHours = interval / (60*60);
+    var toMinutes = interval / 60;
+
+    switch (true) {
+        // The pref value is in seconds. If it is dividable by days then use the
+        // number of days as the textbox value and select Days in the menulist.
+        case Math.ceil(toDays) == toDays:
+            menulist.selectedIndex = 2;
+            textbox.value = toDays;
+            break;
+        // Analogically for hours...
+        case Math.ceil(toHours) == toHours:
+            menulist.selectedIndex = 1;
+            textbox.value = toHours;
+            break;
+        // Otherwise use minutes, ceiling to the nearest integer if necessary.
+        default:
+            menulist.selectedIndex = 0;
+            textbox.value = Math.ceil(toMinutes);
+            break;
+    }
 }
 
 function onExpirationCheckboxCmd(aEvent) {
-    var expirationTextbox = document.getElementById('expiration-textbox');
-    expirationTextbox.disabled = !aEvent.target.checked;
+    var textbox = document.getElementById('expiration-textbox');
+    textbox.disabled = !aEvent.target.checked;
 }
 
 function onMaxEntriesCheckboxCmd(aEvent) {
-    var maxEntriesTextbox = document.getElementById('max-entries-textbox');
-    maxEntriesTextbox.disabled = !aEvent.target.checked;
+    var textbox = document.getElementById('max-entries-textbox');
+    textbox.disabled = !aEvent.target.checked;
 }
 
 function onCheckUpdatesCheckboxCmd(aEvent) {
-    var checkUpdatesTextbox = document.getElementById('check-updates-textbox');
-    checkUpdatesTextbox.disabled = !aEvent.target.checked;
+    var textbox = document.getElementById('check-updates-textbox');
+    var menulist = document.getElementById('update-time-menulist');
+    textbox.disabled = menulist.disabled = !aEvent.target.checked;
 }
 
 
@@ -61,6 +97,7 @@ function OK() {
     var maxEntriesTextbox = document.getElementById('max-entries-textbox');
     var checkUpdatesCheckbox = document.getElementById('check-updates-checkbox');
     var checkUpdatesTextbox = document.getElementById('check-updates-textbox');
+    var checkUpdatesMenulist = document.getElementById('update-time-menulist');
 
     if (expirationCheckbox.checked && expirationTextbox.value)
         gFeed.entryAgeLimit = expirationTextbox.value;
@@ -72,13 +109,35 @@ function OK() {
     else
         gFeed.maxEntries = 0;
 
-    if (checkUpdatesCheckbox.checked && checkUpdatesTextbox.value)
-        gFeed.updateInterval = checkUpdatesTextbox.value;
+    if (checkUpdatesCheckbox.checked && checkUpdatesTextbox.value) {
+        var textboxValue = checkUpdatesTextbox.value;
+        var intervalInSeconds;
+
+        switch (checkUpdatesMenulist.selectedIndex) {
+            case 0:
+                intervalInSeconds = textboxValue * 60; // textbox.value is in minutes
+                break;
+            case 1:
+                intervalInSeconds = textboxValue * 60*60; // textbox.value is in hours
+                break;
+            case 2:
+                intervalInSeconds = textboxValue * 60*60*24; // textbox.value is in days
+                break;
+        }
+
+        gFeed.updateInterval = intervalInSeconds;
+    }
     else
         gFeed.updateInterval = 0;
 
     gStorageService.setFeedOptions(gFeed);
 
+    saveLiveBookmarksData();
+
+    return true;
+}
+
+function saveLiveBookmarksData() {
     // We need to write values of properties that come from Live Bookmarks.
     // First, init stuff.
     var changed = false;
@@ -124,8 +183,6 @@ function OK() {
         if (remote)
             remote.Flush();
     }
-
-    return true;
 }
 
 // Helper function for writing to the RDF data source.
