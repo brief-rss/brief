@@ -5,14 +5,14 @@
 
 <!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
 
-<prefwindow id="briefOptions"
+<prefwindow id="brief-options"
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             title="&optionsWindow.title;"
             persist="screenX screenY width height"
             onload="init();"
             onunload="unload();">
 
-    <prefpane id="mainPane" label="&mainPane.label;">
+    <prefpane id="main-pane" label="&mainPane.label;">
 
         <script type="application/x-javascript" src="options.js"/>
         <script type="application/x-javascript"
@@ -50,7 +50,7 @@
 
     </prefpane>
 
-    <prefpane id="feedsPane" label="&feedsPane.label;">
+    <prefpane id="feeds-pane" label="&feedsPane.label;">
 
         <preferences>
             <preference id="extensions.brief.update.interval"
@@ -140,7 +140,7 @@
 
     </prefpane>
 
-    <prefpane id="displayPane" label="&displayPane.label;">
+    <prefpane id="display-pane" label="&displayPane.label;">
 
         <preferences>
             <preference id="extensions.brief.feedview.showAuthors"

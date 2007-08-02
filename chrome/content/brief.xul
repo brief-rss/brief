@@ -136,7 +136,7 @@
                 </tree>
                 <toolbarbutton id="pick-folder-button"
                                label="&pickFolder.label;"
-                               oncommand="brief.openOptions('mainPane');"/>
+                               oncommand="brief.openOptions('main-pane');"/>
             </deck>
         </vbox>
         <splitter id="left-pane-splitter" persist="hidden"/>
