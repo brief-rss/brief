@@ -24,7 +24,7 @@ const BACKGROUND_UPDATE = Ci.nsIBriefUpdateService.BACKGROUND_UPDATE;
 function dump(aMessage) {
   var consoleService = Cc["@mozilla.org/consoleservice;1"].
                        getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage('Brief:\n' + aMessage);
+  consoleService.logStringMessage(aMessage);
 }
 
 var gBriefUpdateService = null;
@@ -341,9 +341,16 @@ FeedFetcher.prototype = {
 
     requestFeed: function FeedFetcher_requestFeed() {
         var self = this;
+        // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
+        const I_LOVE_NECKO_TOO = 2152398850;
 
         function onRequestError() {
-            self.finish(false);
+            if (self.request.channel.status == I_LOVE_NECKO_TOO) {
+                self.request.abort();
+                self.requestFeed();
+            }
+            else
+                self.finish(false);
         }
 
         function onRequestLoad() {
