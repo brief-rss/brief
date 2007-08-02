@@ -96,7 +96,7 @@ var brief = {
             browser.loadURI(RELEASE_NOTES_URL);
             gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
         }
-        else if (gPrefs.getBoolPref('showHomeView')) {
+        else if (gPrefs.getBoolPref('showHomeView') && gFeedList.tree) {
             setTimeout(function() { gFeedList.tree.view.selection.select(0); }, 0);
         }
 
@@ -574,7 +574,7 @@ var brief = {
                 gFeedList.tree.view.selection.select(currentIndex + 1);
             }
 
-            // The treeitem would have been removed anyway thanks to RDFObserver,
+            // The treeitem would be removed anyway thanks to RDFObserver,
             // but we do it here to give faster visual feedback.
             item.parentNode.removeChild(item);
 
