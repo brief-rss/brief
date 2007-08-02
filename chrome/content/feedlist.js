@@ -166,8 +166,6 @@ var gFeedList = {
                 this.tree.treeBoxObject.ensureRowIsVisible(row);
                 treeSelection.selectEventsSuppressed = false;
             }
-
-            aEvent.stopPropagation();
         }
     },
 
