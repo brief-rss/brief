@@ -9,14 +9,13 @@ var gBrief = {
     statusIcon: null,     // Statusbar panel
     storageService: null,
     updateService: null,
+    prefs: null,
 
     // We can't cache it like statusIcon, because it may be removed or added via Customize
     // Toolbar.
     get toolbarbutton() {
         return document.getElementById('brief-button');
     },
-
-    prefs: null,
 
     openBrief: function gBrief_openBrief(aNewTab) {
         if (this.toolbarbutton)
@@ -38,6 +37,7 @@ var gBrief = {
         }
 
     },
+
 
     markFeedsAsRead: function gBrief_markFeedsAsRead() {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
@@ -84,6 +84,7 @@ var gBrief = {
 
         var query = new BriefQuery(null, null, true);
         query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
+        query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
         var unreadFeeds = this.storageService.getSerializedEntries(query).
                                               getPropertyAsAString('feeds').
                                               match(/[^ ]+/g);
@@ -184,6 +185,7 @@ var gBrief = {
             setTimeout(function(){ gBrief.tab.setAttribute('image', BRIEF_FAVICON_URL); }, 0);
         }
     },
+
 
     handleEvent: function gBrief_handleEvent(aEvent) {
         switch (aEvent.type) {
@@ -328,10 +330,3 @@ var gBrief = {
 }
 
 window.addEventListener('load', gBrief, false);
-
-
-function dump(aMessage) {
-    var consoleService = Cc['@mozilla.org/consoleservice;1']
-                         .getService(Ci.nsIConsoleService);
-    consoleService.logStringMessage('Brief:\n' + aMessage);
-}
