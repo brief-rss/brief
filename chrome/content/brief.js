@@ -96,8 +96,8 @@ var brief = {
             browser.loadURI(RELEASE_NOTES_URL);
             gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
         }
-        else if (gPrefs.getBoolPref('showHomeView') && gFeedList.tree) {
-            setTimeout(function() { gFeedList.tree.view.selection.select(0); }, 0);
+        else if (gPrefs.getBoolPref('showHomeView')) {
+            setTimeout(function() { if (gFeedList.tree) gFeedList.tree.view.selection.select(0) }, 0);
         }
 
         // Init stuff in bookmarks.js
@@ -375,7 +375,7 @@ var brief = {
 
     openOptions: function brief_openOptions(aPaneID) {
         window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
-                          'chrome,titlebar,toolbar,centerscreen,modal,resizable');
+                          'chrome,titlebar,toolbar,centerscreen,modal,resizable', aPaneID);
 
     },
 
