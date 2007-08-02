@@ -42,7 +42,7 @@ function onload() {
 }
 
 function initUpdateIntervalControls() {
-    var interval = gFeed.updateInterval;
+    var interval = gFeed.updateInterval / 1000;
     if (interval == 0)
         return;
 
@@ -111,21 +111,24 @@ function OK() {
 
     if (checkUpdatesCheckbox.checked && checkUpdatesTextbox.value) {
         var textboxValue = checkUpdatesTextbox.value;
-        var intervalInSeconds;
+        var intervalInMilliseconds;
 
         switch (checkUpdatesMenulist.selectedIndex) {
             case 0:
-                intervalInSeconds = textboxValue * 60; // textbox.value is in minutes
+                // textbox.value is in minutes
+                intervalInMilliseconds = textboxValue * 1000*60 ;
                 break;
             case 1:
-                intervalInSeconds = textboxValue * 60*60; // textbox.value is in hours
+                // textbox.value is in hours
+                intervalInMilliseconds = textboxValue * 1000*60*60;
                 break;
             case 2:
-                intervalInSeconds = textboxValue * 60*60*24; // textbox.value is in days
+                // textbox.value is in days
+                intervalInMilliseconds = textboxValue * 1000*60*60*24;
                 break;
         }
 
-        gFeed.updateInterval = intervalInSeconds;
+        gFeed.updateInterval = intervalInMilliseconds;
     }
     else
         gFeed.updateInterval = 0;
