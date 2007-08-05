@@ -97,7 +97,19 @@ var brief = {
             gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
         }
         else if (gPrefs.getBoolPref('showHomeView')) {
-            setTimeout(function() { if (gFeedList.tree) gFeedList.tree.view.selection.select(0) }, 0);
+            function loadHomepage() {
+                if (gFeedList.tree && gFeedList.tree.view)
+                    gFeedList.tree.view.selection.select(0);
+                // If the sidebar is hidden, then tree has no view and we have to manually
+                // create the FeedView.
+                else {
+                    var query = new QuerySH(null, null, true);
+                    var unreadFolder = document.getElementById('unread-folder');
+                    var title = unreadFolder.getAttribute('title');
+                    gFeedView = new FeedView(title, query);
+                }
+            }
+            setTimeout(loadHomepage, 0);
         }
 
         // Init stuff in bookmarks.js
@@ -443,7 +455,7 @@ var brief = {
                 gFeedView = this.previousView;
 
             gFeedView.query.searchString = gFeedView.titleOverride = '';
-            gFeedView._refresh();
+            gFeedView.ensure();
             return;
         }
 
