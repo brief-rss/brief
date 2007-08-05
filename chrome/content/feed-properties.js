@@ -1,9 +1,12 @@
-const NC_NAME          = 'http://home.netscape.com/NC-rdf#Name';
-const NC_FEEDURL       = 'http://home.netscape.com/NC-rdf#FeedURL';
+const NC_NAME    = 'http://home.netscape.com/NC-rdf#Name';
+const NC_FEEDURL = 'http://home.netscape.com/NC-rdf#FeedURL';
 
 var gFeed;
 var gStorageService = Components.classes['@ancestor/brief/storage;1'].
                                  getService(Components.interfaces.nsIBriefStorage);
+var gPrefs = Components.classes['@mozilla.org/preferences-service;1'].
+                        getService(Components.interfaces.nsIPrefService).
+                        getBranch('extensions.brief.');
 
 function onload() {
     var nameTextbox = document.getElementById('feed-name-textbox');
@@ -28,23 +31,19 @@ function onload() {
 
     expirationCheckbox.checked = (gFeed.entryAgeLimit > 0);
     expirationTextbox.disabled = !expirationCheckbox.checked;
-    expirationTextbox.value = expirationTextbox.disabled ? '' : gFeed.entryAgeLimit;
+    expirationTextbox.value = gFeed.entryAgeLimit || gPrefs.getIntPref('database.entryExpirationAge');
 
     maxEntriesCheckbox.checked = (gFeed.maxEntries > 0);
     maxEntriesTextbox.disabled = !maxEntriesCheckbox.checked;
-    maxEntriesTextbox.value = maxEntriesTextbox.disabled ? '' : gFeed.maxEntries;
+    maxEntriesTextbox.value = gFeed.maxEntries || gPrefs.getIntPref('database.maxStoredEntries');
 
     checkUpdatesCheckbox.checked = (gFeed.updateInterval > 0);
     checkUpdatesTextbox.disabled = checkUpdatesMenulist.disabled = !checkUpdatesCheckbox.checked;
-    checkUpdatesTextbox.value = checkUpdatesTextbox.disabled ? '' : gFeed.updateInterval;
-
     initUpdateIntervalControls();
 }
 
 function initUpdateIntervalControls() {
-    var interval = gFeed.updateInterval / 1000;
-    if (interval == 0)
-        return;
+    var interval = gFeed.updateInterval / 1000 || gPrefs.getIntPref('update.interval');
 
     var menulist = document.getElementById('update-time-menulist');
     var textbox = document.getElementById('check-updates-textbox');
