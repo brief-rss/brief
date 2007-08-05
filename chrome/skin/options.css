@@ -2,15 +2,15 @@ radio[pane] {
   list-style-image: url('icons/prefpane-icons.png');
 }
 
-radio[pane=mainPane] {
+radio[pane=main-pane] {
   -moz-image-region: rect(0px, 32px, 32px, 0px);
  }
 
-radio[pane=displayPane] {
+radio[pane=display-pane] {
   -moz-image-region: rect(32px, 32px, 64px, 0px);
   }
 
-radio[pane=feedsPane] {
+radio[pane=feeds-pane] {
   -moz-image-region: rect(64px, 32px, 96px, 0px);
   }
 
