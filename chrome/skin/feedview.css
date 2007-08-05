@@ -1,7 +1,7 @@
 body {
-  background: #fafcfc;
-  font-family: Verdana, sans-serif;
+  background: #fafafc;
   font-size: 62.5%;
+  font-family: Verdana, sans-serif;
   margin: 0;
   padding: 0;
   }
@@ -9,12 +9,11 @@ body {
 /* ----------------  Header ----------------- */
 
 #header {
-  background: #1d272d;
-  border-bottom: 7px solid #646664;
-  color: #eaeaea;
+  background: #314a59 url('chrome://brief/skin/header-bkg.png') repeat-x;
+  color: #ffffff;
   display: block;
-  font-family: Arial, sans-serif;
-  padding: 5px 5% 3px;
+  font-family: Helvetica, Arial, sans-serif;
+  padding: 5px 5% 5px;
   text-decoration: none;
   }
 
@@ -25,16 +24,13 @@ body {
   }
 
 #feed-title {
-  color: #eaeaea;
   font-size: 2.2em;
   font-weight: bold;
   }
 
 #feed-subtitle {
   font-size: 1.4em;
-  font-weight: normal;
   margin-top: 3px;
-  text-align: left;
   }
 
 #clear {
@@ -50,29 +46,32 @@ body {
 /* ----------------  Article ----------------- */
 
 .article-container {
-  background-color: #fdfdfd;
-  border: 1px #bcc8cb solid;
+  background-color: #ffffff;
+  border: 1px #baccd6 solid;
   -moz-border-radius: 2px;
   margin: 0 1em 1em 40px;
-  overflow: visible;
+  overflow: visible; /* This is for the the expand/collapse dropmarker which is taken
+                        outside the box using negative margins*/
   }
 
+.article-container[read] {
+  border-color: #bcc8cb;
+  }
 
 /*               Article header               */
 .article-header {
-  background: url('chrome://brief/skin/unreadEntryBackground.png') repeat-x;
-  margin-bottom: 5px;
-  min-height: 3em;
+  background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
+  min-height: 3.5em;
   padding: 5px 5px 0;
   }
 
 .article-container[read] .article-header {
-  background: #fdfdfd url('chrome://brief/skin/readEntryBackground.png') repeat-x;
+  background: #fdfdfd url('chrome://brief/skin/read-entry-bkg.png') repeat-x;
   }
 
 .article-title-link {
   color: #0f0f0f;
-  font-family: "Lucida Grande", Arial, Helvetica, sans-serif;
+  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
   font-size: 1.3em;
   font-weight: bold;
   text-decoration: none;
@@ -90,11 +89,10 @@ body {
   float: right;
   font-family: Arial, sans-serif;
   font-size: 1.2em;
-  margin-top: -0.2em;
   }
 
 .article-controls button {
-  margin-bottom: 0;
+  margin-top: -2px;
   min-width: 0;
   opacity: 0.8;
   vertical-align: middle;
@@ -171,9 +169,8 @@ body {
   font-size: 1.2em;
   margin: 0 1em 1.5em;
   overflow: auto;
-  /* The 1px bottom padding is necessary to avoid scrollbar showing up when
-  the last element is a link (because links have 1px bottom border) */
-  padding: 0 1.5em 1px;
+  padding: 0 1.5em 1px; /* The 1px bottom padding is necessary to avoid scrollbar showing up when
+                           the last element is a link (because links have 1px bottom border) */
   }
 
 .article-content a {
@@ -200,7 +197,7 @@ body {
 /*       Modifications for the headlines mode         */
 
 .article-container[collapsed] {
-  background: #fafcfc;
+  background: #fafafc;
   border-bottom: none;
   border-right: none;
   border-left: none;
