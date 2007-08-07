@@ -565,14 +565,19 @@ var gFeedList = {
 
 function hashString(aString) {
 
-    var converter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].
-                       createInstance(Ci.nsIScriptableUnicodeConverter);
-    converter.charset = 'UTF-8';
-    var stream = converter.convertToInputStream(aString);
+    // nsICryptoHash can read the data either from an array or a stream.
+    // Creating a stream ought to be faster than converting a long string
+    // into an array using JS.
+    // XXX nsIStringInputStream doesn't work well with UTF-16 strings; it's
+    // lossy, so it increases the risk of collisions.
+    // nsIScriptableUnicodeConverter.convertToInputStream should be used instead.
+    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
+                       createInstance(Ci.nsIStringInputStream);
+    stringStream.setData(aString, aString.length);
 
     var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
     hasher.init(Ci.nsICryptoHash.MD5);
-    hasher.updateFromStream(stream, stream.available());
+    hasher.updateFromStream(stringStream, stringStream.available());
     var hash = hasher.finish(false);
 
     // Convert the hash to a hex-encoded string.
