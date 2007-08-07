@@ -93,6 +93,8 @@
 
                     var evt = document.createEvent('Events');
                     evt.initEvent('MarkEntryRead', false, false);
+
+                    // Do the rest after timout for immediate visual feedback.
                     var self = this;
                     setTimeout(function() {self.dispatchEvent(evt)}, 0);
                 ]]>
@@ -136,7 +138,10 @@
 
                     var evt = document.createEvent('Events');
                     evt.initEvent('StarEntry', false, false);
-                    this.dispatchEvent(evt);
+
+                    // Do the rest after timout for immediate visual feedback.
+                    var self = this;
+                    setTimeout(function() {self.dispatchEvent(evt)}, 0);
                     return;
                 }
 
@@ -335,6 +340,13 @@
                     else
                         event.target.value = '';
                 }
+            ]]>
+            </handler>
+            <handler event="keydown" keycode="VK_ESCAPE">
+            <![CDATA[
+                if (!this.value)
+                    this.setAttribute('showingDescription', true);
+                this.inputField.blur();
             ]]>
             </handler>
         </handlers>
