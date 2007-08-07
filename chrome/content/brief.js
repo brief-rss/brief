@@ -89,28 +89,16 @@ var brief = {
         observerService.addObserver(gFeedList, 'brief:feed-removed', false);
         observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
+        var browser = document.getElementById('feed-view');
+
         // Load the initial Unread view or the new version page.
         var prevLastMajorVersion = gPrefs.getCharPref('lastMajorVersion');
         if (parseFloat(prevLastMajorVersion) < LAST_MAJOR_VERSION) {
-            var browser = document.getElementById('feed-view');
             browser.loadURI(RELEASE_NOTES_URL);
             gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
         }
-        else if (gPrefs.getBoolPref('showHomeView')) {
-            function loadHomepage() {
-                if (gFeedList.tree && gFeedList.tree.view)
-                    gFeedList.tree.view.selection.select(0);
-                // If the sidebar is hidden, then tree has no view and we have to manually
-                // create the FeedView.
-                else {
-                    var query = new QuerySH(null, null, true);
-                    var unreadFolder = document.getElementById('unread-folder');
-                    var title = unreadFolder.getAttribute('title');
-                    gFeedView = new FeedView(title, query);
-                }
-            }
-            setTimeout(loadHomepage, 0);
-        }
+        else if (gPrefs.getBoolPref('showHomeView'))
+            this.loadHomepage();
 
         // Init stuff in bookmarks.js
         setTimeout(function() { initServices(); initBMService(); }, 1000);
@@ -290,6 +278,20 @@ var brief = {
     },
 
 
+    loadHomepage: function brief_loadHomepage() {
+        if (gFeedList.tree && gFeedList.tree.view)
+            gFeedList.tree.view.selection.select(0);
+        // If the sidebar is hidden, then tree has no view and we have to manually
+        // create the FeedView.
+        else {
+            var query = new QuerySH(null, null, true);
+            var unreadFolder = document.getElementById('unread-folder');
+            var title = unreadFolder.getAttribute('title');
+            gFeedView = new FeedView(title, query);
+        }
+    },
+
+
     updateProgressMeter: function brief_updateProgressMeter( ) {
         var progressmeter = document.getElementById('update-progress');
         var progress = 100 * gUpdateService.completedFeedsCount /
@@ -333,6 +335,9 @@ var brief = {
         gStorage.starEntries(newStatus, query);
     },
 
+    // This is for marking entry read when user follows the link. We can't do it
+    // by dispatching custom events like we do above, because for whatever
+    // reason the binding handlers don't catch middle-clicks.
     onFeedViewClick: function brief_onFeedViewClick(aEvent) {
         var anonid = aEvent.originalTarget.getAttribute('anonid');
         var targetEntry = aEvent.target;
@@ -363,6 +368,17 @@ var brief = {
                 gStorage.markEntriesRead(true, query);
             }
         }
+    },
+
+    // By default document.popupNode doesn't dive into anonymous content
+    // and returns the bound element; hence there's no context menu for
+    // content of entries. To work around it, we listen for the mousedown
+    // event and store the originalTarget, so it can be manually set as
+    // document.popupNode (see gBrief.contextMenuOverride()
+    // in brief-overlay.js).
+    onFeedViewMousedown: function brief_onFeedViewMousedown(aEvent) {
+        if (aEvent.button == 2)
+            brief.browserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
     },
 
 // Toolbar commands.
@@ -439,12 +455,11 @@ var brief = {
 
             // For a global search we deselect items in the feed list.
             // We need to suppress selection so that gFeedList.onSelect() isn't used.
-            // nsITreeSelection.ignoreSelectEvent doesn't seem to work here, so
+            // nsITreeSelection.selectEventsSuppressed doesn't seem to work here, so
             // we have to set our own flag which we will check in onSelect().
             if (searchbar.searchScope == 1) {
-                var selection = gFeedList.tree.view.selection;
                 gFeedList.ignoreSelectEvent = true;
-                selection.clearSelection();
+                gFeedList.tree.view.selection.clearSelection();
                 gFeedList.ignoreSelectEvent = false;
             }
         }

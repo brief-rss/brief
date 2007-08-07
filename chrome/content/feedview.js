@@ -294,20 +294,20 @@ FeedView.prototype = {
         doc.addEventListener('DeleteEntry', brief.onDeleteEntry, true);
         doc.addEventListener('RestoreEntry', brief.onRestoreEntry, true);
 
-        // This is for marking entry read when user follows the link. We can't do it
-        // by dispatching custom events like we do above, because for whatever
-        // reason the binding handlers don't catch middle-clicks.
+        // See comments next to the event handler functions.
         doc.addEventListener('click', brief.onFeedViewClick, true);
+        doc.addEventListener('mousedown', brief.onFeedViewMousedown, true);
 
         // Apply the CSS.
         var style = doc.getElementsByTagName('style')[0];
         style.textContent = gFeedViewStyle;
 
-        // Build the header.
+        // Build the header...
         var titleElement = doc.getElementById('feed-title');
         titleElement.textContent = this.titleOverride || this.title;
 
-        // When a single, unfiltered feed is viewed, construct the feed's header.
+        // When a single, unfiltered feed is viewed, construct the
+        // feed's header: the subtitle, the image, and the link.
         var feed = gStorage.getFeed(this.query.feeds);
         if (feed && !this.searchString) {
 
@@ -330,20 +330,24 @@ FeedView.prototype = {
 
         this.feedContent = doc.getElementById('feed-content');
 
-        // If the trash folder is displayed this attribute adjusts the visibility of the
-        // button in article controls.
+        // If the trash folder is displayed this attribute is used for
+        // setting visibility of buttons in article controls.
         if (this.query.deleted == ENTRY_STATE_TRASHED)
             this.feedContent.setAttribute('trash', true);
 
+        // Show feed name in entry's subheader when displaying entries
+        // from multiple feeds.
         if (!feed)
             this.feedContent.setAttribute('showFeedNames', true);
+
+        // Pass value of the necessary preferences.
         if (gPrefs.showHeadlinesOnly)
             this.feedContent.setAttribute('showHeadlinesOnly', true);
         if (gPrefs.doubleClickMarks)
             this.feedContent.setAttribute('doubleClickMarks', true);
 
-        // We have to hand the strings because stringbundles don't work with
-        // unprivileged script.
+        // We have to hand the strings because stringbundles don't
+        // work with unprivileged script.
         var stringbundle = document.getElementById('main-bundle');
         var markReadString = stringbundle.getString('markEntryAsRead');
         this.feedContent.setAttribute('markReadString', markReadString);

@@ -217,6 +217,8 @@ var gBrief = {
                 this.updateStatuspanel();
             }
 
+            nsContextMenu.prototype.initMenu = this.contextMenuOverride;
+
             this.updateService = Cc['@ancestor/brief/updateservice;1'].
                                  getService(Ci.nsIBriefUpdateService);
 
@@ -311,6 +313,25 @@ var gBrief = {
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
                 this.updateStatuspanel();
         }
+    },
+
+
+    contextMenuOverride: function gBrief_contextMenuOverride(popup) {
+        // Save menu.
+        this.menu = popup;
+
+        // Get contextual info.
+        if (gBrowser.selectedTab == gBrief.tab)
+            document.popupNode = gBrief.contextMenuTarget;
+            
+        this.setTarget( document.popupNode, document.popupRangeParent,
+                        document.popupRangeOffset );
+
+        this.isTextSelected = this.isTextSelection();
+        this.isContentSelected = this.isContentSelection();
+
+        // Initialize (disable/remove) menu items.
+        this.initItems();
     },
 
 
