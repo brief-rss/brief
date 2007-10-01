@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Choisir le dossier des marque-pages dynamiques">
+<!ENTITY searchCurrentView.label "Rechercher dans les articles courants">
+<!ENTITY searchAllFeeds.label "Rechercher dans tous les flux">
+<!ENTITY headlinesCheckbox.label "Afficher uniquement les titres">
+<!ENTITY viewConstraintList.label "Afficher :">
+<!ENTITY viewAll.label "Tout">
+<!ENTITY viewUnread.label "Non lus">
+<!ENTITY viewStarred.label "Marqués">
+<!ENTITY updateButton.tooltip "Mettre à jour tous les flux">
+<!ENTITY stopUpdatingButton.tooltip "Arrêter la recherche de mises à jour">
+<!ENTITY searchScopeButton.tooltip "Modifier la portée de recherche">
+<!ENTITY showOptions.tooltip "Ouvrir les options de Brief">
+<!ENTITY markViewRead.tooltip "Marquer les articles courants comme lus">
+<!ENTITY markViewUnread.tooltip "Marquer les articles courants comme non lus">
+<!ENTITY viewConstraintList.tooltip "Choisir quel type d&apos;articles afficher">
+<!ENTITY previousPage.tooltip "Afficher les articles plus récents">
+<!ENTITY nextPage.tooltip "Afficher les articles plus anciens">
+<!ENTITY unreadFolder.label "Non lus">
+<!ENTITY starredFolder.label "Marqués">
+<!ENTITY trashFolder.label "Corbeille">
+<!ENTITY ctxMarkFeedRead.label "Marquer le flux comme lu">
+<!ENTITY ctxMarkFolderRead.label "Marquer le dossier comme lu">
+<!ENTITY ctxUpdateFeed.label "Mettre le flux à jour">
+<!ENTITY ctxUpdateFolder.label "Mettre le dossier à jour">
+<!ENTITY ctxOpenWebsite.label "Afficher le site Web">
+<!ENTITY ctxDeleteFeed.label "Supprimer le flux">
+<!ENTITY ctxDeleteFolder.label "Supprimer le dossier">
+<!ENTITY ctxEmptyFeed.label "Vider le flux dans la corbeille">
+<!ENTITY ctxEmptyFolder.label "Vider le dossier dans la corbeille">
+<!ENTITY ctxRestoreTrashed.label "Restaurer le contenu de la corbeille">
+<!ENTITY ctxEmptyTrash.label "Vider la corbeille">
+<!ENTITY ctxFeedProperties.label "Propriétés">
+<!ENTITY ctxUpdateFeeds.label "Mettre à jour les flux">
+<!ENTITY ctxMarkFeedsAsRead.label "Marquer tous les flux comme lus">

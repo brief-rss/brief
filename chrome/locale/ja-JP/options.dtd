@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Brief オプション">
+<!ENTITY mainPane.label "メイン">
+<!ENTITY folderTree.label "ライブブックマークを含むフォルダ:">
+<!ENTITY showStatusbarIcon.label "ステータスバーにアイコンを表示">
+<!ENTITY openInNewTab.label "新規タブで Brief を開く">
+<!ENTITY feedsPane.label "フィード">
+<!ENTITY updateGroup.caption "更新中">
+<!ENTITY checkForUpdatesBefore.label "フィードの更新間隔">
+<!ENTITY updateIntervalMinutes.label "分">
+<!ENTITY updateIntervalHours.label "時間">
+<!ENTITY updateIntervalDays.label "日">
+<!ENTITY checkForUpdatesAfter.label "分毎に確認">
+<!ENTITY showNotification.label "更新があったときに通知を表示する">
+<!ENTITY storingGroup.caption "保管">
+<!ENTITY expirationBefore.label "ダウンロードしたエントリを">
+<!ENTITY expirationAfter.label "日後に削除">
+<!ENTITY storedEntriesBefore.label "フィードごとに最新">
+<!ENTITY storedEntriesAfter.label "エントリ以上は保管しない">
+<!ENTITY clearAllEntriesButton.label "すべてのエントリを一掃">
+<!ENTITY behaviorGroup.caption "動作">
+<!ENTITY openEntriesInTabs.label "エントリを新しいタブで開く">
+<!ENTITY doubleClickMarks.label "エントリをダブルクリックして既読にする">
+<!ENTITY displayPane.label "表示">
+<!ENTITY authorsCheckbox.label "エントリの作成者を表示">
+<!ENTITY entriesPerPageBefore.label "ページあたり">
+<!ENTITY entriesPerPageAfter.label "エントリずつ表示">
+<!ENTITY styleGroup.caption "フィードコンテンツスタイル">
+<!ENTITY enableCustomStyle.label "フィードコンテンツにカスタムスタイルを使う">
+<!ENTITY browseCustomStyle.label "選択">
+<!ENTITY feedName.label "名前">
+<!ENTITY feedURL.label "場所">
+<!ENTITY optionsGroupbox.caption "フィード設定">
+<!ENTITY maxEntriesPerFeedBefore.label "最新">
+<!ENTITY maxEntriesPerFeedAfter.label "エントリ以上は保管しない">
+<!ENTITY expireEntriesPerFeedBefore.label "ダウンロードしたエントリを">
+<!ENTITY expireEntriesPerFeedAfter.label "日後に削除">
+<!ENTITY checkUpdatesPerFeedBefore.label "更新間隔">

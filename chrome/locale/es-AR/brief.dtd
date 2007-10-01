@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Elegir carpeta de Marcadores Dinámicos">
+<!ENTITY searchCurrentView.label "Buscar en la vista actual">
+<!ENTITY searchAllFeeds.label "Buscar en todas las Fuentes">
+<!ENTITY headlinesCheckbox.label "Show only headlines">
+<!ENTITY viewConstraintList.label "Vista:">
+<!ENTITY viewAll.label "Todo">
+<!ENTITY viewUnread.label "No Leídos">
+<!ENTITY viewStarred.label "Con estrella">
+<!ENTITY updateButton.tooltip "Buscar actualización de todas las Fuentes">
+<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
+<!ENTITY searchScopeButton.tooltip "Cambiar el modo de búsqueda">
+<!ENTITY showOptions.tooltip "Abrir las Opciones de Brief">
+<!ENTITY markViewRead.tooltip "Marcar los Titulares vistos actualmente como Leídos">
+<!ENTITY markViewUnread.tooltip "Marcar los Titulares vistos actualmente como No Leídos">
+<!ENTITY viewConstraintList.tooltip "Escoger que tipo de Titulares mostrar">
+<!ENTITY previousPage.tooltip "Mostrar Titulares nuevos">
+<!ENTITY nextPage.tooltip "Mostrar Titulares antiguos">
+<!ENTITY unreadFolder.label "No Leído">
+<!ENTITY starredFolder.label "Con estrella">
+<!ENTITY trashFolder.label "Basura">
+<!ENTITY ctxMarkFeedRead.label "Marcar Fuente como Leída">
+<!ENTITY ctxMarkFolderRead.label "Marcar carpeta como Leída">
+<!ENTITY ctxUpdateFeed.label "Actualizar Fuente">
+<!ENTITY ctxUpdateFolder.label "Update Folder">
+<!ENTITY ctxOpenWebsite.label "Abrir el sitio web">
+<!ENTITY ctxDeleteFeed.label "Delete Feed">
+<!ENTITY ctxDeleteFolder.label "Delete Folder">
+<!ENTITY ctxEmptyFeed.label "Vaciar Fuente">
+<!ENTITY ctxEmptyFolder.label "Vaciar Carpeta">
+<!ENTITY ctxRestoreTrashed.label "Restaurar los Titulares eliminados">
+<!ENTITY ctxEmptyTrash.label "Vaciar papelera">
+<!ENTITY ctxFeedProperties.label "Properties">
+<!ENTITY ctxUpdateFeeds.label "Actualizar Fuentes ahora">
+<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">

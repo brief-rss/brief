@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Opzioni di Brief">
+<!ENTITY mainPane.label "Principali">
+<!ENTITY folderTree.label "Cartella contenente i segnalibri Live:">
+<!ENTITY showStatusbarIcon.label "Mostra l&apos;icona nella barra di stato">
+<!ENTITY openInNewTab.label "Apri Brief in una nuova scheda">
+<!ENTITY feedsPane.label "Feed">
+<!ENTITY updateGroup.caption "Aggiornamenti">
+<!ENTITY checkForUpdatesBefore.label "Periodo di tempo prima del controllo successivo:">
+<!ENTITY updateIntervalMinutes.label "minuto/i">
+<!ENTITY updateIntervalHours.label "ora/e">
+<!ENTITY updateIntervalDays.label "giorno/i">
+<!ENTITY checkForUpdatesAfter.label "">
+<!ENTITY showNotification.label "Mostra la finestra di notifica quando ci sono aggiornamenti">
+<!ENTITY storingGroup.caption "Memorizzazione">
+<!ENTITY expirationBefore.label "Giorni per i quali memorizzare gli elementi scaricati:">
+<!ENTITY expirationAfter.label "">
+<!ENTITY storedEntriesBefore.label "Numero massimo di elementi per feed da memorizzare:">
+<!ENTITY storedEntriesAfter.label "">
+<!ENTITY clearAllEntriesButton.label "Elimina tutti gli elementi">
+<!ENTITY behaviorGroup.caption "Comportamento">
+<!ENTITY openEntriesInTabs.label "Apri gli elementi in nuove schede">
+<!ENTITY doubleClickMarks.label "Marca elementi come letti con doppio clic del mouse su essi">
+<!ENTITY displayPane.label "Aspetto">
+<!ENTITY authorsCheckbox.label "Mostra gli autori degli elementi">
+<!ENTITY entriesPerPageBefore.label "Elementi da visualizzare per pagina:">
+<!ENTITY entriesPerPageAfter.label "">
+<!ENTITY styleGroup.caption "Stile">
+<!ENTITY enableCustomStyle.label "Usa uno stile personalizzato per la visualizzazione dei feed">
+<!ENTITY browseCustomStyle.label "Sfoglia...">
+<!ENTITY feedName.label "Nome:">
+<!ENTITY feedURL.label "Indirizzo:">
+<!ENTITY optionsGroupbox.caption "Impostazioni dei feed">
+<!ENTITY maxEntriesPerFeedBefore.label "Numero massimo di ultimi elementi da memorizzare:">
+<!ENTITY maxEntriesPerFeedAfter.label "">
+<!ENTITY expireEntriesPerFeedBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
+<!ENTITY expireEntriesPerFeedAfter.label "">
+<!ENTITY checkUpdatesPerFeedBefore.label "Controlla per aggiornamenti ogni:">

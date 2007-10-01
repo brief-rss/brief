@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Escolha a Pasta dos Favoritos Dinâmicos">
+<!ENTITY searchCurrentView.label "Procurar na vizualização atual">
+<!ENTITY searchAllFeeds.label "Procurar em todos os feeds">
+<!ENTITY headlinesCheckbox.label "Show only headlines">
+<!ENTITY viewConstraintList.label "Exibir:">
+<!ENTITY viewAll.label "Todos">
+<!ENTITY viewUnread.label "Não lidos">
+<!ENTITY viewStarred.label "Estrela">
+<!ENTITY updateButton.tooltip "Marcar todos os feeds para atualização">
+<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
+<!ENTITY searchScopeButton.tooltip "Alterar o escopo da busca">
+<!ENTITY showOptions.tooltip "Opções Brief">
+<!ENTITY markViewRead.tooltip "Marcar itens exibidos atualmente como lidos">
+<!ENTITY markViewUnread.tooltip "Marcar itens exibidos atualmente como não lidos">
+<!ENTITY viewConstraintList.tooltip "Escolha que tipos de itens exibir">
+<!ENTITY previousPage.tooltip "Exibir novos itens">
+<!ENTITY nextPage.tooltip "Exibir velhos itens">
+<!ENTITY unreadFolder.label "Não lidos">
+<!ENTITY starredFolder.label "Estrela">
+<!ENTITY trashFolder.label "Lixeira">
+<!ENTITY ctxMarkFeedRead.label "Marcar Feed como lido">
+<!ENTITY ctxMarkFolderRead.label "Marcar Pasta como lido">
+<!ENTITY ctxUpdateFeed.label "Atualizar Feed">
+<!ENTITY ctxUpdateFolder.label "Update Folder">
+<!ENTITY ctxOpenWebsite.label "Abrir Página">
+<!ENTITY ctxDeleteFeed.label "Delete Feed">
+<!ENTITY ctxDeleteFolder.label "Delete Folder">
+<!ENTITY ctxEmptyFeed.label "Esvaziar Feed">
+<!ENTITY ctxEmptyFolder.label "Esvaziar Pasta">
+<!ENTITY ctxRestoreTrashed.label "Restaurar Entradas da Lixeira">
+<!ENTITY ctxEmptyTrash.label "Esvaziar Lixeira">
+<!ENTITY ctxFeedProperties.label "Properties">
+<!ENTITY ctxUpdateFeeds.label "Atualizar Feeds Agora">
+<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">

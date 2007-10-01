@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline "作成者">
+<!ENTITY homepage.label "ウェブサイト">
+<!ENTITY contributors.headline "協力者">
+<!ENTITY credits.headline "クレジット">
+<!ENTITY translators.headline "翻訳者">
+<!ENTITY extdevThanks.paragraph "irc.mozilla.org の #extdev ( irc://irc.mozilla.org/extdev ) からの偉大な皆さんに感謝します。">
+<!ENTITY iconsThanks.paragraph "いくつかのアイコンは才能ある Arvid Axelsson の好意によるものです。">
+<!ENTITY testingThanks.paragraph "テストしてくれた Stefan Plewako に感謝します。">

@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Brief - Einstellungen">
+<!ENTITY mainPane.label "Allgemein">
+<!ENTITY folderTree.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
+<!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
+<!ENTITY openInNewTab.label "Brief in einem neuen Tab öffnen">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY updateGroup.caption "Aktualisierung">
+<!ENTITY checkForUpdatesBefore.label "Feeds alle">
+<!ENTITY updateIntervalMinutes.label "Minuten">
+<!ENTITY updateIntervalHours.label "Stunden">
+<!ENTITY updateIntervalDays.label "Tage">
+<!ENTITY checkForUpdatesAfter.label "Minuten aktualisieren">
+<!ENTITY showNotification.label "Benachrichtigen, wenn neue Einträge gefunden wurden">
+<!ENTITY storingGroup.caption "Speicherung">
+<!ENTITY expirationBefore.label "Remove downloaded entries after">
+<!ENTITY expirationAfter.label "Tage speichern">
+<!ENTITY storedEntriesBefore.label "Nicht mehr als">
+<!ENTITY storedEntriesAfter.label "latest entries of each feed">
+<!ENTITY clearAllEntriesButton.label "Clear All Entries">
+<!ENTITY behaviorGroup.caption "Verhalten">
+<!ENTITY openEntriesInTabs.label "Einträge in neuen Tabs öffnen">
+<!ENTITY doubleClickMarks.label "Einträge in Feed-Ansicht mit Doppelklick als gelesen markieren">
+<!ENTITY displayPane.label "Anzeige">
+<!ENTITY authorsCheckbox.label "Show authors of the entries">
+<!ENTITY entriesPerPageBefore.label "Pro Seite">
+<!ENTITY entriesPerPageAfter.label "Einträge anzeigen">
+<!ENTITY styleGroup.caption "Feed content style">
+<!ENTITY enableCustomStyle.label "Eigenes Stylesheet für die Feed-Ansicht verwenden">
+<!ENTITY browseCustomStyle.label "Durchsuchen...">
+<!ENTITY feedName.label "Name">
+<!ENTITY feedURL.label "Location">
+<!ENTITY optionsGroupbox.caption "Feed settings">
+<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
+<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
+<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
+<!ENTITY expireEntriesPerFeedAfter.label "days">
+<!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">

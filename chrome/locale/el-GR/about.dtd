@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline "Δημιουργός">
+<!ENTITY homepage.label "Αρχική σελίδα">
+<!ENTITY contributors.headline "Συντελεστές">
+<!ENTITY credits.headline "Μνεία">
+<!ENTITY translators.headline "Μεταφραστές">
+<!ENTITY extdevThanks.paragraph "Ευχαριστούμε όλους τους υπέροχους «θαμώνες» του #extdev στο irc.mozilla.org:">
+<!ENTITY iconsThanks.paragraph "Μερικά εικονίδια είναι προσφορά του ταλαντούχου Arvid Axelsson.">
+<!ENTITY testingThanks.paragraph "Ευχαριστούμε τον Stefan Plewako για τον έλεγχο της έκδοσης.">

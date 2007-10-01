@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Selezionare la cartella dei segnalibri Live">
+<!ENTITY searchCurrentView.label "Attualmente visti">
+<!ENTITY searchAllFeeds.label "Tutti i feed">
+<!ENTITY headlinesCheckbox.label "Mostra solo i titoli">
+<!ENTITY viewConstraintList.label "Visualizza:">
+<!ENTITY viewAll.label "tutti">
+<!ENTITY viewUnread.label "non letti">
+<!ENTITY viewStarred.label "segnati con stella">
+<!ENTITY updateButton.tooltip "Controlla gli aggiornamenti di tutti i feed">
+<!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
+<!ENTITY searchScopeButton.tooltip "Cambia l&apos;ambito della ricerca ">
+<!ENTITY showOptions.tooltip "Opzioni...">
+<!ENTITY markViewRead.tooltip "Marca elementi attualmente visti come letti">
+<!ENTITY markViewUnread.tooltip "Marca elementi attualmente visti come non letti">
+<!ENTITY viewConstraintList.tooltip "Selezionare il tipo di elementi da selezionare">
+<!ENTITY previousPage.tooltip "Mostra pagina precedente">
+<!ENTITY nextPage.tooltip "Mostra pagina successiva">
+<!ENTITY unreadFolder.label "Non letti">
+<!ENTITY starredFolder.label "Segnati con stella">
+<!ENTITY trashFolder.label "Cestino">
+<!ENTITY ctxMarkFeedRead.label "Segna feed come letto">
+<!ENTITY ctxMarkFolderRead.label "Segna cartella come letta">
+<!ENTITY ctxUpdateFeed.label "Aggiorna feed">
+<!ENTITY ctxUpdateFolder.label "Aggiorna cartella">
+<!ENTITY ctxOpenWebsite.label "Apri sito web">
+<!ENTITY ctxDeleteFeed.label "Elimina feed">
+<!ENTITY ctxDeleteFolder.label "Elimina cartella">
+<!ENTITY ctxEmptyFeed.label "Svuota feed">
+<!ENTITY ctxEmptyFolder.label "Svuota cartella">
+<!ENTITY ctxRestoreTrashed.label "Ripristina elementi eliminati">
+<!ENTITY ctxEmptyTrash.label "Svuota cestino">
+<!ENTITY ctxFeedProperties.label "Proprietà">
+<!ENTITY ctxUpdateFeeds.label "Aggiorna i feed ora">
+<!ENTITY ctxMarkFeedsAsRead.label "Segna tutti i feed come letti">

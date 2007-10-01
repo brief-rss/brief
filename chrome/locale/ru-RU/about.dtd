@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline "Автор расширения">
+<!ENTITY homepage.label "Оф. сайт расширения">
+<!ENTITY contributors.headline "Помощники">
+<!ENTITY credits.headline "Участники проекта">
+<!ENTITY translators.headline "Переводчики">
+<!ENTITY extdevThanks.paragraph "Спасибо всем замечательным людям с irc-канала #extdev в irc.mozilla.org:">
+<!ENTITY iconsThanks.paragraph "Некоторые значки любезно предоставлены Arvid Axelsson.">
+<!ENTITY testingThanks.paragraph "Спасибо Stefan Plewako за тестирование.">

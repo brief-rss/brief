@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Opções Brief">
+<!ENTITY mainPane.label "Principal">
+<!ENTITY folderTree.label "Pasta contendo seus Favoritos Dinâmicos:">
+<!ENTITY showStatusbarIcon.label "Exibir ícones na barra de estatus">
+<!ENTITY openInNewTab.label "Abrir Brief em nova aba">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY updateGroup.caption "Atualizando">
+<!ENTITY checkForUpdatesBefore.label "Verificar feeds para atualização a cada">
+<!ENTITY updateIntervalMinutes.label "minutes">
+<!ENTITY updateIntervalHours.label "hours">
+<!ENTITY updateIntervalDays.label "days">
+<!ENTITY checkForUpdatesAfter.label "minutos">
+<!ENTITY showNotification.label "Exibir notificação quando houver atualizações disponíveis">
+<!ENTITY storingGroup.caption "Armazenando">
+<!ENTITY expirationBefore.label "Remove downloaded entries after">
+<!ENTITY expirationAfter.label "dias">
+<!ENTITY storedEntriesBefore.label "Store no more than">
+<!ENTITY storedEntriesAfter.label "latest entries of each feed">
+<!ENTITY clearAllEntriesButton.label "Clear All Entries">
+<!ENTITY behaviorGroup.caption "Comportamento">
+<!ENTITY openEntriesInTabs.label "Abrir itens em novas abas">
+<!ENTITY doubleClickMarks.label "Marcar itens como lidos ao dar duplo clique neles">
+<!ENTITY displayPane.label "Exibição">
+<!ENTITY authorsCheckbox.label "Show authors of the entries">
+<!ENTITY entriesPerPageBefore.label "Exibir">
+<!ENTITY entriesPerPageAfter.label "itens por página">
+<!ENTITY styleGroup.caption "Feed content style">
+<!ENTITY enableCustomStyle.label "Usar estilo personalizado para conteúdo do feed">
+<!ENTITY browseCustomStyle.label "Procurar">
+<!ENTITY feedName.label "Name">
+<!ENTITY feedURL.label "Location">
+<!ENTITY optionsGroupbox.caption "Feed settings">
+<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
+<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
+<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
+<!ENTITY expireEntriesPerFeedAfter.label "days">
+<!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">

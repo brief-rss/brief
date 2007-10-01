@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Opciones de Brief">
+<!ENTITY mainPane.label "Principal">
+<!ENTITY folderTree.label "Carpeta que contiene sus marcadores dinámicos:">
+<!ENTITY showStatusbarIcon.label "Mostrar icono en la barra de estado">
+<!ENTITY openInNewTab.label "Abrir Brief en una nueva pestaña">
+<!ENTITY feedsPane.label "Canales">
+<!ENTITY updateGroup.caption "Actualizando">
+<!ENTITY checkForUpdatesBefore.label "Buscar actualización de titulares cada">
+<!ENTITY updateIntervalMinutes.label "minutes">
+<!ENTITY updateIntervalHours.label "hours">
+<!ENTITY updateIntervalDays.label "days">
+<!ENTITY checkForUpdatesAfter.label "minutos">
+<!ENTITY showNotification.label "Mostrar notificación cuando se encuentren actualizaciones">
+<!ENTITY storingGroup.caption "Almacenamiento">
+<!ENTITY expirationBefore.label "Almacenar titulares descargados por">
+<!ENTITY expirationAfter.label "dias">
+<!ENTITY storedEntriesBefore.label "Almacenar hasta">
+<!ENTITY storedEntriesAfter.label "titulares por canal">
+<!ENTITY clearAllEntriesButton.label "Clear All Entries">
+<!ENTITY behaviorGroup.caption "Comportamiento">
+<!ENTITY openEntriesInTabs.label "Abrir titulares en pestañas nuevas">
+<!ENTITY doubleClickMarks.label "Marcar los titulares como leidos al hacer doble click sobre ellos">
+<!ENTITY displayPane.label "Visualización">
+<!ENTITY authorsCheckbox.label "Show authors of the entries">
+<!ENTITY entriesPerPageBefore.label "Mostrar">
+<!ENTITY entriesPerPageAfter.label "titulares por página">
+<!ENTITY styleGroup.caption "Feed content style">
+<!ENTITY enableCustomStyle.label "Usar estilo personalizado para el contenido del canal">
+<!ENTITY browseCustomStyle.label "Explorar">
+<!ENTITY feedName.label "Name">
+<!ENTITY feedURL.label "Location">
+<!ENTITY optionsGroupbox.caption "Feed settings">
+<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
+<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
+<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
+<!ENTITY expireEntriesPerFeedAfter.label "days">
+<!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">

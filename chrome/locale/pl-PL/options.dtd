@@ -6,18 +6,32 @@
 <!ENTITY feedsPane.label "Kanały">
 <!ENTITY updateGroup.caption "Aktualizacje">
 <!ENTITY checkForUpdatesBefore.label "Sprawdzaj kanały co">
+<!ENTITY updateIntervalMinutes.label "min">
+<!ENTITY updateIntervalHours.label "godz.">
+<!ENTITY updateIntervalDays.label "dni">
 <!ENTITY checkForUpdatesAfter.label "min">
 <!ENTITY showNotification.label "Wyświetlaj powiadomienie o nowych wiadomościach">
 <!ENTITY storingGroup.caption "Przechowywanie">
-<!ENTITY expirationBefore.label "Przechowuj pobrane wiadomości przez">
-<!ENTITY expirationAfter.label "dni">
+<!ENTITY expirationBefore.label "Usuń pobrane wiadomości po">
+<!ENTITY expirationAfter.label "dniach">
 <!ENTITY storedEntriesBefore.label "Przechowuj do">
-<!ENTITY storedEntriesAfter.label "wiadomości w kanale">
+<!ENTITY storedEntriesAfter.label "ostatnich wiadomości w kanale">
+<!ENTITY clearAllEntriesButton.label "Wyczyść wszystkie wiadomości">
 <!ENTITY behaviorGroup.caption "Zachowanie">
 <!ENTITY openEntriesInTabs.label "Otwieraj wiadomości w nowej karcie">
 <!ENTITY doubleClickMarks.label "Oznacz wiadomość jako przeczytaną po kliknięciu na niej dwukrotnie">
 <!ENTITY displayPane.label "Widok">
+<!ENTITY authorsCheckbox.label "Wyświetlaj autorów wiadomości">
 <!ENTITY entriesPerPageBefore.label "Wyświetlaj">
 <!ENTITY entriesPerPageAfter.label "wiadomości na jednej stronie">
+<!ENTITY styleGroup.caption "Styl wyświetlania kanału">
 <!ENTITY enableCustomStyle.label "Używaj zewnętrznego stylu widoku kanału">
 <!ENTITY browseCustomStyle.label "Przeglądaj">
+<!ENTITY feedName.label "Nazwa">
+<!ENTITY feedURL.label "Lokalizacja">
+<!ENTITY optionsGroupbox.caption "Ustawienia kanału">
+<!ENTITY maxEntriesPerFeedBefore.label "Przechowuj maksymalnie">
+<!ENTITY maxEntriesPerFeedAfter.label "wiadomości">
+<!ENTITY expireEntriesPerFeedBefore.label "Usuń pobrane wiadomości po">
+<!ENTITY expireEntriesPerFeedAfter.label "dniach">
+<!ENTITY checkUpdatesPerFeedBefore.label "Sprawdzaj kanał co">

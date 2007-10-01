@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Elegir carpeta de marcadores dinámicos">
+<!ENTITY searchCurrentView.label "Buscar en la vista actual">
+<!ENTITY searchAllFeeds.label "Buscar en todos los canales">
+<!ENTITY headlinesCheckbox.label "Show only headlines">
+<!ENTITY viewConstraintList.label "Vista:">
+<!ENTITY viewAll.label "Todo">
+<!ENTITY viewUnread.label "No leídos">
+<!ENTITY viewStarred.label "Con estrella">
+<!ENTITY updateButton.tooltip "Buscar actualización de todos los canales">
+<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
+<!ENTITY searchScopeButton.tooltip "Cambiar el modo de búsqueda">
+<!ENTITY showOptions.tooltip "Abrir las Opciones de Brief">
+<!ENTITY markViewRead.tooltip "Marcar como leídos los titulares vistos actualmente">
+<!ENTITY markViewUnread.tooltip "Marcar como no leídos los titulares vistos actualmente">
+<!ENTITY viewConstraintList.tooltip "Elejir que tipo de titulares mostrar">
+<!ENTITY previousPage.tooltip "Mostrar titulares nuevos">
+<!ENTITY nextPage.tooltip "Mostrar titulares antiguos">
+<!ENTITY unreadFolder.label "No leído">
+<!ENTITY starredFolder.label "Con estrella">
+<!ENTITY trashFolder.label "Basura">
+<!ENTITY ctxMarkFeedRead.label "Marcar canal como leído">
+<!ENTITY ctxMarkFolderRead.label "Marcar carpeta como leída">
+<!ENTITY ctxUpdateFeed.label "Actualizar canal">
+<!ENTITY ctxUpdateFolder.label "Update Folder">
+<!ENTITY ctxOpenWebsite.label "Abrir el sitio web">
+<!ENTITY ctxDeleteFeed.label "Delete Feed">
+<!ENTITY ctxDeleteFolder.label "Delete Folder">
+<!ENTITY ctxEmptyFeed.label "Vaciar canal">
+<!ENTITY ctxEmptyFolder.label "Vaciar carpeta">
+<!ENTITY ctxRestoreTrashed.label "Restaurar los titulares eliminados">
+<!ENTITY ctxEmptyTrash.label "Vaciar papelera">
+<!ENTITY ctxFeedProperties.label "Properties">
+<!ENTITY ctxUpdateFeeds.label "Actualizar canales ahora">
+<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">

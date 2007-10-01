@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Live Bladwijzers-map kiezen">
+<!ENTITY searchCurrentView.label "Zoeken in huidige weergave">
+<!ENTITY searchAllFeeds.label "Zoeken in alle feeds">
+<!ENTITY headlinesCheckbox.label "Alleen kopteksten weergeven">
+<!ENTITY viewConstraintList.label "Weergave:">
+<!ENTITY viewAll.label "Alles">
+<!ENTITY viewUnread.label "Ongelezen">
+<!ENTITY viewStarred.label "Voorzien van ster">
+<!ENTITY updateButton.tooltip "Alle feeds controleren op updates">
+<!ENTITY stopUpdatingButton.tooltip "Feeds niet meer op updates controleren">
+<!ENTITY searchScopeButton.tooltip "De zoekopdracht wijzigen">
+<!ENTITY showOptions.tooltip "Brief opties openen">
+<!ENTITY markViewRead.tooltip "Momenteel bekeken onderwerpen als gelezen markeren">
+<!ENTITY markViewUnread.tooltip "Momenteel bekeken onderwerpen als niet gelezen markeren">
+<!ENTITY viewConstraintList.tooltip "Kies welke berichten moeten worden weergegeven">
+<!ENTITY previousPage.tooltip "Nieuwere onderwerpen weergeven">
+<!ENTITY nextPage.tooltip "Oudere onderwerpen weergeven">
+<!ENTITY unreadFolder.label "Ongelezen">
+<!ENTITY starredFolder.label "Voorzien van ster">
+<!ENTITY trashFolder.label "Prullenbak">
+<!ENTITY ctxMarkFeedRead.label "Feed als gelezen markeren">
+<!ENTITY ctxMarkFolderRead.label "Map als gelezen markeren">
+<!ENTITY ctxUpdateFeed.label "Feed bijwerken">
+<!ENTITY ctxUpdateFolder.label "Map bijwerken">
+<!ENTITY ctxOpenWebsite.label "Website openen">
+<!ENTITY ctxDeleteFeed.label "Feed verwijderen">
+<!ENTITY ctxDeleteFolder.label "Map verwijderen">
+<!ENTITY ctxEmptyFeed.label "Lege feed">
+<!ENTITY ctxEmptyFolder.label "Lege map">
+<!ENTITY ctxRestoreTrashed.label "Weggegooide berichten herstellen">
+<!ENTITY ctxEmptyTrash.label "Prullenbak leegmaken">
+<!ENTITY ctxFeedProperties.label "Eigenschappen">
+<!ENTITY ctxUpdateFeeds.label "Feeds nu bijwerken">
+<!ENTITY ctxMarkFeedsAsRead.label "Alle feeds als gelezen markeren">
