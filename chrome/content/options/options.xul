@@ -131,7 +131,7 @@
                 <label value="&storedEntriesAfter.label;"/>
             </hbox>
             <spacer height="10"/>
-            <hbox align="right">
+            <hbox pack="end">
                 <button id="clear-all-entries"
                         label="&clearAllEntriesButton.label;"
                         oncommand="gFeedsPane.onClearAllEntriesCmd(event);"/>
