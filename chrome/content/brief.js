@@ -120,16 +120,6 @@ var brief = {
         observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
 
         gPrefs.unregister();
-
-        // Persist the folders open/closed state.
-        var items = gFeedList.tree.getElementsByTagName('treeitem');
-        var closedFolders = '';
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
-                closedFolders += item.getAttribute('feedID');
-        }
-        gFeedList.tree.setAttribute('closedFolders', closedFolders);
     },
 
 
