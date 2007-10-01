@@ -22,7 +22,7 @@ const NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
 const BACKGROUND_UPDATE = Ci.nsIBriefUpdateService.BACKGROUND_UPDATE;
 
 function dump(aMessage) {
-  var consoleService = Cc["@mozilla.org/consoleservice;1"].
+  var consoleService = Cc['@mozilla.org/consoleservice;1'].
                        getService(Ci.nsIConsoleService);
   consoleService.logStringMessage(aMessage);
 }
@@ -250,6 +250,8 @@ BriefUpdateService.prototype = {
         // updating is completed.
         case 'brief:feed-error':
         case 'brief:feed-updated':
+            dump('Brief\nWarning: ' + aTopic + ' notification was fired even though updating had been canceled.');
+
             // If |updateInProgress| is NO_UPDATE then it means that a single feed was
             // requested - nothing to do here as batch update wasn't started.
             if (this.updateInProgress == NO_UPDATE || this.updateCanceled)
@@ -261,7 +263,7 @@ BriefUpdateService.prototype = {
             }
 
             // We're done, all feeds updated.
-            if (this.completedFeeds.length == this.scheduledFeeds.length)
+            if (this.completedFeeds.length >= this.scheduledFeeds.length)
                 this.finishUpdate();
 
             break;
@@ -271,7 +273,7 @@ BriefUpdateService.prototype = {
         case 'alertclickcallback':
             var window = Cc['@mozilla.org/appshell/window-mediator;1'].
                          getService(Ci.nsIWindowMediator).
-                         getMostRecentWindow("navigator:browser");
+                         getMostRecentWindow('navigator:browser');
             if (window) {
                 window.gBrief.openBrief(true);
                 window.focus();
@@ -443,7 +445,7 @@ FeedFetcher.prototype = {
 
         // We can't push the feed to the |completedFeeds| stack in brief:feed-updated
         // observer in the main class, because we have to ensure this is done before any
-        // other observers receives this notification. Otherwise the progressmeters won't
+        // other observers receive this notification. Otherwise the progressmeters won't
         // be refreshed properly, because of outdated count of completed feeds.
         gBriefUpdateService.completedFeeds.push(this.feed);
 
