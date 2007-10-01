@@ -140,11 +140,12 @@ BriefUpdateService.prototype = {
 
 
     stopFetching: function BUS_stopFetching() {
-        this.finishUpdate();
         this.updateCanceled = true;
         var observerService = Cc['@mozilla.org/observer-service;1'].
                               getService(Ci.nsIObserverService);
         observerService.notifyObservers(null, 'brief:feed-update-canceled', '');
+
+        this.finishUpdate();
     },
 
 
@@ -254,7 +255,7 @@ BriefUpdateService.prototype = {
 
             // If |updateInProgress| is NO_UPDATE then it means that a single feed was
             // requested - nothing to do here as batch update wasn't started.
-            if (this.updateInProgress == NO_UPDATE || this.updateCanceled)
+            if (this.updateInProgress == NO_UPDATE)
                 return;
 
             if (aSubject && aSubject.QueryInterface(Ci.nsIVariant) > 0) {
