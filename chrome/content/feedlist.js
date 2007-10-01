@@ -177,6 +177,7 @@ var gFeedList = {
             if (item.hasAttribute('container'))
                 this.refreshFolderTreeitems(item);
         }
+        setTimeout(this._persistFolderState, 0);
     },
 
     // See onClick.
@@ -186,6 +187,7 @@ var gFeedList = {
             if (selectedItem.hasAttribute('container'))
                 this.refreshFolderTreeitems(selectedItem);
         }
+        setTimeout(this._persistFolderState, 0);
     },
 
     // Sets the visibility of context menuitem depending on the target.
@@ -526,6 +528,18 @@ var gFeedList = {
             break;
 
         }
+    },
+
+    _persistFolderState: function gFeedList_persistFolderState() {
+        // Persist the folders open/closed state.
+        var items = gFeedList.tree.getElementsByTagName('treeitem');
+        var closedFolders = '';
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
+                closedFolders += item.getAttribute('feedID');
+        }
+        gFeedList.tree.setAttribute('closedFolders', closedFolders);
     },
 
 
