@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Brief opties">
+<!ENTITY mainPane.label "Hoofdvenster">
+<!ENTITY folderTree.label "Map met uw Live Bladwijzers:">
+<!ENTITY showStatusbarIcon.label "Statusbalkpictogram weergeven">
+<!ENTITY openInNewTab.label "Brief in een nieuw tabblad openen">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY updateGroup.caption "Bijwerken">
+<!ENTITY checkForUpdatesBefore.label "Elke">
+<!ENTITY updateIntervalMinutes.label "minuten">
+<!ENTITY updateIntervalHours.label "uur">
+<!ENTITY updateIntervalDays.label "dagen">
+<!ENTITY checkForUpdatesAfter.label "minuten controleren op updates voor feeds">
+<!ENTITY showNotification.label "Bericht geven wanneer updates worden aangetroffen">
+<!ENTITY storingGroup.caption "Opslaan">
+<!ENTITY expirationBefore.label "Gedownloade berichten verwijderen na">
+<!ENTITY expirationAfter.label "dagen">
+<!ENTITY storedEntriesBefore.label "Niet meer dan">
+<!ENTITY storedEntriesAfter.label "meest recente berichten in elke feed opslaan">
+<!ENTITY clearAllEntriesButton.label "Alle berichten wissen">
+<!ENTITY behaviorGroup.caption "Gedrag">
+<!ENTITY openEntriesInTabs.label "Berichten in nieuwe tabbladen openen">
+<!ENTITY doubleClickMarks.label "Berichten als gelezen markeren wanneer ze dubbel geklikt worden">
+<!ENTITY displayPane.label "Weergave">
+<!ENTITY authorsCheckbox.label "Schrijvers van de berichten weergeven">
+<!ENTITY entriesPerPageBefore.label "Per pagina">
+<!ENTITY entriesPerPageAfter.label "onderwerpen weergeven">
+<!ENTITY styleGroup.caption "Stijl van de feedinhoud">
+<!ENTITY enableCustomStyle.label "Aangepaste stijl van de feedinhoud gebruiken">
+<!ENTITY browseCustomStyle.label "Bladeren">
+<!ENTITY feedName.label "Naam">
+<!ENTITY feedURL.label "Locatie">
+<!ENTITY optionsGroupbox.caption "Feedinstellingen">
+<!ENTITY maxEntriesPerFeedBefore.label "Niet meer dan">
+<!ENTITY maxEntriesPerFeedAfter.label "recente berichten">
+<!ENTITY expireEntriesPerFeedBefore.label "Gedownloade berichten verwijderen na">
+<!ENTITY expireEntriesPerFeedAfter.label "dagen">
+<!ENTITY checkUpdatesPerFeedBefore.label "Op updates controleren om de">

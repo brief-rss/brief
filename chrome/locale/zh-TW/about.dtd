@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline "作者">
+<!ENTITY homepage.label "網站首頁">
+<!ENTITY contributors.headline "貢獻者">
+<!ENTITY credits.headline "銘謝">
+<!ENTITY translators.headline "譯者">
+<!ENTITY extdevThanks.paragraph "感謝 irc.mozilla.org 的 #extdev 上偉大的各位:">
+<!ENTITY iconsThanks.paragraph "某些圖示是得到聰明的 Arvid Axelsson 許可而使用的。">
+<!ENTITY testingThanks.paragraph "感謝 Stefan Plewako 的協助測試。">

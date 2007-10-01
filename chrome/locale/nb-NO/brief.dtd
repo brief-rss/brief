@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Velg &apos;Levende bokmerker&apos; mappa">
+<!ENTITY searchCurrentView.label "Søk i nyhetskilden">
+<!ENTITY searchAllFeeds.label "Søk i alle nyhetskilder">
+<!ENTITY headlinesCheckbox.label "Vis kun overskrifter">
+<!ENTITY viewConstraintList.label "Vis:">
+<!ENTITY viewAll.label "Alle">
+<!ENTITY viewUnread.label "Ulest">
+<!ENTITY viewStarred.label "Merket med stjerne">
+<!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
+<!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskildene">
+<!ENTITY searchScopeButton.tooltip "Endre søk">
+<!ENTITY showOptions.tooltip "Brief innstillinger">
+<!ENTITY markViewRead.tooltip "Merk viste elementer som lest">
+<!ENTITY markViewUnread.tooltip "Merk viste elementer som ulest">
+<!ENTITY viewConstraintList.tooltip "Velg hvilke elementer som skal vises">
+<!ENTITY previousPage.tooltip "Vis nyere elementer">
+<!ENTITY nextPage.tooltip "Vis eldre elementer">
+<!ENTITY unreadFolder.label "Ulest">
+<!ENTITY starredFolder.label "Merket med stjerne">
+<!ENTITY trashFolder.label "Søppel">
+<!ENTITY ctxMarkFeedRead.label "Merk nyhetskilden som lest">
+<!ENTITY ctxMarkFolderRead.label "Merk mappa som lest">
+<!ENTITY ctxUpdateFeed.label "Oppdater nyhetskilde">
+<!ENTITY ctxUpdateFolder.label "Oppdater mappe">
+<!ENTITY ctxOpenWebsite.label "Åpne nettside">
+<!ENTITY ctxDeleteFeed.label "Slett nyhetskilde">
+<!ENTITY ctxDeleteFolder.label "Slett mappe">
+<!ENTITY ctxEmptyFeed.label "Tom nyhetskilde">
+<!ENTITY ctxEmptyFolder.label "Tom mappe">
+<!ENTITY ctxRestoreTrashed.label "Gjenopprett elementer">
+<!ENTITY ctxEmptyTrash.label "Tøm søppel">
+<!ENTITY ctxFeedProperties.label "Innstillinger">
+<!ENTITY ctxUpdateFeeds.label "Oppdater nyhetskilder nå">
+<!ENTITY ctxMarkFeedsAsRead.label "Merk alle nyhetskildene som lest">

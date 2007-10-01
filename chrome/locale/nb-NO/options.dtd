@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Brief innstillinger">
+<!ENTITY mainPane.label "Generelt">
+<!ENTITY folderTree.label "Mappe som inneholder levende bokmerker:">
+<!ENTITY showStatusbarIcon.label "Vis ikon i statuslinjen">
+<!ENTITY openInNewTab.label "Åpne Brief i ny fane">
+<!ENTITY feedsPane.label "Nyhetskilder">
+<!ENTITY updateGroup.caption "Oppdatering">
+<!ENTITY checkForUpdatesBefore.label "Finn oppdateringer for nyhetskilder hvert">
+<!ENTITY updateIntervalMinutes.label "minutter">
+<!ENTITY updateIntervalHours.label "timer">
+<!ENTITY updateIntervalDays.label "dager">
+<!ENTITY checkForUpdatesAfter.label "minutt">
+<!ENTITY showNotification.label "Vis beskjed når oppdateringer er funnet">
+<!ENTITY storingGroup.caption "Lagring">
+<!ENTITY expirationBefore.label "Fjern lagrede elementer etter">
+<!ENTITY expirationAfter.label "dager">
+<!ENTITY storedEntriesBefore.label "Ikke lagre mer enn">
+<!ENTITY storedEntriesAfter.label "siste elementer i hver nyhetskilde">
+<!ENTITY clearAllEntriesButton.label "Fjern alle elementer">
+<!ENTITY behaviorGroup.caption "Oppførsel">
+<!ENTITY openEntriesInTabs.label "Åpne elementer i ny fane">
+<!ENTITY doubleClickMarks.label "Markere elementene som lest ved dobbelklikk">
+<!ENTITY displayPane.label "Visning">
+<!ENTITY authorsCheckbox.label "Vis forfatterne av elementene">
+<!ENTITY entriesPerPageBefore.label "Vis">
+<!ENTITY entriesPerPageAfter.label "elementer pr side">
+<!ENTITY styleGroup.caption "Stil for nyhetskildetype">
+<!ENTITY enableCustomStyle.label "Bruk egen stil for nyhetskildeinnholdet">
+<!ENTITY browseCustomStyle.label "Bla">
+<!ENTITY feedName.label "Navn">
+<!ENTITY feedURL.label "Adresse">
+<!ENTITY optionsGroupbox.caption "Innstillinger for nyhetskilder">
+<!ENTITY maxEntriesPerFeedBefore.label "Ikke lagre mer enn">
+<!ENTITY maxEntriesPerFeedAfter.label "siste elementer">
+<!ENTITY expireEntriesPerFeedBefore.label "Fjern lagrede elementer etter">
+<!ENTITY expireEntriesPerFeedAfter.label "dager">
+<!ENTITY checkUpdatesPerFeedBefore.label "Sjekk for oppdateringer hver">

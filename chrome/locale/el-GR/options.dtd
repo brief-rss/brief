@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Επιλογές Brief">
+<!ENTITY mainPane.label "Γενικά">
+<!ENTITY folderTree.label "Κατάλογος δυναμικών σελιδοδεικτών">
+<!ENTITY showStatusbarIcon.label "Προβολή εικονίδιου στη γραμμή κατάστασης">
+<!ENTITY openInNewTab.label "Άνοιγμα του Brief σε νέα καρτέλα">
+<!ENTITY feedsPane.label "Αρχεία ροής">
+<!ENTITY updateGroup.caption "Γίνεται ενημέρωση">
+<!ENTITY checkForUpdatesBefore.label "Έλεγχος ενημερώσεων αρχείων ροής κάθε">
+<!ENTITY updateIntervalMinutes.label "λεπτά">
+<!ENTITY updateIntervalHours.label "ώρες">
+<!ENTITY updateIntervalDays.label "ημέρες">
+<!ENTITY checkForUpdatesAfter.label "λεπτά">
+<!ENTITY showNotification.label "Προβολή ειδοποίησης όταν υπάρχουν ενημερώσεις">
+<!ENTITY storingGroup.caption "Αποθήκευση">
+<!ENTITY expirationBefore.label "Αφαίρεση εμφανισμένων εγγγραφών μετά από">
+<!ENTITY expirationAfter.label "ημέρες">
+<!ENTITY storedEntriesBefore.label "Αποθήκευση το πολύ">
+<!ENTITY storedEntriesAfter.label "πρόσφατων εγγραφών από κάθε αρχείο ροής">
+<!ENTITY clearAllEntriesButton.label "Εκκαθάριση όλων των εγγραφών">
+<!ENTITY behaviorGroup.caption "Συμπεριφορά">
+<!ENTITY openEntriesInTabs.label "Άνοιγμα εγγραφών σε νέες καρτέλες">
+<!ENTITY doubleClickMarks.label "Σημείωση εγγραφών ως αναγνωσμένων με διπλό κλικ">
+<!ENTITY displayPane.label "Εμφάνιση">
+<!ENTITY authorsCheckbox.label "Προβολή συντακτών εγγραφών">
+<!ENTITY entriesPerPageBefore.label "Προβολή">
+<!ENTITY entriesPerPageAfter.label "εγγραφών ανά σελίδα">
+<!ENTITY styleGroup.caption "Στυλ περιεχομένου αρχείου ροής">
+<!ENTITY enableCustomStyle.label "Χρήση προσαρμοσμένου φύλλου στυλ για το περιεχόμενο του αρχείου ροής">
+<!ENTITY browseCustomStyle.label "Εντοπισμός">
+<!ENTITY feedName.label "Όνομα">
+<!ENTITY feedURL.label "Τοποθεσία">
+<!ENTITY optionsGroupbox.caption "Ρυθμίσεις αρχείου ροής">
+<!ENTITY maxEntriesPerFeedBefore.label "Αποθήκευση το πολύ">
+<!ENTITY maxEntriesPerFeedAfter.label "πρόσφατων εγγραφών">
+<!ENTITY expireEntriesPerFeedBefore.label "Αφαίρεση εμφανισμένων εγγραφών μετά από">
+<!ENTITY expireEntriesPerFeedAfter.label "ημέρες">
+<!ENTITY checkUpdatesPerFeedBefore.label "Έλεγχος για ενημερώσεις κάθε">

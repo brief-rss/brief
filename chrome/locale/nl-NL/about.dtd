@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline "Gemaakt door">
+<!ENTITY homepage.label "Homepage bezoeken">
+<!ENTITY contributors.headline "Bijdrages van">
+<!ENTITY credits.headline "Credits">
+<!ENTITY translators.headline "Vertalers">
+<!ENTITY extdevThanks.paragraph "Bedankt aan alle geweldige mensen van #extdev op irc.mozilla.org:">
+<!ENTITY iconsThanks.paragraph "Een paar van de pictogrammen heb ik te danken aan de getalenteerde Arvid Axelsson.">
+<!ENTITY testingThanks.paragraph "Bedankt aan Stefan Plewako voor het testen.">

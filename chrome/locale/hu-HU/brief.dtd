@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Adja meg az élő könyvjelzők mappáját">
+<!ENTITY searchCurrentView.label "Keresés az aktuális nézetben">
+<!ENTITY searchAllFeeds.label "Keresés az összes hírforrásban">
+<!ENTITY headlinesCheckbox.label "Show only headlines">
+<!ENTITY viewConstraintList.label "Nézet:">
+<!ENTITY viewAll.label "Minden">
+<!ENTITY viewUnread.label "Olvasatlan">
+<!ENTITY viewStarred.label "Csillag">
+<!ENTITY updateButton.tooltip "Hírforrások frissítése">
+<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
+<!ENTITY searchScopeButton.tooltip "Keresési hatókör megváltoztatása">
+<!ENTITY showOptions.tooltip "Rövid hírforrások beállítások">
+<!ENTITY markViewRead.tooltip "Aktuális bejegyzés jelölése olvasottként">
+<!ENTITY markViewUnread.tooltip "Aktuális bejegyzése jelölése olvasatlanként">
+<!ENTITY viewConstraintList.tooltip "Válassza ki milyen típusú bejegyzése jelenjen meg">
+<!ENTITY previousPage.tooltip "Újabb bejegyzések megjelenítése">
+<!ENTITY nextPage.tooltip "Régebbi bejegyzések megjelenítése">
+<!ENTITY unreadFolder.label "Olvasatlan bejegyzések">
+<!ENTITY starredFolder.label "Csillagos bejegyzések">
+<!ENTITY trashFolder.label "Törölt bejegyzések">
+<!ENTITY ctxMarkFeedRead.label "Hírforrást olvasottnak jelöl">
+<!ENTITY ctxMarkFolderRead.label "Mappát olvasottnak jelöl">
+<!ENTITY ctxUpdateFeed.label "Hírforrás frissítése">
+<!ENTITY ctxUpdateFolder.label "Update Folder">
+<!ENTITY ctxOpenWebsite.label "Weblap megnyitása">
+<!ENTITY ctxDeleteFeed.label "Delete Feed">
+<!ENTITY ctxDeleteFolder.label "Delete Folder">
+<!ENTITY ctxEmptyFeed.label "Hírforrás ürítése">
+<!ENTITY ctxEmptyFolder.label "Mappa ürítése">
+<!ENTITY ctxRestoreTrashed.label "Törölt bejegyzések visszaállítása">
+<!ENTITY ctxEmptyTrash.label "Törölt bejegyzések ürítése">
+<!ENTITY ctxFeedProperties.label "Properties">
+<!ENTITY ctxUpdateFeeds.label "Hírforrások frissítése azonnal">
+<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">

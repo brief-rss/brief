@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Настройки Brief">
+<!ENTITY mainPane.label "Основные">
+<!ENTITY folderTree.label "Укажите папку, содержащую ленты новостей:">
+<!ENTITY showStatusbarIcon.label "Показывать значок в строке состояния">
+<!ENTITY openInNewTab.label "Открывать Brief в новой вкладке">
+<!ENTITY feedsPane.label "Ленты новостей">
+<!ENTITY updateGroup.caption "Обновление">
+<!ENTITY checkForUpdatesBefore.label "Проверять обновления лент каждые">
+<!ENTITY updateIntervalMinutes.label "минут(ы)">
+<!ENTITY updateIntervalHours.label "час(ов)">
+<!ENTITY updateIntervalDays.label "дней">
+<!ENTITY checkForUpdatesAfter.label "минут(ы)">
+<!ENTITY showNotification.label "Оповещать, если произойдут обновления">
+<!ENTITY storingGroup.caption "Хранение">
+<!ENTITY expirationBefore.label "Удалять загруженные записи после">
+<!ENTITY expirationAfter.label "дней">
+<!ENTITY storedEntriesBefore.label "Хранить не больше чем">
+<!ENTITY storedEntriesAfter.label "последних записей в каждой ленте">
+<!ENTITY clearAllEntriesButton.label "Очистить все записи">
+<!ENTITY behaviorGroup.caption "Поведение">
+<!ENTITY openEntriesInTabs.label "Открывать записи в новых вкладках">
+<!ENTITY doubleClickMarks.label "Отмечать как прочитанное двойным кликом">
+<!ENTITY displayPane.label "Отображение">
+<!ENTITY authorsCheckbox.label "Показывать автора записи">
+<!ENTITY entriesPerPageBefore.label "Показывать">
+<!ENTITY entriesPerPageAfter.label "записей на странице">
+<!ENTITY styleGroup.caption "Стиль отображения лент">
+<!ENTITY enableCustomStyle.label "Использовать другой стиль оформления ленты">
+<!ENTITY browseCustomStyle.label "Обзор">
+<!ENTITY feedName.label "Название">
+<!ENTITY feedURL.label "Адрес">
+<!ENTITY optionsGroupbox.caption "Настройки лент">
+<!ENTITY maxEntriesPerFeedBefore.label "Хранить не более">
+<!ENTITY maxEntriesPerFeedAfter.label "последних записей">
+<!ENTITY expireEntriesPerFeedBefore.label "Удалять загруженные записи после">
+<!ENTITY expireEntriesPerFeedAfter.label "дней">
+<!ENTITY checkUpdatesPerFeedBefore.label "Проверять обновления каждые">

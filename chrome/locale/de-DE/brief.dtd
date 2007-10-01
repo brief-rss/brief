@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Ordner mit dynamischen Lesezeichen auswählen">
+<!ENTITY searchCurrentView.label "In der aktuellen Ansicht suchen">
+<!ENTITY searchAllFeeds.label "In allen Feeds suchen">
+<!ENTITY headlinesCheckbox.label "Nur Schlagzeilen anzeigen">
+<!ENTITY viewConstraintList.label "Ansicht:">
+<!ENTITY viewAll.label "Alle">
+<!ENTITY viewUnread.label "Ungelesene">
+<!ENTITY viewStarred.label "Gekennzeichnete">
+<!ENTITY updateButton.tooltip "Alle Feeds auf Aktualisierungen prüfen">
+<!ENTITY stopUpdatingButton.tooltip "Feeds nicht mehr auf Aktualisierungen prüfen">
+<!ENTITY searchScopeButton.tooltip "Suchbereich ändern">
+<!ENTITY showOptions.tooltip "Einstellungen öffnen">
+<!ENTITY markViewRead.tooltip "Angezeigte Einträge als gelesen markieren">
+<!ENTITY markViewUnread.tooltip "Angezeigte Einträge als ungelesen markieren">
+<!ENTITY viewConstraintList.tooltip "Art der anzuzeigenden Einträge auswählen">
+<!ENTITY previousPage.tooltip "Neuere Einträge anzeigen">
+<!ENTITY nextPage.tooltip "Ältere Einträge anzeigen">
+<!ENTITY unreadFolder.label "Ungelesen">
+<!ENTITY starredFolder.label "Gekennzeichnet">
+<!ENTITY trashFolder.label "Papierkorb">
+<!ENTITY ctxMarkFeedRead.label "Feed als gelesen markieren">
+<!ENTITY ctxMarkFolderRead.label "Ordner als gelesen markieren">
+<!ENTITY ctxUpdateFeed.label "Feed aktualisieren">
+<!ENTITY ctxUpdateFolder.label "Ordner aktualisieren">
+<!ENTITY ctxOpenWebsite.label "Homepage öffnen">
+<!ENTITY ctxDeleteFeed.label "Feed löschen">
+<!ENTITY ctxDeleteFolder.label "Ordner löschen">
+<!ENTITY ctxEmptyFeed.label "Feed-Einträge löschen">
+<!ENTITY ctxEmptyFolder.label "Einträge des Feed-Ordners löschen">
+<!ENTITY ctxRestoreTrashed.label "Einträge aus dem Papierkorb wiederherstellen">
+<!ENTITY ctxEmptyTrash.label "Papierkorb leeren">
+<!ENTITY ctxFeedProperties.label "Eigenschaften">
+<!ENTITY ctxUpdateFeeds.label "Feeds jetzt aktualisieren">
+<!ENTITY ctxMarkFeedsAsRead.label "Alle Feeds als gelesen markieren">

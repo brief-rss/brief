@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Vælg Live Bogmærker-mappe">
+<!ENTITY searchCurrentView.label "Søg nuværende visning">
+<!ENTITY searchAllFeeds.label "Søg alle feeds">
+<!ENTITY headlinesCheckbox.label "Show only headlines">
+<!ENTITY viewConstraintList.label "Vis:">
+<!ENTITY viewAll.label "Alle">
+<!ENTITY viewUnread.label "Ulæste">
+<!ENTITY viewStarred.label "Stjernemarkerede">
+<!ENTITY updateButton.tooltip "Tjek alle feeds for opdateringer">
+<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
+<!ENTITY searchScopeButton.tooltip "Skift søgerækkevidde">
+<!ENTITY showOptions.tooltip "Andre Brief indstillinger">
+<!ENTITY markViewRead.tooltip "Marker nuværende viste elementer som læste">
+<!ENTITY markViewUnread.tooltip "Marker nuværende viste elementer som ulæste">
+<!ENTITY viewConstraintList.tooltip "Vælg hvilke slags emner der skal vises">
+<!ENTITY previousPage.tooltip "Vis nyere elementer">
+<!ENTITY nextPage.tooltip "Vis ældre elementer">
+<!ENTITY unreadFolder.label "Ulæst">
+<!ENTITY starredFolder.label "Stjernemarkeret">
+<!ENTITY trashFolder.label "Skraldespand">
+<!ENTITY ctxMarkFeedRead.label "Marker alle feeds som læste">
+<!ENTITY ctxMarkFolderRead.label "Marker mappe som læst">
+<!ENTITY ctxUpdateFeed.label "Opdater feed">
+<!ENTITY ctxUpdateFolder.label "Update Folder">
+<!ENTITY ctxOpenWebsite.label "Åbn webside">
+<!ENTITY ctxDeleteFeed.label "Delete Feed">
+<!ENTITY ctxDeleteFolder.label "Delete Folder">
+<!ENTITY ctxEmptyFeed.label "Tomt feed">
+<!ENTITY ctxEmptyFolder.label "Tom mappe">
+<!ENTITY ctxRestoreTrashed.label "Genetabler udsmidte emner">
+<!ENTITY ctxEmptyTrash.label "Tøm skraldespand">
+<!ENTITY ctxFeedProperties.label "Properties">
+<!ENTITY ctxUpdateFeeds.label "Opdater feeds nu">
+<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">

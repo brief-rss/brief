@@ -6,18 +6,32 @@
 <!ENTITY feedsPane.label "Фийдове">
 <!ENTITY updateGroup.caption "Ъпдейтване">
 <!ENTITY checkForUpdatesBefore.label "Проверявай фийдовете за ъпдейти на всеки">
+<!ENTITY updateIntervalMinutes.label "минути">
+<!ENTITY updateIntervalHours.label "часа">
+<!ENTITY updateIntervalDays.label "дни">
 <!ENTITY checkForUpdatesAfter.label "минути">
 <!ENTITY showNotification.label "Извести ме при намерени ъпдейти">
 <!ENTITY storingGroup.caption "Запазване">
-<!ENTITY expirationBefore.label "Запази изтеглените добавки за">
+<!ENTITY expirationBefore.label "Изтрий изтеглените фийдове след">
 <!ENTITY expirationAfter.label "дни">
-<!ENTITY storedEntriesBefore.label "Запазвай до">
-<!ENTITY storedEntriesAfter.label "добавки за фийд">
+<!ENTITY storedEntriesBefore.label "Не запазвай повече от">
+<!ENTITY storedEntriesAfter.label "най-новите фийдове">
+<!ENTITY clearAllEntriesButton.label "Зачисти всички фийдове">
 <!ENTITY behaviorGroup.caption "Поведение">
 <!ENTITY openEntriesInTabs.label "Отваряй добавките в нови подпрозорци">
 <!ENTITY doubleClickMarks.label "Маркирай добавките като прочетени при двойно кликване върху тях.">
 <!ENTITY displayPane.label "Дисплей">
+<!ENTITY authorsCheckbox.label "Показвай авторите на фийдовете">
 <!ENTITY entriesPerPageBefore.label "Покажи">
 <!ENTITY entriesPerPageAfter.label "промени на страница">
+<!ENTITY styleGroup.caption "Стил на фийдовете">
 <!ENTITY enableCustomStyle.label "Използвай друг стил за фийдовете">
 <!ENTITY browseCustomStyle.label "Разгледай">
+<!ENTITY feedName.label "Име">
+<!ENTITY feedURL.label "Адрес">
+<!ENTITY optionsGroupbox.caption "Фийд Настройки">
+<!ENTITY maxEntriesPerFeedBefore.label "Не запазвай повече от">
+<!ENTITY maxEntriesPerFeedAfter.label "най-новите фийдове">
+<!ENTITY expireEntriesPerFeedBefore.label "Изтрий изтеглените фийдове след">
+<!ENTITY expireEntriesPerFeedAfter.label "дена">
+<!ENTITY checkUpdatesPerFeedBefore.label "Проверявай за обновления на всеки">

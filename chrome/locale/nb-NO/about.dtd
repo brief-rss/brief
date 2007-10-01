@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline "Laget av">
+<!ENTITY homepage.label "Besøk hjemmeside">
+<!ENTITY contributors.headline "Bidragsytere">
+<!ENTITY credits.headline "Medvirkende">
+<!ENTITY translators.headline "Oversettere">
+<!ENTITY extdevThanks.paragraph "Takk til alle fra #extdev på irc.mozilla.org:">
+<!ENTITY iconsThanks.paragraph "Takk til Arvid Axelsson for noen av ikonene">
+<!ENTITY testingThanks.paragraph "Takk til Stefan Plewako for testing">

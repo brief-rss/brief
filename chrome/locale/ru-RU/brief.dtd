@@ -1,0 +1,34 @@
+<!ENTITY pickFolder.label "Выберите папку с лентами новостей">
+<!ENTITY searchCurrentView.label "Поиск в текущем виде">
+<!ENTITY searchAllFeeds.label "Поиск во всех лентах">
+<!ENTITY headlinesCheckbox.label "Показывать только заголовки новостей">
+<!ENTITY viewConstraintList.label "Показывать:">
+<!ENTITY viewAll.label "Все">
+<!ENTITY viewUnread.label "Непрочитанные">
+<!ENTITY viewStarred.label "Помеченные">
+<!ENTITY updateButton.tooltip "Проверить обновления для всех лент">
+<!ENTITY stopUpdatingButton.tooltip "Остановить проверку обновления">
+<!ENTITY searchScopeButton.tooltip "Изменить область действия поиска">
+<!ENTITY showOptions.tooltip "Открыть настройки Brief">
+<!ENTITY markViewRead.tooltip "Отметить просматриваемые записи как прочитанные">
+<!ENTITY markViewUnread.tooltip "Отметить просматриваемые записи как непрочитанные">
+<!ENTITY viewConstraintList.tooltip "Выберите, какие записи следует отображать">
+<!ENTITY previousPage.tooltip "Показать более новые записи">
+<!ENTITY nextPage.tooltip "Показать более старые записи">
+<!ENTITY unreadFolder.label "Непрочитанные">
+<!ENTITY starredFolder.label "Помеченные">
+<!ENTITY trashFolder.label "Корзина">
+<!ENTITY ctxMarkFeedRead.label "Отметить ленту как прочитанную">
+<!ENTITY ctxMarkFolderRead.label "Отметить папку как прочитанную">
+<!ENTITY ctxUpdateFeed.label "Обновить ленту">
+<!ENTITY ctxUpdateFolder.label "Обновить папку">
+<!ENTITY ctxOpenWebsite.label "Открыть веб-сайт">
+<!ENTITY ctxDeleteFeed.label "Удалить ленту">
+<!ENTITY ctxDeleteFolder.label "Удалить папку">
+<!ENTITY ctxEmptyFeed.label "Очистить ленту">
+<!ENTITY ctxEmptyFolder.label "Очистить папку">
+<!ENTITY ctxRestoreTrashed.label "Восстановить удалённые записи">
+<!ENTITY ctxEmptyTrash.label "Очистить корзину">
+<!ENTITY ctxFeedProperties.label "Свойства">
+<!ENTITY ctxUpdateFeeds.label "Обновить ленты новостей">
+<!ENTITY ctxMarkFeedsAsRead.label "Отметить все ленты как прочитанные">
