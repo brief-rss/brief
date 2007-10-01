@@ -321,9 +321,9 @@ var gBrief = {
         this.menu = popup;
 
         // Get contextual info.
-        if (gBrowser.selectedTab == gBrief.tab)
+        if (content.location == BRIEF_URL && gBrief.contextMenuTarget)
             document.popupNode = gBrief.contextMenuTarget;
-            
+
         this.setTarget( document.popupNode, document.popupRangeParent,
                         document.popupRangeOffset );
 

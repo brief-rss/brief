@@ -260,6 +260,7 @@ FeedView.prototype = {
     // well as hides/unhides the feed view toolbar.
     _onLoad: function FeedView__onLoad(aEvent) {
         var feedViewToolbar = document.getElementById('feed-view-toolbar');
+        gFeedView.browser.contentDocument.addEventListener('mousedown', brief.onFeedViewMousedown, true);
         if (gFeedView.isActive) {
             feedViewToolbar.hidden = false;
             gFeedView._buildFeedView();
@@ -296,7 +297,6 @@ FeedView.prototype = {
 
         // See comments next to the event handler functions.
         doc.addEventListener('click', brief.onFeedViewClick, true);
-        doc.addEventListener('mousedown', brief.onFeedViewMousedown, true);
 
         // Apply the CSS.
         var style = doc.getElementsByTagName('style')[0];

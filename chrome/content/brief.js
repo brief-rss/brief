@@ -377,8 +377,10 @@ var brief = {
     // document.popupNode (see gBrief.contextMenuOverride()
     // in brief-overlay.js).
     onFeedViewMousedown: function brief_onFeedViewMousedown(aEvent) {
-        if (aEvent.button == 2)
+        if (aEvent.button == 2 && gFeedView.isActive)
             brief.browserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
+        else
+            brief.browserWindow.gBrief.contextMenuTarget = null;
     },
 
 // Toolbar commands.
