@@ -23,13 +23,13 @@ treechildren::-moz-tree-line {
   visibility: hidden;
   }
 
-treechildren::-moz-tree-twisty {
+treechildren::-moz-tree-twisty(container) {
   list-style-image: url('icons/tree-dropmarker.png');
   width: 11px;
   height: 11px;
   }
 
-treechildren::-moz-tree-twisty(open) {
+treechildren::-moz-tree-twisty(container, open) {
   list-style-image: url('icons/tree-dropmarker-open.png');
 }
 

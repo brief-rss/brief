@@ -1,18 +1,19 @@
 body {
   background: #fafafc;
-  font-size: 62.5%;
-  font-family: Verdana, sans-serif;
+  font-family: "Lucida Grande", Verdana, sans-serif;
+  font-size: 10px;
   margin: 0;
   padding: 0;
   }
 
-/* ----------------  Header ----------------- */
+
+/* ----------------------  Header ---------------------- */
 
 #header {
   background: #314a59 url('chrome://brief/skin/header-bkg.png') repeat-x;
   color: #ffffff;
   display: block;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
   padding: 5px 5% 5px;
   text-decoration: none;
   }
@@ -24,12 +25,12 @@ body {
   }
 
 #feed-title {
-  font-size: 2.2em;
+  font-size: 22px;
   font-weight: bold;
   }
 
 #feed-subtitle {
-  font-size: 1.4em;
+  font-size: 14px;
   margin-top: 3px;
   }
 
@@ -43,110 +44,73 @@ body {
   }
 
 
-/* ----------------  Article ----------------- */
+/* ----------------------  Article  ---------------------- */
 
+/* .article-container may have "starred", "read", and "collapsed"
+   attributes. The first two are self-explanatory while "collapsed"
+   means that the article's content is folded (headlines-only mode) */
 .article-container {
   background-color: #ffffff;
   border: 1px #baccd6 solid;
   -moz-border-radius: 2px;
-  margin: 0 1em 1em 40px;
-  overflow: visible; /* This is for the the expand/collapse dropmarker which is taken
-                        outside the box using negative margins*/
+  margin: 0 1em 1em 1em;
+  overflow: visible;      /* This is for the the expand/collapse dropmarker which is
+                             taken outside the box using negative margins */
   }
 
-.article-container[read] {
-  border-color: #bcc8cb;
-  }
 
-/*               Article header               */
+/* ----------------------  Article header  ---------------------- */
+
 .article-header {
   background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
   min-height: 3.5em;
-  padding: 5px 5px 0;
-  }
-
-.article-container[read] .article-header {
-  background: #fdfdfd url('chrome://brief/skin/read-entry-bkg.png') repeat-x;
+  padding: 6px 5px 0;
   }
 
 .article-title-link {
   color: #0f0f0f;
-  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
-  font-size: 1.3em;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 13px;
   font-weight: bold;
   text-decoration: none;
   }
 
-.article-container[read] .article-title-link {
-  font-weight: normal;
-  }
 
-
-/*          Article controls             */
+/* ---------------------- Article controls  ---------------------- */
 
 .article-controls {
-  display: table-cell;
+  display: table-cell; /* The only way I could find out to keep the buttons aligned
+                          was to use vertical-align. For this we need table-cell. */
   float: right;
   font-family: Arial, sans-serif;
-  font-size: 1.2em;
+  font-size: 12px;
+  margin-top: -3px;
   }
 
+/*   Never change padding of the buttons as it breaks many themes  */
 .article-controls button {
-  margin-top: -2px;
   min-width: 0;
   opacity: 0.8;
   vertical-align: middle;
   }
 
 .article-controls button:hover {
-  opacity: 1.0 !important;
+  opacity: 1.0;
 }
-
-.delete-entry {
-  list-style-image: url('chrome://brief/skin/icons/entry-delete.png');
-  -moz-image-region: rect(0px, 15px, 15px, 0px);
-  }
-
-.delete-entry:hover {
-  -moz-image-region: rect(15px, 15px, 30px, 0px);
-  }
-
-.restore-entry {
-  list-style-image: url('chrome://brief/skin/icons/restore-entry.png');
-  }
-
-
-.article-container[starred] .star-entry {
-  list-style-image: url('chrome://brief/skin/icons/unstar.png');
-  }
 
 .star-container {
   float: left;
-  margin: -5px 2px 0 -5px;
+  margin: -6px 2px 0 -5px;
   padding: 5px 3px 0 5px;
 }
 
-.star-image {
-  list-style-image: url('chrome://brief/skin/icons/entry-star.png');
-  -moz-image-region: rect(0px, 16px, 16px, 0px);
-  }
 
-.article-container:not([starred]) .star-container:hover .star-image {
-  -moz-image-region: rect(16px, 16px, 32px, 0px);
-  opacity: 0.7;
-  }
+/* ----------------------  Article subheader  ---------------------- */
 
-.article-container[starred] .star-image {
-  -moz-image-region: rect(32px, 16px, 48px, 0px);
-}
-
-
-
-/*           Article subheader             */
 .article-subheader {
   color: #4f4f4f;
-  font-family: "Lucida Grande", Arial, Helvetica, sans-serif;
-  font-size: 1.3em;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 13px;
   min-height: 1.4em;
   padding: 0 2em 0 40px;
 }
@@ -161,40 +125,56 @@ body {
 }
 
 
-/*        Article main area              */
+/* ----------------------  Article content area   ---------------------- */
 
 .article-content {
   color: #101d27;
   clear: both;
-  font-size: 1.2em;
-  margin: 0 1em 1.5em;
+  font-size: 12px;
   overflow: auto;
-  padding: 0 1.5em 1px; /* The 1px bottom padding is necessary to avoid scrollbar showing up when
-                           the last element is a link (because links have 1px bottom border) */
+  padding: 0 2.5em 1.5em;
   }
 
 .article-content a {
-  border-bottom: 1px solid #0a1f72;
   color: #0a1f72;
-  text-decoration: none;
   }
 
 .article-content a:visited	{
-  border-color: #444b66;
   color: #444b66;
   }
 
 .article-content > *:first-child {
-  margin-top: 0;
+  margin-top: 0 !important;;
+}
+
+.article-content img {
+  float: right;
+  margin-left: 10px;
 }
 
 .article-content pre, .article-content code {
-  font-family: "Courier New", Courier, monospace;
+  font-family: "Courier New", monospace;
   font-size: 1em;
   }
 
 
-/*       Modifications for the headlines mode         */
+
+/*  ----------------------  Adjustments for read articles  ---------------------- */
+
+.article-container[read] {
+  border-color: #bcc8cb;
+  }
+
+.article-container[read] .article-header {
+  background: #fdfdfd url('chrome://brief/skin/read-entry-bkg.png') repeat-x;
+  }
+
+.article-container[read] .article-title-link {
+  font-weight: normal;
+  }
+
+
+/* ----------------------  Adjustments for the headlines mode  ---------------------- */
 
 .article-container[collapsed] {
   background: #fafafc;
@@ -203,7 +183,7 @@ body {
   border-left: none;
   clear: both;
   margin-bottom: 0;
-  padding: 0 1px 1em 1px; /* Compensate the lack of border */
+  padding: 0 1px 1em 1px; /* Compensate the lack of border, so it doesn't shift */
 }
 
 .article-container[collapsed] .article-controls,
@@ -225,6 +205,10 @@ body {
 
 #feed-content[showHeadlinesOnly] .expand-button {
   display: block;
+}
+
+#feed-content[showHeadlinesOnly] .article-container {
+  margin-left: 40px; /* Makes space for the expand arrow */
 }
 
 #feed-content[showHeadlinesOnly] .article-container:hover .expand-button {

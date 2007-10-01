@@ -10,3 +10,34 @@
   display: none;
   }
 
+.delete-entry {
+  list-style-image: url('chrome://brief/skin/icons/entry-delete.png');
+  -moz-image-region: rect(0px, 15px, 15px, 0px);
+  }
+
+.delete-entry:hover {
+  -moz-image-region: rect(15px, 15px, 30px, 0px);
+  }
+
+.restore-entry {
+  list-style-image: url('chrome://brief/skin/icons/restore-entry.png');
+  }
+
+
+.article-container[starred] .star-entry {
+  list-style-image: url('chrome://brief/skin/icons/unstar.png');
+  }
+
+.star-image {
+  list-style-image: url('chrome://brief/skin/icons/entry-star.png');
+  -moz-image-region: rect(0px, 16px, 16px, 0px);
+  }
+
+.article-container:not([starred]) .star-container:hover .star-image {
+  -moz-image-region: rect(16px, 16px, 32px, 0px);
+  opacity: 0.7;
+  }
+
+.article-container[starred] .star-image {
+  -moz-image-region: rect(32px, 16px, 48px, 0px);
+}
