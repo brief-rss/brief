@@ -72,8 +72,6 @@ BriefUpdateService.prototype = {
     updateQueue:    [],  // remaining feeds to be fetched
     completedFeeds: [],  // feeds which have been fetched and parsed
 
-    updateCanceled: false,
-
     feedsWithNewEntriesCount: 0,  // number of updated feeds that have new entries
     newEntriesCount:          0,  // total number of new entries in all updated feeds
 
@@ -130,6 +128,7 @@ BriefUpdateService.prototype = {
         if (this.updateInProgress != NORMAL_UPDATE)
             this.updateInProgress = aInBackground ? BACKGROUND_UPDATE : NORMAL_UPDATE;
 
+        // If new feeds have ended up in the queue then send the proper notification.
         if (oldLength < this.scheduledFeeds.length) {
             var data = this.updateInProgress == BACKGROUND_UPDATE ? 'background' : 'foreground';
             var observerService = Cc['@mozilla.org/observer-service;1'].
@@ -140,12 +139,11 @@ BriefUpdateService.prototype = {
 
 
     stopFetching: function BUS_stopFetching() {
-        this.updateCanceled = true;
         var observerService = Cc['@mozilla.org/observer-service;1'].
                               getService(Ci.nsIObserverService);
         observerService.notifyObservers(null, 'brief:feed-update-canceled', '');
 
-        // We must call this after sending brief:feed-update-canceled, because when the
+        // We must call this after sending brief:feed-update-canceled, because when a
         // feed fetcher receives it, it adds a feed to the completedFeeds stack. If we
         // called finishUpdate before that, the completedStack wouldn't be cleaned,
         // thus messing up subsequent updates.
@@ -229,7 +227,6 @@ BriefUpdateService.prototype = {
         this.completedFeeds = [];
         this.scheduledFeeds = [];
         this.updateQueue = [];
-        this.updateCanceled = false;
     },
 
 
@@ -255,8 +252,6 @@ BriefUpdateService.prototype = {
         // updating is completed.
         case 'brief:feed-error':
         case 'brief:feed-updated':
-            dump('Brief\nWarning: ' + aTopic + ' notification was fired even though updating had been canceled.');
-
             // If |updateInProgress| is NO_UPDATE then it means that a single feed was
             // requested - nothing to do here as batch update wasn't started.
             if (this.updateInProgress == NO_UPDATE)
