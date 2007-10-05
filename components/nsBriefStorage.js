@@ -345,12 +345,24 @@ BriefStorageService.prototype = {
         var now = Date.now();
         var oldestEntryDate = now;
 
-        var insertIntoEntries = this.dBConnection.createStatement(
-                                'INSERT OR IGNORE INTO entries (                 ' +
-                                'feedID,   id,       providedId,   entryURL,     ' +
-                                'title,    summary,  content,      date,         ' +
-                                'authors,  read)                                 ' +
-                                'VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) ');
+        var insertEntry = this.dBConnection.createStatement(
+                          'INSERT OR IGNORE INTO entries                     ' +
+                          '(                                                 ' +
+                          'feedID, id, providedId, entryURL, title,          ' +
+                          'summary, content, date, authors, read             ' +
+                          ')                                                 ' +
+                          'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)  ');
+        var updateEntry = this.dBConnection.createStatement(
+                          'UPDATE entries       ' +
+                          'SET summary = ?1,    ' +
+                          '    content = ?2,    ' +
+                          '    date    = ?3,    ' +
+                          '    authors = ?4,    ' +
+                          '    read    = 0      ' +
+                          'WHERE id = ?5        ');
+        var getDateForEntry = this.dBConnection.
+                              createStatement('SELECT date FROM entries WHERE id = ?');
+
         this.dBConnection.beginTransaction();
 
         // Count the unread entries, to compare their number later.
@@ -364,12 +376,15 @@ BriefStorageService.prototype = {
 
         try {
             var entries = aFeed.getEntries({});
-            var entry, title;
+            var entry, title, storedEntryDate;
+
+            // Generate hashes, insert and update entries.
             for (var i = 0; i < entries.length; i++) {
                 entry = entries[i];
                 title = entry.title.replace(/<[^>]+>/g,''); // Strip tags
 
-                // Special case for MediaWiki feeds: include date in the hash. In
+                // Compute the hash which serves as the entry's unique id.
+                // Special case for MediaWiki feeds: include the date in the hash. In
                 // "Recent changes" feeds, entries for subsequent edits of a page
                 // differ only in date.
                 if (isMediaWikiFeed)
@@ -377,24 +392,47 @@ BriefStorageService.prototype = {
                 else
                     hash = hashString(aFeed.feedID + entry.entryURL + entry.id + title);
 
+                // See if this entry is already in the database while getting its date.
+                storedEntryDate = 0;
+                getDateForEntry.bindStringParameter(0, hash);
+                if (getDateForEntry.executeStep())
+                    storedEntryDate = getDateForEntry.getInt64(0);
+                getDateForEntry.reset();
 
-                insertIntoEntries.bindStringParameter(0, aFeed.feedID);
-                insertIntoEntries.bindStringParameter(1, hash);
-                insertIntoEntries.bindStringParameter(2, entry.id);
-                insertIntoEntries.bindStringParameter(3, entry.entryURL);
-                insertIntoEntries.bindStringParameter(4, title);
-                insertIntoEntries.bindStringParameter(5, entry.summary);
-                insertIntoEntries.bindStringParameter(6, entry.content);
-                insertIntoEntries.bindInt64Parameter(7, entry.date ? entry.date : now);
-                insertIntoEntries.bindStringParameter(8, entry.authors);
-                insertIntoEntries.bindInt32Parameter(9, 0);
-                insertIntoEntries.execute();
+                // If no such entry is present yet, insert it. Otherwise, compare if
+                // the downloaded entry has a newer date than the stored version,
+                // in which case update the data and mark the entry as unread.
+                if (storedEntryDate && entry.date && storedEntryDate < entry.date) {
+                    updateEntry.bindStringParameter(0, entry.summary);
+                    updateEntry.bindStringParameter(1, entry.content);
+                    updateEntry.bindInt64Parameter(2, entry.date)
+                    updateEntry.bindStringParameter(3, entry.authors);
+                    updateEntry.bindStringParameter(4, hash);
 
+                    updateEntry.execute();
+                }
+                else {
+                    insertEntry.bindStringParameter(0, aFeed.feedID);
+                    insertEntry.bindStringParameter(1, hash);
+                    insertEntry.bindStringParameter(2, entry.id);
+                    insertEntry.bindStringParameter(3, entry.entryURL);
+                    insertEntry.bindStringParameter(4, title);
+                    insertEntry.bindStringParameter(5, entry.summary);
+                    insertEntry.bindStringParameter(6, entry.content);
+                    insertEntry.bindInt64Parameter(7, entry.date ? entry.date : now);
+                    insertEntry.bindStringParameter(8, entry.authors);
+                    insertEntry.bindInt32Parameter(9, 0);
+
+                    insertEntry.execute();
+                }
+
+                // Track the date of the oldest entry.
                 if (entry.date && entry.date < oldestEntryDate)
                     oldestEntryDate = entry.date;
             }
 
-            // Do not update the title, so that it is always taken from the Live Bookmark.
+            // Update the feed's data. Do not update the title, though, because it's
+            // taken from the Live Bookmark.
             var updateFeed = this.dBConnection.createStatement(
                              'UPDATE feeds                        ' +
                              'SET websiteURL  = ?1,               ' +
