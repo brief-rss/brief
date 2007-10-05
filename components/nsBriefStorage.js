@@ -9,10 +9,10 @@ const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const NC_NAME          = 'http://home.netscape.com/NC-rdf#Name';
-const NC_FEEDURL       = 'http://home.netscape.com/NC-rdf#FeedURL';
-const NC_LIVEMARK      = 'http://home.netscape.com/NC-rdf#Livemark';
-const RDF_TYPE         = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+const NC_NAME     = 'http://home.netscape.com/NC-rdf#Name';
+const NC_FEEDURL  = 'http://home.netscape.com/NC-rdf#FeedURL';
+const NC_LIVEMARK = 'http://home.netscape.com/NC-rdf#Livemark';
+const RDF_TYPE    = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
 // How often to delete entries that have expired or exceed the max number of entries per feed.
 const DELETE_REDUNDANT_ENTRIES_INTERVAL = 3600*24; // 1 day
@@ -24,6 +24,8 @@ const PURGE_DELETED_ENTRIES_INTERVAL = 3600*24*3; // 3 days
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const RDF_OBSERVER_DELAY = 250;
+
+const DATABASE_VERSION = 1;
 
 
 function BriefStorageService() {
@@ -101,35 +103,14 @@ BriefStorageService.prototype = {
                                            'starred    INTEGER DEFAULT 0,       ' +
                                            'deleted    INTEGER DEFAULT 0        ' +
                                            ')');
-        // Columns added in 0.6.
-        try {
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
-        }
-        catch (e) {}
 
-        // Columns added in 0.7.
-        try {
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
-            this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
-        }
-        catch (e) {}
+        var getDatabaseVersion = this.dBConnection.createStatement('PRAGMA user_version');
+        getDatabaseVersion.executeStep();
+        var databaseVersion = getDatabaseVersion.getInt32(0);
+        getDatabaseVersion.reset();
 
-        this.dBConnection.executeSimpleSQL('CREATE UNIQUE INDEX IF NOT EXISTS       ' +
-                                           'entries_id_index ON entries (id)        ');
-        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                           'entries_feedID_index ON entries (feedID)');
-        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                           'entries_date_index ON entries (date)    ');
-        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                           'feeds_feedID_index ON feeds (feedID)    ');
+        if (databaseVersion < DATABASE_VERSION)
+            this.migrateDatabase(databaseVersion);
 
         this.startDummyStatement();
         this.dBConnection.preload();
@@ -143,6 +124,51 @@ BriefStorageService.prototype = {
         this.initBookmarks();
 
         this.observerService.addObserver(this, 'quit-application', false);
+    },
+
+
+    migrateDatabase: function BriefStorage_migrateDatabase(aPreviousVersion) {
+        switch (aPreviousVersion) {
+
+        // Schema version checking has only been introduced in 0.7.5. When migrating from
+        // earlier releases we don't know the exact previous version, so we attempt
+        // to apply all the changes since the beginning of time.
+        case 0:
+            // Columns and indices added in 0.7.
+            try {
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
+            }
+            catch (e) {
+                break;
+            }
+
+            this.dBConnection.executeSimpleSQL('CREATE UNIQUE INDEX IF NOT EXISTS       ' +
+                                               'entries_id_index ON entries (id)        ');
+            this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                               'entries_feedID_index ON entries (feedID)');
+            this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                               'entries_date_index ON entries (date)    ');
+            this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
+                                               'feeds_feedID_index ON feeds (feedID)    ');
+
+            // Columns added in 0.6.
+            try {
+                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
+                this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedId TEXT');
+            }
+            catch (e) {}
+            // Fall through.
+        }
+
+        this.dBConnection.executeSimpleSQL('PRAGMA user_version = ' + DATABASE_VERSION)
     },
 
 
