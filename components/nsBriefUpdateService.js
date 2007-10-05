@@ -145,6 +145,10 @@ BriefUpdateService.prototype = {
                               getService(Ci.nsIObserverService);
         observerService.notifyObservers(null, 'brief:feed-update-canceled', '');
 
+        // We must call this after sending brief:feed-update-canceled, because when the
+        // feed fetcher receives it, it adds a feed to the completedFeeds stack. If we
+        // called finishUpdate before that, the completedStack wouldn't be cleaned,
+        // thus messing up subsequent updates.
         this.finishUpdate();
     },
 
@@ -386,7 +390,7 @@ FeedFetcher.prototype = {
 
     // nsIFeedResultListener
     handleResult: function FeedFetcher_handleResult(aResult) {
-        if (!aResult || !aResult.doc) {
+        if (!aResult || !aResult.doc || aResult.bozo) {
             this.finish(false);
             return;
         }
