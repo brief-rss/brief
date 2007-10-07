@@ -146,9 +146,7 @@ BriefStorageService.prototype = {
                 this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
                 this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
             }
-            catch (e) {
-                break;
-            }
+            catch (e) {}
 
             this.dBConnection.executeSimpleSQL('CREATE UNIQUE INDEX IF NOT EXISTS       ' +
                                                'entries_id_index ON entries (id)        ');
