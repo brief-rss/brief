@@ -1244,8 +1244,9 @@ BriefQuery.prototype = {
         }
 
         if (this.searchString) {
-            text += 'entries.title || entries.summary || entries.content ' +
-                    'LIKE "%" || "' + this.searchString + '" || "%" AND ';
+            var words = this.searchString.match(/[^ ]+/g);
+            for (var i = 0; i < words.length; i++)
+                text += '(entries.title LIKE "%" || "' + words[i] + '" || "%" OR entries.summary LIKE "%" || "' + words[i] + '" || "%" OR entries.content LIKE "%" || "' + words[i] + '" || "%") AND ';
         }
 
         if (this.read)
