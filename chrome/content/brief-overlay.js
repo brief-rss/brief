@@ -25,7 +25,8 @@ var gBrief = {
         if (this.tab)
             gBrowser.selectedTab = this.tab;
         else if (aNewTab) {
-            this.tab = gBrowser.loadOneTab(BRIEF_URL, null, null, null, false);
+            this.tab = gBrowser.addTab(BRIEF_URL, null, null, null, null, false);
+            gBrowser.selectedTab = this.tab;
             var browser = gBrowser.getBrowserForTab(this.tab);
             browser.addEventListener('load', this.onBriefTabLoad, true);
         }
