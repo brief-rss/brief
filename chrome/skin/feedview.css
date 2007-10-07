@@ -166,7 +166,7 @@ body {
   }
 
 .article-container[read] .article-header {
-  background: #fdfdfd url('chrome://brief/skin/read-entry-bkg.png') repeat-x;
+  background: url('chrome://brief/skin/read-entry-bkg.png') repeat-x;
   }
 
 .article-container[read] .article-title-link {
