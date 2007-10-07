@@ -713,8 +713,11 @@ BriefStorageService.prototype = {
         removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
         removeFeeds.execute();
 
-        this.stopDummyStatement();
-        this.dBConnection.executeSimpleSQL('VACUUM');
+        var vacuumDisabled = this.prefs.getBoolPref('database.disableVacuum');
+        if (!vacuumDisabled) {
+            this.stopDummyStatement();
+            this.dBConnection.executeSimpleSQL('VACUUM');
+        }
 
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
