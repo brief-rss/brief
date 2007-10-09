@@ -60,6 +60,13 @@ var brief = {
             // If no Live Bookmarks folder has been picked yet, offer a button to do it.
             var deck = document.getElementById('feed-list-deck');
             deck.selectedIndex = 1;
+
+            // XXX This is just temporary for 0.7.5. Because we can't add new strings,
+            // we have to reuse the existing ones.
+            var stringbundle = document.getElementById('dialog-bundle');
+            var confirmButton = document.getElementById('confirm-home-folder');
+            var acceptString = stringbundle.getString('button-accept');
+            confirmButton.setAttribute('label', acceptString);
         }
 
         this.browserWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
@@ -374,6 +381,15 @@ var brief = {
     },
 
 // Toolbar commands.
+
+    selectHomeFolder: function brief_selectHomeFolder(aEvent) {
+        var foldersTree = document.getElementById('bookmark-folders-tree');
+        var selectedIndex = foldersTree.currentIndex;
+        if (selectedIndex != -1) {
+            var resource = foldersTree.treeBuilder.getResourceAtIndex(selectedIndex);
+            gPrefs.setCharPref('liveBookmarksFolder', resource.Value);
+        }
+    },
 
     toggleLeftPane: function brief_toggleLeftPane(aEvent) {
         var pane = document.getElementById('left-pane');

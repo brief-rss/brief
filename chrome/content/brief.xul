@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/content/bookmarks/bookmarks.css" type="text/css"?>
 
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
@@ -17,6 +18,7 @@
 
     <stringbundleset id="string-bundles">
         <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
+        <stringbundle id="dialog-bundle" src="chrome://global/locale/dialog.properties"/>
     </stringbundleset>
 
     <popupset id="main-popupset">
@@ -134,9 +136,15 @@
                         <treeseparator id="special-folders-separator"/>
                     </treechildren>
                 </tree>
-                <toolbarbutton id="pick-folder-button"
-                               label="&pickFolder.label;"
-                               oncommand="brief.openOptions('main-pane');"/>
+                <vbox>
+                    <label id="select-home-folder-label"
+                           value="&pickFolder.label;"/>
+                    <bookmarks-tree id="bookmark-folders-tree" flex="1" type="folders"/>
+                    <hbox pack="end">
+                        <button id="confirm-home-folder"
+                                oncommand="brief.selectHomeFolder(event)"/>
+                    </hbox>
+                </vbox>
             </deck>
         </vbox>
         <splitter id="left-pane-splitter" persist="hidden"/>

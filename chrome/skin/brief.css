@@ -82,11 +82,19 @@ treechildren::-moz-tree-image(starredFolder) {
   padding-right: 4px;
   }
 
-#pick-folder-button {
-  padding-top: 5em;
-  -moz-box-orient: vertical;
-  list-style-image: url('folder.png');
-  }
+#select-home-folder-label {
+  margin: 7px 0 7px 5px;
+  min-width: 0;
+}
+
+#bookmark-folders-tree {
+  max-height: 400px;
+}
+
+#confirm-home-folder {
+  margin: 5px 3px 5px 0;
+  width: 100px;
+}
 
 #left-pane-grippy {
   -moz-binding: none;
