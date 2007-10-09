@@ -355,8 +355,7 @@ BriefStorageService.prototype = {
                           'SET summary = ?1,    ' +
                           '    content = ?2,    ' +
                           '    date    = ?3,    ' +
-                          '    authors = ?4,    ' +
-                          '    read    = 0      ' +
+                          '    authors = ?4     ' +
                           'WHERE id = ?5        ');
         var getDateForEntry = this.dBConnection.
                               createStatement('SELECT date FROM entries WHERE id = ?');
@@ -772,8 +771,10 @@ BriefStorageService.prototype = {
 
         // Get the current Live Bookmarks
         this.rootURI = this.prefs.getCharPref('liveBookmarksFolder');
-        if (!this.rootURI)
-            throw('No Live Bookmarks folder specified (extensions.brief.liveBookmarksFolder is empty)');
+        if (!this.rootURI) {
+            this.dBConnection.executeSimpleSQL('UPDATE feeds SET hidden = 1');
+            return;
+        }
 
         root = this.rdfService.GetResource(this.rootURI);
         this.traverseLivemarks(root);
