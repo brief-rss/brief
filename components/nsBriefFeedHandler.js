@@ -128,15 +128,19 @@ FeedEntry.prototype = {
         else if (aEntry.published)
             this.date = new Date(aEntry.published).getTime();
 
-        if (aEntry.authors) {
-            var authors = [], author;
-            for (var i = 0; i < aEntry.authors.length; i++) {
-                author = aEntry.authors.queryElementAt(i, Ci.nsIFeedPerson).name;
-                authors.push(author);
+        try {
+            if (aEntry.authors) {
+                var authors = [], author;
+                for (var i = 0; i < aEntry.authors.length; i++) {
+                    author = aEntry.authors.queryElementAt(i, Ci.nsIFeedPerson).name;
+                    authors.push(author);
+                }
+                this.authors = authors.join(', ');
             }
-            this.authors = authors.join(', ');
         }
-
+        catch (e) {
+            // XXX On some feeds accessing nsIFeedContainer.authors throws.
+        }
     },
 
     QueryInterface: function BriefFeedEntry_QueryInterface(aIID) {
