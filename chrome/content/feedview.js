@@ -260,7 +260,8 @@ FeedView.prototype = {
     // well as hides/unhides the feed view toolbar.
     _onLoad: function FeedView__onLoad(aEvent) {
         var feedViewToolbar = document.getElementById('feed-view-toolbar');
-        gFeedView.browser.contentDocument.addEventListener('mousedown', brief.onFeedViewMousedown, true);
+        gFeedView.browser.contentDocument.
+                  addEventListener('mousedown', gFeedViewEvents.onFeedViewMousedown, true);
         if (gFeedView.isActive) {
             feedViewToolbar.hidden = false;
             gFeedView._buildFeedView();
@@ -282,21 +283,21 @@ FeedView.prototype = {
         // running in a page to access local files via XHR. Because of it Firefox is
         // vulnerable to numerous attack vectors  (primarily when browsing locally
         // saved websites) and so are we, because we insert untrusted content into
-        // the local template page. Same-origin policy is going to be tightened in
-        // Firefox 3 (hopefully earlier) which will fix the problem.
-        // Null-ing out XMLHttpRequest object is making the exploit harder but there
+        // a local template page. This is fixed in Firefox 3 by tightening the origin
+        // policy.
+        // Null-ing out XMLHttpRequest object makes the exploit harder but there
         // are ways around it.
         doc.defaultView.XMLHttpRequest = null;
 
         // Add listeners so that the content can communicate with chrome to perform
         // actions that require full privileges by sending custom events.
-        doc.addEventListener('MarkEntryRead', brief.onMarkEntryRead, true);
-        doc.addEventListener('StarEntry', brief.onStarEntry, true);
-        doc.addEventListener('DeleteEntry', brief.onDeleteEntry, true);
-        doc.addEventListener('RestoreEntry', brief.onRestoreEntry, true);
+        doc.addEventListener('MarkEntryRead', gFeedViewEvents.onMarkEntryRead, true);
+        doc.addEventListener('StarEntry', gFeedViewEvents.onStarEntry, true);
+        doc.addEventListener('DeleteEntry', gFeedViewEvents.onDeleteEntry, true);
+        doc.addEventListener('RestoreEntry', gFeedViewEvents.onRestoreEntry, true);
 
         // See comments next to the event handler functions.
-        doc.addEventListener('click', brief.onFeedViewClick, true);
+        doc.addEventListener('click', gFeedViewEvents.onFeedViewClick, true);
 
         // Apply the CSS.
         var style = doc.getElementsByTagName('style')[0];
@@ -406,6 +407,93 @@ FeedView.prototype = {
     showPrevPage: function FeedView_showPrevPage() {
         gFeedView.currentPage--;
         gFeedView._refresh();
+    }
+
+}
+
+
+// Listeners for actions performed in the feed view.
+var gFeedViewEvents = {
+
+    onMarkEntryRead: function feedViewEvents_onMarkEntryRead( aEvent) {
+        var entryID = aEvent.target.getAttribute('id');
+        var readStatus = aEvent.target.hasAttribute('read');
+        var query = new QuerySH(null, entryID, null);
+        query.deleted = ENTRY_STATE_ANY;
+        gStorage.markEntriesRead(readStatus, query);
+    },
+
+
+    onDeleteEntry: function feedViewEvents_onDeleteEntry(aEvent) {
+        var entryID = aEvent.target.getAttribute('id');
+        var query = new QuerySH(null, entryID, null);
+        gStorage.deleteEntries(1, query);
+    },
+
+
+    onRestoreEntry: function feedViewEvents_onRestoreEntry(aEvent) {
+        var entryID = aEvent.target.getAttribute('id');
+        var query = new QuerySH(null, entryID, null);
+        query.deleted = ENTRY_STATE_TRASHED;
+        gStorage.deleteEntries(0, query);
+    },
+
+
+    onStarEntry: function feedViewEvents_onStarEntry( aEvent) {
+        var entryID = aEvent.target.getAttribute('id');
+        var newStatus = aEvent.target.hasAttribute('starred');
+        var query = new QuerySH(null, entryID, null);
+        gStorage.starEntries(newStatus, query);
+    },
+
+
+    // This is for marking entry read when user follows the link. We can't do it
+    // by dispatching custom events like we do above, because for whatever
+    // reason the binding handlers don't catch middle-clicks.
+    onFeedViewClick: function feedViewEvents_onFeedViewClick(aEvent) {
+        var anonid = aEvent.originalTarget.getAttribute('anonid');
+        var targetEntry = aEvent.target;
+
+        if (anonid == 'article-title-link' && (aEvent.button == 0 || aEvent.button == 1)) {
+
+            if (aEvent.button == 0 && gPrefs.getBoolPref('feedview.openEntriesInTabs')) {
+                aEvent.preventDefault();
+                var url = targetEntry.getAttribute('entryURL');
+
+                var prefBranch = Cc['@mozilla.org/preferences-service;1'].
+                                 getService(Ci.nsIPrefBranch);
+                var whereToOpen = prefBranch.getIntPref('browser.link.open_newwindow');
+                if (whereToOpen == 2) {
+                    openDialog('chrome://browser/content/browser.xul', '_blank',
+                               'chrome,all,dialog=no', url);
+                }
+                else {
+                    brief.browserWindow.gBrowser.loadOneTab(url);
+                }
+            }
+
+            if (!targetEntry.hasAttribute('read') &&
+               gPrefs.getBoolPref('feedview.linkMarksRead')) {
+                targetEntry.setAttribute('read', true);
+                var id = targetEntry.getAttribute('id');
+                var query = new QuerySH(null, id, null);
+                gStorage.markEntriesRead(true, query);
+            }
+        }
+    },
+
+
+    // By default document.popupNode doesn't dive into anonymous content
+    // and returns the bound element; hence there's no context menu for
+    // content of entries. To work around it, we listen for the mousedown
+    // event and store the originalTarget, so it can be manually set as
+    // document.popupNode (see gBrief.contextMenuOverride()
+    // in brief-overlay.js).
+    onFeedViewMousedown: function feedViewEvents_onFeedViewMousedown(aEvent) {
+        if (aEvent.button == 2 && gFeedView.isActive)
+            brief.browserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
+        else
+            brief.browserWindow.gBrief.contextMenuTarget = null;
     }
 
 }
