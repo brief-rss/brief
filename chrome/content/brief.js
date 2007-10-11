@@ -371,35 +371,35 @@ var brief = {
 
 var gCommands = {
 
-    toggleLeftPane: function mainCmds_toggleLeftPane(aEvent) {
+    toggleLeftPane: function cmd_toggleLeftPane(aEvent) {
         var pane = document.getElementById('left-pane');
         var splitter = document.getElementById('left-pane-splitter');
         pane.hidden = splitter.hidden = !pane.hidden;
     },
 
-    updateAllFeeds: function mainCmds_updateAllFeeds() {
+    updateAllFeeds: function cmd_updateAllFeeds() {
         gUpdateService.fetchAllFeeds(false);
         var deck = document.getElementById('update-buttons-deck');
         deck.selectedIndex = 1;
     },
 
-    stopUpdating: function mainCmds_stopUpdating() {
+    stopUpdating: function cmd_stopUpdating() {
         gUpdateService.stopFetching();
         var deck = document.getElementById('update-buttons-deck');
         deck.selectedIndex = 0;
     },
 
-    openOptions: function mainCmds_openOptions(aPaneID) {
+    openOptions: function cmd_openOptions(aPaneID) {
         window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
                           'chrome,titlebar,toolbar,centerscreen,modal,resizable', aPaneID);
 
     },
 
-    markCurrentViewRead: function mainCmds_markCurrentViewRead(aNewStatus) {
+    markCurrentViewRead: function cmd_markCurrentViewRead(aNewStatus) {
         gStorage.markEntriesRead(aNewStatus, gFeedView.query);
     },
 
-    toggleHeadlinesMode: function mainCmds_toggleHeadlinesMode() {
+    toggleHeadlinesMode: function cmd_toggleHeadlinesMode() {
         var newState = !gPrefs.showHeadlinesOnly;
         gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
 
@@ -421,10 +421,42 @@ var gCommands = {
         }
     },
 
-    switchViewConstraint: function mainCmds_switchViewConstraint(aConstraint) {
+    switchViewConstraint: function cmd_switchViewConstraint(aConstraint) {
         gPrefs.setCharPref('feedview.shownEntries', aConstraint);
         if (gFeedView)
             gFeedView.ensure();
+    },
+
+    selectNextEntry: function cmd_selectNextEntry() {
+        if (!gFeedView)
+            return;
+
+        if (!gFeedView.selectedEntry) {
+            gFeedView.selectedEntry = gFeedView.feedContent.firstChild;
+            return;
+        }
+
+        var nextEntry = gFeedView.selectedEntry.nextSibling;
+        if (nextEntry)
+            gFeedView.selectedEntry = nextEntry;
+        else
+            gFeedView.currentPage++;
+    },
+
+    selectPrevEntry: function cmd_selectPrevEntry() {
+        if (!gFeedView)
+            return;
+
+        if (!gFeedView.selectedEntry) {
+            gFeedView.selectedEntry = gFeedView.feedContent.firstChild;
+            return;
+        }
+
+        var prevEntry = gFeedView.selectedEntry.previousSibling;
+        if (prevEntry)
+            gFeedView.selectedEntry = prevEntry;
+        else
+            gFeedView.currentPage--;
     }
 
 }
