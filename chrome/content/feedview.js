@@ -53,10 +53,6 @@ FeedView.prototype = {
     // to be refreshed.
     _entries: '',
 
-    currentPage:   0,
-    pageCount:     0,
-    entriesCount:  0,
-
     // Key elements.
     browser:      null,
     document:     null,
@@ -64,11 +60,11 @@ FeedView.prototype = {
 
     // Query that selects entries contained by the view. It is the query to pull ALL the
     // entries, not only the ones displayed on the current page.
+    __query: null,
     set query(aQuery) {
         this.__query = aQuery;
         return aQuery;
     },
-
     get query() {
         if (!this._flagsAreIntrinsic) {
             this.__query.unread = gPrefs.shownEntries == 'unread';
@@ -82,6 +78,37 @@ FeedView.prototype = {
 
         return this.__query;
     },
+
+
+    pageCount:     0,
+    entriesCount:  0,
+
+    __currentPage: 0,
+    set currentPage(aPageNumber) {
+        if (aPageNumber <= this.pageCount && aPageNumber > 0) {
+            this.__currentPage = aPageNumber;
+            this._refresh();
+        }
+    },
+    get currentPage() {
+        return this.__currentPage;
+    },
+
+
+    __selectedEntry: null,
+    set selectedEntry(aEntry) {
+        if (aEntry != this.__selectedEntry) {
+            if (this.__selectedEntry)
+                this.__selectedEntry.removeAttribute('selected');
+            aEntry.setAttribute('selected', true);
+            this.__selectedEntry = aEntry;
+            aEntry.scrollIntoView(true);
+        }
+    },
+    get selectedEntry() {
+        return this.__selectedEntry;
+    },
+
 
     // Indicates whether the feed view is currently displayed in the browser.
     get isActive() {
@@ -397,17 +424,6 @@ FeedView.prototype = {
 
         this.feedContent.appendChild(articleContainer);
     },
-
-
-    showNextPage: function FeedView_showNextPage() {
-        gFeedView.currentPage++;
-        gFeedView._refresh();
-    },
-
-    showPrevPage: function FeedView_showPrevPage() {
-        gFeedView.currentPage--;
-        gFeedView._refresh();
-    }
 
 }
 

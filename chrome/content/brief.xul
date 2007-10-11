@@ -22,8 +22,8 @@
     </stringbundleset>
 
     <keyset>
-        <key key="j" oncommand="keyboardCommands.nextEntry()"/>
-        <key key="k" oncommand="keyboardCommands.previousEntry()"/>
+        <key key="k" phase="capturing" oncommand="gCommands.selectNextEntry()"/>
+        <key key="j" phase="capturing" oncommand="gCommands.selectPrevEntry()"/>
     </keyset>
 
     <popupset id="main-popupset">
@@ -73,17 +73,17 @@
 
     <hbox id="main-box" flex="1">
         <grippy id="left-pane-grippy"
-                onclick="gMainCommands.toggleLeftPane(event);"/>
+                onclick="gCommands.toggleLeftPane(event);"/>
         <vbox id='left-pane' persist="width hidden">
             <toolbox>
                 <toolbar id="feed-list-toolbar">
                     <deck id="update-buttons-deck" selectedIndex="0">
                         <toolbarbutton id="update-button"
                                        tooltiptext="&updateButton.tooltip;"
-                                       oncommand="gMainCommands.updateAllFeeds();"/>
+                                       oncommand="gCommands.updateAllFeeds();"/>
                         <toolbarbutton id="stop-updating-button"
                                        tooltiptext="&stopUpdatingButton.tooltip;"
-                                       oncommand="gMainCommands.stopUpdating();"/>
+                                       oncommand="gCommands.stopUpdating();"/>
                     </deck>
                     <toolbaritem id="searchbar-container" flex="1">
                         <textbox id="searchbar" flex="1"
@@ -95,7 +95,7 @@
                     </toolbaritem>
                     <toolbarbutton id="options-button"
                                    tooltiptext="&showOptions.tooltip;"
-                                   oncommand="gMainCommands.openOptions();"/>
+                                   oncommand="gCommands.openOptions();"/>
                 </toolbar>
             </toolbox>
             <progressmeter id="update-progress" hidden="true"/>
@@ -159,21 +159,21 @@
                          hidden="true">
                     <toolbarbutton id="mark-view-read"
                                    tooltiptext="&markViewRead.tooltip;"
-                                   oncommand="gMainCommands.markCurrentViewRead(true);"/>
+                                   oncommand="gCommands.markCurrentViewRead(true);"/>
                     <toolbarbutton id="mark-view-unread"
                                    tooltiptext="&markViewUnread.tooltip;"
-                                   oncommand="gMainCommands.markCurrentViewRead(false);"/>
+                                   oncommand="gCommands.markCurrentViewRead(false);"/>
                     <spacer flex="1"/>
                     <toolbaritem id="headlines-checkbox-container">
                         <checkbox id="headlines-checkbox"
                                   label="&headlinesCheckbox.label;"
-                                  oncommand="gMainCommands.toggleHeadlinesMode();"/>
+                                  oncommand="gCommands.toggleHeadlinesMode();"/>
                     </toolbaritem>
                     <toolbaritem id="view-constraint-box">
                         <label value="&viewConstraintList.label;"/>
                         <menulist id="view-constraint-list"
                                   tooltiptext="&viewConstraintList.tooltip;"
-                                  oncommand="gMainCommands.switchViewConstraint(event.target.getAttribute('constraint'));">
+                                  oncommand="gCommands.switchViewConstraint(event.target.getAttribute('constraint'));">
                             <menupopup>
                                 <menuitem id="show-all"
                                           constraint="all"
@@ -190,11 +190,11 @@
                     <toolbaritem id="navigation-box">
                         <toolbarbutton id="prev-page"
                                        tooltiptext="&previousPage.tooltip;"
-                                       oncommand="gFeedView.showPrevPage();"/>
+                                       oncommand="gFeedView.currentPage--;"/>
                         <label id="page-desc"/>
                         <toolbarbutton id="next-page"
                                        tooltiptext="&nextPage.tooltip;"
-                                       oncommand="gFeedView.showNextPage();"/>
+                                       oncommand="gFeedView.currentPage++;"/>
                     </toolbaritem>
                 </toolbar>
             </toolbox>
