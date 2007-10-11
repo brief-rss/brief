@@ -105,7 +105,7 @@ var brief = {
             gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
         }
         else if (gPrefs.getBoolPref('showHomeView'))
-            this.loadHomepage();
+            this.loadHomeview();
 
         // Init stuff in bookmarks.js
         setTimeout(function() { initServices(); initBMService(); }, 1000);
@@ -275,12 +275,13 @@ var brief = {
     },
 
 
-    loadHomepage: function brief_loadHomepage() {
-        if (gFeedList.tree && gFeedList.tree.view)
+    loadHomeview: function brief_loadHomeview() {
+        if (gFeedList.tree && gFeedList.tree.view) {
             gFeedList.tree.view.selection.select(0);
-        // If the sidebar is hidden, then tree has no view and we have to manually
-        // create the FeedView.
+        }
         else {
+            // If the sidebar is hidden, then tree has no view and we have to manually
+            // create the FeedView.
             var query = new QuerySH(null, null, true);
             var unreadFolder = document.getElementById('unread-folder');
             var title = unreadFolder.getAttribute('title');
@@ -289,7 +290,7 @@ var brief = {
     },
 
 
-    updateProgressMeter: function brief_updateProgressMeter( ) {
+    updateProgressMeter: function brief_updateProgressMeter() {
         var progressmeter = document.getElementById('update-progress');
         var progress = 100 * gUpdateService.completedFeedsCount /
                              gUpdateService.totalFeedsCount;
@@ -302,85 +303,6 @@ var brief = {
         }
     },
 
-// Listeners for actions performed in the feed view.
-
-    onMarkEntryRead: function brief_onMarkEntryRead( aEvent) {
-        var entryID = aEvent.target.getAttribute('id');
-        var readStatus = aEvent.target.hasAttribute('read');
-        var query = new QuerySH(null, entryID, null);
-        query.deleted = ENTRY_STATE_ANY;
-        gStorage.markEntriesRead(readStatus, query);
-    },
-
-    onDeleteEntry: function brief_onDeleteEntry(aEvent) {
-        var entryID = aEvent.target.getAttribute('id');
-        var query = new QuerySH(null, entryID, null);
-        gStorage.deleteEntries(1, query);
-    },
-
-    onRestoreEntry: function brief_onRestoreEntry(aEvent) {
-        var entryID = aEvent.target.getAttribute('id');
-        var query = new QuerySH(null, entryID, null);
-        query.deleted = ENTRY_STATE_TRASHED;
-        gStorage.deleteEntries(0, query);
-    },
-
-    onStarEntry: function brief_onStarEntry( aEvent) {
-        var entryID = aEvent.target.getAttribute('id');
-        var newStatus = aEvent.target.hasAttribute('starred');
-        var query = new QuerySH(null, entryID, null);
-        gStorage.starEntries(newStatus, query);
-    },
-
-    // This is for marking entry read when user follows the link. We can't do it
-    // by dispatching custom events like we do above, because for whatever
-    // reason the binding handlers don't catch middle-clicks.
-    onFeedViewClick: function brief_onFeedViewClick(aEvent) {
-        var anonid = aEvent.originalTarget.getAttribute('anonid');
-        var targetEntry = aEvent.target;
-
-        if (anonid == 'article-title-link' && (aEvent.button == 0 || aEvent.button == 1)) {
-
-            if (aEvent.button == 0 && gPrefs.getBoolPref('feedview.openEntriesInTabs')) {
-                aEvent.preventDefault();
-                var url = targetEntry.getAttribute('entryURL');
-
-                var prefBranch = Cc['@mozilla.org/preferences-service;1'].
-                                 getService(Ci.nsIPrefBranch);
-                var whereToOpen = prefBranch.getIntPref('browser.link.open_newwindow');
-                if (whereToOpen == 2) {
-                    openDialog('chrome://browser/content/browser.xul', '_blank',
-                               'chrome,all,dialog=no', url);
-                }
-                else {
-                    brief.browserWindow.gBrowser.loadOneTab(url);
-                }
-            }
-
-            if (!targetEntry.hasAttribute('read') &&
-               gPrefs.getBoolPref('feedview.linkMarksRead')) {
-                targetEntry.setAttribute('read', true);
-                var id = targetEntry.getAttribute('id');
-                var query = new QuerySH(null, id, null);
-                gStorage.markEntriesRead(true, query);
-            }
-        }
-    },
-
-    // By default document.popupNode doesn't dive into anonymous content
-    // and returns the bound element; hence there's no context menu for
-    // content of entries. To work around it, we listen for the mousedown
-    // event and store the originalTarget, so it can be manually set as
-    // document.popupNode (see gBrief.contextMenuOverride()
-    // in brief-overlay.js).
-    onFeedViewMousedown: function brief_onFeedViewMousedown(aEvent) {
-        if (aEvent.button == 2 && gFeedView.isActive)
-            brief.browserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
-        else
-            brief.browserWindow.gBrief.contextMenuTarget = null;
-    },
-
-// Toolbar commands.
 
     selectHomeFolder: function brief_selectHomeFolder(aEvent) {
         var foldersTree = document.getElementById('bookmark-folders-tree');
@@ -391,59 +313,6 @@ var brief = {
         }
     },
 
-    toggleLeftPane: function brief_toggleLeftPane(aEvent) {
-        var pane = document.getElementById('left-pane');
-        var splitter = document.getElementById('left-pane-splitter');
-        pane.hidden = splitter.hidden = !pane.hidden;
-    },
-
-    updateAllFeeds: function brief_updateAllFeeds() {
-        gUpdateService.fetchAllFeeds(false);
-        var deck = document.getElementById('update-buttons-deck');
-        deck.selectedIndex = 1;
-    },
-
-    stopUpdating: function brief_stopUpdating() {
-        gUpdateService.stopFetching();
-        var deck = document.getElementById('update-buttons-deck');
-        deck.selectedIndex = 0;
-    },
-
-    openOptions: function brief_openOptions(aPaneID) {
-        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
-                          'chrome,titlebar,toolbar,centerscreen,modal,resizable', aPaneID);
-
-    },
-
-    onHeadlinesCheckboxCmd: function brief_onHeadlinesCheckboxCmd(aEvent) {
-        var state = aEvent.target.checked;
-
-        if (state) {
-            gFeedView.feedContent.setAttribute('showHeadlinesOnly', true);
-            for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
-                gFeedView.feedContent.childNodes[i].setAttribute('collapsed', true);
-        }
-        else {
-            gFeedView.feedContent.removeAttribute('showHeadlinesOnly');
-            for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
-                gFeedView.feedContent.childNodes[i].removeAttribute('collapsed');
-        }
-
-        gPrefs.setBoolPref('feedview.showHeadlinesOnly', state);
-    },
-
-    onConstraintListCmd: function brief_onConstraintListCmd(aEvent) {
-        var choice = aEvent.target.id;
-        var prefValue = choice == 'show-all' ? 'all' :
-                        choice == 'show-unread' ? 'unread' : 'starred';
-
-        gPrefs.setCharPref('feedview.shownEntries', prefValue);
-        gFeedView.ensure();
-    },
-
-    markCurrentViewRead: function brief_markCurrentViewRead(aNewStatus) {
-        gStorage.markEntriesRead(aNewStatus, gFeedView.query);
-    },
 
     // Creates and manages the FeedView displaying the search results, based the current
     // input string and the search scope.
@@ -495,205 +364,67 @@ var brief = {
         gFeedView.titleOverride = title;
         gFeedView.query.searchString = searchbar.value;
         gFeedView.ensure();
+    }
+
+}
+
+
+var gCommands = {
+
+    toggleLeftPane: function mainCmds_toggleLeftPane(aEvent) {
+        var pane = document.getElementById('left-pane');
+        var splitter = document.getElementById('left-pane-splitter');
+        pane.hidden = splitter.hidden = !pane.hidden;
     },
 
-// Feed list context menu commands.
-
-    ctx_markFeedRead: function brief_ctx_markFeedRead(aEvent) {
-        var item = gFeedList.ctx_targetItem;
-        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-        var query = new QuerySH(feedID, null, null);
-        gStorage.markEntriesRead(true, query);
-    },
-
-    ctx_markFolderRead: function brief_ctx_markFolderRead(aEvent) {
-        var targetItem = gFeedList.ctx_targetItem;
-
-        if (targetItem.hasAttribute('specialFolder')) {
-            var query = new Query();
-            if (targetItem.id == 'unread-folder')
-                query.unread = true;
-            else if (targetItem.id == 'starred-folder')
-                query.starred = true;
-            else
-                query.deleted = ENTRY_STATE_TRASHED;
-            gStorage.markEntriesRead(true, query);
-        }
-        else {
-            var query = new Query();
-            query.folders = targetItem.getAttribute('feedID');
-            gStorage.markEntriesRead(true, query);
-        }
-    },
-
-    ctx_updateFeed: function brief_ctx_updateFeed(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-        var feed = gStorage.getFeed(feedID);
-        gUpdateService.fetchFeeds([feed], 1, false);
-    },
-
-    ctx_updateFolder: function brief_ctx_updateFolder(aEvent) {
-        var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
-        var feedID, i, feeds = [];
-        for (i = 0; i < treeitems.length; i++) {
-            if (!treeitems[i].hasAttribute('container')) {
-                feedID = treeitems[i].getAttribute('feedID');
-                feeds.push(gStorage.getFeed(feedID));
-            }
-        }
-
-        gUpdateService.fetchFeeds(feeds, feeds.length, false);
+    updateAllFeeds: function mainCmds_updateAllFeeds() {
+        gUpdateService.fetchAllFeeds(false);
         var deck = document.getElementById('update-buttons-deck');
         deck.selectedIndex = 1;
     },
 
-    ctx_openWebsite: function brief_ctx_openWebsite(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-        var url = gStorage.getFeed(feedID).websiteURL;
-        brief.browserWindow.gBrowser.loadOneTab(url);
+    stopUpdating: function mainCmds_stopUpdating() {
+        gUpdateService.stopFetching();
+        var deck = document.getElementById('update-buttons-deck');
+        deck.selectedIndex = 0;
     },
 
-    ctx_emptyFeed: function brief_ctx_emptyFeed(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-        var query = new QuerySH(feedID, null, null);
-        query.unstarred = true;
-        gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+    openOptions: function mainCmds_openOptions(aPaneID) {
+        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
+                          'chrome,titlebar,toolbar,centerscreen,modal,resizable', aPaneID);
+
     },
 
-    ctx_emptyFolder: function brief_ctx_emptyFolder(aEvent) {
-        var targetItem = gFeedList.ctx_targetItem;
+    markCurrentViewRead: function mainCmds_markCurrentViewRead(aNewStatus) {
+        gStorage.markEntriesRead(aNewStatus, gFeedView.query);
+    },
 
-        if (targetItem.id == 'unread-folder') {
-            var query = new Query();
-            query.unstarred = true;
-            query.unread = true;
-            gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+    toggleHeadlinesMode: function mainCmds_toggleHeadlinesMode() {
+        var newState = !gPrefs.showHeadlinesOnly;
+        gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
+
+        var checkbox = document.getElementById('headlines-checkbox');
+        checkbox.checked = newState;
+
+        if (!gFeedView)
+            return;
+
+        if (newState) {
+            gFeedView.feedContent.setAttribute('showHeadlinesOnly', true);
+            for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
+                gFeedView.feedContent.childNodes[i].setAttribute('collapsed', true);
         }
         else {
-            var query = new Query();
-            query.folders = targetItem.getAttribute('feedID');
-            query.unstarred = true;
-            gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+            gFeedView.feedContent.removeAttribute('showHeadlinesOnly');
+            for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
+                gFeedView.feedContent.childNodes[i].removeAttribute('collapsed');
         }
     },
 
-    ctx_restoreTrashed: function brief_ctx_restoreTrashed(aEvent) {
-        var query = new Query();
-        query.deleted = ENTRY_STATE_TRASHED;
-        gStorage.deleteEntries(ENTRY_STATE_NORMAL, query);
-    },
-
-    ctx_emptyTrash: function brief_ctx_emptyTrash(aEvent) {
-        var query = new Query();
-        query.deleted = ENTRY_STATE_TRASHED;
-        gStorage.deleteEntries(ENTRY_STATE_DELETED, query);
-    },
-
-    ctx_deleteFeed: function brief_ctx_deleteFeed(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-        var feed = gStorage.getFeed(feedID);
-
-        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
-                            getService(Ci.nsIPromptService);
-        var stringbundle = document.getElementById('main-bundle');
-        var title = stringbundle.getString('confirmFeedDeletionTitle');
-        var text = stringbundle.getFormattedString('confirmFeedDeletionText', [feed.title]);
-        var weHaveAGo = promptService.confirm(window, title, text);
-
-        if (weHaveAGo) {
-            var item = gFeedList.getTreeitem(feedID);
-
-            // If the currently selected feed is being removed, select the next one.
-            if (gFeedList.selectedItem == item) {
-                var currentIndex = gFeedList.tree.view.selection.currentIndex;
-                gFeedList.tree.view.selection.select(currentIndex + 1);
-            }
-
-            // The treeitem would be removed anyway thanks to RDFObserver,
-            // but we do it here to give faster visual feedback.
-            item.parentNode.removeChild(item);
-
-            var node = RDF.GetResource(feed.rdf_uri);
-            var parent = BMSVC.getParent(node);
-            RDFC.Init(BMDS, parent);
-            var index = RDFC.IndexOf(node);
-            var propertiesArray = new Array(gBmProperties.length);
-            BookmarksUtils.getAllChildren(node, propertiesArray);
-
-            gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
-                                           'delete', node, index, parent,
-                                           propertiesArray.length, propertiesArray);
-            BookmarksUtils.flushDataSource();
-        }
-    },
-
-    ctx_deleteFolder: function brief_ctx_deleteFolder(aEvent) {
-        var folderFeedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-        var folder = gStorage.getFeed(folderFeedID);
-
-        // Ask for confirmation.
-        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
-                            getService(Ci.nsIPromptService);
-        var stringbundle = document.getElementById('main-bundle');
-        var title = stringbundle.getString('confirmFolderDeletionTitle');
-        var text = stringbundle.getFormattedString('confirmFolderDeletionText', [folder.title]);
-        var weHaveAGo = promptService.confirm(window, title, text);
-
-        if (weHaveAGo) {
-            var item = gFeedList.getTreeitem(folderFeedID);
-
-            // XXX If the currently selected item is being removed, we have to select
-            // another one. Ideally we would select the next sibling but I couldn't get
-            // it to work reliably, so for now the Unread folder gets selected.
-            if (gFeedList.selectedItem == item)
-                gFeedList.tree.view.selection.select(0);
-
-            // The treeitem would have been removed anyway thanks to RDFObserver,
-            // but we do it here to give faster visual feedback.
-            item.parentNode.removeChild(item);
-
-            var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
-
-            gBkmkTxnSvc.startBatch();
-
-            // Delete all the descendant feeds and folder.
-            var feedID, feed, node, parent, index, propertiesArray;
-            for (var i = 0; i < treeitems.length; i++) {
-                feedID = treeitems[i].getAttribute('feedID');
-                feed = gStorage.getFeed(feedID);
-
-                node = RDF.GetResource(feed.rdf_uri);
-                parent = BMSVC.getParent(node);
-                RDFC.Init(BMDS, parent);
-                index = RDFC.IndexOf(node);
-                propertiesArray = new Array(gBmProperties.length);
-                BookmarksUtils.getAllChildren(node, propertiesArray);
-                gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
-                                               'delete', node, index, parent,
-                                               propertiesArray.length, propertiesArray);
-            }
-
-            // Delete the target folder.
-            node = RDF.GetResource(folder.rdf_uri);
-            parent = BMSVC.getParent(node);
-            RDFC.Init(BMDS, parent);
-            index = RDFC.IndexOf(node);
-            propertiesArray = new Array(gBmProperties.length);
-            BookmarksUtils.getAllChildren(node, propertiesArray);
-            gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
-                                           'delete', node, index, parent,
-                                           propertiesArray.length, propertiesArray);
-
-            gBkmkTxnSvc.endBatch();
-            BookmarksUtils.flushDataSource();
-        }
-    },
-
-    ctx_showFeedProperties: function brief_ctx_showFeedProperties(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-
-        openDialog('chrome://brief/content/feed-properties.xul', 'FeedProperties',
-                   'chrome,titlebar,toolbar,centerscreen,modal', feedID);
+    switchViewConstraint: function mainCmds_switchViewConstraint(aConstraint) {
+        gPrefs.setCharPref('feedview.shownEntries', aConstraint);
+        if (gFeedView)
+            gFeedView.ensure();
     }
 
 }

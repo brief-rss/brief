@@ -577,6 +577,220 @@ var gFeedList = {
 
 }
 
+
+// Feed list context menu commands.
+var gContextMenuCommands = {
+
+    markFeedRead: function ctxMenuCmds_markFeedRead(aEvent) {
+        var item = gFeedList.ctx_targetItem;
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var query = new QuerySH(feedID, null, null);
+        gStorage.markEntriesRead(true, query);
+    },
+
+
+    markFolderRead: function ctxMenuCmds_markFolderRead(aEvent) {
+        var targetItem = gFeedList.ctx_targetItem;
+
+        if (targetItem.hasAttribute('specialFolder')) {
+            var query = new Query();
+            if (targetItem.id == 'unread-folder')
+                query.unread = true;
+            else if (targetItem.id == 'starred-folder')
+                query.starred = true;
+            else
+                query.deleted = ENTRY_STATE_TRASHED;
+            gStorage.markEntriesRead(true, query);
+        }
+        else {
+            var query = new Query();
+            query.folders = targetItem.getAttribute('feedID');
+            gStorage.markEntriesRead(true, query);
+        }
+    },
+
+
+    updateFeed: function ctxMenuCmds_updateFeed(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var feed = gStorage.getFeed(feedID);
+        gUpdateService.fetchFeeds([feed], 1, false);
+    },
+
+
+    updateFolder: function ctxMenuCmds_updateFolder(aEvent) {
+        var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
+        var feedID, i, feeds = [];
+        for (i = 0; i < treeitems.length; i++) {
+            if (!treeitems[i].hasAttribute('container')) {
+                feedID = treeitems[i].getAttribute('feedID');
+                feeds.push(gStorage.getFeed(feedID));
+            }
+        }
+
+        gUpdateService.fetchFeeds(feeds, feeds.length, false);
+        var deck = document.getElementById('update-buttons-deck');
+        deck.selectedIndex = 1;
+    },
+
+
+    openWebsite: function ctxMenuCmds_openWebsite(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var url = gStorage.getFeed(feedID).websiteURL;
+        brief.browserWindow.gBrowser.loadOneTab(url);
+    },
+
+
+    emptyFeed: function ctxMenuCmds_emptyFeed(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var query = new QuerySH(feedID, null, null);
+        query.unstarred = true;
+        gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+    },
+
+
+    emptyFolder: function ctxMenuCmds_emptyFolder(aEvent) {
+        var targetItem = gFeedList.ctx_targetItem;
+
+        if (targetItem.id == 'unread-folder') {
+            var query = new Query();
+            query.unstarred = true;
+            query.unread = true;
+            gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+        }
+        else {
+            var query = new Query();
+            query.folders = targetItem.getAttribute('feedID');
+            query.unstarred = true;
+            gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+        }
+    },
+
+
+    restoreTrashed: function ctxMenuCmds_restoreTrashed(aEvent) {
+        var query = new Query();
+        query.deleted = ENTRY_STATE_TRASHED;
+        gStorage.deleteEntries(ENTRY_STATE_NORMAL, query);
+    },
+
+
+    emptyTrash: function ctxMenuCmds_emptyTrash(aEvent) {
+        var query = new Query();
+        query.deleted = ENTRY_STATE_TRASHED;
+        gStorage.deleteEntries(ENTRY_STATE_DELETED, query);
+    },
+
+
+    deleteFeed: function ctxMenuCmds_deleteFeed(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var feed = gStorage.getFeed(feedID);
+
+        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                            getService(Ci.nsIPromptService);
+        var stringbundle = document.getElementById('main-bundle');
+        var title = stringbundle.getString('confirmFeedDeletionTitle');
+        var text = stringbundle.getFormattedString('confirmFeedDeletionText', [feed.title]);
+        var weHaveAGo = promptService.confirm(window, title, text);
+
+        if (weHaveAGo) {
+            var item = gFeedList.getTreeitem(feedID);
+
+            // If the currently selected feed is being removed, select the next one.
+            if (gFeedList.selectedItem == item) {
+                var currentIndex = gFeedList.tree.view.selection.currentIndex;
+                gFeedList.tree.view.selection.select(currentIndex + 1);
+            }
+
+            // The treeitem would be removed anyway thanks to RDFObserver,
+            // but we do it here to give faster visual feedback.
+            item.parentNode.removeChild(item);
+
+            var node = RDF.GetResource(feed.rdf_uri);
+            var parent = BMSVC.getParent(node);
+            RDFC.Init(BMDS, parent);
+            var index = RDFC.IndexOf(node);
+            var propertiesArray = new Array(gBmProperties.length);
+            BookmarksUtils.getAllChildren(node, propertiesArray);
+
+            gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
+                                           'delete', node, index, parent,
+                                           propertiesArray.length, propertiesArray);
+            BookmarksUtils.flushDataSource();
+        }
+    },
+
+
+    deleteFolder: function ctxMenuCmds_deleteFolder(aEvent) {
+        var folderFeedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var folder = gStorage.getFeed(folderFeedID);
+
+        // Ask for confirmation.
+        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                            getService(Ci.nsIPromptService);
+        var stringbundle = document.getElementById('main-bundle');
+        var title = stringbundle.getString('confirmFolderDeletionTitle');
+        var text = stringbundle.getFormattedString('confirmFolderDeletionText', [folder.title]);
+        var weHaveAGo = promptService.confirm(window, title, text);
+
+        if (weHaveAGo) {
+            var item = gFeedList.getTreeitem(folderFeedID);
+
+            // XXX If the currently selected item is being removed, we have to select
+            // another one. Ideally we would select the next sibling but I couldn't get
+            // it to work reliably, so for now the Unread folder gets selected.
+            if (gFeedList.selectedItem == item)
+                gFeedList.tree.view.selection.select(0);
+
+            // The treeitem would have been removed anyway thanks to RDFObserver,
+            // but we do it here to give faster visual feedback.
+            item.parentNode.removeChild(item);
+
+            var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
+
+            gBkmkTxnSvc.startBatch();
+
+            // Delete all the descendant feeds and folder.
+            var feedID, feed, node, parent, index, propertiesArray;
+            for (var i = 0; i < treeitems.length; i++) {
+                feedID = treeitems[i].getAttribute('feedID');
+                feed = gStorage.getFeed(feedID);
+
+                node = RDF.GetResource(feed.rdf_uri);
+                parent = BMSVC.getParent(node);
+                RDFC.Init(BMDS, parent);
+                index = RDFC.IndexOf(node);
+                propertiesArray = new Array(gBmProperties.length);
+                BookmarksUtils.getAllChildren(node, propertiesArray);
+                gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
+                                               'delete', node, index, parent,
+                                               propertiesArray.length, propertiesArray);
+            }
+
+            // Delete the target folder.
+            node = RDF.GetResource(folder.rdf_uri);
+            parent = BMSVC.getParent(node);
+            RDFC.Init(BMDS, parent);
+            index = RDFC.IndexOf(node);
+            propertiesArray = new Array(gBmProperties.length);
+            BookmarksUtils.getAllChildren(node, propertiesArray);
+            gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
+                                           'delete', node, index, parent,
+                                           propertiesArray.length, propertiesArray);
+
+            gBkmkTxnSvc.endBatch();
+            BookmarksUtils.flushDataSource();
+        }
+    },
+
+
+    showFeedProperties: function ctxMenuCmds_showFeedProperties(aEvent) {
+        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+
+        openDialog('chrome://brief/content/feed-properties.xul', 'FeedProperties',
+                   'chrome,titlebar,toolbar,centerscreen,modal', feedID);
+    }
+
+}
+
 function hashString(aString) {
 
     // nsICryptoHash can read the data either from an array or a stream.

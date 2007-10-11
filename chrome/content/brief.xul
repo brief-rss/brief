@@ -21,64 +21,69 @@
         <stringbundle id="dialog-bundle" src="chrome://global/locale/dialog.properties"/>
     </stringbundleset>
 
+    <keyset>
+        <key key="j" oncommand="keyboardCommands.nextEntry()"/>
+        <key key="k" oncommand="keyboardCommands.previousEntry()"/>
+    </keyset>
+
     <popupset id="main-popupset">
         <menupopup id="feed-list-popup"
                    onpopupshowing="gFeedList.onContextMenuShowing(event);"
                    onpopuphiding="gFeedList.onContextMenuHiding(event);">
             <menuitem id="ctx-mark-feed-read"
                       label="&ctxMarkFeedRead.label;"
-                      oncommand="brief.ctx_markFeedRead(event);"/>
+                      oncommand="gContextMenuCommands.markFeedRead(event);"/>
             <menuitem id="ctx-mark-folder-read"
                       label="&ctxMarkFolderRead.label;"
-                      oncommand="brief.ctx_markFolderRead(event);"/>
+                      oncommand="gContextMenuCommands.markFolderRead(event);"/>
             <menuitem id="ctx-update-feed"
                       label="&ctxUpdateFeed.label;"
-                      oncommand="brief.ctx_updateFeed(event);"/>
+                      oncommand="gContextMenuCommands.updateFeed(event);"/>
             <menuitem id="ctx-update-folder"
                       label="&ctxUpdateFolder.label;"
-                      oncommand="brief.ctx_updateFolder(event);"/>
+                      oncommand="gContextMenuCommands.updateFolder(event);"/>
             <menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
-                      oncommand="brief.ctx_openWebsite(event);"/>
+                      oncommand="gContextMenuCommands.openWebsite(event);"/>
             <menuitem id="ctx-restore-trashed"
                       label="&ctxRestoreTrashed.label;"
-                      oncommand="brief.ctx_restoreTrashed(event);"/>
+                      oncommand="gContextMenuCommands.restoreTrashed(event);"/>
             <menuseparator id="ctx-dangerous-cmds-separator"/>
             <menuitem id="ctx-delete-feed"
                       label="&ctxDeleteFeed.label;"
-                      oncommand="brief.ctx_deleteFeed(event);"/>
+                      oncommand="gContextMenuCommands.deleteFeed(event);"/>
             <menuitem id="ctx-delete-folder"
                       label="&ctxDeleteFolder.label;"
-                      oncommand="brief.ctx_deleteFolder(event);"/>
+                      oncommand="gContextMenuCommands.deleteFolder(event);"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
-                      oncommand="brief.ctx_emptyFeed(event);"/>
+                      oncommand="gContextMenuCommands.emptyFeed(event);"/>
             <menuitem id="ctx-empty-folder"
                       label="&ctxEmptyFolder.label;"
-                      oncommand="brief.ctx_emptyFolder(event);"/>
+                      oncommand="gContextMenuCommands.emptyFolder(event);"/>
             <menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
-                      oncommand="brief.ctx_emptyTrash(event);"/>
+                      oncommand="gContextMenuCommands.emptyTrash(event);"/>
             <menuseparator id="ctx-properties-separator"/>
             <menuitem id="ctx-feed-properties"
                       label="&ctxFeedProperties.label;"
-                      oncommand="brief.ctx_showFeedProperties(event);"/>
+                      oncommand="gContextMenuCommands.showFeedProperties(event);"/>
         </menupopup>
     </popupset>
 
     <hbox id="main-box" flex="1">
         <grippy id="left-pane-grippy"
-                onclick="brief.toggleLeftPane(event);"/>
+                onclick="gMainCommands.toggleLeftPane(event);"/>
         <vbox id='left-pane' persist="width hidden">
             <toolbox>
                 <toolbar id="feed-list-toolbar">
                     <deck id="update-buttons-deck" selectedIndex="0">
                         <toolbarbutton id="update-button"
                                        tooltiptext="&updateButton.tooltip;"
-                                       oncommand="brief.updateAllFeeds();"/>
+                                       oncommand="gMainCommands.updateAllFeeds();"/>
                         <toolbarbutton id="stop-updating-button"
                                        tooltiptext="&stopUpdatingButton.tooltip;"
-                                       oncommand="brief.stopUpdating();"/>
+                                       oncommand="gMainCommands.stopUpdating();"/>
                     </deck>
                     <toolbaritem id="searchbar-container" flex="1">
                         <textbox id="searchbar" flex="1"
@@ -90,7 +95,7 @@
                     </toolbaritem>
                     <toolbarbutton id="options-button"
                                    tooltiptext="&showOptions.tooltip;"
-                                   oncommand="brief.openOptions();"/>
+                                   oncommand="gMainCommands.openOptions();"/>
                 </toolbar>
             </toolbox>
             <progressmeter id="update-progress" hidden="true"/>
@@ -154,27 +159,30 @@
                          hidden="true">
                     <toolbarbutton id="mark-view-read"
                                    tooltiptext="&markViewRead.tooltip;"
-                                   oncommand="brief.markCurrentViewRead(true);"/>
+                                   oncommand="gMainCommands.markCurrentViewRead(true);"/>
                     <toolbarbutton id="mark-view-unread"
                                    tooltiptext="&markViewUnread.tooltip;"
-                                   oncommand="brief.markCurrentViewRead(false);"/>
+                                   oncommand="gMainCommands.markCurrentViewRead(false);"/>
                     <spacer flex="1"/>
                     <toolbaritem id="headlines-checkbox-container">
                         <checkbox id="headlines-checkbox"
                                   label="&headlinesCheckbox.label;"
-                                  oncommand="brief.onHeadlinesCheckboxCmd(event);"/>
+                                  oncommand="gMainCommands.toggleHeadlinesMode();"/>
                     </toolbaritem>
                     <toolbaritem id="view-constraint-box">
                         <label value="&viewConstraintList.label;"/>
                         <menulist id="view-constraint-list"
                                   tooltiptext="&viewConstraintList.tooltip;"
-                                  oncommand="brief.onConstraintListCmd(event);">
+                                  oncommand="gMainCommands.switchViewConstraint(event.target.getAttribute('constraint'));">
                             <menupopup>
                                 <menuitem id="show-all"
+                                          constraint="all"
                                           label="&viewAll.label;"/>
                                 <menuitem id="show-unread"
+                                          constraint="unread"
                                           label="&viewUnread.label;"/>
                                 <menuitem id="show-starred"
+                                          constraint="starred"
                                           label="&viewStarred.label;"/>
                             </menupopup>
                         </menulist>
