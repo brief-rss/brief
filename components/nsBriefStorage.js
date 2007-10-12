@@ -27,6 +27,7 @@ const RDF_OBSERVER_DELAY = 250;
 
 const DATABASE_VERSION = 1;
 
+var gStorageService = null;
 
 function BriefStorageService() {
     this.observerService = Cc['@mozilla.org/observer-service;1'].
@@ -255,90 +256,6 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    getEntries: function BriefStorage_getEntries(aQuery, entryCount) {
-        var statement = 'SELECT                                            ' +
-                        'entries.id,    entries.feedID,  entries.entryURL, ' +
-                        'entries.title, entries.summary, entries.content,  ' +
-                        'entries.date,  entries.authors, entries.read,     ' +
-                        'entries.starred ' + aQuery.getQueryTextForSelect();
-
-        var select = this.dBConnection.createStatement(statement);
-
-        var entries = new Array();
-        try {
-            while (select.executeStep()) {
-                var entry = Cc['@ancestor/brief/feedentry;1'].
-                            createInstance(Ci.nsIBriefFeedEntry);
-                entry.id = select.getString(0);
-                entry.feedID = select.getString(1);
-                entry.entryURL = select.getString(2);
-                entry.title = select.getString(3);
-                entry.summary = select.getString(4);
-                entry.content = select.getString(5);
-                entry.date = select.getInt64(6);
-                entry.authors = select.getString(7);
-                entry.read = (select.getInt32(8) == 1);
-                entry.starred = (select.getInt32(9) == 1);
-
-                entries.push(entry);
-            }
-        }
-        finally {
-            select.reset();
-        }
-        entryCount.value = entries.length;
-        return entries;
-    },
-
-
-    // nsIBriefStorage
-    getSerializedEntries: function BriefStorage_getSerializedEntries(aQuery) {
-        var statement = 'SELECT entries.id, entries.feedID ' + aQuery.getQueryTextForSelect();
-        var select = this.dBConnection.createStatement(statement);
-
-        var entries = [];
-        var feeds = [];
-        try {
-            while (select.executeStep()) {
-                // |array[array.length] = x| is faster than |array.push(x)| (bug 385393)
-                entries[entries.length] = select.getString(0);
-
-                var feedID = select.getString(1);
-                if (feeds.indexOf(feedID) == -1)
-                    feeds[feeds.length] = feedID;
-            }
-        }
-        finally {
-            select.reset();
-        }
-
-        var bag = Cc['@mozilla.org/hash-property-bag;1'].
-                  createInstance(Ci.nsIWritablePropertyBag2);
-        bag.setPropertyAsAString('entries', entries.join(' '));
-        bag.setPropertyAsAString('feeds', feeds.join(' '));
-
-        return bag;
-    },
-
-
-    // nsIBriefStorage
-    getEntriesCount: function BriefStorage_getEntriesCount(aQuery) {
-        var statement = 'SELECT COUNT(1) ' + aQuery.getQueryTextForSelect();
-        var select = this.dBConnection.createStatement(statement);
-
-        var count = 0;
-        try {
-            select.executeStep();
-            var count = select.getInt32(0);
-        }
-        finally {
-            select.reset();
-        }
-        return count;
-    },
-
-
-    // nsIBriefStorage
     updateFeed: function BriefStorage_updateFeed(aFeed) {
         var now = Date.now();
         var oldestEntryDate = now;
@@ -366,7 +283,7 @@ BriefStorageService.prototype = {
         var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
                                  createInstance(Ci.nsIBriefQuery);
         unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
-        var oldUnreadCount = this.getEntriesCount(unreadEntriesQuery);
+        var oldUnreadCount = unreadEntriesQuery.getEntriesCount();
 
         var isMediaWikiFeed = aFeed.wrappedFeed.generator &&
                               aFeed.wrappedFeed.generator.agent.match('MediaWiki');
@@ -467,7 +384,7 @@ BriefStorageService.prototype = {
             this.dBConnection.commitTransaction();
         }
 
-        var newUnreadCount = this.getEntriesCount(unreadEntriesQuery);
+        var newUnreadCount = unreadEntriesQuery.getEntriesCount();
         var newEntriesCount = newUnreadCount - oldUnreadCount;
         var subject = Cc["@mozilla.org/variant;1"].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
@@ -498,102 +415,6 @@ BriefStorageService.prototype = {
             feed.maxEntries = aFeed.maxEntries;
             feed.updateInterval = aFeed.updateInterval;
         }
-    },
-
-
-    // nsIBriefStorage
-    markEntriesRead: function BriefStorage_markEntriesRead(aStatus, aQuery) {
-
-        // Make sure not to select entries which already have the desired status.
-        prevUnreadFlag = aQuery.unread;
-        prevReadFlag = aQuery.read;
-        if (aStatus)
-            aQuery.unread = true;
-        else
-            aQuery.read = true;
-
-        var statement = 'UPDATE entries SET read = ? ' + aQuery.getQueryText();
-
-        var update = this.dBConnection.createStatement(statement)
-        update.bindInt32Parameter(0, aStatus ? 1 : 0);
-
-        this.dBConnection.beginTransaction();
-        try {
-            // Get the list of entries which we deleted, so we can pass it in the
-            // notification. Never include those from hidden feeds though - nobody care
-            // for them and, what's more, they don't expect to deal with them.
-            aQuery.includeHiddenFeeds = false;
-            var changedEntries = this.getSerializedEntries(aQuery);
-            update.execute();
-        }
-        finally {
-            this.dBConnection.commitTransaction();
-            aQuery.unread = prevUnreadFlag;
-            aQuery.read = prevReadFlag;
-        }
-
-        // If any entries were marked, dispatch the notifiaction.
-        if (changedEntries.getPropertyAsAString('entries')) {
-            this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                                 aStatus ? 'read' : 'unread');
-        }
-    },
-
-
-    // nsIBriefStorage
-    deleteEntries: function BriefStorage_deleteEntries(aState, aQuery) {
-
-        var statementString;
-        switch (aState) {
-            case Ci.nsIBriefStorage.ENTRY_STATE_NORMAL:
-            case Ci.nsIBriefStorage.ENTRY_STATE_TRASHED:
-            case Ci.nsIBriefStorage.ENTRY_STATE_DELETED:
-                statementString = 'UPDATE entries SET deleted = ' + aState +
-                                   aQuery.getQueryText();
-                break;
-            case Ci.nsIBriefStorage.REMOVE_FROM_DATABASE:
-                statementString = 'DELETE FROM entries ' + aQuery.getQueryText();
-                break;
-            default:
-                throw('Invalid deleted state.');
-        }
-
-        var statement = this.dBConnection.createStatement(statementString)
-        this.dBConnection.beginTransaction();
-        try {
-            // See markEntriesRead.
-            aQuery.includeHiddenFeeds = false;
-            var changedEntries = this.getSerializedEntries(aQuery);
-            statement.execute();
-        }
-        finally {
-            this.dBConnection.commitTransaction();
-        }
-
-        this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                             'deleted');
-    },
-
-
-    // nsIBriefStorage
-    starEntries: function BriefStorage_starEntries(aStatus, aQuery) {
-        var statement = 'UPDATE entries SET starred = ? ' + aQuery.getQueryText();
-        var update = this.dBConnection.createStatement(statement);
-        update.bindInt32Parameter(0, aStatus ? 1 : 0);
-
-        this.dBConnection.beginTransaction();
-        try {
-            // See markEntriesRead.
-            aQuery.includeHiddenFeeds = false;
-            var changedEntries = this.getSerializedEntries(aQuery);
-            update.execute();
-        }
-        finally {
-            this.dBConnection.commitTransaction();
-        }
-
-        this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                             'starred');
     },
 
 
@@ -1150,7 +971,11 @@ BriefStorageService.prototype = {
 
 }
 
-function BriefQuery() { }
+function BriefQuery() {
+    this.observerService = Cc['@mozilla.org/observer-service;1'].
+                           getService(Ci.nsIObserverService);
+
+}
 
 BriefQuery.prototype = {
 
@@ -1181,12 +1006,213 @@ BriefQuery.prototype = {
     // folders alone - we also have to consider their subfolders. And because feeds have
     // no knowledge about the folders they are in besides their direct parent, we have
     // to compute actual ("effective") folders list when creating the query.
-    _effectiveFolders: null,
+    effectiveFolders: null,
+
+    get dBConnection() {
+        return gStorageService.dBConnection;
+    },
 
     setConditions: function BriefQuery_setConditions(aFeeds, aEntries, aUnread) {
         this.feeds = aFeeds;
         this.entries = aEntries;
         this.unread = aUnread;
+    },
+
+
+    // nsIBriefQuery
+    getEntries: function BriefQuery_getEntries(entryCount) {
+        var statement = 'SELECT                                            ' +
+                        'entries.id,    entries.feedID,  entries.entryURL, ' +
+                        'entries.title, entries.summary, entries.content,  ' +
+                        'entries.date,  entries.authors, entries.read,     ' +
+                        'entries.starred ' + this.getQueryTextForSelect();
+
+        var select = this.dBConnection.createStatement(statement);
+
+        var entries = new Array();
+        try {
+            while (select.executeStep()) {
+                var entry = Cc['@ancestor/brief/feedentry;1'].
+                            createInstance(Ci.nsIBriefFeedEntry);
+                entry.id = select.getString(0);
+                entry.feedID = select.getString(1);
+                entry.entryURL = select.getString(2);
+                entry.title = select.getString(3);
+                entry.summary = select.getString(4);
+                entry.content = select.getString(5);
+                entry.date = select.getInt64(6);
+                entry.authors = select.getString(7);
+                entry.read = (select.getInt32(8) == 1);
+                entry.starred = (select.getInt32(9) == 1);
+
+                entries.push(entry);
+            }
+        }
+        finally {
+            select.reset();
+        }
+        entryCount.value = entries.length;
+        return entries;
+    },
+
+
+    // nsIBriefQuery
+    getSerializedEntries: function BriefQuery_getSerializedEntries() {
+        var statement = 'SELECT entries.id, entries.feedID ' + this.getQueryTextForSelect();
+        var select = this.dBConnection.createStatement(statement);
+
+        var entries = [];
+        var feeds = [];
+        try {
+            while (select.executeStep()) {
+                // |array[array.length] = x| is faster than |array.push(x)| (bug 385393)
+                entries[entries.length] = select.getString(0);
+
+                var feedID = select.getString(1);
+                if (feeds.indexOf(feedID) == -1)
+                    feeds[feeds.length] = feedID;
+            }
+        }
+        finally {
+            select.reset();
+        }
+
+        var bag = Cc['@mozilla.org/hash-property-bag;1'].
+                  createInstance(Ci.nsIWritablePropertyBag2);
+        bag.setPropertyAsAString('entries', entries.join(' '));
+        bag.setPropertyAsAString('feeds', feeds.join(' '));
+
+        return bag;
+    },
+
+
+    // nsIBriefQuery
+    getEntriesCount: function BriefQuery_getEntriesCount() {
+        // Optimization: ignore sorting settings.
+        var oldSortOrder = this.sortOrder;
+        this.sortOrder = Ci.nsIBriefQuery.NO_SORT;
+
+        var statement = 'SELECT COUNT(1) ' + this.getQueryTextForSelect();
+        var select = this.dBConnection.createStatement(statement);
+
+        this.sortOrder = oldSortOrder;
+
+        var count = 0;
+        try {
+            select.executeStep();
+            count = select.getInt32(0);
+        }
+        finally {
+            select.reset();
+        }
+        return count;
+    },
+
+
+    // nsIBriefQuery
+    markEntriesRead: function BriefQuery_markEntriesRead(aStatus) {
+
+        // Make sure not to select entries which already have the desired status.
+        prevUnreadFlag = this.unread;
+        prevReadFlag = this.read;
+        if (aStatus)
+            this.unread = true;
+        else
+            this.read = true;
+
+        var statement = 'UPDATE entries SET read = ? ' + this.getQueryText();
+
+        var update = this.dBConnection.createStatement(statement)
+        update.bindInt32Parameter(0, aStatus ? 1 : 0);
+
+        this.dBConnection.beginTransaction();
+        try {
+            // Get the list of entries which we deleted, so we can pass it in the
+            // notification. Never include those from hidden feeds though - nobody cares
+            // for them and, what's more, they don't expect to deal with them.
+            var prevIncludeHiddenFlag = this.includeHiddenFeeds;
+            this.includeHiddenFeeds = false;
+            var changedEntries = this.getSerializedEntries(this);
+            this.includeHiddenFeeds = prevIncludeHiddenFlag;
+
+            update.execute();
+        }
+        finally {
+            this.dBConnection.commitTransaction();
+            this.unread = prevUnreadFlag;
+            this.read = prevReadFlag;
+        }
+
+        // If any entries were marked, dispatch the notifiaction.
+        if (changedEntries.getPropertyAsAString('entries')) {
+            this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                                 aStatus ? 'read' : 'unread');
+        }
+    },
+
+
+    // nsIBriefQuery
+    deleteEntries: function BriefQuery_deleteEntries(aState) {
+
+        var statementString;
+        switch (aState) {
+            case Ci.nsIBriefQuery.ENTRY_STATE_NORMAL:
+            case Ci.nsIBriefQuery.ENTRY_STATE_TRASHED:
+            case Ci.nsIBriefQuery.ENTRY_STATE_DELETED:
+                statementString = 'UPDATE entries SET deleted = ' + aState +
+                                   this.getQueryText();
+                break;
+
+            case Ci.nsIBriefQuery.REMOVE_FROM_DATABASE:
+                statementString = 'DELETE FROM entries ' + this.getQueryText();
+                break;
+
+            default:
+                throw('Invalid deleted state.');
+        }
+
+        var statement = this.dBConnection.createStatement(statementString)
+        this.dBConnection.beginTransaction();
+        try {
+            // See markEntriesRead.
+            var prevIncludeHiddenFlag = this.includeHiddenFeeds;
+            this.includeHiddenFeeds = false;
+            var changedEntries = this.getSerializedEntries(this);
+            this.includeHiddenFeeds = prevIncludeHiddenFlag;
+
+            statement.execute();
+        }
+        finally {
+            this.dBConnection.commitTransaction();
+        }
+
+        this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                             'deleted');
+    },
+
+
+    // nsIBriefQuery
+    starEntries: function BriefQuery_starEntries(aStatus) {
+        var statement = 'UPDATE entries SET starred = ? ' + this.getQueryText();
+        var update = this.dBConnection.createStatement(statement);
+        update.bindInt32Parameter(0, aStatus ? 1 : 0);
+
+        this.dBConnection.beginTransaction();
+        try {
+            // See markEntriesRead.
+            var prevIncludeHiddenFlag = this.includeHiddenFeeds;
+            this.includeHiddenFeeds = false;
+            var changedEntries = this.getSerializedEntries(this);
+            this.includeHiddenFeeds = prevIncludeHiddenFlag;
+
+            update.execute();
+        }
+        finally {
+            this.dBConnection.commitTransaction();
+        }
+
+        this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                             'starred');
     },
 
 
@@ -1200,7 +1226,7 @@ BriefQuery.prototype = {
         }
 
         if (this.folders) {
-            this._effectiveFolders = this.folders.match(/[^ ]+/g);
+            this.effectiveFolders = this.folders.match(/[^ ]+/g);
 
             // Cache the items list to avoid retrieving it over and over when traversing.
             this._items = Components.classes['@ancestor/brief/storage;1'].
@@ -1209,12 +1235,12 @@ BriefQuery.prototype = {
             var rootFolderURI = Cc["@mozilla.org/preferences-service;1"].
                                 getService(Ci.nsIPrefBranch).
                                 getCharPref('extensions.brief.liveBookmarksFolder');
-            this._traverseChildren(hashString(rootFolderURI));
+            this.traverseChildren(hashString(rootFolderURI));
 
             text += '(';
-            for (var i = 0; i < this._effectiveFolders.length; i++) {
-                text += 'feeds.parent = "' + this._effectiveFolders[i] + '"';
-                if (i < this._effectiveFolders.length - 1)
+            for (var i = 0; i < this.effectiveFolders.length; i++) {
+                text += 'feeds.parent = "' + this.effectiveFolders[i] + '"';
+                if (i < this.effectiveFolders.length - 1)
                     text += ' OR ';
             }
             text += ') AND ';
@@ -1273,8 +1299,8 @@ BriefQuery.prototype = {
 
         // Trim the trailing AND, if there is one
         text = text.replace(/AND $/, '');
-        // If the were no constraints (all entries are matched), we may end up with
-        // a dangling WHERE.
+        // If the were no constraints (all entries are matched),
+        // we may end up with a dangling WHERE.
         text = text.replace(/WHERE $/, '');
 
         if (!aForSelect)
@@ -1313,15 +1339,15 @@ BriefQuery.prototype = {
         return this.getQueryText(true);
     },
 
-    _traverseChildren: function BriefQuery__traverseChildren(aFolder) {
-        var isEffectiveFolder = this._effectiveFolders.indexOf(aFolder) != -1;
+    traverseChildren: function BriefQuery_traverseChildren(aFolder) {
+        var isEffectiveFolder = this.effectiveFolders.indexOf(aFolder) != -1;
         var item, i;
         for (i = 0; i < this._items.length; i++) {
             item = this._items[i];
             if (item.parent == aFolder && item.isFolder) {
                 if (isEffectiveFolder)
-                    this._effectiveFolders.push(item.feedID);
-                this._traverseChildren(item.feedID);
+                    this.effectiveFolders.push(item.feedID);
+                this.traverseChildren(item.feedID);
             }
         }
     },
@@ -1373,16 +1399,14 @@ function dump(aMessage) {
 
 var StorageServiceFactory = {
 
-    _singleton: null,
-
     createInstance: function(aOuter, aIID) {
         if (aOuter != null)
             throw Components.results.NS_ERROR_NO_AGGREGATION;
 
-        if (!this._singleton)
-            this._singleton = new BriefStorageService();
+        if (!gStorageService)
+            gStorageService = new BriefStorageService();
 
-        return this._singleton.QueryInterface(aIID);
+        return gStorageService.QueryInterface(aIID);
     }
 
 }

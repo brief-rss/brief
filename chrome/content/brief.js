@@ -396,7 +396,7 @@ var gCommands = {
     },
 
     markCurrentViewRead: function cmd_markCurrentViewRead(aNewStatus) {
-        gStorage.markEntriesRead(aNewStatus, gFeedView.query);
+        gFeedView.query.markEntriesRead(aNewStatus);
     },
 
     toggleHeadlinesMode: function cmd_toggleHeadlinesMode() {
@@ -474,7 +474,7 @@ var gCommands = {
 
         var query = new QuerySH(null, entryID, null);
         query.deleted = ENTRY_STATE_ANY;
-        setTimeout(function() { gStorage.markEntriesRead(newStatus, query) }, 0);
+        setTimeout(function() { query.markEntriesRead(newStatus) }, 0);
     },
 
 
@@ -486,7 +486,7 @@ var gCommands = {
         var entryID = selectedEntry.getAttribute('id');
 
         var query = new QuerySH(null, entryID, null);
-        gStorage.deleteEntries(1, query);
+        query.deleteEntries(ENTRY_STATE_TRASHED);
     },
 
 
@@ -499,7 +499,7 @@ var gCommands = {
 
         var query = new QuerySH(null, entryID, null);
         query.deleted = ENTRY_STATE_TRASHED;
-        gStorage.deleteEntries(0, query);
+        query.deleteEntries(ENTRY_STATE_NORMAL);
     },
 
 
@@ -517,7 +517,7 @@ var gCommands = {
             selectedEntry.removeAttribute('starred');
 
         var query = new QuerySH(null, entryID, null);
-        setTimeout(function() { gStorage.starEntries(newStatus, query) }, 0);
+        setTimeout(function() { query.starEntries(newStatus) }, 0);
     },
 
     unfoldSelectedEntry: function cmd_unfoldSelectedEntry() {

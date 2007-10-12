@@ -38,7 +38,7 @@ interface nsIBriefQuery : nsISupports {
     attribute boolean unstarred;
 
     /**
-     * Deleted state of entries to be selected. Must be one of the below constants.
+     * Constants representing deleted state of entries to be selected.
      *
      * @default value is ENTRY_STATE_NORMAL.
      */
@@ -111,15 +111,55 @@ interface nsIBriefQuery : nsISupports {
     void setConditions(in string feeds, in string entries, in boolean unread);
 
     /**
-     * Returns the computed SQL query string.
+     * Returns matched entries in a full form.
+     *
+     * @param entryCount Empty object (required by XPConnect to return an array).
+     *
+     * @returns Array of nsIBriefFeedEntry objects.
      */
-    AString getQueryText();
+    void getEntries(out unsigned long entryCount,
+                    [retval, array, size_is(entryCount)] out nsIBriefFeedEntry entries);
 
     /**
-     * Return the cumputed SQL query string including the clauses that may be used only
-     * with SELECT statement.
+     * Returns a space-separated list of IDs of matched entries and a similar list of
+     * IDs of feeds which these entries belong to.
+     *
+     * @returns Property bag containing "entries" and "feeds" string properties.
      */
-    AString getQueryTextForSelect();
+    nsIWritablePropertyBag2 getSerializedEntries();
+
+    /**
+     * Returns the number of matched entries.
+     */
+    unsigned long getEntriesCount();
+
+    /**
+     * Marks the matched entries as read/unread.
+     *
+     * @param  status  New status of entries (TRUE for read, FALSE for unread).
+     */
+    void markEntriesRead(in boolean status);
+
+    /**
+     * Mark matched entries as starred/unstarred.
+     *
+     * @param  status  New status of entries (TRUE for starred, FALSE for not starred).
+     */
+    void starEntries(in boolean status);
+
+    /**
+     * Sets the entries' deleted state or removes them from the database.
+     *
+     * @param  state  The new deleted state or instruction to remove the entries from the
+     *                database.
+     *                Must be one of the state constants (see nsIBriefQuery.deleted)
+     *                or the below REMOVE_FROM_DATABASE constant.
+     *
+     * @throws on invalid |state| parameter.
+     */
+    const short REMOVE_FROM_DATABASE = 4;
+
+    void deleteEntries(in short state);
 
 };
 
@@ -158,36 +198,6 @@ interface nsIBriefStorage : nsISupports {
                           [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
 
   /**
-   * Get array of entries matching specified constraints sorted descending by
-   * date.
-   *
-   * @param query      Query selecting the entries.
-   * @param entryCount Empty object (required by XPConnect to return an array).
-   *
-   * @returns Array of nsIBriefFeedEntry objects.
-   */
-  void getEntries(in nsIBriefQuery query,
-                  out unsigned long entryCount,
-                  [retval, array, size_is(entryCount)] out nsIBriefFeedEntry entries);
-
-  /**
-   * Returns a space-separated list of IDs of entries matching a given query
-   * and a similar list of IDs of feeds which these entries belong to.
-   *
-   * @param  query  Query selecting the entries.
-   *
-   * @returns Property bag containing "entries" and "feeds" string properties.
-   */
-  nsIWritablePropertyBag2 getSerializedEntries(in nsIBriefQuery query);
-
-  /**
-   * Returns number of entries.
-   *
-   * @param  query  Query selecting the entries to be counted.
-   */
-  unsigned long getEntriesCount(in nsIBriefQuery query);
-
-  /**
    * Synchronize database with Live Bookmarks in folder which RDF id is
    * specified by extensions.brief.liveBookmarksFolder.
    * Previously added feeds that aren't in the current folder anymore are
@@ -212,37 +222,5 @@ interface nsIBriefStorage : nsISupports {
    *               fields in the database.
    */
   void setFeedOptions(in nsIBriefFeed feed);
-
-  /**
-   * Marks entries as read/unread.
-   *
-   * @param  status  New status of entries (TRUE for read, FALSE for unread).
-   * @param  query   Query selecting the entries to be processed.
-   */
-  void markEntriesRead(in boolean status, in nsIBriefQuery query);
-
-  /**
-   * Mark entries as starred/unstarred.
-   *
-   * @param  status  New status of entries (TRUE for starred, FALSE for not starred).
-   * @param  query   Query selecting the entries to be processed.
-   */
-  void starEntries(in boolean status, in nsIBriefQuery query);
-
-  /**
-   * Sets the entries' deleted state or removes them from the database..
-   *
-   * @param  state  The new deleted state or instruction to remove the entries from the
-   *                database. Must be one of the below constants.
-   * @param  query  Query selecting the entries to be processed.
-   *
-   * @throws on invalid |state| parameter.
-   */
-  const short ENTRY_STATE_NORMAL = 0;
-  const short ENTRY_STATE_TRASHED = 1;
-  const short ENTRY_STATE_DELETED = 2;
-  const short REMOVE_FROM_DATABASE = 3;
-
-  void deleteEntries(in short state, in nsIBriefQuery query);
 
 };

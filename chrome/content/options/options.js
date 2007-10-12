@@ -146,9 +146,7 @@ var gFeedsPane = {
             query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
             query.unstarred = checked.value;
             query.includeHiddenFeeds = true;
-
-            var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-            storageService.deleteEntries(Ci.nsIBriefStorage.ENTRY_STATE_DELETED, query);
+            query.deleteEntries(Ci.nsIBriefStorage.ENTRY_STATE_DELETED);
 
             prefBranch.setBoolPref('extensions.brief.database.keepStarredWhenClearing', checked.value)
         }
