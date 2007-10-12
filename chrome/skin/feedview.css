@@ -214,3 +214,10 @@ body {
 #feed-content[showHeadlinesOnly] .article-container:hover .expand-button {
   background: url(chrome://brief/skin/icons/expand-button.png) 15px 5px no-repeat;
 }
+
+/* ----------------------  Adjustments for the selected articles  -------------------- */
+.article-container[selected] {
+  border: 1px #1474d6 solid;
+  padding-left: 0;
+  padding-right: 0;
+}

@@ -142,7 +142,7 @@ FeedView.prototype = {
             return true;
 
         var prevEntries = this._entries;
-        var currentEntriesCount = gStorage.getEntriesCount(this.query);
+        var currentEntriesCount = this.query.getEntriesCount();
 
         if (!prevEntries || !currentEntriesCount)
             this._refresh();
@@ -156,9 +156,9 @@ FeedView.prototype = {
         if (this.entriesCount - currentEntriesCount == 1) {
             var removedEntry = null;
             var removedEntryIndex;
-            var currentEntries = gStorage.getSerializedEntries(this.query).
-                                          getPropertyAsAString('entries').
-                                          match(/[^ ]+/g);
+            var currentEntries = this.query.getSerializedEntries().
+                                            getPropertyAsAString('entries').
+                                            match(/[^ ]+/g);
 
             // Find the removed entry.
             for (var i = 0; i < prevEntries.length; i++) {
@@ -188,7 +188,7 @@ FeedView.prototype = {
             this._refreshIncrementally(removedEntry);
 
             // Update this._entries here, so that this._refreshIncrementally()
-            // doesn't have to call gStorage.getSerializedEntries() again.
+            // doesn't have to call this.query.getSerializedEntries() again.
             this._entries = currentEntries;
             isDirty = true;
         }
@@ -223,9 +223,9 @@ FeedView.prototype = {
         // the view needs to be refreshed when database changes. This can be done
         // after timeout, so not to delay the view creation any futher.
         function setEntries() {
-            gFeedView._entries = gStorage.getSerializedEntries(gFeedView.query).
-                                          getPropertyAsAString('entries').
-                                          match(/[^ ]+/g);
+            gFeedView._entries = gFeedView.query.getSerializedEntries().
+                                                 getPropertyAsAString('entries').
+                                                 match(/[^ ]+/g);
         }
         setTimeout(setEntries, 500);
     },
@@ -258,7 +258,7 @@ FeedView.prototype = {
             var query = self.query;
             query.offset = gPrefs.entriesPerPage * self.currentPage - 1;
             query.limit = 1;
-            var newEntry = gStorage.getEntries(query, {})[0];
+            var newEntry = query.getEntries({})[0];
 
             // Append the entry. If we're on the last page then there may
             // have been no futher entries to pull.
@@ -278,7 +278,7 @@ FeedView.prototype = {
     // Computes the current entries count, page counter, current page ordinal and
     // refreshes the navigation UI.
     _computePages: function FeedView__computePages() {
-        this.entriesCount = gStorage.getEntriesCount(this.query);
+        this.entriesCount = this.query.getEntriesCount();
         this.pageCount = Math.ceil(this.entriesCount / gPrefs.entriesPerPage);
 
         // This may happen for example when you are on the last page, and the
@@ -411,7 +411,7 @@ FeedView.prototype = {
         query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
         query.limit = gPrefs.entriesPerPage;
 
-        var entries = gStorage.getEntries(query, {});
+        var entries = query.getEntries({});
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
@@ -465,14 +465,14 @@ var gFeedViewEvents = {
         var readStatus = aEvent.target.hasAttribute('read');
         var query = new QuerySH(null, entryID, null);
         query.deleted = ENTRY_STATE_ANY;
-        gStorage.markEntriesRead(readStatus, query);
+        query.markEntriesRead(readStatus);
     },
 
 
     onDeleteEntry: function feedViewEvents_onDeleteEntry(aEvent) {
         var entryID = aEvent.target.getAttribute('id');
         var query = new QuerySH(null, entryID, null);
-        gStorage.deleteEntries(1, query);
+        query.deleteEntries(ENTRY_STATE_TRASHED);
     },
 
 
@@ -480,7 +480,7 @@ var gFeedViewEvents = {
         var entryID = aEvent.target.getAttribute('id');
         var query = new QuerySH(null, entryID, null);
         query.deleted = ENTRY_STATE_TRASHED;
-        gStorage.deleteEntries(0, query);
+        query.deleteEntries(ENTRY_STATE_NORMAL);
     },
 
 
@@ -488,7 +488,7 @@ var gFeedViewEvents = {
         var entryID = aEvent.target.getAttribute('id');
         var newStatus = aEvent.target.hasAttribute('starred');
         var query = new QuerySH(null, entryID, null);
-        gStorage.starEntries(newStatus, query);
+        query.starEntries(newStatus);
     },
 
 
@@ -518,7 +518,7 @@ var gFeedViewEvents = {
                 targetEntry.setAttribute('read', true);
                 var id = targetEntry.getAttribute('id');
                 var query = new QuerySH(null, id, null);
-                gStorage.markEntriesRead(true, query);
+                query.markEntriesRead(true);
             }
         }
     },

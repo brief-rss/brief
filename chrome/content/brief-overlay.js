@@ -44,7 +44,7 @@ var gBrief = {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
         query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
-        this.storageService.markEntriesRead(true, query);
+        query.markEntriesRead(true);
     },
 
 
@@ -53,7 +53,7 @@ var gBrief = {
         var panel = document.getElementById('brief-status');
 
         var query = new BriefQuery(null, null, true);
-        var unreadEntriesCount = this.storageService.getEntriesCount(query);
+        var unreadEntriesCount = query.getEntriesCount();
 
         counter.value = unreadEntriesCount;
         panel.setAttribute('unread', unreadEntriesCount > 0);
@@ -86,9 +86,8 @@ var gBrief = {
         var query = new BriefQuery(null, null, true);
         query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
         query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
-        var unreadFeeds = this.storageService.getSerializedEntries(query).
-                                              getPropertyAsAString('feeds').
-                                              match(/[^ ]+/g);
+        var unreadFeeds = query.getSerializedEntries().getPropertyAsAString('feeds').
+                                                       match(/[^ ]+/g);
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
         var value = bundle.getString('noUnreadFeedsTooltip');
@@ -108,7 +107,7 @@ var gBrief = {
             row.appendChild(label);
 
             var query = new BriefQuery(unreadFeeds[i], null, true);
-            var unreadCount = this.storageService.getEntriesCount(query);
+            var unreadCount = query.getEntriesCount();
             label = document.createElement('label');
             label.setAttribute('class', 'unread-entries-count');
             label.setAttribute('value', unreadCount);
@@ -266,10 +265,8 @@ var gBrief = {
             break;
 
         case 'brief:entry-status-changed':
-            if ((aData == 'read' || aData == 'unread' || aData == 'deleted') &&
-               !this.statusIcon.hidden) {
-                this.updateStatuspanel();
-            }
+            if ((aData == 'read' || aData == 'unread' || aData == 'deleted') && !this.statusIcon.hidden)
+                setTimeout(this.updateStatuspanel, 0);
             break;
 
         case 'nsPref:changed':

@@ -295,7 +295,7 @@ var gFeedList = {
             query.starred = true;
         else if (aSpecialItem == 'trash-folder')
             query.deleted = ENTRY_STATE_TRASHED;
-        var unreadCount = gStorage.getEntriesCount(query);
+        var unreadCount = query.getEntriesCount();
 
         var title = treeitem.getAttribute('title');
         if (unreadCount > 0) {
@@ -332,7 +332,7 @@ var gFeedList = {
                 query = new Query();
                 query.folders = folder.feedID;
                 query.unread = true;
-                unreadCount = gStorage.getEntriesCount(query);
+                unreadCount = query.getEntriesCount();
 
                 if (unreadCount > 0) {
                     label = folder.title + ' (' + unreadCount +')';
@@ -365,7 +365,7 @@ var gFeedList = {
 
             // Update the label.
             query = new QuerySH(feed.feedID, null, true);
-            unreadCount = gStorage.getEntriesCount(query);
+            unreadCount = query.getEntriesCount();
             if (unreadCount > 0) {
                 label = feed.title + ' (' + unreadCount +')';
                 this.setProperty(treecell, 'unread');
@@ -585,7 +585,7 @@ var gContextMenuCommands = {
         var item = gFeedList.ctx_targetItem;
         var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
         var query = new QuerySH(feedID, null, null);
-        gStorage.markEntriesRead(true, query);
+        query.markEntriesRead(true);
     },
 
 
@@ -600,12 +600,12 @@ var gContextMenuCommands = {
                 query.starred = true;
             else
                 query.deleted = ENTRY_STATE_TRASHED;
-            gStorage.markEntriesRead(true, query);
+            query.markEntriesRead(true);
         }
         else {
             var query = new Query();
             query.folders = targetItem.getAttribute('feedID');
-            gStorage.markEntriesRead(true, query);
+            query.markEntriesRead(true);
         }
     },
 
@@ -644,7 +644,7 @@ var gContextMenuCommands = {
         var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
         var query = new QuerySH(feedID, null, null);
         query.unstarred = true;
-        gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+        query.deleteEntries(ENTRY_STATE_TRASHED);
     },
 
 
@@ -655,13 +655,13 @@ var gContextMenuCommands = {
             var query = new Query();
             query.unstarred = true;
             query.unread = true;
-            gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+            query.deleteEntries(ENTRY_STATE_TRASHED);
         }
         else {
             var query = new Query();
             query.folders = targetItem.getAttribute('feedID');
             query.unstarred = true;
-            gStorage.deleteEntries(ENTRY_STATE_TRASHED, query);
+            query.deleteEntries(ENTRY_STATE_TRASHED);
         }
     },
 
@@ -669,14 +669,14 @@ var gContextMenuCommands = {
     restoreTrashed: function ctxMenuCmds_restoreTrashed(aEvent) {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
-        gStorage.deleteEntries(ENTRY_STATE_NORMAL, query);
+        query.deleteEntries(ENTRY_STATE_NORMAL);
     },
 
 
     emptyTrash: function ctxMenuCmds_emptyTrash(aEvent) {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
-        gStorage.deleteEntries(ENTRY_STATE_DELETED, query);
+        query.deleteEntries(ENTRY_STATE_DELETED);
     },
 
 
