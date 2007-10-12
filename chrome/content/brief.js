@@ -457,6 +457,76 @@ var gCommands = {
             gFeedView.selectedEntry = prevEntry;
         else
             gFeedView.currentPage--;
+    },
+
+    markSelectedEntryRead: function cmd_markSelectedEntryRead() {
+        if (!gFeedView)
+            return;
+
+        var selectedEntry = gFeedView.selectedEntry;
+        var entryID = selectedEntry.getAttribute('id');
+        var newStatus = !selectedEntry.hasAttribute('read');
+
+        if (newStatus)
+            selectedEntry.setAttribute('read', true);
+        else
+            selectedEntry.removeAttribute('read');
+
+        var query = new QuerySH(null, entryID, null);
+        query.deleted = ENTRY_STATE_ANY;
+        setTimeout(function() { gStorage.markEntriesRead(newStatus, query) }, 0);
+    },
+
+
+    deleteSelectedEntry: function cmd_deleteSelectedEntry() {
+        if (!gFeedView)
+            return;
+
+        var selectedEntry = gFeedView.selectedEntry;
+        var entryID = selectedEntry.getAttribute('id');
+
+        var query = new QuerySH(null, entryID, null);
+        gStorage.deleteEntries(1, query);
+    },
+
+
+    restoreSelectedEntry: function cmd_restoreSelectedEntry() {
+        if (!gFeedView)
+            return;
+
+        var selectedEntry = gFeedView.selectedEntry;
+        var entryID = selectedEntry.getAttribute('id');
+
+        var query = new QuerySH(null, entryID, null);
+        query.deleted = ENTRY_STATE_TRASHED;
+        gStorage.deleteEntries(0, query);
+    },
+
+
+    starSelectedEntry: function cmd_starSelectedEntry() {
+        if (!gFeedView)
+            return;
+
+        var selectedEntry = gFeedView.selectedEntry;
+        var entryID = selectedEntry.getAttribute('id');
+        var newStatus = !selectedEntry.hasAttribute('starred');
+
+        if (newStatus)
+            selectedEntry.setAttribute('starred', true);
+        else
+            selectedEntry.removeAttribute('starred');
+
+        var query = new QuerySH(null, entryID, null);
+        setTimeout(function() { gStorage.starEntries(newStatus, query) }, 0);
+    },
+
+    unfoldSelectedEntry: function cmd_unfoldSelectedEntry() {
+        if (!gFeedView || !gPrefs.showHeadlinesOnly)
+            return;
+
+        var evt = document.createEvent('Events');
+        evt.initEvent('CollapseEntry', false, false);
+        gFeedView.selectedEntry.dispatchEvent(evt);
     }
 
 }

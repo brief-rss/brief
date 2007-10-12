@@ -160,7 +160,8 @@
                     if (target.className == 'expand-button' || (target.className == 'article-header' &&
                        feedContent.hasAttribute('showHeadlinesOnly'))) {
                         var self = this;
-                        $(articleContent).slideUp('fast', function() {self.setAttribute('collapsed', true);} );
+                        $(articleContent).slideUp('fast',
+                                                  function(){ self.setAttribute('collapsed', true) });
                     }
                 }
             ]]>
@@ -200,9 +201,14 @@
                     else
                         markReadButton.label = feedContentDiv.getAttribute('markReadString');
                     break;
+
                 case 'collapsed':
                     var content = document.
                                   getAnonymousElementByAttribute(this, 'class', 'article-content');
+
+                    // If an entry was (un)folded using jQuery, then changing
+                    // the "collapsed" attribute alone isn't enough, because it
+                    // doesn't (un)fold article-content.
                     if (event.newValue == 'true')
                         $(content).hide();
                     else
@@ -219,6 +225,21 @@
                 var self = this;
                 var feedContent = document.getElementById('feed-content');
                 setTimeout(function() { feedContent.removeChild(self); }, 300);
+            ]]>
+            </handler>
+
+            <handler event="CollapseEntry">
+            <![CDATA[
+            var articleContent = document.getAnonymousElementByAttribute(this, 'class',
+                                                                      'article-content');
+            if (this.hasAttribute('collapsed')) {
+                $(articleContent).slideDown('fast');
+                this.removeAttribute('collapsed');
+            }
+            else {
+                var self = this;
+                $(articleContent).slideUp('fast', function(){ self.setAttribute('collapsed', true) });
+            }
             ]]>
             </handler>
         </handlers>
