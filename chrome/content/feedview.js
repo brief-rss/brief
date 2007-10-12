@@ -53,6 +53,8 @@ FeedView.prototype = {
     // to be refreshed.
     _entries: '',
 
+    keyNavEnabled: false,
+
     // Key elements.
     browser:      null,
     document:     null,
@@ -97,7 +99,9 @@ FeedView.prototype = {
 
     __selectedEntry: null,
     set selectedEntry(aEntry) {
-        if (aEntry != this.__selectedEntry) {
+        this.keyNavEnabled = true;
+
+        if (aEntry && aEntry != this.__selectedEntry) {
             if (this.__selectedEntry)
                 this.__selectedEntry.removeAttribute('selected');
             aEntry.setAttribute('selected', true);
@@ -234,6 +238,10 @@ FeedView.prototype = {
         while (entry.id != aEntryId)
             entry = entry.nextSibling;
 
+        // Remember the next sibling as we may need to select it.
+        var nextSibling = entry.nextSibling;
+        var previousSibling = entry.previousSibling;
+
         // Remove the entry. We don't do it directly, because we want to
         // use jQuery to to fade it gracefully and we cannot call it from
         // here, because it's untrusted.
@@ -241,19 +249,29 @@ FeedView.prototype = {
         evt.initEvent('RemoveEntry', false, false);
         entry.dispatchEvent(evt);
 
-        this._computePages();
+        var self = this;
+        function finish() {
+            self._computePages();
 
-        // Pull the entry to be added to the current page, which happens
-        // to have been the first entry of the next page.
-        var query = this.query;
-        query.offset = gPrefs.entriesPerPage * this.currentPage - 1;
-        query.limit = 1;
-        var entry = gStorage.getEntries(query, {})[0];
+            // Pull the entry to be added to the current page, which happens
+            // to have been the first entry of the next page.
+            var query = self.query;
+            query.offset = gPrefs.entriesPerPage * self.currentPage - 1;
+            query.limit = 1;
+            var newEntry = gStorage.getEntries(query, {})[0];
 
-        // Append the entry. If we're on the last page then there may
-        // have been no futher entries to pull.
-        if (entry)
-            this._appendEntry(entry);
+            // Append the entry. If we're on the last page then there may
+            // have been no futher entries to pull.
+            var appendedEntry = null;
+            if (newEntry)
+                appendedEntry = self._appendEntry(newEntry);
+
+            // Select another entry
+            self.selectedEntry = nextSibling || appendedEntry || previousSibling || null;
+        }
+
+        // Don't append the new entry until the old one is removed.
+        setTimeout(finish, 350);
     },
 
 
@@ -266,9 +284,9 @@ FeedView.prototype = {
         // This may happen for example when you are on the last page, and the
         // number of entries decreases (e.g. they are deleted).
         if (this.currentPage > this.pageCount)
-            this.currentPage = this.pageCount;
+            this.__currentPage = this.pageCount;
         else if (this.currentPage == 0 && this.pageCount > 0)
-            this.currentPage = 1;
+            this.__currentPage = 1;
 
         // Update the page commands and description
         var pageLabel = document.getElementById('page-desc');
@@ -325,6 +343,12 @@ FeedView.prototype = {
 
         // See comments next to the event handler functions.
         doc.addEventListener('click', gFeedViewEvents.onFeedViewClick, true);
+
+        // These listeners do two things (a) stop propagation of
+        // keypresses in order to prevent FAYT (b) forward keypresses
+        // from the feed view document to the main one.
+        document.addEventListener('keypress', function(e) { e.stopPropagation() }, true);
+        doc.defaultView.addEventListener('keypress', gFeedViewEvents.forwardKeypress, true);
 
         // Apply the CSS.
         var style = doc.getElementsByTagName('style')[0];
@@ -391,6 +415,9 @@ FeedView.prototype = {
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
+        if (this.keyNavEnabled)
+            this.selectedEntry = this.feedContent.firstChild;
+
         // Restore default cursor which we changed to "wait" at the beginning of
         // the refresh.
         this.browser.style.cursor = 'auto';
@@ -423,7 +450,9 @@ FeedView.prototype = {
             articleContainer.setAttribute('collapsed', true);
 
         this.feedContent.appendChild(articleContainer);
-    },
+
+        return articleContainer;
+    }
 
 }
 
@@ -479,17 +508,13 @@ var gFeedViewEvents = {
                 var prefBranch = Cc['@mozilla.org/preferences-service;1'].
                                  getService(Ci.nsIPrefBranch);
                 var whereToOpen = prefBranch.getIntPref('browser.link.open_newwindow');
-                if (whereToOpen == 2) {
-                    openDialog('chrome://browser/content/browser.xul', '_blank',
-                               'chrome,all,dialog=no', url);
-                }
-                else {
+                if (whereToOpen == 2)
+                    openDialog('chrome://browser/content/browser.xul', '_blank', 'chrome,all,dialog=no', url);
+                else
                     brief.browserWindow.gBrowser.loadOneTab(url);
-                }
             }
 
-            if (!targetEntry.hasAttribute('read') &&
-               gPrefs.getBoolPref('feedview.linkMarksRead')) {
+            if (!targetEntry.hasAttribute('read') && gPrefs.getBoolPref('feedview.linkMarksRead')) {
                 targetEntry.setAttribute('read', true);
                 var id = targetEntry.getAttribute('id');
                 var query = new QuerySH(null, id, null);
@@ -510,6 +535,17 @@ var gFeedViewEvents = {
             brief.browserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
         else
             brief.browserWindow.gBrief.contextMenuTarget = null;
+    },
+
+    forwardKeypress: function feedViewEvents_forwardKeypress(aEvent) {
+        if (aEvent.ctrlKey || aEvent.altKey || aEvent.metaKey)
+            return;
+
+        aEvent.stopPropagation();
+        var evt = document.createEvent('KeyboardEvent');
+        evt.initKeyEvent('keypress', true, true, null,
+                         false, false, false, false, 0, aEvent.charCode);
+        gFeedView.browser.dispatchEvent(evt);
     }
 
 }
