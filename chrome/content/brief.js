@@ -351,7 +351,7 @@ var gCommands = {
     },
 
     markSelectedEntryRead: function cmd_markSelectedEntryRead() {
-        if (!gFeedView)
+        if (!gFeedView || !gFeedView.selectedEntry)
             return;
 
         var selectedEntry = gFeedView.selectedEntry;
@@ -370,24 +370,20 @@ var gCommands = {
 
 
     deleteSelectedEntry: function cmd_deleteSelectedEntry() {
-        if (!gFeedView)
+        if (!gFeedView || !gFeedView.selectedEntry)
             return;
 
-        var selectedEntry = gFeedView.selectedEntry;
-        var entryID = selectedEntry.getAttribute('id');
-
+        var entryID = gFeedView.selectedEntry.getAttribute('id');
         var query = new QuerySH(null, entryID, null);
         query.deleteEntries(ENTRY_STATE_TRASHED);
     },
 
 
     restoreSelectedEntry: function cmd_restoreSelectedEntry() {
-        if (!gFeedView)
+        if (!gFeedView || !gFeedView.selectedEntry)
             return;
 
-        var selectedEntry = gFeedView.selectedEntry;
-        var entryID = selectedEntry.getAttribute('id');
-
+        var entryID = gFeedView.selectedEntry.getAttribute('id');
         var query = new QuerySH(null, entryID, null);
         query.deleted = ENTRY_STATE_TRASHED;
         query.deleteEntries(ENTRY_STATE_NORMAL);
@@ -395,7 +391,7 @@ var gCommands = {
 
 
     starSelectedEntry: function cmd_starSelectedEntry() {
-        if (!gFeedView)
+        if (!gFeedView || !gFeedView.selectedEntry)
             return;
 
         var selectedEntry = gFeedView.selectedEntry;
@@ -412,14 +408,18 @@ var gCommands = {
     },
 
     unfoldSelectedEntry: function cmd_unfoldSelectedEntry() {
-        if (!gFeedView || !gPrefs.showHeadlinesOnly)
+        if (!gFeedView || !gFeedView.selectedEntry || !gPrefs.showHeadlinesOnly)
             return;
 
         var evt = document.createEvent('Events');
         evt.initEvent('CollapseEntry', false, false);
         gFeedView.selectedEntry.dispatchEvent(evt);
-    }
+    },
 
+    focusSearchbar: function cmd_focusSearchbar() {
+        var searchbar = document.getElementById('searchbar');
+        searchbar.focus();
+    }
 }
 
 // Returns a string containing the style of the feed view.
@@ -590,6 +590,9 @@ var gPrefs = {
             break;
         case 'feedview.shownEntries':
             this.shownEntries = this.getCharPref('feedview.shownEntries');
+            var viewConstraintList = document.getElementById('view-constraint-list');
+            viewConstraintList.selectedIndex = this.shownEntries == 'all' ? 0 :
+                                               this.shownEntries == 'unread' ? 1 : 2;
             break;
         case 'feedview.doubleClickMarks':
             this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');

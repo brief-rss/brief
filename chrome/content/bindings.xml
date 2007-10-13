@@ -298,36 +298,44 @@
                     if (val != this.searchScope) {
                         this.setAttribute('searchScope', val.toString());
                         if (!this.hasAttribute('showingDescription') && this.value)
-                            brief.performSearch();
+                            performSearch();
                     }
                     return val;
                 ]]>
                 </setter>
             </property>
+            <method name="clear">
+                <body>
+                <![CDATA[
+                    this.value = '';
+                    this.clearButton.hidden = true;
+                    performSearch();
+                    this.inputField.blur();
+                ]]>
+                </body>
+            </method>
+
         </implementation>
 
         <handlers>
             <handler event="command">
             <![CDATA[
                 var target = event.originalTarget;
+                var anonid = target.getAttribute('anonid');
                 var textbox = document.getBindingParent(target);
 
-                if (target.getAttribute('anonid') == 'search-current' ||
-                   target.getAttribute('anonid') == 'search-all') {
+                if (anonid == 'search-current' || anonid == 'search-all') {
                     if (textbox.hasAttribute('showingDescription'))
                         textbox.value = target.label;
                     textbox.searchScope = target.value;
                 }
 
                 else if (target.id == 'searchbar') {
-                    brief.performSearch(event);
+                    performSearch();
                 }
 
-                else if (target.getAttribute('anonid') == 'searchbar-clearbutton') {
-                    this.value = '';
-                    this.clearButton.hidden = true;
-                    brief.performSearch();
-                    this.inputField.blur();
+                else if (anonid == 'searchbar-clearbutton') {
+                    this.clear();
                 }
             ]]>
             </handler>
@@ -365,9 +373,8 @@
             </handler>
             <handler event="keydown" keycode="VK_ESCAPE">
             <![CDATA[
-                if (!this.value)
-                    this.setAttribute('showingDescription', true);
-                this.inputField.blur();
+                this.clear();
+                event.preventDefault();
             ]]>
             </handler>
         </handlers>
