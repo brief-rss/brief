@@ -8,8 +8,8 @@
 <page id="brief-window"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       title="Brief"
-      onload="init();"
-      onunload="unload();">
+      onload="init()"
+      onunload="unload()">
 
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
@@ -44,62 +44,62 @@
 
     <popupset id="main-popupset">
         <menupopup id="feed-list-popup"
-                   onpopupshowing="gFeedList.onContextMenuShowing(event);"
-                   onpopuphiding="gFeedList.onContextMenuHiding(event);">
+                   onpopupshowing="gFeedList.onContextMenuShowing(event)"
+                   onpopuphiding="gFeedList.onContextMenuHiding(event)">
             <menuitem id="ctx-mark-feed-read"
                       label="&ctxMarkFeedRead.label;"
-                      oncommand="gContextMenuCommands.markFeedRead(event);"/>
+                      oncommand="gContextMenuCommands.markFeedRead(event)"/>
             <menuitem id="ctx-mark-folder-read"
                       label="&ctxMarkFolderRead.label;"
-                      oncommand="gContextMenuCommands.markFolderRead(event);"/>
+                      oncommand="gContextMenuCommands.markFolderRead(event)"/>
             <menuitem id="ctx-update-feed"
                       label="&ctxUpdateFeed.label;"
-                      oncommand="gContextMenuCommands.updateFeed(event);"/>
+                      oncommand="gContextMenuCommands.updateFeed(event)"/>
             <menuitem id="ctx-update-folder"
                       label="&ctxUpdateFolder.label;"
-                      oncommand="gContextMenuCommands.updateFolder(event);"/>
+                      oncommand="gContextMenuCommands.updateFolder(event)"/>
             <menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
-                      oncommand="gContextMenuCommands.openWebsite(event);"/>
+                      oncommand="gContextMenuCommands.openWebsite(event)"/>
             <menuitem id="ctx-restore-trashed"
                       label="&ctxRestoreTrashed.label;"
-                      oncommand="gContextMenuCommands.restoreTrashed(event);"/>
+                      oncommand="gContextMenuCommands.restoreTrashed(event)"/>
             <menuseparator id="ctx-dangerous-cmds-separator"/>
             <menuitem id="ctx-delete-feed"
                       label="&ctxDeleteFeed.label;"
-                      oncommand="gContextMenuCommands.deleteFeed(event);"/>
+                      oncommand="gContextMenuCommands.deleteFeed(event)"/>
             <menuitem id="ctx-delete-folder"
                       label="&ctxDeleteFolder.label;"
-                      oncommand="gContextMenuCommands.deleteFolder(event);"/>
+                      oncommand="gContextMenuCommands.deleteFolder(event)"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
-                      oncommand="gContextMenuCommands.emptyFeed(event);"/>
+                      oncommand="gContextMenuCommands.emptyFeed(event)"/>
             <menuitem id="ctx-empty-folder"
                       label="&ctxEmptyFolder.label;"
-                      oncommand="gContextMenuCommands.emptyFolder(event);"/>
+                      oncommand="gContextMenuCommands.emptyFolder(event)"/>
             <menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
-                      oncommand="gContextMenuCommands.emptyTrash(event);"/>
+                      oncommand="gContextMenuCommands.emptyTrash(event)"/>
             <menuseparator id="ctx-properties-separator"/>
             <menuitem id="ctx-feed-properties"
                       label="&ctxFeedProperties.label;"
-                      oncommand="gContextMenuCommands.showFeedProperties(event);"/>
+                      oncommand="gContextMenuCommands.showFeedProperties(event)"/>
         </menupopup>
     </popupset>
 
     <hbox id="main-box" flex="1">
         <grippy id="left-pane-grippy"
-                onclick="gCommands.toggleLeftPane(event);"/>
+                onclick="gCommands.toggleLeftPane(event)"/>
         <vbox id='left-pane' persist="width hidden">
             <toolbox>
                 <toolbar id="feed-list-toolbar">
                     <deck id="update-buttons-deck" selectedIndex="0">
                         <toolbarbutton id="update-button"
                                        tooltiptext="&updateButton.tooltip;"
-                                       oncommand="gCommands.updateAllFeeds();"/>
+                                       oncommand="gCommands.updateAllFeeds()"/>
                         <toolbarbutton id="stop-updating-button"
                                        tooltiptext="&stopUpdatingButton.tooltip;"
-                                       oncommand="gCommands.stopUpdating();"/>
+                                       oncommand="gCommands.stopUpdating()"/>
                     </deck>
                     <toolbaritem id="searchbar-container" flex="1">
                         <textbox id="searchbar" flex="1"
@@ -111,7 +111,7 @@
                     </toolbaritem>
                     <toolbarbutton id="options-button"
                                    tooltiptext="&showOptions.tooltip;"
-                                   oncommand="gCommands.openOptions();"/>
+                                   oncommand="gCommands.openOptions()"/>
                 </toolbar>
             </toolbox>
             <progressmeter id="update-progress" hidden="true"/>
@@ -121,10 +121,10 @@
                       seltype="single"
                       contextmenu="feed-list-popup"
                       persist="closedFolders"
-                      onselect="gFeedList.onSelect(event);"
-                      onmousedown="gFeedList.onMouseDown(event);"
-                      onclick="gFeedList.onClick(event);"
-                      onkeyup="gFeedList.onKeyUp(event);">
+                      onselect="gFeedList.onSelect(event)"
+                      onmousedown="gFeedList.onMouseDown(event)"
+                      onclick="gFeedList.onClick(event)"
+                      onkeyup="gFeedList.onKeyUp(event)">
 
                     <treecols>
                         <treecol id="name" flex="1"
@@ -175,21 +175,21 @@
                          hidden="true">
                     <toolbarbutton id="mark-view-read"
                                    tooltiptext="&markViewRead.tooltip;"
-                                   oncommand="gCommands.markCurrentViewRead(true);"/>
+                                   oncommand="gCommands.markCurrentViewRead(true)"/>
                     <toolbarbutton id="mark-view-unread"
                                    tooltiptext="&markViewUnread.tooltip;"
-                                   oncommand="gCommands.markCurrentViewRead(false);"/>
+                                   oncommand="gCommands.markCurrentViewRead(false)"/>
                     <spacer flex="1"/>
                     <toolbaritem id="headlines-checkbox-container">
                         <checkbox id="headlines-checkbox"
                                   label="&headlinesCheckbox.label;"
-                                  oncommand="gCommands.toggleHeadlinesMode();"/>
+                                  oncommand="gCommands.toggleHeadlinesMode()"/>
                     </toolbaritem>
                     <toolbaritem id="view-constraint-box">
                         <label value="&viewConstraintList.label;"/>
                         <menulist id="view-constraint-list"
                                   tooltiptext="&viewConstraintList.tooltip;"
-                                  oncommand="gCommands.switchViewConstraint(event.target.getAttribute('constraint'));">
+                                  oncommand="gCommands.switchViewConstraint(event.target.getAttribute('constraint'))">
                             <menupopup>
                                 <menuitem id="show-all"
                                           constraint="all"
