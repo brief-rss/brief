@@ -8,8 +8,8 @@
 <page id="brief-window"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       title="Brief"
-      onload="brief.init();"
-      onunload="brief.unload();">
+      onload="init();"
+      onunload="unload();">
 
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
@@ -159,7 +159,7 @@
                     <bookmarks-tree id="bookmark-folders-tree" flex="1" type="folders"/>
                     <hbox pack="end">
                         <button id="confirm-home-folder"
-                                oncommand="brief.selectHomeFolder(event)"/>
+                                oncommand="selectHomeFolder(event)"/>
                     </hbox>
                 </vbox>
             </deck>

@@ -17,122 +17,120 @@ const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
-var gFeedView;
+var gFeedView = null;
+var gInitialized = false;
+var gTopBrowserWindow;
 var gTemplateURI;
 var gFeedViewStyle;
 
-var brief = {
+function init(aEvent) {
+    if (gInitialized)
+        return;
+    gInitialized = true;
 
-    briefLoaded: false,
-    browserWindow: null,
+    gPrefs.register();
+    gFeedViewStyle = getFeedViewStyle();
 
-    init: function brief_init(aEvent) {
-        if (this.briefLoaded)
-            return;
-        this.briefLoaded = true;
+    // Get the extension's directory.
+    var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
+                       getService(Ci.nsIExtensionManager).
+                       getInstallLocation(EXT_ID).
+                       getItemLocation(EXT_ID);
+    // Get the template file.
+    itemLocation.append('defaults');
+    itemLocation.append('data');
+    itemLocation.append(TEMPLATE_FILENAME);
+    // Create URI of the template file.
+    gTemplateURI = Cc['@mozilla.org/network/protocol;1?name=file'].
+                   getService(Ci.nsIFileProtocolHandler).
+                   newFileURI(itemLocation);
 
-        gPrefs.register();
-        gFeedViewStyle = this.getFeedViewStyle();
+    // Initiate the feed list.
+    var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
+    if (liveBookmarksFolder) {
+        // This timeout causes the Brief window to be displayed a lot sooner and to
+        // populate the feed list afterwards.
+        setTimeout(function(){ gFeedList.rebuild() }, 0);
+        setTimeout(function(){ gStorage.syncWithBookmarks() }, 500);
+    }
+    else {
+        // If no Live Bookmarks folder has been picked yet, offer a button to do it.
+        var deck = document.getElementById('feed-list-deck');
+        deck.selectedIndex = 1;
 
-        // Get the extension's directory.
-        var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
-                           getService(Ci.nsIExtensionManager).
-                           getInstallLocation(EXT_ID).
-                           getItemLocation(EXT_ID);
-        // Get the template file.
-        itemLocation.append('defaults');
-        itemLocation.append('data');
-        itemLocation.append(TEMPLATE_FILENAME);
-        // Create URI of the template file.
-        gTemplateURI = Cc['@mozilla.org/network/protocol;1?name=file'].
-                       getService(Ci.nsIFileProtocolHandler).
-                       newFileURI(itemLocation);
+        // XXX This is just temporary for 0.8. Because we can't add new strings,
+        // we have to reuse the existing ones.
+        var stringbundle = document.getElementById('dialog-bundle');
+        var confirmButton = document.getElementById('confirm-home-folder');
+        var acceptString = stringbundle.getString('button-accept');
+        confirmButton.setAttribute('label', acceptString);
+    }
 
-        // Initiate the feed list.
-        var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
-        if (liveBookmarksFolder) {
-            // This timeout causes the Brief window to be displayed a lot sooner and to
-            // populate the feed list afterwards.
-            setTimeout(function(){ gFeedList.rebuild() }, 0);
-            setTimeout(function(){ gStorage.syncWithBookmarks() }, 500);
-        }
-        else {
-            // If no Live Bookmarks folder has been picked yet, offer a button to do it.
-            var deck = document.getElementById('feed-list-deck');
-            deck.selectedIndex = 1;
+    gTopBrowserWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
+                               getInterface(Ci.nsIWebNavigation).
+                               QueryInterface(Ci.nsIDocShellTreeItem).
+                               rootTreeItem.
+                               QueryInterface(Ci.nsIInterfaceRequestor).
+                               getInterface(Ci.nsIDOMWindow);
 
-            // XXX This is just temporary for 0.7.5. Because we can't add new strings,
-            // we have to reuse the existing ones.
-            var stringbundle = document.getElementById('dialog-bundle');
-            var confirmButton = document.getElementById('confirm-home-folder');
-            var acceptString = stringbundle.getString('button-accept');
-            confirmButton.setAttribute('label', acceptString);
-        }
+    var headlinesCheckbox = document.getElementById('headlines-checkbox');
+    headlinesCheckbox.checked = gPrefs.showHeadlinesOnly;
+    var viewConstraintList = document.getElementById('view-constraint-list');
+    viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
+                                       gPrefs.shownEntries == 'unread' ? 1 : 2;
 
-        this.browserWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
-                                    getInterface(Ci.nsIWebNavigation).
-                                    QueryInterface(Ci.nsIDocShellTreeItem).
-                                    rootTreeItem.
-                                    QueryInterface(Ci.nsIInterfaceRequestor).
-                                    getInterface(Ci.nsIDOMWindow);
+    var observerService = Cc["@mozilla.org/observer-service;1"].
+                          getService(Ci.nsIObserverService);
 
-        var headlinesCheckbox = document.getElementById('headlines-checkbox');
-        headlinesCheckbox.checked = gPrefs.showHeadlinesOnly;
-        var viewConstraintList = document.getElementById('view-constraint-list');
-        viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
-                                           gPrefs.shownEntries == 'unread' ? 1 : 2;
+    observerService.addObserver(gObserver, 'brief:feed-updated', false);
+    observerService.addObserver(gObserver, 'brief:feed-loading', false);
+    observerService.addObserver(gObserver, 'brief:feed-error', false);
+    observerService.addObserver(gObserver, 'brief:entry-status-changed', false);
+    observerService.addObserver(gObserver, 'brief:feed-update-queued', false);
+    observerService.addObserver(gObserver, 'brief:feed-update-canceled', false);
 
-        var observerService = Cc["@mozilla.org/observer-service;1"].
-                              getService(Ci.nsIObserverService);
+    observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
+    observerService.addObserver(gFeedList, 'brief:feed-removed', false);
+    observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
-        observerService.addObserver(this, 'brief:feed-updated', false);
-        observerService.addObserver(this, 'brief:feed-loading', false);
-        observerService.addObserver(this, 'brief:feed-error', false);
-        observerService.addObserver(this, 'brief:entry-status-changed', false);
-        observerService.addObserver(this, 'brief:feed-update-queued', false);
-        observerService.addObserver(this, 'brief:feed-update-canceled', false);
+    var browser = document.getElementById('feed-view');
 
-        observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
-        observerService.addObserver(gFeedList, 'brief:feed-removed', false);
-        observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
+    // Load the initial Unread view or the new version page.
+    var prevLastMajorVersion = gPrefs.getCharPref('lastMajorVersion');
+    if (parseFloat(prevLastMajorVersion) < LAST_MAJOR_VERSION) {
+        browser.loadURI(RELEASE_NOTES_URL);
+        gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
+    }
+    else if (gPrefs.getBoolPref('showHomeView'))
+        loadHomeview();
 
-        var browser = document.getElementById('feed-view');
-
-        // Load the initial Unread view or the new version page.
-        var prevLastMajorVersion = gPrefs.getCharPref('lastMajorVersion');
-        if (parseFloat(prevLastMajorVersion) < LAST_MAJOR_VERSION) {
-            browser.loadURI(RELEASE_NOTES_URL);
-            gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
-        }
-        else if (gPrefs.getBoolPref('showHomeView'))
-            this.loadHomeview();
-
-        // Init stuff in bookmarks.js
-        setTimeout(function() { initServices(); initBMService(); }, 1000);
-    },
+    // Init stuff in bookmarks.js
+    setTimeout(function() { initServices(); initBMService(); }, 1000);
+}
 
 
-    unload: function brief_unload() {
-        var observerService = Cc["@mozilla.org/observer-service;1"].
-                              getService(Ci.nsIObserverService);
-        observerService.removeObserver(this, 'brief:feed-updated');
-        observerService.removeObserver(this, 'brief:feed-loading');
-        observerService.removeObserver(this, 'brief:feed-error');
-        observerService.removeObserver(this, 'brief:entry-status-changed');
-        observerService.removeObserver(this, 'brief:feed-update-queued');
-        observerService.removeObserver(this, 'brief:feed-update-canceled');
+function unload() {
+    var observerService = Cc["@mozilla.org/observer-service;1"].
+                          getService(Ci.nsIObserverService);
+    observerService.removeObserver(gObserver, 'brief:feed-updated');
+    observerService.removeObserver(gObserver, 'brief:feed-loading');
+    observerService.removeObserver(gObserver, 'brief:feed-error');
+    observerService.removeObserver(gObserver, 'brief:entry-status-changed');
+    observerService.removeObserver(gObserver, 'brief:feed-update-queued');
+    observerService.removeObserver(gObserver, 'brief:feed-update-canceled');
 
-        observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
-        observerService.removeObserver(gFeedList, 'brief:feed-removed');
-        observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
+    observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
+    observerService.removeObserver(gFeedList, 'brief:feed-removed');
+    observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
 
-        gPrefs.unregister();
-    },
+    gPrefs.unregister();
+}
 
 
-    // Storage and UpdateService components communicate with us through global
-    // notifications.
-    observe: function brief_observe(aSubject, aTopic, aData) {
+// Storage and UpdateService components communicate with us through global notifications.
+var gObserver = {
+
+    observe: function gObserver_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
 
         // A feed update was finished and new entries are available. Restore the
@@ -144,7 +142,7 @@ var brief = {
             item.removeAttribute('error');
             item.removeAttribute('loading');
             gFeedList.refreshFeedTreeitems(item);
-            this.updateProgressMeter();
+            updateProgressMeter();
 
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
               gFeedList.refreshSpecialTreeitem('unread-folder');
@@ -167,7 +165,7 @@ var brief = {
             item.removeAttribute('loading');
             item.setAttribute('error', true);
             gFeedList.refreshFeedTreeitems(item);
-            this.updateProgressMeter();
+            updateProgressMeter();
             break;
 
         // Sets up the updating progressmeter.
@@ -205,7 +203,7 @@ var brief = {
 
     // Updates the approperiate treeitems in the feed list and refreshes the feedview
     // when necessary.
-    onEntryStatusChanged: function brief_onEntryStatusChanged(aChangedItems, aChangeType) {
+    onEntryStatusChanged: function gObserver_onEntryStatusChanged(aChangedItems, aChangeType) {
         aChangedItems.QueryInterface(Ci.nsIWritablePropertyBag2);
         var changedFeeds = aChangedItems.getPropertyAsAString('feeds').
                                          match(/[^ ]+/g);
@@ -253,117 +251,6 @@ var brief = {
             gFeedList.refreshSpecialTreeitem('trash-folder');
             break;
         }
-    },
-
-
-    // Returns a string containing the style of the feed view.
-    getFeedViewStyle: function brief_getFeedViewStyle() {
-        if (gPrefs.getBoolPref('feedview.useCustomStyle')) {
-            var pref = gPrefs.getComplexValue('feedview.customStylePath',
-                                              Ci.nsISupportsString);
-            var url = 'file:///' + pref.data;
-        }
-        else {
-            var url = DEFAULT_STYLE_PATH;
-        }
-
-        var request = new XMLHttpRequest;
-        request.open('GET', url, false);
-        request.send(null);
-
-        return request.responseText;
-    },
-
-
-    loadHomeview: function brief_loadHomeview() {
-        if (gFeedList.tree && gFeedList.tree.view) {
-            gFeedList.tree.view.selection.select(0);
-        }
-        else {
-            // If the sidebar is hidden, then tree has no view and we have to manually
-            // create the FeedView.
-            var query = new QuerySH(null, null, true);
-            var unreadFolder = document.getElementById('unread-folder');
-            var title = unreadFolder.getAttribute('title');
-            gFeedView = new FeedView(title, query);
-        }
-    },
-
-
-    updateProgressMeter: function brief_updateProgressMeter() {
-        var progressmeter = document.getElementById('update-progress');
-        var progress = 100 * gUpdateService.completedFeedsCount /
-                             gUpdateService.totalFeedsCount;
-        progressmeter.value = progress;
-
-        if (progress == 100) {
-            setTimeout(function() {progressmeter.hidden = true}, 500);
-            var deck = document.getElementById('update-buttons-deck');
-            deck.selectedIndex = 0;
-        }
-    },
-
-
-    selectHomeFolder: function brief_selectHomeFolder(aEvent) {
-        var foldersTree = document.getElementById('bookmark-folders-tree');
-        var selectedIndex = foldersTree.currentIndex;
-        if (selectedIndex != -1) {
-            var resource = foldersTree.treeBuilder.getResourceAtIndex(selectedIndex);
-            gPrefs.setCharPref('liveBookmarksFolder', resource.Value);
-        }
-    },
-
-
-    // Creates and manages the FeedView displaying the search results, based the current
-    // input string and the search scope.
-    performSearch: function brief_performSearch(aEvent) {
-        var searchbar = document.getElementById('searchbar');
-        var bundle = document.getElementById('main-bundle');
-        var title = bundle.getFormattedString('searchResults', [searchbar.value]);
-
-        // If there's no feed view and the search scope is "current view" then do nothing.
-        if (searchbar.searchScope == 0 && !gFeedView)
-            return;
-
-        // A new search is being started.
-        if (searchbar.value && gFeedView && !gFeedView.query.searchString) {
-            // Remember the old view to restore it after the search is finished.
-            this.previousView = gFeedView;
-
-            // For a global search we deselect items in the feed list.
-            // We need to suppress selection so that gFeedList.onSelect() isn't used.
-            // nsITreeSelection.selectEventsSuppressed doesn't seem to work here, so
-            // we have to set our own flag which we will check in onSelect().
-            if (searchbar.searchScope == 1) {
-                gFeedList.ignoreSelectEvent = true;
-                gFeedList.tree.view.selection.clearSelection();
-                gFeedList.ignoreSelectEvent = false;
-            }
-        }
-
-        // The search has finished.
-        if (!searchbar.value && gFeedView && gFeedView.query.searchString) {
-            if (this.previousView)
-                gFeedView = this.previousView;
-
-            gFeedView.query.searchString = gFeedView.titleOverride = '';
-            gFeedView.ensure();
-            return;
-        }
-
-        // If the search scope is set to "global" and there is no view or it is not
-        // a global search view, then let's create it.
-        if ((searchbar.searchScope == 1 && !gFeedView.isGlobalSearch) ||
-           (searchbar.searchScope == 1 && !gFeedView)) {
-            var query = new Query();
-            query.searchString = searchbar.value;
-            gFeedView = new FeedView(title, query);
-            return;
-        }
-
-        gFeedView.titleOverride = title;
-        gFeedView.query.searchString = searchbar.value;
-        gFeedView.ensure();
     }
 
 }
@@ -531,6 +418,117 @@ var gCommands = {
 
 }
 
+// Returns a string containing the style of the feed view.
+function getFeedViewStyle() {
+    if (gPrefs.getBoolPref('feedview.useCustomStyle')) {
+        var pref = gPrefs.getComplexValue('feedview.customStylePath',
+                                          Ci.nsISupportsString);
+        var url = 'file:///' + pref.data;
+    }
+    else {
+        var url = DEFAULT_STYLE_PATH;
+    }
+
+    var request = new XMLHttpRequest;
+    request.open('GET', url, false);
+    request.send(null);
+
+    return request.responseText;
+}
+
+
+function loadHomeview() {
+    if (gFeedList.tree && gFeedList.tree.view) {
+        gFeedList.tree.view.selection.select(0);
+    }
+    else {
+        // If the sidebar is hidden, then tree has no view and we have to manually
+        // create the FeedView.
+        var query = new QuerySH(null, null, true);
+        var unreadFolder = document.getElementById('unread-folder');
+        var title = unreadFolder.getAttribute('title');
+        gFeedView = new FeedView(title, query);
+    }
+}
+
+
+function updateProgressMeter() {
+    var progressmeter = document.getElementById('update-progress');
+    var progress = 100 * gUpdateService.completedFeedsCount /
+                         gUpdateService.totalFeedsCount;
+    progressmeter.value = progress;
+
+    if (progress == 100) {
+        setTimeout(function() {progressmeter.hidden = true}, 500);
+        var deck = document.getElementById('update-buttons-deck');
+        deck.selectedIndex = 0;
+    }
+}
+
+
+function selectHomeFolder(aEvent) {
+    var foldersTree = document.getElementById('bookmark-folders-tree');
+    var selectedIndex = foldersTree.currentIndex;
+    if (selectedIndex != -1) {
+        var resource = foldersTree.treeBuilder.getResourceAtIndex(selectedIndex);
+        gPrefs.setCharPref('liveBookmarksFolder', resource.Value);
+    }
+}
+
+
+// Creates and manages the FeedView displaying the search results, based the current
+// input string and the search scope.
+var previousView = null;
+function performSearch(aEvent) {
+    var searchbar = document.getElementById('searchbar');
+    var bundle = document.getElementById('main-bundle');
+    var title = bundle.getFormattedString('searchResults', [searchbar.value]);
+
+    // If there's no feed view and the search scope is "current view" then do nothing.
+    if (searchbar.searchScope == 0 && !gFeedView)
+        return;
+
+    // A new search is being started.
+    if (searchbar.value && gFeedView && !gFeedView.query.searchString) {
+        // Remember the old view to restore it after the search is finished.
+        previousView = gFeedView;
+
+        // For a global search we deselect items in the feed list.
+        // We need to suppress selection so that gFeedList.onSelect() isn't used.
+        // nsITreeSelection.selectEventsSuppressed doesn't seem to work here, so
+        // we have to set our own flag which we will check in onSelect().
+        if (searchbar.searchScope == 1) {
+            gFeedList.ignoreSelectEvent = true;
+            gFeedList.tree.view.selection.clearSelection();
+            gFeedList.ignoreSelectEvent = false;
+        }
+    }
+
+    // The search has finished.
+    if (!searchbar.value && gFeedView && gFeedView.query.searchString) {
+        if (previousView)
+            gFeedView = previousView;
+
+        gFeedView.query.searchString = gFeedView.titleOverride = '';
+        gFeedView.ensure();
+        return;
+    }
+
+    // If the search scope is set to "global" and there is no view or it is not
+    // a global search view, then let's create it.
+    if ((searchbar.searchScope == 1 && !gFeedView.isGlobalSearch) ||
+       (searchbar.searchScope == 1 && !gFeedView)) {
+        var query = new Query();
+        query.searchString = searchbar.value;
+        gFeedView = new FeedView(title, query);
+        return;
+    }
+
+    gFeedView.titleOverride = title;
+    gFeedView.query.searchString = searchbar.value;
+    gFeedView.ensure();
+}
+
 
 var gPrefs = {
 
@@ -574,11 +572,11 @@ var gPrefs = {
 
             case 'feedview.customStylePath':
                 if (this.getBoolPref('feedview.useCustomStyle'))
-                    gFeedViewStyle = brief.getFeedViewStyle();
+                    gFeedViewStyle = getFeedViewStyle();
                 break;
 
             case 'feedview.useCustomStyle':
-                gFeedViewStyle = brief.getFeedViewStyle();
+                gFeedViewStyle = getFeedViewStyle();
                 break;
 
             // Observers to keep the cached prefs up to date.

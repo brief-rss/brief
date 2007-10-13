@@ -511,7 +511,7 @@ var gFeedViewEvents = {
                 if (whereToOpen == 2)
                     openDialog('chrome://browser/content/browser.xul', '_blank', 'chrome,all,dialog=no', url);
                 else
-                    brief.browserWindow.gBrowser.loadOneTab(url);
+                    gTopBrowserWindow.gBrowser.loadOneTab(url);
             }
 
             if (!targetEntry.hasAttribute('read') && gPrefs.getBoolPref('feedview.linkMarksRead')) {
@@ -532,9 +532,9 @@ var gFeedViewEvents = {
     // in brief-overlay.js).
     onFeedViewMousedown: function feedViewEvents_onFeedViewMousedown(aEvent) {
         if (aEvent.button == 2 && gFeedView.isActive)
-            brief.browserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
+            gTopBrowserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
         else
-            brief.browserWindow.gBrief.contextMenuTarget = null;
+            gTopBrowserWindow.gBrief.contextMenuTarget = null;
     },
 
     forwardKeypress: function feedViewEvents_forwardKeypress(aEvent) {
