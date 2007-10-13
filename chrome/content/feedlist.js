@@ -636,7 +636,7 @@ var gContextMenuCommands = {
     openWebsite: function ctxMenuCmds_openWebsite(aEvent) {
         var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
         var url = gStorage.getFeed(feedID).websiteURL;
-        brief.browserWindow.gBrowser.loadOneTab(url);
+        gTopBrowserWindow.gBrowser.loadOneTab(url);
     },
 
 
