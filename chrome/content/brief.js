@@ -1,7 +1,7 @@
 const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
-const LAST_MAJOR_VERSION = 0.7;
+const LAST_MAJOR_VERSION = '0.8b1';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/0.7.html';
 
 const Cc = Components.classes;
@@ -23,7 +23,7 @@ var gTopBrowserWindow;
 var gTemplateURI;
 var gFeedViewStyle;
 
-function init(aEvent) {
+function init() {
     if (gInitialized)
         return;
     gInitialized = true;
@@ -93,16 +93,20 @@ function init(aEvent) {
     observerService.addObserver(gFeedList, 'brief:feed-removed', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
-    var browser = document.getElementById('feed-view');
+    // If Brief has been update, load the new version info page.
+    var prevVersion = gPrefs.getCharPref('lastMajorVersion');
+    var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
+                        getService(Ci.nsIVersionComparator);
 
-    // Load the initial Unread view or the new version page.
-    var prevLastMajorVersion = gPrefs.getCharPref('lastMajorVersion');
-    if (parseFloat(prevLastMajorVersion) < LAST_MAJOR_VERSION) {
+    if (verComparator.compare(prevVersion, LAST_MAJOR_VERSION) < 0) {
+        var browser = document.getElementById('feed-view');
         browser.loadURI(RELEASE_NOTES_URL);
         gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
     }
-    else if (gPrefs.getBoolPref('showHomeView'))
+    // Otherwise, load the Unread view.
+    else if (gPrefs.getBoolPref('showHomeView')) {
         loadHomeview();
+    }
 
     // Init stuff in bookmarks.js
     setTimeout(function() { initServices(); initBMService(); }, 1000);
@@ -564,37 +568,38 @@ var gPrefs = {
     observe: function gPrefs_observe(aSubject, aTopic, aData) {
         if (aTopic != 'nsPref:changed')
             return;
+
         switch (aData) {
-            case 'showFavicons':
-                var feeds = gStorage.getAllFeeds({});
-                gFeedList.refreshFeedTreeitems(feeds);
-                break;
+        case 'showFavicons':
+            var feeds = gStorage.getAllFeeds({});
+            gFeedList.refreshFeedTreeitems(feeds);
+            break;
 
-            case 'feedview.customStylePath':
-                if (this.getBoolPref('feedview.useCustomStyle'))
-                    gFeedViewStyle = getFeedViewStyle();
-                break;
-
-            case 'feedview.useCustomStyle':
+        case 'feedview.customStylePath':
+            if (this.getBoolPref('feedview.useCustomStyle'))
                 gFeedViewStyle = getFeedViewStyle();
-                break;
+            break;
 
-            // Observers to keep the cached prefs up to date.
-            case 'feedview.entriesPerPage':
-                this.entriesPerPage = this.getIntPref('feedview.entriesPerPage');
-                break;
-            case 'feedview.shownEntries':
-                this.shownEntries = this.getCharPref('feedview.shownEntries');
-                break;
-            case 'feedview.doubleClickMarks':
-                this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
-                break;
-            case 'feedview.showHeadlinesOnly':
-                this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
-                break;
-            case 'feedview.showAuthors':
-                this.showAuthors = this.getBoolPref('feedview.showAuthors');
-                break;
+        case 'feedview.useCustomStyle':
+            gFeedViewStyle = getFeedViewStyle();
+            break;
+
+        // Observers to keep the cached prefs up to date.
+        case 'feedview.entriesPerPage':
+            this.entriesPerPage = this.getIntPref('feedview.entriesPerPage');
+            break;
+        case 'feedview.shownEntries':
+            this.shownEntries = this.getCharPref('feedview.shownEntries');
+            break;
+        case 'feedview.doubleClickMarks':
+            this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
+            break;
+        case 'feedview.showHeadlinesOnly':
+            this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
+            break;
+        case 'feedview.showAuthors':
+            this.showAuthors = this.getBoolPref('feedview.showAuthors');
+            break;
         }
     }
 
