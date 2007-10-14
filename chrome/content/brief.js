@@ -318,37 +318,6 @@ var gCommands = {
             gFeedView.ensure();
     },
 
-    selectNextEntry: function cmd_selectNextEntry() {
-        if (!gFeedView)
-            return;
-
-        if (!gFeedView.selectedEntry) {
-            gFeedView.selectedEntry = gFeedView.feedContent.firstChild;
-            return;
-        }
-
-        var nextEntry = gFeedView.selectedEntry.nextSibling;
-        if (nextEntry)
-            gFeedView.selectedEntry = nextEntry;
-        else
-            gFeedView.currentPage++;
-    },
-
-    selectPrevEntry: function cmd_selectPrevEntry() {
-        if (!gFeedView)
-            return;
-
-        if (!gFeedView.selectedEntry) {
-            gFeedView.selectedEntry = gFeedView.feedContent.firstChild;
-            return;
-        }
-
-        var prevEntry = gFeedView.selectedEntry.previousSibling;
-        if (prevEntry)
-            gFeedView.selectedEntry = prevEntry;
-        else
-            gFeedView.currentPage--;
-    },
 
     markSelectedEntryRead: function cmd_markSelectedEntryRead() {
         if (!gFeedView || !gFeedView.selectedEntry)
