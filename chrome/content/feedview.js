@@ -104,9 +104,46 @@ FeedView.prototype = {
         if (aEntry && aEntry != this.__selectedEntry) {
             if (this.__selectedEntry)
                 this.__selectedEntry.removeAttribute('selected');
+
             aEntry.setAttribute('selected', true);
             this.__selectedEntry = aEntry;
-            aEntry.scrollIntoView(true);
+
+            var win = this.document.defaultView;
+            var targetScrollPos, distance, jump, difference;
+
+            if (aEntry.offsetHeight >= window.innerHeight) {
+                targetScrollPos = aEntry.offsetTop;
+            }
+            else {
+                difference = win.innerHeight - aEntry.offsetHeight;
+                targetScrollPos = aEntry.offsetTop - Math.floor(difference / 2);
+            }
+
+            if (targetScrollPos < 0)
+                targetScrollPos = 0;
+
+            if (targetScrollPos > win.scrollMaxY)
+                targetScrollPos = win.scrollMaxY
+
+            distance = Math.floor(targetScrollPos - win.pageYOffset);
+            jump = distance / 10;
+
+            var self = this;
+            function scroll() {
+                // If we are within epsilon smaller than the jump, then scroll
+                // directly to the target position.
+                if (Math.abs(win.pageYOffset - targetScrollPos) < Math.abs(jump)) {
+                    win.scroll(win.pageXOffset, targetScrollPos)
+                    clearInterval(self._interval);
+                    return;
+                }
+                win.scroll(win.pageXOffset, win.pageYOffset + jump);
+            }
+
+            // Clear the previous interval, if exists (might happen when we select
+            // another entry before previous scrolling is finished).
+            clearInterval(this._interval);
+            this._interval = setInterval(scroll, 7);
         }
     },
     get selectedEntry() {
@@ -149,9 +186,9 @@ FeedView.prototype = {
 
         // If a single entry was removed we do partial refresh, otherwise we
         // refresh from scratch.
-        // Because as far as I can tell it is not possible to remove some entries and add
-        // some others with a single operation, the number of entries always changes when
-        // the entry set changes. This greatly simplifies things, because we don't
+        // Because in practice it is extremely unlikely for some entries to be removed
+        // and others added with a single operation, the number of entries always changes
+        // when the entry set changes. This greatly simplifies things, because we don't
         // have to check entries one by one and we can just compare their numbers.
         if (this.entriesCount - currentEntriesCount == 1) {
             var removedEntry = null;
