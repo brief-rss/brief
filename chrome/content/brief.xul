@@ -22,8 +22,8 @@
     </stringbundleset>
 
     <keyset id="brief-keyset">
-        <key key="k" phase="capturing" oncommand="gCommands.selectNextEntry()"/>
-        <key key="j" phase="capturing" oncommand="gCommands.selectPrevEntry()"/>
+        <key key="k" phase="capturing" oncommand="if (gFeedView) gFeedView.selectNextEntry()"/>
+        <key key="j" phase="capturing" oncommand="if (gFeedView) gFeedView.selectPrevEntry()"/>
         <key key="m" phase="capturing" oncommand="gCommands.markSelectedEntryRead()"/>
         <key key="b" phase="capturing" oncommand="gCommands.deleteSelectedEntry()"/>
         <key key="r" phase="capturing" oncommand="gCommands.restoreSelectedEntry()"/>

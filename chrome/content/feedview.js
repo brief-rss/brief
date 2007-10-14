@@ -97,57 +97,98 @@ FeedView.prototype = {
     },
 
 
-    __selectedEntry: null,
-    set selectedEntry(aEntry) {
+    selectedEntry: null,
+
+    /**
+     *  Selects the given entry and smoothly scrolls it into view, if desired.
+     *
+     *  @param aEntry Entry to select (DOM element).
+     *  @param aScroll Whether to scroll the entry into view.
+     */
+    selectEntry: function FeedView_selectEntry(aEntry, aScroll) {
         this.keyNavEnabled = true;
 
-        if (aEntry && aEntry != this.__selectedEntry) {
-            if (this.__selectedEntry)
-                this.__selectedEntry.removeAttribute('selected');
+        if (!aEntry || aEntry == this.selectedEntry)
+            return;
 
-            aEntry.setAttribute('selected', true);
-            this.__selectedEntry = aEntry;
+        if (this.selectedEntry)
+            this.selectedEntry.removeAttribute('selected');
 
-            var win = this.document.defaultView;
-            var targetScrollPos, distance, jump, difference;
+        aEntry.setAttribute('selected', true);
+        this.selectedEntry = aEntry;
 
-            if (aEntry.offsetHeight >= window.innerHeight) {
-                targetScrollPos = aEntry.offsetTop;
-            }
-            else {
-                difference = win.innerHeight - aEntry.offsetHeight;
-                targetScrollPos = aEntry.offsetTop - Math.floor(difference / 2);
-            }
+        if (!aScroll)
+            return;
 
-            if (targetScrollPos < 0)
-                targetScrollPos = 0;
+        var win = this.document.defaultView;
+        var targetScrollPos, distance, jump, difference;
 
-            if (targetScrollPos > win.scrollMaxY)
-                targetScrollPos = win.scrollMaxY
-
-            distance = Math.floor(targetScrollPos - win.pageYOffset);
-            jump = distance / 10;
-
-            var self = this;
-            function scroll() {
-                // If we are within epsilon smaller than the jump, then scroll
-                // directly to the target position.
-                if (Math.abs(win.pageYOffset - targetScrollPos) < Math.abs(jump)) {
-                    win.scroll(win.pageXOffset, targetScrollPos)
-                    clearInterval(self._interval);
-                    return;
-                }
-                win.scroll(win.pageXOffset, win.pageYOffset + jump);
-            }
-
-            // Clear the previous interval, if exists (might happen when we select
-            // another entry before previous scrolling is finished).
-            clearInterval(this._interval);
-            this._interval = setInterval(scroll, 7);
+        // If the entry is taller than the viewport height, align with the top.
+        if (aEntry.offsetHeight >= window.innerHeight) {
+            targetScrollPos = aEntry.offsetTop;
         }
+        // Otherwise, scroll the entry to the middle of the screen.
+        else {
+            difference = win.innerHeight - aEntry.offsetHeight;
+            targetScrollPos = aEntry.offsetTop - Math.floor(difference / 2);
+        }
+
+        if (targetScrollPos < 0)
+            targetScrollPos = 0;
+        else if (targetScrollPos > win.scrollMaxY)
+            targetScrollPos = win.scrollMaxY;
+
+        distance = Math.floor(targetScrollPos - win.pageYOffset);
+        jump = distance / 10;
+
+        var self = this;
+        function scroll() {
+            // If we are within epsilon smaller than the jump, then scroll
+            // directly to the target position.
+            if (Math.abs(win.pageYOffset - targetScrollPos) < Math.abs(jump)) {
+                win.scroll(win.pageXOffset, targetScrollPos)
+                clearInterval(self._interval);
+                return;
+            }
+            win.scroll(win.pageXOffset, win.pageYOffset + jump);
+        }
+
+        // Clear the previous interval, if exists (might happen when we select
+        // another entry before previous scrolling is finished).
+        clearInterval(this._interval);
+        this._interval = setInterval(scroll, 7);
     },
-    get selectedEntry() {
-        return this.__selectedEntry;
+
+    // Used when going back one page by selecting previous entry
+    // when the topmost entry is selected.
+    _selectLastEntryOnRefresh: false,
+
+    selectNextEntry: function FeedView_selectNextEntry() {
+        if (!this.selectedEntry) {
+            this.selectEntry(this.feedContent.firstChild, false);
+            return;
+        }
+
+        var nextEntry = this.selectedEntry.nextSibling;
+        if (nextEntry)
+            this.selectEntry(nextEntry, true);
+        else
+            this.currentPage++;
+    },
+
+    selectPrevEntry: function FeedView_selectPrevEntry() {
+        if (!this.selectedEntry) {
+            this.selectEntry(this.feedContent.firstChild, false);
+            return;
+        }
+
+        var prevEntry = this.selectedEntry.previousSibling;
+        if (prevEntry)
+            this.selectEntry(prevEntry, true);
+        else {
+            this._selectLastEntryOnRefresh = true;
+            this.currentPage--;
+        }
     },
 
 
@@ -452,8 +493,19 @@ FeedView.prototype = {
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
-        if (this.keyNavEnabled)
-            this.selectedEntry = this.feedContent.firstChild;
+        if (this.keyNavEnabled) {
+            if (this._selectLastEntryOnRefresh) {
+                var entry =  this.feedContent.lastChild;
+                this.selectEntry(entry, false);
+                // Manually scroll the entry, because we don't want to scroll smoothly here.
+                entry.scrollIntoView(true);
+            }
+            else {
+                var entry = this.feedContent.firstChild;
+                this.selectEntry(entry, false);
+            }
+            this._selectLastEntryOnRefresh = false;
+        }
 
         // Restore default cursor which we changed to "wait" at the beginning of
         // the refresh.
