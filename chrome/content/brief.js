@@ -452,8 +452,8 @@ function selectHomeFolder(aEvent) {
 }
 
 
-// Creates and manages the FeedView displaying the search results, based the current
-// input string and the search scope.
+// Creates and manages a FeedView displaying the search results,
+// based on the current input string and the search scope.
 var previousView = null;
 function performSearch(aEvent) {
     var searchbar = document.getElementById('searchbar');
@@ -481,9 +481,13 @@ function performSearch(aEvent) {
     }
 
     // The search has finished.
-    if (!searchbar.value && gFeedView && gFeedView.query.searchString) {
-        if (previousView)
+    if (!searchbar.value && gFeedView) {
+        if (previousView != gFeedView) {
             gFeedView = previousView;
+            gFeedView.query.searchString = gFeedView.titleOverride = '';
+            gFeedView._refresh();
+            return;
+        }
 
         gFeedView.query.searchString = gFeedView.titleOverride = '';
         gFeedView.ensure();
