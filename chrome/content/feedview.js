@@ -422,10 +422,9 @@ FeedView.prototype = {
         // See comments next to the event handler functions.
         doc.addEventListener('click', gFeedViewEvents.onFeedViewClick, true);
 
-        // These listeners do two things (a) stop propagation of
-        // keypresses in order to prevent FAYT (b) forward keypresses
-        // from the feed view document to the main one.
-        document.addEventListener('keypress', function(e) { e.stopPropagation() }, true);
+        // This listener does two things:
+        // (a) stops propagation of keypresses in order to prevent FAYT
+        // (b) forwards keypresses from the feed view document to the main one.
         doc.defaultView.addEventListener('keypress', gFeedViewEvents.forwardKeypress, true);
 
         // Apply the CSS.
@@ -630,10 +629,15 @@ var gFeedViewEvents = {
         if (aEvent.ctrlKey || aEvent.altKey || aEvent.metaKey)
             return;
 
-        aEvent.stopPropagation();
+        // Stop propagation of character keys, to disable FAYT.
+        if (aEvent.charCode)
+            aEvent.stopPropagation();
+
         var evt = document.createEvent('KeyboardEvent');
-        evt.initKeyEvent('keypress', true, true, null,
-                         false, false, false, false, 0, aEvent.charCode);
+
+        evt.initKeyEvent(aEvent.type, aEvent.canBubble, aEvent.cancelable, aEvent.view,
+                         aEvent.ctrlKey, aEvent.altKey, aEvent.shiftKey, aEvent.metaKey,
+                         aEvent.keyCode, aEvent.charCode);
         gFeedView.browser.dispatchEvent(evt);
     }
 
