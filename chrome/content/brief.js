@@ -79,6 +79,9 @@ function init() {
     viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
                                        gPrefs.shownEntries == 'unread' ? 1 : 2;
 
+    // Stop propagation of character keys, to disable FAYT.
+    document.addEventListener('keypress', function(e){if (e.charCode) e.stopPropagation()}, true);
+
     var observerService = Cc["@mozilla.org/observer-service;1"].
                           getService(Ci.nsIObserverService);
 
