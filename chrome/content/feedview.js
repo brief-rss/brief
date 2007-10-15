@@ -139,6 +139,9 @@ FeedView.prototype = {
         else if (targetScrollPos > win.scrollMaxY)
             targetScrollPos = win.scrollMaxY;
 
+        if (targetScrollPos == win.pageYOffset)
+            return;
+
         if (aScrollInstantly) {
             win.scroll(win.pageXOffset, targetScrollPos);
             return;
@@ -355,7 +358,8 @@ FeedView.prototype = {
                 appendedEntry = self._appendEntry(newEntry);
 
             // Select another entry
-            self.selectEntry(nextSibling || appendedEntry || previousSibling || null, true);
+            if (self.keyNavEnabled)
+                self.selectEntry(nextSibling || appendedEntry || previousSibling || null, true);
         }
 
         // Don't append the new entry until the old one is removed.
