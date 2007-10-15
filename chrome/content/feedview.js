@@ -87,7 +87,7 @@ FeedView.prototype = {
 
     __currentPage: 0,
     set currentPage(aPageNumber) {
-        if (aPageNumber <= this.pageCount && aPageNumber > 0) {
+        if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
             this.__currentPage = aPageNumber;
             this._refresh();
         }
@@ -104,8 +104,9 @@ FeedView.prototype = {
      *
      *  @param aEntry Entry to select (DOM element).
      *  @param aScroll Whether to scroll the entry into view.
+     *  @param aScrollInstantly Disable smooth scrolling (optional).
      */
-    selectEntry: function FeedView_selectEntry(aEntry, aScroll) {
+    selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollInstantly) {
         this.keyNavEnabled = true;
 
         if (!aEntry || aEntry == this.selectedEntry)
@@ -138,6 +139,11 @@ FeedView.prototype = {
         else if (targetScrollPos > win.scrollMaxY)
             targetScrollPos = win.scrollMaxY;
 
+        if (aScrollInstantly) {
+            win.scroll(win.pageXOffset, targetScrollPos);
+            return;
+        }
+
         distance = Math.floor(targetScrollPos - win.pageYOffset);
         jump = distance / 10;
 
@@ -165,7 +171,7 @@ FeedView.prototype = {
 
     selectNextEntry: function FeedView_selectNextEntry() {
         if (!this.selectedEntry) {
-            this.selectEntry(this.feedContent.firstChild, false);
+            this.selectEntry(this.feedContent.firstChild, true);
             return;
         }
 
@@ -178,14 +184,18 @@ FeedView.prototype = {
 
     selectPrevEntry: function FeedView_selectPrevEntry() {
         if (!this.selectedEntry) {
-            this.selectEntry(this.feedContent.firstChild, false);
+            this.selectEntry(this.feedContent.firstChild, true);
             return;
         }
 
         var prevEntry = this.selectedEntry.previousSibling;
-        if (prevEntry)
+        if (prevEntry) {
             this.selectEntry(prevEntry, true);
-        else {
+        }
+        // Normally we wouldn't have to check |currentPage > 1|, because the setter
+        // validates the input. However, we don't want to set _selectLastEntryOnRefresh
+        // and then not refresh.
+        else if (this.currentPage > 1) {
             this._selectLastEntryOnRefresh = true;
             this.currentPage--;
         }
@@ -345,7 +355,7 @@ FeedView.prototype = {
                 appendedEntry = self._appendEntry(newEntry);
 
             // Select another entry
-            self.selectedEntry = nextSibling || appendedEntry || previousSibling || null;
+            self.selectEntry(nextSibling || appendedEntry || previousSibling || null, true);
         }
 
         // Don't append the new entry until the old one is removed.
@@ -493,16 +503,9 @@ FeedView.prototype = {
             this._appendEntry(entries[i]);
 
         if (this.keyNavEnabled) {
-            if (this._selectLastEntryOnRefresh) {
-                var entry =  this.feedContent.lastChild;
-                this.selectEntry(entry, false);
-                // Manually scroll the entry, because we don't want to scroll smoothly here.
-                entry.scrollIntoView(true);
-            }
-            else {
-                var entry = this.feedContent.firstChild;
-                this.selectEntry(entry, false);
-            }
+            var entry = this._selectLastEntryOnRefresh ? this.feedContent.lastChild
+                                                       : this.feedContent.firstChild;
+            this.selectEntry(entry, true, true);
             this._selectLastEntryOnRefresh = false;
         }
 
@@ -626,9 +629,6 @@ var gFeedViewEvents = {
     },
 
     forwardKeypress: function feedViewEvents_forwardKeypress(aEvent) {
-        if (aEvent.ctrlKey || aEvent.altKey || aEvent.metaKey)
-            return;
-
         // Stop propagation of character keys, to disable FAYT.
         if (aEvent.charCode)
             aEvent.stopPropagation();
