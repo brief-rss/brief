@@ -30,9 +30,9 @@
         <key key="n" phase="capturing" oncommand="gCommands.starSelectedEntry()"/>
         <key key="o" phase="capturing" oncommand="gCommands.unfoldSelectedEntry()"/>
         <key key="p" phase="capturing" oncommand="gCommands.toggleHeadlinesMode()"/>
-        <key key="k" phase="capturing" modifiers="accel"
+        <key key="k" phase="capturing" modifiers="alt"
                                        oncommand="if (gFeedView) gFeedView.currentPage++"/>
-        <key key="j" phase="capturing" modifiers="accel"
+        <key key="j" phase="capturing" modifiers="alt"
                                        oncommand="if (gFeedView) gFeedView.currentPage--"/>
         <key key="m" phase="capturing" modifiers="accel"
                                        oncommand="gCommands.markCurrentViewRead(true)"/>
