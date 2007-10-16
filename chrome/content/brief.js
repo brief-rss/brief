@@ -22,6 +22,7 @@ var gInitialized = false;
 var gTopBrowserWindow;
 var gTemplateURI;
 var gFeedViewStyle;
+var gKeyNavEnabled = false;
 
 function init() {
     if (gInitialized)

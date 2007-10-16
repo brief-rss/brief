@@ -53,8 +53,6 @@ FeedView.prototype = {
     // to be refreshed.
     _entries: '',
 
-    keyNavEnabled: false,
-
     // Key elements.
     browser:      null,
     document:     null,
@@ -89,6 +87,7 @@ FeedView.prototype = {
     set currentPage(aPageNumber) {
         if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
             this.__currentPage = aPageNumber;
+            clearInterval(this._autoScrollInterval);
             this._refresh();
         }
     },
@@ -99,78 +98,11 @@ FeedView.prototype = {
 
     selectedEntry: null,
 
-    /**
-     *  Selects the given entry and smoothly scrolls it into view, if desired.
-     *
-     *  @param aEntry Entry to select (DOM element).
-     *  @param aScroll Whether to scroll the entry into view.
-     *  @param aScrollInstantly Disable smooth scrolling (optional).
-     */
-    selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollInstantly) {
-        this.keyNavEnabled = true;
-
-        if (!aEntry || aEntry == this.selectedEntry)
-            return;
-
-        if (this.selectedEntry)
-            this.selectedEntry.removeAttribute('selected');
-
-        aEntry.setAttribute('selected', true);
-        this.selectedEntry = aEntry;
-
-        if (!aScroll)
-            return;
-
-        var win = this.document.defaultView;
-        var targetScrollPos, distance, jump, difference;
-
-        // If the entry is taller than the viewport height, align with the top.
-        if (aEntry.offsetHeight >= window.innerHeight) {
-            targetScrollPos = aEntry.offsetTop;
-        }
-        // Otherwise, scroll the entry to the middle of the screen.
-        else {
-            difference = win.innerHeight - aEntry.offsetHeight;
-            targetScrollPos = aEntry.offsetTop - Math.floor(difference / 2);
-        }
-
-        if (targetScrollPos < 0)
-            targetScrollPos = 0;
-        else if (targetScrollPos > win.scrollMaxY)
-            targetScrollPos = win.scrollMaxY;
-
-        if (targetScrollPos == win.pageYOffset)
-            return;
-
-        if (aScrollInstantly) {
-            win.scroll(win.pageXOffset, targetScrollPos);
-            return;
-        }
-
-        distance = Math.floor(targetScrollPos - win.pageYOffset);
-        jump = distance / 10;
-
-        var self = this;
-        function scroll() {
-            // If we are within epsilon smaller than the jump, then scroll
-            // directly to the target position.
-            if (Math.abs(win.pageYOffset - targetScrollPos) < Math.abs(jump)) {
-                win.scroll(win.pageXOffset, targetScrollPos)
-                clearInterval(self._interval);
-                return;
-            }
-            win.scroll(win.pageXOffset, win.pageYOffset + jump);
-        }
-
-        // Clear the previous interval, if exists (might happen when we select
-        // another entry before previous scrolling is finished).
-        clearInterval(this._interval);
-        this._interval = setInterval(scroll, 7);
-    },
-
     // Used when going back one page by selecting previous entry
     // when the topmost entry is selected.
     _selectLastEntryOnRefresh: false,
+
+    _autoScrollInterval: null,
 
     selectNextEntry: function FeedView_selectNextEntry() {
         if (!this.selectedEntry) {
@@ -204,6 +136,74 @@ FeedView.prototype = {
         }
     },
 
+    /**
+     *  Selects the given entry and smoothly scrolls it into view, if desired.
+     *
+     *  @param aEntry Entry to select (DOM element).
+     *  @param aScroll Whether to scroll the entry into view.
+     *  @param aScrollInstantly Disable smooth scrolling (optional).
+     */
+    selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollInstantly) {
+        gKeyNavEnabled = true;
+
+        if (!aEntry || aEntry == this.selectedEntry)
+            return;
+
+        if (this.selectedEntry)
+            this.selectedEntry.removeAttribute('selected');
+
+        aEntry.setAttribute('selected', true);
+        this.selectedEntry = aEntry;
+
+        if (!aScroll)
+            return;
+
+        var win = this.document.defaultView;
+        var targetScrollPos, distance, jump, difference;
+
+        // If the entry is taller than the viewport height, align with the top.
+        if (aEntry.offsetHeight >= win.innerHeight) {
+            targetScrollPos = aEntry.offsetTop;
+        }
+        // Otherwise, scroll the entry to the middle of the screen.
+        else {
+            difference = win.innerHeight - aEntry.offsetHeight;
+            targetScrollPos = aEntry.offsetTop - Math.floor(difference / 2);
+        }
+
+        if (targetScrollPos < 0)
+            targetScrollPos = 0;
+        else if (targetScrollPos > win.scrollMaxY)
+            targetScrollPos = win.scrollMaxY;
+
+        if (targetScrollPos == win.pageYOffset)
+            return;
+
+        if (aScrollInstantly) {
+            win.scroll(win.pageXOffset, targetScrollPos);
+            return;
+        }
+
+        distance = Math.floor(targetScrollPos - win.pageYOffset);
+        jump = distance / 10;
+
+        var self = this;
+        function scroll() {
+            // If we are within epsilon smaller than the jump, then scroll
+            // directly to the target position.
+            if (Math.abs(win.pageYOffset - targetScrollPos) < Math.abs(jump)) {
+                win.scroll(win.pageXOffset, targetScrollPos)
+                clearInterval(self._autoScrollInterval);
+                return;
+            }
+            win.scroll(win.pageXOffset, win.pageYOffset + jump);
+        }
+
+        // Clear the previous interval, if exists (might happen when we select
+        // another entry before previous scrolling is finished).
+        clearInterval(this._autoScrollInterval);
+        this._autoScrollInterval = setInterval(scroll, 7);
+    },
 
     // Indicates whether the feed view is currently displayed in the browser.
     get isActive() {
@@ -358,7 +358,7 @@ FeedView.prototype = {
                 appendedEntry = self._appendEntry(newEntry);
 
             // Select another entry
-            if (self.keyNavEnabled)
+            if (gKeyNavEnabled)
                 self.selectEntry(nextSibling || appendedEntry || previousSibling || null, true);
         }
 
@@ -441,6 +441,8 @@ FeedView.prototype = {
         // (b) forwards keypresses from the feed view document to the main one.
         doc.defaultView.addEventListener('keypress', gFeedViewEvents.forwardKeypress, true);
 
+        //doc.addEventListener('scroll', this._setScrollTimeout, true);
+
         // Apply the CSS.
         var style = doc.getElementsByTagName('style')[0];
         style.textContent = gFeedViewStyle;
@@ -483,7 +485,7 @@ FeedView.prototype = {
         if (!feed)
             this.feedContent.setAttribute('showFeedNames', true);
 
-        // Pass value of the necessary preferences.
+        // Pass values of the necessary preferences.
         if (gPrefs.showHeadlinesOnly)
             this.feedContent.setAttribute('showHeadlinesOnly', true);
         if (gPrefs.doubleClickMarks)
@@ -506,7 +508,8 @@ FeedView.prototype = {
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
-        if (this.keyNavEnabled) {
+        // Select an entry if keyboard navigation is enabled.
+        if (gKeyNavEnabled) {
             var entry = this._selectLastEntryOnRefresh ? this.feedContent.lastChild
                                                        : this.feedContent.firstChild;
             this.selectEntry(entry, true, true);
@@ -593,6 +596,9 @@ var gFeedViewEvents = {
     onFeedViewClick: function feedViewEvents_onFeedViewClick(aEvent) {
         var anonid = aEvent.originalTarget.getAttribute('anonid');
         var targetEntry = aEvent.target;
+
+        if (gKeyNavEnabled && targetEntry.className == 'article-container')
+            gFeedView.selectEntry(targetEntry, false);
 
         if (anonid == 'article-title-link' && (aEvent.button == 0 || aEvent.button == 1)) {
 
