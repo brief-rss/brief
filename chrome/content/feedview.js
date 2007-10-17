@@ -140,20 +140,26 @@ FeedView.prototype = {
      *  Selects the given entry and smoothly scrolls it into view, if desired.
      *
      *  @param aEntry Entry to select (DOM element).
-     *  @param aScroll Whether to scroll the entry into view.
+     *  @param aScroll Whether to scroll the entry into view (optional).
      *  @param aScrollInstantly Disable smooth scrolling (optional).
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollInstantly) {
-        gKeyNavEnabled = true;
-
-        if (!aEntry || aEntry == this.selectedEntry)
+        if (aEntry == this.selectedEntry)
             return;
 
         if (this.selectedEntry)
             this.selectedEntry.removeAttribute('selected');
+        this.selectedEntry = aEntry;
+
+        if (!aEntry) {
+            gPrefs.setBoolPref('feedview.keyNavEnabled', false);
+            return;
+        }
+
+        if (!gPrefs.keyNavEnabled)
+            gPrefs.setBoolPref('feedview.keyNavEnabled', true);
 
         aEntry.setAttribute('selected', true);
-        this.selectedEntry = aEntry;
 
         if (!aScroll)
             return;
@@ -358,7 +364,7 @@ FeedView.prototype = {
                 appendedEntry = self._appendEntry(newEntry);
 
             // Select another entry
-            if (gKeyNavEnabled)
+            if (gPrefs.keyNavEnabled)
                 self.selectEntry(nextSibling || appendedEntry || previousSibling || null, true);
         }
 
@@ -441,8 +447,6 @@ FeedView.prototype = {
         // (b) forwards keypresses from the feed view document to the main one.
         doc.defaultView.addEventListener('keypress', gFeedViewEvents.forwardKeypress, true);
 
-        //doc.addEventListener('scroll', this._setScrollTimeout, true);
-
         // Apply the CSS.
         var style = doc.getElementsByTagName('style')[0];
         style.textContent = gFeedViewStyle;
@@ -509,7 +513,7 @@ FeedView.prototype = {
             this._appendEntry(entries[i]);
 
         // Select an entry if keyboard navigation is enabled.
-        if (gKeyNavEnabled) {
+        if (gPrefs.keyNavEnabled) {
             var entry = this._selectLastEntryOnRefresh ? this.feedContent.lastChild
                                                        : this.feedContent.firstChild;
             this.selectEntry(entry, true, true);
@@ -597,7 +601,7 @@ var gFeedViewEvents = {
         var anonid = aEvent.originalTarget.getAttribute('anonid');
         var targetEntry = aEvent.target;
 
-        if (gKeyNavEnabled && targetEntry.className == 'article-container')
+        if (gPrefs.keyNavEnabled && targetEntry.className == 'article-container')
             gFeedView.selectEntry(targetEntry, false);
 
         if (anonid == 'article-title-link' && (aEvent.button == 0 || aEvent.button == 1)) {
@@ -642,9 +646,10 @@ var gFeedViewEvents = {
         // Stop propagation of character keys, to disable FAYT.
         if (aEvent.charCode)
             aEvent.stopPropagation();
+        if (aEvent.keyCode == aEvent.DOM_VK_TAB)
+            aEvent.preventDefault();
 
         var evt = document.createEvent('KeyboardEvent');
-
         evt.initKeyEvent(aEvent.type, aEvent.canBubble, aEvent.cancelable, aEvent.view,
                          aEvent.ctrlKey, aEvent.altKey, aEvent.shiftKey, aEvent.metaKey,
                          aEvent.keyCode, aEvent.charCode);
