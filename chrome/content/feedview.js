@@ -151,10 +151,8 @@ FeedView.prototype = {
             this.selectedEntry.removeAttribute('selected');
         this.selectedEntry = aEntry;
 
-        if (!aEntry) {
-            gPrefs.setBoolPref('feedview.keyNavEnabled', false);
+        if (!aEntry)
             return;
-        }
 
         if (!gPrefs.keyNavEnabled)
             gPrefs.setBoolPref('feedview.keyNavEnabled', true);
@@ -329,15 +327,19 @@ FeedView.prototype = {
 
 
     // Refreshes the view when one entry is removed from the currently displayed page.
-    _refreshIncrementally: function FeedView__refreshIncrementally(aEntryId) {
-        // Find the entry that be removed.
-        var entry = this.feedContent.firstChild;
-        while (entry.id != aEntryId)
-            entry = entry.nextSibling;
+    _refreshIncrementally: function FeedView__refreshIncrementally(aEntryID) {
+        var entry = this.document.getElementById(aEntryID);
 
-        // Remember the next sibling as we may need to select it.
-        var nextSibling = entry.nextSibling;
-        var previousSibling = entry.previousSibling;
+        var entryWasSelected = (entry == this.selectedEntry);
+        if (entryWasSelected) {
+            // Immediately deselect the entry, so that no futher commands can be sent.
+            this.selectEntry(null);
+
+            // Remember the next and previous siblings as we
+            // may need to select one of them.
+            var nextSibling = entry.nextSibling;
+            var previousSibling = entry.previousSibling;
+        }
 
         // Remove the entry. We don't do it directly, because we want to
         // use jQuery to to fade it gracefully and we cannot call it from
@@ -364,12 +366,12 @@ FeedView.prototype = {
                 appendedEntry = self._appendEntry(newEntry);
 
             // Select another entry
-            if (gPrefs.keyNavEnabled)
-                self.selectEntry(nextSibling || appendedEntry || previousSibling || null, true);
+            if (entryWasSelected)
+                self.selectEntry(nextSibling || appendedEntry || previousSibling || null, false);
         }
 
         // Don't append the new entry until the old one is removed.
-        setTimeout(finish, 350);
+        setTimeout(finish, 310);
     },
 
 
@@ -520,8 +522,8 @@ FeedView.prototype = {
             this._selectLastEntryOnRefresh = false;
         }
 
-        // Restore default cursor which we changed to "wait" at the beginning of
-        // the refresh.
+        // Restore default cursor which we changed to
+        // "wait" at the beginning of the refresh.
         this.browser.style.cursor = 'auto';
     },
 
