@@ -22,13 +22,20 @@
     </stringbundleset>
 
     <keyset id="brief-keyset">
+        <key keycode="VK_TAB" phase="capturing"
+             oncommand="if (gFeedView) gFeedView.selectNextEntry()"/>
+        <key keycode="VK_TAB" modifiers="shift" phase="capturing"
+             oncommand="if (gFeedView) gFeedView.selectPrevEntry()"/>
         <key key="k" phase="capturing" oncommand="if (gFeedView) gFeedView.selectNextEntry()"/>
         <key key="j" phase="capturing" oncommand="if (gFeedView) gFeedView.selectPrevEntry()"/>
+        <key key="t" phase="capturing" oncommand="gCommands.turnOffKeyNav()"/>
+
         <key key="m" phase="capturing" oncommand="gCommands.markSelectedEntryRead()"/>
         <key key="b" phase="capturing" oncommand="gCommands.deleteSelectedEntry()"/>
         <key key="r" phase="capturing" oncommand="gCommands.restoreSelectedEntry()"/>
         <key key="n" phase="capturing" oncommand="gCommands.starSelectedEntry()"/>
         <key key="o" phase="capturing" oncommand="gCommands.unfoldSelectedEntry()"/>
+
         <key key="p" phase="capturing" oncommand="gCommands.toggleHeadlinesMode()"/>
         <key key="k" phase="capturing" modifiers="alt"
                                        oncommand="if (gFeedView) gFeedView.currentPage++"/>

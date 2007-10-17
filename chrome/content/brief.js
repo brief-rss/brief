@@ -22,7 +22,6 @@ var gInitialized = false;
 var gTopBrowserWindow;
 var gTemplateURI;
 var gFeedViewStyle;
-var gKeyNavEnabled = false;
 
 function init() {
     if (gInitialized)
@@ -392,6 +391,14 @@ var gCommands = {
     focusSearchbar: function cmd_focusSearchbar() {
         var searchbar = document.getElementById('searchbar');
         searchbar.focus();
+    },
+
+    turnOffKeyNav: function cmd_turnOffKeyNav() {
+        if (gPrefs.keyNavEnabled) {
+            gPrefs.setBoolPref('feedview.keyNavEnabled', false);
+            if (gFeedView)
+                gFeedView.selectEntry(null);
+        }
     }
 }
 
@@ -534,6 +541,7 @@ var gPrefs = {
         this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
         this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
         this.showAuthors = this.getBoolPref('feedview.showAuthors');
+        this.keyNavEnabled = this.getBoolPref('feedview.keyNavEnabled');
 
         this._branch.addObserver('', this, false);
     },
@@ -579,6 +587,9 @@ var gPrefs = {
             break;
         case 'feedview.showAuthors':
             this.showAuthors = this.getBoolPref('feedview.showAuthors');
+            break;
+        case 'feedview.keyNavEnabled':
+            this.keyNavEnabled = this.getBoolPref('feedview.keyNavEnabled');
             break;
         }
     }
