@@ -237,26 +237,25 @@ var gObserver = {
                 }
             }
 
-            gFeedList.refreshFeedTreeitems(changedFeeds);
+            setTimeout(function(){gFeedList.refreshFeedTreeitems(changedFeeds)}, 0);
 
             // We can't know if any of those need updating, so we have to
             // update them all.
-            gFeedList.refreshSpecialTreeitem('unread-folder');
-            gFeedList.refreshSpecialTreeitem('starred-folder');
-            gFeedList.refreshSpecialTreeitem('trash-folder');
+            setTimeout(function(){gFeedList.refreshSpecialTreeitem('unread-folder')}, 0);
+            setTimeout(function(){gFeedList.refreshSpecialTreeitem('starred-folder')}, 0);
+            setTimeout(function(){gFeedList.refreshSpecialTreeitem('trash-folder')}, 0);
             break;
 
         case 'starred':
-            gFeedList.refreshSpecialTreeitem('starred-folder');
+            setTimeout(function(){gFeedList.refreshSpecialTreeitem('starred-folder')}, 0);
             break;
 
         case 'deleted':
-            gFeedList.refreshFeedTreeitems(changedFeeds);
+            setTimeout(function(){gFeedList.refreshFeedTreeitems(changedFeeds)}, 0);
 
-            gFeedList.refreshSpecialTreeitem('unread-folder');
-            gFeedList.refreshSpecialTreeitem('starred-folder');
-            gFeedList.refreshSpecialTreeitem('trash-folder');
-            break;
+            setTimeout(function(){gFeedList.refreshSpecialTreeitem('unread-folder')}, 0);
+            setTimeout(function(){gFeedList.refreshSpecialTreeitem('starred-folder')}, 0);
+            setTimeout(function(){gFeedList.refreshSpecialTreeitem('trash-folder')}, 0);
         }
     }
 
@@ -337,7 +336,7 @@ var gCommands = {
 
         var query = new QuerySH(null, entryID, null);
         query.deleted = ENTRY_STATE_ANY;
-        setTimeout(function() { query.markEntriesRead(newStatus) }, 0);
+        query.markEntriesRead(newStatus)
     },
 
 
@@ -376,7 +375,7 @@ var gCommands = {
             selectedEntry.removeAttribute('starred');
 
         var query = new QuerySH(null, entryID, null);
-        setTimeout(function() { query.starEntries(newStatus) }, 0);
+        query.starEntries(newStatus);
     },
 
     unfoldSelectedEntry: function cmd_unfoldSelectedEntry() {
