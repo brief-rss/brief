@@ -1,33 +1,124 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-<!DOCTYPE html
-PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+    <head>
+        <title>Brief</title>
+        <link rel="stylesheet" href="chrome://brief/skin/feedview-common.css" type="text/css" media="screen">
+        <link rel="stylesheet" href="chrome://brief/skin/thickbox.css" type="text/css" media="screen">
+        <style type="text/css"></style>
+        <script type="text/javascript" src="chrome://brief/content/jquery.js"></script>
+        <script type="text/javascript" src="chrome://brief/content/thickbox.js"></script>
+        <script type="text/javascript">
+            function displayShortcuts() {
+                tb_show('Shortcut keys:', document.location + '#TB_inline?height=600&inlineId=keyboardSortcuts', false);
+            }
+            document.addEventListener('DisplayShortcuts', displayShortcuts, true);
+        </script>
+    </head>
 
-<html id="feed-view"
-      xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <body>
+        <div id="container">
+            <div id="keyboardSortcuts" style="display: none;">
+                <table id="shortcuts-table">
+                    <tr>
+                        <td colspan="2" class="shortucts-header">Navigation</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">K <span class="shortcuts-plain">or</span> Space</td>
+                        <td>Select next entry</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">J <span class="shortcuts-plain">or</span> Backspace</td>
+                        <td>Select previous entry</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">Alt + K</td>
+                        <td>Show next page</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">Alt + J</td>
+                        <td>Show previous page</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">Enter</td>
+                        <td>Open entry</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">Ctrl + Enter</td>
+                        <td>Open entry in new tab</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">N</td>
+                        <td>Unfold or fold selected entry (when showing only headlines)</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="shortucts-header">Entries</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">M</td>
+                        <td>Mark selected entry as read or unread</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">B</td>
+                        <td>Star or unstar selected entry</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">T</td>
+                        <td>Move selected entry to Trash</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">R</td>
+                        <td>Restore selected entry (when in Trash)</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">Ctrl + M</td>
+                        <td>Mark all viewed entries as read</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">Tab</td>
+                        <td>Deselect any entries</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="shortucts-header">View</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">F</td>
+                        <td>Toggle headlines mode</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">A</td>
+                        <td>View all entries</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">S</td>
+                        <td>View starred entries</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">D</td>
+                        <td>View unread entries</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">/</td>
+                        <td>Focus searchbox</td>
+                    </tr>
+                    <tr>
+                        <td class="shortcut-key">?</td>
+                        <td>Display list of shortcuts keys</td>
+                    </tr>
+                </table>
+            </div>
 
-  <head>
-      <link rel="stylesheet" href="chrome://brief/skin/feedview-common.css" type="text/css"/>
-      <style type="text/css"></style>
-      <script type="text/javascript" src="chrome://brief/content/jquery.js"/>
-  </head>
+            <a id="header">
+                <img id="feed-image">
+                <div id="feed-title"></div>
+                <div id="feed-subtitle"></div>
+                <div id="clear"></div>
+            </a>
 
-  <body>
-    <div id="container">
+            <div id="feed-content"></div>
 
-      <a id="header">
-        <img id="feed-image"/>
-        <div id="feed-title"></div>
-        <div id="feed-subtitle"></div>
-        <div id="clear"></div>
-      </a>
+        </div>
 
-      <div id="feed-content"></div>
-
-    </div>
-
-  </body>
+    </body>
 
 </html>

@@ -41,3 +41,29 @@
 .article-container[starred] .star-image {
   -moz-image-region: rect(32px, 16px, 48px, 0px);
 }
+
+#shortcuts-table {
+    border-spacing: 0;
+    margin: 0 auto;
+}
+
+#shortcuts-table td {
+    padding: 3px 10px;
+    border-bottom: 1px solid lightgray;
+}
+
+.shortcut-key {
+    border-right: 1px solid lightgray;
+    font-weight: bold;
+    text-align: center;
+}
+
+.shortcuts-plain {
+    font-weight: normal;
+}
+
+.shortucts-header {
+    font-size: 14px;
+    text-align: center;
+    padding-top: 20px !important;
+}
