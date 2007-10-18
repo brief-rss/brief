@@ -649,8 +649,16 @@ var gFeedViewEvents = {
         // Stop propagation of character keys, to disable FAYT.
         if (aEvent.charCode)
             aEvent.stopPropagation();
-        if (aEvent.keyCode == aEvent.DOM_VK_TAB || aEvent.charCode == aEvent.DOM_VK_SPACE)
+
+        // Brief takes over these shortcut keys, so let's stop
+        // the default action. Let's not prevent the user from typing
+        // in inputs that entries may contain, though.
+        if ((aEvent.keyCode == aEvent.DOM_VK_TAB
+            || aEvent.charCode == aEvent.DOM_VK_SPACE
+            || aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE)
+            && aEvent.originalTarget.localName != 'input') {
             aEvent.preventDefault();
+        }
 
         var evt = document.createEvent('KeyboardEvent');
         evt.initKeyEvent(aEvent.type, aEvent.canBubble, aEvent.cancelable, aEvent.view,
