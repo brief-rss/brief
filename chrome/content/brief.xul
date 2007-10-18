@@ -22,31 +22,23 @@
     </stringbundleset>
 
     <keyset id="brief-keyset">
-        <key keycode="VK_TAB" phase="capturing"
-             oncommand="if (gFeedView) gFeedView.selectNextEntry()"/>
-        <key keycode="VK_TAB" modifiers="shift" phase="capturing"
-             oncommand="if (gFeedView) gFeedView.selectPrevEntry()"/>
-        <key key="k" phase="capturing" oncommand="if (gFeedView) gFeedView.selectNextEntry()"/>
-        <key key="j" phase="capturing" oncommand="if (gFeedView) gFeedView.selectPrevEntry()"/>
-        <key key="t" phase="capturing" oncommand="gCommands.turnOffKeyNav()"/>
+        <key key="k" oncommand="if (gFeedView) gFeedView.selectNextEntry()"/>
+        <key key="j" oncommand="if (gFeedView) gFeedView.selectPrevEntry()"/>
 
-        <key key="m" phase="capturing" oncommand="gCommands.markSelectedEntryRead()"/>
-        <key key="b" phase="capturing" oncommand="gCommands.deleteSelectedEntry()"/>
-        <key key="r" phase="capturing" oncommand="gCommands.restoreSelectedEntry()"/>
-        <key key="n" phase="capturing" oncommand="gCommands.starSelectedEntry()"/>
-        <key key="o" phase="capturing" oncommand="gCommands.unfoldSelectedEntry()"/>
+        <key key="m" oncommand="gCommands.markSelectedEntryRead()"/>
+        <key key="b" oncommand="gCommands.deleteSelectedEntry()"/>
+        <key key="r" oncommand="gCommands.restoreSelectedEntry()"/>
+        <key key="n" oncommand="gCommands.starSelectedEntry()"/>
+        <key key="o" oncommand="gCommands.unfoldSelectedEntry()"/>
 
-        <key key="p" phase="capturing" oncommand="gCommands.toggleHeadlinesMode()"/>
-        <key key="k" phase="capturing" modifiers="alt"
-                                       oncommand="if (gFeedView) gFeedView.currentPage++"/>
-        <key key="j" phase="capturing" modifiers="alt"
-                                       oncommand="if (gFeedView) gFeedView.currentPage--"/>
-        <key key="m" phase="capturing" modifiers="accel"
-                                       oncommand="gCommands.markCurrentViewRead(true)"/>
-        <key key="a" phase="capturing" oncommand="gCommands.switchViewConstraint('all')"/>
-        <key key="s" phase="capturing" oncommand="gCommands.switchViewConstraint('starred')"/>
-        <key key="d" phase="capturing" oncommand="gCommands.switchViewConstraint('unread')"/>
-        <key key="/" phase="capturing" oncommand="gCommands.focusSearchbar()"/>
+        <key key="p" oncommand="gCommands.toggleHeadlinesMode()"/>
+        <key key="k" modifiers="alt" oncommand="if (gFeedView) gFeedView.currentPage++"/>
+        <key key="j" modifiers="alt" oncommand="if (gFeedView) gFeedView.currentPage--"/>
+        <key key="m" modifiers="accel" oncommand="gCommands.markCurrentViewRead(true)"/>
+        <key key="a" oncommand="gCommands.switchViewConstraint('all')"/>
+        <key key="s" oncommand="gCommands.switchViewConstraint('starred')"/>
+        <key key="d" oncommand="gCommands.switchViewConstraint('unread')"/>
+        <key key="/" oncommand="gCommands.focusSearchbar()"/>
     </keyset>
 
     <popupset id="main-popupset">

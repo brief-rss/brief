@@ -79,8 +79,7 @@ function init() {
     viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
                                        gPrefs.shownEntries == 'unread' ? 1 : 2;
 
-    // Stop propagation of character keys, to disable FAYT.
-    document.addEventListener('keypress', function(e){if (e.charCode) e.stopPropagation()}, true);
+    document.addEventListener('keypress', onKeyPress, true);
 
     var observerService = Cc["@mozilla.org/observer-service;1"].
                           getService(Ci.nsIObserverService);
@@ -208,8 +207,8 @@ var gObserver = {
         }
     },
 
-    // Updates the approperiate treeitems in the feed list and refreshes the feedview
-    // when necessary.
+    // Updates the approperiate treeitems in the feed list
+    // and refreshes the feedview when necessary.
     onEntryStatusChanged: function gObserver_onEntryStatusChanged(aChangedItems, aChangeType) {
         aChangedItems.QueryInterface(Ci.nsIWritablePropertyBag2);
         var changedFeeds = aChangedItems.getPropertyAsAString('feeds').
@@ -237,6 +236,7 @@ var gObserver = {
                 }
             }
 
+            // Do everything asychronously to speed up refreshing of the feed view.
             setTimeout(function(){gFeedList.refreshFeedTreeitems(changedFeeds)}, 0);
 
             // We can't know if any of those need updating, so we have to
@@ -514,6 +514,26 @@ function performSearch(aEvent) {
     gFeedView.titleOverride = title;
     gFeedView.query.searchString = searchbar.value;
     gFeedView.ensure();
+}
+
+
+function onKeyPress(aEvent) {
+    // Stop propagation of character keys, to disable FAYT.
+    if (aEvent.charCode)
+        aEvent.stopPropagation();
+
+    if (aEvent.keyCode == aEvent.DOM_VK_TAB && gFeedView && gFeedView.isActive) {
+        gCommands.turnOffKeyNav();
+        aEvent.preventDefault();
+        return;
+    }
+
+    var searchbar = document.getElementById('searchbar');
+    if (aEvent.charCode == aEvent.DOM_VK_SPACE && gFeedView && gFeedView.isActive &&
+        searchbar.getAttribute('focused') != 'true') {
+        gFeedView.selectNextEntry()
+        aEvent.preventDefault();
+    }
 }
 
 
