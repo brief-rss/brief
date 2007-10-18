@@ -58,6 +58,7 @@ FeedView.prototype = {
     document:     null,
     feedContent:  null,
 
+
     // Query that selects entries contained by the view. It is the query to pull ALL the
     // entries, not only the ones displayed on the current page.
     __query: null,
@@ -102,11 +103,15 @@ FeedView.prototype = {
     // when the topmost entry is selected.
     _selectLastEntryOnRefresh: false,
 
+    // Temporarily disable selecting entries while the view is being refreshed.
+    _selectionSuppressed: false,
+
     _autoScrollInterval: null,
 
     selectNextEntry: function FeedView_selectNextEntry() {
         if (!this.selectedEntry) {
-            this.selectEntry(this.feedContent.firstChild, true);
+            if (!this._selectionSuppressed)
+                this.selectEntry(this.feedContent.firstChild, true);
             return;
         }
 
@@ -119,7 +124,8 @@ FeedView.prototype = {
 
     selectPrevEntry: function FeedView_selectPrevEntry() {
         if (!this.selectedEntry) {
-            this.selectEntry(this.feedContent.firstChild, true);
+            if (!this._selectionSuppressed)
+                this.selectEntry(this.feedContent.firstChild, true);
             return;
         }
 
@@ -307,6 +313,10 @@ FeedView.prototype = {
     // Refreshes the feed view from scratch.
     _refresh: function FeedView__refresh() {
         this.browser.style.cursor = 'wait';
+
+        // Immediately deselect the entry, so that no futher commands can be sent.
+        this.selectEntry(null);
+        this._selectionSuppressed = true;
 
         this._computePages();
 
@@ -521,6 +531,7 @@ FeedView.prototype = {
             this.selectEntry(entry, true, true);
             this._selectLastEntryOnRefresh = false;
         }
+        this._selectionSuppressed = false;
 
         // Restore default cursor which we changed to
         // "wait" at the beginning of the refresh.
@@ -648,7 +659,7 @@ var gFeedViewEvents = {
         // Stop propagation of character keys, to disable FAYT.
         if (aEvent.charCode)
             aEvent.stopPropagation();
-        if (aEvent.keyCode == aEvent.DOM_VK_TAB)
+        if (aEvent.keyCode == aEvent.DOM_VK_TAB || aEvent.charCode == aEvent.DOM_VK_SPACE)
             aEvent.preventDefault();
 
         var evt = document.createEvent('KeyboardEvent');
