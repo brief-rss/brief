@@ -26,12 +26,14 @@
         <key key="j" oncommand="if (gFeedView) gFeedView.selectPrevEntry()"/>
 
         <key key="m" oncommand="gCommands.markSelectedEntryRead()"/>
-        <key key="b" oncommand="gCommands.deleteSelectedEntry()"/>
+        <key key="t" oncommand="gCommands.deleteSelectedEntry()"/>
         <key key="r" oncommand="gCommands.restoreSelectedEntry()"/>
         <key key="n" oncommand="gCommands.starSelectedEntry()"/>
-        <key key="o" oncommand="gCommands.unfoldSelectedEntry()"/>
+        <key key="b" oncommand="gCommands.unfoldSelectedEntry()"/>
+        <key keycode="VK_RETURN" oncommand="gCommands.openSelectedEntryLink()"/>
+        <key keycode="VK_RETURN" modifiers="accel" oncommand="gCommands.openSelectedEntryLink(true)"/>
 
-        <key key="p" oncommand="gCommands.toggleHeadlinesMode()"/>
+        <key key="f" oncommand="gCommands.toggleHeadlinesMode()"/>
         <key key="k" modifiers="alt" oncommand="if (gFeedView) gFeedView.currentPage++"/>
         <key key="j" modifiers="alt" oncommand="if (gFeedView) gFeedView.currentPage--"/>
         <key key="m" modifiers="accel" oncommand="gCommands.markCurrentViewRead(true)"/>

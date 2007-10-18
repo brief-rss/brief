@@ -618,26 +618,16 @@ var gFeedViewEvents = {
             gFeedView.selectEntry(targetEntry, false);
 
         if (anonid == 'article-title-link' && (aEvent.button == 0 || aEvent.button == 1)) {
+            aEvent.preventDefault();
 
-            if (aEvent.button == 0 && gPrefs.getBoolPref('feedview.openEntriesInTabs')) {
-                aEvent.preventDefault();
-                var url = targetEntry.getAttribute('entryURL');
+            // Prevent default doesn't seem to stop the default action when
+            // middle-clicking, so we've got stop propagation as well.
+            if (aEvent.button == 1)
+                aEvent.stopPropagation();
 
-                var prefBranch = Cc['@mozilla.org/preferences-service;1'].
-                                 getService(Ci.nsIPrefBranch);
-                var whereToOpen = prefBranch.getIntPref('browser.link.open_newwindow');
-                if (whereToOpen == 2)
-                    openDialog('chrome://browser/content/browser.xul', '_blank', 'chrome,all,dialog=no', url);
-                else
-                    gTopBrowserWindow.gBrowser.loadOneTab(url);
-            }
-
-            if (!targetEntry.hasAttribute('read') && gPrefs.getBoolPref('feedview.linkMarksRead')) {
-                targetEntry.setAttribute('read', true);
-                var id = targetEntry.getAttribute('id');
-                var query = new QuerySH(null, id, null);
-                query.markEntriesRead(true);
-            }
+            var openEntriesInTabs = gPrefs.getBoolPref('feedview.openEntriesInTabs');
+            var newTab = (aEvent.button == 0 && openEntriesInTabs || aEvent.button == 1);
+            gCommands.openEntryLink(targetEntry, newTab);
         }
     },
 
