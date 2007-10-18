@@ -398,6 +398,37 @@ var gCommands = {
             if (gFeedView)
                 gFeedView.selectEntry(null);
         }
+    },
+
+    openSelectedEntryLink: function cmd_openSelectedEntryLink(aForceNewTab) {
+        if (!gFeedView || !gFeedView.selectedEntry)
+            return;
+
+        var newTab = gPrefs.getBoolPref('feedview.openEntriesInTabs') || aForceNewTab;
+        gCommands.openEntryLink(gFeedView.selectedEntry, newTab);
+    },
+
+    openEntryLink: function cmd_openEntryLink(aEntry, aNewTab) {
+        var url = aEntry.getAttribute('entryURL');
+
+        if (aNewTab) {
+            var prefBranch = Cc['@mozilla.org/preferences-service;1'].
+                             getService(Ci.nsIPrefBranch);
+            var whereToOpen = prefBranch.getIntPref('browser.link.open_newwindow');
+            if (whereToOpen == 2)
+                openDialog('chrome://browser/content/browser.xul', '_blank', 'chrome,all,dialog=no', url);
+            else
+                gTopBrowserWindow.gBrowser.loadOneTab(url);
+        }
+        else {
+            gFeedView.browser.loadURI(url);
+        }
+
+        if (!aEntry.hasAttribute('read') && gPrefs.getBoolPref('feedview.linkMarksRead')) {
+            aEntry.setAttribute('read', true);
+            var query = new QuerySH(null, aEntry.id, null);
+            query.markEntriesRead(true);
+        }
     }
 }
 
