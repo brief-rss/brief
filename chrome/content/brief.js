@@ -553,6 +553,9 @@ function onKeyPress(aEvent) {
     if (aEvent.charCode)
         aEvent.stopPropagation();
 
+    // We can't leave handling of Space and Tab to XUL like other keys,
+    // because unlike them they have to be default-prevented.
+    // Also, I couldn't get Space to be caught by <key>'s at all.
     if (aEvent.keyCode == aEvent.DOM_VK_TAB && gFeedView && gFeedView.isActive) {
         gCommands.turnOffKeyNav();
         aEvent.preventDefault();
@@ -560,9 +563,16 @@ function onKeyPress(aEvent) {
     }
 
     var searchbar = document.getElementById('searchbar');
-    if (aEvent.charCode == aEvent.DOM_VK_SPACE && gFeedView && gFeedView.isActive &&
-        searchbar.getAttribute('focused') != 'true') {
-        gFeedView.selectNextEntry()
+    if (aEvent.charCode == aEvent.DOM_VK_SPACE && gFeedView && gFeedView.isActive
+        && searchbar.getAttribute('focused') != 'true') {
+        gFeedView.selectNextEntry();
+        aEvent.preventDefault();
+        return;
+    }
+
+    if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE && gFeedView && gFeedView.isActive
+        && searchbar.getAttribute('focused') != 'true') {
+        gFeedView.selectPrevEntry();
         aEvent.preventDefault();
     }
 }

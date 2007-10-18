@@ -28,8 +28,8 @@
         <key key="m" oncommand="gCommands.markSelectedEntryRead()"/>
         <key key="t" oncommand="gCommands.deleteSelectedEntry()"/>
         <key key="r" oncommand="gCommands.restoreSelectedEntry()"/>
-        <key key="n" oncommand="gCommands.starSelectedEntry()"/>
-        <key key="b" oncommand="gCommands.unfoldSelectedEntry()"/>
+        <key key="b" oncommand="gCommands.starSelectedEntry()"/>
+        <key key="n" oncommand="gCommands.unfoldSelectedEntry()"/>
         <key keycode="VK_RETURN" oncommand="gCommands.openSelectedEntryLink()"/>
         <key keycode="VK_RETURN" modifiers="accel" oncommand="gCommands.openSelectedEntryLink(true)"/>
 
@@ -41,6 +41,8 @@
         <key key="s" oncommand="gCommands.switchViewConstraint('starred')"/>
         <key key="d" oncommand="gCommands.switchViewConstraint('unread')"/>
         <key key="/" oncommand="gCommands.focusSearchbar()"/>
+
+        <key key="?" oncommand="gCommands.displayShortcuts()"/>
     </keyset>
 
     <popupset id="main-popupset">
