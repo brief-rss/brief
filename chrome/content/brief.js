@@ -429,6 +429,14 @@ var gCommands = {
             var query = new QuerySH(null, aEntry.id, null);
             query.markEntriesRead(true);
         }
+    },
+
+    displayShortcuts: function cmd_displayShortcuts() {
+        if (gFeedView && gFeedView.isActive) {
+            var evt = document.createEvent('Events');
+            evt.initEvent('DisplayShortcuts', false, false);
+            gFeedView.document.dispatchEvent(evt);
+        }
     }
 }
 
