@@ -297,6 +297,7 @@ var gCommands = {
         gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
 
         var checkbox = document.getElementById('headlines-checkbox');
+        document.documentElement.focus();
         checkbox.checked = newState;
 
         if (!gFeedView)
@@ -316,6 +317,7 @@ var gCommands = {
 
     switchViewConstraint: function cmd_switchViewConstraint(aConstraint) {
         gPrefs.setCharPref('feedview.shownEntries', aConstraint);
+
         if (gFeedView)
             gFeedView.ensure();
     },
@@ -385,6 +387,7 @@ var gCommands = {
         var evt = document.createEvent('Events');
         evt.initEvent('CollapseEntry', false, false);
         gFeedView.selectedEntry.dispatchEvent(evt);
+        setTimeout(function(){ gFeedView.selectedEntry.scrollIntoView(false) }, 310);
     },
 
     focusSearchbar: function cmd_focusSearchbar() {
