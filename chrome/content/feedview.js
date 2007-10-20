@@ -88,7 +88,6 @@ FeedView.prototype = {
     set currentPage(aPageNumber) {
         if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
             this.__currentPage = aPageNumber;
-            clearInterval(this._autoScrollInterval);
             this._refresh();
         }
     },
@@ -103,15 +102,17 @@ FeedView.prototype = {
     // when the topmost entry is selected.
     _selectLastEntryOnRefresh: false,
 
-    // Temporarily disable selecting entries while the view is being refreshed.
+    // Temporarily disable selecting entries.
     _selectionSuppressed: false,
 
     _autoScrollInterval: null,
 
     selectNextEntry: function FeedView_selectNextEntry() {
+        if (this._selectionSuppressed)
+            return;
+
         if (!this.selectedEntry) {
-            if (!this._selectionSuppressed)
-                this.selectEntry(this.feedContent.firstChild, true);
+            this.selectEntry(this.feedContent.firstChild, true);
             return;
         }
 
@@ -123,9 +124,11 @@ FeedView.prototype = {
     },
 
     selectPrevEntry: function FeedView_selectPrevEntry() {
+        if (this._selectionSuppressed)
+            return;
+
         if (!this.selectedEntry) {
-            if (!this._selectionSuppressed)
-                this.selectEntry(this.feedContent.firstChild, true);
+            this.selectEntry(this.feedContent.firstChild, true);
             return;
         }
 
@@ -204,6 +207,7 @@ FeedView.prototype = {
             if (Math.abs(win.pageYOffset - targetScrollPos) < Math.abs(jump)) {
                 win.scroll(win.pageXOffset, targetScrollPos)
                 clearInterval(self._autoScrollInterval);
+                self._selectionSuppressed = false;
                 return;
             }
             win.scroll(win.pageXOffset, win.pageYOffset + jump);
@@ -212,6 +216,10 @@ FeedView.prototype = {
         // Clear the previous interval, if exists (might happen when we select
         // another entry before previous scrolling is finished).
         clearInterval(this._autoScrollInterval);
+
+        // Disallow selecting futher entries until scrolling is finished.
+        this._selectionSuppressed = true;
+
         this._autoScrollInterval = setInterval(scroll, 7);
     },
 
@@ -314,8 +322,10 @@ FeedView.prototype = {
     _refresh: function FeedView__refresh() {
         this.browser.style.cursor = 'wait';
 
-        // Immediately deselect the entry, so that no futher commands can be sent.
-        this.selectEntry(null);
+        // Stop scrolling, so it doesn't continue after refreshing.
+        clearInterval(this._autoScrollInterval);
+
+        // Suppress selecting entry until we refresh is finished.
         this._selectionSuppressed = true;
 
         this._computePages();
@@ -525,13 +535,13 @@ FeedView.prototype = {
             this._appendEntry(entries[i]);
 
         // Select an entry if keyboard navigation is enabled.
+        this._selectionSuppressed = false;
         if (gPrefs.keyNavEnabled) {
             var entry = this._selectLastEntryOnRefresh ? this.feedContent.lastChild
                                                        : this.feedContent.firstChild;
             this.selectEntry(entry, true, true);
             this._selectLastEntryOnRefresh = false;
         }
-        this._selectionSuppressed = false;
 
         // Restore default cursor which we changed to
         // "wait" at the beginning of the refresh.
