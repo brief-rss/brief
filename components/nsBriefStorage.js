@@ -97,7 +97,6 @@ BriefStorageService.prototype = {
                                            'providedID  TEXT,                    ' +
                                            'entryURL    TEXT,                    ' +
                                            'title       TEXT,                    ' +
-                                           'summary     TEXT,                    ' +
                                            'content     TEXT,                    ' +
                                            'date        INTEGER,                 ' +
                                            'authors     TEXT,                    ' +
@@ -132,8 +131,8 @@ BriefStorageService.prototype = {
     migrateDatabase: function BriefStorage_migrateDatabase(aPreviousVersion) {
         switch (aPreviousVersion) {
 
-        // Schema version checking has only been introduced in 0.8. When migrating from
-        // earlier releases we don't know the exact previous version, so we attempt
+        // Schema version checking has only been introduced in 0.8 beta 1. When migrating
+        // from earlier releases we don't know the exact previous version, so we attempt
         // to apply all the changes since the beginning of time.
         case 0:
             // Columns added in 0.6.
@@ -167,12 +166,14 @@ BriefStorageService.prototype = {
                                                'feeds_feedID_index ON feeds (feedID)    ');
             // Fall through...
 
-        // 0.8 beta 1
+        // From 0.8 beta 1.
         case 1:
             try {
                 this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
-            } catch (e) { }
+            } catch (e) {}
 
+            // 0.8 changed how IDs are generated. Below we recompute IDs, but we doesn't
+            // need to do it for entries which are no longer available in the feed.
             var selectRecentEntries = this.dBConnection.createStatement(
                 'SELECT entries.feedID, entries.entryURL, entries.providedID, entries.id ' +
                 'FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID          ' +
@@ -180,6 +181,15 @@ BriefStorageService.prototype = {
 
             var updateEntryIDs = this.dBConnection.createStatement(
                 'UPDATE OR IGNORE entries SET id = ?1, secondaryID = ?2 WHERE id = ?3');
+
+            // Brief isn't likely to ever make use of storing both content field
+            // and summary field, so we may as well abandon the |summary| column.
+            // In the |content| column we will store either the content or when
+            // content is unavailable - the summary.
+            // To migrate to the new system, we need populate empty |content| columns
+            // with |summary| columns.
+            var updateEntryContent = this.dBConnection.createStatement(
+                'UPDATE entries SET content = summary, summary = "" WHERE content = ""');
 
             var entries = [], entry, newID, newSecondaryID;
             this.dBConnection.beginTransaction();
@@ -204,6 +214,11 @@ BriefStorageService.prototype = {
                     updateEntryIDs.bindStringParameter(2, entry.id);
                     updateEntryIDs.execute();
                 }
+
+                updateEntryContent.execute();
+            }
+            catch (e) {
+                this.logDatabaseError(e);
             }
             finally {
                 this.dBConnection.commitTransaction();
@@ -308,16 +323,15 @@ BriefStorageService.prototype = {
                           'INSERT OR IGNORE INTO entries                         ' +
                           '(                                                     ' +
                           'feedID, id, secondaryID, providedID, entryURL,        ' +
-                          'title,  summary, content, date, authors, read         ' +
+                          'title,  content, date, authors, read                  ' +
                           ')                                                     ' +
-                          'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11) ');
+                          'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)      ');
         var updateEntry = this.dBConnection.createStatement(
                           'UPDATE entries       ' +
-                          'SET summary = ?1,    ' +
-                          '    content = ?2,    ' +
-                          '    date    = ?3,    ' +
-                          '    authors = ?4     ' +
-                          'WHERE id = ?5        ');
+                          'SET content = ?1,    ' +
+                          '    date    = ?2,    ' +
+                          '    authors = ?3     ' +
+                          'WHERE id = ?4        ');
         var getDateForEntry = this.dBConnection.
                               createStatement('SELECT date FROM entries WHERE id = ?');
 
@@ -341,8 +355,8 @@ BriefStorageService.prototype = {
                 entry = entries[i];
                 entryAlreadyStored = false;
 
-                // Strip tags
-                title = entry.title ? entry.title.replace(/<[^>]+>/g,'') : '';
+                title = entry.title ? entry.title.replace(/<[^>]+>/g,'') : ''; // Strip tags
+                content = entry.content || entry.summary;
 
                 // Compute the hash which serves as the entry's unique id.
                 // Special case for MediaWiki feeds: include the date in the hash. In
@@ -387,11 +401,10 @@ BriefStorageService.prototype = {
                 // update the data and mark the entry as unread.
                 // Otherwise, if no such entry is present yet, insert it.
                 if (storedEntryDate !== null && entry.date && storedEntryDate < entry.date) {
-                    updateEntry.bindStringParameter(0, entry.summary);
-                    updateEntry.bindStringParameter(1, entry.content);
-                    updateEntry.bindInt64Parameter(2, entry.date)
-                    updateEntry.bindStringParameter(3, entry.authors);
-                    updateEntry.bindStringParameter(4, primaryID);
+                    updateEntry.bindStringParameter(0, content);
+                    updateEntry.bindInt64Parameter(1, entry.date)
+                    updateEntry.bindStringParameter(2, entry.authors);
+                    updateEntry.bindStringParameter(3, primaryID);
 
                     updateEntry.execute();
                 }
@@ -402,11 +415,10 @@ BriefStorageService.prototype = {
                     insertEntry.bindStringParameter(3, entry.id);
                     insertEntry.bindStringParameter(4, entry.entryURL);
                     insertEntry.bindStringParameter(5, title);
-                    insertEntry.bindStringParameter(6, entry.summary);
-                    insertEntry.bindStringParameter(7, entry.content);
-                    insertEntry.bindInt64Parameter(8, entry.date ? entry.date : now);
-                    insertEntry.bindStringParameter(9, entry.authors);
-                    insertEntry.bindInt32Parameter(10, 0);
+                    insertEntry.bindStringParameter(6, content);
+                    insertEntry.bindInt64Parameter(7, entry.date ? entry.date : now);
+                    insertEntry.bindStringParameter(8, entry.authors);
+                    insertEntry.bindInt32Parameter(9, 0);
 
                     insertEntry.execute();
                 }
@@ -1095,11 +1107,10 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     getEntries: function BriefQuery_getEntries(entryCount) {
-        var statement = 'SELECT                                            ' +
-                        'entries.id,    entries.feedID,  entries.entryURL, ' +
-                        'entries.title, entries.summary, entries.content,  ' +
-                        'entries.date,  entries.authors, entries.read,     ' +
-                        'entries.starred ' + this.getQueryTextForSelect();
+        var statement = 'SELECT entries.id,      entries.feedID,  entries.entryURL, ' +
+                        '       entries.title,   entries.content, entries.date,     ' +
+                        '       entries.authors, entries.read,    entries.starred   ' +
+                         this.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
 
@@ -1112,12 +1123,11 @@ BriefQuery.prototype = {
                 entry.feedID = select.getString(1);
                 entry.entryURL = select.getString(2);
                 entry.title = select.getString(3);
-                entry.summary = select.getString(4);
-                entry.content = select.getString(5);
-                entry.date = select.getInt64(6);
-                entry.authors = select.getString(7);
-                entry.read = (select.getInt32(8) == 1);
-                entry.starred = (select.getInt32(9) == 1);
+                entry.content = select.getString(4);
+                entry.date = select.getInt64(5);
+                entry.authors = select.getString(6);
+                entry.read = (select.getInt32(7) == 1);
+                entry.starred = (select.getInt32(8) == 1);
 
                 entries.push(entry);
             }
@@ -1347,7 +1357,7 @@ BriefQuery.prototype = {
         if (this.searchString) {
             var words = this.searchString.match(/[^ ]+/g);
             for (var i = 0; i < words.length; i++)
-                text += '(entries.title LIKE "%" || "' + words[i] + '" || "%" OR entries.summary LIKE "%" || "' + words[i] + '" || "%" OR entries.content LIKE "%" || "' + words[i] + '" || "%") AND ';
+                text += '(entries.title LIKE "%" || "' + words[i] + '" || "%" OR entries.content LIKE "%" || "' + words[i] + '" || "%") AND ';
         }
 
         if (this.read)
