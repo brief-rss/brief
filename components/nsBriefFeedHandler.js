@@ -95,7 +95,6 @@ FeedEntry.prototype = {
     id:       '',
     entryURL: '',
     title:    '',
-    summary:  '',
     content:  '',
     date:     0,
     authors:  '',
@@ -115,9 +114,6 @@ FeedEntry.prototype = {
 
         if (aEntry.link)
             this.entryURL = aEntry.link.spec;
-
-        if (aEntry.summary)
-            this.summary = aEntry.summary.text;
 
         if (aEntry.content)
             this.content = aEntry.content.text;
