@@ -116,7 +116,7 @@ toolbarbutton {
   }
 
 #feed-view-toolbar {
-  padding: 0 20px 0 10px;
+  padding: 0 10px 0 10px;
   }
 
 #searchbar-container {
@@ -147,6 +147,10 @@ toolbarbutton {
 #mark-view-unread {
   list-style-image: url('toolbar/markViewUnread.png');
   }
+
+#headlines-checkbox {
+  margin-right: 8px;
+}
 
 #view-constraint-box {
   margin-right: 10px;
