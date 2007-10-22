@@ -19,6 +19,8 @@ interface nsIBriefFeedEntry : nsISupports {
 
   attribute AString title;
 
+  attribute AString summary;
+
   attribute AString content;
 
   attribute unsigned long long date;
