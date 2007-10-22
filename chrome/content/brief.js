@@ -1,8 +1,8 @@
 const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
-const LAST_MAJOR_VERSION = '0.8b1';
-const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/0.7.html';
+const LAST_MAJOR_VERSION = '0.8';
+const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/0.8.html';
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -297,8 +297,12 @@ var gCommands = {
         gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
 
         var checkbox = document.getElementById('headlines-checkbox');
-        document.documentElement.focus();
         checkbox.checked = newState;
+
+        // Prevent the checkbox from being focused, because then Space toggles it
+        // which conflicts with the shortcut to select next entry.
+        if (document.commandDispatcher.focusedElement == checkbox)
+            document.documentElement.focus();
 
         if (!gFeedView)
             return;
