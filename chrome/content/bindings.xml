@@ -42,7 +42,6 @@
                 // Get the data passed to us through attributes
                 var entryURL = this.getAttribute('entryURL');
                 var title    = this.getAttribute('entryTitle');
-                var summary  = this.getAttribute('summary');
                 var content  = this.getAttribute('content');
                 var date     = new Date(parseInt(this.getAttribute('date')));
                 var isRead   = this.getAttribute('read');
@@ -76,7 +75,7 @@
                 if (authors)
                     authorsElement.innerHTML = authors + ',';
 
-                articleContentElement.innerHTML = content ? content : summary;
+                articleContentElement.innerHTML = content;
 
                 markReadButton.label = isRead ? feedContentElement.getAttribute('markUnreadString')
                                               : feedContentElement.getAttribute('markReadString');
@@ -230,16 +229,19 @@
 
             <handler event="CollapseEntry">
             <![CDATA[
-            var articleContent = document.getAnonymousElementByAttribute(this, 'class',
-                                                                      'article-content');
-            if (this.hasAttribute('collapsed')) {
-                $(articleContent).slideDown('fast');
-                this.removeAttribute('collapsed');
-            }
-            else {
-                var self = this;
-                $(articleContent).slideUp('fast', function(){ self.setAttribute('collapsed', true) });
-            }
+                var articleContent = document.getAnonymousElementByAttribute(this, 'class',
+                                                                          'article-content');
+                if (this.hasAttribute('collapsed')) {
+                    $(articleContent).slideDown('fast');
+                    this.removeAttribute('collapsed');
+                }
+                else {
+                    var self = this;
+                    function collapse() {
+                        self.setAttribute('collapsed', true);
+                    }
+                    $(articleContent).slideUp('fast', collapse);
+                }
             ]]>
             </handler>
         </handlers>
