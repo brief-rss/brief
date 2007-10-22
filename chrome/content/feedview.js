@@ -557,7 +557,6 @@ FeedView.prototype = {
         articleContainer.setAttribute('id', aEntry.id);
         articleContainer.setAttribute('entryURL', aEntry.entryURL);
         articleContainer.setAttribute('entryTitle', aEntry.title);
-        articleContainer.setAttribute('summary', aEntry.summary);
         articleContainer.setAttribute('content', aEntry.content);
         articleContainer.setAttribute('date', aEntry.date);
 
