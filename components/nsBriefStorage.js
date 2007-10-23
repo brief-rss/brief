@@ -627,7 +627,7 @@ BriefStorageService.prototype = {
         var now = Math.round(Date.now() / 1000);
         this.prefs.setIntPref('database.lastPurgeTime', now);
 
-        var vacuumDisabled = this.prefs.getBoolPref('database.disableVacuum');
+        var vacuumDisabled = this.prefs.getBoolPref('database.disableCompacting');
         if (!vacuumDisabled) {
             this.stopDummyStatement();
             this.dBConnection.executeSimpleSQL('VACUUM');
