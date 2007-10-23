@@ -220,6 +220,9 @@ FeedView.prototype = {
         // Disallow selecting futher entries until scrolling is finished.
         this._selectionSuppressed = true;
 
+        // XXX Hack. The selection sometimes isn't unsuppressed in scroll()
+        setTimeout(function() { self._selectionSuppressed = false }, 500);
+
         this._autoScrollInterval = setInterval(scroll, 7);
     },
 
