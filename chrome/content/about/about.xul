@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
-<?xml-stylesheet href="chrome://global/skin/" type="text/css"?> 
-<?xml-stylesheet href="chrome://brief/skin/about.css" type="text/css"?> 
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://brief/skin/about.css" type="text/css"?>
 
 <!DOCTYPE dialog SYSTEM "chrome://brief/locale/about.dtd">
 
@@ -10,19 +10,19 @@
         xmlns:html="http://www.w3.org/1999/xhtml"
         buttons="accept"
         onload="init()">
-        
-    <script type="application/x-javascript" 
+
+    <script type="application/x-javascript"
             src="chrome://brief/content/about/about.js"/>
-    <script type="application/x-javascript" 
-            src="chrome://global/content/contentAreaUtils.js"/>            
-  
+    <script type="application/x-javascript"
+            src="chrome://global/content/contentAreaUtils.js"/>
+
     <stringbundleset id="aboutSet">
-        <stringbundle id="extensionsStrings" 
+        <stringbundle id="extensionsStrings"
                       src="chrome://mozapps/locale/extensions/extensions.properties"/>
     </stringbundleset>
 
     <vbox id="clientBox" flex="1">
-        
+
         <hbox id="header" class="section">
             <image id="icon" src="chrome://brief/skin/icon.png"/>
             <vbox>
@@ -33,13 +33,13 @@
                 <description id="extensionDescription"/>
             </vbox>
         </hbox>
-    
+
         <vbox id="creatorBox" class="section">
             <label class="sectionTitle">&createdBy.headline;</label>
             <hbox>
                 <label id="extensionCreator" flex="1"/>
                 <hbox flex="1" pack="end">
-                    <label id="extensionHomepage" class="text-link" 
+                    <label id="extensionHomepage" class="text-link"
                            value="&homepage.label;"
                            onclick="loadHomepage(event);"/>
                 </hbox>
@@ -49,24 +49,22 @@
         <vbox id="contributorsBox" class="section">
             <label id="extensionContributors" class="sectionTitle">&contributors.headline;</label>
         </vbox>
-    
+
         <vbox id="translatorsBox" class="section">
             <label id="extensionTranslators" class="sectionTitle">&translators.headline;</label>
         </vbox>
-    
+
         <vbox class="section">
            <label class="sectionTitle">&credits.headline;</label>
            <description>&extdevThanks.paragraph; <html:br/>
-             Christian Biesinger, Mark Finkle, Mook, Nickolay Ponomarev, 
+             Christian Biesinger, Mark Finkle, Mook, Nickolay Ponomarev,
              Doron Rosenberg, Dave Townsend and Mike Shaver.
            </description>
            <description>&iconsThanks.paragraph;</description>
            <description>&testingThanks.paragraph;</description> 
-        </vbox> 
-        
+        </vbox>
+
     </vbox>
     <separator id="groove" class="groove"/>
 
 </dialog>
-
-        
