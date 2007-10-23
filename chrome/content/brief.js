@@ -180,6 +180,9 @@ var gObserver = {
             if (aData == 'background')
                 return;
 
+            var deck = document.getElementById('update-buttons-deck');
+            deck.selectedIndex = 1;
+
             var progressmeter = document.getElementById('update-progress');
             progressmeter.hidden = false;
             progressmeter.value = 100 * gUpdateService.completedFeedsCount /
@@ -272,8 +275,6 @@ var gCommands = {
 
     updateAllFeeds: function cmd_updateAllFeeds() {
         gUpdateService.fetchAllFeeds(false);
-        var deck = document.getElementById('update-buttons-deck');
-        deck.selectedIndex = 1;
     },
 
     stopUpdating: function cmd_stopUpdating() {
