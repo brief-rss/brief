@@ -22,7 +22,7 @@ pref("extensions.brief.update.interval", 3600);
 pref("extensions.brief.update.lastUpdateTime", 0);
 pref("extensions.brief.update.enableAutoUpdate", true);
 pref("extensions.brief.update.showNotification", true);
-pref("extensions.brief.update.defaultFetchDelay", 500);
+pref("extensions.brief.update.defaultFetchDelay", 1000);
 pref("extensions.brief.update.backgroundFetchDelay", 2000);
 
 pref("extensions.brief.database.expireEntries", false);
@@ -31,5 +31,5 @@ pref("extensions.brief.database.limitStoredEntries", false);
 pref("extensions.brief.database.maxStoredEntries", 100);
 pref("extensions.brief.database.lastDeletedRedundantTime", 0);
 pref("extensions.brief.database.lastPurgeTime", 0);
-pref("extensions.brief.database.disableVacuum", false);
+pref("extensions.brief.database.disableCompacting", false);
 pref("extensions.brief.database.keepStarredWhenClearing", true);
