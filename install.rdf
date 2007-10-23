@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>0.7</version>
+    <version>0.8</version>
     <type>2</type>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
     <iconURL>chrome://brief/skin/icon.png</iconURL>
@@ -35,15 +35,17 @@
     <translator>ReinekeFux (de-DE)</translator>
     <translator>Sonickydon (el-GR)</translator>
     <translator>Static_Rage (en-GB)</translator>
-    <translator>ZuGro (es-ES, es-AR)</translator>
     <translator>nico@nc (fr-FR)</translator>
+    <translator>kami (hu-HU)</translator>
     <translator>MatrixIsAllOver (it-IT)</translator>
-    <translator>Krcko (hr-HR)</translator>
     <translator>drry (ja-JP)</translator>
     <translator>gandhi2 (nb-NO)</translator>
     <translator>markh (nl-NL)</translator>
+    <translator>pedsann (pt-BR)</translator>
     <translator>Modex (ru-RU)</translator>
     <translator>Jacen (sk-SK)</translator>
+    <translator>smyrna (tr-TR)</translator>
+    <translator>xmoke (zh-CN)</translator>
     <translator>winiah (zh-TW)</translator>
 
   </rdf:Description>
