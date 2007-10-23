@@ -60,11 +60,15 @@ BriefStorageService.prototype = {
                    getService(Ci.nsIProperties).
                    get('ProfD', Ci.nsIFile);
         file.append('brief.sqlite');
+        var databaseIsNew = !file.exists();
 
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
         this.dBConnection = storageService.openDatabase(file);
         this.dummyDBConnection = storageService.openDatabase(file);
+
+        if (databaseIsNew)
+            this.dBConnection.executeSimpleSQL('PRAGMA user_version = ' + DATABASE_VERSION);
 
         //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
         //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
@@ -619,15 +623,15 @@ BriefStorageService.prototype = {
         removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
         removeFeeds.execute();
 
+        // Prefs can only store longs while Date is a long long.
+        var now = Math.round(Date.now() / 1000);
+        this.prefs.setIntPref('database.lastPurgeTime', now);
+
         var vacuumDisabled = this.prefs.getBoolPref('database.disableVacuum');
         if (!vacuumDisabled) {
             this.stopDummyStatement();
             this.dBConnection.executeSimpleSQL('VACUUM');
         }
-
-        // Prefs can only store longs while Date is a long long.
-        var now = Math.round(Date.now() / 1000);
-        this.prefs.setIntPref('database.lastPurgeTime', now);
     },
 
 
