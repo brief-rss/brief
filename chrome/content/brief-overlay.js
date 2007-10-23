@@ -193,15 +193,15 @@ var gBrief = {
             window.removeEventListener('load', this, false);
 
             this.statusIcon = document.getElementById('brief-status');
-
             this.prefs = Cc['@mozilla.org/preferences-service;1'].
                          getService(Ci.nsIPrefService).
                          getBranch('extensions.brief.').
                          QueryInterface(Ci.nsIPrefBranch2);
             this.prefs.addObserver('', this, false);
-
             this.storageService = Cc['@ancestor/brief/storage;1'].
                                   getService(Ci.nsIBriefStorage);
+            this.updateService = Cc['@ancestor/brief/updateservice;1'].
+                                 getService(Ci.nsIBriefUpdateService);
 
             var firstRun = this.prefs.getBoolPref('firstRun');
             if (firstRun) {
@@ -218,9 +218,6 @@ var gBrief = {
             }
 
             nsContextMenu.prototype.initMenu = this.contextMenuOverride;
-
-            this.updateService = Cc['@ancestor/brief/updateservice;1'].
-                                 getService(Ci.nsIBriefUpdateService);
 
             // Observe changes to the feed database in order to keep the statusbar
             // icon up-to-date.
