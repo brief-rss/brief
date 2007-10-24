@@ -162,7 +162,7 @@
                 </tree>
                 <vbox>
                     <label id="select-home-folder-label"
-                           value="&pickFolder.label;"/>
+                           value="&selectHomeFolder.label;"/>
                     <bookmarks-tree id="bookmark-folders-tree" flex="1" type="folders"/>
                     <hbox pack="end">
                         <button id="confirm-home-folder"
@@ -177,11 +177,9 @@
                 <toolbar id="feed-view-toolbar"
                          hidden="true">
                     <toolbarbutton id="mark-view-read"
+                                   label="&markAllRead.label;"
                                    tooltiptext="&markViewRead.tooltip;"
                                    oncommand="gCommands.markCurrentViewRead(true)"/>
-                    <toolbarbutton id="mark-view-unread"
-                                   tooltiptext="&markViewUnread.tooltip;"
-                                   oncommand="gCommands.markCurrentViewRead(false)"/>
                     <spacer flex="1"/>
                     <toolbaritem id="headlines-checkbox-container">
                         <checkbox id="headlines-checkbox"
