@@ -509,6 +509,8 @@ var gFeedList = {
         // in-database list of feeds was synchronized.
         case 'brief:invalidate-feedlist':
             this.rebuild();
+            if (gFeedView)
+                setTimeout(function(){ gFeedView.ensure() }, 0);
             var deck = document.getElementById('feed-list-deck');
             deck.selectedIndex = 0;
             break;
