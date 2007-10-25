@@ -50,3 +50,7 @@
 <!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
 <!ENTITY maxEntriesPerFeed.accesskey "S">
 <!ENTITY maxEntriesPerFeedAfter.label "latest entries">
+<!ENTITY previousFeed.label "&lt; Previous">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Next &gt;">
+<!ENTITY nextFeed.accesskey "N">

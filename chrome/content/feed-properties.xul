@@ -68,4 +68,21 @@
         <spacer height="10"/>
     </groupbox>
 
+    <hbox>
+        <hbox flex="1">
+            <button id="previous-feed"
+                    label="&previousFeed.label;"
+                    accesskey="&previousFeed.accesskey;"
+                    oncommand="previousFeed()"/>
+        </hbox>
+        <hbox flex="1" pack="end">
+            <button id="next-feed"
+                    label="&nextFeed.label;"
+                    accesskey="&nextFeed.accesskey;"
+                    oncommand="nextFeed()"/>
+        </hbox>
+    </hbox>
+
+    <spacer height="15"/>
+
 </dialog>

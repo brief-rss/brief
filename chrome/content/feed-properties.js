@@ -1,7 +1,7 @@
 const NC_NAME    = 'http://home.netscape.com/NC-rdf#Name';
 const NC_FEEDURL = 'http://home.netscape.com/NC-rdf#FeedURL';
 
-var gFeed;
+var gFeed = null;
 var gStorageService = Components.classes['@ancestor/brief/storage;1'].
                                  getService(Components.interfaces.nsIBriefStorage);
 var gPrefs = Components.classes['@mozilla.org/preferences-service;1'].
@@ -19,8 +19,10 @@ function onload() {
     var checkUpdatesTextbox = document.getElementById('check-updates-textbox');
     var checkUpdatesMenulist = document.getElementById('update-time-menulist');
 
-    var feedID = window.arguments[0];
-    gFeed = gStorageService.getFeed(feedID);
+    if (!gFeed) {
+        var feedID = window.arguments[0];
+        gFeed = gStorageService.getFeed(feedID);
+    }
 
     var stringbundle = document.getElementById('main-bundle');
     var string = stringbundle.getFormattedString('feedPropertiesDialogTitle', [gFeed.title]);
@@ -40,7 +42,33 @@ function onload() {
     checkUpdatesCheckbox.checked = (gFeed.updateInterval > 0);
     checkUpdatesTextbox.disabled = checkUpdatesMenulist.disabled = !checkUpdatesCheckbox.checked;
     initUpdateIntervalControls();
+
+    var allFeeds = gStorageService.getAllFeeds({});
+    var currentIndex = allFeeds.indexOf(gFeed);
+    var nextFeed = document.getElementById('next-feed');
+    var previousFeed = document.getElementById('previous-feed');
+    nextFeed.disabled = (currentIndex == allFeeds.length - 1);
+    previousFeed.disabled = (currentIndex == 0);
 }
+
+function previousFeed() {
+    var allFeeds = gStorageService.getAllFeeds({});
+    var currentIndex = allFeeds.indexOf(gFeed);
+    if (currentIndex > 0) {
+        gFeed = allFeeds[currentIndex - 1];
+        onload();
+    }
+}
+
+function nextFeed() {
+    var allFeeds = gStorageService.getAllFeeds({});
+    var currentIndex = allFeeds.indexOf(gFeed);
+    if (currentIndex < allFeeds.length - 1) {
+        gFeed = allFeeds[currentIndex + 1];
+        onload();
+    }
+}
+
 
 function initUpdateIntervalControls() {
     var interval = gFeed.updateInterval / 1000 || gPrefs.getIntPref('update.interval');
