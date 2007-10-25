@@ -85,7 +85,6 @@ function init() {
     observerService.addObserver(gObserver, 'brief:feed-update-canceled', false);
 
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
-    observerService.addObserver(gFeedList, 'brief:feed-removed', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
     // If Brief has been update, load the new version info page.
@@ -119,7 +118,6 @@ function unload() {
     observerService.removeObserver(gObserver, 'brief:feed-update-canceled');
 
     observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
-    observerService.removeObserver(gFeedList, 'brief:feed-removed');
     observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
 
     gPrefs.unregister();

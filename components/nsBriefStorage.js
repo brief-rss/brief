@@ -825,7 +825,7 @@ BriefStorageService.prototype = {
                         hideFeed.execute();
                     }
 
-                    this.observerService.notifyObservers(null, 'brief:feed-removed', feed.feedID);
+                    invalidateFeedList = true;
                 }
             }
         }

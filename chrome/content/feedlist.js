@@ -520,13 +520,6 @@ var gFeedList = {
             else
                 this.refreshFeedTreeitems(aData);
             break;
-
-        case 'brief:feed-removed':
-            var item = this.getTreeitem(aData);
-            if (item)
-                item.parentNode.removeChild(item);
-            break;
-
         }
     },
 
