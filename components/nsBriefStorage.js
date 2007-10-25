@@ -564,7 +564,7 @@ BriefStorageService.prototype = {
                 entryCount = getEntriesCountForFeed.getInt32(0);
                 getEntriesCountForFeed.reset();
 
-                // Calculace the difference between the current number of entries and the
+                // Calculate the difference between the current number of entries and the
                 // limit specified in either the per-feed preferences stored in the
                 // database or the global preference.
                 difference = 0;
@@ -688,7 +688,12 @@ BriefStorageService.prototype = {
         }
 
         root = this.rdfService.GetResource(this.rootURI);
-        this.traverseLivemarks(root);
+        try {
+            this.traverseLivemarks(root);
+        }
+        catch (e) {
+            // Traversing will throw if root folder was removed.
+        }
 
         this.dBConnection.beginTransaction();
         try {
