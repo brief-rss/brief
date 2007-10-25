@@ -1,8 +1,9 @@
-<!ENTITY pickFolder.label "Choose Live Bookmarks Folder">
+<!ENTITY selectHomeFolder.label "Select folder containing your Live Bookmarks:">
+<!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Search current view">
 <!ENTITY searchAllFeeds.label "Search all feeds">
-<!ENTITY headlinesCheckbox.label "Show only headlines">
-<!ENTITY viewConstraintList.label "View:">
+<!ENTITY headlinesCheckbox.label "Headlines view">
+<!ENTITY viewConstraintList.label "Show:">
 <!ENTITY viewAll.label "All">
 <!ENTITY viewUnread.label "Unread">
 <!ENTITY viewStarred.label "Starred">
@@ -10,8 +11,8 @@
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY searchScopeButton.tooltip "Change the search scope">
 <!ENTITY showOptions.tooltip "Open Brief options">
+<!ENTITY markAllRead.label "Mark all as read">
 <!ENTITY markViewRead.tooltip "Mark currently viewed entries as read">
-<!ENTITY markViewUnread.tooltip "Mark currently viewed entries as unread">
 <!ENTITY viewConstraintList.tooltip "Choose what kind of entries to display">
 <!ENTITY previousPage.tooltip "Show newer entries">
 <!ENTITY nextPage.tooltip "Show older entries">
