@@ -2,36 +2,51 @@
 <!ENTITY mainPane.label "Main">
 <!ENTITY folderTree.label "Folder containing your Live Bookmarks:">
 <!ENTITY showStatusbarIcon.label "Show statusbar icon">
+<!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Open Brief in a new tab">
+<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Updating">
 <!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
+<!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "minutes">
 <!ENTITY updateIntervalHours.label "hours">
 <!ENTITY updateIntervalDays.label "days">
 <!ENTITY checkForUpdatesAfter.label "minutes">
 <!ENTITY showNotification.label "Show notification when updates are found">
+<!ENTITY showNotification.accesskey "n">
+<!ENTITY behaviorGroup.caption "Behavior">
+<!ENTITY openEntriesInTabs.label "Open entries in new tabs">
+<!ENTITY openEntriesInTabs.accesskey "t">
+<!ENTITY doubleClickMarks.label "Mark entries as read when double-clicking on them">
+<!ENTITY doubleClickMarks.accesskey "M">
 <!ENTITY storingGroup.caption "Storing">
 <!ENTITY expirationBefore.label "Remove downloaded entries after">
 <!ENTITY expirationAfter.label "days">
+<!ENTITY expirationCheckbox.accesskey "R">
 <!ENTITY storedEntriesBefore.label "Store no more than">
 <!ENTITY storedEntriesAfter.label "latest entries of each feed">
-<!ENTITY clearAllEntriesButton.label "Clear All Entries">
-<!ENTITY behaviorGroup.caption "Behavior">
-<!ENTITY openEntriesInTabs.label "Open entries in new tabs">
-<!ENTITY doubleClickMarks.label "Mark entries as read when double-clicking on them">
+<!ENTITY storedEntriesCheckbox.accesskey "e">
+<!ENTITY clearAllEntriesButton.label "Clear all entries">
+<!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Display">
 <!ENTITY authorsCheckbox.label "Show authors of the entries">
+<!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Show">
 <!ENTITY entriesPerPageAfter.label "entries per page">
 <!ENTITY styleGroup.caption "Feed content style">
 <!ENTITY enableCustomStyle.label "Use custom style of the feed content">
+<!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Browse">
+<!ENTITY browseCustomStyle.accesskey "B">
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Location">
 <!ENTITY optionsGroupbox.caption "Feed settings">
-<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
-<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
-<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
-<!ENTITY expireEntriesPerFeedAfter.label "days">
 <!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "days">
+<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
+<!ENTITY maxEntriesPerFeed.accesskey "S">
+<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
