@@ -42,7 +42,13 @@
   -moz-image-region: rect(32px, 16px, 48px, 0px);
 }
 
+#shortcuts-frame {
+  margin: 0 auto !important;
+}
+
 #shortcuts-table {
+    font-size: 12px;
+    font-family: "Lucida Grande", Verdana, sans-serif;
     border-spacing: 0;
     margin: 0 auto;
 }

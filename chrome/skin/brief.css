@@ -84,7 +84,6 @@ treechildren::-moz-tree-image(starredFolder) {
 
 #select-home-folder-label {
   margin: 7px 0 7px 5px;
-  min-width: 0;
 }
 
 #bookmark-folders-tree {
@@ -142,10 +141,7 @@ toolbarbutton {
 
 #mark-view-read {
   list-style-image: url('toolbar/markViewRead.png');
-  }
-
-#mark-view-unread {
-  list-style-image: url('toolbar/markViewUnread.png');
+  padding-right: 5px;
   }
 
 #headlines-checkbox {
