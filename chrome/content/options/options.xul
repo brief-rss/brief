@@ -42,9 +42,11 @@
         <groupbox>
             <checkbox id="show-statusbar-icon"
                       label="&showStatusbarIcon.label;"
+                      accesskey="&showStatusbarIcon.accesskey;"
                       preference="extensions.brief.showStatusbarIcon"/>
             <checkbox id="open-in-new-tab"
                       label="&openInNewTab.label;"
+                      accesskey="&openInNewTab.accesskey;"
                       preference="extensions.brief.openInNewTab"/>
         </groupbox>
 
@@ -87,6 +89,7 @@
             <hbox align="center">
                 <checkbox id="checkForUpdates"
                           label="&checkForUpdatesBefore.label;"
+                          accesskey="&checkForUpdates.accesskey;"
                           preference="extensions.brief.update.enableAutoUpdate"
                           oncommand="gFeedsPane.updateIntervalDisabledState();"/>
                 <textbox id="updateInterval" size="2"/>
@@ -99,14 +102,17 @@
                 </menulist>
             </hbox>
             <checkbox label="&showNotification.label;"
+                      accesskey="&showNotification.accesskey;"
                       preference="extensions.brief.update.showNotification"/>
         </groupbox>
 
         <groupbox>
             <caption label="&behaviorGroup.caption;"/>
             <checkbox label="&openEntriesInTabs.label;"
+                      accesskey="&openEntriesInTabs.accesskey;"
                       preference="extensions.brief.feedview.openEntriesInTabs"/>
             <checkbox label="&doubleClickMarks.label;"
+                      accesskey="&doubleClickMarks.accesskey;"
                       preference="extensions.brief.feedview.doubleClickMarks"/>
         </groupbox>
 
@@ -115,6 +121,7 @@
             <hbox align="center">
                 <checkbox id="expiration-checkbox"
                           label="&expirationBefore.label;"
+                          accesskey="&expirationCheckbox.accesskey;"
                           preference="extensions.brief.database.expireEntries"
                           oncommand="gFeedsPane.updateExpirationDisabledState();"/>
                 <textbox id="expiration-textbox" size="2"
@@ -124,6 +131,7 @@
             <hbox align="center">
                 <checkbox id="stored-entries-checkbox"
                           label="&storedEntriesBefore.label;"
+                          accesskey="&storedEntriesCheckbox.accesskey;"
                           preference="extensions.brief.database.limitStoredEntries"
                           oncommand="gFeedsPane.updateStoredEntriesDisabledState();"/>
                 <textbox id="stored-entries-textbox" size="2"
@@ -134,6 +142,7 @@
             <hbox pack="end">
                 <button id="clear-all-entries"
                         label="&clearAllEntriesButton.label;"
+                        accesskey="&clearAllEntriesButton.accesskey;"
                         oncommand="gFeedsPane.onClearAllEntriesCmd(event);"/>
             </hbox>
         </groupbox>
@@ -160,6 +169,7 @@
         <groupbox>
             <checkbox id="authors-checkbox"
                       label="&authorsCheckbox.label;"
+                      accesskey="&authorsCheckbox.accesskey;"
                       preference="extensions.brief.feedview.showAuthors"/>
             <hbox align="center">
                 <label value="&entriesPerPageBefore.label;"/>
@@ -174,6 +184,7 @@
             <caption label="&styleGroup.caption;"/>
             <checkbox id="custom-style-checkbox"
                       label="&enableCustomStyle.label;"
+                      accesskey="&enableCustomStyle.accesskey;"
                       preference="extensions.brief.feedview.useCustomStyle"
                       oncommand="gDisplayPane.updateCustomStyleDisabledState();"/>
             <hbox align="center">
@@ -181,6 +192,7 @@
                          preference="extensions.brief.feedview.customStylePath"/>
                 <button id="browse-custom-style"
                         label="&browseCustomStyle.label;"
+                        accesskey="&browseCustomStyle.accesskey;"
                         oncommand="gDisplayPane.browseCustomStyle();"/>
             </hbox>
         </groupbox>
