@@ -54,16 +54,9 @@ function init() {
         setTimeout(function(){ gStorage.syncWithBookmarks() }, 500);
     }
     else {
-        // If no Live Bookmarks folder has been picked yet, offer a button to do it.
+        // If no Live Bookmarks folder has been picked yet, show a panel to select it.
         var deck = document.getElementById('feed-list-deck');
         deck.selectedIndex = 1;
-
-        // XXX This is just temporary for 0.8. Because we can't add new strings,
-        // we have to reuse the existing ones.
-        var stringbundle = document.getElementById('dialog-bundle');
-        var confirmButton = document.getElementById('confirm-home-folder');
-        var acceptString = stringbundle.getString('button-accept');
-        confirmButton.setAttribute('label', acceptString);
     }
 
     gTopBrowserWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
