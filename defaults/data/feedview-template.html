@@ -10,7 +10,9 @@
         <script type="text/javascript" src="chrome://brief/content/thickbox.js"></script>
         <script type="text/javascript">
             function displayShortcuts() {
-                tb_show('Shortcut keys:', document.location + '#TB_inline?width=500&height=600&inlineId=keyboardSortcuts', false);
+                var frame = document.getElementById('shortcuts-frame');
+                frame.src = 'keyboard-shortcuts.xhtml';
+                tb_show(null, document.location + '#TB_inline?width=500&height=650&inlineId=shortcuts', false);
             }
             document.addEventListener('DisplayShortcuts', displayShortcuts, true);
         </script>
@@ -18,94 +20,8 @@
 
     <body>
         <div id="container">
-            <div id="keyboardSortcuts" style="display: none;">
-                <table id="shortcuts-table">
-                    <tr>
-                        <td colspan="2" class="shortucts-header">Navigation</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">K <span class="shortcuts-plain">or</span> Space</td>
-                        <td>Select next entry</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">J <span class="shortcuts-plain">or</span> Backspace</td>
-                        <td>Select previous entry</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">Alt + K</td>
-                        <td>Show next page</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">Alt + J</td>
-                        <td>Show previous page</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">Enter</td>
-                        <td>Open entry</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">Ctrl + Enter</td>
-                        <td>Open entry in new tab</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">N</td>
-                        <td>Unfold or fold selected entry (when in headlines view)</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="shortucts-header">Entries</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">M</td>
-                        <td>Mark selected entry as read or unread</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">B</td>
-                        <td>Star or unstar selected entry</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">T</td>
-                        <td>Move selected entry to Trash</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">R</td>
-                        <td>Restore selected entry (when in Trash)</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">Ctrl + M</td>
-                        <td>Mark all viewed entries as read</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">Tab</td>
-                        <td>Deselect any entries</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="shortucts-header">View</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">A</td>
-                        <td>Show all entries</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">S</td>
-                        <td>Show starred entries</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">D</td>
-                        <td>Show unread entries</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">F</td>
-                        <td>Toggle headlines view</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">/</td>
-                        <td>Focus searchbox</td>
-                    </tr>
-                    <tr>
-                        <td class="shortcut-key">?</td>
-                        <td>Display list of shortcuts keys</td>
-                    </tr>
-                </table>
+            <div id="shortcuts" style="display: none">
+                <iframe id="shortcuts-frame" height="620" width="500" frameborder="0"></iframe>
             </div>
 
             <a id="header">
