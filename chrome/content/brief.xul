@@ -18,7 +18,6 @@
 
     <stringbundleset id="string-bundles">
         <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
-        <stringbundle id="dialog-bundle" src="chrome://global/locale/dialog.properties"/>
     </stringbundleset>
 
     <keyset id="brief-keyset">
@@ -162,10 +161,12 @@
                 </tree>
                 <vbox>
                     <label id="select-home-folder-label"
+                           crop="end"
                            value="&selectHomeFolder.label;"/>
                     <bookmarks-tree id="bookmark-folders-tree" flex="1" type="folders"/>
                     <hbox pack="end">
                         <button id="confirm-home-folder"
+                                label="&confirmHomeFolder.label;"
                                 oncommand="selectHomeFolder(event)"/>
                     </hbox>
                 </vbox>
