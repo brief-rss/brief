@@ -22,3 +22,11 @@ radio[pane=feeds-pane] {
 groupbox {
   -moz-box-flex: 1;
 }
+
+#show-shortcuts {
+  list-style-image: url(chrome://brief/skin/icons/keyboard.png);
+}
+
+#show-shortcuts .button-icon {
+  margin-right: 5px;
+}

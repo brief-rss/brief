@@ -61,7 +61,8 @@
              Doron Rosenberg, Dave Townsend and Mike Shaver.
            </description>
            <description>&iconsThanks.paragraph;</description>
-           <description>&testingThanks.paragraph;</description> 
+           <description>&testingThanks.paragraph;</description>
+           <description>&keyboardIconsCredit.paragraph;</description>
         </vbox>
 
     </vbox>

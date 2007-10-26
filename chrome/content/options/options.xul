@@ -197,6 +197,15 @@
             </hbox>
         </groupbox>
 
+        <spacer height="10"/>
+
+        <hbox>
+            <button id="show-shortcuts"
+                    label="&showShortcuts.label;"
+                    accesskey="&showShortcuts.accesskey;"
+                    oncommand="gDisplayPane.showShortcuts()"/>
+        </hbox>
+
     </prefpane>
 
 </prefwindow>
