@@ -148,8 +148,7 @@ body {
 }
 
 .article-content img {
-  float: right;
-  margin-left: 10px;
+  margin: 5px;
 }
 
 .article-content pre, .article-content code {
