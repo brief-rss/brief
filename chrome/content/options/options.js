@@ -182,6 +182,27 @@ var gDisplayPane = {
             var pref = document.getElementById('extensions.brief.feedview.customStylePath');
             pref.value = pathTextbox.value;
         }
+    },
+
+    showShortcuts: function() {
+        const EXT_ID = 'brief@mozdev.org';
+        const SHORTCUTS_FILENAME = 'keyboard-shortcuts.xhtml';
+
+        var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
+                           getService(Ci.nsIExtensionManager).
+                           getInstallLocation(EXT_ID).
+                           getItemLocation(EXT_ID);
+        // Get the template file.
+        itemLocation.append('defaults');
+        itemLocation.append('data');
+        itemLocation.append(SHORTCUTS_FILENAME);
+        // Create URI of the template file.
+        gShortcutsURI = Cc['@mozilla.org/network/protocol;1?name=file'].
+                       getService(Ci.nsIFileProtocolHandler).
+                       newFileURI(itemLocation);
+
+        window.openDialog(gShortcutsURI.spec, 'Brief shortcuts',
+                          'centerscreen,resizable,width=500, height=620');
     }
 
 }
