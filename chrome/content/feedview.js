@@ -98,6 +98,9 @@ FeedView.prototype = {
 
     selectedEntry: null,
 
+    // The ID is stored additionally, so we can preserve selection when refreshing.
+    _selectedEntryID: '',
+
     // Used when going back one page by selecting previous entry
     // when the topmost entry is selected.
     _selectLastEntryOnRefresh: false,
@@ -158,15 +161,20 @@ FeedView.prototype = {
 
         if (this.selectedEntry)
             this.selectedEntry.removeAttribute('selected');
-        this.selectedEntry = aEntry;
 
-        if (!aEntry)
+        if (!aEntry) {
+            this.selectedEntry = null;
+            this._selectedEntryID = '';
             return;
+        }
+        else {
+            this.selectedEntry = aEntry;
+            this._selectedEntryID = aEntry.id;
+            aEntry.setAttribute('selected', true);
+        }
 
         if (!gPrefs.keyNavEnabled)
             gPrefs.setBoolPref('feedview.keyNavEnabled', true);
-
-        aEntry.setAttribute('selected', true);
 
         if (!aScroll)
             return;
@@ -264,7 +272,7 @@ FeedView.prototype = {
         // Because in practice it is extremely unlikely for some entries to be removed
         // and others added with a single operation, the number of entries always changes
         // when the entry set changes. This greatly simplifies things, because we don't
-        // have to check entries one by one and we can just compare their numbers.
+        // have to check entries one by one and we can just compare their number.
         if (this.entriesCount - currentEntriesCount == 1) {
             var removedEntry = null;
             var removedEntryIndex;
@@ -430,6 +438,7 @@ FeedView.prototype = {
         var feedViewToolbar = document.getElementById('feed-view-toolbar');
         gFeedView.browser.contentDocument.
                   addEventListener('mousedown', gFeedViewEvents.onFeedViewMousedown, true);
+
         if (gFeedView.isActive) {
             feedViewToolbar.hidden = false;
             gFeedView._buildFeedView();
@@ -448,7 +457,7 @@ FeedView.prototype = {
         var doc = this.document = this.browser.contentDocument;
 
         // All file:// URIs are treated as same-origin which allows a script
-        // running in a page to access local files via XHR. Because of it Firefox is
+        // running in a page to access local files via XHR. Because of it, Firefox is
         // vulnerable to numerous attack vectors  (primarily when browsing locally
         // saved websites) and so are we, because we insert untrusted content into
         // a local template page. This is fixed in Firefox 3 by tightening the origin
@@ -540,9 +549,20 @@ FeedView.prototype = {
         // Select an entry if keyboard navigation is enabled.
         this._selectionSuppressed = false;
         if (gPrefs.keyNavEnabled) {
-            var entry = this._selectLastEntryOnRefresh ? this.feedContent.lastChild
-                                                       : this.feedContent.firstChild;
-            this.selectEntry(entry, true, true);
+
+            var entry = doc.getElementById(this._selectedEntryID);
+            if (this._selectedEntryID && entry) {
+                this.selectEntry(entry, true, true);
+            }
+            else if (this._selectLastEntryOnRefresh) {
+                entry = this.feedContent.lastChild;
+                this.selectEntry(entry, true, true);
+            }
+            else {
+                entry = this.feedContent.firstChild;
+                this.selectEntry(entry, false);
+            }
+
             this._selectLastEntryOnRefresh = false;
         }
 
