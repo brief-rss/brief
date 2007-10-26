@@ -8,7 +8,7 @@ var gPrefs = Components.classes['@mozilla.org/preferences-service;1'].
                         getService(Components.interfaces.nsIPrefService).
                         getBranch('extensions.brief.');
 
-function onload() {
+function setupWindow() {
     var nameTextbox = document.getElementById('feed-name-textbox');
     var urlTextbox = document.getElementById('feed-url-textbox');
     var expirationCheckbox = document.getElementById('expiration-checkbox');
@@ -53,19 +53,31 @@ function onload() {
 
 function previousFeed() {
     var allFeeds = gStorageService.getAllFeeds({});
+
+    // The reason we must re-get the feed is because the old feeds cache in
+    // the storage component may have been destroyed after modifying the bookmarks
+    // datasource in saveChanges(). In such case gFeed would be a reference to the object
+    // in the destroyed cache, not in the array which we got from the above
+    // getAllFeeds() call.
+    gFeed = gStorageService.getFeed(gFeed.feedID);
+
     var currentIndex = allFeeds.indexOf(gFeed);
     if (currentIndex > 0) {
+        saveChanges();
         gFeed = allFeeds[currentIndex - 1];
-        onload();
+        setupWindow();
     }
 }
 
 function nextFeed() {
     var allFeeds = gStorageService.getAllFeeds({});
+    // see previousFeed()
+    gFeed = gStorageService.getFeed(gFeed.feedID);
     var currentIndex = allFeeds.indexOf(gFeed);
     if (currentIndex < allFeeds.length - 1) {
+        saveChanges();
         gFeed = allFeeds[currentIndex + 1];
-        onload();
+        setupWindow();
     }
 }
 
@@ -117,7 +129,7 @@ function onCheckUpdatesCheckboxCmd(aEvent) {
 }
 
 
-function OK() {
+function saveChanges() {
     var expirationCheckbox = document.getElementById('expiration-checkbox');
     var expirationTextbox = document.getElementById('expiration-textbox');
     var maxEntriesCheckbox = document.getElementById('max-entries-checkbox');
@@ -168,17 +180,22 @@ function OK() {
 }
 
 function saveLiveBookmarksData() {
+    var nameTextbox = document.getElementById('feed-name-textbox');
+    var urlTextbox = document.getElementById('feed-url-textbox')
+
+    if (gFeed.title == nameTextbox.value && gFeed.feedURL == urlTextbox.value)
+        return;
+
     // We need to write values of properties that come from Live Bookmarks.
     // First, init stuff.
     var changed = false;
     initServices();
     initBMService();
     var resource = RDF.GetResource(gFeed.rdf_uri);
-    var field, arc, newValue, oldValue;
+    var arc, newValue, oldValue;
 
     // Write the name.
-    field = document.getElementById('feed-name-textbox');
-    newValue = field.value;
+    newValue = nameTextbox.value;
     arc = RDF.GetResource(NC_NAME)
     oldValue = BMDS.GetTarget(resource, arc, true);
     if (oldValue)
@@ -189,8 +206,7 @@ function saveLiveBookmarksData() {
 
 
     // Write the URL.
-    field = document.getElementById('feed-url-textbox')
-    newValue = field.value;
+    newValue = urlTextbox.value;
     arc = RDF.GetResource(NC_FEEDURL);
     oldValue = BMDS.GetTarget(resource, arc, true);
     if (oldValue)

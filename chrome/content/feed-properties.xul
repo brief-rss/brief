@@ -6,8 +6,8 @@
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         persist="screenX screenY"
         buttons="accept,cancel"
-        onload="onload();"
-        ondialogaccept="return OK();">
+        onload="setupWindow();"
+        ondialogaccept="return saveChanges();">
 
     <script type="application/x-javascript" src="feed-properties.js"/>
     <script type="application/x-javascript" src="chrome://browser/content/bookmarks/bookmarks.js"/>
