@@ -96,20 +96,8 @@
                 <![CDATA[
                     if (this.hasAttribute('read'))
                         this.removeAttribute('read');
-                    else {
+                    else
                         this.setAttribute('read', 'true');
-
-                        if (this.hasAttribute('updated')) {
-                            this.removeAttribute('updated');
-
-                            var date = new Date(parseInt(this.getAttribute('date')));
-                            var dateString = date.toLocaleString();
-                            dateString = dateString.substring(0, dateString.length - 3);
-                            var dateElement = document.getAnonymousElementByAttribute(
-                                                            this, 'class', 'article-date');
-                            dateElement.innerHTML = dateString;
-                        }
-                    }
 
                     var evt = document.createEvent('Events');
                     evt.initEvent('MarkEntryRead', false, false);
@@ -120,6 +108,7 @@
                 ]]>
                 </body>
             </method>
+
         </implementation>
 
         <handlers>
@@ -216,10 +205,22 @@
                                getAnonymousElementByAttribute(this, 'class', 'mark-read');
                     var feedContentDiv = document.getElementById('feed-content');
 
-                    if (event.newValue == 'true')
+                    if (event.newValue == 'true') {
                         markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
-                    else
+                        if (this.hasAttribute('updated')) {
+                            this.removeAttribute('updated');
+
+                            var date = new Date(parseInt(this.getAttribute('date')));
+                            var dateString = date.toLocaleString();
+                            dateString = dateString.substring(0, dateString.length - 3);
+                            var dateElement = document.getAnonymousElementByAttribute(
+                                                            this, 'class', 'article-date');
+                            dateElement.innerHTML = dateString;
+                        }
+                    }
+                    else {
                         markReadButton.label = feedContentDiv.getAttribute('markReadString');
+                    }
                     break;
 
                 case 'collapsed':
