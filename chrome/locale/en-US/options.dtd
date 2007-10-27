@@ -16,24 +16,24 @@
 <!ENTITY showNotification.label "Show notification when updates are found">
 <!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "Behavior">
-<!ENTITY openEntriesInTabs.label "Open entries in new tabs">
+<!ENTITY openEntriesInTabs.label "Open items in new tabs">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY doubleClickMarks.label "Mark entries as read when double-clicking on them">
+<!ENTITY doubleClickMarks.label "Mark items as read when double-clicking on them">
 <!ENTITY doubleClickMarks.accesskey "M">
 <!ENTITY storingGroup.caption "Storing">
-<!ENTITY expirationBefore.label "Remove downloaded entries after">
+<!ENTITY expirationBefore.label "Remove downloaded items after">
 <!ENTITY expirationAfter.label "days">
 <!ENTITY expirationCheckbox.accesskey "R">
 <!ENTITY storedEntriesBefore.label "Store no more than">
-<!ENTITY storedEntriesAfter.label "latest entries of each feed">
+<!ENTITY storedEntriesAfter.label "latest items of each feed">
 <!ENTITY storedEntriesCheckbox.accesskey "e">
-<!ENTITY clearAllEntriesButton.label "Clear all entries">
+<!ENTITY clearAllEntriesButton.label "Clear all items">
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Display">
-<!ENTITY authorsCheckbox.label "Show authors of the entries">
+<!ENTITY authorsCheckbox.label "Show authors of the items">
 <!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Show">
-<!ENTITY entriesPerPageAfter.label "entries per page">
+<!ENTITY entriesPerPageAfter.label "items per page">
 <!ENTITY styleGroup.caption "Feed content style">
 <!ENTITY enableCustomStyle.label "Use custom style of the feed content">
 <!ENTITY enableCustomStyle.accesskey "f">
@@ -46,12 +46,12 @@
 <!ENTITY optionsGroupbox.caption "Feed settings">
 <!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">
 <!ENTITY checkUpdatesPerFeed.accesskey "C">
-<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
+<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded items after">
 <!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "days">
 <!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
 <!ENTITY maxEntriesPerFeed.accesskey "S">
-<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
+<!ENTITY maxEntriesPerFeedAfter.label "latest items">
 <!ENTITY previousFeed.label "&lt; Previous">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Next &gt;">
