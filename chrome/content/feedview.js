@@ -84,7 +84,7 @@ FeedView.prototype = {
     pageCount:     0,
     entriesCount:  0,
 
-    __currentPage: 0,
+    __currentPage: 1,
     set currentPage(aPageNumber) {
         if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
             this.__currentPage = aPageNumber;
@@ -339,8 +339,6 @@ FeedView.prototype = {
         // Suppress selecting entry until we refresh is finished.
         this._selectionSuppressed = true;
 
-        this._computePages();
-
         // Load the template. The actual content building happens when the template
         // page is loaded - see _onLoad below.
         this.browser.loadURI(gTemplateURI.spec);
@@ -445,6 +443,7 @@ FeedView.prototype = {
         if (gFeedView.isActive) {
             feedViewToolbar.hidden = false;
             gFeedView._buildFeedView();
+            setTimeout(function(){ gFeedView._computePages() }, 0);
         }
         else {
             feedViewToolbar.hidden = true;
