@@ -133,6 +133,10 @@ body {
   clear: right;
 }
 
+.article-container[updated] .article-date {
+  color: #ff6800;
+}
+
 
 /* ----------------------  Article content area   ---------------------- */
 

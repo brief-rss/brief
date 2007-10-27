@@ -595,6 +595,12 @@ FeedView.prototype = {
         if (aEntry.starred)
             articleContainer.setAttribute('starred', true);
 
+        if (aEntry.updated) {
+            var bundle = document.getElementById('main-bundle');
+            var string = bundle.getString('entryUpdatedDatePrefix');
+            articleContainer.setAttribute('updated', string);
+        }
+
         var feedName = gStorage.getFeed(aEntry.feedID).title;
         articleContainer.setAttribute('feedName', feedName);
 
