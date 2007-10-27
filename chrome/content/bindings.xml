@@ -70,10 +70,13 @@
 
                 if (feedContentElement.hasAttribute('showFeedNames'))
                     feedNameElement.innerHTML = feedName;
-                if (date > 0)
-                    dateElement.textContent = date.toLocaleString();
+
+                if (date > 0) {
+                    var dateString = date.toLocaleString();
+                    dateElement.textContent = dateString.substring(0, dateString.length - 3);
+                }
                 if (authors)
-                    authorsElement.innerHTML = authors + ',';
+                    authorsElement.innerHTML = authors;
 
                 articleContentElement.innerHTML = content;
 
