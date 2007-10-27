@@ -98,7 +98,17 @@
                         this.removeAttribute('read');
                     else {
                         this.setAttribute('read', 'true');
-                        this.removeAttribute('updated');
+
+                        if (this.hasAttribute('updated')) {
+                            this.removeAttribute('updated');
+
+                            var date = new Date(parseInt(this.getAttribute('date')));
+                            var dateString = date.toLocaleString();
+                            dateString = dateString.substring(0, dateString.length - 3);
+                            var dateElement = document.getAnonymousElementByAttribute(
+                                                            this, 'class', 'article-date');
+                            dateElement.innerHTML = dateString;
+                        }
                     }
 
                     var evt = document.createEvent('Events');
