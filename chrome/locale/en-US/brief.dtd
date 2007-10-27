@@ -12,10 +12,10 @@
 <!ENTITY searchScopeButton.tooltip "Change the search scope">
 <!ENTITY showOptions.tooltip "Open Brief options">
 <!ENTITY markAllRead.label "Mark all as read">
-<!ENTITY markViewRead.tooltip "Mark currently viewed entries as read">
-<!ENTITY viewConstraintList.tooltip "Choose what kind of entries to display">
-<!ENTITY previousPage.tooltip "Show newer entries">
-<!ENTITY nextPage.tooltip "Show older entries">
+<!ENTITY markViewRead.tooltip "Mark currently viewed items as read">
+<!ENTITY viewConstraintList.tooltip "Choose what kind of items to display">
+<!ENTITY previousPage.tooltip "Show newer items">
+<!ENTITY nextPage.tooltip "Show older items">
 <!ENTITY unreadFolder.label "Unread">
 <!ENTITY starredFolder.label "Starred">
 <!ENTITY trashFolder.label "Trash">
@@ -28,7 +28,7 @@
 <!ENTITY ctxDeleteFolder.label "Delete Folder">
 <!ENTITY ctxEmptyFeed.label "Empty Feed">
 <!ENTITY ctxEmptyFolder.label "Empty Folder">
-<!ENTITY ctxRestoreTrashed.label "Restore Trashed Entries">
+<!ENTITY ctxRestoreTrashed.label "Restore All Items">
 <!ENTITY ctxEmptyTrash.label "Empty Trash">
 <!ENTITY ctxFeedProperties.label "Properties">
 <!ENTITY ctxUpdateFeeds.label "Update Feeds Now">
