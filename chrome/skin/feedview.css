@@ -67,6 +67,7 @@ body {
   border-left: 1px #baccd6 solid;
   -moz-border-radius: 2px;
   margin: 0 1em 1em 1em;
+  padding-bottom: 1px; /* The bottom edge is sometimes cut-off without this */
   overflow: visible;      /* This is for the the expand/collapse dropmarker which is
                              taken outside the box using negative margins */
   }
@@ -126,7 +127,7 @@ body {
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
   min-height: 1.4em;
-  overflow: auto;
+  overflow: auto; /* Clears the contained floats */
   padding: 0 2em 0 40px;
 }
 
