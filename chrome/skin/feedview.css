@@ -59,7 +59,12 @@ body {
    means that the article's content is folded (headlines-only mode) */
 .article-container {
   background-color: #ffffff;
-  border: 1px #baccd6 solid;
+  /* We apply border-top separately, to the header, because in collapsed state
+     side borders are removed and replaced by padding. If the top border was on
+     the container then it would be 1px to long on the sides. */
+  border-right: 1px #baccd6 solid;
+  border-bottom: 1px #baccd6 solid;
+  border-left: 1px #baccd6 solid;
   -moz-border-radius: 2px;
   margin: 0 1em 1em 1em;
   overflow: visible;      /* This is for the the expand/collapse dropmarker which is
@@ -71,6 +76,7 @@ body {
 
 .article-header {
   background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
+  border-top: 1px #baccd6 solid;
   min-height: 3.5em;
   padding: 6px 5px 0;
   }
@@ -120,6 +126,7 @@ body {
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
   min-height: 1.4em;
+  overflow: auto;
   padding: 0 2em 0 40px;
 }
 
@@ -134,7 +141,7 @@ body {
 }
 
 .article-container[updated] .article-date {
-  color: #ff6800;
+  color: #de5b00;
 }
 
 
@@ -142,17 +149,17 @@ body {
 
 .article-content {
   color: #101d27;
-  clear: both;
   font-size: 12px;
   overflow: auto;
-  padding: 1.5em 2.5em 1.5em;
+  margin-top: 1.5em;
+  padding: 0 2.5em 1.5em;
   }
 
 .article-content a {
   color: #0a1f72;
   }
 
-.article-content a:visited	{
+.article-content a:visited {
   color: #444b66;
   }
 
@@ -190,7 +197,7 @@ body {
 
 .article-container[collapsed] {
   background: #fafafc;
-  border-bottom: none;
+  border-bottom-color: #fafafc;
   border-right: none;
   border-left: none;
   clear: both;
@@ -231,6 +238,11 @@ body {
 /* ----------------------  Adjustments for the selected articles  -------------------- */
 .article-container[selected] {
   border: 1px #1474d6 solid;
+  border-bottom-color: #1474d6;
   padding-left: 0;
   padding-right: 0;
+}
+
+.article-container[selected] > .article-header {
+  border-top: none;
 }
