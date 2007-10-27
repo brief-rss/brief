@@ -684,6 +684,7 @@ BriefStorageService.prototype = {
         this.rootURI = this.prefs.getCharPref('liveBookmarksFolder');
         if (!this.rootURI) {
             this.dBConnection.executeSimpleSQL('UPDATE feeds SET hidden = 1');
+            this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
             return;
         }
 
@@ -934,6 +935,7 @@ BriefStorageService.prototype = {
         }
     },
 
+
     onAssert: function BriefStorage_onAssert(aDataSource, aSource, aProperty, aTarget) {
 
         // Because we only care about livemarks and folders, check if the assertion
@@ -947,7 +949,6 @@ BriefStorageService.prototype = {
         if (isFolder && this.resourceIsInHomeFolder(aTarget))
             this.delayedBookmarksSync();
     },
-
 
     onUnassert: function BriefStorage_onUnassert(aDataSource, aSource, aProperty, aTarget) {
 
@@ -966,7 +967,6 @@ BriefStorageService.prototype = {
             this.delayedBookmarksSync();
     },
 
-
     onChange: function BriefStorage_onChange(aDataSource, aSource, aProperty, aOldTarget,
                                              aNewTarget) {
 
@@ -977,9 +977,12 @@ BriefStorageService.prototype = {
 
     },
 
+    onEndUpdateBatch: function BriefStorage_onEndUpdateBatch(aDataSource) {
+        this.delayedBookmarksSync();
+    },
+
     onMove: function BriefStorage_onMove(aDataSource, aOldSource, aNewSource, aProperty, aTarget) { },
     onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch(aDataSource) { },
-    onEndUpdateBatch: function BriefStorage_onEndUpdateBatch(aDataSource) { },
 
     resourceIsInHomeFolder: function BriefStorage_resourceIsInHomeFolder(aResource) {
         var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
