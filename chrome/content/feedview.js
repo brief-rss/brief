@@ -396,6 +396,9 @@ FeedView.prototype = {
             if (newEntry)
                 appendedEntry = self._appendEntry(newEntry);
 
+            if (!self.feedContent.childNodes.length)
+                self._setEmptyViewMessage();
+
             // Select another entry
             if (entryWasSelected)
                 self.selectEntry(nextSibling || appendedEntry || previousSibling || null, false);
@@ -546,6 +549,9 @@ FeedView.prototype = {
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
+        if (!entries.length)
+            this._setEmptyViewMessage();
+
         // Select an entry if keyboard navigation is enabled.
         this._selectionSuppressed = false;
         if (gPrefs.keyNavEnabled) {
@@ -599,6 +605,26 @@ FeedView.prototype = {
         this.feedContent.appendChild(articleContainer);
 
         return articleContainer;
+    },
+
+    _setEmptyViewMessage: function FeedView__setEmptyViewMessage() {
+        var paragraph = this.document.getElementById('message');
+        var bundle = document.getElementById('main-bundle');
+        var message;
+
+        if (this.query.unread)
+            message = bundle.getString('noUnreadEntries');
+        else if (this.query.starred && this._flagsAreIntrinsic)
+            message = bundle.getString('noStarredEntries');
+        else if (this.query.starred)
+            message = bundle.getString('noStarredEntriesInFeed');
+        else if (this.query.deleted == ENTRY_STATE_TRASHED)
+            message = bundle.getString('trashIsEmpty');
+        else
+            message = bundle.getString('noEntries');
+
+        paragraph.textContent = message;
+        paragraph.style.display = 'block';
     }
 
 }
