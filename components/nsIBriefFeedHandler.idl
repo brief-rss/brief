@@ -39,6 +39,8 @@ interface nsIBriefFeedEntry : nsISupports {
 
   attribute boolean starred;
 
+  attribute boolean updated;
+
   /**
    * The wrapped entry (if available).
    */

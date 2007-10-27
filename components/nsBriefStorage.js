@@ -25,7 +25,7 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const RDF_OBSERVER_DELAY = 250;
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 
 var gStorageService = null;
 
@@ -105,6 +105,7 @@ BriefStorageService.prototype = {
                                            'date        INTEGER,                 ' +
                                            'authors     TEXT,                    ' +
                                            'read        INTEGER DEFAULT 0,       ' +
+                                           'updated     INTEGER DEFAULT 0,       ' +
                                            'starred     INTEGER DEFAULT 0,       ' +
                                            'deleted     INTEGER DEFAULT 0        ' +
                                            ')');
@@ -170,7 +171,7 @@ BriefStorageService.prototype = {
                                                'feeds_feedID_index ON feeds (feedID)    ');
             // Fall through...
 
-        // From 0.8 beta 1.
+        // To 0.8.
         case 1:
             try {
                 this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
@@ -228,6 +229,15 @@ BriefStorageService.prototype = {
                 this.dBConnection.commitTransaction();
             }
             // Fall through...
+
+        // To 0.8.1
+        case 2:
+            try {
+                this.dBConnection.executeSimpleSQL(
+                              'ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
+            } catch (e) {}
+            // Fall through...
+
         }
 
         this.dBConnection.executeSimpleSQL('PRAGMA user_version = ' + DATABASE_VERSION)
@@ -334,7 +344,9 @@ BriefStorageService.prototype = {
                           'UPDATE entries       ' +
                           'SET content = ?1,    ' +
                           '    date    = ?2,    ' +
-                          '    authors = ?3     ' +
+                          '    authors = ?3,    ' +
+                          '    read    = 0,     ' +
+                          '    updated = 1      ' +
                           'WHERE id = ?4        ');
         var getDateForEntry = this.dBConnection.
                               createStatement('SELECT date FROM entries WHERE id = ?');
@@ -1121,7 +1133,8 @@ BriefQuery.prototype = {
     getEntries: function BriefQuery_getEntries(entryCount) {
         var statement = 'SELECT entries.id,      entries.feedID,  entries.entryURL, ' +
                         '       entries.title,   entries.content, entries.date,     ' +
-                        '       entries.authors, entries.read,    entries.starred   ' +
+                        '       entries.authors, entries.read,    entries.starred,  ' +
+                        '       entries.updated                                     ' +
                          this.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
@@ -1140,6 +1153,7 @@ BriefQuery.prototype = {
                 entry.authors = select.getString(6);
                 entry.read = (select.getInt32(7) == 1);
                 entry.starred = (select.getInt32(8) == 1);
+                entry.updated = (select.getInt32(9) == 1);
 
                 entries.push(entry);
             }
@@ -1216,7 +1230,7 @@ BriefQuery.prototype = {
         else
             this.read = true;
 
-        var statement = 'UPDATE entries SET read = ? ' + this.getQueryText();
+        var statement = 'UPDATE entries SET read = ?, updated = 0 ' + this.getQueryText();
 
         var update = this.dBConnection.createStatement(statement)
         update.bindInt32Parameter(0, aStatus ? 1 : 0);

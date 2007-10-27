@@ -101,6 +101,7 @@ FeedEntry.prototype = {
     authors:  '',
     read:     false,
     starred:  false,
+    updated:  false,
 
     wrappedEntry: null,
 

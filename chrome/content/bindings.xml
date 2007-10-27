@@ -73,8 +73,14 @@
 
                 if (date > 0) {
                     var dateString = date.toLocaleString();
-                    dateElement.textContent = dateString.substring(0, dateString.length - 3);
+                    // Trim the seconds part.
+                    dateString = dateString.substring(0, dateString.length - 3);
+                    if (this.hasAttribute('updated'))
+                        dateString = this.getAttribute('updated') + ' ' + dateString;
+
+                    dateElement.innerHTML = dateString;
                 }
+
                 if (authors)
                     authorsElement.innerHTML = authors;
 
@@ -90,8 +96,10 @@
                 <![CDATA[
                     if (this.hasAttribute('read'))
                         this.removeAttribute('read');
-                    else
+                    else {
                         this.setAttribute('read', 'true');
+                        this.removeAttribute('updated');
+                    }
 
                     var evt = document.createEvent('Events');
                     evt.initEvent('MarkEntryRead', false, false);
