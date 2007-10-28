@@ -15,7 +15,7 @@ pref("extensions.brief.feedview.useCustomStyle", false);
 pref("extensions.brief.feedview.openEntriesInTabs", false);
 pref("extensions.brief.feedview.doubleClickMarks", true);
 pref("extensions.brief.feedview.linkMarksRead", true);
-pref("extensions.brief.feedview.showAuthors", false);
+pref("extensions.brief.feedview.showAuthors", true);
 pref("extensions.brief.feedview.keyNavEnabled", false);
 
 pref("extensions.brief.update.interval", 3600);
