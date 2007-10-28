@@ -458,14 +458,6 @@ FeedView.prototype = {
     _buildFeedView: function FeedView__buildFeedView() {
         var doc = this.document = this.browser.contentDocument;
 
-        // All file:// URIs are treated as same-origin which allows a script
-        // running in a page to access local files via XHR. Because of it, Firefox is
-        // vulnerable to numerous attack vectors  (primarily when browsing locally
-        // saved websites) and so are we, because we insert untrusted content into
-        // a local template page. This is fixed in Firefox 3 by tightening the origin
-        // policy.
-        // Null-ing out XMLHttpRequest object makes the exploit harder but there
-        // are ways around it.
         doc.defaultView.XMLHttpRequest = null;
 
         // Add listeners so that the content can communicate with chrome to perform
