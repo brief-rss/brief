@@ -43,7 +43,8 @@
                 var entryURL = this.getAttribute('entryURL');
                 var title    = this.getAttribute('entryTitle');
                 var content  = this.getAttribute('content');
-                var date     = new Date(parseInt(this.getAttribute('date')));
+                var date     = this.getAttribute('date');
+                var updated  = this.getAttribute('updated');
                 var isRead   = this.getAttribute('read');
                 var feedName = this.getAttribute('feedName');
                 var authors  = this.getAttribute('authors');
@@ -71,15 +72,7 @@
                 if (feedContentElement.hasAttribute('showFeedNames'))
                     feedNameElement.innerHTML = feedName;
 
-                if (date > 0) {
-                    var dateString = date.toLocaleString();
-                    // Trim the seconds part.
-                    dateString = dateString.substring(0, dateString.length - 3);
-                    if (this.hasAttribute('updated'))
-                        dateString = this.getAttribute('updated') + ' ' + dateString;
-
-                    dateElement.innerHTML = dateString;
-                }
+                dateElement.innerHTML = updated || date || '';
 
                 if (authors)
                     authorsElement.innerHTML = authors;
@@ -209,13 +202,9 @@
                         markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
                         if (this.hasAttribute('updated')) {
                             this.removeAttribute('updated');
-
-                            var date = new Date(parseInt(this.getAttribute('date')));
-                            var dateString = date.toLocaleString();
-                            dateString = dateString.substring(0, dateString.length - 3);
                             var dateElement = document.getAnonymousElementByAttribute(
                                                             this, 'class', 'article-date');
-                            dateElement.innerHTML = dateString;
+                            dateElement.innerHTML = this.getAttribute('date');
                         }
                     }
                     else {

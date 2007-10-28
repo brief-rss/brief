@@ -141,7 +141,7 @@ body {
   clear: right;
 }
 
-.article-container[updated] .article-date {
+.article-updated {
   color: #de5b00;
 }
 
