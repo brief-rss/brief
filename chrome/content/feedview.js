@@ -641,7 +641,9 @@ FeedView.prototype = {
         var bundle = document.getElementById('main-bundle');
         var message;
 
-        if (this.query.unread)
+        if (this.query.searchString)
+            message = bundle.getString('noEntriesFound');
+        else if (this.query.unread)
             message = bundle.getString('noUnreadEntries');
         else if (this.query.starred && this._flagsAreIntrinsic)
             message = bundle.getString('noStarredEntries');
