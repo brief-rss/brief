@@ -416,7 +416,7 @@ FeedView.prototype = {
         // This may happen for example when you are on the last page, and the
         // number of entries decreases (e.g. they are deleted).
         if (this.currentPage > this.pageCount)
-            this.__currentPage = this.pageCount;
+            this.__currentPage = this.pageCount || 1;
         else if (this.currentPage == 0 && this.pageCount > 0)
             this.__currentPage = 1;
 
