@@ -93,9 +93,9 @@ function init() {
     FeedView.prototype.todayStr = bundle.getString('today');
     FeedView.prototype.yesterdayStr = bundle.getString('yesterday');
     FeedView.prototype.authorPrefixStr = bundle.getString('authorIntroductionPrefix') + ' ';
-    FeedView.prototype.updatedString = bundle.getString('entryWasUpdated');
-    FeedView.prototype.markReadStringStr = bundle.getString('markEntryAsRead');
-    FeedView.prototype.markEntryAsUnreadStr = bundle.getString('markEntryAsUnread');
+    FeedView.prototype.updatedStr = bundle.getString('entryWasUpdated');
+    FeedView.prototype.markAsReadStr = bundle.getString('markEntryAsRead');
+    FeedView.prototype.markAsUnreadStr = bundle.getString('markEntryAsUnread');
 
     // If Brief has been update, load the new version info page.
     var prevVersion = gPrefs.getCharPref('lastMajorVersion');
