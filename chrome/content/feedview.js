@@ -533,8 +533,8 @@ FeedView.prototype = {
 
         // We have to hand the strings because stringbundles don't
         // work with unprivileged script.
-        this.feedContent.setAttribute('markReadString', this.markReadStringStr);
-        this.feedContent.setAttribute('markUnreadString', this.markEntryAsUnreadStr);
+        this.feedContent.setAttribute('markReadString', this.markAsReadStr);
+        this.feedContent.setAttribute('markUnreadString', this.markAsUnreadStr);
 
         // Get the entries and append them.
         var query = this.query;
