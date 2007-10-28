@@ -230,7 +230,7 @@ BriefStorageService.prototype = {
             }
             // Fall through...
 
-        // To 0.8.1
+        // To 1.0b1
         case 2:
             try {
                 this.dBConnection.executeSimpleSQL(
@@ -364,23 +364,32 @@ BriefStorageService.prototype = {
 
         try {
             var entries = aFeed.getEntries({});
-            var entry, title, storedEntryDate, primaryID, secondaryID, entryAlreadyStored;
+            var entry, title, storedEntryDate, primaryID, secondaryID, entryAlreadyStored,
+                entryURL, authors;
 
             // Generate hashes, insert and update entries.
             for (var i = 0; i < entries.length; i++) {
                 entry = entries[i];
                 entryAlreadyStored = false;
 
-                title = entry.title ? entry.title.replace(/<[^>]+>/g,'') : ''; // Strip tags
                 content = entry.content || entry.summary;
+
+                // Strip tags
+                title = entry.title ? entry.title.replace(/<[^>]+>/g, '') : '';
+
+                // All file:// URIs are treated as same-origin which would let a script
+                // running in our template a page access local files using XHR.
+                content = content ? content.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
+                entryURL = entry.entryURL ? entry.entryURL.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
+                authors = entry.authors ? entry.authors.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
 
                 // Compute the hash which serves as the entry's unique id.
                 // Special case for MediaWiki feeds: include the date in the hash. In
                 // "Recent changes" feeds, entries for subsequent edits of a page
                 // differ only in date (not in URL or GUID).
                 // Sometimes the provided GUID is lost (maybe a bug in the parser?) and
-                // having an empty GUID effects in a different hash than previously which
-                // leads to annoying duplication of entries. We work around it by having
+                // having an empty GUID effects in a different hash which leads to
+                // annoying duplication of entries. We work around it by having
                 // a secondary hash, computed without the GUID, and using it when
                 // GUID is blank to check if entry exists (see below).
                 if (isMediaWikiFeed) {
@@ -415,11 +424,11 @@ BriefStorageService.prototype = {
                 // If the entry is already present in the database, compare if the
                 // downloaded entry has a newer date than the stored one and if so,
                 // update the data and mark the entry as unread.
-                // Otherwise, if no such entry is present yet, insert it.
+                // Otherwise, insert it if it isn't present yet.
                 if (storedEntryDate !== null && entry.date && storedEntryDate < entry.date) {
                     updateEntry.bindStringParameter(0, content);
                     updateEntry.bindInt64Parameter(1, entry.date)
-                    updateEntry.bindStringParameter(2, entry.authors);
+                    updateEntry.bindStringParameter(2, authors);
                     updateEntry.bindStringParameter(3, primaryID);
 
                     updateEntry.execute();
@@ -429,11 +438,11 @@ BriefStorageService.prototype = {
                     insertEntry.bindStringParameter(1, primaryID);
                     insertEntry.bindStringParameter(2, secondaryID);
                     insertEntry.bindStringParameter(3, entry.id);
-                    insertEntry.bindStringParameter(4, entry.entryURL);
+                    insertEntry.bindStringParameter(4, entryURL);
                     insertEntry.bindStringParameter(5, title);
                     insertEntry.bindStringParameter(6, content);
                     insertEntry.bindInt64Parameter(7, entry.date ? entry.date : now);
-                    insertEntry.bindStringParameter(8, entry.authors);
+                    insertEntry.bindStringParameter(8, authors);
                     insertEntry.bindInt32Parameter(9, 0);
 
                     insertEntry.execute();

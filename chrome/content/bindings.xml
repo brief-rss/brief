@@ -36,7 +36,6 @@
         <implementation>
             <constructor>
             <![CDATA[
-                // See comment in FeedView.buildFeedView() in feedview.js.
                 window.XMLHttpRequest = null;
 
                 // Get the data passed to us through attributes
