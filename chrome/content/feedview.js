@@ -533,11 +533,8 @@ FeedView.prototype = {
 
         // We have to hand the strings because stringbundles don't
         // work with unprivileged script.
-        var stringbundle = document.getElementById('main-bundle');
-        var markReadString = stringbundle.getString('markEntryAsRead');
-        this.feedContent.setAttribute('markReadString', markReadString);
-        var markEntryAsUnread = stringbundle.getString('markEntryAsUnread');
-        this.feedContent.setAttribute('markUnreadString', markEntryAsUnread);
+        this.feedContent.setAttribute('markReadString', this.markReadStringStr);
+        this.feedContent.setAttribute('markUnreadString', this.markEntryAsUnreadStr);
 
         // Get the entries and append them.
         var query = this.query;
@@ -586,19 +583,46 @@ FeedView.prototype = {
         articleContainer.setAttribute('entryURL', aEntry.entryURL);
         articleContainer.setAttribute('entryTitle', aEntry.title);
         articleContainer.setAttribute('content', aEntry.content);
-        articleContainer.setAttribute('date', aEntry.date);
 
-        if (gPrefs.showAuthors)
-            articleContainer.setAttribute('authors', aEntry.authors);
+        if (gPrefs.showAuthors && aEntry.authors) {
+            articleContainer.setAttribute('authors', this.authorPrefixStr + aEntry.authors);
+        }
         if (aEntry.read)
             articleContainer.setAttribute('read', true);
         if (aEntry.starred)
             articleContainer.setAttribute('starred', true);
 
-        if (aEntry.updated) {
-            var bundle = document.getElementById('main-bundle');
-            var string = bundle.getString('entryUpdatedDatePrefix');
-            articleContainer.setAttribute('updated', string);
+        if (aEntry.date) {
+            var formatString = '';
+
+            var entryDate = new Date(aEntry.date);
+            var entryTime = entryDate.getTime() + 3600000;
+            var nowTime = Date.now() + 3600000;
+
+            var today = Math.ceil(nowTime / 86400000);
+            var entryDay = Math.ceil(entryTime / 86400000);
+            var deltaDays = today - entryDay;
+
+            if (deltaDays === 0)
+                formatString = this.todayStr + ', %X ';
+            else if (deltaDays === 1)
+                formatString += this.yesterdayStr + ', %X ';
+            else if (deltaDays < 7)
+                formatString += '%A, %X ';
+            else
+                formatString = '%d %B, %X ';
+
+            var string = entryDate.toLocaleFormat(formatString);
+            string = string.replace(/:\d\d /, ' ');
+            // XXX We do it because %e conversion specification doesn't work
+            string = string.replace(/^0/, '');
+
+            articleContainer.setAttribute('date', string);
+
+            if (aEntry.updated) {
+                string += ' <span class="article-updated">' + this.updatedStr + '</span>'
+                articleContainer.setAttribute('updated', string);
+            }
         }
 
         var feedName = gStorage.getFeed(aEntry.feedID).title;

@@ -87,6 +87,16 @@ function init() {
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
+    // Cache the strings, so they don't have to retrieved every time when
+    // refreshing the feed view.
+    var bundle = document.getElementById('main-bundle');
+    FeedView.prototype.todayStr = bundle.getString('today');
+    FeedView.prototype.yesterdayStr = bundle.getString('yesterday');
+    FeedView.prototype.authorPrefixStr = bundle.getString('authorIntroductionPrefix') + ' ';
+    FeedView.prototype.updatedString = bundle.getString('entryWasUpdated');
+    FeedView.prototype.markReadStringStr = bundle.getString('markEntryAsRead');
+    FeedView.prototype.markEntryAsUnreadStr = bundle.getString('markEntryAsUnread');
+
     // If Brief has been update, load the new version info page.
     var prevVersion = gPrefs.getCharPref('lastMajorVersion');
     var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
