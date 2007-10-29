@@ -592,14 +592,24 @@ FeedView.prototype = {
             var entryDay = Math.ceil(entryTime / 86400000);
             var deltaDays = today - entryDay;
 
-            if (deltaDays === 0)
-                formatString = this.todayStr + ', %X ';
-            else if (deltaDays === 1)
-                formatString += this.yesterdayStr + ', %X ';
-            else if (deltaDays < 7)
-                formatString += '%A, %X ';
-            else
-                formatString = '%d %B, %X ';
+            var deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
+
+            switch (true) {
+                case deltaDays === 0:
+                    formatString = this.todayStr + ', %X ';
+                    break;
+                case deltaDays === 1:
+                    formatString = this.yesterdayStr + ', %X ';
+                    break;
+                case deltaDays < 7:
+                    formatString = '%A, %X ';
+                    break;
+                case deltaYears > 0:
+                    formatString = '%d %B %Y, %X ';
+                    break;
+                default:
+                    formatString = '%d %B, %X ';
+            }
 
             var string = entryDate.toLocaleFormat(formatString);
             string = string.replace(/:\d\d /, ' ');
