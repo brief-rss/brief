@@ -27,7 +27,7 @@ function init() {
     if (gInitialized)
         return;
     gInitialized = true;
-    
+
     gPrefs.register();
     gFeedViewStyle = getFeedViewStyle();
 
@@ -330,7 +330,7 @@ var gCommands = {
         gPrefs.setCharPref('feedview.shownEntries', aConstraint);
 
         if (gFeedView)
-            gFeedView.ensure();
+            gFeedView.refresh();
     },
 
     showNextPage: function cmd_showNextPage() {
@@ -585,7 +585,7 @@ function performSearch(aEvent) {
         if (previousView != gFeedView) {
             gFeedView = previousView;
             gFeedView.query.searchString = gFeedView.titleOverride = '';
-            gFeedView._refresh();
+            gFeedView.refresh();
             return;
         }
 
