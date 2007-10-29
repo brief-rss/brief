@@ -16,6 +16,7 @@ body {
   font-family: Verdana, Helvetica, Arial, sans-serif;
   padding: 5px 5% 5px;
   text-decoration: none;
+  overflow: auto; /* Clears containerd floats */
   }
 
 #feed-image {
@@ -32,10 +33,6 @@ body {
 #feed-subtitle {
   font-size: 14px;
   margin-top: 3px;
-  }
-
-#clear {
-  clear: both;
   }
 
 #feed-content {
