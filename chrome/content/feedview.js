@@ -31,7 +31,7 @@ function FeedView(aTitle, aQuery) {
 
     this.browser.addEventListener('load', this._onLoad, false);
 
-    this._refresh();
+    this.refresh();
 }
 
 
@@ -88,7 +88,7 @@ FeedView.prototype = {
     set currentPage(aPageNumber) {
         if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
             this.__currentPage = aPageNumber;
-            this._refresh();
+            this.refresh();
         }
     },
     get currentPage() {
@@ -264,8 +264,10 @@ FeedView.prototype = {
         var prevEntries = this._entries;
         var currentEntriesCount = this.query.getEntriesCount();
 
-        if (!prevEntries || !currentEntriesCount)
-            this._refresh();
+        if (!prevEntries || !currentEntriesCount) {
+            this.refresh();
+            return false;
+        }
 
         // If a single entry was removed we do partial refresh, otherwise we
         // refresh from scratch.
@@ -292,16 +294,16 @@ FeedView.prototype = {
             // If there are no more entries on this page and it the last
             // page then perform full refresh.
             if (this.feedContent.childNodes.length == 1 && this.currentPage == this.pageCount) {
-                this._refresh();
+                this.currentPage--;
                 return false;
             }
 
             // If the removed entry is on a different page than the
             // currently shown one then perform full refresh.
             var firstIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
-            var lastIndex = firstIndex + gPrefs.entriesPerPage;
+            var lastIndex = firstIndex + gPrefs.entriesPerPage - 1;
             if (removedEntryIndex < firstIndex || removedEntryIndex > lastIndex) {
-                this._refresh();
+                this.refresh();
                 return false;
             }
 
@@ -313,7 +315,7 @@ FeedView.prototype = {
             isDirty = true;
         }
         else if (this.entriesCount != currentEntriesCount) {
-            this._refresh();
+            this.refresh();
             return false;
         }
 
@@ -330,7 +332,7 @@ FeedView.prototype = {
 
 
     // Refreshes the feed view from scratch.
-    _refresh: function FeedView__refresh() {
+    refresh: function FeedView_refresh() {
         this.browser.style.cursor = 'wait';
 
         // Stop scrolling, so it doesn't continue after refreshing.
@@ -411,14 +413,12 @@ FeedView.prototype = {
     // refreshes the navigation UI.
     _computePages: function FeedView__computePages() {
         this.entriesCount = this.query.getEntriesCount();
-        this.pageCount = Math.ceil(this.entriesCount / gPrefs.entriesPerPage);
+        this.pageCount = Math.ceil(this.entriesCount / gPrefs.entriesPerPage) || 1;
 
         // This may happen for example when you are on the last page, and the
         // number of entries decreases (e.g. they are deleted).
         if (this.currentPage > this.pageCount)
-            this.__currentPage = this.pageCount || 1;
-        else if (this.currentPage == 0 && this.pageCount > 0)
-            this.__currentPage = 1;
+            this.__currentPage = this.pageCount;
 
         // Update the page commands and description
         var pageLabel = document.getElementById('page-desc');
