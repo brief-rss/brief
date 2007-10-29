@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Επιλογή καταλόγου δυναμικών σελιδοδεικτών">
 <!ENTITY searchCurrentView.label "Εύρεση στα εμφανισμένα">
 <!ENTITY searchAllFeeds.label "Εύρεση σε όλα τα αρχεία ροής">
-<!ENTITY headlinesCheckbox.label "Προβολή μόνο των επικεφαλίδων">
-<!ENTITY viewConstraintList.label "Εμφάνιση:">
-<!ENTITY viewAll.label "Όλα">
-<!ENTITY viewUnread.label "Μη αναγνωσμένα">
-<!ENTITY viewStarred.label "Με αστέρι">
 <!ENTITY updateButton.tooltip "Έλεγχος για ενημερώσεις όλων των αρχείων ροής">
 <!ENTITY stopUpdatingButton.tooltip "Διακοπή ελέγχου για ενημερώσεις">
 <!ENTITY searchScopeButton.tooltip "Αλλαγή της εμβέλειας εύρεσης">

@@ -1,11 +1,10 @@
-<!ENTITY pickFolder.label "Wybierz folder dynamicznych zakładek">
 <!ENTITY searchCurrentView.label "Szukaj w widocznych">
 <!ENTITY searchAllFeeds.label "Szukaj we wszystkich kanałach">
-<!ENTITY headlinesCheckbox.label "Wyświetlaj tylko nagłówki">
-<!ENTITY viewConstraintList.label "Wyświetl:">
+<!ENTITY headlinesCheckbox.label "Widok nagłówków">
+<!ENTITY viewConstraintList.label "Pokaż:">
 <!ENTITY viewAll.label "Wszystkie">
 <!ENTITY viewUnread.label "Nieprzeczytane">
-<!ENTITY viewStarred.label "Zaznaczone">
+<!ENTITY viewStarred.label "Zaznaczone"
 <!ENTITY updateButton.tooltip "Pobierz nowe wiadomości ze wszystkich kanałów">
 <!ENTITY stopUpdatingButton.tooltip "Przerwij aktualizowanie kanałów">
 <!ENTITY searchScopeButton.tooltip "Określ zakres wyszukiwania">

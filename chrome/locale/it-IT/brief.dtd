@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Selezionare la cartella dei segnalibri Live">
 <!ENTITY searchCurrentView.label "Attualmente visti">
 <!ENTITY searchAllFeeds.label "Tutti i feed">
-<!ENTITY headlinesCheckbox.label "Mostra solo i titoli">
-<!ENTITY viewConstraintList.label "Visualizza:">
-<!ENTITY viewAll.label "tutti">
-<!ENTITY viewUnread.label "non letti">
-<!ENTITY viewStarred.label "segnati con stella">
 <!ENTITY updateButton.tooltip "Controlla gli aggiornamenti di tutti i feed">
 <!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
 <!ENTITY searchScopeButton.tooltip "Cambia l&apos;ambito della ricerca ">

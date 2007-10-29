@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "ライブブックマークフォルダを選ぶ">
 <!ENTITY searchCurrentView.label "現在の表示から検索">
 <!ENTITY searchAllFeeds.label "すべてのフィードを検索">
-<!ENTITY headlinesCheckbox.label "見出しのみを表示">
-<!ENTITY viewConstraintList.label "表示:">
-<!ENTITY viewAll.label "すべて">
-<!ENTITY viewUnread.label "未読">
-<!ENTITY viewStarred.label "スター">
 <!ENTITY updateButton.tooltip "すべてのフィードを更新確認する">
 <!ENTITY stopUpdatingButton.tooltip "フィードの更新確認を止める">
 <!ENTITY searchScopeButton.tooltip "検索範囲を変更する">

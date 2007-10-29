@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Live Bladwijzers-map kiezen">
 <!ENTITY searchCurrentView.label "Zoeken in huidige weergave">
 <!ENTITY searchAllFeeds.label "Zoeken in alle feeds">
-<!ENTITY headlinesCheckbox.label "Alleen kopteksten weergeven">
-<!ENTITY viewConstraintList.label "Weergave:">
-<!ENTITY viewAll.label "Alles">
-<!ENTITY viewUnread.label "Ongelezen">
-<!ENTITY viewStarred.label "Voorzien van ster">
 <!ENTITY updateButton.tooltip "Alle feeds controleren op updates">
 <!ENTITY stopUpdatingButton.tooltip "Feeds niet meer op updates controleren">
 <!ENTITY searchScopeButton.tooltip "De zoekopdracht wijzigen">

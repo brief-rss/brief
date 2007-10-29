@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "選取即時書籤資料夾">
 <!ENTITY searchCurrentView.label "搜尋目前所閱讀的">
 <!ENTITY searchAllFeeds.label "搜尋所有消息來源">
-<!ENTITY headlinesCheckbox.label "只顯示標題">
-<!ENTITY viewConstraintList.label "顯示:">
-<!ENTITY viewAll.label "全部的">
-<!ENTITY viewUnread.label "未讀的">
-<!ENTITY viewStarred.label "標有星號的">
 <!ENTITY updateButton.tooltip "確認全部消息來源的更新">
 <!ENTITY stopUpdatingButton.tooltip "停止繼續確認消息來源的更新">
 <!ENTITY searchScopeButton.tooltip "變更搜尋範圍">

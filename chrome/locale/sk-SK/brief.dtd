@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Vybrať priečinok Aktívne záložky">
 <!ENTITY searchCurrentView.label "Hľadať v aktuálne zobrazených">
 <!ENTITY searchAllFeeds.label "Hľadať vo všetkých kanáloch">
-<!ENTITY headlinesCheckbox.label "Zobraziť len titulky">
-<!ENTITY viewConstraintList.label "Zobraziť:">
-<!ENTITY viewAll.label "Všetko">
-<!ENTITY viewUnread.label "Neprečítané">
-<!ENTITY viewStarred.label "S hviezdičkou">
 <!ENTITY updateButton.tooltip "Skontrolovať aktualizáciu všetkých kanálov">
 <!ENTITY stopUpdatingButton.tooltip "Zastaviť kontrolu aktualizácie">
 <!ENTITY searchScopeButton.tooltip "Zmeniť vyhľadávací rozsah">
