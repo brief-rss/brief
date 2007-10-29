@@ -28,6 +28,7 @@
 <!ENTITY restoreEntry "Restore selected item (when in Trash)">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY markAllAsRead "Mark all viewed items as read">
+<!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
 <!ENTITY deselectEntries "Deselect any items">
 <!ENTITY view.header "View">
