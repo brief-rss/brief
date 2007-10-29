@@ -27,16 +27,14 @@ var gBrief = {
         else if (aNewTab) {
             this.tab = gBrowser.addTab(BRIEF_URL, null, null, null, null, false);
             gBrowser.selectedTab = this.tab;
-            var browser = gBrowser.getBrowserForTab(this.tab);
-            browser.addEventListener('load', this.onBriefTabLoad, true);
         }
         else {
             gBrowser.loadURI(BRIEF_URL, null, null);
             this.tab = gBrowser.selectedTab;
-            var browser = gBrowser.getBrowserForTab(this.tab);
-            browser.addEventListener('load', this.onBriefTabLoad, true);
         }
-
+        var browser = gBrowser.getBrowserForTab(this.tab);
+        browser.addEventListener('load', this.onBriefTabLoad, true);
+        this.tab.setAttribute('briefTab', true);
     },
 
 
@@ -163,9 +161,12 @@ var gBrief = {
     },
 
     onBriefTabLoad: function gBrief_onBriefTabLoad(aEvent) {
-        if (this.currentURI.spec == BRIEF_URL)
-            setTimeout(function(){ gBrief.tab.setAttribute('image', BRIEF_FAVICON_URL); }, 0);
+        if (this.currentURI.spec == BRIEF_URL) {
+            gBrief.tab.setAttribute('briefTab', true);
+            gBrowser.setIcon(gBrief.tab, BRIEF_FAVICON_URL);
+        }
         else {
+            gBrief.tab.removeAttribute('briefTab');
             gBrief.tab = null;
             if (gBrief.toolbarbutton)
                 gBrief.toolbarbutton.checked = false;
@@ -185,15 +186,12 @@ var gBrief = {
 
     onTabRestored: function gBrief_onTabRestored(aEvent) {
         var restoredTab = aEvent.originalTarget;
-        var browser = gBrowser.getBrowserForTab(restoredTab);
-        if (browser.currentURI.spec == BRIEF_URL) {
+        if (restoredTab.hasAttribute('briefTab')) {
             gBrief.tab = restoredTab;
             var browser = gBrowser.getBrowserForTab(gBrief.tab);
             browser.addEventListener('load', gBrief.onBriefTabLoad, true);
             if (gBrief.toolbarbutton)
                 gBrief.toolbarbutton.checked = (gBrowser.selectedTab == restoredTab);
-
-            setTimeout(function(){ gBrief.tab.setAttribute('image', BRIEF_FAVICON_URL); }, 0);
         }
     },
 
@@ -213,6 +211,10 @@ var gBrief = {
                                   getService(Ci.nsIBriefStorage);
             this.updateService = Cc['@ancestor/brief/updateservice;1'].
                                  getService(Ci.nsIBriefUpdateService);
+
+            var sessionStore = Cc['@mozilla.org/browser/sessionstore;1'].
+                               getService(Ci.nsISessionStore);
+            sessionStore.persistTabAttribute('briefTab');
 
             var firstRun = this.prefs.getBoolPref('firstRun');
             if (firstRun) {
@@ -244,9 +246,9 @@ var gBrief = {
             // limitation.
             // These listeners are responsible for observing in which tab Brief is loaded
             // as well as for maintaining correct checked state of the toolbarbutton.
-            window.addEventListener('TabClose', this.onTabClose, false);
-            window.addEventListener('TabSelect', this.onTabSelect, false);
-            window.addEventListener('SSTabRestored', this.onTabRestored, false);
+            gBrowser.addEventListener('TabClose', this.onTabClose, false);
+            gBrowser.addEventListener('TabSelect', this.onTabSelect, false);
+            gBrowser.addEventListener('SSTabRestoring', this.onTabRestored, false);
 
             window.addEventListener('unload', this, false);
             break;
