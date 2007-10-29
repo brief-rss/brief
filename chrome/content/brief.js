@@ -27,7 +27,7 @@ function init() {
     if (gInitialized)
         return;
     gInitialized = true;
-
+    
     gPrefs.register();
     gFeedViewStyle = getFeedViewStyle();
 
@@ -45,11 +45,9 @@ function init() {
                    getService(Ci.nsIFileProtocolHandler).
                    newFileURI(itemLocation);
 
-    // Initiate the feed list.
     var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
     if (liveBookmarksFolder) {
-        // This timeout causes the Brief window to be displayed a lot sooner and to
-        // populate the feed list afterwards.
+        // Initiate the feed list (asynchronously, so that the window is displayed sooner).
         setTimeout(function(){ gFeedList.rebuild() }, 0);
         setTimeout(function(){ gStorage.syncWithBookmarks() }, 500);
     }
@@ -66,14 +64,13 @@ function init() {
                                QueryInterface(Ci.nsIInterfaceRequestor).
                                getInterface(Ci.nsIDOMWindow);
 
-    document.addEventListener('DoCommand', onDoCommand, false);
-
     var headlinesCheckbox = document.getElementById('headlines-checkbox');
     headlinesCheckbox.checked = gPrefs.showHeadlinesOnly;
     var viewConstraintList = document.getElementById('view-constraint-list');
     viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
                                        gPrefs.shownEntries == 'unread' ? 1 : 2;
 
+    document.addEventListener('DoCommand', onDoCommand, false);
     document.addEventListener('keypress', onKeyPress, true);
 
     var observerService = Cc["@mozilla.org/observer-service;1"].
@@ -99,20 +96,7 @@ function init() {
     FeedView.prototype.markAsReadStr = bundle.getString('markEntryAsRead');
     FeedView.prototype.markAsUnreadStr = bundle.getString('markEntryAsUnread');
 
-    // If Brief has been update, load the new version info page.
-    var prevVersion = gPrefs.getCharPref('lastMajorVersion');
-    var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
-                        getService(Ci.nsIVersionComparator);
-
-    if (verComparator.compare(prevVersion, LAST_MAJOR_VERSION) < 0) {
-        var browser = document.getElementById('feed-view');
-        browser.loadURI(RELEASE_NOTES_URL);
-        gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
-    }
-    // Otherwise, load the Unread view.
-    else if (gPrefs.getBoolPref('showHomeView')) {
-        loadHomeview();
-    }
+    loadHomeview();
 
     // Init stuff in bookmarks.js
     setTimeout(function() { initServices(); initBMService(); }, 1000);
@@ -513,6 +497,23 @@ function getFeedViewStyle() {
 
 
 function loadHomeview() {
+    // If Brief has been update, load the new version info page.
+    var prevVersion = gPrefs.getCharPref('lastMajorVersion');
+    var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
+                        getService(Ci.nsIVersionComparator);
+
+    if (verComparator.compare(prevVersion, LAST_MAJOR_VERSION) < 0) {
+        var browser = document.getElementById('feed-view');
+        browser.loadURI(RELEASE_NOTES_URL);
+        gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
+        return;
+    }
+
+    // XXX We should probably kill this pref.
+    if (!gPrefs.getBoolPref('showHomeView'))
+        return;
+
+    // Load the Unread view.
     if (gFeedList.tree && gFeedList.tree.view) {
         gFeedList.tree.view.selection.select(0);
     }
