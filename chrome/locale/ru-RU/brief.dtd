@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Выберите папку с лентами новостей">
 <!ENTITY searchCurrentView.label "Поиск в текущем виде">
 <!ENTITY searchAllFeeds.label "Поиск во всех лентах">
-<!ENTITY headlinesCheckbox.label "Показывать только заголовки новостей">
-<!ENTITY viewConstraintList.label "Показывать:">
-<!ENTITY viewAll.label "Все">
-<!ENTITY viewUnread.label "Непрочитанные">
-<!ENTITY viewStarred.label "Помеченные">
 <!ENTITY updateButton.tooltip "Проверить обновления для всех лент">
 <!ENTITY stopUpdatingButton.tooltip "Остановить проверку обновления">
 <!ENTITY searchScopeButton.tooltip "Изменить область действия поиска">

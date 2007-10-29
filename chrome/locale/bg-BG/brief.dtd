@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Избери Папка за Отметки">
 <!ENTITY searchCurrentView.label "Търси в сегашния фийд">
 <!ENTITY searchAllFeeds.label "Търси из всички фийдове">
-<!ENTITY headlinesCheckbox.label "Показвай само заглавията">
-<!ENTITY viewConstraintList.label "Разгледай:">
-<!ENTITY viewAll.label "Всички">
-<!ENTITY viewUnread.label "Непрочетени">
-<!ENTITY viewStarred.label "Изтъкнати">
 <!ENTITY updateButton.tooltip "Провери всички фийдове за обновления">
 <!ENTITY stopUpdatingButton.tooltip "Спри да проверяваш дали фийдовете са обновени">
 <!ENTITY searchScopeButton.tooltip "Промени начина на търсене">

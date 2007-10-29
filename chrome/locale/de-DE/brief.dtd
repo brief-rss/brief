@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Ordner mit dynamischen Lesezeichen auswählen">
 <!ENTITY searchCurrentView.label "In der aktuellen Ansicht suchen">
 <!ENTITY searchAllFeeds.label "In allen Feeds suchen">
-<!ENTITY headlinesCheckbox.label "Nur Schlagzeilen anzeigen">
-<!ENTITY viewConstraintList.label "Ansicht:">
-<!ENTITY viewAll.label "Alle">
-<!ENTITY viewUnread.label "Ungelesene">
-<!ENTITY viewStarred.label "Gekennzeichnete">
 <!ENTITY updateButton.tooltip "Alle Feeds auf Aktualisierungen prüfen">
 <!ENTITY stopUpdatingButton.tooltip "Feeds nicht mehr auf Aktualisierungen prüfen">
 <!ENTITY searchScopeButton.tooltip "Suchbereich ändern">

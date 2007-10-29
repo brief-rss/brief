@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Velg &apos;Levende bokmerker&apos; mappa">
 <!ENTITY searchCurrentView.label "Søk i nyhetskilden">
 <!ENTITY searchAllFeeds.label "Søk i alle nyhetskilder">
-<!ENTITY headlinesCheckbox.label "Vis kun overskrifter">
-<!ENTITY viewConstraintList.label "Vis:">
-<!ENTITY viewAll.label "Alle">
-<!ENTITY viewUnread.label "Ulest">
-<!ENTITY viewStarred.label "Merket med stjerne">
 <!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
 <!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskildene">
 <!ENTITY searchScopeButton.tooltip "Endre søk">

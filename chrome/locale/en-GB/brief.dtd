@@ -1,11 +1,5 @@
-<!ENTITY pickFolder.label "Choose Live Bookmarks Folder">
 <!ENTITY searchCurrentView.label "Search current view">
 <!ENTITY searchAllFeeds.label "Search all feeds">
-<!ENTITY headlinesCheckbox.label "Show only headlines">
-<!ENTITY viewConstraintList.label "View:">
-<!ENTITY viewAll.label "All">
-<!ENTITY viewUnread.label "Unread">
-<!ENTITY viewStarred.label "Starred">
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY searchScopeButton.tooltip "Change the search scope">
