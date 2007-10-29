@@ -8,6 +8,50 @@
 
     <script type="application/x-javascript" src="brief-overlay.js"/>
 
+    <keyset id="mainKeyset">
+        <key id="Brief_selectNextEntry" key="k"
+             oncommand="gBrief.doCommand('selectNextEntry')"/>
+        <key id="Brief_selectPreviousEntry" key="j"
+             oncommand="gBrief.doCommand('selectPrevEntry')"/>
+
+        <key id="Brief_markSelectedEntryRead" key="m"
+             oncommand="gBrief.doCommand('markSelectedEntryRead')"/>
+        <key id="Brief_deleteSelectedEntry" key="t"
+             oncommand="gBrief.doCommand('deleteSelectedEntry')"/>
+        <key id="Brief_restoreSelectedEntry" key="r"
+             oncommand="gBrief.doCommand('restoreSelectedEntry')"/>
+        <key id="Brief_starSelectedEntry" key="b"
+             oncommand="gBrief.doCommand('starSelectedEntry')"/>
+        <key id="Brief_unfoldSelectedEntry" key="n"
+             oncommand="gBrief.doCommand('unfoldSelectedEntry')"/>
+        <key id="Brief_openSelectedEntry" keycode="VK_RETURN"
+             oncommand="gBrief.doCommand('openSelectedEntryLink')"/>
+        <key id="Brief_openSelectedEntryInTab" keycode="VK_RETURN" modifiers="accel"
+             oncommand="gBrief.doCommand('openSelectedEntryLinkInTab')"/>
+
+        <key id="Brief_toggleHeadlinesMode" key="f"
+             oncommand="gBrief.doCommand('toggleHeadlinesMode')"/>
+        <key id="Brief_showNextPage" key="k" modifiers="alt"
+             oncommand="gBrief.doCommand('showNextPage')"/>
+        <key id="Brief_showPrevPage" key="j" modifiers="alt"
+             oncommand="gBrief.doCommand('showPrevPage')"/>
+        <key id="Brief_markCurrentViewRead" key="m" modifiers="accel"
+             oncommand="gBrief.doCommand('markCurrentViewRead')"/>
+        <key id="Brief_showAllEntries" key="a"
+             oncommand="gBrief.doCommand('showAllEntries')"/>
+        <key id="Brief_showStarredEntries" key="s"
+             oncommand="gBrief.doCommand('showStarredEntries')"/>
+        <key id="Brief_showUnreadEntries" key="d"
+             oncommand="gBrief.doCommand('showUnreadEntries')"/>
+        <key id="Brief_focusSearchbar" key="/"
+             oncommand="gBrief.doCommand('focusSearchbar')"/>
+        <key id="Brief_turnOffKeyboardNav" key="q"
+             oncommand="gBrief.doCommand('turnOffKeyNav')"/>
+
+        <key id="Brief_displayShortcuts" key="?"
+             oncommand="gBrief.doCommand('displayShortcuts')"/>
+    </keyset>
+
     <popupset id="mainPopupSet">
         <popup id="brief-status-context">
             <menuitem id="brief-ctx-update-feeds"

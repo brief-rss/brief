@@ -66,6 +66,8 @@ function init() {
                                QueryInterface(Ci.nsIInterfaceRequestor).
                                getInterface(Ci.nsIDOMWindow);
 
+    document.addEventListener('DoCommand', onDoCommand, false);
+
     var headlinesCheckbox = document.getElementById('headlines-checkbox');
     headlinesCheckbox.checked = gPrefs.showHeadlinesOnly;
     var viewConstraintList = document.getElementById('view-constraint-list');
@@ -266,6 +268,13 @@ var gObserver = {
 }
 
 
+function onDoCommand(aEvent) {
+    var commandName = document.documentElement.getAttribute('command');
+    var command = gCommands[commandName];
+    command();
+}
+
+
 var gCommands = {
 
     toggleLeftPane: function cmd_toggleLeftPane(aEvent) {
@@ -290,8 +299,8 @@ var gCommands = {
 
     },
 
-    markCurrentViewRead: function cmd_markCurrentViewRead(aNewStatus) {
-        gFeedView.query.markEntriesRead(aNewStatus);
+    markCurrentViewRead: function cmd_markCurrentViewRead() {
+        gFeedView.query.markEntriesRead(true);
     },
 
     toggleHeadlinesMode: function cmd_toggleHeadlinesMode() {
@@ -321,6 +330,18 @@ var gCommands = {
         }
     },
 
+    showAllEntries: function cmd_showAllEntries() {
+        gCommands.switchViewConstraint('all');
+    },
+
+    showUnreadEntries: function cmd_showUnreadEntries() {
+        gCommands.switchViewConstraint('unread');
+    },
+
+    showStarredEntries: function cmd_showStarredEntries() {
+        gCommands.switchViewConstraint('starred');
+    },
+
     switchViewConstraint: function cmd_switchViewConstraint(aConstraint) {
         gPrefs.setCharPref('feedview.shownEntries', aConstraint);
 
@@ -328,6 +349,25 @@ var gCommands = {
             gFeedView.ensure();
     },
 
+    showNextPage: function cmd_showNextPage() {
+        if (gFeedView)
+            gFeedView.currentPage++;
+    },
+
+    showPrevPage: function cmd_showPrevPage() {
+        if (gFeedView)
+            gFeedView.currentPage--;
+    },
+
+    selectNextEntry: function cmd_selectNextEntry() {
+        if (gFeedView)
+            gFeedView.selectNextEntry()
+    },
+
+    selectPrevEntry: function cmd_selectPrevEntry() {
+        if (gFeedView)
+            gFeedView.selectPrevEntry();
+    },
 
     markSelectedEntryRead: function cmd_markSelectedEntryRead() {
         if (!gFeedView || !gFeedView.selectedEntry)
@@ -407,6 +447,10 @@ var gCommands = {
             if (gFeedView)
                 gFeedView.selectEntry(null);
         }
+    },
+
+    openSelectedEntryLinkInTab: function cmd_openSelectedEntryLinkInTab() {
+        gCommands.openSelectedEntryLink(true);
     },
 
     openSelectedEntryLink: function cmd_openSelectedEntryLink(aForceNewTab) {
@@ -570,26 +614,28 @@ function onKeyPress(aEvent) {
     if (aEvent.charCode)
         aEvent.stopPropagation();
 
+    // Brief takes over these shortcut keys, so we stop the default action.
+    // Let's not prevent the user from typing in inputs that entries may contain, though.
+    if (!gPrefs.assumeStandardKeys || aEvent.originalTarget.localName == 'input')
+        return;
+
     // We can't leave handling of Space and Tab to XUL like other keys,
     // because unlike them they have to be default-prevented.
-    // Also, I couldn't get Space to be caught by <key>'s at all.
-    if (aEvent.keyCode == aEvent.DOM_VK_TAB && gFeedView && gFeedView.isActive) {
+    if (aEvent.keyCode == aEvent.DOM_VK_TAB) {
         gCommands.turnOffKeyNav();
         aEvent.preventDefault();
         return;
     }
 
     var searchbar = document.getElementById('searchbar');
-    if (aEvent.charCode == aEvent.DOM_VK_SPACE && gFeedView && gFeedView.isActive
-        && searchbar.getAttribute('focused') != 'true') {
-        gFeedView.selectNextEntry();
+    if (aEvent.charCode == aEvent.DOM_VK_SPACE && searchbar.getAttribute('focused') != 'true') {
+        gCommands.selectNextEntry();
         aEvent.preventDefault();
         return;
     }
 
-    if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE && gFeedView && gFeedView.isActive
-        && searchbar.getAttribute('focused') != 'true') {
-        gFeedView.selectPrevEntry();
+    if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE && searchbar.getAttribute('focused') != 'true') {
+        gCommands.selectPrevEntry();
         aEvent.preventDefault();
     }
 }
@@ -619,6 +665,7 @@ var gPrefs = {
         this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
         this.showAuthors = this.getBoolPref('feedview.showAuthors');
         this.keyNavEnabled = this.getBoolPref('feedview.keyNavEnabled');
+        this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
 
         this._branch.addObserver('', this, false);
     },
@@ -667,6 +714,9 @@ var gPrefs = {
             break;
         case 'feedview.keyNavEnabled':
             this.keyNavEnabled = this.getBoolPref('feedview.keyNavEnabled');
+            break;
+        case 'assumeStandardKeys':
+            this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
             break;
         }
     }

@@ -40,6 +40,17 @@ var gBrief = {
     },
 
 
+    doCommand: function gBrief_doCommand(aCommand) {
+        if (gBrowser.currentURI.spec == BRIEF_URL) {
+            var doc = gBrowser.contentDocument;
+            var evt = document.createEvent('Events');
+            evt.initEvent('DoCommand', false, false);
+            doc.documentElement.setAttribute('command', aCommand);
+            doc.dispatchEvent(evt);
+        }
+    },
+
+
     markFeedsAsRead: function gBrief_markFeedsAsRead() {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
         query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;

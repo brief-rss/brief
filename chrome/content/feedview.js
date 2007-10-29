@@ -156,7 +156,7 @@ FeedView.prototype = {
      *  @param aScrollInstantly Disable smooth scrolling (optional).
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollInstantly) {
-        if (aEntry == this.selectedEntry)
+        if (!this.isActive || aEntry == this.selectedEntry)
             return;
 
         if (this.selectedEntry)
@@ -470,10 +470,7 @@ FeedView.prototype = {
         // See comments next to the event handler functions.
         doc.addEventListener('click', gFeedViewEvents.onFeedViewClick, true);
 
-        // This listener does two things:
-        // (a) stops propagation of keypresses in order to prevent FAYT
-        // (b) forwards keypresses from the feed view document to the main one.
-        doc.defaultView.addEventListener('keypress', gFeedViewEvents.forwardKeypress, true);
+        doc.defaultView.addEventListener('keypress', onKeyPress, true);
 
         // Apply the CSS.
         var style = doc.getElementsByTagName('style')[0];
@@ -724,28 +721,6 @@ var gFeedViewEvents = {
             gTopBrowserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
         else
             gTopBrowserWindow.gBrief.contextMenuTarget = null;
-    },
-
-    forwardKeypress: function feedViewEvents_forwardKeypress(aEvent) {
-        // Stop propagation of character keys, to disable FAYT.
-        if (aEvent.charCode)
-            aEvent.stopPropagation();
-
-        // Brief takes over these shortcut keys, so let's stop
-        // the default action. Let's not prevent the user from typing
-        // in inputs that entries may contain, though.
-        if ((aEvent.keyCode == aEvent.DOM_VK_TAB
-            || aEvent.charCode == aEvent.DOM_VK_SPACE
-            || aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE)
-            && aEvent.originalTarget.localName != 'input') {
-            aEvent.preventDefault();
-        }
-
-        var evt = document.createEvent('KeyboardEvent');
-        evt.initKeyEvent(aEvent.type, aEvent.canBubble, aEvent.cancelable, aEvent.view,
-                         aEvent.ctrlKey, aEvent.altKey, aEvent.shiftKey, aEvent.metaKey,
-                         aEvent.keyCode, aEvent.charCode);
-        gFeedView.browser.dispatchEvent(evt);
     }
 
 }

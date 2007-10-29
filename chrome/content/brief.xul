@@ -20,30 +20,6 @@
         <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
     </stringbundleset>
 
-    <keyset id="brief-keyset">
-        <key key="k" oncommand="if (gFeedView) gFeedView.selectNextEntry()"/>
-        <key key="j" oncommand="if (gFeedView) gFeedView.selectPrevEntry()"/>
-
-        <key key="m" oncommand="gCommands.markSelectedEntryRead()"/>
-        <key key="t" oncommand="gCommands.deleteSelectedEntry()"/>
-        <key key="r" oncommand="gCommands.restoreSelectedEntry()"/>
-        <key key="b" oncommand="gCommands.starSelectedEntry()"/>
-        <key key="n" oncommand="gCommands.unfoldSelectedEntry()"/>
-        <key keycode="VK_RETURN" oncommand="gCommands.openSelectedEntryLink()"/>
-        <key keycode="VK_RETURN" modifiers="accel" oncommand="gCommands.openSelectedEntryLink(true)"/>
-
-        <key key="f" oncommand="gCommands.toggleHeadlinesMode()"/>
-        <key key="k" modifiers="alt" oncommand="if (gFeedView) gFeedView.currentPage++"/>
-        <key key="j" modifiers="alt" oncommand="if (gFeedView) gFeedView.currentPage--"/>
-        <key key="m" modifiers="accel" oncommand="gCommands.markCurrentViewRead(true)"/>
-        <key key="a" oncommand="gCommands.switchViewConstraint('all')"/>
-        <key key="s" oncommand="gCommands.switchViewConstraint('starred')"/>
-        <key key="d" oncommand="gCommands.switchViewConstraint('unread')"/>
-        <key key="/" oncommand="gCommands.focusSearchbar()"/>
-
-        <key key="?" oncommand="gCommands.displayShortcuts()"/>
-    </keyset>
-
     <popupset id="main-popupset">
         <menupopup id="feed-list-popup"
                    onpopupshowing="gFeedList.onContextMenuShowing(event)"
