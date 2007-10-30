@@ -443,7 +443,6 @@ FeedView.prototype = {
         if (gFeedView.isActive) {
             feedViewToolbar.hidden = false;
             gFeedView._buildFeedView();
-            setTimeout(function(){ gFeedView._computePages() }, 0);
         }
         else {
             feedViewToolbar.hidden = true;
@@ -525,12 +524,32 @@ FeedView.prototype = {
         this.feedContent.setAttribute('markReadString', this.markAsReadStr);
         this.feedContent.setAttribute('markUnreadString', this.markAsUnreadStr);
 
-        // Get the entries and append them.
         var query = this.query;
         query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
         query.limit = gPrefs.entriesPerPage;
 
         var entries = query.getEntries({});
+
+        // Important: because for performance we try to delay computing pages until
+        // after the view is displayed. However, the whole reason why we recompute
+        // pages is that their number may have changed and we need to know that to
+        // correctly refresh the view.
+        // The only time when recomputing pages may affect the currently displayed
+        // entry set is when currentPage goes out of range if the view is now containing
+        // less pages than before. This in turn makes the offset invalid and the query
+        // returns no entries.
+        // To avoid that, whenever the query returns no entries we force immediate
+        // recomputation of pages to make sure that they are correct and then we redo
+        // the query.
+        if (!entries.length) {
+            this._computePages();
+            query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
+            entries = query.getEntries({});
+        }
+        else {
+            setTimeout(function computePagesAsync(){ gFeedView._computePages() }, 0);
+        }
+
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
