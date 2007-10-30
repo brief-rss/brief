@@ -327,10 +327,12 @@ var gCommands = {
     },
 
     switchViewConstraint: function cmd_switchViewConstraint(aConstraint) {
-        gPrefs.setCharPref('feedview.shownEntries', aConstraint);
+        if (gPrefs.shownEntries != aConstraint) {
+            gPrefs.setCharPref('feedview.shownEntries', aConstraint);
 
-        if (gFeedView)
-            gFeedView.refresh();
+            if (gFeedView)
+                gFeedView.refresh();
+        }
     },
 
     showNextPage: function cmd_showNextPage() {
