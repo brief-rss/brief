@@ -39,8 +39,8 @@
 <!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Browse">
 <!ENTITY browseCustomStyle.accesskey "B">
-<!ENTITY showShortcuts.label "Show keyboard shortcuts">
-<!ENTITY showShortcuts.accesskey "k">
+<!ENTITY showShortcuts.label "Show shortcuts">
+<!ENTITY showShortcuts.accesskey "w">
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Location">
 <!ENTITY optionsGroupbox.caption "Feed settings">
