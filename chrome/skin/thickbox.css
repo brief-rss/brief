@@ -89,7 +89,12 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	padding:7px 10px 5px 0;
 	margin-bottom:1px;
 	text-align:right;
+        text-decoration: none !important;
 	float:right;
+}
+
+#TB_closeWindowButton {
+        text-decoration: none;
 }
 
 #TB_ajaxWindowTitle{
@@ -101,8 +106,7 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 #TB_title{
 	font-size: 16px;
         font-weight: bold;
-        background-color:#e8e8e8;
-	height:27px;
+	height: 20px;
 }
 
 #TB_ajaxContent{

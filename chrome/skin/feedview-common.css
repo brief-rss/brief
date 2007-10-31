@@ -46,6 +46,10 @@
   margin: 0 auto !important;
 }
 
+#shortcuts-body {
+  margin: 0;
+}
+
 #shortcuts-table {
     font-size: 12px;
     font-family: "Lucida Grande", Verdana, sans-serif;
@@ -68,8 +72,8 @@
     font-weight: normal;
 }
 
-.shortucts-header {
+#shortcuts-table .shortucts-header {
     font-size: 14px;
     text-align: center;
-    padding-top: 20px !important;
+    padding-top: 20px;
 }
