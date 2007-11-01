@@ -463,7 +463,7 @@ var gCommands = {
             gFeedView.browser.loadURI(url);
         }
 
-        if (!aEntry.hasAttribute('read') && gPrefs.getBoolPref('feedview.linkMarksRead')) {
+        if (!aEntry.hasAttribute('read')) {
             aEntry.setAttribute('read', true);
             var query = new QuerySH(null, aEntry.id, null);
             query.markEntriesRead(true);
@@ -510,10 +510,6 @@ function loadHomeview() {
         gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
         return;
     }
-
-    // XXX We should probably kill this pref.
-    if (!gPrefs.getBoolPref('showHomeView'))
-        return;
 
     // Load the Unread view.
     if (gFeedList.tree && gFeedList.tree.view) {

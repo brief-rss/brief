@@ -177,6 +177,8 @@ var gFeedList = {
             if (item.hasAttribute('container'))
                 this.refreshFolderTreeitems(item);
         }
+        // We have to persist folders immediatelly instead of when Brief is closed,
+        // because otherwise if the feedlist was rebuilt, the changes would be lost.
         setTimeout(this._persistFolderState, 0);
     },
 
@@ -385,7 +387,7 @@ var gFeedList = {
             }
             else {
                 favicon = feed.favicon;
-                if (favicon != 'no-favicon' && gPrefs.getBoolPref('showFavicons'))
+                if (favicon != 'no-favicon')
                     iconURL = favicon;
             }
 
