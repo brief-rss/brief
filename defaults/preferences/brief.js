@@ -1,8 +1,6 @@
 pref("extensions.brief.liveBookmarksFolder", "");
 pref("extensions.brief.showStatusbarIcon", true);
 pref("extensions.brief.openInNewTab", false);
-pref("extensions.brief.showFavicons", true);
-pref("extensions.brief.showHomeView", true);
 pref("extensions.brief.firstRun", true);
 pref("extensions.brief.lastMajorVersion", "0");
 pref("extensions.brief@mozdev.org.description", "chrome://brief/locale/brief.properties");
@@ -15,7 +13,6 @@ pref("extensions.brief.feedview.customStylePath", '');
 pref("extensions.brief.feedview.useCustomStyle", false);
 pref("extensions.brief.feedview.openEntriesInTabs", false);
 pref("extensions.brief.feedview.doubleClickMarks", true);
-pref("extensions.brief.feedview.linkMarksRead", true);
 pref("extensions.brief.feedview.showAuthors", true);
 pref("extensions.brief.feedview.keyNavEnabled", false);
 
