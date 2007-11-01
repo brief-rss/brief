@@ -604,8 +604,10 @@ FeedView.prototype = {
             var formatString = '';
 
             var entryDate = new Date(aEntry.date);
-            var entryTime = entryDate.getTime() + 3600000;
-            var nowTime = Date.now() + 3600000;
+            var entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
+
+            var now = new Date();
+            var nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
 
             var today = Math.ceil(nowTime / 86400000);
             var entryDay = Math.ceil(entryTime / 86400000);
