@@ -16,9 +16,9 @@
                     <xul:image class="star-image"/>
                 </html:div>
                 <html:div class="article-controls">
-                    <xul:button anonid="mark-read" class="mark-read"/>
-                    <xul:button anonid="delete-entry" class="delete-entry"/>
-                    <xul:button anonid="restore-entry" class="restore-entry"/>
+                    <xul:button anonid="mark-read" class="article-button mark-read"/>
+                    <xul:button anonid="delete-entry" class="article-button delete-entry"/>
+                    <xul:button anonid="restore-entry" class="article-button restore-entry"/>
                 </html:div>
                 <html:a anonid="article-title-link" class="article-title-link"/>
             </html:div>
@@ -61,7 +61,7 @@
                 var articleContentElement =
                     document.getAnonymousElementByAttribute(this, 'class', 'article-content');
                 var markReadButton =
-                    document.getAnonymousElementByAttribute(this, 'class', 'mark-read');
+                    document.getAnonymousElementByAttribute(this, 'anonid', 'mark-read');
 
                 // Construct elements' contents from feed entry data. Use innerHTML
                 // instead of textContent, so that the entities are resolved.
@@ -194,7 +194,7 @@
                 switch (event.attrName) {
                 case 'read':
                     var markReadButton = document.
-                               getAnonymousElementByAttribute(this, 'class', 'mark-read');
+                               getAnonymousElementByAttribute(this, 'anonid', 'mark-read');
                     var feedContentDiv = document.getElementById('feed-content');
 
                     if (event.newValue == 'true') {
