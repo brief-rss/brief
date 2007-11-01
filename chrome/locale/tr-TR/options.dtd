@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Brief options">
+<!ENTITY mainPane.label "Main">
+<!ENTITY folderTree.label "Folder containing your Live Bookmarks:">
+<!ENTITY showStatusbarIcon.label "Show statusbar icon">
+<!ENTITY openInNewTab.label "Open Brief in a new tab">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY updateGroup.caption "Updating">
+<!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
+<!ENTITY updateIntervalMinutes.label "minutes">
+<!ENTITY updateIntervalHours.label "hours">
+<!ENTITY updateIntervalDays.label "days">
+<!ENTITY checkForUpdatesAfter.label "minutes">
+<!ENTITY showNotification.label "Show notification when updates are found">
+<!ENTITY storingGroup.caption "Storing">
+<!ENTITY expirationBefore.label "Remove downloaded entries after">
+<!ENTITY expirationAfter.label "days">
+<!ENTITY storedEntriesBefore.label "Store no more than">
+<!ENTITY storedEntriesAfter.label "latest entries of each feed">
+<!ENTITY clearAllEntriesButton.label "Clear All Entries">
+<!ENTITY behaviorGroup.caption "Behavior">
+<!ENTITY openEntriesInTabs.label "Open entries in new tabs">
+<!ENTITY doubleClickMarks.label "Mark entries as read when double-clicking on them">
+<!ENTITY displayPane.label "Display">
+<!ENTITY authorsCheckbox.label "Show authors of the entries">
+<!ENTITY entriesPerPageBefore.label "Show">
+<!ENTITY entriesPerPageAfter.label "entries per page">
+<!ENTITY styleGroup.caption "Feed content style">
+<!ENTITY enableCustomStyle.label "Use custom style of the feed content">
+<!ENTITY browseCustomStyle.label "Browse">
+<!ENTITY feedName.label "Name">
+<!ENTITY feedURL.label "Location">
+<!ENTITY optionsGroupbox.caption "Feed settings">
+<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
+<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
+<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
+<!ENTITY expireEntriesPerFeedAfter.label "days">
+<!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">

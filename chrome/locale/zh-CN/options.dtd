@@ -1,0 +1,37 @@
+<!ENTITY optionsWindow.title "Brief 选项">
+<!ENTITY mainPane.label "主要">
+<!ENTITY folderTree.label "放置实时书签的文件夹：">
+<!ENTITY showStatusbarIcon.label "在状态栏显示图标">
+<!ENTITY openInNewTab.label "在新标签页打开 Brief">
+<!ENTITY feedsPane.label "聚合">
+<!ENTITY updateGroup.caption "更新">
+<!ENTITY checkForUpdatesBefore.label "每">
+<!ENTITY updateIntervalMinutes.label "分钟">
+<!ENTITY updateIntervalHours.label "小时">
+<!ENTITY updateIntervalDays.label "天">
+<!ENTITY checkForUpdatesAfter.label "分钟">
+<!ENTITY showNotification.label "当有更新时显示提示">
+<!ENTITY storingGroup.caption "保存">
+<!ENTITY expirationBefore.label "在">
+<!ENTITY expirationAfter.label "天后清除已下载信息">
+<!ENTITY storedEntriesBefore.label "每个聚合只保存最新的">
+<!ENTITY storedEntriesAfter.label "条信息">
+<!ENTITY clearAllEntriesButton.label "清除所有信息">
+<!ENTITY behaviorGroup.caption "动作">
+<!ENTITY openEntriesInTabs.label "在新标签页打开信息">
+<!ENTITY doubleClickMarks.label "双击信息后标记为已读">
+<!ENTITY displayPane.label "显示">
+<!ENTITY authorsCheckbox.label "显示信息的作者">
+<!ENTITY entriesPerPageBefore.label "每页显示">
+<!ENTITY entriesPerPageAfter.label "条信息">
+<!ENTITY styleGroup.caption "聚合内容的样式">
+<!ENTITY enableCustomStyle.label "使用自定义样式">
+<!ENTITY browseCustomStyle.label "浏览">
+<!ENTITY feedName.label "名称">
+<!ENTITY feedURL.label "地址">
+<!ENTITY optionsGroupbox.caption "聚合设置">
+<!ENTITY maxEntriesPerFeedBefore.label "只保存">
+<!ENTITY maxEntriesPerFeedAfter.label "条最新消息">
+<!ENTITY expireEntriesPerFeedBefore.label "在">
+<!ENTITY expireEntriesPerFeedAfter.label "天后移除已下载的信息">
+<!ENTITY checkUpdatesPerFeedBefore.label "每隔多久检查更新：">
