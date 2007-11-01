@@ -122,6 +122,7 @@
                 <checkbox id="expiration-checkbox"
                           label="&expirationBefore.label;"
                           accesskey="&expirationCheckbox.accesskey;"
+                          tooltiptext="&starredItemsKept.tooltip;"
                           preference="extensions.brief.database.expireEntries"
                           oncommand="gFeedsPane.updateExpirationDisabledState();"/>
                 <textbox id="expiration-textbox" size="2"
@@ -132,6 +133,7 @@
                 <checkbox id="stored-entries-checkbox"
                           label="&storedEntriesBefore.label;"
                           accesskey="&storedEntriesCheckbox.accesskey;"
+                          tooltiptext="&starredItemsKept.tooltip;"
                           preference="extensions.brief.database.limitStoredEntries"
                           oncommand="gFeedsPane.updateStoredEntriesDisabledState();"/>
                 <textbox id="stored-entries-textbox" size="2"
@@ -167,10 +169,7 @@
         </preferences>
 
         <groupbox>
-            <checkbox id="authors-checkbox"
-                      label="&authorsCheckbox.label;"
-                      accesskey="&authorsCheckbox.accesskey;"
-                      preference="extensions.brief.feedview.showAuthors"/>
+            <caption label="&feedViewGroup.caption;"/>
             <hbox align="center">
                 <label value="&entriesPerPageBefore.label;"/>
                 <textbox id="entriesPerPage"
@@ -178,10 +177,11 @@
                          size="2"/>
                 <label value="&entriesPerPageAfter.label;"/>
             </hbox>
-        </groupbox>
-
-        <groupbox>
-            <caption label="&styleGroup.caption;"/>
+            <spacer height="5"/>
+            <checkbox id="authors-checkbox"
+                      label="&authorsCheckbox.label;"
+                      accesskey="&authorsCheckbox.accesskey;"
+                      preference="extensions.brief.feedview.showAuthors"/>
             <checkbox id="custom-style-checkbox"
                       label="&enableCustomStyle.label;"
                       accesskey="&enableCustomStyle.accesskey;"
