@@ -24,18 +24,19 @@
 <!ENTITY expirationBefore.label "Remove downloaded items after">
 <!ENTITY expirationAfter.label "days">
 <!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "Starred items will be kept">
 <!ENTITY storedEntriesBefore.label "Store no more than">
 <!ENTITY storedEntriesAfter.label "latest items of each feed">
 <!ENTITY storedEntriesCheckbox.accesskey "e">
 <!ENTITY clearAllEntriesButton.label "Clear all items">
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Display">
+<!ENTITY feedViewGroup.caption "Feed content view">
 <!ENTITY authorsCheckbox.label "Show authors of the items">
 <!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Show">
 <!ENTITY entriesPerPageAfter.label "items per page">
-<!ENTITY styleGroup.caption "Feed content style">
-<!ENTITY enableCustomStyle.label "Use custom style of the feed content">
+<!ENTITY enableCustomStyle.label "Use custom style of the feed content view">
 <!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Browse">
 <!ENTITY browseCustomStyle.accesskey "B">
