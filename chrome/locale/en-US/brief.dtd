@@ -20,7 +20,9 @@
 <!ENTITY starredFolder.label "Starred">
 <!ENTITY trashFolder.label "Trash">
 <!ENTITY ctxMarkFeedRead.label "Mark Feed As Read">
+<!ENTITY ctxMarkFeedUnread.label "Mark Feed As Unread">
 <!ENTITY ctxMarkFolderRead.label "Mark Folder As Read">
+<!ENTITY ctxMarkFolderUnread.label "Mark Folder As Unread">
 <!ENTITY ctxUpdateFeed.label "Update Feed">
 <!ENTITY ctxUpdateFolder.label "Update Folder">
 <!ENTITY ctxOpenWebsite.label "Open Website">

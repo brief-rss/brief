@@ -6,9 +6,9 @@
 <!ENTITY feedsPane.label "Nyhetskilder">
 <!ENTITY updateGroup.caption "Oppdatering">
 <!ENTITY checkForUpdatesBefore.label "Finn oppdateringer for nyhetskilder hvert">
-<!ENTITY updateIntervalMinutes.label "minutter">
-<!ENTITY updateIntervalHours.label "timer">
-<!ENTITY updateIntervalDays.label "dager">
+<!ENTITY updateIntervalMinutes.label "minutt">
+<!ENTITY updateIntervalHours.label "time">
+<!ENTITY updateIntervalDays.label "dag">
 <!ENTITY checkForUpdatesAfter.label "minutt">
 <!ENTITY showNotification.label "Vis beskjed når oppdateringer er funnet">
 <!ENTITY storingGroup.caption "Lagring">
@@ -19,9 +19,9 @@
 <!ENTITY clearAllEntriesButton.label "Fjern alle elementer">
 <!ENTITY behaviorGroup.caption "Oppførsel">
 <!ENTITY openEntriesInTabs.label "Åpne elementer i ny fane">
-<!ENTITY doubleClickMarks.label "Markere elementene som lest ved dobbelklikk">
+<!ENTITY doubleClickMarks.label "Markere elementer som lest ved dobbelklikk">
 <!ENTITY displayPane.label "Visning">
-<!ENTITY authorsCheckbox.label "Vis forfatterne av elementene">
+<!ENTITY authorsCheckbox.label "Vis forfattere av elementer">
 <!ENTITY entriesPerPageBefore.label "Vis">
 <!ENTITY entriesPerPageAfter.label "elementer pr side">
 <!ENTITY styleGroup.caption "Stil for nyhetskildetype">
