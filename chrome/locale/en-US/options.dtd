@@ -42,6 +42,9 @@
 <!ENTITY browseCustomStyle.accesskey "B">
 <!ENTITY showShortcuts.label "Show shortcuts">
 <!ENTITY showShortcuts.accesskey "w">
+<!ENTITY compactDatabase.label "Compact stored items">
+<!ENTITY compactDatabase.accesskey "C">
+<!ENTITY compactingInProgress.label "Brief is compacting stored items...">
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Location">
 <!ENTITY optionsGroupbox.caption "Feed settings">
