@@ -136,9 +136,9 @@
                     </treechildren>
                 </tree>
                 <vbox>
-                    <label id="select-home-folder-label"
-                           crop="end"
-                           value="&selectHomeFolder.label;"/>
+                    <label id="select-home-folder-label">
+                        &selectHomeFolder.label;
+                    </label>
                     <bookmarks-tree id="bookmark-folders-tree" flex="1" type="folders"/>
                     <hbox pack="end">
                         <button id="confirm-home-folder"
