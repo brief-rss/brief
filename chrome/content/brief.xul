@@ -158,11 +158,6 @@
                                    tooltiptext="&markViewRead.tooltip;"
                                    oncommand="gCommands.markCurrentViewRead(true)"/>
                     <spacer flex="1"/>
-                    <toolbaritem id="headlines-checkbox-container">
-                        <checkbox id="headlines-checkbox"
-                                  label="&headlinesCheckbox.label;"
-                                  oncommand="gCommands.toggleHeadlinesMode()"/>
-                    </toolbaritem>
                     <toolbaritem id="view-constraint-box">
                         <label value="&viewConstraintList.label;"/>
                         <menulist id="view-constraint-list"
@@ -181,6 +176,11 @@
                             </menupopup>
                         </menulist>
                     </toolbaritem>
+                    <toolbarbutton id="headlines-checkbox"
+                                   type="checkbox"
+                                   autoCheck="false"
+                                   tooltiptext="&headlinesCheckbox.label;"
+                                   oncommand="gCommands.toggleHeadlinesMode()"/>
                     <toolbaritem id="navigation-box">
                         <toolbarbutton id="prev-page"
                                        tooltiptext="&previousPage.tooltip;"
