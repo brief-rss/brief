@@ -145,13 +145,15 @@ toolbarbutton {
   }
 
 #headlines-checkbox {
-  list-style-image: url('toolbar/headlines.png');
+  list-style-image: url('toolbar/headlines-view.png');
   margin-right: 5px;
 }
 
 #headlines-checkbox[checked="true"] {
   margin-top: 1px;
+  padding-top: 4px !important;
   padding-bottom: 4px !important;
+  -moz-padding-start: 4px !important;
   -moz-padding-end: 0px !important;
 }
 
