@@ -2,36 +2,57 @@
 <!ENTITY mainPane.label "Hoved">
 <!ENTITY folderTree.label "Mappe indeholdende dine Live-bogmærker">
 <!ENTITY showStatusbarIcon.label "Vis statuslinjeikon">
+
 <!ENTITY openInNewTab.label "Åbn Brien i et nyt faneblad">
+
 <!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Opdaterer">
 <!ENTITY checkForUpdatesBefore.label "Tjek feeds for opdateringer hver">
+
 <!ENTITY updateIntervalMinutes.label "minutter">
 <!ENTITY updateIntervalHours.label "timer">
 <!ENTITY updateIntervalDays.label "dage">
 <!ENTITY checkForUpdatesAfter.label "minutter">
 <!ENTITY showNotification.label "Vis notifikation når der findes opdateringer">
+
+<!ENTITY behaviorGroup.caption "Opførsel">
+<!ENTITY openEntriesInTabs.label "Åbn emner i nye faneblade">
+
+<!ENTITY doubleClickMarks.label "Marker emner som læste ved dobbeltklik">
+
 <!ENTITY storingGroup.caption "Opbevaring">
 <!ENTITY expirationBefore.label "Fjern downloadede emner efter">
 <!ENTITY expirationAfter.label "dage">
+
+
 <!ENTITY storedEntriesBefore.label "Gem ikke flere end">
 <!ENTITY storedEntriesAfter.label "seneste indlæg af hver emne">
+
 <!ENTITY clearAllEntriesButton.label "Ryd alle indlæg">
-<!ENTITY behaviorGroup.caption "Opførsel">
-<!ENTITY openEntriesInTabs.label "Åbn emner i nye faneblade">
-<!ENTITY doubleClickMarks.label "Marker emner som læste ved dobbeltklik">
+
 <!ENTITY displayPane.label "Vis">
+
 <!ENTITY authorsCheckbox.label "Vis forfattere på emner">
+
 <!ENTITY entriesPerPageBefore.label "Vis">
 <!ENTITY entriesPerPageAfter.label "indlæg pr. side">
-<!ENTITY styleGroup.caption "Feed indholdslayout">
 <!ENTITY enableCustomStyle.label "Brug feedets eget stil-indhold">
+
 <!ENTITY browseCustomStyle.label "Gennemse">
+
+
+
+
+
+
 <!ENTITY feedName.label "Navn">
 <!ENTITY feedURL.label "Placering">
 <!ENTITY optionsGroupbox.caption "Feed-indstillinger">
-<!ENTITY maxEntriesPerFeedBefore.label "Vis ikke mere end">
-<!ENTITY maxEntriesPerFeedAfter.label "seneste emner">
-<!ENTITY expireEntriesPerFeedBefore.label "Fjern downloadede emner efter">
-<!ENTITY expireEntriesPerFeedAfter.label "dage">
 <!ENTITY checkUpdatesPerFeedBefore.label "Tjek for opdateringer hver">
+
+<!ENTITY expireEntriesPerFeedBefore.label "Fjern downloadede emner efter">
+
+<!ENTITY expireEntriesPerFeedAfter.label "dage">
+<!ENTITY maxEntriesPerFeedBefore.label "Vis ikke mere end">
+
+<!ENTITY maxEntriesPerFeedAfter.label "seneste emner">

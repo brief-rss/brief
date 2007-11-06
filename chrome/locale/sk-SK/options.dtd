@@ -2,36 +2,61 @@
 <!ENTITY mainPane.label "Hlavné">
 <!ENTITY folderTree.label "Priečinok obsahujúci vaše Aktívne záložky:">
 <!ENTITY showStatusbarIcon.label "Zobraziť ikonu v stavovom riadku">
+<!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Otvoriť Brief na novej karte">
+<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY feedsPane.label "Kanály">
 <!ENTITY updateGroup.caption "Aktualizácia">
 <!ENTITY checkForUpdatesBefore.label "Kontrolovať aktualizáciu kanálov každých">
+<!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "minút">
 <!ENTITY updateIntervalHours.label "hodín">
 <!ENTITY updateIntervalDays.label "dní">
 <!ENTITY checkForUpdatesAfter.label "minút">
 <!ENTITY showNotification.label "Zobraziť upozornenie, ak sú aktualizácie dostupné">
+<!ENTITY showNotification.accesskey "n">
+<!ENTITY behaviorGroup.caption "Režim">
+<!ENTITY openEntriesInTabs.label "Otvoriť položky na nových kartách">
+<!ENTITY openEntriesInTabs.accesskey "t">
+<!ENTITY doubleClickMarks.label "Po dvojkliknutí na položky, označiť ako prečítané">
+<!ENTITY doubleClickMarks.accesskey "M">
 <!ENTITY storingGroup.caption "Ukladanie">
 <!ENTITY expirationBefore.label "Odstrániť stiahnuté položky po">
 <!ENTITY expirationAfter.label "dňoch">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "Položky s hviezdičkou budú zachované">
 <!ENTITY storedEntriesBefore.label "Uchovať nie dlhšie než">
 <!ENTITY storedEntriesAfter.label "posledné položky každého kanála">
+<!ENTITY storedEntriesCheckbox.accesskey "e">
 <!ENTITY clearAllEntriesButton.label "Vyčistiť všetky vstupy">
-<!ENTITY behaviorGroup.caption "Režim">
-<!ENTITY openEntriesInTabs.label "Otvoriť položky na nových kartách">
-<!ENTITY doubleClickMarks.label "Po dvojkliknutí na položky ich označiť ako prečítané">
+<!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Zobraziť">
+<!ENTITY feedViewGroup.caption "Náhľad obsahu kanála">
 <!ENTITY authorsCheckbox.label "Zobraziť autora položky">
+<!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Zobraziť">
 <!ENTITY entriesPerPageAfter.label "položiek na stránku">
-<!ENTITY styleGroup.caption "Štýl obsahu kanála">
 <!ENTITY enableCustomStyle.label "Použiť vlastný štýl pre obsah kanála">
+<!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Prehľadávať">
+<!ENTITY browseCustomStyle.accesskey "B">
+<!ENTITY showShortcuts.label "Zobraziť skratky">
+<!ENTITY showShortcuts.accesskey "z">
+<!ENTITY compactDatabase.label "Zhustiť uložené položky">
+<!ENTITY compactDatabase.accesskey "C">
+<!ENTITY compactingInProgress.label "Brief zhusťuje uložené položky pre zvýšenie miesta na disku...">
 <!ENTITY feedName.label "Názov">
 <!ENTITY feedURL.label "Umiestnenie">
 <!ENTITY optionsGroupbox.caption "Nastavenia kanála">
-<!ENTITY maxEntriesPerFeedBefore.label "Uchovať nie dlhšie než">
-<!ENTITY maxEntriesPerFeedAfter.label "posledné položky">
-<!ENTITY expireEntriesPerFeedBefore.label "Odstrániť stiahnuté položky po">
-<!ENTITY expireEntriesPerFeedAfter.label "dňoch">
 <!ENTITY checkUpdatesPerFeedBefore.label "Kontrolovať aktualizácie každých">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "Odstrániť stiahnuté položky po">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "dňoch">
+<!ENTITY maxEntriesPerFeedBefore.label "Uchovať nie dlhšie než">
+<!ENTITY maxEntriesPerFeed.accesskey "S">
+<!ENTITY maxEntriesPerFeedAfter.label "posledné položky">
+<!ENTITY previousFeed.label "&lt; Predchádzajúci">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Ďalší &gt;">
+<!ENTITY nextFeed.accesskey "D">

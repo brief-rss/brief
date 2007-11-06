@@ -2,36 +2,57 @@
 <!ENTITY mainPane.label "Általános">
 <!ENTITY folderTree.label "Élő könyvjelzőket tartalmazó mappa:">
 <!ENTITY showStatusbarIcon.label "Állapotsor ikon megjelenítése">
+
 <!ENTITY openInNewTab.label "Rövid hírforrások megnyitás új lapon">
+
 <!ENTITY feedsPane.label "Hírforrások">
 <!ENTITY updateGroup.caption "Frissítés">
 <!ENTITY checkForUpdatesBefore.label "Hírforrások frissítése minden">
+
 <!ENTITY updateIntervalMinutes.label "perc">
 <!ENTITY updateIntervalHours.label "óra">
 <!ENTITY updateIntervalDays.label "nap">
 <!ENTITY checkForUpdatesAfter.label "percben">
 <!ENTITY showNotification.label "Értesítés megjelenítése új tartalom esetén">
+
+<!ENTITY behaviorGroup.caption "Viselkedés">
+<!ENTITY openEntriesInTabs.label "Bejegyzések megnyitása új alpon">
+
+<!ENTITY doubleClickMarks.label "Bejegyzések olvasottnak jelölése dupla kattintással">
+
 <!ENTITY storingGroup.caption "Tárolás">
 <!ENTITY expirationBefore.label "Letöltött elemek eltávolítása">
 <!ENTITY expirationAfter.label "nap elteltével">
+
+
 <!ENTITY storedEntriesBefore.label "Ne tároljon többet mint">
 <!ENTITY storedEntriesAfter.label "bejegyzés hírforrásonként">
+
 <!ENTITY clearAllEntriesButton.label "Összes elem törlése">
-<!ENTITY behaviorGroup.caption "Viselkedés">
-<!ENTITY openEntriesInTabs.label "Bejegyzések megnyitása új alpon">
-<!ENTITY doubleClickMarks.label "Bejegyzések olvasottnak jelölése dupla kattintással">
+
 <!ENTITY displayPane.label "Megjelenítés">
+
 <!ENTITY authorsCheckbox.label "Bejegyzések szerzőinek megjelenítése">
+
 <!ENTITY entriesPerPageBefore.label "Oldalanként">
 <!ENTITY entriesPerPageAfter.label "bejegyzés megjelenítése">
-<!ENTITY styleGroup.caption "Hírforrás tartalmi stílus">
 <!ENTITY enableCustomStyle.label "Egyedi stíluslap használata a bejegyzésekhez">
+
 <!ENTITY browseCustomStyle.label "Tallózás">
+
+
+
+
+
+
 <!ENTITY feedName.label "Név">
 <!ENTITY feedURL.label "Hely">
 <!ENTITY optionsGroupbox.caption "Hírforrás beállítások">
-<!ENTITY maxEntriesPerFeedBefore.label "Ne tároljon többet mint">
-<!ENTITY maxEntriesPerFeedAfter.label "bejegyzés hírforrásonként">
-<!ENTITY expireEntriesPerFeedBefore.label "Letöltött elemek eltávolítása">
-<!ENTITY expireEntriesPerFeedAfter.label "nap elteltével">
 <!ENTITY checkUpdatesPerFeedBefore.label "Hírforrások frissítése minden">
+
+<!ENTITY expireEntriesPerFeedBefore.label "Letöltött elemek eltávolítása">
+
+<!ENTITY expireEntriesPerFeedAfter.label "nap elteltével">
+<!ENTITY maxEntriesPerFeedBefore.label "Ne tároljon többet mint">
+
+<!ENTITY maxEntriesPerFeedAfter.label "bejegyzés hírforrásonként">

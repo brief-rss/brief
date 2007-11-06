@@ -1,11 +1,12 @@
+
+
 <!ENTITY searchCurrentView.label "Keresés az aktuális nézetben">
 <!ENTITY searchAllFeeds.label "Keresés az összes hírforrásban">
 <!ENTITY updateButton.tooltip "Hírforrások frissítése">
 <!ENTITY stopUpdatingButton.tooltip "Hírforrás felfüggesztése">
 <!ENTITY searchScopeButton.tooltip "Keresési hatókör megváltoztatása">
 <!ENTITY showOptions.tooltip "Rövid hírforrások beállítások">
-<!ENTITY markViewRead.tooltip "Aktuális bejegyzés jelölése olvasottként">
-<!ENTITY markViewUnread.tooltip "Aktuális bejegyzése jelölése olvasatlanként">
+
 <!ENTITY viewConstraintList.tooltip "Válassza ki milyen típusú bejegyzése jelenjen meg">
 <!ENTITY previousPage.tooltip "Újabb bejegyzések megjelenítése">
 <!ENTITY nextPage.tooltip "Régebbi bejegyzések megjelenítése">
@@ -13,7 +14,9 @@
 <!ENTITY starredFolder.label "Csillagos bejegyzések">
 <!ENTITY trashFolder.label "Törölt bejegyzések">
 <!ENTITY ctxMarkFeedRead.label "Hírforrást olvasottnak jelöl">
+
 <!ENTITY ctxMarkFolderRead.label "Mappát olvasottnak jelöl">
+
 <!ENTITY ctxUpdateFeed.label "Hírforrás frissítése">
 <!ENTITY ctxUpdateFolder.label "Frissítési mappa">
 <!ENTITY ctxOpenWebsite.label "Weblap megnyitása">

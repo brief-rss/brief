@@ -1,37 +1,62 @@
-<!ENTITY optionsWindow.title "Brief 选项">
+<!ENTITY optionsWindow.title "Brief 设置">
 <!ENTITY mainPane.label "主要">
 <!ENTITY folderTree.label "放置实时书签的文件夹：">
 <!ENTITY showStatusbarIcon.label "在状态栏显示图标">
+<!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "在新标签页打开 Brief">
+<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY feedsPane.label "聚合">
 <!ENTITY updateGroup.caption "更新">
 <!ENTITY checkForUpdatesBefore.label "每">
+<!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "分钟">
 <!ENTITY updateIntervalHours.label "小时">
 <!ENTITY updateIntervalDays.label "天">
 <!ENTITY checkForUpdatesAfter.label "分钟">
 <!ENTITY showNotification.label "当有更新时显示提示">
+<!ENTITY showNotification.accesskey "n">
+<!ENTITY behaviorGroup.caption "动作">
+<!ENTITY openEntriesInTabs.label "在新标签页打开信息">
+<!ENTITY openEntriesInTabs.accesskey "t">
+<!ENTITY doubleClickMarks.label "双击信息后标记为已读">
+<!ENTITY doubleClickMarks.accesskey "M">
 <!ENTITY storingGroup.caption "保存">
 <!ENTITY expirationBefore.label "在">
 <!ENTITY expirationAfter.label "天后清除已下载信息">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "带星号的信息会被保留">
 <!ENTITY storedEntriesBefore.label "每个聚合只保存最新的">
 <!ENTITY storedEntriesAfter.label "条信息">
+<!ENTITY storedEntriesCheckbox.accesskey "e">
 <!ENTITY clearAllEntriesButton.label "清除所有信息">
-<!ENTITY behaviorGroup.caption "动作">
-<!ENTITY openEntriesInTabs.label "在新标签页打开信息">
-<!ENTITY doubleClickMarks.label "双击信息后标记为已读">
+<!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "显示">
+<!ENTITY feedViewGroup.caption "浏览聚合内容">
 <!ENTITY authorsCheckbox.label "显示信息的作者">
+<!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "每页显示">
 <!ENTITY entriesPerPageAfter.label "条信息">
-<!ENTITY styleGroup.caption "聚合内容的样式">
 <!ENTITY enableCustomStyle.label "使用自定义样式">
+<!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "浏览">
+<!ENTITY browseCustomStyle.accesskey "B">
+<!ENTITY showShortcuts.label "显示快捷键">
+<!ENTITY showShortcuts.accesskey "w">
+
+<!ENTITY compactDatabase.accesskey "C">
+
 <!ENTITY feedName.label "名称">
 <!ENTITY feedURL.label "地址">
 <!ENTITY optionsGroupbox.caption "聚合设置">
-<!ENTITY maxEntriesPerFeedBefore.label "只保存">
-<!ENTITY maxEntriesPerFeedAfter.label "条最新消息">
-<!ENTITY expireEntriesPerFeedBefore.label "在">
-<!ENTITY expireEntriesPerFeedAfter.label "天后移除已下载的信息">
 <!ENTITY checkUpdatesPerFeedBefore.label "每隔多久检查更新：">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "在">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "天后移除已下载的信息">
+<!ENTITY maxEntriesPerFeedBefore.label "只保存">
+<!ENTITY maxEntriesPerFeed.accesskey "S">
+<!ENTITY maxEntriesPerFeedAfter.label "条最新消息">
+<!ENTITY previousFeed.label "&lt; 后退">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "前进 &gt;">
+<!ENTITY nextFeed.accesskey "N">

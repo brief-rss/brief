@@ -1,19 +1,22 @@
+<!ENTITY selectHomeFolder.label "ライブブックマークを含むフォルダを選択:">
+<!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "現在の表示から検索">
 <!ENTITY searchAllFeeds.label "すべてのフィードを検索">
 <!ENTITY updateButton.tooltip "すべてのフィードを更新確認する">
 <!ENTITY stopUpdatingButton.tooltip "フィードの更新確認を止める">
 <!ENTITY searchScopeButton.tooltip "検索範囲を変更する">
 <!ENTITY showOptions.tooltip "Brief のオプションを開く">
-<!ENTITY markViewRead.tooltip "現在表示されているエントリを既読にする">
-<!ENTITY markViewUnread.tooltip "現在表示されているエントリを未読にする">
-<!ENTITY viewConstraintList.tooltip "表示するエントリの種類を選ぶ">
-<!ENTITY previousPage.tooltip "より新たなエントリを表示">
-<!ENTITY nextPage.tooltip "より古いエントリを表示">
+<!ENTITY markAllRead.label "すべてを既読にする">
+<!ENTITY viewConstraintList.tooltip "表示する項目の種類を選ぶ">
+<!ENTITY previousPage.tooltip "より新たな項目を表示">
+<!ENTITY nextPage.tooltip "より古い項目を表示">
 <!ENTITY unreadFolder.label "未読">
-<!ENTITY starredFolder.label "スターあり">
+<!ENTITY starredFolder.label "スター済み">
 <!ENTITY trashFolder.label "ごみ箱">
 <!ENTITY ctxMarkFeedRead.label "フィードを既読にする">
+<!ENTITY ctxMarkFeedUnread.label "フィードを未読にする">
 <!ENTITY ctxMarkFolderRead.label "フォルダを既読にする">
+<!ENTITY ctxMarkFolderUnread.label "フォルダを未読にする">
 <!ENTITY ctxUpdateFeed.label "フィードを確認する">
 <!ENTITY ctxUpdateFolder.label "フォルダを更新する">
 <!ENTITY ctxOpenWebsite.label "ウェブサイトを開く">
@@ -21,7 +24,7 @@
 <!ENTITY ctxDeleteFolder.label "フォルダを削除する">
 <!ENTITY ctxEmptyFeed.label "フィードを空にする">
 <!ENTITY ctxEmptyFolder.label "フォルダを空にする">
-<!ENTITY ctxRestoreTrashed.label "ゴミ箱に捨てたエントリを元に戻す">
+<!ENTITY ctxRestoreTrashed.label "ごみ箱に捨てた項目を元に戻す">
 <!ENTITY ctxEmptyTrash.label "ごみ箱を空にする">
 <!ENTITY ctxFeedProperties.label "プロパティ">
 <!ENTITY ctxUpdateFeeds.label "今すぐフィードを確認">

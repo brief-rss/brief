@@ -1,37 +1,58 @@
-<!ENTITY optionsWindow.title "Opciones de Brief">
-<!ENTITY mainPane.label "Principal">
-<!ENTITY folderTree.label "Carpeta que contiene sus marcadores dinámicos:">
-<!ENTITY showStatusbarIcon.label "Mostrar icono en la barra de estado">
-<!ENTITY openInNewTab.label "Abrir Brief en una nueva pestaña">
-<!ENTITY feedsPane.label "Canales">
-<!ENTITY updateGroup.caption "Actualizando">
-<!ENTITY checkForUpdatesBefore.label "Buscar actualización de titulares cada">
+<!ENTITY optionsWindow.title "Options de Brief">
+<!ENTITY mainPane.label "Générales">
+<!ENTITY folderTree.label "Dossier contenant vos marque-pages dynamiques :">
+<!ENTITY showStatusbarIcon.label "Afficher l&apos;icône dans la barre d&apos;état">
+
+<!ENTITY openInNewTab.label "Ouvrir Brief dans un nouvel onglet">
+
+<!ENTITY feedsPane.label "Flux">
+<!ENTITY updateGroup.caption "Mises à jour">
+<!ENTITY checkForUpdatesBefore.label "Mettre les flux à jour toutes les">
+
 <!ENTITY updateIntervalMinutes.label "minutes">
-<!ENTITY updateIntervalHours.label "hours">
-<!ENTITY updateIntervalDays.label "days">
-<!ENTITY checkForUpdatesAfter.label "minutos">
-<!ENTITY showNotification.label "Mostrar notificación cuando se encuentren actualizaciones">
-<!ENTITY storingGroup.caption "Almacenamiento">
-<!ENTITY expirationBefore.label "Almacenar titulares descargados por">
-<!ENTITY expirationAfter.label "dias">
-<!ENTITY storedEntriesBefore.label "Almacenar hasta">
-<!ENTITY storedEntriesAfter.label "titulares por canal">
-<!ENTITY clearAllEntriesButton.label "Clear All Entries">
-<!ENTITY behaviorGroup.caption "Comportamiento">
-<!ENTITY openEntriesInTabs.label "Abrir titulares en pestañas nuevas">
-<!ENTITY doubleClickMarks.label "Marcar los titulares como leidos al hacer doble click sobre ellos">
-<!ENTITY displayPane.label "Visualización">
-<!ENTITY authorsCheckbox.label "Show authors of the entries">
-<!ENTITY entriesPerPageBefore.label "Mostrar">
-<!ENTITY entriesPerPageAfter.label "titulares por página">
-<!ENTITY styleGroup.caption "Feed content style">
-<!ENTITY enableCustomStyle.label "Usar estilo personalizado para el contenido del canal">
-<!ENTITY browseCustomStyle.label "Explorar">
-<!ENTITY feedName.label "Name">
-<!ENTITY feedURL.label "Location">
-<!ENTITY optionsGroupbox.caption "Feed settings">
-<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
-<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
-<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
-<!ENTITY expireEntriesPerFeedAfter.label "days">
-<!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">
+<!ENTITY updateIntervalHours.label "heures">
+<!ENTITY updateIntervalDays.label "jours">
+<!ENTITY checkForUpdatesAfter.label "minutes">
+<!ENTITY showNotification.label "M&apos;avertir si des mises à jour ont été trouvées">
+
+<!ENTITY behaviorGroup.caption "Comportement">
+<!ENTITY openEntriesInTabs.label "Ouvrir les articles dans de nouveaux onglets">
+
+<!ENTITY doubleClickMarks.label "Marquer les articles comme lus au double-clic">
+
+<!ENTITY storingGroup.caption "Enregistrement">
+<!ENTITY expirationBefore.label "Supprimer les articles téléchargés il y a plus de">
+<!ENTITY expirationAfter.label "jours">
+
+
+<!ENTITY storedEntriesBefore.label "N&apos;enregistrer que les">
+<!ENTITY storedEntriesAfter.label "derniers articles de chaque flux">
+
+<!ENTITY clearAllEntriesButton.label "Supprimer tous les articles">
+
+<!ENTITY displayPane.label "Affichage">
+
+<!ENTITY authorsCheckbox.label "Afficher l&apos;auteur des articles">
+
+<!ENTITY entriesPerPageBefore.label "Afficher">
+<!ENTITY entriesPerPageAfter.label "articles par page">
+<!ENTITY enableCustomStyle.label "Utiliser un style personnalisé pour le contenu des flux">
+
+<!ENTITY browseCustomStyle.label "Parcourir…">
+
+
+
+
+
+
+<!ENTITY feedName.label "Nom">
+<!ENTITY feedURL.label "Adresse">
+<!ENTITY optionsGroupbox.caption "Réglages des flux">
+<!ENTITY checkUpdatesPerFeedBefore.label "Mettre les flux à jour toutes les">
+
+<!ENTITY expireEntriesPerFeedBefore.label "Supprimer les articles de plus de">
+
+<!ENTITY expireEntriesPerFeedAfter.label "jours">
+<!ENTITY maxEntriesPerFeedBefore.label "N&apos;enregistrer que les">
+
+<!ENTITY maxEntriesPerFeedAfter.label "derniers articles">

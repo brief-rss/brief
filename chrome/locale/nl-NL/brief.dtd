@@ -1,11 +1,12 @@
+<!ENTITY selectHomeFolder.label "Selecteer de map met uw Live Bladwijzers:">
+<!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Zoeken in huidige weergave">
 <!ENTITY searchAllFeeds.label "Zoeken in alle feeds">
 <!ENTITY updateButton.tooltip "Alle feeds controleren op updates">
 <!ENTITY stopUpdatingButton.tooltip "Feeds niet meer op updates controleren">
 <!ENTITY searchScopeButton.tooltip "De zoekopdracht wijzigen">
 <!ENTITY showOptions.tooltip "Brief opties openen">
-<!ENTITY markViewRead.tooltip "Momenteel bekeken onderwerpen als gelezen markeren">
-<!ENTITY markViewUnread.tooltip "Momenteel bekeken onderwerpen als niet gelezen markeren">
+<!ENTITY markAllRead.label "Alles gelezen">
 <!ENTITY viewConstraintList.tooltip "Kies welke berichten moeten worden weergegeven">
 <!ENTITY previousPage.tooltip "Nieuwere onderwerpen weergeven">
 <!ENTITY nextPage.tooltip "Oudere onderwerpen weergeven">
@@ -13,7 +14,9 @@
 <!ENTITY starredFolder.label "Voorzien van ster">
 <!ENTITY trashFolder.label "Prullenbak">
 <!ENTITY ctxMarkFeedRead.label "Feed als gelezen markeren">
+<!ENTITY ctxMarkFeedUnread.label "Als ongelezen markeren">
 <!ENTITY ctxMarkFolderRead.label "Map als gelezen markeren">
+<!ENTITY ctxMarkFolderUnread.label "Map als ongelezen markeren">
 <!ENTITY ctxUpdateFeed.label "Feed bijwerken">
 <!ENTITY ctxUpdateFolder.label "Map bijwerken">
 <!ENTITY ctxOpenWebsite.label "Website openen">

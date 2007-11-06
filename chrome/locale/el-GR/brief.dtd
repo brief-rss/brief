@@ -1,19 +1,22 @@
+<!ENTITY selectHomeFolder.label "Επιλογή καταλόγου που περιέχει δυναμικούς σελιδοδείκτες:">
+<!ENTITY confirmHomeFolder.label "ΟΚ">
 <!ENTITY searchCurrentView.label "Εύρεση στα εμφανισμένα">
 <!ENTITY searchAllFeeds.label "Εύρεση σε όλα τα αρχεία ροής">
 <!ENTITY updateButton.tooltip "Έλεγχος για ενημερώσεις όλων των αρχείων ροής">
 <!ENTITY stopUpdatingButton.tooltip "Διακοπή ελέγχου για ενημερώσεις">
 <!ENTITY searchScopeButton.tooltip "Αλλαγή της εμβέλειας εύρεσης">
 <!ENTITY showOptions.tooltip "Άνοιγμα επιλογών Brief">
-<!ENTITY markViewRead.tooltip "Σημείωση εμφανισθέντων εγγραφών ως αναγνωσμένων">
-<!ENTITY markViewUnread.tooltip "Σημείωση εμφανισθέντων εγγραφών ως μη αναγνωσμένων">
+<!ENTITY markAllRead.label "Όλα ως αναγνωσμένα">
 <!ENTITY viewConstraintList.tooltip "Επιλογή είδους εγγραφών προς εμφάνιση">
 <!ENTITY previousPage.tooltip "Προβολή πρόσφατων εγγραφών">
 <!ENTITY nextPage.tooltip "Προβολή παλαιότερων εγγραφών">
 <!ENTITY unreadFolder.label "Μη αναγνωσμένα">
 <!ENTITY starredFolder.label "Με αστέρι">
 <!ENTITY trashFolder.label "Κάδος">
-<!ENTITY ctxMarkFeedRead.label "Σημείωση αρχείου ροής ως αναγνωσμένο">
-<!ENTITY ctxMarkFolderRead.label "Σημείωση φακέλου ως αναγνωσμένου">
+<!ENTITY ctxMarkFeedRead.label "Σημείωση αρχείου ροής ως αναγνωσμένου">
+<!ENTITY ctxMarkFeedUnread.label "Σημείωση αρχείου ροής ως μη αναγνωσμένου">
+<!ENTITY ctxMarkFolderRead.label "Σημείωση καταλόγου ως αναγνωσμένου">
+<!ENTITY ctxMarkFolderUnread.label "Σημείωση καταλόγου ως μη αναγνωσμένου">
 <!ENTITY ctxUpdateFeed.label "Ενημέρωση αρχείου ροής">
 <!ENTITY ctxUpdateFolder.label "Ενημέρωση καταλόγου">
 <!ENTITY ctxOpenWebsite.label "Άνοιγμα ιστότοπου">

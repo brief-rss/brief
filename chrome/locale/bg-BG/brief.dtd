@@ -1,11 +1,12 @@
+
+
 <!ENTITY searchCurrentView.label "Търси в сегашния фийд">
 <!ENTITY searchAllFeeds.label "Търси из всички фийдове">
 <!ENTITY updateButton.tooltip "Провери всички фийдове за обновления">
 <!ENTITY stopUpdatingButton.tooltip "Спри да проверяваш дали фийдовете са обновени">
 <!ENTITY searchScopeButton.tooltip "Промени начина на търсене">
 <!ENTITY showOptions.tooltip "Отвори Брийф настроиките">
-<!ENTITY markViewRead.tooltip "Маркирай гледаните в момента фийдове като прочетени">
-<!ENTITY markViewUnread.tooltip "Маркирай гледаните в момента фийдове като непрочетени">
+
 <!ENTITY viewConstraintList.tooltip "Избери какво да бъде показвано">
 <!ENTITY previousPage.tooltip "Покажи обновените фийдове">
 <!ENTITY nextPage.tooltip "Покажи старите фийдове">
@@ -13,7 +14,9 @@
 <!ENTITY starredFolder.label "Позвездено">
 <!ENTITY trashFolder.label "Боклук">
 <!ENTITY ctxMarkFeedRead.label "Марирай Фийда като Прочетен">
+
 <!ENTITY ctxMarkFolderRead.label "Марирай Папката като Прочетена">
+
 <!ENTITY ctxUpdateFeed.label "Ъпдейтни Фийда">
 <!ENTITY ctxUpdateFolder.label "Обнови папката">
 <!ENTITY ctxOpenWebsite.label "Отвори Уеб-сайта">

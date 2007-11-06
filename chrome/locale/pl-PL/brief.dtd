@@ -1,16 +1,12 @@
+<!ENTITY selectHomeFolder.label "Wybierz folder zawierający twoje dynamiczne zakładki">
+<!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Szukaj w widocznych">
 <!ENTITY searchAllFeeds.label "Szukaj we wszystkich kanałach">
-<!ENTITY headlinesCheckbox.label "Widok nagłówków">
-<!ENTITY viewConstraintList.label "Pokaż:">
-<!ENTITY viewAll.label "Wszystkie">
-<!ENTITY viewUnread.label "Nieprzeczytane">
-<!ENTITY viewStarred.label "Zaznaczone"
 <!ENTITY updateButton.tooltip "Pobierz nowe wiadomości ze wszystkich kanałów">
 <!ENTITY stopUpdatingButton.tooltip "Przerwij aktualizowanie kanałów">
 <!ENTITY searchScopeButton.tooltip "Określ zakres wyszukiwania">
 <!ENTITY showOptions.tooltip "Otwórz opcje rozszerzenia">
-<!ENTITY markViewRead.tooltip "Oznacz widoczne wiadomości jako przeczytane">
-<!ENTITY markViewUnread.tooltip "Oznacz widoczne wiadomości jako nieprzeczytane">
+<!ENTITY markAllRead.label "Przeczytane">
 <!ENTITY viewConstraintList.tooltip "Wybierz typ wiadomości do wyświetlenia">
 <!ENTITY previousPage.tooltip "Wyświetl nowsze wiadomości">
 <!ENTITY nextPage.tooltip "Wyświetl starsze wiadomości">
@@ -18,7 +14,9 @@
 <!ENTITY starredFolder.label "Zaznaczone">
 <!ENTITY trashFolder.label "Kosz">
 <!ENTITY ctxMarkFeedRead.label "Oznacz kanał jako przeczytany">
+<!ENTITY ctxMarkFeedUnread.label "Oznacz kanał jako nieprzeczytany">
 <!ENTITY ctxMarkFolderRead.label "Oznacz folder jako przeczytany">
+<!ENTITY ctxMarkFolderUnread.label "Oznacz folder jako nieprzeczytany">
 <!ENTITY ctxUpdateFeed.label "Aktualizuj kanał">
 <!ENTITY ctxUpdateFolder.label "Aktualizuj folder">
 <!ENTITY ctxOpenWebsite.label "Otwórz witrynę">

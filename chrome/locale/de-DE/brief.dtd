@@ -1,11 +1,12 @@
+
+
 <!ENTITY searchCurrentView.label "In aktueller Ansicht suchen">
 <!ENTITY searchAllFeeds.label "In allen Feeds suchen">
 <!ENTITY updateButton.tooltip "Alle Feeds auf Aktualisierungen prüfen">
 <!ENTITY stopUpdatingButton.tooltip "Überprüfung abbrechen">
 <!ENTITY searchScopeButton.tooltip "Suchbereich ändern">
 <!ENTITY showOptions.tooltip "Einstellungen öffnen">
-<!ENTITY markViewRead.tooltip "Angezeigte Einträge als gelesen markieren">
-<!ENTITY markViewUnread.tooltip "Angezeigte Einträge als ungelesen markieren">
+
 <!ENTITY viewConstraintList.tooltip "Art der anzuzeigenden Einträge auswählen">
 <!ENTITY previousPage.tooltip "Aktuellere Einträge anzeigen">
 <!ENTITY nextPage.tooltip "Ältere Einträge anzeigen">
@@ -13,7 +14,9 @@
 <!ENTITY starredFolder.label "Gekennzeichnet">
 <!ENTITY trashFolder.label "Papierkorb">
 <!ENTITY ctxMarkFeedRead.label "Feed als gelesen markieren">
+
 <!ENTITY ctxMarkFolderRead.label "Ordner als gelesen markieren">
+
 <!ENTITY ctxUpdateFeed.label "Feed aktualisieren">
 <!ENTITY ctxUpdateFolder.label "Ordner aktualisieren">
 <!ENTITY ctxOpenWebsite.label "Homepage öffnen">

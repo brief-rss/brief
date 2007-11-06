@@ -1,17 +1,12 @@
-<!ENTITY pickFolder.label "Odaberite mapu živih zabilješki">
+
+
 <!ENTITY searchCurrentView.label "Pretraži trenutni pogled">
 <!ENTITY searchAllFeeds.label "Pretraži sve izvore">
-<!ENTITY headlinesCheckbox.label "Show only headlines">
-<!ENTITY viewConstraintList.label "Pogled:">
-<!ENTITY viewAll.label "Sve">
-<!ENTITY viewUnread.label "Nepročitano">
-<!ENTITY viewStarred.label "Označeno">
 <!ENTITY updateButton.tooltip "Provjeri sve izvore za ažuriranje">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY searchScopeButton.tooltip "Promijeniti opseg pretrage">
 <!ENTITY showOptions.tooltip "Otvori Brief opcije">
-<!ENTITY markViewRead.tooltip "Označi trenutno pogledane unose kao pročitane">
-<!ENTITY markViewUnread.tooltip "Označi trenutno pogledane unose kao nepročitane">
+
 <!ENTITY viewConstraintList.tooltip "Odabrati kakav tip unosa se prikazuje">
 <!ENTITY previousPage.tooltip "Prikaži novije unose">
 <!ENTITY nextPage.tooltip "Prikaži starije unose">
@@ -19,7 +14,9 @@
 <!ENTITY starredFolder.label "Označeno">
 <!ENTITY trashFolder.label "Smeće">
 <!ENTITY ctxMarkFeedRead.label "Označi izvor kao pročitan">
+
 <!ENTITY ctxMarkFolderRead.label "Označi mapu kao pročitanu">
+
 <!ENTITY ctxUpdateFeed.label "Ažuriraj izvor">
 <!ENTITY ctxUpdateFolder.label "Update Folder">
 <!ENTITY ctxOpenWebsite.label "Otvori web stranicu">
