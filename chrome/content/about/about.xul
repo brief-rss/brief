@@ -52,6 +52,13 @@
 
         <vbox id="translatorsBox" class="section">
             <label id="extensionTranslators" class="sectionTitle">&translators.headline;</label>
+            <grid id="translatorsGrid">
+                <columns>
+                    <column flex="1"/>
+                    <column flex="1"/>
+                </columns>
+                <rows id="translatorsRows"/>
+            </grid>
         </vbox>
 
         <vbox class="section">
@@ -63,6 +70,7 @@
            <description>&iconsThanks.paragraph;</description>
            <description>&testingThanks.paragraph;</description>
            <description>&keyboardIconsCredit.paragraph;</description>
+           <description>&toolbarIconsCredits.paragraph;</description>
         </vbox>
 
     </vbox>
