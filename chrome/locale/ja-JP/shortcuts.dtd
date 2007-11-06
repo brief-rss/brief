@@ -1,0 +1,46 @@
+<!ENTITY shortcutsPage.title "Brief - キーボードショートカット">
+<!ENTITY navigation.header "ナビゲーション">
+<!ENTITY k.key "K">
+<!ENTITY or "または">
+<!ENTITY space.key "Space">
+<!ENTITY selectNext "次の項目を選択">
+<!ENTITY j.key "J">
+<!ENTITY backspace.key "BackSpace">
+<!ENTITY selectPrevious "前の項目を選択">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "次のページを表示">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "前のページを表示">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "項目を開く">
+<!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY openEntryTab "項目を新しいタブで開く">
+<!ENTITY n.key "N">
+<!ENTITY foldEntry "選択済み項目を展開または折り畳む (見出し表示時)">
+<!ENTITY entries.header "項目">
+<!ENTITY m.key "M">
+<!ENTITY markRead "選択済み項目を既読または未読にする">
+<!ENTITY b.key "B">
+<!ENTITY starEntry "選択済み項目をスターまたは非スターにする">
+<!ENTITY t.key "T">
+<!ENTITY moveToTrash "選択済み項目をごみ箱に移動する">
+<!ENTITY r.key "R">
+<!ENTITY restoreEntry "選択済み項目を元に戻す (ごみ箱にある時)">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY markAllAsRead "すべての表示済み項目を既読にする">
+<!ENTITY q.key "Q">
+<!ENTITY tab.key "Tab">
+<!ENTITY deselectEntries "あらゆる項目の非選択状態にする">
+<!ENTITY view.header "表示">
+<!ENTITY a.key "A">
+<!ENTITY showAll "すべての項目を表示">
+<!ENTITY s.key "S">
+<!ENTITY showStarred "スター済み項目を表示">
+<!ENTITY d.key "D">
+<!ENTITY showUnread "未読項目を表示">
+<!ENTITY f.key "F">
+<!ENTITY headlinesView "見出し表示を切り替える">
+<!ENTITY slash.key "/">
+<!ENTITY focusSearchbar "検索バーにフォーカスする">
+<!ENTITY questionMark.key "?">
+<!ENTITY displayShortcuts "ショートカットキーの一覧を表示する">

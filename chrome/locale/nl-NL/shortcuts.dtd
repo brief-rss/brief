@@ -1,0 +1,46 @@
+<!ENTITY shortcutsPage.title "Brief - sneltoetsen">
+<!ENTITY navigation.header "Navigatie">
+<!ENTITY k.key "K">
+<!ENTITY or "of">
+<!ENTITY space.key "Spatie">
+<!ENTITY selectNext "Volgend bericht selecteren">
+<!ENTITY j.key "J">
+<!ENTITY backspace.key "Backspace">
+<!ENTITY selectPrevious "Vorig bericht selecteren">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "Volgende pagina weergeven">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Vorige pagina weergeven">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Bercht openen">
+<!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY openEntryTab "Bericht in nieuw tabblad openen">
+<!ENTITY n.key "N">
+<!ENTITY foldEntry "Geselecteerd bericht uit- of inklappen (wanneer kopteksten worden bekeken)">
+<!ENTITY entries.header "Berichten">
+<!ENTITY m.key "M">
+<!ENTITY markRead "Geselecteerd bericht als gelezen of ongelezen markeren">
+<!ENTITY b.key "B">
+<!ENTITY starEntry "Geselecteerd bericht van ster voorzien of ontdoen">
+<!ENTITY t.key "T">
+<!ENTITY moveToTrash "Geselecteerd bericht naar Prullenbak verplaatsen">
+<!ENTITY r.key "R">
+<!ENTITY restoreEntry "Geselecteerd bericht herstellen (wanneer in de Prullenbak)">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY markAllAsRead "Alle bekeken berichten als gelezen markeren">
+<!ENTITY q.key "Q">
+<!ENTITY tab.key "Tab">
+<!ENTITY deselectEntries "Alle berichten deselecteren">
+<!ENTITY view.header "Beeld">
+<!ENTITY a.key "A">
+<!ENTITY showAll "Alle berichten weergeven">
+<!ENTITY s.key "S">
+<!ENTITY showStarred "Berichten met ster weergeven">
+<!ENTITY d.key "D">
+<!ENTITY showUnread "Ongelezen berichten weergeven">
+<!ENTITY f.key "F">
+<!ENTITY headlinesView "Kopteksten aan- of uitzetten">
+<!ENTITY slash.key "/">
+<!ENTITY focusSearchbar "Zoekbalk focus geven">
+<!ENTITY questionMark.key "?">
+<!ENTITY displayShortcuts "Lijst met sneltoetsen weergeven">
