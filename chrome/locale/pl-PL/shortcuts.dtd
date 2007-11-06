@@ -1,0 +1,46 @@
+<!ENTITY shortcutsPage.title "Brief - skróty klawiaturowe">
+<!ENTITY navigation.header "Nawigacja">
+<!ENTITY k.key "K">
+<!ENTITY or "lub">
+<!ENTITY space.key "Spacja">
+<!ENTITY selectNext "Przejdź do następnej wiadomości">
+<!ENTITY j.key "J">
+<!ENTITY backspace.key "Backspace">
+<!ENTITY selectPrevious "Przejdź do poprzedniej wiadomości">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "Wyświetl następną stronę">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Wyświetl poprzednią stronę">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Otwórz wiadomość">
+<!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY openEntryTab "Otwórz wiadomość w nowej karcie">
+<!ENTITY n.key "N">
+<!ENTITY foldEntry "Rozwiń lub zwiń wiadomość (w trybie widoku nagłówków)">
+<!ENTITY entries.header "Wiadomości">
+<!ENTITY m.key "M">
+<!ENTITY markRead "Oznacz wybraną wiadomość jako przeczytaną/nieprzeczytaną">
+<!ENTITY b.key "B">
+<!ENTITY starEntry "Wyróżnij gwiazdką wybraną wiadomość / usuń wyróżnienie">
+<!ENTITY t.key "T">
+<!ENTITY moveToTrash "Przenieś wybrane wiadomości do kosza">
+<!ENTITY r.key "R">
+<!ENTITY restoreEntry "Przywróć z kosza wybraną wiadomość">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY markAllAsRead "Oznacz wszystkie widoczne wiadomości jako przeczytane">
+<!ENTITY q.key "Q">
+<!ENTITY tab.key "Tab">
+<!ENTITY deselectEntries "Odznacz wszystkie wiadomości">
+<!ENTITY view.header "Podgląd">
+<!ENTITY a.key "A">
+<!ENTITY showAll "Wyświetl wszystkie wiadomości">
+<!ENTITY s.key "S">
+<!ENTITY showStarred "Wyświetl wiadomości wyróżnione gwiazdką">
+<!ENTITY d.key "D">
+<!ENTITY showUnread "Wyświetl nieprzeczytane wiadomości">
+<!ENTITY f.key "F">
+<!ENTITY headlinesView "Przełącz widok nagłówków">
+<!ENTITY slash.key "/">
+<!ENTITY focusSearchbar "Uaktywnij pasek szukania">
+<!ENTITY questionMark.key "?">
+<!ENTITY displayShortcuts "Wyświetl listę skrótów klawiaturowych">

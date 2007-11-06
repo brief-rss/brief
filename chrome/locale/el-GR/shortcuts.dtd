@@ -1,0 +1,46 @@
+<!ENTITY shortcutsPage.title "Πλήκτρα συντομεύσεων Brief">
+<!ENTITY navigation.header "Πλοήγηση">
+<!ENTITY k.key "λ">
+<!ENTITY or "ή">
+<!ENTITY space.key "Space">
+<!ENTITY selectNext "Επιλογή επόμενης εγγραφής">
+<!ENTITY j.key "ε">
+<!ENTITY backspace.key "Backspace">
+<!ENTITY selectPrevious "Επιλογή προηγούμενης εγγραφής">
+<!ENTITY altK.key "Alt + Ε">
+<!ENTITY nextPage "Προβολή επόμενης σελίδας">
+<!ENTITY altJ.key "Alt + μ">
+<!ENTITY previousPage "Προβολή προηγούμενης σελίδας">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Άνοιγμα εγγραφής">
+<!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY openEntryTab "Άνοιγμα εγγραφής σε νέα καρτέλα">
+<!ENTITY n.key "Ν">
+<!ENTITY foldEntry "Δίπλωμα ή ξεδίπλωμα επιλεγμένης εγγραφής (στην κατάσταση εμφάνισης επικεφαλίδων)">
+<!ENTITY entries.header "Εγγραφές">
+<!ENTITY m.key "η">
+<!ENTITY markRead "Σημείωση επιλεγμένης εγγραφής ως αναγνωσμένης ή μη">
+<!ENTITY b.key "τ">
+<!ENTITY starEntry "Σημείωση επιλεγμένης εγγραφής με αστέρι ή χωρίς">
+<!ENTITY t.key "Κ">
+<!ENTITY moveToTrash "Μεταφορά επιλεγμένης εγγραφής στον κάδο">
+<!ENTITY r.key "Φ">
+<!ENTITY restoreEntry "Επαναφορά επιλεγμένης εγγραφής (από τον κάδο)">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY markAllAsRead "Σημείωση όλων των εμφανισθέντων εγγραφών ως αναγνωσμένων">
+<!ENTITY q.key "υ">
+<!ENTITY tab.key "Tab">
+<!ENTITY deselectEntries "Ακύρωση επιλογής εγγραφών">
+<!ENTITY view.header "Εμφάνιση">
+<!ENTITY a.key "Ο">
+<!ENTITY showAll "Προβολή όλων των εγγραφών">
+<!ENTITY s.key "Σ">
+<!ENTITY showStarred "Προβολή εγγραφών με αστέρι">
+<!ENTITY d.key "Μ">
+<!ENTITY showUnread "Προβολή μη αναγνωσμένων εγγραφών">
+<!ENTITY f.key "Κ">
+<!ENTITY headlinesView "Εναλλαγή εμφάνισης επικεφαλίδων">
+<!ENTITY slash.key "/">
+<!ENTITY focusSearchbar "Εστίαση εργαλειοθήκης αναζήτησης">
+<!ENTITY questionMark.key ";">
+<!ENTITY displayShortcuts "Εμφάνιση λίστας πλήκτρων συντομεύσεων">

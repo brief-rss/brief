@@ -1,0 +1,46 @@
+<!ENTITY shortcutsPage.title "Brief - raccourcis clavier">
+<!ENTITY navigation.header "Navigation">
+<!ENTITY k.key "K">
+<!ENTITY or "ou">
+<!ENTITY space.key "Espace">
+<!ENTITY selectNext "Sélectionner l&apos;article suivant">
+<!ENTITY j.key "J">
+<!ENTITY backspace.key "Retour arrière">
+<!ENTITY selectPrevious "Sélectionner l&apos;article précédent">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "Afficher la page suivante">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Afficher la page précédente">
+<!ENTITY enter.key "Entrée">
+<!ENTITY openEntry "Ouvrir l&apos;article">
+<!ENTITY ctrlEnter.key "Ctrl + Entrée">
+<!ENTITY openEntryTab "Ouvrir l&apos;article dans un nouvel onglet">
+<!ENTITY n.key "N">
+<!ENTITY foldEntry "Afficher ou réduire l&apos;article sélectionné (en mode d&apos;affichage des titres)">
+<!ENTITY entries.header "Articles">
+<!ENTITY m.key "M">
+<!ENTITY markRead "Marquer l&apos;article sélectionné comme lu ou non lu">
+<!ENTITY b.key "B">
+<!ENTITY starEntry "Marquer ou supprimer la marque de l&apos;article">
+<!ENTITY t.key "T">
+<!ENTITY moveToTrash "Envoyer l&apos;article sélectionné à la corbeille">
+<!ENTITY r.key "R">
+<!ENTITY restoreEntry "Restaurer l&apos;article sélectionné (dans la corbeille)">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY markAllAsRead "Marquer les articles courants comme lus">
+<!ENTITY q.key "Q">
+<!ENTITY tab.key "Tab">
+<!ENTITY deselectEntries "Désélectionner tous les articles">
+<!ENTITY view.header "Affichage">
+<!ENTITY a.key "A">
+<!ENTITY showAll "Afficher tous les articles">
+<!ENTITY s.key "S">
+<!ENTITY showStarred "Afficher les articles marqués">
+<!ENTITY d.key "D">
+<!ENTITY showUnread "Afficher les articles non lus">
+<!ENTITY f.key "F">
+<!ENTITY headlinesView "Activer/désactiver le mode d&apos;affichage des titres">
+<!ENTITY slash.key "/">
+<!ENTITY focusSearchbar "Focus sur la barre de recherche">
+<!ENTITY questionMark.key "?">
+<!ENTITY displayShortcuts "Afficher la liste des raccourcis clavier">
