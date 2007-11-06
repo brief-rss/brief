@@ -153,34 +153,32 @@
             <toolbox>
                 <toolbar id="feed-view-toolbar"
                          hidden="true">
+                    <toolbarspring/>
                     <toolbarbutton id="mark-view-read"
-                                   label="&markAllRead.label;"
                                    tooltiptext="&markViewRead.tooltip;"
                                    oncommand="gCommands.markCurrentViewRead(true)"/>
-                    <spacer flex="1"/>
+                    <toolbarbutton id="headlines-checkbox"
+                                   type="checkbox"
+                                   autoCheck="false"
+                                   tooltiptext="&headlinesCheckbox.tooltip;"
+                                   oncommand="gCommands.toggleHeadlinesMode()"/>
                     <toolbaritem id="view-constraint-box">
-                        <label value="&viewConstraintList.label;"/>
                         <menulist id="view-constraint-list"
                                   tooltiptext="&viewConstraintList.tooltip;"
                                   oncommand="gCommands.switchViewConstraint(event.target.getAttribute('constraint'))">
                             <menupopup>
                                 <menuitem id="show-all"
                                           constraint="all"
-                                          label="&viewAll.label;"/>
+                                          label="&showAll.label;"/>
                                 <menuitem id="show-unread"
                                           constraint="unread"
-                                          label="&viewUnread.label;"/>
+                                          label="&showUnread.label;"/>
                                 <menuitem id="show-starred"
                                           constraint="starred"
-                                          label="&viewStarred.label;"/>
+                                          label="&showStarred.label;"/>
                             </menupopup>
                         </menulist>
                     </toolbaritem>
-                    <toolbarbutton id="headlines-checkbox"
-                                   type="checkbox"
-                                   autoCheck="false"
-                                   tooltiptext="&headlinesCheckbox.label;"
-                                   oncommand="gCommands.toggleHeadlinesMode()"/>
                     <toolbaritem id="navigation-box">
                         <toolbarbutton id="prev-page"
                                        tooltiptext="&previousPage.tooltip;"
