@@ -1,11 +1,12 @@
+
+
 <!ENTITY searchCurrentView.label "Attualmente visti">
 <!ENTITY searchAllFeeds.label "Tutti i feed">
 <!ENTITY updateButton.tooltip "Controlla gli aggiornamenti di tutti i feed">
 <!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
 <!ENTITY searchScopeButton.tooltip "Cambia l&apos;ambito della ricerca ">
 <!ENTITY showOptions.tooltip "Opzioni...">
-<!ENTITY markViewRead.tooltip "Marca elementi attualmente visti come letti">
-<!ENTITY markViewUnread.tooltip "Marca elementi attualmente visti come non letti">
+
 <!ENTITY viewConstraintList.tooltip "Selezionare il tipo di elementi da selezionare">
 <!ENTITY previousPage.tooltip "Mostra pagina precedente">
 <!ENTITY nextPage.tooltip "Mostra pagina successiva">
@@ -13,7 +14,9 @@
 <!ENTITY starredFolder.label "Segnati con stella">
 <!ENTITY trashFolder.label "Cestino">
 <!ENTITY ctxMarkFeedRead.label "Segna feed come letto">
+
 <!ENTITY ctxMarkFolderRead.label "Segna cartella come letta">
+
 <!ENTITY ctxUpdateFeed.label "Aggiorna feed">
 <!ENTITY ctxUpdateFolder.label "Aggiorna cartella">
 <!ENTITY ctxOpenWebsite.label "Apri sito web">

@@ -2,36 +2,61 @@
 <!ENTITY mainPane.label "Hoofdvenster">
 <!ENTITY folderTree.label "Map met uw Live Bladwijzers:">
 <!ENTITY showStatusbarIcon.label "Statusbalkpictogram weergeven">
+<!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Brief in een nieuw tabblad openen">
+<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Bijwerken">
 <!ENTITY checkForUpdatesBefore.label "Elke">
+<!ENTITY checkForUpdates.accesskey "E">
 <!ENTITY updateIntervalMinutes.label "minuten">
 <!ENTITY updateIntervalHours.label "uur">
 <!ENTITY updateIntervalDays.label "dagen">
 <!ENTITY checkForUpdatesAfter.label "minuten controleren op updates voor feeds">
 <!ENTITY showNotification.label "Bericht geven wanneer updates worden aangetroffen">
+<!ENTITY showNotification.accesskey "f">
+<!ENTITY behaviorGroup.caption "Gedrag">
+<!ENTITY openEntriesInTabs.label "Berichten in nieuwe tabbladen openen">
+<!ENTITY openEntriesInTabs.accesskey "t">
+<!ENTITY doubleClickMarks.label "Berichten als gelezen markeren wanneer ze dubbel geklikt worden">
+<!ENTITY doubleClickMarks.accesskey "M">
 <!ENTITY storingGroup.caption "Opslaan">
 <!ENTITY expirationBefore.label "Gedownloade berichten verwijderen na">
 <!ENTITY expirationAfter.label "dagen">
+<!ENTITY expirationCheckbox.accesskey "V">
+<!ENTITY starredItemsKept.tooltip "Berichten met een ster worden behouden">
 <!ENTITY storedEntriesBefore.label "Niet meer dan">
 <!ENTITY storedEntriesAfter.label "meest recente berichten in elke feed opslaan">
+<!ENTITY storedEntriesCheckbox.accesskey "r">
 <!ENTITY clearAllEntriesButton.label "Alle berichten wissen">
-<!ENTITY behaviorGroup.caption "Gedrag">
-<!ENTITY openEntriesInTabs.label "Berichten in nieuwe tabbladen openen">
-<!ENTITY doubleClickMarks.label "Berichten als gelezen markeren wanneer ze dubbel geklikt worden">
+<!ENTITY clearAllEntriesButton.accesskey "W">
 <!ENTITY displayPane.label "Weergave">
+<!ENTITY feedViewGroup.caption "Feedinhoud">
 <!ENTITY authorsCheckbox.label "Schrijvers van de berichten weergeven">
+<!ENTITY authorsCheckbox.accesskey "g">
 <!ENTITY entriesPerPageBefore.label "Per pagina">
 <!ENTITY entriesPerPageAfter.label "onderwerpen weergeven">
-<!ENTITY styleGroup.caption "Stijl van de feedinhoud">
 <!ENTITY enableCustomStyle.label "Aangepaste stijl van de feedinhoud gebruiken">
+<!ENTITY enableCustomStyle.accesskey "d">
 <!ENTITY browseCustomStyle.label "Bladeren">
+<!ENTITY browseCustomStyle.accesskey "B">
+<!ENTITY showShortcuts.label "Snelkoppelingen weergeven">
+<!ENTITY showShortcuts.accesskey "k">
+<!ENTITY compactDatabase.label "Opgeslagen berichten comprimeren">
+<!ENTITY compactDatabase.accesskey "C">
+<!ENTITY compactingInProgress.label "Brief comprimeert opgeslagen berichten om schijfruimte vrij te maken...">
 <!ENTITY feedName.label "Naam">
 <!ENTITY feedURL.label "Locatie">
 <!ENTITY optionsGroupbox.caption "Feedinstellingen">
-<!ENTITY maxEntriesPerFeedBefore.label "Niet meer dan">
-<!ENTITY maxEntriesPerFeedAfter.label "recente berichten">
-<!ENTITY expireEntriesPerFeedBefore.label "Gedownloade berichten verwijderen na">
-<!ENTITY expireEntriesPerFeedAfter.label "dagen">
 <!ENTITY checkUpdatesPerFeedBefore.label "Op updates controleren om de">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "Gedownloade berichten verwijderen na">
+<!ENTITY expireEntriesPerFeed.accesskey "w">
+<!ENTITY expireEntriesPerFeedAfter.label "dagen">
+<!ENTITY maxEntriesPerFeedBefore.label "Niet meer dan">
+<!ENTITY maxEntriesPerFeed.accesskey "M">
+<!ENTITY maxEntriesPerFeedAfter.label "recente berichten">
+<!ENTITY previousFeed.label "&lt; Vorige">
+<!ENTITY previousFeed.accesskey "V">
+<!ENTITY nextFeed.label "Volgende &gt;">
+<!ENTITY nextFeed.accesskey "o">

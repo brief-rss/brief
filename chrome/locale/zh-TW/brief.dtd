@@ -1,11 +1,12 @@
+
+
 <!ENTITY searchCurrentView.label "搜尋目前所閱讀的">
 <!ENTITY searchAllFeeds.label "搜尋所有消息來源">
 <!ENTITY updateButton.tooltip "確認全部消息來源的更新">
 <!ENTITY stopUpdatingButton.tooltip "停止繼續確認消息來源的更新">
 <!ENTITY searchScopeButton.tooltip "變更搜尋範圍">
 <!ENTITY showOptions.tooltip "開啟 Brief 選項">
-<!ENTITY markViewRead.tooltip "標記目前閱讀的所有項目為已讀">
-<!ENTITY markViewUnread.tooltip "標記目前閱讀的所有項目為未讀">
+
 <!ENTITY viewConstraintList.tooltip "選擇要顯示那種類型的項目">
 <!ENTITY previousPage.tooltip "顯示較新的項目">
 <!ENTITY nextPage.tooltip "顯示較舊的項目">
@@ -13,7 +14,9 @@
 <!ENTITY starredFolder.label "標有星號的">
 <!ENTITY trashFolder.label "垃圾桶">
 <!ENTITY ctxMarkFeedRead.label "標記消息來源為已讀">
+
 <!ENTITY ctxMarkFolderRead.label "標記資料夾為已讀">
+
 <!ENTITY ctxUpdateFeed.label "更新消息來源">
 <!ENTITY ctxUpdateFolder.label "更新資料夾">
 <!ENTITY ctxOpenWebsite.label "在新分頁中開啟網站">

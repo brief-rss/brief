@@ -2,36 +2,61 @@
 <!ENTITY mainPane.label "Generelt">
 <!ENTITY folderTree.label "Mappe som inneholder levende bokmerker:">
 <!ENTITY showStatusbarIcon.label "Vis ikon i statuslinjen">
+<!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Åpne Brief i ny fane">
+<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY feedsPane.label "Nyhetskilder">
 <!ENTITY updateGroup.caption "Oppdatering">
 <!ENTITY checkForUpdatesBefore.label "Finn oppdateringer for nyhetskilder hvert">
+<!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "minutt">
 <!ENTITY updateIntervalHours.label "time">
 <!ENTITY updateIntervalDays.label "dag">
 <!ENTITY checkForUpdatesAfter.label "minutt">
 <!ENTITY showNotification.label "Vis beskjed når oppdateringer er funnet">
+<!ENTITY showNotification.accesskey "n">
+<!ENTITY behaviorGroup.caption "Oppførsel">
+<!ENTITY openEntriesInTabs.label "Åpne elementer i ny fane">
+<!ENTITY openEntriesInTabs.accesskey "t">
+<!ENTITY doubleClickMarks.label "Markere elementer som lest ved dobbelklikk">
+<!ENTITY doubleClickMarks.accesskey "M">
 <!ENTITY storingGroup.caption "Lagring">
 <!ENTITY expirationBefore.label "Fjern lagrede elementer etter">
 <!ENTITY expirationAfter.label "dager">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "Elementer merket med stjerne blir beholdt">
 <!ENTITY storedEntriesBefore.label "Ikke lagre mer enn">
 <!ENTITY storedEntriesAfter.label "siste elementer i hver nyhetskilde">
+<!ENTITY storedEntriesCheckbox.accesskey "e">
 <!ENTITY clearAllEntriesButton.label "Fjern alle elementer">
-<!ENTITY behaviorGroup.caption "Oppførsel">
-<!ENTITY openEntriesInTabs.label "Åpne elementer i ny fane">
-<!ENTITY doubleClickMarks.label "Markere elementer som lest ved dobbelklikk">
+<!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Visning">
+<!ENTITY feedViewGroup.caption "Innholdsvisning for nyhetskilder">
 <!ENTITY authorsCheckbox.label "Vis forfattere av elementer">
+<!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Vis">
 <!ENTITY entriesPerPageAfter.label "elementer pr side">
-<!ENTITY styleGroup.caption "Stil for nyhetskildetype">
 <!ENTITY enableCustomStyle.label "Bruk egen stil for nyhetskildeinnholdet">
+<!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Bla">
+<!ENTITY browseCustomStyle.accesskey "B">
+<!ENTITY showShortcuts.label "Vis snarveier">
+<!ENTITY showShortcuts.accesskey "w">
+<!ENTITY compactDatabase.label "Komprimer lagrede elementer">
+<!ENTITY compactDatabase.accesskey "C">
+<!ENTITY compactingInProgress.label "Brief komprimerer lagrede elementer for å frigi harddiskplass ...">
 <!ENTITY feedName.label "Navn">
 <!ENTITY feedURL.label "Adresse">
 <!ENTITY optionsGroupbox.caption "Innstillinger for nyhetskilder">
-<!ENTITY maxEntriesPerFeedBefore.label "Ikke lagre mer enn">
-<!ENTITY maxEntriesPerFeedAfter.label "siste elementer">
-<!ENTITY expireEntriesPerFeedBefore.label "Fjern lagrede elementer etter">
-<!ENTITY expireEntriesPerFeedAfter.label "dager">
 <!ENTITY checkUpdatesPerFeedBefore.label "Sjekk for oppdateringer hver">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "Fjern lagrede elementer etter">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "dager">
+<!ENTITY maxEntriesPerFeedBefore.label "Ikke lagre mer enn">
+<!ENTITY maxEntriesPerFeed.accesskey "S">
+<!ENTITY maxEntriesPerFeedAfter.label "siste elementer">
+<!ENTITY previousFeed.label "&lt; Forrige">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Neste &gt;">
+<!ENTITY nextFeed.accesskey "N">

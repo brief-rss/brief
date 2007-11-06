@@ -1,11 +1,12 @@
-<!ENTITY searchCurrentView.label "Rechercher dans les articles courants">
-<!ENTITY searchAllFeeds.label "Rechercher dans tous les flux">
+<!ENTITY selectHomeFolder.label "Sélectionnez le dossier contenant vos marque-pages dynamiques :">
+<!ENTITY confirmHomeFolder.label "OK">
+<!ENTITY searchCurrentView.label "Articles courants">
+<!ENTITY searchAllFeeds.label "Tous les flux">
 <!ENTITY updateButton.tooltip "Mettre à jour tous les flux">
 <!ENTITY stopUpdatingButton.tooltip "Arrêter la recherche de mises à jour">
 <!ENTITY searchScopeButton.tooltip "Modifier la portée de recherche">
 <!ENTITY showOptions.tooltip "Ouvrir les options de Brief">
-<!ENTITY markViewRead.tooltip "Marquer les articles courants comme lus">
-<!ENTITY markViewUnread.tooltip "Marquer les articles courants comme non lus">
+<!ENTITY markAllRead.label "Tout marquer comme lu">
 <!ENTITY viewConstraintList.tooltip "Choisir quel type d&apos;articles afficher">
 <!ENTITY previousPage.tooltip "Afficher les articles plus récents">
 <!ENTITY nextPage.tooltip "Afficher les articles plus anciens">
@@ -13,7 +14,9 @@
 <!ENTITY starredFolder.label "Marqués">
 <!ENTITY trashFolder.label "Corbeille">
 <!ENTITY ctxMarkFeedRead.label "Marquer le flux comme lu">
+<!ENTITY ctxMarkFeedUnread.label "Marquer le flux comme non lu">
 <!ENTITY ctxMarkFolderRead.label "Marquer le dossier comme lu">
+<!ENTITY ctxMarkFolderUnread.label "Marquer le dossier comme non lu">
 <!ENTITY ctxUpdateFeed.label "Mettre le flux à jour">
 <!ENTITY ctxUpdateFolder.label "Mettre le dossier à jour">
 <!ENTITY ctxOpenWebsite.label "Afficher le site Web">

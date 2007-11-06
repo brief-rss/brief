@@ -2,36 +2,61 @@
 <!ENTITY mainPane.label "Ogólne">
 <!ENTITY folderTree.label "Folder zawierający dynamiczne zakładki:">
 <!ENTITY showStatusbarIcon.label "Wyświetlaj ikonę rozszerzenia na pasku stanu">
+<!ENTITY showStatusbarIcon.accesskey "A">
 <!ENTITY openInNewTab.label "Otwieraj Brief w nowej karcie">
+<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY feedsPane.label "Kanały">
 <!ENTITY updateGroup.caption "Aktualizacje">
 <!ENTITY checkForUpdatesBefore.label "Sprawdzaj kanały co">
+<!ENTITY checkForUpdates.accesskey "S">
 <!ENTITY updateIntervalMinutes.label "min">
 <!ENTITY updateIntervalHours.label "godz.">
 <!ENTITY updateIntervalDays.label "dni">
 <!ENTITY checkForUpdatesAfter.label "min">
 <!ENTITY showNotification.label "Wyświetlaj powiadomienie o nowych wiadomościach">
+<!ENTITY showNotification.accesskey "E">
+<!ENTITY behaviorGroup.caption "Zachowanie">
+<!ENTITY openEntriesInTabs.label "Otwieraj wiadomości w nowej karcie">
+<!ENTITY openEntriesInTabs.accesskey "T">
+<!ENTITY doubleClickMarks.label "Oznacz wiadomość jako przeczytaną po kliknięciu na niej dwukrotnie">
+<!ENTITY doubleClickMarks.accesskey "C">
 <!ENTITY storingGroup.caption "Przechowywanie">
 <!ENTITY expirationBefore.label "Usuń pobrane wiadomości po">
 <!ENTITY expirationAfter.label "dniach">
+<!ENTITY expirationCheckbox.accesskey "U">
+<!ENTITY starredItemsKept.tooltip "Wiadomości oznaczone gwiazdką zostaną zachowane">
 <!ENTITY storedEntriesBefore.label "Przechowuj do">
 <!ENTITY storedEntriesAfter.label "ostatnich wiadomości w kanale">
+<!ENTITY storedEntriesCheckbox.accesskey "P">
 <!ENTITY clearAllEntriesButton.label "Wyczyść wszystkie wiadomości">
-<!ENTITY behaviorGroup.caption "Zachowanie">
-<!ENTITY openEntriesInTabs.label "Otwieraj wiadomości w nowej karcie">
-<!ENTITY doubleClickMarks.label "Oznacz wiadomość jako przeczytaną po kliknięciu na niej dwukrotnie">
+<!ENTITY clearAllEntriesButton.accesskey "W">
 <!ENTITY displayPane.label "Widok">
+<!ENTITY feedViewGroup.caption "Wygląd zawartości kanału">
 <!ENTITY authorsCheckbox.label "Wyświetlaj autorów wiadomości">
+<!ENTITY authorsCheckbox.accesskey "R">
 <!ENTITY entriesPerPageBefore.label "Wyświetlaj">
 <!ENTITY entriesPerPageAfter.label "wiadomości na jednej stronie">
-<!ENTITY styleGroup.caption "Styl wyświetlania kanału">
 <!ENTITY enableCustomStyle.label "Używaj zewnętrznego stylu widoku kanału">
+<!ENTITY enableCustomStyle.accesskey "N">
 <!ENTITY browseCustomStyle.label "Przeglądaj">
+<!ENTITY browseCustomStyle.accesskey "D">
+<!ENTITY showShortcuts.label "Pokaż skróty">
+<!ENTITY showShortcuts.accesskey "K">
+<!ENTITY compactDatabase.label "Kompaktuj zapisane elementy">
+<!ENTITY compactDatabase.accesskey "Z">
+<!ENTITY compactingInProgress.label "Brief kompaktuje zapisane wiadomości...">
 <!ENTITY feedName.label "Nazwa">
 <!ENTITY feedURL.label "Lokalizacja">
 <!ENTITY optionsGroupbox.caption "Ustawienia kanału">
-<!ENTITY maxEntriesPerFeedBefore.label "Przechowuj maksymalnie">
-<!ENTITY maxEntriesPerFeedAfter.label "wiadomości">
-<!ENTITY expireEntriesPerFeedBefore.label "Usuń pobrane wiadomości po">
-<!ENTITY expireEntriesPerFeedAfter.label "dniach">
 <!ENTITY checkUpdatesPerFeedBefore.label "Sprawdzaj kanał co">
+<!ENTITY checkUpdatesPerFeed.accesskey "S">
+<!ENTITY expireEntriesPerFeedBefore.label "Usuń pobrane wiadomości po">
+<!ENTITY expireEntriesPerFeed.accesskey "U">
+<!ENTITY expireEntriesPerFeedAfter.label "dniach">
+<!ENTITY maxEntriesPerFeedBefore.label "Przechowuj maksymalnie">
+<!ENTITY maxEntriesPerFeed.accesskey "R">
+<!ENTITY maxEntriesPerFeedAfter.label "wiadomości">
+<!ENTITY previousFeed.label "« Poprzedni">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Następny »">
+<!ENTITY nextFeed.accesskey "N">

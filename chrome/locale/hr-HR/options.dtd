@@ -2,36 +2,57 @@
 <!ENTITY mainPane.label "Glavno">
 <!ENTITY folderTree.label "Mapa koja sadrži Vaše žive zabilješke:">
 <!ENTITY showStatusbarIcon.label "Prikaži ikonu statusne trake">
+
 <!ENTITY openInNewTab.label "Otvori Brief u novoj kartici">
+
 <!ENTITY feedsPane.label "Izvori">
 <!ENTITY updateGroup.caption "Ažuriranje">
 <!ENTITY checkForUpdatesBefore.label "Provjeri izvore za ažuriranje svakih">
+
 <!ENTITY updateIntervalMinutes.label "minutes">
 <!ENTITY updateIntervalHours.label "hours">
 <!ENTITY updateIntervalDays.label "days">
 <!ENTITY checkForUpdatesAfter.label "minuta">
 <!ENTITY showNotification.label "Prikaži obavijest kada su pronađena ažuriranja">
+
+<!ENTITY behaviorGroup.caption "Ponašanje">
+<!ENTITY openEntriesInTabs.label "Unose otvoriti u novim karticama">
+
+<!ENTITY doubleClickMarks.label "Označiti unose kao pročitane nakon dvostrukog klika na njih">
+
 <!ENTITY storingGroup.caption "Razvrstavanje">
 <!ENTITY expirationBefore.label "Remove downloaded entries after">
 <!ENTITY expirationAfter.label "dana">
+
+
 <!ENTITY storedEntriesBefore.label "Store no more than">
 <!ENTITY storedEntriesAfter.label "latest entries of each feed">
+
 <!ENTITY clearAllEntriesButton.label "Clear All Entries">
-<!ENTITY behaviorGroup.caption "Ponašanje">
-<!ENTITY openEntriesInTabs.label "Unose otvoriti u novim karticama">
-<!ENTITY doubleClickMarks.label "Označiti unose kao pročitane nakon dvostrukog klika na njih">
+
 <!ENTITY displayPane.label "Prikaz">
+
 <!ENTITY authorsCheckbox.label "Show authors of the entries">
+
 <!ENTITY entriesPerPageBefore.label "Prikaži">
 <!ENTITY entriesPerPageAfter.label "unosa po stranici">
-<!ENTITY styleGroup.caption "Feed content style">
 <!ENTITY enableCustomStyle.label "Koristi prilagođeni stil sadržaja izvora">
+
 <!ENTITY browseCustomStyle.label "Pronađi">
+
+
+
+
+
+
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Location">
 <!ENTITY optionsGroupbox.caption "Feed settings">
-<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
-<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
-<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
-<!ENTITY expireEntriesPerFeedAfter.label "days">
 <!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">
+
+<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
+
+<!ENTITY expireEntriesPerFeedAfter.label "days">
+<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
+
+<!ENTITY maxEntriesPerFeedAfter.label "latest entries">

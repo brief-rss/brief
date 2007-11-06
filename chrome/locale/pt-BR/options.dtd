@@ -2,36 +2,57 @@
 <!ENTITY mainPane.label "Principal">
 <!ENTITY folderTree.label "Pasta contendo seus Favoritos Dinâmicos:">
 <!ENTITY showStatusbarIcon.label "Exibir ícones na barra de estatus">
+
 <!ENTITY openInNewTab.label "Abrir Brief em nova aba">
+
 <!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Atualizando">
 <!ENTITY checkForUpdatesBefore.label "Verificar feeds para atualização a cada">
+
 <!ENTITY updateIntervalMinutes.label "minutos">
 <!ENTITY updateIntervalHours.label "horas">
 <!ENTITY updateIntervalDays.label "dias">
 <!ENTITY checkForUpdatesAfter.label "minutos">
 <!ENTITY showNotification.label "Exibir notificação quando houver atualizações disponíveis">
+
+<!ENTITY behaviorGroup.caption "Comportamento">
+<!ENTITY openEntriesInTabs.label "Abrir itens em novas abas">
+
+<!ENTITY doubleClickMarks.label "Marcar itens como lidos ao dar duplo clique neles">
+
 <!ENTITY storingGroup.caption "Armazenando">
 <!ENTITY expirationBefore.label "Excluir itens baixados depois de">
 <!ENTITY expirationAfter.label "dias">
+
+
 <!ENTITY storedEntriesBefore.label "Armazenar no máximo">
 <!ENTITY storedEntriesAfter.label "últimos itens de cada fonte">
+
 <!ENTITY clearAllEntriesButton.label "Limpar todos os Ítens">
-<!ENTITY behaviorGroup.caption "Comportamento">
-<!ENTITY openEntriesInTabs.label "Abrir itens em novas abas">
-<!ENTITY doubleClickMarks.label "Marcar itens como lidos ao dar duplo clique neles">
+
 <!ENTITY displayPane.label "Exibição">
+
 <!ENTITY authorsCheckbox.label "Exibir os autores dos itens">
+
 <!ENTITY entriesPerPageBefore.label "Exibir">
 <!ENTITY entriesPerPageAfter.label "itens por página">
-<!ENTITY styleGroup.caption "Estilo do conteúdo">
 <!ENTITY enableCustomStyle.label "Usar estilo personalizado para conteúdo do feed">
+
 <!ENTITY browseCustomStyle.label "Procurar">
+
+
+
+
+
+
 <!ENTITY feedName.label "Nome">
 <!ENTITY feedURL.label "Caminho">
 <!ENTITY optionsGroupbox.caption "Configurações da Fontes">
-<!ENTITY maxEntriesPerFeedBefore.label "Armazenar no máximo">
-<!ENTITY maxEntriesPerFeedAfter.label "últimos ítens">
-<!ENTITY expireEntriesPerFeedBefore.label "Excluir ítens baixados depois de">
-<!ENTITY expireEntriesPerFeedAfter.label "dias">
 <!ENTITY checkUpdatesPerFeedBefore.label "Verificar atualizações a cada">
+
+<!ENTITY expireEntriesPerFeedBefore.label "Excluir ítens baixados depois de">
+
+<!ENTITY expireEntriesPerFeedAfter.label "dias">
+<!ENTITY maxEntriesPerFeedBefore.label "Armazenar no máximo">
+
+<!ENTITY maxEntriesPerFeedAfter.label "últimos ítens">

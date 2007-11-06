@@ -1,11 +1,12 @@
+
+
 <!ENTITY searchCurrentView.label "Search current view">
 <!ENTITY searchAllFeeds.label "Search all feeds">
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY searchScopeButton.tooltip "Change the search scope">
 <!ENTITY showOptions.tooltip "Open Brief options">
-<!ENTITY markViewRead.tooltip "Mark currently viewed entries as read">
-<!ENTITY markViewUnread.tooltip "Mark currently viewed entries as unread">
+
 <!ENTITY viewConstraintList.tooltip "Choose what kind of entries to display">
 <!ENTITY previousPage.tooltip "Show newer entries">
 <!ENTITY nextPage.tooltip "Show older entries">
@@ -13,7 +14,9 @@
 <!ENTITY starredFolder.label "Starred">
 <!ENTITY trashFolder.label "Trash">
 <!ENTITY ctxMarkFeedRead.label "Mark Feed As Read">
+
 <!ENTITY ctxMarkFolderRead.label "Mark Folder As Read">
+
 <!ENTITY ctxUpdateFeed.label "Update Feed">
 <!ENTITY ctxUpdateFolder.label "Update Folder">
 <!ENTITY ctxOpenWebsite.label "Open Website">

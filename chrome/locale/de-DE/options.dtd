@@ -3,35 +3,55 @@
 <!ENTITY folderTree.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
 <!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
 <!ENTITY openInNewTab.label "Brief in einem neuen Tab öffnen">
+
 <!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Aktualisierung">
 <!ENTITY checkForUpdatesBefore.label "Feeds überprüfen alle">
+
 <!ENTITY updateIntervalMinutes.label "Minuten">
 <!ENTITY updateIntervalHours.label "Stunden">
 <!ENTITY updateIntervalDays.label "Tage">
 <!ENTITY checkForUpdatesAfter.label "Minuten aktualisieren">
 <!ENTITY showNotification.label "Benachrichtigen, wenn neue Einträge gefunden wurden">
+
+<!ENTITY behaviorGroup.caption "Verhalten">
+<!ENTITY openEntriesInTabs.label "Einträge in neuen Tabs öffnen">
+
+<!ENTITY doubleClickMarks.label "Einträge in Feed-Ansicht mit Doppelklick als gelesen markieren">
+
 <!ENTITY storingGroup.caption "Speicherung">
 <!ENTITY expirationBefore.label "Heruntergeladene Einträge für">
 <!ENTITY expirationAfter.label "Tage speichern">
+
+
 <!ENTITY storedEntriesBefore.label "Nicht mehr als">
 <!ENTITY storedEntriesAfter.label "Einträge pro Feed speichern">
+
 <!ENTITY clearAllEntriesButton.label "Alle Einträge entfernen">
-<!ENTITY behaviorGroup.caption "Verhalten">
-<!ENTITY openEntriesInTabs.label "Einträge in neuen Tabs öffnen">
-<!ENTITY doubleClickMarks.label "Einträge in Feed-Ansicht mit Doppelklick als gelesen markieren">
+
 <!ENTITY displayPane.label "Anzeige">
+
 <!ENTITY authorsCheckbox.label "Autoren der Einträge anzeigen">
+
 <!ENTITY entriesPerPageBefore.label "Pro Seite">
 <!ENTITY entriesPerPageAfter.label "Einträge anzeigen">
-<!ENTITY styleGroup.caption "Anzeigestil des Feed-Inhalts">
 <!ENTITY enableCustomStyle.label "Eigenes Stylesheet für die Darstellung der Feeds verwenden">
+
 <!ENTITY browseCustomStyle.label "Durchsuchen...">
+
+
+
+
+
+
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Feed-Adresse">
 <!ENTITY optionsGroupbox.caption "Feed-Einstellungen">
-<!ENTITY maxEntriesPerFeedBefore.label "Nicht mehr als">
-<!ENTITY maxEntriesPerFeedAfter.label "der letzten Einträge speichern">
-<!ENTITY expireEntriesPerFeedBefore.label "Heruntergeladene Einträge nach">
-<!ENTITY expireEntriesPerFeedAfter.label "Tagen entfernen">
 <!ENTITY checkUpdatesPerFeedBefore.label "Auf Aktualisierung überprüfen alle">
+
+<!ENTITY expireEntriesPerFeedBefore.label "Heruntergeladene Einträge nach">
+
+<!ENTITY expireEntriesPerFeedAfter.label "Tagen entfernen">
+<!ENTITY maxEntriesPerFeedBefore.label "Nicht mehr als">
+
+<!ENTITY maxEntriesPerFeedAfter.label "der letzten Einträge speichern">
