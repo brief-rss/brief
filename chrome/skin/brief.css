@@ -141,7 +141,7 @@ toolbarbutton {
 
 #mark-view-read {
   list-style-image: url('toolbar/markViewRead.png');
-  padding-right: 5px;
+  margin-right: 5px;
   }
 
 #headlines-checkbox {
