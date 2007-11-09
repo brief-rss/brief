@@ -26,8 +26,8 @@ interface nsIBriefQuery : nsISupports {
     attribute string folders;
 
     /**
-     * The following attributes represent entry status flags. If one of these attributes
-     * is TRUE then the respective flag must be present on selected entries.
+     * Entry status. Set any of these attributes to TRUE to limit query to entries with
+     * respetive status.
      */
     attribute boolean read;
 
