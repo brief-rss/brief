@@ -173,9 +173,7 @@ BriefStorageService.prototype = {
 
         // To 0.8.
         case 1:
-            try {
-                this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
-            } catch (e) {}
+            this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
 
             // 0.8 changed how IDs are generated. Below we recompute IDs, but we doesn't
             // need to do it for entries which are no longer available in the feed.
@@ -232,10 +230,8 @@ BriefStorageService.prototype = {
 
         // To 1.0b1
         case 2:
-            try {
-                this.dBConnection.executeSimpleSQL(
+            this.dBConnection.executeSimpleSQL(
                               'ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
-            } catch (e) {}
             // Fall through...
 
         }
