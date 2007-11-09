@@ -544,6 +544,7 @@ FeedView.prototype = {
         if (!entries.length) {
             this._computePages();
             query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
+            query.limit = gPrefs.entriesPerPage;
             entries = query.getEntries({});
         }
         else {
