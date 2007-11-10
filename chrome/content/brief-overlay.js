@@ -24,17 +24,10 @@ var gBrief = {
         // If Brief is already open then select the existing tab.
         if (this.tab)
             gBrowser.selectedTab = this.tab;
-        else if (aNewTab) {
-            this.tab = gBrowser.addTab(BRIEF_URL, null, null, null, null, false);
-            gBrowser.selectedTab = this.tab;
-        }
-        else {
+        else if (aNewTab)
+            gBrowser.loadOneTab(BRIEF_URL, null, null, null, false, false);
+        else
             gBrowser.loadURI(BRIEF_URL, null, null);
-            this.tab = gBrowser.selectedTab;
-        }
-        var browser = gBrowser.getBrowserForTab(this.tab);
-        browser.addEventListener('load', this.onBriefTabLoad, true);
-        this.tab.setAttribute('briefTab', true);
     },
 
 
@@ -160,17 +153,31 @@ var gBrief = {
         }
     },
 
-    onBriefTabLoad: function gBrief_onBriefTabLoad(aEvent) {
-        if (this.currentURI.spec == BRIEF_URL) {
-            gBrief.tab.setAttribute('briefTab', true);
+    onTabLoad: function gBrief_onTabLoad(aEvent) {
+        var targetDoc = aEvent.target;
+
+        if (targetDoc && targetDoc.documentURI == BRIEF_URL) {
+
+            if (!gBrief.tab) {
+                var targetBrowser = gBrowser.getBrowserForDocument(targetDoc);
+                var tabs = gBrowser.mTabs;
+                for (var i = 0; i < tabs.length; i++) {
+                    if (tabs[i].linkedBrowser == targetBrowser) {
+                        gBrief.tab = tabs[i];
+                        break;
+                    }
+                }
+            }
+
             gBrowser.setIcon(gBrief.tab, BRIEF_FAVICON_URL);
+            if (gBrief.toolbarbutton)
+                gBrief.toolbarbutton.checked = (gBrowser.selectedTab == gBrief.tab);
         }
-        else {
-            gBrief.tab.removeAttribute('briefTab');
+
+        else if (gBrief.tab && gBrief.tab.linkedBrowser.currentURI.spec != BRIEF_URL) {
             gBrief.tab = null;
             if (gBrief.toolbarbutton)
-                gBrief.toolbarbutton.checked = false;
-            this.removeEventListener('load', gBrief.onBriefTabLoad, true);
+                gBrief.toolbarbutton.checked = (gBrowser.selectedTab == gBrief.tab);
         }
     },
 
@@ -183,18 +190,6 @@ var gBrief = {
         if (gBrief.toolbarbutton)
             gBrief.toolbarbutton.checked = (aEvent.originalTarget == gBrief.tab);
     },
-
-    onTabRestored: function gBrief_onTabRestored(aEvent) {
-        var restoredTab = aEvent.originalTarget;
-        if (restoredTab.hasAttribute('briefTab')) {
-            gBrief.tab = restoredTab;
-            var browser = gBrowser.getBrowserForTab(gBrief.tab);
-            browser.addEventListener('load', gBrief.onBriefTabLoad, true);
-            if (gBrief.toolbarbutton)
-                gBrief.toolbarbutton.checked = (gBrowser.selectedTab == restoredTab);
-        }
-    },
-
 
     handleEvent: function gBrief_handleEvent(aEvent) {
         switch (aEvent.type) {
@@ -211,10 +206,6 @@ var gBrief = {
                                   getService(Ci.nsIBriefStorage);
             this.updateService = Cc['@ancestor/brief/updateservice;1'].
                                  getService(Ci.nsIBriefUpdateService);
-
-            var sessionStore = Cc['@mozilla.org/browser/sessionstore;1'].
-                               getService(Ci.nsISessionStore);
-            sessionStore.persistTabAttribute('briefTab');
 
             var firstRun = this.prefs.getBoolPref('firstRun');
             if (firstRun) {
@@ -248,7 +239,7 @@ var gBrief = {
             // as well as for maintaining correct checked state of the toolbarbutton.
             gBrowser.addEventListener('TabClose', this.onTabClose, false);
             gBrowser.addEventListener('TabSelect', this.onTabSelect, false);
-            gBrowser.addEventListener('SSTabRestoring', this.onTabRestored, false);
+            gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
             window.addEventListener('unload', this, false);
             break;
