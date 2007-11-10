@@ -126,6 +126,10 @@ var gBrief = {
 
 
     onBriefButtonClick: function gBrief_onBriefButtonClick(aEvent) {
+        // We only care about left and middle clicks.
+        if (aEvent.button != 0 && aEvent.button != 1)
+            return;
+
         // Clicking the button when Brief is open in current tab "unpresses" it and
         // closes Brief.
         if (gBrowser.selectedTab == this.tab && aEvent.button == 0) {
@@ -143,14 +147,10 @@ var gBrief = {
 
         var openInNewTab = this.prefs.getBoolPref('openInNewTab');
 
-        // Check whether to load Brief in the current tab or in a new one.
-        if ((aEvent.button == 0 && !openInNewTab) || (aEvent.button == 1 && openInNewTab) ||
-           (gBrowser.currentURI.spec == 'about:blank' && (aEvent.button == 0 || aEvent.button == 1)) ) {
+        if (aEvent.button == 0 && !openInNewTab || gBrowser.currentURI.spec == 'about:blank')
             gBrief.openBrief(false);
-        }
-        else if ((aEvent.button == 0 && openInNewTab) || (aEvent.button == 1 && !openInNewTab)) {
+        else
             gBrief.openBrief(true);
-        }
     },
 
     onTabLoad: function gBrief_onTabLoad(aEvent) {
