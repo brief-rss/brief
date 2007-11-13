@@ -1,5 +1,5 @@
 body {
-  background: #fbfcfe;
+  background: #fafcff;
   font-family: "Lucida Grande", Verdana, sans-serif;
   font-size: 10px;
   margin: 0;
@@ -37,11 +37,12 @@ body {
 
 #feed-content {
   margin: 20px auto 0;
-  padding-bottom: 10px;
+  padding: 0 10px 10px;
   max-width: 80em;
   }
 
 #message {
+  font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 20px;
   color: #4a6e85;
   text-align: center;
@@ -59,9 +60,8 @@ body {
   background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
   background-color: #ffffff;
   border-top: 1px #abbfc9 solid;
-  border-right: 1px #eceef3 solid;
-  border-left: 1px #eceef3 solid;
-  padding-bottom: 35px;
+  border-right: 1px #dadde5 solid;
+  border-left: 1px #dadde5 solid;
   overflow: visible;   /* This is for the the expand/collapse dropmarker which is
                           taken outside the box using negative margins */
   }
@@ -71,11 +71,11 @@ body {
 
 .article-header {
   min-height: 3.5em;
-  padding: 6px 5px 0;
+  padding: 6px 5px 0 0;
   }
 
 .article-title-link {
-  color: #002438;
+  color: #001c2c;
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
   font-weight: bold;
@@ -94,7 +94,7 @@ body {
   margin-top: -5px;
   }
 
-/*   Never change padding of the buttons as it breaks many themes  */
+/*   Never change padding of the buttons as it would break many themes  */
 .article-controls > button {
   opacity: 0.8;
   min-width: 0;
@@ -107,15 +107,20 @@ body {
 
 .star-container {
   float: left;
-  margin: -6px 2px 0 -5px;
-  padding: 5px 3px 0 5px;
+  margin: -6px 2px 0 0;
+  width: 24px;
+  height: 3.0em;
+}
+
+.star-image {
+  padding: 5px 0 0 5px;
 }
 
 
 /* ----------------------  Article subheader  ---------------------- */
 
 .article-subheader {
-  color: #4f4f4f;
+  color: #3b4d68;
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
   padding: 0 2em 0 40px;
@@ -143,7 +148,7 @@ body {
   color: #101d27;
   font-size: 12px;
   margin-top: 1.5em;
-  padding: 0 2.5em;
+  padding: 0 2.5em 35px;
   overflow: auto;
   }
 
@@ -185,7 +190,9 @@ body {
 
 .article-container[collapsed] {
   background-image: none;
-  background-color: #f7faff;
+  background-color: #f5faff;
+  border-right-color: #e1e8ef;
+  border-left-color: #e1e8ef;
   padding-bottom: 1em;
 }
 
@@ -199,7 +206,7 @@ body {
   display: none;
 }
 
-/* Shows the controls on hover */
+/* Shows controls on hover */
 .article-container[collapsed]:hover .article-controls {
   display: table-cell;
 }
@@ -228,6 +235,8 @@ body {
   border-left-color: #1474d6;
 }
 
+/* Non-selected articles don't have bottom border, so if we added one now the article
+   would shift. Therefore, we change the top border color of the NEXT article. */
 .article-container[selected] + .article-container {
   border-top-color: #1474d6;
 }
