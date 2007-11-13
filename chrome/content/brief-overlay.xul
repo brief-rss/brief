@@ -84,7 +84,7 @@
 
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="brief-button"
-                       class="toolbarbutton-1"
+                       class="toolbarbutton-1 chromeclass-toolbar-additional"
                        label="Brief"
                        tooltip="brief-tooltip"
                        type="checkbox"
