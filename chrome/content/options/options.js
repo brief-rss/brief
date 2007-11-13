@@ -201,6 +201,9 @@ var gDisplayPane = {
                        getService(Ci.nsIFileProtocolHandler).
                        newFileURI(itemLocation);
 
+        var screenHeight = window.screen.availHeight;
+        var height = screenHeight < 620 ? screenHeight : 620;
+
         window.openDialog(gShortcutsURI.spec, 'Brief shortcuts',
                           'centerscreen,resizable,width=500, height=620');
     }
