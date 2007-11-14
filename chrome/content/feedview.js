@@ -530,7 +530,7 @@ FeedView.prototype = {
 
         var entries = query.getEntries({});
 
-        // Important: because for performance we try to delay computing pages until
+        // Important: for better performance we try to delay computing pages until
         // after the view is displayed. However, the whole reason why we recompute
         // pages is that their number may have changed and we need to know that to
         // correctly refresh the view.
@@ -602,8 +602,6 @@ FeedView.prototype = {
             articleContainer.setAttribute('starred', true);
 
         if (aEntry.date) {
-            var formatString = '';
-
             var entryDate = new Date(aEntry.date);
             var entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
 
@@ -616,24 +614,26 @@ FeedView.prototype = {
 
             var deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
 
+            var string = '';
             switch (true) {
                 case deltaDays === 0:
-                    formatString = this.todayStr + ', %X ';
+                    string = entryDate.toLocaleFormat(', %X ');
+                    string = this.todayStr + string;
                     break;
                 case deltaDays === 1:
-                    formatString = this.yesterdayStr + ', %X ';
+                    string = entryDate.toLocaleFormat(', %X ');
+                    string = this.yesterdayStr + string
                     break;
                 case deltaDays < 7:
-                    formatString = '%A, %X ';
+                    string = entryDate.toLocaleFormat('%A, %X ');
                     break;
                 case deltaYears > 0:
-                    formatString = '%d %B %Y, %X ';
+                    string = entryDate.toLocaleFormat('%d %B %Y, %X ');
                     break;
                 default:
-                    formatString = '%d %B, %X ';
+                    string = entryDate.toLocaleFormat('%d %B, %X ');
             }
 
-            var string = entryDate.toLocaleFormat(formatString);
             string = string.replace(/:\d\d /, ' ');
             // XXX We do it because %e conversion specification doesn't work
             string = string.replace(/^0/, '');
