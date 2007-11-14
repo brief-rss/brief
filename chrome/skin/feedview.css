@@ -212,20 +212,23 @@ body {
 }
 
 .expand-button {
-  background: url(chrome://brief/skin/icons/expand-button.png) 15px 5px no-repeat;
   display: none;
   float: left;
-  margin: -5px 0 0 -48px;
-  height: 6em;
+  margin: -5px 0 0 -35px;
+  height: 6.5em;
   width: 42px;
 }
 
 #feed-content[showHeadlinesOnly] > .article-container {
-  margin-left: 40px; /* Makes space for the expand button */
+  margin-left: 30px; /* Makes space for the expand button */
+}
+
+#feed-content[showHeadlinesOnly] .expand-button {
+  display: block;
 }
 
 #feed-content[showHeadlinesOnly] > .article-container:hover .expand-button {
-  display: block;
+  background: url(chrome://brief/skin/icons/expand-button.png) 5px 5px no-repeat;
 }
 
 /* ----------------------  Adjustments for the selected articles  -------------------- */
