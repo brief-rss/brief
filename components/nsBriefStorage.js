@@ -25,7 +25,7 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const RDF_OBSERVER_DELAY = 250;
 
-const DATABASE_VERSION = 3;
+const DATABASE_VERSION = 4;
 
 var gStorageService = null;
 
@@ -110,6 +110,11 @@ BriefStorageService.prototype = {
                                            'deleted     INTEGER DEFAULT 0        ' +
                                            ')');
 
+        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
+                                           'entries_feedID_index ON entries (feedID) ');
+        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
+                                           'entries_date_index ON entries (date)     ');
+
         var getDatabaseVersion = this.dBConnection.createStatement('PRAGMA user_version');
         getDatabaseVersion.executeStep();
         var databaseVersion = getDatabaseVersion.getInt32(0);
@@ -161,14 +166,6 @@ BriefStorageService.prototype = {
             }
             catch (e) {}
 
-            this.dBConnection.executeSimpleSQL('CREATE UNIQUE INDEX IF NOT EXISTS       ' +
-                                               'entries_id_index ON entries (id)        ');
-            this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                               'entries_feedID_index ON entries (feedID)');
-            this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                               'entries_date_index ON entries (date)    ');
-            this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS              ' +
-                                               'feeds_feedID_index ON feeds (feedID)    ');
             // Fall through...
 
         // To 0.8.
@@ -228,10 +225,16 @@ BriefStorageService.prototype = {
             }
             // Fall through...
 
-        // To 1.0b1
+        // To 1.0 beta 1
         case 2:
             this.dBConnection.executeSimpleSQL(
                               'ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
+            // Fall through...
+
+        // To 1.0
+        case 3:
+            this.dBConnection.executeSimpleSQL('DROP INDEX entries_id_index');
+            this.dBConnection.executeSimpleSQL('DROP INDEX feeds_feedID_index');
             // Fall through...
 
         }
@@ -1332,13 +1335,10 @@ BriefQuery.prototype = {
 
 
     getQueryText: function BriefQuery_getQueryText(aForSelect) {
-        if (aForSelect) {
-            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE '
-        }
-        else {
-            var text = ' WHERE entries.id IN (SELECT entries.id FROM ' +
-                       'entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE ';
-        }
+        if (aForSelect)
+            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE ';
+        else
+            var text = ' WHERE entries.rowid IN (SELECT entries.rowid FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE ';
 
         if (this.folders) {
             this.effectiveFolders = this.folders.match(/[^ ]+/g);
