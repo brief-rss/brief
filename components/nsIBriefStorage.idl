@@ -38,7 +38,7 @@ interface nsIBriefQuery : nsISupports {
     attribute boolean unstarred;
 
     /**
-     * Constants representing deleted state of entries to be selected.
+     * Deleted state of entries to be selected.
      *
      * @default value is ENTRY_STATE_NORMAL.
      */
@@ -50,8 +50,7 @@ interface nsIBriefQuery : nsISupports {
     attribute short deleted;
 
     /**
-     * String that must be contained by either title, summary or content of the selected
-     * entries.
+     * String that must be contained by either title or content of the selected entries.
      */
     attribute AString searchString;
 
@@ -77,7 +76,8 @@ interface nsIBriefQuery : nsISupports {
     attribute unsigned long offset;
 
     /**
-     * Include hidden (no longer in Live Bookmarks) feeds.
+     * Include hidden feeds i.e. the ones whose Live Bookmarks are no longer to be found
+     * in our home bookmarks folder.
      *
      * @default value is FALSE
      */
@@ -106,12 +106,12 @@ interface nsIBriefQuery : nsISupports {
     attribute short sortDirection;
 
     /**
-     * Convenience function to set the most common constraint conditions all at once.
+     * Convenience function to set the most common constraint conditions.
      */
     void setConditions(in string feeds, in string entries, in boolean unread);
 
     /**
-     * Returns matched entries in a full form.
+     * Returns selected entries in full.
      *
      * @param entryCount Empty object (required by XPConnect to return an array).
      *
@@ -121,7 +121,7 @@ interface nsIBriefQuery : nsISupports {
                     [retval, array, size_is(entryCount)] out nsIBriefFeedEntry entries);
 
     /**
-     * Returns a space-separated list of IDs of matched entries and a similar list of
+     * Returns a space-separated list of IDs of selected entries and a list of
      * IDs of feeds which these entries belong to.
      *
      * @returns Property bag containing "entries" and "feeds" string properties.
@@ -129,31 +129,30 @@ interface nsIBriefQuery : nsISupports {
     nsIWritablePropertyBag2 getSerializedEntries();
 
     /**
-     * Returns the number of matched entries.
+     * Returns the number of selected entries.
      */
     unsigned long getEntriesCount();
 
     /**
-     * Marks the matched entries as read/unread.
+     * Marks selected entries as read/unread.
      *
      * @param  status  New status of entries (TRUE for read, FALSE for unread).
      */
     void markEntriesRead(in boolean status);
 
     /**
-     * Mark matched entries as starred/unstarred.
+     * Mark selected entries as starred/unstarred.
      *
      * @param  status  New status of entries (TRUE for starred, FALSE for not starred).
      */
     void starEntries(in boolean status);
 
     /**
-     * Sets the entries' deleted state or removes them from the database.
+     * Sets the deleted state of the selected entries or removes them from the database.
      *
-     * @param  state  The new deleted state or instruction to remove the entries from the
-     *                database.
-     *                Must be one of the state constants (see nsIBriefQuery.deleted)
-     *                or the below REMOVE_FROM_DATABASE constant.
+     * @param  state  The new deleted state (as defined above, near nsIBriefQuery.deleted
+     *                attribute) or instruction to physically remove the entries from the
+     *                database (REMOVE_FROM_DATABASE constant below).
      *
      * @throws on invalid |state| parameter.
      */
@@ -165,10 +164,7 @@ interface nsIBriefQuery : nsISupports {
 
 
 /**
- * This interface is intended be implemented as a service. It provides access
- * to the the feed database. Feeds in the database are always taken from user's
- * Live Bookmarks from the folder specified by extensions.brief.liveBookmarksFolder
- * pref.
+ * This interface is implemented as a service and manages the feed database.
  */
 [scriptable, uuid(982F337E-7EE9-11DB-8A00-7C8255D89593)]
 interface nsIBriefStorage : nsISupports {
@@ -198,24 +194,24 @@ interface nsIBriefStorage : nsISupports {
                           [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
 
   /**
-   * Synchronize database with Live Bookmarks in folder which RDF id is
+   * Synchronizes database with Live Bookmarks from home folder which RDF URI is
    * specified by extensions.brief.liveBookmarksFolder.
-   * Previously added feeds that aren't in the current folder anymore are
-   * hidden, so the data is restored if they are added again.
-   *
-   * @throws if extensions.brief.liveBookmarksFolder preference is empty.
+   * Feeds that were removed from the home folder remain in the database in the hidden
+   * state for some time.
    */
   void syncWithBookmarks();
 
   /**
-   * Update feed with new entries. This can be called asynchronously.
+   * Updates the feed properties such as title based on the provided nsIBriefFeed.
+   * Evaluates the provided entries, inserting any new items and updating existing
+   * items when newer versions are available.
    *
-   * @param feed Contains the feed with which to update the database.
+   * @param  feed  Contains the feed and the entries to evaluate for new data.
    */
   void updateFeed(in nsIBriefFeed feed);
 
   /**
-   * Sets field relating to various feed's settings (currently entryAgeLimit, maxEntries,
+   * Sets various feed's settings (currently entryAgeLimit, maxEntries,
    * and updateInterval).
    *
    * @param  feed  nIBriefFeed object with whose properties to update the respective
