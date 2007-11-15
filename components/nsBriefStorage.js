@@ -14,6 +14,9 @@ const NC_FEEDURL  = 'http://home.netscape.com/NC-rdf#FeedURL';
 const NC_LIVEMARK = 'http://home.netscape.com/NC-rdf#Livemark';
 const RDF_TYPE    = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
+const COMPACTING_WINDOW_URL = 'chrome://brief/content/compacting-progress.xul';
+const COMPACTING_DELAY = 500;
+
 // How often to delete entries that have expired or exceed the max number of entries per feed.
 const DELETE_REDUNDANT_ENTRIES_INTERVAL = 3600*24; // 1 day
 
@@ -54,6 +57,7 @@ BriefStorageService.prototype = {
     rdfObserverDelayTimer: null,
     rdfObserverTimerIsRunning: false,
 
+    vacuumDelayTimer: null,
 
     instantiate: function BriefStorage_instantiate() {
         var file = Cc['@mozilla.org/file/directory_service;1'].
@@ -528,6 +532,24 @@ BriefStorageService.prototype = {
     },
 
 
+    // nsIBriefStorage
+    compactDatabase: function BriefStorage_compactDatabase() {
+        this.purgeDeletedEntries();
+
+        windowWatcher = Cc['@mozilla.org/embedcomp/window-watcher;1'].
+                        getService(Ci.nsIWindowWatcher);
+
+        this.compactingWindow = windowWatcher.openWindow(null, COMPACTING_WINDOW_URL,
+                                           'Brief', 'chrome,titlebar,centerscreen', null);
+
+        // nsIWindowWatcher.openWindow is asynchronous, so the we must do the
+        // vacuuming after delay for the window to appear first.
+        this.vacuumDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+        this.vacuumDelayTimer.initWithCallback(this, COMPACTING_DELAY,
+                                               Ci.nsITimer.TYPE_ONE_SHOT);
+    },
+
+
     // Deletes entries that are outdated or exceed the max number per feed based.
     deleteRedundantEntries: function BriefStorage_deleteRedundantEntries() {
         var expireEntriesGlobal = this.prefs.getBoolPref('database.expireEntries');
@@ -623,7 +645,7 @@ BriefStorageService.prototype = {
 
     // Permanently remove the deleted entries from database and VACUUM it. Should only
     // be run on shutdown.
-    purgeDeletedEntries: function BriefStorage_purgeDeletedEntries() {
+    purgeDeletedEntries: function BriefStorage_purgeDeletedEntries(aForceVacuum) {
         var removeEntries = this.dBConnection.createStatement(
             'DELETE FROM entries                                                              ' +
             'WHERE id IN                                                                      ' +
@@ -646,12 +668,6 @@ BriefStorageService.prototype = {
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
         this.prefs.setIntPref('database.lastPurgeTime', now);
-
-        var vacuumDisabled = this.prefs.getBoolPref('database.disableCompacting');
-        if (!vacuumDisabled) {
-            this.stopDummyStatement();
-            this.dBConnection.executeSimpleSQL('VACUUM');
-        }
     },
 
 
@@ -680,11 +696,6 @@ BriefStorageService.prototype = {
                 this.observerService.removeObserver(this, 'profile-after-change');
                 break;
 
-            case 'timer-callback':
-                this.rdfObserverTimerIsRunning = false;
-                this.syncWithBookmarks();
-                break;
-
             case 'nsPref:changed':
                 switch (aData) {
                     case 'liveBookmarksFolder':
@@ -692,6 +703,27 @@ BriefStorageService.prototype = {
                         break;
                 }
                 break;
+        }
+    },
+
+    // nsITimer
+    notify: function BriefStorage_notify(aTimer) {
+        switch (aTimer) {
+
+            case this.vacuumDelayTimer:
+                this.stopDummyStatement();
+                this.dBConnection.executeSimpleSQL('VACUUM');
+                this.startDummyStatement();
+
+                this.compactingWindow.close();
+                this.compactingWindow = null;
+                break;
+
+            case this.rdfObserverDelayTimer:
+                this.rdfObserverTimerIsRunning = false;
+                this.syncWithBookmarks();
+                break;
+
         }
     },
 
@@ -1022,7 +1054,8 @@ BriefStorageService.prototype = {
         if (this.rdfObserverTimerIsRunning)
             this.rdfObserverDelayTimer.cancel();
 
-        this.rdfObserverDelayTimer.init(this, RDF_OBSERVER_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
+        this.rdfObserverDelayTimer.initWithCallback(this, RDF_OBSERVER_DELAY,
+                                                    Ci.nsITimer.TYPE_ONE_SHOT);
         this.rdfObserverTimerIsRunning = true;
     },
 
