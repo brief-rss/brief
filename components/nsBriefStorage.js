@@ -532,7 +532,7 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     compactDatabase: function BriefStorage_compactDatabase() {
-        this.purgeDeletedEntries();
+        this.purgeEntries(false);
 
         windowWatcher = Cc['@mozilla.org/embedcomp/window-watcher;1'].
                         getService(Ci.nsIWindowWatcher);
@@ -656,8 +656,9 @@ BriefStorageService.prototype = {
 
     // Moves expired entries to Trash and permanently removes the deleted items from
     // database.
-    purgeEntries: function BriefStorage_purgeDeletedEntries() {
-        this.deleteExpiredEntries();
+    purgeEntries: function BriefStorage_purgeDeletedEntries(aDeleteExpired) {
+        if (aDeleteExpired)
+            this.deleteExpiredEntries();
 
         var removeEntries = this.dBConnection.createStatement(
             'DELETE FROM entries                                                              ' +
@@ -700,7 +701,7 @@ BriefStorageService.prototype = {
 
                 var lastPurgeTime = this.prefs.getIntPref('database.lastPurgeTime');
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
-                    this.purgeEntries();
+                    this.purgeEntries(true);
 
                 this.bookmarksDataSource.RemoveObserver(this);
                 this.prefs.removeObserver('', this);
