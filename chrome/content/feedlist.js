@@ -677,7 +677,7 @@ var gContextMenuCommands = {
         var bundle = document.getElementById('main-bundle');
         var dialogTitle = bundle.getString('compactPromptTitle');
         var dialogText = bundle.getString('compactPromptText');
-        var dialogConfirmLabel = bundle.getString('compactPromptConfirm');
+        var dialogConfirmLabel = bundle.getString('compactPromptConfirmButton');
 
         var buttonFlags = promptService.BUTTON_POS_0 * promptService.BUTTON_TITLE_IS_STRING +
                           promptService.BUTTON_POS_1 * promptService.BUTTON_TITLE_NO +
@@ -692,8 +692,8 @@ var gContextMenuCommands = {
         query.deleteEntries(ENTRY_STATE_DELETED);
 
         if (shouldCompact === 0) {
-            var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-            storage.compactDatabase();
+            window.openDialog('chrome://brief/content/compacting-progress.xul', 'Brief',
+                              'chrome,titlebar,centerscreen');
         }
     },
 
