@@ -17,11 +17,8 @@ const RDF_TYPE    = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 const COMPACTING_WINDOW_URL = 'chrome://brief/content/compacting-progress.xul';
 const COMPACTING_DELAY = 500;
 
-// How often to delete entries that have expired or exceed the max number of entries per feed.
-const DELETE_REDUNDANT_ENTRIES_INTERVAL = 3600*24; // 1 day
-
-// How often to permanently remove deleted entries and VACUUM the database.
-const PURGE_DELETED_ENTRIES_INTERVAL = 3600*24*3; // 3 days
+// How often to manage entry expiration and removing deleted items.
+const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 
 // How long to keep entries from feeds no longer in the home folder.
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
@@ -29,6 +26,7 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const RDF_OBSERVER_DELAY = 250;
 
 const DATABASE_VERSION = 4;
+
 
 var gStorageService = null;
 
@@ -551,7 +549,7 @@ BriefStorageService.prototype = {
 
 
     // Deletes entries that are outdated or exceed the max number per feed based.
-    deleteRedundantEntries: function BriefStorage_deleteRedundantEntries() {
+    deleteExpiredEntries: function BriefStorage_deleteRedundantEntries() {
         var expireEntriesGlobal = this.prefs.getBoolPref('database.expireEntries');
         var useGlobalStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
         var globalExpirationAge = this.prefs.getIntPref('database.entryExpirationAge');
@@ -561,30 +559,40 @@ BriefStorageService.prototype = {
         var globalEdgeDate = Date.now() - globalExpirationAge * 86400000;
         var feeds = this.getAllFeeds({});
 
+        const STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
+        const STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+
         var deleteOutdatedGlobal = this.dBConnection.createStatement(
-            'UPDATE entries SET deleted = 2                                    ' +
+            'UPDATE entries SET deleted = ?1                                   ' +
             'WHERE id IN                                                       ' +
             '(                                                                 ' +
             '   SELECT entries.id                                              ' +
             '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-            '   WHERE feeds.entryAgeLimit = 0 AND entries.starred = 0 AND      ' +
-            '         entries.date < ?                                         ' +
+            '   WHERE entries.deleted = ?2 AND                                 ' +
+            '         feeds.entryAgeLimit = 0 AND                              ' +
+            '         entries.starred = 0 AND                                  ' +
+            '         entries.date < ?3                                        ' +
             ')                                                                 ');
 
         var deleteOutdatedPerFeed = this.dBConnection.createStatement(
-            'UPDATE entries SET deleted = 2                          ' +
-            'WHERE feedID = ? AND starred = 0 AND entries.date < ?   ');
+            'UPDATE entries SET deleted = ?1  ' +
+            'WHERE entries.deleted = ?2 AND   ' +
+            '      starred = 0 AND            ' +
+            '      entries.date < ?3 AND      ' +
+            '      feedID = ?4                ');
 
         var deleteExcessive = this.dBConnection.createStatement(
-            'UPDATE entries SET deleted = 2                        ' +
-            'WHERE id IN                                           ' +
-            '(                                                     ' +
-            '    SELECT id                                         ' +
-            '    FROM entries                                      ' +
-            '    WHERE starred = 0 AND feedID = ?                  ' +
-            '    ORDER BY date ASC                                 ' +
-            '    LIMIT ?                                           ' +
-            ')                                                     ');
+            'UPDATE entries SET deleted = ?1       ' +
+            'WHERE id IN                           ' +
+            '(                                     ' +
+            '    SELECT id                         ' +
+            '    FROM entries                      ' +
+            '    WHERE deleted = ?2 AND            ' +
+            '          starred = 0 AND             ' +
+            '          feedID = ?3                 ' +
+            '    ORDER BY date ASC                 ' +
+            '    LIMIT ?4                          ' +
+            ')                                     ');
 
         var getEntriesCountForFeed = this.dBConnection.createStatement(
             'SELECT COUNT(1) FROM entries WHERE starred = 0 AND feedID = ? ');
@@ -593,7 +601,9 @@ BriefStorageService.prototype = {
         try {
             // Delete outdated entries in feeds that don't have per-feed setting enabled.
             if (expireEntriesGlobal) {
-                deleteOutdatedGlobal.bindInt64Parameter(0, globalEdgeDate);
+                deleteOutdatedGlobal.bindInt32Parameter(0, STATE_TRASHED);
+                deleteOutdatedGlobar.bindInt32Parameter(1, STATE_NORMAL)
+                deleteOutdatedGlobal.bindInt64Parameter(2, globalEdgeDate);
                 deleteOutdatedGlobal.execute();
             }
 
@@ -616,8 +626,10 @@ BriefStorageService.prototype = {
                     difference = entryCount - globalMaxEntries;
 
                 if (difference > 0) {
-                    deleteExcessive.bindStringParameter(0, feeds[i].feedID);
-                    deleteExcessive.bindInt64Parameter(1, difference);
+                    deleteExcessive.bindInt32Parameter(0, STATE_TRASHED);
+                    deleteExcessive.bindInt32Parameter(1, STATE_NORMAL)
+                    deleteExcessive.bindStringParameter(2, feeds[i].feedID);
+                    deleteExcessive.bindInt64Parameter(3, difference);
                     deleteExcessive.execute();
                 }
             }
@@ -627,8 +639,10 @@ BriefStorageService.prototype = {
             for (i = 0; i < feeds.length; i++) {
                 if (feeds[i].entryAgeLimit > 0) {
                     edgeDate = Date.now() - feeds[i].entryAgeLimit * 86400000;
-                    deleteOutdatedPerFeed.bindStringParameter(0, feeds[i].feedID);
-                    deleteOutdatedPerFeed.bindInt64Parameter(1, edgeDate);
+                    deleteOutdatedPerFeed.bindInt32Parameter(0, STATE_TRASHED);
+                    deleteOutdatedPerFeed.bindInt32Parameter(1, STATE_NORMAL);
+                    deleteOutdatedPerFeed.bindInt64Parameter(2, edgeDate);
+                    deleteOutdatedPerFeed.bindStringParameter(3, feeds[i].feedID);
                     deleteOutdatedPerFeed.execute();
                 }
             }
@@ -637,26 +651,28 @@ BriefStorageService.prototype = {
             this.dBConnection.commitTransaction();
         }
 
-        // Prefs can only store longs while Date is a long long.
-        var now = Math.round(Date.now() / 1000);
-        this.prefs.setIntPref('database.lastDeletedRedundantTime', now);
     },
 
 
-    // Permanently remove the deleted entries from database and VACUUM it. Should only
-    // be run on shutdown.
-    purgeDeletedEntries: function BriefStorage_purgeDeletedEntries(aForceVacuum) {
+    // Moves expired entries to Trash and permanently removes the deleted items from
+    // database.
+    purgeEntries: function BriefStorage_purgeDeletedEntries() {
+        this.deleteExpiredEntries();
+
         var removeEntries = this.dBConnection.createStatement(
             'DELETE FROM entries                                                              ' +
             'WHERE id IN                                                                      ' +
             '(                                                                                ' +
             '   SELECT entries.id                                                             ' +
             '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID                ' +
-            '   WHERE (entries.deleted = 2 AND feeds.oldestAvailableEntryDate > entries.date) ' +
+            '   WHERE (entries.deleted = ? AND feeds.oldestAvailableEntryDate > entries.date) ' +
             '         OR (? - feeds.hidden > ? AND feeds.hidden != 0)                         ' +
             ')                                                                                ');
-        removeEntries.bindInt64Parameter(0, Date.now());
-        removeEntries.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
+
+
+        removeEntries.bindInt32Parameter(0, Ci.nsIBriefQuery.ENTRY_STATE_DELETED);
+        removeEntries.bindInt64Parameter(1, Date.now());
+        removeEntries.bindInt64Parameter(2, DELETED_FEEDS_RETENTION_TIME);
         removeEntries.execute();
 
         var removeFeeds = this.dBConnection.createStatement(
@@ -682,13 +698,9 @@ BriefStorageService.prototype = {
                 // Integer prefs are longs while Date is a long long.
                 var now = Math.round(Date.now() / 1000);
 
-                var lastTime = this.prefs.getIntPref('database.lastDeletedRedundantTime');
-                if (now - lastTime > DELETE_REDUNDANT_ENTRIES_INTERVAL)
-                    this.deleteRedundantEntries();
-
-                lastTime = this.prefs.getIntPref('database.lastPurgeTime');
-                if (now - lastTime > PURGE_DELETED_ENTRIES_INTERVAL)
-                    this.purgeDeletedEntries();
+                var lastPurgeTime = this.prefs.getIntPref('database.lastPurgeTime');
+                if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
+                    this.purgeEntries();
 
                 this.bookmarksDataSource.RemoveObserver(this);
                 this.prefs.removeObserver('', this);
