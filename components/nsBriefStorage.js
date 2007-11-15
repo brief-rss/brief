@@ -14,9 +14,6 @@ const NC_FEEDURL  = 'http://home.netscape.com/NC-rdf#FeedURL';
 const NC_LIVEMARK = 'http://home.netscape.com/NC-rdf#Livemark';
 const RDF_TYPE    = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
-const COMPACTING_WINDOW_URL = 'chrome://brief/content/compacting-progress.xul';
-const COMPACTING_DELAY = 500;
-
 // How often to manage entry expiration and removing deleted items.
 const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 
@@ -54,8 +51,6 @@ BriefStorageService.prototype = {
 
     rdfObserverDelayTimer: null,
     rdfObserverTimerIsRunning: false,
-
-    vacuumDelayTimer: null,
 
     instantiate: function BriefStorage_instantiate() {
         var file = Cc['@mozilla.org/file/directory_service;1'].
@@ -534,17 +529,9 @@ BriefStorageService.prototype = {
     compactDatabase: function BriefStorage_compactDatabase() {
         this.purgeEntries(false);
 
-        windowWatcher = Cc['@mozilla.org/embedcomp/window-watcher;1'].
-                        getService(Ci.nsIWindowWatcher);
-
-        this.compactingWindow = windowWatcher.openWindow(null, COMPACTING_WINDOW_URL,
-                                           'Brief', 'chrome,titlebar,centerscreen', null);
-
-        // nsIWindowWatcher.openWindow is asynchronous, so the we must do the
-        // vacuuming after delay for the window to appear first.
-        this.vacuumDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        this.vacuumDelayTimer.initWithCallback(this, COMPACTING_DELAY,
-                                               Ci.nsITimer.TYPE_ONE_SHOT);
+        this.stopDummyStatement();
+        this.dBConnection.executeSimpleSQL('VACUUM');
+        this.startDummyStatement();
     },
 
 
@@ -709,6 +696,11 @@ BriefStorageService.prototype = {
                 this.observerService.removeObserver(this, 'profile-after-change');
                 break;
 
+            case 'timer-callback':
+                this.rdfObserverTimerIsRunning = false;
+                this.syncWithBookmarks();
+                break;
+
             case 'nsPref:changed':
                 switch (aData) {
                     case 'liveBookmarksFolder':
@@ -716,27 +708,6 @@ BriefStorageService.prototype = {
                         break;
                 }
                 break;
-        }
-    },
-
-    // nsITimer
-    notify: function BriefStorage_notify(aTimer) {
-        switch (aTimer) {
-
-            case this.vacuumDelayTimer:
-                this.stopDummyStatement();
-                this.dBConnection.executeSimpleSQL('VACUUM');
-                this.startDummyStatement();
-
-                this.compactingWindow.close();
-                this.compactingWindow = null;
-                break;
-
-            case this.rdfObserverDelayTimer:
-                this.rdfObserverTimerIsRunning = false;
-                this.syncWithBookmarks();
-                break;
-
         }
     },
 
@@ -1067,8 +1038,7 @@ BriefStorageService.prototype = {
         if (this.rdfObserverTimerIsRunning)
             this.rdfObserverDelayTimer.cancel();
 
-        this.rdfObserverDelayTimer.initWithCallback(this, RDF_OBSERVER_DELAY,
-                                                    Ci.nsITimer.TYPE_ONE_SHOT);
+        this.rdfObserverDelayTimer.init(this, RDF_OBSERVER_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
         this.rdfObserverTimerIsRunning = true;
     },
 
