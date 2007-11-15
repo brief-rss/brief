@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://brief/locale/options.dtd">
+
+<window id="brief-compacting-progress"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        title="&compactingWindow.title;"
+        style="padding: 2em 1em; max-width: 35em; text-align: center;"
+        pack="center">
+
+    <label>
+        &compactingInProgress.label;
+    </label>
+
+</window>

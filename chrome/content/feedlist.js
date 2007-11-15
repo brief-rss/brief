@@ -674,6 +674,27 @@ var gContextMenuCommands = {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
         query.deleteEntries(ENTRY_STATE_DELETED);
+
+        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                            getService(Ci.nsIPromptService);
+
+        var bundle = document.getElementById('main-bundle');
+        var dialogTitle = bundle.getString('compactPromptTitle');
+        var dialogText = bundle.getString('compactPromptText');
+        var dialogConfirmLabel = bundle.getString('compactPromptConfirm');
+
+        var buttonFlags = promptService.BUTTON_POS_0 * promptService.BUTTON_TITLE_IS_STRING +
+                          promptService.BUTTON_POS_1 * promptService.BUTTON_TITLE_NO +
+                          promptService.BUTTON_POS_0_DEFAULT;
+
+        var shouldCompact = promptService.confirmEx(window, dialogTitle, dialogText,
+                                                    buttonFlags, dialogConfirmLabel, null,
+                                                    null, null, {value:0});
+
+        if (shouldCompact == 0) {
+            var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+            storage.compactDatabase();
+        }
     },
 
 

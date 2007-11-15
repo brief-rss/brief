@@ -36,7 +36,7 @@
 <!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Show">
 <!ENTITY entriesPerPageAfter.label "items per page">
-<!ENTITY enableCustomStyle.label "Use custom style of the feed content view">
+<!ENTITY enableCustomStyle.label "Use custom style: ">
 <!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Browse">
 <!ENTITY browseCustomStyle.accesskey "B">
@@ -44,7 +44,8 @@
 <!ENTITY showShortcuts.accesskey "w">
 <!ENTITY compactDatabase.label "Compact stored items">
 <!ENTITY compactDatabase.accesskey "C">
-<!ENTITY compactingInProgress.label "Brief is compacting stored items...">
+<!ENTITY compactingWindow.title "Compacting feeds">
+<!ENTITY compactingInProgress.label "Brief is compacting stored feeds. This may take a few minutes...">
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Location">
 <!ENTITY optionsGroupbox.caption "Feed settings">

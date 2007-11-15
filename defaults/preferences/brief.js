@@ -29,5 +29,4 @@ pref("extensions.brief.database.limitStoredEntries", false);
 pref("extensions.brief.database.maxStoredEntries", 100);
 pref("extensions.brief.database.lastDeletedRedundantTime", 0);
 pref("extensions.brief.database.lastPurgeTime", 0);
-pref("extensions.brief.database.disableCompacting", true);
 pref("extensions.brief.database.keepStarredWhenClearing", true);

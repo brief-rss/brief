@@ -219,4 +219,10 @@ interface nsIBriefStorage : nsISupports {
    */
   void setFeedOptions(in nsIBriefFeed feed);
 
+  /**
+   * Physically removes all deleted items and runs SQL VACUUM command to reclaim
+   * disc space and defragment the database.
+   */
+  void compactDatabase();
+
 };
