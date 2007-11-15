@@ -671,10 +671,6 @@ var gContextMenuCommands = {
 
 
     emptyTrash: function ctxMenuCmds_emptyTrash(aEvent) {
-        var query = new Query();
-        query.deleted = ENTRY_STATE_TRASHED;
-        query.deleteEntries(ENTRY_STATE_DELETED);
-
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
 
@@ -688,10 +684,14 @@ var gContextMenuCommands = {
                           promptService.BUTTON_POS_0_DEFAULT;
 
         var shouldCompact = promptService.confirmEx(window, dialogTitle, dialogText,
-                                                    buttonFlags, dialogConfirmLabel, null,
-                                                    null, null, {value:0});
+                                                    buttonFlags, dialogConfirmLabel,
+                                                    null, null, null, {value:0});
 
-        if (shouldCompact == 0) {
+        var query = new Query();
+        query.deleted = ENTRY_STATE_TRASHED;
+        query.deleteEntries(ENTRY_STATE_DELETED);
+
+        if (shouldCompact === 0) {
             var storage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
             storage.compactDatabase();
         }
