@@ -2,14 +2,19 @@
 <!ENTITY confirmHomeFolder.label "ОК">
 <!ENTITY searchCurrentView.label "Поиск в текущем виде">
 <!ENTITY searchAllFeeds.label "Поиск во всех лентах">
+<!ENTITY headlinesCheckbox.tooltip "Показывать только заголовки">
+<!ENTITY showAll.label "Все записи">
+<!ENTITY showUnread.label "Непрочитанные записи">
+<!ENTITY showStarred.label "Помеченные записи">
 <!ENTITY updateButton.tooltip "Проверить обновления для всех лент">
 <!ENTITY stopUpdatingButton.tooltip "Остановить проверку обновления">
 <!ENTITY searchScopeButton.tooltip "Изменить область действия поиска">
 <!ENTITY showOptions.tooltip "Открыть настройки Brief">
-<!ENTITY markAllRead.label "Отметить всё как прочитанное">
+<!ENTITY markAllRead.label "Всё прочитано">
+<!ENTITY markViewRead.tooltip "Отметить всё как прочитанное">
 <!ENTITY viewConstraintList.tooltip "Выберите, какие записи следует отображать">
-<!ENTITY previousPage.tooltip "Показать более новые записи">
-<!ENTITY nextPage.tooltip "Показать более старые записи">
+<!ENTITY previousPage.tooltip "Показать новые записи">
+<!ENTITY nextPage.tooltip "Показать старые записи">
 <!ENTITY unreadFolder.label "Непрочитанные">
 <!ENTITY starredFolder.label "Помеченные">
 <!ENTITY trashFolder.label "Корзина">

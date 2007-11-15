@@ -2,57 +2,58 @@
 <!ENTITY mainPane.label "主要">
 <!ENTITY folderTree.label "放置即時書籤的資料夾:">
 <!ENTITY showStatusbarIcon.label "顯示狀態列圖示">
-
+<!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "在新分頁中開啟 Brief">
-
+<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY feedsPane.label "消息來源">
 <!ENTITY updateGroup.caption "更新">
 <!ENTITY checkForUpdatesBefore.label "每">
-
+<!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "分鐘">
 <!ENTITY updateIntervalHours.label "小時">
 <!ENTITY updateIntervalDays.label "天">
 <!ENTITY checkForUpdatesAfter.label "分鐘更新一次消息來源">
 <!ENTITY showNotification.label "當有更新時顯示通知">
-
+<!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "操作習慣">
 <!ENTITY openEntriesInTabs.label "在新分頁中開啟項目">
-
+<!ENTITY openEntriesInTabs.accesskey "t">
 <!ENTITY doubleClickMarks.label "在雙擊項目後標為已讀（或未讀）">
-
+<!ENTITY doubleClickMarks.accesskey "M">
 <!ENTITY storingGroup.caption "保存">
 <!ENTITY expirationBefore.label "待">
 <!ENTITY expirationAfter.label "天後，再移除下載好的項目。">
-
-
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "已標星號的項目會保留下來">
 <!ENTITY storedEntriesBefore.label "每個消息來源中，僅保存最新">
 <!ENTITY storedEntriesAfter.label "條項目。">
-
+<!ENTITY storedEntriesCheckbox.accesskey "e">
 <!ENTITY clearAllEntriesButton.label "清除所有項目">
-
+<!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "顯示">
-
+<!ENTITY feedViewGroup.caption "消息來源內容畫面">
 <!ENTITY authorsCheckbox.label "顯示各項目的作者">
-
+<!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "每頁顯示">
 <!ENTITY entriesPerPageAfter.label "條項目">
 <!ENTITY enableCustomStyle.label "套用自訂的樣式到消息來源內容上">
-
+<!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "瀏覽">
-
-
-
-
-
-
+<!ENTITY browseCustomStyle.accesskey "B">
+<!ENTITY showShortcuts.label "顯示快捷鍵">
+<!ENTITY showShortcuts.accesskey "w">
 <!ENTITY feedName.label "名稱">
 <!ENTITY feedURL.label "網址">
 <!ENTITY optionsGroupbox.caption "消息來源設定">
 <!ENTITY checkUpdatesPerFeedBefore.label "每隔以下時間確認一次更新：">
-
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
 <!ENTITY expireEntriesPerFeedBefore.label "待以下天數後再移除下載好的項目：">
-
+<!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "天">
 <!ENTITY maxEntriesPerFeedBefore.label "僅保存">
-
+<!ENTITY maxEntriesPerFeed.accesskey "S">
 <!ENTITY maxEntriesPerFeedAfter.label "條最新的項目">
+<!ENTITY previousFeed.label "&lt; 上一個">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "下一個 &gt;">
+<!ENTITY nextFeed.accesskey "N">

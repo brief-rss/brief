@@ -2,11 +2,16 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Articles courants">
 <!ENTITY searchAllFeeds.label "Tous les flux">
+<!ENTITY headlinesCheckbox.tooltip "Affichage des titres">
+<!ENTITY showAll.label "Tous les articles">
+<!ENTITY showUnread.label "Articles non lus">
+<!ENTITY showStarred.label "Articles marqués">
 <!ENTITY updateButton.tooltip "Mettre à jour tous les flux">
 <!ENTITY stopUpdatingButton.tooltip "Arrêter la recherche de mises à jour">
 <!ENTITY searchScopeButton.tooltip "Modifier la portée de recherche">
 <!ENTITY showOptions.tooltip "Ouvrir les options de Brief">
 <!ENTITY markAllRead.label "Tout marquer comme lu">
+<!ENTITY markViewRead.tooltip "Marquer les articles courants comme lus">
 <!ENTITY viewConstraintList.tooltip "Choisir quel type d&apos;articles afficher">
 <!ENTITY previousPage.tooltip "Afficher les articles plus récents">
 <!ENTITY nextPage.tooltip "Afficher les articles plus anciens">

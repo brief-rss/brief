@@ -3,40 +3,44 @@
 <!ENTITY k.key "K">
 <!ENTITY or "或">
 <!ENTITY space.key "空格">
-<!ENTITY selectNext "选择下条信息">
+<!ENTITY selectNext "选择下个项目">
 <!ENTITY j.key "J">
 <!ENTITY backspace.key "退格">
-<!ENTITY selectPrevious "选择上个信息">
+<!ENTITY selectPrevious "选择上个项目">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "显示下个页面">
 <!ENTITY altJ.key "Alt + J">
 <!ENTITY previousPage "显示上个页面">
 <!ENTITY enter.key "回车">
-<!ENTITY openEntry "打开信息">
+<!ENTITY openEntry "打开项目">
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
-<!ENTITY openEntryTab "在新标签页打开信息">
+<!ENTITY openEntryTab "在新标签页打开项目">
 <!ENTITY n.key "N">
-<!ENTITY foldEntry "展开或收起选中信息 （需选中只查看标题）">
-<!ENTITY entries.header "信息">
+<!ENTITY foldEntry "展开或收起选中的项目 （需选中标题查看）">
+<!ENTITY entries.header "项目">
 <!ENTITY m.key "M">
-<!ENTITY markRead "标记选中信息为已读或未读">
+<!ENTITY markRead "标记选中的项目为已读或未读">
 <!ENTITY b.key "B">
-<!ENTITY starEntry "标记或取消标记选中信息">
+<!ENTITY starEntry "标记或取消标记选中的项目">
 <!ENTITY t.key "T">
-<!ENTITY moveToTrash "移动选中信息到垃圾桶">
+<!ENTITY moveToTrash "移动选中的项目到垃圾桶">
 <!ENTITY r.key "R">
-<!ENTITY restoreEntry "恢复选中信息">
+<!ENTITY restoreEntry "恢复选中的项目（位于垃圾桶时）">
 <!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY markAllAsRead "标记所有已查看的项目为已读">
 <!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
-<!ENTITY deselectEntries "取消选中信息">
+<!ENTITY deselectEntries "取消选中项目">
 <!ENTITY view.header "查看">
 <!ENTITY a.key "A">
-<!ENTITY showAll "显示所有信息">
+<!ENTITY showAll "显示所有项目">
 <!ENTITY s.key "S">
+<!ENTITY showStarred "显示标记的项目">
 <!ENTITY d.key "D">
+<!ENTITY showUnread "显示未读的项目">
 <!ENTITY f.key "F">
 <!ENTITY headlinesView "切换只显示标题">
 <!ENTITY slash.key "/">
+<!ENTITY focusSearchbar "切换焦点到搜索栏">
 <!ENTITY questionMark.key "?">
 <!ENTITY displayShortcuts "显示快捷键列表">

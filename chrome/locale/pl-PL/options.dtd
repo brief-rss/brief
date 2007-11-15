@@ -36,15 +36,12 @@
 <!ENTITY authorsCheckbox.accesskey "R">
 <!ENTITY entriesPerPageBefore.label "Wyświetlaj">
 <!ENTITY entriesPerPageAfter.label "wiadomości na jednej stronie">
-<!ENTITY enableCustomStyle.label "Używaj zewnętrznego stylu widoku kanału">
+<!ENTITY enableCustomStyle.label "Używaj zewnętrznego stylu widoku kanału:">
 <!ENTITY enableCustomStyle.accesskey "N">
 <!ENTITY browseCustomStyle.label "Przeglądaj">
 <!ENTITY browseCustomStyle.accesskey "D">
 <!ENTITY showShortcuts.label "Pokaż skróty">
 <!ENTITY showShortcuts.accesskey "K">
-<!ENTITY compactDatabase.label "Kompaktuj zapisane elementy">
-<!ENTITY compactDatabase.accesskey "Z">
-<!ENTITY compactingInProgress.label "Brief kompaktuje zapisane wiadomości...">
 <!ENTITY feedName.label "Nazwa">
 <!ENTITY feedURL.label "Lokalizacja">
 <!ENTITY optionsGroupbox.caption "Ustawienia kanału">
@@ -53,10 +50,10 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Usuń pobrane wiadomości po">
 <!ENTITY expireEntriesPerFeed.accesskey "U">
 <!ENTITY expireEntriesPerFeedAfter.label "dniach">
-<!ENTITY maxEntriesPerFeedBefore.label "Przechowuj maksymalnie">
+<!ENTITY maxEntriesPerFeedBefore.label "Przechowuj do">
 <!ENTITY maxEntriesPerFeed.accesskey "R">
-<!ENTITY maxEntriesPerFeedAfter.label "wiadomości">
-<!ENTITY previousFeed.label "« Poprzedni">
+<!ENTITY maxEntriesPerFeedAfter.label "ostatnich wiadomości">
+<!ENTITY previousFeed.label "&lt; Poprzedni">
 <!ENTITY previousFeed.accesskey "P">
-<!ENTITY nextFeed.label "Następny »">
+<!ENTITY nextFeed.label "Następny &gt;">
 <!ENTITY nextFeed.accesskey "N">

@@ -1,22 +1,27 @@
-
-
+<!ENTITY selectHomeFolder.label "Selezionare la cartella contenente i segnalibri Live:">
+<!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Attualmente visti">
 <!ENTITY searchAllFeeds.label "Tutti i feed">
+<!ENTITY headlinesCheckbox.tooltip "Nascondi le anteprime degli elementi">
+<!ENTITY showAll.label "Mostra tutti">
+<!ENTITY showUnread.label "Mostra non letti">
+<!ENTITY showStarred.label "Mostra segnati con stella">
 <!ENTITY updateButton.tooltip "Controlla gli aggiornamenti di tutti i feed">
 <!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
 <!ENTITY searchScopeButton.tooltip "Cambia l&apos;ambito della ricerca ">
 <!ENTITY showOptions.tooltip "Opzioni...">
-
-<!ENTITY viewConstraintList.tooltip "Selezionare il tipo di elementi da selezionare">
+<!ENTITY markAllRead.label "Segna tutti come letti">
+<!ENTITY markViewRead.tooltip "Segna elementi attualmente visti come letti">
+<!ENTITY viewConstraintList.tooltip "Seleziona il tipo di elementi da visualizzare">
 <!ENTITY previousPage.tooltip "Mostra pagina precedente">
 <!ENTITY nextPage.tooltip "Mostra pagina successiva">
 <!ENTITY unreadFolder.label "Non letti">
 <!ENTITY starredFolder.label "Segnati con stella">
 <!ENTITY trashFolder.label "Cestino">
 <!ENTITY ctxMarkFeedRead.label "Segna feed come letto">
-
+<!ENTITY ctxMarkFeedUnread.label "Segna feed come non letto">
 <!ENTITY ctxMarkFolderRead.label "Segna cartella come letta">
-
+<!ENTITY ctxMarkFolderUnread.label "Segna cartella come non letta">
 <!ENTITY ctxUpdateFeed.label "Aggiorna feed">
 <!ENTITY ctxUpdateFolder.label "Aggiorna cartella">
 <!ENTITY ctxOpenWebsite.label "Apri sito web">

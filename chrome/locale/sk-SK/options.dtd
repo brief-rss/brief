@@ -42,9 +42,6 @@
 <!ENTITY browseCustomStyle.accesskey "B">
 <!ENTITY showShortcuts.label "Zobraziť skratky">
 <!ENTITY showShortcuts.accesskey "z">
-<!ENTITY compactDatabase.label "Zhustiť uložené položky">
-<!ENTITY compactDatabase.accesskey "C">
-<!ENTITY compactingInProgress.label "Brief zhusťuje uložené položky pre zvýšenie miesta na disku...">
 <!ENTITY feedName.label "Názov">
 <!ENTITY feedURL.label "Umiestnenie">
 <!ENTITY optionsGroupbox.caption "Nastavenia kanála">

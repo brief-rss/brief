@@ -2,11 +2,16 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Søk i nyhetskilden">
 <!ENTITY searchAllFeeds.label "Søk i alle nyhetskilder">
+<!ENTITY headlinesCheckbox.tooltip "Vis kun overskrifter">
+<!ENTITY showAll.label "Vis alle">
+<!ENTITY showUnread.label "Vis ulest">
+<!ENTITY showStarred.label "Vis merket med stjerne">
 <!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
 <!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskilder">
 <!ENTITY searchScopeButton.tooltip "Endre søk">
 <!ENTITY showOptions.tooltip "Brief innstillinger">
 <!ENTITY markAllRead.label "Merk alle som lest">
+<!ENTITY markViewRead.tooltip "Merk alle elementer som lest">
 <!ENTITY viewConstraintList.tooltip "Velg hvilke elementer som skal vises">
 <!ENTITY previousPage.tooltip "Vis nyere elementer">
 <!ENTITY nextPage.tooltip "Vis eldre elementer">
@@ -26,6 +31,6 @@
 <!ENTITY ctxEmptyFolder.label "Tom mappe">
 <!ENTITY ctxRestoreTrashed.label "Gjenopprett elementer">
 <!ENTITY ctxEmptyTrash.label "Tøm papirkurven">
-<!ENTITY ctxFeedProperties.label "Innstillinger">
+<!ENTITY ctxFeedProperties.label "Egenskaper">
 <!ENTITY ctxUpdateFeeds.label "Oppdater nyhetskilder nå">
 <!ENTITY ctxMarkFeedsAsRead.label "Merk alle nyhetskilder som lest">

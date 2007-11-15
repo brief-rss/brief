@@ -1,0 +1,46 @@
+<!ENTITY shortcutsPage.title "Brief - Tastaturkürzel">
+<!ENTITY navigation.header "Navigation">
+<!ENTITY k.key "K">
+<!ENTITY or "oder">
+<!ENTITY space.key "Leertaste">
+<!ENTITY selectNext "Nächsten Eintrag auswählen">
+<!ENTITY j.key "J">
+<!ENTITY backspace.key "Rücktaste">
+<!ENTITY selectPrevious "Vorherigen Eintrag auswählen">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "Nächste Seite anzeigen">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Vorherige Seite anzeigen">
+<!ENTITY enter.key "Eingabetaste">
+<!ENTITY openEntry "Eintrag öffnen">
+<!ENTITY ctrlEnter.key "Strg + Eingabetaste">
+<!ENTITY openEntryTab "Eintrag in neuem Tab öffnen">
+<!ENTITY n.key "N">
+<!ENTITY foldEntry "Ausgewählten Eintrag aus- oder einklappen (wenn im Überschriftenmodus)">
+<!ENTITY entries.header "Einträge">
+<!ENTITY m.key "M">
+<!ENTITY markRead "Ausgewählten Eintrag als gelesen oder ungelesen markieren">
+<!ENTITY b.key "B">
+<!ENTITY starEntry "Ausgewählten Eintrag kennzeichnen oder nicht kennzeichnen">
+<!ENTITY t.key "T">
+<!ENTITY moveToTrash "Ausgewählten Eintrag in den Papierkorb verschieben">
+<!ENTITY r.key "R">
+<!ENTITY restoreEntry "Ausgewählten Eintrag wiederherstellen (wenn im Papierkorb)">
+<!ENTITY ctrlM.key "Strg + M">
+<!ENTITY markAllAsRead "Alle angezeigten Einträge als gelesen markieren">
+<!ENTITY q.key "Q">
+<!ENTITY tab.key "Tabulator">
+<!ENTITY deselectEntries "Auswahl für Einträge aufheben">
+<!ENTITY view.header "Anzeige">
+<!ENTITY a.key "A">
+<!ENTITY showAll "Alle Einträge anzeigen">
+<!ENTITY s.key "S">
+<!ENTITY showStarred "Gekennzeichnete Einträge anzeigen">
+<!ENTITY d.key "D">
+<!ENTITY showUnread "Ungelesene Einträge anzeigen">
+<!ENTITY f.key "F">
+<!ENTITY headlinesView "Überschriftenmodus umschalten">
+<!ENTITY slash.key "/">
+<!ENTITY focusSearchbar "Brief-Suchleiste fokussieren">
+<!ENTITY questionMark.key "?">
+<!ENTITY displayShortcuts "Liste der Tastaturkürzel anzeigen">

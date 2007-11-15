@@ -3,6 +3,8 @@
 <!ENTITY contributors.headline "貢獻者">
 <!ENTITY credits.headline "銘謝">
 <!ENTITY translators.headline "譯者">
-<!ENTITY extdevThanks.paragraph "感謝 irc.mozilla.org 的 #extdev 上偉大的各位:">
-<!ENTITY iconsThanks.paragraph "某些圖示是得到聰明的 Arvid Axelsson 許可而使用的。">
-<!ENTITY testingThanks.paragraph "感謝 Stefan Plewako 的協助測試。">
+<!ENTITY extdevThanks.paragraph "感謝 irc.mozilla.org 的 #extdev 頻道上偉大的各位:">
+<!ENTITY iconsThanks.paragraph "某些圖示是承蒙聰明能幹的 Arvid Axelsson 好意而來。">
+<!ENTITY testingThanks.paragraph "感謝 Stefan Plewako 協助測試。">
+<!ENTITY keyboardIconsCredit.paragraph "按鍵圖示由 Alan 提供（這是誰？ - http://alanwho.com/ ）">
+<!ENTITY toolbarIconsCredits.paragraph "某些工具列圖示是由 Tango Desktop Project 中取一部分來製作的">

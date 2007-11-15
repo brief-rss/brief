@@ -1,0 +1,46 @@
+<!ENTITY shortcutsPage.title "Brief - tastaturgenveje">
+<!ENTITY navigation.header "Navigation">
+<!ENTITY k.key "K">
+<!ENTITY or "eller">
+<!ENTITY space.key "Mellemrum">
+<!ENTITY selectNext "Vælg næste emne">
+<!ENTITY j.key "J">
+<!ENTITY backspace.key "Backspace">
+<!ENTITY selectPrevious "Vælg foregående emne">
+<!ENTITY altK.key "Alt - K">
+<!ENTITY nextPage "Vis næste side">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Vis foregående side">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Åben emne">
+<!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY openEntryTab "Åben emne i nyt faneblad">
+<!ENTITY n.key "n">
+<!ENTITY foldEntry "Sammenfold eller udfold valgte emne (i overskrift-visning)">
+<!ENTITY entries.header "Emner">
+<!ENTITY m.key "m">
+<!ENTITY markRead "Marker valgte emne som læst eller ulæst">
+<!ENTITY b.key "B">
+<!ENTITY starEntry "Stjernemarker eller fjern markering fra valgte emne">
+<!ENTITY t.key "T">
+<!ENTITY moveToTrash "Flyt valgte emne til Skraldespand">
+<!ENTITY r.key "R">
+<!ENTITY restoreEntry "Genetabler valgte element (i Skraldespand)">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY markAllAsRead "Marker alle viste emner som læste">
+<!ENTITY q.key "Q">
+<!ENTITY tab.key "Tab">
+<!ENTITY deselectEntries "Fravælg ethvert emne">
+<!ENTITY view.header "Vis">
+<!ENTITY a.key "A">
+<!ENTITY showAll "Vis alle emner">
+<!ENTITY s.key "S">
+<!ENTITY showStarred "Vis stjernemarkerede emner">
+<!ENTITY d.key "D">
+<!ENTITY showUnread "Vis ulæste emner">
+<!ENTITY f.key "F">
+<!ENTITY headlinesView "Slå overskrift-visning til/fra">
+<!ENTITY slash.key "/">
+<!ENTITY focusSearchbar "Fokusér søgelinje">
+<!ENTITY questionMark.key "?">
+<!ENTITY displayShortcuts "Vis liste over genvejstaster">

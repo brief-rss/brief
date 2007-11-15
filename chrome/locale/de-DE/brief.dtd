@@ -1,12 +1,17 @@
-
-
+<!ENTITY selectHomeFolder.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
+<!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "In aktueller Ansicht suchen">
 <!ENTITY searchAllFeeds.label "In allen Feeds suchen">
+<!ENTITY headlinesCheckbox.tooltip "Nur Überschriften anzeigen">
+<!ENTITY showAll.label "Alle anzeigen">
+<!ENTITY showUnread.label "Ungelesene anzeigen">
+<!ENTITY showStarred.label "Gekennzeichnete anzeigen">
 <!ENTITY updateButton.tooltip "Alle Feeds auf Aktualisierungen prüfen">
 <!ENTITY stopUpdatingButton.tooltip "Überprüfung abbrechen">
 <!ENTITY searchScopeButton.tooltip "Suchbereich ändern">
 <!ENTITY showOptions.tooltip "Einstellungen öffnen">
-
+<!ENTITY markAllRead.label "Alles als gelesen markieren">
+<!ENTITY markViewRead.tooltip "Alle Einträge als gelesen markieren">
 <!ENTITY viewConstraintList.tooltip "Art der anzuzeigenden Einträge auswählen">
 <!ENTITY previousPage.tooltip "Aktuellere Einträge anzeigen">
 <!ENTITY nextPage.tooltip "Ältere Einträge anzeigen">
@@ -14,9 +19,9 @@
 <!ENTITY starredFolder.label "Gekennzeichnet">
 <!ENTITY trashFolder.label "Papierkorb">
 <!ENTITY ctxMarkFeedRead.label "Feed als gelesen markieren">
-
+<!ENTITY ctxMarkFeedUnread.label "Feed als ungelesen markieren">
 <!ENTITY ctxMarkFolderRead.label "Ordner als gelesen markieren">
-
+<!ENTITY ctxMarkFolderUnread.label "Ordner als ungelesen markieren">
 <!ENTITY ctxUpdateFeed.label "Feed aktualisieren">
 <!ENTITY ctxUpdateFolder.label "Ordner aktualisieren">
 <!ENTITY ctxOpenWebsite.label "Homepage öffnen">

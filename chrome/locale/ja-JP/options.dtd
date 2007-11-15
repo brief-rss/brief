@@ -42,9 +42,6 @@
 <!ENTITY browseCustomStyle.accesskey "B">
 <!ENTITY showShortcuts.label "ショートカットを表示">
 <!ENTITY showShortcuts.accesskey "w">
-<!ENTITY compactDatabase.label "保存済み項目を詰める">
-<!ENTITY compactDatabase.accesskey "C">
-<!ENTITY compactingInProgress.label "Bried はディスク容量を解放するために保存済み項目を圧縮します...">
 <!ENTITY feedName.label "名前">
 <!ENTITY feedURL.label "場所">
 <!ENTITY optionsGroupbox.caption "フィード設定">

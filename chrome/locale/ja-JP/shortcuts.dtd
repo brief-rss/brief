@@ -30,7 +30,7 @@
 <!ENTITY markAllAsRead "すべての表示済み項目を既読にする">
 <!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
-<!ENTITY deselectEntries "あらゆる項目の非選択状態にする">
+<!ENTITY deselectEntries "項目を非選択状態にする">
 <!ENTITY view.header "表示">
 <!ENTITY a.key "A">
 <!ENTITY showAll "すべての項目を表示">

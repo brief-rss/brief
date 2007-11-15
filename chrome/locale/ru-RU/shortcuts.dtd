@@ -16,14 +16,31 @@
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
 <!ENTITY openEntryTab "Открыть запись в новой вкладке">
 <!ENTITY n.key "N">
+<!ENTITY foldEntry "Unfold or fold selected item (when in headlines view)">
+<!ENTITY entries.header "Записи">
+<!ENTITY m.key "M">
+<!ENTITY markRead "Отметить выбранное (не)прочитанным">
+<!ENTITY b.key "B">
+<!ENTITY starEntry "Добавить пометку">
+<!ENTITY t.key "T">
 <!ENTITY moveToTrash "Переместить запись в Корзину">
+<!ENTITY r.key "R">
 <!ENTITY restoreEntry "Восстановить запись (когда в Корзине)">
+<!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY markAllAsRead "Отметить все просмотренные записи как прочитанные">
+<!ENTITY q.key "Q">
+<!ENTITY tab.key "Tab">
 <!ENTITY deselectEntries "Отменить выделение записей">
 <!ENTITY view.header "Вид">
+<!ENTITY a.key "A">
 <!ENTITY showAll "Показать все записи">
+<!ENTITY s.key "S">
 <!ENTITY showStarred "Показать помеченные записи">
+<!ENTITY d.key "D">
 <!ENTITY showUnread "Показать непрочитанные записи">
+<!ENTITY f.key "F">
 <!ENTITY headlinesView "Переключить вид заголовков">
+<!ENTITY slash.key "/">
 <!ENTITY focusSearchbar "Переместить фокус в строку поиска">
+<!ENTITY questionMark.key "?">
 <!ENTITY displayShortcuts "Показывать список клавиатурных сокращений">

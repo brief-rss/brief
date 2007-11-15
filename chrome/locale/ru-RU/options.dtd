@@ -18,7 +18,7 @@
 <!ENTITY behaviorGroup.caption "Поведение">
 <!ENTITY openEntriesInTabs.label "Открывать записи в новых вкладках">
 <!ENTITY openEntriesInTabs.accesskey "ы">
-<!ENTITY doubleClickMarks.label "Отмечать как прочитанное двойным кликом">
+<!ENTITY doubleClickMarks.label "Отмечать запись как прочитанную двойным кликом">
 <!ENTITY doubleClickMarks.accesskey "е">
 <!ENTITY storingGroup.caption "Хранение">
 <!ENTITY expirationBefore.label "Удалять загруженные записи после">
@@ -31,7 +31,7 @@
 <!ENTITY clearAllEntriesButton.label "Очистить все записи">
 <!ENTITY clearAllEntriesButton.accesskey "с">
 <!ENTITY displayPane.label "Отображение">
-<!ENTITY feedViewGroup.caption "Вид содержимого ленты">
+<!ENTITY feedViewGroup.caption "Стиль содержимого ленты">
 <!ENTITY authorsCheckbox.label "Показывать автора записи">
 <!ENTITY authorsCheckbox.accesskey "к">
 <!ENTITY entriesPerPageBefore.label "Показывать">
@@ -40,11 +40,8 @@
 <!ENTITY enableCustomStyle.accesskey "з">
 <!ENTITY browseCustomStyle.label "Обзор">
 <!ENTITY browseCustomStyle.accesskey "б">
-
-
-<!ENTITY compactDatabase.label "Сжать сохранённые записи">
-<!ENTITY compactDatabase.accesskey "ё">
-<!ENTITY compactingInProgress.label "Brief выполняет сжатие информации для освобождения дискового пространства...">
+<!ENTITY showShortcuts.label "Показать клавиатурные сочетания">
+<!ENTITY showShortcuts.accesskey "ы">
 <!ENTITY feedName.label "Название">
 <!ENTITY feedURL.label "Адрес">
 <!ENTITY optionsGroupbox.caption "Настройки лент">
