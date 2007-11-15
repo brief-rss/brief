@@ -1296,7 +1296,7 @@ BriefQuery.prototype = {
             // for them and, what's more, they don't expect to deal with them.
             var prevIncludeHiddenFlag = this.includeHiddenFeeds;
             this.includeHiddenFeeds = false;
-            var changedEntries = this.getSerializedEntries(this);
+            var changedEntries = this.getSerializedEntries();
             this.includeHiddenFeeds = prevIncludeHiddenFlag;
 
             update.execute();
@@ -1341,7 +1341,7 @@ BriefQuery.prototype = {
             // See markEntriesRead.
             var prevIncludeHiddenFlag = this.includeHiddenFeeds;
             this.includeHiddenFeeds = false;
-            var changedEntries = this.getSerializedEntries(this);
+            var changedEntries = this.getSerializedEntries();
             this.includeHiddenFeeds = prevIncludeHiddenFlag;
 
             statement.execute();
@@ -1350,8 +1350,10 @@ BriefQuery.prototype = {
             this.dBConnection.commitTransaction();
         }
 
-        this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                             'deleted');
+        if (changedEntries.getPropertyAsAString('entries')) {
+            this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                                 'deleted');
+        }
     },
 
 
@@ -1366,7 +1368,7 @@ BriefQuery.prototype = {
             // See markEntriesRead.
             var prevIncludeHiddenFlag = this.includeHiddenFeeds;
             this.includeHiddenFeeds = false;
-            var changedEntries = this.getSerializedEntries(this);
+            var changedEntries = this.getSerializedEntries();
             this.includeHiddenFeeds = prevIncludeHiddenFlag;
 
             update.execute();
@@ -1375,8 +1377,10 @@ BriefQuery.prototype = {
             this.dBConnection.commitTransaction();
         }
 
-        this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                             'starred');
+        if (changedEntries.getPropertyAsAString('entries')) {
+            this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                                 'starred');
+        }
     },
 
 
