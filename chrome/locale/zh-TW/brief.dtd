@@ -1,22 +1,27 @@
-
-
-<!ENTITY searchCurrentView.label "搜尋目前所閱讀的">
+<!ENTITY selectHomeFolder.label "選取放有即時書籤的資料夾:">
+<!ENTITY confirmHomeFolder.label "確定">
+<!ENTITY searchCurrentView.label "搜尋目前顯示中的">
 <!ENTITY searchAllFeeds.label "搜尋所有消息來源">
-<!ENTITY updateButton.tooltip "確認全部消息來源的更新">
-<!ENTITY stopUpdatingButton.tooltip "停止繼續確認消息來源的更新">
+<!ENTITY headlinesCheckbox.tooltip "只顯示標題">
+<!ENTITY showAll.label "顯示所有項目">
+<!ENTITY showUnread.label "顯示未讀項目">
+<!ENTITY showStarred.label "顯示星號項目">
+<!ENTITY updateButton.tooltip "逐一檢查消息來源是否有更新">
+<!ENTITY stopUpdatingButton.tooltip "停止繼續檢查消息來源的更新">
 <!ENTITY searchScopeButton.tooltip "變更搜尋範圍">
 <!ENTITY showOptions.tooltip "開啟 Brief 選項">
-
-<!ENTITY viewConstraintList.tooltip "選擇要顯示那種類型的項目">
+<!ENTITY markAllRead.label "全標為已讀">
+<!ENTITY markViewRead.tooltip "項目全標為已讀">
+<!ENTITY viewConstraintList.tooltip "選擇要顯示哪種類型的項目">
 <!ENTITY previousPage.tooltip "顯示較新的項目">
 <!ENTITY nextPage.tooltip "顯示較舊的項目">
 <!ENTITY unreadFolder.label "未讀的">
 <!ENTITY starredFolder.label "標有星號的">
 <!ENTITY trashFolder.label "垃圾桶">
-<!ENTITY ctxMarkFeedRead.label "標記消息來源為已讀">
-
-<!ENTITY ctxMarkFolderRead.label "標記資料夾為已讀">
-
+<!ENTITY ctxMarkFeedRead.label "消息來源標為已讀">
+<!ENTITY ctxMarkFeedUnread.label "消息來源標為未讀">
+<!ENTITY ctxMarkFolderRead.label "資料夾標為已讀">
+<!ENTITY ctxMarkFolderUnread.label "資料夾標為未讀">
 <!ENTITY ctxUpdateFeed.label "更新消息來源">
 <!ENTITY ctxUpdateFolder.label "更新資料夾">
 <!ENTITY ctxOpenWebsite.label "在新分頁中開啟網站">
@@ -24,8 +29,8 @@
 <!ENTITY ctxDeleteFolder.label "刪除資料夾">
 <!ENTITY ctxEmptyFeed.label "清空消息來源">
 <!ENTITY ctxEmptyFolder.label "清空資料夾">
-<!ENTITY ctxRestoreTrashed.label "還原被丟入垃圾筒的項目">
+<!ENTITY ctxRestoreTrashed.label "還原所有項目">
 <!ENTITY ctxEmptyTrash.label "清空垃圾桶">
-<!ENTITY ctxFeedProperties.label "屬性">
+<!ENTITY ctxFeedProperties.label "屬性設定">
 <!ENTITY ctxUpdateFeeds.label "立即更新消息來源">
-<!ENTITY ctxMarkFeedsAsRead.label "將所有消息來源標為已讀">
+<!ENTITY ctxMarkFeedsAsRead.label "所有消息來源標為已讀">

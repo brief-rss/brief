@@ -2,11 +2,16 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "現在の表示から検索">
 <!ENTITY searchAllFeeds.label "すべてのフィードを検索">
+<!ENTITY headlinesCheckbox.tooltip "見出しのみを表示">
+<!ENTITY showAll.label "すべて見る">
+<!ENTITY showUnread.label "未読を見る">
+<!ENTITY showStarred.label "スター済みを見る">
 <!ENTITY updateButton.tooltip "すべてのフィードを更新確認する">
 <!ENTITY stopUpdatingButton.tooltip "フィードの更新確認を止める">
 <!ENTITY searchScopeButton.tooltip "検索範囲を変更する">
 <!ENTITY showOptions.tooltip "Brief のオプションを開く">
 <!ENTITY markAllRead.label "すべてを既読にする">
+<!ENTITY markViewRead.tooltip "すべての項目を既読にする">
 <!ENTITY viewConstraintList.tooltip "表示する項目の種類を選ぶ">
 <!ENTITY previousPage.tooltip "より新たな項目を表示">
 <!ENTITY nextPage.tooltip "より古い項目を表示">
@@ -17,7 +22,7 @@
 <!ENTITY ctxMarkFeedUnread.label "フィードを未読にする">
 <!ENTITY ctxMarkFolderRead.label "フォルダを既読にする">
 <!ENTITY ctxMarkFolderUnread.label "フォルダを未読にする">
-<!ENTITY ctxUpdateFeed.label "フィードを確認する">
+<!ENTITY ctxUpdateFeed.label "フィードを更新する">
 <!ENTITY ctxUpdateFolder.label "フォルダを更新する">
 <!ENTITY ctxOpenWebsite.label "ウェブサイトを開く">
 <!ENTITY ctxDeleteFeed.label "フィードを削除する">
@@ -27,5 +32,5 @@
 <!ENTITY ctxRestoreTrashed.label "ごみ箱に捨てた項目を元に戻す">
 <!ENTITY ctxEmptyTrash.label "ごみ箱を空にする">
 <!ENTITY ctxFeedProperties.label "プロパティ">
-<!ENTITY ctxUpdateFeeds.label "今すぐフィードを確認">
+<!ENTITY ctxUpdateFeeds.label "今すぐフィードを更新">
 <!ENTITY ctxMarkFeedsAsRead.label "すべてのフィードを既読とする">

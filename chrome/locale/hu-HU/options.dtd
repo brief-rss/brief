@@ -2,57 +2,58 @@
 <!ENTITY mainPane.label "Általános">
 <!ENTITY folderTree.label "Élő könyvjelzőket tartalmazó mappa:">
 <!ENTITY showStatusbarIcon.label "Állapotsor ikon megjelenítése">
-
-<!ENTITY openInNewTab.label "Rövid hírforrások megnyitás új lapon">
-
+<!ENTITY showStatusbarIcon.accesskey "i">
+<!ENTITY openInNewTab.label "Rövid hírforrások megnyitása új lapon">
+<!ENTITY openInNewTab.accesskey "m">
 <!ENTITY feedsPane.label "Hírforrások">
 <!ENTITY updateGroup.caption "Frissítés">
 <!ENTITY checkForUpdatesBefore.label "Hírforrások frissítése minden">
-
+<!ENTITY checkForUpdates.accesskey "H">
 <!ENTITY updateIntervalMinutes.label "perc">
 <!ENTITY updateIntervalHours.label "óra">
 <!ENTITY updateIntervalDays.label "nap">
 <!ENTITY checkForUpdatesAfter.label "percben">
 <!ENTITY showNotification.label "Értesítés megjelenítése új tartalom esetén">
-
+<!ENTITY showNotification.accesskey "m">
 <!ENTITY behaviorGroup.caption "Viselkedés">
 <!ENTITY openEntriesInTabs.label "Bejegyzések megnyitása új alpon">
-
+<!ENTITY openEntriesInTabs.accesskey "g">
 <!ENTITY doubleClickMarks.label "Bejegyzések olvasottnak jelölése dupla kattintással">
-
+<!ENTITY doubleClickMarks.accesskey "j">
 <!ENTITY storingGroup.caption "Tárolás">
 <!ENTITY expirationBefore.label "Letöltött elemek eltávolítása">
 <!ENTITY expirationAfter.label "nap elteltével">
-
-
+<!ENTITY expirationCheckbox.accesskey "L">
+<!ENTITY starredItemsKept.tooltip "Jelölt bejegyzések megtartása">
 <!ENTITY storedEntriesBefore.label "Ne tároljon többet mint">
 <!ENTITY storedEntriesAfter.label "bejegyzés hírforrásonként">
-
+<!ENTITY storedEntriesCheckbox.accesskey "N">
 <!ENTITY clearAllEntriesButton.label "Összes elem törlése">
-
+<!ENTITY clearAllEntriesButton.accesskey "t">
 <!ENTITY displayPane.label "Megjelenítés">
-
+<!ENTITY feedViewGroup.caption "Stíluslap bejegyzések">
 <!ENTITY authorsCheckbox.label "Bejegyzések szerzőinek megjelenítése">
-
+<!ENTITY authorsCheckbox.accesskey "B">
 <!ENTITY entriesPerPageBefore.label "Oldalanként">
 <!ENTITY entriesPerPageAfter.label "bejegyzés megjelenítése">
 <!ENTITY enableCustomStyle.label "Egyedi stíluslap használata a bejegyzésekhez">
-
+<!ENTITY enableCustomStyle.accesskey "E">
 <!ENTITY browseCustomStyle.label "Tallózás">
-
-
-
-
-
-
+<!ENTITY browseCustomStyle.accesskey "T">
+<!ENTITY showShortcuts.label "Rövidítések megjelenítése">
+<!ENTITY showShortcuts.accesskey "R">
 <!ENTITY feedName.label "Név">
 <!ENTITY feedURL.label "Hely">
 <!ENTITY optionsGroupbox.caption "Hírforrás beállítások">
 <!ENTITY checkUpdatesPerFeedBefore.label "Hírforrások frissítése minden">
-
+<!ENTITY checkUpdatesPerFeed.accesskey "f">
 <!ENTITY expireEntriesPerFeedBefore.label "Letöltött elemek eltávolítása">
-
+<!ENTITY expireEntriesPerFeed.accesskey "e">
 <!ENTITY expireEntriesPerFeedAfter.label "nap elteltével">
 <!ENTITY maxEntriesPerFeedBefore.label "Ne tároljon többet mint">
-
+<!ENTITY maxEntriesPerFeed.accesskey "N">
 <!ENTITY maxEntriesPerFeedAfter.label "bejegyzés hírforrásonként">
+<!ENTITY previousFeed.label "&lt; Előző">
+<!ENTITY previousFeed.accesskey "E">
+<!ENTITY nextFeed.label "Következő &gt;">
+<!ENTITY nextFeed.accesskey "K">

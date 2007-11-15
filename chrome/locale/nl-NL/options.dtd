@@ -18,7 +18,7 @@
 <!ENTITY behaviorGroup.caption "Gedrag">
 <!ENTITY openEntriesInTabs.label "Berichten in nieuwe tabbladen openen">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY doubleClickMarks.label "Berichten als gelezen markeren wanneer ze dubbel geklikt worden">
+<!ENTITY doubleClickMarks.label "Berichten als gelezen markeren wanneer ze dubbelgeklikt worden">
 <!ENTITY doubleClickMarks.accesskey "M">
 <!ENTITY storingGroup.caption "Opslaan">
 <!ENTITY expirationBefore.label "Gedownloade berichten verwijderen na">
@@ -40,11 +40,8 @@
 <!ENTITY enableCustomStyle.accesskey "d">
 <!ENTITY browseCustomStyle.label "Bladeren">
 <!ENTITY browseCustomStyle.accesskey "B">
-<!ENTITY showShortcuts.label "Snelkoppelingen weergeven">
-<!ENTITY showShortcuts.accesskey "k">
-<!ENTITY compactDatabase.label "Opgeslagen berichten comprimeren">
-<!ENTITY compactDatabase.accesskey "C">
-<!ENTITY compactingInProgress.label "Brief comprimeert opgeslagen berichten om schijfruimte vrij te maken...">
+<!ENTITY showShortcuts.label "Sneltoetsen weergeven">
+<!ENTITY showShortcuts.accesskey "t">
 <!ENTITY feedName.label "Naam">
 <!ENTITY feedURL.label "Locatie">
 <!ENTITY optionsGroupbox.caption "Feedinstellingen">

@@ -1,12 +1,17 @@
-
-
+<!ENTITY selectHomeFolder.label "Válassza ki az élő könyvjelzőket tartalmazó mappát:">
+<!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Keresés az aktuális nézetben">
 <!ENTITY searchAllFeeds.label "Keresés az összes hírforrásban">
+<!ENTITY headlinesCheckbox.tooltip "Csak a fejlécek megjelenítése">
+<!ENTITY showAll.label "Mindent megjelenít">
+<!ENTITY showUnread.label "Olvasatlan megjelenítése">
+<!ENTITY showStarred.label "Megjelenítés csillaggal">
 <!ENTITY updateButton.tooltip "Hírforrások frissítése">
 <!ENTITY stopUpdatingButton.tooltip "Hírforrás felfüggesztése">
 <!ENTITY searchScopeButton.tooltip "Keresési hatókör megváltoztatása">
 <!ENTITY showOptions.tooltip "Rövid hírforrások beállítások">
-
+<!ENTITY markAllRead.label "Olvasottként megjelöl">
+<!ENTITY markViewRead.tooltip "Összes megjelölése olvasottként">
 <!ENTITY viewConstraintList.tooltip "Válassza ki milyen típusú bejegyzése jelenjen meg">
 <!ENTITY previousPage.tooltip "Újabb bejegyzések megjelenítése">
 <!ENTITY nextPage.tooltip "Régebbi bejegyzések megjelenítése">
@@ -14,9 +19,9 @@
 <!ENTITY starredFolder.label "Csillagos bejegyzések">
 <!ENTITY trashFolder.label "Törölt bejegyzések">
 <!ENTITY ctxMarkFeedRead.label "Hírforrást olvasottnak jelöl">
-
+<!ENTITY ctxMarkFeedUnread.label "Megjelölés olvasatlanként">
 <!ENTITY ctxMarkFolderRead.label "Mappát olvasottnak jelöl">
-
+<!ENTITY ctxMarkFolderUnread.label "Mappa megjelölése olvasatlanként">
 <!ENTITY ctxUpdateFeed.label "Hírforrás frissítése">
 <!ENTITY ctxUpdateFolder.label "Frissítési mappa">
 <!ENTITY ctxOpenWebsite.label "Weblap megnyitása">

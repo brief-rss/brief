@@ -2,11 +2,16 @@
 <!ENTITY confirmHomeFolder.label "ΟΚ">
 <!ENTITY searchCurrentView.label "Εύρεση στα εμφανισμένα">
 <!ENTITY searchAllFeeds.label "Εύρεση σε όλα τα αρχεία ροής">
+<!ENTITY headlinesCheckbox.tooltip "Προβολή μόνο επικεφαλίδων">
+<!ENTITY showAll.label "Εμφάνιση όλων">
+<!ENTITY showUnread.label "Εμφάνιση μη ανανγωσμένων">
+<!ENTITY showStarred.label "Εμφάνιση σημειωμένων με αστέρι">
 <!ENTITY updateButton.tooltip "Έλεγχος για ενημερώσεις όλων των αρχείων ροής">
 <!ENTITY stopUpdatingButton.tooltip "Διακοπή ελέγχου για ενημερώσεις">
 <!ENTITY searchScopeButton.tooltip "Αλλαγή της εμβέλειας εύρεσης">
 <!ENTITY showOptions.tooltip "Άνοιγμα επιλογών Brief">
 <!ENTITY markAllRead.label "Όλα ως αναγνωσμένα">
+<!ENTITY markViewRead.tooltip "Σημείωση όλων ως αναγνωσμένων">
 <!ENTITY viewConstraintList.tooltip "Επιλογή είδους εγγραφών προς εμφάνιση">
 <!ENTITY previousPage.tooltip "Προβολή πρόσφατων εγγραφών">
 <!ENTITY nextPage.tooltip "Προβολή παλαιότερων εγγραφών">

@@ -42,9 +42,6 @@
 <!ENTITY browseCustomStyle.accesskey "Ε">
 <!ENTITY showShortcuts.label "Προβολή συντομεύσεων πληκτρολογίου">
 <!ENTITY showShortcuts.accesskey "ω">
-<!ENTITY compactDatabase.label "Σύμπτυξη αποθηκευμένων εγγραφών">
-<!ENTITY compactDatabase.accesskey "Σ">
-<!ENTITY compactingInProgress.label "Το Brief συμπτύσει τις αποθηκευμένες εγγραφές για να απελευθερώσει χώρο στο δίσκο...">
 <!ENTITY feedName.label "Όνομα">
 <!ENTITY feedURL.label "Τοποθεσία">
 <!ENTITY optionsGroupbox.caption "Ρυθμίσεις αρχείου ροής">

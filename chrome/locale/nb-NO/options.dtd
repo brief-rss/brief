@@ -1,7 +1,7 @@
-<!ENTITY optionsWindow.title "Brief innstillinger">
+<!ENTITY optionsWindow.title "Innstillinger - Brief">
 <!ENTITY mainPane.label "Generelt">
 <!ENTITY folderTree.label "Mappe som inneholder levende bokmerker:">
-<!ENTITY showStatusbarIcon.label "Vis ikon i statuslinjen">
+<!ENTITY showStatusbarIcon.label "Vis ikon i statuslinja">
 <!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Åpne Brief i ny fane">
 <!ENTITY openInNewTab.accesskey "O">
@@ -42,9 +42,6 @@
 <!ENTITY browseCustomStyle.accesskey "B">
 <!ENTITY showShortcuts.label "Vis snarveier">
 <!ENTITY showShortcuts.accesskey "w">
-<!ENTITY compactDatabase.label "Komprimer lagrede elementer">
-<!ENTITY compactDatabase.accesskey "C">
-<!ENTITY compactingInProgress.label "Brief komprimerer lagrede elementer for å frigi harddiskplass ...">
 <!ENTITY feedName.label "Navn">
 <!ENTITY feedURL.label "Adresse">
 <!ENTITY optionsGroupbox.caption "Innstillinger for nyhetskilder">

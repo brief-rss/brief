@@ -42,9 +42,6 @@
 <!ENTITY browseCustomStyle.accesskey "P">
 <!ENTITY showShortcuts.label "Raccourcis clavier">
 <!ENTITY showShortcuts.accesskey "R">
-<!ENTITY compactDatabase.label "Compacter les articles enregistrés">
-<!ENTITY compactDatabase.accesskey "C">
-<!ENTITY compactingInProgress.label "Brief est en train de compacter les articles enregistrés afin de libérer de l&apos;espace sur le disque…">
 <!ENTITY feedName.label "Nom :">
 <!ENTITY feedURL.label "Adresse :">
 <!ENTITY optionsGroupbox.caption "Réglages des flux">
