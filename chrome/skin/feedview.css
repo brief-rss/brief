@@ -64,6 +64,7 @@ body {
   border-left: 1px #dadde5 solid;
   overflow: visible;   /* This is for the the expand/collapse dropmarker which is
                           taken outside the box using negative margins */
+  position: relative;
   }
 
 
@@ -116,6 +117,15 @@ body {
   padding: 5px 0 0 5px;
 }
 
+.expand-button {
+  display: none;
+  position: absolute;
+  top: -2px;
+  left: -35px;
+  height: 6em;
+  width: 42px;
+}
+
 
 /* ----------------------  Article subheader  ---------------------- */
 
@@ -123,17 +133,17 @@ body {
   color: #3b4d68;
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
-  padding: 0 2em 0 40px;
+  padding: 0 25px 0 40px;
   overflow: auto; /* Clears contained floats */
 }
 
 .article-authors, .article-date {
-  line-height: 18px;
   text-align: right;
   float: right;
 }
 
 .article-authors {
+  margin-top: 3px;
   clear: right;
 }
 
@@ -186,14 +196,18 @@ body {
   }
 
 
-/* ----------------------  Adjustments for headlines mode  ---------------------- */
+/* ----------------------  Adjustments for headlines view   ---------------------- */
 
 .article-container[collapsed] {
   background-image: none;
-  background-color: #f5faff;
+  background-color: #ebf5ff;
   border-right-color: #e1e8ef;
   border-left-color: #e1e8ef;
-  padding-bottom: 1em;
+  min-height: 5.5em;
+}
+
+.article-container[collapsed][read] {
+  background-color: #f5faff;
 }
 
 .article-container[collapsed]:last-child {
@@ -201,9 +215,50 @@ body {
 }
 
 .article-container[collapsed] .article-controls,
-.article-container[collapsed] .article-content,
-.article-container[collapsed] .article-authors {
+.article-container[collapsed] > .article-content,
+.article-container[collapsed] > .article-subheader {
   display: none;
+}
+
+.article-container[collapsed] .article-title-link {
+  font-size: 12px;
+}
+
+.article-container[collapsed] .article-controls {
+  background-color: #ebf5ff;
+  position: absolute;
+  top: 1px;
+  right: 5px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.article-container[collapsed][read] .article-controls {
+  background-color: #f5faff;
+}
+
+.article-container[collapsed] .article-date {
+  color: #3b4d68;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  margin: 12px 8px 0;
+  clear: right;
+}
+
+.article-container[collapsed] .feed-name {
+  color: #3b4d68;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  margin: 0 8px;
+  max-width: 170px;
+  height: 1.3em; /* Height of a single line */
+  overflow: hidden;
+  float: right;
+}
+
+/* Hide the feed name when hovering an entry, because controls are shown on top of it */
+.article-container[collapsed]:hover .feed-name {
+  visibility: hidden;
 }
 
 /* Shows controls on hover */
@@ -211,22 +266,17 @@ body {
   display: table-cell;
 }
 
-.expand-button {
-  display: none;
-  float: left;
-  margin: -5px 0 0 -35px;
-  height: 6.5em;
-  width: 42px;
+
+/* Turn on expand arrow in headlines view */
+#feed-content[showHeadlinesOnly] .expand-button {
+  display: block;
 }
 
 #feed-content[showHeadlinesOnly] > .article-container {
   margin-left: 30px; /* Makes space for the expand button */
 }
 
-#feed-content[showHeadlinesOnly] .expand-button {
-  display: block;
-}
-
+/* Display the expand arrow when hovering an article*/
 #feed-content[showHeadlinesOnly] > .article-container:hover .expand-button {
   background: url(chrome://brief/skin/icons/expand-button.png) 5px 5px no-repeat;
 }
