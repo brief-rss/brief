@@ -80,6 +80,13 @@
 
                 markReadButton.label = isRead ? feedContentElement.getAttribute('markUnreadString')
                                               : feedContentElement.getAttribute('markReadString');
+
+                if (this.hasAttribute('collapsed')) {
+                    var header =
+                        document.getAnonymousElementByAttribute(this, 'class', 'article-header');
+                    header.insertBefore(feedNameElement, titleElement);
+                    header.insertBefore(dateElement, titleElement);
+                }
             ]]>
             </constructor>
 
@@ -212,16 +219,34 @@
                     break;
 
                 case 'collapsed':
-                    var content = document.
-                                  getAnonymousElementByAttribute(this, 'class', 'article-content');
+                    var content = document.getAnonymousElementByAttribute(this, 'class',
+                                                                          'article-content');
+                    var feedName = document.getAnonymousElementByAttribute(this, 'class',
+                                                                           'feed-name');
+                    var date = document.getAnonymousElementByAttribute(this, 'class',
+                                                                       'article-date');
 
                     // If an entry was (un)folded using jQuery, then changing
                     // the "collapsed" attribute alone isn't enough, because it
                     // doesn't (un)fold article-content.
-                    if (event.newValue == 'true')
+                    if (event.newValue == 'true') {
                         $(content).hide();
-                    else
+                        var title = document.getAnonymousElementByAttribute(this, 'class',
+                                                                      'article-title-link');
+                        var header = document.getAnonymousElementByAttribute(this, 'class',
+                                                                         'article-header');
+                        header.insertBefore(feedName, title);
+                        header.insertBefore(date, title);
+                    }
+                    else {
                         $(content).show();
+                        var subheader = document.getAnonymousElementByAttribute(this, 'class',
+                                                                     'article-subheader');
+                        var authors = document.getAnonymousElementByAttribute(this, 'class',
+                                                                       'article-authors');
+                        subheader.appendChild(feedName);
+                        subheader.insertBefore(date, authors);
+                    }
 
                     break;
                 }
