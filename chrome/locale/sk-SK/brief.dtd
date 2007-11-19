@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Vlastnosti">
 <!ENTITY ctxUpdateFeeds.label "Aktualizovať kanály teraz">
 <!ENTITY ctxMarkFeedsAsRead.label "Označiť všetky kanály ako prečítané">
+<!ENTITY compactingWindow.title "Zhusťovanie kanálov">
+<!ENTITY compactingInProgress.label "Brief zhusťuje uložené kanály. To môže trvať niekoľko minút...">

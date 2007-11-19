@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Egenskaber">
 <!ENTITY ctxUpdateFeeds.label "Opdater feeds nu">
 <!ENTITY ctxMarkFeedsAsRead.label "Marker alle feeds som læste">
+<!ENTITY compactingWindow.title "Compacting feeds">
+<!ENTITY compactingInProgress.label "Brief is compacting stored feeds. This may take a few minutes...">

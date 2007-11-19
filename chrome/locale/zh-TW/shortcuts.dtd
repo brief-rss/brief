@@ -43,4 +43,4 @@
 <!ENTITY slash.key "/">
 <!ENTITY focusSearchbar "游標移至搜尋列">
 <!ENTITY questionMark.key "?">
-<!ENTITY displayShortcuts "顯示快捷鍵列表（可按 Esc 關閉）">
+<!ENTITY displayShortcuts "顯示快捷鍵列表">

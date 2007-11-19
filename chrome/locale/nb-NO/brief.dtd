@@ -9,7 +9,7 @@
 <!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
 <!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskilder">
 <!ENTITY searchScopeButton.tooltip "Endre søk">
-<!ENTITY showOptions.tooltip "Brief innstillinger">
+<!ENTITY showOptions.tooltip "Innstillinger for Brief">
 <!ENTITY markAllRead.label "Merk alle som lest">
 <!ENTITY markViewRead.tooltip "Merk alle elementer som lest">
 <!ENTITY viewConstraintList.tooltip "Velg hvilke elementer som skal vises">
@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Egenskaper">
 <!ENTITY ctxUpdateFeeds.label "Oppdater nyhetskilder nå">
 <!ENTITY ctxMarkFeedsAsRead.label "Merk alle nyhetskilder som lest">
+<!ENTITY compactingWindow.title "Komprimerer nyhetskilder">
+<!ENTITY compactingInProgress.label "Brief komprimerer lagrede nyhetskilder. Dette kan ta noen minutter ...">

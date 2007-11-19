@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Свойства">
 <!ENTITY ctxUpdateFeeds.label "Обновить ленты новостей">
 <!ENTITY ctxMarkFeedsAsRead.label "Отметить все ленты как прочитанные">
+<!ENTITY compactingWindow.title "Сжатие лент...">
+<!ENTITY compactingInProgress.label "Brief выполняет сжатие сохранённых лент. Выполнение данной операции может занять несколько минут...">

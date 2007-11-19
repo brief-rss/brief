@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Ιδιότητες">
 <!ENTITY ctxUpdateFeeds.label "Ενημέρωση εγγραφής τώρα">
 <!ENTITY ctxMarkFeedsAsRead.label "Σημείωση όλων ως αναγνωσμένων">
+<!ENTITY compactingWindow.title "Γίνεται σύμπτυξη αρχείων ροής">
+<!ENTITY compactingInProgress.label "Το Brief συμπτύσει τα αποθηκευμένα αρχεία ροής. Αυτό μπορεί να διαρκέσει μερικά λεπτά...">

@@ -3,20 +3,20 @@
 <!ENTITY searchCurrentView.label "搜索当前阅读的聚合">
 <!ENTITY searchAllFeeds.label "搜索所有聚合">
 <!ENTITY headlinesCheckbox.tooltip "只显示标题">
-<!ENTITY showAll.label "查看全部项目">
-<!ENTITY showUnread.label "查看未读的项目">
-<!ENTITY showStarred.label "查看标记的项目">
+<!ENTITY showAll.label "查看全部信息">
+<!ENTITY showUnread.label "查看未读的信息">
+<!ENTITY showStarred.label "查看带星号的信息">
 <!ENTITY updateButton.tooltip "更新聚合">
 <!ENTITY stopUpdatingButton.tooltip "停止更新聚合">
 <!ENTITY searchScopeButton.tooltip "改变搜索范围">
-<!ENTITY showOptions.tooltip "打开 Brief 选项">
-<!ENTITY markAllRead.label "标记所有项目为已读">
-<!ENTITY markViewRead.tooltip "标记所有项目为已读">
-<!ENTITY viewConstraintList.tooltip "选择显示哪种项目">
-<!ENTITY previousPage.tooltip "显示新的项目">
-<!ENTITY nextPage.tooltip "显示旧的项目">
-<!ENTITY unreadFolder.label "未读">
-<!ENTITY starredFolder.label "带星号的">
+<!ENTITY showOptions.tooltip "打开 Brief 设置">
+<!ENTITY markAllRead.label "标记所有信息为已读">
+<!ENTITY markViewRead.tooltip "标记所有信息为已读">
+<!ENTITY viewConstraintList.tooltip "选择显示哪种信息">
+<!ENTITY previousPage.tooltip "显示新的信息">
+<!ENTITY nextPage.tooltip "显示旧的信息">
+<!ENTITY unreadFolder.label "未读信息">
+<!ENTITY starredFolder.label "带星号的信息">
 <!ENTITY trashFolder.label "垃圾桶">
 <!ENTITY ctxMarkFeedRead.label "标记聚合为已读">
 <!ENTITY ctxMarkFeedUnread.label "标记聚合为未读">
@@ -29,8 +29,10 @@
 <!ENTITY ctxDeleteFolder.label "删除文件夹">
 <!ENTITY ctxEmptyFeed.label "清空聚合">
 <!ENTITY ctxEmptyFolder.label "清空文件夹">
-<!ENTITY ctxRestoreTrashed.label "还原垃圾桶中的项目">
+<!ENTITY ctxRestoreTrashed.label "还原垃圾桶中的信息">
 <!ENTITY ctxEmptyTrash.label "清空垃圾桶">
 <!ENTITY ctxFeedProperties.label "属性">
 <!ENTITY ctxUpdateFeeds.label "立即更新聚合">
 <!ENTITY ctxMarkFeedsAsRead.label "标记所有聚合为已读">
+<!ENTITY compactingWindow.title "正在压缩聚合">
+<!ENTITY compactingInProgress.label "Brief 正在压缩已保存的聚合，这可能要花几分钟。。。">

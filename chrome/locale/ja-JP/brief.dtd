@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "プロパティ">
 <!ENTITY ctxUpdateFeeds.label "今すぐフィードを更新">
 <!ENTITY ctxMarkFeedsAsRead.label "すべてのフィードを既読とする">
+<!ENTITY compactingWindow.title "フィード圧縮中">
+<!ENTITY compactingInProgress.label "Brief は保管済みフィードを圧縮しています。しばらく時間がかかるでしょう...">
