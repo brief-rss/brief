@@ -147,7 +147,8 @@ var gBrief = {
 
         var openInNewTab = this.prefs.getBoolPref('openInNewTab');
 
-        if (aEvent.button == 0 && !openInNewTab || gBrowser.currentURI.spec == 'about:blank')
+        if (aEvent.button == 0 && !openInNewTab
+            || gBrowser.currentURI.spec == 'about:blank' && gBrowser.webProgress.isLoadingDocument)
             gBrief.openBrief(false);
         else
             gBrief.openBrief(true);
