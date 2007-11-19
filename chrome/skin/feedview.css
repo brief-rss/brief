@@ -26,12 +26,12 @@ body {
   }
 
 #feed-title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
   }
 
 #feed-subtitle {
-  font-size: 14px;
+  font-size: 13px;
   margin-top: 3px;
   }
 
@@ -120,7 +120,7 @@ body {
 .expand-button {
   display: none;
   position: absolute;
-  top: -2px;
+  top: 0;
   left: -35px;
   height: 6em;
   width: 42px;
@@ -230,7 +230,7 @@ body {
   top: 1px;
   right: 5px;
   margin: 0;
-  padding-left: 20px;
+  padding-left: 10px;
 }
 
 .article-container[collapsed][read] .article-controls {
