@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Tulajdonságok">
 <!ENTITY ctxUpdateFeeds.label "Hírforrások frissítése azonnal">
 <!ENTITY ctxMarkFeedsAsRead.label "Hírforrások jelölése olvasottként">
+<!ENTITY compactingWindow.title "Hírforrások tömörítése">
+<!ENTITY compactingInProgress.label "A Brief tömöríti a mentett hírforrásokat. Kérem várjon...">

@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Właściwości">
 <!ENTITY ctxUpdateFeeds.label "Aktualizuj kanały">
 <!ENTITY ctxMarkFeedsAsRead.label "Oznacz wszystkie kanały jako przeczytane">
+<!ENTITY compactingWindow.title "Porządkowanie kanałów">
+<!ENTITY compactingInProgress.label "Brief porządkuje kanały... Operacja ta może potrwać dłuższą chwilę.">

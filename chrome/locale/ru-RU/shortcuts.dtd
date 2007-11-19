@@ -16,16 +16,16 @@
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
 <!ENTITY openEntryTab "Открыть запись в новой вкладке">
 <!ENTITY n.key "N">
-<!ENTITY foldEntry "Unfold or fold selected item (when in headlines view)">
+<!ENTITY foldEntry "Свернуть/развернуть выделенную запись (в режиме просмотра заголовков)">
 <!ENTITY entries.header "Записи">
 <!ENTITY m.key "M">
-<!ENTITY markRead "Отметить выбранное (не)прочитанным">
+<!ENTITY markRead "Отметить выделенную запись (не)прочитанной">
 <!ENTITY b.key "B">
 <!ENTITY starEntry "Добавить пометку">
 <!ENTITY t.key "T">
 <!ENTITY moveToTrash "Переместить запись в Корзину">
 <!ENTITY r.key "R">
-<!ENTITY restoreEntry "Восстановить запись (когда в Корзине)">
+<!ENTITY restoreEntry "Восстановить запись (в Корзине)">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY markAllAsRead "Отметить все просмотренные записи как прочитанные">
 <!ENTITY q.key "Q">

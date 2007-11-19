@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Eigenschaften">
 <!ENTITY ctxUpdateFeeds.label "Feeds jetzt aktualisieren">
 <!ENTITY ctxMarkFeedsAsRead.label "Alle Feeds als gelesen markieren">
+<!ENTITY compactingWindow.title "Feeds komprimieren">
+<!ENTITY compactingInProgress.label "Gespeicherte Feeds werden komprimiert. Dies kann einige Minuten in Anspruch nehmen...">

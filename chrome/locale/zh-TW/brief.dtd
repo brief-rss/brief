@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "屬性設定">
 <!ENTITY ctxUpdateFeeds.label "立即更新消息來源">
 <!ENTITY ctxMarkFeedsAsRead.label "所有消息來源標為已讀">
+<!ENTITY compactingWindow.title "正在壓實消息來源">
+<!ENTITY compactingInProgress.label "Brief 正在壓實已保存的消息來源。也許會花上幾分鐘……">

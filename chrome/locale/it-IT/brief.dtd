@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Proprietà">
 <!ENTITY ctxUpdateFeeds.label "Aggiorna i feed ora">
 <!ENTITY ctxMarkFeedsAsRead.label "Segna tutti i feed come letti">
+<!ENTITY compactingWindow.title "Compattazione dei feed">
+<!ENTITY compactingInProgress.label "Brief sta compattando i feed memorizzati. Potrebbero essere necessari alcuni minuti...">

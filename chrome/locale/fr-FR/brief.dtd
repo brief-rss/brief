@@ -34,3 +34,5 @@
 <!ENTITY ctxFeedProperties.label "Propriétés">
 <!ENTITY ctxUpdateFeeds.label "Mettre à jour les flux">
 <!ENTITY ctxMarkFeedsAsRead.label "Marquer tous les flux comme lus">
+<!ENTITY compactingWindow.title "Compactage des flux">
+<!ENTITY compactingInProgress.label "Brief est en train de procéder au compactage des flux sauvegardés. Ceci peut durer quelques minutes…">

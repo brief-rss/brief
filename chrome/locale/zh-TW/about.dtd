@@ -6,5 +6,5 @@
 <!ENTITY extdevThanks.paragraph "感謝 irc.mozilla.org 的 #extdev 頻道上偉大的各位:">
 <!ENTITY iconsThanks.paragraph "某些圖示是承蒙聰明能幹的 Arvid Axelsson 好意而來。">
 <!ENTITY testingThanks.paragraph "感謝 Stefan Plewako 協助測試。">
-<!ENTITY keyboardIconsCredit.paragraph "按鍵圖示由 Alan 提供（這是誰？ - http://alanwho.com/ ）">
-<!ENTITY toolbarIconsCredits.paragraph "某些工具列圖示是由 Tango Desktop Project 中取一部分來製作的">
+<!ENTITY keyboardIconsCredit.paragraph "按鍵圖示由 Alan Who? 提供( http://alanwho.com/ )">
+<!ENTITY toolbarIconsCredits.paragraph "我弄的一些工具列圖示是取材自 Tango Desktop Project">
