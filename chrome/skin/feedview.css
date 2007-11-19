@@ -256,10 +256,6 @@ body {
   float: right;
 }
 
-/* Hide the feed name when hovering an entry, because controls are shown on top of it */
-.article-container[collapsed]:hover .feed-name {
-  visibility: hidden;
-}
 
 /* Shows controls on hover */
 .article-container[collapsed]:hover .article-controls {
