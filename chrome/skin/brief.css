@@ -179,11 +179,11 @@ toolbarbutton {
   }
 
 #next-page {
-  -moz-image-region: rect(0, 81px, 27px, 54px);
+  -moz-image-region: rect(0, 108px, 27px, 81px);
   }
 
 #next-page[disabled='true'] {
-  -moz-image-region: rect(0, 98px, 27px, 54px);
+  -moz-image-region: rect(0, 81px, 27px, 54px);
   }
 
 #searchbar[showingDescription]  {
