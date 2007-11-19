@@ -115,7 +115,7 @@ toolbarbutton {
   }
 
 #feed-view-toolbar {
-  padding: 0 10px 0 10px;
+  padding-right: 10px;
   }
 
 #searchbar-container {
@@ -128,24 +128,29 @@ toolbarbutton {
   }
 
 #update-button {
-  list-style-image: url('toolbar/updateFeeds.png');
+  list-style-image: url('toolbar-buttons-1.png');
+  -moz-image-region: rect(0, 24px, 24px, 0);
   }
 
 #stop-updating-button {
-  list-style-image: url('toolbar/stopUpdating.png');
+  list-style-image: url('toolbar-buttons-1.png');
+  -moz-image-region: rect(0, 48px, 24px, 24px);
   }
 
 #options-button {
-  list-style-image: url('toolbar/options.png');
+  list-style-image: url('toolbar-buttons-1.png');
+  -moz-image-region: rect(0, 72px, 24px, 48px);
   }
 
 #mark-view-read {
-  list-style-image: url('toolbar/markViewRead.png');
+  list-style-image: url('toolbar-buttons-1.png');
+  -moz-image-region: rect(0, 96px, 24px, 72px);
   margin-right: 5px;
   }
 
 #headlines-checkbox {
-  list-style-image: url('toolbar/headlines-view.png');
+  list-style-image: url('toolbar-buttons-1.png');
+  -moz-image-region: rect(0, 120px, 24px, 96px);
   margin-right: 5px;
 }
 
@@ -161,20 +166,24 @@ toolbarbutton {
   margin-right: 5px;
   }
 
+#navigation-box > toolbarbutton {
+  list-style-image: url('toolbar-buttons-2.png');
+}
+
 #prev-page {
-  list-style-image: url('toolbar/previousPage.png');
+  -moz-image-region: rect(0, 27px, 27px, 0);
   }
 
 #prev-page[disabled='true'] {
-  list-style-image: url('toolbar/previousPage-disabled.png');
+  -moz-image-region: rect(0, 54px, 27px, 27px);
   }
 
 #next-page {
-  list-style-image: url('toolbar/nextPage.png');
+  -moz-image-region: rect(0, 81px, 27px, 54px);
   }
 
 #next-page[disabled='true'] {
-  list-style-image: url('toolbar/nextPage-disabled.png');
+  -moz-image-region: rect(0, 98px, 27px, 54px);
   }
 
 #searchbar[showingDescription]  {
