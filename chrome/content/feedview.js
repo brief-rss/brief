@@ -236,7 +236,7 @@ FeedView.prototype = {
 
     // Indicates whether the feed view is currently displayed in the browser.
     get isActive() {
-        return (this.browser.currentURI.spec == gTemplateURI.spec);
+        return this.browser.currentURI.equals(gTemplateURI);
     },
 
     get isGlobalSearch() {
@@ -258,7 +258,7 @@ FeedView.prototype = {
     ensure: function FeedView_ensure() {
         var isDirty = false;
 
-        if (!this.isActive)
+        if (!this.isActive || this.browser.webProgress.isLoadingDocument)
             return true;
 
         var prevEntries = this._entries;
