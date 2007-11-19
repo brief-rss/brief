@@ -294,11 +294,6 @@ var gCommands = {
         var checkbox = document.getElementById('headlines-checkbox');
         checkbox.checked = newState;
 
-        // Prevent the checkbox from being focused, because then Space toggles it
-        // which conflicts with the shortcut to select next entry.
-        if (document.commandDispatcher.focusedElement == checkbox)
-            document.documentElement.focus();
-
         if (!gFeedView)
             return;
 
@@ -721,6 +716,7 @@ var gPrefs = {
     }
 
 }
+
 
 function dump(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].
