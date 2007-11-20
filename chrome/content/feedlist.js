@@ -280,7 +280,7 @@ var gFeedList = {
         var treeSelection = this.tree.view.selection;
         this.ignoreSelectEvent = true;
         treeSelection.select(treeSelection.currentIndex);
-        this.ignoreSelectEvent = true;
+        this.ignoreSelectEvent = false;
 
         this.ctx_targetItem = null;
     },
