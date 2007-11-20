@@ -29,7 +29,7 @@
 <!ENTITY storedEntriesAfter.label "posledné položky každého kanála">
 <!ENTITY storedEntriesCheckbox.accesskey "e">
 <!ENTITY clearAllEntriesButton.label "Vyčistiť všetky vstupy">
-<!ENTITY clearAllEntriesButton.accesskey "a">
+<!ENTITY clearAllEntriesButton.accesskey "V">
 <!ENTITY displayPane.label "Zobraziť">
 <!ENTITY feedViewGroup.caption "Náhľad obsahu kanála">
 <!ENTITY authorsCheckbox.label "Zobraziť autora položky">
@@ -39,7 +39,7 @@
 <!ENTITY enableCustomStyle.label "Použiť vlastný štýl pre obsah kanála">
 <!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Prehľadávať">
-<!ENTITY browseCustomStyle.accesskey "B">
+<!ENTITY browseCustomStyle.accesskey "P">
 <!ENTITY showShortcuts.label "Zobraziť skratky">
 <!ENTITY showShortcuts.accesskey "z">
 <!ENTITY feedName.label "Názov">
@@ -51,9 +51,9 @@
 <!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "dňoch">
 <!ENTITY maxEntriesPerFeedBefore.label "Uchovať nie dlhšie než">
-<!ENTITY maxEntriesPerFeed.accesskey "S">
+<!ENTITY maxEntriesPerFeed.accesskey "U">
 <!ENTITY maxEntriesPerFeedAfter.label "posledné položky">
 <!ENTITY previousFeed.label "&lt; Predchádzajúci">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Ďalší &gt;">
-<!ENTITY nextFeed.accesskey "D">
+<!ENTITY nextFeed.accesskey "Ď">
