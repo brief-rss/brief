@@ -1,8 +1,8 @@
 const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
-const LAST_MAJOR_VERSION = '0.8';
-const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/0.8.html';
+const LAST_MAJOR_VERSION = '1.0';
+const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.0.html';
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
