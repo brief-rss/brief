@@ -679,24 +679,33 @@ var gPrefs = {
             break;
 
         case 'feedview.customStylePath':
-            if (this.getBoolPref('feedview.useCustomStyle'))
+            if (this.getBoolPref('feedview.useCustomStyle')) {
                 gFeedViewStyle = getFeedViewStyle();
+                if (gFeedView && gFeedView.isActive)
+                    gFeedView.refresh();
+            }
             break;
 
         case 'feedview.useCustomStyle':
             gFeedViewStyle = getFeedViewStyle();
+            if (gFeedView && gFeedView.isActive)
+                gFeedView.refresh();
             break;
 
         // Observers to keep the cached prefs up to date.
         case 'feedview.entriesPerPage':
             this.entriesPerPage = this.getIntPref('feedview.entriesPerPage');
+            if (gFeedView && gFeedView.isActive)
+                gFeedView.refresh();
             break;
+
         case 'feedview.shownEntries':
             this.shownEntries = this.getCharPref('feedview.shownEntries');
             var viewConstraintList = document.getElementById('view-constraint-list');
             viewConstraintList.selectedIndex = this.shownEntries == 'all' ? 0 :
                                                this.shownEntries == 'unread' ? 1 : 2;
             break;
+
         case 'feedview.doubleClickMarks':
             this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
             break;
