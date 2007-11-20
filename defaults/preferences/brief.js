@@ -8,7 +8,7 @@ pref("extensions.brief.assumeStandardKeys", true);
 
 pref("extensions.brief.feedview.showHeadlinesOnly", false);
 pref("extensions.brief.feedview.shownEntries", 'all');
-pref("extensions.brief.feedview.entriesPerPage", 10);
+pref("extensions.brief.feedview.entriesPerPage", 15);
 pref("extensions.brief.feedview.customStylePath", '');
 pref("extensions.brief.feedview.useCustomStyle", false);
 pref("extensions.brief.feedview.openEntriesInTabs", false);
