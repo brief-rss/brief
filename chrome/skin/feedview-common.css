@@ -10,6 +10,10 @@
   display: none;
   }
 
+
+
+/* --------------------- Button images ---------------------*/
+
 .delete-entry {
   list-style-image: url('chrome://brief/skin/icons/entry-delete.png');
   -moz-image-region: rect(0px, 15px, 15px, 0px);
@@ -22,7 +26,6 @@
 .restore-entry {
   list-style-image: url('chrome://brief/skin/icons/restore-entry.png');
   }
-
 
 .article-container[starred] .star-entry {
   list-style-image: url('chrome://brief/skin/icons/unstar.png');
@@ -41,6 +44,59 @@
 .article-container[starred] .star-image {
   -moz-image-region: rect(32px, 16px, 48px, 0px);
 }
+
+
+
+/* ----------------------  Article content area   ---------------------- */
+
+/* Reset the top margin, so that the gap between
+   header and content is always the same */
+.article-content > *:first-child {
+  margin-top: 0 !important;;
+}
+
+.article-content img {
+  margin: 5px;
+}
+
+.article-content pre, .article-content code {
+  font-family: "Courier New", monospace;
+  font-size: 1em;
+  }
+
+
+
+/* ----------------------  Adjustments for headlines view   ---------------------- */
+
+.article-container[collapsed] .article-controls,
+.article-container[collapsed] > .article-content,
+.article-container[collapsed] > .article-subheader {
+  display: none;
+}
+
+/* Shows controls on hover */
+.article-container[collapsed]:hover .article-controls {
+  display: table-cell;
+}
+
+
+/* Turn on expand arrow in headlines view */
+#feed-content[showHeadlinesOnly] .expand-button {
+  display: block;
+}
+
+#feed-content[showHeadlinesOnly] > .article-container {
+  margin-left: 30px; /* Makes space for the expand button */
+}
+
+/* Display the expand arrow when hovering an article */
+#feed-content[showHeadlinesOnly] > .article-container:hover .expand-button {
+  background: url(chrome://brief/skin/icons/expand-button.png) 5px 5px no-repeat;
+}
+
+
+
+/* ----------------------  Shortcuts overlay   ---------------------- */
 
 #shortcuts-frame {
   margin: 0 auto !important;
