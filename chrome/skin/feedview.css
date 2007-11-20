@@ -1,17 +1,17 @@
 body {
   background: #fafcff;
-  font-family: "Lucida Grande", Verdana, sans-serif;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 10px;
   margin: 0;
   padding: 0;
   }
 
 
+
 /* ----------------------  Header ---------------------- */
 
 #header {
   background: #314a59 url('chrome://brief/skin/header-bkg.png') repeat-x;
-  font-family: Verdana, Helvetica, Arial, sans-serif;
   color: #ffffff;
   text-decoration: none;
   display: block;
@@ -42,7 +42,6 @@ body {
   }
 
 #message {
-  font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 20px;
   color: #4a6e85;
   text-align: center;
@@ -51,7 +50,8 @@ body {
 }
 
 
-/* ----------------------  Article  ---------------------- */
+
+/* ---------------------------  Article  ------------------------ */
 
 /* .article-container may have "starred", "read", and "collapsed"
    attributes. The first two are self-explanatory while "collapsed"
@@ -68,6 +68,7 @@ body {
   }
 
 
+
 /* ----------------------  Article header  ---------------------- */
 
 .article-header {
@@ -77,11 +78,11 @@ body {
 
 .article-title-link {
   color: #001c2c;
-  font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
   font-weight: bold;
   text-decoration: none;
   }
+
 
 
 /* ---------------------- Article controls  ---------------------- */
@@ -127,11 +128,11 @@ body {
 }
 
 
+
 /* ----------------------  Article subheader  ---------------------- */
 
 .article-subheader {
   color: #3b4d68;
-  font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size: 13px;
   padding: 0 25px 0 40px;
   overflow: auto; /* Clears contained floats */
@@ -155,6 +156,7 @@ body {
 /* ----------------------  Article content area   ---------------------- */
 
 .article-content {
+  font-family: "Lucida Grande", Verdana, sans-serif;
   color: #101d27;
   font-size: 12px;
   margin-top: 1.5em;
@@ -170,23 +172,10 @@ body {
   color: #444b66;
   }
 
-/* Reset the top margin, so that the gap between header and content is always the same */
-.article-content > *:first-child {
-  margin-top: 0 !important;;
-}
-
-.article-content img {
-  margin: 5px;
-}
-
-.article-content pre, .article-content code {
-  font-family: "Courier New", monospace;
-  font-size: 1em;
-  }
-
 
 
 /*  ----------------------  Adjustments for read articles  ---------------------- */
+
 .article-container[read] {
   background-image: url('chrome://brief/skin/read-entry-bkg.png');
   }
@@ -194,6 +183,7 @@ body {
 .article-container[read] > .article-header > .article-title-link {
   font-weight: normal;
   }
+
 
 
 /* ----------------------  Adjustments for headlines view   ---------------------- */
@@ -214,13 +204,7 @@ body {
   border-bottom: 1px solid #abbfc9;
 }
 
-.article-container[collapsed] .article-controls,
-.article-container[collapsed] > .article-content,
-.article-container[collapsed] > .article-subheader {
-  display: none;
-}
-
-.article-container[collapsed] .article-title-link {
+.article-container[collapsed] > .article-header {
   font-size: 12px;
 }
 
@@ -239,16 +223,12 @@ body {
 
 .article-container[collapsed] .article-date {
   color: #3b4d68;
-  font-family: Verdana, Helvetica, Arial, sans-serif;
-  font-size: 12px;
   margin: 12px 8px 0;
   clear: right;
 }
 
 .article-container[collapsed] .feed-name {
   color: #3b4d68;
-  font-family: Verdana, Helvetica, Arial, sans-serif;
-  font-size: 12px;
   margin: 0 8px;
   max-width: 170px;
   height: 1.3em; /* Height of a single line */
@@ -257,27 +237,9 @@ body {
 }
 
 
-/* Shows controls on hover */
-.article-container[collapsed]:hover .article-controls {
-  display: table-cell;
-}
-
-
-/* Turn on expand arrow in headlines view */
-#feed-content[showHeadlinesOnly] .expand-button {
-  display: block;
-}
-
-#feed-content[showHeadlinesOnly] > .article-container {
-  margin-left: 30px; /* Makes space for the expand button */
-}
-
-/* Display the expand arrow when hovering an article*/
-#feed-content[showHeadlinesOnly] > .article-container:hover .expand-button {
-  background: url(chrome://brief/skin/icons/expand-button.png) 5px 5px no-repeat;
-}
 
 /* ----------------------  Adjustments for the selected articles  -------------------- */
+
 .article-container[selected] {
   border-top-color: #1474d6;
   border-right-color: #1474d6;
