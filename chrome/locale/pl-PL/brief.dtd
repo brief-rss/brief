@@ -2,9 +2,9 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Szukaj w widocznych">
 <!ENTITY searchAllFeeds.label "Szukaj we wszystkich kanałach">
-<!ENTITY headlinesCheckbox.tooltip "Wyświetl tylko nagłówki">
+<!ENTITY headlinesCheckbox.tooltip "Przełącz widok nagłówków">
 <!ENTITY showAll.label "Wyświetl wszystkie">
-<!ENTITY showUnread.label "Wyświetl  nieprzeczytane">
+<!ENTITY showUnread.label "Wyświetl nieprzeczytane">
 <!ENTITY showStarred.label "Wyświetl wyróżnione">
 <!ENTITY updateButton.tooltip "Pobierz nowe wiadomości ze wszystkich kanałów">
 <!ENTITY stopUpdatingButton.tooltip "Przerwij aktualizowanie kanałów">
@@ -16,7 +16,7 @@
 <!ENTITY previousPage.tooltip "Wyświetl nowsze wiadomości">
 <!ENTITY nextPage.tooltip "Wyświetl starsze wiadomości">
 <!ENTITY unreadFolder.label "Nieprzeczytane">
-<!ENTITY starredFolder.label "Zaznaczone">
+<!ENTITY starredFolder.label "Wyróżnione">
 <!ENTITY trashFolder.label "Kosz">
 <!ENTITY ctxMarkFeedRead.label "Oznacz kanał jako przeczytany">
 <!ENTITY ctxMarkFeedUnread.label "Oznacz kanał jako nieprzeczytany">

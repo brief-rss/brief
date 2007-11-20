@@ -41,19 +41,19 @@
 <!ENTITY browseCustomStyle.label "Bla">
 <!ENTITY browseCustomStyle.accesskey "B">
 <!ENTITY showShortcuts.label "Vis snarveier">
-<!ENTITY showShortcuts.accesskey "w">
+<!ENTITY showShortcuts.accesskey "V">
 <!ENTITY feedName.label "Navn">
 <!ENTITY feedURL.label "Adresse">
 <!ENTITY optionsGroupbox.caption "Innstillinger for nyhetskilder">
 <!ENTITY checkUpdatesPerFeedBefore.label "Sjekk for oppdateringer hver">
-<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY checkUpdatesPerFeed.accesskey "S">
 <!ENTITY expireEntriesPerFeedBefore.label "Fjern lagrede elementer etter">
 <!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "dager">
 <!ENTITY maxEntriesPerFeedBefore.label "Ikke lagre mer enn">
-<!ENTITY maxEntriesPerFeed.accesskey "S">
+<!ENTITY maxEntriesPerFeed.accesskey "k">
 <!ENTITY maxEntriesPerFeedAfter.label "siste elementer">
 <!ENTITY previousFeed.label "&lt; Forrige">
-<!ENTITY previousFeed.accesskey "P">
+<!ENTITY previousFeed.accesskey "F">
 <!ENTITY nextFeed.label "Neste &gt;">
 <!ENTITY nextFeed.accesskey "N">
