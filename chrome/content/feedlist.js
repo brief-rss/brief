@@ -17,13 +17,16 @@ var gFeedList = {
     get selectedItem() {
         var item = null;
         var currentIndex = this.tree.currentIndex;
-        if (currentIndex != -1)
+        if (currentIndex != -1 && currentIndex < this.tree.view.rowCount)
             item = this.tree.view.getItemAtIndex(currentIndex);
         return item;
     },
 
     // nsIBriefFeed object of the the currently selected feed, or null.
     get selectedFeed() {
+        if (!this.selectedItem)
+            return null;
+
         var feed = null;
         var feedID = this.selectedItem.getAttribute('feedID');
         if (feedID)
@@ -275,9 +278,9 @@ var gFeedList = {
     // context menu target.
     onContextMenuHiding: function gFeedList_onContextMenuHiding(aEvent) {
         var treeSelection = this.tree.view.selection;
-        treeSelection.selectEventsSuppressed = true;
+        this.ignoreSelectEvent = true;
         treeSelection.select(treeSelection.currentIndex);
-        treeSelection.selectEventsSuppressed = false;
+        this.ignoreSelectEvent = true;
 
         this.ctx_targetItem = null;
     },
@@ -417,6 +420,10 @@ var gFeedList = {
         this.refreshSpecialTreeitem('starred-folder');
         this.refreshSpecialTreeitem('trash-folder');
 
+        // Preserve selection.
+        if (this.selectedFeed)
+            this.feedIDToSelect = this.selectedFeed.feedID;
+
         // Clear the existing tree.
         var lastChild = topLevelChildren.lastChild;
         while (lastChild.id != 'special-folders-separator') {
@@ -471,6 +478,13 @@ var gFeedList = {
                 var treecell = document.createElement('treecell');
                 treecell = treerow.appendChild(treecell);
 
+                if (feed.feedID == this.feedIDToSelect) {
+                    this.ignoreSelectEvent = true;
+                    this.tree.view.selection.select(this.tree.view.rowCount - 1);
+                    this.ignoreSelectEvent = false;
+                    this.feedIDToSelect = null;
+                }
+
                 this.refreshFolderTreeitems(treeitem);
 
                 var treechildren = document.createElement('treechildren');
@@ -496,6 +510,13 @@ var gFeedList = {
                 treeitem.appendChild(treerow);
 
                 parent.appendChild(treeitem);
+
+                if (feed.feedID == this.feedIDToSelect) {
+                    this.ignoreSelectEvent = true;
+                    this.tree.view.selection.select(this.tree.view.rowCount - 1);
+                    this.ignoreSelectEvent = false;
+                    this.feedIDToSelect = null;
+                }
 
                 this.refreshFeedTreeitems(treeitem);
             }
@@ -710,10 +731,13 @@ var gContextMenuCommands = {
         if (weHaveAGo) {
             var item = gFeedList.getTreeitem(feedID);
 
+            indexToSelect = -1;
             // If the currently selected feed is being removed, select the next one.
             if (gFeedList.selectedItem == item) {
                 var currentIndex = gFeedList.tree.view.selection.currentIndex;
-                gFeedList.tree.view.selection.select(currentIndex + 1);
+                var rowCount = gFeedList.tree.view.rowCount;
+                var indexToSelect = currentIndex == rowCount - 1 ? currentIndex - 1
+                                                                 : currentIndex;
             }
 
             // The treeitem would be removed anyway thanks to RDFObserver,
@@ -731,6 +755,12 @@ var gContextMenuCommands = {
                                            'delete', node, index, parent,
                                            propertiesArray.length, propertiesArray);
             BookmarksUtils.flushDataSource();
+
+            if (indexToSelect != -1) {
+                gFeedList.ignoreSelectEvent = true;
+                gFeedList.tree.view.selection.select(indexToSelect);
+                gFeedList.ignoreSelectEvent = false;
+            }
         }
     },
 
