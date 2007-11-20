@@ -509,6 +509,7 @@ function loadHomeview() {
     // Load the Unread view.
     if (gFeedList.tree && gFeedList.tree.view) {
         gFeedList.tree.view.selection.select(0);
+        gFeedList.tree.focus();
     }
     else {
         // If the sidebar is hidden, then tree has no view and we have to manually
