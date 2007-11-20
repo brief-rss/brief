@@ -625,8 +625,6 @@ var gContextMenuCommands = {
         }
 
         gUpdateService.fetchFeeds(feeds, feeds.length, false);
-        var deck = document.getElementById('update-buttons-deck');
-        deck.selectedIndex = 1;
     },
 
 
@@ -766,7 +764,7 @@ var gContextMenuCommands = {
 
             gBkmkTxnSvc.startBatch();
 
-            // Delete all the descendant feeds and folder.
+            // Delete all the descendant feeds and folders.
             var feedID, feed, node, parent, index, propertiesArray;
             for (var i = 0; i < treeitems.length; i++) {
                 feedID = treeitems[i].getAttribute('feedID');
