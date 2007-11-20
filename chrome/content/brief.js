@@ -96,7 +96,7 @@ function init() {
     FeedView.prototype.markAsReadStr = bundle.getString('markEntryAsRead');
     FeedView.prototype.markAsUnreadStr = bundle.getString('markEntryAsUnread');
 
-    loadHomeview();
+    setTimeout(function(){ loadHomeview() }, 0);
 
     // Init stuff in bookmarks.js
     setTimeout(function() { initServices(); initBMService(); }, 1000);
