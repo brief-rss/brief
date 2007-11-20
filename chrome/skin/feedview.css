@@ -133,7 +133,7 @@ body {
 
 .article-subheader {
   color: #3b4d68;
-  font-size: 13px;
+  font-size: 12px;
   padding: 0 25px 0 40px;
   overflow: auto; /* Clears contained floats */
 }
@@ -159,8 +159,8 @@ body {
   font-family: "Lucida Grande", Verdana, sans-serif;
   color: #101d27;
   font-size: 12px;
-  margin-top: 1.5em;
-  padding: 0 2.5em 35px;
+  margin-top: 15px;
+  padding: 0 25px 35px;
   overflow: auto;
   }
 
