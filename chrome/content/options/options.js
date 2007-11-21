@@ -205,7 +205,7 @@ var gDisplayPane = {
         var height = screenHeight < 620 ? screenHeight : 620;
 
         window.openDialog(gShortcutsURI.spec, 'Brief shortcuts',
-                          'centerscreen,resizable,width=500, height=620');
+                          'centerscreen,titlebar,resizable,width=500, height=' + height);
     }
 
 }
