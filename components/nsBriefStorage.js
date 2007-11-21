@@ -224,14 +224,23 @@ BriefStorageService.prototype = {
 
         // To 1.0 beta 1
         case 2:
-            this.dBConnection.executeSimpleSQL(
+            // There was a bug in 1.0 and 1.0.1 due to which the next step threw an
+            // exception for some users. When this happened, the below column was added
+            // but the new user_version wasn't set, so Brief was repeating the migration
+            // on subsequent runs and failing, because the adding an already existing
+            // columns throws an exception.
+            // To help users get out that endless loop we use the try...catch block.
+            try {
+                this.dBConnection.executeSimpleSQL(
                               'ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
+            }
+            catch (e) { }
             // Fall through...
 
         // To 1.0
         case 3:
-            this.dBConnection.executeSimpleSQL('DROP INDEX entries_id_index');
-            this.dBConnection.executeSimpleSQL('DROP INDEX feeds_feedID_index');
+            this.dBConnection.executeSimpleSQL('DROP INDEX IF EXISTS entries_id_index');
+            this.dBConnection.executeSimpleSQL('DROP INDEX IF EXISTS feeds_feedID_index');
             // Fall through...
 
         }
