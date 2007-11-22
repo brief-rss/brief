@@ -278,9 +278,14 @@ var gCommands = {
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
-        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
-                          'chrome,titlebar,toolbar,centerscreen,modal,resizable', aPaneID);
+        var prefBranch = Cc['@mozilla.org/preferences-service;1'].
+                         getService(Ci.nsIPrefBranch);
+        var instantApply = prefBranch.getBoolPref('browser.preferences.instantApply');
+        var features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
+        features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
+        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
+                          features, aPaneID);
     },
 
     markCurrentViewRead: function cmd_markCurrentViewRead() {

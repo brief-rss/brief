@@ -203,9 +203,9 @@ var gDisplayPane = {
 
         var screenHeight = window.screen.availHeight;
         var height = screenHeight < 620 ? screenHeight : 620;
+        var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
 
-        window.openDialog(gShortcutsURI.spec, 'Brief shortcuts',
-                          'centerscreen,titlebar,resizable,width=500, height=' + height);
+        window.openDialog(gShortcutsURI.spec, 'Brief shortcuts', features);
     }
 
 }
