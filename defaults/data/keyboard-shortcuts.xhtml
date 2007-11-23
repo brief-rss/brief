@@ -6,9 +6,18 @@
     <head>
         <title>&shortcutsPage.title;</title>
         <link rel="stylesheet" href="chrome://brief/skin/feedview-common.css" type="text/css" media="screen"/>
+        <link id="mac-override" rel="stylesheet" type="text/css" media="screen"/>
+        <script type="text/javascript">
+            function applyMacOverride() {
+                if (window.navigator.platform.match('Mac')) {
+                    var link = document.getElementById('mac-override');
+                    link.setAttribute('href', 'chrome://brief/skin/mac.css');
+                }
+            }
+        </script>
     </head>
 
-    <body id="shortcuts-body">
+    <body id="shortcuts-body" onload="applyMacOverride()">
         <table id="shortcuts-table">
             <tr>
                 <td colspan="2" class="shortucts-header" style="padding-top: 10px;">&navigation.header;</td>
@@ -21,11 +30,11 @@
                 <td class="shortcut-key">&j.key; <span class="shortcuts-plain">&or;</span> &backspace.key;</td>
                 <td>&selectPrevious;</td>
             </tr>
-            <tr>
+            <tr class="noMac">
                 <td class="shortcut-key">&altK.key;</td>
                 <td>&nextPage;</td>
             </tr>
-            <tr>
+            <tr class="noMac">
                 <td class="shortcut-key">&altJ.key;</td>
                 <td>&previousPage;</td>
             </tr>
@@ -34,7 +43,10 @@
                 <td>&openEntry;</td>
             </tr>
             <tr>
-                <td class="shortcut-key">&ctrlEnter.key;</td>
+                <td class="shortcut-key">
+                    <span class="onlyMac">&cmdEnter.key;</span>
+                    <span class="noMac">&ctrlEnter.key;</span>
+                </td>
                 <td>&openEntryTab;</td>
             </tr>
             <tr>
@@ -61,7 +73,10 @@
                 <td>&restoreEntry;</td>
             </tr>
             <tr>
-                <td class="shortcut-key">&ctrlM.key;</td>
+                <td class="shortcut-key">
+                    <span class="onlyMac">&cmdM.key;</span>
+                    <span class="noMac">&ctrlM.key;</span>
+                </td>
                 <td>&markAllAsRead;</td>
             </tr>
             <tr>

@@ -3,6 +3,10 @@ const Ci = Components.interfaces;
 
 function init() {
     sizeToContent();
+
+    if (window.navigator.platform.match('Mac'))
+        applyMacStyleOverride();
+
     setTimeout(gMainPane.setUpFoldersTree, 0);
 
     gFeedsPane.initUpdateIntervalControls();
@@ -209,6 +213,19 @@ var gDisplayPane = {
     }
 
 }
+
+
+function applyMacStyleOverride() {
+    const XHTML_NS = 'http://www.w3.org/1999/xhtml';
+    const MAC_STYLE_OVERRIDE_URL = 'chrome://brief/skin/mac.css';
+
+    var link = document.createElementNS(XHTML_NS, 'link');
+    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('type', 'text/css');
+    link.setAttribute('href', MAC_STYLE_OVERRIDE_URL);
+    document.documentElement.appendChild(link);
+}
+
 
 function dump(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].

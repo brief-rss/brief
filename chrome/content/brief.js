@@ -1,11 +1,18 @@
 const EXT_ID = 'brief@mozdev.org';
+
 const TEMPLATE_FILENAME = 'feedview-template.html';
-const DEFAULT_STYLE_PATH = 'chrome://brief/skin/feedview.css'
+const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
+const MAC_STYLE_OVERRIDE_URL = 'chrome://brief/skin/mac.css';
+
 const LAST_MAJOR_VERSION = '1.0';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.0.html';
 
+const XHTML_NS = 'http://www.w3.org/1999/xhtml';
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
+const isPlatformMac = window.navigator.platform.match('Mac');
 
 const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 const gUpdateService = Cc['@ancestor/brief/updateservice;1'].getService(Ci.nsIBriefUpdateService);
@@ -19,17 +26,20 @@ const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
 var gFeedView = null;
 var gInitialized = false;
-var gTopBrowserWindow;
-var gTemplateURI;
-var gFeedViewStyle;
+var gTopBrowserWindow = null;
+var gTemplateURI = '';
+var gStyleURL = '';
 
 function init() {
     if (gInitialized)
         return;
     gInitialized = true;
 
+    if (isPlatformMac)
+        applyMacStyleOverride(document);
+
     gPrefs.register();
-    gFeedViewStyle = getFeedViewStyle();
+    gStyleURL = getStyleURL();
 
     // Get the extension's directory.
     var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
@@ -480,21 +490,24 @@ var gCommands = {
 }
 
 // Returns a string containing the style of the feed view.
-function getFeedViewStyle() {
+function getStyleURL() {
+    var url = '';
     if (gPrefs.getBoolPref('feedview.useCustomStyle')) {
-        var pref = gPrefs.getComplexValue('feedview.customStylePath',
-                                          Ci.nsISupportsString);
-        var url = 'file:///' + pref.data;
+        var pref = gPrefs.getComplexValue('feedview.customStylePath', Ci.nsISupportsString);
+        url = 'file:///' + pref.data;
     }
-    else {
-        var url = DEFAULT_STYLE_PATH;
-    }
+    else
+        url = DEFAULT_STYLE_URL;
 
-    var request = new XMLHttpRequest;
-    request.open('GET', url, false);
-    request.send(null);
+    return url;
+}
 
-    return request.responseText;
+function applyMacStyleOverride(aDoc) {
+    var link = aDoc.createElementNS(XHTML_NS, 'link');
+    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('type', 'text/css');
+    link.setAttribute('href', MAC_STYLE_OVERRIDE_URL);
+    aDoc.documentElement.appendChild(link);
 }
 
 
@@ -686,14 +699,14 @@ var gPrefs = {
 
         case 'feedview.customStylePath':
             if (this.getBoolPref('feedview.useCustomStyle')) {
-                gFeedViewStyle = getFeedViewStyle();
+                gStyleURL = getStyleURL();
                 if (gFeedView && gFeedView.isActive)
                     gFeedView.refresh();
             }
             break;
 
         case 'feedview.useCustomStyle':
-            gFeedViewStyle = getFeedViewStyle();
+            gStyleURL = getStyleURL();
             if (gFeedView && gFeedView.isActive)
                 gFeedView.refresh();
             break;
