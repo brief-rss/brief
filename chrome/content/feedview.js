@@ -1,5 +1,3 @@
-const XHTML_NS = 'http://www.w3.org/1999/xhtml';
-
 /**
  * This object represents the main feed display. It stores and manages
  * the display parameters.
@@ -472,8 +470,10 @@ FeedView.prototype = {
         doc.defaultView.addEventListener('keypress', onKeyPress, true);
 
         // Apply the CSS.
-        var style = doc.getElementsByTagName('style')[0];
-        style.textContent = gFeedViewStyle;
+        var style = doc.getElementById('feedview-style');
+        style.setAttribute('href', gStyleURL);
+        if (isPlatformMac)
+            applyMacStyleOverride(doc);
 
         // Build the header...
         var titleElement = doc.getElementById('feed-title');

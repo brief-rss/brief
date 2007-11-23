@@ -1,0 +1,20 @@
+#show-shortcuts image {
+    display: none;
+}
+
+.article-controls > button {
+  opacity: 1.0 !important;
+  margin-top: 1px !important;
+}
+
+#feed-list treechildren::-moz-tree-image(container) {
+  list-style-image: url('chrome://browser/skin/bookmarks/bookmark-folder.png') !important;
+}
+
+.onlyMac {
+    display: inline !important;
+}
+
+.noMac {
+    display: none;
+}

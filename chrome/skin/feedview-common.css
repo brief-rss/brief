@@ -133,3 +133,7 @@
     text-align: center;
     padding-top: 20px;
 }
+
+.onlyMac {
+  display: none;
+}
