@@ -2,10 +2,6 @@
   width: 22em;
 }
 
-#feed-list-toolbar {
-  overflow: hidden;
-  }
-
 #feed-list > treechildren {
   -moz-binding: url('chrome://brief/content/bindings.xml#feedlist-treebody');
   }
@@ -110,8 +106,17 @@ toolbar, toolbaritem {
   -moz-box-align: center;
   }
 
+toolbar {
+  padding-top: 1px;
+}
+
+#feed-list-toolbar {
+  overflow: hidden;
+  }
+
 toolbarbutton {
-  padding: 5px 0 4px 4px;
+  padding: 4px 0 3px 4px;
+  min-width: 0;
   }
 
 #feed-view-toolbar {
@@ -157,7 +162,7 @@ toolbarbutton {
 #headlines-checkbox[checked="true"] {
   margin-top: 1px;
   padding-top: 4px !important;
-  padding-bottom: 4px !important;
+  padding-bottom: 3px !important;
   -moz-padding-start: 4px !important;
   -moz-padding-end: 0px !important;
 }
@@ -171,20 +176,24 @@ toolbarbutton {
 }
 
 #prev-page {
-  -moz-image-region: rect(0, 27px, 27px, 0);
+  -moz-image-region: rect(0, 26px, 24px, 0);
   }
 
 #prev-page[disabled='true'] {
-  -moz-image-region: rect(0, 54px, 27px, 27px);
+  -moz-image-region: rect(24px, 26px, 48px, 0);
   }
 
 #next-page {
-  -moz-image-region: rect(0, 108px, 27px, 81px);
+  -moz-image-region: rect(0, 52px, 24px, 26px);
   }
 
 #next-page[disabled='true'] {
-  -moz-image-region: rect(0, 81px, 27px, 54px);
+  -moz-image-region: rect(24px, 52px, 48px, 26px);
   }
+
+#navigation-box > label {
+  margin-left: 5px;
+}
 
 #searchbar[showingDescription]  {
   color: GrayText;
