@@ -93,13 +93,12 @@ var gFeedList = {
         var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
         var folders = [];
 
-        var rootURI = gPrefs.getCharPref('liveBookmarksFolder');
-        var rootFolderID = hashString(rootURI);
+        var root = gPrefs.homeFolder; // Fx2Compat
 
         for (var i = 0; i < feeds.length; i++) {
             var feed = this.getBriefFeed(feeds[i]);
             var parentID = feed.parent;
-            while (parentID != rootFolderID) {
+            while (parentID != root) {
                 if (folders.indexOf(parentID) == -1)
                     folders.push(parentID);
                 parentID = gStorage.getFeed(parentID).parent;
@@ -439,8 +438,9 @@ var gFeedList = {
         // items.
         this._folderParentChain = [topLevelChildren];
 
-        var rootURI = gPrefs.getCharPref('liveBookmarksFolder');
-        this._buildFolderChildren(hashString(rootURI));
+        var root = gPrefs.homeFolder; // Fx2Compat
+
+        this._buildFolderChildren(root);
 
         // Fill the items cache.
         this.items = this.tree.getElementsByTagName('treeitem');
@@ -464,7 +464,7 @@ var gFeedList = {
             if (feed.isFolder) {
                 var prevParent = this._folderParentChain[this._folderParentChain.length - 1];
                 var closedFolders = this.tree.getAttribute('closedFolders');
-                var isOpen = !closedFolders.match(feed.feedID);
+                var isOpen = !closedFolders.match(escape(feed.feedID));
 
                 var treeitem = document.createElement('treeitem');
                 treeitem.setAttribute('container', 'true');
@@ -557,7 +557,7 @@ var gFeedList = {
             if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
                 closedFolders += item.getAttribute('feedID');
         }
-        gFeedList.tree.setAttribute('closedFolders', closedFolders);
+        gFeedList.tree.setAttribute('closedFolders', escape(closedFolders));
     },
 
 
@@ -744,7 +744,7 @@ var gContextMenuCommands = {
             // but we do it here to give faster visual feedback.
             item.parentNode.removeChild(item);
 
-            var node = RDF.GetResource(feed.rdf_uri);
+            var node = RDF.GetResource(feed.bookmarkID);
             var parent = BMSVC.getParent(node);
             RDFC.Init(BMDS, parent);
             var index = RDFC.IndexOf(node);
@@ -800,7 +800,7 @@ var gContextMenuCommands = {
                 feedID = treeitems[i].getAttribute('feedID');
                 feed = gStorage.getFeed(feedID);
 
-                node = RDF.GetResource(feed.rdf_uri);
+                node = RDF.GetResource(feed.bookmarkID);
                 parent = BMSVC.getParent(node);
                 RDFC.Init(BMDS, parent);
                 index = RDFC.IndexOf(node);
@@ -812,7 +812,7 @@ var gContextMenuCommands = {
             }
 
             // Delete the target folder.
-            node = RDF.GetResource(folder.rdf_uri);
+            node = RDF.GetResource(folder.bookmarkID);
             parent = BMSVC.getParent(node);
             RDFC.Init(BMDS, parent);
             index = RDFC.IndexOf(node);
@@ -835,31 +835,4 @@ var gContextMenuCommands = {
                    'chrome,titlebar,toolbar,centerscreen,modal', feedID);
     }
 
-}
-
-function hashString(aString) {
-
-    // nsICryptoHash can read the data either from an array or a stream.
-    // Creating a stream ought to be faster than converting a long string
-    // into an array using JS.
-    // XXX nsIStringInputStream doesn't work well with UTF-16 strings; it's
-    // lossy, so it increases the risk of collisions.
-    // nsIScriptableUnicodeConverter.convertToInputStream should be used instead.
-    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
-                       createInstance(Ci.nsIStringInputStream);
-    stringStream.setData(aString, aString.length);
-
-    var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
-    hasher.init(Ci.nsICryptoHash.MD5);
-    hasher.updateFromStream(stringStream, stringStream.available());
-    var hash = hasher.finish(false);
-
-    // Convert the hash to a hex-encoded string.
-    var hexchars = '0123456789ABCDEF';
-    var hexrep = new Array(hash.length * 2);
-    for (var i = 0; i < hash.length; ++i) {
-        hexrep[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 15);
-        hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
-    }
-    return hexrep.join('');
 }

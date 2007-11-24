@@ -14,14 +14,10 @@ radio[pane=feeds-pane] {
   -moz-image-region: rect(64px, 32px, 96px, 0px);
   }
 
-#folders-tree {
+#folders-tree, #places-tree {
   height: 15em;
   margin-bottom: 1em;
   }
-
-groupbox {
-  -moz-box-flex: 1;
-}
 
 #show-shortcuts {
   list-style-image: url(chrome://brief/skin/icons/keyboard.png);

@@ -1,13 +1,27 @@
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Ci, Cc;
+var gPlacesEnabled;
 
 function init() {
-    sizeToContent();
+    if (!Ci)
+        Ci = Components.interfaces;
+    if (!Cc)
+        Cc = Components.classes;
+
+    gPlacesEnabled = 'nsINavHistoryService' in Ci;
 
     if (window.navigator.platform.match('Mac'))
         applyMacStyleOverride();
 
-    setTimeout(gMainPane.setUpFoldersTree, 0);
+    if (gPlacesEnabled) {
+        document.getElementById('folders-tree').hidden = true;
+        gMainPane.setUpPlacesTree();
+    }
+    else {
+        document.getElementById('places-tree').hidden = true;
+        setTimeout(gMainPane.setUpRDFBookmarksTree, 0);
+    }
+
+    sizeToContent();
 
     gFeedsPane.initUpdateIntervalControls();
     gFeedsPane.updateExpirationDisabledState();
@@ -22,10 +36,32 @@ function unload() {
 
 var gMainPane = {
 
-    setUpFoldersTree: function() {
-        var folderID = Cc['@mozilla.org/preferences-service;1'].
-                       getService(Ci.nsIPrefBranch).
-                       getCharPref('extensions.brief.liveBookmarksFolder');
+    setUpPlacesTree: function() {
+        var tree = document.getElementById('places-tree');
+        var pref = document.getElementById('extensions.brief.homeFolder');
+
+        // Get the place URI for the bookmarks root to populate the tree.
+        var query = PlacesUtils.history.getNewQuery();
+        var options = PlacesUtils.history.getNewQueryOptions();
+        var bookmarksRoot = PlacesUtils.bookmarks.bookmarksRoot;
+        query.setFolders([bookmarksRoot], 1);
+        options.excludeItems = true;
+        var placeURI = PlacesUtils.history.queriesToQueryString([query], 1, options);
+
+        tree.place = placeURI;
+
+        // Get the place URI for the home folder to select it.
+        query.setFolders([pref.value], 1);
+        placeURI = PlacesUtils.history.queriesToQueryString([query], 1, options);
+
+        tree.selectPlaceURI(placeURI);
+    },
+
+    // Fx2Compat
+    setUpRDFBookmarksTree: function() {
+        var pref = document.getElementById('extensions.brief.liveBookmarksFolder');
+        var folderID = pref.value;
+
         if (folderID) {
             var rdfService = Cc['@mozilla.org/rdf/rdf-service;1'].
                              getService(Ci.nsIRDFService);
@@ -41,7 +77,16 @@ var gMainPane = {
         }
     },
 
-    onFolderSelected: function(aEvent) {
+    onPlacesTreeSelect: function(aEvent) {
+        var placesTree = document.getElementById('places-tree');
+        var pref = document.getElementById('extensions.brief.homeFolder');
+
+        if (placesTree.currentIndex != -1)
+            pref.value = placesTree.selectedNode.itemId;
+    },
+
+    // Fx2Compat
+    onRDFTreeSelect: function(aEvent) {
         var foldersTree = document.getElementById('folders-tree');
         var selectedIndex = foldersTree.currentIndex;
         if (selectedIndex != -1) {
@@ -232,3 +277,5 @@ function dump(aMessage) {
                        getService(Ci.nsIConsoleService);
   consoleService.logStringMessage(aMessage);
 }
+
+function NS_ASSERT() { }

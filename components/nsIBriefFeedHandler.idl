@@ -107,9 +107,9 @@ interface nsIBriefFeed : nsISupports {
   attribute string parent;
 
   /**
-   * URI of the corresponding Live Bookmark in the bookmarks RDF datasource.
+   * In Fx3 - ID of the corresponding bookmark. In Fx2 - its RDF URI.
    */
-  attribute string rdf_uri;
+  attribute string bookmarkID;
 
   /**
    * The below attributes carry various per-feed preferences.
