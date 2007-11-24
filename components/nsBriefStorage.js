@@ -24,6 +24,7 @@ const RDF_OBSERVER_DELAY = 250;
 
 const DATABASE_VERSION = 4;
 
+const gPlacesEnabled = 'nsINavHistoryService' in Ci;
 
 var gStorageService = null;
 
@@ -44,8 +45,14 @@ BriefStorageService.prototype = {
 
     observerService:       null,
     prefs:                 null,
+
+    // Places services
+    historyService:   null,
+    bookmarksService: null,
+    livemarkService:  null,
+
+    // Fx2Compat RDF components
     rdfService:            null,
-    bookmarksService:      null,
     rdfContainerUtils:     null,
     bookmarksDataSource:   null,
 
@@ -129,7 +136,11 @@ BriefStorageService.prototype = {
                      QueryInterface(Ci.nsIPrefBranch2);
         this.prefs.addObserver('', this, false);
 
-        this.initBookmarks();
+        // Fx2Compat
+        if (gPlacesEnabled)
+            this.initPlaces();
+        else
+            this.initRDFBookmarks();
 
         this.observerService.addObserver(this, 'quit-application', false);
     },
@@ -317,7 +328,7 @@ BriefStorageService.prototype = {
                 feed.rowIndex = select.getInt32(11);
                 feed.parent = select.getString(12);
                 feed.isFolder = select.getInt32(13) == 1;
-                feed.rdf_uri = select.getString(14);
+                feed.bookmarkID = select.getString(14);
                 feed.entryAgeLimit = select.getInt32(15);
                 feed.maxEntries = select.getInt32(16);
                 feed.updateInterval = select.getInt64(17);
@@ -712,7 +723,8 @@ BriefStorageService.prototype = {
 
             case 'nsPref:changed':
                 switch (aData) {
-                    case 'liveBookmarksFolder':
+                    case 'liveBookmarksFolder': // Fx2Compat
+                    case 'homeFolder':
                         this.syncWithBookmarks();
                         break;
                 }
@@ -725,20 +737,35 @@ BriefStorageService.prototype = {
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         this.bookmarkItems = [];
 
-        // Get the current Live Bookmarks
-        this.rootURI = this.prefs.getCharPref('liveBookmarksFolder');
-        if (!this.rootURI) {
+        // Fx2Compat
+        var homeFolder = gPlacesEnabled ? this.prefs.getCharPref('homeFolder')
+                                        : this.prefs.getCharPref('liveBookmarksFolder');
+
+        if (!homeFolder) {
             this.dBConnection.executeSimpleSQL('UPDATE feeds SET hidden = 1');
             this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
             return;
         }
 
-        root = this.rdfService.GetResource(this.rootURI);
-        try {
-            this.traverseLivemarks(root);
+        // Get the current Live Bookmarks.
+        if (gPlacesEnabled) {
+            var options = this.historyService.getNewQueryOptions();
+            var query = this.historyService.getNewQuery();
+
+            query.setFolders([parseInt(homeFolder)], 1);
+            options.excludeItems = true;
+            var result = this.historyService.executeQuery(query, options);
+
+            this.traversePlacesQueryResults(result.root);
         }
-        catch (e) {
-            // Traversing will throw if root folder was removed.
+        else {
+            root = this.rdfService.GetResource(homeFolder);
+            try {
+                this.traverseLivemarks(root);
+            }
+            catch (e) {
+                // Traversing will throw if root folder was removed.
+            }
         }
 
         this.dBConnection.beginTransaction();
@@ -772,7 +799,7 @@ BriefStorageService.prototype = {
                 feed.rowIndex = selectAll.getInt32(2);
                 feed.isFolder = selectAll.getInt32(3) == 1;
                 feed.parent = selectAll.getString(4);
-                feed.rdf_uri = selectAll.getString(5);
+                feed.bookmarkID = selectAll.getString(5);
                 feed.hidden = selectAll.getInt64(6);
                 feeds.push(feed);
             }
@@ -807,7 +834,7 @@ BriefStorageService.prototype = {
                     insertItem.bindInt32Parameter(3, item.rowIndex)
                     insertItem.bindInt32Parameter(4, item.isFolder ? 1 : 0);
                     insertItem.bindStringParameter(5, item.parent);
-                    insertItem.bindStringParameter(6, item.uri);
+                    insertItem.bindStringParameter(6, item.bookmarkID);
                     insertItem.execute();
 
                     this.observerService.notifyObservers(null,'brief:feed-added', item.feedID);
@@ -823,7 +850,8 @@ BriefStorageService.prototype = {
                     // If the bookmark was found in the database then check if its row is
                     // up-to-date.
                     if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
-                       item.title != feed.title || item.uri != feed.rdf_uri || feed.hidden > 0) {
+                       item.title != feed.title || item.bookmarkID != feed.bookmarkID ||
+                       feed.hidden > 0) {
 
                         // Invalidate cache since feeds table is about to change.
                         this.feedsCache = this.feedsAndFoldersCache = null;
@@ -831,7 +859,7 @@ BriefStorageService.prototype = {
                         updateFeed.bindStringParameter(0, item.title);
                         updateFeed.bindInt32Parameter(1, item.rowIndex);
                         updateFeed.bindStringParameter(2, item.parent);
-                        updateFeed.bindStringParameter(3, item.uri);
+                        updateFeed.bindStringParameter(3, item.bookmarkID);
                         updateFeed.bindStringParameter(4, item.feedID);
                         updateFeed.execute();
 
@@ -896,15 +924,23 @@ BriefStorageService.prototype = {
     },
 
 
+    initPlaces: function BriefStorage_initPlaces() {
+        this.historyService =   Cc['@mozilla.org/browser/nav-history-service;1'].
+                                getService(Ci.nsINavHistoryService);
+        this.bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
+                                getService(Ci.nsINavBookmarksService);
+        this.livemarkService =  Cc['@mozilla.org/browser/livemark-service;2'].
+                                getService(Ci.nsILivemarkService);
+    },
+
+
     // Initializes RDF services and resources.
-    initBookmarks: function BriefStorage_initLivemarks() {
+    initRDFBookmarks: function BriefStorage_initRDFBookmarks() {
         this.rdfService = Cc['@mozilla.org/rdf/rdf-service;1'].
                           getService(Ci.nsIRDFService);
         this.bookmarksDataSource = this.rdfService.GetDataSource('rdf:bookmarks');
         this.bookmarksDataSource.AddObserver(this);
 
-        this.bookmarksService = this.bookmarksDataSource.
-                                     QueryInterface(Ci.nsIBookmarksService);
         this.rdfContainerUtils = Cc['@mozilla.org/rdf/container-utils;1'].
                                  getService(Ci.nsIRDFContainerUtils);
 
@@ -929,14 +965,13 @@ BriefStorageService.prototype = {
      traverseLivemarks: function BriefStorage_traverseLivemarks(aFolder) {
 
         var folderURI = aFolder.QueryInterface(Ci.nsIRDFResource).Value;
-        var folderFeedID = hashString(folderURI);
 
         var container = Cc['@mozilla.org/rdf/container;1'].
                         createInstance(Ci.nsIRDFContainer);
         container.Init(this.bookmarksDataSource, aFolder);
         var children = container.GetElements();
 
-        var child, type, item, uri;
+        var child, type, item;
         while (children.hasMoreElements()) {
 
             child = children.getNext();
@@ -949,13 +984,13 @@ BriefStorageService.prototype = {
                                                         QueryInterface(Ci.nsIRDFLiteral).
                                                         Value;
                 item.feedID = hashString(item.feedURL);
-                item.uri = child.QueryInterface(Ci.nsIRDFResource).Value;
+                item.bookmarkID = child.QueryInterface(Ci.nsIRDFResource).Value;
                 item.title = this.bookmarksDataSource.GetTarget(child, this.nameArc, true).
                                                       QueryInterface(Ci.nsIRDFLiteral).
                                                       Value;
                 item.rowIndex = this.bookmarkItems.length;
                 item.isFolder = false;
-                item.parent = folderFeedID;
+                item.parent = folderURI;
 
                 this.bookmarkItems.push(item);
             }
@@ -966,11 +1001,11 @@ BriefStorageService.prototype = {
                 item.title = this.bookmarksDataSource.GetTarget(child, this.nameArc, true).
                                                       QueryInterface(Ci.nsIRDFLiteral).
                                                       Value;
-                item.uri = child.QueryInterface(Ci.nsIRDFResource).Value;
-                item.feedID = hashString(item.uri);
+                item.bookmarkID = child.QueryInterface(Ci.nsIRDFResource).Value;
+                item.feedID = item.bookmarkID;
                 item.rowIndex = this.bookmarkItems.length;
                 item.isFolder = true;
-                item.parent = folderFeedID;
+                item.parent = folderURI;
 
                 this.bookmarkItems.push(item);
 
@@ -978,6 +1013,36 @@ BriefStorageService.prototype = {
                 this.traverseLivemarks(child);
             }
         }
+    },
+
+
+    traversePlacesQueryResults: function BriefStorage_traversePlacesQueryResults(aContainer) {
+        aContainer.containerOpen = true;
+
+        for (var i = 0; i < aContainer.childCount; i++) {
+            var node = aContainer.getChild(i);
+
+            if (node.type == Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER) {
+                var isLivemark = this.livemarkService.isLivemark(node.itemId);
+                var url = isLivemark ? this.livemarkService.getFeedURI(node.itemId).spec : '';
+
+                item = {};
+                item.title = this.bookmarksService.getItemTitle(node.itemId);
+                item.bookmarkID = node.itemId;
+                item.feedURL = url;
+                item.feedID = isLivemark ? hashString(url) : node.itemId;
+                item.rowIndex = this.bookmarkItems.length;
+                item.isFolder = !isLivemark;
+                item.parent = aContainer.itemId;
+
+                this.bookmarkItems.push(item);
+
+                if (!isLivemark && node instanceof Ci.nsINavHistoryContainerResultNode)
+                    this.traversePlacesQueryResults(node);
+            }
+        }
+
+        aContainer.containerOpen = false;
     },
 
 
@@ -1031,8 +1096,9 @@ BriefStorageService.prototype = {
 
     resourceIsInHomeFolder: function BriefStorage_resourceIsInHomeFolder(aResource) {
         var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
+        var bookmarksService = this.bookmarksDataSource.QueryInterface(Ci.nsIBookmarksService);
 
-        var parentChain = this.bookmarksService.getParentChain(aResource);
+        var parentChain = bookmarksService.getParentChain(aResource);
         var length = parentChain.length;
         for (var i = 0; i < length; i++) {
             var node = parentChain.queryElementAt(i, Ci.nsIRDFResource);
@@ -1376,10 +1442,10 @@ BriefQuery.prototype = {
             this._items = Components.classes['@ancestor/brief/storage;1'].
                                      getService(Components.interfaces.nsIBriefStorage).
                                      getFeedsAndFolders({});
-            var rootFolderURI = Cc["@mozilla.org/preferences-service;1"].
-                                getService(Ci.nsIPrefBranch).
-                                getCharPref('extensions.brief.liveBookmarksFolder');
-            this.traverseChildren(hashString(rootFolderURI));
+            // Fx2Compat
+            var homeFolder = gPlacesEnabled ? gStorageService.prefs.getCharPref('homeFolder')
+                                            : gStorageService.prefs.getCharPref('liveBookmarksFolder')
+            this.traverseChildren(homeFolder);
 
             text += '(';
             for (var i = 0; i < this.effectiveFolders.length; i++) {

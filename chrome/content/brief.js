@@ -13,6 +13,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const isPlatformMac = window.navigator.platform.match('Mac');
+const gPlacesEnabled = 'nsINavHistoryService' in Ci;
 
 const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 const gUpdateService = Cc['@ancestor/brief/updateservice;1'].getService(Ci.nsIBriefUpdateService);
@@ -55,8 +56,8 @@ function init() {
                    getService(Ci.nsIFileProtocolHandler).
                    newFileURI(itemLocation);
 
-    var liveBookmarksFolder = gPrefs.getCharPref('liveBookmarksFolder');
-    if (liveBookmarksFolder) {
+    // Fx2Compat
+    if (gPrefs.homeFolder) {
         // Initiate the feed list (asynchronously, so that the window is displayed sooner).
         setTimeout(function(){ gFeedList.rebuild() }, 0);
         setTimeout(function(){ gStorage.syncWithBookmarks() }, 500);
@@ -108,8 +109,10 @@ function init() {
 
     setTimeout(function(){ loadHomeview() }, 0);
 
+    // Fx2Compat
     // Init stuff in bookmarks.js
-    setTimeout(function() { initServices(); initBMService(); }, 1000);
+    if (!gPlacesEnabled)
+        setTimeout(function() { initServices(); initBMService(); }, 1000);
 }
 
 
@@ -685,6 +688,12 @@ var gPrefs = {
 
     unregister: function gPrefs_unregister() {
         this._branch.removeObserver('', this);
+    },
+
+    // Fx2Compat
+    get homeFolder() {
+        return gPlacesEnabled ? gPrefs.getCharPref('homeFolder')
+                              : gPrefs.getCharPref('liveBookmarksFolder');
     },
 
     observe: function gPrefs_observe(aSubject, aTopic, aData) {

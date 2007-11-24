@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/options.css" type="text/css"?>
-<?xml-stylesheet href="chrome://browser/content/bookmarks/bookmarks.css" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/content/places/places.css"?>
+<?xml-stylesheet href="chrome://browser/content/bookmarks/bookmarks.css" type="text/css"?> <!-- Fx2Compat -->
 
 <!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
 
@@ -14,18 +15,28 @@
 
     <prefpane id="main-pane" label="&mainPane.label;">
 
-        <script type="application/x-javascript" src="options.js"/>
         <script type="application/x-javascript"
-                src="chrome://browser/content/bookmarks/bookmarks.js"/>
+                src="options.js"/>
+        <script type="application/x-javascript"
+                src="chrome://browser/content/bookmarks/bookmarks.js"/> <!-- Fx2Compat -->
+        <script type="application/x-javascript"
+                src="chrome://browser/content/places/utils.js"/>
+        <script type="application/x-javascript"
+                src="chrome://browser/content/places/controller.js"/>
+        <script type="application/x-javascript"
+                src="chrome://browser/content/places/treeView.js"/>
 
         <stringbundleset id="string-bundles">
             <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
         </stringbundleset>
 
         <preferences>
+            <preference id="extensions.brief.homeFolder"
+                        name="extensions.brief.homeFolder"
+                        type="string"/>
             <preference id="extensions.brief.liveBookmarksFolder"
                         name="extensions.brief.liveBookmarksFolder"
-                        type="string"/>
+                        type="string"/> <!-- Fx2Compat -->
             <preference id="extensions.brief.openInNewTab"
                         name="extensions.brief.openInNewTab"
                         type="bool"/>
@@ -36,8 +47,21 @@
 
         <label value="&folderTree.label;"/>
         <separator class="thin"/>
+
+        <tree id="places-tree"
+              type="places"
+              hidecolumnpicker="true"
+              onselect="gMainPane.onPlacesTreeSelect(event)">
+            <treecols>
+                <treecol id="title" flex="1"
+                         primary="true"
+                         hideheader="true"/>
+            </treecols>
+            <treechildren flex="1"/>
+        </tree>
+
         <bookmarks-tree id="folders-tree" flex="1" type="folders"
-                        onselect="gMainPane.onFolderSelected(event);"/>
+                        onselect="gMainPane.onRDFTreeSelect(event)"/> <!-- Fx2Compat -->
 
         <groupbox>
             <checkbox id="show-statusbar-icon"

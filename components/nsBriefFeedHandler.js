@@ -28,6 +28,7 @@ Feed.prototype = {
 
     lastUpdated: 0,
 
+    bookmarkID: '',
     rowIndex: 0,
     isFolder: false,
     parent:   '',
