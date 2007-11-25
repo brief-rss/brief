@@ -93,7 +93,7 @@ var gFeedList = {
         var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
         var folders = [];
 
-        var root = gPrefs.homeFolder; // Fx2Compat
+        var root = gPrefs.homeFolder;
 
         for (var i = 0; i < feeds.length; i++) {
             var feed = this.getBriefFeed(feeds[i]);
@@ -438,9 +438,7 @@ var gFeedList = {
         // items.
         this._folderParentChain = [topLevelChildren];
 
-        var root = gPrefs.homeFolder; // Fx2Compat
-
-        this._buildFolderChildren(root);
+        this._buildFolderChildren(gPrefs.homeFolder);
 
         // Fill the items cache.
         this.items = this.tree.getElementsByTagName('treeitem');
@@ -718,7 +716,8 @@ var gContextMenuCommands = {
 
 
     deleteFeed: function ctxMenuCmds_deleteFeed(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.getAttribute('feedID');
+        var targetTreeitem = gFeedList.ctx_targetItem;
+        var feedID = targetTreeitem.getAttribute('feedID');
         var feed = gStorage.getFeed(feedID);
 
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
@@ -729,45 +728,21 @@ var gContextMenuCommands = {
         var weHaveAGo = promptService.confirm(window, title, text);
 
         if (weHaveAGo) {
-            var item = gFeedList.getTreeitem(feedID);
+            this._removeTreeitem(targetTreeitem);
 
-            indexToSelect = -1;
-            // If the currently selected feed is being removed, select the next one.
-            if (gFeedList.selectedItem == item) {
-                var currentIndex = gFeedList.tree.view.selection.currentIndex;
-                var rowCount = gFeedList.tree.view.rowCount;
-                var indexToSelect = currentIndex == rowCount - 1 ? currentIndex - 1
-                                                                 : currentIndex;
-            }
-
-            // The treeitem would be removed anyway thanks to RDFObserver,
-            // but we do it here to give faster visual feedback.
-            item.parentNode.removeChild(item);
-
-            var node = RDF.GetResource(feed.bookmarkID);
-            var parent = BMSVC.getParent(node);
-            RDFC.Init(BMDS, parent);
-            var index = RDFC.IndexOf(node);
-            var propertiesArray = new Array(gBmProperties.length);
-            BookmarksUtils.getAllChildren(node, propertiesArray);
-
-            gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
-                                           'delete', node, index, parent,
-                                           propertiesArray.length, propertiesArray);
-            BookmarksUtils.flushDataSource();
-
-            if (indexToSelect != -1) {
-                gFeedList.ignoreSelectEvent = true;
-                gFeedList.tree.view.selection.select(indexToSelect);
-                gFeedList.ignoreSelectEvent = false;
-            }
+            // Fx2Compat
+            if (gPlacesEnabled)
+                this._deletePlacesItems([feed]);
+            else
+                this._deleteRDFItems([feed]);
         }
     },
 
 
     deleteFolder: function ctxMenuCmds_deleteFolder(aEvent) {
-        var folderFeedID = gFeedList.ctx_targetItem.getAttribute('feedID');
-        var folder = gStorage.getFeed(folderFeedID);
+        var targetTreeitem = gFeedList.ctx_targetItem;
+        var feedID = targetTreeitem.getAttribute('feedID');
+        var folder = gStorage.getFeed(feedID);
 
         // Ask for confirmation.
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
@@ -778,41 +753,64 @@ var gContextMenuCommands = {
         var weHaveAGo = promptService.confirm(window, title, text);
 
         if (weHaveAGo) {
-            var item = gFeedList.getTreeitem(folderFeedID);
+            this._removeTreeitem(targetTreeitem);
 
-            // XXX If the currently selected item is being removed, we have to select
-            // another one. Ideally we would select the next sibling but I couldn't get
-            // it to work reliably, so for now the Unread folder gets selected.
-            if (gFeedList.selectedItem == item)
-                gFeedList.tree.view.selection.select(0);
-
-            // The treeitem would have been removed anyway thanks to RDFObserver,
-            // but we do it here to give faster visual feedback.
-            item.parentNode.removeChild(item);
-
-            var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
-
-            gBkmkTxnSvc.startBatch();
-
-            // Delete all the descendant feeds and folders.
-            var feedID, feed, node, parent, index, propertiesArray;
+            var treeitems = targetTreeitem.getElementsByTagName('treeitem');
+            var items = [folder];
             for (var i = 0; i < treeitems.length; i++) {
                 feedID = treeitems[i].getAttribute('feedID');
-                feed = gStorage.getFeed(feedID);
-
-                node = RDF.GetResource(feed.bookmarkID);
-                parent = BMSVC.getParent(node);
-                RDFC.Init(BMDS, parent);
-                index = RDFC.IndexOf(node);
-                propertiesArray = new Array(gBmProperties.length);
-                BookmarksUtils.getAllChildren(node, propertiesArray);
-                gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
-                                               'delete', node, index, parent,
-                                               propertiesArray.length, propertiesArray);
+                items.push(gStorage.getFeed(feedID));
             }
 
-            // Delete the target folder.
-            node = RDF.GetResource(folder.bookmarkID);
+            // Fx2Compat
+            if (gPlacesEnabled)
+                this._deletePlacesItems(items);
+            else
+                this._deleteRDFItems(items);
+        }
+    },
+
+    // Removes a treeitem and updates selection if it was selected.
+    _removeTreeitem: function ctxMenuCmds__removeTreeitem(aTreeitem) {
+        var treeview = gFeedList.tree.view;
+        var currentIndex = treeview.selection.currentIndex;
+        var rowCount = treeview.rowCount;
+        var indexToSelect = -1;
+
+        if (gFeedList.selectedItem == aTreeitem) {
+            if (currentIndex == rowCount - 1)
+                indexToSelect = treeview.getIndexOfItem(aTreeitem.previousSibling);
+            else if (currentIndex != 3)
+                indexToSelect = currentIndex; // Don't select the separator.
+            else
+                var indexToSelect = 0;
+        }
+
+        aTreeitem.parentNode.removeChild(aTreeitem);
+
+        if (indexToSelect != -1)
+            setTimeout(function(){ treeview.selection.select(indexToSelect) }, 0);
+    },
+
+    _deletePlacesItems: function ctxMenuCmds__deletePlacesItems(aItems) {
+        var transactionsService = Cc["@mozilla.org/browser/placesTransactionsService;1"].
+                                  getService(Ci.nsIPlacesTransactionsService);
+
+        var transactions = [];
+        for (var i = aItems.length -1; i >= 0; i--)
+            transactions.push(transactionsService.removeItem(aItems[i].bookmarkID));
+
+        var txn = transactionsService.aggregateTransactions('Remove items', transactions);
+        transactionsService.commitTransaction(txn);
+    },
+
+
+    _deleteRDFItems: function ctxMenuCmds__deleteRDFItems(aItems) {
+        if (aItems.length > 1)
+            gBkmkTxnSvc.startBatch();
+
+        for each (item in aItems) {
+            node = RDF.GetResource(item.bookmarkID);
             parent = BMSVC.getParent(node);
             RDFC.Init(BMDS, parent);
             index = RDFC.IndexOf(node);
@@ -821,10 +819,12 @@ var gContextMenuCommands = {
             gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
                                            'delete', node, index, parent,
                                            propertiesArray.length, propertiesArray);
-
-            gBkmkTxnSvc.endBatch();
-            BookmarksUtils.flushDataSource();
         }
+
+        if (aItems.length > 1)
+            gBkmkTxnSvc.endBatch();
+
+        BookmarksUtils.flushDataSource();
     },
 
 
