@@ -40,15 +40,13 @@ var gMainPane = {
         var tree = document.getElementById('places-tree');
         var pref = document.getElementById('extensions.brief.homeFolder');
 
-        // Get the place URI for the bookmarks root to populate the tree.
+        // Populate the tree.
         var query = PlacesUtils.history.getNewQuery();
         var options = PlacesUtils.history.getNewQueryOptions();
         var bookmarksRoot = PlacesUtils.bookmarks.bookmarksRoot;
         query.setFolders([bookmarksRoot], 1);
         options.excludeItems = true;
-        var placeURI = PlacesUtils.history.queriesToQueryString([query], 1, options);
-
-        tree.place = placeURI;
+        tree.load([query], options);
 
         // Get the place URI for the home folder to select it.
         query.setFolders([pref.value], 1);
