@@ -29,7 +29,7 @@ var gFeedView = null;
 var gInitialized = false;
 var gTopBrowserWindow = null;
 var gTemplateURI = '';
-var gStyleURL = '';
+var gFeedViewStyle = '';
 
 function init() {
     if (gInitialized)
@@ -40,7 +40,7 @@ function init() {
         applyMacStyleOverride(document);
 
     gPrefs.register();
-    gStyleURL = getStyleURL();
+    getFeedViewStyle();
 
     // Get the extension's directory.
     var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
@@ -56,7 +56,6 @@ function init() {
                    getService(Ci.nsIFileProtocolHandler).
                    newFileURI(itemLocation);
 
-    // Fx2Compat
     if (gPrefs.homeFolder) {
         // Initiate the feed list (asynchronously, so that the window is displayed sooner).
         setTimeout(function(){ gFeedList.rebuild() }, 0);
@@ -107,10 +106,9 @@ function init() {
     FeedView.prototype.markAsReadStr = bundle.getString('markEntryAsRead');
     FeedView.prototype.markAsUnreadStr = bundle.getString('markEntryAsUnread');
 
-    setTimeout(function(){ loadHomeview() }, 0);
+    setTimeout(loadHomeview, 0);
 
-    // Fx2Compat
-    // Init stuff in bookmarks.js
+    // Fx2Compat Init stuff in bookmarks.js
     if (!gPlacesEnabled)
         setTimeout(function() { initServices(); initBMService(); }, 1000);
 }
@@ -492,17 +490,22 @@ var gCommands = {
     }
 }
 
-// Returns a string containing the style of the feed view.
-function getStyleURL() {
-    var url = '';
+
+// Gets a string containing the style of the feed view.
+function getFeedViewStyle() {
     if (gPrefs.getBoolPref('feedview.useCustomStyle')) {
-        var pref = gPrefs.getComplexValue('feedview.customStylePath', Ci.nsISupportsString);
-        url = 'file:///' + pref.data;
+        var pref = gPrefs.getComplexValue('feedview.customStylePath',
+                                          Ci.nsISupportsString);
+        var url = 'file:///' + pref.data;
     }
     else
-        url = DEFAULT_STYLE_URL;
+        var url = DEFAULT_STYLE_URL;
 
-    return url;
+    var request = new XMLHttpRequest;
+    request.open('GET', url, false);
+    request.send(null);
+
+    gFeedViewStyle = request.responseText;
 }
 
 function applyMacStyleOverride(aDoc) {
@@ -708,14 +711,14 @@ var gPrefs = {
 
         case 'feedview.customStylePath':
             if (this.getBoolPref('feedview.useCustomStyle')) {
-                gStyleURL = getStyleURL();
+                getFeedViewStyle();
                 if (gFeedView && gFeedView.isActive)
                     gFeedView.refresh();
             }
             break;
 
         case 'feedview.useCustomStyle':
-            gStyleURL = getStyleURL();
+            getFeedViewStyle();
             if (gFeedView && gFeedView.isActive)
                 gFeedView.refresh();
             break;

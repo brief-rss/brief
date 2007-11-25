@@ -471,7 +471,7 @@ FeedView.prototype = {
 
         // Apply the CSS.
         var style = doc.getElementById('feedview-style');
-        style.setAttribute('href', gStyleURL);
+        style.textContent = gFeedViewStyle;
         if (isPlatformMac)
             applyMacStyleOverride(doc);
 
