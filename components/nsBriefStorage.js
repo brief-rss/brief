@@ -46,6 +46,13 @@ BriefStorageService.prototype = {
     observerService:       null,
     prefs:                 null,
 
+    bookmarksObserverDelayTimer: null,
+    bookmarksObserverTimerIsRunning: false,
+
+    // Only used by the Places version of the observer
+    batchUpdateInProgress: false,
+    homeFolderContentModified: false,
+
     // Places services
     historyService:   null,
     bookmarksService: null,
@@ -55,9 +62,6 @@ BriefStorageService.prototype = {
     rdfService:            null,
     rdfContainerUtils:     null,
     bookmarksDataSource:   null,
-
-    rdfObserverDelayTimer: null,
-    rdfObserverTimerIsRunning: false,
 
     instantiate: function BriefStorage_instantiate() {
         var file = Cc['@mozilla.org/file/directory_service;1'].
@@ -141,6 +145,9 @@ BriefStorageService.prototype = {
             this.initPlaces();
         else
             this.initRDFBookmarks();
+
+        this.bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
+                                           createInstance(Ci.nsITimer);
 
         this.observerService.addObserver(this, 'quit-application', false);
     },
@@ -266,6 +273,18 @@ BriefStorageService.prototype = {
         var feeds = this.getFeedsAndFolders({});
         for (var i = 0; i < feeds.length; i++) {
             if (feeds[i].feedID == aFeedID) {
+                foundFeed = feeds[i];
+                break;
+            }
+        }
+        return foundFeed;
+    },
+
+    getFeedByBookmarkID: function BriefStorage_getFeedByBookmarkID(aBookmarkID) {
+        var foundFeed = null;
+        var feeds = this.getFeedsAndFolders({});
+        for (var i = 0; i < feeds.length; i++) {
+            if (feeds[i].bookmarkID == aBookmarkID) {
                 foundFeed = feeds[i];
                 break;
             }
@@ -710,14 +729,20 @@ BriefStorageService.prototype = {
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeEntries(true);
 
-                this.bookmarksDataSource.RemoveObserver(this);
+                if (gPlacesEnabled)
+                    this.bookmarksService.removedObserver(this);
+                else
+                    this.bookmarksDataSource.RemoveObserver(this);
+
                 this.prefs.removeObserver('', this);
                 this.observerService.removeObserver(this, 'quit-application');
                 this.observerService.removeObserver(this, 'profile-after-change');
+
+                this.bookmarksObserverDelayTimer = null;
                 break;
 
             case 'timer-callback':
-                this.rdfObserverTimerIsRunning = false;
+                this.bookmarksObserverTimerIsRunning = false;
                 this.syncWithBookmarks();
                 break;
 
@@ -931,6 +956,8 @@ BriefStorageService.prototype = {
                                 getService(Ci.nsINavBookmarksService);
         this.livemarkService =  Cc['@mozilla.org/browser/livemark-service;2'].
                                 getService(Ci.nsILivemarkService);
+
+        this.bookmarksService.addObserver(this, false);
     },
 
 
@@ -943,8 +970,6 @@ BriefStorageService.prototype = {
 
         this.rdfContainerUtils = Cc['@mozilla.org/rdf/container-utils;1'].
                                  getService(Ci.nsIRDFContainerUtils);
-
-        this.rdfObserverDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
         // Predicates
         this.typeArc = this.rdfService.GetResource(RDF_TYPE);
@@ -1046,6 +1071,7 @@ BriefStorageService.prototype = {
     },
 
 
+    // nsIRDFObserver
     onAssert: function BriefStorage_onAssert(aDataSource, aSource, aProperty, aTarget) {
 
         // Because we only care about livemarks and folders, check if the assertion
@@ -1060,6 +1086,7 @@ BriefStorageService.prototype = {
             this.delayedBookmarksSync();
     },
 
+    // nsIRDFObserver
     onUnassert: function BriefStorage_onUnassert(aDataSource, aSource, aProperty, aTarget) {
 
         if (!(aTarget instanceof Ci.nsIRDFResource) ||
@@ -1069,14 +1096,15 @@ BriefStorageService.prototype = {
 
         var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
 
-        // We need to check if the home folder is in the removed item's (i.e. the
-        // assertion target's) parent chain. Because the target is already detached and
+        // We need to check if the home folder is in the parent chain of the removed item
+        // (i.e. the assertion target). Because the target is already detached and
         // has no parent, we need to examine the parent chain of the assertion source
         // instead. But the source itself can be the home folder, so let's check that, too.
         if (aSource.Value == homeFolderURI || this.resourceIsInHomeFolder(aSource))
             this.delayedBookmarksSync();
     },
 
+    // nsIRDFObserver
     onChange: function BriefStorage_onChange(aDataSource, aSource, aProperty, aOldTarget,
                                              aNewTarget) {
 
@@ -1087,34 +1115,116 @@ BriefStorageService.prototype = {
 
     },
 
+    // nsIRDFObserver
+    onMove: function BriefStorage_onMove(aDataSource, aOldSource, aNewSource, aProperty, aTarget) { },
+
+    // nsIRDFObserver and nsINavBookmarkObserver
     onEndUpdateBatch: function BriefStorage_onEndUpdateBatch(aDataSource) {
-        this.delayedBookmarksSync();
+        if (gPlacesEnabled && this.homeFolderContentModified || !gPlacesEnabled)
+            this.delayedBookmarksSync();
+
+        this.batchUpdateInProgress = false;
+        this.homeFolderContentModified = false;
     },
 
-    onMove: function BriefStorage_onMove(aDataSource, aOldSource, aNewSource, aProperty, aTarget) { },
-    onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch(aDataSource) { },
+    // nsIRDFObserver and nsINavBookmarkObserver
+    onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch(aDataSource) {
+        this.batchUpdateInProgress = true;
+    },
+
+    // nsINavBookmarkObserver
+    onItemAdded: function BriefStorage_onItemAdded(aItemID, aFolder, aIndex) {
+        this.handleCommonNotification(aItemID);
+    },
+
+    // nsINavBookmarkObserver
+    onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
+        this.handleCommonNotification(aItemID);
+    },
+
+    // nsINavBookmarkObserver
+    onItemMoved: function BriefStorage_onItemMoved(aItemID, aOldParent, aOldIndex,
+                                                   aNewParent, aNewIndex) {
+        this.handleCommonNotification(aItemID);
+    },
+
+    // nsINavBookmarkObserver
+    onItemChanged: function BriefStorage_onItemChanged(aItemID, aProperty,
+                                                       aIsAnnotationProperty, aValue) {
+
+        if (aProperty == 'title' && this.isBookmarkInHomeFolder(aItemID)) {
+            var feed = this.getFeedByBookmarkID(aItemID);
+
+            var update = this.dBConnection.createStatement(
+                         'UPDATE feeds SET title = ? WHERE feedID = ?');
+
+            update.bindStringParameter(0, aValue);
+            update.bindStringParameter(1, feed.feedID);
+            update.execute();
+
+            // Update the cached item.
+            feed.title = aValue;
+
+            this.observerService.notifyObservers(null, 'brief:feed-title-changed',
+                                                 feed.feedID);
+        }
+    },
+
+    // nsINavBookmarkObserver
+    aOnItemVisited: function BriefStorage_aOnItemVisited(aItemID, aVisitID, aTime) { },
+
+
+// Helper function for bookmarks observers.
 
     resourceIsInHomeFolder: function BriefStorage_resourceIsInHomeFolder(aResource) {
         var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
         var bookmarksService = this.bookmarksDataSource.QueryInterface(Ci.nsIBookmarksService);
+        var inHome = false;
 
         var parentChain = bookmarksService.getParentChain(aResource);
         var length = parentChain.length;
         for (var i = 0; i < length; i++) {
             var node = parentChain.queryElementAt(i, Ci.nsIRDFResource);
-            if (node.Value == homeFolderURI)
-                return true;
+            if (node.Value == homeFolderURI) {
+                inHome = true;
+                break;
+            }
         }
 
-        return false;
+        return inHome;
+    },
+
+    handleCommonNotification: function BriefStorage_handleCommonNotification(aItemID) {
+        if (this.isBookmarkInHomeFolder(aItemID)) {
+            if (this.batchUpdateInProgress)
+                this.homeFolderContentModified = true;
+            else
+                this.delayedBookmarksSync();
+        }
+    },
+
+    isBookmarkInHomeFolder: function BriefStorage_isBookmarkInHomeFolder(aItemID) {
+        var inHome = false;
+        var homeFolderID = this.prefs.getCharPref('homeFolder');
+        var parent = aItemID;
+
+        while (parent != this.bookmarksService.bookmarksRoot) {
+            parent = this.bookmarksService.getFolderIdForItem(parent);
+            if (parent == homeFolderID) {
+                inHome = true;
+                break;
+            }
+        }
+
+        return inHome;
     },
 
     delayedBookmarksSync: function BriefStorage_delayedBookmarksSync() {
-        if (this.rdfObserverTimerIsRunning)
-            this.rdfObserverDelayTimer.cancel();
+        if (this.bookmarksObserverTimerIsRunning)
+            this.bookmarksObserverDelayTimer.cancel();
 
-        this.rdfObserverDelayTimer.init(this, RDF_OBSERVER_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
-        this.rdfObserverTimerIsRunning = true;
+        this.bookmarksObserverDelayTimer.init(this, RDF_OBSERVER_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
+        this.bookmarksObserverTimerIsRunning = true;
     },
 
 
@@ -1172,6 +1282,7 @@ BriefStorageService.prototype = {
         if (!aIID.equals(Components.interfaces.nsIBriefStorage) &&
             !aIID.equals(Components.interfaces.nsIObserver) &&
             !aIID.equals(Components.interfaces.nsIRDFObserver) &&
+            !aIID.equals(Components.interfaces.nsINavBookmarkObserver) &&
             !aIID.equals(Components.interfaces.nsISupports)) {
             throw Components.results.NS_ERROR_NO_INTERFACE;
         }
