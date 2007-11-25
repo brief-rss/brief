@@ -1,12 +1,15 @@
 const NC_NAME    = 'http://home.netscape.com/NC-rdf#Name';
 const NC_FEEDURL = 'http://home.netscape.com/NC-rdf#FeedURL';
 
+Ci = Components.interfaces;
+Cc = Components.classes;
+
+const gPlacesEnabled = 'nsINavHistoryService' in Ci;
+
 var gFeed = null;
-var gStorageService = Components.classes['@ancestor/brief/storage;1'].
-                                 getService(Components.interfaces.nsIBriefStorage);
-var gPrefs = Components.classes['@mozilla.org/preferences-service;1'].
-                        getService(Components.interfaces.nsIPrefService).
-                        getBranch('extensions.brief.');
+var gStorageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+var gPrefs = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
+                                                      getBranch('extensions.brief.');
 
 function setupWindow() {
     var nameTextbox = document.getElementById('feed-name-textbox');
@@ -56,7 +59,7 @@ function previousFeed() {
 
     // The reason we must re-get the feed is because the old feeds cache in
     // the storage component may have been destroyed after modifying the bookmarks
-    // datasource in saveChanges(). In such case gFeed would be a reference to the object
+    // database in saveChanges(). In such case gFeed would be a reference to the object
     // in the destroyed cache, not in the array which we got from the above
     // getAllFeeds() call.
     gFeed = gStorageService.getFeed(gFeed.feedID);
@@ -174,12 +177,35 @@ function saveChanges() {
 
     gStorageService.setFeedOptions(gFeed);
 
-    saveLiveBookmarksData();
+    if (gPlacesEnabled)
+        savePlacesLivemarksData();
+    else
+        saveRDFLivemarksData();
 
     return true;
 }
 
-function saveLiveBookmarksData() {
+function savePlacesLivemarksData() {
+    var nameTextbox = document.getElementById('feed-name-textbox');
+    var urlTextbox = document.getElementById('feed-url-textbox')
+
+    var bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
+                           getService(Ci.nsINavBookmarksService);
+    var livemarkService =  Cc['@mozilla.org/browser/livemark-service;2'].
+                           getService(Ci.nsILivemarkService);
+
+    if (gFeed.title != nameTextbox.value)
+        bookmarksService.setItemTitle(gFeed.bookmarkID, nameTextbox.value);
+
+    if (gFeed.feedURL != urlTextbox.value) {
+        var ioService = Cc['@mozilla.org/network/io-service;1'].
+                        getService(Ci.nsIIOService);
+        var uri = ioService.newURI(urlTextbox.value, null, null);
+        livemarkService.setFeedURI(gFeed.bookmarkID, uri);
+    }
+}
+
+function saveRDFLivemarksData() {
     var nameTextbox = document.getElementById('feed-name-textbox');
     var urlTextbox = document.getElementById('feed-url-textbox')
 
@@ -191,7 +217,7 @@ function saveLiveBookmarksData() {
     var changed = false;
     initServices();
     initBMService();
-    var resource = RDF.GetResource(gFeed.rdf_uri);
+    var resource = RDF.GetResource(gFeed.bookmarkID);
     var arc, newValue, oldValue;
 
     // Write the name.
@@ -199,7 +225,7 @@ function saveLiveBookmarksData() {
     arc = RDF.GetResource(NC_NAME)
     oldValue = BMDS.GetTarget(resource, arc, true);
     if (oldValue)
-        oldValue = oldValue.QueryInterface(Components.interfaces.nsIRDFLiteral);
+        oldValue = oldValue.QueryInterface(Ci.nsIRDFLiteral);
     if (newValue)
         newValue = RDF.GetLiteral(newValue);
     changed |= updateAttribute(arc, oldValue, newValue);
@@ -210,7 +236,7 @@ function saveLiveBookmarksData() {
     arc = RDF.GetResource(NC_FEEDURL);
     oldValue = BMDS.GetTarget(resource, arc, true);
     if (oldValue)
-        oldValue = oldValue.QueryInterface(Components.interfaces.nsIRDFLiteral);
+        oldValue = oldValue.QueryInterface(Ci.nsIRDFLiteral);
     if (newValue && newValue.indexOf(':') < 0)
         newValue = 'http://' + newValue; // If a scheme isn't specified, use http://
     if (newValue)
@@ -225,7 +251,7 @@ function saveLiveBookmarksData() {
     }
 
     if (changed) {
-        var remote = BMDS.QueryInterface(Components.interfaces.nsIRDFRemoteDataSource);
+        var remote = BMDS.QueryInterface(Ci.nsIRDFRemoteDataSource);
         if (remote)
             remote.Flush();
     }
@@ -233,7 +259,7 @@ function saveLiveBookmarksData() {
 
 // Helper function for writing to the RDF data source.
 function updateAttribute(aProperty, aOldValue, aNewValue) {
-    var resource = RDF.GetResource(gFeed.rdf_uri);
+    var resource = RDF.GetResource(gFeed.bookmarkID);
 
     if ((aOldValue || aNewValue) && aOldValue != aNewValue) {
         if (aOldValue && !aNewValue)
