@@ -1,0 +1,4 @@
+skin   brief-mac  classic skin/
+
+style  chrome://brief/content/brief.xul  chrome://brief-mac/skin/mac.css
+style  chrome://brief/content/options/options.xul  chrome://brief-mac/skin/mac.css

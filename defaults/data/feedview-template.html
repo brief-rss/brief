@@ -5,10 +5,18 @@
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
         <title>Brief</title>
         <link rel="stylesheet" href="chrome://brief/skin/feedview-common.css" type="text/css" media="screen">
+        <link rel="stylesheet" id="mac-style-override" type="text/css" media="screen">
         <link rel="stylesheet" href="chrome://brief/skin/thickbox.css" type="text/css" media="screen">
         <script type="text/javascript" src="chrome://brief/content/jquery.js"></script>
         <script type="text/javascript" src="chrome://brief/content/thickbox.js"></script>
         <script type="text/javascript">
+            function applyMacStyleOverride() {
+                if (window.navigator.platform.match('Mac')) {
+                    var link = document.getElementById('mac-style-override');
+                    link.setAttribute('href', 'chrome://brief-mac/skin/mac.css');
+                }
+            }
+
             function displayShortcuts() {
                 var frame = document.getElementById('shortcuts-frame');
                 frame.src = 'keyboard-shortcuts.xhtml';
@@ -29,7 +37,7 @@
         <style id="feedview-style" type="text/css" media="screen"></style>
     </head>
 
-    <body>
+    <body onload="applyMacStyleOverride()">
         <div id="container">
             <div id="shortcuts" style="display: none">
                 <iframe id="shortcuts-frame" frameborder="0"></iframe>

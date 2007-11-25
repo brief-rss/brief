@@ -472,8 +472,6 @@ FeedView.prototype = {
         // Apply the CSS.
         var style = doc.getElementById('feedview-style');
         style.textContent = gFeedViewStyle;
-        if (isPlatformMac)
-            applyMacStyleOverride(doc);
 
         // Build the header...
         var titleElement = doc.getElementById('feed-title');
