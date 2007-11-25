@@ -1151,22 +1151,30 @@ BriefStorageService.prototype = {
     // nsINavBookmarkObserver
     onItemChanged: function BriefStorage_onItemChanged(aItemID, aProperty,
                                                        aIsAnnotationProperty, aValue) {
+        if (!this.isBookmarkInHomeFolder(aItemID))
+            return;
 
-        if (aProperty == 'title' && this.isBookmarkInHomeFolder(aItemID)) {
-            var feed = this.getFeedByBookmarkID(aItemID);
+        switch (aProperty) {
+            case 'title':
+                var feed = this.getFeedByBookmarkID(aItemID);
 
-            var update = this.dBConnection.createStatement(
-                         'UPDATE feeds SET title = ? WHERE feedID = ?');
+                var update = this.dBConnection.createStatement(
+                             'UPDATE feeds SET title = ? WHERE feedID = ?');
 
-            update.bindStringParameter(0, aValue);
-            update.bindStringParameter(1, feed.feedID);
-            update.execute();
+                update.bindStringParameter(0, aValue);
+                update.bindStringParameter(1, feed.feedID);
+                update.execute();
 
-            // Update the cached item.
-            feed.title = aValue;
+                // Update the cached item.
+                feed.title = aValue;
 
-            this.observerService.notifyObservers(null, 'brief:feed-title-changed',
-                                                 feed.feedID);
+                this.observerService.notifyObservers(null, 'brief:feed-title-changed',
+                                                     feed.feedID);
+                break;
+
+            case 'livemark/feedURI':
+                this.delayedBookmarksSync();
+                break;
         }
     },
 
