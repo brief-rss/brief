@@ -2,7 +2,6 @@ const EXT_ID = 'brief@mozdev.org';
 
 const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
-const MAC_STYLE_OVERRIDE_URL = 'chrome://brief/skin/mac.css';
 
 const LAST_MAJOR_VERSION = '1.0';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.0.html';
@@ -12,7 +11,6 @@ const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const isPlatformMac = window.navigator.platform.match('Mac');
 const gPlacesEnabled = 'nsINavHistoryService' in Ci;
 
 const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
@@ -35,9 +33,6 @@ function init() {
     if (gInitialized)
         return;
     gInitialized = true;
-
-    if (isPlatformMac)
-        applyMacStyleOverride(document);
 
     gPrefs.register();
     getFeedViewStyle();
@@ -506,14 +501,6 @@ function getFeedViewStyle() {
     request.send(null);
 
     gFeedViewStyle = request.responseText;
-}
-
-function applyMacStyleOverride(aDoc) {
-    var link = aDoc.createElementNS(XHTML_NS, 'link');
-    link.setAttribute('rel', 'stylesheet');
-    link.setAttribute('type', 'text/css');
-    link.setAttribute('href', MAC_STYLE_OVERRIDE_URL);
-    aDoc.documentElement.appendChild(link);
 }
 
 
