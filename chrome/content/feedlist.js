@@ -12,6 +12,10 @@ var gFeedList = {
     // "select" event is occurs.
     ignoreSelectEvent: false,
 
+    // Flag set when the sidebar was hidden and the tree wasn't built,
+    // so that we know to rebuild it when unhiding the sidebar.
+    treeNotBuilt: false,
+
     // Currently selected item. Returns the treeitem if a folder is selected or
     // the treecell if a feed is selected.
     get selectedItem() {
@@ -413,6 +417,14 @@ var gFeedList = {
     // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
         this.tree = document.getElementById('feed-list');
+
+        if (!this.tree.view) {
+            this.treeNotBuilt = true;
+            return;
+        }
+        else
+            this.treeNotBuilt = false;
+
         var topLevelChildren = document.getElementById('top-level-children');
 
         this.refreshSpecialTreeitem('unread-folder');
