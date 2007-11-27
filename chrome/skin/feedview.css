@@ -60,8 +60,8 @@ body {
   background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
   background-color: #ffffff;
   border-top: 1px #abbfc9 solid;
-  border-right: 1px #dadde5 solid;
-  border-left: 1px #dadde5 solid;
+  border-right: 1px #e1e5da solid;
+  border-left: 1px #e1e5da solid;
   overflow: visible;   /* This is for the the expand/collapse dropmarker which is
                           taken outside the box using negative margins */
   position: relative;
@@ -77,7 +77,7 @@ body {
   }
 
 .article-title-link {
-  color: #001c2c;
+  color: #00394f;
   font-size: 13px;
   font-weight: bold;
   text-decoration: none;
@@ -132,7 +132,7 @@ body {
 /* ----------------------  Article subheader  ---------------------- */
 
 .article-subheader {
-  color: #3b4d68;
+  color: #477900;
   font-size: 12px;
   padding: 0 25px 0 40px;
   overflow: auto; /* Clears contained floats */
@@ -157,8 +157,8 @@ body {
 
 .article-content {
   font-family: "Lucida Grande", Verdana, sans-serif;
-  color: #101d27;
   font-size: 12px;
+  color: #272727;
   margin-top: 15px;
   padding: 0 25px 35px;
   overflow: auto;
@@ -204,7 +204,7 @@ body {
   border-bottom: 1px solid #abbfc9;
 }
 
-.article-container[collapsed] > .article-header {
+.article-container[collapsed] .article-title-link {
   font-size: 12px;
 }
 
@@ -222,13 +222,15 @@ body {
 }
 
 .article-container[collapsed] .article-date {
-  color: #3b4d68;
+  font-size: 12px;
+  color: #5c7933;
   margin: 12px 8px 0;
   clear: right;
 }
 
 .article-container[collapsed] .feed-name {
-  color: #3b4d68;
+  font-size: 12px;
+  color: #5c7933;
   margin: 0 8px;
   max-width: 170px;
   height: 1.3em; /* Height of a single line */
