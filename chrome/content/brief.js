@@ -271,6 +271,8 @@ var gCommands = {
         var pane = document.getElementById('left-pane');
         var splitter = document.getElementById('left-pane-splitter');
         pane.hidden = splitter.hidden = !pane.hidden;
+        if (gFeedList.treeNotBuilt)
+            gFeedList.rebuild();
     },
 
     updateAllFeeds: function cmd_updateAllFeeds() {
