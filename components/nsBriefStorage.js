@@ -9,6 +9,7 @@ const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+// Fx2Compat
 const NC_NAME     = 'http://home.netscape.com/NC-rdf#Name';
 const NC_FEEDURL  = 'http://home.netscape.com/NC-rdf#FeedURL';
 const NC_LIVEMARK = 'http://home.netscape.com/NC-rdf#Livemark';
@@ -1082,7 +1083,7 @@ BriefStorageService.prototype = {
         // Check if the target item is an RDF sequence (i.e. livemark or folder) and if
         // it is in the home folder.
         var isFolder = this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, aTarget);
-        if (isFolder && this.resourceIsInHomeFolder(aTarget))
+        if (isFolder && this.isResourceInHomeFolder(aTarget))
             this.delayedBookmarksSync();
     },
 
@@ -1100,7 +1101,7 @@ BriefStorageService.prototype = {
         // (i.e. the assertion target). Because the target is already detached and
         // has no parent, we need to examine the parent chain of the assertion source
         // instead. But the source itself can be the home folder, so let's check that, too.
-        if (aSource.Value == homeFolderURI || this.resourceIsInHomeFolder(aSource))
+        if (aSource.Value == homeFolderURI || this.isResourceInHomeFolder(aSource))
             this.delayedBookmarksSync();
     },
 
@@ -1109,10 +1110,9 @@ BriefStorageService.prototype = {
                                              aNewTarget) {
 
         if ((aProperty == this.nameArc || aProperty == this.feedUrlArc) &&
-           this.resourceIsInHomeFolder(aSource)) {
+           this.isResourceInHomeFolder(aSource)) {
             this.delayedBookmarksSync();
         }
-
     },
 
     // nsIRDFObserver
@@ -1134,47 +1134,63 @@ BriefStorageService.prototype = {
 
     // nsINavBookmarkObserver
     onItemAdded: function BriefStorage_onItemAdded(aItemID, aFolder, aIndex) {
-        this.handleCommonNotification(aItemID);
+        if (this.isItemInHomeFolder(aItemID)) {
+            if (this.batchUpdateInProgress)
+                this.homeFolderContentModified = true;
+            else
+                this.delayedBookmarksSync();
+        }
     },
 
     // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
-        this.handleCommonNotification(aItemID);
+        if (this.getFeedByBookmarkID(aItemID)) {
+            if (this.batchUpdateInProgress)
+                this.homeFolderContentModified = true;
+            else
+                this.delayedBookmarksSync();
+        }
     },
 
     // nsINavBookmarkObserver
     onItemMoved: function BriefStorage_onItemMoved(aItemID, aOldParent, aOldIndex,
                                                    aNewParent, aNewIndex) {
-        this.handleCommonNotification(aItemID);
+        var inFeeds = !!this.getFeedByBookmarkID(aItemID);
+
+        if (inFeeds || this.isItemInHomeFolder(aItemID)) {
+            if (this.batchUpdateInProgress)
+                this.homeFolderContentModified = true;
+            else
+                this.delayedBookmarksSync();
+        }
     },
 
     // nsINavBookmarkObserver
     onItemChanged: function BriefStorage_onItemChanged(aItemID, aProperty,
                                                        aIsAnnotationProperty, aValue) {
-        if (!this.isBookmarkInHomeFolder(aItemID))
+        var feed = this.getFeedByBookmarkID(aItemID);
+        if (!feed)
             return;
 
         switch (aProperty) {
-            case 'title':
-                var feed = this.getFeedByBookmarkID(aItemID);
+        case 'title':
+            var update = this.dBConnection.createStatement(
+                         'UPDATE feeds SET title = ? WHERE feedID = ?');
 
-                var update = this.dBConnection.createStatement(
-                             'UPDATE feeds SET title = ? WHERE feedID = ?');
+            update.bindStringParameter(0, aValue);
+            update.bindStringParameter(1, feed.feedID);
+            update.execute();
 
-                update.bindStringParameter(0, aValue);
-                update.bindStringParameter(1, feed.feedID);
-                update.execute();
+            // Update the cached item.
+            feed.title = aValue;
 
-                // Update the cached item.
-                feed.title = aValue;
+            this.observerService.notifyObservers(null, 'brief:feed-title-changed',
+                                                 feed.feedID);
+            break;
 
-                this.observerService.notifyObservers(null, 'brief:feed-title-changed',
-                                                     feed.feedID);
-                break;
-
-            case 'livemark/feedURI':
-                this.delayedBookmarksSync();
-                break;
+        case 'livemark/feedURI':
+            this.delayedBookmarksSync();
+            break;
         }
     },
 
@@ -1184,7 +1200,7 @@ BriefStorageService.prototype = {
 
 // Helper function for bookmarks observers.
 
-    resourceIsInHomeFolder: function BriefStorage_resourceIsInHomeFolder(aResource) {
+    isResourceInHomeFolder: function BriefStorage_isResourceInHomeFolder(aResource) {
         var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
         var bookmarksService = this.bookmarksDataSource.QueryInterface(Ci.nsIBookmarksService);
         var inHome = false;
@@ -1202,28 +1218,26 @@ BriefStorageService.prototype = {
         return inHome;
     },
 
-    handleCommonNotification: function BriefStorage_handleCommonNotification(aItemID) {
-        if (this.isBookmarkInHomeFolder(aItemID)) {
-            if (this.batchUpdateInProgress)
-                this.homeFolderContentModified = true;
-            else
-                this.delayedBookmarksSync();
-        }
-    },
-
-    isBookmarkInHomeFolder: function BriefStorage_isBookmarkInHomeFolder(aItemID) {
+    // Returns TRUE if an item is a livemark or a folder and if it is in the home folder.
+    isItemInHomeFolder: function BriefStorage_isItemInHomeFolder(aItemID) {
         var inHome = false;
-        var homeFolderID = this.prefs.getCharPref('homeFolder');
-        var parent = aItemID;
 
-        while (parent != this.bookmarksService.bookmarksRoot) {
-            parent = this.bookmarksService.getFolderIdForItem(parent);
-            if (parent == homeFolderID) {
-                inHome = true;
-                break;
+        var typeFolder = this.bookmarksService.TYPE_FOLDER;
+        var isFolder = (this.bookmarksService.getItemType(aItemID) == typeFolder);
+
+        if (isFolder) {
+            var homeFolderID = this.prefs.getCharPref('homeFolder');
+            var parent = aItemID;
+
+            while (parent != this.bookmarksService.bookmarksRoot) {
+                parent = this.bookmarksService.getFolderIdForItem(parent);
+                if (parent == homeFolderID) {
+                    inHome = true;
+                    break;
+                }
             }
         }
-
+        
         return inHome;
     },
 
