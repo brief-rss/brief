@@ -14,6 +14,7 @@
 <!ENTITY enter.key "Entrée">
 <!ENTITY openEntry "Ouvrir l&apos;article">
 <!ENTITY ctrlEnter.key "Ctrl + Entrée">
+<!ENTITY cmdEnter.key "Cmd + Entrée">
 <!ENTITY openEntryTab "Ouvrir l&apos;article dans un nouvel onglet">
 <!ENTITY n.key "N">
 <!ENTITY foldEntry "Afficher ou réduire l&apos;article sélectionné (en mode d&apos;affichage des titres)">
@@ -27,6 +28,7 @@
 <!ENTITY r.key "R">
 <!ENTITY restoreEntry "Restaurer l&apos;article sélectionné (dans la corbeille)">
 <!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Marquer les articles courants comme lus">
 <!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">

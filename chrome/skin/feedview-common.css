@@ -52,17 +52,21 @@
 /* Reset the top margin, so that the gap between
    header and content is always the same */
 .article-content > *:first-child {
-  margin-top: 0 !important;;
+  margin-top: 0 !important;
 }
 
 .article-content img {
-  margin: 5px;
+  margin: 0.75em;
 }
 
-.article-content pre, .article-content code {
+blockquote {
+  font-style: italic;
+}
+
+pre, code {
   font-family: "Courier New", monospace;
   font-size: 1em;
-  }
+}
 
 
 

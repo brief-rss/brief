@@ -14,6 +14,7 @@
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Bericht openen">
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY cmdEnter.key "Cmd + Enter">
 <!ENTITY openEntryTab "Bericht in nieuw tabblad openen">
 <!ENTITY n.key "N">
 <!ENTITY foldEntry "Geselecteerd bericht uit- of inklappen (wanneer kopteksten worden bekeken)">
@@ -27,6 +28,7 @@
 <!ENTITY r.key "R">
 <!ENTITY restoreEntry "Geselecteerd bericht herstellen (wanneer in de Prullenbak)">
 <!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Alle bekeken berichten als gelezen markeren">
 <!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">

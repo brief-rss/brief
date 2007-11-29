@@ -14,6 +14,7 @@
 <!ENTITY enter.key "Eingabetaste">
 <!ENTITY openEntry "Eintrag öffnen">
 <!ENTITY ctrlEnter.key "Strg + Eingabetaste">
+<!ENTITY cmdEnter.key "Cmd + Eingabetaste">
 <!ENTITY openEntryTab "Eintrag in neuem Tab öffnen">
 <!ENTITY n.key "N">
 <!ENTITY foldEntry "Ausgewählten Eintrag aus- oder einklappen (wenn im Überschriftenmodus)">
@@ -27,6 +28,7 @@
 <!ENTITY r.key "R">
 <!ENTITY restoreEntry "Ausgewählten Eintrag wiederherstellen (wenn im Papierkorb)">
 <!ENTITY ctrlM.key "Strg + M">
+<!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Alle angezeigten Einträge als gelesen markieren">
 <!ENTITY q.key "Q">
 <!ENTITY tab.key "Tabulator">
