@@ -2,6 +2,26 @@
   width: 22em;
 }
 
+splitter {
+  border-left: 0;
+}
+
+#select-home-folder-label {
+  margin: 7px 0 7px 5px;
+}
+
+#bookmark-folders-tree {
+  max-height: 400px;
+}
+
+#confirm-home-folder {
+  margin: 5px 3px 5px 0;
+  width: 100px;
+}
+
+
+/* ----------------- Feed list tree ------------------ */
+
 #feed-list > treechildren {
   -moz-binding: url('chrome://brief/content/bindings.xml#feedlist-treebody');
   }
@@ -9,10 +29,6 @@
 #feed-list {
   border-right: 0;
   margin: 0;
-}
-
-splitter {
-  border-left: 0;
 }
 
 treechildren::-moz-tree-line {
@@ -78,29 +94,9 @@ treechildren::-moz-tree-image(starredFolder) {
   padding-right: 4px;
   }
 
-#select-home-folder-label {
-  margin: 7px 0 7px 5px;
-}
 
-#bookmark-folders-tree {
-  max-height: 400px;
-}
 
-#confirm-home-folder {
-  margin: 5px 3px 5px 0;
-  width: 100px;
-}
-
-#left-pane-grippy {
-  -moz-binding: none;
-  width: 4px;
-}
-
-#left-pane-grippy:hover {
-  background-color: #ff7312;
-}
-
-/*        Toolbars          */
+/* ----------------------  Toolbars  ----------------------- */
 
 toolbar, toolbaritem {
   -moz-box-align: center;
@@ -147,6 +143,26 @@ toolbarbutton {
   -moz-image-region: rect(0, 72px, 24px, 48px);
   }
 
+
+#toggle-sidebar {
+  list-style-image: url(chrome://brief/skin/sidebar-button.png);
+  -moz-image-region: rect(0, 16px, 24px, 0);
+  -moz-appearance: none;
+  border: none !important;
+}
+
+#toggle-sidebar:hover {
+  -moz-image-region: rect(24px, 16px, 48px, 0);
+}
+
+#toggle-sidebar[sidebarHidden="true"] {
+  -moz-image-region: rect(0, 32px, 24px, 16px);
+}
+
+#toggle-sidebar[sidebarHidden="true"]:hover {
+  -moz-image-region: rect(24px, 32px, 48px, 16px);
+}
+
 #mark-view-read {
   list-style-image: url('toolbar-buttons-1.png');
   -moz-image-region: rect(0, 96px, 24px, 72px);
@@ -160,7 +176,6 @@ toolbarbutton {
 }
 
 #headlines-checkbox[checked="true"] {
-  margin-top: 1px;
   padding-top: 4px !important;
   padding-bottom: 3px !important;
   -moz-padding-start: 4px !important;
