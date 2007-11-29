@@ -74,7 +74,6 @@ BriefStorageService.prototype = {
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
         this.dBConnection = storageService.openDatabase(file);
-        this.dummyDBConnection = storageService.openDatabase(file);
 
         if (databaseIsNew)
             this.dBConnection.executeSimpleSQL('PRAGMA user_version = ' + DATABASE_VERSION);
@@ -132,7 +131,12 @@ BriefStorageService.prototype = {
         if (databaseVersion < DATABASE_VERSION)
             this.migrateDatabase(databaseVersion);
 
-        this.startDummyStatement();
+        // Fx2Compat
+        if (!gPlacesEnabled) {
+            this.dummyDBConnection = storageService.openDatabase(file);
+            this.startDummyStatement();
+        }
+
         this.dBConnection.preload();
 
         this.prefs = Cc["@mozilla.org/preferences-service;1"].
@@ -569,9 +573,14 @@ BriefStorageService.prototype = {
     compactDatabase: function BriefStorage_compactDatabase() {
         this.purgeEntries(false);
 
-        this.stopDummyStatement();
-        this.dBConnection.executeSimpleSQL('VACUUM');
-        this.startDummyStatement();
+        // Fx2Compat
+        if (gPlacesEnabled)
+            this.dBConnection.executeSimpleSQL('VACUUM');
+        else {
+            this.stopDummyStatement();
+            this.dBConnection.executeSimpleSQL('VACUUM');
+            this.startDummyStatement();
+        }
     },
 
 
@@ -1237,7 +1246,7 @@ BriefStorageService.prototype = {
                 }
             }
         }
-        
+
         return inHome;
     },
 
