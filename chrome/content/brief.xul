@@ -66,8 +66,6 @@
     </popupset>
 
     <hbox id="main-box" flex="1">
-        <grippy id="left-pane-grippy"
-                onclick="gCommands.toggleLeftPane(event)"/>
         <vbox id='left-pane' persist="width hidden">
             <toolbox>
                 <toolbar id="feed-list-toolbar">
@@ -153,6 +151,8 @@
             <toolbox>
                 <toolbar id="feed-view-toolbar"
                          hidden="true">
+                    <toolbarbutton id="toggle-sidebar"
+                                   oncommand="gCommands.toggleSidebar()"/>
                     <toolbarspring/>
                     <toolbarbutton id="mark-view-read"
                                    tooltiptext="&markViewRead.tooltip;"

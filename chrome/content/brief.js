@@ -267,10 +267,14 @@ function onDoCommand(aEvent) {
 
 var gCommands = {
 
-    toggleLeftPane: function cmd_toggleLeftPane(aEvent) {
+    toggleSidebar: function cmd_toggleLeftPane() {
         var pane = document.getElementById('left-pane');
         var splitter = document.getElementById('left-pane-splitter');
+        var button = document.getElementById('toggle-sidebar');
+
         pane.hidden = splitter.hidden = !pane.hidden;
+        button.setAttribute('sidebarHidden', pane.hidden);
+
         if (gFeedList.treeNotBuilt)
             gFeedList.rebuild();
     },
