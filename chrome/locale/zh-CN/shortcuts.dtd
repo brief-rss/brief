@@ -14,6 +14,7 @@
 <!ENTITY enter.key "回车">
 <!ENTITY openEntry "打开信息">
 <!ENTITY ctrlEnter.key "Ctrl + 回车">
+<!ENTITY cmdEnter.key "Cmd + 回车">
 <!ENTITY openEntryTab "在新标签页打开信息">
 <!ENTITY n.key "N">
 <!ENTITY foldEntry "展开或收起选中的信息 （需选中只显示标题）">
@@ -27,6 +28,7 @@
 <!ENTITY r.key "R">
 <!ENTITY restoreEntry "恢复选中的信息（位于垃圾桶时）">
 <!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "标记所有已查看的信息为已读">
 <!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">

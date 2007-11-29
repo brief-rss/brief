@@ -14,6 +14,7 @@
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "項目を開く">
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY cmdEnter.key "Cmd + Enter">
 <!ENTITY openEntryTab "項目を新しいタブで開く">
 <!ENTITY n.key "N">
 <!ENTITY foldEntry "選択済み項目を展開または折り畳む (見出し表示時)">
@@ -27,6 +28,7 @@
 <!ENTITY r.key "R">
 <!ENTITY restoreEntry "選択済み項目を元に戻す (ごみ箱にある時)">
 <!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "すべての表示済み項目を既読にする">
 <!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
