@@ -137,7 +137,7 @@ var gObserver = {
         // and the feedview if necessary.
         case 'brief:feed-updated':
             var feedID = aData;
-            var item = gFeedList.getTreeitem(feedID);
+            var item = document.getElementById(feedID);
             item.removeAttribute('error');
             item.removeAttribute('loading');
             gFeedList.refreshFeedTreeitems(item);
@@ -152,7 +152,7 @@ var gObserver = {
 
         // A feed was requested; show throbber as its icon.
         case 'brief:feed-loading':
-            var item = gFeedList.getTreeitem(aData);
+            var item = document.getElementById(aData);
             item.setAttribute('loading', true);
             gFeedList.refreshFeedTreeitems(item);
             break;
@@ -160,7 +160,7 @@ var gObserver = {
         // An error occured when downloading or parsing a feed; show error icon.
         case 'brief:feed-error':
             var feedID = aData;
-            var item = gFeedList.getTreeitem(feedID);
+            var item = document.getElementById(feedID);
             item.removeAttribute('loading');
             item.setAttribute('error', true);
             gFeedList.refreshFeedTreeitems(item);
