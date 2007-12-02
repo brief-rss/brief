@@ -7,8 +7,9 @@
   margin-top: 1px !important;
 }
 
-#feed-list treechildren::-moz-tree-image(container) {
+#feed-list treechildren::-moz-tree-image(container, primary) {
   list-style-image: url('chrome://browser/skin/bookmarks/bookmark-folder.png') !important;
+  -moz-image-region: auto;
 }
 
 .onlyMac {
