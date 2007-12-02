@@ -631,14 +631,17 @@ BriefStorageService.prototype = {
             ')                                     ');
 
         var getEntriesCountForFeed = this.dBConnection.createStatement(
-            'SELECT COUNT(1) FROM entries WHERE starred = 0 AND feedID = ? ');
+            'SELECT COUNT(1) FROM entries  ' +
+            'WHERE feedID = ? AND          ' +
+            '      starred = 0 AND         ' +
+            '      deleted = ?             ');
 
         this.dBConnection.beginTransaction();
         try {
             // Delete outdated entries in feeds that don't have per-feed setting enabled.
             if (expireEntriesGlobal) {
                 deleteOutdatedGlobal.bindInt32Parameter(0, STATE_TRASHED);
-                deleteOutdatedGlobar.bindInt32Parameter(1, STATE_NORMAL)
+                deleteOutdatedGlobal.bindInt32Parameter(1, STATE_NORMAL)
                 deleteOutdatedGlobal.bindInt64Parameter(2, globalEdgeDate);
                 deleteOutdatedGlobal.execute();
             }
@@ -648,6 +651,7 @@ BriefStorageService.prototype = {
             for (i = 0; i < feeds.length; i++) {
                 // Count the number of entries in the feed.
                 getEntriesCountForFeed.bindStringParameter(0, feeds[i].feedID);
+                getEntriesCountForFeed.bindStringParameter(1, STATE_NORMAL);
                 getEntriesCountForFeed.executeStep()
                 entryCount = getEntriesCountForFeed.getInt32(0);
                 getEntriesCountForFeed.reset();
