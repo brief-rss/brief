@@ -15,9 +15,12 @@ radio[pane=feeds-pane] {
   }
 
 #folders-tree, #places-tree {
-  height: 15em;
-  margin-bottom: 1em;
-  }
+  height: 13em;
+}
+
+#import-export-box {
+  margin: 0.5em 0 1em;
+}
 
 #show-shortcuts {
   list-style-image: url(chrome://brief/skin/icons/keyboard.png);

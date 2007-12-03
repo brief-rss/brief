@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Brief options">
 <!ENTITY mainPane.label "Main">
 <!ENTITY folderTree.label "Folder containing your Live Bookmarks:">
+<!ENTITY importOPML.label "Import...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Export...">
+<!ENTITY exportOPML.accesskey "x">
 <!ENTITY showStatusbarIcon.label "Show statusbar icon">
 <!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Open Brief in a new tab">

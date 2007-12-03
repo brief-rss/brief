@@ -24,6 +24,8 @@ function init() {
     gFeedsPane.updateExpirationDisabledState();
     gFeedsPane.updateStoredEntriesDisabledState();
     gDisplayPane.updateCustomStyleDisabledState();
+
+    opml.init();
 }
 
 function unload() {
