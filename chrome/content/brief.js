@@ -69,11 +69,7 @@ function init() {
                                QueryInterface(Ci.nsIInterfaceRequestor).
                                getInterface(Ci.nsIDOMWindow);
 
-    var headlinesCheckbox = document.getElementById('headlines-checkbox');
-    headlinesCheckbox.checked = gPrefs.showHeadlinesOnly;
-    var viewConstraintList = document.getElementById('view-constraint-list');
-    viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
-                                       gPrefs.shownEntries == 'unread' ? 1 : 2;
+    initToolbarsAndStrings()
 
     document.addEventListener('DoCommand', onDoCommand, false);
     document.addEventListener('keypress', onKeyPress, true);
@@ -91,21 +87,37 @@ function init() {
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
+    setTimeout(loadHomeview, 0);
+
+    // Fx2Compat Init stuff in bookmarks.js
+    if (!gPlacesEnabled)
+        setTimeout(function() { initServices(); initBMService(); }, 1000);
+}
+
+
+function initToolbarsAndStrings() {
+    var headlinesCheckbox = document.getElementById('headlines-checkbox');
+    headlinesCheckbox.checked = gPrefs.showHeadlinesOnly;
+    var viewConstraintList = document.getElementById('view-constraint-list');
+    viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
+                                       gPrefs.shownEntries == 'unread' ? 1 : 2;
+
+    // Set show/hide sidebar button's tooltip.
+    var pane = document.getElementById('left-pane');
+    var bundle = document.getElementById('main-bundle');
+    var button = document.getElementById('toggle-sidebar');
+    var tooltiptext = pane.hidden ? bundle.getString('showSidebarTooltip')
+                                  : bundle.getString('hideSidebarTooltip');
+    button.setAttribute('tooltiptext', tooltiptext);
+
     // Cache the strings, so they don't have to retrieved every time when
     // refreshing the feed view.
-    var bundle = document.getElementById('main-bundle');
     FeedView.prototype.todayStr = bundle.getString('today');
     FeedView.prototype.yesterdayStr = bundle.getString('yesterday');
     FeedView.prototype.authorPrefixStr = bundle.getString('authorIntroductionPrefix') + ' ';
     FeedView.prototype.updatedStr = bundle.getString('entryWasUpdated');
     FeedView.prototype.markAsReadStr = bundle.getString('markEntryAsRead');
     FeedView.prototype.markAsUnreadStr = bundle.getString('markEntryAsUnread');
-
-    setTimeout(loadHomeview, 0);
-
-    // Fx2Compat Init stuff in bookmarks.js
-    if (!gPlacesEnabled)
-        setTimeout(function() { initServices(); initBMService(); }, 1000);
 }
 
 
@@ -271,8 +283,13 @@ var gCommands = {
         var pane = document.getElementById('left-pane');
         var splitter = document.getElementById('left-pane-splitter');
         var button = document.getElementById('toggle-sidebar');
+        var bundle = document.getElementById('main-bundle');
 
         pane.hidden = splitter.hidden = !pane.hidden;
+
+        var tooltiptext = pane.hidden ? bundle.getString('showSidebarTooltip')
+                                      : bundle.getString('hideSidebarTooltip');
+        button.setAttribute('tooltiptext', tooltiptext);
         button.setAttribute('sidebarHidden', pane.hidden);
 
         if (gFeedList.treeNotBuilt)
