@@ -14,6 +14,7 @@ pref("extensions.brief.feedview.customStylePath", '');
 pref("extensions.brief.feedview.useCustomStyle", false);
 pref("extensions.brief.feedview.openEntriesInTabs", false);
 pref("extensions.brief.feedview.doubleClickMarks", true);
+pref("extensions.brief.feedview.autoMarkRead", false);
 pref("extensions.brief.feedview.showAuthors", true);
 pref("extensions.brief.feedview.keyNavEnabled", false);
 
