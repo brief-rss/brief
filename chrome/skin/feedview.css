@@ -62,6 +62,7 @@ body {
   border-top: 1px #abbfc9 solid;
   border-right: 1px #e1e5da solid;
   border-left: 1px #e1e5da solid;
+  padding-bottom: 1px; /* Without this, the article is sometimes cut-off */
   overflow: visible;   /* This is for the the expand/collapse dropmarker which is
                           taken outside the box using negative margins */
   position: relative;
