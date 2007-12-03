@@ -18,6 +18,8 @@
         <script type="application/x-javascript"
                 src="options.js"/>
         <script type="application/x-javascript"
+                src="opml.js"/>
+        <script type="application/x-javascript"
                 src="chrome://browser/content/bookmarks/bookmarks.js"/> <!-- Fx2Compat -->
         <script type="application/x-javascript"
                 src="chrome://browser/content/places/utils.js"/>
@@ -28,6 +30,7 @@
 
         <stringbundleset id="string-bundles">
             <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
+            <stringbundle id="options-bundle" src="chrome://brief/locale/options.properties"/>
         </stringbundleset>
 
         <preferences>
@@ -62,6 +65,16 @@
 
         <bookmarks-tree id="folders-tree" flex="1" type="folders"
                         onselect="gMainPane.onRDFTreeSelect(event)"/> <!-- Fx2Compat -->
+        <box id="import-export-box" pack="end">
+            <button id="import-opml"
+                    label="&importOPML.label;"
+                    accesskey="&importOPML.accesskey;"
+                    oncommand="opml.importOPML()"/>
+            <button id="export-opml"
+                    label="&exportOPML.label;"
+                    accesskey="&exportOPML.accesskey;"
+                    oncommand="opml.exportOPML()"/>
+        </box>
 
         <groupbox>
             <checkbox id="show-statusbar-icon"
