@@ -88,8 +88,8 @@
             <preference id="extensions.brief.feedview.openEntriesInTabs"
                         name="extensions.brief.feedview.openEntriesInTabs"
                         type="bool"/>
-            <preference id="extensions.brief.feedview.doubleClickMarks"
-                        name="extensions.brief.feedview.doubleClickMarks"
+            <preference id="extensions.brief.feedview.autoMarkRead"
+                        name="extensions.brief.feedview.autoMarkRead"
                         type="bool"/>
             <preference id="extensions.brief.database.expireEntries"
                         name="extensions.brief.database.expireEntries"
@@ -135,9 +135,9 @@
             <checkbox label="&openEntriesInTabs.label;"
                       accesskey="&openEntriesInTabs.accesskey;"
                       preference="extensions.brief.feedview.openEntriesInTabs"/>
-            <checkbox label="&doubleClickMarks.label;"
-                      accesskey="&doubleClickMarks.accesskey;"
-                      preference="extensions.brief.feedview.doubleClickMarks"/>
+            <checkbox label="&autoMarkRead.label;"
+                      accesskey="&autoMarkRead.accesskey;"
+                      preference="extensions.brief.feedview.autoMarkRead"/>
         </groupbox>
 
         <groupbox>

@@ -18,8 +18,8 @@
 <!ENTITY behaviorGroup.caption "Behavior">
 <!ENTITY openEntriesInTabs.label "Open items in new tabs">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY doubleClickMarks.label "Mark items as read when double-clicking on them">
-<!ENTITY doubleClickMarks.accesskey "M">
+<!ENTITY autoMarkRead.label "Mark items as read after they are viewed">
+<!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "Storing">
 <!ENTITY expirationBefore.label "Remove downloaded items after">
 <!ENTITY expirationAfter.label "days">

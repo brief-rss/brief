@@ -678,6 +678,7 @@ var gPrefs = {
         this.showAuthors = this.getBoolPref('feedview.showAuthors');
         this.keyNavEnabled = this.getBoolPref('feedview.keyNavEnabled');
         this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
+        this.autoMarkRead = this.getBoolPref('feedview.autoMarkRead');
 
         this._branch.addObserver('', this, false);
     },
@@ -744,6 +745,9 @@ var gPrefs = {
             break;
         case 'assumeStandardKeys':
             this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
+            break;
+        case 'feedview.autoMarkRead':
+            this.autoMarkRead = this.getBoolPref('feedview.autoMarkRead');
             break;
         }
     }

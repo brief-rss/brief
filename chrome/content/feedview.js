@@ -1,3 +1,8 @@
+// These have to be global vars instead of properties of a FeedView, because when new
+// gFeedView is created, they have to be canceled.
+var gOnScrollTimeout = null;
+var gSelectScrollInterval = null;
+
 /**
  * This object represents the main feed display. It stores and manages
  * the display parameters.
@@ -19,8 +24,7 @@ function FeedView(aTitle, aQuery) {
         searchbar.setAttribute('showingDescription', true);
     }
 
-    this.browser = document.getElementById('feed-view');
-    this.document = this.browser.contentDocument;
+    this._markedUnreadEntries = [];
 
     // If view is tied to specified intrinsic flags (e.g. special "Unread" view), hide
     // the UI to pick the flags from the user.
@@ -49,12 +53,18 @@ FeedView.prototype = {
     // Array of ids of displayed entries. This isn't used to specify which entries are
     // displayed but computed post-factum and used for determining if the view needs
     // to be refreshed.
-    _entries: '',
+    _entries: [],
 
     // Key elements.
-    browser:      null,
-    document:     null,
-    feedContent:  null,
+    get browser() {
+        return document.getElementById('feed-view');
+    },
+
+    get document() {
+        return this.browser.contentDocument;
+    },
+
+    feedContent: null,
 
 
     // Query that selects entries contained by the view. It is the query to pull ALL the
@@ -105,8 +115,6 @@ FeedView.prototype = {
 
     // Temporarily disable selecting entries.
     _selectionSuppressed: false,
-
-    _autoScrollInterval: null,
 
     selectNextEntry: function FeedView_selectNextEntry() {
         if (this._selectionSuppressed)
@@ -212,7 +220,7 @@ FeedView.prototype = {
             // directly to the target position.
             if (Math.abs(win.pageYOffset - targetScrollPos) < Math.abs(jump)) {
                 win.scroll(win.pageXOffset, targetScrollPos)
-                clearInterval(self._autoScrollInterval);
+                clearInterval(gSelectScrollInterval);
                 self._selectionSuppressed = false;
                 return;
             }
@@ -221,7 +229,7 @@ FeedView.prototype = {
 
         // Clear the previous interval, if exists (might happen when we select
         // another entry before previous scrolling is finished).
-        clearInterval(this._autoScrollInterval);
+        clearInterval(gSelectScrollInterval);
 
         // Disallow selecting futher entries until scrolling is finished.
         this._selectionSuppressed = true;
@@ -229,7 +237,40 @@ FeedView.prototype = {
         // XXX Hack. The selection sometimes isn't unsuppressed in scroll()
         setTimeout(function() { self._selectionSuppressed = false }, 500);
 
-        this._autoScrollInterval = setInterval(scroll, 7);
+        gSelectScrollInterval = setInterval(scroll, 7);
+    },
+
+
+    // When autoMarkRead is on, the user could not mark an entry as unread,
+    // because it would be immediatelly re-marked as read. Therefore, we maintain a
+    // list of entries, which were marked as unread by the user, and exclude them
+    // from auto-marking for the duration of the view's lifetime.
+    _markedUnreadEntries: [],
+
+    _onScroll: function FeedView__onScroll() {
+        var view = gFeedView;
+        if (gPrefs.autoMarkRead && !view.query.unread) {
+            clearTimeout(gOnScrollTimeout);
+            gOnScrollTimeout = setTimeout(function(){ view._markVisibleEntriesRead() }, 1000);
+        }
+    },
+
+    _markVisibleEntriesRead: function FeedView__markVisibleEntriesRead() {
+        var win = this.document.defaultView;
+        var scrollPos = win.pageYOffset;
+        var winHeight = win.innerHeight;
+        var entriesToMark = [], entryPos, wasMarkedUnread, i;
+
+        var entries = this.feedContent.childNodes;
+        for (i = 0; i < entries.length; i++) {
+            entryPos = entries[i].offsetTop;
+            wasMarkedUnread = (this._markedUnreadEntries.indexOf(entries[i].id) != -1);
+            if (entryPos >= scrollPos && !wasMarkedUnread)
+                entriesToMark.push(entries[i].id);
+        }
+
+        var query = new QuerySH(null, entriesToMark.join(' '), false);
+        query.markEntriesRead(true);
     },
 
     // Indicates whether the feed view is currently displayed in the browser.
@@ -334,7 +375,10 @@ FeedView.prototype = {
         this.browser.style.cursor = 'wait';
 
         // Stop scrolling, so it doesn't continue after refreshing.
-        clearInterval(this._autoScrollInterval);
+        clearInterval(gSelectScrollInterval);
+
+        // Cancel auto-marking entries as read.
+        clearTimeout(gOnScrollTimeout);
 
         // Suppress selecting entry until we refresh is finished.
         this._selectionSuppressed = true;
@@ -453,7 +497,7 @@ FeedView.prototype = {
     // markup) this page needs to be have a file:// URI to be unprivileged.
     // It is untrusted and all the interaction respects XPCNativeWrappers.
     _buildFeedView: function FeedView__buildFeedView() {
-        var doc = this.document = this.browser.contentDocument;
+        var doc = this.document;
 
         doc.defaultView.XMLHttpRequest = null;
 
@@ -467,7 +511,8 @@ FeedView.prototype = {
         // See comments next to the event handler functions.
         doc.addEventListener('click', gFeedViewEvents.onFeedViewClick, true);
 
-        doc.defaultView.addEventListener('keypress', onKeyPress, true);
+        doc.addEventListener('keypress', onKeyPress, true);
+        doc.addEventListener('scroll', this._onScroll, true);
 
         // Apply the CSS.
         var style = doc.getElementById('feedview-style');
@@ -574,6 +619,8 @@ FeedView.prototype = {
 
             this._selectLastEntryOnRefresh = false;
         }
+
+        this._onScroll();
 
         // Restore default cursor which we changed to
         // "wait" at the beginning of the refresh.
@@ -683,12 +730,15 @@ FeedView.prototype = {
 // Listeners for actions performed in the feed view.
 var gFeedViewEvents = {
 
-    onMarkEntryRead: function feedViewEvents_onMarkEntryRead( aEvent) {
+    onMarkEntryRead: function feedViewEvents_onMarkEntryRead(aEvent) {
         var entryID = aEvent.target.getAttribute('id');
         var readStatus = aEvent.target.hasAttribute('read');
         var query = new QuerySH(null, entryID, null);
         query.deleted = ENTRY_STATE_ANY;
         query.markEntriesRead(readStatus);
+
+        if (gPrefs.autoMarkRead && !readStatus)
+            gFeedView._markedUnreadEntries.push(entryID);
     },
 
 
