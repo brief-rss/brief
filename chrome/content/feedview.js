@@ -251,7 +251,7 @@ FeedView.prototype = {
         var view = gFeedView;
         if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !view.query.unread) {
             clearTimeout(gMarkVisibleTimeout);
-            gMarkVisibleTimeout = setTimeout(function(){ view._doMarkVisibleAsRead() }, 1000);
+            gMarkVisibleTimeout = setTimeout(function(){ view._doMarkVisibleAsRead() }, 500);
         }
     },
 
