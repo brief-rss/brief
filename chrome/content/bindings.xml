@@ -156,20 +156,29 @@
                 var articleContent = document.getAnonymousElementByAttribute(this, 'class',
                                                                       'article-content');
                 var feedContent = document.getElementById('feed-content');
+                var self = this;
+
+                function dispatchCollapseEvent() {
+                    var evt = document.createEvent('Events');
+                    evt.initEvent('EntryCollapsed', false, false);
+                    self.dispatchEvent(evt);
+                }
+
                 if (this.hasAttribute('collapsed')) {
                     if (target.className != 'article-title-link' &&
                        target.className != 'article-controls' &&
                        target.parentNode.className != 'article-controls') {
-                        $(articleContent).slideDown(200);
+                        $(articleContent).slideDown(200, dispatchCollapseEvent);
                         this.removeAttribute('collapsed');
                     }
                 }
                 else {
                     if (target.className == 'expand-button' || (target.className == 'article-header' &&
                        feedContent.hasAttribute('showHeadlinesOnly'))) {
-                        var self = this;
-                        $(articleContent).slideUp(200,
-                                                  function(){ self.setAttribute('collapsed', true) });
+                        $(articleContent).slideUp(200, function() {
+                                                     self.setAttribute('collapsed', true);
+                                                     dispatchCollapseEvent();
+                                                    });
                     }
                 }
             ]]>
@@ -247,12 +256,6 @@
                         subheader.appendChild(feedName);
                         subheader.insertBefore(date, authors);
                     }
-
-                    var evt = document.createEvent('Events');
-                    evt.initEvent('EntryCollapsed', false, false);
-
-                    var self = this;
-                    setTimeout(function(){ self.dispatchEvent(evt) }, 250);
 
                     break;
                 }
