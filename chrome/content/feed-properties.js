@@ -27,7 +27,7 @@ function setupWindow() {
         gFeed = gStorageService.getFeed(feedID);
     }
 
-    var stringbundle = document.getElementById('main-bundle');
+    var stringbundle = document.getElementById('options-bundle');
     var string = stringbundle.getFormattedString('feedPropertiesDialogTitle', [gFeed.title]);
     document.title = string;
 

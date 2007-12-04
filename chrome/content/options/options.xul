@@ -29,7 +29,6 @@
                 src="chrome://browser/content/places/treeView.js"/>
 
         <stringbundleset id="string-bundles">
-            <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
             <stringbundle id="options-bundle" src="chrome://brief/locale/options.properties"/>
         </stringbundleset>
 
