@@ -15,7 +15,7 @@ radio[pane=feeds-pane] {
   }
 
 #folders-tree, #places-tree {
-  height: 13em;
+  height: 15em;
 }
 
 #import-export-box {
