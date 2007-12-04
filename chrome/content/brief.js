@@ -706,8 +706,16 @@ var gPrefs = {
 
     // Fx2Compat
     get homeFolder() {
-        return gPlacesEnabled ? gPrefs.getCharPref('homeFolder')
-                              : gPrefs.getCharPref('liveBookmarksFolder');
+        var home = null;
+        if (gPlacesEnabled) {
+            var pref = this.getIntPref('homeFolder');
+            home = (pref != -1) ? pref : null;
+        }
+        else {
+            home = this.getCharPref('liveBookmarksFolder');
+        }
+
+        return home;
     },
 
     observe: function gPrefs_observe(aSubject, aTopic, aData) {

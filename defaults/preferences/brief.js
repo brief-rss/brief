@@ -1,5 +1,5 @@
 pref("extensions.brief.liveBookmarksFolder", "");
-pref("extensions.brief.homeFolder", "");
+pref("extensions.brief.homeFolder", -1);
 pref("extensions.brief.showStatusbarIcon", true);
 pref("extensions.brief.openInNewTab", false);
 pref("extensions.brief.firstRun", true);

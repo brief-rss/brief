@@ -777,21 +777,29 @@ BriefStorageService.prototype = {
         this.bookmarkItems = [];
 
         // Fx2Compat
-        var homeFolder = gPlacesEnabled ? this.prefs.getCharPref('homeFolder')
+        var homeFolder = gPlacesEnabled ? this.prefs.getIntPref('homeFolder')
                                         : this.prefs.getCharPref('liveBookmarksFolder');
 
-        if (!homeFolder) {
-            this.dBConnection.executeSimpleSQL('UPDATE feeds SET hidden = 1');
-            this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+        if (!homeFolder || homeFolder == -1) {
+            this.onHomeFolderRemoved();
             return;
         }
 
         // Get the current Live Bookmarks.
         if (gPlacesEnabled) {
+            try {
+                // This will throw if the homeFolder was deleted.
+                this.bookmarksService.getItemTitle(homeFolder);
+            }
+            catch (e) {
+                this.onHomeFolderRemoved();
+                return;
+            }
+
             var options = this.historyService.getNewQueryOptions();
             var query = this.historyService.getNewQuery();
 
-            query.setFolders([parseInt(homeFolder)], 1);
+            query.setFolders([homeFolder], 1);
             options.excludeItems = true;
             var result = this.historyService.executeQuery(query, options);
 
@@ -804,6 +812,8 @@ BriefStorageService.prototype = {
             }
             catch (e) {
                 // Traversing will throw if root folder was removed.
+                this.onHomeFolderRemoved();
+                return;
             }
         }
 
@@ -962,6 +972,17 @@ BriefStorageService.prototype = {
 
     },
 
+    onHomeFolderRemoved: function BriefStorage_onHomeFolderRemoved() {
+        // Fx2Compat
+        if (gPlacesEnabled)
+            this.prefs.clearUserPref('homeFolder');
+        else
+            this.prefs.clearUserPref('liveBookmarksFolder');
+
+        this.dBConnection.executeSimpleSQL('UPDATE feeds SET hidden = 1');
+        this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+    },
+
 
     initPlaces: function BriefStorage_initPlaces() {
         this.historyService =   Cc['@mozilla.org/browser/nav-history-service;1'].
@@ -1012,7 +1033,6 @@ BriefStorageService.prototype = {
 
         var child, type, item;
         while (children.hasMoreElements()) {
-
             child = children.getNext();
             type = this.bookmarksDataSource.GetTarget(child, this.typeArc, true);
 
@@ -1114,7 +1134,7 @@ BriefStorageService.prototype = {
         // (i.e. the assertion target). Because the target is already detached and
         // has no parent, we need to examine the parent chain of the assertion source
         // instead. But the source itself can be the home folder, so let's check that, too.
-        if (aSource.Value == homeFolderURI || this.isResourceInHomeFolder(aSource))
+        if (aTarget.Value == homeFolderURI || this.isResourceInHomeFolder(aSource))
             this.delayedBookmarksSync();
     },
 
@@ -1157,7 +1177,8 @@ BriefStorageService.prototype = {
 
     // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
-        if (this.getFeedByBookmarkID(aItemID)) {
+        if (this.getFeedByBookmarkID(aItemID) || this.prefs.getIntPref('homeFolder') == aItemID) {
+
             if (this.batchUpdateInProgress)
                 this.homeFolderContentModified = true;
             else
@@ -1233,13 +1254,16 @@ BriefStorageService.prototype = {
 
     // Returns TRUE if an item is a livemark or a folder and if it is in the home folder.
     isItemInHomeFolder: function BriefStorage_isItemInHomeFolder(aItemID) {
+        var homeFolderID = this.prefs.getIntPref('homeFolder');
+        if (homeFolderID == -1)
+            return false;
+
         var inHome = false;
 
         var typeFolder = this.bookmarksService.TYPE_FOLDER;
         var isFolder = (this.bookmarksService.getItemType(aItemID) == typeFolder);
 
         if (isFolder) {
-            var homeFolderID = this.prefs.getCharPref('homeFolder');
             var parent = aItemID;
 
             while (parent != this.bookmarksService.bookmarksRoot) {
@@ -1589,7 +1613,7 @@ BriefQuery.prototype = {
                                      getService(Components.interfaces.nsIBriefStorage).
                                      getFeedsAndFolders({});
             // Fx2Compat
-            var homeFolder = gPlacesEnabled ? gStorageService.prefs.getCharPref('homeFolder')
+            var homeFolder = gPlacesEnabled ? gStorageService.prefs.getIntPref('homeFolder')
                                             : gStorageService.prefs.getCharPref('liveBookmarksFolder')
             this.traverseChildren(homeFolder);
 
