@@ -757,6 +757,11 @@ var gPrefs = {
             viewConstraintList.selectedIndex = this.shownEntries == 'all' ? 0 :
                                                this.shownEntries == 'unread' ? 1 : 2;
             break;
+        case 'feedview.autoMarkRead':
+            this.autoMarkRead = this.getBoolPref('feedview.autoMarkRead');
+            if (this.autoMarkRead && gFeedView)
+                gFeedView.markVisibleAsRead();
+            break;
 
         case 'feedview.doubleClickMarks':
             this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
@@ -772,9 +777,6 @@ var gPrefs = {
             break;
         case 'assumeStandardKeys':
             this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
-            break;
-        case 'feedview.autoMarkRead':
-            this.autoMarkRead = this.getBoolPref('feedview.autoMarkRead');
             break;
         }
     }
