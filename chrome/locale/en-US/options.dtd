@@ -22,7 +22,7 @@
 <!ENTITY behaviorGroup.caption "Behavior">
 <!ENTITY openEntriesInTabs.label "Open items in new tabs">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY autoMarkRead.label "Mark items as read after they are viewed">
+<!ENTITY autoMarkRead.label "Mark items as read when they are viewed">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "Storing">
 <!ENTITY expirationBefore.label "Remove downloaded items after">
@@ -32,7 +32,7 @@
 <!ENTITY storedEntriesBefore.label "Store no more than">
 <!ENTITY storedEntriesAfter.label "latest items of each feed">
 <!ENTITY storedEntriesCheckbox.accesskey "e">
-<!ENTITY clearAllEntriesButton.label "Clear all items">
+<!ENTITY clearAllEntriesButton.label "Clear all items...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Display">
 <!ENTITY feedViewGroup.caption "Feed content view">
