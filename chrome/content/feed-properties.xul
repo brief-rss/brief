@@ -13,7 +13,7 @@
     <script type="application/x-javascript" src="chrome://browser/content/bookmarks/bookmarks.js"/>
 
     <stringbundleset id="string-bundles">
-        <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
+        <stringbundle id="options-bundle" src="chrome://brief/locale/options.properties"/>
     </stringbundleset>
 
     <grid>

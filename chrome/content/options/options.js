@@ -42,8 +42,8 @@ var gMainPane = {
         // Populate the tree.
         var query = PlacesUtils.history.getNewQuery();
         var options = PlacesUtils.history.getNewQueryOptions();
-        var bookmarksRoot = PlacesUtils.bookmarks.bookmarksRoot;
-        query.setFolders([bookmarksRoot], 1);
+        var root = PlacesUtils.placesRootId;
+        query.setFolders([root], 1);
         options.excludeItems = true;
         tree.load([query], options);
 
@@ -180,7 +180,7 @@ var gFeedsPane = {
                          getService(Ci.nsIPrefBranch);
         var keepStarred = prefBranch.getBoolPref('extensions.brief.database.keepStarredWhenClearing');
 
-        var stringbundle = document.getElementById('main-bundle');
+        var stringbundle = document.getElementById('options-bundle');
         var title = stringbundle.getString('confirmClearAllEntriesTitle');
         var text = stringbundle.getString('confirmClearAllEntriesText');
         var checkboxLabel = stringbundle.getString('confirmClearAllEntriesCheckbox');
@@ -214,7 +214,7 @@ var gDisplayPane = {
 
     browseCustomStyle: function() {
         var picker = Cc['@mozilla.org/filepicker;1'].createInstance(Ci.nsIFilePicker);
-        var stringbundle = document.getElementById('main-bundle');
+        var stringbundle = document.getElementById('options-bundle');
         var pickerTitle = stringbundle.getString('stylePickerTitle');
         var pickerFilterName = stringbundle.getString('stylePickerExtFilterName');
         picker.init(window, pickerTitle, picker.modeOpen);
