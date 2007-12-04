@@ -95,8 +95,9 @@ var opml = {
 
     importLevelPlaces: function(nodes, createIn) {
         if (!createIn) {
-			var home = document.getElementById('extensions.brief.homeFolder').value;
-            var createIn = home || this.bookmarksService.bookmarksMenuFolder;
+            var home = document.getElementById('extensions.brief.homeFolder').value;
+            var createIn = (home != -1) ? home
+                                        : this.bookmarksService.bookmarksMenuFolder;
         }
 
         for (var i = 0; i < nodes.length; i++) {
@@ -108,7 +109,6 @@ var opml = {
                 break;
 
             case 'feed':
-
                 var siteURI = this.ioService.newURI(node.url, null, null);
                 var feedURI = this.ioService.newURI(node.feedURL, null, null);
                 this.livemarkService.createLivemark(createIn, node.title, siteURI,
@@ -188,7 +188,8 @@ var opml = {
             // Fx2Compat
             if (gPlacesEnabled) {
                 var home = document.getElementById('extensions.brief.homeFolder').value;
-                var folder = home || this.bookmarksService.bookmarksMenuFolder;
+                var folder = (home != -1) ? home
+                                          : this.bookmarksService.bookmarksMenuFolder;
 
                 var options = this.historyService.getNewQueryOptions();
                 var query = this.historyService.getNewQuery();

@@ -36,7 +36,7 @@
         <preferences>
             <preference id="extensions.brief.homeFolder"
                         name="extensions.brief.homeFolder"
-                        type="string"/>
+                        type="int"/>
             <preference id="extensions.brief.liveBookmarksFolder"
                         name="extensions.brief.liveBookmarksFolder"
                         type="string"/> <!-- Fx2Compat -->
@@ -65,7 +65,7 @@
 
         <bookmarks-tree id="folders-tree" flex="1" type="folders"
                         onselect="gMainPane.onRDFTreeSelect(event)"/> <!-- Fx2Compat -->
-        <box id="import-export-box" pack="end">
+        <hbox id="import-export-box" pack="end">
             <button id="import-opml"
                     label="&importOPML.label;"
                     accesskey="&importOPML.accesskey;"
@@ -74,7 +74,7 @@
                     label="&exportOPML.label;"
                     accesskey="&exportOPML.accesskey;"
                     oncommand="opml.exportOPML()"/>
-        </box>
+        </hbox>
 
         <groupbox>
             <checkbox id="show-statusbar-icon"
