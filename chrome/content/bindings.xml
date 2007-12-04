@@ -160,7 +160,7 @@
                     if (target.className != 'article-title-link' &&
                        target.className != 'article-controls' &&
                        target.parentNode.className != 'article-controls') {
-                        $(articleContent).slideDown('fast');
+                        $(articleContent).slideDown(200);
                         this.removeAttribute('collapsed');
                     }
                 }
@@ -168,7 +168,7 @@
                     if (target.className == 'expand-button' || (target.className == 'article-header' &&
                        feedContent.hasAttribute('showHeadlinesOnly'))) {
                         var self = this;
-                        $(articleContent).slideUp('fast',
+                        $(articleContent).slideUp(200,
                                                   function(){ self.setAttribute('collapsed', true) });
                     }
                 }
@@ -248,6 +248,12 @@
                         subheader.insertBefore(date, authors);
                     }
 
+                    var evt = document.createEvent('Events');
+                    evt.initEvent('EntryCollapsed', false, false);
+
+                    var self = this;
+                    setTimeout(function(){ self.dispatchEvent(evt) }, 250);
+
                     break;
                 }
             ]]>
@@ -267,7 +273,7 @@
                 var articleContent = document.getAnonymousElementByAttribute(this, 'class',
                                                                           'article-content');
                 if (this.hasAttribute('collapsed')) {
-                    $(articleContent).slideDown('fast');
+                    $(articleContent).slideDown(200);
                     this.removeAttribute('collapsed');
                 }
                 else {
@@ -275,7 +281,7 @@
                     function collapse() {
                         self.setAttribute('collapsed', true);
                     }
-                    $(articleContent).slideUp('fast', collapse);
+                    $(articleContent).slideUp(200, collapse);
                 }
             ]]>
             </handler>

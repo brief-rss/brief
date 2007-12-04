@@ -340,6 +340,8 @@ var gCommands = {
             gFeedView.feedContent.removeAttribute('showHeadlinesOnly');
             for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
                 gFeedView.feedContent.childNodes[i].removeAttribute('collapsed');
+
+            gFeedView.markVisibleAsRead();
         }
     },
 
