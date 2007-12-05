@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
-<?xml-stylesheet href="chrome://browser/content/bookmarks/bookmarks.css" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/content/bookmarks/bookmarks.css" type="text/css"?> <!--Fx2Compat-->
+<?xml-stylesheet href="chrome://browser/content/places/places.css"?>
 
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
@@ -14,7 +15,12 @@
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
-    <script type="application/x-javascript" src="chrome://browser/content/bookmarks/bookmarks.js"/>
+    <script type="application/x-javascript" src="chrome://browser/content/bookmarks/bookmarks.js"/> <!--Fx2Compat-->
+    <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+    <script type="application/x-javascript" src="chrome://browser/content/places/utils.js"/>
+    <script type="application/x-javascript" src="chrome://browser/content/places/controller.js"/>
+    <script type="application/x-javascript" src="chrome://browser/content/places/treeView.js"/>
+
 
     <stringbundleset id="string-bundles">
         <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
@@ -137,7 +143,19 @@
                     <label id="select-home-folder-label">
                         &selectHomeFolder.label;
                     </label>
-                    <bookmarks-tree id="bookmark-folders-tree" flex="1" type="folders"/>
+                    <bookmarks-tree id="bookmark-folders-tree"
+                                    type="folders"
+                                    hidden="true"/> <!--Fx2Compat-->
+                    <tree id="places-tree"
+                          type="places"
+                          hidecolumnpicker="true">
+                        <treecols>
+                            <treecol id="title" flex="1"
+                                     primary="true"
+                                     hideheader="true"/>
+                        </treecols>
+                        <treechildren flex="1"/>
+                    </tree>
                     <hbox pack="end">
                         <button id="confirm-home-folder"
                                 label="&confirmHomeFolder.label;"

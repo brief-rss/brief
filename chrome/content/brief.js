@@ -8,10 +8,13 @@ const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.0.html';
 
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+const gPlacesEnabled = 'nsINavHistoryService' in Components.interfaces;
 
-const gPlacesEnabled = 'nsINavHistoryService' in Ci;
+//Fx2Compat
+if (!gPlacesEnabled) {
+    var Cc = Components.classes;
+    var Ci = Components.interfaces;
+}
 
 const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 const gUpdateService = Cc['@ancestor/brief/updateservice;1'].getService(Ci.nsIBriefUpdateService);
@@ -54,12 +57,10 @@ function init() {
     if (gPrefs.homeFolder) {
         // Initiate the feed list (asynchronously, so that the window is displayed sooner).
         setTimeout(function(){ gFeedList.rebuild() }, 0);
-        setTimeout(function(){ gStorage.syncWithBookmarks() }, 500);
+        setTimeout(function(){ gStorage.syncWithBookmarks() }, 1000);
     }
     else {
-        // If no Live Bookmarks folder has been picked yet, show a panel to select it.
-        var deck = document.getElementById('feed-list-deck');
-        deck.selectedIndex = 1;
+        showHomeFolderPicker();
     }
 
     gTopBrowserWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
@@ -571,13 +572,45 @@ function updateProgressMeter() {
     }
 }
 
+function showHomeFolderPicker() {
+    var deck = document.getElementById('feed-list-deck');
+    deck.selectedIndex = 1;
+
+    //Fx2Compat
+    var placesTree = document.getElementById('places-tree');
+    var rdfBookmarksTree = document.getElementById('bookmark-folders-tree');
+
+    if (gPlacesEnabled) {
+        rdfBookmarksTree.hidden = true;
+
+        var query = PlacesUtils.history.getNewQuery();
+        var options = PlacesUtils.history.getNewQueryOptions();
+        var root = PlacesUtils.placesRootId;
+        query.setFolders([root], 1);
+        options.excludeItems = true;
+        placesTree.load([query], options);
+    }
+    else {
+        placesTree.hidden = true;
+        rdfBookmarksTree.hidden = false;
+    }
+}
+
 
 function selectHomeFolder(aEvent) {
-    var foldersTree = document.getElementById('bookmark-folders-tree');
-    var selectedIndex = foldersTree.currentIndex;
-    if (selectedIndex != -1) {
-        var resource = foldersTree.treeBuilder.getResourceAtIndex(selectedIndex);
-        gPrefs.setCharPref('liveBookmarksFolder', resource.Value);
+    if (gPlacesEnabled) {
+        var placesTree = document.getElementById('places-tree');
+
+        if (placesTree.currentIndex != -1)
+            gPrefs.setIntPref('homeFolder', placesTree.selectedNode.itemId);
+    }
+    else {
+        var foldersTree = document.getElementById('bookmark-folders-tree');
+        var selectedIndex = foldersTree.currentIndex;
+        if (selectedIndex != -1) {
+            var resource = foldersTree.treeBuilder.getResourceAtIndex(selectedIndex);
+            gPrefs.setCharPref('liveBookmarksFolder', resource.Value);
+        }
     }
 }
 

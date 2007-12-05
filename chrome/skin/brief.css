@@ -1,5 +1,5 @@
 #left-pane {
-  width: 22em;
+  width: 20em;
 }
 
 splitter {
@@ -8,10 +8,15 @@ splitter {
 
 #select-home-folder-label {
   margin: 7px 0 7px 5px;
+  font-weight: bold;
 }
 
-#bookmark-folders-tree {
-  max-height: 400px;
+/*Fx2Compat*/
+#bookmark-folders-tree, #places-tree {
+  -moz-box-flex: 1;
+  max-height: 600px;
+  border-right: 0;
+  margin: 0;
 }
 
 #confirm-home-folder {
