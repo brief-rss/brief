@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>1.1pre</version>
+    <version>1.1pre2</version>
     <type>2</type>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
     <iconURL>chrome://brief/skin/icon.png</iconURL>
@@ -28,6 +28,7 @@
     <homepageURL>http://brief.mozdev.org/</homepageURL>
 
     <contributor>Leszek "teo" Życzkowski</contributor>
+    <contributor>Christopher Finke</contributor>
 
     <translator>AlleyKat (da-DK)</translator>
     <translator>Fenian (de-DE)</translator>
