@@ -271,8 +271,10 @@ FeedView.prototype = {
                 entriesToMark.push(entries[i].id);
         }
 
-        var query = new QuerySH(null, entriesToMark.join(' '), false);
-        query.markEntriesRead(true);
+        if (entriesToMark.length) {
+            var query = new QuerySH(null, entriesToMark.join(' '), false);
+            query.markEntriesRead(true);
+        }
     },
 
     // Indicates whether the feed view is currently displayed in the browser.
