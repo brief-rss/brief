@@ -773,6 +773,7 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
+    // XXX This function is ridiculous, it needs to be split up and rewritten.
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         this.bookmarkItems = [];
 
@@ -781,7 +782,12 @@ BriefStorageService.prototype = {
                                         : this.prefs.getCharPref('liveBookmarksFolder');
 
         if (!homeFolder || homeFolder == -1) {
-            this.onHomeFolderRemoved();
+            var hideAllFeeds = this.dBConnection.createStatement('UPDATE feeds SET hidden = ?');
+            hideAllFeeds.bindInt64Parameter(0, Date.now());
+            hideAllFeeds.execute();
+
+            this.feedsCache = this.feedsAndFoldersCache = null;
+            this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
             return;
         }
 
@@ -979,7 +985,11 @@ BriefStorageService.prototype = {
         else
             this.prefs.clearUserPref('liveBookmarksFolder');
 
-        this.dBConnection.executeSimpleSQL('UPDATE feeds SET hidden = 1');
+        var hideAllFeeds = this.dBConnection.createStatement('UPDATE feeds SET hidden = ?');
+        hideAllFeeds.bindInt64Parameter(0, Date.now());
+        hideAllFeeds.execute();
+
+        this.feedsCache = this.feedsAndFoldersCache = null;
         this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
     },
 

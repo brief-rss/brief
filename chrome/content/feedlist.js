@@ -531,7 +531,11 @@ var gFeedList = {
                 setTimeout(function(){ gFeedView.ensure() }, 0);
 
             var deck = document.getElementById('feed-list-deck');
-            deck.selectedIndex = gPrefs.homeFolder ? 0 : 1;
+            if (gPrefs.homeFolder)
+                deck.selectedIndex = 0;
+            else
+                showHomeFolderPicker();
+
             break;
 
         case 'brief:feed-title-changed':
