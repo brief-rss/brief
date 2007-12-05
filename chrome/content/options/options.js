@@ -1,14 +1,11 @@
-var Ci, Cc;
-var gPlacesEnabled;
+const gPlacesEnabled = 'nsINavHistoryService' in Components.interfaces;
+
+if (!gPlacesEnabled) {
+    var Ci = Components.interfaces;
+    var Cc = Components.classes;
+}
 
 function init() {
-    if (!Ci)
-        Ci = Components.interfaces;
-    if (!Cc)
-        Cc = Components.classes;
-
-    gPlacesEnabled = 'nsINavHistoryService' in Ci;
-
     if (gPlacesEnabled) {
         document.getElementById('folders-tree').hidden = true;
         gMainPane.setUpPlacesTree();
@@ -261,5 +258,3 @@ function dump(aMessage) {
                        getService(Ci.nsIConsoleService);
   consoleService.logStringMessage(aMessage);
 }
-
-function NS_ASSERT() { }
