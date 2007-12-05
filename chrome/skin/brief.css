@@ -33,35 +33,42 @@ splitter {
 
 treechildren::-moz-tree-line {
   visibility: hidden;
-  }
+}
+
+treechildren::-moz-tree-cell-text {
+  font-size: 12px;
+}
+
+treechildren::-moz-tree-cell-text(unread) {
+  font-weight: bold;
+}
+
+treechildren::-moz-tree-row {
+  height: 1.6em;
+}
+
+
+/* ------------ Icons and twisty images ------------ */
 
 treechildren::-moz-tree-twisty(container) {
   list-style-image: url('icons/tree-dropmarker.png');
   width: 11px;
   height: 11px;
-  }
+}
 
 treechildren::-moz-tree-twisty(container, open) {
   list-style-image: url('icons/tree-dropmarker-open.png');
 }
 
-treechildren::-moz-tree-row {
-  height: 1.6em;
-  }
-
-treechildren::-moz-tree-cell-text(unread) {
-  font-weight: bold;
-  }
-
 treechildren::-moz-tree-image(container) {
   list-style-image: url('chrome://global/skin/icons/folder-item.png') !important;
   -moz-image-region: rect(0px, 32px, 16px, 16px);
   padding-right: 4px;
-  }
+}
 
 treechildren::-moz-tree-image(container, open) {
   -moz-image-region: rect(16px, 32px, 32px, 16px);
-  }
+}
 
 treechildren::-moz-tree-image(feed-item) {
   list-style-image: url('chrome://browser/skin/livemark-item.png') !important;
@@ -69,12 +76,15 @@ treechildren::-moz-tree-image(feed-item) {
   width: 16px;
   height: 16px;
   padding-right: 4px;
-  }
+}
 
 treechildren::-moz-tree-image(feed-item, unread) {
   list-style-image: url('chrome://browser/skin/livemark-item.png') !important;
   -moz-image-region: rect(18px, 35px, 34px, 19px) !important;
-  }
+}
+
+
+/* ---- Fixed images for predefined special folders ---- */
 
 treechildren::-moz-tree-image(unreadFolder) {
   list-style-image: url('icons/folders.png') !important;
