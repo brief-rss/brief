@@ -8,7 +8,12 @@ if (!gPlacesEnabled) {
 function init() {
     if (gPlacesEnabled) {
         document.getElementById('folders-tree').hidden = true;
-        gMainPane.setUpPlacesTree();
+
+        //XXX Temporary workaround for Firefox 3 beta 2, where this fails.
+        try {
+            gMainPane.setUpPlacesTree();
+        }
+        catch (e) { }
     }
     else {
         document.getElementById('places-tree').hidden = true;
