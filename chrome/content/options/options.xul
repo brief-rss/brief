@@ -202,7 +202,9 @@
         <groupbox>
             <caption label="&feedViewGroup.caption;"/>
             <hbox align="center">
-                <label value="&entriesPerPageBefore.label;"/>
+                <label value="&entriesPerPageBefore.label;"
+                       accesskey="&entriesPerPage.accesskey;"
+                       control="entriesPerPage"/>
                 <textbox id="entriesPerPage"
                          preference="extensions.brief.feedview.entriesPerPage"
                          size="2"/>
