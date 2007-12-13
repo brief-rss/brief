@@ -709,18 +709,23 @@ BriefStorageService.prototype = {
             '   WHERE (entries.deleted = ? AND feeds.oldestAvailableEntryDate > entries.date) ' +
             '         OR (? - feeds.hidden > ? AND feeds.hidden != 0)                         ' +
             ')                                                                                ');
-
-
-        removeEntries.bindInt32Parameter(0, Ci.nsIBriefQuery.ENTRY_STATE_DELETED);
-        removeEntries.bindInt64Parameter(1, Date.now());
-        removeEntries.bindInt64Parameter(2, DELETED_FEEDS_RETENTION_TIME);
-        removeEntries.execute();
-
         var removeFeeds = this.dBConnection.createStatement(
-            'DELETE FROM feeds WHERE (? - feeds.hidden > ?) AND feeds.hidden != 0');
-        removeFeeds.bindInt64Parameter(0, Date.now());
-        removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
-        removeFeeds.execute();
+                'DELETE FROM feeds WHERE (? - feeds.hidden > ?) AND feeds.hidden != 0');
+
+        this.dBConnection.beginTransaction()
+        try {
+            removeEntries.bindInt32Parameter(0, Ci.nsIBriefQuery.ENTRY_STATE_DELETED);
+            removeEntries.bindInt64Parameter(1, Date.now());
+            removeEntries.bindInt64Parameter(2, DELETED_FEEDS_RETENTION_TIME);
+            removeEntries.execute();
+
+            removeFeeds.bindInt64Parameter(0, Date.now());
+            removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
+            removeFeeds.execute();
+        }
+        finally {
+            this.dBConnection.commitTransaction();
+        }
 
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
