@@ -10,11 +10,8 @@ const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
 const gPlacesEnabled = 'nsINavHistoryService' in Components.interfaces;
 
-//Fx2Compat
-if (!gPlacesEnabled) {
-    var Cc = Components.classes;
-    var Ci = Components.interfaces;
-}
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 const gUpdateService = Cc['@ancestor/brief/updateservice;1'].getService(Ci.nsIBriefUpdateService);
