@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Brief - opcje">
 <!ENTITY mainPane.label "Ogólne">
 <!ENTITY folderTree.label "Folder zawierający dynamiczne zakładki:">
+<!ENTITY importOPML.label "Importuj...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Eksportuj...">
+<!ENTITY exportOPML.accesskey "E">
 <!ENTITY showStatusbarIcon.label "Wyświetlaj ikonę rozszerzenia na pasku stanu">
 <!ENTITY showStatusbarIcon.accesskey "A">
 <!ENTITY openInNewTab.label "Otwieraj Brief w nowej karcie">
@@ -14,29 +18,30 @@
 <!ENTITY updateIntervalDays.label "dni">
 <!ENTITY checkForUpdatesAfter.label "min">
 <!ENTITY showNotification.label "Wyświetlaj powiadomienie o nowych wiadomościach">
-<!ENTITY showNotification.accesskey "E">
+<!ENTITY showNotification.accesskey "M">
 <!ENTITY behaviorGroup.caption "Zachowanie">
 <!ENTITY openEntriesInTabs.label "Otwieraj wiadomości w nowej karcie">
 <!ENTITY openEntriesInTabs.accesskey "T">
-<!ENTITY doubleClickMarks.label "Oznacz wiadomość jako przeczytaną po kliknięciu na niej dwukrotnie">
-<!ENTITY doubleClickMarks.accesskey "C">
+<!ENTITY autoMarkRead.label "Oznaczaj wyświetlone wiadomości jako przeczytane">
+<!ENTITY autoMarkRead.accesskey "C">
 <!ENTITY storingGroup.caption "Przechowywanie">
 <!ENTITY expirationBefore.label "Usuń pobrane wiadomości po">
 <!ENTITY expirationAfter.label "dniach">
-<!ENTITY expirationCheckbox.accesskey "U">
+<!ENTITY expirationCheckbox.accesskey "B">
 <!ENTITY starredItemsKept.tooltip "Wiadomości oznaczone gwiazdką zostaną zachowane">
 <!ENTITY storedEntriesBefore.label "Przechowuj do">
 <!ENTITY storedEntriesAfter.label "ostatnich wiadomości w kanale">
 <!ENTITY storedEntriesCheckbox.accesskey "P">
-<!ENTITY clearAllEntriesButton.label "Wyczyść wszystkie wiadomości">
-<!ENTITY clearAllEntriesButton.accesskey "W">
+<!ENTITY clearAllEntriesButton.label "Usuń wszystkie wiadomości...">
+<!ENTITY clearAllEntriesButton.accesskey "U">
 <!ENTITY displayPane.label "Widok">
 <!ENTITY feedViewGroup.caption "Wygląd zawartości kanału">
 <!ENTITY authorsCheckbox.label "Wyświetlaj autorów wiadomości">
 <!ENTITY authorsCheckbox.accesskey "R">
 <!ENTITY entriesPerPageBefore.label "Wyświetlaj">
 <!ENTITY entriesPerPageAfter.label "wiadomości na jednej stronie">
-<!ENTITY enableCustomStyle.label "Używaj zewnętrznego stylu widoku kanału:">
+<!ENTITY entriesPerPage.accesskey "y">
+<!ENTITY enableCustomStyle.label "Używaj własnego stylu:">
 <!ENTITY enableCustomStyle.accesskey "N">
 <!ENTITY browseCustomStyle.label "Przeglądaj">
 <!ENTITY browseCustomStyle.accesskey "D">

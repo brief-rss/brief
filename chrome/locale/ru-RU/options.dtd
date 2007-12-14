@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Настройки Brief">
 <!ENTITY mainPane.label "Основные">
 <!ENTITY folderTree.label "Укажите папку, содержащую ленты новостей:">
+<!ENTITY importOPML.label "Импорт…">
+<!ENTITY importOPML.accesskey "И">
+<!ENTITY exportOPML.label "Экспорт…">
+<!ENTITY exportOPML.accesskey "Э">
 <!ENTITY showStatusbarIcon.label "Показывать значок в строке состояния">
 <!ENTITY showStatusbarIcon.accesskey "о">
 <!ENTITY openInNewTab.label "Открывать Brief в новой вкладке">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "Поведение">
 <!ENTITY openEntriesInTabs.label "Открывать записи в новых вкладках">
 <!ENTITY openEntriesInTabs.accesskey "ы">
-<!ENTITY doubleClickMarks.label "Отмечать запись как прочитанную двойным кликом">
-<!ENTITY doubleClickMarks.accesskey "е">
+<!ENTITY autoMarkRead.label "Отметить новости прочитанными после просмотра">
+<!ENTITY autoMarkRead.accesskey "п">
 <!ENTITY storingGroup.caption "Хранение">
 <!ENTITY expirationBefore.label "Удалять загруженные записи после">
 <!ENTITY expirationAfter.label "дней">
@@ -28,16 +32,17 @@
 <!ENTITY storedEntriesBefore.label "Хранить не больше чем">
 <!ENTITY storedEntriesAfter.label "последних записей в каждой ленте">
 <!ENTITY storedEntriesCheckbox.accesskey "и">
-<!ENTITY clearAllEntriesButton.label "Очистить все записи">
-<!ENTITY clearAllEntriesButton.accesskey "с">
+<!ENTITY clearAllEntriesButton.label "Очистить все новости…">
+<!ENTITY clearAllEntriesButton.accesskey "ч">
 <!ENTITY displayPane.label "Отображение">
 <!ENTITY feedViewGroup.caption "Стиль содержимого ленты">
 <!ENTITY authorsCheckbox.label "Показывать автора записи">
 <!ENTITY authorsCheckbox.accesskey "к">
 <!ENTITY entriesPerPageBefore.label "Показывать">
 <!ENTITY entriesPerPageAfter.label "записей на странице">
-<!ENTITY enableCustomStyle.label "Использовать другой стиль оформления ленты">
-<!ENTITY enableCustomStyle.accesskey "з">
+<!ENTITY entriesPerPage.accesskey "П">
+<!ENTITY enableCustomStyle.label "Использовать другой стиль оформления лент:">
+<!ENTITY enableCustomStyle.accesskey "с">
 <!ENTITY browseCustomStyle.label "Обзор">
 <!ENTITY browseCustomStyle.accesskey "б">
 <!ENTITY showShortcuts.label "Показать клавиатурные сочетания">

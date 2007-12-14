@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Søk i nyhetskilden">
 <!ENTITY searchAllFeeds.label "Søk i alle nyhetskilder">
-<!ENTITY headlinesCheckbox.tooltip "Vis kun overskrifter">
+<!ENTITY headlinesCheckbox.tooltip "Bruk overskriftsvisning">
 <!ENTITY showAll.label "Vis alle">
 <!ENTITY showUnread.label "Vis ulest">
 <!ENTITY showStarred.label "Vis merket med stjerne">
@@ -27,8 +27,8 @@
 <!ENTITY ctxOpenWebsite.label "Åpne nettside">
 <!ENTITY ctxDeleteFeed.label "Slett nyhetskilde">
 <!ENTITY ctxDeleteFolder.label "Slett mappe">
-<!ENTITY ctxEmptyFeed.label "Tom nyhetskilde">
-<!ENTITY ctxEmptyFolder.label "Tom mappe">
+<!ENTITY ctxEmptyFeed.label "Tøm nyhetskilde">
+<!ENTITY ctxEmptyFolder.label "Tøm mappe">
 <!ENTITY ctxRestoreTrashed.label "Gjenopprett elementer">
 <!ENTITY ctxEmptyTrash.label "Tøm papirkurven">
 <!ENTITY ctxFeedProperties.label "Egenskaper">

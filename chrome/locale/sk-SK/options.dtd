@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Možnosti Brief">
 <!ENTITY mainPane.label "Hlavné">
 <!ENTITY folderTree.label "Priečinok obsahujúci vaše Aktívne záložky:">
+<!ENTITY importOPML.label "Imortovať...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportovať...">
+<!ENTITY exportOPML.accesskey "x">
 <!ENTITY showStatusbarIcon.label "Zobraziť ikonu v stavovom riadku">
 <!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Otvoriť Brief na novej karte">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "Režim">
 <!ENTITY openEntriesInTabs.label "Otvoriť položky na nových kartách">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY doubleClickMarks.label "Po dvojkliknutí na položky, označiť ako prečítané">
-<!ENTITY doubleClickMarks.accesskey "M">
+<!ENTITY autoMarkRead.label "Označiť ako prečítané po zobrazení">
+<!ENTITY autoMarkRead.accesskey "z">
 <!ENTITY storingGroup.caption "Ukladanie">
 <!ENTITY expirationBefore.label "Odstrániť stiahnuté položky po">
 <!ENTITY expirationAfter.label "dňoch">
@@ -28,16 +32,17 @@
 <!ENTITY storedEntriesBefore.label "Uchovať nie dlhšie než">
 <!ENTITY storedEntriesAfter.label "posledné položky každého kanála">
 <!ENTITY storedEntriesCheckbox.accesskey "e">
-<!ENTITY clearAllEntriesButton.label "Vyčistiť všetky vstupy">
-<!ENTITY clearAllEntriesButton.accesskey "V">
+<!ENTITY clearAllEntriesButton.label "Vyčistiť všetky položky...">
+<!ENTITY clearAllEntriesButton.accesskey "s">
 <!ENTITY displayPane.label "Zobraziť">
 <!ENTITY feedViewGroup.caption "Náhľad obsahu kanála">
 <!ENTITY authorsCheckbox.label "Zobraziť autora položky">
 <!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Zobraziť">
 <!ENTITY entriesPerPageAfter.label "položiek na stránku">
-<!ENTITY enableCustomStyle.label "Použiť vlastný štýl pre obsah kanála">
-<!ENTITY enableCustomStyle.accesskey "f">
+<!ENTITY entriesPerPage.accesskey "S">
+<!ENTITY enableCustomStyle.label "Použiť vlastný štýl">
+<!ENTITY enableCustomStyle.accesskey "o">
 <!ENTITY browseCustomStyle.label "Prehľadávať">
 <!ENTITY browseCustomStyle.accesskey "P">
 <!ENTITY showShortcuts.label "Zobraziť skratky">

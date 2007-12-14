@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Brief 選項">
 <!ENTITY mainPane.label "主要">
 <!ENTITY folderTree.label "放置即時書籤的資料夾:">
+<!ENTITY importOPML.label "Import...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Export...">
+<!ENTITY exportOPML.accesskey "x">
 <!ENTITY showStatusbarIcon.label "顯示狀態列圖示">
 <!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "在新分頁中開啟 Brief">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "操作習慣">
 <!ENTITY openEntriesInTabs.label "在新分頁中開啟項目">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY doubleClickMarks.label "在雙擊項目後標為已讀（或未讀）">
-<!ENTITY doubleClickMarks.accesskey "M">
+<!ENTITY autoMarkRead.label "Mark items as read when they are viewed">
+<!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "保存">
 <!ENTITY expirationBefore.label "待">
 <!ENTITY expirationAfter.label "天後，再移除下載好的項目。">
@@ -28,7 +32,7 @@
 <!ENTITY storedEntriesBefore.label "每個消息來源中，僅保存最新">
 <!ENTITY storedEntriesAfter.label "條項目。">
 <!ENTITY storedEntriesCheckbox.accesskey "e">
-<!ENTITY clearAllEntriesButton.label "清除所有項目">
+<!ENTITY clearAllEntriesButton.label "Clear all items...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "顯示">
 <!ENTITY feedViewGroup.caption "消息來源內容畫面">
@@ -36,7 +40,8 @@
 <!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "每頁顯示">
 <!ENTITY entriesPerPageAfter.label "條項目">
-<!ENTITY enableCustomStyle.label "套用自訂的樣式到消息來源內容上">
+<!ENTITY entriesPerPage.accesskey "S">
+<!ENTITY enableCustomStyle.label "Use custom style: ">
 <!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "瀏覽">
 <!ENTITY browseCustomStyle.accesskey "B">
