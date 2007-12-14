@@ -731,12 +731,7 @@ var gContextMenuCommands = {
 
         if (weHaveAGo) {
             this._removeTreeitem(targetTreeitem);
-
-            // Fx2Compat
-            if (gPlacesEnabled)
-                this._deletePlacesItems([feed]);
-            else
-                this._deleteRDFItems([feed]);
+            this._deleteBookmarks([feed]);
         }
     },
 
@@ -764,11 +759,7 @@ var gContextMenuCommands = {
                 items.push(gStorage.getFeed(feedID));
             }
 
-            // Fx2Compat
-            if (gPlacesEnabled)
-                this._deletePlacesItems(items);
-            else
-                this._deleteRDFItems(items);
+            this._deleteBookmarks(items);
         }
     },
 
@@ -794,39 +785,16 @@ var gContextMenuCommands = {
             setTimeout(function(){ treeview.selection.select(indexToSelect) }, 0);
     },
 
-    _deletePlacesItems: function ctxMenuCmds__deletePlacesItems(aItems) {
+    _deleteBookmarks: function ctxMenuCmds__deleteBookmarks(aFeeds) {
         var transactionsService = Cc["@mozilla.org/browser/placesTransactionsService;1"].
                                   getService(Ci.nsIPlacesTransactionsService);
 
         var transactions = [];
-        for (var i = aItems.length -1; i >= 0; i--)
-            transactions.push(transactionsService.removeItem(aItems[i].bookmarkID));
+        for (var i = aFeeds.length -1; i >= 0; i--)
+            transactions.push(transactionsService.removeItem(aFeeds[i].bookmarkID));
 
         var txn = transactionsService.aggregateTransactions('Remove items', transactions);
         transactionsService.commitTransaction(txn);
-    },
-
-
-    _deleteRDFItems: function ctxMenuCmds__deleteRDFItems(aItems) {
-        if (aItems.length > 1)
-            gBkmkTxnSvc.startBatch();
-
-        for each (item in aItems) {
-            node = RDF.GetResource(item.bookmarkID);
-            parent = BMSVC.getParent(node);
-            RDFC.Init(BMDS, parent);
-            index = RDFC.IndexOf(node);
-            propertiesArray = new Array(gBmProperties.length);
-            BookmarksUtils.getAllChildren(node, propertiesArray);
-            gBkmkTxnSvc.createAndCommitTxn(Ci.nsIBookmarkTransactionManager.REMOVE,
-                                           'delete', node, index, parent,
-                                           propertiesArray.length, propertiesArray);
-        }
-
-        if (aItems.length > 1)
-            gBkmkTxnSvc.endBatch();
-
-        BookmarksUtils.flushDataSource();
     },
 
 

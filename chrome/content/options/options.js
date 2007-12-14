@@ -1,24 +1,12 @@
-const gPlacesEnabled = 'nsINavHistoryService' in Components.interfaces;
-
-if (!gPlacesEnabled) {
-    var Ci = Components.interfaces;
-    var Cc = Components.classes;
-}
+var Ci = Components.interfaces;
+var Cc = Components.classes;
 
 function init() {
-    if (gPlacesEnabled) {
-        document.getElementById('folders-tree').hidden = true;
-
-        //XXX Temporary workaround for Firefox 3 beta 2, where this fails.
-        try {
-            gMainPane.setUpPlacesTree();
-        }
-        catch (e) { }
+    // XXX Temporary workaround for Firefox 3 beta 2, where this fails.
+    try {
+        gMainPane.setUpPlacesTree();
     }
-    else {
-        document.getElementById('places-tree').hidden = true;
-        setTimeout(gMainPane.setUpRDFBookmarksTree, 0);
-    }
+    catch (e) { }
 
     sizeToContent();
 
@@ -56,26 +44,6 @@ var gMainPane = {
         tree.selectPlaceURI(placeURI);
     },
 
-    // Fx2Compat
-    setUpRDFBookmarksTree: function() {
-        var pref = document.getElementById('extensions.brief.liveBookmarksFolder');
-        var folderID = pref.value;
-
-        if (folderID) {
-            var rdfService = Cc['@mozilla.org/rdf/rdf-service;1'].
-                             getService(Ci.nsIRDFService);
-            var folder = rdfService.GetResource(folderID);
-
-            var foldersTree = document.getElementById('folders-tree');
-            foldersTree.treeBoxObject.view.selection.selectEventsSuppressed = true;
-            foldersTree.treeBoxObject.view.selection.clearSelection();
-            foldersTree.selectResource(folder);
-            var index = foldersTree.currentIndex;
-            foldersTree.treeBoxObject.ensureRowIsVisible(index);
-            foldersTree.treeBoxObject.view.selection.selectEventsSuppressed = false;
-        }
-    },
-
     onPlacesTreeSelect: function(aEvent) {
         var placesTree = document.getElementById('places-tree');
         var pref = document.getElementById('extensions.brief.homeFolder');
@@ -83,18 +51,6 @@ var gMainPane = {
         if (placesTree.currentIndex != -1)
             pref.value = placesTree.selectedNode.itemId;
     },
-
-    // Fx2Compat
-    onRDFTreeSelect: function(aEvent) {
-        var foldersTree = document.getElementById('folders-tree');
-        var selectedIndex = foldersTree.currentIndex;
-        if (selectedIndex != -1) {
-            var resource = foldersTree.treeBuilder.getResourceAtIndex(selectedIndex);
-
-            var pref = document.getElementById('extensions.brief.liveBookmarksFolder');
-            pref.value = resource.Value;
-        }
-    }
 
 }
 

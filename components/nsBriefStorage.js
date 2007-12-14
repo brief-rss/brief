@@ -9,30 +9,22 @@ const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-// Fx2Compat
-const NC_NAME     = 'http://home.netscape.com/NC-rdf#Name';
-const NC_FEEDURL  = 'http://home.netscape.com/NC-rdf#FeedURL';
-const NC_LIVEMARK = 'http://home.netscape.com/NC-rdf#Livemark';
-const RDF_TYPE    = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
-
 // How often to manage entry expiration and removing deleted items.
 const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 
 // How long to keep entries from feeds no longer in the home folder.
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
-const RDF_OBSERVER_DELAY = 250;
+const BOOKMARKS_OBSERVER_DELAY = 250;
 
 const DATABASE_VERSION = 4;
-
-const gPlacesEnabled = 'nsINavHistoryService' in Ci;
 
 var gStorageService = null;
 
 function BriefStorageService() {
     this.observerService = Cc['@mozilla.org/observer-service;1'].
                            getService(Ci.nsIObserverService);
-
+    
     // The instantiation can't be done on app-startup, because the directory service
     // doesn't work yet, so we perform it on profile-after-change.
     this.observerService.addObserver(this, 'profile-after-change', false);
@@ -50,7 +42,7 @@ BriefStorageService.prototype = {
     bookmarksObserverDelayTimer: null,
     bookmarksObserverTimerIsRunning: false,
 
-    // Only used by the Places version of the observer
+    // State properties uses by the bookmarks observer.
     batchUpdateInProgress: false,
     homeFolderContentModified: false,
 
@@ -58,11 +50,6 @@ BriefStorageService.prototype = {
     historyService:   null,
     bookmarksService: null,
     livemarkService:  null,
-
-    // Fx2Compat RDF components
-    rdfService:            null,
-    rdfContainerUtils:     null,
-    bookmarksDataSource:   null,
 
     instantiate: function BriefStorage_instantiate() {
         var file = Cc['@mozilla.org/file/directory_service;1'].
@@ -131,12 +118,6 @@ BriefStorageService.prototype = {
         if (databaseVersion < DATABASE_VERSION)
             this.migrateDatabase(databaseVersion);
 
-        // Fx2Compat
-        if (!gPlacesEnabled) {
-            this.dummyDBConnection = storageService.openDatabase(file);
-            this.startDummyStatement();
-        }
-
         this.dBConnection.preload();
 
         this.prefs = Cc["@mozilla.org/preferences-service;1"].
@@ -145,11 +126,7 @@ BriefStorageService.prototype = {
                      QueryInterface(Ci.nsIPrefBranch2);
         this.prefs.addObserver('', this, false);
 
-        // Fx2Compat
-        if (gPlacesEnabled)
-            this.initPlaces();
-        else
-            this.initRDFBookmarks();
+        this.initPlaces();
 
         this.bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
                                            createInstance(Ci.nsITimer);
@@ -572,15 +549,7 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     compactDatabase: function BriefStorage_compactDatabase() {
         this.purgeEntries(false);
-
-        // Fx2Compat
-        if (gPlacesEnabled)
-            this.dBConnection.executeSimpleSQL('VACUUM');
-        else {
-            this.stopDummyStatement();
-            this.dBConnection.executeSimpleSQL('VACUUM');
-            this.startDummyStatement();
-        }
+        this.dBConnection.executeSimpleSQL('VACUUM');
     },
 
 
@@ -748,10 +717,7 @@ BriefStorageService.prototype = {
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeEntries(true);
 
-                if (gPlacesEnabled)
-                    this.bookmarksService.removedObserver(this);
-                else
-                    this.bookmarksDataSource.RemoveObserver(this);
+                this.bookmarksService.removedObserver(this);
 
                 this.prefs.removeObserver('', this);
                 this.observerService.removeObserver(this, 'quit-application');
@@ -767,7 +733,6 @@ BriefStorageService.prototype = {
 
             case 'nsPref:changed':
                 switch (aData) {
-                    case 'liveBookmarksFolder': // Fx2Compat
                     case 'homeFolder':
                         this.syncWithBookmarks();
                         break;
@@ -782,9 +747,7 @@ BriefStorageService.prototype = {
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         this.bookmarkItems = [];
 
-        // Fx2Compat
-        var homeFolder = gPlacesEnabled ? this.prefs.getIntPref('homeFolder')
-                                        : this.prefs.getCharPref('liveBookmarksFolder');
+        var homeFolder = this.prefs.getIntPref('homeFolder');
 
         if (!homeFolder || homeFolder == -1) {
             var hideAllFeeds = this.dBConnection.createStatement('UPDATE feeds SET hidden = ?');
@@ -797,36 +760,23 @@ BriefStorageService.prototype = {
         }
 
         // Get the current Live Bookmarks.
-        if (gPlacesEnabled) {
-            try {
-                // This will throw if the homeFolder was deleted.
-                this.bookmarksService.getItemTitle(homeFolder);
-            }
-            catch (e) {
-                this.onHomeFolderRemoved();
-                return;
-            }
-
-            var options = this.historyService.getNewQueryOptions();
-            var query = this.historyService.getNewQuery();
-
-            query.setFolders([homeFolder], 1);
-            options.excludeItems = true;
-            var result = this.historyService.executeQuery(query, options);
-
-            this.traversePlacesQueryResults(result.root);
+        try {
+            // This will throw if the homeFolder was deleted.
+            this.bookmarksService.getItemTitle(homeFolder);
         }
-        else {
-            root = this.rdfService.GetResource(homeFolder);
-            try {
-                this.traverseLivemarks(root);
-            }
-            catch (e) {
-                // Traversing will throw if root folder was removed.
-                this.onHomeFolderRemoved();
-                return;
-            }
+        catch (e) {
+            this.onHomeFolderRemoved();
+            return;
         }
+
+        var options = this.historyService.getNewQueryOptions();
+        var query = this.historyService.getNewQuery();
+
+        query.setFolders([homeFolder], 1);
+        options.excludeItems = true;
+        var result = this.historyService.executeQuery(query, options);
+
+        this.traversePlacesQueryResults(result.root);
 
         this.dBConnection.beginTransaction();
         try {
@@ -984,11 +934,7 @@ BriefStorageService.prototype = {
     },
 
     onHomeFolderRemoved: function BriefStorage_onHomeFolderRemoved() {
-        // Fx2Compat
-        if (gPlacesEnabled)
-            this.prefs.clearUserPref('homeFolder');
-        else
-            this.prefs.clearUserPref('liveBookmarksFolder');
+        this.prefs.clearUserPref('homeFolder');
 
         var hideAllFeeds = this.dBConnection.createStatement('UPDATE feeds SET hidden = ?');
         hideAllFeeds.bindInt64Parameter(0, Date.now());
@@ -1008,85 +954,6 @@ BriefStorageService.prototype = {
                                 getService(Ci.nsILivemarkService);
 
         this.bookmarksService.addObserver(this, false);
-    },
-
-
-    // Initializes RDF services and resources.
-    initRDFBookmarks: function BriefStorage_initRDFBookmarks() {
-        this.rdfService = Cc['@mozilla.org/rdf/rdf-service;1'].
-                          getService(Ci.nsIRDFService);
-        this.bookmarksDataSource = this.rdfService.GetDataSource('rdf:bookmarks');
-        this.bookmarksDataSource.AddObserver(this);
-
-        this.rdfContainerUtils = Cc['@mozilla.org/rdf/container-utils;1'].
-                                 getService(Ci.nsIRDFContainerUtils);
-
-        // Predicates
-        this.typeArc = this.rdfService.GetResource(RDF_TYPE);
-        this.nameArc = this.rdfService.GetResource(NC_NAME);
-        this.feedUrlArc = this.rdfService.GetResource(NC_FEEDURL);
-
-        // Common targets
-        this.livemarkType = this.rdfService.GetResource(NC_LIVEMARK);
-    },
-
-
-    /**
-     * Recursively reads livemarks and folders and stores them in the |bookmarkItems|
-     * array.
-     *
-     * @param  aFolder  An RDF resource - the folder to be traversed.
-     */
-     traverseLivemarks: function BriefStorage_traverseLivemarks(aFolder) {
-
-        var folderURI = aFolder.QueryInterface(Ci.nsIRDFResource).Value;
-
-        var container = Cc['@mozilla.org/rdf/container;1'].
-                        createInstance(Ci.nsIRDFContainer);
-        container.Init(this.bookmarksDataSource, aFolder);
-        var children = container.GetElements();
-
-        var child, type, item;
-        while (children.hasMoreElements()) {
-            child = children.getNext();
-            type = this.bookmarksDataSource.GetTarget(child, this.typeArc, true);
-
-            // The child is a Live Bookmark.
-            if (type == this.livemarkType) {
-                item = {};
-                item.feedURL = this.bookmarksDataSource.GetTarget(child, this.feedUrlArc, true).
-                                                        QueryInterface(Ci.nsIRDFLiteral).
-                                                        Value;
-                item.feedID = hashString(item.feedURL);
-                item.bookmarkID = child.QueryInterface(Ci.nsIRDFResource).Value;
-                item.title = this.bookmarksDataSource.GetTarget(child, this.nameArc, true).
-                                                      QueryInterface(Ci.nsIRDFLiteral).
-                                                      Value;
-                item.rowIndex = this.bookmarkItems.length;
-                item.isFolder = false;
-                item.parent = folderURI;
-
-                this.bookmarkItems.push(item);
-            }
-
-            // The child is a folder.
-            else if (this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, child)) {
-                item = {};
-                item.title = this.bookmarksDataSource.GetTarget(child, this.nameArc, true).
-                                                      QueryInterface(Ci.nsIRDFLiteral).
-                                                      Value;
-                item.bookmarkID = child.QueryInterface(Ci.nsIRDFResource).Value;
-                item.feedID = item.bookmarkID;
-                item.rowIndex = this.bookmarkItems.length;
-                item.isFolder = true;
-                item.parent = folderURI;
-
-                this.bookmarkItems.push(item);
-
-                // Recurse...
-                this.traverseLivemarks(child);
-            }
-        }
     },
 
 
@@ -1120,62 +987,16 @@ BriefStorageService.prototype = {
     },
 
 
-    // nsIRDFObserver
-    onAssert: function BriefStorage_onAssert(aDataSource, aSource, aProperty, aTarget) {
-
-        // Because we only care about livemarks and folders, check if the assertion
-        // target is even a resource, for optimization.
-        if (!(aTarget instanceof Ci.nsIRDFResource))
-            return;
-
-        // Check if the target item is an RDF sequence (i.e. livemark or folder) and if
-        // it is in the home folder.
-        var isFolder = this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, aTarget);
-        if (isFolder && this.isResourceInHomeFolder(aTarget))
-            this.delayedBookmarksSync();
-    },
-
-    // nsIRDFObserver
-    onUnassert: function BriefStorage_onUnassert(aDataSource, aSource, aProperty, aTarget) {
-
-        if (!(aTarget instanceof Ci.nsIRDFResource) ||
-           !this.rdfContainerUtils.IsSeq(this.bookmarksDataSource, aTarget)) {
-            return;
-        }
-
-        var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
-
-        // We need to check if the home folder is in the parent chain of the removed item
-        // (i.e. the assertion target). Because the target is already detached and
-        // has no parent, we need to examine the parent chain of the assertion source
-        // instead. But the source itself can be the home folder, so let's check that, too.
-        if (aTarget.Value == homeFolderURI || this.isResourceInHomeFolder(aSource))
-            this.delayedBookmarksSync();
-    },
-
-    // nsIRDFObserver
-    onChange: function BriefStorage_onChange(aDataSource, aSource, aProperty, aOldTarget,
-                                             aNewTarget) {
-
-        if ((aProperty == this.nameArc || aProperty == this.feedUrlArc) &&
-           this.isResourceInHomeFolder(aSource)) {
-            this.delayedBookmarksSync();
-        }
-    },
-
-    // nsIRDFObserver
-    onMove: function BriefStorage_onMove(aDataSource, aOldSource, aNewSource, aProperty, aTarget) { },
-
-    // nsIRDFObserver and nsINavBookmarkObserver
+    // nsINavBookmarkObserver
     onEndUpdateBatch: function BriefStorage_onEndUpdateBatch(aDataSource) {
-        if (gPlacesEnabled && this.homeFolderContentModified || !gPlacesEnabled)
+        if (this.homeFolderContentModified)
             this.delayedBookmarksSync();
 
         this.batchUpdateInProgress = false;
         this.homeFolderContentModified = false;
     },
 
-    // nsIRDFObserver and nsINavBookmarkObserver
+    // nsINavBookmarkObserver
     onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch(aDataSource) {
         this.batchUpdateInProgress = true;
     },
@@ -1247,26 +1068,6 @@ BriefStorageService.prototype = {
     aOnItemVisited: function BriefStorage_aOnItemVisited(aItemID, aVisitID, aTime) { },
 
 
-// Helper function for bookmarks observers.
-
-    isResourceInHomeFolder: function BriefStorage_isResourceInHomeFolder(aResource) {
-        var homeFolderURI = this.prefs.getCharPref('liveBookmarksFolder');
-        var bookmarksService = this.bookmarksDataSource.QueryInterface(Ci.nsIBookmarksService);
-        var inHome = false;
-
-        var parentChain = bookmarksService.getParentChain(aResource);
-        var length = parentChain.length;
-        for (var i = 0; i < length; i++) {
-            var node = parentChain.queryElementAt(i, Ci.nsIRDFResource);
-            if (node.Value == homeFolderURI) {
-                inHome = true;
-                break;
-            }
-        }
-
-        return inHome;
-    },
-
     // Returns TRUE if an item is a livemark or a folder and if it is in the home folder.
     isItemInHomeFolder: function BriefStorage_isItemInHomeFolder(aItemID) {
         var homeFolderID = this.prefs.getIntPref('homeFolder');
@@ -1297,48 +1098,8 @@ BriefStorageService.prototype = {
         if (this.bookmarksObserverTimerIsRunning)
             this.bookmarksObserverDelayTimer.cancel();
 
-        this.bookmarksObserverDelayTimer.init(this, RDF_OBSERVER_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
+        this.bookmarksObserverDelayTimer.init(this, BOOKMARKS_OBSERVER_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
         this.bookmarksObserverTimerIsRunning = true;
-    },
-
-
-    /**
-     * Adopted from nsNavHistory::StartDummyStatement.
-     *
-     * sqlite page caches are discarded when a statement is complete. To get
-     * around this, we keep a different connection. This dummy connection has a
-     * statement that stays open and thus keeps its pager cache in memory. When
-     * the shared pager cache is enabled before either connection has been opened
-     * (this is done by the storage service on DB init), our main connection
-     * will get the same pager cache, which will be persisted.
-     *
-     * When a statement is open on a database, it is disallowed to change the
-     * schema of the database (add or modify tables or indices).
-     */
-    startDummyStatement: function BriefStorage_startDummyStatement() {
-        // Make sure the dummy table exists.
-        this.dBConnection.executeSimpleSQL(
-                       'CREATE TABLE IF NOT EXISTS dummy_table (id INTEGER PRIMARY KEY)');
-
-        // This table is guaranteed to have something in it and will keep the dummy
-        // statement open. If the table is empty, it won't hold the statement open.
-        this.dBConnection.executeSimpleSQL('INSERT OR IGNORE INTO dummy_table VALUES (1)');
-
-        this.dummyStatement = this.dummyDBConnection.
-                                   createStatement('SELECT id FROM dummy_table LIMIT 1');
-
-        // We have to step the dummy statement so that it will hold a lock on the DB.
-        this.dummyStatement.executeStep();
-    },
-
-
-    stopDummyStatement: function BriefStorage_stopDummyStatement() {
-        // Do nothing if the dummy statement isn't running.
-        if (!this.dummyStatement)
-            return;
-
-        this.dummyStatement.reset();
-        this.dummyStatement = null;
     },
 
 
@@ -1355,7 +1116,6 @@ BriefStorageService.prototype = {
     QueryInterface: function BriefStorage_QueryInterface(aIID) {
         if (!aIID.equals(Components.interfaces.nsIBriefStorage) &&
             !aIID.equals(Components.interfaces.nsIObserver) &&
-            !aIID.equals(Components.interfaces.nsIRDFObserver) &&
             !aIID.equals(Components.interfaces.nsINavBookmarkObserver) &&
             !aIID.equals(Components.interfaces.nsISupports)) {
             throw Components.results.NS_ERROR_NO_INTERFACE;
@@ -1627,9 +1387,9 @@ BriefQuery.prototype = {
             this._items = Components.classes['@ancestor/brief/storage;1'].
                                      getService(Components.interfaces.nsIBriefStorage).
                                      getFeedsAndFolders({});
-            // Fx2Compat
-            var homeFolder = gPlacesEnabled ? gStorageService.prefs.getIntPref('homeFolder')
-                                            : gStorageService.prefs.getCharPref('liveBookmarksFolder')
+
+            var homeFolder = gStorageService.prefs.getIntPref('homeFolder');
+
             this.traverseChildren(homeFolder);
 
             text += '(';
