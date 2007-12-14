@@ -1,13 +1,7 @@
-const FEED_CLASS_ID = Components.ID('{33F4FF4C-7F11-11DB-83CE-09C655D89593}');
-const ENTRY_CLASS_ID = Components.ID('{2B99DB2E-7F11-11DB-ABEC-E0C555D89593}');
-const FEED_CLASS_NAME = 'Container for feed data';
-const ENTRY_CLASS_NAME = 'Container for a single feed entry';
-const FEED_CONTRACT_ID = '@ancestor/brief/feed;1';
-const ENTRY_CONTRACT_ID = '@ancestor/brief/feedentry;1';
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // nsBriefFeed class definition
 function Feed() { }
@@ -77,12 +71,10 @@ Feed.prototype = {
         }
     },
 
-    QueryInterface: function BriefFeed_QueryInterface(aIID) {
-        if (!aIID.equals(Components.interfaces.nsIBriefFeed) &&
-            !aIID.equals(Components.interfaces.nsISupports))
-            throw Components.results.NS_ERROR_NO_INTERFACE;
-        return this;
-    }
+    classDescription: 'Container for feed data',
+    classID: Components.ID('{33F4FF4C-7F11-11DB-83CE-09C655D89593}'),
+    contractID: '@ancestor/brief/feed;1',
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefFeed])
 
 }
 
@@ -141,75 +133,23 @@ FeedEntry.prototype = {
             }
         }
         catch (e) {
-            // XXX On some feeds accessing nsIFeedContainer.authors throws.
+            // XXX With some feeds accessing nsIFeedContainer.authors throws.
         }
     },
 
-    QueryInterface: function BriefFeedEntry_QueryInterface(aIID) {
-      if (!aIID.equals(Components.interfaces.nsIBriefFeedEntry) &&
-          !aIID.equals(Components.interfaces.nsISupports))
-          throw Components.results.NS_ERROR_NO_INTERFACE;
-      return this;
-    }
+    classDescription: 'Container for a single feed entry',
+    classID: Components.ID('{2B99DB2E-7F11-11DB-ABEC-E0C555D89593}'),
+    contractID: '@ancestor/brief/feedentry;1',
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefFeedEntry])
 
 }
 
-
-
-function Factory(aInterface) {
-    this._interface = aInterface;
-}
-
-Factory.prototype = {
-
-    createInstance: function(aOuter, aIID) {
-        if (aOuter != null)
-            throw Components.results.NS_ERROR_NO_AGGREGATION;
-
-      return (new this._interface()).QueryInterface(aIID);
-    }
-
-}
-
-// Module definition (xpcom registration)
-var Module = {
-    _firstTime: true,
-
-    registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
-        aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-        aCompMgr.registerFactoryLocation(FEED_CLASS_ID, FEED_CLASS_NAME, FEED_CONTRACT_ID,
-                                         aFileSpec, aLocation, aType);
-        aCompMgr.registerFactoryLocation(ENTRY_CLASS_ID, ENTRY_CLASS_NAME, ENTRY_CONTRACT_ID,
-                                         aFileSpec, aLocation, aType);
-    },
-
-    unregisterSelf: function(aCompMgr, aLocation, aType) {
-        aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-        aCompMgr.unregisterFactoryLocation(FEED_CLASS_ID, aLocation);
-        aCompMgr.unregisterFactoryLocation(ENTRY_CLASS_ID, aLocation);
-    },
-
-    getClassObject: function(aCompMgr, aCID, aIID) {
-        if (!aIID.equals(Components.interfaces.nsIFactory))
-            throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
-
-        if (aCID.equals(FEED_CLASS_ID))
-            return new Factory(Feed);
-        if (aCID.equals(ENTRY_CLASS_ID))
-            return new Factory(FeedEntry);
-
-        throw Components.results.NS_ERROR_NO_INTERFACE;
-    },
-
-    canUnload: function(aCompMgr) { return true; },
-
-}
-
-// Module initialization
-function NSGetModule(aCompMgr, aFileSpec) { return Module; }
 
 function dump(aMessage) {
   var consoleService = Cc["@mozilla.org/consoleservice;1"].
                        getService(Ci.nsIConsoleService);
   consoleService.logStringMessage('Brief:\n' + aMessage);
 }
+
+
+function NSGetModule(compMgr, fileSpec) XPCOMUtils.generateModule([Feed, FeedEntry])
