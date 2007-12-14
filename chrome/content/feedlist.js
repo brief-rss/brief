@@ -794,7 +794,7 @@ var gContextMenuCommands = {
             transactions.push(transactionsService.removeItem(aFeeds[i].bookmarkID));
 
         var txn = transactionsService.aggregateTransactions('Remove items', transactions);
-        transactionsService.commitTransaction(txn);
+        transactionsService.doTransaction(txn);
     },
 
 
