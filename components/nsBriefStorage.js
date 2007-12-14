@@ -19,12 +19,14 @@ const BOOKMARKS_OBSERVER_DELAY = 250;
 
 const DATABASE_VERSION = 4;
 
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+
 var gStorageService = null;
 
 function BriefStorageService() {
     this.observerService = Cc['@mozilla.org/observer-service;1'].
                            getService(Ci.nsIObserverService);
-    
+
     // The instantiation can't be done on app-startup, because the directory service
     // doesn't work yet, so we perform it on profile-after-change.
     this.observerService.addObserver(this, 'profile-after-change', false);
@@ -70,15 +72,15 @@ BriefStorageService.prototype = {
 
         this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds (    ' +
                                            'feedID         TEXT UNIQUE,           ' +
-                                           'RDF_URI        TEXT,                  ' +
+                                           'RDF_URI        TEXT,                  ' + // rename
                                            'feedURL        TEXT,                  ' +
-                                           'websiteURL     TEXT,                  ' +
-                                           'title          TEXT,                  ' +
+                                           'websiteURL     TEXT,                  ' + // obsolete?
+                                           'title          TEXT,                  ' + // obsolete?
                                            'subtitle       TEXT,                  ' +
                                            'imageURL       TEXT,                  ' +
-                                           'imageLink      TEXT,                  ' +
+                                           'imageLink      TEXT,                  ' + // obsolete?
                                            'imageTitle     TEXT,                  ' +
-                                           'favicon        TEXT,                  ' +
+                                           'favicon        TEXT,                  ' + // obsolete?
                                            'hidden         INTEGER DEFAULT 0,     ' +
                                            'oldestAvailableEntryDate INTEGER,     ' +
                                            'rowIndex       INTEGER,               ' +
@@ -946,12 +948,12 @@ BriefStorageService.prototype = {
 
 
     initPlaces: function BriefStorage_initPlaces() {
-        this.historyService =   Cc['@mozilla.org/browser/nav-history-service;1'].
-                                getService(Ci.nsINavHistoryService);
+        this.historyService   = Cc['@mozilla.org/browser/nav-history-service;1'].
+                                  getService(Ci.nsINavHistoryService);
         this.bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
-                                getService(Ci.nsINavBookmarksService);
-        this.livemarkService =  Cc['@mozilla.org/browser/livemark-service;2'].
-                                getService(Ci.nsILivemarkService);
+                                  getService(Ci.nsINavBookmarksService);
+        this.livemarkService  = Cc['@mozilla.org/browser/livemark-service;2'].
+                                  getService(Ci.nsILivemarkService);
 
         this.bookmarksService.addObserver(this, false);
     },
@@ -963,22 +965,31 @@ BriefStorageService.prototype = {
         for (var i = 0; i < aContainer.childCount; i++) {
             var node = aContainer.getChild(i);
 
-            if (node.type == Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER) {
-                var isLivemark = this.livemarkService.isLivemark(node.itemId);
-                var url = isLivemark ? this.livemarkService.getFeedURI(node.itemId).spec : '';
+            if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
+                continue;
 
-                item = {};
-                item.title = this.bookmarksService.getItemTitle(node.itemId);
-                item.bookmarkID = node.itemId;
-                item.feedURL = url;
-                item.feedID = isLivemark ? hashString(url) : node.itemId;
-                item.rowIndex = this.bookmarkItems.length;
-                item.isFolder = !isLivemark;
-                item.parent = aContainer.itemId;
+            item = {};
+            item.title = this.bookmarksService.getItemTitle(node.itemId);
+            item.bookmarkID = node.itemId;
+            item.rowIndex = this.bookmarkItems.length;
+            item.parent = aContainer.itemId;
+
+            if (this.livemarkService.isLivemark(node.itemId)) {
+                var feedURL = this.livemarkService.getFeedURI(node.itemId).spec;
+                item.feedURL = feedURL;
+                item.feedID = hashString(feedURL);
+                item.isFolder = false;
+
+                this.bookmarkItems.push(item);
+            }
+            else {
+                item.feedURL = '';
+                item.feedID = node.itemId;
+                item.isFolder = true;
 
                 this.bookmarkItems.push(item);
 
-                if (!isLivemark && node instanceof Ci.nsINavHistoryContainerResultNode)
+                if (node instanceof Ci.nsINavHistoryContainerResultNode)
                     this.traversePlacesQueryResults(node);
             }
         }
@@ -988,7 +999,7 @@ BriefStorageService.prototype = {
 
 
     // nsINavBookmarkObserver
-    onEndUpdateBatch: function BriefStorage_onEndUpdateBatch(aDataSource) {
+    onEndUpdateBatch: function BriefStorage_onEndUpdateBatch() {
         if (this.homeFolderContentModified)
             this.delayedBookmarksSync();
 
@@ -997,7 +1008,7 @@ BriefStorageService.prototype = {
     },
 
     // nsINavBookmarkObserver
-    onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch(aDataSource) {
+    onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch() {
         this.batchUpdateInProgress = true;
     },
 
@@ -1112,23 +1123,29 @@ BriefStorageService.prototype = {
     },
 
 
-    // nsISupports
-    QueryInterface: function BriefStorage_QueryInterface(aIID) {
-        if (!aIID.equals(Components.interfaces.nsIBriefStorage) &&
-            !aIID.equals(Components.interfaces.nsIObserver) &&
-            !aIID.equals(Components.interfaces.nsINavBookmarkObserver) &&
-            !aIID.equals(Components.interfaces.nsISupports)) {
-            throw Components.results.NS_ERROR_NO_INTERFACE;
-        }
-        return this;
-    }
+    classDescription: STORAGE_CLASS_NAME,
+    classID: STORAGE_CLASS_ID,
+    contractID: STORAGE_CONTRACT_ID,
+    _xpcom_categories: [ { category: 'app-startup', service: true } ],
+    _xpcom_factory: {
+        createInstance: function(aOuter, aIID) {
+            if (aOuter != null)
+                throw Components.results.NS_ERROR_NO_AGGREGATION;
 
+            if (!gStorageService)
+                gStorageService = new BriefStorageService();
+
+            return gStorageService.QueryInterface(aIID);
+        }
+    },
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefStorage,
+                                           Ci.nsIObserver,
+                                           Ci.nsINavBookmarkObserver])
 }
 
 function BriefQuery() {
     this.observerService = Cc['@mozilla.org/observer-service;1'].
-                           getService(Ci.nsIObserverService);
-
+                             getService(Ci.nsIObserverService);
 }
 
 BriefQuery.prototype = {
@@ -1507,15 +1524,10 @@ BriefQuery.prototype = {
         }
     },
 
-    // nsISupports
-    QueryInterface: function BriefQuery_QueryInterface(aIID) {
-        if (!aIID.equals(Components.interfaces.nsIBriefQuery) &&
-           !aIID.equals(Components.interfaces.nsISupports)) {
-            throw Components.results.NS_ERROR_NO_INTERFACE;
-        }
-        return this;
-    }
-
+    classDescription: QUERY_CLASS_NAME,
+    classID: QUERY_CLASS_ID,
+    contractID: QUERY_CONTRACT_ID,
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefQuery])
 }
 
 function hashString(aString) {
@@ -1552,72 +1564,5 @@ function dump(aMessage) {
 }
 
 
-var StorageServiceFactory = {
-
-    createInstance: function(aOuter, aIID) {
-        if (aOuter != null)
-            throw Components.results.NS_ERROR_NO_AGGREGATION;
-
-        if (!gStorageService)
-            gStorageService = new BriefStorageService();
-
-        return gStorageService.QueryInterface(aIID);
-    }
-
-}
-
-var QueryFactory = {
-
-    createInstance: function(aOuter, aIID) {
-        if (aOuter != null)
-            throw Components.results.NS_ERROR_NO_AGGREGATION;
-
-        return (new BriefQuery()).QueryInterface(aIID);
-    }
-
-}
-
-// module definition (xpcom registration)
-var Module = {
-    _firstTime: true,
-
-    registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
-        aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-        aCompMgr.registerFactoryLocation(STORAGE_CLASS_ID, STORAGE_CLASS_NAME,
-                                         STORAGE_CONTRACT_ID, aFileSpec, aLocation, aType);
-        aCompMgr.registerFactoryLocation(QUERY_CLASS_ID, QUERY_CLASS_NAME,
-                                         QUERY_CONTRACT_ID, aFileSpec, aLocation, aType);
-
-        var categoryManager = Components.classes['@mozilla.org/categorymanager;1'].
-                              getService(Components.interfaces.nsICategoryManager);
-        categoryManager.addCategoryEntry('app-startup', 'nsIBriefStorage',
-                                         STORAGE_CONTRACT_ID, true, true);
-    },
-
-    unregisterSelf: function(aCompMgr, aLocation, aType) {
-        aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-        aCompMgr.unregisterFactoryLocation(CLASS_ID, aLocation);
-
-        var categoryManager = Components.classes['@mozilla.org/categorymanager;1'].
-                              getService(Components.interfaces.nsICategoryManager);
-        categoryManager.deleteCategoryEntry('app-startup', 'nsIBriefStorage', true);
-    },
-
-    getClassObject: function(aCompMgr, aCID, aIID) {
-        if (!aIID.equals(Components.interfaces.nsIFactory))
-            throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
-
-        if (aCID.equals(STORAGE_CLASS_ID))
-            return StorageServiceFactory;
-        if (aCID.equals(QUERY_CLASS_ID))
-            return QueryFactory;
-
-        throw Components.results.NS_ERROR_NO_INTERFACE;
-    },
-
-    canUnload: function(aCompMgr) { return true; }
-
-}
-
-// module initialization
-function NSGetModule(aCompMgr, aFileSpec) { return Module; }
+var components = [BriefStorageService, BriefQuery];
+function NSGetModule(compMgr, fileSpec) XPCOMUtils.generateModule(components)
