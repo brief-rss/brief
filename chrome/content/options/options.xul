@@ -2,7 +2,8 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/options.css" type="text/css"?>
 <?xml-stylesheet href="chrome://browser/content/places/places.css"?>
-<?xml-stylesheet href="chrome://browser/content/bookmarks/bookmarks.css" type="text/css"?> <!-- Fx2Compat -->
+
+<?xul-overlay href="chrome://browser/content/places/placesOverlay.xul"?>
 
 <!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
 
@@ -17,11 +18,6 @@
 
         <script type="application/x-javascript" src="options.js"/>
         <script type="application/x-javascript" src="opml.js"/>
-        <script type="application/x-javascript" src="chrome://browser/content/bookmarks/bookmarks.js"/> <!-- Fx2Compat -->
-        <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
-        <script type="application/x-javascript" src="chrome://browser/content/places/utils.js"/>
-        <script type="application/x-javascript" src="chrome://browser/content/places/controller.js"/>
-        <script type="application/x-javascript" src="chrome://browser/content/places/treeView.js"/>
 
         <stringbundleset id="string-bundles">
             <stringbundle id="options-bundle" src="chrome://brief/locale/options.properties"/>
@@ -31,9 +27,6 @@
             <preference id="extensions.brief.homeFolder"
                         name="extensions.brief.homeFolder"
                         type="int"/>
-            <preference id="extensions.brief.liveBookmarksFolder"
-                        name="extensions.brief.liveBookmarksFolder"
-                        type="string"/> <!-- Fx2Compat -->
             <preference id="extensions.brief.openInNewTab"
                         name="extensions.brief.openInNewTab"
                         type="bool"/>
@@ -57,8 +50,6 @@
             <treechildren flex="1"/>
         </tree>
 
-        <bookmarks-tree id="folders-tree" flex="1" type="folders"
-                        onselect="gMainPane.onRDFTreeSelect(event)"/> <!-- Fx2Compat -->
         <hbox id="import-export-box" pack="end">
             <button id="import-opml"
                     label="&importOPML.label;"

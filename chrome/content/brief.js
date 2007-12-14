@@ -8,8 +8,6 @@ const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.0.html';
 
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
-const gPlacesEnabled = 'nsINavHistoryService' in Components.interfaces;
-
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
@@ -86,10 +84,6 @@ function init() {
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
     setTimeout(loadHomeview, 0);
-
-    // Fx2Compat Init stuff in bookmarks.js
-    if (!gPlacesEnabled)
-        setTimeout(function() { initServices(); initBMService(); }, 1000);
 }
 
 
@@ -573,42 +567,22 @@ function showHomeFolderPicker() {
     var deck = document.getElementById('feed-list-deck');
     deck.selectedIndex = 1;
 
-    //Fx2Compat
     var placesTree = document.getElementById('places-tree');
-    var rdfBookmarksTree = document.getElementById('bookmark-folders-tree');
 
-    if (gPlacesEnabled) {
-        rdfBookmarksTree.hidden = true;
-
-        var query = PlacesUtils.history.getNewQuery();
-        var options = PlacesUtils.history.getNewQueryOptions();
-        var root = PlacesUtils.placesRootId;
-        query.setFolders([root], 1);
-        options.excludeItems = true;
-        placesTree.load([query], options);
-    }
-    else {
-        placesTree.hidden = true;
-        rdfBookmarksTree.hidden = false;
-    }
+    var query = PlacesUtils.history.getNewQuery();
+    var options = PlacesUtils.history.getNewQueryOptions();
+    var root = PlacesUtils.placesRootId;
+    query.setFolders([root], 1);
+    options.excludeItems = true;
+    placesTree.load([query], options);
 }
 
 
 function selectHomeFolder(aEvent) {
-    if (gPlacesEnabled) {
-        var placesTree = document.getElementById('places-tree');
+    var placesTree = document.getElementById('places-tree');
 
-        if (placesTree.currentIndex != -1)
-            gPrefs.setIntPref('homeFolder', placesTree.selectedNode.itemId);
-    }
-    else {
-        var foldersTree = document.getElementById('bookmark-folders-tree');
-        var selectedIndex = foldersTree.currentIndex;
-        if (selectedIndex != -1) {
-            var resource = foldersTree.treeBuilder.getResourceAtIndex(selectedIndex);
-            gPrefs.setCharPref('liveBookmarksFolder', resource.Value);
-        }
-    }
+    if (placesTree.currentIndex != -1)
+        gPrefs.setIntPref('homeFolder', placesTree.selectedNode.itemId);
 }
 
 
@@ -736,18 +710,9 @@ var gPrefs = {
         this._branch.removeObserver('', this);
     },
 
-    // Fx2Compat
     get homeFolder() {
-        var home = null;
-        if (gPlacesEnabled) {
-            var pref = this.getIntPref('homeFolder');
-            home = (pref != -1) ? pref : null;
-        }
-        else {
-            home = this.getCharPref('liveBookmarksFolder');
-        }
-
-        return home;
+        var pref = this.getIntPref('homeFolder');
+        return (pref != -1) ? pref : null;
     },
 
     observe: function gPrefs_observe(aSubject, aTopic, aData) {

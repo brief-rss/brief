@@ -1,10 +1,5 @@
-const NC_NAME    = 'http://home.netscape.com/NC-rdf#Name';
-const NC_FEEDURL = 'http://home.netscape.com/NC-rdf#FeedURL';
-
 Ci = Components.interfaces;
 Cc = Components.classes;
-
-const gPlacesEnabled = 'nsINavHistoryService' in Ci;
 
 var gFeed = null;
 var gStorageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
@@ -172,20 +167,18 @@ function saveChanges() {
 
         gFeed.updateInterval = intervalInMilliseconds;
     }
-    else
+    else {
         gFeed.updateInterval = 0;
+    }
 
     gStorageService.setFeedOptions(gFeed);
 
-    if (gPlacesEnabled)
-        savePlacesLivemarksData();
-    else
-        saveRDFLivemarksData();
+    saveLivemarksData();
 
     return true;
 }
 
-function savePlacesLivemarksData() {
+function saveLivemarksData() {
     var nameTextbox = document.getElementById('feed-name-textbox');
     var urlTextbox = document.getElementById('feed-url-textbox')
 
@@ -203,74 +196,4 @@ function savePlacesLivemarksData() {
         var uri = ioService.newURI(urlTextbox.value, null, null);
         livemarkService.setFeedURI(gFeed.bookmarkID, uri);
     }
-}
-
-function saveRDFLivemarksData() {
-    var nameTextbox = document.getElementById('feed-name-textbox');
-    var urlTextbox = document.getElementById('feed-url-textbox')
-
-    if (gFeed.title == nameTextbox.value && gFeed.feedURL == urlTextbox.value)
-        return;
-
-    // We need to write values of properties that come from Live Bookmarks.
-    // First, init stuff.
-    var changed = false;
-    initServices();
-    initBMService();
-    var resource = RDF.GetResource(gFeed.bookmarkID);
-    var arc, newValue, oldValue;
-
-    // Write the name.
-    newValue = nameTextbox.value;
-    arc = RDF.GetResource(NC_NAME)
-    oldValue = BMDS.GetTarget(resource, arc, true);
-    if (oldValue)
-        oldValue = oldValue.QueryInterface(Ci.nsIRDFLiteral);
-    if (newValue)
-        newValue = RDF.GetLiteral(newValue);
-    changed |= updateAttribute(arc, oldValue, newValue);
-
-
-    // Write the URL.
-    newValue = urlTextbox.value;
-    arc = RDF.GetResource(NC_FEEDURL);
-    oldValue = BMDS.GetTarget(resource, arc, true);
-    if (oldValue)
-        oldValue = oldValue.QueryInterface(Ci.nsIRDFLiteral);
-    if (newValue && newValue.indexOf(':') < 0)
-        newValue = 'http://' + newValue; // If a scheme isn't specified, use http://
-    if (newValue)
-        newValue = RDF.GetLiteral(newValue);
-    changed |= updateAttribute(arc, oldValue, newValue);
-
-    // If the URL was changed, clear out the favicon.
-    if (oldValue && oldValue.Value != newValue.Value) {
-        var icon = BMDS.GetTarget(resource, RDF.GetResource(gNC_NS + 'Icon'), true);
-        if (icon)
-            BMDS.Unassert(resource, RDF.GetResource(gNC_NS + 'Icon'), icon);
-    }
-
-    if (changed) {
-        var remote = BMDS.QueryInterface(Ci.nsIRDFRemoteDataSource);
-        if (remote)
-            remote.Flush();
-    }
-}
-
-// Helper function for writing to the RDF data source.
-function updateAttribute(aProperty, aOldValue, aNewValue) {
-    var resource = RDF.GetResource(gFeed.bookmarkID);
-
-    if ((aOldValue || aNewValue) && aOldValue != aNewValue) {
-        if (aOldValue && !aNewValue)
-            BMDS.Unassert(gResource, aProperty, aOldValue);
-        else if (!aOldValue && aNewValue)
-            BMDS.Assert(resource, aProperty, aNewValue, true);
-        else
-            BMDS.Change(resource, aProperty, aOldValue, aNewValue);
-
-        return true;
-    }
-
-    return false;
 }

@@ -5,22 +5,14 @@
 var opml = {
 
     init: function() {
-        // Fx2Compat
-        this.importLevel = gPlacesEnabled ? this.importLevelPlaces
-                                          : this.importLevelRDF;
-        this.addFolderToOPML = gPlacesEnabled ? this.addFolderToOPML_Places
-                                              : this.addFolderToOPML_RDF;
-
-        if (gPlacesEnabled) {
-            this.historyService =   Cc['@mozilla.org/browser/nav-history-service;1'].
-                                    getService(Ci.nsINavHistoryService);
-            this.bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
-                                    getService(Ci.nsINavBookmarksService);
-            this.livemarkService =  Cc['@mozilla.org/browser/livemark-service;2'].
-                                    getService(Ci.nsILivemarkService);
-            this.ioService = Cc['@mozilla.org/network/io-service;1'].
-                             getService(Ci.nsIIOService);
-        }
+        this.historyService   = Cc['@mozilla.org/browser/nav-history-service;1'].
+                                getService(Ci.nsINavHistoryService);
+        this.bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
+                                getService(Ci.nsINavBookmarksService);
+        this.livemarkService  = Cc['@mozilla.org/browser/livemark-service;2'].
+                                getService(Ci.nsILivemarkService);
+        this.ioService = Cc['@mozilla.org/network/io-service;1'].
+                         getService(Ci.nsIIOService);
     },
 
     importOPML: function() {
@@ -68,40 +60,16 @@ var opml = {
         }
     },
 
-    importLevelRDF: function(nodes, createIn) {
-        if (!createIn) {
-			var pref = document.getElementById('extensions.brief.liveBookmarksFolder');
-            createIn = RDF.GetResource(pref.value || 'NC:BookmarksRoot');
-        }
-
-        for (var i = 0; i < nodes.length; i++) {
-            var node = nodes[i];
-            switch (node.type) {
-            case 'folder':
-                var newCreateIn = BMSVC.createFolderInContainer(node.title, createIn, null);
-                this.importLevel(node.children, newCreateIn);
-                break;
-            case 'feed':
-                BMSVC.createLivemarkInContainer(node.title, node.url, node.feedURL,
-                                                node.desc, createIn, null);
-                break;
-            case 'link':
-                BMSVC.createBookmarkInContainer(node.title, node.url, node.keyword,
-                                                node.desc, null, null, createIn, null);
-                break;
-            }
-        }
-    },
-
-    importLevelPlaces: function(nodes, createIn) {
+    importLevel: function(aNodes, aCreateIn) {
+        var createIn = aCreateIn;
         if (!createIn) {
             var home = document.getElementById('extensions.brief.homeFolder').value;
             var createIn = (home != -1) ? home
                                         : this.bookmarksService.bookmarksMenuFolder;
         }
 
-        for (var i = 0; i < nodes.length; i++) {
-            var node = nodes[i];
+        for (var i = 0; i < aNodes.length; i++) {
+            var node = aNodes[i];
             switch (node.type) {
             case 'folder':
                 var newCreateIn = this.bookmarksService.createFolder(createIn, node.title, -1);
@@ -185,24 +153,17 @@ var opml = {
         var file = this.promptForFile(filePrefix);
 
         if (file) {
-            // Fx2Compat
-            if (gPlacesEnabled) {
-                var home = document.getElementById('extensions.brief.homeFolder').value;
-                var folder = (home != -1) ? home
-                                          : this.bookmarksService.bookmarksMenuFolder;
+            var home = document.getElementById('extensions.brief.homeFolder').value;
+            var folder = (home != -1) ? home
+                                      : this.bookmarksService.bookmarksMenuFolder;
 
-                var options = this.historyService.getNewQueryOptions();
-                var query = this.historyService.getNewQuery();
+            var options = this.historyService.getNewQueryOptions();
+            var query = this.historyService.getNewQuery();
 
-                query.setFolders([folder], 1);
-                options.excludeItems = true;
-                var result = this.historyService.executeQuery(query, options);
-                var root = result.root;
-            }
-            else {
-                var pref = document.getElementById('extensions.brief.liveBookmarksFolder');
-                var root = RDF.GetResource(pref.value || 'NC:BookmarksRoot');
-            }
+            query.setFolders([folder], 1);
+            options.excludeItems = true;
+            var result = this.historyService.executeQuery(query, options);
+            var root = result.root;
 
             var data = '';
             data += '<?xml version="1.0" encoding="UTF-8"?>' + '\n';
@@ -233,65 +194,8 @@ var opml = {
         }
     },
 
-    addFolderToOPML_RDF: function(dataString, folder, level, isBase) {
-        level++;
 
-        if (!isBase) {
-            dataString += '\t';
-
-            for (var i = 1; i < level; i++)
-                dataString += '\t';
-
-            var name = this.getField(folder, 'Name');
-            dataString += '<outline text="' + this.cleanXMLText(name) + '">' + '\n';
-        }
-
-        RDFC.Init(BMDS, folder);
-
-        var elements = RDFC.GetElements();
-
-        while (elements.hasMoreElements()) {
-            var element = elements.getNext();
-            element.QueryInterface(Components.interfaces.nsIRDFResource);
-
-            var type = BookmarksUtils.resolveType(element);
-
-            if (type == 'Folder' || type == 'PersonalToolbarFolder') {
-                dataString = this.addFolderToOPML(dataString, element, level, false);
-            }
-            else if (type == 'Livemark') {
-                dataString += '\t\t';
-
-                for (var i = 1; i < level; i++)
-                    dataString += '\t';
-
-                var name = this.getField(element, "Name");
-                var url = this.getField(element, "URL");
-                var feedURL = this.getField(element, "FeedURL");
-                var desc = this.getField(element, "Description");
-
-                dataString += '<outline type="rss" version="RSS" '           +
-                              'text="'          + this.cleanXMLText(name)    +
-                              '" htmlUrl="'     + this.cleanXMLText(url)     +
-                              '" xmlUrl="'      + this.cleanXMLText(feedURL) +
-                              '" description="' + this.cleanXMLText(desc)    +
-                              '"/>' + "\n";
-            }
-        }
-
-        if (!isBase) {
-            dataString += '\t';
-
-            for (var i = 1; i < level; i++)
-                dataString += '\t';
-
-            dataString += '</outline>' + '\n';
-        }
-
-        return dataString;
-    },
-
-    addFolderToOPML_Places: function(dataString, folder, level, isBase) {
+    addFolderToOPML: function(dataString, folder, level, isBase) {
         level++;
 
         if (!isBase) {
@@ -368,7 +272,7 @@ var opml = {
             return fp.file;
     },
 
-    cleanXMLText : function (str) {
+    cleanXMLText: function(str) {
         var res = [
             {find : '&', replace : '&amp;'},
             {find : '"', replace : '&quot;'},
@@ -385,7 +289,7 @@ var opml = {
         return str;
     },
 
-    getField : function (e, field) {
+    getField: function(e, field) {
         try {
             var source = RDF.GetResource(e.Value);
             var property = RDF.GetResource('http://home.netscape.com/NC-rdf#'+field);
