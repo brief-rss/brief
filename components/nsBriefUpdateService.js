@@ -36,18 +36,15 @@ function BriefUpdateService() {
     this.startupDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
     this.prefs = Cc['@mozilla.org/preferences-service;1'].
-                 getService(Ci.nsIPrefService).
-                 getBranch('extensions.brief.').
-                 QueryInterface(Ci.nsIPrefBranch2);
+                   getService(Ci.nsIPrefService).
+                   getBranch('extensions.brief.').
+                   QueryInterface(Ci.nsIPrefBranch2);
 
-    // Unfortunately alerts don't work on all platforms in Fx2.
-    if (Ci.nsIAlertsService && '@mozilla.org/alerts-service;1' in Cc) {
-        this.alertsService = Cc['@mozilla.org/alerts-service;1'].
-                             getService(Ci.nsIAlertsService);
-    }
+    this.alertsService = Cc['@mozilla.org/alerts-service;1'].
+                           getService(Ci.nsIAlertsService);
 
     var observerService = Cc['@mozilla.org/observer-service;1'].
-                          getService(Ci.nsIObserverService);
+                            getService(Ci.nsIObserverService);
     observerService.addObserver(this, 'brief:feed-updated', false);
     observerService.addObserver(this, 'brief:feed-error', false);
     observerService.addObserver(this, 'profile-after-change', false);
