@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Brief - Einstellungen">
 <!ENTITY mainPane.label "Allgemein">
 <!ENTITY folderTree.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
+<!ENTITY importOPML.label "Importieren...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportieren...">
+<!ENTITY exportOPML.accesskey "x">
 <!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
 <!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Brief in einem neuen Tab öffnen">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "Verhalten">
 <!ENTITY openEntriesInTabs.label "Einträge in neuen Tabs öffnen">
 <!ENTITY openEntriesInTabs.accesskey "E">
-<!ENTITY doubleClickMarks.label "Einträge in Feed-Ansicht mit Doppelklick als gelesen markieren">
-<!ENTITY doubleClickMarks.accesskey "i">
+<!ENTITY autoMarkRead.label "Angesehene Einträge als gelesen markieren">
+<!ENTITY autoMarkRead.accesskey "m">
 <!ENTITY storingGroup.caption "Speicherung">
 <!ENTITY expirationBefore.label "Heruntergeladene Einträge für">
 <!ENTITY expirationAfter.label "Tage speichern">
@@ -28,7 +32,7 @@
 <!ENTITY storedEntriesBefore.label "Nicht mehr als">
 <!ENTITY storedEntriesAfter.label "Einträge pro Feed speichern">
 <!ENTITY storedEntriesCheckbox.accesskey "m">
-<!ENTITY clearAllEntriesButton.label "Alle Einträge entfernen">
+<!ENTITY clearAllEntriesButton.label "Alle Einträge löschen...">
 <!ENTITY clearAllEntriesButton.accesskey "A">
 <!ENTITY displayPane.label "Anzeige">
 <!ENTITY feedViewGroup.caption "Anzeige des Feed-Inhalts">
@@ -36,8 +40,9 @@
 <!ENTITY authorsCheckbox.accesskey "u">
 <!ENTITY entriesPerPageBefore.label "Pro Seite">
 <!ENTITY entriesPerPageAfter.label "Einträge anzeigen">
-<!ENTITY enableCustomStyle.label "Eigenes Stylesheet für die Darstellung der Feeds verwenden">
-<!ENTITY enableCustomStyle.accesskey "y">
+<!ENTITY entriesPerPage.accesskey "S">
+<!ENTITY enableCustomStyle.label "Benutzerdefinierter Style:">
+<!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Durchsuchen...">
 <!ENTITY browseCustomStyle.accesskey "D">
 <!ENTITY showShortcuts.label "Tastaturkürzel anzeigen">

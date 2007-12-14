@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Brief indstillinger">
 <!ENTITY mainPane.label "Hoved">
 <!ENTITY folderTree.label "Mappe indeholdende dine Live-bogmærker">
+<!ENTITY importOPML.label "Import...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Export...">
+<!ENTITY exportOPML.accesskey "x">
 <!ENTITY showStatusbarIcon.label "Vis statuslinjeikon">
 <!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Åbn Brief i et nyt faneblad">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "Opførsel">
 <!ENTITY openEntriesInTabs.label "Åbn emner i nye faneblade">
 <!ENTITY openEntriesInTabs.accesskey "b">
-<!ENTITY doubleClickMarks.label "Marker emner som læste ved dobbeltklik">
-<!ENTITY doubleClickMarks.accesskey "m">
+<!ENTITY autoMarkRead.label "Mark items as read when they are viewed">
+<!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "Opbevaring">
 <!ENTITY expirationBefore.label "Fjern downloadede emner efter">
 <!ENTITY expirationAfter.label "dage">
@@ -28,7 +32,7 @@
 <!ENTITY storedEntriesBefore.label "Gem ikke flere end">
 <!ENTITY storedEntriesAfter.label "seneste indlæg af hver emne">
 <!ENTITY storedEntriesCheckbox.accesskey "e">
-<!ENTITY clearAllEntriesButton.label "Ryd alle indlæg">
+<!ENTITY clearAllEntriesButton.label "Clear all items...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Vis">
 <!ENTITY feedViewGroup.caption "Fed indholdsvisning">
@@ -36,8 +40,9 @@
 <!ENTITY authorsCheckbox.accesskey "V">
 <!ENTITY entriesPerPageBefore.label "Vis">
 <!ENTITY entriesPerPageAfter.label "indlæg pr. side">
-<!ENTITY enableCustomStyle.label "Brug feedets eget stil-indhold">
-<!ENTITY enableCustomStyle.accesskey "i">
+<!ENTITY entriesPerPage.accesskey "S">
+<!ENTITY enableCustomStyle.label "Use custom style: ">
+<!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Gennemse">
 <!ENTITY browseCustomStyle.accesskey "G">
 <!ENTITY showShortcuts.label "Vis genveje">

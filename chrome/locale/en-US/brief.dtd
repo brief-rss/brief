@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Search current view">
 <!ENTITY searchAllFeeds.label "Search all feeds">
-<!ENTITY headlinesCheckbox.tooltip "Show only headlines">
+<!ENTITY headlinesCheckbox.tooltip "Use headlines view">
 <!ENTITY showAll.label "View all">
 <!ENTITY showUnread.label "View unread">
 <!ENTITY showStarred.label "View starred">

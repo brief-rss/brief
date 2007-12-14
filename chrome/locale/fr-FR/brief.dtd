@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Articles courants">
 <!ENTITY searchAllFeeds.label "Tous les flux">
-<!ENTITY headlinesCheckbox.tooltip "Affichage des titres">
+<!ENTITY headlinesCheckbox.tooltip "Utiliser l&apos;affichage des titres">
 <!ENTITY showAll.label "Tous les articles">
 <!ENTITY showUnread.label "Articles non lus">
 <!ENTITY showStarred.label "Articles marqués">

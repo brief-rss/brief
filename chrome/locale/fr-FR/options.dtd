@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Options de Brief">
 <!ENTITY mainPane.label "Générales">
 <!ENTITY folderTree.label "Dossier contenant vos marque-pages dynamiques :">
+<!ENTITY importOPML.label "Importer…">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exporter…">
+<!ENTITY exportOPML.accesskey "E">
 <!ENTITY showStatusbarIcon.label "Afficher l&apos;icône dans la barre d&apos;état">
 <!ENTITY showStatusbarIcon.accesskey "A">
 <!ENTITY openInNewTab.label "Ouvrir Brief dans un nouvel onglet">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "Comportement">
 <!ENTITY openEntriesInTabs.label "Ouvrir les articles dans de nouveaux onglets">
 <!ENTITY openEntriesInTabs.accesskey "O">
-<!ENTITY doubleClickMarks.label "Marquer les articles comme lus au double-clic">
-<!ENTITY doubleClickMarks.accesskey "M">
+<!ENTITY autoMarkRead.label "Marquer les articles vus comme lus">
+<!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "Enregistrement">
 <!ENTITY expirationBefore.label "Supprimer les articles téléchargés il y a plus de">
 <!ENTITY expirationAfter.label "jours">
@@ -28,16 +32,17 @@
 <!ENTITY storedEntriesBefore.label "N&apos;enregistrer que les">
 <!ENTITY storedEntriesAfter.label "derniers articles de chaque flux">
 <!ENTITY storedEntriesCheckbox.accesskey "N">
-<!ENTITY clearAllEntriesButton.label "Supprimer tous les articles">
-<!ENTITY clearAllEntriesButton.accesskey "u">
+<!ENTITY clearAllEntriesButton.label "Supprimer tous les articles…">
+<!ENTITY clearAllEntriesButton.accesskey "t">
 <!ENTITY displayPane.label "Affichage">
 <!ENTITY feedViewGroup.caption "Affichage du contenu des flux">
 <!ENTITY authorsCheckbox.label "Afficher l&apos;auteur des articles">
 <!ENTITY authorsCheckbox.accesskey "A">
 <!ENTITY entriesPerPageBefore.label "Afficher">
 <!ENTITY entriesPerPageAfter.label "articles par page">
-<!ENTITY enableCustomStyle.label "Utiliser un style personnalisé pour le contenu des flux">
-<!ENTITY enableCustomStyle.accesskey "U">
+<!ENTITY entriesPerPage.accesskey "r">
+<!ENTITY enableCustomStyle.label "Utiliser un style personnalisé :">
+<!ENTITY enableCustomStyle.accesskey "s">
 <!ENTITY browseCustomStyle.label "Parcourir…">
 <!ENTITY browseCustomStyle.accesskey "P">
 <!ENTITY showShortcuts.label "Raccourcis clavier">

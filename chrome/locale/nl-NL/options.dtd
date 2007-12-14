@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Brief opties">
 <!ENTITY mainPane.label "Hoofdvenster">
 <!ENTITY folderTree.label "Map met uw Live Bladwijzers:">
+<!ENTITY importOPML.label "Importeren...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exporteren...">
+<!ENTITY exportOPML.accesskey "x">
 <!ENTITY showStatusbarIcon.label "Statusbalkpictogram weergeven">
 <!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Brief in een nieuw tabblad openen">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "Gedrag">
 <!ENTITY openEntriesInTabs.label "Berichten in nieuwe tabbladen openen">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY doubleClickMarks.label "Berichten als gelezen markeren wanneer ze dubbelgeklikt worden">
-<!ENTITY doubleClickMarks.accesskey "M">
+<!ENTITY autoMarkRead.label "Berichten als gelezen markeren wanneer ze worden bekeken">
+<!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "Opslaan">
 <!ENTITY expirationBefore.label "Gedownloade berichten verwijderen na">
 <!ENTITY expirationAfter.label "dagen">
@@ -28,16 +32,17 @@
 <!ENTITY storedEntriesBefore.label "Niet meer dan">
 <!ENTITY storedEntriesAfter.label "meest recente berichten in elke feed opslaan">
 <!ENTITY storedEntriesCheckbox.accesskey "r">
-<!ENTITY clearAllEntriesButton.label "Alle berichten wissen">
-<!ENTITY clearAllEntriesButton.accesskey "W">
+<!ENTITY clearAllEntriesButton.label "Alle berichten wissen...">
+<!ENTITY clearAllEntriesButton.accesskey "A">
 <!ENTITY displayPane.label "Weergave">
 <!ENTITY feedViewGroup.caption "Feedinhoud">
 <!ENTITY authorsCheckbox.label "Schrijvers van de berichten weergeven">
 <!ENTITY authorsCheckbox.accesskey "g">
 <!ENTITY entriesPerPageBefore.label "Per pagina">
 <!ENTITY entriesPerPageAfter.label "onderwerpen weergeven">
-<!ENTITY enableCustomStyle.label "Aangepaste stijl van de feedinhoud gebruiken">
-<!ENTITY enableCustomStyle.accesskey "d">
+<!ENTITY entriesPerPage.accesskey "g">
+<!ENTITY enableCustomStyle.label "Aangepaste stijl gebruiken:">
+<!ENTITY enableCustomStyle.accesskey "j">
 <!ENTITY browseCustomStyle.label "Bladeren">
 <!ENTITY browseCustomStyle.accesskey "B">
 <!ENTITY showShortcuts.label "Sneltoetsen weergeven">

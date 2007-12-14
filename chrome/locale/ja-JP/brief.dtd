@@ -2,19 +2,19 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "現在の表示から検索">
 <!ENTITY searchAllFeeds.label "すべてのフィードを検索">
-<!ENTITY headlinesCheckbox.tooltip "見出しのみを表示">
+<!ENTITY headlinesCheckbox.tooltip "見出し表示を利用します">
 <!ENTITY showAll.label "すべて見る">
 <!ENTITY showUnread.label "未読を見る">
 <!ENTITY showStarred.label "スター済みを見る">
-<!ENTITY updateButton.tooltip "すべてのフィードを更新確認する">
-<!ENTITY stopUpdatingButton.tooltip "フィードの更新確認を止める">
-<!ENTITY searchScopeButton.tooltip "検索範囲を変更する">
-<!ENTITY showOptions.tooltip "Brief のオプションを開く">
+<!ENTITY updateButton.tooltip "すべてのフィードを更新確認します">
+<!ENTITY stopUpdatingButton.tooltip "フィードの更新確認を停止します">
+<!ENTITY searchScopeButton.tooltip "検索範囲を変更します">
+<!ENTITY showOptions.tooltip "Brief のオプションを開きます">
 <!ENTITY markAllRead.label "すべてを既読にする">
-<!ENTITY markViewRead.tooltip "すべての項目を既読にする">
-<!ENTITY viewConstraintList.tooltip "表示する項目の種類を選ぶ">
-<!ENTITY previousPage.tooltip "より新たな項目を表示">
-<!ENTITY nextPage.tooltip "より古い項目を表示">
+<!ENTITY markViewRead.tooltip "すべての項目を既読にします">
+<!ENTITY viewConstraintList.tooltip "表示する項目の種類を選びます">
+<!ENTITY previousPage.tooltip "より新たな項目を表示します">
+<!ENTITY nextPage.tooltip "より古い項目を表示します">
 <!ENTITY unreadFolder.label "未読">
 <!ENTITY starredFolder.label "スター済み">
 <!ENTITY trashFolder.label "ごみ箱">
@@ -29,7 +29,7 @@
 <!ENTITY ctxDeleteFolder.label "フォルダを削除する">
 <!ENTITY ctxEmptyFeed.label "フィードを空にする">
 <!ENTITY ctxEmptyFolder.label "フォルダを空にする">
-<!ENTITY ctxRestoreTrashed.label "ごみ箱に捨てた項目を元に戻す">
+<!ENTITY ctxRestoreTrashed.label "すべての項目を元に戻す">
 <!ENTITY ctxEmptyTrash.label "ごみ箱を空にする">
 <!ENTITY ctxFeedProperties.label "プロパティ">
 <!ENTITY ctxUpdateFeeds.label "今すぐフィードを更新">

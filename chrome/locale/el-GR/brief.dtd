@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "ΟΚ">
 <!ENTITY searchCurrentView.label "Εύρεση στα εμφανισμένα">
 <!ENTITY searchAllFeeds.label "Εύρεση σε όλα τα αρχεία ροής">
-<!ENTITY headlinesCheckbox.tooltip "Προβολή μόνο επικεφαλίδων">
+<!ENTITY headlinesCheckbox.tooltip "Εμφάνιση μόνο επικεφαλίδων">
 <!ENTITY showAll.label "Εμφάνιση όλων">
 <!ENTITY showUnread.label "Εμφάνιση μη ανανγωσμένων">
 <!ENTITY showStarred.label "Εμφάνιση σημειωμένων με αστέρι">
