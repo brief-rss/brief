@@ -40,7 +40,7 @@ function BriefUpdateService() {
                  getBranch('extensions.brief.').
                  QueryInterface(Ci.nsIPrefBranch2);
 
-    // Unfortunately alerts don't work on all platforms
+    // Unfortunately alerts don't work on all platforms in Fx2.
     if (Ci.nsIAlertsService && '@mozilla.org/alerts-service;1' in Cc) {
         this.alertsService = Cc['@mozilla.org/alerts-service;1'].
                              getService(Ci.nsIAlertsService);
@@ -315,34 +315,43 @@ BriefUpdateService.prototype = {
  */
 function FeedFetcher(aFeed) {
     this.feed = aFeed;
-    this.favicon = aFeed.favicon;
 
     this.observerService = Cc['@mozilla.org/observer-service;1'].
-                           getService(Ci.nsIObserverService);
+                             getService(Ci.nsIObserverService);
     this.observerService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
     this.observerService.addObserver(this, 'brief:feed-update-canceled', false);
+
     this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+
+    this.favicon = this.feed.favicon;
+
+    // We use websiteURL instead of feedURL for resolving the favicon URL,
+    // because many websites use services like Feedburner for generating their
+    // feeds and we'd get the Feedburner's favicon instead of the website's
+    // favicon.
+    if (!this.favicon)
+        new FaviconFetcher(aFeed.websiteURL, this);
 
     this.requestFeed();
 }
 
 FeedFetcher.prototype = {
 
-    feed: null,           // The passed feed, as currently stored in the database.
+    feed:           null, // The passed feed, as currently stored in the database.
     downloadedFeed: null, // The downloaded feed. Initially null.
-    favicon: '',          // The feed's favicon. Initially set to what's currently in the database.
 
-    request: null,
+    request:      null,
     timeoutTimer: null,
+
     observerService: null,
 
     // Indicates if the request has encountered an error (either a connection error or
-    // parsing error) and have sent 'brief:feed-error' notification.
+    // parsing error) and has sent 'brief:feed-error' notification.
     inError: false,
-
 
     requestFeed: function FeedFetcher_requestFeed() {
         var self = this;
+
         // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
         const I_LOVE_NECKO_TOO = 2152398850;
 
@@ -401,28 +410,17 @@ FeedFetcher.prototype = {
         this.downloadedFeed.feedURL = this.feed.feedURL;
         this.downloadedFeed.feedID = this.feed.feedID;
 
-        // Now that we have the feed we can download the favicon if necessary. We
-        // couldn't download it earlier, because we may have had no websiteURL.
-        // We must use websiteURL instead of feedURL for resolving the favicon URL,
-        // because many websites use services like Feedburner for generating their
-        // feeds and we'd get the Feedburner's favicon instead of the website's
-        // favicon.
-        if (!this.favicon) {
-            if (!this.downloadedFeed.websiteURL) {
-                this.favicon = 'no-favicon';
-                this.passDataToStorage();
-                return;
-            }
-
-            var uri = Cc['@mozilla.org/network/io-service;1'].
-                      getService(Ci.nsIIOService).
-                      newURI(this.downloadedFeed.websiteURL, null, null);
-            new FaviconFetcher(uri, this);
-        }
-        else {
-            // If we already have the favicon, we're ready to commit the data
+        // If we already have the favicon, we're ready to commit the data.
+        if (this.favicon)
             this.passDataToStorage();
-        }
+    },
+
+    onFaviconReady: function FeedFetcher_onFaviconReady(aFavicon) {
+        this.favicon = aFavicon;
+
+        // If the feed was already downloaded and parsed, we can commit the data.
+        if (this.downloadedFeed)
+            this.passDataToStorage();
     },
 
 
@@ -430,7 +428,8 @@ FeedFetcher.prototype = {
         this.finish(true);
 
         this.downloadedFeed.favicon = this.favicon;
-        var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+        var storageService = Cc['@ancestor/brief/storage;1'].
+                               getService(Ci.nsIBriefStorage);
         storageService.updateFeed(this.downloadedFeed);
     },
 
@@ -475,6 +474,7 @@ FeedFetcher.prototype = {
         }
     },
 
+
     QueryInterface: function FeedFetcher_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
            aIID.equals(Ci.nsIObserver) ||
@@ -485,81 +485,64 @@ FeedFetcher.prototype = {
 
 }
 
-
 /**
- * Downloads a favicon of a webpage and b64-encodes it.
+ * Downloads a favicon of a webpage and base64-encodes it.
  *
- * @param aWebsiteURI  URI of webpage which favicon to download (not URI of the
+ * @param aWebsiteURL  URL of webpage which favicon to download (not URI of the
  *                     favicon itself).
  * @param aFeedFetcher FeedFetcher to use for callback.
  */
-function FaviconFetcher(aWebsiteURI, aFeedFetcher) {
-    var ios = Cc['@mozilla.org/network/io-service;1'].
-              getService(Ci.nsIIOService);
-    var faviconURI = ios.newURI(aWebsiteURI.prePath + '/favicon.ico', null, null);
+function FaviconFetcher(aWebsiteURL, aFeedFetcher) {
+    var ioService = Cc['@mozilla.org/network/io-service;1'].
+                      getService(Ci.nsIIOService);
+    var websiteURI = ioService.newURI(aWebsiteURL, null, null)
+    var faviconURI = ioService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
     var chan = ios.newChannelFromURI(faviconURI);
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
     this.feedFetcher = aFeedFetcher;
-    this.websiteURI = aWebsiteURI;
+    this.websiteURI = websiteURI;
     this._channel = chan;
     this._bytes = [];
 }
 
 FaviconFetcher.prototype = {
+    feedFetcher: null,
+    websiteURI:  null,
+
     _channel:   null,
     _countRead: 0,
     _stream:    null,
 
-    QueryInterface: function FaviconFetcher_loadQI(aIID) {
-        if (aIID.equals(Ci.nsISupports)           ||
-            aIID.equals(Ci.nsIRequestObserver)    ||
-            aIID.equals(Ci.nsIStreamListener)     ||
-            aIID.equals(Ci.nsIChannelEventSink)   ||
-            aIID.equals(Ci.nsIInterfaceRequestor) ||
-            aIID.equals(Ci.nsIBadCertListener)    ||
-            // See bug 358878 comment 11
-            aIID.equals(Ci.nsIPrompt)             ||
-            // See FIXME comment below
-            aIID.equals(Ci.nsIHttpEventSink)      ||
-            aIID.equals(Ci.nsIProgressEventSink)  ||
-            false) {
-            return this;
-        }
-
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    },
-
     // nsIRequestObserver
-    onStartRequest: function FaviconFetcher_loadStartR(aRequest, aContext) {
+    onStartRequest: function FaviconFetcher_lonStartRequest(aRequest, aContext) {
         this._stream = Cc["@mozilla.org/binaryinputstream;1"].
-                       createInstance(Ci.nsIBinaryInputStream);
+                         createInstance(Ci.nsIBinaryInputStream);
     },
 
-    onStopRequest: function FaviconFetcher_loadStopR(aRequest, aContext, aStatusCode) {
+    onStopRequest: function FaviconFetcher_onStopRequest(aRequest, aContext, aStatusCode) {
         var requestFailed = !Components.isSuccessCode(aStatusCode);
         if (!requestFailed && (aRequest instanceof Ci.nsIHttpChannel))
             requestFailed = !aRequest.requestSucceeded;
 
         if (!requestFailed && this._countRead != 0) {
-            var dataURI = ICON_DATAURL_PREFIX + this._b64(this._bytes);
-            this.feedFetcher.favicon = dataURI;
-            this.feedFetcher.passDataToStorage();
+            var base64DataString =  btoa(String.fromCharCode.apply(null, this._bytes))
+            var favicon = ICON_DATAURL_PREFIX + base64DataStringy;
         }
         else {
-            this.feedFetcher.favicon = 'no-favicon';
-            this.feedFetcher.passDataToStorage();
+            favicon = 'no-favicon';
         }
+
+        this.feedFetcher.onFaviconReady(favicon);
 
         this._channel = null;
         this._element  = null;
     },
 
     // nsIStreamListener
-    onDataAvailable: function FaviconFetcher_onDataAvailable(aRequest, aContext,
-                                                             aInputStream, aOffset, aCount) {
+    onDataAvailable: function(aRequest, aContext, aInputStream, aOffset, aCount) {
         this._stream.setInputStream(aInputStream);
 
         // Get a byte array of the data
@@ -568,84 +551,33 @@ FaviconFetcher.prototype = {
     },
 
     // nsIChannelEventSink
-    onChannelRedirect: function FaviconFetcher_onChannelRedirect(aOldChannel, aNewChannel,
-                                                                 aFlags) {
+    onChannelRedirect: function(aOldChannel, aNewChannel, aFlags) {
         this._channel = aNewChannel;
     },
 
-    // nsIInterfaceRequestor
-    getInterface: function(aIID) {
-        return this.QueryInterface(aIID);
-    },
-
-    // nsIBadCertListener
-    confirmUnknownIssuer: function(aSocketInfo, aCert, aCertAddType) {
-        return false;
-    },
-
-    confirmMismatchDomain: function(aSocketInfo, aTargetURL, aCert) {
-        return false;
-    },
-
-    confirmCertExpired: function(aSocketInfo, aCert) {
-        return false;
-    },
-
-    notifyCrlNextupdate: function(aSocketInfo, aTargetURL, aCert) {
-    },
-
-    // FIXME: bug 253127
-    // nsIHttpEventSink
-    onRedirect: function(aChannel, aNewChannel) { },
-    // nsIProgressEventSink
-    onProgress: function(aRequest, aContext, aProgress, aProgressMax) { },
+    getInterface: function(aIID) { return this.QueryInterface(aIID) }, // nsIInterfaceRequestor
+    confirmUnknownIssuer: function(aSocketInfo, aCert, aCertAddType) { return false }, // nsIBadCertListener
+    confirmMismatchDomain: function(aSocketInfo, aTargetURL, aCert) { return false },
+    confirmCertExpired: function(aSocketInfo, aCert) { return false },
+    notifyCrlNextupdate: function(aSocketInfo, aTargetURL, aCert) { },
+    onRedirect: function(aChannel, aNewChannel) { }, // nsIHttpEventSink
+    onProgress: function(aRequest, aContext, aProgress, aProgressMax) { }, // nsIProgressEventSink
     onStatus: function(aRequest, aContext, aStatus, aStatusArg) { },
 
-    // copied over from nsSearchService.js
-    _b64: function FaviconFetcher_b64(aBytes) {
-        const B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-        var index = 0;
-        function get3Bytes() {
-            if (aBytes.length - index < 3)
-                return null; // Less than three bytes remaining
-
-            // Return the next three bytes in the array, and increment index for our
-            // next invocation
-            return aBytes.slice(index, index += 3);
+    QueryInterface: function(aIID) {
+        if (aIID.equals(Ci.nsISupports)
+            || aIID.equals(Ci.nsIRequestObserver)
+            || aIID.equals(Ci.nsIStreamListener)
+            || aIID.equals(Ci.nsIChannelEventSink)
+            || aIID.equals(Ci.nsIInterfaceRequestor)
+            || aIID.equals(Ci.nsIBadCertListener)
+            || aIID.equals(Ci.nsIPrompt)
+            || aIID.equals(Ci.nsIHttpEventSink)
+            || aIID.equals(Ci.nsIProgressEventSink)) {
+            return this;
         }
 
-        var out = "";
-        var bytes = null;
-        while ((bytes = get3Bytes())) {
-            var bits = 0;
-            for (var i = 0; i < 3; i++) {
-                bits <<= 8;
-                bits |= bytes[i];
-            }
-            for (var j = 18; j >= 0; j -= 6)
-                out += B64_CHARS[(bits>>j) & 0x3F];
-        }
-
-        // Get the remaining bytes
-        bytes = aBytes.slice(index);
-
-        switch (bytes.length) {
-            case 2:
-                out += B64_CHARS[(bytes[0]>>2) & 0x3F] +
-                       B64_CHARS[((bytes[0] & 0x03) << 4) | ((bytes[1] >> 4) & 0x0F)] +
-                       B64_CHARS[((bytes[1] & 0x0F) << 2)] +
-                       "=";
-                break;
-
-            case 1:
-                out += B64_CHARS[(bytes[0]>>2) & 0x3F] +
-                       B64_CHARS[(bytes[0] & 0x03) << 4] +
-                       "==";
-                break;
-        }
-
-        return out;
+        throw Cr.NS_ERROR_NO_INTERFACE;
     }
 
 }
