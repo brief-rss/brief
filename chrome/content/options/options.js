@@ -2,11 +2,7 @@ var Ci = Components.interfaces;
 var Cc = Components.classes;
 
 function init() {
-    // XXX Temporary workaround for Firefox 3 beta 2, where this fails.
-    try {
-        gMainPane.setUpPlacesTree();
-    }
-    catch (e) { }
+    gMainPane.setUpPlacesTree();
 
     sizeToContent();
 
@@ -32,16 +28,11 @@ var gMainPane = {
         // Populate the tree.
         var query = PlacesUtils.history.getNewQuery();
         var options = PlacesUtils.history.getNewQueryOptions();
-        var root = PlacesUtils.placesRootId;
-        query.setFolders([root], 1);
+        query.setFolders([PlacesUtils.allBookmarksFolderId], 1);
         options.excludeItems = true;
         tree.load([query], options);
 
-        // Get the place URI for the home folder to select it.
-        query.setFolders([pref.value], 1);
-        placeURI = PlacesUtils.history.queriesToQueryString([query], 1, options);
-
-        tree.selectPlaceURI(placeURI);
+        tree.selectItems([pref.value]);
     },
 
     onPlacesTreeSelect: function(aEvent) {
@@ -50,7 +41,7 @@ var gMainPane = {
 
         if (placesTree.currentIndex != -1)
             pref.value = placesTree.selectedNode.itemId;
-    },
+    }
 
 }
 
