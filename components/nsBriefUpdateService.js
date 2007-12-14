@@ -325,13 +325,6 @@ function FeedFetcher(aFeed) {
 
     this.favicon = this.feed.favicon;
 
-    // We use websiteURL instead of feedURL for resolving the favicon URL,
-    // because many websites use services like Feedburner for generating their
-    // feeds and we'd get the Feedburner's favicon instead of the website's
-    // favicon.
-    if (!this.favicon)
-        new FaviconFetcher(aFeed.websiteURL, this);
-
     this.requestFeed();
 }
 
@@ -410,17 +403,28 @@ FeedFetcher.prototype = {
         this.downloadedFeed.feedURL = this.feed.feedURL;
         this.downloadedFeed.feedID = this.feed.feedID;
 
-        // If we already have the favicon, we're ready to commit the data.
-        if (this.favicon)
+        if (!this.favicon) {
+            // We use websiteURL instead of feedURL for resolving the favicon URL,
+            // because many websites use services like Feedburner for generating their
+            // feeds and we'd get the Feedburner's favicon instead of the website's
+            // favicon.
+            if (this.downloadedFeed.websiteURL) {
+                new FaviconFetcher(this.downloadedFeed.websiteURL, this);
+            }
+            else {
+                this.favicon = 'no-favicon';
+                this.passDataToStorage();
+            }
+        }
+        else {
             this.passDataToStorage();
+        }
     },
+    
 
     onFaviconReady: function FeedFetcher_onFaviconReady(aFavicon) {
         this.favicon = aFavicon;
-
-        // If the feed was already downloaded and parsed, we can commit the data.
-        if (this.downloadedFeed)
-            this.passDataToStorage();
+        this.passDataToStorage();
     },
 
 
@@ -498,7 +502,7 @@ function FaviconFetcher(aWebsiteURL, aFeedFetcher) {
     var websiteURI = ioService.newURI(aWebsiteURL, null, null)
     var faviconURI = ioService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
-    var chan = ios.newChannelFromURI(faviconURI);
+    var chan = ioService.newChannelFromURI(faviconURI);
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
@@ -529,7 +533,7 @@ FaviconFetcher.prototype = {
 
         if (!requestFailed && this._countRead != 0) {
             var base64DataString =  btoa(String.fromCharCode.apply(null, this._bytes))
-            var favicon = ICON_DATAURL_PREFIX + base64DataStringy;
+            var favicon = ICON_DATAURL_PREFIX + base64DataString;
         }
         else {
             favicon = 'no-favicon';
