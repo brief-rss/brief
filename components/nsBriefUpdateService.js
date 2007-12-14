@@ -21,13 +21,13 @@ const NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
 const NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
 const BACKGROUND_UPDATE = Ci.nsIBriefUpdateService.BACKGROUND_UPDATE;
 
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+
 function dump(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].
                        getService(Ci.nsIConsoleService);
   consoleService.logStringMessage(aMessage);
 }
-
-var gBriefUpdateService = null;
 
 // Class definition
 function BriefUpdateService() {
@@ -94,7 +94,7 @@ BriefUpdateService.prototype = {
         // If only one feed is to be updated, we just do it right away without maintaining
         // the update queue.
         if (this.updateInProgress == NO_UPDATE && aFeeds.length == 1) {
-            new FeedFetcher(aFeeds[0]);
+            new FeedFetcher(aFeeds[0], this);
             return;
         }
 
@@ -197,7 +197,7 @@ BriefUpdateService.prototype = {
             // All feeds in the update queue may have already been requested,
             // because we don't cancel the timer until after all feeds are completed.
             if (feed)
-                new FeedFetcher(feed);
+                new FeedFetcher(feed, this);
 
             break;
         }
@@ -294,17 +294,13 @@ BriefUpdateService.prototype = {
         }
     },
 
-
-    // nsISupports
-    QueryInterface: function BUS_QueryInterface(aIID) {
-        if (!aIID.equals(Components.interfaces.nsIBriefUpdateService) &&
-            !aIID.equals(Components.interfaces.nsISupports) &&
-            !aIID.equals(Components.interfaces.nsITimerCallback) &&
-            !aIID.equals(Components.interfaces.nsIObserver))
-            throw Components.results.NS_ERROR_NO_INTERFACE;
-        return this;
-    }
-
+    classDescription: CLASS_NAME,
+    classID: CLASS_ID,
+    contractID: CONTRACT_ID,
+    _xpcom_categories: [ { category: 'app-startup', service: true } ],
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefUpdateService,
+                                           Ci.nsITimerCallback,
+                                           Ci.nsIObserver])
 }
 
 
@@ -313,8 +309,9 @@ BriefUpdateService.prototype = {
  *
  * @param aFeed nsIFeed object representing the feed to be downloaded.
  */
-function FeedFetcher(aFeed) {
+function FeedFetcher(aFeed, aUpdateService) {
     this.feed = aFeed;
+    this.updateService = aUpdateService;
 
     this.observerService = Cc['@mozilla.org/observer-service;1'].
                              getService(Ci.nsIObserverService);
@@ -420,7 +417,7 @@ FeedFetcher.prototype = {
             this.passDataToStorage();
         }
     },
-    
+
 
     onFaviconReady: function FeedFetcher_onFaviconReady(aFavicon) {
         this.favicon = aFavicon;
@@ -450,7 +447,7 @@ FeedFetcher.prototype = {
         // observer in the main class, because we have to ensure this is done before any
         // other observers receive this notification. Otherwise the progressmeters won't
         // be refreshed properly, because of outdated count of completed feeds.
-        gBriefUpdateService.completedFeeds.push(this.feed);
+        this.updateService.completedFeeds.push(this.feed);
 
         if (!aOK) {
             this.inError = true;
@@ -559,13 +556,13 @@ FaviconFetcher.prototype = {
         this._channel = aNewChannel;
     },
 
-    getInterface: function(aIID) { return this.QueryInterface(aIID) }, // nsIInterfaceRequestor
-    confirmUnknownIssuer: function(aSocketInfo, aCert, aCertAddType) { return false }, // nsIBadCertListener
-    confirmMismatchDomain: function(aSocketInfo, aTargetURL, aCert) { return false },
-    confirmCertExpired: function(aSocketInfo, aCert) { return false },
+    getInterface: function(aIID) this.QueryInterface(aIID),                 // nsIInterfaceRequestor
+    confirmUnknownIssuer: function(aSocketInfo, aCert, aCertAddType) false, // nsIBadCertListener
+    confirmMismatchDomain: function(aSocketInfo, aTargetURL, aCert) false,
+    confirmCertExpired: function(aSocketInfo, aCert) false,
     notifyCrlNextupdate: function(aSocketInfo, aTargetURL, aCert) { },
-    onRedirect: function(aChannel, aNewChannel) { }, // nsIHttpEventSink
-    onProgress: function(aRequest, aContext, aProgress, aProgressMax) { }, // nsIProgressEventSink
+    onRedirect: function(aChannel, aNewChannel) { },                        // nsIHttpEventSink
+    onProgress: function(aRequest, aContext, aProgress, aProgressMax) { },  // nsIProgressEventSink
     onStatus: function(aRequest, aContext, aStatus, aStatusArg) { },
 
     QueryInterface: function(aIID) {
@@ -587,54 +584,4 @@ FaviconFetcher.prototype = {
 }
 
 
-var Factory = {
-
-    createInstance: function (aOuter, aIID) {
-        if (aOuter != null)
-            throw Components.results.NS_ERROR_NO_AGGREGATION;
-        if (gBriefUpdateService === null)
-            gBriefUpdateService = new BriefUpdateService();
-        return gBriefUpdateService.QueryInterface(aIID);
-    }
-}
-
-// Module definition (xpcom registration)
-var Module = {
-    _firstTime: true,
-
-    registerSelf: function(aCompMgr, aFileSpec, aLocation, aType) {
-        aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-        aCompMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID,
-                                         aFileSpec, aLocation, aType);
-
-        var categoryManager = Components.classes['@mozilla.org/categorymanager;1'].
-                              getService(Components.interfaces.nsICategoryManager);
-        categoryManager.addCategoryEntry('app-startup', 'nsIBriefUpdateService',
-                                         CONTRACT_ID, true, true);
-    },
-
-    unregisterSelf: function(aCompMgr, aLocation, aType) {
-        aCompMgr = aCompMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-        aCompMgr.unregisterFactoryLocation(CLASS_ID, aLocation);
-
-        var categoryManager = Components.classes['@mozilla.org/categorymanager;1'].
-                              getService(Components.interfaces.nsICategoryManager);
-        categoryManager.deleteCategoryEntry('app-startup', 'nsIBriefUpdateService', true);
-    },
-
-    getClassObject: function(aCompMgr, aCID, aIID) {
-        if (!aIID.equals(Components.interfaces.nsIFactory))
-            throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
-
-        if (aCID.equals(CLASS_ID))
-            return Factory;
-
-        throw Components.results.NS_ERROR_NO_INTERFACE;
-    },
-
-    canUnload: function(aCompMgr) { return true; }
-
-}
-
-// Module initialization
-function NSGetModule(aCompMgr, aFileSpec) { return Module; }
+function NSGetModule(compMgr, fileSpec) XPCOMUtils.generateModule([BriefUpdateService])
