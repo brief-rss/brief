@@ -36,8 +36,6 @@
         <implementation>
             <constructor>
             <![CDATA[
-                window.XMLHttpRequest = null;
-
                 // Get the data passed to us through attributes
                 var entryURL = this.getAttribute('entryURL');
                 var title    = this.getAttribute('entryTitle');

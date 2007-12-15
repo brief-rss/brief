@@ -423,12 +423,6 @@ BriefStorageService.prototype = {
         // Strip tags
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : '';
 
-        // All file:// URIs are treated as same-origin which would let a script
-        // running in our template a page access local files using XHR.
-        content = content ? content.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
-        var entryURL = aEntry.entryURL ? aEntry.entryURL.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
-        var authors = aEntry.authors ? aEntry.authors.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
-
         // Now the fun part - the logic of computing unique entry IDs and inserting
         // entries.
         // We have two types of IDs: primary and secondary. The former is used as a
@@ -486,7 +480,7 @@ BriefStorageService.prototype = {
                 var update = this.updateEntry_stmt;
                 update.bindStringParameter(0, content);
                 update.bindInt64Parameter(1, aEntry.date)
-                update.bindStringParameter(2, authors);
+                update.bindStringParameter(2, aEntry.authors);
                 update.bindStringParameter(3, primaryID);
 
                 update.execute();
@@ -499,11 +493,11 @@ BriefStorageService.prototype = {
             insert.bindStringParameter(1, primaryID);
             insert.bindStringParameter(2, secondaryID);
             insert.bindStringParameter(3, entry.id);
-            insert.bindStringParameter(4, entryURL);
+            insert.bindStringParameter(4, aEntry.entryURL);
             insert.bindStringParameter(5, title);
             insert.bindStringParameter(6, content);
             insert.bindInt64Parameter(7, aEntry.date ? aEntry.date : now);
-            insert.bindStringParameter(8, authors);
+            insert.bindStringParameter(8, aEntry.authors);
             insert.bindInt32Parameter(9, 0);
 
             insert.execute();
