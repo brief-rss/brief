@@ -51,8 +51,8 @@ function init() {
 
     if (gPrefs.homeFolder) {
         // Initiate the feed list (asynchronously, so that the window is displayed sooner).
-        setTimeout(function(){ gFeedList.rebuild() }, 0);
-        setTimeout(function(){ gStorage.syncWithBookmarks() }, 1000);
+        async(gFeedList.rebuild, 0, gFeedList);
+        async(gStorage.syncWithBookmarks, 1000, gStorage);
     }
     else {
         showHomeFolderPicker();
@@ -83,7 +83,7 @@ function init() {
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
-    setTimeout(loadHomeview, 0);
+    async(loadHomeview);
 }
 
 
@@ -237,31 +237,34 @@ var gObserver = {
             }
 
             // Do everything asychronously to speed up refreshing of the feed view.
-            setTimeout(function(){gFeedList.refreshFeedTreeitems(changedFeeds)}, 0);
+            async(gFeedList, gFeedList.refreshFeedTreeitems, 0, changedFeeds);
 
             // We can't know if any of those need updating, so we have to
             // update them all.
-            setTimeout(function(){gFeedList.refreshSpecialTreeitem('unread-folder')}, 0);
-            setTimeout(function(){gFeedList.refreshSpecialTreeitem('starred-folder')}, 0);
-            setTimeout(function(){gFeedList.refreshSpecialTreeitem('trash-folder')}, 0);
+            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'unread-folder');
+            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'starred-folder');
+            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'trash-folder');
             break;
 
         case 'starred':
-            setTimeout(function(){gFeedList.refreshSpecialTreeitem('starred-folder')}, 0);
+            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'starred-folder');
             break;
 
         case 'deleted':
-            setTimeout(function(){gFeedList.refreshFeedTreeitems(changedFeeds)}, 0);
+            async(gFeedList, gFeedList.refreshFeedTreeitems, 0, changedFeeds);
 
-            setTimeout(function(){gFeedList.refreshSpecialTreeitem('unread-folder')}, 0);
-            setTimeout(function(){gFeedList.refreshSpecialTreeitem('starred-folder')}, 0);
-            setTimeout(function(){gFeedList.refreshSpecialTreeitem('trash-folder')}, 0);
+            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'unread-folder');
+            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'starred-folder');
+            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'trash-folder');
         }
     }
 
 }
 
 
+// The keyset containing keyboard shortucts is in the top level browser window.
+// Because we are an untrusted document, we can't be called directly. Instead,
+// 'command' attribute is set on the documentElement and 'DoCommand' event is sent.
 function onDoCommand(aEvent) {
     var commandName = document.documentElement.getAttribute('command');
     var command = gCommands[commandName];
@@ -442,7 +445,7 @@ var gCommands = {
         var evt = document.createEvent('Events');
         evt.initEvent('CollapseEntry', false, false);
         gFeedView.selectedEntry.dispatchEvent(evt);
-        setTimeout(function(){ gFeedView.selectedEntry.scrollIntoView(false) }, 310);
+        async(gFeedView.selectedEntry, 'scrollIntoView', 310, false);
     },
 
     focusSearchbar: function cmd_focusSearchbar() {
@@ -503,6 +506,17 @@ var gCommands = {
 }
 
 
+/**
+ * Executes given function asynchronously. All arguments besides
+ * the first one are optional.
+ */
+function async(aFunction, aDelay, aObject, arg1, arg2) {
+    function asc() {
+        aFunction.call(aObject || this, arg1, arg2);
+    }
+    setTimeout(asc, aDelay || 0);
+}
+
 // Gets a string containing the style of the feed view.
 function getFeedViewStyle() {
     if (gPrefs.getBoolPref('feedview.useCustomStyle')) {
@@ -557,7 +571,7 @@ function updateProgressMeter() {
     progressmeter.value = progress;
 
     if (progress == 100) {
-        setTimeout(function() {progressmeter.hidden = true}, 500);
+        async(function() { progressmeter.hidden = true }, 500);
         var deck = document.getElementById('update-buttons-deck');
         deck.selectedIndex = 0;
     }

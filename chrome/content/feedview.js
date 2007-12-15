@@ -160,6 +160,8 @@ FeedView.prototype = {
      *  @param aEntry Entry to select (DOM element).
      *  @param aScroll Whether to scroll the entry into view (optional).
      *  @param aScrollInstantly Disable smooth scrolling (optional).
+     *
+     *  XXX Split this function up and get rid of all the early returns.
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollInstantly) {
         if (!this.isActive || aEntry == this.selectedEntry)
@@ -235,7 +237,7 @@ FeedView.prototype = {
         this._selectionSuppressed = true;
 
         // XXX Hack. The selection sometimes isn't unsuppressed in scroll()
-        setTimeout(function() { self._selectionSuppressed = false }, 500);
+        async(function() { self._selectionSuppressed = false }, 500);
 
         gSelectScrollInterval = setInterval(scroll, 7);
     },
@@ -251,7 +253,7 @@ FeedView.prototype = {
         var view = gFeedView;
         if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !view.query.unread) {
             clearTimeout(gMarkVisibleTimeout);
-            gMarkVisibleTimeout = setTimeout(function(){ view._doMarkVisibleAsRead() }, 500);
+            gMarkVisibleTimeout = async(function(){ view._doMarkVisibleAsRead() }, 500);
         }
     },
 
@@ -399,7 +401,7 @@ FeedView.prototype = {
                                                  getPropertyAsAString('entries').
                                                  match(/[^ ]+/g);
         }
-        setTimeout(setEntries, 500);
+        async(setEntries, 500);
     },
 
 
@@ -451,7 +453,7 @@ FeedView.prototype = {
         }
 
         // Don't append the new entry until the old one is removed.
-        setTimeout(finish, 310);
+        async(finish, 310);
     },
 
 
@@ -596,7 +598,7 @@ FeedView.prototype = {
             entries = query.getEntries({});
         }
         else {
-            setTimeout(function computePagesAsync(){ gFeedView._computePages() }, 0);
+            async(this._computePages, 0, this);
         }
 
         for (var i = 0; i < entries.length; i++)

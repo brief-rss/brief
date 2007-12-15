@@ -162,7 +162,7 @@ var gFeedList = {
         }
         // We have to persist folders immediatelly instead of when Brief is closed,
         // because otherwise if the feedlist was rebuilt, the changes would be lost.
-        setTimeout(this._persistFolderState, 0);
+        async(this._persistFolderState, 0, this);
     },
 
     // See onClick.
@@ -172,7 +172,7 @@ var gFeedList = {
             if (selectedItem.hasAttribute('container'))
                 this.refreshFolderTreeitems(selectedItem);
         }
-        setTimeout(this._persistFolderState, 0);
+        async(this._persistFolderState, 0, this);
     },
 
     // Sets the visibility of context menuitem depending on the target.
@@ -528,7 +528,7 @@ var gFeedList = {
         case 'brief:invalidate-feedlist':
             this.rebuild();
             if (gFeedView)
-                setTimeout(function(){ gFeedView.ensure() }, 0);
+                async(gFeedView.ensure, 0, gFeedView);
 
             var deck = document.getElementById('feed-list-deck');
             if (gPrefs.homeFolder)
@@ -782,7 +782,7 @@ var gContextMenuCommands = {
         aTreeitem.parentNode.removeChild(aTreeitem);
 
         if (indexToSelect != -1)
-            setTimeout(function(){ treeview.selection.select(indexToSelect) }, 0);
+            async(treeview.selection.select, 0, treeview.selection, indexToSelect);
     },
 
     _deleteBookmarks: function ctxMenuCmds__deleteBookmarks(aFeeds) {
