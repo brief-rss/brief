@@ -9,6 +9,10 @@ const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
+const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
+
 // How often to manage entry expiration and removing deleted items.
 const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 
@@ -182,9 +186,9 @@ BriefStorageService.prototype = {
             // There was a bug in 1.0 and 1.0.1 due to which the next step threw an
             // exception for some users. When this happened, the below column was added
             // but the new user_version wasn't set, so Brief was repeating the migration
-            // on subsequent runs and failing, because the adding an already existing
+            // on subsequent runs and failing, because adding an already existing
             // columns throws an exception.
-            // To help users get out that endless loop we use the try...catch block.
+            // To help users get out that endless loop we use a try...catch block.
             try {
                 this.dBConnection.executeSimpleSQL(
                               'ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
@@ -572,21 +576,66 @@ BriefStorageService.prototype = {
     },
 
 
-    // Deletes entries that are outdated or exceed the max number per feed based.
-    deleteExpiredEntries: function BriefStorage_deleteRedundantEntries() {
-        var expireEntriesGlobal = this.prefs.getBoolPref('database.expireEntries');
-        var useGlobalStoreLimit = this.prefs.getBoolPref('database.limitStoredEntries');
-        var globalExpirationAge = this.prefs.getIntPref('database.entryExpirationAge');
-        var globalMaxEntries = this.prefs.getIntPref('database.maxStoredEntries');
+    // Moves expired entries to Trash and permanently removes the deleted items from
+    // database.
+    purgeEntries: function BriefStorage_purgeDeletedEntries(aDeleteExpired) {
 
-        // globalExpirationAge is in days, convert it to miliseconds
-        var globalEdgeDate = Date.now() - globalExpirationAge * 86400000;
-        var feeds = this.getAllFeeds({});
+        var removeEntries = this.dBConnection.createStatement(
+            'DELETE FROM entries                                                              ' +
+            'WHERE id IN                                                                      ' +
+            '(                                                                                ' +
+            '   SELECT entries.id                                                             ' +
+            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID                ' +
+            '   WHERE (entries.deleted = ? AND feeds.oldestAvailableEntryDate > entries.date) ' +
+            '         OR (? - feeds.hidden > ? AND feeds.hidden != 0)                         ' +
+            ')                                                                                ');
+        var removeFeeds = this.dBConnection.createStatement(
+                'DELETE FROM feeds WHERE (? - feeds.hidden > ?) AND feeds.hidden != 0');
 
-        const STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
-        const STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+        this.dBConnection.beginTransaction()
+        try {
+            if (aDeleteExpired) {
+                this.expireEntriesByAgeGlobal();
 
-        var deleteOutdatedGlobal = this.dBConnection.createStatement(
+                this.expireEntriesByAgePerFeed();
+
+                this.expireEntriesByNumber();
+            }
+
+            removeEntries.bindInt32Parameter(0, ENTRY_STATE_DELETED);
+            removeEntries.bindInt64Parameter(1, Date.now());
+            removeEntries.bindInt64Parameter(2, DELETED_FEEDS_RETENTION_TIME);
+            removeEntries.execute();
+
+            removeFeeds.bindInt64Parameter(0, Date.now());
+            removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
+            removeFeeds.execute();
+        }
+        catch (ex) {
+            this.reportError(ex);
+        }
+        finally {
+            this.dBConnection.commitTransaction();
+        }
+
+        // Prefs can only store longs while Date is a long long.
+        var now = Math.round(Date.now() / 1000);
+        this.prefs.setIntPref('database.lastPurgeTime', now);
+    },
+
+
+    // Expire old entries in feeds that don't have per-feed setting enabled.
+    expireEntriesByAgeGlobal: function BriefStorage_expireEntriesByAgeGlobal() {
+        var shouldExpire = this.prefs.getBoolPref('database.expireEntries');
+        if (!shouldExpire)
+            return;
+
+        var expirationAge = this.prefs.getIntPref('database.entryExpirationAge');
+
+        // expirationAge is in days, convert it to miliseconds.
+        var edgeDate = Date.now() - expirationAge * 86400000;
+
+        var statement = this.dBConnection.createStatement(
             'UPDATE entries SET deleted = ?1                                   ' +
             'WHERE id IN                                                       ' +
             '(                                                                 ' +
@@ -598,14 +647,44 @@ BriefStorageService.prototype = {
             '         entries.date < ?3                                        ' +
             ')                                                                 ');
 
-        var deleteOutdatedPerFeed = this.dBConnection.createStatement(
-            'UPDATE entries SET deleted = ?1  ' +
-            'WHERE entries.deleted = ?2 AND   ' +
-            '      starred = 0 AND            ' +
-            '      entries.date < ?3 AND      ' +
-            '      feedID = ?4                ');
+        statement.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
+        statement.bindInt32Parameter(1, ENTRY_STATE_NORMAL)
+        statement.bindInt64Parameter(2, edgeDate);
+        statement.execute();
+    },
 
-        var deleteExcessive = this.dBConnection.createStatement(
+
+    // Delete old entries based on the per-feed limit.
+    expireEntriesByAgePerFeed: function BriefStorage_expireEntriesByAgePerFeed() {
+        var statement = this.dBConnection.createStatement(
+                        'UPDATE entries SET deleted = ?1  ' +
+                        'WHERE entries.deleted = ?2 AND   ' +
+                        '      starred = 0 AND            ' +
+                        '      entries.date < ?3 AND      ' +
+                        '      feedID = ?4                ');
+
+        var feeds = this.getAllFeeds({});
+        var now = Date.now();
+
+        for each (feed in feeds) {
+            if (feed.entryAgeLimit > 0) {
+                var edgeDate = now - feed.entryAgeLimit * 86400000;
+                statement.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
+                statement.bindInt32Parameter(1, ENTRY_STATE_NORMAL);
+                statement.bindInt64Parameter(2, edgeDate);
+                statement.bindStringParameter(3, feed.feedID);
+                statement.execute();
+            }
+        }
+    },
+
+
+    // Delete entries exceeding the max number defined by global or per-feed settings.
+    expireEntriesByNumber: function BriefStorage_expireEntriesByNumber() {
+        var useGlobalLimit = this.prefs.getBoolPref('database.limitStoredEntries');
+        var globalMaxEntriesNumber = this.prefs.getIntPref('database.maxStoredEntries');
+
+        var expireByNumber = this.dBConnection.createStatement(
             'UPDATE entries SET deleted = ?1       ' +
             'WHERE id IN                           ' +
             '(                                     ' +
@@ -624,100 +703,32 @@ BriefStorageService.prototype = {
             '      starred = 0 AND         ' +
             '      deleted = ?             ');
 
-        this.dBConnection.beginTransaction();
-        try {
-            // Delete outdated entries in feeds that don't have per-feed setting enabled.
-            if (expireEntriesGlobal) {
-                deleteOutdatedGlobal.bindInt32Parameter(0, STATE_TRASHED);
-                deleteOutdatedGlobal.bindInt32Parameter(1, STATE_NORMAL)
-                deleteOutdatedGlobal.bindInt64Parameter(2, globalEdgeDate);
-                deleteOutdatedGlobal.execute();
-            }
+        var feeds = this.getAllFeeds({});
+        for each (feed in feeds) {
+            // Count the number of entries in the feed.
+            getEntriesCountForFeed.bindStringParameter(0, feed.feedID);
+            getEntriesCountForFeed.bindStringParameter(1, ENTRY_STATE_NORMAL);
+            getEntriesCountForFeed.executeStep()
+            var entryCount = getEntriesCountForFeed.getInt32(0);
+            getEntriesCountForFeed.reset();
 
-            // Delete entries exceeding the max number. We have to do it feed by feed.
-            var entryCount, difference, i;
-            for (i = 0; i < feeds.length; i++) {
-                // Count the number of entries in the feed.
-                getEntriesCountForFeed.bindStringParameter(0, feeds[i].feedID);
-                getEntriesCountForFeed.bindStringParameter(1, STATE_NORMAL);
-                getEntriesCountForFeed.executeStep()
-                entryCount = getEntriesCountForFeed.getInt32(0);
-                getEntriesCountForFeed.reset();
+            // Calculate the difference between the current number of entries and the
+            // limit specified in either the per-feed preferences stored in the
+            // database or the global preference.
+            var difference = 0;
+            if (feed.maxEntries > 0)
+                difference = entryCount - feed.maxEntries
+            else if (useGlobalLimit)
+                difference = entryCount - globalMaxEntriesNumber;
 
-                // Calculate the difference between the current number of entries and the
-                // limit specified in either the per-feed preferences stored in the
-                // database or the global preference.
-                difference = 0;
-                if (feeds[i].maxEntries > 0)
-                    difference = entryCount - feeds[i].maxEntries
-                else if (useGlobalStoreLimit)
-                    difference = entryCount - globalMaxEntries;
-
-                if (difference > 0) {
-                    deleteExcessive.bindInt32Parameter(0, STATE_TRASHED);
-                    deleteExcessive.bindInt32Parameter(1, STATE_NORMAL)
-                    deleteExcessive.bindStringParameter(2, feeds[i].feedID);
-                    deleteExcessive.bindInt64Parameter(3, difference);
-                    deleteExcessive.execute();
-                }
-            }
-
-            // Delete outdated entries based on the per-feed limit.
-            var edgeDate, i;
-            for (i = 0; i < feeds.length; i++) {
-                if (feeds[i].entryAgeLimit > 0) {
-                    edgeDate = Date.now() - feeds[i].entryAgeLimit * 86400000;
-                    deleteOutdatedPerFeed.bindInt32Parameter(0, STATE_TRASHED);
-                    deleteOutdatedPerFeed.bindInt32Parameter(1, STATE_NORMAL);
-                    deleteOutdatedPerFeed.bindInt64Parameter(2, edgeDate);
-                    deleteOutdatedPerFeed.bindStringParameter(3, feeds[i].feedID);
-                    deleteOutdatedPerFeed.execute();
-                }
+            if (difference > 0) {
+                expireByNumber.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
+                expireByNumber.bindInt32Parameter(1, ENTRY_STATE_NORMAL)
+                expireByNumber.bindStringParameter(2, feed.feedID);
+                expireByNumber.bindInt64Parameter(3, difference);
+                expireByNumber.execute();
             }
         }
-        finally {
-            this.dBConnection.commitTransaction();
-        }
-
-    },
-
-
-    // Moves expired entries to Trash and permanently removes the deleted items from
-    // database.
-    purgeEntries: function BriefStorage_purgeDeletedEntries(aDeleteExpired) {
-        if (aDeleteExpired)
-            this.deleteExpiredEntries();
-
-        var removeEntries = this.dBConnection.createStatement(
-            'DELETE FROM entries                                                              ' +
-            'WHERE id IN                                                                      ' +
-            '(                                                                                ' +
-            '   SELECT entries.id                                                             ' +
-            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID                ' +
-            '   WHERE (entries.deleted = ? AND feeds.oldestAvailableEntryDate > entries.date) ' +
-            '         OR (? - feeds.hidden > ? AND feeds.hidden != 0)                         ' +
-            ')                                                                                ');
-        var removeFeeds = this.dBConnection.createStatement(
-                'DELETE FROM feeds WHERE (? - feeds.hidden > ?) AND feeds.hidden != 0');
-
-        this.dBConnection.beginTransaction()
-        try {
-            removeEntries.bindInt32Parameter(0, Ci.nsIBriefQuery.ENTRY_STATE_DELETED);
-            removeEntries.bindInt64Parameter(1, Date.now());
-            removeEntries.bindInt64Parameter(2, DELETED_FEEDS_RETENTION_TIME);
-            removeEntries.execute();
-
-            removeFeeds.bindInt64Parameter(0, Date.now());
-            removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
-            removeFeeds.execute();
-        }
-        finally {
-            this.dBConnection.commitTransaction();
-        }
-
-        // Prefs can only store longs while Date is a long long.
-        var now = Math.round(Date.now() / 1000);
-        this.prefs.setIntPref('database.lastPurgeTime', now);
     },
 
 
@@ -1199,7 +1210,7 @@ BriefQuery.prototype = {
     unread:    false,
     starred:   false,
     unstarred: false,
-    deleted:   Components.interfaces.nsIBriefQuery.ENTRY_STATE_NORMAL,
+    deleted:   ENTRY_STATE_NORMAL,
 
     searchString: '',
 
@@ -1368,9 +1379,9 @@ BriefQuery.prototype = {
 
         var statementString;
         switch (aState) {
-            case Ci.nsIBriefQuery.ENTRY_STATE_NORMAL:
-            case Ci.nsIBriefQuery.ENTRY_STATE_TRASHED:
-            case Ci.nsIBriefQuery.ENTRY_STATE_DELETED:
+            case ENTRY_STATE_NORMAL:
+            case ENTRY_STATE_TRASHED:
+            case ENTRY_STATE_DELETED:
                 statementString = 'UPDATE entries SET deleted = ' + aState +
                                    this.getQueryText();
                 break;
