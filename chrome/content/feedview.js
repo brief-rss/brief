@@ -33,7 +33,7 @@ function FeedView(aTitle, aQuery) {
 
     this.browser.addEventListener('load', this._onLoad, false);
 
-    this.refresh();
+    this._refresh();
 }
 
 
@@ -96,7 +96,7 @@ FeedView.prototype = {
     set currentPage(aPageNumber) {
         if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
             this.__currentPage = aPageNumber;
-            this.refresh();
+            this.ensure(true);
         }
     },
     get currentPage() {
@@ -300,7 +300,12 @@ FeedView.prototype = {
      *
      * @returns TRUE if the view was up-to-date, FALSE if it needed refreshing.
      */
-    ensure: function FeedView_ensure() {
+    ensure: function FeedView_ensure(aForceRefresh) {
+        if (aForceRefresh && this.isActive) {
+            this._refresh();
+            return false;
+        }
+
         var isDirty = false;
 
         if (!this.isActive || this.browser.webProgress.isLoadingDocument)
@@ -310,7 +315,7 @@ FeedView.prototype = {
         var currentEntriesCount = this.query.getEntriesCount();
 
         if (!prevEntries || !currentEntriesCount) {
-            this.refresh();
+            this._refresh();
             return false;
         }
 
@@ -348,7 +353,7 @@ FeedView.prototype = {
             var firstIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
             var lastIndex = firstIndex + gPrefs.entriesPerPage - 1;
             if (removedEntryIndex < firstIndex || removedEntryIndex > lastIndex) {
-                this.refresh();
+                this._refresh();
                 return false;
             }
 
@@ -360,7 +365,7 @@ FeedView.prototype = {
             isDirty = true;
         }
         else if (this.entriesCount != currentEntriesCount) {
-            this.refresh();
+            this._refresh();
             return false;
         }
 
@@ -377,7 +382,7 @@ FeedView.prototype = {
 
 
     // Refreshes the feed view from scratch.
-    refresh: function FeedView_refresh() {
+    _refresh: function FeedView_refresh() {
         this.browser.style.cursor = 'wait';
 
         // Stop scrolling, so it doesn't continue after refreshing.
