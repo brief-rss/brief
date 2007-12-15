@@ -148,8 +148,7 @@ var gObserver = {
             updateProgressMeter();
 
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
-              gFeedList.refreshSpecialTreeitem('unread-folder');
-              if (gFeedView)
+                gFeedList.refreshSpecialTreeitem('unread-folder');
                 gFeedView.ensure();
             }
             break;
@@ -216,15 +215,13 @@ var gObserver = {
         var changedEntries = aChangedItems.getPropertyAsAString('entries').
                                            match(/[^ ]+/g);
 
-        var viewIsCool = true;
-        if (gFeedView)
-            viewIsCool = gFeedView.ensure();
+        var viewIsCool = gFeedView.ensure();
 
         switch (aChangeType) {
         case 'unread':
         case 'read':
             // Just visually mark the changed entries as read/unread.
-            if (gFeedView && gFeedView.isActive && viewIsCool) {
+            if (gFeedView.isActive && viewIsCool) {
                 var nodes = gFeedView.feedContent.childNodes;
                 for (i = 0; i < nodes.length; i++) {
                     if (changedEntries.indexOf(nodes[i].id) != -1) {
@@ -356,29 +353,24 @@ var gCommands = {
         if (gPrefs.shownEntries != aConstraint) {
             gPrefs.setCharPref('feedview.shownEntries', aConstraint);
 
-            if (gFeedView)
-                gFeedView.refresh();
+            gFeedView.ensure(true);
         }
     },
 
     showNextPage: function cmd_showNextPage() {
-        if (gFeedView)
-            gFeedView.currentPage++;
+        gFeedView.currentPage++;
     },
 
     showPrevPage: function cmd_showPrevPage() {
-        if (gFeedView)
-            gFeedView.currentPage--;
+        gFeedView.currentPage--;
     },
 
     selectNextEntry: function cmd_selectNextEntry() {
-        if (gFeedView)
-            gFeedView.selectNextEntry()
+        gFeedView.selectNextEntry()
     },
 
     selectPrevEntry: function cmd_selectPrevEntry() {
-        if (gFeedView)
-            gFeedView.selectPrevEntry();
+        gFeedView.selectPrevEntry();
     },
 
     markSelectedEntryRead: function cmd_markSelectedEntryRead() {
@@ -456,8 +448,7 @@ var gCommands = {
     turnOffKeyNav: function cmd_turnOffKeyNav() {
         if (gPrefs.keyNavEnabled) {
             gPrefs.setBoolPref('feedview.keyNavEnabled', false);
-            if (gFeedView)
-                gFeedView.selectEntry(null);
+            gFeedView.selectEntry(null);
         }
     },
 
@@ -497,7 +488,7 @@ var gCommands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        if (gFeedView && gFeedView.isActive) {
+        if (gFeedView.isActive) {
             var evt = document.createEvent('Events');
             evt.initEvent('DisplayShortcuts', false, false);
             gFeedView.document.dispatchEvent(evt);
@@ -633,7 +624,7 @@ function performSearch(aEvent) {
         if (previousView != gFeedView) {
             gFeedView = previousView;
             gFeedView.query.searchString = gFeedView.titleOverride = '';
-            gFeedView.refresh();
+            gFeedView.ensure(true);
             return;
         }
 
@@ -742,22 +733,19 @@ var gPrefs = {
         case 'feedview.customStylePath':
             if (this.getBoolPref('feedview.useCustomStyle')) {
                 getFeedViewStyle();
-                if (gFeedView && gFeedView.isActive)
-                    gFeedView.refresh();
+                gFeedView.ensure(true);
             }
             break;
 
         case 'feedview.useCustomStyle':
             getFeedViewStyle();
-            if (gFeedView && gFeedView.isActive)
-                gFeedView.refresh();
+            gFeedView.ensure(true);
             break;
 
         // Observers to keep the cached prefs up to date.
         case 'feedview.entriesPerPage':
             this.entriesPerPage = this.getIntPref('feedview.entriesPerPage');
-            if (gFeedView && gFeedView.isActive)
-                gFeedView.refresh();
+            gFeedView.ensure(true);
             break;
 
         case 'feedview.shownEntries':

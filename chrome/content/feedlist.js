@@ -527,8 +527,7 @@ var gFeedList = {
         // in-database list of feeds was synchronized.
         case 'brief:invalidate-feedlist':
             this.rebuild();
-            if (gFeedView)
-                async(gFeedView.ensure, 0, gFeedView);
+            async(gFeedView.ensure, 0, gFeedView);
 
             var deck = document.getElementById('feed-list-deck');
             if (gPrefs.homeFolder)
