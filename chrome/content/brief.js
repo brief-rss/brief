@@ -234,7 +234,7 @@ var gObserver = {
             }
 
             // Do everything asychronously to speed up refreshing of the feed view.
-            async(gFeedList, gFeedList.refreshFeedTreeitems, 0, changedFeeds);
+            async(gFeedList.refreshFeedTreeitems, 0, gFeedList, changedFeeds);
 
             // We can't know if any of those need updating, so we have to
             // update them all.
@@ -248,7 +248,7 @@ var gObserver = {
             break;
 
         case 'deleted':
-            async(gFeedList, gFeedList.refreshFeedTreeitems, 0, changedFeeds);
+            async(gFeedList.refreshFeedTreeitems, 0, gFeedList, changedFeeds);
 
             async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'unread-folder');
             async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'starred-folder');
