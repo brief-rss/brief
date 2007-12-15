@@ -17,7 +17,7 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const BOOKMARKS_OBSERVER_DELAY = 250;
 
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -74,13 +74,13 @@ BriefStorageService.prototype = {
                                            'feedID         TEXT UNIQUE,           ' +
                                            'RDF_URI        TEXT,                  ' + // rename
                                            'feedURL        TEXT,                  ' +
-                                           'websiteURL     TEXT,                  ' + // obsolete?
+                                           'websiteURL     TEXT,                  ' +
                                            'title          TEXT,                  ' + // obsolete?
                                            'subtitle       TEXT,                  ' +
                                            'imageURL       TEXT,                  ' +
                                            'imageLink      TEXT,                  ' + // obsolete?
                                            'imageTitle     TEXT,                  ' +
-                                           'favicon        TEXT,                  ' + // obsolete?
+                                           'favicon        TEXT,                  ' +
                                            'hidden         INTEGER DEFAULT 0,     ' +
                                            'oldestAvailableEntryDate INTEGER,     ' +
                                            'rowIndex       INTEGER,               ' +
@@ -171,16 +171,6 @@ BriefStorageService.prototype = {
         case 1:
             this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
 
-            // 0.8 changed how IDs are generated. Below we recompute IDs, but we doesn't
-            // need to do it for entries which are no longer available in the feed.
-            var selectRecentEntries = this.dBConnection.createStatement(
-                'SELECT entries.feedID, entries.entryURL, entries.providedID, entries.id ' +
-                'FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID          ' +
-                'WHERE entries.date >= feeds.oldestAvailableEntryDate                    ');
-
-            var updateEntryIDs = this.dBConnection.createStatement(
-                'UPDATE OR IGNORE entries SET id = ?1, secondaryID = ?2 WHERE id = ?3');
-
             // Brief isn't likely to ever make use of storing both content field
             // and summary field, so we may as well abandon the |summary| column.
             // In the |content| column we will store either the content or when
@@ -189,39 +179,7 @@ BriefStorageService.prototype = {
             // with |summary| columns.
             var updateEntryContent = this.dBConnection.createStatement(
                 'UPDATE entries SET content = summary, summary = "" WHERE content = ""');
-
-            var entries = [], entry, newID, newSecondaryID;
-            this.dBConnection.beginTransaction();
-
-            try {
-                while (selectRecentEntries.executeStep()) {
-                    entry = {};
-                    entry.feedID = selectRecentEntries.getString(0);
-                    entry.entryURL = selectRecentEntries.getString(1);
-                    entry.providedID = selectRecentEntries.getString(2);
-                    entry.id = selectRecentEntries.getString(3);
-                    entries.push(entry);
-                }
-                selectRecentEntries.reset();
-
-                for each (entry in entries) {
-                    newID = hashString(entry.feedID + entry.entryURL + entry.providedID);
-                    newSecondaryID = hashString(entry.feedID + entry.entryURL);
-
-                    updateEntryIDs.bindStringParameter(0, newID);
-                    updateEntryIDs.bindStringParameter(1, newSecondaryID);
-                    updateEntryIDs.bindStringParameter(2, entry.id);
-                    updateEntryIDs.execute();
-                }
-
-                updateEntryContent.execute();
-            }
-            catch (e) {
-                this.logDatabaseError(e);
-            }
-            finally {
-                this.dBConnection.commitTransaction();
-            }
+            updateEntryContent.execute();
             // Fall through...
 
         // To 1.0 beta 1
@@ -243,6 +201,49 @@ BriefStorageService.prototype = {
         case 3:
             this.dBConnection.executeSimpleSQL('DROP INDEX IF EXISTS entries_id_index');
             this.dBConnection.executeSimpleSQL('DROP INDEX IF EXISTS feeds_feedID_index');
+            // Fall through...
+
+        // To 1.2
+        case 4:
+            // This version changed how IDs are generated. Below we recompute IDs,
+            // but only for entries which are still available in the feed.
+            var selectRecentEntries = this.dBConnection.createStatement(
+                'SELECT entries.feedID, entries.providedID, entries.id           ' +
+                'FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID  ' +
+                'WHERE entries.date >= feeds.oldestAvailableEntryDate            ');
+
+            var updateEntryID = this.dBConnection.createStatement(
+                'UPDATE OR IGNORE entries SET id = ?1 WHERE id = ?2');
+
+            this.dBConnection.beginTransaction();
+
+            try {
+                var entries = [];
+                while (selectRecentEntries.executeStep()) {
+                    var entry = {};
+                    entry.feedID = selectRecentEntries.getString(0);
+                    entry.providedID = selectRecentEntries.getString(1);
+                    entry.id = selectRecentEntries.getString(2);
+                    entries.push(entry);
+                }
+                selectRecentEntries.reset();
+
+                for each (entry in entries) {
+                    if (entry.providedID) {
+                        var newID = hashString(entry.feedID + entry.providedID)
+
+                        updateEntryID.bindStringParameter(0, newID);
+                        updateEntryID.bindStringParameter(1, entry.id);
+                        updateEntryID.execute();
+                    }
+                }
+            }
+            catch (e) {
+                this.logDatabaseError(e);
+            }
+            finally {
+                this.dBConnection.commitTransaction();
+            }
             // Fall through...
 
         }
@@ -349,28 +350,9 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     updateFeed: function BriefStorage_updateFeed(aFeed) {
-        var now = Date.now();
-        var oldestEntryDate = now;
+        var oldestEntryDate = Date.now();
 
-        var insertEntry = this.dBConnection.createStatement(
-                          'INSERT OR IGNORE INTO entries                         ' +
-                          '(                                                     ' +
-                          'feedID, id, secondaryID, providedID, entryURL,        ' +
-                          'title,  content, date, authors, read                  ' +
-                          ')                                                     ' +
-                          'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)      ');
-        var updateEntry = this.dBConnection.createStatement(
-                          'UPDATE entries       ' +
-                          'SET content = ?1,    ' +
-                          '    date    = ?2,    ' +
-                          '    authors = ?3,    ' +
-                          '    read    = 0,     ' +
-                          '    updated = 1      ' +
-                          'WHERE id = ?4        ');
-        var getDateForEntry = this.dBConnection.
-                              createStatement('SELECT date FROM entries WHERE id = ?');
-
-        this.dBConnection.beginTransaction();
+        this.preCreateUpdatingStatements();
 
         // Count the unread entries, to compare their number later.
         var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
@@ -378,134 +360,22 @@ BriefStorageService.prototype = {
         unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
         var oldUnreadCount = unreadEntriesQuery.getEntriesCount();
 
-        var isMediaWikiFeed = aFeed.wrappedFeed.generator &&
-                              aFeed.wrappedFeed.generator.agent.match('MediaWiki');
+        this.dBConnection.beginTransaction();
 
         try {
             var entries = aFeed.getEntries({});
-            var entry, title, storedEntryDate, primaryID, secondaryID, entryAlreadyStored,
-                entryURL, authors;
 
-            // Generate hashes, insert and update entries.
             for (var i = 0; i < entries.length; i++) {
                 entry = entries[i];
-                entryAlreadyStored = false;
 
-                content = entry.content || entry.summary;
-
-                // Strip tags
-                title = entry.title ? entry.title.replace(/<[^>]+>/g, '') : '';
-
-                // All file:// URIs are treated as same-origin which would let a script
-                // running in our template a page access local files using XHR.
-                content = content ? content.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
-                entryURL = entry.entryURL ? entry.entryURL.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
-                authors = entry.authors ? entry.authors.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
-
-                // Compute the hash which serves as the entry's unique id.
-                // Special case for MediaWiki feeds: include the date in the hash. In
-                // "Recent changes" feeds, entries for subsequent edits of a page
-                // differ only in date (not in URL or GUID).
-                // Sometimes the provided GUID is lost (maybe a bug in the parser?) and
-                // having an empty GUID effects in a different hash which leads to
-                // annoying duplication of entries. We work around it by having
-                // a secondary hash, computed without the GUID, and using it when
-                // GUID is blank to check if entry exists (see below).
-                if (isMediaWikiFeed) {
-                    primaryID = hashString(aFeed.feedID + entry.entryURL + entry.id + entry.date);
-                    secondaryID = hashString(aFeed.feedID + entry.entryURL + entry.date);
-                }
-                else {
-                    primaryID = hashString(aFeed.feedID + entry.entryURL + entry.id);
-                    secondaryID = hashString(aFeed.feedID + entry.entryURL);
-                }
-
-                // If GUID is blank, manually check for entry's existance using the
-                // secondaryID. This makes no difference for feeds which don't
-                // supply GUIDs at all and circumvents the problem of when a feed
-                // does usually supply GUIDs but one of them gets lost during a
-                // particular update.
-                if (!entry.id) {
-                    var checkEntryBySecondaryID = this.dBConnection.createStatement(
-                        'SELECT secondaryID FROM entries WHERE secondaryID = ?');
-                    checkEntryBySecondaryID.bindStringParameter(0, secondaryID);
-                    entryAlreadyStored = checkEntryBySecondaryID.executeStep();
-                    checkEntryBySecondaryID.reset();
-                }
-
-                // See if this entry is already in the database while getting its date.
-                storedEntryDate = null;
-                getDateForEntry.bindStringParameter(0, primaryID);
-                if (getDateForEntry.executeStep())
-                    storedEntryDate = getDateForEntry.getInt64(0);
-                getDateForEntry.reset();
-
-                // If the entry is already present in the database, compare if the
-                // downloaded entry has a newer date than the stored one and if so,
-                // update the data and mark the entry as unread.
-                // Otherwise, insert it if it isn't present yet.
-                if (storedEntryDate !== null && entry.date && storedEntryDate < entry.date) {
-                    updateEntry.bindStringParameter(0, content);
-                    updateEntry.bindInt64Parameter(1, entry.date)
-                    updateEntry.bindStringParameter(2, authors);
-                    updateEntry.bindStringParameter(3, primaryID);
-
-                    updateEntry.execute();
-                }
-                else if (!entryAlreadyStored) {
-                    insertEntry.bindStringParameter(0, aFeed.feedID);
-                    insertEntry.bindStringParameter(1, primaryID);
-                    insertEntry.bindStringParameter(2, secondaryID);
-                    insertEntry.bindStringParameter(3, entry.id);
-                    insertEntry.bindStringParameter(4, entryURL);
-                    insertEntry.bindStringParameter(5, title);
-                    insertEntry.bindStringParameter(6, content);
-                    insertEntry.bindInt64Parameter(7, entry.date ? entry.date : now);
-                    insertEntry.bindStringParameter(8, authors);
-                    insertEntry.bindInt32Parameter(9, 0);
-
-                    insertEntry.execute();
-                }
+                this.processEntry(entry, aFeed);
 
                 // Track the date of the oldest entry.
                 if (entry.date && entry.date < oldestEntryDate)
                     oldestEntryDate = entry.date;
             }
 
-            // Update the feed's data. Do not update the title, though, because it's
-            // taken from the Live Bookmark.
-            var updateFeed = this.dBConnection.createStatement(
-                             'UPDATE feeds                        ' +
-                             'SET websiteURL  = ?1,               ' +
-                             '    subtitle    = ?2,               ' +
-                             '    imageURL    = ?3,               ' +
-                             '    imageLink   = ?4,               ' +
-                             '    imageTitle  = ?5,               ' +
-                             '    favicon     = ?6,               ' +
-                             '    oldestAvailableEntryDate = ?7,  ' +
-                             '    lastUpdated = ?8                ' +
-                             'WHERE feedID = ?9                   ');
-            updateFeed.bindStringParameter(0, aFeed.websiteURL);
-            updateFeed.bindStringParameter(1, aFeed.subtitle);
-            updateFeed.bindStringParameter(2, aFeed.imageURL);
-            updateFeed.bindStringParameter(3, aFeed.imageLink);
-            updateFeed.bindStringParameter(4, aFeed.imageTitle);
-            updateFeed.bindStringParameter(5, aFeed.favicon);
-            updateFeed.bindInt64Parameter(6,  oldestEntryDate);
-            updateFeed.bindInt64Parameter(7,  now);
-            updateFeed.bindStringParameter(8, aFeed.feedID);
-            updateFeed.execute();
-
-            // Update the cache.
-            var cachedFeed = this.getFeed(aFeed.feedID);
-            cachedFeed.websiteURL = aFeed.websiteURL;
-            cachedFeed.subtitle = aFeed.subtitle;
-            cachedFeed.imageURL = aFeed.imageURL;
-            cachedFeed.imageLink = aFeed.imageLink;
-            cachedFeed.imageTitle = aFeed.imageTitle;
-            cachedFeed.favicon = aFeed.favicon;
-            cachedFeed.lastUpdated = now;
-            cachedFeed.oldestAvailableEntryDate = oldestEntryDate;
+            this.updateFeedData(aFeed, oldestEntryDate);
         }
         catch (e) {
             this.logDatabaseError(e);
@@ -522,6 +392,164 @@ BriefStorageService.prototype = {
     },
 
 
+    preCreateUpdatingStatements: function BriefStorage_preCreateUpdatingStatement() {
+        this.insertEntry_stmt = this.dBConnection.createStatement(
+                          'INSERT OR IGNORE INTO entries                         ' +
+                          '(                                                     ' +
+                          'feedID, id, secondaryID, providedID, entryURL,        ' +
+                          'title,  content, date, authors, read                  ' +
+                          ')                                                     ' +
+                          'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)      ');
+        this.updateEntry_stmt = this.dBConnection.createStatement(
+                          'UPDATE entries       ' +
+                          'SET content = ?1,    ' +
+                          '    date    = ?2,    ' +
+                          '    authors = ?3,    ' +
+                          '    read    = 0,     ' +
+                          '    updated = 1      ' +
+                          'WHERE id = ?4        ');
+
+        this.checkByPrimaryID_stmt = this.dBConnection.
+                        createStatement('SELECT date FROM entries WHERE id = ?');
+        this.checkBySecondaryID_stmt = this.dBConnection.
+                        createStatement('SELECT date FROM entries WHERE secondaryID = ?');
+    },
+
+
+    processEntry: function BriefStorage_processEntry(aEntry, aFeed) {
+
+        var content = aEntry.content || aEntry.summary;
+
+        // Strip tags
+        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : '';
+
+        // All file:// URIs are treated as same-origin which would let a script
+        // running in our template a page access local files using XHR.
+        content = content ? content.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
+        var entryURL = aEntry.entryURL ? aEntry.entryURL.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
+        var authors = aEntry.authors ? aEntry.authors.replace(/XMLHttpRequest/g, 'XMLHTTPRequest') : '';
+
+        // Now the fun part - the logic of computing unique entry IDs and inserting
+        // entries.
+        // We have two types of IDs: primary and secondary. The former is used as a
+        // unique identifier at all times, while the latter is only used during updating,
+        // to work around a bug (see later). Below are two sets of fields used to
+        // produce each of the hashes.
+        var primarySet = aEntry.id ? [aFeed.feedID, aEntry.id]
+                                   : [aFeed.feedID, aEntry.entryURL];
+        var secondarySet = [aFeed.feedID, aEntry.entryURL];
+
+        // Special case for MediaWiki feeds: include the date in the hash. In
+        // "Recent changes" feeds, entries for subsequent edits of a page differ
+        // only in date (not in URL or GUID).
+        var generator = aFeed.wrappedFeed.generator;
+        if (generator && generator.agent.match('MediaWiki')) {
+            primarySet.push(aEntry.date);
+            secondarySet.push(aEntry.date);
+         }
+
+        var primaryID = hashString(primarySet.join(''));
+        var secondaryID = hashString(secondarySet.join(''));
+
+        // Sometimes the provided GUID is lost (maybe a bug in the parser?) and
+        // having an empty GUID effects in a different hash which leads to
+        // annoying duplication of entries. In such case, we work around it by
+        // checking for entry's existance using the secondary hash, which doesn't
+        // include the GUID and is therefore immune to that problem.
+        //
+        // While checking, we also get the date which we'll need to see if the
+        // stored entry needs to be updated.
+        if (!aEntry.id) {
+            var check = this.checkBySecondaryID_stmt;
+            check.bindStringParameter(0, secondaryID);
+            var entryAlreadyStored = check.executeStep();
+            if (entryAlreadyStored)
+                var storedEntryDate = check.getInt64(0);
+            check.reset();
+        }
+        else {
+            check = this.checkByPrimaryID_stmt;
+            check.bindStringParameter(0, primaryID);
+            entryAlreadyStored = check.executeStep();
+            if (entryAlreadyStored)
+                storedEntryDate = check.getInt64(0);
+            check.reset();
+        }
+
+
+        // If the entry is already present in the database, compare if the downloaded
+        // entry has a newer date than the stored one and if so, update the data and
+        // mark the entry as unread. Otherwise, insert it if it isn't present yet.
+        if (entryAlreadyStored) {
+
+            if (aEntry.date && storedEntryDate < aEntry.date) {
+                var update = this.updateEntry_stmt;
+                update.bindStringParameter(0, content);
+                update.bindInt64Parameter(1, aEntry.date)
+                update.bindStringParameter(2, authors);
+                update.bindStringParameter(3, primaryID);
+
+                update.execute();
+            }
+
+        }
+        else {
+            var insert = this.insertEntry_stmt;
+            insert.bindStringParameter(0, aFeed.feedID);
+            insert.bindStringParameter(1, primaryID);
+            insert.bindStringParameter(2, secondaryID);
+            insert.bindStringParameter(3, entry.id);
+            insert.bindStringParameter(4, entryURL);
+            insert.bindStringParameter(5, title);
+            insert.bindStringParameter(6, content);
+            insert.bindInt64Parameter(7, aEntry.date ? aEntry.date : now);
+            insert.bindStringParameter(8, authors);
+            insert.bindInt32Parameter(9, 0);
+
+            insert.execute();
+        }
+    },
+
+
+    updateFeedData: function BriefStorage_updateFeedData(aFeed, aOldestEntryDate) {
+
+        // Do not update the title, because it's taken from the bookmarks.
+        var updateFeed = this.dBConnection.createStatement(
+                         'UPDATE feeds                        ' +
+                         'SET websiteURL  = ?1,               ' +
+                         '    subtitle    = ?2,               ' +
+                         '    imageURL    = ?3,               ' +
+                         '    imageLink   = ?4,               ' +
+                         '    imageTitle  = ?5,               ' +
+                         '    favicon     = ?6,               ' +
+                         '    oldestAvailableEntryDate = ?7,  ' +
+                         '    lastUpdated = ?8                ' +
+                         'WHERE feedID = ?9                   ');
+        updateFeed.bindStringParameter(0, aFeed.websiteURL);
+        updateFeed.bindStringParameter(1, aFeed.subtitle);
+        updateFeed.bindStringParameter(2, aFeed.imageURL);
+        updateFeed.bindStringParameter(3, aFeed.imageLink);
+        updateFeed.bindStringParameter(4, aFeed.imageTitle);
+        updateFeed.bindStringParameter(5, aFeed.favicon);
+        updateFeed.bindInt64Parameter(6,  aOldestEntryDate);
+        updateFeed.bindInt64Parameter(7,  Date.now());
+        updateFeed.bindStringParameter(8, aFeed.feedID);
+        updateFeed.execute();
+
+        // Update the cache.
+        var cachedFeed = this.getFeed(aFeed.feedID);
+        cachedFeed.websiteURL = aFeed.websiteURL;
+        cachedFeed.subtitle = aFeed.subtitle;
+        cachedFeed.imageURL = aFeed.imageURL;
+        cachedFeed.imageLink = aFeed.imageLink;
+        cachedFeed.imageTitle = aFeed.imageTitle;
+        cachedFeed.favicon = aFeed.favicon;
+        cachedFeed.lastUpdated = Date.now();
+        cachedFeed.oldestAvailableEntryDate = aOldestEntryDate;
+    },
+
+
+    // nsIBriefStorage
     setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
         var update = this.dBConnection.
             createStatement('UPDATE feeds            ' +
