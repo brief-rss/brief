@@ -56,13 +56,8 @@ FeedView.prototype = {
     _entries: [],
 
     // Key elements.
-    get browser() {
-        return document.getElementById('feed-view');
-    },
-
-    get document() {
-        return this.browser.contentDocument;
-    },
+    get browser() document.getElementById('feed-view'),
+    get document() this.browser.contentDocument,
 
     feedContent: null,
 
@@ -76,8 +71,8 @@ FeedView.prototype = {
     },
     get query() {
         if (!this._flagsAreIntrinsic) {
-            this.__query.unread = gPrefs.shownEntries == 'unread';
-            this.__query.starred = gPrefs.shownEntries == 'starred';
+            this.__query.unread = (gPrefs.shownEntries == 'unread');
+            this.__query.starred = (gPrefs.shownEntries == 'starred');
             this.__query.deleted = gPrefs.shownEntries == 'trashed' ? ENTRY_STATE_TRASHED
                                                                     : ENTRY_STATE_NORMAL;
         }
@@ -99,9 +94,7 @@ FeedView.prototype = {
             this.ensure(true);
         }
     },
-    get currentPage() {
-        return this.__currentPage;
-    },
+    get currentPage() this.__currentPage,
 
 
     selectedEntry: null,
