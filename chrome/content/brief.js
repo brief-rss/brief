@@ -576,7 +576,7 @@ function showHomeFolderPicker() {
 
     var query = PlacesUtils.history.getNewQuery();
     var options = PlacesUtils.history.getNewQueryOptions();
-    var root = PlacesUtils.placesRootId;
+    var root = PlacesUtils.allBookmarksFolderId;
     query.setFolders([root], 1);
     options.excludeItems = true;
     placesTree.load([query], options);
