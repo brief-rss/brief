@@ -65,7 +65,7 @@ BriefStorageService.prototype = {
         this.dBConnection = storageService.openDatabase(file);
 
         if (databaseIsNew)
-            this.dBConnection.executeSimpleSQL('PRAGMA user_version = ' + DATABASE_VERSION);
+            this.dBConnection.schemaVersion = DATABASE_VERSION;
 
         //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
         //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
@@ -112,13 +112,8 @@ BriefStorageService.prototype = {
         this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
                                            'entries_date_index ON entries (date)     ');
 
-        var getDatabaseVersion = this.dBConnection.createStatement('PRAGMA user_version');
-        getDatabaseVersion.executeStep();
-        var databaseVersion = getDatabaseVersion.getInt32(0);
-        getDatabaseVersion.reset();
-
-        if (databaseVersion < DATABASE_VERSION)
-            this.migrateDatabase(databaseVersion);
+        if (this.dBConnection.schemaVersion < DATABASE_VERSION)
+            this.migrateDatabase();
 
         this.dBConnection.preload();
 
@@ -137,8 +132,8 @@ BriefStorageService.prototype = {
     },
 
 
-    migrateDatabase: function BriefStorage_migrateDatabase(aPreviousVersion) {
-        switch (aPreviousVersion) {
+    migrateDatabase: function BriefStorage_migrateDatabase() {
+        switch (this.dBConnection.schemaVersion) {
 
         // Schema version checking has only been introduced in 0.8 beta 1. When migrating
         // from earlier releases we don't know the exact previous version, so we attempt
@@ -248,7 +243,7 @@ BriefStorageService.prototype = {
 
         }
 
-        this.dBConnection.executeSimpleSQL('PRAGMA user_version = ' + DATABASE_VERSION)
+        this.dBConnection.schemaVersion = DATABASE_VERSION;
     },
 
 
