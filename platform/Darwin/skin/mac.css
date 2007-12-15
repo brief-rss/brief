@@ -12,6 +12,11 @@
   -moz-image-region: auto;
 }
 
+#feed-list treechildren::-moz-tree-image(feed-item, unread) {
+  list-style-image: url('chrome://browser/skin/livemark-item.png') !important;
+  -moz-image-region: rect(18px, 35px, 34px, 19px) !important;
+}
+
 .onlyMac {
     display: inline !important;
 }
