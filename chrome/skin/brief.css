@@ -77,7 +77,7 @@ treechildren::-moz-tree-image(container, open) {
 
 treechildren::-moz-tree-image(feed-item) {
   list-style-image: url('chrome://browser/skin/livemark-item.png') !important;
-  -moz-image-region: rect(0px, 35px, 16px, 19px) !important;
+  -moz-image-region: rect(1px, 36px, 17px, 20px) !important;
   width: 16px;
   height: 16px;
   padding-right: 4px;
