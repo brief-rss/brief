@@ -239,7 +239,7 @@ BriefStorageService.prototype = {
                 }
             }
             catch (e) {
-                this.logDatabaseError(e);
+                this.reportError(e);
             }
             finally {
                 this.dBConnection.commitTransaction();
@@ -378,7 +378,7 @@ BriefStorageService.prototype = {
             this.updateFeedData(aFeed, oldestEntryDate);
         }
         catch (e) {
-            this.logDatabaseError(e);
+            this.reportError(e);
         }
         finally {
             this.dBConnection.commitTransaction();
@@ -496,7 +496,7 @@ BriefStorageService.prototype = {
             insert.bindStringParameter(4, aEntry.entryURL);
             insert.bindStringParameter(5, title);
             insert.bindStringParameter(6, content);
-            insert.bindInt64Parameter(7, aEntry.date ? aEntry.date : now);
+            insert.bindInt64Parameter(7, aEntry.date ? aEntry.date : Date.now());
             insert.bindStringParameter(8, aEntry.authors);
             insert.bindInt32Parameter(9, 0);
 
@@ -767,207 +767,9 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    // XXX This function is ridiculous, it needs to be split up and rewritten.
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
-        this.bookmarkItems = [];
-
-        var homeFolder = this.prefs.getIntPref('homeFolder');
-
-        if (!homeFolder || homeFolder == -1) {
-            var hideAllFeeds = this.dBConnection.createStatement('UPDATE feeds SET hidden = ?');
-            hideAllFeeds.bindInt64Parameter(0, Date.now());
-            hideAllFeeds.execute();
-
-            this.feedsCache = this.feedsAndFoldersCache = null;
-            this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
-            return;
-        }
-
-        // Get the current Live Bookmarks.
-        try {
-            // This will throw if the homeFolder was deleted.
-            this.bookmarksService.getItemTitle(homeFolder);
-        }
-        catch (e) {
-            this.onHomeFolderRemoved();
-            return;
-        }
-
-        var options = this.historyService.getNewQueryOptions();
-        var query = this.historyService.getNewQuery();
-
-        query.setFolders([homeFolder], 1);
-        options.excludeItems = true;
-        var result = this.historyService.executeQuery(query, options);
-
-        this.traversePlacesQueryResults(result.root);
-
-        this.dBConnection.beginTransaction();
-        try {
-            var selectAll = this.dBConnection.
-                createStatement('SELECT feedID, title, rowIndex, isFolder, parent, ' +
-                                '       RDF_URI, hidden                            ' +
-                                'FROM feeds                                        ');
-
-            var insertItem = this.dBConnection.
-                createStatement('INSERT OR IGNORE INTO feeds                                   ' +
-                                '(feedID, feedURL, title, rowIndex, isFolder, parent, RDF_URI) ' +
-                                'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                           ');
-
-            var updateFeed = this.dBConnection.
-                createStatement('UPDATE feeds                                                     ' +
-                                'SET title = ?, rowIndex = ?, parent = ?, RDF_URI = ?, hidden = 0 ' +
-                                'WHERE feedID = ?                                                 ');
-
-            var removeFeed = this.dBConnection.
-                createStatement('DELETE FROM feeds WHERE feedID = ?');
-            var hideFeed = this.dBConnection.
-                createStatement('UPDATE feeds SET hidden = ? WHERE feedID =?');
-
-            // Get all feeds currently in the database.
-            var feeds = [];
-            while (selectAll.executeStep()) {
-                var feed = {};
-                feed.feedID = selectAll.getString(0);
-                feed.title = selectAll.getString(1);
-                feed.rowIndex = selectAll.getInt32(2);
-                feed.isFolder = selectAll.getInt32(3) == 1;
-                feed.parent = selectAll.getString(4);
-                feed.bookmarkID = selectAll.getString(5);
-                feed.hidden = selectAll.getInt64(6);
-                feeds.push(feed);
-            }
-
-            // Check if there are any new bookmarks among the just retrieved ones and add
-            // them.
-            var item, feed, found;
-            var addedFeedIDs = [];
-            var invalidateFeedList = false;
-            for (var i = 0; i < this.bookmarkItems.length; i++) {
-                item = this.bookmarkItems[i];
-                found = false;
-
-                // Search for the bookmark by iterating over all the feeds in the database.
-                for (var j = 0; j < feeds.length; j++) {
-                    feed = feeds[j];
-                    if (feed.feedID == item.feedID) {
-                        // Found it, the bookmark is already in the database.
-                        found = true;
-                        break;
-                    }
-                }
-
-                // If the bookmark wasn't found in the database, add it.
-                if (!found) {
-                    // Invalidate cache since feeds table is about to change
-                    this.feedsCache = this.feedsAndFoldersCache = null;
-
-                    insertItem.bindStringParameter(0, item.feedID);
-                    insertItem.bindStringParameter(1, item.feedURL || null);
-                    insertItem.bindStringParameter(2, item.title);
-                    insertItem.bindInt32Parameter(3, item.rowIndex)
-                    insertItem.bindInt32Parameter(4, item.isFolder ? 1 : 0);
-                    insertItem.bindStringParameter(5, item.parent);
-                    insertItem.bindStringParameter(6, item.bookmarkID);
-                    insertItem.execute();
-
-                    this.observerService.notifyObservers(null,'brief:feed-added', item.feedID);
-                    invalidateFeedList = true;
-
-                    if (!item.isFolder)
-                        addedFeedIDs.push(item.feedID);
-                }
-                else {
-                    // Mark that the feed is still in bookmarks.
-                    feed.isInBookmarks = true;
-
-                    // If the bookmark was found in the database then check if its row is
-                    // up-to-date.
-                    if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
-                       item.title != feed.title || item.bookmarkID != feed.bookmarkID ||
-                       feed.hidden > 0) {
-
-                        // Invalidate cache since feeds table is about to change.
-                        this.feedsCache = this.feedsAndFoldersCache = null;
-
-                        updateFeed.bindStringParameter(0, item.title);
-                        updateFeed.bindInt32Parameter(1, item.rowIndex);
-                        updateFeed.bindStringParameter(2, item.parent);
-                        updateFeed.bindStringParameter(3, item.bookmarkID);
-                        updateFeed.bindStringParameter(4, item.feedID);
-                        updateFeed.execute();
-
-                        if (item.rowIndex != feed.rowIndex || item.parent != feed.parent ||
-                           feed.hidden > 0) {
-                            // If it has been row index, parent or hidden state that
-                            // changed, then the whole feed list tree in the Brief window
-                            // has to be rebuilt.
-                            invalidateFeedList = true;
-                        }
-                        else {
-                            // If only the title has changed, the feed list can be updated
-                            // incrementally, so we send a different notification.
-                            this.observerService.notifyObservers(null,
-                                                                 'brief:feed-title-changed',
-                                                                 item.feedID);
-                        }
-                    }
-                }
-            }
-
-            // Finally, hide any feeds that are no longer bookmarked.
-            for (i = 0; i < feeds.length; i++) {
-                feed = feeds[i];
-                if (!feed.isInBookmarks && feed.hidden == 0) {
-
-                    // Invalidate cache since feeds table is about to change.
-                    this.feedsCache = this.feedsAndFoldersCache = null;
-
-                    if (feed.isFolder) {
-                        removeFeed.bindStringParameter(0, feed.feedID);
-                        removeFeed.execute();
-                    }
-                    else {
-                        hideFeed.bindInt64Parameter(0, Date.now());
-                        hideFeed.bindStringParameter(1, feed.feedID);
-                        hideFeed.execute();
-                    }
-
-                    invalidateFeedList = true;
-                }
-            }
-        }
-        finally {
-            this.dBConnection.commitTransaction();
-            if (invalidateFeedList)
-                this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
-        }
-
-        // Update newly addded feeds, if any.
-        var addedFeeds = [], feed;
-        for (var i = 0; i < addedFeedIDs.length; i++) {
-            feed = this.getFeed(addedFeedIDs[i]);
-            addedFeeds.push(feed);
-        }
-        if (addedFeeds.length > 0) {
-            var updateService = Cc['@ancestor/brief/updateservice;1'].
-                                getService(Ci.nsIBriefUpdateService);
-            updateService.fetchFeeds(addedFeeds, addedFeeds.length, false);
-        }
-
+        new BookmarksSynchronizer();
     },
-
-    onHomeFolderRemoved: function BriefStorage_onHomeFolderRemoved() {
-        this.prefs.clearUserPref('homeFolder');
-
-        var hideAllFeeds = this.dBConnection.createStatement('UPDATE feeds SET hidden = ?');
-        hideAllFeeds.bindInt64Parameter(0, Date.now());
-        hideAllFeeds.execute();
-
-        this.feedsCache = this.feedsAndFoldersCache = null;
-        this.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
-    },
-
 
     initPlaces: function BriefStorage_initPlaces() {
         this.historyService   = Cc['@mozilla.org/browser/nav-history-service;1'].
@@ -978,45 +780,6 @@ BriefStorageService.prototype = {
                                   getService(Ci.nsILivemarkService);
 
         this.bookmarksService.addObserver(this, false);
-    },
-
-
-    traversePlacesQueryResults: function BriefStorage_traversePlacesQueryResults(aContainer) {
-        aContainer.containerOpen = true;
-
-        for (var i = 0; i < aContainer.childCount; i++) {
-            var node = aContainer.getChild(i);
-
-            if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
-                continue;
-
-            item = {};
-            item.title = this.bookmarksService.getItemTitle(node.itemId);
-            item.bookmarkID = node.itemId;
-            item.rowIndex = this.bookmarkItems.length;
-            item.parent = aContainer.itemId;
-
-            if (this.livemarkService.isLivemark(node.itemId)) {
-                var feedURL = this.livemarkService.getFeedURI(node.itemId).spec;
-                item.feedURL = feedURL;
-                item.feedID = hashString(feedURL);
-                item.isFolder = false;
-
-                this.bookmarkItems.push(item);
-            }
-            else {
-                item.feedURL = '';
-                item.feedID = node.itemId;
-                item.isFolder = true;
-
-                this.bookmarkItems.push(item);
-
-                if (node instanceof Ci.nsINavHistoryContainerResultNode)
-                    this.traversePlacesQueryResults(node);
-            }
-        }
-
-        aContainer.containerOpen = false;
     },
 
 
@@ -1136,12 +899,13 @@ BriefStorageService.prototype = {
     },
 
 
-    logDatabaseError: function BriefStorage_logDatabaseError(aException) {
-        var error = this.dBConnection.lastErrorString;
+    reportError: function BriefStorage_reportError(aException) {
+        Components.utils.reportError(aException);
+
+        var dbError = this.dBConnection.lastErrorString;
         var consoleService = Cc['@mozilla.org/consoleservice;1'].
                              getService(Ci.nsIConsoleService);
-        consoleService.logStringMessage('Brief database error:\n ' + error + '\n\n ' +
-                                        aException);
+        consoleService.logStringMessage('Brief database error:\n ' + dbError);
     },
 
 
@@ -1163,6 +927,266 @@ BriefStorageService.prototype = {
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefStorage,
                                            Ci.nsIObserver,
                                            Ci.nsINavBookmarkObserver])
+}
+
+
+/**
+ * Synchronizes the list of feeds stored in the database with the bookmarks available
+ * in the user's home folder.
+ */
+function BookmarksSynchronizer() {
+    if (!this.checkHomeFolder())
+        return;
+
+    this.newFeeds = [];
+
+    this.getBookmarks()
+
+    this.dBConnection.beginTransaction();
+    try {
+        this.getFeeds();
+
+        for each (bookmark in this.bookmarks)
+            this.syncBookmark(bookmark);
+
+        for each (feed in this.feeds) {
+            if (!feed.isInBookmarks && feed.hidden == 0)
+                this.hideFeed(feed);
+        }
+    }
+    finally {
+        this.dBConnection.commitTransaction();
+        if (this.feedListChanged) {
+            this.srv.feedsCache = this.srv.feedsAndFoldersCache = null;
+            this.srv.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+        }
+    }
+
+    this.updateNewFeeds();
+}
+
+BookmarksSynchronizer.prototype = {
+
+    get srv() gStorageService,
+    get dBConnection() gStorageService.dBConnection,
+
+    checkHomeFolder: function BookmarksSync_checkHomeFolder() {
+        var folderValid = true;
+        var homeFolder = this.srv.prefs.getIntPref('homeFolder');
+
+        if (homeFolder == -1) {
+            var hideAllFeeds = this.dBConnection.createStatement('UPDATE feeds SET hidden = ?');
+            hideAllFeeds.bindInt64Parameter(0, Date.now());
+            hideAllFeeds.execute();
+
+            this.srv.feedsCache = this.srv.feedsAndFoldersCache = null;
+            this.srv.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+            folderValid = false;
+        }
+        else {
+            try {
+                // This will throw if the home folder was deleted.
+                this.srv.bookmarksService.getItemTitle(homeFolder);
+            }
+            catch (e) {
+                this.srv.prefs.clearUserPref('homeFolder');
+                folderValid = false;
+            }
+        }
+
+        return folderValid;
+    },
+
+
+    // Get all bookmarks in the user's home folder.
+    getBookmarks: function BookmarksSync_getBookmarks() {
+        var homeFolder = this.srv.prefs.getIntPref('homeFolder');
+
+        // Get the current Live Bookmarks.
+        var options = this.srv.historyService.getNewQueryOptions();
+        var query = this.srv.historyService.getNewQuery();
+
+        query.setFolders([homeFolder], 1);
+        options.excludeItems = true;
+        var result = this.srv.historyService.executeQuery(query, options);
+
+        this.bookmarks = [];
+        this.traversePlacesQueryResults(result.root);
+    },
+
+
+    // Gets all feeds currently in the database.
+    getFeeds: function BookmarksSync_getFeeds() {
+        var selectAll = this.dBConnection.createStatement(
+            'SELECT feedID, title, rowIndex, isFolder, parent, RDF_URI, hidden ' +
+            'FROM feeds                                                        ');
+
+        this.feeds = [];
+        while (selectAll.executeStep()) {
+            var feed = {};
+            feed.feedID = selectAll.getString(0);
+            feed.title = selectAll.getString(1);
+            feed.rowIndex = selectAll.getInt32(2);
+            feed.isFolder = (selectAll.getInt32(3) == 1);
+            feed.parent = selectAll.getString(4);
+            feed.bookmarkID = selectAll.getString(5);
+            feed.hidden = selectAll.getInt64(6);
+            this.feeds.push(feed);
+        }
+    },
+
+
+    // Inserts a bookmark if there is no such feed yet and checks if the feed's data
+    // is up-to-date.
+    // It also sets isInBookmarks property on every feed which it finds, so that later
+    // feeds without this property and can be hidden as no longer bookmarked.
+    syncBookmark: function BookmarksSync_syncBookmark(aItem) {
+        var found = false;
+        var feedListChanged = false;
+
+        // Search for the bookmark by iterating over all the feeds in the database.
+        for (var i = 0; i < this.feeds.length; i++) {
+            var feed = this.feeds[i];
+            if (feed.feedID == aItem.feedID) {
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            feed.isInBookmarks = true;
+            this.updateFeedFromBookmark(aItem, feed);
+        }
+        else {
+            this.insertFeed(aItem);
+            if (!aItem.isFolder)
+                this.newFeeds.push(aItem.feedID);
+        }
+    },
+
+
+    insertFeed: function BookmarksSync_insertFeed(aBookmark) {
+        var insertFeed = this.dBConnection.createStatement(
+            'INSERT OR IGNORE INTO feeds                                   ' +
+            '(feedID, feedURL, title, rowIndex, isFolder, parent, RDF_URI) ' +
+            'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                           ');
+
+        insertFeed.bindStringParameter(0, aBookmark.feedID);
+        insertFeed.bindStringParameter(1, aBookmark.feedURL || null);
+        insertFeed.bindStringParameter(2, aBookmark.title);
+        insertFeed.bindInt32Parameter(3, aBookmark.rowIndex)
+        insertFeed.bindInt32Parameter(4, aBookmark.isFolder ? 1 : 0);
+        insertFeed.bindStringParameter(5, aBookmark.parent);
+        insertFeed.bindStringParameter(6, aBookmark.bookmarkID);
+        insertFeed.execute();
+
+        this.feedListChanged = true;
+    },
+
+
+    updateFeedFromBookmark: function BookmarksSync_updateFeedFromBookmark(aItem, aFeed) {
+        if (aItem.rowIndex == aFeed.rowIndex && aItem.parent == aFeed.parent && aFeed.hidden == 0
+            && aItem.title == aFeed.title && aItem.bookmarkID == aFeed.bookmarkID) {
+            return;
+        }
+
+        var updateFeed = this.dBConnection.createStatement(
+            'UPDATE feeds                                ' +
+            'SET title = ?1, rowIndex = ?2, parent = ?3, ' +
+            '    RDF_URI = ?4, hidden = 0                ' +
+            'WHERE feedID = ?5                           ');
+
+        updateFeed.bindStringParameter(0, aItem.title);
+        updateFeed.bindInt32Parameter(1, aItem.rowIndex);
+        updateFeed.bindStringParameter(2, aItem.parent);
+        updateFeed.bindStringParameter(3, aItem.bookmarkID);
+        updateFeed.bindStringParameter(4, aItem.feedID);
+        updateFeed.execute();
+
+        if (aItem.rowIndex != aFeed.rowIndex || aItem.parent != aFeed.parent || aFeed.hidden > 0) {
+            this.feedListChanged = true;
+        }
+        else {
+            // Invalidate feeds cache.
+            this.srv.feedsCache = this.srv.feedsAndFoldersCache = null;
+
+            // If only the title has changed, the feed list can be updated incrementally.
+            this.srv.observerService.notifyObservers(null, 'brief:feed-title-changed',
+                                                     aItem.feedID);
+        }
+    },
+
+
+    hideFeed: function BookmarksSync_hideFeed(aFeed) {
+        if (aFeed.isFolder) {
+            var removeFolder = this.dBConnection.
+                                    createStatement('DELETE FROM feeds WHERE feedID = ?');
+            removeFeed.bindStringParameter(0, aFeed.feedID);
+            removeFeed.execute();
+        }
+        else {
+            var hideFeed = this.dBConnection.
+                                createStatement('UPDATE feeds SET hidden = ? WHERE feedID =?');
+            hideFeed.bindInt64Parameter(0, Date.now());
+            hideFeed.bindStringParameter(1, aFeed.feedID);
+            hideFeed.execute();
+        }
+
+        this.feedListChanged = true;
+    },
+
+
+    updateNewFeeds: function BookmarksSync_updateNewFeeds() {
+        if (this.newFeeds.length > 0) {
+            var feeds = [];
+            for each (feedID in this.newFeeds)
+                feeds.push(this.srv.getFeed(feedID));
+
+            var updateService = Cc['@ancestor/brief/updateservice;1'].
+                                getService(Ci.nsIBriefUpdateService);
+            updateService.fetchFeeds(feeds, feeds.length, false);
+        }
+    },
+
+
+    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer) {
+        aContainer.containerOpen = true;
+
+        for (var i = 0; i < aContainer.childCount; i++) {
+            var node = aContainer.getChild(i);
+
+            if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
+                continue;
+
+            item = {};
+            item.title = this.srv.bookmarksService.getItemTitle(node.itemId);
+            item.bookmarkID = node.itemId;
+            item.rowIndex = this.bookmarks.length;
+            item.parent = aContainer.itemId;
+
+            if (this.srv.livemarkService.isLivemark(node.itemId)) {
+                var feedURL = this.srv.livemarkService.getFeedURI(node.itemId).spec;
+                item.feedURL = feedURL;
+                item.feedID = hashString(feedURL);
+                item.isFolder = false;
+
+                this.bookmarks.push(item);
+            }
+            else {
+                item.feedURL = '';
+                item.feedID = node.itemId;
+                item.isFolder = true;
+
+                this.bookmarks.push(item);
+
+                if (node instanceof Ci.nsINavHistoryContainerResultNode)
+                    this.traversePlacesQueryResults(node);
+            }
+        }
+
+        aContainer.containerOpen = false;
+    }
+
 }
 
 function BriefQuery() {
