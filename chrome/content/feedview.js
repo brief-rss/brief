@@ -505,8 +505,6 @@ FeedView.prototype = {
     _buildFeedView: function FeedView__buildFeedView() {
         var doc = this.document;
 
-        doc.defaultView.XMLHttpRequest = null;
-
         // Add listeners so that the content can communicate with chrome to perform
         // actions that require full privileges by sending custom events.
         doc.addEventListener('MarkEntryRead', gFeedViewEvents.onMarkEntryRead, true);
