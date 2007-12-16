@@ -1,11 +1,5 @@
-/* ----------------------------------------------------------------------------------------------------------------*/
-/* ---------->>> global settings needed for thickbox <<<-----------------------------------------------------------*/
-/* ----------------------------------------------------------------------------------------------------------------*/
-/**{padding: 0; margin: 0;}*/
+/* thickbox specific link and font settings */
 
-/* ----------------------------------------------------------------------------------------------------------------*/
-/* ---------->>> thickbox specific link and font settings <<<------------------------------------------------------*/
-/* ----------------------------------------------------------------------------------------------------------------*/
 #TB_window {
 	font: 12px Arial, Helvetica, sans-serif;
 	color: #333333;
@@ -22,9 +16,8 @@
 #TB_window a:active {color: #666666;}
 #TB_window a:focus{color: #666666;}
 
-/* ----------------------------------------------------------------------------------------------------------------*/
-/* ---------->>> thickbox settings <<<-----------------------------------------------------------------------------*/
-/* ----------------------------------------------------------------------------------------------------------------*/
+
+/* thickbox settings */
 #TB_overlay {
 	position: fixed;
 	z-index:100;
@@ -34,17 +27,14 @@
 	width:100%;
 }
 
-.TB_overlayMacFFBGHack {background: url(chrome://brief/skin/macFFBgHack.png) repeat;}
-.TB_overlayBG {
-	background-color:#000;
-	filter:alpha(opacity=75);
-	-moz-opacity: 0.75;
-	opacity: 0.75;
+.TB_overlayMacFFBGHack {
+	background: url(chrome://brief/skin/macFFBgHack.png) repeat;
 }
 
-* html #TB_overlay { /* ie6 hack */
-     position: absolute;
-     height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
+.TB_overlayBG {
+	background-color:#000;
+	-moz-opacity: 0.75;
+	opacity: 0.75;
 }
 
 #TB_window {
@@ -59,12 +49,7 @@
 	left:50%;
 }
 
-* html #TB_window { /* ie6 hack */
-position: absolute;
-margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
-}
-
-#TB_window img#TB_Image {
+#TB_window #TB_Image {
 	display:block;
 	margin: 15px 0 0 15px;
 	border-right: 1px solid #ccc;
@@ -136,11 +121,6 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	margin: -6px 0 0 -104px; /* -height/2 0 0 -width/2 */
 }
 
-* html #TB_load { /* ie6 hack */
-position: absolute;
-margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
-}
-
 #TB_HideSelect{
 	z-index:99;
 	position:fixed;
@@ -148,16 +128,10 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	left: 0;
 	background-color:#fff;
 	border:none;
-	filter:alpha(opacity=0);
 	-moz-opacity: 0;
 	opacity: 0;
 	height:100%;
 	width:100%;
-}
-
-* html #TB_HideSelect { /* ie6 hack */
-     position: absolute;
-     height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
 }
 
 #TB_iframeContent{
@@ -165,5 +139,4 @@ margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = d
 	border:none;
 	margin-bottom:-1px;
 	margin-top:1px;
-	_margin-bottom:1px;
 }
