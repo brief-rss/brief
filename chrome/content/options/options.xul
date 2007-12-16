@@ -117,7 +117,7 @@
                 <textbox id="updateInterval"
                          type="number"
                          min="1"
-                         size="2"/>
+                         size="1"/>
                 <menulist id="update-time-menulist">
                     <menupopup>
                         <menuitem label="&updateIntervalMinutes.label;"/>
@@ -151,7 +151,7 @@
                           preference="extensions.brief.database.expireEntries"
                           oncommand="gFeedsPane.updateExpirationDisabledState();"/>
                 <textbox id="expiration-textbox"
-                         size="2"
+                         size="1"
                          type="number"
                          min="1"
                          preference="extensions.brief.database.entryExpirationAge"/>
@@ -165,7 +165,7 @@
                           preference="extensions.brief.database.limitStoredEntries"
                           oncommand="gFeedsPane.updateStoredEntriesDisabledState();"/>
                 <textbox id="stored-entries-textbox"
-                         size="2"
+                         size="1"
                          type="number"
                          min="1"
                          preference="extensions.brief.database.maxStoredEntries"/>
@@ -210,7 +210,7 @@
                          min="1"
                          max="100"
                          preference="extensions.brief.feedview.entriesPerPage"
-                         size="2"/>
+                         size="1"/>
                 <label value="&entriesPerPageAfter.label;"/>
             </hbox>
             <spacer height="5"/>
