@@ -97,140 +97,135 @@ FeedView.prototype = {
     get currentPage() this.__currentPage,
 
 
-    selectedEntry: null,
+    // ID of the selected entry.
+    selectedEntry: '',
 
-    // The ID is stored additionally, so we can preserve selection when refreshing.
-    _selectedEntryID: '',
+    get selectedElement() {
+        return this.selectedEntry ? this.document.getElementById(this.selectedEntry)
+                                  : null;
+    },
 
-    // Used when going back one page by selecting previous entry
-    // when the topmost entry is selected.
+    // Used when going back one page by selecting previous
+    // entry when the topmost entry is selected.
     _selectLastEntryOnRefresh: false,
 
     // Temporarily disable selecting entries.
     _selectionSuppressed: false,
 
     selectNextEntry: function FeedView_selectNextEntry() {
-        if (this._selectionSuppressed)
-            return;
-
-        if (!this.selectedEntry) {
-            this.selectEntry(this.feedContent.firstChild, true);
-            return;
+        if (!this._selectionSuppressed) {
+            var entry = this.selectedElement ? this.selectedElement.nextSibling
+                                             : this.feedContent.firstChild;
+            if (entry)
+                this.selectEntry(entry, true, true);
+            else
+                this.currentPage++;
         }
-
-        var nextEntry = this.selectedEntry.nextSibling;
-        if (nextEntry)
-            this.selectEntry(nextEntry, true);
-        else
-            this.currentPage++;
     },
 
     selectPrevEntry: function FeedView_selectPrevEntry() {
-        if (this._selectionSuppressed)
-            return;
+        if (!this._selectionSuppressed) {
+            var entry = this.selectedElement ? this.selectedElement.previousSibling
+                                             : this.feedContent.firstChild;
 
-        if (!this.selectedEntry) {
-            this.selectEntry(this.feedContent.firstChild, true);
-            return;
-        }
-
-        var prevEntry = this.selectedEntry.previousSibling;
-        if (prevEntry) {
-            this.selectEntry(prevEntry, true);
-        }
-        // Normally we wouldn't have to check |currentPage > 1|, because the setter
-        // validates the input. However, we don't want to set _selectLastEntryOnRefresh
-        // and then not refresh.
-        else if (this.currentPage > 1) {
-            this._selectLastEntryOnRefresh = true;
-            this.currentPage--;
+            if (entry) {
+                this.selectEntry(entry, true, true);
+            }
+            // Normally we wouldn't have to check |currentPage > 1|, because
+            // the setter validates the input. However, we don't want to set
+            // _selectLastEntryOnRefresh and then not refresh.
+            else if (this.currentPage > 1) {
+                this._selectLastEntryOnRefresh = true;
+                this.currentPage--;
+            }
         }
     },
 
     /**
-     *  Selects the given entry and smoothly scrolls it into view, if desired.
+     * Selects the given entry and scrolls it into view, if desired.
      *
-     *  @param aEntry Entry to select (DOM element).
-     *  @param aScroll Whether to scroll the entry into view (optional).
-     *  @param aScrollInstantly Disable smooth scrolling (optional).
-     *
-     *  XXX Split this function up and get rid of all the early returns.
+     * @param aEntry           ID od DOM element of entry to select. Can be null.
+     * @param aScroll          Whether to scroll the entry into view.
+     * @param aScrollSmoothly  Enable smooth scrolling.
      */
-    selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollInstantly) {
-        if (!this.isActive || aEntry == this.selectedEntry)
-            return;
+    selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollSmoothly) {
+        if (this.isActive) {
+            var entry = (typeof aEntry == 'string' || !aEntry) ? aEntry : aEntry.id;
 
-        if (this.selectedEntry)
-            this.selectedEntry.removeAttribute('selected');
+            if (this.selectedElement)
+                this.selectedElement.removeAttribute('selected');
 
-        if (!aEntry) {
-            this.selectedEntry = null;
-            this._selectedEntryID = '';
-            return;
+            this.selectedEntry = entry;
+
+            if (entry) {
+                this.selectedElement.setAttribute('selected', true);
+
+                if (!gPrefs.keyNavEnabled)
+                    gPrefs.setBoolPref('feedview.keyNavEnabled', true);
+
+                if (aScroll)
+                    this.scrollToEntry(entry, aScrollSmoothly);
+            }
         }
-        else {
-            this.selectedEntry = aEntry;
-            this._selectedEntryID = aEntry.id;
-            aEntry.setAttribute('selected', true);
-        }
+    },
 
-        if (!gPrefs.keyNavEnabled)
-            gPrefs.setBoolPref('feedview.keyNavEnabled', true);
-
-        if (!aScroll)
-            return;
-
+    /**
+     * Scroll entry into view.
+     *
+     * @param aEntry  ID od DOM element of entry to select.
+     * @param Smooth  Enable smooth scrolling.
+     */
+    scrollToEntry: function FeedView_scrollToEntry(aEntry, aSmooth) {
         var win = this.document.defaultView;
-        var targetScrollPos, distance, jump, difference;
+        var entryElement = (typeof aEntry == 'string') ? this.document.getElementById(aEntry)
+                                                       : aEntry;
 
-        // If the entry is taller than the viewport height, align with the top.
-        if (aEntry.offsetHeight >= win.innerHeight) {
-            targetScrollPos = aEntry.offsetTop;
+        if (entryElement.offsetHeight >= win.innerHeight) {
+            // If the entry is taller than the viewport height, align with the top.
+            var targetPosition = entryElement.offsetTop;
         }
-        // Otherwise, scroll the entry to the middle of the screen.
         else {
-            difference = win.innerHeight - aEntry.offsetHeight;
-            targetScrollPos = aEntry.offsetTop - Math.floor(difference / 2);
+            // Otherwise, scroll the entry to the middle of the screen.
+            var difference = win.innerHeight - entryElement.offsetHeight;
+            targetPosition = entryElement.offsetTop - Math.floor(difference / 2);
         }
 
-        if (targetScrollPos < 0)
-            targetScrollPos = 0;
-        else if (targetScrollPos > win.scrollMaxY)
-            targetScrollPos = win.scrollMaxY;
+        if (targetPosition < 0)
+            targetPosition = 0;
+        else if (targetPosition > win.scrollMaxY)
+            targetPosition = win.scrollMaxY;
 
-        if (targetScrollPos == win.pageYOffset)
-            return;
-
-        if (aScrollInstantly) {
-            win.scroll(win.pageXOffset, targetScrollPos);
-            return;
+        if (targetPosition != win.pageYOffset) {
+            if (aSmooth)
+                this._scrollSmoothly(targetPosition);
+            else
+                win.scroll(win.pageXOffset, targetPosition);
         }
+    },
 
-        distance = Math.floor(targetScrollPos - win.pageYOffset);
-        jump = distance / 10;
+    _scrollSmoothly: function FeedView__scrollSmoothly(aTargetPosition) {
+        var win = this.document.defaultView;
+
+        var delta = aTargetPosition - win.pageYOffset;
+        var jump = Math.round(delta / 10);
+        jump = (jump !== 0) ? jump : (delta > 0) ? 1 : -1;
 
         var self = this;
+
         function scroll() {
-            // If we are within epsilon smaller than the jump, then scroll
-            // directly to the target position.
-            if (Math.abs(win.pageYOffset - targetScrollPos) < Math.abs(jump)) {
-                win.scroll(win.pageXOffset, targetScrollPos)
+            // If we are within epsilon smaller than the jump,
+            // then scroll directly to the target position.
+            if (Math.abs(aTargetPosition - win.pageYOffset) <= Math.abs(jump)) {
+                win.scroll(win.pageXOffset, aTargetPosition)
                 clearInterval(gSelectScrollInterval);
                 self._selectionSuppressed = false;
-                return;
             }
-            win.scroll(win.pageXOffset, win.pageYOffset + jump);
+            else {
+                win.scroll(win.pageXOffset, win.pageYOffset + jump);
+            }
         }
-
-        // Clear the previous interval, if exists (might happen when we select
-        // another entry before previous scrolling is finished).
-        clearInterval(gSelectScrollInterval);
-
         // Disallow selecting futher entries until scrolling is finished.
         this._selectionSuppressed = true;
-
-        // XXX Hack. The selection sometimes isn't unsuppressed in scroll()
-        async(function() { self._selectionSuppressed = false }, 500);
 
         gSelectScrollInterval = setInterval(scroll, 7);
     },
@@ -239,7 +234,7 @@ FeedView.prototype = {
     // This array is used to prevent entries from being immediately re-marked as read,
     // when the user marks them as unread and autoMarkRead is on.
     // We maintain a list of entries, which were marked as unread by the user, and
-    // exclude them from auto-marking for the duration of the view's lifetime.
+    // exclude them from auto-marking for the duration of the view's life.
     _markedUnreadEntries: [],
 
     markVisibleAsRead: function FeedView_markVisibleAsRead() {
@@ -447,7 +442,7 @@ FeedView.prototype = {
 
             // Select another entry
             if (entryWasSelected)
-                self.selectEntry(nextSibling || appendedEntry || previousSibling || null, false);
+                self.selectEntry(nextSibling || appendedEntry || previousSibling || null);
         }
 
         // Don't append the new entry until the old one is removed.
@@ -607,17 +602,16 @@ FeedView.prototype = {
         this._selectionSuppressed = false;
         if (gPrefs.keyNavEnabled) {
 
-            var entry = doc.getElementById(this._selectedEntryID);
-            if (this._selectedEntryID && entry) {
-                this.selectEntry(entry, true, true);
+            if (this.selectedElement) {
+                this.selectEntry(this.selectedEntry, true);
             }
             else if (this._selectLastEntryOnRefresh) {
                 entry = this.feedContent.lastChild;
-                this.selectEntry(entry, true, true);
+                this.selectEntry(entry, true);
             }
             else {
                 entry = this.feedContent.firstChild;
-                this.selectEntry(entry, false);
+                this.selectEntry(entry);
             }
 
             this._selectLastEntryOnRefresh = false;
@@ -785,7 +779,7 @@ var gFeedViewEvents = {
         var targetEntry = aEvent.target;
 
         if (gPrefs.keyNavEnabled && targetEntry.className == 'article-container')
-            gFeedView.selectEntry(targetEntry, false);
+            gFeedView.selectEntry(targetEntry);
 
         if (anonid == 'article-title-link' && (aEvent.button == 0 || aEvent.button == 1)) {
             aEvent.preventDefault();
