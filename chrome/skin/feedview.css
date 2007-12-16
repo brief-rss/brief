@@ -62,12 +62,16 @@ body {
   border-top: 1px #abbfc9 solid;
   border-right: 1px #e1e5da solid;
   border-left: 1px #e1e5da solid;
+  border-bottom: 1px transparent solid;
   padding-bottom: 1px; /* Without this, the article is sometimes cut-off */
   overflow: visible;   /* This is for the the expand/collapse dropmarker which is
                           taken outside the box using negative margins */
   position: relative;
   }
 
+.article-container:last-child {
+  border-bottom-color: #e1e5da;
+}
 
 
 /* ----------------------  Article header  ---------------------- */
@@ -248,17 +252,5 @@ body {
 /* ----------------------  Adjustments for the selected articles  -------------------- */
 
 .article-container[selected] {
-  border-top-color: #1474d6;
-  border-right-color: #1474d6;
-  border-left-color: #1474d6;
-}
-
-/* Non-selected articles don't have bottom border, so if we added one now the article
-   would shift. Therefore, we change the top border color of the NEXT article. */
-.article-container[selected] + .article-container {
-  border-top-color: #1474d6;
-}
-
-.article-container[selected]:last-child {
-  border-bottom: 1px solid #1474d6;
+  border-color: #1474d6;
 }
