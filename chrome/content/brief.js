@@ -426,7 +426,7 @@ var gCommands = {
             var evt = document.createEvent('Events');
             evt.initEvent('CollapseEntry', false, false);
             selectedElement.dispatchEvent(evt);
-            
+
             async(selectedElement.scrollIntoView, 310, selectedElement, false);
         }
     },
@@ -498,19 +498,26 @@ function async(aFunction, aDelay, aObject, arg1, arg2) {
     setTimeout(asc, aDelay || 0);
 }
 
-// Gets a string containing the style of the feed view.
+// Gets a string containing the CSS style of the feed view.
 function getFeedViewStyle() {
-    if (gPrefs.getBoolPref('feedview.useCustomStyle')) {
-        var pref = gPrefs.getComplexValue('feedview.customStylePath',
-                                          Ci.nsISupportsString);
-        var url = 'file:///' + pref.data;
-    }
-    else
-        var url = DEFAULT_STYLE_URL;
+    var useCustomStyle = gPrefs.getBoolPref('feedview.useCustomStyle');
+    var stylePath = gPrefs.getComplexValue('feedview.customStylePath',
+                                           Ci.nsISupportsString);
+
+    var url = (useCustomStyle && stylePath) ? 'file:///' + stylePath.data
+                                            : DEFAULT_STYLE_URL;
 
     var request = new XMLHttpRequest;
     request.open('GET', url, false);
-    request.send(null);
+    request.overrideMimeType('text/css');
+    try {
+        request.send(null);
+    }
+    catch (ex) {
+        // The file could not be found. Fetch the default style.
+        request.open('GET', DEFAULT_STYLE_URL, false);
+        request.send(null);
+    }
 
     gFeedViewStyle = request.responseText;
 }
@@ -665,19 +672,19 @@ function onKeyPress(aEvent) {
 var gPrefs = {
 
     register: function gPrefs_register() {
-        this._branch = Cc['@mozilla.org/preferences-service;1'].
-                       getService(Ci.nsIPrefService).
-                       getBranch('extensions.brief.').
-                       QueryInterface(Ci.nsIPrefBranch2);
+        this.branch = Cc['@mozilla.org/preferences-service;1'].
+                        getService(Ci.nsIPrefService).
+                        getBranch('extensions.brief.').
+                        QueryInterface(Ci.nsIPrefBranch2);
 
-        this.getIntPref = this._branch.getIntPref;
-        this.getBoolPref = this._branch.getBoolPref;
-        this.getCharPref = this._branch.getCharPref;
-        this.getComplexValue = this._branch.getComplexValue;
+        this.getIntPref = this.branch.getIntPref;
+        this.getBoolPref = this.branch.getBoolPref;
+        this.getCharPref = this.branch.getCharPref;
+        this.getComplexValue = this.branch.getComplexValue;
 
-        this.setIntPref = this._branch.setIntPref;
-        this.setBoolPref = this._branch.setBoolPref;
-        this.setCharPref = this._branch.setCharPref;
+        this.setIntPref = this.branch.setIntPref;
+        this.setBoolPref = this.branch.setBoolPref;
+        this.setCharPref = this.branch.setCharPref;
 
         // Cache prefs access to which is critical for performance.
         this.entriesPerPage = this.getIntPref('feedview.entriesPerPage');
@@ -689,11 +696,11 @@ var gPrefs = {
         this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
         this.autoMarkRead = this.getBoolPref('feedview.autoMarkRead');
 
-        this._branch.addObserver('', this, false);
+        this.branch.addObserver('', this, false);
     },
 
     unregister: function gPrefs_unregister() {
-        this._branch.removeObserver('', this);
+        this.branch.removeObserver('', this);
     },
 
     get homeFolder() {
