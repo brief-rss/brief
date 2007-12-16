@@ -509,19 +509,26 @@ var gCommands = {
 }
 
 
-// Gets a string containing the style of the feed view.
+// Gets a string containing the CSS style of the feed view.
 function getFeedViewStyle() {
-    if (gPrefs.getBoolPref('feedview.useCustomStyle')) {
-        var pref = gPrefs.getComplexValue('feedview.customStylePath',
-                                          Ci.nsISupportsString);
-        var url = 'file:///' + pref.data;
-    }
-    else
-        var url = DEFAULT_STYLE_URL;
+    var useCustomStyle = gPrefs.getBoolPref('feedview.useCustomStyle');
+    var stylePath = gPrefs.getComplexValue('feedview.customStylePath',
+                                           Ci.nsISupportsString);
+
+    var url = (useCustomStyle && stylePath) ? 'file:///' + stylePath.data
+                                            : DEFAULT_STYLE_URL;
 
     var request = new XMLHttpRequest;
     request.open('GET', url, false);
-    request.send(null);
+    request.overrideMimeType('text/css');
+    try {
+        request.send(null);
+    }
+    catch (ex) {
+        // The file could not be found. Fetch the default style.
+        request.open('GET', DEFAULT_STYLE_URL, false);
+        request.send(null);
+    }
 
     gFeedViewStyle = request.responseText;
 }
