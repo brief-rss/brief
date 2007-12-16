@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
-<!DOCTYPE window SYSTEM "chrome://brief/locale/options.dtd">
+
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://brief/skin/options.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://brief/locale/options.dtd">
 
 <dialog id="brief-feed-properties"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -39,7 +42,10 @@
                       label="&checkUpdatesPerFeedBefore.label;"
                       accesskey="&checkUpdatesPerFeed.accesskey;"
                       oncommand="onCheckUpdatesCheckboxCmd(event);"/>
-            <textbox id="check-updates-textbox" size="2"/>
+            <textbox id="check-updates-textbox"
+                     size="2"
+                     type="number"
+                     min="1"/>
             <menulist id="update-time-menulist">
                 <menupopup>
                     <menuitem label="&updateIntervalMinutes.label;"/>
@@ -53,7 +59,10 @@
                       label="&expireEntriesPerFeedBefore.label;"
                       accesskey="&expireEntriesPerFeed.accesskey;"
                       oncommand="onExpirationCheckboxCmd(event);"/>
-            <textbox id="expiration-textbox" size="2"/>
+            <textbox id="expiration-textbox"
+                     size="2"
+                     type="number"
+                     min="1"/>
             <label value="&expireEntriesPerFeedAfter.label;"/>
         </hbox>
         <hbox align="center">
@@ -61,7 +70,10 @@
                       accesskey="&maxEntriesPerFeed.accesskey;"
                       label="&maxEntriesPerFeedBefore.label;"
                       oncommand="onMaxEntriesCheckboxCmd(event);"/>
-            <textbox id="max-entries-textbox" size="2"/>
+            <textbox id="max-entries-textbox"
+                     size="2"
+                     type="number"
+                     min="1"/>
             <label value="&maxEntriesPerFeedAfter.label;"/>
         </hbox>
         <spacer height="10"/>
