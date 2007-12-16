@@ -320,9 +320,6 @@ var gCommands = {
         var checkbox = document.getElementById('headlines-checkbox');
         checkbox.checked = newState;
 
-        if (!gFeedView)
-            return;
-
         if (newState) {
             gFeedView.feedContent.setAttribute('showHeadlinesOnly', true);
             for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
@@ -374,70 +371,65 @@ var gCommands = {
     },
 
     markSelectedEntryRead: function cmd_markSelectedEntryRead() {
-        if (!gFeedView || !gFeedView.selectedEntry)
-            return;
+        if (gFeedView.selectedEntry) {
+            var selectedEntry = gFeedView.selectedEntry;
+            var entryID = selectedEntry.getAttribute('id');
+            var newStatus = !selectedEntry.hasAttribute('read');
 
-        var selectedEntry = gFeedView.selectedEntry;
-        var entryID = selectedEntry.getAttribute('id');
-        var newStatus = !selectedEntry.hasAttribute('read');
+            if (newStatus)
+                selectedEntry.setAttribute('read', true);
+            else
+                selectedEntry.removeAttribute('read');
 
-        if (newStatus)
-            selectedEntry.setAttribute('read', true);
-        else
-            selectedEntry.removeAttribute('read');
-
-        var query = new QuerySH(null, entryID, null);
-        query.deleted = ENTRY_STATE_ANY;
-        query.markEntriesRead(newStatus)
+            var query = new QuerySH(null, entryID, null);
+            query.deleted = ENTRY_STATE_ANY;
+            query.markEntriesRead(newStatus)
+        }
     },
 
 
     deleteSelectedEntry: function cmd_deleteSelectedEntry() {
-        if (!gFeedView || !gFeedView.selectedEntry)
-            return;
-
-        var entryID = gFeedView.selectedEntry.getAttribute('id');
-        var query = new QuerySH(null, entryID, null);
-        query.deleteEntries(ENTRY_STATE_TRASHED);
+        if (gFeedView.selectedEntry) {
+            var entryID = gFeedView.selectedEntry.getAttribute('id');
+            var query = new QuerySH(null, entryID, null);
+            query.deleteEntries(ENTRY_STATE_TRASHED);
+        }
     },
 
 
     restoreSelectedEntry: function cmd_restoreSelectedEntry() {
-        if (!gFeedView || !gFeedView.selectedEntry)
-            return;
-
-        var entryID = gFeedView.selectedEntry.getAttribute('id');
-        var query = new QuerySH(null, entryID, null);
-        query.deleted = ENTRY_STATE_TRASHED;
-        query.deleteEntries(ENTRY_STATE_NORMAL);
+        if (gFeedView.selectedEntry) {
+            var entryID = gFeedView.selectedEntry.getAttribute('id');
+            var query = new QuerySH(null, entryID, null);
+            query.deleted = ENTRY_STATE_TRASHED;
+            query.deleteEntries(ENTRY_STATE_NORMAL);
+        }
     },
 
 
     starSelectedEntry: function cmd_starSelectedEntry() {
-        if (!gFeedView || !gFeedView.selectedEntry)
-            return;
+        if (gFeedView.selectedEntry) {
+            var selectedEntry = gFeedView.selectedEntry;
+            var entryID = selectedEntry.getAttribute('id');
+            var newStatus = !selectedEntry.hasAttribute('starred');
 
-        var selectedEntry = gFeedView.selectedEntry;
-        var entryID = selectedEntry.getAttribute('id');
-        var newStatus = !selectedEntry.hasAttribute('starred');
+            if (newStatus)
+                selectedEntry.setAttribute('starred', true);
+            else
+                selectedEntry.removeAttribute('starred');
 
-        if (newStatus)
-            selectedEntry.setAttribute('starred', true);
-        else
-            selectedEntry.removeAttribute('starred');
-
-        var query = new QuerySH(null, entryID, null);
-        query.starEntries(newStatus);
+            var query = new QuerySH(null, entryID, null);
+            query.starEntries(newStatus);
+        }
     },
 
     unfoldSelectedEntry: function cmd_unfoldSelectedEntry() {
-        if (!gFeedView || !gFeedView.selectedEntry || !gPrefs.showHeadlinesOnly)
-            return;
-
-        var evt = document.createEvent('Events');
-        evt.initEvent('CollapseEntry', false, false);
-        gFeedView.selectedEntry.dispatchEvent(evt);
-        async(gFeedView.selectedEntry, 'scrollIntoView', 310, false);
+        if (gFeedView.selectedEntry && gPrefs.showHeadlinesOnly) {
+            var evt = document.createEvent('Events');
+            evt.initEvent('CollapseEntry', false, false);
+            gFeedView.selectedEntry.dispatchEvent(evt);
+            async(gFeedView.selectedEntry, 'scrollIntoView', 310, false);
+        }
     },
 
     focusSearchbar: function cmd_focusSearchbar() {
@@ -457,11 +449,10 @@ var gCommands = {
     },
 
     openSelectedEntryLink: function cmd_openSelectedEntryLink(aForceNewTab) {
-        if (!gFeedView || !gFeedView.selectedEntry)
-            return;
-
-        var newTab = gPrefs.getBoolPref('feedview.openEntriesInTabs') || aForceNewTab;
-        gCommands.openEntryLink(gFeedView.selectedEntry, newTab);
+        if (gFeedView.selectedEntry) {
+            var newTab = gPrefs.getBoolPref('feedview.openEntriesInTabs') || aForceNewTab;
+            gCommands.openEntryLink(gFeedView.selectedEntry, newTab);
+        }
     },
 
     openEntryLink: function cmd_openEntryLink(aEntry, aNewTab) {
@@ -536,11 +527,8 @@ function loadHomeview() {
         var browser = document.getElementById('feed-view');
         browser.loadURI(RELEASE_NOTES_URL);
         gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
-        return;
     }
-
-    // Load the Unread view.
-    if (gFeedList.tree && gFeedList.tree.view) {
+    else if (gFeedList.tree && gFeedList.tree.view) {
         gFeedList.tree.view.selection.select(0);
         gFeedList.tree.focus();
     }
@@ -594,61 +582,63 @@ function selectHomeFolder(aEvent) {
 // Creates and manages a FeedView displaying the search results,
 // based on the current input string and the search scope.
 var previousView = null;
+var previousSelectedIndex = 0;
 function performSearch(aEvent) {
     var searchbar = document.getElementById('searchbar');
-    var bundle = document.getElementById('main-bundle');
-    var title = bundle.getFormattedString('searchResults', [searchbar.value]);
 
-    // If there's no feed view and the search scope is "current view" then do nothing.
-    if (searchbar.searchScope == 0 && !gFeedView)
-        return;
+    if (searchbar.value) {
 
-    // A new search is being started.
-    if (searchbar.value && gFeedView && !gFeedView.query.searchString) {
-        // Remember the old view to restore it after the search is finished.
-        previousView = gFeedView;
+        // If new search is being started, remember the old view to
+        // restore it after the search is finished.
+        if (!gFeedView.query.searchString) {
+            previousView = gFeedView;
+            previousSelectedIndex = gFeedList.tree.currentIndex;
+        }
 
-        // For a global search we deselect items in the feed list.
-        // We need to suppress selection so that gFeedList.onSelect() isn't used.
-        // nsITreeSelection.selectEventsSuppressed doesn't seem to work here, so
-        // we have to set our own flag which we will check in onSelect().
-        if (searchbar.searchScope == 1) {
+        var title = document.getElementById('main-bundle').
+                             getFormattedString('searchResults', [searchbar.value]);
+
+        // If the search scope is set to global but the view is not the
+        // global search view, then let's create it.
+        if (searchbar.searchScope == 1 && !gFeedView.isGlobalSearch) {
+            // Clear selection in the feed list.
             gFeedList.ignoreSelectEvent = true;
             gFeedList.tree.view.selection.clearSelection();
             gFeedList.ignoreSelectEvent = false;
+
+            var query = new Query();
+            query.searchString = searchbar.value;
+            gFeedView = new FeedView(title, query);
+        }
+        else {
+            gFeedView.titleOverride = title;
+            gFeedView.query.searchString = searchbar.value;
+            gFeedView.ensure();
         }
     }
 
     // The search has finished.
-    if (!searchbar.value && gFeedView) {
+    else {
+        gFeedList.ignoreSelectEvent = true;
+        gFeedList.tree.view.selection.select(previousSelectedIndex);
+        gFeedList.ignoreSelectEvent = false;
+
         if (previousView != gFeedView) {
             gFeedView = previousView;
             gFeedView.query.searchString = gFeedView.titleOverride = '';
             gFeedView.ensure(true);
-            return;
         }
-
-        gFeedView.query.searchString = gFeedView.titleOverride = '';
-        gFeedView.ensure();
-        return;
+        else {
+            gFeedView.query.searchString = gFeedView.titleOverride = '';
+            gFeedView.ensure();
+        }
     }
-
-    // If the search scope is set to "global" and there is no view or it is not
-    // a global search view, then let's create it.
-    if ((searchbar.searchScope == 1 && !gFeedView.isGlobalSearch) ||
-       (searchbar.searchScope == 1 && !gFeedView)) {
-        var query = new Query();
-        query.searchString = searchbar.value;
-        gFeedView = new FeedView(title, query);
-        return;
-    }
-
-    gFeedView.titleOverride = title;
-    gFeedView.query.searchString = searchbar.value;
-    gFeedView.ensure();
 }
 
 
+// We can't leave handling of Space, Tab, and Backspace can't be captured using <key>
+// XUL elements, so we handle them manually using a listener.
+// Additionally, unlike other keys, they have to be default-prevented.
 function onKeyPress(aEvent) {
     // Stop propagation of character keys, to disable FAYT.
     if (aEvent.charCode)
@@ -656,27 +646,19 @@ function onKeyPress(aEvent) {
 
     // Brief takes over these shortcut keys, so we stop the default action.
     // Let's not prevent the user from typing in inputs that entries may contain, though.
-    if (!gPrefs.assumeStandardKeys || aEvent.originalTarget.localName == 'input')
-        return;
-
-    // We can't leave handling of Space and Tab to XUL like other keys,
-    // because unlike them they have to be default-prevented.
-    if (aEvent.keyCode == aEvent.DOM_VK_TAB) {
-        gCommands.turnOffKeyNav();
-        aEvent.preventDefault();
-        return;
-    }
-
-    var searchbar = document.getElementById('searchbar');
-    if (aEvent.charCode == aEvent.DOM_VK_SPACE && searchbar.getAttribute('focused') != 'true') {
-        gCommands.selectNextEntry();
-        aEvent.preventDefault();
-        return;
-    }
-
-    if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE && searchbar.getAttribute('focused') != 'true') {
-        gCommands.selectPrevEntry();
-        aEvent.preventDefault();
+    if (gPrefs.assumeStandardKeys && aEvent.originalTarget.localName != 'input') {
+        if (aEvent.keyCode == aEvent.DOM_VK_TAB) {
+            gCommands.turnOffKeyNav();
+            aEvent.preventDefault();
+        }
+        else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
+            gCommands.selectNextEntry();
+            aEvent.preventDefault();
+        }
+        else if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE) {
+            gCommands.selectPrevEntry();
+            aEvent.preventDefault();
+        }
     }
 }
 
