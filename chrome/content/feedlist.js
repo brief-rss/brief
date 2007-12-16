@@ -803,7 +803,10 @@ var gContextMenuCommands = {
             transactions.push(transactionsService.removeItem(aItems[i].bookmarkID));
 
         var txn = transactionsService.aggregateTransactions('Remove items', transactions);
-        transactionsService.commitTransaction(txn);
+        // Compat with Fx 3 beta 1.
+        var doTransaction = transactionsService.commitTransaction
+                            || transactionsService.doTransaction;
+        doTransaction(txn);
     },
 
 

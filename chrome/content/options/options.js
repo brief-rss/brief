@@ -9,11 +9,7 @@ function init() {
     if (gPlacesEnabled) {
         document.getElementById('folders-tree').hidden = true;
 
-        //XXX Temporary workaround for Firefox 3 beta 2, where this fails.
-        try {
-            gMainPane.setUpPlacesTree();
-        }
-        catch (e) { }
+        gMainPane.setUpPlacesTree();
     }
     else {
         document.getElementById('places-tree').hidden = true;
@@ -44,16 +40,23 @@ var gMainPane = {
         // Populate the tree.
         var query = PlacesUtils.history.getNewQuery();
         var options = PlacesUtils.history.getNewQueryOptions();
-        var root = PlacesUtils.placesRootId;
+        // bookmarksRootId is for compat with Fx 3 beta 1
+        var root = PlacesUtils.allBookmarksFolderId || PlacesUtils.bookmarksRootId;
         query.setFolders([root], 1);
         options.excludeItems = true;
         tree.load([query], options);
 
-        // Get the place URI for the home folder to select it.
-        query.setFolders([pref.value], 1);
-        placeURI = PlacesUtils.history.queriesToQueryString([query], 1, options);
+        if (tree.selectItems) {
+            tree.selectItems([pref.value]);
+        }
+        // Compat with Fx 3 beta 1.
+        else {
+            // Get the place URI for the home folder to select it.
+            query.setFolders([pref.value], 1);
+            placeURI = PlacesUtils.history.queriesToQueryString([query], 1, options);
 
-        tree.selectPlaceURI(placeURI);
+            tree.selectPlaceURI(placeURI);
+        }
     },
 
     // Fx2Compat

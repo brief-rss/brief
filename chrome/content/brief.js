@@ -589,7 +589,8 @@ function showHomeFolderPicker() {
 
         var query = PlacesUtils.history.getNewQuery();
         var options = PlacesUtils.history.getNewQueryOptions();
-        var root = PlacesUtils.placesRootId;
+        // bookmarksRootId is for compat with Fx 3 beta 1
+        var root = PlacesUtils.allBookmarksFolderId || PlacesUtils.bookmarksRootId;
         query.setFolders([root], 1);
         options.excludeItems = true;
         placesTree.load([query], options);
