@@ -372,16 +372,15 @@ var gCommands = {
 
     markSelectedEntryRead: function cmd_markSelectedEntryRead() {
         if (gFeedView.selectedEntry) {
-            var selectedEntry = gFeedView.selectedEntry;
-            var entryID = selectedEntry.getAttribute('id');
-            var newStatus = !selectedEntry.hasAttribute('read');
+            var selectedElement = gFeedView.selectedElement;
+            var newStatus = !selectedElement.hasAttribute('read');
 
             if (newStatus)
-                selectedEntry.setAttribute('read', true);
+                selectedElement.setAttribute('read', true);
             else
-                selectedEntry.removeAttribute('read');
+                selectedElement.removeAttribute('read');
 
-            var query = new QuerySH(null, entryID, null);
+            var query = new QuerySH(null, gFeedView.selectedEntry, null);
             query.deleted = ENTRY_STATE_ANY;
             query.markEntriesRead(newStatus)
         }
@@ -390,8 +389,7 @@ var gCommands = {
 
     deleteSelectedEntry: function cmd_deleteSelectedEntry() {
         if (gFeedView.selectedEntry) {
-            var entryID = gFeedView.selectedEntry.getAttribute('id');
-            var query = new QuerySH(null, entryID, null);
+            var query = new QuerySH(null, gFeedView.selectedEntry, null);
             query.deleteEntries(ENTRY_STATE_TRASHED);
         }
     },
@@ -399,8 +397,7 @@ var gCommands = {
 
     restoreSelectedEntry: function cmd_restoreSelectedEntry() {
         if (gFeedView.selectedEntry) {
-            var entryID = gFeedView.selectedEntry.getAttribute('id');
-            var query = new QuerySH(null, entryID, null);
+            var query = new QuerySH(null, gFeedView.selectedEntry, null);
             query.deleted = ENTRY_STATE_TRASHED;
             query.deleteEntries(ENTRY_STATE_NORMAL);
         }
@@ -409,26 +406,28 @@ var gCommands = {
 
     starSelectedEntry: function cmd_starSelectedEntry() {
         if (gFeedView.selectedEntry) {
-            var selectedEntry = gFeedView.selectedEntry;
-            var entryID = selectedEntry.getAttribute('id');
-            var newStatus = !selectedEntry.hasAttribute('starred');
+            var selectedElement = gFeedView.selectedElement;
+            var newStatus = !selectedElement.hasAttribute('starred');
 
             if (newStatus)
-                selectedEntry.setAttribute('starred', true);
+                selectedElement.setAttribute('starred', true);
             else
-                selectedEntry.removeAttribute('starred');
+                selectedElement.removeAttribute('starred');
 
-            var query = new QuerySH(null, entryID, null);
+            var query = new QuerySH(null, gFeedView.selectedEntry, null);
             query.starEntries(newStatus);
         }
     },
 
     unfoldSelectedEntry: function cmd_unfoldSelectedEntry() {
         if (gFeedView.selectedEntry && gPrefs.showHeadlinesOnly) {
+            var selectedElement = gFeedView.selectedElement;
+
             var evt = document.createEvent('Events');
             evt.initEvent('CollapseEntry', false, false);
-            gFeedView.selectedEntry.dispatchEvent(evt);
-            async(gFeedView.selectedEntry, 'scrollIntoView', 310, false);
+            selectedElement.dispatchEvent(evt);
+            
+            async(selectedElement.scrollIntoView, 310, selectedElement, false);
         }
     },
 
@@ -451,7 +450,7 @@ var gCommands = {
     openSelectedEntryLink: function cmd_openSelectedEntryLink(aForceNewTab) {
         if (gFeedView.selectedEntry) {
             var newTab = gPrefs.getBoolPref('feedview.openEntriesInTabs') || aForceNewTab;
-            gCommands.openEntryLink(gFeedView.selectedEntry, newTab);
+            gCommands.openEntryLink(gFeedView.selectedElement, newTab);
         }
     },
 
