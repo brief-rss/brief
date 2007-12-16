@@ -43,7 +43,7 @@
                       accesskey="&checkUpdatesPerFeed.accesskey;"
                       oncommand="onCheckUpdatesCheckboxCmd(event);"/>
             <textbox id="check-updates-textbox"
-                     size="2"
+                     size="1"
                      type="number"
                      min="1"/>
             <menulist id="update-time-menulist">
@@ -60,7 +60,7 @@
                       accesskey="&expireEntriesPerFeed.accesskey;"
                       oncommand="onExpirationCheckboxCmd(event);"/>
             <textbox id="expiration-textbox"
-                     size="2"
+                     size="1"
                      type="number"
                      min="1"/>
             <label value="&expireEntriesPerFeedAfter.label;"/>
@@ -71,7 +71,7 @@
                       label="&maxEntriesPerFeedBefore.label;"
                       oncommand="onMaxEntriesCheckboxCmd(event);"/>
             <textbox id="max-entries-textbox"
-                     size="2"
+                     size="1"
                      type="number"
                      min="1"/>
             <label value="&maxEntriesPerFeedAfter.label;"/>
