@@ -42,7 +42,7 @@
 <!ENTITY entriesPerPageAfter.label "items per page">
 <!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY enableCustomStyle.label "Use custom style: ">
-<!ENTITY enableCustomStyle.accesskey "f">
+<!ENTITY enableCustomStyle.accesskey "u">
 <!ENTITY browseCustomStyle.label "Browse">
 <!ENTITY browseCustomStyle.accesskey "B">
 <!ENTITY showShortcuts.label "Show shortcuts">
