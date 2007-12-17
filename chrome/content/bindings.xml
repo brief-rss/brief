@@ -161,7 +161,7 @@
                 function dispatchCollapseEvent() {
                     var evt = document.createEvent('Events');
                     evt.initEvent('EntryCollapsed', false, false);
-                    self.dispatchEvent(evt);
+                    setTimeout(function(){ self.dispatchEvent(evt) }, 100);
                 }
 
                 if (this.hasAttribute('collapsed')) {
