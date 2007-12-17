@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Hľadať v aktuálne zobrazených">
 <!ENTITY searchAllFeeds.label "Hľadať vo všetkých kanáloch">
-<!ENTITY headlinesCheckbox.tooltip "Zobraziť len titulky">
+<!ENTITY headlinesCheckbox.tooltip "Požiť náhľad tituliek">
 <!ENTITY showAll.label "Zobraziť všetko">
 <!ENTITY showUnread.label "Zobraziť neprečítané">
 <!ENTITY showStarred.label "Zobraziť s hviezdičkou">

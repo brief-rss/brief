@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "確定">
 <!ENTITY searchCurrentView.label "搜尋目前顯示中的">
 <!ENTITY searchAllFeeds.label "搜尋所有消息來源">
-<!ENTITY headlinesCheckbox.tooltip "只顯示標題">
+<!ENTITY headlinesCheckbox.tooltip "Use headlines view">
 <!ENTITY showAll.label "顯示所有項目">
 <!ENTITY showUnread.label "顯示未讀項目">
 <!ENTITY showStarred.label "顯示星號項目">

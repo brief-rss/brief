@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Zoeken in huidige weergave">
 <!ENTITY searchAllFeeds.label "Zoeken in alle feeds">
-<!ENTITY headlinesCheckbox.tooltip "Alleen kopteksten weergeven">
+<!ENTITY headlinesCheckbox.tooltip "Koptekstweergave">
 <!ENTITY showAll.label "Alles bekijken">
 <!ENTITY showUnread.label "Ongelezen bekijken">
 <!ENTITY showStarred.label "Met ster bekijken">
@@ -35,4 +35,4 @@
 <!ENTITY ctxUpdateFeeds.label "Feeds nu bijwerken">
 <!ENTITY ctxMarkFeedsAsRead.label "Alle feeds als gelezen markeren">
 <!ENTITY compactingWindow.title "Feeds compacteren">
-<!ENTITY compactingInProgress.label "Brief compacteert opgeslagen feeds. Dit kanen enkele minuten duren...">
+<!ENTITY compactingInProgress.label "Brief compacteert opgeslagen feeds. Dit kan enkele minuten duren...">

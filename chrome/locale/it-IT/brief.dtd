@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Attualmente visti">
 <!ENTITY searchAllFeeds.label "Tutti i feed">
-<!ENTITY headlinesCheckbox.tooltip "Nascondi le anteprime degli elementi">
+<!ENTITY headlinesCheckbox.tooltip "Attiva/disattiva la visualizzazione delle anteprime">
 <!ENTITY showAll.label "Mostra tutti">
 <!ENTITY showUnread.label "Mostra non letti">
 <!ENTITY showStarred.label "Mostra segnati con stella">

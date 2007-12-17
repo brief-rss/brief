@@ -229,6 +229,10 @@ toolbarbutton {
   color: GrayText;
   }
 
+.searchbar-textbox {
+  -moz-box-align: center;
+}
+
 .search-scope-button {
   -moz-appearance: none;
   -moz-binding: none;

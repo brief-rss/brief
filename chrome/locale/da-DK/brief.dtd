@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Søg nuværende visning">
 <!ENTITY searchAllFeeds.label "Søg alle feeds">
-<!ENTITY headlinesCheckbox.tooltip "Vis kun overskrifter">
+<!ENTITY headlinesCheckbox.tooltip "Use headlines view">
 <!ENTITY showAll.label "Vis alle">
 <!ENTITY showUnread.label "Vis ulæste">
 <!ENTITY showStarred.label "Vis stjernemarkerede">

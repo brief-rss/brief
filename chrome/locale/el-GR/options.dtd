@@ -1,6 +1,10 @@
 <!ENTITY optionsWindow.title "Επιλογές Brief">
 <!ENTITY mainPane.label "Γενικά">
 <!ENTITY folderTree.label "Κατάλογος δυναμικών σελιδοδεικτών">
+<!ENTITY importOPML.label "Εισαγωγή...">
+<!ENTITY importOPML.accesskey "ω">
+<!ENTITY exportOPML.label "Εξαγωγή...">
+<!ENTITY exportOPML.accesskey "ξ">
 <!ENTITY showStatusbarIcon.label "Προβολή εικονίδιου στη γραμμή κατάστασης">
 <!ENTITY showStatusbarIcon.accesskey "ρ">
 <!ENTITY openInNewTab.label "Άνοιγμα του Brief σε νέα καρτέλα">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "Συμπεριφορά">
 <!ENTITY openEntriesInTabs.label "Άνοιγμα εγγραφών σε νέες καρτέλες">
 <!ENTITY openEntriesInTabs.accesskey "ι">
-<!ENTITY doubleClickMarks.label "Σημείωση εγγραφών ως αναγνωσμένων με διπλό κλικ">
-<!ENTITY doubleClickMarks.accesskey "δ">
+<!ENTITY autoMarkRead.label "Σημείωση εγγραφών ως αναγνωσμένων με την εμφάνιση τους">
+<!ENTITY autoMarkRead.accesskey "μ">
 <!ENTITY storingGroup.caption "Αποθήκευση">
 <!ENTITY expirationBefore.label "Αφαίρεση εμφανισμένων εγγγραφών μετά από">
 <!ENTITY expirationAfter.label "ημέρες">
@@ -29,15 +33,16 @@
 <!ENTITY storedEntriesAfter.label "πρόσφατων εγγραφών από κάθε αρχείο ροής">
 <!ENTITY storedEntriesCheckbox.accesskey "θ">
 <!ENTITY clearAllEntriesButton.label "Εκκαθάριση όλων των εγγραφών">
-<!ENTITY clearAllEntriesButton.accesskey "κ">
+<!ENTITY clearAllEntriesButton.accesskey "α">
 <!ENTITY displayPane.label "Εμφάνιση">
 <!ENTITY feedViewGroup.caption "Εμφάνιση περιεχόμενου αρχείου ροής">
 <!ENTITY authorsCheckbox.label "Προβολή συντακτών εγγραφών">
 <!ENTITY authorsCheckbox.accesskey "υ">
 <!ENTITY entriesPerPageBefore.label "Προβολή">
 <!ENTITY entriesPerPageAfter.label "εγγραφών ανά σελίδα">
-<!ENTITY enableCustomStyle.label "Χρήση προσαρμοσμένου φύλλου στυλ για το περιεχόμενο του αρχείου ροής">
-<!ENTITY enableCustomStyle.accesskey "λ">
+<!ENTITY entriesPerPage.accesskey "">
+<!ENTITY enableCustomStyle.label "Χρήση προσαρμοσμένου στυλ:">
+<!ENTITY enableCustomStyle.accesskey "π">
 <!ENTITY browseCustomStyle.label "Εντοπισμός">
 <!ENTITY browseCustomStyle.accesskey "Ε">
 <!ENTITY showShortcuts.label "Προβολή συντομεύσεων πληκτρολογίου">

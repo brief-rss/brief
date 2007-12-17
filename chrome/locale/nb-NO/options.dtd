@@ -1,13 +1,17 @@
 <!ENTITY optionsWindow.title "Innstillinger - Brief">
 <!ENTITY mainPane.label "Generelt">
 <!ENTITY folderTree.label "Mappe som inneholder levende bokmerker:">
+<!ENTITY importOPML.label "Importer ...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Eksporter ...">
+<!ENTITY exportOPML.accesskey "k">
 <!ENTITY showStatusbarIcon.label "Vis ikon i statuslinja">
 <!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY openInNewTab.label "Åpne Brief i ny fane">
 <!ENTITY openInNewTab.accesskey "O">
 <!ENTITY feedsPane.label "Nyhetskilder">
 <!ENTITY updateGroup.caption "Oppdatering">
-<!ENTITY checkForUpdatesBefore.label "Finn oppdateringer for nyhetskilder hvert">
+<!ENTITY checkForUpdatesBefore.label "Finn oppdateringer for nyhetskilder hver(t)">
 <!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "minutt">
 <!ENTITY updateIntervalHours.label "time">
@@ -18,8 +22,8 @@
 <!ENTITY behaviorGroup.caption "Oppførsel">
 <!ENTITY openEntriesInTabs.label "Åpne elementer i ny fane">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY doubleClickMarks.label "Markere elementer som lest ved dobbelklikk">
-<!ENTITY doubleClickMarks.accesskey "M">
+<!ENTITY autoMarkRead.label "Merk elementer som lest når de åpnes">
+<!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "Lagring">
 <!ENTITY expirationBefore.label "Fjern lagrede elementer etter">
 <!ENTITY expirationAfter.label "dager">
@@ -28,7 +32,7 @@
 <!ENTITY storedEntriesBefore.label "Ikke lagre mer enn">
 <!ENTITY storedEntriesAfter.label "siste elementer i hver nyhetskilde">
 <!ENTITY storedEntriesCheckbox.accesskey "e">
-<!ENTITY clearAllEntriesButton.label "Fjern alle elementer">
+<!ENTITY clearAllEntriesButton.label "Fjern alle elementer ...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Visning">
 <!ENTITY feedViewGroup.caption "Innholdsvisning for nyhetskilder">
@@ -36,7 +40,8 @@
 <!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Vis">
 <!ENTITY entriesPerPageAfter.label "elementer pr side">
-<!ENTITY enableCustomStyle.label "Bruk egen stil for nyhetskildeinnholdet">
+<!ENTITY entriesPerPage.accesskey "S">
+<!ENTITY enableCustomStyle.label "Bruk selvvalgt stil:">
 <!ENTITY enableCustomStyle.accesskey "f">
 <!ENTITY browseCustomStyle.label "Bla">
 <!ENTITY browseCustomStyle.accesskey "B">

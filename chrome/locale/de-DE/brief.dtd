@@ -2,7 +2,7 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "In aktueller Ansicht suchen">
 <!ENTITY searchAllFeeds.label "In allen Feeds suchen">
-<!ENTITY headlinesCheckbox.tooltip "Nur Überschriften anzeigen">
+<!ENTITY headlinesCheckbox.tooltip "Überschriftenmodus verwenden">
 <!ENTITY showAll.label "Alle anzeigen">
 <!ENTITY showUnread.label "Ungelesene anzeigen">
 <!ENTITY showStarred.label "Gekennzeichnete anzeigen">
