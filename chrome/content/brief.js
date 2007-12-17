@@ -3,8 +3,8 @@ const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
 
-const LAST_MAJOR_VERSION = '1.0';
-const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.0.html';
+const LAST_MAJOR_VERSION = '1.1';
+const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.1.html';
 
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
