@@ -41,7 +41,7 @@ treechildren::-moz-tree-line {
 }
 
 treechildren::-moz-tree-cell-text {
-  font-size: 12px;
+  font-size: 12px !important;
 }
 
 treechildren::-moz-tree-cell-text(unread) {
@@ -49,7 +49,7 @@ treechildren::-moz-tree-cell-text(unread) {
 }
 
 treechildren::-moz-tree-row {
-  height: 1.6em;
+  height: 1.8em;
 }
 
 
