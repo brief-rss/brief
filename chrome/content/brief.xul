@@ -201,6 +201,7 @@
                 </toolbar>
             </toolbox>
             <browser id="feed-view" flex="1"
+                     disablehistory="true"
                      type="content"/>
         </vbox>
     </hbox>
