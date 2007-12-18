@@ -23,7 +23,7 @@ const BOOKMARKS_OBSERVER_DELAY = 250;
 
 const DATABASE_VERSION = 5;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 var gStorageService = null;
 
@@ -900,7 +900,8 @@ BriefStorageService.prototype = {
         if (this.bookmarksObserverTimerIsRunning)
             this.bookmarksObserverDelayTimer.cancel();
 
-        this.bookmarksObserverDelayTimer.init(this, BOOKMARKS_OBSERVER_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
+        this.bookmarksObserverDelayTimer.init(this, BOOKMARKS_OBSERVER_DELAY,
+                                              Ci.nsITimer.TYPE_ONE_SHOT);
         this.bookmarksObserverTimerIsRunning = true;
     },
 
@@ -975,6 +976,11 @@ BookmarksSynchronizer.prototype = {
 
     get srv() gStorageService,
     get dBConnection() gStorageService.dBConnection,
+
+    feeds:     null,
+    newFeeds:  null,
+    bookmarks: null,
+    feedListChanged: false,
 
     checkHomeFolder: function BookmarksSync_checkHomeFolder() {
         var folderValid = true;
@@ -1127,8 +1133,8 @@ BookmarksSynchronizer.prototype = {
         if (aFeed.isFolder) {
             var removeFolder = this.dBConnection.
                                     createStatement('DELETE FROM feeds WHERE feedID = ?');
-            removeFeed.bindStringParameter(0, aFeed.feedID);
-            removeFeed.execute();
+            removeFolder.bindStringParameter(0, aFeed.feedID);
+            removeFolder.execute();
         }
         else {
             var hideFeed = this.dBConnection.
@@ -1220,20 +1226,18 @@ BriefQuery.prototype = {
     limit:  0,
     offset: 1,
 
-    sortOrder: Components.interfaces.nsIBriefQuery.NO_SORT,
-    sortDirection: Components.interfaces.nsIBriefQuery.SORT_DESCENDING,
+    sortOrder: Ci.nsIBriefQuery.NO_SORT,
+    sortDirection: Ci.nsIBriefQuery.SORT_DESCENDING,
 
     includeHiddenFeeds: false,
 
-    // When |BriefQuery.folders| is set, it's not enough to take the feeds from these
-    // folders alone - we also have to consider their subfolders. And because feeds have
+    // When |nsIBriefQuery.folders| is set, it's not enough to take feeds from these
+    // folders alone - we also have to consider their subfolders. Because feeds have
     // no knowledge about the folders they are in besides their direct parent, we have
-    // to compute actual ("effective") folders list when creating the query.
+    // to compute actual folders list when creating the query.
     effectiveFolders: null,
 
-    get dBConnection() {
-        return gStorageService.dBConnection;
-    },
+    get dBConnection() gStorageService.dBConnection,
 
     setConditions: function BriefQuery_setConditions(aFeeds, aEntries, aUnread) {
         this.feeds = aFeeds;
