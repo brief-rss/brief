@@ -119,8 +119,6 @@ BriefStorageService.prototype = {
         if (this.dBConnection.schemaVersion < DATABASE_VERSION)
             this.migrateDatabase();
 
-        this.dBConnection.preload();
-
         this.prefs = Cc["@mozilla.org/preferences-service;1"].
                      getService(Ci.nsIPrefService).
                      getBranch('extensions.brief.').
