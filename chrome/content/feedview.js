@@ -76,7 +76,6 @@ FeedView.prototype = {
             this.__query.deleted = gPrefs.shownEntries == 'trashed' ? ENTRY_STATE_TRASHED
                                                                     : ENTRY_STATE_NORMAL;
         }
-        // XXX We should not have to reset the offset and limit every time.
         this.__query.limit = 0;
         this.__query.offset = 1;
 
@@ -224,6 +223,7 @@ FeedView.prototype = {
                 win.scroll(win.pageXOffset, win.pageYOffset + jump);
             }
         }
+
         // Disallow selecting futher entries until scrolling is finished.
         this._selectionSuppressed = true;
 
@@ -241,7 +241,7 @@ FeedView.prototype = {
         var view = gFeedView;
         if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !view.query.unread) {
             clearTimeout(gMarkVisibleTimeout);
-            gMarkVisibleTimeout = async(function(){ view._doMarkVisibleAsRead() }, 500);
+            gMarkVisibleTimeout = async(view._doMarkVisibleAsRead, 500, view);
         }
     },
 
@@ -400,17 +400,17 @@ FeedView.prototype = {
 
     // Refreshes the view when one entry is removed from the currently displayed page.
     _refreshIncrementally: function FeedView__refreshIncrementally(aEntryID) {
-        var entry = this.document.getElementById(aEntryID);
+        var entryElement = this.document.getElementById(aEntryID);
 
-        var entryWasSelected = (entry == this.selectedEntry);
+        var entryWasSelected = (aEntryID == this.selectedEntry);
         if (entryWasSelected) {
             // Immediately deselect the entry, so that no futher commands can be sent.
             this.selectEntry(null);
 
             // Remember the next and previous siblings as we
             // may need to select one of them.
-            var nextSibling = entry.nextSibling;
-            var previousSibling = entry.previousSibling;
+            var nextSibling = entryElement.nextSibling;
+            var previousSibling = entryElement.previousSibling;
         }
 
         // Remove the entry. We don't do it directly, because we want to
@@ -418,7 +418,7 @@ FeedView.prototype = {
         // here, because it's untrusted.
         var evt = document.createEvent('Events');
         evt.initEvent('RemoveEntry', false, false);
-        entry.dispatchEvent(evt);
+        entryElement.dispatchEvent(evt);
 
         var self = this;
         function finish() {
