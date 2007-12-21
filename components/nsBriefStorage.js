@@ -202,38 +202,36 @@ BriefStorageService.prototype = {
 
         // To 1.2
         case 4:
-            // This version changed how IDs are generated. Below we recompute IDs,
-            // but only for entries which are still available in the feed.
-            var selectRecentEntries = this.dBConnection.createStatement(
-                'SELECT entries.feedID, entries.providedID, entries.id           ' +
-                'FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID  ' +
-                'WHERE entries.date >= feeds.oldestAvailableEntryDate            ');
+            var hashStringFunc = {
+                QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
+                onFunctionCall: function(aArgs) hashString(aArgs.getUTF8String(0))
+            }
+            var generateEntryHashFunc = {
+                QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
+                onFunctionCall: function(aArgs) hashString(aArgs.getUTF8String(0) +
+                                                           aArgs.getUTF8String(1))
+            }
 
-            var updateEntryID = this.dBConnection.createStatement(
-                'UPDATE OR IGNORE entries SET id = ?1 WHERE id = ?2');
+            this.dBConnection.createFunction('hashString', 1, hashStringFunc);
+            this.dBConnection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
 
             this.dBConnection.beginTransaction();
 
             try {
-                var entries = [];
-                while (selectRecentEntries.executeStep()) {
-                    var entry = {};
-                    entry.feedID = selectRecentEntries.getString(0);
-                    entry.providedID = selectRecentEntries.getString(1);
-                    entry.id = selectRecentEntries.getString(2);
-                    entries.push(entry);
-                }
-                selectRecentEntries.reset();
+                // This version changed how IDs are generated. Below we recompute IDs,
+                // but only for entries which are still available in the feed.
+                this.dBConnection.executeSimpleSQL(
+                'UPDATE OR IGNORE entries                                          ' +
+                'SET id = generateEntryHash(feedID, providedID)                    ' +
+                'WHERE rowid IN (                                                  ' +
+                '   SELECT entries.rowid                                           ' +
+                '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                '   WHERE entries.date >= feeds.oldestAvailableEntryDate AND       ' +
+                '         entries.providedID != ""                                 ' +
+                ')                                                                 ');
 
-                for each (entry in entries) {
-                    if (entry.providedID) {
-                        var newID = hashString(entry.feedID + entry.providedID)
-
-                        updateEntryID.bindStringParameter(0, newID);
-                        updateEntryID.bindStringParameter(1, entry.id);
-                        updateEntryID.execute();
-                    }
-                }
+                this.dBConnection.executeSimpleSQL(
+                'UPDATE OR IGNORE feeds SET feedID = hashString(feedURL)');
             }
             catch (e) {
                 this.reportError(e);
@@ -1585,20 +1583,17 @@ BriefQuery.prototype = {
 }
 
 function hashString(aString) {
-
     // nsICryptoHash can read the data either from an array or a stream.
     // Creating a stream ought to be faster than converting a long string
     // into an array using JS.
-    // XXX nsIStringInputStream doesn't work well with UTF-16 strings; it's
-    // lossy, so it increases the risk of collisions.
-    // nsIScriptableUnicodeConverter.convertToInputStream should be used instead.
-    var stringStream = Cc["@mozilla.org/io/string-input-stream;1"].
-                       createInstance(Ci.nsIStringInputStream);
-    stringStream.setData(aString, aString.length);
+    var unicodeConverter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].
+                           createInstance(Ci.nsIScriptableUnicodeConverter);
+    unicodeConverter.charset = 'UTF-8';
+    var stream = unicodeConverter.convertToInputStream(aString);
 
     var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
     hasher.init(Ci.nsICryptoHash.MD5);
-    hasher.updateFromStream(stringStream, stringStream.available());
+    hasher.updateFromStream(stream, stream.available());
     var hash = hasher.finish(false);
 
     // Convert the hash to a hex-encoded string.
