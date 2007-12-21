@@ -504,8 +504,8 @@ function getFeedViewStyle() {
     var stylePath = gPrefs.getComplexValue('feedview.customStylePath',
                                            Ci.nsISupportsString);
 
-    var url = (useCustomStyle && stylePath) ? 'file:///' + stylePath.data
-                                            : DEFAULT_STYLE_URL;
+    var url = (useCustomStyle && stylePath.data) ? 'file:///' + stylePath.data
+                                                 : DEFAULT_STYLE_URL;
 
     var request = new XMLHttpRequest;
     request.open('GET', url, false);
