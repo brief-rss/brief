@@ -83,7 +83,6 @@ pre, code {
   display: table-cell;
 }
 
-
 /* Turn on expand arrow in headlines view */
 #feed-content[showHeadlinesOnly] .expand-button {
   display: block;
