@@ -14,19 +14,6 @@
 
 /* --------------------- Button images ---------------------*/
 
-.delete-entry {
-  list-style-image: url('chrome://brief/skin/icons/entry-delete.png');
-  -moz-image-region: rect(0px, 15px, 15px, 0px);
-  }
-
-.delete-entry:hover {
-  -moz-image-region: rect(15px, 15px, 30px, 0px);
-  }
-
-.restore-entry {
-  list-style-image: url('chrome://brief/skin/icons/restore-entry.png');
-  }
-
 .article-container[starred] .star-entry {
   list-style-image: url('chrome://brief/skin/icons/unstar.png');
   }
