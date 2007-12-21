@@ -93,24 +93,69 @@ body {
 /* ---------------------- Article controls  ---------------------- */
 
 .article-controls {
+  float: right;
+  margin-top: -3px;
+}
+
+.article-button {
+  display: inline-block;
+}
+
+.mark-read {
   font-family: Arial, sans-serif;
   font-size: 12px;
-  display: table-cell; /* The only way I could find out to keep the buttons aligned
-                          was to use vertical-align. For this we need table-cell. */
-  float: right;
-  margin-top: -5px;
-  }
-
-/*   Never change padding of the buttons as it would break many themes  */
-.article-controls > button {
-  opacity: 0.8;
-  min-width: 0;
-  vertical-align: middle;
-  }
-
-.article-controls > button:hover {
-  opacity: 1.0;
+  color: #326585;
+  text-align: center;
+  cursor: default;
+  -moz-user-select: none;
+  margin-right: 3px;
 }
+
+.mark-read > * {
+  display: table-cell;
+  height: 25px;
+}
+
+.mark-read-left, .mark-read-right {
+  background-image: url(chrome://brief/skin/mark-read-button-endcaps.png);
+  width: 7px;
+}
+
+.mark-read-centre {
+  background-image: url(chrome://brief/skin/mark-read-button-centre.png);
+  padding: 0 1px;
+  min-width: 70px;
+  vertical-align: middle;
+}
+
+.mark-read-right {
+  background-position: -7px 0;
+}
+
+.mark-read:hover > .mark-read-right {
+  background-position: -7px -25px;
+}
+
+.delete-entry, .restore-entry {
+  width: 29px;
+  height: 25px;
+}
+
+.delete-entry {
+  background-image: url(chrome://brief/skin/delete-button.png);
+}
+
+.restore-entry {
+  background-image: url(chrome://brief/skin/restore-button.png);
+}
+
+.delete-entry:hover,
+.restore-entry:hover,
+.mark-read:hover > .mark-read-centre,
+.mark-read:hover > .mark-read-left {
+  background-position: 0 -25px;
+}
+
 
 .star-container {
   float: left;
@@ -197,7 +242,7 @@ body {
 
 .article-container[collapsed] {
   background-image: none;
-  background-color: #ebf5ff;
+  background-color: #ebf7ff;
   border-right-color: #e1e8ef;
   border-left-color: #e1e8ef;
   min-height: 5.5em;
@@ -216,9 +261,9 @@ body {
 }
 
 .article-container[collapsed] .article-controls {
-  background-color: #ebf5ff;
+  background-color: #ebf7ff;
   position: absolute;
-  top: 1px;
+  top: 3px;
   right: 5px;
   margin: 0;
   padding-left: 10px;

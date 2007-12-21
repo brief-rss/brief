@@ -16,9 +16,13 @@
                     <xul:image class="star-image"/>
                 </html:div>
                 <html:div class="article-controls">
-                    <xul:button anonid="mark-read" class="article-button mark-read"/>
-                    <xul:button anonid="delete-entry" class="article-button delete-entry"/>
-                    <xul:button anonid="restore-entry" class="article-button restore-entry"/>
+                    <html:div anonid="mark-read" class="article-button mark-read">
+                        <html:div class="mark-read-left"/>
+                        <html:div class="mark-read-centre"/>
+                        <html:div class="mark-read-right"/>
+                    </html:div>
+                    <html:div anonid="delete-entry" class="article-button delete-entry"/>
+                    <html:div anonid="restore-entry" class="article-button restore-entry"/>
                 </html:div>
                 <html:a anonid="article-title-link" class="article-title-link"/>
             </html:div>
@@ -58,8 +62,8 @@
                     document.getAnonymousElementByAttribute(this, 'class', 'article-date');
                 var articleContentElement =
                     document.getAnonymousElementByAttribute(this, 'class', 'article-content');
-                var markReadButton =
-                    document.getAnonymousElementByAttribute(this, 'anonid', 'mark-read');
+                var markReadButtonText =
+                    document.getAnonymousElementByAttribute(this, 'class', 'mark-read-centre');
 
                 // Construct elements' contents from feed entry data. Use innerHTML
                 // instead of textContent, so that the entities are resolved.
@@ -76,8 +80,8 @@
 
                 articleContentElement.innerHTML = content;
 
-                markReadButton.label = isRead ? feedContentElement.getAttribute('markUnreadString')
-                                              : feedContentElement.getAttribute('markReadString');
+                markReadButtonText.textContent = isRead ? feedContentElement.getAttribute('markUnreadString')
+                                                        : feedContentElement.getAttribute('markReadString');
 
                 if (this.hasAttribute('collapsed')) {
                     var header =
@@ -109,32 +113,29 @@
         </implementation>
 
         <handlers>
-            <handler event="command">
-            <![CDATA[
-                var anonid = event.originalTarget.getAttribute('anonid');
-                switch (anonid) {
-                case 'mark-read':
-                    this.toggleReadStatus();
-                    break;
-
-                case 'delete-entry':
-                    var evt = document.createEvent('Events');
-                    evt.initEvent('DeleteEntry', false, false);
-                    this.dispatchEvent(evt);
-                    break;
-
-                case 'restore-entry':
-                  var evt = document.createEvent('Events');
-                    evt.initEvent('RestoreEntry', false, false);
-                    this.dispatchEvent(evt);
-                    break;
-                }
-            ]]>
-            </handler>
-
             <handler event="click" button="0">
             <![CDATA[
                 var target = event.originalTarget;
+                var anonid = target.getAttribute('anonid');
+
+                if (anonid == 'mark-read' || target.parentNode.getAttribute('anonid') == 'mark-read') {
+                    this.toggleReadStatus();
+                    return;
+                }
+
+                if (anonid == 'delete-entry') {
+                    var evt = document.createEvent('Events');
+                    evt.initEvent('DeleteEntry', false, false);
+                    this.dispatchEvent(evt);
+                    return;
+                }
+
+                if (anonid == 'restore-entry') {
+                    var evt = document.createEvent('Events');
+                    evt.initEvent('RestoreEntry', false, false);
+                    this.dispatchEvent(evt);
+                    return;
+                }
 
                 if (target.className == 'star-container' || target.className == 'star-image') {
                     if (this.hasAttribute('starred'))
@@ -207,12 +208,11 @@
             <![CDATA[
                 switch (event.attrName) {
                 case 'read':
-                    var markReadButton = document.
-                               getAnonymousElementByAttribute(this, 'anonid', 'mark-read');
+                    var markReadButtonText = document.
+                               getAnonymousElementByAttribute(this, 'class', 'mark-read-centre');
                     var feedContentDiv = document.getElementById('feed-content');
-
                     if (event.newValue == 'true') {
-                        markReadButton.label = feedContentDiv.getAttribute('markUnreadString');
+                        markReadButtonText.textContent = feedContentDiv.getAttribute('markUnreadString');
                         if (this.hasAttribute('updated')) {
                             this.removeAttribute('updated');
                             var dateElement = document.getAnonymousElementByAttribute(
@@ -221,7 +221,7 @@
                         }
                     }
                     else {
-                        markReadButton.label = feedContentDiv.getAttribute('markReadString');
+                        markReadButtonText.textContent = feedContentDiv.getAttribute('markReadString');
                     }
                     break;
 
