@@ -9,6 +9,8 @@ const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+
 const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
 const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
@@ -23,7 +25,40 @@ const BOOKMARKS_OBSERVER_DELAY = 250;
 
 const DATABASE_VERSION = 5;
 
-Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
+                           'feedURL         TEXT,                ' +
+                           'websiteURL      TEXT,                ' +
+                           'title           TEXT,                ' +
+                           'subtitle        TEXT,                ' +
+                           'imageURL        TEXT,                ' +
+                           'imageLink       TEXT,                ' +
+                           'imageTitle      TEXT,                ' +
+                           'favicon         TEXT,                ' +
+                           'bookmarkID      TEXT,                ' +
+                           'rowIndex        INTEGER,             ' +
+                           'parent          TEXT,                ' +
+                           'isFolder        INTEGER,             ' +
+                           'hidden          INTEGER DEFAULT 0,   ' +
+                           'lastUpdated     INTEGER DEFAULT 0,   ' +
+                           'dateModified    INTEGER DEFAULT 0,   ' +
+                           'oldestEntryDate INTEGER,             ' +
+                           'entryAgeLimit   INTEGER DEFAULT 0,   ' +
+                           'maxEntries      INTEGER DEFAULT 0,   ' +
+                           'updateInterval  INTEGER DEFAULT 0    ';
+
+const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
+                             'feedID      TEXT,               ' +
+                             'secondaryID TEXT,               ' +
+                             'providedID  TEXT,               ' +
+                             'entryURL    TEXT,               ' +
+                             'title       TEXT,               ' +
+                             'content     TEXT,               ' +
+                             'date        INTEGER,            ' +
+                             'authors     TEXT,               ' +
+                             'read        INTEGER DEFAULT 0,  ' +
+                             'updated     INTEGER DEFAULT 0,  ' +
+                             'starred     INTEGER DEFAULT 0,  ' +
+                             'deleted     INTEGER DEFAULT 0   ';
 
 var gStorageService = null;
 
@@ -38,7 +73,9 @@ function BriefStorageService() {
 
 BriefStorageService.prototype = {
 
-    dBConnection:          null,
+    databaseFile:  null,
+    dBConnection:  null,
+
     feedsAndFoldersCache:  null,
     feedsCache:            null,
 
@@ -58,65 +95,19 @@ BriefStorageService.prototype = {
     livemarkService:  null,
 
     instantiate: function BriefStorage_instantiate() {
-        var file = Cc['@mozilla.org/file/directory_service;1'].
-                   getService(Ci.nsIProperties).
-                   get('ProfD', Ci.nsIFile);
-        file.append('brief.sqlite');
-        var databaseIsNew = !file.exists();
+        this.databaseFile = Cc['@mozilla.org/file/directory_service;1'].
+                            getService(Ci.nsIProperties).
+                            get('ProfD', Ci.nsIFile);
+        this.databaseFile.append('brief.sqlite');
+        var databaseIsNew = !this.databaseFile.exists();
 
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
-        this.dBConnection = storageService.openDatabase(file);
+        this.dBConnection = storageService.openDatabase(this.databaseFile);
 
         if (databaseIsNew)
-            this.dBConnection.schemaVersion = DATABASE_VERSION;
-
-        //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
-        //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
-
-        this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds (    ' +
-                                           'feedID         TEXT UNIQUE,           ' +
-                                           'RDF_URI        TEXT,                  ' + // rename
-                                           'feedURL        TEXT,                  ' +
-                                           'websiteURL     TEXT,                  ' +
-                                           'title          TEXT,                  ' + // obsolete?
-                                           'subtitle       TEXT,                  ' +
-                                           'imageURL       TEXT,                  ' +
-                                           'imageLink      TEXT,                  ' + // obsolete?
-                                           'imageTitle     TEXT,                  ' +
-                                           'favicon        TEXT,                  ' +
-                                           'hidden         INTEGER DEFAULT 0,     ' +
-                                           'oldestAvailableEntryDate INTEGER,     ' +
-                                           'rowIndex       INTEGER,               ' +
-                                           'parent         TEXT,                  ' +
-                                           'isFolder       INTEGER,               ' +
-                                           'entryAgeLimit  INTEGER DEFAULT 0,     ' +
-                                           'maxEntries     INTEGER DEFAULT 0,     ' +
-                                           'updateInterval INTEGER DEFAULT 0,     ' +
-                                           'lastUpdated    INTEGER DEFAULT 0      ' +
-                                           ')');
-        this.dBConnection.executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries (' +
-                                           'feedID      TEXT,                    ' +
-                                           'id          TEXT UNIQUE,             ' +
-                                           'secondaryID TEXT,                    ' +
-                                           'providedID  TEXT,                    ' +
-                                           'entryURL    TEXT,                    ' +
-                                           'title       TEXT,                    ' +
-                                           'content     TEXT,                    ' +
-                                           'date        INTEGER,                 ' +
-                                           'authors     TEXT,                    ' +
-                                           'read        INTEGER DEFAULT 0,       ' +
-                                           'updated     INTEGER DEFAULT 0,       ' +
-                                           'starred     INTEGER DEFAULT 0,       ' +
-                                           'deleted     INTEGER DEFAULT 0        ' +
-                                           ')');
-
-        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
-                                           'entries_feedID_index ON entries (feedID) ');
-        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
-                                           'entries_date_index ON entries (date)     ');
-
-        if (this.dBConnection.schemaVersion < DATABASE_VERSION)
+            this.createTables();
+        else if (this.dBConnection.schemaVersion < DATABASE_VERSION)
             this.migrateDatabase();
 
         this.prefs = Cc["@mozilla.org/preferences-service;1"].
@@ -127,10 +118,24 @@ BriefStorageService.prototype = {
 
         this.initPlaces();
 
-        this.bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
-                                           createInstance(Ci.nsITimer);
-
         this.observerService.addObserver(this, 'quit-application', false);
+    },
+
+    createTables: function BriefStorage_createTables() {
+        //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
+        //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
+
+        this.dBConnection.
+             executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')');
+        this.dBConnection.
+             executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')');
+
+        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
+                                           'entries_feedID_index ON entries (feedID) ');
+        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
+                                           'entries_date_index ON entries (date)     ');
+
+        this.dBConnection.schemaVersion = DATABASE_VERSION;
     },
 
 
@@ -202,48 +207,89 @@ BriefStorageService.prototype = {
 
         // To 1.2
         case 4:
-            var hashStringFunc = {
-                QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
-                onFunctionCall: function(aArgs) hashString(aArgs.getUTF8String(0))
-            }
-            var generateEntryHashFunc = {
-                QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
-                onFunctionCall: function(aArgs) hashString(aArgs.getUTF8String(0) +
-                                                           aArgs.getUTF8String(1))
-            }
-
-            this.dBConnection.createFunction('hashString', 1, hashStringFunc);
-            this.dBConnection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
-
-            this.dBConnection.beginTransaction();
-
-            try {
-                // This version changed how IDs are generated. Below we recompute IDs,
-                // but only for entries which are still available in the feed.
-                this.dBConnection.executeSimpleSQL(
-                'UPDATE OR IGNORE entries                                          ' +
-                'SET id = generateEntryHash(feedID, providedID)                    ' +
-                'WHERE rowid IN (                                                  ' +
-                '   SELECT entries.rowid                                           ' +
-                '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                '   WHERE entries.date >= feeds.oldestAvailableEntryDate AND       ' +
-                '         entries.providedID != ""                                 ' +
-                ')                                                                 ');
-
-                this.dBConnection.executeSimpleSQL(
-                'UPDATE OR IGNORE feeds SET feedID = hashString(feedURL)');
-            }
-            catch (e) {
-                this.reportError(e);
-            }
-            finally {
-                this.dBConnection.commitTransaction();
-            }
+            this.recreateFeedsTable();
+            this.recomputeIDs();
             // Fall through...
 
         }
 
         this.dBConnection.schemaVersion = DATABASE_VERSION;
+    },
+
+    recreateFeedsTable: function BriefStorage_recreateFeedsTable() {
+        var storageService = Cc['@mozilla.org/storage/service;1'].
+                             getService(Ci.mozIStorageService);
+        var tempDBConnection = storageService.openDatabase(this.databaseFile);
+
+        // Columns in this list must be in the same order as the respective columns
+        // in the new schema.
+        var oldColumns = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,    ' +
+                         'imageLink, imageTitle, favicon, RDF_URI, rowIndex, parent, ' +
+                         'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   ' +
+                         'entryAgeLimit, maxEntries, updateInterval, dateModified    ';
+
+        tempDBConnection.beginTransaction();
+
+        try {
+
+            this.dBConnection.executeSimpleSQL(
+                           'ALTER TABLE feeds ADD COLUMN dateModified INTEGER DEFAULT 0');
+
+            var statement = 'CREATE TEMPORARY TABLE feeds_backup ('+oldColumns+')';
+            tempDBConnection.executeSimpleSQL(statement);
+
+            statement = 'INSERT INTO feeds_backup SELECT '+oldColumns+' FROM feeds';
+            tempDBConnection.executeSimpleSQL(statement);
+
+            tempDBConnection.executeSimpleSQL('DROP TABLE feeds');
+            tempDBConnection.executeSimpleSQL('CREATE TABLE feeds ('+FEEDS_TABLE_SCHEMA+')');
+            tempDBConnection.executeSimpleSQL('INSERT INTO feeds SELECT * FROM feeds_backup');
+        }
+        catch (ex) {
+            this.reportError(ex);
+        }
+        finally {
+            tempDBConnection.commitTransaction();
+            tempDBConnection.close();
+        }
+    },
+
+    recomputeIDs: function BriefStorage_recomputeIDs() {
+        var hashStringFunc = {
+            QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
+            onFunctionCall: function(aArgs) hashString(aArgs.getUTF8String(0))
+        }
+        var generateEntryHashFunc = {
+            QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
+            onFunctionCall: function(aArgs) hashString(aArgs.getUTF8String(0) +
+                                                       aArgs.getUTF8String(1))
+        }
+
+        this.dBConnection.createFunction('hashString', 1, hashStringFunc);
+        this.dBConnection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
+
+        this.dBConnection.beginTransaction();
+
+        try {
+            this.dBConnection.executeSimpleSQL(
+            'UPDATE OR IGNORE entries                                          ' +
+            'SET id = generateEntryHash(feedID, providedID)                    ' +
+            'WHERE rowid IN (                                                  ' +
+            '   SELECT entries.rowid                                           ' +
+            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+            '   WHERE entries.date >= feeds.oldestEntryDate AND                ' +
+            '         entries.providedID != ""                                 ' +
+            ')                                                                 ');
+
+            this.dBConnection.executeSimpleSQL(
+            'UPDATE OR IGNORE feeds SET feedID = hashString(feedURL) WHERE isFolder = 0');
+        }
+        catch (e) {
+            this.reportError(e);
+        }
+        finally {
+            this.dBConnection.commitTransaction();
+        }
     },
 
 
@@ -304,8 +350,8 @@ BriefStorageService.prototype = {
         var select = this.dBConnection.
             createStatement('SELECT  feedID, feedURL, websiteURL, title,               ' +
                             '        subtitle, imageURL, imageLink, imageTitle,        ' +
-                            '        favicon, lastUpdated, oldestAvailableEntryDate,   ' +
-                            '        rowIndex, parent, isFolder, RDF_URI,              ' +
+                            '        favicon, lastUpdated, oldestEntryDate,            ' +
+                            '        rowIndex, parent, isFolder, bookmarkID,           ' +
                             '        entryAgeLimit, maxEntries, updateInterval         ' +
                             'FROM feeds                                                ' +
                             'WHERE hidden = 0                                          ' +
@@ -504,16 +550,16 @@ BriefStorageService.prototype = {
 
         // Do not update the title, because it's taken from the bookmarks.
         var updateFeed = this.dBConnection.createStatement(
-                         'UPDATE feeds                        ' +
-                         'SET websiteURL  = ?1,               ' +
-                         '    subtitle    = ?2,               ' +
-                         '    imageURL    = ?3,               ' +
-                         '    imageLink   = ?4,               ' +
-                         '    imageTitle  = ?5,               ' +
-                         '    favicon     = ?6,               ' +
-                         '    oldestAvailableEntryDate = ?7,  ' +
-                         '    lastUpdated = ?8                ' +
-                         'WHERE feedID = ?9                   ');
+                         'UPDATE feeds               ' +
+                         'SET websiteURL  = ?1,      ' +
+                         '    subtitle    = ?2,      ' +
+                         '    imageURL    = ?3,      ' +
+                         '    imageLink   = ?4,      ' +
+                         '    imageTitle  = ?5,      ' +
+                         '    favicon     = ?6,      ' +
+                         '    oldestEntryDate = ?7,  ' +
+                         '    lastUpdated = ?8       ' +
+                         'WHERE feedID = ?9          ');
         updateFeed.bindStringParameter(0, aFeed.websiteURL);
         updateFeed.bindStringParameter(1, aFeed.subtitle);
         updateFeed.bindStringParameter(2, aFeed.imageURL);
@@ -545,7 +591,7 @@ BriefStorageService.prototype = {
                             'SET entryAgeLimit  = ?, ' +
                             '    maxEntries     = ?, ' +
                             '    updateInterval = ?  ' +
-                            'WHERE feedID = ?');
+                            'WHERE feedID = ?        ');
 
         update.bindInt32Parameter(0, aFeed.entryAgeLimit);
         update.bindInt32Parameter(1, aFeed.maxEntries);
@@ -577,14 +623,14 @@ BriefStorageService.prototype = {
     purgeEntries: function BriefStorage_purgeDeletedEntries(aDeleteExpired) {
 
         var removeEntries = this.dBConnection.createStatement(
-            'DELETE FROM entries                                                              ' +
-            'WHERE id IN                                                                      ' +
-            '(                                                                                ' +
-            '   SELECT entries.id                                                             ' +
-            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID                ' +
-            '   WHERE (entries.deleted = ? AND feeds.oldestAvailableEntryDate > entries.date) ' +
-            '         OR (? - feeds.hidden > ? AND feeds.hidden != 0)                         ' +
-            ')                                                                                ');
+            'DELETE FROM entries                                                     ' +
+            'WHERE id IN                                                             ' +
+            '(                                                                       ' +
+            '   SELECT entries.id                                                    ' +
+            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID       ' +
+            '   WHERE (entries.deleted = ? AND feeds.oldestEntryDate > entries.date) ' +
+            '         OR (? - feeds.hidden > ? AND feeds.hidden != 0)                ' +
+            ')                                                                       ');
         var removeFeeds = this.dBConnection.createStatement(
                 'DELETE FROM feeds WHERE (? - feeds.hidden > ?) AND feeds.hidden != 0');
 
@@ -780,6 +826,9 @@ BriefStorageService.prototype = {
                                   getService(Ci.nsINavBookmarksService);
         this.livemarkService  = Cc['@mozilla.org/browser/livemark-service;2'].
                                   getService(Ci.nsILivemarkService);
+
+        this.bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
+                                           createInstance(Ci.nsITimer);
 
         this.bookmarksService.addObserver(this, false);
     },
@@ -1026,8 +1075,8 @@ BookmarksSynchronizer.prototype = {
     // Gets all feeds currently in the database.
     getFeeds: function BookmarksSync_getFeeds() {
         var selectAll = this.dBConnection.createStatement(
-            'SELECT feedID, title, rowIndex, isFolder, parent, RDF_URI, hidden ' +
-            'FROM feeds                                                        ');
+            'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden ' +
+            'FROM feeds                                                           ');
 
         this.feeds = [];
         while (selectAll.executeStep()) {
@@ -1075,9 +1124,9 @@ BookmarksSynchronizer.prototype = {
 
     insertFeed: function BookmarksSync_insertFeed(aBookmark) {
         var insertFeed = this.dBConnection.createStatement(
-            'INSERT OR IGNORE INTO feeds                                   ' +
-            '(feedID, feedURL, title, rowIndex, isFolder, parent, RDF_URI) ' +
-            'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                           ');
+            'INSERT OR IGNORE INTO feeds                                       ' +
+            '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID) ' +
+            'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                               ');
 
         insertFeed.bindStringParameter(0, aBookmark.feedID);
         insertFeed.bindStringParameter(1, aBookmark.feedURL || null);
@@ -1099,10 +1148,10 @@ BookmarksSynchronizer.prototype = {
         }
 
         var updateFeed = this.dBConnection.createStatement(
-            'UPDATE feeds                                ' +
-            'SET title = ?1, rowIndex = ?2, parent = ?3, ' +
-            '    RDF_URI = ?4, hidden = 0                ' +
-            'WHERE feedID = ?5                           ');
+            'UPDATE feeds                                   ' +
+            'SET title = ?1, rowIndex = ?2, parent = ?3,    ' +
+            '    bookmarkID = ?4, hidden = 0                ' +
+            'WHERE feedID = ?5                              ');
 
         updateFeed.bindStringParameter(0, aItem.title);
         updateFeed.bindInt32Parameter(1, aItem.rowIndex);
