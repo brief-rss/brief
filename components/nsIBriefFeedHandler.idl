@@ -83,6 +83,8 @@ interface nsIBriefFeed : nsISupports {
 
   attribute AString imageTitle;
 
+  attribute AString dateModified;
+
 
   /**
    * base64-encoded data: URI of the favicon of the site under websiteURL.
@@ -95,7 +97,7 @@ interface nsIBriefFeed : nsISupports {
    * permanently removed from the database without the risk of them being downloaded
    * again.
    */
-  attribute unsigned long long oldestAvailableEntryDate;
+  attribute unsigned long long oldestEntryDate;
 
   attribute unsigned long rowIndex;
 
@@ -107,7 +109,7 @@ interface nsIBriefFeed : nsISupports {
   attribute string parent;
 
   /**
-   * In Fx3 - ID of the corresponding bookmark. In Fx2 - its RDF URI.
+   * ID of the Live Bookmark.
    */
   attribute string bookmarkID;
 
@@ -121,7 +123,7 @@ interface nsIBriefFeed : nsISupports {
   attribute unsigned long long updateInterval;
 
   /**
-   * The last time the feed was updated.
+   * The last time the feed was checked for updates.
    */
   attribute unsigned long long lastUpdated;
 

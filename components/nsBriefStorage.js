@@ -348,8 +348,8 @@ BriefStorageService.prototype = {
         this.feedsAndFoldersCache = [];
 
         var select = this.dBConnection.
-            createStatement('SELECT  feedID, feedURL, websiteURL, title,               ' +
-                            '        subtitle, imageURL, imageLink, imageTitle,        ' +
+            createStatement('SELECT  feedID, feedURL, websiteURL, title, subtitle,     ' +
+                            '        imageURL, imageLink, imageTitle, dateModified,    ' +
                             '        favicon, lastUpdated, oldestEntryDate,            ' +
                             '        rowIndex, parent, isFolder, bookmarkID,           ' +
                             '        entryAgeLimit, maxEntries, updateInterval         ' +
@@ -367,16 +367,17 @@ BriefStorageService.prototype = {
                 feed.imageURL = select.getString(5);
                 feed.imageLink = select.getString(6);
                 feed.imageTitle = select.getString(7);
-                feed.favicon = select.getString(8);
-                feed.lastUpdated = select.getInt64(9);
-                feed.oldestAvailableEntryDate = select.getInt64(10);
-                feed.rowIndex = select.getInt32(11);
-                feed.parent = select.getString(12);
-                feed.isFolder = select.getInt32(13) == 1;
-                feed.bookmarkID = select.getString(14);
-                feed.entryAgeLimit = select.getInt32(15);
-                feed.maxEntries = select.getInt32(16);
-                feed.updateInterval = select.getInt64(17);
+                feed.dateModified = select.getInt64(8);
+                feed.favicon = select.getString(9);
+                feed.lastUpdated = select.getInt64(10);
+                feed.oldestEntryDate = select.getInt64(11);
+                feed.rowIndex = select.getInt32(12);
+                feed.parent = select.getString(13);
+                feed.isFolder = (select.getInt32(14) == 1);
+                feed.bookmarkID = select.getString(15);
+                feed.entryAgeLimit = select.getInt32(16);
+                feed.maxEntries = select.getInt32(17);
+                feed.updateInterval = select.getInt64(18);
 
                 this.feedsAndFoldersCache.push(feed);
                 if (!feed.isFolder)
@@ -580,7 +581,7 @@ BriefStorageService.prototype = {
         cachedFeed.imageTitle = aFeed.imageTitle;
         cachedFeed.favicon = aFeed.favicon;
         cachedFeed.lastUpdated = Date.now();
-        cachedFeed.oldestAvailableEntryDate = aOldestEntryDate;
+        cachedFeed.oldestEntryDate = aOldestEntryDate;
     },
 
 
