@@ -17,6 +17,7 @@ Feed.prototype = {
     imageURL:   '',
     imageLink:  '',
     imageTitle: '',
+    dateModified: 0,
 
     favicon: '',
 
@@ -34,7 +35,7 @@ Feed.prototype = {
     maxEntries:     0,
     updateInterval: 0,
 
-    oldestAvailableEntryDate: 0,
+    oldestEntryDate: 0,
 
     getEntries: function BriefFeed_getEntries(entryCount) {
         entryCount.value = this.items.length;
