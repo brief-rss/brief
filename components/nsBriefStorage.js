@@ -392,42 +392,48 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     updateFeed: function BriefStorage_updateFeed(aFeed) {
-        var oldestEntryDate = Date.now();
+        var newEntriesCount = 0;
+        var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
 
-        this.preCreateUpdatingStatements();
+        if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
+            var oldestEntryDate = Date.now();
 
-        // Count the unread entries, to compare their number later.
-        var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
-                                 createInstance(Ci.nsIBriefQuery);
-        unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
-        var oldUnreadCount = unreadEntriesQuery.getEntriesCount();
+            this.preCreateUpdatingStatements();
 
-        this.dBConnection.beginTransaction();
+            // Count the unread entries, to compare their number later.
+            var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
+                                     createInstance(Ci.nsIBriefQuery);
+            unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
+            var oldUnreadCount = unreadEntriesQuery.getEntriesCount();
 
-        try {
-            var entries = aFeed.getEntries({});
+            this.dBConnection.beginTransaction();
 
-            for (var i = 0; i < entries.length; i++) {
-                entry = entries[i];
+            try {
+                var entries = aFeed.getEntries({});
 
-                this.processEntry(entry, aFeed);
+                for (var i = 0; i < entries.length; i++) {
+                    entry = entries[i];
 
-                // Track the date of the oldest entry.
-                if (entry.date && entry.date < oldestEntryDate)
-                    oldestEntryDate = entry.date;
+                    this.processEntry(entry, aFeed);
+
+                    // Track the date of the oldest entry.
+                    if (entry.date && entry.date < oldestEntryDate)
+                        oldestEntryDate = entry.date;
+                }
+
+                this.updateFeedData(aFeed, oldestEntryDate);
+            }
+            catch (e) {
+                this.reportError(e);
+            }
+            finally {
+                this.dBConnection.commitTransaction();
             }
 
-            this.updateFeedData(aFeed, oldestEntryDate);
-        }
-        catch (e) {
-            this.reportError(e);
-        }
-        finally {
-            this.dBConnection.commitTransaction();
+            var newUnreadCount = unreadEntriesQuery.getEntriesCount();
+            newEntriesCount = newUnreadCount - oldUnreadCount;
         }
 
-        var newUnreadCount = unreadEntriesQuery.getEntriesCount();
-        var newEntriesCount = newUnreadCount - oldUnreadCount;
         var subject = Cc["@mozilla.org/variant;1"].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
         this.observerService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
@@ -559,8 +565,12 @@ BriefStorageService.prototype = {
                          '    imageTitle  = ?5,      ' +
                          '    favicon     = ?6,      ' +
                          '    oldestEntryDate = ?7,  ' +
-                         '    lastUpdated = ?8       ' +
-                         'WHERE feedID = ?9          ');
+                         '    lastUpdated = ?8,      ' +
+                         '    dateModified = ?9      ' +
+                         'WHERE feedID = ?10         ');
+
+        var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
+
         updateFeed.bindStringParameter(0, aFeed.websiteURL);
         updateFeed.bindStringParameter(1, aFeed.subtitle);
         updateFeed.bindStringParameter(2, aFeed.imageURL);
@@ -569,7 +579,8 @@ BriefStorageService.prototype = {
         updateFeed.bindStringParameter(5, aFeed.favicon);
         updateFeed.bindInt64Parameter(6,  aOldestEntryDate);
         updateFeed.bindInt64Parameter(7,  Date.now());
-        updateFeed.bindStringParameter(8, aFeed.feedID);
+        updateFeed.bindInt64Parameter(8,  dateModified);
+        updateFeed.bindStringParameter(9, aFeed.feedID);
         updateFeed.execute();
 
         // Update the cache.
@@ -582,6 +593,7 @@ BriefStorageService.prototype = {
         cachedFeed.favicon = aFeed.favicon;
         cachedFeed.lastUpdated = Date.now();
         cachedFeed.oldestEntryDate = aOldestEntryDate;
+        cachedFeed.dateModified = dateModified;
     },
 
 
