@@ -11,29 +11,6 @@
   }
 
 
-
-/* --------------------- Button images ---------------------*/
-
-.article-container[starred] .star-entry {
-  list-style-image: url('chrome://brief/skin/icons/unstar.png');
-  }
-
-.star-image {
-  list-style-image: url('chrome://brief/skin/icons/entry-star.png');
-  -moz-image-region: rect(0px, 16px, 16px, 0px);
-  }
-
-.article-container:not([starred]) .star-container:hover .star-image {
-  -moz-image-region: rect(16px, 16px, 32px, 0px);
-  opacity: 0.7;
-  }
-
-.article-container[starred] .star-image {
-  -moz-image-region: rect(32px, 16px, 48px, 0px);
-}
-
-
-
 /* ----------------------  Article content area   ---------------------- */
 
 /* Reset the top margin, so that the gap between

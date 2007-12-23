@@ -12,9 +12,7 @@
     <content>
         <html:div class="article-header">
             <html:div class="expand-button"/>
-            <html:div class="star-container">
-                <xul:image class="star-image"/>
-            </html:div>
+            <html:div anonid="star-article" class="star-article"/>
             <html:div class="article-controls">
                 <html:div anonid="mark-read" class="article-button mark-read">
                     <html:div class="mark-read-left"/>
@@ -137,7 +135,7 @@
                 return;
             }
 
-            if (target.className == 'star-container' || target.className == 'star-image') {
+            if (anonid == 'star-article') {
                 if (this.hasAttribute('starred'))
                     this.removeAttribute('starred');
                 else
@@ -195,7 +193,7 @@
             var target = event.originalTarget;
             while (target != this) {
                 if (target.className == 'article-controls' ||
-                    target.className == 'star-container')
+                    target.className == 'star-article')
                     return;
                 target = target.parentNode;
             }
