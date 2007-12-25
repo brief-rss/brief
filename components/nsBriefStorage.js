@@ -772,7 +772,7 @@ BriefStorageService.prototype = {
             // database or the global preference.
             var difference = 0;
             if (feed.maxEntries > 0)
-                difference = entryCount - feed.maxEntries
+                difference = entryCount - feed.maxEntries;
             else if (useGlobalLimit)
                 difference = entryCount - globalMaxEntriesNumber;
 
@@ -802,7 +802,7 @@ BriefStorageService.prototype = {
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeEntries(true);
 
-                this.bookmarksService.removedObserver(this);
+                this.bookmarksService.removeObserver(this);
 
                 this.prefs.removeObserver('', this);
                 this.observerService.removeObserver(this, 'quit-application');
