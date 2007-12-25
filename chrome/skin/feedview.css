@@ -36,9 +36,7 @@ body {
   }
 
 #feed-content {
-  margin: 20px auto 0;
-  padding: 0 10px 10px;
-  max-width: 80em;
+  padding: 20px 10px 10px;
   }
 
 #message {
@@ -53,20 +51,23 @@ body {
 
 /* ---------------------------  Article  ------------------------ */
 
-/* .article-container may have "starred", "read", and "collapsed"
+/* Article container can have "starred", "read", and "collapsed"
    attributes. The first two are self-explanatory while "collapsed"
-   means that the article's content is folded (headlines-only mode) */
+   means that the article's content is folded (headlines view) */
 .article-container {
   background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
   background-color: #ffffff;
   border-top: 1px #abbfc9 solid;
   border-right: 1px #e1e5da solid;
   border-left: 1px #e1e5da solid;
-  border-bottom: 1px transparent solid;
+  border-bottom: 1px transparent solid; /* Placeholder for the selection border */
   padding-bottom: 1px; /* Without this, the article is sometimes cut-off */
   overflow: visible;   /* This is for the the expand/collapse dropmarker which is
                           taken outside the box using negative margins */
   position: relative;
+  margin: 0 auto;
+  min-width: -moz-min-content;
+  max-width: 70em;
   }
 
 .article-container:last-child {
@@ -178,7 +179,7 @@ body {
   display: none;
   position: absolute;
   top: 0;
-  left: -35px;
+  left: -30px;
   height: 6em;
   width: 42px;
 }
@@ -219,7 +220,6 @@ body {
   color: #272727;
   margin-top: 15px;
   padding: 0 25px 35px;
-  overflow: auto;
   }
 
 .article-content a {
