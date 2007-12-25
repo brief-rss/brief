@@ -51,13 +51,14 @@ pre, code {
   display: block;
 }
 
-#feed-content[showHeadlinesOnly] > .article-container {
-  margin-left: 30px; /* Makes space for the expand button */
+#feed-content[showHeadlinesOnly] {
+  padding-left: 30px; /* Makes space for the expand button */
 }
 
 /* Display the expand arrow when hovering an article */
 #feed-content[showHeadlinesOnly] > .article-container:hover .expand-button {
-  background: url(chrome://brief/skin/icons/expand-button.png) 5px 5px no-repeat;
+  background: url(chrome://brief/skin/icons/expand-button.png) no-repeat;
+  background-position: 5px 5px;
 }
 
 
