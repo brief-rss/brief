@@ -60,7 +60,7 @@ FeedView.prototype = {
     get document() this.browser.contentDocument,
 
     feedContent: null,
-
+    
 
     // Query that selects entries contained by the view. It is the query to pull ALL the
     // entries, not only the ones displayed on the current page.
@@ -94,6 +94,17 @@ FeedView.prototype = {
         }
     },
     get currentPage() this.__currentPage,
+
+
+    performAction: function FeedView_performAction(aAction, aTargetEntry) {
+        var evt = document.createEvent('Events');
+        evt.initEvent('PerformAction', false, false);
+
+        var element = this.document.getElementById(aTargetEntry);
+        element.setAttribute('action', aAction);
+
+        element.dispatchEvent(evt);
+    },
 
 
     // ID of the selected entry.
@@ -414,11 +425,8 @@ FeedView.prototype = {
         }
 
         // Remove the entry. We don't do it directly, because we want to
-        // use jQuery to to fade it gracefully and we cannot call it from
-        // here, because it's untrusted.
-        var evt = document.createEvent('Events');
-        evt.initEvent('RemoveEntry', false, false);
-        entryElement.dispatchEvent(evt);
+        // use jQuery to to fade it gracefully.
+        this.performAction('remove', aEntryID);
 
         var self = this;
         function finish() {
