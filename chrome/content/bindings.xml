@@ -12,17 +12,17 @@
     <content>
         <html:div class="article-header">
             <html:div class="expand-button"/>
-            <html:div anonid="star-article" class="star-article"/>
+            <html:div class="star-article" command="star"/>
             <html:div class="article-controls">
-                <html:div anonid="mark-read" class="article-button mark-read">
-                    <html:div class="mark-read-left"/>
-                    <html:div class="mark-read-centre"/>
-                    <html:div class="mark-read-right"/>
+                <html:div class="mark-read" command="mark-read">
+                    <html:div class="mark-read-left" command="mark-read"/>
+                    <html:div class="mark-read-centre" command="mark-read"/>
+                    <html:div class="mark-read-right" command="mark-read"/>
                 </html:div>
-                <html:div anonid="delete-entry" class="article-button delete-entry"/>
-                <html:div anonid="restore-entry" class="article-button restore-entry"/>
+                <html:div class="delete-entry" command="delete"/>
+                <html:div class="restore-entry" command="restore"/>
             </html:div>
-            <html:a anonid="article-title-link" class="article-title-link"/>
+            <html:a class="article-title-link" command="open"/>
         </html:div>
 
         <html:div class="article-subheader">
@@ -37,253 +37,261 @@
 
     <implementation>
         <constructor>
-        <![CDATA[
-            // Get the data passed to us through attributes
-            var entryURL = this.getAttribute('entryURL');
-            var title    = this.getAttribute('entryTitle');
-            var content  = this.getAttribute('content');
-            var date     = this.getAttribute('date');
-            var updated  = this.getAttribute('updated');
-            var isRead   = this.getAttribute('read');
-            var feedName = this.getAttribute('feedName');
-            var authors  = this.getAttribute('authors');
-
+            <![CDATA[
             // Find elements
-            var feedContentElement = document.getElementById('feed-content');
-            var feedNameElement =
-                document.getAnonymousElementByAttribute(this, 'class', 'feed-name');
-            var authorsElement =
-                document.getAnonymousElementByAttribute(this, 'class', 'article-authors');
-            var titleElement =
-                document.getAnonymousElementByAttribute(this, 'class', 'article-title-link');
-            var dateElement =
-                document.getAnonymousElementByAttribute(this, 'class', 'article-date');
-            var articleContentElement =
-                document.getAnonymousElementByAttribute(this, 'class', 'article-content');
-            var markReadButtonText =
-                document.getAnonymousElementByAttribute(this, 'class', 'mark-read-centre');
+            var feedContent = document.getElementById('feed-content');
+            var feedNameElem = this.getElement('feed-name');
+            var authorsElem  = this.getElement('article-authors');
+            var titleElem    = this.getElement('article-title-link');
+            var dateElem     = this.getElement('article-date');
+            var contentElem  = this.getElement('article-content');
+            var markReadElem = this.getElement('mark-read-centre');
 
-            // Construct elements' contents from feed entry data. Use innerHTML
-            // instead of textContent, so that the entities are resolved.
-            titleElement.setAttribute('href', entryURL);
-            titleElement.innerHTML = title;
+            // Use innerHTML instead of textContent, so that the entities are resolved.
+            titleElem.setAttribute('href', this.getAttribute('entryURL'));
+            titleElem.innerHTML = this.getAttribute('entryTitle');
 
-            if (feedContentElement.hasAttribute('showFeedNames'))
-                feedNameElement.innerHTML = feedName;
+            if (feedContent.hasAttribute('showFeedNames'))
+                feedNameElem.innerHTML = this.getAttribute('feedName');
 
-            dateElement.innerHTML = updated || date || '';
+            dateElem.innerHTML = this.getAttribute('date') ||
+                                 this.getAttribute('updated');
 
-            if (authors)
-                authorsElement.innerHTML = authors;
+            authorsElem.innerHTML = this.getAttribute('authors');
 
-            articleContentElement.innerHTML = content;
+            contentElem.innerHTML = this.getAttribute('content');
 
-            markReadButtonText.textContent = isRead ? feedContentElement.getAttribute('markUnreadString')
-                                                    : feedContentElement.getAttribute('markReadString');
+            markReadElem.textContent = this.read ? feedContent.getAttribute('markUnreadString')
+                                                 : feedContent.getAttribute('markReadString');
 
-            if (this.hasAttribute('collapsed')) {
-                var header =
-                    document.getAnonymousElementByAttribute(this, 'class', 'article-header');
-                header.insertBefore(feedNameElement, titleElement);
-                header.insertBefore(dateElement, titleElement);
+            if (this.collapsed) {
+                $(contentElem).hide();
+                var headerElem = this.getElement('article-header');
+                headerElem.insertBefore(feedNameElem, titleElem);
+                headerElem.insertBefore(dateElem, titleElem);
             }
-        ]]>
+            ]]>
         </constructor>
 
-        <method name="toggleReadStatus">
+        <method name="getElement">
+            <parameter name="aClassName"/>
             <body>
-            <![CDATA[
-                if (this.hasAttribute('read'))
-                    this.removeAttribute('read');
-                else
-                    this.setAttribute('read', 'true');
-
-                var evt = document.createEvent('Events');
-                evt.initEvent('MarkEntryRead', false, false);
-
-                // Do the rest after timout for immediate visual feedback.
-                var self = this;
-                setTimeout(function() {self.dispatchEvent(evt)}, 0);
-            ]]>
+                return document.getAnonymousElementByAttribute(this, 'class', aClassName);
             </body>
         </method>
+
+        <method name="sendEvent">
+            <parameter name="aEventName"/>
+            <parameter name="aAsync"/>
+            <body>
+                var evt = document.createEvent('Events');
+                evt.initEvent(aEventName, false, false);
+                if (aAsync) {
+                    var self = this;
+                    setTimeout(function() { self.dispatchEvent(evt) }, 0);
+                }
+                else {
+                    this.dispatchEvent(evt);
+                }
+            </body>
+        </method>
+
+        <method name="collapse">
+            <parameter name="aState"/>
+            <parameter name="aAnimate"/>
+            <body>
+                <![CDATA[
+                if (aState == this.collapsed)
+                    return;
+
+                var articleContent = this.getElement('article-content');
+                var feedName = this.getElement('feed-name');
+                var date = this.getElement('article-date');
+                var self = this;
+
+                if (aState) {
+                    function finish() {
+                        self.setAttribute('collapsed', true);
+
+                        var title = self.getElement('article-title-link');
+                        var header = self.getElement('article-header');
+                        header.insertBefore(feedName, title);
+                        header.insertBefore(date, title);
+
+                        self.sendEvent('EntryCollapsed');
+                    }
+
+                    if (aAnimate) {
+                        $(articleContent).slideUp(200, finish);
+                    }
+                    else {
+                        $(articleContent).hide();
+                        finish();
+                    }
+                }
+
+                else {
+                    this.removeAttribute('collapsed');
+
+                    var subheader = self.getElement('article-subheader');
+                    var authors = self.getElement('article-authors');
+                    subheader.appendChild(feedName);
+                    subheader.insertBefore(date, authors);
+
+                    function finish() {
+                        self.sendEvent('EntryCollapsed');
+                    }
+
+                    if (aAnimate) {
+                        $(articleContent).slideDown(200, finish);
+                    }
+                    else {
+                        $(articleContent).show();
+                        finish();
+                    }
+                }
+                ]]>
+            </body>
+        </method>
+
+
+        <property name="read"
+                  onget="return this.hasAttribute('read')">
+            <setter>
+                <![CDATA[
+                if (val == this.read)
+                    return;
+
+                var markReadButton = this.getElement('mark-read-centre');
+                var feedContent = document.getElementById('feed-content');
+
+                if (val) {
+                    this.setAttribute('read', 'true');
+
+                    var string = feedContent.getAttribute('markUnreadString');
+                    markReadButton.textContent = string;
+
+                    if (this.hasAttribute('updated')) {
+                        this.removeAttribute('updated');
+                        var dateElement = this.getElement('article-date');
+                        dateElement.innerHTML = this.getAttribute('date');
+                    }
+                }
+
+                else {
+                    this.removeAttribute('read');
+
+                    string = feedContent.getAttribute('markReadString');
+                    markReadButton.textContent = string;
+                }
+
+                return val;
+                ]]>
+            </setter>
+        </property>
+
+        <property name="starred"
+                  onget="return this.hasAttribute('starred')">
+            <setter>
+                if (val)
+                    this.setAttribute('starred', 'true');
+                else
+                    this.removeAttribute('starred');
+
+                return val;
+            </setter>
+        </property>
+
+        <property name="collapsed"
+                  onget="return this.hasAttribute('collapsed')"/>
 
     </implementation>
 
     <handlers>
         <handler event="click" button="0">
-        <![CDATA[
+            <![CDATA[
             var target = event.originalTarget;
-            var anonid = target.getAttribute('anonid');
+            var command = target.getAttribute('command');
 
-            if (anonid == 'mark-read' || target.parentNode.getAttribute('anonid') == 'mark-read') {
-                this.toggleReadStatus();
-                return;
-            }
-
-            if (anonid == 'delete-entry') {
-                var evt = document.createEvent('Events');
-                evt.initEvent('DeleteEntry', false, false);
-                this.dispatchEvent(evt);
-                return;
-            }
-
-            if (anonid == 'restore-entry') {
-                var evt = document.createEvent('Events');
-                evt.initEvent('RestoreEntry', false, false);
-                this.dispatchEvent(evt);
-                return;
-            }
-
-            if (anonid == 'star-article') {
-                if (this.hasAttribute('starred'))
-                    this.removeAttribute('starred');
-                else
-                    this.setAttribute('starred', 'true');
-
-                var evt = document.createEvent('Events');
-                evt.initEvent('StarEntry', false, false);
-
-                // Do the rest after timout for immediate visual feedback.
-                var self = this;
-                setTimeout(function() {self.dispatchEvent(evt)}, 0);
-                return;
-            }
-
-            var articleContent = document.getAnonymousElementByAttribute(this, 'class',
-                                                                  'article-content');
-            var feedContent = document.getElementById('feed-content');
-            var self = this;
-
-            function dispatchCollapseEvent() {
-                var evt = document.createEvent('Events');
-                evt.initEvent('EntryCollapsed', false, false);
-                self.dispatchEvent(evt);
-            }
-
-            if (this.hasAttribute('collapsed')) {
-                if (target.className != 'article-title-link' &&
-                   target.className != 'article-controls' &&
-                   target.parentNode.className != 'article-controls') {
-                    $(articleContent).slideDown(200, dispatchCollapseEvent);
-                    this.removeAttribute('collapsed');
+            if (command) {
+                switch (command) {
+                    case 'mark-read':
+                        this.read = !this.read;
+                        this.sendEvent('MarkEntryRead', true);
+                        break;
+                    case 'star':
+                        this.starred = !this.starred;
+                        this.sendEvent('StarEntry');
+                        break;
+                    case 'delete':
+                        this.sendEvent('DeleteEntry');
+                        break;
+                    case 'restore':
+                        this.sendEvent('RestoreEntry');
+                        break;
                 }
             }
+
+            else if (this.collapsed) {
+                if (!target.hasAttribute(command))
+                    this.collapse(false, true);
+            }
+
             else {
-                if (target.className == 'expand-button' || (target.className == 'article-header' &&
-                   feedContent.hasAttribute('showHeadlinesOnly'))) {
-                    $(articleContent).slideUp(200, function() {
-                                                 self.setAttribute('collapsed', true);
-                                                 dispatchCollapseEvent();
-                                                });
-                }
+                var headlinesView = document.getElementById('feed-content').
+                                             hasAttribute('showHeadlinesOnly');
+                var cls = target.className;
+
+                if (headlinesView && (cls == 'expand-button' || cls == 'article-header'))
+                    this.collapse(true, true);
             }
-        ]]>
+            ]]>
         </handler>
 
-        <!-- Double-click marks the entry as read/unread -->
+        <!-- Double-click marks the entry as read/unread. If double-click targeted a
+             command element, do nothing since it's too easy to do it accidentally.-->
         <handler event="click" button="0" clickcount="2">
-        <![CDATA[
-            var feedContentDiv = document.getElementById('feed-content');
-            if (!feedContentDiv.hasAttribute('doubleClickMarks'))
-                return;
+            <![CDATA[
+            var doubleClickMarks = document.getElementById('feed-content').
+                                            hasAttribute('doubleClickMarks');
+            var isCommandElement = event.originalTarget.hasAttribute('command');
 
-            // If double-click happened in the article controls, do nothing
-            // since it's too easy to trigger that accidentally.
-            var target = event.originalTarget;
-            while (target != this) {
-                if (target.className == 'article-controls' ||
-                    target.className == 'star-article')
-                    return;
-                target = target.parentNode;
-            }
-
-            this.toggleReadStatus();
-        ]]>
+            if (doubleClickMarks && !isCommandElement)
+                this.read = !this.read;
+            ]]>
         </handler>
 
-        <handler event="DOMAttrModified">
-        <![CDATA[
-            switch (event.attrName) {
-            case 'read':
-                var markReadButtonText = document.
-                           getAnonymousElementByAttribute(this, 'class', 'mark-read-centre');
-                var feedContentDiv = document.getElementById('feed-content');
-                if (event.newValue == 'true') {
-                    markReadButtonText.textContent = feedContentDiv.getAttribute('markUnreadString');
-                    if (this.hasAttribute('updated')) {
-                        this.removeAttribute('updated');
-                        var dateElement = document.getAnonymousElementByAttribute(
-                                                        this, 'class', 'article-date');
-                        dateElement.innerHTML = this.getAttribute('date');
+        <!-- This event is how chrome sends us messages to do various stuff -->
+        <handler event="PerformAction">
+            <![CDATA[
+            switch (this.getAttribute('action')) {
+                case 'markRead':
+                    this.read = true;
+                    break;
+                case 'markUnread':
+                    this.read = false;
+                    break;
+                case 'star':
+                    this.starred = !this.starred;
+                    break;
+                case 'collapse':
+                    this.collapse(!this.collapsed, false);
+                    break;
+                case 'collapseAnimate':
+                    this.collapse(!this.collapsed, true);
+                    break;
+                case 'remove':
+                    var self = this;
+                    function callback() {
+                        var feedContent = document.getElementById('feed-content');
+                        feedContent.removeChild(self);
                     }
-                }
-                else {
-                    markReadButtonText.textContent = feedContentDiv.getAttribute('markReadString');
-                }
-                break;
-
-            case 'collapsed':
-                var content = document.getAnonymousElementByAttribute(this, 'class',
-                                                                      'article-content');
-                var feedName = document.getAnonymousElementByAttribute(this, 'class',
-                                                                       'feed-name');
-                var date = document.getAnonymousElementByAttribute(this, 'class',
-                                                                   'article-date');
-
-                // If an entry was (un)folded using jQuery, then changing
-                // the "collapsed" attribute alone isn't enough, because it
-                // doesn't (un)fold article-content.
-                if (event.newValue == 'true') {
-                    $(content).hide();
-                    var title = document.getAnonymousElementByAttribute(this, 'class',
-                                                                  'article-title-link');
-                    var header = document.getAnonymousElementByAttribute(this, 'class',
-                                                                     'article-header');
-                    header.insertBefore(feedName, title);
-                    header.insertBefore(date, title);
-                }
-                else {
-                    $(content).show();
-                    var subheader = document.getAnonymousElementByAttribute(this, 'class',
-                                                                 'article-subheader');
-                    var authors = document.getAnonymousElementByAttribute(this, 'class',
-                                                                   'article-authors');
-                    subheader.appendChild(feedName);
-                    subheader.insertBefore(date, authors);
-                }
-
-                break;
+                    $(this).fadeOut(300, callback);
+                    break;
             }
-        ]]>
+            ]]>
         </handler>
 
-        <handler event="RemoveEntry">
-        <![CDATA[
-            $(this).fadeOut(300);
-            var self = this;
-            var feedContent = document.getElementById('feed-content');
-            setTimeout(function() { feedContent.removeChild(self); }, 300);
-        ]]>
-        </handler>
-
-        <handler event="CollapseEntry">
-        <![CDATA[
-            var articleContent = document.getAnonymousElementByAttribute(this, 'class',
-                                                                      'article-content');
-            if (this.hasAttribute('collapsed')) {
-                $(articleContent).slideDown(200);
-                this.removeAttribute('collapsed');
-            }
-            else {
-                var self = this;
-                function collapse() {
-                    self.setAttribute('collapsed', true);
-                }
-                $(articleContent).slideUp(200, collapse);
-            }
-        ]]>
-        </handler>
     </handlers>
 </binding>
 

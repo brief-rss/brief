@@ -220,15 +220,16 @@ var gObserver = {
         switch (aChangeType) {
         case 'unread':
         case 'read':
-            // Just visually mark the changed entries as read/unread.
+            // If view wasn't invalidated, we still may have to visually mark the
+            // some changed entries as read/unread.
             if (gFeedView.isActive && viewIsCool) {
                 var nodes = gFeedView.feedContent.childNodes;
                 for (i = 0; i < nodes.length; i++) {
                     if (changedEntries.indexOf(nodes[i].id) != -1) {
                         if (aChangeType == 'read')
-                            nodes[i].setAttribute('read', 'true');
+                            gFeedView.performAction('markRead', nodes[i].id);
                         else
-                            nodes[i].removeAttribute('read');
+                            gFeedView.performAction('markUnread', nodes[i].id);
                     }
                 }
             }
@@ -320,15 +321,21 @@ var gCommands = {
         var checkbox = document.getElementById('headlines-checkbox');
         checkbox.checked = newState;
 
+        var entries = gFeedView.feedContent.childNodes;
+
         if (newState) {
             gFeedView.feedContent.setAttribute('showHeadlinesOnly', true);
-            for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
-                gFeedView.feedContent.childNodes[i].setAttribute('collapsed', true);
+            for (var i = 0; i < entries.length; i++) {
+                if (!entries[i].hasAttribute('collapsed'))
+                    gFeedView.performAction('collapse', entries[i].id);
+            }
         }
         else {
             gFeedView.feedContent.removeAttribute('showHeadlinesOnly');
-            for (var i = 0; i < gFeedView.feedContent.childNodes.length; i++)
-                gFeedView.feedContent.childNodes[i].removeAttribute('collapsed');
+            for (i = 0; i < entries.length; i++) {
+                if (entries[i].hasAttribute('collapsed'))
+                    gFeedView.performAction('collapse', entries[i].id);
+            }
 
             gFeedView.markVisibleAsRead();
         }
@@ -372,13 +379,7 @@ var gCommands = {
 
     markSelectedEntryRead: function cmd_markSelectedEntryRead() {
         if (gFeedView.selectedEntry) {
-            var selectedElement = gFeedView.selectedElement;
-            var newStatus = !selectedElement.hasAttribute('read');
-
-            if (newStatus)
-                selectedElement.setAttribute('read', true);
-            else
-                selectedElement.removeAttribute('read');
+            var newStatus = !gFeedView.selectedElement.hasAttribute('read');
 
             var query = new QuerySH(null, gFeedView.selectedEntry, null);
             query.deleted = ENTRY_STATE_ANY;
@@ -406,13 +407,11 @@ var gCommands = {
 
     starSelectedEntry: function cmd_starSelectedEntry() {
         if (gFeedView.selectedEntry) {
-            var selectedElement = gFeedView.selectedElement;
-            var newStatus = !selectedElement.hasAttribute('starred');
+            var newStatus = !gFeedView.selectedElement.hasAttribute('starred');
 
-            if (newStatus)
-                selectedElement.setAttribute('starred', true);
-            else
-                selectedElement.removeAttribute('starred');
+            // Theoretically the feed view should be updated in the callback from
+            // the database, but it's the only place
+            gFeedView.performAction('star', gFeedView.selectedEntry);
 
             var query = new QuerySH(null, gFeedView.selectedEntry, null);
             query.starEntries(newStatus);
@@ -421,12 +420,9 @@ var gCommands = {
 
     unfoldSelectedEntry: function cmd_unfoldSelectedEntry() {
         if (gFeedView.selectedEntry && gPrefs.showHeadlinesOnly) {
+            gFeedView.performAction('collapseAnimate', gFeedView.selectedEntry);
+
             var selectedElement = gFeedView.selectedElement;
-
-            var evt = document.createEvent('Events');
-            evt.initEvent('CollapseEntry', false, false);
-            selectedElement.dispatchEvent(evt);
-
             async(selectedElement.scrollIntoView, 310, selectedElement, false);
         }
     },

@@ -37,7 +37,6 @@ pre, code {
 /* ----------------------  Adjustments for headlines view   ---------------------- */
 
 .article-container[collapsed] .article-controls,
-.article-container[collapsed] > .article-content,
 .article-container[collapsed] > .article-subheader {
   display: none;
 }

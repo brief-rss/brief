@@ -97,7 +97,7 @@ body {
   margin: -3px 0 0 5px;
 }
 
-.article-button {
+.article-controls > * {
   display: inline-block;
 }
 
@@ -258,9 +258,10 @@ body {
   background-color: #f5faff;
 }
 
-.article-container[collapsed]:last-child {
+/* Temporarily comment it out, because it seems to be causing some problems.
+ .article-container[collapsed]:last-child {
   border-bottom: 1px solid #abbfc9;
-}
+}*/
 
 .article-container[collapsed] .article-title-link {
   font-size: 12px;
