@@ -63,9 +63,7 @@ FeedView.prototype = {
     // feedview.shownEntries preference.
     _flagsAreIntrinsic: false,
 
-    // Array of ids of displayed entries. This isn't used to specify which entries are
-    // displayed but computed post-factum and used for determining if the view needs
-    // to be refreshed.
+    // IDs of contained entries, used for determining if the view needs refreshing.
     _entries: [],
 
     // Key elements.
@@ -129,6 +127,15 @@ FeedView.prototype = {
     },
 
 
+    /**
+     * Sends an event to an entry displayed on the current page, can a message to
+     * perform an action or update its state. This is the only way we can communicate
+     * with the untrusted document.
+     *
+     * @param aTargetEntry  ID of the target entry.
+     * @param aEventType    Type of the event.
+     * @param aState        Additional parameter, the new state of the entry.
+     */
     _sendEvent: function FeedView__sendEvent(aTargetEntry, aEventType, aState) {
         var evt = document.createEvent('Events');
         evt.initEvent('ViewEvent', false, false);
@@ -188,7 +195,7 @@ FeedView.prototype = {
     /**
      * Selects the given entry and scrolls it into view, if desired.
      *
-     * @param aEntry           ID od DOM element of entry to select. Can be null.
+     * @param aEntry           ID of entry to select. Can be null.
      * @param aScroll          Whether to scroll the entry into view.
      * @param aScrollSmoothly  Enable smooth scrolling.
      */
@@ -221,8 +228,7 @@ FeedView.prototype = {
      */
     scrollToEntry: function FeedView_scrollToEntry(aEntry, aSmooth) {
         var win = this.document.defaultView;
-        var entryElement = (typeof aEntry == 'string') ? this.document.getElementById(aEntry)
-                                                       : aEntry;
+        var entryElement = this.document.getElementById(aEntry);
 
         if (entryElement.offsetHeight >= win.innerHeight) {
             // If the entry is taller than the viewport height, align with the top.
@@ -255,12 +261,13 @@ FeedView.prototype = {
 
         var delta = aTargetPosition - win.pageYOffset;
         var jump = Math.round(delta / 10);
-        jump = (jump !== 0) ? jump : (delta > 0) ? 1 : -1;
+        if (jump === 0)
+            jump = (delta > 0) ? 1 : -1;
 
         var self = this;
 
         function scroll() {
-            // If we are within epsilon smaller than the jump,
+            // If we are within epsilon smaller or equal to the jump,
             // then scroll directly to the target position.
             if (Math.abs(aTargetPosition - win.pageYOffset) <= Math.abs(jump)) {
                 win.scroll(win.pageXOffset, aTargetPosition)
@@ -400,9 +407,13 @@ FeedView.prototype = {
 
 
     /**
-     * Checks if the view is up-to-date (contains all the right entries nad has the
-     * right title) and refreshes it if necessary.
+     * Checks if the view is up-to-date (i.e. contains the right set of entries and
+     * displays the correct title) and refreshes it if necessary. Note that the visual
+     * state of entries (read/unread, starred/unstarred) is not verified, it has to be
+     * maintained separetely by calling onEntryMarkedRead and onEntryStarred whenever
+     * it is changed.
      *
+     * @param aForceRefresh Forces full refresh, without checking.
      * @returns TRUE if the view was up-to-date, FALSE if it needed refreshing.
      */
     ensure: function FeedView_ensure(aForceRefresh) {
@@ -424,12 +435,14 @@ FeedView.prototype = {
             return false;
         }
 
-        // If a single entry was removed we do partial refresh, otherwise we
-        // refresh from scratch.
-        // Because in practice it is extremely unlikely for some entries to be removed
-        // and others added with a single operation, the number of entries always changes
-        // when the entry set changes. This greatly simplifies things, because we don't
-        // have to check entries one by one and we can just compare their number.
+        // We optimize for the common case when a single entry is removed and we do
+        // partial refresh then. For other kinds of changes, we refresh from scratch.
+        //
+        // Note: exhaustively comparing the old and the new entry sets is very slow.
+        // To speed things up we compare just the numbers of entries, thus assuming that
+        // whenever the set changes, the their number changes too. This assumption holds
+        // up for most of our purposes. If we are not sure if that's true in a particular
+        // case, we should force full refresh by passing TRUE as the parameter.
         if (this.entriesCount - currentEntriesCount == 1) {
             var removedEntry = null;
             var removedEntryIndex;
@@ -621,31 +634,9 @@ FeedView.prototype = {
         var style = doc.getElementById('feedview-style');
         style.textContent = gFeedViewStyle;
 
-        // Build the header...
-        var titleElement = doc.getElementById('feed-title');
-        titleElement.textContent = this.titleOverride || this.title;
-
-        // When a single, unfiltered feed is viewed, construct the
-        // feed's header: the subtitle, the image, and the link.
         var feed = gStorage.getFeed(this.query.feeds);
-        if (feed && !this.searchString) {
 
-            // Create the link.
-            var header = doc.getElementById('header');
-            header.setAttribute('href', feed.websiteURL ? feed.websiteURL : feed.feedURL);
-
-            // Create feed image.
-            if (feed.imageURL) {
-                var feedImage = doc.getElementById('feed-image');
-                feedImage.setAttribute('src', feed.imageURL);
-                if (feed.imageTitle)
-                    feedImage.setAttribute('title', feed.imageTitle);
-            }
-
-            // Create feed subtitle.
-            if (feed.subtitle)
-                doc.getElementById('feed-subtitle').innerHTML = feed.subtitle;
-        }
+        this._buildHeader(feed);
 
         this.feedContent = doc.getElementById('feed-content');
 
@@ -696,30 +687,35 @@ FeedView.prototype = {
         if (!entries.length)
             this._setEmptyViewMessage();
 
-        // Select an entry if keyboard navigation is enabled.
-        this._selectionSuppressed = false;
-        if (gPrefs.keyNavEnabled) {
-
-            if (this.selectedElement) {
-                this.selectEntry(this.selectedEntry, true);
-            }
-            else if (this._selectLastEntryOnRefresh) {
-                entry = this.feedContent.lastChild;
-                this.selectEntry(entry, true);
-            }
-            else {
-                entry = this.feedContent.firstChild;
-                this.selectEntry(entry);
-            }
-
-            this._selectLastEntryOnRefresh = false;
-        }
+        this._initSelection()
 
         this.markVisibleAsRead();
 
-        // Restore default cursor which we changed to
-        // "wait" at the beginning of the refresh.
         this.browser.style.cursor = 'auto';
+    },
+
+
+    _buildHeader: function FeedView__buildHeader(aFeed) {
+        var doc = this.document
+
+        var titleElement = doc.getElementById('feed-title');
+        titleElement.textContent = this.titleOverride || this.title;
+
+        // When a single unfiltered feed is viewed, add the subtitle,
+        // the image, and the link.
+        if (aFeed && !this.searchString) {
+            var header = doc.getElementById('header');
+            header.setAttribute('href', aFeed.websiteURL ? aFeed.websiteURL : aFeed.feedURL);
+
+            if (aFeed.imageURL) {
+                var feedImage = doc.getElementById('feed-image');
+                feedImage.setAttribute('src', aFeed.imageURL);
+                feedImage.setAttribute('title', aFeed.imageTitle);
+            }
+
+            if (aFeed.subtitle)
+                doc.getElementById('feed-subtitle').innerHTML = aFeed.subtitle;
+        }
     },
 
 
@@ -733,56 +729,20 @@ FeedView.prototype = {
         articleContainer.setAttribute('entryTitle', aEntry.title);
         articleContainer.setAttribute('content', aEntry.content);
 
-        if (gPrefs.showAuthors && aEntry.authors) {
+        if (gPrefs.showAuthors && aEntry.authors)
             articleContainer.setAttribute('authors', this.authorPrefixStr + aEntry.authors);
-        }
         if (aEntry.read)
             articleContainer.setAttribute('read', true);
         if (aEntry.starred)
             articleContainer.setAttribute('starred', true);
 
         if (aEntry.date) {
-            var entryDate = new Date(aEntry.date);
-            var entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
-
-            var now = new Date();
-            var nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
-
-            var today = Math.ceil(nowTime / 86400000);
-            var entryDay = Math.ceil(entryTime / 86400000);
-            var deltaDays = today - entryDay;
-
-            var deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
-
-            var string = '';
-            switch (true) {
-                case deltaDays === 0:
-                    string = entryDate.toLocaleFormat(', %X ');
-                    string = this.todayStr + string;
-                    break;
-                case deltaDays === 1:
-                    string = entryDate.toLocaleFormat(', %X ');
-                    string = this.yesterdayStr + string
-                    break;
-                case deltaDays < 7:
-                    string = entryDate.toLocaleFormat('%A, %X ');
-                    break;
-                case deltaYears > 0:
-                    string = entryDate.toLocaleFormat('%d %B %Y, %X ');
-                    break;
-                default:
-                    string = entryDate.toLocaleFormat('%d %B, %X ');
-            }
-
-            string = string.replace(/:\d\d /, ' ');
-            // XXX We do it because %e conversion specification doesn't work
-            string = string.replace(/^0/, '');
-
-            articleContainer.setAttribute('date', string);
+            var dateString = this._constructEntryDate(aEntry);
+            articleContainer.setAttribute('date', dateString);
 
             if (aEntry.updated) {
-                string += ' <span class="article-updated">' + this.updatedStr + '</span>'
-                articleContainer.setAttribute('updated', string);
+                dateString += ' <span class="article-updated">' + this.updatedStr + '</span>'
+                articleContainer.setAttribute('updated', dateString);
             }
         }
 
@@ -796,6 +756,48 @@ FeedView.prototype = {
 
         return articleContainer;
     },
+
+
+    _constructEntryDate: function FeedView__constructEntryDate(aEntry) {
+        var entryDate = new Date(aEntry.date);
+        var entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
+
+        var now = new Date();
+        var nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
+
+        var today = Math.ceil(nowTime / 86400000);
+        var entryDay = Math.ceil(entryTime / 86400000);
+        var deltaDays = today - entryDay;
+
+        var deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
+
+        var string = '';
+        switch (true) {
+            case deltaDays === 0:
+                string = entryDate.toLocaleFormat(', %X ');
+                string = this.todayStr + string;
+                break;
+            case deltaDays === 1:
+                string = entryDate.toLocaleFormat(', %X ');
+                string = this.yesterdayStr + string
+                break;
+            case deltaDays < 7:
+                string = entryDate.toLocaleFormat('%A, %X ');
+                break;
+            case deltaYears > 0:
+                string = entryDate.toLocaleFormat('%d %B %Y, %X ');
+                break;
+            default:
+                string = entryDate.toLocaleFormat('%d %B, %X ');
+        }
+
+        string = string.replace(/:\d\d /, ' ');
+        // XXX We do it because %e conversion specification doesn't work
+        string = string.replace(/^0/, '');
+
+        return string;
+    },
+
 
     _setEmptyViewMessage: function FeedView__setEmptyViewMessage() {
         var paragraph = this.document.getElementById('message');
@@ -817,6 +819,28 @@ FeedView.prototype = {
 
         paragraph.textContent = message;
         paragraph.style.display = 'block';
+    },
+
+
+    _initSelection: function FeedView__initSelection() {
+        this._selectionSuppressed = false;
+
+        if (gPrefs.keyNavEnabled) {
+
+            if (this.selectedElement) {
+                this.selectEntry(this.selectedEntry, true);
+            }
+            else if (this._selectLastEntryOnRefresh) {
+                entry = this.feedContent.lastChild;
+                this.selectEntry(entry, true);
+            }
+            else {
+                entry = this.feedContent.firstChild;
+                this.selectEntry(entry);
+            }
+
+            this._selectLastEntryOnRefresh = false;
+        }
     }
 
 }
