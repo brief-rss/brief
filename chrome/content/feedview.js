@@ -412,90 +412,52 @@ FeedView.prototype = {
      * state of entries (read/unread, starred/unstarred) is not verified, it has to be
      * maintained separetely by calling onEntryMarkedRead and onEntryStarred whenever
      * it is changed.
+     * Note: exhaustively comparing the old and the new entry sets would be very slow.
+     * To speed things up we compare just the numbers of entries, assuming that whenever
+     * the set changes, the their number changes too. This assumption holds up for most
+     * of our purposes. If we are not sure if that's true in a particular case,
+     * we should force full refresh by passing TRUE as the parameter.
      *
      * @param aForceRefresh Forces full refresh, without checking.
      * @returns TRUE if the view was up-to-date, FALSE if it needed refreshing.
      */
     ensure: function FeedView_ensure(aForceRefresh) {
-        if (aForceRefresh && this.isActive) {
-            this._refresh();
-            return false;
+        var viewIsClean = true;
+
+        if (!this.isActive)
+            return viewIsClean;
+
+        if (aForceRefresh) {
+            viewIsClean = false;
         }
+        else if (!this.browser.webProgress.isLoadingDocument) {
+            var oldCount = this.entriesCount;
+            var currentCount = this.query.getEntriesCount();
 
-        var isDirty = false;
+            if (!oldCount || !currentCount || oldCount != currentCount)
+                viewIsClean = false;
 
-        if (!this.isActive || this.browser.webProgress.isLoadingDocument)
-            return true;
-
-        var prevEntries = this._entries;
-        var currentEntriesCount = this.query.getEntriesCount();
-
-        if (!prevEntries || !currentEntriesCount) {
-            this._refresh();
-            return false;
-        }
-
-        // We optimize for the common case when a single entry is removed and we do
-        // partial refresh then. For other kinds of changes, we refresh from scratch.
-        //
-        // Note: exhaustively comparing the old and the new entry sets is very slow.
-        // To speed things up we compare just the numbers of entries, thus assuming that
-        // whenever the set changes, the their number changes too. This assumption holds
-        // up for most of our purposes. If we are not sure if that's true in a particular
-        // case, we should force full refresh by passing TRUE as the parameter.
-        if (this.entriesCount - currentEntriesCount == 1) {
-            var removedEntry = null;
-            var removedEntryIndex;
-            var currentEntries = this.query.getSerializedEntries().
-                                            getPropertyAsAString('entries').
-                                            match(/[^ ]+/g);
-
-            // Find the removed entry.
-            for (var i = 0; i < prevEntries.length; i++) {
-                if (currentEntries.indexOf(prevEntries[i]) == -1) {
-                    removedEntry = prevEntries[i];
-                    removedEntryIndex = i;
-                    break;
-                }
+            // Optimize the common case when a single entry is removed.
+            if (oldCount - currentCount == 1) {
+                this._refreshOnEntryRemoved();
+                var didPartialRefresh = true;
             }
-
-            // If there are no more entries on this page and it the last
-            // page then perform full refresh.
-            if (this.feedContent.childNodes.length == 1 && this.currentPage == this.pageCount) {
-                this.currentPage--;
-                return false;
-            }
-
-            // If the removed entry is on a different page than the
-            // currently shown one then perform full refresh.
-            var firstIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
-            var lastIndex = firstIndex + gPrefs.entriesPerPage - 1;
-            if (removedEntryIndex < firstIndex || removedEntryIndex > lastIndex) {
-                this._refresh();
-                return false;
-            }
-
-            this._removeEntry(removedEntry);
-
-            // Update this._entries here, so that this._removeEntry() doesn't
-            // have to call this.query.getSerializedEntries() again.
-            this._entries = currentEntries;
-            isDirty = true;
         }
-        else if (this.entriesCount != currentEntriesCount) {
+
+        if (!viewIsClean && !didPartialRefresh) {
             this._refresh();
-            return false;
+        }
+        else {
+            var title = this.titleOverride || this.title;
+            var titleElement = this.document.getElementById('feed-title');
+
+            if (titleElement.textContent != title) {
+                viewIsClean = false;
+                titleElement.textContent = title;
+            }
         }
 
-        // Update the title.
-        var title = this.titleOverride || this.title;
-        var titleElement = this.document.getElementById('feed-title');
-        if (titleElement.textContent != title) {
-            titleElement.textContent = title;
-            isDirty = true;
-        }
-
-        return !isDirty;
+        return viewIsClean;
     },
 
 
@@ -528,11 +490,52 @@ FeedView.prototype = {
     },
 
 
-    // Removes an entry element from the current page and appends a new one.
-    _removeEntry: function FeedView__removeEntry(aEntryID) {
-        var entryElement = this.document.getElementById(aEntryID);
+    // Fast path for refreshing the view in the common case of a single
+    // entry having been removed, which allows us to gracefully remove
+    // just it instead of completely refreshing the view.
+    _refreshOnEntryRemoved: function FeedView__refreshOnEntryRemoved() {
+        var removedEntry = null;
+        var removedIndex;
+        var oldEntries = this._entries;
+        var currentEntries = this.query.getSerializedEntries().
+                                        getPropertyAsAString('entries').
+                                        match(/[^ ]+/g);
 
-        var entryWasSelected = (aEntryID == this.selectedEntry);
+        // Find the removed entry.
+        for (var i = 0; i < oldEntries.length; i++) {
+            if (currentEntries.indexOf(oldEntries[i]) == -1) {
+                removedEntry = oldEntries[i];
+                removedIndex = i;
+                break;
+            }
+        }
+
+        // If there are no more entries on this page and it the last one,
+        // then go to the previous page.
+        if (this.feedContent.childNodes.length == 1 && this.currentPage == this.pageCount) {
+            this.currentPage--;
+        }
+        else {
+            var startPageIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
+            var endPageIndex = startPageIndex + gPrefs.entriesPerPage - 1;
+
+            // If the removed entry wasn't on the current page then perform full refresh.
+            if (removedIndex < startPageIndex || removedIndex > endPageIndex) {
+                this._refresh();
+            }
+            else {
+                this._removeEntry(removedEntry);
+                this._entries = currentEntries;
+            }
+        }
+    },
+
+
+    // Removes an entry element from the current page and appends a new one.
+    _removeEntry: function FeedView__removeEntry(aEntry) {
+        var entryElement = this.document.getElementById(aEntry);
+
+        var entryWasSelected = (aEntry == this.selectedEntry);
         if (entryWasSelected) {
             // Immediately deselect the entry, so that no futher commands can be sent.
             this.selectEntry(null);
@@ -545,7 +548,7 @@ FeedView.prototype = {
 
         // Remove the entry. We don't do it directly, because we want to
         // use jQuery to to fade it gracefully.
-        this._sendEvent(aEntryID, 'DoRemoveEntry');
+        this._sendEvent(aEntry, 'DoRemoveEntry');
 
         var self = this;
         function finish() {
