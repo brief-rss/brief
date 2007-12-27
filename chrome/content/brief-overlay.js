@@ -32,12 +32,47 @@ var gBrief = {
 
 
     doCommand: function gBrief_doCommand(aCommand) {
-        if (gBrowser.currentURI.spec == BRIEF_URL) {
-            var doc = gBrowser.contentDocument;
-            var evt = document.createEvent('Events');
-            evt.initEvent('DoCommand', false, false);
-            doc.documentElement.setAttribute('command', aCommand);
-            doc.dispatchEvent(evt);
+        if (gBrowser.currentURI.spec != BRIEF_URL)
+            return;
+
+        var win = gBrowser.contentDocument.defaultView.wrappedJSObject;
+
+        switch (aCommand) {
+            case 'selectNextEntry':
+                win.gFeedView.selectNextEntry();
+                break;
+            case 'selectPrevEntry':
+                win.gFeedView.selectPrevEntry();
+                break;
+            case 'openSelectedEntryLinkInTab':
+                win.gCommands.openSelectedEntryLink(true);
+                break;
+            case 'showNextPage':
+                win.gFeedView.currentPage++;
+                break;
+            case 'showPrevPage':
+                win.gFeedView.currentPage--;
+                break;
+            case 'markCurrentViewRead':
+                win.gFeedView.query.markEntriesRead(true);
+                break;
+            case 'showAllEntries':
+                win.gCommands.changeViewConstraint('all');
+                break;
+            case 'showUnreadEntries':
+                win.gCommands.changeViewConstraint('unread');
+                break;
+            case 'showStarredEntries':
+                win.gCommands.changeViewConstraint('starred');
+                break;
+            case 'focusSearchbar':
+                var searchbar = win.document.getElementById('searchbar');
+                searchbar.focus();
+                break;
+
+            default:
+                var func = win.gCommands[aCommand]();
+                break;
         }
     },
 

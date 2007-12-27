@@ -136,16 +136,16 @@ interface nsIBriefQuery : nsISupports {
     /**
      * Marks selected entries as read/unread.
      *
-     * @param  status  New status of entries (TRUE for read, FALSE for unread).
+     * @param  state  New state of entries (TRUE for read, FALSE for unread).
      */
-    void markEntriesRead(in boolean status);
+    void markEntriesRead(in boolean state);
 
     /**
      * Mark selected entries as starred/unstarred.
      *
-     * @param  status  New status of entries (TRUE for starred, FALSE for not starred).
+     * @param  state  New state of entries (TRUE for starred, FALSE for not starred).
      */
-    void starEntries(in boolean status);
+    void starEntries(in boolean state);
 
     /**
      * Sets the deleted state of the selected entries or removes them from the database.

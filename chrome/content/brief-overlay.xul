@@ -14,23 +14,23 @@
         <key id="Brief_selectPreviousEntry" key="j"
              oncommand="gBrief.doCommand('selectPrevEntry')"/>
 
-        <key id="Brief_markSelectedEntryRead" key="m"
-             oncommand="gBrief.doCommand('markSelectedEntryRead')"/>
+        <key id="Brief_switchSelectedEntryRead" key="m"
+             oncommand="gBrief.doCommand('switchSelectedEntryRead')"/>
         <key id="Brief_deleteSelectedEntry" key="t"
              oncommand="gBrief.doCommand('deleteSelectedEntry')"/>
         <key id="Brief_restoreSelectedEntry" key="r"
              oncommand="gBrief.doCommand('restoreSelectedEntry')"/>
-        <key id="Brief_starSelectedEntry" key="b"
-             oncommand="gBrief.doCommand('starSelectedEntry')"/>
-        <key id="Brief_unfoldSelectedEntry" key="n"
-             oncommand="gBrief.doCommand('unfoldSelectedEntry')"/>
+        <key id="Brief_switchSelectedEntryStarred" key="b"
+             oncommand="gBrief.doCommand('switchSelectedEntryStarred')"/>
+        <key id="Brief_switchSelectedEntryCollapsed" key="n"
+             oncommand="gBrief.doCommand('switchSelectedEntryCollapsed')"/>
         <key id="Brief_openSelectedEntry" keycode="VK_RETURN"
              oncommand="gBrief.doCommand('openSelectedEntryLink')"/>
         <key id="Brief_openSelectedEntryInTab" keycode="VK_RETURN" modifiers="accel"
              oncommand="gBrief.doCommand('openSelectedEntryLinkInTab')"/>
 
-        <key id="Brief_toggleHeadlinesMode" key="f"
-             oncommand="gBrief.doCommand('toggleHeadlinesMode')"/>
+        <key id="Brief_switchHeadlinesView" key="f"
+             oncommand="gBrief.doCommand('switchHeadlinesView')"/>
         <key id="Brief_showNextPage" key="k" modifiers="alt"
              oncommand="gBrief.doCommand('showNextPage')"/>
         <key id="Brief_showPrevPage" key="j" modifiers="alt"
