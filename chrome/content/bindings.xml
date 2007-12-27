@@ -247,8 +247,10 @@
             <![CDATA[
             var isCommandElement = event.originalTarget.hasAttribute('command');
 
-            if (gConveyedData.doubleClickMarks && !isCommandElement)
+            if (gConveyedData.doubleClickMarks && !isCommandElement) {
                 this.read = !this.read;
+                this.sendEvent('SwitchEntryRead', true);
+            }
             ]]>
         </handler>
 
