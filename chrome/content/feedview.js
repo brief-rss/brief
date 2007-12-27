@@ -26,7 +26,7 @@ __defineSetter__('gFeedView', function(aView) {
     var viewConstraintBox = document.getElementById('view-constraint-box');
     viewConstraintBox.hidden = aView._flagsAreIntrinsic;
 
-    aView.ensure(true);
+    aView._refresh();
 });
 __defineGetter__('gFeedView', function() _gFeedView);
 

@@ -166,7 +166,7 @@
                     <toolbarspring/>
                     <toolbarbutton id="mark-view-read"
                                    tooltiptext="&markViewRead.tooltip;"
-                                   oncommand="gCommands.markCurrentViewRead(true)"/>
+                                   oncommand="gFeedView.query.markEntriesRead(true)"/>
                     <toolbarbutton id="headlines-checkbox"
                                    type="checkbox"
                                    autoCheck="false"
