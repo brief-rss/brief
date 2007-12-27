@@ -1395,12 +1395,12 @@ BriefQuery.prototype = {
 
 
     // nsIBriefQuery
-    markEntriesRead: function BriefQuery_markEntriesRead(aStatus) {
+    markEntriesRead: function BriefQuery_markEntriesRead(aState) {
 
         // Make sure not to select entries which already have the desired status.
         prevUnreadFlag = this.unread;
         prevReadFlag = this.read;
-        if (aStatus)
+        if (aState)
             this.unread = true;
         else
             this.read = true;
@@ -1408,7 +1408,7 @@ BriefQuery.prototype = {
         var statement = 'UPDATE entries SET read = ?, updated = 0 ' + this.getQueryText();
 
         var update = this.dBConnection.createStatement(statement)
-        update.bindInt32Parameter(0, aStatus ? 1 : 0);
+        update.bindInt32Parameter(0, aState ? 1 : 0);
 
         this.dBConnection.beginTransaction();
         try {
@@ -1431,7 +1431,7 @@ BriefQuery.prototype = {
         // If any entries were marked, dispatch the notifiaction.
         if (changedEntries.getPropertyAsAString('entries')) {
             this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                                 aStatus ? 'read' : 'unread');
+                                                 aState ? 'read' : 'unread');
         }
     },
 
@@ -1479,10 +1479,10 @@ BriefQuery.prototype = {
 
 
     // nsIBriefQuery
-    starEntries: function BriefQuery_starEntries(aStatus) {
+    starEntries: function BriefQuery_starEntries(aState) {
         var statement = 'UPDATE entries SET starred = ? ' + this.getQueryText();
         var update = this.dBConnection.createStatement(statement);
-        update.bindInt32Parameter(0, aStatus ? 1 : 0);
+        update.bindInt32Parameter(0, aState ? 1 : 0);
 
         this.dBConnection.beginTransaction();
         try {
@@ -1500,7 +1500,7 @@ BriefQuery.prototype = {
 
         if (changedEntries.getPropertyAsAString('entries')) {
             this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                                 'starred');
+                                                 aState ? 'starred' : 'unstarred');
         }
     },
 

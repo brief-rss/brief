@@ -21,7 +21,6 @@ const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
-var gFeedView = null;
 var gInitialized = false;
 var gTopBrowserWindow = null;
 var gTemplateURI = '';
@@ -67,7 +66,6 @@ function init() {
 
     initToolbarsAndStrings()
 
-    document.addEventListener('DoCommand', onDoCommand, false);
     document.addEventListener('keypress', onKeyPress, true);
 
     var observerService = Cc["@mozilla.org/observer-service;1"].
@@ -220,17 +218,12 @@ var gObserver = {
         switch (aChangeType) {
         case 'unread':
         case 'read':
-            // If view wasn't invalidated, we still may have to visually mark the
-            // some changed entries as read/unread.
+            // If view wasn't invalidated, we still may have to visually adjust entries.
             if (gFeedView.isActive && viewIsCool) {
                 var nodes = gFeedView.feedContent.childNodes;
                 for (i = 0; i < nodes.length; i++) {
-                    if (changedEntries.indexOf(nodes[i].id) != -1) {
-                        if (aChangeType == 'read')
-                            gFeedView.performAction('markRead', nodes[i].id);
-                        else
-                            gFeedView.performAction('markUnread', nodes[i].id);
-                    }
+                    if (changedEntries.indexOf(nodes[i].id) != -1)
+                        gFeedView.onEntryMarkedRead(nodes[i].id, aChangeType == 'read');
                 }
             }
 
@@ -245,6 +238,16 @@ var gObserver = {
             break;
 
         case 'starred':
+        case 'unstarred':
+            // If view wasn't invalidated, we still may have to visually adjust entries.
+            if (gFeedView.isActive && viewIsCool) {
+                var nodes = gFeedView.feedContent.childNodes;
+                for (i = 0; i < nodes.length; i++) {
+                    if (changedEntries.indexOf(nodes[i].id) != -1)
+                        gFeedView.onEntryStarred(nodes[i].id, aChangeType == 'starred');
+                }
+            }
+
             async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'starred-folder');
             break;
 
@@ -257,16 +260,6 @@ var gObserver = {
         }
     }
 
-}
-
-
-// The keyset containing keyboard shortucts is in the top level browser window.
-// Because we are an untrusted document, we can't be called directly. Instead,
-// 'command' attribute is set on the documentElement and 'DoCommand' event is sent.
-function onDoCommand(aEvent) {
-    var commandName = document.documentElement.getAttribute('command');
-    var command = gCommands[commandName];
-    command();
 }
 
 
@@ -310,11 +303,7 @@ var gCommands = {
                           features, aPaneID);
     },
 
-    markCurrentViewRead: function cmd_markCurrentViewRead() {
-        gFeedView.query.markEntriesRead(true);
-    },
-
-    toggleHeadlinesMode: function cmd_toggleHeadlinesMode() {
+    switchHeadlinesView: function cmd_switchHeadlinesView() {
         var newState = !gPrefs.showHeadlinesOnly;
         gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
 
@@ -322,38 +311,19 @@ var gCommands = {
         checkbox.checked = newState;
 
         var entries = gFeedView.feedContent.childNodes;
+        for (var i = 0; i < entries.length; i++)
+            gFeedView.collapseEntry(entries[i].id, newState, false);
 
         if (newState) {
             gFeedView.feedContent.setAttribute('showHeadlinesOnly', true);
-            for (var i = 0; i < entries.length; i++) {
-                if (!entries[i].hasAttribute('collapsed'))
-                    gFeedView.performAction('collapse', entries[i].id);
-            }
         }
         else {
             gFeedView.feedContent.removeAttribute('showHeadlinesOnly');
-            for (i = 0; i < entries.length; i++) {
-                if (entries[i].hasAttribute('collapsed'))
-                    gFeedView.performAction('collapse', entries[i].id);
-            }
-
             gFeedView.markVisibleAsRead();
         }
     },
 
-    showAllEntries: function cmd_showAllEntries() {
-        gCommands.switchViewConstraint('all');
-    },
-
-    showUnreadEntries: function cmd_showUnreadEntries() {
-        gCommands.switchViewConstraint('unread');
-    },
-
-    showStarredEntries: function cmd_showStarredEntries() {
-        gCommands.switchViewConstraint('starred');
-    },
-
-    switchViewConstraint: function cmd_switchViewConstraint(aConstraint) {
+    changeViewConstraint: function cmd_changeViewConstraint(aConstraint) {
         if (gPrefs.shownEntries != aConstraint) {
             gPrefs.setCharPref('feedview.shownEntries', aConstraint);
 
@@ -361,75 +331,64 @@ var gCommands = {
         }
     },
 
-    showNextPage: function cmd_showNextPage() {
-        gFeedView.currentPage++;
-    },
-
-    showPrevPage: function cmd_showPrevPage() {
-        gFeedView.currentPage--;
-    },
-
-    selectNextEntry: function cmd_selectNextEntry() {
-        gFeedView.selectNextEntry()
-    },
-
-    selectPrevEntry: function cmd_selectPrevEntry() {
-        gFeedView.selectPrevEntry();
-    },
-
-    markSelectedEntryRead: function cmd_markSelectedEntryRead() {
+    switchSelectedEntryRead: function cmd_switchSelectedEntryRead() {
         if (gFeedView.selectedEntry) {
-            var newStatus = !gFeedView.selectedElement.hasAttribute('read');
-
-            var query = new QuerySH(null, gFeedView.selectedEntry, null);
-            query.deleted = ENTRY_STATE_ANY;
-            query.markEntriesRead(newStatus)
+            var newState = !gFeedView.selectedElement.hasAttribute('read');
+            this.markEntryRead(gFeedView.selectedEntry, newState);
         }
     },
 
+    markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
+        var query = new QuerySH(null, aEntry, null);
+        query.deleted = ENTRY_STATE_ANY;
+        query.markEntriesRead(aNewState);
+
+        if (gPrefs.autoMarkRead && !aNewState)
+            gFeedView.entriesMarkedUnread.push(aEntry);
+    },
 
     deleteSelectedEntry: function cmd_deleteSelectedEntry() {
-        if (gFeedView.selectedEntry) {
-            var query = new QuerySH(null, gFeedView.selectedEntry, null);
-            query.deleteEntries(ENTRY_STATE_TRASHED);
-        }
+        if (gFeedView.selectedEntry)
+            this.deleteEntry(gFeedView.selectedEntry);
     },
 
+    deleteEntry: function cmd_deleteEntry(aEntry) {
+        var query = new QuerySH(null, aEntry, null);
+        query.deleteEntries(ENTRY_STATE_TRASHED);
+    },
 
     restoreSelectedEntry: function cmd_restoreSelectedEntry() {
+        if (gFeedView.selectedEntry)
+            this.restoreEntry(gFeedView.selectedEntry);
+    },
+
+    restoreEntry: function cmd_restoreEntry(aEntry) {
+        var query = new QuerySH(null, aEntry, null);
+        query.deleted = ENTRY_STATE_TRASHED;
+        query.deleteEntries(ENTRY_STATE_NORMAL);
+    },
+
+    switchSelectedEntryStarred: function cmd_switchSelectedEntryStarred() {
         if (gFeedView.selectedEntry) {
-            var query = new QuerySH(null, gFeedView.selectedEntry, null);
-            query.deleted = ENTRY_STATE_TRASHED;
-            query.deleteEntries(ENTRY_STATE_NORMAL);
+            var newState = !gFeedView.selectedElement.hasAttribute('starred');
+            this.starEntry(gFeedView.selectedEntry, newState);
         }
     },
 
-
-    starSelectedEntry: function cmd_starSelectedEntry() {
-        if (gFeedView.selectedEntry) {
-            var newStatus = !gFeedView.selectedElement.hasAttribute('starred');
-
-            // Theoretically the feed view should be updated in the callback from
-            // the database, but it's the only place
-            gFeedView.performAction('star', gFeedView.selectedEntry);
-
-            var query = new QuerySH(null, gFeedView.selectedEntry, null);
-            query.starEntries(newStatus);
-        }
+    starEntry: function cmd_starEntry(aEntry, aNewState) {
+        var query = new QuerySH(null, aEntry, null);
+        query.starEntries(aNewState);
     },
 
-    unfoldSelectedEntry: function cmd_unfoldSelectedEntry() {
+    switchSelectedEntryCollapsed: function cmd_switchSelectedEntryCollapsed() {
         if (gFeedView.selectedEntry && gPrefs.showHeadlinesOnly) {
-            gFeedView.performAction('collapseAnimate', gFeedView.selectedEntry);
-
             var selectedElement = gFeedView.selectedElement;
+            var newState = !selectedElement.hasAttribute('collapsed');
+
+            gFeedView.collapseEntry(gFeedView.selectedEntry, newState, true);
+
             async(selectedElement.scrollIntoView, 310, selectedElement, false);
         }
-    },
-
-    focusSearchbar: function cmd_focusSearchbar() {
-        var searchbar = document.getElementById('searchbar');
-        searchbar.focus();
     },
 
     turnOffKeyNav: function cmd_turnOffKeyNav() {
@@ -437,10 +396,6 @@ var gCommands = {
             gPrefs.setBoolPref('feedview.keyNavEnabled', false);
             gFeedView.selectEntry(null);
         }
-    },
-
-    openSelectedEntryLinkInTab: function cmd_openSelectedEntryLinkInTab() {
-        gCommands.openSelectedEntryLink(true);
     },
 
     openSelectedEntryLink: function cmd_openSelectedEntryLink(aForceNewTab) {
@@ -491,7 +446,7 @@ function async(aFunction, aDelay, aObject, arg1, arg2) {
     function asc() {
         aFunction.call(aObject || this, arg1, arg2);
     }
-    setTimeout(asc, aDelay || 0);
+    return setTimeout(asc, aDelay || 0);
 }
 
 // Gets a string containing the CSS style of the feed view.
@@ -628,7 +583,6 @@ function performSearch(aEvent) {
         if (previousView != gFeedView) {
             gFeedView = previousView;
             gFeedView.query.searchString = gFeedView.titleOverride = '';
-            gFeedView.ensure(true);
         }
         else {
             gFeedView.query.searchString = gFeedView.titleOverride = '';
@@ -654,11 +608,11 @@ function onKeyPress(aEvent) {
             aEvent.preventDefault();
         }
         else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
-            gCommands.selectNextEntry();
+            gFeedView.selectNextEntry();
             aEvent.preventDefault();
         }
         else if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE) {
-            gCommands.selectPrevEntry();
+            gFeedView.selectPrevEntry();
             aEvent.preventDefault();
         }
     }

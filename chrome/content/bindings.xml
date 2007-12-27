@@ -12,12 +12,12 @@
     <content>
         <html:div class="article-header">
             <html:div class="expand-button"/>
-            <html:div class="star-article" command="star"/>
+            <html:div class="star-article" command="switchStarred"/>
             <html:div class="article-controls">
-                <html:div class="mark-read" command="mark-read">
-                    <html:div class="mark-read-left" command="mark-read"/>
-                    <html:div class="mark-read-centre" command="mark-read"/>
-                    <html:div class="mark-read-right" command="mark-read"/>
+                <html:div class="mark-read" command="switchRead">
+                    <html:div class="mark-read-left" command="switchRead"/>
+                    <html:div class="mark-read-centre" command="switchRead"/>
+                    <html:div class="mark-read-right" command="switchRead"/>
                 </html:div>
                 <html:div class="delete-entry" command="delete"/>
                 <html:div class="restore-entry" command="restore"/>
@@ -39,7 +39,6 @@
         <constructor>
             <![CDATA[
             // Find elements
-            var feedContent = document.getElementById('feed-content');
             var feedNameElem = this.getElement('feed-name');
             var authorsElem  = this.getElement('article-authors');
             var titleElem    = this.getElement('article-title-link');
@@ -51,7 +50,7 @@
             titleElem.setAttribute('href', this.getAttribute('entryURL'));
             titleElem.innerHTML = this.getAttribute('entryTitle');
 
-            if (feedContent.hasAttribute('showFeedNames'))
+            if (gConveyedData.showFeedNames)
                 feedNameElem.innerHTML = this.getAttribute('feedName');
 
             dateElem.innerHTML = this.getAttribute('date') ||
@@ -61,8 +60,8 @@
 
             contentElem.innerHTML = this.getAttribute('content');
 
-            markReadElem.textContent = this.read ? feedContent.getAttribute('markUnreadString')
-                                                 : feedContent.getAttribute('markReadString');
+            markReadElem.textContent = this.read ? gConveyedData.markUnreadString
+                                                 : gConveyedData.markReadString;
 
             if (this.collapsed) {
                 $(contentElem).hide();
@@ -117,8 +116,6 @@
                         var header = self.getElement('article-header');
                         header.insertBefore(feedName, title);
                         header.insertBefore(date, title);
-
-                        self.sendEvent('EntryCollapsed');
                     }
 
                     if (aAnimate) {
@@ -139,7 +136,7 @@
                     subheader.insertBefore(date, authors);
 
                     function finish() {
-                        self.sendEvent('EntryCollapsed');
+                        self.sendEvent('EntryUncollapsed');
                     }
 
                     if (aAnimate) {
@@ -163,13 +160,10 @@
                     return;
 
                 var markReadButton = this.getElement('mark-read-centre');
-                var feedContent = document.getElementById('feed-content');
 
                 if (val) {
                     this.setAttribute('read', 'true');
-
-                    var string = feedContent.getAttribute('markUnreadString');
-                    markReadButton.textContent = string;
+                    markReadButton.textContent = gConveyedData.markUnreadString;
 
                     if (this.hasAttribute('updated')) {
                         this.removeAttribute('updated');
@@ -180,9 +174,7 @@
 
                 else {
                     this.removeAttribute('read');
-
-                    string = feedContent.getAttribute('markReadString');
-                    markReadButton.textContent = string;
+                    markReadButton.textContent = gConveyedData.markReadString;
                 }
 
                 return val;
@@ -215,13 +207,13 @@
 
             if (command) {
                 switch (command) {
-                    case 'mark-read':
+                    case 'switchRead':
                         this.read = !this.read;
-                        this.sendEvent('MarkEntryRead', true);
+                        this.sendEvent('SwitchEntryRead', true);
                         break;
-                    case 'star':
+                    case 'switchStarred':
                         this.starred = !this.starred;
-                        this.sendEvent('StarEntry');
+                        this.sendEvent('SwitchEntryStarred');
                         break;
                     case 'delete':
                         this.sendEvent('DeleteEntry');
@@ -248,45 +240,43 @@
             ]]>
         </handler>
 
-        <!-- Double-click marks the entry as read/unread. If double-click targeted a
+
+        <!-- Double-click marks the entry as read/unread. If the click targeted a
              command element, do nothing since it's too easy to do it accidentally.-->
         <handler event="click" button="0" clickcount="2">
             <![CDATA[
-            var doubleClickMarks = document.getElementById('feed-content').
-                                            hasAttribute('doubleClickMarks');
             var isCommandElement = event.originalTarget.hasAttribute('command');
 
-            if (doubleClickMarks && !isCommandElement)
+            if (gConveyedData.doubleClickMarks && !isCommandElement)
                 this.read = !this.read;
             ]]>
         </handler>
 
+
         <!-- This event is how chrome sends us messages to do various stuff -->
-        <handler event="PerformAction">
+        <handler event="ViewEvent">
             <![CDATA[
-            switch (this.getAttribute('action')) {
-                case 'markRead':
-                    this.read = true;
+            var state = (this.getAttribute('eventState') == 'true');
+            switch (this.getAttribute('eventType')) {
+                case 'EntryMarkedRead':
+                    this.read = state;
                     break;
-                case 'markUnread':
-                    this.read = false;
+                case 'EntryStarred':
+                    this.starred = state;
                     break;
-                case 'star':
-                    this.starred = !this.starred;
-                    break;
-                case 'collapse':
-                    this.collapse(!this.collapsed, false);
-                    break;
-                case 'collapseAnimate':
-                    this.collapse(!this.collapsed, true);
-                    break;
-                case 'remove':
+                case 'DoRemoveEntry':
                     var self = this;
                     function callback() {
                         var feedContent = document.getElementById('feed-content');
                         feedContent.removeChild(self);
                     }
                     $(this).fadeOut(300, callback);
+                    break;
+                case 'DoCollapseEntry':
+                    this.collapse(state, false);
+                    break;
+                case 'DoCollapseEntryAnimated':
+                    this.collapse(state, true);
                     break;
             }
             ]]>

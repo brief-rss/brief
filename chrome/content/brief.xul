@@ -171,11 +171,11 @@
                                    type="checkbox"
                                    autoCheck="false"
                                    tooltiptext="&headlinesCheckbox.tooltip;"
-                                   oncommand="gCommands.toggleHeadlinesMode()"/>
+                                   oncommand="gCommands.switchHeadlinesView()"/>
                     <toolbaritem id="view-constraint-box">
                         <menulist id="view-constraint-list"
                                   tooltiptext="&viewConstraintList.tooltip;"
-                                  oncommand="gCommands.switchViewConstraint(event.target.getAttribute('constraint'))">
+                                  oncommand="gCommands.changeViewConstraint(event.target.getAttribute('constraint'))">
                             <menupopup>
                                 <menuitem id="show-all"
                                           constraint="all"

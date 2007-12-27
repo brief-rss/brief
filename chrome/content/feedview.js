@@ -1,7 +1,35 @@
-// These have to be global vars instead of properties of a FeedView, because when new
-// gFeedView is created, they have to be canceled.
-var gMarkVisibleTimeout = null;
-var gSelectScrollInterval = null;
+/**
+ * gFeedView is the instance of FeedView currently attached to the browser.
+ */
+var _gFeedView = null;
+__defineSetter__('gFeedView', function(aView) {
+
+    // Detach the previous view.
+    if (_gFeedView) {
+        _gFeedView.browser.removeEventListener('load', _gFeedView, false);
+        clearInterval(_gFeedView._smoothScrollInterval);
+        clearTimeout(_gFeedView._markVisibleTimeout);
+    }
+
+    // Attach the new view and set up the necessary UI pieces.
+    _gFeedView = aView;
+    aView.browser.addEventListener('load', aView, false);
+
+    // Clear the searchbar.
+    if (!aView.query.searchString) {
+        var searchbar = document.getElementById('searchbar');
+        searchbar.setAttribute('showingDescription', true);
+    }
+
+    // If view is tied to specified intrinsic flags (e.g. the "Unread" view),
+    // hide the UI to pick the flags.
+    var viewConstraintBox = document.getElementById('view-constraint-box');
+    viewConstraintBox.hidden = aView._flagsAreIntrinsic;
+
+    aView.ensure(true);
+});
+__defineGetter__('gFeedView', function() _gFeedView);
+
 
 /**
  * This object represents the main feed display. It stores and manages
@@ -18,22 +46,7 @@ function FeedView(aTitle, aQuery) {
     this.query = aQuery;
     this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
 
-    // Clear the searchbar.
-    if (!aQuery.searchString) {
-        var searchbar = document.getElementById('searchbar');
-        searchbar.setAttribute('showingDescription', true);
-    }
-
-    this._markedUnreadEntries = [];
-
-    // If view is tied to specified intrinsic flags (e.g. special "Unread" view), hide
-    // the UI to pick the flags from the user.
-    var viewConstraintBox = document.getElementById('view-constraint-box');
-    viewConstraintBox.hidden = this._flagsAreIntrinsic;
-
-    this.browser.addEventListener('load', this._onLoad, false);
-
-    this._refresh();
+    this.entriesMarkedUnread = [];
 }
 
 
@@ -60,7 +73,7 @@ FeedView.prototype = {
     get document() this.browser.contentDocument,
 
     feedContent: null,
-    
+
 
     // Query that selects entries contained by the view. It is the query to pull ALL the
     // entries, not only the ones displayed on the current page.
@@ -96,12 +109,33 @@ FeedView.prototype = {
     get currentPage() this.__currentPage,
 
 
-    performAction: function FeedView_performAction(aAction, aTargetEntry) {
+    // Indicates whether the feed view is currently displayed in the browser.
+    get isActive() this.browser.currentURI.equals(gTemplateURI),
+
+    get isGlobalSearch() {
+        return !this.query.folders && !this.query.feeds && !this._flagsAreIntrinsic
+               && this.query.searchString;
+    },
+
+    get isViewSearch() {
+        return (this.query.folders || this.query.feeds || this._flagsAreIntrinsic)
+               && gFeedView.query.searchString;
+    },
+
+
+    collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
+        var eventType = aAnimate ? 'DoCollapseEntryAnimated' : 'DoCollapseEntry';
+        this._sendEvent(aEntry, eventType, aNewState);
+    },
+
+
+    _sendEvent: function FeedView__sendEvent(aTargetEntry, aEventType, aState) {
         var evt = document.createEvent('Events');
-        evt.initEvent('PerformAction', false, false);
+        evt.initEvent('ViewEvent', false, false);
 
         var element = this.document.getElementById(aTargetEntry);
-        element.setAttribute('action', aAction);
+        element.setAttribute('eventType', aEventType);
+        element.setAttribute('eventState', aState);
 
         element.dispatchEvent(evt);
     },
@@ -213,6 +247,9 @@ FeedView.prototype = {
         }
     },
 
+
+    _smoothScrollInterval: null,
+
     _scrollSmoothly: function FeedView__scrollSmoothly(aTargetPosition) {
         var win = this.document.defaultView;
 
@@ -227,7 +264,7 @@ FeedView.prototype = {
             // then scroll directly to the target position.
             if (Math.abs(aTargetPosition - win.pageYOffset) <= Math.abs(jump)) {
                 win.scroll(win.pageXOffset, aTargetPosition)
-                clearInterval(gSelectScrollInterval);
+                clearInterval(self._smoothScrollInterval);
                 self._selectionSuppressed = false;
             }
             else {
@@ -238,21 +275,21 @@ FeedView.prototype = {
         // Disallow selecting futher entries until scrolling is finished.
         this._selectionSuppressed = true;
 
-        gSelectScrollInterval = setInterval(scroll, 7);
+        this._smoothScrollInterval = setInterval(scroll, 7);
     },
 
 
-    // This array is used to prevent entries from being immediately re-marked as read,
-    // when the user marks them as unread and autoMarkRead is on.
-    // We maintain a list of entries, which were marked as unread by the user, and
-    // exclude them from auto-marking for the duration of the view's life.
-    _markedUnreadEntries: [],
+    // This array stores the list of entries marked as unread by the user.
+    // They become excluded from auto-marking, in order to prevent them from
+    // being immediately re-marked as read when autoMarkRead is on.
+    entriesMarkedUnread: [],
+
+    _markVisibleTimeout: null,
 
     markVisibleAsRead: function FeedView_markVisibleAsRead() {
-        var view = gFeedView;
-        if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !view.query.unread) {
-            clearTimeout(gMarkVisibleTimeout);
-            gMarkVisibleTimeout = async(view._doMarkVisibleAsRead, 500, view);
+        if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !this.query.unread) {
+            clearTimeout(this._markVisibleTimeout);
+            this._markVisibleTimeout = async(this._doMarkVisibleAsRead, 1000, this);
         }
     },
 
@@ -266,7 +303,7 @@ FeedView.prototype = {
 
         for (i = 0; i < entries.length; i++) {
             entryTop = entries[i].offsetTop;
-            wasMarkedUnread = (this._markedUnreadEntries.indexOf(entries[i].id) != -1);
+            wasMarkedUnread = (this.entriesMarkedUnread.indexOf(entries[i].id) != -1);
 
             if (entryTop >= winTop && entryTop < winBottom - 50 && !wasMarkedUnread)
                 entriesToMark.push(entries[i].id);
@@ -278,20 +315,89 @@ FeedView.prototype = {
         }
     },
 
-    // Indicates whether the feed view is currently displayed in the browser.
-    get isActive() {
-        return this.browser.currentURI.equals(gTemplateURI);
+
+    handleEvent: function FeedView_handleEvent(aEvent) {
+        var target = aEvent.target;
+
+        switch (aEvent.type) {
+
+            // Forward commands from the view to the controller.
+            case 'SwitchEntryRead':
+                var newState = target.hasAttribute('read');
+                gCommands.markEntryRead(target.id, newState);
+                break;
+            case 'DeleteEntry':
+                gCommands.deleteEntry(target.id);
+                break;
+            case 'RestoreEntry':
+                gCommands.restoreEntry(target.id);
+                break;
+            case 'SwitchEntryStarred':
+                var newState = target.hasAttribute('starred');
+                gCommands.starEntry(target.id, newState);
+                break;
+
+            case 'EntryUncollapsed':
+                if (gPrefs.autoMarkRead && !this.query.unread)
+                    gCommands.markEntryRead(target.id, true);
+                break;
+
+            case 'load':
+                var feedViewToolbar = document.getElementById('feed-view-toolbar');
+
+                if (this.isActive) {
+                    feedViewToolbar.hidden = false;
+                    this._buildFeedView();
+                }
+                else {
+                    feedViewToolbar.hidden = true;
+                    gTopBrowserWindow.gBrief.contextMenuTarget = null;
+                }
+                break;
+
+            case 'scroll':
+                this.markVisibleAsRead();
+                break;
+
+            case 'click':
+                this._onClick(aEvent);
+                break;
+
+            // We store targets of right-clicks to override document.popupNode, so that
+            // context menu sees anonymous content.
+            case 'mousedown':
+                if (aEvent.button == 2 && this.isActive)
+                    gTopBrowserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
+                else
+                    gTopBrowserWindow.gBrief.contextMenuTarget = null;
+                break;
+        }
     },
 
-    get isGlobalSearch() {
-        return !this.query.folders && !this.query.feeds && !this._flagsAreIntrinsic &&
-               this.query.searchString;
+    _onClick: function FeedView__onClick(aEvent) {
+        var target = aEvent.target;
+
+        if (gPrefs.keyNavEnabled && target.className == 'article-container')
+            gFeedView.selectEntry(target.id);
+
+        // We can't open entry links by dispatching custom events, because for
+        // whatever reason the binding handlers don't catch middle-clicks.
+        var cmd = aEvent.originalTarget.getAttribute('command');
+
+        if (cmd == 'open' && (aEvent.button == 0 || aEvent.button == 1)) {
+            aEvent.preventDefault();
+
+            // Prevent default doesn't seem to stop the default action when
+            // middle-clicking, so we've got stop propagation as well.
+            if (aEvent.button == 1)
+                aEvent.stopPropagation();
+
+            var openInTabs = gPrefs.getBoolPref('feedview.openEntriesInTabs');
+            var newTab = (openInTabs || aEvent.button == 1);
+            gCommands.openEntryLink(target, newTab);
+        }
     },
 
-    get isViewSearch() {
-        return (this.query.folders || this.query.feeds || this._flagsAreIntrinsic) &&
-                gFeedView.query.searchString;
-    },
 
     /**
      * Checks if the view is up-to-date (contains all the right entries nad has the
@@ -356,10 +462,10 @@ FeedView.prototype = {
                 return false;
             }
 
-            this._refreshIncrementally(removedEntry);
+            this._removeEntry(removedEntry);
 
-            // Update this._entries here, so that this._refreshIncrementally()
-            // doesn't have to call this.query.getSerializedEntries() again.
+            // Update this._entries here, so that this._removeEntry() doesn't
+            // have to call this.query.getSerializedEntries() again.
             this._entries = currentEntries;
             isDirty = true;
         }
@@ -385,10 +491,10 @@ FeedView.prototype = {
         this.browser.style.cursor = 'wait';
 
         // Stop scrolling, so it doesn't continue after refreshing.
-        clearInterval(gSelectScrollInterval);
+        clearInterval(this._smoothScrollInterval);
 
         // Cancel auto-marking entries as read.
-        clearTimeout(gMarkVisibleTimeout);
+        clearTimeout(this._markVisibleTimeout);
 
         // Suppress selecting entry until we refresh is finished.
         this._selectionSuppressed = true;
@@ -409,8 +515,8 @@ FeedView.prototype = {
     },
 
 
-    // Refreshes the view when one entry is removed from the currently displayed page.
-    _refreshIncrementally: function FeedView__refreshIncrementally(aEntryID) {
+    // Removes an entry element from the current page and appends a new one.
+    _removeEntry: function FeedView__removeEntry(aEntryID) {
         var entryElement = this.document.getElementById(aEntryID);
 
         var entryWasSelected = (aEntryID == this.selectedEntry);
@@ -426,7 +532,7 @@ FeedView.prototype = {
 
         // Remove the entry. We don't do it directly, because we want to
         // use jQuery to to fade it gracefully.
-        this.performAction('remove', aEntryID);
+        this._sendEvent(aEntryID, 'DoRemoveEntry');
 
         var self = this;
         function finish() {
@@ -457,6 +563,13 @@ FeedView.prototype = {
         async(finish, 310);
     },
 
+    onEntryMarkedRead: function FeedView_onEntryMarkedRead(aEntry, aNewState) {
+        this._sendEvent(aEntry, 'EntryMarkedRead', aNewState);
+    },
+
+    onEntryStarred: function FeedView_onEntryStarred(aEntry, aNewState) {
+        this._sendEvent(aEntry, 'EntryStarred', aNewState);
+    },
 
     // Computes the current entries count, page counter, current page ordinal and
     // refreshes the navigation UI.
@@ -482,23 +595,6 @@ FeedView.prototype = {
     },
 
 
-    // Listens to load events and builds the feed view page when necessary as
-    // well as hides/unhides the feed view toolbar.
-    _onLoad: function FeedView__onLoad(aEvent) {
-        var feedViewToolbar = document.getElementById('feed-view-toolbar');
-        gFeedView.browser.contentDocument.
-                  addEventListener('mousedown', gFeedViewEvents.onFeedViewMousedown, true);
-
-        if (gFeedView.isActive) {
-            feedViewToolbar.hidden = false;
-            gFeedView._buildFeedView();
-        }
-        else {
-            feedViewToolbar.hidden = true;
-        }
-    },
-
-
     // Generates and sets up the feed view page. Because we insert third-party
     // content in it (the entries are not served in plain text but in full HTML
     // markup) this page needs to be have a file:// URI to be unprivileged.
@@ -508,17 +604,18 @@ FeedView.prototype = {
 
         // Add listeners so that the content can communicate with chrome to perform
         // actions that require full privileges by sending custom events.
-        doc.addEventListener('MarkEntryRead', gFeedViewEvents.onMarkEntryRead, true);
-        doc.addEventListener('StarEntry', gFeedViewEvents.onStarEntry, true);
-        doc.addEventListener('DeleteEntry', gFeedViewEvents.onDeleteEntry, true);
-        doc.addEventListener('RestoreEntry', gFeedViewEvents.onRestoreEntry, true);
-        doc.addEventListener('EntryCollapsed', gFeedViewEvents.onEntryCollapsed, true);
+        doc.addEventListener('SwitchEntryRead', this, true);
+        doc.addEventListener('SwitchEntryStar', this, true);
+        doc.addEventListener('DeleteEntry', this, true);
+        doc.addEventListener('RestoreEntry', this, true);
+        doc.addEventListener('EntryUncollapsed', this, true);
 
-        // See comments next to the event handler functions.
-        doc.addEventListener('click', gFeedViewEvents.onFeedViewClick, true);
+        doc.addEventListener('click', this, true);
+        doc.addEventListener('mousedown', this, true);
+        doc.addEventListener('scroll', this, true);
 
         doc.addEventListener('keypress', onKeyPress, true);
-        doc.addEventListener('scroll', this.markVisibleAsRead, true);
+
 
         // Apply the CSS.
         var style = doc.getElementById('feedview-style');
@@ -552,26 +649,21 @@ FeedView.prototype = {
 
         this.feedContent = doc.getElementById('feed-content');
 
-        // If the trash folder is displayed this attribute is used for
-        // setting visibility of buttons in article controls.
+        // Attributes indicating view type, used by CSS.
         if (this.query.deleted == ENTRY_STATE_TRASHED)
             this.feedContent.setAttribute('trash', true);
-
-        // Show feed name in entry's subheader when displaying entries
-        // from multiple feeds.
-        if (!feed)
-            this.feedContent.setAttribute('showFeedNames', true);
-
-        // Pass values of the necessary preferences.
         if (gPrefs.showHeadlinesOnly)
             this.feedContent.setAttribute('showHeadlinesOnly', true);
-        if (gPrefs.doubleClickMarks)
-            this.feedContent.setAttribute('doubleClickMarks', true);
 
-        // We have to hand the strings because stringbundles don't
-        // work with unprivileged script.
-        this.feedContent.setAttribute('markReadString', this.markAsReadStr);
-        this.feedContent.setAttribute('markUnreadString', this.markAsUnreadStr);
+        // Pass some data which bindings need but don't have access to.
+        // We can bypass XPCNW here, because untrusted content is not
+        // inserted until the bindings are attached.
+        var data = {};
+        data.doubleClickMarks = gPrefs.doubleClickMarks;
+        data.markReadString = this.markAsReadStr;
+        data.markUnreadString = this.markAsUnreadStr;
+        data.showFeedNames = !feed;
+        this.document.defaultView.wrappedJSObject.gConveyedData = data;
 
         var query = this.query;
         query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
@@ -580,11 +672,9 @@ FeedView.prototype = {
         var entries = query.getEntries({});
 
         // Important: for better performance we try to delay computing pages until
-        // after the view is displayed. However, the whole reason why we recompute
-        // pages is that their number may have changed and we need to know that to
-        // correctly refresh the view.
+        // after the view is displayed.
         // The only time when recomputing pages may affect the currently displayed
-        // entry set is when currentPage goes out of range if the view is now containing
+        // entry set is when currentPage goes out of range, because the view contains
         // less pages than before. This in turn makes the offset invalid and the query
         // returns no entries.
         // To avoid that, whenever the query returns no entries we force immediate
@@ -727,94 +817,6 @@ FeedView.prototype = {
 
         paragraph.textContent = message;
         paragraph.style.display = 'block';
-    }
-
-}
-
-
-// Listeners for actions performed in the feed view.
-var gFeedViewEvents = {
-
-    onMarkEntryRead: function feedViewEvents_onMarkEntryRead(aEvent) {
-        var entryID = aEvent.target.getAttribute('id');
-        var readStatus = aEvent.target.hasAttribute('read');
-        var query = new QuerySH(null, entryID, null);
-        query.deleted = ENTRY_STATE_ANY;
-        query.markEntriesRead(readStatus);
-
-        if (gPrefs.autoMarkRead && !readStatus)
-            gFeedView._markedUnreadEntries.push(entryID);
-    },
-
-
-    onDeleteEntry: function feedViewEvents_onDeleteEntry(aEvent) {
-        var entryID = aEvent.target.getAttribute('id');
-        var query = new QuerySH(null, entryID, null);
-        query.deleteEntries(ENTRY_STATE_TRASHED);
-    },
-
-
-    onRestoreEntry: function feedViewEvents_onRestoreEntry(aEvent) {
-        var entryID = aEvent.target.getAttribute('id');
-        var query = new QuerySH(null, entryID, null);
-        query.deleted = ENTRY_STATE_TRASHED;
-        query.deleteEntries(ENTRY_STATE_NORMAL);
-    },
-
-
-    onStarEntry: function feedViewEvents_onStarEntry(aEvent) {
-        var entryID = aEvent.target.getAttribute('id');
-        var newStatus = aEvent.target.hasAttribute('starred');
-        var query = new QuerySH(null, entryID, null);
-        query.starEntries(newStatus);
-    },
-
-    onEntryCollapsed: function feedViewEvents_onEntryCollapsed(aEvent) {
-        if (gPrefs.autoMarkRead && gPrefs.showHeadlinesOnly && !gFeedView.query.unread
-            && !aEvent.target.hasAttribute('collapsed')) {
-
-            var query = new QuerySH(null, aEvent.target.id, null);
-            query.markEntriesRead(true);
-        }
-    },
-
-
-    // This is for marking entry read when user follows the link. We can't do it
-    // by dispatching custom events like we do above, because for whatever
-    // reason the binding handlers don't catch middle-clicks.
-    onFeedViewClick: function feedViewEvents_onFeedViewClick(aEvent) {
-        var anonid = aEvent.originalTarget.getAttribute('anonid');
-        var targetEntry = aEvent.target;
-
-        if (gPrefs.keyNavEnabled && targetEntry.className == 'article-container')
-            gFeedView.selectEntry(targetEntry);
-
-        if (anonid == 'article-title-link' && (aEvent.button == 0 || aEvent.button == 1)) {
-            aEvent.preventDefault();
-
-            // Prevent default doesn't seem to stop the default action when
-            // middle-clicking, so we've got stop propagation as well.
-            if (aEvent.button == 1)
-                aEvent.stopPropagation();
-
-            var openEntriesInTabs = gPrefs.getBoolPref('feedview.openEntriesInTabs');
-            var newTab = (aEvent.button == 0 && openEntriesInTabs || aEvent.button == 1);
-            gCommands.openEntryLink(targetEntry, newTab);
-        }
-    },
-
-
-    // By default document.popupNode doesn't dive into anonymous content
-    // and returns the bound element; hence there's no context menu for
-    // content of entries. To work around it, we listen for the mousedown
-    // event and store the originalTarget, so it can be manually set as
-    // document.popupNode (see gBrief.contextMenuOverride()
-    // in brief-overlay.js).
-    onFeedViewMousedown: function feedViewEvents_onFeedViewMousedown(aEvent) {
-        if (aEvent.button == 2 && gFeedView.isActive)
-            gTopBrowserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
-        else
-            gTopBrowserWindow.gBrief.contextMenuTarget = null;
     }
 
 }
