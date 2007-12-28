@@ -351,16 +351,19 @@ var gBrief = {
     },
 
 
-    contextMenuOverride: function gBrief_contextMenuOverride(popup) {
+    contextMenuOverride: function gBrief_contextMenuOverride(aPopup, aBrowser) {
         // Save menu.
-        this.menu = popup;
+        this.menu = aPopup;
+        this.browser = aBrowser;
+
+        this.isFrameImage = document.getElementById('isFrameImage');
 
         // Get contextual info.
-        if (content.location == BRIEF_URL && gBrief.contextMenuTarget)
+        if (content.location === BRIEF_URL && gBrief.contextMenuTarget)
             document.popupNode = gBrief.contextMenuTarget;
 
-        this.setTarget( document.popupNode, document.popupRangeParent,
-                        document.popupRangeOffset );
+        this.setTarget(document.popupNode, document.popupRangeParent,
+                       document.popupRangeOffset);
 
         this.isTextSelected = this.isTextSelection();
         this.isContentSelected = this.isContentSelection();
