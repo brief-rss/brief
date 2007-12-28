@@ -14,7 +14,7 @@ const ICON_DATAURL_PREFIX = 'data:image/x-icon;base64,';
 const FEED_ICON_URL       = 'chrome://brief/skin/icon.png';
 
 const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
-const STARTUP_DELAY = 5000; // 5 seconds
+const STARTUP_DELAY = 10000; // 10 seconds
 const FEED_FETCHER_TIMEOUT = 15000; // 15 seconds
 
 const NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
@@ -305,6 +305,7 @@ BriefUpdateService.prototype = {
  * This object downloads the feed, parses it and updates the database.
  *
  * @param aFeed nsIFeed object representing the feed to be downloaded.
+ * @param aUpdateService Reference to the service class used for callback.
  */
 function FeedFetcher(aFeed, aUpdateService) {
     this.feed = aFeed;
