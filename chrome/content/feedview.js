@@ -580,21 +580,20 @@ FeedView.prototype = {
                                         getPropertyAsAString('entries').
                                         match(/[^ ]+/g);
 
-        // Find the removed entry.
-        for (var i = 0; i < oldEntries.length; i++) {
-            if (currentEntries.indexOf(oldEntries[i]) == -1) {
-                removedEntry = oldEntries[i];
-                removedIndex = i;
-                break;
-            }
-        }
-
-        // If there are no more entries on this page and it the last one,
-        // then go to the previous page.
-        if (this.feedContent.childNodes.length == 1 && this.currentPage == this.pageCount) {
+        var visibleEntriesCount = this.feedContent.childNodes.length;
+        if (visibleEntriesCount === 1 && currentEntries && this.currentPage === this.pageCount) {
             this.currentPage--;
         }
         else {
+            // Find the removed entry.
+            for (var i = 0; i < oldEntries.length; i++) {
+                if (!currentEntries || currentEntries.indexOf(oldEntries[i]) === -1) {
+                    removedEntry = oldEntries[i];
+                    removedIndex = i;
+                    break;
+                }
+            }
+
             var startPageIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
             var endPageIndex = startPageIndex + gPrefs.entriesPerPage - 1;
 
