@@ -29,7 +29,7 @@ __defineSetter__('gFeedView', function(aView) {
 
     aView._refresh();
 });
-__defineGetter__('gFeedView', function() _gFeedView);
+__defineGetter__('gFeedView', function() { return _gFeedView });
 
 
 /**
