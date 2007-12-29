@@ -48,7 +48,7 @@
         <key id="Brief_turnOffKeyboardNav" key="q"
              oncommand="gBrief.doCommand('turnOffKeyNav')"/>
 
-        <key id="Brief_displayShortcuts" key="?"
+        <key id="Brief_displayShortcuts" key="?" modifiers="shift"
              oncommand="gBrief.doCommand('displayShortcuts')"/>
     </keyset>
 
