@@ -391,12 +391,6 @@ var gCommands = {
         }
     },
 
-    turnOffKeyNav: function cmd_turnOffKeyNav() {
-        if (gPrefs.keyNavEnabled) {
-            gPrefs.setBoolPref('feedview.keyNavEnabled', false);
-            gFeedView.selectEntry(null);
-        }
-    },
 
     openSelectedEntryLink: function cmd_openSelectedEntryLink(aForceNewTab) {
         if (gFeedView.selectedEntry) {
@@ -592,9 +586,11 @@ function performSearch(aEvent) {
 }
 
 
-// We can't leave handling of Space, Tab, and Backspace can't be captured using <key>
-// XUL elements, so we handle them manually using a listener.
-// Additionally, unlike other keys, they have to be default-prevented.
+/**
+ * We can't leave handling of Space, Tab, and Backspace can't be captured using <key>
+ * XUL elements, so we handle them manually using a listener.
+ * Additionally, unlike other keys, they have to be default-prevented.
+ */
 function onKeyPress(aEvent) {
     // Stop propagation of character keys, to disable FAYT.
     if (aEvent.charCode)
@@ -603,16 +599,27 @@ function onKeyPress(aEvent) {
     // Brief takes over these shortcut keys, so we stop the default action.
     // Let's not prevent the user from typing in inputs that entries may contain, though.
     if (gPrefs.assumeStandardKeys && aEvent.originalTarget.localName != 'input') {
+
         if (aEvent.keyCode == aEvent.DOM_VK_TAB) {
-            gCommands.turnOffKeyNav();
+            gFeedView.switchKeyboardSelection();
             aEvent.preventDefault();
         }
+
         else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
-            gFeedView.selectNextEntry();
+            if (gPrefs.keyNavEnabled)
+                gFeedView.selectNextEntry();
+            else
+                gFeedView.scrollToNextEntry(true);
+
             aEvent.preventDefault();
         }
+
         else if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE) {
-            gFeedView.selectPrevEntry();
+            if (gPrefs.keyNavEnabled)
+                gFeedView.selectPrevEntry();
+            else
+                gFeedView.scrollToPrevEntry(true);
+
             aEvent.preventDefault();
         }
     }

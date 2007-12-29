@@ -8,6 +8,7 @@ __defineSetter__('gFeedView', function(aView) {
     if (_gFeedView) {
         _gFeedView.browser.removeEventListener('load', _gFeedView, false);
         clearInterval(_gFeedView._smoothScrollInterval);
+        _gFeedView._smoothScrollInterval = null;
         clearTimeout(_gFeedView._markVisibleTimeout);
     }
 
@@ -164,20 +165,28 @@ FeedView.prototype = {
     _selectionSuppressed: false,
 
     selectNextEntry: function FeedView_selectNextEntry() {
-        if (!this._selectionSuppressed) {
-            var entry = this.selectedElement ? this.selectedElement.nextSibling
-                                             : this.feedContent.firstChild;
+        if (this._selectionSuppressed)
+            return;
+
+        if (gPrefs.keyNavEnabled) {
+            var entry = this.selectedElement.nextSibling.id;
+
             if (entry)
                 this.selectEntry(entry, true, true);
             else
                 this.currentPage++;
         }
+        else {
+            this.switchKeyboardSelection();
+        }
     },
 
     selectPrevEntry: function FeedView_selectPrevEntry() {
-        if (!this._selectionSuppressed) {
-            var entry = this.selectedElement ? this.selectedElement.previousSibling
-                                             : this.feedContent.firstChild;
+        if (this._selectionSuppressed)
+            return;
+
+        if (gPrefs.keyNavEnabled) {
+            var entry = this.selectedElement.previousSibling.id;
 
             if (entry) {
                 this.selectEntry(entry, true, true);
@@ -190,14 +199,19 @@ FeedView.prototype = {
                 this.currentPage--;
             }
         }
+        else {
+            this.switchKeyboardSelection();
+        }
     },
 
     /**
-     * Selects the given entry and scrolls it into view, if desired.
+     * Selects the given entry and optionally scrolls it into view.
      *
-     * @param aEntry           ID of entry to select. Can be null.
-     * @param aScroll          Whether to scroll the entry into view.
-     * @param aScrollSmoothly  Enable smooth scrolling.
+     * @param aEntry           ID or DOM element of entry to select. Pass null to
+     *                         deselect current entry.
+     * @param aScroll          Set to TRUE to scroll the entry into view.
+     * @param aScrollSmoothly  Set to TRUE to scroll smoothly, FALSE to jump directly
+     *                         to the target position.
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollSmoothly) {
         if (this.isActive) {
@@ -211,32 +225,57 @@ FeedView.prototype = {
             if (entry) {
                 this.selectedElement.setAttribute('selected', true);
 
-                if (!gPrefs.keyNavEnabled)
-                    gPrefs.setBoolPref('feedview.keyNavEnabled', true);
-
                 if (aScroll)
                     this.scrollToEntry(entry, aScrollSmoothly);
             }
         }
     },
 
+    /**
+     * Scrolls to the next entry after the entry closest to the middle of the screen.
+     *
+     * @param aSmooth Set to TRUE to scroll smoothly, FALSE to jump directly to the
+     *                target position.
+     */
+    scrollToPrevEntry: function FeedView_scrollToPrevEntry(aSmooth) {
+        var middleElement = this._getMiddleEntryElement();
+        if (middleElement)
+            var previousElement = middleElement.previousSibling;
+
+        if (previousElement)
+            this.scrollToEntry(previousElement.id, aSmooth);
+    },
+
+
+    // See scrollToPrevEntry.
+    scrollToNextEntry: function FeedView_scrollToNextEntry(aSmooth) {
+        var win = this.document.defaultView;
+        var middleElement = this._getMiddleEntryElement();
+        if (middleElement)
+            var nextElement = middleElement.nextSibling;
+
+        if (nextElement)
+            this.scrollToEntry(nextElement.id, aSmooth);
+    },
+
 
     /**
-     * Scroll entry into view.
+     * Scroll entry into view. If the entry is taller than the height of the screen,
+     * the scroll position is aligned with the top of the entry, otherwise the entry
+     * is positioned in the middle of the screen.
      *
-     * @param aEntry  ID od DOM element of entry to select.
-     * @param Smooth  Enable smooth scrolling.
+     * @param aEntry  ID of entry to scroll to.
+     * @param aSmooth Set to TRUE to scroll smoothly, FALSE to jump directly to the
+     *                target position.
      */
     scrollToEntry: function FeedView_scrollToEntry(aEntry, aSmooth) {
         var win = this.document.defaultView;
         var entryElement = this.document.getElementById(aEntry);
 
         if (entryElement.offsetHeight >= win.innerHeight) {
-            // If the entry is taller than the viewport height, align with the top.
             var targetPosition = entryElement.offsetTop;
         }
         else {
-            // Otherwise, scroll the entry to the middle of the screen.
             var difference = win.innerHeight - entryElement.offsetHeight;
             targetPosition = entryElement.offsetTop - Math.floor(difference / 2);
         }
@@ -258,6 +297,11 @@ FeedView.prototype = {
     _smoothScrollInterval: null,
 
     _scrollSmoothly: function FeedView__scrollSmoothly(aTargetPosition) {
+
+        // Don't start if scrolling is already in progress.
+        if (this._smoothScrollInterval)
+            return;
+
         var win = this.document.defaultView;
 
         var delta = aTargetPosition - win.pageYOffset;
@@ -273,6 +317,7 @@ FeedView.prototype = {
             if (Math.abs(aTargetPosition - win.pageYOffset) <= Math.abs(jump)) {
                 win.scroll(win.pageXOffset, aTargetPosition)
                 clearInterval(self._smoothScrollInterval);
+                self._smoothScrollInterval = null;
                 self._selectionSuppressed = false;
             }
             else {
@@ -284,6 +329,37 @@ FeedView.prototype = {
         this._selectionSuppressed = true;
 
         this._smoothScrollInterval = setInterval(scroll, 7);
+    },
+
+
+    // Return the element of the entry closest to the middle of the screen.
+    _getMiddleEntryElement: function FeedView__getMiddleEntryElement() {
+        var elems = this.feedContent.childNodes;
+        if (!elems.length)
+            return null;
+
+        var win = this.document.defaultView;
+        var middleLine = win.pageYOffset + Math.round(win.innerHeight / 2);
+
+        // Get the element in the middle of the screen.
+        for (var i = 0; i < elems.length - 1; i++) {
+            if (elems[i].offsetTop <= middleLine && elems[i + 1].offsetTop > middleLine) {
+                var middleElement = elems[i];
+                break;
+            }
+        }
+
+        return middleElement || elems[elems.length - 1];
+    },
+
+
+    switchKeyboardSelection: function FeedView_switchKeyboardSelection() {
+        gPrefs.setBoolPref('feedview.keyNavEnabled', !gPrefs.keyNavEnabled);
+
+        if (gPrefs.keyNavEnabled)
+            this.selectEntry(this._getMiddleEntryElement());
+        else
+            this.selectEntry(null);
     },
 
 
@@ -410,24 +486,24 @@ FeedView.prototype = {
 
     /**
      * Checks if the view is up-to-date (i.e. contains the right set of entries and
-     * displays the correct title) and refreshes it if necessary. Note that the visual
-     * state of entries (read/unread, starred/unstarred) is not verified, it has to be
-     * maintained separetely by calling onEntryMarkedRead and onEntryStarred whenever
-     * it is changed.
+     * displays the correct title) and refreshes it if necessary.
+     * Note: the visual state of entries (read/unread, starred/unstarred) is not verified
+     * and it has to be maintained separetely by calling onEntryMarkedRead and
+     * onEntryStarred whenever it is changed.
      * Note: exhaustively comparing the old and the new entry sets would be very slow.
      * To speed things up we compare just the numbers of entries, assuming that whenever
-     * the set changes, the their number changes too. This assumption holds up for most
-     * of our purposes. If we are not sure if that's true in a particular case,
-     * we should force full refresh by passing TRUE as the parameter.
+     * the set changes, their number changes too. This assumption holds up for most of
+     * our purposes. If we are not sure if that's true in a particular case, we should
+     * force full refresh by passing TRUE as the parameter.
      *
      * @param aForceRefresh Forces full refresh, without checking.
      * @returns TRUE if the view was up-to-date, FALSE if it needed refreshing.
      */
     ensure: function FeedView_ensure(aForceRefresh) {
-        var viewIsClean = true;
-
         if (!this.isActive)
-            return viewIsClean;
+            return true;
+
+        var viewIsClean = true;
 
         if (aForceRefresh) {
             viewIsClean = false;
@@ -469,6 +545,7 @@ FeedView.prototype = {
 
         // Stop scrolling, so it doesn't continue after refreshing.
         clearInterval(this._smoothScrollInterval);
+        this._smoothScrollInterval = null;
 
         // Cancel auto-marking entries as read.
         clearTimeout(this._markVisibleTimeout);
