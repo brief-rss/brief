@@ -8,7 +8,7 @@
         title="&compactingWindow.title;"
         style="padding: 2em 1em; max-width: 35em; text-align: center;"
         pack="center"
-        onload="setTimeout(function(){ Components.classes['@ancestor/brief/storage;1'].getService(Components.interfaces.nsIBriefStorage).compactDatabase(); window.close(); }, 0)">
+        onload="setTimeout(function(){ Components.classes['@ancestor/brief/storage;1'].getService(Components.interfaces.nsIBriefStorage).compactDatabase(); window.close(); }, 100)">
 
     <label>
         &compactingInProgress.label;
