@@ -32,7 +32,7 @@
 <!ENTITY markAllAsRead "Mark all viewed items as read">
 <!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
-<!ENTITY deselectEntries "Deselect item (clear selection)">
+<!ENTITY deselectEntries "Turn keyboard selection on/off">
 <!ENTITY view.header "View">
 <!ENTITY a.key "A">
 <!ENTITY showAll "Show all items">
