@@ -220,6 +220,7 @@ FeedView.prototype = {
         }
     },
 
+
     /**
      * Scroll entry into view.
      *
@@ -380,6 +381,7 @@ FeedView.prototype = {
                 break;
         }
     },
+
 
     _onClick: function FeedView__onClick(aEvent) {
         var target = aEvent.target;
@@ -579,13 +581,16 @@ FeedView.prototype = {
         async(finish, 310);
     },
 
+
     onEntryMarkedRead: function FeedView_onEntryMarkedRead(aEntry, aNewState) {
         this._sendEvent(aEntry, 'EntryMarkedRead', aNewState);
     },
 
+
     onEntryStarred: function FeedView_onEntryStarred(aEntry, aNewState) {
         this._sendEvent(aEntry, 'EntryStarred', aNewState);
     },
+
 
     // Computes the current entries count, page counter, current page ordinal and
     // refreshes the navigation UI.
