@@ -702,7 +702,7 @@ FeedView.prototype = {
         // Add listeners so that the content can communicate with chrome to perform
         // actions that require full privileges by sending custom events.
         doc.addEventListener('SwitchEntryRead', this, true);
-        doc.addEventListener('SwitchEntryStar', this, true);
+        doc.addEventListener('SwitchEntryStarred', this, true);
         doc.addEventListener('DeleteEntry', this, true);
         doc.addEventListener('RestoreEntry', this, true);
         doc.addEventListener('EntryUncollapsed', this, true);
