@@ -46,11 +46,11 @@ const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'isFolder        INTEGER,             ' +
                            'hidden          INTEGER DEFAULT 0,   ' +
                            'lastUpdated     INTEGER DEFAULT 0,   ' +
-                           'dateModified    INTEGER DEFAULT 0,   ' +
                            'oldestEntryDate INTEGER,             ' +
                            'entryAgeLimit   INTEGER DEFAULT 0,   ' +
                            'maxEntries      INTEGER DEFAULT 0,   ' +
-                           'updateInterval  INTEGER DEFAULT 0    ';
+                           'updateInterval  INTEGER DEFAULT 0,   ' +
+                           'dateModified    INTEGER DEFAULT 0    ';
 
 const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
                              'feedID      TEXT,               ' +
