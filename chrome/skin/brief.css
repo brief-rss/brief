@@ -11,8 +11,7 @@ splitter {
   font-weight: bold;
 }
 
-/*Fx2Compat*/
-#bookmark-folders-tree, #places-tree {
+#places-tree {
   -moz-box-flex: 1;
   max-height: 600px;
   border-right: 0;
@@ -76,16 +75,14 @@ treechildren::-moz-tree-image(container, open) {
 }
 
 treechildren::-moz-tree-image(feed-item) {
-  list-style-image: url('chrome://browser/skin/livemark-item.png') !important;
-  -moz-image-region: rect(1px, 36px, 17px, 20px) !important;
+  list-style-image: url('chrome://browser/skin/feeds/feedIcon16.png') !important;
   width: 16px;
   height: 16px;
   padding-right: 4px;
 }
 
 treechildren::-moz-tree-image(feed-item, unread) {
-  list-style-image: url('chrome://browser/skin/livemark-folder.png') !important;
-  -moz-image-region: rect(16px, 16px, 32px, 0px) !important;
+  list-style-image: url('chrome://browser/skin/feeds/feedIcon16.png') !important;
 }
 
 
@@ -118,7 +115,7 @@ toolbar, toolbaritem {
   }
 
 toolbar {
-  padding-top: 1px;
+  padding: 1px 0 1px;
 }
 
 #feed-list-toolbar {
