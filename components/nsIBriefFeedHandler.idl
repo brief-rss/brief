@@ -41,6 +41,9 @@ interface nsIBriefFeedEntry : nsISupports {
 
   attribute boolean updated;
 
+
+  attribute long long bookmarkID;
+
   /**
    * The wrapped entry (if available).
    */

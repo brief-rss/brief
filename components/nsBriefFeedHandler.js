@@ -96,6 +96,7 @@ FeedEntry.prototype = {
     read:     false,
     starred:  false,
     updated:  false,
+    bookmarkID: -1,
 
     wrappedEntry: null,
 
