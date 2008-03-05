@@ -6,10 +6,16 @@ const QUERY_CLASS_ID = Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}');
 const QUERY_CLASS_NAME = 'Query to database of the Brief extension';
 const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+
+const PLACES_UTILS_URL = 'chrome://browser/content/places/utils.js';
+Cc['@mozilla.org/moz/jssubscript-loader;1'].getService(Ci.mozIJSSubScriptLoader).
+                                            loadSubScript(PLACES_UTILS_URL);
+
+const ANNO_BRIEF_FEED_ITEM = 'brief/bookmarkedItem';
 
 const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
 const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
@@ -58,7 +64,8 @@ const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
                              'read        INTEGER DEFAULT 0,  ' +
                              'updated     INTEGER DEFAULT 0,  ' +
                              'starred     INTEGER DEFAULT 0,  ' +
-                             'deleted     INTEGER DEFAULT 0   ';
+                             'deleted     INTEGER DEFAULT 0,  ' +
+                             'bookmarkID  INTEGER DEFAULT -1  ';
 
 var gStorageService = null;
 
@@ -105,6 +112,8 @@ BriefStorageService.prototype = {
                              getService(Ci.mozIStorageService);
         this.dBConnection = storageService.openDatabase(this.databaseFile);
 
+        this.initPlaces();
+
         if (databaseIsNew)
             this.createTables();
         else if (this.dBConnection.schemaVersion < DATABASE_VERSION)
@@ -114,10 +123,9 @@ BriefStorageService.prototype = {
                      getService(Ci.nsIPrefService).
                      getBranch('extensions.brief.').
                      QueryInterface(Ci.nsIPrefBranch2);
+
         this.prefs.addObserver('', this, false);
-
-        this.initPlaces();
-
+        this.bookmarksService.addObserver(this, false);
         this.observerService.addObserver(this, 'quit-application', false);
     },
 
@@ -209,12 +217,55 @@ BriefStorageService.prototype = {
         case 4:
             this.recreateFeedsTable();
             this.recomputeIDs();
-            // Fall through...
 
+            this.dBConnection.executeSimpleSQL(
+                          'ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
+
+            var ioService = Cc['@mozilla.org/network/io-service;1'].
+                            getService(Ci.nsIIOService);
+            var unfiledFolder = PlacesUtils.unfiledBookmarksFolderId;
+            var annos = PlacesUtils.annotations;
+            var bookmarkedEntries = [];
+
+            this.dBConnection.beginTransaction();
+            try {
+                var stmt = 'SELECT entryURL, title, id FROM entries WHERE starred = 1';
+                var select = this.dBConnection.createStatement(stmt);
+
+                stmt = 'UPDATE entries SET bookmarkID = ? WHERE id = ?';
+                var update = this.dBConnection.createStatement(stmt);
+
+                while (select.executeStep()) {
+                    var uri = ioService.newURI(select.getString(0), null, null);
+                    var title = select.getString(1);
+                    var entryID = select.getString(2);
+
+                    var bookmarkID = PlacesUtils.bookmarks.insertBookmark(unfiledFolder,
+                                                                          uri, -1, title);
+                    annos.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM, entryID, 0,
+                                            annos.EXPIRE_NEVER)
+                    // TODO: make the tag localizable
+                    PlacesUtils.tagging.tagURI(uri, ['feed item']);
+
+                    update.bindStringParameter(0, bookmarkID);
+                    update.bindStringParameter(1, entryID);
+                    update.execute();
+                }
+                select.reset();
+            }
+            catch (ex) {
+                this.reportError(ex);
+            }
+            finally {
+                this.dBConnection.commitTransaction();
+            }
+
+            // Fall through...
         }
 
         this.dBConnection.schemaVersion = DATABASE_VERSION;
     },
+
 
     recreateFeedsTable: function BriefStorage_recreateFeedsTable() {
         var storageService = Cc['@mozilla.org/storage/service;1'].
@@ -842,8 +893,6 @@ BriefStorageService.prototype = {
 
         this.bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
                                            createInstance(Ci.nsITimer);
-
-        this.bookmarksService.addObserver(this, false);
     },
 
 
@@ -1309,7 +1358,7 @@ BriefQuery.prototype = {
         var statement = 'SELECT entries.id,      entries.feedID,  entries.entryURL, ' +
                         '       entries.title,   entries.content, entries.date,     ' +
                         '       entries.authors, entries.read,    entries.starred,  ' +
-                        '       entries.updated                                     ' +
+                        '       entries.updated, entries.bookmarkID                 ' +
                          this.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
@@ -1329,6 +1378,7 @@ BriefQuery.prototype = {
                 entry.read = (select.getInt32(7) == 1);
                 entry.starred = (select.getInt32(8) == 1);
                 entry.updated = (select.getInt32(9) == 1);
+                entry.bookmarkID = select.getInt64(10);
 
                 entries.push(entry);
             }
@@ -1480,26 +1530,52 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     starEntries: function BriefQuery_starEntries(aState) {
-        var statement = 'UPDATE entries SET starred = ? ' + this.getQueryText();
+        var statement = 'UPDATE entries SET starred = ?1, bookmarkID = ?2 WHERE id = ?3';
         var update = this.dBConnection.createStatement(statement);
-        update.bindInt32Parameter(0, aState ? 1 : 0);
 
         this.dBConnection.beginTransaction();
         try {
-            // See markEntriesRead.
-            var prevIncludeHiddenFlag = this.includeHiddenFeeds;
-            this.includeHiddenFeeds = false;
-            var changedEntries = this.getSerializedEntries();
-            this.includeHiddenFeeds = prevIncludeHiddenFlag;
+            // Temporarily set includeHiddenFeeds to false.
+            [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
+            var serializedChangedEntries = this.getSerializedEntries();
+            this.includeHiddenFeeds = temp;
 
-            update.execute();
+            var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+            var bms = PlacesUtils.bookmarks;
+            var annos = PlacesUtils.annotations;
+
+            var changedEntries = this.getEntries({});
+            for each (entry in changedEntries) {
+                if (aState) {
+                    var uri = ioService.newURI(entry.entryURL, null, null);
+                    var bookmarkID = bms.insertBookmark(PlacesUtils.unfiledBookmarksFolderId,
+                                                        uri, bms.DEFAULT_INDEX, entry.title);
+                    annos.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM, entry.id, 0,
+                                            annos.EXPIRE_NEVER);
+                    // TODO: make the tag localizable
+                    PlacesUtils.tagging.tagURI(uri, ['feed item']);
+                }
+                else {
+                    bms.removeItem(entry.bookmarkID);
+                    annos.removeItemAnnotation(entry.bookmarkID, ANNO_BRIEF_FEED_ITEM);
+                }
+
+                update.bindInt32Parameter(0, aState ? 1 : 0);
+                update.bindInt64Parameter(1, aState ? bookmarkID : -1);
+                update.bindStringParameter(2, entry.id);
+                update.execute();
+            }
+        }
+        catch (ex) {
+            Components.utils.reportError(ex);
         }
         finally {
             this.dBConnection.commitTransaction();
         }
 
-        if (changedEntries.getPropertyAsAString('entries')) {
-            this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+        if (serializedChangedEntries.getPropertyAsAString('entries')) {
+            this.observerService.notifyObservers(serializedChangedEntries,
+                                                 'brief:entry-status-changed',
                                                  aState ? 'starred' : 'unstarred');
         }
     },
