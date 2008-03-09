@@ -53,13 +53,9 @@
             if (gConveyedData.showFeedNames)
                 feedNameElem.innerHTML = this.getAttribute('feedName');
 
-            dateElem.innerHTML = this.getAttribute('date') ||
-                                 this.getAttribute('updated');
-
+            dateElem.innerHTML = this.getAttribute('updated') || this.getAttribute('date');
             authorsElem.innerHTML = this.getAttribute('authors');
-
             contentElem.innerHTML = this.getAttribute('content');
-
             markReadElem.textContent = this.read ? gConveyedData.markUnreadString
                                                  : gConveyedData.markReadString;
 
@@ -255,7 +251,7 @@
         </handler>
 
 
-        <!-- This event is how chrome sends us messages to do various stuff -->
+        <!-- This event is how chrome sends us messages -->
         <handler event="ViewEvent">
             <![CDATA[
             var state = (this.getAttribute('eventState') == 'true');
