@@ -4,7 +4,7 @@ function init() {
     var extension = rdfs.GetResource('urn:mozilla:item:brief@mozdev.org');
     var gExtensionDB = Components.classes['@mozilla.org/extensions/manager;1'].
                        getService(Components.interfaces.nsIExtensionManager).
-                       QueryInterface(Components.interfaces.nsIExtensionManager_MOZILLA_1_8_BRANCH).
+                       QueryInterface(Components.interfaces.nsIExtensionManager).
                        datasource;
 
     var extensionsStrings = document.getElementById('extensionsStrings');
