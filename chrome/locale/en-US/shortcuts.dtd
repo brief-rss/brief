@@ -1,10 +1,8 @@
 <!ENTITY shortcutsPage.title "Brief - keyboard shortcuts">
 <!ENTITY navigation.header "Navigation">
-<!ENTITY k.key "K">
 <!ENTITY or "or">
 <!ENTITY space.key "Space">
 <!ENTITY selectNext "Select next item">
-<!ENTITY j.key "J">
 <!ENTITY backspace.key "Backspace">
 <!ENTITY selectPrevious "Select previous item">
 <!ENTITY altK.key "Alt + K">
@@ -16,33 +14,21 @@
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
 <!ENTITY cmdEnter.key "Cmd + Enter">
 <!ENTITY openEntryTab "Open item in new tab">
-<!ENTITY n.key "N">
 <!ENTITY foldEntry "Unfold or fold selected item (when in headlines view)">
 <!ENTITY entries.header "Items">
-<!ENTITY m.key "M">
 <!ENTITY markRead "Mark selected item as read or unread">
-<!ENTITY b.key "B">
 <!ENTITY starEntry "Star or unstar selected item">
-<!ENTITY t.key "T">
 <!ENTITY moveToTrash "Move selected item to Trash">
-<!ENTITY r.key "R">
 <!ENTITY restoreEntry "Restore selected item (when in Trash)">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Mark all viewed items as read">
-<!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
 <!ENTITY toggleKeyboardSelection "Turn keyboard selection on/off">
 <!ENTITY view.header "View">
-<!ENTITY a.key "A">
 <!ENTITY showAll "Show all items">
-<!ENTITY s.key "S">
 <!ENTITY showStarred "Show starred items">
-<!ENTITY d.key "D">
 <!ENTITY showUnread "Show unread items">
-<!ENTITY f.key "F">
 <!ENTITY headlinesView "Toggle headlines view">
-<!ENTITY slash.key "/">
 <!ENTITY focusSearchbar "Focus searchbar">
-<!ENTITY questionMark.key "?">
 <!ENTITY displayShortcuts "Display list of shortcuts keys">
