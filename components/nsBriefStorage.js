@@ -29,7 +29,7 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const BOOKMARKS_OBSERVER_DELAY = 250;
 
-const DATABASE_VERSION = 5;
+const DATABASE_VERSION = 6;
 
 const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'feedURL         TEXT,                ' +
@@ -57,8 +57,6 @@ const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
                              'secondaryID TEXT,               ' +
                              'providedID  TEXT,               ' +
                              'entryURL    TEXT,               ' +
-                             'title       TEXT,               ' +
-                             'content     TEXT,               ' +
                              'date        INTEGER,            ' +
                              'authors     TEXT,               ' +
                              'read        INTEGER DEFAULT 0,  ' +
@@ -66,6 +64,11 @@ const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
                              'starred     INTEGER DEFAULT 0,  ' +
                              'deleted     INTEGER DEFAULT 0,  ' +
                              'bookmarkID  INTEGER DEFAULT -1  ';
+
+const ENTRIES_TEXT_TABLE_SCHEMA = 'title, content';
+
+var executeSQL;
+var createStatement;
 
 var gStorageService = null;
 
@@ -110,7 +113,13 @@ BriefStorageService.prototype = {
 
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
-        this.dBConnection = storageService.openDatabase(this.databaseFile);
+        this.dBConnection = storageService.openUnsharedDatabase(this.databaseFile);
+        if (!this.dBConnection.connectionReady)
+            this.dBConnection.backupDB('brief-backup.sqlite');
+
+        // Define some shorthands for common functions.
+        executeSQL = this.dBConnection.executeSimpleSQL;
+        createStatement = this.dBConnection.createStatement;
 
         this.initPlaces();
 
@@ -130,18 +139,15 @@ BriefStorageService.prototype = {
     },
 
     createTables: function BriefStorage_createTables() {
-        //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS feeds');
-        //this.dBConnection.executeSimpleSQL('DROP TABLE IF EXISTS entries');
+        //executeSQL('DROP TABLE IF EXISTS feeds');
+        //executeSQL('DROP TABLE IF EXISTS entries');
 
-        this.dBConnection.
-             executeSimpleSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')');
-        this.dBConnection.
-             executeSimpleSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')');
+        executeSQL('CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA + ')');
+        executeSQL('CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA + ')');
+        executeSQL('CREATE VIRTUAL TABLE IF NOT EXISTS entries_text using fts3(' + ENTRIES_TEXT_TABLE_SCHEMA + ')');
 
-        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
-                                           'entries_feedID_index ON entries (feedID) ');
-        this.dBConnection.executeSimpleSQL('CREATE INDEX IF NOT EXISTS               ' +
-                                           'entries_date_index ON entries (date)     ');
+        executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
+        executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
 
         this.dBConnection.schemaVersion = DATABASE_VERSION;
     },
@@ -213,7 +219,7 @@ BriefStorageService.prototype = {
             this.dBConnection.executeSimpleSQL('DROP INDEX IF EXISTS feeds_feedID_index');
             // Fall through...
 
-        // To 1.2
+        // To 1.2a1
         case 4:
             this.recreateFeedsTable();
             this.recomputeIDs();
@@ -259,8 +265,12 @@ BriefStorageService.prototype = {
             finally {
                 this.dBConnection.commitTransaction();
             }
-
             // Fall through...
+
+        case 5:
+            this.migrateEntriesToFTS();
+            // Fall through...
+
         }
 
         this.dBConnection.schemaVersion = DATABASE_VERSION;
@@ -268,40 +278,58 @@ BriefStorageService.prototype = {
 
 
     recreateFeedsTable: function BriefStorage_recreateFeedsTable() {
-        var storageService = Cc['@mozilla.org/storage/service;1'].
-                             getService(Ci.mozIStorageService);
-        var tempDBConnection = storageService.openDatabase(this.databaseFile);
-
         // Columns in this list must be in the same order as the respective columns
         // in the new schema.
-        var oldColumns = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,    ' +
-                         'imageLink, imageTitle, favicon, RDF_URI, rowIndex, parent, ' +
-                         'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   ' +
-                         'entryAgeLimit, maxEntries, updateInterval, dateModified    ';
+        const OLD_COLUMNS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,    ' +
+                            'imageLink, imageTitle, favicon, RDF_URI, rowIndex, parent, ' +
+                            'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   ' +
+                            'entryAgeLimit, maxEntries, updateInterval, dateModified    ';
 
-        tempDBConnection.beginTransaction();
-
+        this.dBConnection.beginTransaction();
         try {
+            executeSQL('ALTER TABLE feeds ADD COLUMN dateModified INTEGER DEFAULT 0');
 
-            this.dBConnection.executeSimpleSQL(
-                           'ALTER TABLE feeds ADD COLUMN dateModified INTEGER DEFAULT 0');
-
-            var statement = 'CREATE TEMPORARY TABLE feeds_backup ('+oldColumns+')';
-            tempDBConnection.executeSimpleSQL(statement);
-
-            statement = 'INSERT INTO feeds_backup SELECT '+oldColumns+' FROM feeds';
-            tempDBConnection.executeSimpleSQL(statement);
-
-            tempDBConnection.executeSimpleSQL('DROP TABLE feeds');
-            tempDBConnection.executeSimpleSQL('CREATE TABLE feeds ('+FEEDS_TABLE_SCHEMA+')');
-            tempDBConnection.executeSimpleSQL('INSERT INTO feeds SELECT * FROM feeds_backup');
+            executeSQL('CREATE TABLE feeds_copy (' + OLD_COLUMNS + ')');
+            executeSQL('INSERT INTO feeds_copy SELECT ' + OLD_COLUMNS + ' FROM feeds');
+            executeSQL('DROP TABLE feeds');
+            executeSQL('CREATE TABLE feeds (' + FEEDS_TABLE_SCHEMA + ')');
+            executeSQL('INSERT INTO feeds SELECT * FROM feeds_copy');
+            executeSQL('DROP TABLE feeds_copy');
         }
         catch (ex) {
             this.reportError(ex);
         }
         finally {
-            tempDBConnection.commitTransaction();
-            tempDBConnection.close();
+            this.dBConnection.commitTransaction();
+        }
+    },
+
+    migrateEntriesToFTS: function BriefStorage_migrateEntriesToFTS() {
+        const OLD_COLUMNS = 'id, feedID, secondaryID , providedID, entryURL, title, content, ' +
+                            'date, authors, read, updated, starred, deleted, bookmarkID      ';
+        const NEW_COLUMNS = 'id, feedID, secondaryID , providedID, entryURL, date, ' +
+                            'authors, read, updated, starred, deleted, bookmarkID  ';
+
+        this.dBConnection.beginTransaction();
+        try {
+
+            executeSQL('CREATE TABLE entries_copy (' + OLD_COLUMNS + ')');
+            executeSQL('INSERT INTO entries_copy SELECT ' + OLD_COLUMNS + ' FROM entries');
+            executeSQL('DROP TABLE entries');
+
+            this.createTables();
+
+            executeSQL('INSERT INTO entries (rowid, ' + NEW_COLUMNS + ')' +
+                       'SELECT rowid, ' + NEW_COLUMNS + ' FROM entries_copy ');
+            executeSQL('INSERT INTO entries_text (title, content) ' +
+                       'SELECT title, content FROM entries_copy   ');
+            executeSQL('DROP TABLE entries_copy');
+        }
+        catch (ex) {
+            this.reportError(ex);
+        }
+        finally {
+            this.dBConnection.commitTransaction();
         }
     },
 
@@ -449,8 +477,6 @@ BriefStorageService.prototype = {
         if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
             var oldestEntryDate = Date.now();
 
-            this.preCreateUpdatingStatements();
-
             // Count the unread entries, to compare their number later.
             var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
                                      createInstance(Ci.nsIBriefQuery);
@@ -491,32 +517,51 @@ BriefStorageService.prototype = {
     },
 
 
-    preCreateUpdatingStatements: function BriefStorage_preCreateUpdatingStatement() {
-        this.insertEntry_stmt = this.dBConnection.createStatement(
-                          'INSERT OR IGNORE INTO entries                         ' +
-                          '(                                                     ' +
-                          'feedID, id, secondaryID, providedID, entryURL,        ' +
-                          'title,  content, date, authors, read                  ' +
-                          ')                                                     ' +
-                          'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)      ');
-        this.updateEntry_stmt = this.dBConnection.createStatement(
-                          'UPDATE entries       ' +
-                          'SET content = ?1,    ' +
-                          '    date    = ?2,    ' +
-                          '    authors = ?3,    ' +
-                          '    read    = 0,     ' +
-                          '    updated = 1      ' +
-                          'WHERE id = ?4        ');
-
-        this.checkByPrimaryID_stmt = this.dBConnection.
-                        createStatement('SELECT date FROM entries WHERE id = ?');
-        this.checkBySecondaryID_stmt = this.dBConnection.
-                        createStatement('SELECT date FROM entries WHERE secondaryID = ?');
+    get insertEntry_stmt() {
+        delete this.__proto__.insertEntry_stmt;
+        return this.insertEntry_stmt = createStatement(
+               'INSERT INTO entries (feedID, id, secondaryID, providedID, entryURL, ' +
+               'date, authors) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                  ');
     },
 
+    get insertEntryText_stmt() {
+        delete this.__proto__.insertEntryText_stmt;
+        return this.insertEntryText_stmt = createStatement(
+               'INSERT INTO entries_text (rowid, title, content) ' +
+               'VALUES(last_insert_rowid(), ?1, ?2)              ');
+    },
+
+    get updateEntry_stmt() {
+        delete this.__proto__.updateEntry_stmt;
+        return this.updateEntry_stmt = createStatement(
+               'UPDATE entries       ' +
+               'SET date    = ?1,    ' +
+               '    authors = ?2,    ' +
+               '    read    = 0,     ' +
+               '    updated = 1      ' +
+               'WHERE id = ?3        ');
+    },
+
+    get updateEntryText_stmt() {
+        delete this.__proto__.updateEntryText_stmt;
+        return this.updateEntryText_stmt = createStatement(
+               'UPDATE entries_text                                   ' +
+               'SET title =   ?1,                                     ' +
+               '    content = ?2,                                     ' +
+               'WHERE rowid = SELECT rowid FROM entries WHERE id = ?3 ');
+    },
+
+    get checkByPrimaryID_stmt() {
+        delete this.__proto__.checkByPrimaryID_stmt;
+        return this.checkByPrimaryID_stmt = createStatement('SELECT date FROM entries WHERE id = ?');
+    },
+
+    get checkBySecondaryID_stmt() {
+        delete this.__proto__.checkBySecondaryID_stmt;
+        return this.checkBySecondaryID_stmt = createStatement('SELECT date FROM entries WHERE secondaryID = ?');
+    },
 
     processEntry: function BriefStorage_processEntry(aEntry, aFeed) {
-
         var content = aEntry.content || aEntry.summary;
 
         // Strip tags
@@ -569,22 +614,23 @@ BriefStorageService.prototype = {
             check.reset();
         }
 
-
         // If the entry is already present in the database, compare if the downloaded
         // entry has a newer date than the stored one and if so, update the data and
         // mark the entry as unread. Otherwise, insert it if it isn't present yet.
         if (entryAlreadyStored) {
-
             if (aEntry.date && storedEntryDate < aEntry.date) {
                 var update = this.updateEntry_stmt;
-                update.bindStringParameter(0, content);
-                update.bindInt64Parameter(1, aEntry.date)
-                update.bindStringParameter(2, aEntry.authors);
-                update.bindStringParameter(3, primaryID);
+                update.bindInt64Parameter(0, aEntry.date);
+                update.bindStringParameter(1, aEntry.authors);
+                update.bindStringParameter(2, primaryID);
+                update_stmt.execute();
 
+                update = this.updateEntryText_stmt;
+                update.bindStringParameter(0, aEntry.title);
+                update.bindStringParameter(1, aEntry.content);
+                update.bindStringParameter(2, primaryID);
                 update.execute();
             }
-
         }
         else {
             var insert = this.insertEntry_stmt;
@@ -593,19 +639,19 @@ BriefStorageService.prototype = {
             insert.bindStringParameter(2, secondaryID);
             insert.bindStringParameter(3, entry.id);
             insert.bindStringParameter(4, aEntry.entryURL);
-            insert.bindStringParameter(5, title);
-            insert.bindStringParameter(6, content);
-            insert.bindInt64Parameter(7, aEntry.date ? aEntry.date : Date.now());
-            insert.bindStringParameter(8, aEntry.authors);
-            insert.bindInt32Parameter(9, 0);
+            insert.bindInt64Parameter(5, aEntry.date ? aEntry.date : Date.now());
+            insert.bindStringParameter(6, aEntry.authors);
+            insert.execute();
 
+            insert = this.insertEntryText_stmt;
+            insert.bindStringParameter(0, aEntry.title);
+            insert.bindStringParameter(1, content);
             insert.execute();
         }
     },
 
 
     updateFeedData: function BriefStorage_updateFeedData(aFeed, aOldestEntryDate) {
-
         // Do not update the title, because it's taken from the bookmarks.
         var updateFeed = this.dBConnection.createStatement(
                          'UPDATE feeds               ' +
@@ -1355,10 +1401,10 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     getEntries: function BriefQuery_getEntries(entryCount) {
-        var statement = 'SELECT entries.id,      entries.feedID,  entries.entryURL, ' +
-                        '       entries.title,   entries.content, entries.date,     ' +
-                        '       entries.authors, entries.read,    entries.starred,  ' +
-                        '       entries.updated, entries.bookmarkID                 ' +
+        var statement = 'SELECT entries.id, entries.feedID, entries.entryURL,          ' +
+                        '       entries.date, entries.authors, entries.read,           ' +
+                        '       entries.starred, entries.updated, entries.bookmarkID,  ' +
+                        '       entries_text.title, entries_text.content               ' +
                          this.getQueryTextForSelect();
 
         var select = this.dBConnection.createStatement(statement);
@@ -1371,14 +1417,14 @@ BriefQuery.prototype = {
                 entry.id = select.getString(0);
                 entry.feedID = select.getString(1);
                 entry.entryURL = select.getString(2);
-                entry.title = select.getString(3);
-                entry.content = select.getString(4);
-                entry.date = select.getInt64(5);
-                entry.authors = select.getString(6);
-                entry.read = (select.getInt32(7) == 1);
-                entry.starred = (select.getInt32(8) == 1);
-                entry.updated = (select.getInt32(9) == 1);
-                entry.bookmarkID = select.getInt64(10);
+                entry.date = select.getInt64(3);
+                entry.authors = select.getString(4);
+                entry.read = (select.getInt32(5) == 1);
+                entry.starred = (select.getInt32(6) == 1);
+                entry.updated = (select.getInt32(7) == 1);
+                entry.bookmarkID = select.getInt64(8);
+                entry.title = select.getString(9);
+                entry.content = select.getString(10);
 
                 entries.push(entry);
             }
@@ -1582,10 +1628,15 @@ BriefQuery.prototype = {
 
 
     getQueryText: function BriefQuery_getQueryText(aForSelect) {
-        if (aForSelect)
-            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE ';
-        else
-            var text = ' WHERE entries.rowid IN (SELECT entries.rowid FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID WHERE ';
+        if (aForSelect) {
+            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID INNER JOIN entries_text ON entries.rowid = entries_text.rowid WHERE ';
+        }
+        else {
+            text = ' WHERE entries.rowid IN (SELECT entries.rowid FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ';
+            if (this.searchString)
+                text += ' INNER JOIN entries_text ON entries.rowid = entries_text.rowid ';
+            text += ' WHERE ';
+        }
 
         if (this.folders) {
             this.effectiveFolders = this.folders.match(/[^ ]+/g);
@@ -1632,11 +1683,8 @@ BriefQuery.prototype = {
             text += ') AND ';
         }
 
-        if (this.searchString) {
-            var words = this.searchString.match(/[^ ]+/g);
-            for (var i = 0; i < words.length; i++)
-                text += '(entries.title LIKE "%" || "' + words[i] + '" || "%" OR entries.content LIKE "%" || "' + words[i] + '" || "%") AND ';
-        }
+        if (this.searchString)
+            text += 'entries_text MATCH "' + this.searchString +'" AND ';
 
         if (this.read)
             text += 'entries.read = 1 AND ';
