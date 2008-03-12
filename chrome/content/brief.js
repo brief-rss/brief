@@ -168,12 +168,8 @@ var gObserver = {
             updateProgressMeter();
             break;
 
-        // Sets up the updating progressmeter.
+        // Sets up the progressmeter and the stop button.
         case 'brief:feed-update-queued':
-            // Don't display progress for background updates.
-            if (aData == 'background')
-                return;
-
             var deck = document.getElementById('update-buttons-deck');
             deck.selectedIndex = 1;
 
@@ -726,7 +722,7 @@ var gPrefs = {
 }
 
 
-function dump(aMessage) {
+function log(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].
                        getService(Ci.nsIConsoleService);
   consoleService.logStringMessage(aMessage);
