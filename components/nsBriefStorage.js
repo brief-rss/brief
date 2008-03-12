@@ -149,7 +149,7 @@ BriefStorageService.prototype = {
 
         executeSQL('CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA + ')');
         executeSQL('CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA + ')');
-        executeSQL('CREATE VIRTUAL TABLE IF NOT EXISTS entries_text using fts3(' + ENTRIES_TEXT_TABLE_SCHEMA + ')');
+        executeSQL('CREATE VIRTUAL TABLE entries_text using fts3(' + ENTRIES_TEXT_TABLE_SCHEMA + ')');
 
         executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
         executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
@@ -274,7 +274,10 @@ BriefStorageService.prototype = {
             executeSQL('DROP TABLE entries');
 
             // This will recreate the entries table and its indices.
-            this.setupDatabase();
+            executeSQL('CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA + ')');
+            executeSQL('CREATE VIRTUAL TABLE entries_text using fts3(' + ENTRIES_TEXT_TABLE_SCHEMA + ')');
+            executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
+            executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
 
             executeSQL('INSERT INTO entries (rowid, ' + NEW_COLUMNS + ')' +
                        'SELECT rowid, ' + NEW_COLUMNS + ' FROM entries_copy ');
