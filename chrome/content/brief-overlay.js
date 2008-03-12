@@ -69,6 +69,9 @@ var gBrief = {
                 var searchbar = win.document.getElementById('searchbar');
                 searchbar.focus();
                 break;
+            case 'toggleEntrySelection':
+                win.gFeedView.toggleEntrySelection();
+                break;
 
             default:
                 var func = win.gCommands[aCommand]();

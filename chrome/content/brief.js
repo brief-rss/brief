@@ -596,22 +596,20 @@ function onKeyPress(aEvent) {
     // Let's not prevent the user from typing in inputs that entries may contain, though.
     if (gPrefs.assumeStandardKeys && aEvent.originalTarget.localName != 'input') {
 
-        if (aEvent.keyCode == aEvent.DOM_VK_TAB) {
-            gFeedView.switchKeyboardSelection();
+        if (aEvent.keyCode == aEvent.DOM_VK_TAB && !aEvent.ctrlKey) {
+            gFeedView.toggleEntrySelection();
             aEvent.preventDefault();
         }
-
         else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
-            if (gPrefs.keyNavEnabled)
+            if (gPrefs.entrySelectionEnabled)
                 gFeedView.selectNextEntry();
             else
                 gFeedView.scrollToNextEntry(true);
 
             aEvent.preventDefault();
         }
-
         else if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE) {
-            if (gPrefs.keyNavEnabled)
+            if (gPrefs.entrySelectionEnabled)
                 gFeedView.selectPrevEntry();
             else
                 gFeedView.scrollToPrevEntry(true);
@@ -645,7 +643,7 @@ var gPrefs = {
         this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
         this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
         this.showAuthors = this.getBoolPref('feedview.showAuthors');
-        this.keyNavEnabled = this.getBoolPref('feedview.keyNavEnabled');
+        this.entrySelectionEnabled = this.getBoolPref('feedview.entrySelectionEnabled');
         this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
         this.autoMarkRead = this.getBoolPref('feedview.autoMarkRead');
 
@@ -710,8 +708,8 @@ var gPrefs = {
         case 'feedview.showAuthors':
             this.showAuthors = this.getBoolPref('feedview.showAuthors');
             break;
-        case 'feedview.keyNavEnabled':
-            this.keyNavEnabled = this.getBoolPref('feedview.keyNavEnabled');
+        case 'feedview.entrySelectionEnabled':
+            this.entrySelectionEnabled = this.getBoolPref('feedview.entrySelectionEnabled');
             break;
         case 'assumeStandardKeys':
             this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');

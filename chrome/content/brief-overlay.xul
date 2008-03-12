@@ -45,8 +45,8 @@
              oncommand="gBrief.doCommand('showUnreadEntries')"/>
         <key id="Brief_focusSearchbar" key="/"
              oncommand="gBrief.doCommand('focusSearchbar')"/>
-        <key id="Brief_turnOffKeyboardNav" key="q"
-             oncommand="gBrief.doCommand('turnOffKeyNav')"/>
+        <key id="Brief_toggleEntrySelection" key="q"
+             oncommand="gBrief.doCommand('toggleEntrySelection')"/>
 
         <key id="Brief_displayShortcuts" key="?" modifiers="shift"
              oncommand="gBrief.doCommand('displayShortcuts')"/>

@@ -24,7 +24,7 @@
 <!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Mark all viewed items as read">
 <!ENTITY tab.key "Tab">
-<!ENTITY toggleKeyboardSelection "Turn keyboard selection on/off">
+<!ENTITY toggleEntrySelection "Toggle entry selection">
 <!ENTITY view.header "View">
 <!ENTITY showAll "Show all items">
 <!ENTITY showStarred "Show starred items">
