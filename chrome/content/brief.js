@@ -489,7 +489,7 @@ function loadHomeview() {
         var query = new QuerySH(null, null, true);
         var unreadFolder = document.getElementById('unread-folder');
         var title = unreadFolder.getAttribute('title');
-        gFeedView = new FeedView(title, query);
+        setView(new FeedView(title, query));
     }
 }
 
@@ -559,7 +559,7 @@ function performSearch(aEvent) {
 
             var query = new Query();
             query.searchString = searchbar.value;
-            gFeedView = new FeedView(title, query);
+            setView(new FeedView(title, query));
         }
         else {
             gFeedView.titleOverride = title;
@@ -575,7 +575,7 @@ function performSearch(aEvent) {
         gFeedList.ignoreSelectEvent = false;
 
         if (previousView != gFeedView) {
-            gFeedView = previousView;
+            setView(previousView);
             gFeedView.query.searchString = gFeedView.titleOverride = '';
         }
         else {
