@@ -131,7 +131,7 @@ FeedView.prototype = {
 
 
     /**
-     * Sends an event to an entry displayed on the current page, can a message to
+     * Sends an event to an entry element on the current page, for example a message to
      * perform an action or update its state. This is the only way we can communicate
      * with the untrusted document.
      *
@@ -170,7 +170,7 @@ FeedView.prototype = {
         if (this._selectionSuppressed)
             return;
 
-        if (gPrefs.keyNavEnabled) {
+        if (gPrefs.entrySelectionEnabled) {
             var entry = this.selectedElement.nextSibling.id;
 
             if (entry)
@@ -179,7 +179,7 @@ FeedView.prototype = {
                 this.currentPage++;
         }
         else {
-            this.switchKeyboardSelection();
+            this.toggleEntrySelection();
         }
     },
 
@@ -187,7 +187,7 @@ FeedView.prototype = {
         if (this._selectionSuppressed)
             return;
 
-        if (gPrefs.keyNavEnabled) {
+        if (gPrefs.entrySelectionEnabled) {
             var entry = this.selectedElement.previousSibling.id;
 
             if (entry) {
@@ -202,7 +202,7 @@ FeedView.prototype = {
             }
         }
         else {
-            this.switchKeyboardSelection();
+            this.toggleEntrySelection();
         }
     },
 
@@ -299,7 +299,6 @@ FeedView.prototype = {
     _smoothScrollInterval: null,
 
     _scrollSmoothly: function FeedView__scrollSmoothly(aTargetPosition) {
-
         // Don't start if scrolling is already in progress.
         if (this._smoothScrollInterval)
             return;
@@ -334,7 +333,7 @@ FeedView.prototype = {
     },
 
 
-    // Return the element of the entry closest to the middle of the screen.
+    // Return the entry element closest to the middle of the screen.
     _getMiddleEntryElement: function FeedView__getMiddleEntryElement() {
         var elems = this.feedContent.childNodes;
         if (!elems.length)
@@ -355,10 +354,10 @@ FeedView.prototype = {
     },
 
 
-    switchKeyboardSelection: function FeedView_switchKeyboardSelection() {
-        gPrefs.setBoolPref('feedview.keyNavEnabled', !gPrefs.keyNavEnabled);
+    toggleEntrySelection: function FeedView_toggleEntrySelection() {
+        gPrefs.setBoolPref('feedview.entrySelectionEnabled', !gPrefs.entrySelectionEnabled);
 
-        if (gPrefs.keyNavEnabled)
+        if (gPrefs.entrySelectionEnabled)
             this.selectEntry(this._getMiddleEntryElement());
         else
             this.selectEntry(null);
@@ -430,7 +429,6 @@ FeedView.prototype = {
 
             case 'load':
                 var feedViewToolbar = document.getElementById('feed-view-toolbar');
-
                 if (this.isActive) {
                     feedViewToolbar.hidden = false;
                     this._buildFeedView();
@@ -464,7 +462,7 @@ FeedView.prototype = {
     _onClick: function FeedView__onClick(aEvent) {
         var target = aEvent.target;
 
-        if (gPrefs.keyNavEnabled && target.className == 'article-container')
+        if (gPrefs.entrySelectionEnabled && target.className == 'article-container')
             gFeedView.selectEntry(target.id);
 
         // We can't open entry links by dispatching custom events, because for
@@ -715,7 +713,6 @@ FeedView.prototype = {
 
         doc.addEventListener('keypress', onKeyPress, true);
 
-
         // Apply the CSS.
         var style = doc.getElementById('feedview-style');
         style.textContent = gFeedViewStyle;
@@ -910,8 +907,7 @@ FeedView.prototype = {
     _initSelection: function FeedView__initSelection() {
         this._selectionSuppressed = false;
 
-        if (gPrefs.keyNavEnabled) {
-
+        if (gPrefs.entrySelectionEnabled) {
             if (this.selectedElement) {
                 this.selectEntry(this.selectedEntry, true);
             }
