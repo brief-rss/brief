@@ -66,8 +66,12 @@ FeedView.prototype = {
     _entries: [],
 
     // Key elements.
-    get browser() document.getElementById('feed-view'),
-    get document() this.browser.contentDocument,
+    get browser FeedView_get_browser() {
+        delete this.__proto__.browser;
+        return this.__proto__.browser = document.getElementById('feed-view');
+    },
+
+    get document FeedView_get_document() this.browser.contentDocument,
 
     feedContent: null,
 
@@ -75,11 +79,11 @@ FeedView.prototype = {
     // Query that selects entries contained by the view. It is the query to pull ALL the
     // entries, not only the ones displayed on the current page.
     __query: null,
-    set query(aQuery) {
+    set query FeedView_set_query(aQuery) {
         this.__query = aQuery;
         return aQuery;
     },
-    get query() {
+    get query FeedView_get_query() {
         if (!this._flagsAreIntrinsic) {
             this.__query.unread = (gPrefs.shownEntries == 'unread');
             this.__query.starred = (gPrefs.shownEntries == 'starred');
@@ -97,24 +101,24 @@ FeedView.prototype = {
     entriesCount:  0,
 
     __currentPage: 1,
-    set currentPage(aPageNumber) {
+    set currentPage FeedView_set_currentPage(aPageNumber) {
         if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
             this.__currentPage = aPageNumber;
             this.ensure(true);
         }
     },
-    get currentPage() this.__currentPage,
+    get currentPage FeedView_get_currentPage() this.__currentPage,
 
 
     // Indicates whether the feed view is currently displayed in the browser.
-    get isActive() this.browser.currentURI.equals(gTemplateURI),
+    get isActive FeedView_get_isActive() this.browser.currentURI.equals(gTemplateURI),
 
-    get isGlobalSearch() {
+    get isGlobalSearch FeedView_get_isGlobalSearch() {
         return !this.query.folders && !this.query.feeds && !this._flagsAreIntrinsic
                && this.query.searchString;
     },
 
-    get isViewSearch() {
+    get isViewSearch FeedView_get_isGlobalSearch() {
         return (this.query.folders || this.query.feeds || this._flagsAreIntrinsic)
                && gFeedView.query.searchString;
     },
