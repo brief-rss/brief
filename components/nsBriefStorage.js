@@ -6,16 +6,10 @@ const QUERY_CLASS_ID = Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}');
 const QUERY_CLASS_NAME = 'Query to database of the Brief extension';
 const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 
+const ANNO_BRIEF_FEED_ITEM = 'brief/bookmarkedItem';
+
 var Cc = Components.classes;
 var Ci = Components.interfaces;
-
-Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-
-const PLACES_UTILS_URL = 'chrome://browser/content/places/utils.js';
-Cc['@mozilla.org/moz/jssubscript-loader;1'].getService(Ci.mozIJSSubScriptLoader).
-                                            loadSubScript(PLACES_UTILS_URL);
-
-const ANNO_BRIEF_FEED_ITEM = 'brief/bookmarkedItem';
 
 const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
 const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
@@ -30,7 +24,6 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const BOOKMARKS_OBSERVER_DELAY = 250;
 
 const DATABASE_VERSION = 6;
-
 const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'feedURL         TEXT,                ' +
                            'websiteURL      TEXT,                ' +
@@ -51,7 +44,6 @@ const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'maxEntries      INTEGER DEFAULT 0,   ' +
                            'updateInterval  INTEGER DEFAULT 0,   ' +
                            'dateModified    INTEGER DEFAULT 0    ';
-
 const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
                              'feedID      TEXT,               ' +
                              'secondaryID TEXT,               ' +
@@ -64,81 +56,94 @@ const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
                              'starred     INTEGER DEFAULT 0,  ' +
                              'deleted     INTEGER DEFAULT 0,  ' +
                              'bookmarkID  INTEGER DEFAULT -1  ';
-
 const ENTRIES_TEXT_TABLE_SCHEMA = 'title, content';
 
+
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+Components.utils.import('resource://gre/modules/utils.js');
+
+var places = PlacesUtils;
+
+// Shorthands for common functions.
 var executeSQL;
 var createStatement;
+
+__defineGetter__('observerService', function() {
+    delete this.observerService;
+    return this.observerService = Cc['@mozilla.org/observer-service;1'].
+                                  getService(Ci.nsIObserverService);
+});
+__defineGetter__('prefs', function() {
+    delete this.prefs;
+    return this.prefs = Cc['@mozilla.org/preferences-service;1'].
+                        getService(Ci.nsIPrefService).
+                        getBranch('extensions.brief.').
+                        QueryInterface(Ci.nsIPrefBranch2);
+});
+
 
 var gStorageService = null;
 
 function BriefStorageService() {
-    this.observerService = Cc['@mozilla.org/observer-service;1'].
-                           getService(Ci.nsIObserverService);
-
     // The instantiation can't be done on app-startup, because the directory service
     // doesn't work yet, so we perform it on profile-after-change.
-    this.observerService.addObserver(this, 'profile-after-change', false);
+    observerService.addObserver(this, 'profile-after-change', false);
 }
 
 BriefStorageService.prototype = {
 
-    databaseFile:  null,
     dBConnection:  null,
 
     feedsAndFoldersCache:  null,
     feedsCache:            null,
 
-    observerService:       null,
-    prefs:                 null,
-
-    bookmarksObserverDelayTimer: null,
-    bookmarksObserverTimerIsRunning: false,
-
     // State properties uses by the bookmarks observer.
     batchUpdateInProgress: false,
     homeFolderContentModified: false,
+    bookmarksObserverTimerIsRunning: false,
 
-    // Places services
-    historyService:   null,
-    bookmarksService: null,
-    livemarkService:  null,
+    get bookmarksObserverDelayTimer BriefStorage_bookmarksObserverDelayTimer() {
+        delete this.__proto__.bookmarksObserverDelayTimer;
+        return this.__proto__.bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
+                                                            createInstance(Ci.nsITimer);
+    },
+
 
     instantiate: function BriefStorage_instantiate() {
-        this.databaseFile = Cc['@mozilla.org/file/directory_service;1'].
+        var databaseFile = Cc['@mozilla.org/file/directory_service;1'].
                             getService(Ci.nsIProperties).
                             get('ProfD', Ci.nsIFile);
-        this.databaseFile.append('brief.sqlite');
-        var databaseIsNew = !this.databaseFile.exists();
+        databaseFile.append('brief.sqlite');
+        var databaseIsNew = !databaseFile.exists();
 
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
-        this.dBConnection = storageService.openUnsharedDatabase(this.databaseFile);
-        if (!this.dBConnection.connectionReady)
-            this.dBConnection.backupDB('brief-backup.sqlite');
+        this.dBConnection = storageService.openUnsharedDatabase(databaseFile);
 
-        // Define some shorthands for common functions.
+        // Define shorthands for some common functions.
         executeSQL = this.dBConnection.executeSimpleSQL;
         createStatement = this.dBConnection.createStatement;
 
-        this.initPlaces();
-
-        if (databaseIsNew)
-            this.createTables();
-        else if (this.dBConnection.schemaVersion < DATABASE_VERSION)
+        if (!this.dBConnection.connectionReady) {
+            this.dBConnection.backupDB('brief-backup.sqlite');
+            this.dBConnection.close();
+            databaseFile.remove(false);
+            this.dBConnection = storageService.openUnsharedDatabase(databaseFile);
+            this.setupDatabase();
+        }
+        else if (databaseIsNew) {
+            this.setupDatabase();
+        }
+        else if (this.dBConnection.schemaVersion < DATABASE_VERSION) {
             this.migrateDatabase();
+        }
 
-        this.prefs = Cc["@mozilla.org/preferences-service;1"].
-                     getService(Ci.nsIPrefService).
-                     getBranch('extensions.brief.').
-                     QueryInterface(Ci.nsIPrefBranch2);
-
-        this.prefs.addObserver('', this, false);
-        this.bookmarksService.addObserver(this, false);
-        this.observerService.addObserver(this, 'quit-application', false);
+        prefs.addObserver('', this, false);
+        places.bookmarks.addObserver(this, false);
+        observerService.addObserver(this, 'quit-application', false);
     },
 
-    createTables: function BriefStorage_createTables() {
+    setupDatabase: function BriefStorage_setupDatabase() {
         //executeSQL('DROP TABLE IF EXISTS feeds');
         //executeSQL('DROP TABLE IF EXISTS entries');
 
@@ -162,115 +167,66 @@ BriefStorageService.prototype = {
         case 0:
             // Columns added in 0.6.
             try {
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN providedID TEXT');
+                executeSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
+                executeSQL('ALTER TABLE entries ADD COLUMN providedID TEXT');
             }
             catch (e) {}
 
             // Columns and indices added in 0.7.
             try {
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
-                this.dBConnection.executeSimpleSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
+                executeSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
+                executeSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
+                executeSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
+                executeSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
+                executeSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
+                executeSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
+                executeSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
+                executeSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
+                executeSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
             }
             catch (e) {}
-
             // Fall through...
 
         // To 0.8.
         case 1:
-            this.dBConnection.executeSimpleSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
+            executeSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
 
-            // Brief isn't likely to ever make use of storing both content field
-            // and summary field, so we may as well abandon the |summary| column.
-            // In the |content| column we will store either the content or when
-            // content is unavailable - the summary.
-            // To migrate to the new system, we need populate empty |content| columns
-            // with |summary| columns.
-            var updateEntryContent = this.dBConnection.createStatement(
+            // Abandon the summary column and always store the prefered data
+            // in the content column.
+            var updateEntryContent = createStatement(
                 'UPDATE entries SET content = summary, summary = "" WHERE content = ""');
             updateEntryContent.execute();
             // Fall through...
 
         // To 1.0 beta 1
         case 2:
-            // There was a bug in 1.0 and 1.0.1 due to which the next step threw an
-            // exception for some users. When this happened, the below column was added
-            // but the new user_version wasn't set, so Brief was repeating the migration
-            // on subsequent runs and failing, because adding an already existing
-            // columns throws an exception.
-            // To help users get out that endless loop we use a try...catch block.
+            // Due to a bug, the next step threw an exception in 1.0 and 1.0.1 for some
+            // users, which caused the below column to be added but the new user_version
+            // wasn't set. We have to catch an the exception caused by attempting to add
+            // an existing column to allow the migration to be completed for those users.
             try {
-                this.dBConnection.executeSimpleSQL(
-                              'ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
+                executeSQL('ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
             }
             catch (e) { }
             // Fall through...
 
         // To 1.0
         case 3:
-            this.dBConnection.executeSimpleSQL('DROP INDEX IF EXISTS entries_id_index');
-            this.dBConnection.executeSimpleSQL('DROP INDEX IF EXISTS feeds_feedID_index');
+            executeSQL('DROP INDEX IF EXISTS entries_id_index');
+            executeSQL('DROP INDEX IF EXISTS feeds_feedID_index');
             // Fall through...
 
         // To 1.2a1
         case 4:
             this.recreateFeedsTable();
             this.recomputeIDs();
-
-            this.dBConnection.executeSimpleSQL(
-                          'ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
-
-            var ioService = Cc['@mozilla.org/network/io-service;1'].
-                            getService(Ci.nsIIOService);
-            var unfiledFolder = PlacesUtils.unfiledBookmarksFolderId;
-            var annos = PlacesUtils.annotations;
-            var bookmarkedEntries = [];
-
-            this.dBConnection.beginTransaction();
-            try {
-                var stmt = 'SELECT entryURL, title, id FROM entries WHERE starred = 1';
-                var select = this.dBConnection.createStatement(stmt);
-
-                stmt = 'UPDATE entries SET bookmarkID = ? WHERE id = ?';
-                var update = this.dBConnection.createStatement(stmt);
-
-                while (select.executeStep()) {
-                    var uri = ioService.newURI(select.getString(0), null, null);
-                    var title = select.getString(1);
-                    var entryID = select.getString(2);
-
-                    var bookmarkID = PlacesUtils.bookmarks.insertBookmark(unfiledFolder,
-                                                                          uri, -1, title);
-                    annos.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM, entryID, 0,
-                                            annos.EXPIRE_NEVER)
-                    // TODO: make the tag localizable
-                    PlacesUtils.tagging.tagURI(uri, ['feed item']);
-
-                    update.bindStringParameter(0, bookmarkID);
-                    update.bindStringParameter(1, entryID);
-                    update.execute();
-                }
-                select.reset();
-            }
-            catch (ex) {
-                this.reportError(ex);
-            }
-            finally {
-                this.dBConnection.commitTransaction();
-            }
+            executeSQL('ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
+            this.bookmarkStarredEntries();
             // Fall through...
 
         case 5:
             this.migrateEntriesToFTS();
             // Fall through...
-
         }
 
         this.dBConnection.schemaVersion = DATABASE_VERSION;
@@ -304,6 +260,7 @@ BriefStorageService.prototype = {
         }
     },
 
+
     migrateEntriesToFTS: function BriefStorage_migrateEntriesToFTS() {
         const OLD_COLUMNS = 'id, feedID, secondaryID , providedID, entryURL, title, content, ' +
                             'date, authors, read, updated, starred, deleted, bookmarkID      ';
@@ -312,12 +269,12 @@ BriefStorageService.prototype = {
 
         this.dBConnection.beginTransaction();
         try {
-
             executeSQL('CREATE TABLE entries_copy (' + OLD_COLUMNS + ')');
             executeSQL('INSERT INTO entries_copy SELECT ' + OLD_COLUMNS + ' FROM entries');
             executeSQL('DROP TABLE entries');
 
-            this.createTables();
+            // This will recreate the entries table and its indices.
+            this.setupDatabase();
 
             executeSQL('INSERT INTO entries (rowid, ' + NEW_COLUMNS + ')' +
                        'SELECT rowid, ' + NEW_COLUMNS + ' FROM entries_copy ');
@@ -332,6 +289,47 @@ BriefStorageService.prototype = {
             this.dBConnection.commitTransaction();
         }
     },
+
+
+    bookmarkStarredEntries: function BriefStorage_bookmarkStarredEntries() {
+        var ioService = Cc['@mozilla.org/network/io-service;1'].
+                        getService(Ci.nsIIOService);
+        var unfiledFolder = places.unfiledBookmarksFolderId;
+        var bookmarkedEntries = [];
+
+        var select = createStatement('SELECT entryURL, title, id FROM entries WHERE starred = 1');
+        var update = createStatement('UPDATE entries SET bookmarkID = ? WHERE id = ?');
+
+        this.dBConnection.beginTransaction();
+        try {
+            while (select.executeStep()) {
+                var uri = ioService.newURI(select.getString(0), null, null);
+                var title = select.getString(1);
+                var entryID = select.getString(2);
+
+                var bookmarkID = places.bookmarks.insertBookmark(unfiledFolder, uri,
+                                                                 -1, title);
+                places.annotations.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM,
+                                                     entryID, 0,
+                                                     places.annotations.EXPIRE_NEVER)
+                // TODO: make the tag localizable
+                places.tagging.tagURI(uri, ['feed item']);
+
+                update.bindStringParameter(0, bookmarkID);
+                update.bindStringParameter(1, entryID);
+                update.execute();
+            }
+            select.reset();
+        }
+        catch (ex) {
+            this.reportError(ex);
+        }
+        finally {
+            this.dBConnection.commitTransaction();
+        }
+        // Fall through...
+    },
+
 
     recomputeIDs: function BriefStorage_recomputeIDs() {
         var hashStringFunc = {
@@ -348,23 +346,19 @@ BriefStorageService.prototype = {
         this.dBConnection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
 
         this.dBConnection.beginTransaction();
-
         try {
-            this.dBConnection.executeSimpleSQL(
-            'UPDATE OR IGNORE entries                                          ' +
-            'SET id = generateEntryHash(feedID, providedID)                    ' +
-            'WHERE rowid IN (                                                  ' +
-            '   SELECT entries.rowid                                           ' +
-            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-            '   WHERE entries.date >= feeds.oldestEntryDate AND                ' +
-            '         entries.providedID != ""                                 ' +
-            ')                                                                 ');
-
-            this.dBConnection.executeSimpleSQL(
-            'UPDATE OR IGNORE feeds SET feedID = hashString(feedURL) WHERE isFolder = 0');
+            executeSQL('UPDATE OR IGNORE entries                                          ' +
+                       'SET id = generateEntryHash(feedID, providedID)                    ' +
+                       'WHERE rowid IN (                                                  ' +
+                       '   SELECT entries.rowid                                           ' +
+                       '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                       '   WHERE entries.date >= feeds.oldestEntryDate AND                ' +
+                       '         entries.providedID != ""                                 ' +
+                       ')                                                                 ');
+            executeSQL('UPDATE OR IGNORE feeds SET feedID = hashString(feedURL) WHERE isFolder = 0');
         }
-        catch (e) {
-            this.reportError(e);
+        catch (ex) {
+            this.reportError(ex);
         }
         finally {
             this.dBConnection.commitTransaction();
@@ -384,6 +378,7 @@ BriefStorageService.prototype = {
         }
         return foundFeed;
     },
+
 
     getFeedByBookmarkID: function BriefStorage_getFeedByBookmarkID(aBookmarkID) {
         var foundFeed = null;
@@ -426,15 +421,15 @@ BriefStorageService.prototype = {
         this.feedsCache = [];
         this.feedsAndFoldersCache = [];
 
-        var select = this.dBConnection.
-            createStatement('SELECT  feedID, feedURL, websiteURL, title, subtitle,     ' +
-                            '        imageURL, imageLink, imageTitle, dateModified,    ' +
-                            '        favicon, lastUpdated, oldestEntryDate,            ' +
-                            '        rowIndex, parent, isFolder, bookmarkID,           ' +
-                            '        entryAgeLimit, maxEntries, updateInterval         ' +
-                            'FROM feeds                                                ' +
-                            'WHERE hidden = 0                                          ' +
-                            'ORDER BY rowIndex ASC                                     ');
+        var select = createStatement(
+                     'SELECT  feedID, feedURL, websiteURL, title, subtitle,     ' +
+                     '        imageURL, imageLink, imageTitle, dateModified,    ' +
+                     '        favicon, lastUpdated, oldestEntryDate,            ' +
+                     '        rowIndex, parent, isFolder, bookmarkID,           ' +
+                     '        entryAgeLimit, maxEntries, updateInterval         ' +
+                     'FROM feeds                                                ' +
+                     'WHERE hidden = 0                                          ' +
+                     'ORDER BY rowIndex ASC                                     ');
         try {
             while (select.executeStep()) {
                 var feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
@@ -484,18 +479,13 @@ BriefStorageService.prototype = {
             var oldUnreadCount = unreadEntriesQuery.getEntriesCount();
 
             this.dBConnection.beginTransaction();
-
             try {
                 var entries = aFeed.getEntries({});
 
                 for (var i = 0; i < entries.length; i++) {
-                    entry = entries[i];
-
-                    this.processEntry(entry, aFeed);
-
-                    // Track the date of the oldest entry.
-                    if (entry.date && entry.date < oldestEntryDate)
-                        oldestEntryDate = entry.date;
+                    this.processEntry(entries[i], aFeed);
+                    if (entries[i].date && entries[i].date < oldestEntryDate)
+                        oldestEntryDate = entries[i].date;
                 }
 
                 this.updateFeedData(aFeed, oldestEntryDate);
@@ -511,29 +501,29 @@ BriefStorageService.prototype = {
             newEntriesCount = newUnreadCount - oldUnreadCount;
         }
 
-        var subject = Cc["@mozilla.org/variant;1"].createInstance(Ci.nsIWritableVariant);
+        var subject = Cc['@mozilla.org/variant;1'].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
-        this.observerService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
+        observerService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
     },
 
 
-    get insertEntry_stmt() {
+    get insertEntry_stmt BriefStorage_insertEntry_stmt() {
         delete this.__proto__.insertEntry_stmt;
-        return this.insertEntry_stmt = createStatement(
+        return this.__proto__.insertEntry_stmt = createStatement(
                'INSERT INTO entries (feedID, id, secondaryID, providedID, entryURL, ' +
                'date, authors) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                  ');
     },
 
-    get insertEntryText_stmt() {
+    get insertEntryText_stmt BriefStorage_insertEntryText_stmt() {
         delete this.__proto__.insertEntryText_stmt;
-        return this.insertEntryText_stmt = createStatement(
+        return this.__proto__.insertEntryText_stmt = createStatement(
                'INSERT INTO entries_text (rowid, title, content) ' +
                'VALUES(last_insert_rowid(), ?1, ?2)              ');
     },
 
-    get updateEntry_stmt() {
+    get updateEntry_stmt BriefStorage_updateEntry_stmt() {
         delete this.__proto__.updateEntry_stmt;
-        return this.updateEntry_stmt = createStatement(
+        return this.__proto__.updateEntry_stmt = createStatement(
                'UPDATE entries       ' +
                'SET date    = ?1,    ' +
                '    authors = ?2,    ' +
@@ -542,24 +532,27 @@ BriefStorageService.prototype = {
                'WHERE id = ?3        ');
     },
 
-    get updateEntryText_stmt() {
+    get updateEntryText_stmt BriefStorage_updateEntryText_stmt() {
         delete this.__proto__.updateEntryText_stmt;
-        return this.updateEntryText_stmt = createStatement(
+        return this.__proto__.updateEntryText_stmt = createStatement(
                'UPDATE entries_text                                   ' +
                'SET title =   ?1,                                     ' +
                '    content = ?2,                                     ' +
                'WHERE rowid = SELECT rowid FROM entries WHERE id = ?3 ');
     },
 
-    get checkByPrimaryID_stmt() {
+    get checkByPrimaryID_stmt BriefStorage_checkByPrimaryID_stmt() {
         delete this.__proto__.checkByPrimaryID_stmt;
-        return this.checkByPrimaryID_stmt = createStatement('SELECT date FROM entries WHERE id = ?');
+        return this.__proto__.checkByPrimaryID_stmt = createStatement(
+               'SELECT date FROM entries WHERE id = ?');
     },
 
-    get checkBySecondaryID_stmt() {
+    get checkBySecondaryID_stmt BriefStorage_checkBySecondaryID_stmt() {
         delete this.__proto__.checkBySecondaryID_stmt;
-        return this.checkBySecondaryID_stmt = createStatement('SELECT date FROM entries WHERE secondaryID = ?');
+        return this.__proto__.checkBySecondaryID_stmt = createStatement(
+               'SELECT date FROM entries WHERE secondaryID = ?');
     },
+
 
     processEntry: function BriefStorage_processEntry(aEntry, aFeed) {
         var content = aEntry.content || aEntry.summary;
@@ -623,7 +616,7 @@ BriefStorageService.prototype = {
                 update.bindInt64Parameter(0, aEntry.date);
                 update.bindStringParameter(1, aEntry.authors);
                 update.bindStringParameter(2, primaryID);
-                update_stmt.execute();
+                update.execute();
 
                 update = this.updateEntryText_stmt;
                 update.bindStringParameter(0, aEntry.title);
@@ -637,7 +630,7 @@ BriefStorageService.prototype = {
             insert.bindStringParameter(0, aFeed.feedID);
             insert.bindStringParameter(1, primaryID);
             insert.bindStringParameter(2, secondaryID);
-            insert.bindStringParameter(3, entry.id);
+            insert.bindStringParameter(3, aEntry.id);
             insert.bindStringParameter(4, aEntry.entryURL);
             insert.bindInt64Parameter(5, aEntry.date ? aEntry.date : Date.now());
             insert.bindStringParameter(6, aEntry.authors);
@@ -653,18 +646,17 @@ BriefStorageService.prototype = {
 
     updateFeedData: function BriefStorage_updateFeedData(aFeed, aOldestEntryDate) {
         // Do not update the title, because it's taken from the bookmarks.
-        var updateFeed = this.dBConnection.createStatement(
-                         'UPDATE feeds               ' +
-                         'SET websiteURL  = ?1,      ' +
-                         '    subtitle    = ?2,      ' +
-                         '    imageURL    = ?3,      ' +
-                         '    imageLink   = ?4,      ' +
-                         '    imageTitle  = ?5,      ' +
-                         '    favicon     = ?6,      ' +
-                         '    oldestEntryDate = ?7,  ' +
-                         '    lastUpdated = ?8,      ' +
-                         '    dateModified = ?9      ' +
-                         'WHERE feedID = ?10         ');
+        var updateFeed = createStatement('UPDATE feeds               ' +
+                                         'SET websiteURL  = ?1,      ' +
+                                         '    subtitle    = ?2,      ' +
+                                         '    imageURL    = ?3,      ' +
+                                         '    imageLink   = ?4,      ' +
+                                         '    imageTitle  = ?5,      ' +
+                                         '    favicon     = ?6,      ' +
+                                         '    oldestEntryDate = ?7,  ' +
+                                         '    lastUpdated = ?8,      ' +
+                                         '    dateModified = ?9      ' +
+                                         'WHERE feedID = ?10         ');
 
         var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
 
@@ -696,18 +688,15 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
-        var update = this.dBConnection.
-            createStatement('UPDATE feeds            ' +
-                            'SET entryAgeLimit  = ?, ' +
-                            '    maxEntries     = ?, ' +
-                            '    updateInterval = ?  ' +
-                            'WHERE feedID = ?        ');
-
+        var update = createStatement('UPDATE feeds             ' +
+                                     'SET entryAgeLimit  = ?1, ' +
+                                     '    maxEntries     = ?2, ' +
+                                     '    updateInterval = ?3  ' +
+                                     'WHERE feedID = ?4        ');
         update.bindInt32Parameter(0, aFeed.entryAgeLimit);
         update.bindInt32Parameter(1, aFeed.maxEntries);
         update.bindInt64Parameter(2, aFeed.updateInterval);
         update.bindStringParameter(3, aFeed.feedID);
-
         update.execute();
 
         // Update the cache if neccassary (it may not be if nsIBriefFeed instance that was
@@ -724,33 +713,29 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     compactDatabase: function BriefStorage_compactDatabase() {
         this.purgeEntries(false);
-        this.dBConnection.executeSimpleSQL('VACUUM');
+        executeSQL('VACUUM');
     },
 
 
     // Moves expired entries to Trash and permanently removes the deleted items from
     // database.
     purgeEntries: function BriefStorage_purgeDeletedEntries(aDeleteExpired) {
-
-        var removeEntries = this.dBConnection.createStatement(
-            'DELETE FROM entries                                                     ' +
-            'WHERE id IN                                                             ' +
-            '(                                                                       ' +
-            '   SELECT entries.id                                                    ' +
-            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID       ' +
-            '   WHERE (entries.deleted = ? AND feeds.oldestEntryDate > entries.date) ' +
-            '         OR (? - feeds.hidden > ? AND feeds.hidden != 0)                ' +
-            ')                                                                       ');
-        var removeFeeds = this.dBConnection.createStatement(
-                'DELETE FROM feeds WHERE (? - feeds.hidden > ?) AND feeds.hidden != 0');
+        var removeEntries = createStatement(
+            'DELETE FROM entries                                                      ' +
+            'WHERE id IN (                                                            ' +
+            '   SELECT entries.id                                                     ' +
+            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        ' +
+            '   WHERE (entries.deleted = ?1 AND feeds.oldestEntryDate > entries.date) ' +
+            '         OR (?2 - feeds.hidden > ?3 AND feeds.hidden != 0)               ' +
+            ')                                                                        ');
+        var removeFeeds = createStatement(
+            'DELETE FROM feeds WHERE (?1 - feeds.hidden > ?2) AND feeds.hidden != 0');
 
         this.dBConnection.beginTransaction()
         try {
             if (aDeleteExpired) {
                 this.expireEntriesByAgeGlobal();
-
                 this.expireEntriesByAgePerFeed();
-
                 this.expireEntriesByNumber();
             }
 
@@ -772,25 +757,23 @@ BriefStorageService.prototype = {
 
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
-        this.prefs.setIntPref('database.lastPurgeTime', now);
+        prefs.setIntPref('database.lastPurgeTime', now);
     },
 
 
     // Expire old entries in feeds that don't have per-feed setting enabled.
     expireEntriesByAgeGlobal: function BriefStorage_expireEntriesByAgeGlobal() {
-        var shouldExpire = this.prefs.getBoolPref('database.expireEntries');
+        var shouldExpire = prefs.getBoolPref('database.expireEntries');
         if (!shouldExpire)
             return;
 
-        var expirationAge = this.prefs.getIntPref('database.entryExpirationAge');
-
+        var expirationAge = prefs.getIntPref('database.entryExpirationAge');
         // expirationAge is in days, convert it to miliseconds.
         var edgeDate = Date.now() - expirationAge * 86400000;
 
-        var statement = this.dBConnection.createStatement(
+        var statement = createStatement(
             'UPDATE entries SET deleted = ?1                                   ' +
-            'WHERE id IN                                                       ' +
-            '(                                                                 ' +
+            'WHERE id IN (                                                     ' +
             '   SELECT entries.id                                              ' +
             '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
             '   WHERE entries.deleted = ?2 AND                                 ' +
@@ -798,7 +781,6 @@ BriefStorageService.prototype = {
             '         entries.starred = 0 AND                                  ' +
             '         entries.date < ?3                                        ' +
             ')                                                                 ');
-
         statement.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
         statement.bindInt32Parameter(1, ENTRY_STATE_NORMAL)
         statement.bindInt64Parameter(2, edgeDate);
@@ -808,13 +790,11 @@ BriefStorageService.prototype = {
 
     // Delete old entries based on the per-feed limit.
     expireEntriesByAgePerFeed: function BriefStorage_expireEntriesByAgePerFeed() {
-        var statement = this.dBConnection.createStatement(
-                        'UPDATE entries SET deleted = ?1  ' +
-                        'WHERE entries.deleted = ?2 AND   ' +
-                        '      starred = 0 AND            ' +
-                        '      entries.date < ?3 AND      ' +
-                        '      feedID = ?4                ');
-
+        var statement = createStatement('UPDATE entries SET deleted = ?1  ' +
+                                        'WHERE entries.deleted = ?2 AND   ' +
+                                        '      starred = 0 AND            ' +
+                                        '      entries.date < ?3 AND      ' +
+                                        '      feedID = ?4                ');
         var feeds = this.getAllFeeds({});
         var now = Date.now();
 
@@ -833,27 +813,24 @@ BriefStorageService.prototype = {
 
     // Delete entries exceeding the max number defined by global or per-feed settings.
     expireEntriesByNumber: function BriefStorage_expireEntriesByNumber() {
-        var useGlobalLimit = this.prefs.getBoolPref('database.limitStoredEntries');
-        var globalMaxEntriesNumber = this.prefs.getIntPref('database.maxStoredEntries');
+        var useGlobalLimit = prefs.getBoolPref('database.limitStoredEntries');
+        var globalMaxEntriesNumber = prefs.getIntPref('database.maxStoredEntries');
 
-        var expireByNumber = this.dBConnection.createStatement(
-            'UPDATE entries SET deleted = ?1       ' +
-            'WHERE id IN                           ' +
-            '(                                     ' +
-            '    SELECT id                         ' +
-            '    FROM entries                      ' +
-            '    WHERE deleted = ?2 AND            ' +
-            '          starred = 0 AND             ' +
-            '          feedID = ?3                 ' +
-            '    ORDER BY date ASC                 ' +
-            '    LIMIT ?4                          ' +
-            ')                                     ');
+        var expireByNumber = createStatement('UPDATE entries SET deleted = ?1       ' +
+                                             'WHERE id IN (                         ' +
+                                             '    SELECT id                         ' +
+                                             '    FROM entries                      ' +
+                                             '    WHERE deleted = ?2 AND            ' +
+                                             '          starred = 0 AND             ' +
+                                             '          feedID = ?3                 ' +
+                                             '    ORDER BY date ASC                 ' +
+                                             '    LIMIT ?4                          ' +
+                                             ')                                     ');
 
-        var getEntriesCountForFeed = this.dBConnection.createStatement(
-            'SELECT COUNT(1) FROM entries  ' +
-            'WHERE feedID = ? AND          ' +
-            '      starred = 0 AND         ' +
-            '      deleted = ?             ');
+        var getEntriesCountForFeed = createStatement('SELECT COUNT(1) FROM entries  ' +
+                                                     'WHERE feedID = ?1 AND          ' +
+                                                     '      starred = 0 AND         ' +
+                                                     '      deleted = ?2             ');
 
         var feeds = this.getAllFeeds({});
         for each (feed in feeds) {
@@ -894,16 +871,14 @@ BriefStorageService.prototype = {
             case 'quit-application':
                 // Integer prefs are longs while Date is a long long.
                 var now = Math.round(Date.now() / 1000);
-
-                var lastPurgeTime = this.prefs.getIntPref('database.lastPurgeTime');
+                var lastPurgeTime = prefs.getIntPref('database.lastPurgeTime');
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeEntries(true);
 
-                this.bookmarksService.removeObserver(this);
-
-                this.prefs.removeObserver('', this);
-                this.observerService.removeObserver(this, 'quit-application');
-                this.observerService.removeObserver(this, 'profile-after-change');
+                places.bookmarks.removeObserver(this);
+                prefs.removeObserver('', this);
+                observerService.removeObserver(this, 'quit-application');
+                observerService.removeObserver(this, 'profile-after-change');
 
                 this.bookmarksObserverDelayTimer = null;
                 break;
@@ -927,18 +902,6 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         new BookmarksSynchronizer();
-    },
-
-    initPlaces: function BriefStorage_initPlaces() {
-        this.historyService   = Cc['@mozilla.org/browser/nav-history-service;1'].
-                                  getService(Ci.nsINavHistoryService);
-        this.bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
-                                  getService(Ci.nsINavBookmarksService);
-        this.livemarkService  = Cc['@mozilla.org/browser/livemark-service;2'].
-                                  getService(Ci.nsILivemarkService);
-
-        this.bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
-                                           createInstance(Ci.nsITimer);
     },
 
 
@@ -968,7 +931,7 @@ BriefStorageService.prototype = {
 
     // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
-        if (this.getFeedByBookmarkID(aItemID) || this.prefs.getIntPref('homeFolder') == aItemID) {
+        if (this.getFeedByBookmarkID(aItemID) || prefs.getIntPref('homeFolder') == aItemID) {
 
             if (this.batchUpdateInProgress)
                 this.homeFolderContentModified = true;
@@ -999,18 +962,14 @@ BriefStorageService.prototype = {
 
         switch (aProperty) {
         case 'title':
-            var update = this.dBConnection.createStatement(
-                         'UPDATE feeds SET title = ? WHERE feedID = ?');
-
+            var update = createStatement('UPDATE feeds SET title = ? WHERE feedID = ?');
             update.bindStringParameter(0, aValue);
             update.bindStringParameter(1, feed.feedID);
             update.execute();
 
-            // Update the cached item.
-            feed.title = aValue;
+            feed.title = aValue; // Update the cached item.
 
-            this.observerService.notifyObservers(null, 'brief:feed-title-changed',
-                                                 feed.feedID);
+            observerService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
             break;
 
         case 'livemark/feedURI':
@@ -1025,20 +984,18 @@ BriefStorageService.prototype = {
 
     // Returns TRUE if an item is a livemark or a folder and if it is in the home folder.
     isItemInHomeFolder: function BriefStorage_isItemInHomeFolder(aItemID) {
-        var homeFolderID = this.prefs.getIntPref('homeFolder');
+        var homeFolderID = prefs.getIntPref('homeFolder');
         if (homeFolderID == -1)
             return false;
 
         var inHome = false;
-
-        var typeFolder = this.bookmarksService.TYPE_FOLDER;
-        var isFolder = (this.bookmarksService.getItemType(aItemID) == typeFolder);
+        var typeFolder = places.bookmarks.TYPE_FOLDER;
+        var isFolder = (places.bookmarks.getItemType(aItemID) == typeFolder);
 
         if (isFolder) {
             var parent = aItemID;
-
-            while (parent != this.bookmarksService.bookmarksRoot) {
-                parent = this.bookmarksService.getFolderIdForItem(parent);
+            while (parent != places.bookmarks.bookmarksRoot) {
+                parent = places.bookmarks.getFolderIdForItem(parent);
                 if (parent == homeFolderID) {
                     inHome = true;
                     break;
@@ -1117,8 +1074,8 @@ function BookmarksSynchronizer() {
     finally {
         this.dBConnection.commitTransaction();
         if (this.feedListChanged) {
-            this.srv.feedsCache = this.srv.feedsAndFoldersCache = null;
-            this.srv.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+            gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
+            observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
         }
     }
 
@@ -1127,7 +1084,6 @@ function BookmarksSynchronizer() {
 
 BookmarksSynchronizer.prototype = {
 
-    get srv() gStorageService,
     get dBConnection() gStorageService.dBConnection,
 
     feeds:     null,
@@ -1137,24 +1093,24 @@ BookmarksSynchronizer.prototype = {
 
     checkHomeFolder: function BookmarksSync_checkHomeFolder() {
         var folderValid = true;
-        var homeFolder = this.srv.prefs.getIntPref('homeFolder');
+        var homeFolder = prefs.getIntPref('homeFolder');
 
         if (homeFolder == -1) {
-            var hideAllFeeds = this.dBConnection.createStatement('UPDATE feeds SET hidden = ?');
+            var hideAllFeeds = createStatement('UPDATE feeds SET hidden = ?');
             hideAllFeeds.bindInt64Parameter(0, Date.now());
             hideAllFeeds.execute();
 
-            this.srv.feedsCache = this.srv.feedsAndFoldersCache = null;
-            this.srv.observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+            gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
+            observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
             folderValid = false;
         }
         else {
             try {
                 // This will throw if the home folder was deleted.
-                this.srv.bookmarksService.getItemTitle(homeFolder);
+                places.bookmarks.getItemTitle(homeFolder);
             }
             catch (e) {
-                this.srv.prefs.clearUserPref('homeFolder');
+                prefs.clearUserPref('homeFolder');
                 folderValid = false;
             }
         }
@@ -1165,15 +1121,15 @@ BookmarksSynchronizer.prototype = {
 
     // Get all bookmarks in the user's home folder.
     getBookmarks: function BookmarksSync_getBookmarks() {
-        var homeFolder = this.srv.prefs.getIntPref('homeFolder');
+        var homeFolder = prefs.getIntPref('homeFolder');
 
         // Get the current Live Bookmarks.
-        var options = this.srv.historyService.getNewQueryOptions();
-        var query = this.srv.historyService.getNewQuery();
+        var options = places.history.getNewQueryOptions();
+        var query = places.history.getNewQuery();
 
         query.setFolders([homeFolder], 1);
         options.excludeItems = true;
-        var result = this.srv.historyService.executeQuery(query, options);
+        var result = places.history.executeQuery(query, options);
 
         this.bookmarks = [];
         this.traversePlacesQueryResults(result.root);
@@ -1182,9 +1138,8 @@ BookmarksSynchronizer.prototype = {
 
     // Gets all feeds currently in the database.
     getFeeds: function BookmarksSync_getFeeds() {
-        var selectAll = this.dBConnection.createStatement(
-            'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden ' +
-            'FROM feeds                                                           ');
+        var selectAll = createStatement('SELECT feedID, title, rowIndex, isFolder,    ' +
+                                        '       parent, bookmarkID, hidden FROM feeds ');
 
         this.feeds = [];
         while (selectAll.executeStep()) {
@@ -1231,10 +1186,10 @@ BookmarksSynchronizer.prototype = {
 
 
     insertFeed: function BookmarksSync_insertFeed(aBookmark) {
-        var insertFeed = this.dBConnection.createStatement(
-            'INSERT OR IGNORE INTO feeds                                       ' +
+        var insertFeed = createStatement(
+            'INSERT OR IGNORE INTO feeds                                      ' +
             '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID) ' +
-            'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                               ');
+            'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                              ');
 
         insertFeed.bindStringParameter(0, aBookmark.feedID);
         insertFeed.bindStringParameter(1, aBookmark.feedURL || null);
@@ -1255,12 +1210,10 @@ BookmarksSynchronizer.prototype = {
             return;
         }
 
-        var updateFeed = this.dBConnection.createStatement(
-            'UPDATE feeds                                   ' +
-            'SET title = ?1, rowIndex = ?2, parent = ?3,    ' +
-            '    bookmarkID = ?4, hidden = 0                ' +
-            'WHERE feedID = ?5                              ');
-
+        var updateFeed = createStatement('UPDATE feeds                                ' +
+                                         'SET title = ?1, rowIndex = ?2, parent = ?3, ' +
+                                         '    bookmarkID = ?4, hidden = 0             ' +
+                                         'WHERE feedID = ?5                           ');
         updateFeed.bindStringParameter(0, aItem.title);
         updateFeed.bindInt32Parameter(1, aItem.rowIndex);
         updateFeed.bindStringParameter(2, aItem.parent);
@@ -1273,25 +1226,22 @@ BookmarksSynchronizer.prototype = {
         }
         else {
             // Invalidate feeds cache.
-            this.srv.feedsCache = this.srv.feedsAndFoldersCache = null;
+            gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
 
             // If only the title has changed, the feed list can be updated incrementally.
-            this.srv.observerService.notifyObservers(null, 'brief:feed-title-changed',
-                                                     aItem.feedID);
+            observerService.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
         }
     },
 
 
     hideFeed: function BookmarksSync_hideFeed(aFeed) {
         if (aFeed.isFolder) {
-            var removeFolder = this.dBConnection.
-                                    createStatement('DELETE FROM feeds WHERE feedID = ?');
+            var removeFolder = createStatement('DELETE FROM feeds WHERE feedID = ?');
             removeFolder.bindStringParameter(0, aFeed.feedID);
             removeFolder.execute();
         }
         else {
-            var hideFeed = this.dBConnection.
-                                createStatement('UPDATE feeds SET hidden = ? WHERE feedID =?');
+            var hideFeed = createStatement('UPDATE feeds SET hidden = ? WHERE feedID =?');
             hideFeed.bindInt64Parameter(0, Date.now());
             hideFeed.bindStringParameter(1, aFeed.feedID);
             hideFeed.execute();
@@ -1305,7 +1255,7 @@ BookmarksSynchronizer.prototype = {
         if (this.newFeeds.length > 0) {
             var feeds = [];
             for each (feedID in this.newFeeds)
-                feeds.push(this.srv.getFeed(feedID));
+                feeds.push(gStorageService.getFeed(feedID));
 
             var updateService = Cc['@ancestor/brief/updateservice;1'].
                                 getService(Ci.nsIBriefUpdateService);
@@ -1324,13 +1274,13 @@ BookmarksSynchronizer.prototype = {
                 continue;
 
             item = {};
-            item.title = this.srv.bookmarksService.getItemTitle(node.itemId);
+            item.title = places.bookmarks.getItemTitle(node.itemId);
             item.bookmarkID = node.itemId;
             item.rowIndex = this.bookmarks.length;
             item.parent = aContainer.itemId;
 
-            if (this.srv.livemarkService.isLivemark(node.itemId)) {
-                var feedURL = this.srv.livemarkService.getFeedURI(node.itemId).spec;
+            if (places.livemarks.isLivemark(node.itemId)) {
+                var feedURL = places.livemarks.getFeedURI(node.itemId).spec;
                 item.feedURL = feedURL;
                 item.feedID = hashString(feedURL);
                 item.isFolder = false;
@@ -1354,10 +1304,7 @@ BookmarksSynchronizer.prototype = {
 
 }
 
-function BriefQuery() {
-    this.observerService = Cc['@mozilla.org/observer-service;1'].
-                             getService(Ci.nsIObserverService);
-}
+function BriefQuery() { }
 
 BriefQuery.prototype = {
 
@@ -1401,15 +1348,14 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     getEntries: function BriefQuery_getEntries(entryCount) {
-        var statement = 'SELECT entries.id, entries.feedID, entries.entryURL,          ' +
-                        '       entries.date, entries.authors, entries.read,           ' +
-                        '       entries.starred, entries.updated, entries.bookmarkID,  ' +
-                        '       entries_text.title, entries_text.content               ' +
-                         this.getQueryTextForSelect();
+        var select = createStatement(
+                     'SELECT entries.id, entries.feedID, entries.entryURL,          ' +
+                     '       entries.date, entries.authors, entries.read,           ' +
+                     '       entries.starred, entries.updated, entries.bookmarkID,  ' +
+                     '       entries_text.title, entries_text.content               ' +
+                      this.getQueryStringForSelect());
 
-        var select = this.dBConnection.createStatement(statement);
-
-        var entries = new Array();
+        var entries = [];
         try {
             while (select.executeStep()) {
                 var entry = Cc['@ancestor/brief/feedentry;1'].
@@ -1432,6 +1378,7 @@ BriefQuery.prototype = {
         finally {
             select.reset();
         }
+
         entryCount.value = entries.length;
         return entries;
     },
@@ -1439,19 +1386,16 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     getSerializedEntries: function BriefQuery_getSerializedEntries() {
-        var statement = 'SELECT entries.id, entries.feedID ' + this.getQueryTextForSelect();
-        var select = this.dBConnection.createStatement(statement);
-
+        var select = createStatement('SELECT entries.id, entries.feedID ' +
+                                     this.getQueryStringForSelect());
         var entries = [];
         var feeds = [];
         try {
             while (select.executeStep()) {
-                // |array[array.length] = x| is faster than |array.push(x)| (bug 385393)
-                entries[entries.length] = select.getString(0);
-
+                entries.push(select.getString(0));
                 var feedID = select.getString(1);
                 if (feeds.indexOf(feedID) == -1)
-                    feeds[feeds.length] = feedID;
+                    feeds.push(feedID);
             }
         }
         finally {
@@ -1470,13 +1414,9 @@ BriefQuery.prototype = {
     // nsIBriefQuery
     getEntriesCount: function BriefQuery_getEntriesCount() {
         // Optimization: ignore sorting settings.
-        var oldSortOrder = this.sortOrder;
-        this.sortOrder = Ci.nsIBriefQuery.NO_SORT;
-
-        var statement = 'SELECT COUNT(1) ' + this.getQueryTextForSelect();
-        var select = this.dBConnection.createStatement(statement);
-
-        this.sortOrder = oldSortOrder;
+        [this.sortOrder, temp] = [Ci.nsIBriefQuery.NO_SORT, this.sortOrder];
+        var select = createStatement('SELECT COUNT(1) ' + this.getQueryStringForSelect());
+        this.sortOrder = temp;
 
         var count = 0;
         try {
@@ -1492,7 +1432,6 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     markEntriesRead: function BriefQuery_markEntriesRead(aState) {
-
         // Make sure not to select entries which already have the desired status.
         prevUnreadFlag = this.unread;
         prevReadFlag = this.read;
@@ -1501,20 +1440,18 @@ BriefQuery.prototype = {
         else
             this.read = true;
 
-        var statement = 'UPDATE entries SET read = ?, updated = 0 ' + this.getQueryText();
-
-        var update = this.dBConnection.createStatement(statement)
+        var update = createStatement('UPDATE entries SET read = ?, updated = 0 ' +
+                                     this.getQueryString())
         update.bindInt32Parameter(0, aState ? 1 : 0);
 
         this.dBConnection.beginTransaction();
         try {
             // Get the list of entries which we deleted, so we can pass it in the
             // notification. Never include those from hidden feeds though - nobody cares
-            // for them and, what's more, they don't expect to deal with them.
-            var prevIncludeHiddenFlag = this.includeHiddenFeeds;
-            this.includeHiddenFeeds = false;
+            // about them nor expects to deal with them.
+            [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
             var changedEntries = this.getSerializedEntries();
-            this.includeHiddenFeeds = prevIncludeHiddenFlag;
+            this.includeHiddenFeeds = false;
 
             update.execute();
         }
@@ -1526,40 +1463,37 @@ BriefQuery.prototype = {
 
         // If any entries were marked, dispatch the notifiaction.
         if (changedEntries.getPropertyAsAString('entries')) {
-            this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                                 aState ? 'read' : 'unread');
+            observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                            aState ? 'read' : 'unread');
         }
     },
 
 
     // nsIBriefQuery
     deleteEntries: function BriefQuery_deleteEntries(aState) {
-
         var statementString;
         switch (aState) {
             case ENTRY_STATE_NORMAL:
             case ENTRY_STATE_TRASHED:
             case ENTRY_STATE_DELETED:
                 statementString = 'UPDATE entries SET deleted = ' + aState +
-                                   this.getQueryText();
+                                   this.getQueryString();
                 break;
 
             case Ci.nsIBriefQuery.REMOVE_FROM_DATABASE:
-                statementString = 'DELETE FROM entries ' + this.getQueryText();
+                statementString = 'DELETE FROM entries ' + this.getQueryString();
                 break;
 
             default:
                 throw('Invalid deleted state.');
         }
 
-        var statement = this.dBConnection.createStatement(statementString)
+        var statement = createStatement(statementString)
         this.dBConnection.beginTransaction();
         try {
-            // See markEntriesRead.
-            var prevIncludeHiddenFlag = this.includeHiddenFeeds;
-            this.includeHiddenFeeds = false;
+            [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
             var changedEntries = this.getSerializedEntries();
-            this.includeHiddenFeeds = prevIncludeHiddenFlag;
+            this.includeHiddenFeeds = temp;
 
             statement.execute();
         }
@@ -1568,38 +1502,38 @@ BriefQuery.prototype = {
         }
 
         if (changedEntries.getPropertyAsAString('entries')) {
-            this.observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                                 'deleted');
+            observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                            'deleted');
         }
     },
 
 
     // nsIBriefQuery
     starEntries: function BriefQuery_starEntries(aState) {
-        var statement = 'UPDATE entries SET starred = ?1, bookmarkID = ?2 WHERE id = ?3';
-        var update = this.dBConnection.createStatement(statement);
+        var update = createStatement(
+                     'UPDATE entries SET starred = ?1, bookmarkID = ?2 WHERE id = ?3');
 
         this.dBConnection.beginTransaction();
         try {
-            // Temporarily set includeHiddenFeeds to false.
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
             var serializedChangedEntries = this.getSerializedEntries();
             this.includeHiddenFeeds = temp;
 
-            var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-            var bms = PlacesUtils.bookmarks;
-            var annos = PlacesUtils.annotations;
+            var ioService = Cc['@mozilla.org/network/io-service;1'].
+                            getService(Ci.nsIIOService);
+            var bms = places.bookmarks;
+            var annos = places.annotations;
 
             var changedEntries = this.getEntries({});
             for each (entry in changedEntries) {
                 if (aState) {
                     var uri = ioService.newURI(entry.entryURL, null, null);
-                    var bookmarkID = bms.insertBookmark(PlacesUtils.unfiledBookmarksFolderId,
+                    var bookmarkID = bms.insertBookmark(places.unfiledBookmarksFolderId,
                                                         uri, bms.DEFAULT_INDEX, entry.title);
                     annos.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM, entry.id, 0,
                                             annos.EXPIRE_NEVER);
                     // TODO: make the tag localizable
-                    PlacesUtils.tagging.tagURI(uri, ['feed item']);
+                    places.tagging.tagURI(uri, ['feed item']);
                 }
                 else {
                     bms.removeItem(entry.bookmarkID);
@@ -1620,20 +1554,22 @@ BriefQuery.prototype = {
         }
 
         if (serializedChangedEntries.getPropertyAsAString('entries')) {
-            this.observerService.notifyObservers(serializedChangedEntries,
-                                                 'brief:entry-status-changed',
-                                                 aState ? 'starred' : 'unstarred');
+            observerService.notifyObservers(serializedChangedEntries,
+                                            'brief:entry-status-changed',
+                                            aState ? 'starred' : 'unstarred');
         }
     },
 
 
-    getQueryText: function BriefQuery_getQueryText(aForSelect) {
+    getQueryString: function BriefQuery_getQueryString(aForSelect) {
+        var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
+
         if (aForSelect) {
             var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID INNER JOIN entries_text ON entries.rowid = entries_text.rowid WHERE ';
         }
         else {
             text = ' WHERE entries.rowid IN (SELECT entries.rowid FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ';
-            if (this.searchString)
+            if (this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
                 text += ' INNER JOIN entries_text ON entries.rowid = entries_text.rowid ';
             text += ' WHERE ';
         }
@@ -1643,12 +1579,12 @@ BriefQuery.prototype = {
 
             // Cache the items list to avoid retrieving it over and over when traversing.
             this._items = Components.classes['@ancestor/brief/storage;1'].
-                                     getService(Components.interfaces.nsIBriefStorage).
+                                     getService(Ci.nsIBriefStorage).
                                      getFeedsAndFolders({});
 
-            var homeFolder = gStorageService.prefs.getIntPref('homeFolder');
+            var homeFolder = prefs.getIntPref('homeFolder');
 
-            this.traverseChildren(homeFolder);
+            this.traverseFolderChildren(homeFolder);
 
             text += '(';
             for (var i = 0; i < this.effectiveFolders.length; i++) {
@@ -1695,7 +1631,6 @@ BriefQuery.prototype = {
         if (this.unstarred)
             text += 'entries.starred = 0 AND ';
 
-        var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
         if (this.deleted != nsIBriefQuery.ENTRY_STATE_ANY)
             text += 'entries.deleted = ' + this.deleted + ' AND ';
 
@@ -1707,7 +1642,7 @@ BriefQuery.prototype = {
         if (!this.includeHiddenFeeds)
             text += 'feeds.hidden = 0 ';
 
-        // Trim the trailing AND, if there is one
+        // Trim the trailing AND, if there is one.
         text = text.replace(/AND $/, '');
         // If the were no constraints (all entries are matched),
         // we may end up with a dangling WHERE.
@@ -1717,23 +1652,21 @@ BriefQuery.prototype = {
             return text += ') ';
 
         if (this.sortOrder != nsIBriefQuery.NO_SORT) {
-
-            var sortOrder;
             switch (this.sortOrder) {
-            case nsIBriefQuery.SORT_BY_FEED_ROW_INDEX:
-                sortOrder = 'feeds.rowIndex ';
-                break;
-            case nsIBriefQuery.SORT_BY_DATE:
-                sortOrder = 'entries.date ';
-                break;
-            case nsIBriefQuery.SORT_BY_TITLE:
-                sortOrder = 'entries.title ';
-                break;
-            default:
-                throw('BriefQuery: wrong sort order, use one the defined constants.');
+                case nsIBriefQuery.SORT_BY_FEED_ROW_INDEX:
+                    var sortOrder = 'feeds.rowIndex ';
+                    break;
+                case nsIBriefQuery.SORT_BY_DATE:
+                    sortOrder = 'entries.date ';
+                    break;
+                case nsIBriefQuery.SORT_BY_TITLE:
+                    sortOrder = 'entries_text.title ';
+                    break;
+                default:
+                    throw('BriefQuery: wrong sort order, use one the defined constants.');
             }
 
-            var sortDir = this.sortDirection == nsIBriefQuery.SORT_ASCENDING ? 'ASC' : 'DESC';
+            var sortDir = (this.sortDirection == nsIBriefQuery.SORT_ASCENDING) ? 'ASC' : 'DESC';
             text += 'ORDER BY ' + sortOrder + sortDir;
         }
 
@@ -1745,11 +1678,11 @@ BriefQuery.prototype = {
         return text;
     },
 
-    getQueryTextForSelect: function BriefQuery_getQueryTextForSelect() {
-        return this.getQueryText(true);
+    getQueryStringForSelect: function BriefQuery_getQueryStringForSelect() {
+        return this.getQueryString(true);
     },
 
-    traverseChildren: function BriefQuery_traverseChildren(aFolder) {
+    traverseFolderChildren: function BriefQuery_traverseFolderChildren(aFolder) {
         var isEffectiveFolder = this.effectiveFolders.indexOf(aFolder) != -1;
         var item, i;
         for (i = 0; i < this._items.length; i++) {
@@ -1757,7 +1690,7 @@ BriefQuery.prototype = {
             if (item.parent == aFolder && item.isFolder) {
                 if (isEffectiveFolder)
                     this.effectiveFolders.push(item.feedID);
-                this.traverseChildren(item.feedID);
+                this.traverseFolderChildren(item.feedID);
             }
         }
     },
@@ -1767,6 +1700,7 @@ BriefQuery.prototype = {
     contractID: QUERY_CONTRACT_ID,
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefQuery])
 }
+
 
 function hashString(aString) {
     // nsICryptoHash can read the data either from an array or a stream.
@@ -1792,8 +1726,8 @@ function hashString(aString) {
     return hexrep.join('');
 }
 
-function dump(aMessage) {
-  var consoleService = Cc["@mozilla.org/consoleservice;1"].
+function log(aMessage) {
+  var consoleService = Cc['@mozilla.org/consoleservice;1'].
                        getService(Ci.nsIConsoleService);
   consoleService.logStringMessage('Brief:\n' + aMessage);
 }
