@@ -21,30 +21,37 @@ const NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
 const NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
 const BACKGROUND_UPDATE = Ci.nsIBriefUpdateService.BACKGROUND_UPDATE;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
-function dump(aMessage) {
-  var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                       getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage(aMessage);
-}
+
+__defineGetter__('observerService', function() {
+    delete this.observerService;
+    return this.observerService = Cc['@mozilla.org/observer-service;1'].
+                                  getService(Ci.nsIObserverService);
+});
+__defineGetter__('prefs', function() {
+    delete this.prefs;
+    return this.prefs = Cc['@mozilla.org/preferences-service;1'].
+                        getService(Ci.nsIPrefService).
+                        getBranch('extensions.brief.').
+                        QueryInterface(Ci.nsIPrefBranch2);
+});
+__defineGetter__('ioService', function() {
+    delete this.ioService;
+    return this.ioService = Cc['@mozilla.org/network/io-service;1'].
+                            getService(Ci.nsIIOService);
+});
+__defineGetter__('briefStorage', function() {
+    delete this.briefStorage;
+    return this.briefStorage = Cc['@ancestor/brief/storage;1'].
+                               getService(Ci.nsIBriefStorage);
+});
+
+
+gUpdateService = null;
 
 // Class definition
 function BriefUpdateService() {
-    this.updateTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-    this.fetchDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-    this.startupDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-
-    this.prefs = Cc['@mozilla.org/preferences-service;1'].
-                   getService(Ci.nsIPrefService).
-                   getBranch('extensions.brief.').
-                   QueryInterface(Ci.nsIPrefBranch2);
-
-    this.alertsService = Cc['@mozilla.org/alerts-service;1'].
-                           getService(Ci.nsIAlertsService);
-
-    var observerService = Cc['@mozilla.org/observer-service;1'].
-                            getService(Ci.nsIObserverService);
     observerService.addObserver(this, 'brief:feed-updated', false);
     observerService.addObserver(this, 'brief:feed-error', false);
     observerService.addObserver(this, 'profile-after-change', false);
@@ -72,19 +79,42 @@ BriefUpdateService.prototype = {
     feedsWithNewEntriesCount: 0,  // number of updated feeds that have new entries
     newEntriesCount:          0,  // total number of new entries in all updated feeds
 
-    updateTimer:     null,
-    fetchDelayTimer: null,
-    prefs:           null,
+
+    __updateTimer: null,
+    get updateTimer BUS_updateTimer() {
+        if (!this.__updateTimer)
+            this.__updateTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+        return this.__updateTimer;
+    },
+
+    __startupDelayTimer: null,
+    get startupDelayTimer BUS_startupDelayTimer() {
+        if (!this.__startupDelayTimer) {
+            this.__startupDelayTimer = Cc['@mozilla.org/timer;1'].
+                                       createInstance(Ci.nsITimer);
+        }
+        return this.__startupDelayTimer;
+    },
+
+    __fetchDelayTimer: null,
+    get fetchDelayTimer BUS_fetchDelayTimer() {
+        if (!this.__fetchDelayTimer) {
+            this.__fetchDelayTimer = Cc['@mozilla.org/timer;1'].
+                                     createInstance(Ci.nsITimer);
+        }
+        return this.__fetchDelayTimer;
+    },
+
 
     // nsIBriefUpdateService
     fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
-        var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
         var feeds = storageService.getAllFeeds({});
         this.fetchFeeds(feeds, feeds.length, aInBackground);
 
         var roundedNow = Math.round(Date.now() / 1000);
-        this.prefs.setIntPref('update.lastUpdateTime', roundedNow);
+        prefs.setIntPref('update.lastUpdateTime', roundedNow);
     },
+
 
     // nsIBriefUpdateService
     fetchFeeds: function BUS_fetchFeeds(aFeeds, aFeedsLength, aInBackground) {
@@ -109,8 +139,8 @@ BriefUpdateService.prototype = {
         // Start updating if it isn't in progress yet. We will fetch feeds on an interval,
         // so we don't choke when downloading and processing all of them a once.
         if (this.updateInProgress == NO_UPDATE) {
-            var delay = aInBackground ? this.prefs.getIntPref('update.backgroundFetchDelay')
-                                      : this.prefs.getIntPref('update.defaultFetchDelay');
+            var delay = aInBackground ? prefs.getIntPref('update.backgroundFetchDelay')
+                                      : prefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
         }
 
@@ -118,7 +148,7 @@ BriefUpdateService.prototype = {
         // we stop the background start continue with a foreground one.
         if (this.updateInProgress == BACKGROUND_UPDATE && !aInBackground) {
             this.fetchDelayTimer.cancel();
-            var delay = this.prefs.getIntPref('update.defaultFetchDelay');
+            var delay = prefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
         }
 
@@ -128,16 +158,12 @@ BriefUpdateService.prototype = {
         // If new feeds have ended up in the queue then send the proper notification.
         if (oldLength < this.scheduledFeeds.length) {
             var data = this.updateInProgress == BACKGROUND_UPDATE ? 'background' : 'foreground';
-            var observerService = Cc['@mozilla.org/observer-service;1'].
-                                  getService(Ci.nsIObserverService);
             observerService.notifyObservers(null, 'brief:feed-update-queued', data);
         }
     },
 
 
     stopFetching: function BUS_stopFetching() {
-        var observerService = Cc['@mozilla.org/observer-service;1'].
-                              getService(Ci.nsIObserverService);
         observerService.notifyObservers(null, 'brief:feed-update-canceled', '');
 
         // We must call this after sending brief:feed-update-canceled, because when a
@@ -154,20 +180,19 @@ BriefUpdateService.prototype = {
 
         case this.startupDelayTimer:
             this.updateTimer.initWithCallback(this, UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
-            this.startupDelayTimer = null;
+            // Fall through...
 
         case this.updateTimer:
-            var globalUpdatingEnabled = this.prefs.getBoolPref('update.enableAutoUpdate');
+            var globalUpdatingEnabled = prefs.getBoolPref('update.enableAutoUpdate');
             // Preferencos are in seconds, because they can only store 32 bit integers.
-            var globalInterval = this.prefs.getIntPref('update.interval') * 1000;
-            var lastGlobalUpdateTime = this.prefs.getIntPref('update.lastUpdateTime') * 1000;
+            var globalInterval = prefs.getIntPref('update.interval') * 1000;
+            var lastGlobalUpdateTime = prefs.getIntPref('update.lastUpdateTime') * 1000;
             var now = Date.now();
 
             var itsGlobalUpdateTime = globalUpdatingEnabled &&
                                       now - lastGlobalUpdateTime > globalInterval;
 
-            var storageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-            var feeds = storageService.getAllFeeds({});
+            var feeds = briefStorage.getAllFeeds({});
 
             var feed, i, feedsToUpdate = [];
             for (i = 0; i < feeds.length; i++) {
@@ -183,7 +208,7 @@ BriefUpdateService.prototype = {
             if (itsGlobalUpdateTime) {
                 // Preferences can only store 32 bit integers, so round to seconds.
                 var roundedNow = Math.round(now / 1000);
-                this.prefs.setIntPref('update.lastUpdateTime', roundedNow);
+                prefs.setIntPref('update.lastUpdateTime', roundedNow);
             }
 
             break;
@@ -205,8 +230,8 @@ BriefUpdateService.prototype = {
         this.updateInProgress = NO_UPDATE;
         this.fetchDelayTimer.cancel();
 
-        var showNotification = this.prefs.getBoolPref('update.showNotification');
-        if (this.feedsWithNewEntriesCount > 0 && showNotification && this.alertsService) {
+        var showNotification = prefs.getBoolPref('update.showNotification');
+        if (this.feedsWithNewEntriesCount > 0 && showNotification) {
 
             var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
                          getService(Ci.nsIStringBundleService).
@@ -215,8 +240,10 @@ BriefUpdateService.prototype = {
             var params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
             var text = bundle.formatStringFromName('updateAlertText', params, 2);
 
-            this.alertsService.showAlertNotification(FEED_ICON_URL, title, text,
-                                                     true, null, this);
+            var alertsService = Cc['@mozilla.org/alerts-service;1'].
+                                getService(Ci.nsIAlertsService);
+            alertsService.showAlertNotification(FEED_ICON_URL, title, text,
+                                                true, null, this);
         }
 
         // Reset the properties after updating is finished.
@@ -241,7 +268,7 @@ BriefUpdateService.prototype = {
 
                 // We add the observer here instead of in the constructor as prefs
                 // are changed during startup when assuming their user-set values.
-                this.prefs.addObserver('', this, false);
+                prefs.addObserver('', this, false);
             }
             break;
 
@@ -295,6 +322,17 @@ BriefUpdateService.prototype = {
     classID: CLASS_ID,
     contractID: CONTRACT_ID,
     _xpcom_categories: [ { category: 'app-startup', service: true } ],
+    _xpcom_factory: {
+        createInstance: function(aOuter, aIID) {
+            if (aOuter != null)
+                throw Components.results.NS_ERROR_NO_AGGREGATION;
+
+            if (!gUpdateService)
+                gUpdateService = new BriefUpdateService();
+
+            return gUpdateService.QueryInterface(aIID);
+        }
+    },
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefUpdateService,
                                            Ci.nsITimerCallback,
                                            Ci.nsIObserver])
@@ -305,16 +343,12 @@ BriefUpdateService.prototype = {
  * This object downloads the feed, parses it and updates the database.
  *
  * @param aFeed nsIFeed object representing the feed to be downloaded.
- * @param aUpdateService Reference to the service class used for callback.
  */
-function FeedFetcher(aFeed, aUpdateService) {
+function FeedFetcher(aFeed) {
     this.feed = aFeed;
-    this.updateService = aUpdateService;
 
-    this.observerService = Cc['@mozilla.org/observer-service;1'].
-                             getService(Ci.nsIObserverService);
-    this.observerService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
-    this.observerService.addObserver(this, 'brief:feed-update-canceled', false);
+    observerService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
+    observerService.addObserver(this, 'brief:feed-update-canceled', false);
 
     this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
@@ -330,8 +364,6 @@ FeedFetcher.prototype = {
 
     request:      null,
     timeoutTimer: null,
-
-    observerService: null,
 
     // Indicates if the request has encountered an error (either a connection error or
     // parsing error) and has sent 'brief:feed-error' notification.
@@ -355,9 +387,9 @@ FeedFetcher.prototype = {
         function onRequestLoad() {
             self.timeoutTimer.cancel();
 
-            var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
             var uri = ioService.newURI(self.feed.feedURL, null, null);
-            var parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
+            var parser = Cc['@mozilla.org/feed-processor;1'].
+                         createInstance(Ci.nsIFeedProcessor);
             parser.listener = self;
 
             try {
@@ -427,9 +459,7 @@ FeedFetcher.prototype = {
         this.finish(true);
 
         this.downloadedFeed.favicon = this.favicon;
-        var storageService = Cc['@ancestor/brief/storage;1'].
-                               getService(Ci.nsIBriefStorage);
-        storageService.updateFeed(this.downloadedFeed);
+        briefStorage.updateFeed(this.downloadedFeed);
     },
 
 
@@ -445,15 +475,15 @@ FeedFetcher.prototype = {
         // observer in the main class, because we have to ensure this is done before any
         // other observers receive this notification. Otherwise the progressmeters won't
         // be refreshed properly, because of outdated count of completed feeds.
-        this.updateService.completedFeeds.push(this.feed);
+        gUpdateService.completedFeeds.push(this.feed);
 
         if (!aOK) {
             this.inError = true;
-            this.observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
+            observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
         }
 
         // Clean up, so that we don't leak (hopefully).
-        this.observerService.removeObserver(this, 'brief:feed-update-canceled');
+        observerService.removeObserver(this, 'brief:feed-update-canceled');
         this.request = null;
         this.timeoutTimer.cancel();
         this.timeoutTimer = null;
@@ -474,13 +504,8 @@ FeedFetcher.prototype = {
     },
 
 
-    QueryInterface: function FeedFetcher_QueryInterface(aIID) {
-        if (aIID.equals(Ci.nsISupports) ||
-           aIID.equals(Ci.nsIObserver) ||
-           aIID.equals(Ci.nsIFeedResultListener))
-            return this;
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver],
+                                          [Ci.nsIFeedResultListener])
 
 }
 
@@ -492,8 +517,6 @@ FeedFetcher.prototype = {
  * @param aFeedFetcher FeedFetcher to use for callback.
  */
 function FaviconFetcher(aWebsiteURL, aFeedFetcher) {
-    var ioService = Cc['@mozilla.org/network/io-service;1'].
-                      getService(Ci.nsIIOService);
     var websiteURI = ioService.newURI(aWebsiteURL, null, null)
     var faviconURI = ioService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
@@ -517,7 +540,7 @@ FaviconFetcher.prototype = {
 
     // nsIRequestObserver
     onStartRequest: function FaviconFetcher_lonStartRequest(aRequest, aContext) {
-        this._stream = Cc["@mozilla.org/binaryinputstream;1"].
+        this._stream = Cc['@mozilla.org/binaryinputstream;1'].
                          createInstance(Ci.nsIBinaryInputStream);
     },
 
@@ -563,22 +586,22 @@ FaviconFetcher.prototype = {
     onProgress: function(aRequest, aContext, aProgress, aProgressMax) { },  // nsIProgressEventSink
     onStatus: function(aRequest, aContext, aStatus, aStatusArg) { },
 
-    QueryInterface: function(aIID) {
-        if (aIID.equals(Ci.nsISupports)
-            || aIID.equals(Ci.nsIRequestObserver)
-            || aIID.equals(Ci.nsIStreamListener)
-            || aIID.equals(Ci.nsIChannelEventSink)
-            || aIID.equals(Ci.nsIInterfaceRequestor)
-            || aIID.equals(Ci.nsIBadCertListener)
-            || aIID.equals(Ci.nsIPrompt)
-            || aIID.equals(Ci.nsIHttpEventSink)
-            || aIID.equals(Ci.nsIProgressEventSink)) {
-            return this;
-        }
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIRequestObserver],
+                                          [Ci.nsIStreamListener],
+                                          [Ci.nsIChannelEventSink],
+                                          [Ci.nsIInterfaceRequestor],
+                                          [Ci.nsIBadCertListener],
+                                          [Ci.nsIPrompt],
+                                          [Ci.nsIHttpEventSink],
+                                          [Ci.nsIProgressEventSink])
 
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
+}
 
+
+function log(aMessage) {
+  var consoleService = Cc['@mozilla.org/consoleservice;1'].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage(aMessage);
 }
 
 
