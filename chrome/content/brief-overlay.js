@@ -182,11 +182,13 @@ var gBrief = {
 
         var openInNewTab = this.prefs.getBoolPref('openInNewTab');
 
-        if (aEvent.button == 0 && !openInNewTab
-            || gBrowser.currentURI.spec == 'about:blank' && gBrowser.webProgress.isLoadingDocument)
+        if (aEvent.button == 0 && !openInNewTab || gBrowser.currentURI.spec == 'about:blank'
+            && openInNewTab && !gBrowser.webProgress.isLoadingDocument) {
             gBrief.openBrief(false);
-        else
+        }
+        else {
             gBrief.openBrief(true);
+        }
     },
 
     onTabLoad: function gBrief_onTabLoad(aEvent) {
