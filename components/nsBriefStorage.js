@@ -1620,7 +1620,7 @@ BriefQuery.prototype = {
         }
 
         if (this.searchString)
-            text += 'entries_text MATCH "' + this.searchString +'" AND ';
+            text += 'entries_text MATCH \'' + this.searchString +'\' AND ';
 
         if (this.read)
             text += 'entries.read = 1 AND ';
