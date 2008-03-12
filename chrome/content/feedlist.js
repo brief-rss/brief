@@ -111,20 +111,20 @@ var gFeedList = {
             query.starred = selectedItem.id == 'starred-folder';
             query.deleted = selectedItem.id == 'trash-folder' ? ENTRY_STATE_TRASHED
                                                               : ENTRY_STATE_NORMAL;
-            gFeedView = new FeedView(title, query);
+            setView(new FeedView(title, query));
         }
 
         else if (selectedItem.hasAttribute('container')) {
             var feed = this.selectedFeed;
             query = new Query();
             query.folders = feed.feedID;
-            gFeedView = new FeedView(feed.title, query);
+            setView(new FeedView(feed.title, query));
         }
 
         else {
             var feed = this.selectedFeed;
             query = new QuerySH(feed.feedID, null, null);
-            gFeedView = new FeedView(feed.title, query);
+            setView(new FeedView(feed.title, query));
         }
     },
 
@@ -762,6 +762,7 @@ var gContextMenuCommands = {
         }
     },
 
+
     // Removes a treeitem and updates selection if it was selected.
     _removeTreeitem: function ctxMenuCmds__removeTreeitem(aTreeitem) {
         var treeview = gFeedList.tree.view;
@@ -775,7 +776,7 @@ var gContextMenuCommands = {
             else if (currentIndex != 3)
                 indexToSelect = currentIndex; // Don't select the separator.
             else
-                var indexToSelect = 0;
+                indexToSelect = 0;
         }
 
         aTreeitem.parentNode.removeChild(aTreeitem);
@@ -784,12 +785,13 @@ var gContextMenuCommands = {
             async(treeview.selection.select, 0, treeview.selection, indexToSelect);
     },
 
+
     _deleteBookmarks: function ctxMenuCmds__deleteBookmarks(aFeeds) {
-        var transactionsService = Cc["@mozilla.org/browser/placesTransactionsService;1"].
+        var transactionsService = Cc['@mozilla.org/browser/placesTransactionsService;1'].
                                   getService(Ci.nsIPlacesTransactionsService);
 
         var transactions = [];
-        for (var i = aFeeds.length -1; i >= 0; i--)
+        for (var i = aFeeds.length - 1; i >= 0; i--)
             transactions.push(transactionsService.removeItem(aFeeds[i].bookmarkID));
 
         var txn = transactionsService.aggregateTransactions('Remove items', transactions);

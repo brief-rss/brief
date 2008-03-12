@@ -1,19 +1,19 @@
 /**
  * gFeedView is the instance of FeedView currently attached to the browser.
  */
-var _gFeedView = null;
-__defineSetter__('gFeedView', function(aView) {
+var gFeedView = null;
 
+function setView(aView) {
     // Detach the previous view.
-    if (_gFeedView) {
-        _gFeedView.browser.removeEventListener('load', _gFeedView, false);
-        clearInterval(_gFeedView._smoothScrollInterval);
-        _gFeedView._smoothScrollInterval = null;
-        clearTimeout(_gFeedView._markVisibleTimeout);
+    if (gFeedView) {
+        gFeedView.browser.removeEventListener('load', gFeedView, false);
+        clearInterval(gFeedView._smoothScrollInterval);
+        gFeedView._smoothScrollInterval = null;
+        clearTimeout(gFeedView._markVisibleTimeout);
     }
 
     // Attach the new view and set up the necessary UI pieces.
-    _gFeedView = aView;
+    gFeedView = aView;
     aView.browser.addEventListener('load', aView, false);
 
     // Clear the searchbar.
@@ -28,9 +28,7 @@ __defineSetter__('gFeedView', function(aView) {
     viewConstraintBox.hidden = aView._flagsAreIntrinsic;
 
     aView._refresh();
-});
-__defineGetter__('gFeedView', function() { return _gFeedView });
-
+}
 
 /**
  * This object represents the main feed display. It stores and manages
@@ -488,7 +486,7 @@ FeedView.prototype = {
      * Checks if the view is up-to-date (i.e. contains the right set of entries and
      * displays the correct title) and refreshes it if necessary.
      * Note: the visual state of entries (read/unread, starred/unstarred) is not verified
-     * and it has to be maintained separetely by calling onEntryMarkedRead and
+     * and it has to be maintained separately by calling onEntryMarkedRead and
      * onEntryStarred whenever it is changed.
      * Note: exhaustively comparing the old and the new entry sets would be very slow.
      * To speed things up we compare just the numbers of entries, assuming that whenever
@@ -762,7 +760,7 @@ FeedView.prototype = {
             entries = query.getEntries({});
         }
         else {
-            async(this._computePages, 0, this);
+            async(this._computePages, 500, this);
         }
 
         for (var i = 0; i < entries.length; i++)
@@ -852,7 +850,6 @@ FeedView.prototype = {
         var today = Math.ceil(nowTime / 86400000);
         var entryDay = Math.ceil(entryTime / 86400000);
         var deltaDays = today - entryDay;
-
         var deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
 
         var string = '';
