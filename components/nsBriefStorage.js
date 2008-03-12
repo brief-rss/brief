@@ -102,10 +102,13 @@ BriefStorageService.prototype = {
     homeFolderContentModified: false,
     bookmarksObserverTimerIsRunning: false,
 
+    __bookmarksObserverDelayTimer: null,
     get bookmarksObserverDelayTimer BriefStorage_bookmarksObserverDelayTimer() {
-        delete this.__proto__.bookmarksObserverDelayTimer;
-        return this.__proto__.bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
-                                                            createInstance(Ci.nsITimer);
+        if (!this.__bookmarksObserverDelayTimer) {
+            this.__bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
+                                                 createInstance(Ci.nsITimer);
+        }
+        return this.__bookmarksObserverDelayTimer;
     },
 
 
