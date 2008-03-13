@@ -1,5 +1,5 @@
-Ci = Components.interfaces;
-Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cc = Components.classes;
 
 var gFeed = null;
 var gStorageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
