@@ -108,7 +108,7 @@ BriefUpdateService.prototype = {
 
     // nsIBriefUpdateService
     fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
-        var feeds = storageService.getAllFeeds({});
+        var feeds = briefStorage.getAllFeeds({});
         this.fetchFeeds(feeds, feeds.length, aInBackground);
 
         var roundedNow = Math.round(Date.now() / 1000);
