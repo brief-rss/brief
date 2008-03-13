@@ -446,15 +446,6 @@ FeedView.prototype = {
             case 'click':
                 this._onClick(aEvent);
                 break;
-
-            // We store targets of right-clicks to override document.popupNode, so that
-            // context menu sees anonymous content.
-            case 'mousedown':
-                if (aEvent.button == 2 && this.isActive)
-                    gTopBrowserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
-                else
-                    gTopBrowserWindow.gBrief.contextMenuTarget = null;
-                break;
         }
     },
 
@@ -464,6 +455,13 @@ FeedView.prototype = {
 
         if (gPrefs.entrySelectionEnabled && target.className == 'article-container')
             gFeedView.selectEntry(target.id);
+
+        // We store targets of right-clicks to override document.popupNode, so that
+        // context menu sees anonymous content.
+        if (aEvent.button == 2) {
+            gTopBrowserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
+            return;
+        }
 
         // We can't open entry links by dispatching custom events, because for
         // whatever reason the binding handlers don't catch middle-clicks.
