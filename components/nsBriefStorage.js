@@ -114,8 +114,8 @@ BriefStorageService.prototype = {
 
     instantiate: function BriefStorage_instantiate() {
         var databaseFile = Cc['@mozilla.org/file/directory_service;1'].
-                            getService(Ci.nsIProperties).
-                            get('ProfD', Ci.nsIFile);
+                           getService(Ci.nsIProperties).
+                           get('ProfD', Ci.nsIFile);
         databaseFile.append('brief.sqlite');
         var databaseIsNew = !databaseFile.exists();
 
@@ -541,10 +541,10 @@ BriefStorageService.prototype = {
     get updateEntryText_stmt BriefStorage_updateEntryText_stmt() {
         delete this.__proto__.updateEntryText_stmt;
         return this.__proto__.updateEntryText_stmt = createStatement(
-               'UPDATE entries_text                                   ' +
-               'SET title =   ?1,                                     ' +
-               '    content = ?2,                                     ' +
-               'WHERE rowid = SELECT rowid FROM entries WHERE id = ?3 ');
+               'UPDATE entries_text                                     ' +
+               'SET title =   ?1,                                       ' +
+               '    content = ?2                                        ' +
+               'WHERE rowid = (SELECT rowid FROM entries WHERE id = ?3) ');
     },
 
     get checkByPrimaryID_stmt BriefStorage_checkByPrimaryID_stmt() {
@@ -1438,14 +1438,6 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     markEntriesRead: function BriefQuery_markEntriesRead(aState) {
-        // Make sure not to select entries which already have the desired status.
-        prevUnreadFlag = this.unread;
-        prevReadFlag = this.read;
-        if (aState)
-            this.unread = true;
-        else
-            this.read = true;
-
         var update = createStatement('UPDATE entries SET read = ?, updated = 0 ' +
                                      this.getQueryString())
         update.bindInt32Parameter(0, aState ? 1 : 0);
@@ -1463,8 +1455,6 @@ BriefQuery.prototype = {
         }
         finally {
             this.dBConnection.commitTransaction();
-            this.unread = prevUnreadFlag;
-            this.read = prevReadFlag;
         }
 
         // If any entries were marked, dispatch the notifiaction.
@@ -1654,9 +1644,6 @@ BriefQuery.prototype = {
         // we may end up with a dangling WHERE.
         text = text.replace(/WHERE $/, '');
 
-        if (!aForSelect)
-            return text += ') ';
-
         if (this.sortOrder != nsIBriefQuery.NO_SORT) {
             switch (this.sortOrder) {
                 case nsIBriefQuery.SORT_BY_FEED_ROW_INDEX:
@@ -1680,6 +1667,9 @@ BriefQuery.prototype = {
             text += ' LIMIT ' + this.limit;
         if (this.offset > 1)
             text += ' OFFSET ' + this.offset;
+
+        if (!aForSelect)
+            text += ') ';
 
         return text;
     },
