@@ -500,42 +500,36 @@ FeedView.prototype = {
      * @returns TRUE if the view was up-to-date, FALSE if it needed refreshing.
      */
     ensure: function FeedView_ensure(aForceRefresh) {
-        if (!this.isActive)
-            return true;
-
-        var viewIsClean = true;
-
         if (aForceRefresh) {
-            viewIsClean = false;
-        }
-        else if (!this.browser.webProgress.isLoadingDocument) {
-            var oldCount = this.entriesCount;
-            var currentCount = this.query.getEntriesCount();
-
-            if (!oldCount || !currentCount || oldCount != currentCount)
-                viewIsClean = false;
-
-            // Optimize the common case when a single entry is removed.
-            if (oldCount - currentCount == 1) {
-                this._refreshOnEntryRemoved();
-                var didPartialRefresh = true;
-            }
-        }
-
-        if (!viewIsClean && !didPartialRefresh) {
             this._refresh();
-        }
-        else {
-            var title = this.titleOverride || this.title;
-            var titleElement = this.document.getElementById('feed-title');
-
-            if (titleElement.textContent != title) {
-                viewIsClean = false;
-                titleElement.textContent = title;
-            }
+            return false;
         }
 
-        return viewIsClean;
+        var oldCount = this.entriesCount;
+        var currentCount = this.query.getEntriesCount();
+
+        if (!oldCount || !currentCount || oldCount != currentCount) {
+
+            // If a different page is shown, we don't have to refresh the page,
+            // but we still need to update the state properties.
+            if (!this.isActive || this.browser.webProgress.isLoadingDocument)
+                this._computePages();
+            else if (oldCount - currentCount == 1)
+                this._refreshOnEntryRemoved();
+            else
+                this._refresh();
+
+            return false;
+        }
+
+        var title = this.titleOverride || this.title;
+        var titleElement = this.document.getElementById('feed-title');
+        if (titleElement.textContent != title) {
+            titleElement.textContent = title;
+            return false;
+        }
+
+        return true;
     },
 
 
@@ -556,16 +550,6 @@ FeedView.prototype = {
         // Load the template. The actual content building happens when the template
         // page is loaded - see _onLoad below.
         this.browser.loadURI(gTemplateURI.spec);
-
-        // Store a list of ids of displayed entries. It is used to determine if
-        // the view needs to be refreshed when database changes. This can be done
-        // after timeout, so not to delay the view creation any futher.
-        function setEntries() {
-            gFeedView._entries = gFeedView.query.getSerializedEntries().
-                                                 getPropertyAsAString('entries').
-                                                 match(/[^ ]+/g);
-        }
-        async(setEntries, 500);
     },
 
 
@@ -598,13 +582,10 @@ FeedView.prototype = {
             var endPageIndex = startPageIndex + gPrefs.entriesPerPage - 1;
 
             // If the removed entry wasn't on the current page then perform full refresh.
-            if (removedIndex < startPageIndex || removedIndex > endPageIndex) {
+            if (removedIndex < startPageIndex || removedIndex > endPageIndex)
                 this._refresh();
-            }
-            else {
+            else
                 this._removeEntry(removedEntry);
-                this._entries = currentEntries;
-            }
         }
     },
 
@@ -689,6 +670,10 @@ FeedView.prototype = {
         var stringbundle = document.getElementById('main-bundle');
         var params = [this.currentPage, this.pageCount];
         pageLabel.value = stringbundle.getFormattedString('pageNumberLabel', params);
+
+        async(function(){ gFeedView._entries = gFeedView.query.getSerializedEntries().
+                                               getPropertyAsAString('entries').
+                                               match(/[^ ]+/g); });
     },
 
 
@@ -761,7 +746,7 @@ FeedView.prototype = {
             entries = query.getEntries({});
         }
         else {
-            async(this._computePages, 500, this);
+            async(this._computePages, 250, this);
         }
 
         for (var i = 0; i < entries.length; i++)
