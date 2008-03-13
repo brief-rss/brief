@@ -299,6 +299,17 @@ var gCommands = {
                           features, aPaneID);
     },
 
+    markViewRead: function cmd_markViewRead(aEvent) {
+        var query = gFeedView.query;
+
+        if (aEvent.ctrlKey) {
+            query.offset = gPrefs.entriesPerPage * (gFeedView.currentPage - 1);
+            query.limit = gPrefs.entriesPerPage;
+        }
+
+        query.markEntriesRead(true);
+    },
+
     switchHeadlinesView: function cmd_switchHeadlinesView() {
         var newState = !gPrefs.showHeadlinesOnly;
         gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
