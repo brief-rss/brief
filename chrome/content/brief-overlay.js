@@ -262,7 +262,8 @@ var gBrief = {
                 this.updateStatuspanel();
             }
 
-            nsContextMenu.prototype.initMenu = this.contextMenuOverride;
+            document.getElementById('contentAreaContextMenu').
+                     setAttribute('onpopupshowing', 'if (event.target != this) return true; if (content.location == BRIEF_URL) document.popupNode = gBrief.contextMenuTarget; updateEditUIVisibility(); gContextMenu = new nsContextMenu(this, window.getBrowser()); return gContextMenu.shouldDisplay;');
 
             // Observe changes to the feed database in order to keep the statusbar
             // icon up-to-date.
@@ -353,28 +354,6 @@ var gBrief = {
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
                 this.updateStatuspanel();
         }
-    },
-
-
-    contextMenuOverride: function gBrief_contextMenuOverride(aPopup, aBrowser) {
-        // Save menu.
-        this.menu = aPopup;
-        this.browser = aBrowser;
-
-        this.isFrameImage = document.getElementById('isFrameImage');
-
-        // Get contextual info.
-        if (content.location === BRIEF_URL && gBrief.contextMenuTarget)
-            document.popupNode = gBrief.contextMenuTarget;
-
-        this.setTarget(document.popupNode, document.popupRangeParent,
-                       document.popupRangeOffset);
-
-        this.isTextSelected = this.isTextSelection();
-        this.isContentSelected = this.isContentSelection();
-
-        // Initialize (disable/remove) menu items.
-        this.initItems();
     },
 
 
