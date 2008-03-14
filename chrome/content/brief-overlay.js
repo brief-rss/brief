@@ -263,7 +263,7 @@ var gBrief = {
             }
 
             document.getElementById('contentAreaContextMenu').
-                     setAttribute('onpopupshowing', 'if (event.target != this) return true; if (content.location == BRIEF_URL) document.popupNode = gBrief.contextMenuTarget; updateEditUIVisibility(); gContextMenu = new nsContextMenu(this, window.getBrowser()); return gContextMenu.shouldDisplay;');
+                     setAttribute('onpopupshowing', 'if (event.target != this) return true; if (content.location == BRIEF_URL && gBrief.contextMenuTarget) document.popupNode = gBrief.contextMenuTarget; updateEditUIVisibility(); gContextMenu = new nsContextMenu(this, window.getBrowser()); return gContextMenu.shouldDisplay;');
 
             // Observe changes to the feed database in order to keep the statusbar
             // icon up-to-date.
