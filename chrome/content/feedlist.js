@@ -152,27 +152,39 @@ var gFeedList = {
         }
     },
 
-    // This is used for detecting when a folder is open/closed and refreshing its label.
+
     onClick: function gFeedList_onClick(aEvent) {
         var row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
         if (row != -1) {
             var item = this.tree.view.getItemAtIndex(row);
-            if (item.hasAttribute('container'))
+
+            // Detect when folder is collapsed/expanded.
+            if (item.hasAttribute('container')) {
                 this.refreshFolderTreeitems(item);
+
+                // We have to persist folders immediatelly instead of when Brief is closed,
+                // because otherwise if the feedlist was rebuilt, the changes would be lost.
+                async(this._persistFolderState, 0, this);
+            }
+
+            // If there is a webpage open in the browser then clicking on
+            // the already selected item, should bring back the feed view.
+            if (!gFeedView.isActive && item == this.selectedItem && aEvent.button == 0)
+                gFeedView.ensure(true);
         }
-        // We have to persist folders immediatelly instead of when Brief is closed,
-        // because otherwise if the feedlist was rebuilt, the changes would be lost.
-        async(this._persistFolderState, 0, this);
     },
 
-    // See onClick.
+
     onKeyUp: function gFeedList_onKeyUp(aEvent) {
         if (aEvent.keyCode == aEvent.DOM_VK_RETURN) {
             var selectedItem = this.selectedItem;
-            if (selectedItem.hasAttribute('container'))
+
+            // See onClick.
+            if (selectedItem.hasAttribute('container')) {
                 this.refreshFolderTreeitems(selectedItem);
+                async(this._persistFolderState, 0, this);
+            }
         }
-        async(this._persistFolderState, 0, this);
     },
 
     // Sets the visibility of context menuitem depending on the target.
