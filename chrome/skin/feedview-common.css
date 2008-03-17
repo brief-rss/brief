@@ -10,6 +10,66 @@
   display: none;
   }
 
+/* ----------------------  Article button images ------------------- */
+.article-controls > * {
+  display: inline-block;
+}
+
+.mark-read {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  color: #326585;
+  text-align: center;
+  cursor: default;
+  -moz-user-select: none;
+  margin-right: 3px;
+}
+
+.mark-read > * {
+  display: table-cell;
+  height: 25px;
+}
+
+.mark-read-left, .mark-read-right {
+  background-image: url(chrome://brief/skin/mark-read-button-endcaps.png);
+  width: 7px;
+}
+
+.mark-read-centre {
+  background-image: url(chrome://brief/skin/mark-read-button-centre.png);
+  padding: 0 1px;
+  min-width: 70px;
+  vertical-align: middle;
+}
+
+.mark-read-right {
+  background-position: -7px 0;
+}
+
+.mark-read:hover > .mark-read-right {
+  background-position: -7px -25px;
+}
+
+.delete-entry, .restore-entry {
+  width: 29px;
+  height: 25px;
+}
+
+.delete-entry {
+  background-image: url(chrome://brief/skin/delete-button.png);
+}
+
+.restore-entry {
+  background-image: url(chrome://brief/skin/restore-button.png);
+}
+
+.delete-entry:hover,
+.restore-entry:hover,
+.mark-read:hover > .mark-read-centre,
+.mark-read:hover > .mark-read-left {
+  background-position: 0 -25px;
+}
+
 
 /* ----------------------  Article content area   ---------------------- */
 
