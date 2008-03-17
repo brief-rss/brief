@@ -28,7 +28,10 @@ var gMainPane = {
         // Populate the tree.
         var query = PlacesUtils.history.getNewQuery();
         var options = PlacesUtils.history.getNewQueryOptions();
-        query.setFolders([PlacesUtils.allBookmarksFolderId], 1);
+        // XXX Temporary, for preserving compatibility with Fx 3.0b4
+        var folder = PlacesUIUtils ? [PlacesUIUtils.allBookmarksFolderId]
+                                   : [PlacesUtils.allBookmarksFolderId];
+        query.setFolders(folder, 1);
         options.excludeItems = true;
         tree.load([query], options);
 
@@ -40,7 +43,7 @@ var gMainPane = {
         var pref = document.getElementById('extensions.brief.homeFolder');
 
         if (placesTree.currentIndex != -1)
-            pref.value = placesTree.selectedNode.itemId;
+            pref.value = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
     }
 
 }
