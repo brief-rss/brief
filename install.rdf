@@ -17,7 +17,7 @@
       <rdf:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
         <minVersion>3.0b4</minVersion>
-        <maxVersion>3.0b5</maxVersion>
+        <maxVersion>3.0b5pre</maxVersion>
       </rdf:Description>
     </targetApplication>
 
