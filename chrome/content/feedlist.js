@@ -3,7 +3,11 @@ const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
 var gFeedList = {
 
-    tree:  null,
+    get tree gFeedList_tree() {
+        delete this.tree;
+        return this.tree = document.getElementById('feed-list');
+    },
+
     items: null,  // All treeitems in the tree.
     ctx_targetItem: null,  // Current target item of the context menu.
     _prevSelectedItem: null,
@@ -16,9 +20,6 @@ var gFeedList = {
     // so that we know to rebuild it when unhiding the sidebar.
     treeNotBuilt: false,
 
-    // Cached document fragments, "bricks" used to build the tree.
-    _folderRow: null,
-    _feedRow: null,
 
     // Currently selected item. Returns the treeitem if a folder is selected or
     // the treecell if a feed is selected.
@@ -389,14 +390,11 @@ var gFeedList = {
 
     // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
-        this.tree = document.getElementById('feed-list');
-
         if (!this.tree.view) {
             this.treeNotBuilt = true;
             return;
         }
-        else
-            this.treeNotBuilt = false;
+        this.treeNotBuilt = false;
 
         var topLevelChildren = document.getElementById('top-level-children');
 
@@ -417,8 +415,6 @@ var gFeedList = {
 
         this.feeds = gStorage.getFeedsAndFolders({});
 
-        this._createTreeFragments();
-
         // This a helper array used by _buildFolderChildren. As the function recurses,
         // the array stores the <treechildren> elements of all folders in the parent chain
         // of the currently processed folder. This is how it tracks where to append the
@@ -431,12 +427,10 @@ var gFeedList = {
         this.items = this.tree.getElementsByTagName('treeitem');
     },
 
+    // Cached document fragments, "bricks" used to build the tree.
+    get _folderRow gFeedList__folderRow() {
+        delete this._folderRow;
 
-    _createTreeFragments: function gFeedList__createTreeFragments() {
-        if (this._folderRow && this._feedRow)
-            return;
-
-        // Create the row of a folder.
         this._folderRow = document.createDocumentFragment();
 
         var treeitem = document.createElement('treeitem');
@@ -452,7 +446,12 @@ var gFeedList = {
         var treechildren = document.createElement('treechildren');
         treechildren = treeitem.appendChild(treechildren);
 
-        // Create the row of a feed.
+        return this._folderRow;
+    },
+
+    get _feedRow gFeedList__feedRow() {
+        delete this._feedRow;
+
         this._feedRow = document.createDocumentFragment();
 
         var treeitem = document.createElement('treeitem');
@@ -465,6 +464,8 @@ var gFeedList = {
         var treecell = document.createElement('treecell');
         treecell.setAttribute('properties', 'feed-item '); // Mind the whitespace
         treerow.appendChild(treecell);
+
+        return this._feedRow;
     },
 
     /**
