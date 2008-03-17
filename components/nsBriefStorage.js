@@ -1381,6 +1381,10 @@ BriefQuery.prototype = {
                 entries.push(entry);
             }
         }
+        catch (ex if this.dBConnection.lastError == 1) {
+            // Full-text search throws "SQL logic error or missing database" if the query
+            // doesn't contain at least one non-excluded term.
+        }
         finally {
             select.reset();
         }
@@ -1403,6 +1407,10 @@ BriefQuery.prototype = {
                 if (feeds.indexOf(feedID) == -1)
                     feeds.push(feedID);
             }
+        }
+        catch (ex if this.dBConnection.lastError == 1) {
+            // Full-text search throws "SQL logic error or missing database" if the query
+            // doesn't contain at least one non-excluded term.
         }
         finally {
             select.reset();
@@ -1429,6 +1437,10 @@ BriefQuery.prototype = {
             select.executeStep();
             count = select.getInt32(0);
         }
+        catch (ex if this.dBConnection.lastError == 1) {
+            // Full-text search throws "SQL logic error or missing database" if the query
+            // doesn't contain at least one non-excluded term.
+        }
         finally {
             select.reset();
         }
@@ -1452,6 +1464,10 @@ BriefQuery.prototype = {
             this.includeHiddenFeeds = false;
 
             update.execute();
+        }
+        catch (ex if this.dBConnection.lastError == 1) {
+            // Full-text search throws "SQL logic error or missing database" if the query
+            // doesn't contain at least one non-excluded term.
         }
         finally {
             this.dBConnection.commitTransaction();
@@ -1492,6 +1508,10 @@ BriefQuery.prototype = {
             this.includeHiddenFeeds = temp;
 
             statement.execute();
+        }
+        catch (ex if this.dBConnection.lastError == 1) {
+            // Full-text search throws "SQL logic error or missing database" if the query
+            // doesn't contain at least one non-excluded term.
         }
         finally {
             this.dBConnection.commitTransaction();
