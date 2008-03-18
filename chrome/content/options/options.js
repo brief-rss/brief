@@ -29,9 +29,13 @@ var gMainPane = {
         var query = PlacesUtils.history.getNewQuery();
         var options = PlacesUtils.history.getNewQueryOptions();
         // XXX Temporary, for preserving compatibility with Fx 3.0b4
-        var folder = PlacesUIUtils ? [PlacesUIUtils.allBookmarksFolderId]
-                                   : [PlacesUtils.allBookmarksFolderId];
-        query.setFolders(folder, 1);
+        try {
+            var folder = PlacesUIUtils.allBookmarksFolderId;
+        }
+        catch (ex) {
+            folder = PlacesUtils.allBookmarksFolderId;
+        }
+        query.setFolders([folder], 1);
         options.excludeItems = true;
         tree.load([query], options);
 
