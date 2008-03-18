@@ -35,72 +35,72 @@ splitter {
   margin: 0;
 }
 
-treechildren::-moz-tree-line {
+#feed-list > treechildren::-moz-tree-line {
   visibility: hidden;
 }
 
-treechildren::-moz-tree-cell-text {
+#feed-list > treechildren::-moz-tree-cell-text {
   font-size: 12px !important;
 }
 
-treechildren::-moz-tree-cell-text(unread) {
+#feed-list > treechildren::-moz-tree-cell-text(unread) {
   font-weight: bold;
 }
 
-treechildren::-moz-tree-row {
+#feed-list > treechildren::-moz-tree-row {
   height: 22px;
 }
 
 
 /* ------------ Icons and twisty images ------------ */
 
-treechildren::-moz-tree-twisty(container) {
+#feed-list > treechildren::-moz-tree-twisty(container) {
   list-style-image: url('icons/tree-dropmarker.png');
   width: 11px;
   height: 11px;
 }
 
-treechildren::-moz-tree-twisty(container, open) {
+#feed-list > treechildren::-moz-tree-twisty(container, open) {
   list-style-image: url('icons/tree-dropmarker-open.png');
 }
 
-treechildren::-moz-tree-image(container) {
+#feed-list > treechildren::-moz-tree-image(container) {
   list-style-image: url('chrome://global/skin/icons/folder-item.png') !important;
   -moz-image-region: rect(0px, 32px, 16px, 16px);
   padding-right: 4px;
 }
 
-treechildren::-moz-tree-image(container, open) {
+#feed-list > treechildren::-moz-tree-image(container, open) {
   -moz-image-region: rect(16px, 32px, 32px, 16px);
 }
 
-treechildren::-moz-tree-image(feed-item) {
+#feed-list > treechildren::-moz-tree-image(feed-item) {
   list-style-image: url('chrome://browser/skin/feeds/feedIcon16.png') !important;
   width: 16px;
   height: 16px;
   padding-right: 4px;
 }
 
-treechildren::-moz-tree-image(feed-item, unread) {
+#feed-list > treechildren::-moz-tree-image(feed-item, unread) {
   list-style-image: url('chrome://browser/skin/feeds/feedIcon16.png') !important;
 }
 
 
 /* ---- Fixed images for predefined special folders ---- */
 
-treechildren::-moz-tree-image(unreadFolder) {
+#feed-list > treechildren::-moz-tree-image(unreadFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(0px, 16px, 16px, 0px);
   padding-right: 4px;
   }
 
-treechildren::-moz-tree-image(trashFolder) {
+#feed-list > treechildren::-moz-tree-image(trashFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(32px, 16px, 48px, 0px);
   padding-right: 4px;
   }
 
-treechildren::-moz-tree-image(starredFolder) {
+#feed-list > treechildren::-moz-tree-image(starredFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(16px, 16px, 32px, 0px);
   padding-right: 4px;
