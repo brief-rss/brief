@@ -132,7 +132,7 @@ body {
   color: #477900;
   clear: both;
   font-size: 12px;
-  padding: 5px 25px 0 40px;
+  padding: 10px 10px 0 40px;
   overflow: auto; /* Clears contained floats */
 }
 
@@ -158,7 +158,7 @@ body {
   font-size: 12px;
   line-height: 1.4;
   color: #272727;
-  margin-top: 15px;
+  margin-top: 10px;
   padding: 0 25px 35px;
   overflow: auto;
   }
