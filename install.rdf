@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>1.2a2</version>
+    <version>1.2a3</version>
     <type>2</type>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
     <iconURL>chrome://brief/skin/icon.png</iconURL>
