@@ -60,7 +60,12 @@ const ENTRIES_TEXT_TABLE_SCHEMA = 'title, content';
 
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-Components.utils.import('resource://gre/modules/utils.js');
+
+// XXX This is for compatibility with Fx 3 beta 4, switch to C.u.import later.
+const PLACES_UTILS_URL = 'chrome://browser/content/places/utils.js';
+Cc['@mozilla.org/moz/jssubscript-loader;1'].getService(Ci.mozIJSSubScriptLoader).
+                                            loadSubScript(PLACES_UTILS_URL);
+
 
 var places = PlacesUtils;
 
@@ -1500,7 +1505,7 @@ BriefQuery.prototype = {
                 throw('Invalid deleted state.');
         }
 
-        var statement = createStatement(statementString)
+        var statement = createStatement(statementString);
         this.dBConnection.beginTransaction();
         try {
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
@@ -1561,9 +1566,6 @@ BriefQuery.prototype = {
                 update.bindStringParameter(2, entry.id);
                 update.execute();
             }
-        }
-        catch (ex) {
-            Components.utils.reportError(ex);
         }
         finally {
             this.dBConnection.commitTransaction();
