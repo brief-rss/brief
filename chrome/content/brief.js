@@ -522,7 +522,13 @@ function showHomeFolderPicker() {
 
     var query = PlacesUtils.history.getNewQuery();
     var options = PlacesUtils.history.getNewQueryOptions();
-    var root = PlacesUtils.allBookmarksFolderId;
+    // XXX Temporary, for preserving compatibility with Fx 3.0b4
+    try {
+        var root = PlacesUIUtils.allBookmarksFolderId;
+    }
+    catch (ex) {
+        root = PlacesUtils.allBookmarksFolderId;
+    }
     query.setFolders([root], 1);
     options.excludeItems = true;
     placesTree.load([query], options);
@@ -531,9 +537,10 @@ function showHomeFolderPicker() {
 
 function selectHomeFolder(aEvent) {
     var placesTree = document.getElementById('places-tree');
-
-    if (placesTree.currentIndex != -1)
-        gPrefs.setIntPref('homeFolder', placesTree.selectedNode.itemId);
+    if (placesTree.currentIndex != -1) {
+        var folderId = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
+        gPrefs.setIntPref('homeFolder', folderId);
+    }
 }
 
 
