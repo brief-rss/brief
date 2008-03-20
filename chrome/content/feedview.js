@@ -4,17 +4,16 @@
 var gFeedView = null;
 
 function setView(aView) {
-    // Detach the previous view.
+    // Detach the old view.
     if (gFeedView) {
         gFeedView.browser.removeEventListener('load', gFeedView, false);
+        for each (event in gFeedView._events)
+            gFeedView.document.removeEventListener(event, gFeedView, true);
+
         clearInterval(gFeedView._smoothScrollInterval);
         gFeedView._smoothScrollInterval = null;
         clearTimeout(gFeedView._markVisibleTimeout);
     }
-
-    // Attach the new view and set up the necessary UI pieces.
-    gFeedView = aView;
-    aView.browser.addEventListener('load', aView, false);
 
     // Clear the searchbar.
     if (!aView.query.searchString) {
@@ -27,7 +26,16 @@ function setView(aView) {
     var viewConstraintBox = document.getElementById('view-constraint-box');
     viewConstraintBox.hidden = aView._flagsAreIntrinsic;
 
-    aView._refresh();
+    // Attach the new view.
+    gFeedView = aView;
+    aView.browser.addEventListener('load', aView, false);
+    if (aView.browser.currentURI.equals(gTemplateURI)) {
+        aView._setupTemplatePage();
+        async(aView._refresh, 0, aView);
+    }
+    else {
+        aView.browser.loadURI(gTemplateURI.spec);
+    }
 }
 
 /**
@@ -64,6 +72,11 @@ FeedView.prototype = {
 
     // IDs of contained entries, used for determining if the view needs refreshing.
     _entries: [],
+
+    // Events to which we listen to in the template page. Entry binding communicates with
+    // chrome to perform actions that require full privileges by sending custom events.
+    _events: ['SwitchEntryRead', 'SwitchEntryStarred', 'DeleteEntry', 'RestoreEntry',
+              'EntryUncollapsed', 'click', 'mousedown', 'scroll', 'keypress'],
 
     // Key elements.
     get browser FeedView_get_browser() {
@@ -154,7 +167,7 @@ FeedView.prototype = {
     // ID of the selected entry.
     selectedEntry: '',
 
-    get selectedElement() {
+    get selectedElement FeedView_get_selectedElement() {
         return this.selectedEntry ? this.document.getElementById(this.selectedEntry)
                                   : null;
     },
@@ -428,13 +441,12 @@ FeedView.prototype = {
                 break;
 
             case 'load':
-                var feedViewToolbar = document.getElementById('feed-view-toolbar');
                 if (this.isActive) {
-                    feedViewToolbar.hidden = false;
-                    this._buildFeedView();
+                    this._setupTemplatePage();
+                    async(this._refresh, 0, this);
                 }
                 else {
-                    feedViewToolbar.hidden = true;
+                    document.getElementById('feed-view-toolbar').hidden = true;
                     gTopBrowserWindow.gBrief.contextMenuTarget = null;
                 }
                 break;
@@ -479,6 +491,28 @@ FeedView.prototype = {
             var newTab = (openInTabs || aEvent.button == 1);
             gCommands.openEntryLink(target, newTab);
         }
+    },
+
+
+    // Because we insert third-party content in it (the entries are not served in plain
+    // text but in full HTML markup) this page needs to be have a file:// URI to be
+    // unprivileged. It is untrusted and all the interaction respects XPCNativeWrappers.
+    _setupTemplatePage: function FeedView__setupTemplatePage() {
+        for each (event in this._events)
+            this.document.addEventListener(event, this, true);
+
+        // Apply the CSS.
+        var style = this.document.getElementById('feedview-style');
+        style.textContent = gFeedViewStyle;
+
+        // Pass some data which bindings need but don't have access to.
+        // We can bypass XPCNW here, because untrusted content is not
+        // inserted until the bindings are attached.
+        var data = {};
+        data.doubleClickMarks = gPrefs.doubleClickMarks;
+        data.markReadString = this.markAsReadStr;
+        data.markUnreadString = this.markAsUnreadStr;
+        this.document.defaultView.wrappedJSObject.gConveyedData = data;
     },
 
 
@@ -531,10 +565,8 @@ FeedView.prototype = {
     },
 
 
-    // Refreshes the feed view from scratch.
+    // Refreshes the feed view.
     _refresh: function FeedView_refresh() {
-        this.browser.style.cursor = 'wait';
-
         // Stop scrolling, so it doesn't continue after refreshing.
         clearInterval(this._smoothScrollInterval);
         this._smoothScrollInterval = null;
@@ -545,9 +577,64 @@ FeedView.prototype = {
         // Suppress selecting entry until we refresh is finished.
         this._selectionSuppressed = true;
 
-        // Load the template. The actual content building happens when the template
-        // page is loaded - see _onLoad below.
-        this.browser.loadURI(gTemplateURI.spec);
+        document.getElementById('feed-view-toolbar').hidden = false;
+
+        // Remove the old content.
+        var container = this.document.getElementById('container');
+        var oldContent = this.document.getElementById('feed-content');
+        container.removeChild(oldContent);
+
+        this.feedContent = this.document.createElementNS(XHTML_NS, 'div');
+        this.feedContent.id = 'feed-content';
+        container.appendChild(this.feedContent);
+
+        var feed = gStorage.getFeed(this.query.feeds);
+
+        this._buildHeader(feed);
+
+        if (this.query.deleted == ENTRY_STATE_TRASHED)
+            this.feedContent.setAttribute('trash', true);
+        if (gPrefs.showHeadlinesOnly)
+            this.feedContent.setAttribute('showHeadlinesOnly', true);
+        if (!feed)
+            this.feedContent.setAttribute('showFeedNames', true);
+
+        var query = this.query;
+        query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
+        query.limit = gPrefs.entriesPerPage;
+
+        var entries = query.getEntries({});
+
+        // Important: for better performance we try to delay computing pages until
+        // after the view is displayed.
+        // The only time when recomputing pages may affect the currently displayed
+        // entry set is when currentPage goes out of range, because the view contains
+        // less pages than before. This in turn makes the offset invalid and the query
+        // returns no entries.
+        // To avoid that, whenever the query returns no entries we force immediate
+        // recomputation of pages to make sure that they are correct and then we redo
+        // the query.
+        if (!entries.length) {
+            this._computePages();
+            query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
+            query.limit = gPrefs.entriesPerPage;
+            entries = query.getEntries({});
+        }
+        else {
+            async(this._computePages, 250, this);
+        }
+
+        for (var i = 0; i < entries.length; i++)
+            this._appendEntry(entries[i]);
+
+        if (!entries.length)
+            this._setEmptyViewMessage();
+        else
+            this.document.getElementById('message').style.display = 'none';
+
+        this._initSelection()
+
+        this.markVisibleAsRead();
     },
 
 
@@ -671,93 +758,7 @@ FeedView.prototype = {
 
         async(function(){ gFeedView._entries = gFeedView.query.getSerializedEntries().
                                                getPropertyAsAString('entries').
-                                               match(/[^ ]+/g); });
-    },
-
-
-    // Generates and sets up the feed view page. Because we insert third-party
-    // content in it (the entries are not served in plain text but in full HTML
-    // markup) this page needs to be have a file:// URI to be unprivileged.
-    // It is untrusted and all the interaction respects XPCNativeWrappers.
-    _buildFeedView: function FeedView__buildFeedView() {
-        var doc = this.document;
-
-        // Add listeners so that the content can communicate with chrome to perform
-        // actions that require full privileges by sending custom events.
-        doc.addEventListener('SwitchEntryRead', this, true);
-        doc.addEventListener('SwitchEntryStarred', this, true);
-        doc.addEventListener('DeleteEntry', this, true);
-        doc.addEventListener('RestoreEntry', this, true);
-        doc.addEventListener('EntryUncollapsed', this, true);
-
-        doc.addEventListener('click', this, true);
-        doc.addEventListener('mousedown', this, true);
-        doc.addEventListener('scroll', this, true);
-
-        doc.addEventListener('keypress', onKeyPress, true);
-
-        // Apply the CSS.
-        var style = doc.getElementById('feedview-style');
-        style.textContent = gFeedViewStyle;
-
-        var feed = gStorage.getFeed(this.query.feeds);
-
-        this._buildHeader(feed);
-
-        this.feedContent = doc.getElementById('feed-content');
-
-        // Attributes indicating view type, used by CSS.
-        if (this.query.deleted == ENTRY_STATE_TRASHED)
-            this.feedContent.setAttribute('trash', true);
-        if (gPrefs.showHeadlinesOnly)
-            this.feedContent.setAttribute('showHeadlinesOnly', true);
-
-        // Pass some data which bindings need but don't have access to.
-        // We can bypass XPCNW here, because untrusted content is not
-        // inserted until the bindings are attached.
-        var data = {};
-        data.doubleClickMarks = gPrefs.doubleClickMarks;
-        data.markReadString = this.markAsReadStr;
-        data.markUnreadString = this.markAsUnreadStr;
-        data.showFeedNames = !feed;
-        this.document.defaultView.wrappedJSObject.gConveyedData = data;
-
-        var query = this.query;
-        query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
-        query.limit = gPrefs.entriesPerPage;
-
-        var entries = query.getEntries({});
-
-        // Important: for better performance we try to delay computing pages until
-        // after the view is displayed.
-        // The only time when recomputing pages may affect the currently displayed
-        // entry set is when currentPage goes out of range, because the view contains
-        // less pages than before. This in turn makes the offset invalid and the query
-        // returns no entries.
-        // To avoid that, whenever the query returns no entries we force immediate
-        // recomputation of pages to make sure that they are correct and then we redo
-        // the query.
-        if (!entries.length) {
-            this._computePages();
-            query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
-            query.limit = gPrefs.entriesPerPage;
-            entries = query.getEntries({});
-        }
-        else {
-            async(this._computePages, 250, this);
-        }
-
-        for (var i = 0; i < entries.length; i++)
-            this._appendEntry(entries[i]);
-
-        if (!entries.length)
-            this._setEmptyViewMessage();
-
-        this._initSelection()
-
-        this.markVisibleAsRead();
-
-        this.browser.style.cursor = 'auto';
+                                               match(/[^ ]+/g); }, 500);
     },
 
 
