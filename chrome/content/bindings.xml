@@ -50,7 +50,8 @@
             titleElem.setAttribute('href', this.getAttribute('entryURL'));
             titleElem.innerHTML = this.getAttribute('entryTitle');
 
-            if (gConveyedData.showFeedNames)
+            var feedContent = document.getElementById('feed-content');
+            if (feedContent.hasAttribute('showFeedNames'))
                 feedNameElem.innerHTML = this.getAttribute('feedName');
 
             dateElem.innerHTML = this.getAttribute('updated') || this.getAttribute('date');
