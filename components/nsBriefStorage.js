@@ -631,7 +631,7 @@ BriefStorageService.prototype = {
 
                 update = this.updateEntryText_stmt;
                 update.bindStringParameter(0, aEntry.title);
-                update.bindStringParameter(1, aEntry.content);
+                update.bindStringParameter(1, content);
                 update.bindStringParameter(2, primaryID);
                 update.execute();
             }
