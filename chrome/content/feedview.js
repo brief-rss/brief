@@ -454,9 +454,11 @@ FeedView.prototype = {
             case 'scroll':
                 this.markVisibleAsRead();
                 break;
-
             case 'click':
                 this._onClick(aEvent);
+                break;
+            case 'keypress':
+                onKeyPress(aEvent);
                 break;
         }
     },
@@ -763,25 +765,30 @@ FeedView.prototype = {
 
 
     _buildHeader: function FeedView__buildHeader(aFeed) {
-        var doc = this.document
+        var header = this.document.getElementById('header');
+        var titleElement = this.document.getElementById('feed-title');
+        var feedImage = this.document.getElementById('feed-image');
+        var feedSubtitle = this.document.getElementById('feed-subtitle');
 
-        var titleElement = doc.getElementById('feed-title');
+        // Reset the old header.
+        header.removeAttribute('href');
+        feedImage.setAttribute('src', '');
+        feedImage.removeAttribute('title');
+        feedSubtitle.innerHTML = '';
+
         titleElement.textContent = this.titleOverride || this.title;
 
-        // When a single unfiltered feed is viewed, add the subtitle,
-        // the image, and the link.
-        if (aFeed && !this.searchString) {
-            var header = doc.getElementById('header');
-            header.setAttribute('href', aFeed.websiteURL ? aFeed.websiteURL : aFeed.feedURL);
+        // When a single unfiltered feed is viewed, add subtitle, image, and link.
+        if (aFeed) {
+            header.setAttribute('href', aFeed.websiteURL || aFeed.feedURL);
 
             if (aFeed.imageURL) {
-                var feedImage = doc.getElementById('feed-image');
                 feedImage.setAttribute('src', aFeed.imageURL);
                 feedImage.setAttribute('title', aFeed.imageTitle);
             }
 
             if (aFeed.subtitle)
-                doc.getElementById('feed-subtitle').innerHTML = aFeed.subtitle;
+                feedSubtitle.innerHTML = aFeed.subtitle;
         }
     },
 
