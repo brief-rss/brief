@@ -160,8 +160,7 @@
         <splitter id="left-pane-splitter" persist="hidden"/>
         <vbox flex="1">
             <toolbox>
-                <toolbar id="feed-view-toolbar"
-                         hidden="true">
+                <toolbar id="feed-view-toolbar">
                     <toolbarbutton id="toggle-sidebar"
                                    oncommand="gCommands.toggleSidebar()"/>
                     <toolbarspring/>
