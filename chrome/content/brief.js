@@ -22,7 +22,7 @@ const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
 var gInitialized = false;
-var gTopBrowserWindow = null;
+var gTopWindow = null;
 var gTemplateURI = '';
 var gFeedViewStyle = '';
 
@@ -57,12 +57,12 @@ function init() {
         showHomeFolderPicker();
     }
 
-    gTopBrowserWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
-                               getInterface(Ci.nsIWebNavigation).
-                               QueryInterface(Ci.nsIDocShellTreeItem).
-                               rootTreeItem.
-                               QueryInterface(Ci.nsIInterfaceRequestor).
-                               getInterface(Ci.nsIDOMWindow);
+    gTopWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
+                        getInterface(Ci.nsIWebNavigation).
+                        QueryInterface(Ci.nsIDocShellTreeItem).
+                        rootTreeItem.
+                        QueryInterface(Ci.nsIInterfaceRequestor).
+                        getInterface(Ci.nsIDOMWindow);
 
     initToolbarsAndStrings()
 
@@ -416,7 +416,7 @@ var gCommands = {
             if (whereToOpen == 2)
                 openDialog('chrome://browser/content/browser.xul', '_blank', 'chrome,all,dialog=no', url);
             else
-                gTopBrowserWindow.gBrowser.loadOneTab(url);
+                gTopWindow.gBrowser.loadOneTab(url);
         }
         else {
             gFeedView.browser.loadURI(url);
