@@ -73,11 +73,6 @@ FeedView.prototype = {
     // IDs of contained entries, used for determining if the view needs refreshing.
     _entries: [],
 
-    // Events to which we listen to in the template page. Entry binding communicates with
-    // chrome to perform actions that require full privileges by sending custom events.
-    _events: ['SwitchEntryRead', 'SwitchEntryStarred', 'DeleteEntry', 'RestoreEntry',
-              'EntryUncollapsed', 'click', 'mousedown', 'scroll', 'keypress'],
-
     // Key elements.
     get browser FeedView_get_browser() {
         delete this.__proto__.browser;
@@ -414,6 +409,12 @@ FeedView.prototype = {
     },
 
 
+    // Events to which we listen to in the template page. Entry binding communicates with
+    // chrome to perform actions that require full privileges by sending custom events.
+    _events: ['SwitchEntryRead', 'SwitchEntryStarred', 'ShowBookmarkPopup',
+              'DeleteEntry', 'RestoreEntry', 'EntryUncollapsed', 'click',
+              'mousedown', 'scroll', 'keypress'],
+
     handleEvent: function FeedView_handleEvent(aEvent) {
         var target = aEvent.target;
 
@@ -447,7 +448,7 @@ FeedView.prototype = {
                 }
                 else {
                     document.getElementById('feed-view-toolbar').hidden = true;
-                    gTopBrowserWindow.gBrief.contextMenuTarget = null;
+                    gTopWindow.gBrief.contextMenuTarget = null;
                 }
                 break;
 
@@ -473,7 +474,7 @@ FeedView.prototype = {
         // We store targets of right-clicks to override document.popupNode, so that
         // context menu sees anonymous content.
         if (aEvent.button == 2) {
-            gTopBrowserWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
+            gTopWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
             return;
         }
 
