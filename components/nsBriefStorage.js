@@ -949,7 +949,7 @@ BriefStorageService.prototype = {
 
     // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
-        if (this.isItemStoredInDB(aItemID)) {
+        if (this.isItemStoredInDB(aItemID) || aItemID == this.homeFolderID) {
             if (this.batchUpdateInProgress)
                 this.homeFolderContentModified = true;
             else
