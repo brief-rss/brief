@@ -102,21 +102,6 @@ BriefStorageService.prototype = {
     feedsAndFoldersCache:  null,
     feedsCache:            null,
 
-    // State properties uses by the bookmarks observer.
-    batchUpdateInProgress: false,
-    homeFolderContentModified: false,
-    bookmarksObserverTimerIsRunning: false,
-
-    __bookmarksObserverDelayTimer: null,
-    get bookmarksObserverDelayTimer BriefStorage_bookmarksObserverDelayTimer() {
-        if (!this.__bookmarksObserverDelayTimer) {
-            this.__bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
-                                                 createInstance(Ci.nsITimer);
-        }
-        return this.__bookmarksObserverDelayTimer;
-    },
-
-
     instantiate: function BriefStorage_instantiate() {
         var databaseFile = Cc['@mozilla.org/file/directory_service;1'].
                            getService(Ci.nsIProperties).
@@ -146,6 +131,7 @@ BriefStorageService.prototype = {
             this.migrateDatabase();
         }
 
+        this.homeFolderID = prefs.getIntPref('homeFolder');
         prefs.addObserver('', this, false);
         places.bookmarks.addObserver(this, false);
         observerService.addObserver(this, 'quit-application', false);
@@ -308,7 +294,10 @@ BriefStorageService.prototype = {
         var unfiledFolder = places.unfiledBookmarksFolderId;
         var bookmarkedEntries = [];
 
-        var select = createStatement('SELECT entryURL, title, id FROM entries WHERE starred = 1');
+        var select = createStatement(
+            'SELECT entries.entryURL, entries.id, entries_text.title                    ' +
+            'FROM entries INNER JOIN entries_text ON entries.rowid = entries_text.rowid ' +
+            'WHERE starred = 1                                                          ');
         var update = createStatement('UPDATE entries SET bookmarkID = ? WHERE id = ?');
 
         this.dBConnection.beginTransaction();
@@ -323,6 +312,7 @@ BriefStorageService.prototype = {
                 places.annotations.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM,
                                                      entryID, 0,
                                                      places.annotations.EXPIRE_NEVER)
+
                 // TODO: make the tag localizable
                 places.tagging.tagURI(uri, ['feed item']);
 
@@ -338,7 +328,6 @@ BriefStorageService.prototype = {
         finally {
             this.dBConnection.commitTransaction();
         }
-        // Fall through...
     },
 
 
@@ -902,6 +891,7 @@ BriefStorageService.prototype = {
             case 'nsPref:changed':
                 switch (aData) {
                     case 'homeFolder':
+                        this.homeFolderID = prefs.getIntPref('homeFolder');
                         this.syncWithBookmarks();
                         break;
                 }
@@ -913,6 +903,23 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
         new BookmarksSynchronizer();
+    },
+
+
+    homeFolderID: -1,
+
+    // State properties uses by the bookmarks observer.
+    batchUpdateInProgress: false,
+    homeFolderContentModified: false,
+    bookmarksObserverTimerIsRunning: false,
+
+    __bookmarksObserverDelayTimer: null,
+    get bookmarksObserverDelayTimer BriefStorage_bookmarksObserverDelayTimer() {
+        if (!this.__bookmarksObserverDelayTimer) {
+            this.__bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
+                                                 createInstance(Ci.nsITimer);
+        }
+        return this.__bookmarksObserverDelayTimer;
     },
 
 
@@ -932,7 +939,7 @@ BriefStorageService.prototype = {
 
     // nsINavBookmarkObserver
     onItemAdded: function BriefStorage_onItemAdded(aItemID, aFolder, aIndex) {
-        if (this.isItemInHomeFolder(aItemID)) {
+        if (this.isItemFolder(aItemID) && this.isItemInHomeFolder(aItemID)) {
             if (this.batchUpdateInProgress)
                 this.homeFolderContentModified = true;
             else
@@ -942,8 +949,7 @@ BriefStorageService.prototype = {
 
     // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
-        if (this.getFeedByBookmarkID(aItemID) || prefs.getIntPref('homeFolder') == aItemID) {
-
+        if (this.isItemStoredInDB(aItemID)) {
             if (this.batchUpdateInProgress)
                 this.homeFolderContentModified = true;
             else
@@ -954,9 +960,7 @@ BriefStorageService.prototype = {
     // nsINavBookmarkObserver
     onItemMoved: function BriefStorage_onItemMoved(aItemID, aOldParent, aOldIndex,
                                                    aNewParent, aNewIndex) {
-        var inFeeds = !!this.getFeedByBookmarkID(aItemID);
-
-        if (inFeeds || this.isItemInHomeFolder(aItemID)) {
+        if (this.isItemStoredInDB(aItemID) || this.isItemInHomeFolder(aItemID)) {
             if (this.batchUpdateInProgress)
                 this.homeFolderContentModified = true;
             else
@@ -993,21 +997,20 @@ BriefStorageService.prototype = {
     aOnItemVisited: function BriefStorage_aOnItemVisited(aItemID, aVisitID, aTime) { },
 
 
-    // Returns TRUE if an item is a livemark or a folder and if it is in the home folder.
+    // Returns TRUE if an item is a livemark or a folder and is in the home folder.
     isItemInHomeFolder: function BriefStorage_isItemInHomeFolder(aItemID) {
-        var homeFolderID = prefs.getIntPref('homeFolder');
-        if (homeFolderID == -1)
+        if (this.homeFolderID === -1)
             return false;
 
-        var inHome = false;
-        var typeFolder = places.bookmarks.TYPE_FOLDER;
-        var isFolder = (places.bookmarks.getItemType(aItemID) == typeFolder);
+        if (this.homeFolderID === aItemID)
+            return true;
 
-        if (isFolder) {
+        var inHome = false;
+        if (this.isItemFolder(aItemID)) {
             var parent = aItemID;
-            while (parent != places.bookmarks.bookmarksRoot) {
+            while (parent !== places.placesRootId) {
                 parent = places.bookmarks.getFolderIdForItem(parent);
-                if (parent == homeFolderID) {
+                if (parent === homeFolderID) {
                     inHome = true;
                     break;
                 }
@@ -1017,6 +1020,19 @@ BriefStorageService.prototype = {
         return inHome;
     },
 
+    isItemFolder: function BriefStorage_isItemFolder(aItemID) {
+        return places.bookmarks.getItemType(aItemID) === places.bookmarks.TYPE_FOLDER;
+    },
+
+    isItemStoredInDB: function BriefStorage_isItemStoredInDB(aItemID) {
+        var stmt = this.checkItemByBookmarkID_stmt;
+        stmt.bindInt64Parameter(0, aItemID);
+        stmt.bindInt64Parameter(1, aItemID);
+        var isItemStored = stmt.executeStep();
+        stmt.reset();
+        return isItemStored;
+    },
+
     delayedBookmarksSync: function BriefStorage_delayedBookmarksSync() {
         if (this.bookmarksObserverTimerIsRunning)
             this.bookmarksObserverDelayTimer.cancel();
@@ -1024,6 +1040,18 @@ BriefStorageService.prototype = {
         this.bookmarksObserverDelayTimer.init(this, BOOKMARKS_OBSERVER_DELAY,
                                               Ci.nsITimer.TYPE_ONE_SHOT);
         this.bookmarksObserverTimerIsRunning = true;
+    },
+
+    get checkItemByBookmarkID_stmt BriefStorage_checkItemByBookmarkID_stmt() {
+        delete this.__proto__.checkForBookmarkID_stmt;
+        return this.__proto__.checkForBookmarkID_stmt = createStatement(
+               'SELECT COUNT(1) FROM feeds WHERE feeds.bookmarkID = ?2');
+    },
+
+    get unstarEntry_stmt BriefStorage_get_unstarEntry_stmt() {
+        delete this.__proto__.unstarEntry_stmt;
+        return this.__proto__.unstarEntry_stmt = createStatement(
+               'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE bookmarkID = ?1');
     },
 
 
@@ -1059,8 +1087,8 @@ BriefStorageService.prototype = {
 
 
 /**
- * Synchronizes the list of feeds stored in the database with the bookmarks available
- * in the user's home folder.
+ * Synchronizes the list of feeds stored in the database with
+ * the bookmarks available in the user's home folder.
  */
 function BookmarksSynchronizer() {
     if (!this.checkHomeFolder())
