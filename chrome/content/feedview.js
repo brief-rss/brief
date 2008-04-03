@@ -31,6 +31,9 @@ function setView(aView) {
     aView.browser.addEventListener('load', aView, false);
     if (aView.browser.currentURI.equals(gTemplateURI)) {
         aView._setupTemplatePage();
+
+        // Do it asynchronously, because UI maybe waiting to be redrawn
+        // (e.g. after selecting a treeitem).
         async(aView._refresh, 0, aView);
     }
     else {
@@ -447,9 +450,9 @@ FeedView.prototype = {
             case 'load':
                 var toolbar = document.getElementById('feed-view-toolbar');
                 if (this.isActive) {
-                    this._setupTemplatePage();
                     toolbar.hidden = false;
-                    async(this._refresh, 0, this);
+                    this._setupTemplatePage();
+                    this._refresh();
                 }
                 else {
                     toolbar.hidden = true;
@@ -764,9 +767,9 @@ FeedView.prototype = {
         var params = [this.currentPage, this.pageCount];
         pageLabel.value = stringbundle.getFormattedString('pageNumberLabel', params);
 
-        async(function(){ gFeedView._entries = gFeedView.query.getSerializedEntries().
-                                               getPropertyAsAString('entries').
-                                               match(/[^ ]+/g); }, 500);
+        this._entries = this.query.getSerializedEntries().
+                                   getPropertyAsAString('entries').
+                                   match(/[^ ]+/g);
     },
 
 
