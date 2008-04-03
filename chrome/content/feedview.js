@@ -41,6 +41,9 @@ function setView(aView) {
 /**
  * This object represents the main feed display. It stores and manages
  * the display parameters.
+ * The feed displayed using a local, unprivileged template page. We insert third-party
+ * content in it (the entries are served with full HTML markup) the template page is
+ * untrusted and all the interaction respects XPCNativeWrappers.
  *
  * @param aTitle  Title of the view which will be shown in the header.
  * @param aQuery  Query selecting entries to be displayed.
@@ -442,12 +445,14 @@ FeedView.prototype = {
                 break;
 
             case 'load':
+                var toolbar = document.getElementById('feed-view-toolbar');
                 if (this.isActive) {
                     this._setupTemplatePage();
+                    toolbar.hidden = false;
                     async(this._refresh, 0, this);
                 }
                 else {
-                    document.getElementById('feed-view-toolbar').hidden = true;
+                    toolbar.hidden = true;
                     gTopWindow.gBrief.contextMenuTarget = null;
                 }
                 break;
@@ -497,9 +502,8 @@ FeedView.prototype = {
     },
 
 
-    // Because we insert third-party content in it (the entries are not served in plain
-    // text but in full HTML markup) this page needs to be have a file:// URI to be
-    // unprivileged. It is untrusted and all the interaction respects XPCNativeWrappers.
+    // This function sets up the page after it's loaded or after attaching a new FeedView.
+    // It does the initial work, which doesn't have to be done every time when refreshing.
     _setupTemplatePage: function FeedView__setupTemplatePage() {
         for each (event in this._events)
             this.document.addEventListener(event, this, true);
@@ -568,7 +572,7 @@ FeedView.prototype = {
     },
 
 
-    // Refreshes the feed view.
+    // Refreshes the feed view. Removes the old content and builds it from scratch.
     _refresh: function FeedView_refresh() {
         // Stop scrolling, so it doesn't continue after refreshing.
         clearInterval(this._smoothScrollInterval);
@@ -580,7 +584,8 @@ FeedView.prototype = {
         // Suppress selecting entry until we refresh is finished.
         this._selectionSuppressed = true;
 
-        document.getElementById('feed-view-toolbar').hidden = false;
+        var win = this.document.defaultView;
+        win.scroll(win.pageXOffset, 0);
 
         // Remove the old content.
         var container = this.document.getElementById('container');
