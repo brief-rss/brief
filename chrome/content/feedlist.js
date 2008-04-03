@@ -171,7 +171,7 @@ var gFeedList = {
             // If there is a webpage open in the browser then clicking on
             // the already selected item, should bring back the feed view.
             if (!gFeedView.isActive && item == this.selectedItem && aEvent.button == 0)
-                gFeedView.ensure(true);
+                gFeedView.browser.loadURI(gTemplateURI.spec);
         }
     },
 
