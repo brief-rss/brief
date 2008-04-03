@@ -587,7 +587,7 @@ FeedView.prototype = {
         var oldContent = this.document.getElementById('feed-content');
         container.removeChild(oldContent);
 
-        this.feedContent = this.document.createElementNS(XHTML_NS, 'div');
+        this.feedContent = this.document.createElement('div');
         this.feedContent.id = 'feed-content';
         container.appendChild(this.feedContent);
 
