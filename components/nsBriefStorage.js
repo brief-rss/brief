@@ -60,12 +60,7 @@ const ENTRIES_TEXT_TABLE_SCHEMA = 'title, content';
 
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-
-// XXX This is for compatibility with Fx 3 beta 4, switch to C.u.import later.
-const PLACES_UTILS_URL = 'chrome://browser/content/places/utils.js';
-Cc['@mozilla.org/moz/jssubscript-loader;1'].getService(Ci.mozIJSSubScriptLoader).
-                                            loadSubScript(PLACES_UTILS_URL);
-
+Components.utils.import('resource://gre/modules/utils.js');
 
 var places = PlacesUtils;
 
@@ -84,6 +79,12 @@ __defineGetter__('prefs', function() {
                         getService(Ci.nsIPrefService).
                         getBranch('extensions.brief.').
                         QueryInterface(Ci.nsIPrefBranch2);
+});
+__defineGetter__('stringbundle', function() {
+    delete this.stringbundle;
+    return this.stringbundle = Cc['@mozilla.org/intl/stringbundle;1'].
+                               getService(Ci.nsIStringBundleService).
+                               createBundle('chrome://brief/locale/brief.properties');
 });
 
 
@@ -292,6 +293,7 @@ BriefStorageService.prototype = {
         var ioService = Cc['@mozilla.org/network/io-service;1'].
                         getService(Ci.nsIIOService);
         var unfiledFolder = places.unfiledBookmarksFolderId;
+        var tagName = stringbundle.GetStringFromName('bookmarkedEntryTagName');
         var bookmarkedEntries = [];
 
         var select = createStatement(
@@ -312,9 +314,7 @@ BriefStorageService.prototype = {
                 places.annotations.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM,
                                                      entryID, 0,
                                                      places.annotations.EXPIRE_NEVER)
-
-                // TODO: make the tag localizable
-                places.tagging.tagURI(uri, ['feed item']);
+                places.tagging.tagURI(uri, [tagName]);
 
                 update.bindStringParameter(0, bookmarkID);
                 update.bindStringParameter(1, entryID);
@@ -1010,7 +1010,7 @@ BriefStorageService.prototype = {
             var parent = aItemID;
             while (parent !== places.placesRootId) {
                 parent = places.bookmarks.getFolderIdForItem(parent);
-                if (parent === homeFolderID) {
+                if (parent === this.homeFolderID) {
                     inHome = true;
                     break;
                 }
@@ -1570,6 +1570,9 @@ BriefQuery.prototype = {
 
             var ioService = Cc['@mozilla.org/network/io-service;1'].
                             getService(Ci.nsIIOService);
+            var txnService = Cc['@mozilla.org/browser/placesTransactionsService;1'].
+                             getService(Ci.nsIPlacesTransactionsService);
+            var tagName = stringbundle.GetStringFromName('bookmarkedEntryTagName');
             var bms = places.bookmarks;
             var annos = places.annotations;
 
@@ -1581,11 +1584,12 @@ BriefQuery.prototype = {
                                                         uri, bms.DEFAULT_INDEX, entry.title);
                     annos.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM, entry.id, 0,
                                             annos.EXPIRE_NEVER);
-                    // TODO: make the tag localizable
-                    places.tagging.tagURI(uri, ['feed item']);
+                    places.tagging.tagURI(uri, [tagName]);
                 }
                 else {
-                    bms.removeItem(entry.bookmarkID);
+                    // We have to use a transaction, so that tags are removed too.
+                    var txn = txnService.removeItem(entry.bookmarkID);
+                    txnService.doTransaction(txn);
                     annos.removeItemAnnotation(entry.bookmarkID, ANNO_BRIEF_FEED_ITEM);
                 }
 
