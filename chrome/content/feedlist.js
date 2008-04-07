@@ -338,8 +338,8 @@ var gFeedList = {
      *                 nsIBriefFeed object, feedID string, or treeitem XULElement.
      */
     refreshFeedTreeitems: function gFeedList_refreshFeedTreeitems(aFeeds) {
-        var feed, treeitem, treecell, query, unreadCount, iconURL;
-        var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
+        var feed, treeitem, treecell, query, unreadCount;
+        var feeds = (aFeeds instanceof Array) ? aFeeds : [aFeeds];
 
         for (var i = 0; i < feeds.length; i++) {
             feed = this.getBriefFeed(feeds[i]);
@@ -353,14 +353,11 @@ var gFeedList = {
 
             // Update the favicon.
             if (treeitem.hasAttribute('loading'))
-                iconURL = THROBBER_URL;
+                treecell.setAttribute('src', THROBBER_URL);
             else if (treeitem.hasAttribute('error'))
-                iconURL = ERROR_ICON_URL;
+                treecell.setAttribute('src', ERROR_ICON_URL);
             else if (feed.favicon != 'no-favicon')
-                iconURL = feed.favicon;
-
-            if (iconURL)
-                treecell.setAttribute('src', iconURL);
+                treecell.setAttribute('src', feed.favicon);
             else
                 treecell.removeAttribute('src');
         }
