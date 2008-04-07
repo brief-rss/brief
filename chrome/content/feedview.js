@@ -587,9 +587,6 @@ FeedView.prototype = {
         // Suppress selecting entry until we refresh is finished.
         this._selectionSuppressed = true;
 
-        var win = this.document.defaultView;
-        win.scroll(win.pageXOffset, 0);
-
         // Remove the old content.
         var container = this.document.getElementById('container');
         var oldContent = this.document.getElementById('feed-content');
@@ -921,6 +918,10 @@ FeedView.prototype = {
             }
 
             this._selectLastEntryOnRefresh = false;
+        }
+        else {
+            var win = this.document.defaultView;
+            win.scroll(win.pageXOffset, 0);
         }
     }
 
