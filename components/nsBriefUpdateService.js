@@ -126,13 +126,12 @@ BriefUpdateService.prototype = {
         }
 
         // Add feeds to the queue, but don't let the same feed be added twice.
-        var feed, i;
-        var oldLength = this.scheduledFeeds.length;
-        for (i = 0; i < aFeeds.length; i++) {
-            feed = aFeeds[i];
-            if (this.scheduledFeeds.indexOf(feed) == -1) {
+        var newFeedsQueued = false;
+        for each (feed in aFeeds) {
+            if (this.updateQueue.indexOf(feed) == -1) {
                 this.scheduledFeeds.push(feed);
                 this.updateQueue.push(feed);
+                newFeedsQueued = true;
             }
         }
 
@@ -156,7 +155,7 @@ BriefUpdateService.prototype = {
             this.updateInProgress = aInBackground ? BACKGROUND_UPDATE : NORMAL_UPDATE;
 
         // If new feeds have ended up in the queue then send the proper notification.
-        if (oldLength < this.scheduledFeeds.length) {
+        if (newFeedsQueued) {
             var data = this.updateInProgress == BACKGROUND_UPDATE ? 'background' : 'foreground';
             observerService.notifyObservers(null, 'brief:feed-update-queued', data);
         }
