@@ -456,7 +456,6 @@ FeedView.prototype = {
                 }
                 else {
                     toolbar.hidden = true;
-                    gTopWindow.gBrief.contextMenuTarget = null;
                 }
                 break;
 
@@ -474,23 +473,26 @@ FeedView.prototype = {
 
 
     _onClick: function FeedView__onClick(aEvent) {
-        var target = aEvent.target;
-
-        if (gPrefs.entrySelectionEnabled && target.className == 'article-container')
-            gFeedView.selectEntry(target.id);
-
-        // We store targets of right-clicks to override document.popupNode, so that
-        // context menu sees anonymous content.
-        if (aEvent.button == 2) {
-            gTopWindow.gBrief.contextMenuTarget = aEvent.originalTarget;
-            return;
+        // Look for the article container in the target's parent chain.
+        var elem = aEvent.target;
+        while (elem != this.document.documentElement) {
+            if (elem.className == 'article-container') {
+                var entryElement = elem;
+                break;
+            }
+            elem = elem.parentNode;
         }
 
-        // We can't open entry links by dispatching custom events, because for
-        // whatever reason the binding handlers don't catch middle-clicks.
-        var cmd = aEvent.originalTarget.getAttribute('command');
+        if (gPrefs.entrySelectionEnabled && entryElement)
+            gFeedView.selectEntry(entryElement.id);
 
-        if (cmd == 'open' && (aEvent.button == 0 || aEvent.button == 1)) {
+        // We intercept clicks on the article title link, so that we can mark the
+        // entry as read and force opening in a new tab if necessary. We can't
+        // dispatch a custom event like we do with other actions, because for
+        // whatever reason the binding handlers don't catch middle-clicks.
+        if (aEvent.target.className == 'article-title-link'
+            && (aEvent.button == 0 || aEvent.button == 1)) {
+
             aEvent.preventDefault();
 
             // Prevent default doesn't seem to stop the default action when
@@ -500,7 +502,7 @@ FeedView.prototype = {
 
             var openInTabs = gPrefs.getBoolPref('feedview.openEntriesInTabs');
             var newTab = (openInTabs || aEvent.button == 1);
-            gCommands.openEntryLink(target, newTab);
+            gCommands.openEntryLink(entryElement, newTab);
         }
     },
 
@@ -800,7 +802,7 @@ FeedView.prototype = {
 
 
     _appendEntry: function FeedView__appendEntry(aEntry) {
-        var articleContainer = this.document.createElementNS(XHTML_NS, 'div');
+        var articleContainer = this.document.createElement('div');
         articleContainer.className = 'article-container';
 
         // Safely pass the data so that binding constructor can use it.

@@ -22,7 +22,7 @@
                 <html:div class="delete-entry" command="delete"/>
                 <html:div class="restore-entry" command="restore"/>
             </html:div>
-            <html:a class="article-title-link" command="open"/>
+            <children includes="a"/>
         </html:div>
 
         <html:div class="article-subheader">
@@ -31,7 +31,6 @@
             <html:div class="feed-name"/>
         </html:div>
 
-        <html:div class="article-content"/>
         <children/>
     </content>
 
@@ -41,24 +40,34 @@
             // Find elements
             var feedNameElem = this.getElement('feed-name');
             var authorsElem  = this.getElement('article-authors');
-            var titleElem    = this.getElement('article-title-link');
             var dateElem     = this.getElement('article-date');
-            var contentElem  = this.getElement('article-content');
             var markReadElem = this.getElement('mark-read-centre');
+            var feedContent = document.getElementById('feed-content');
 
             // Use innerHTML instead of textContent, so that the entities are resolved.
-            titleElem.setAttribute('href', this.getAttribute('entryURL'));
-            titleElem.innerHTML = this.getAttribute('entryTitle');
-
-            var feedContent = document.getElementById('feed-content');
             if (feedContent.hasAttribute('showFeedNames'))
                 feedNameElem.innerHTML = this.getAttribute('feedName');
 
             dateElem.innerHTML = this.getAttribute('updated') || this.getAttribute('date');
             authorsElem.innerHTML = this.getAttribute('authors');
-            contentElem.innerHTML = this.getAttribute('content');
             markReadElem.textContent = this.read ? gConveyedData.markUnreadString
                                                  : gConveyedData.markReadString;
+
+            // Create article-content and article-title-link elements manually
+            // to make them explicit instead of anynymous. This makes the context
+            // menu work without the need of ugly and fragile hacks like modyfing
+            // nsContextMenu. It also increases the chance of compatibility with
+            // various other extensions which interact with the content.
+            var contentElem = document.createElement('div');
+            contentElem.className = 'article-content';
+            contentElem.innerHTML = this.getAttribute('content');
+            this.appendChild(contentElem);
+
+            var titleElem = document.createElement('a');
+            titleElem.className = 'article-title-link';
+            titleElem.setAttribute('href', this.getAttribute('entryURL'));
+            titleElem.innerHTML = this.getAttribute('entryTitle');
+            this.appendChild(titleElem);
 
             if (this.collapsed) {
                 $(contentElem).hide();
