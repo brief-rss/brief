@@ -3,7 +3,7 @@ const BRIEF_FAVICON_URL = 'chrome://brief/skin/feed-icon-16x16.png';
 var BriefQuery = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery',
                                         'setConditions');
 
-var gBrief = {
+const gBrief = {
 
     tab: null,            // Tab in which Brief is loaded
     statusIcon: null,     // Statusbar panel
