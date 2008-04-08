@@ -240,10 +240,18 @@ BriefUpdateService.prototype = {
             var params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
             var text = bundle.formatStringFromName('updateAlertText', params, 2);
 
-            var alertsService = Cc['@mozilla.org/alerts-service;1'].
-                                getService(Ci.nsIAlertsService);
-            alertsService.showAlertNotification(FEED_ICON_URL, title, text,
-                                                true, null, this);
+            try {
+                var alertsService = Cc['@mozilla.org/alerts-service;1'].
+                                    getService(Ci.nsIAlertsService);
+                alertsService.showAlertNotification(FEED_ICON_URL, title, text,
+                                                    true, null, this);
+            }
+            catch (ex) {
+                // XXX There are some reports of nsIAlertsService failing on OS X with
+                // Growl installed. Let's catch the exception until a real solution
+                // is found.
+                Components.utils.reportError(ex);
+            }
         }
 
         // Reset the properties after updating is finished.
