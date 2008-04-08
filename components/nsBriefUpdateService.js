@@ -380,8 +380,9 @@ FeedFetcher.prototype = {
                 self.request.abort();
                 self.requestFeed();
             }
-            else
+            else {
                 self.finish(false);
+            }
         }
 
         function onRequestLoad() {
@@ -395,7 +396,7 @@ FeedFetcher.prototype = {
             try {
                 parser.parseFromString(self.request.responseText, uri);
             }
-            catch(e) {
+            catch (ex) {
                 self.finish(false);
             }
         }
@@ -463,7 +464,7 @@ FeedFetcher.prototype = {
     },
 
 
-    finish: function FeedFetcher_finish(aOK) {
+    finish: function FeedFetcher_finish(aSuccess) {
         // For whatever reason, if nsIFeedProcessor gets a parsing error it sometimes
         // calls handleResult() twice. We check the inError flag to avoid doing finish()
         // again, because it would seriously mess up the batch update by adding the
@@ -477,7 +478,7 @@ FeedFetcher.prototype = {
         // be refreshed properly, because of outdated count of completed feeds.
         gUpdateService.completedFeeds.push(this.feed);
 
-        if (!aOK) {
+        if (!aSuccess) {
             this.inError = true;
             observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
         }
