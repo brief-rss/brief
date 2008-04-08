@@ -179,7 +179,7 @@ body {
   background-image: url('chrome://brief/skin/read-entry-bkg.png');
   }
 
-.article-container[read] > .article-header > .article-title-link {
+.article-container[read] .article-title-link {
   font-weight: normal;
   }
 

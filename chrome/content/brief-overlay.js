@@ -262,9 +262,6 @@ const gBrief = {
                 this.updateStatuspanel();
             }
 
-            document.getElementById('contentAreaContextMenu').
-                     setAttribute('onpopupshowing', 'if (event.target != this) return true; if (content.location == BRIEF_URL && gBrief.contextMenuTarget) document.popupNode = gBrief.contextMenuTarget; updateEditUIVisibility(); gContextMenu = new nsContextMenu(this, window.getBrowser()); return gContextMenu.shouldDisplay;');
-
             // Observe changes to the feed database in order to keep the statusbar
             // icon up-to-date.
             var observerService = Cc['@mozilla.org/observer-service;1'].
@@ -331,8 +328,8 @@ const gBrief = {
 
             var progressmeter = document.getElementById('brief-progressmeter');
 
-            // Only show the progressmeter if Brief isn't opened in the currently selected
-            // tab (no need to show two progressmeters on screen).
+            // Only show the progressmeter if Brief isn't opened in the currently
+            // selected tab (no need to show two progressmeters on screen).
             if (gBrowser.selectedTab != this.tab)
                 progressmeter.hidden = false;
 
@@ -347,9 +344,8 @@ const gBrief = {
                                  this.updateService.totalFeedsCount;
             progressmeter.value = progress;
 
-            if (progress == 100) {
-                setTimeout(function() {progressmeter.hidden = true}, 500);
-            }
+            if (progress == 100)
+                setTimeout(function() { progressmeter.hidden = true }, 500);
 
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
                 this.updateStatuspanel();
