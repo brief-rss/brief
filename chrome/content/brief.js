@@ -3,8 +3,8 @@ const EXT_ID = 'brief@mozdev.org';
 const TEMPLATE_FILENAME = 'feedview-template.html';
 const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
 
-const LAST_MAJOR_VERSION = '1.0';
-const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.0.html';
+const LAST_MAJOR_VERSION = '1.1';
+const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
 
 const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
@@ -21,16 +21,11 @@ const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
-var gInitialized = false;
 var gTopWindow = null;
 var gTemplateURI = '';
 var gFeedViewStyle = '';
 
 function init() {
-    if (gInitialized)
-        return;
-    gInitialized = true;
-
     gPrefs.register();
     getFeedViewStyle();
 
@@ -522,14 +517,7 @@ function showHomeFolderPicker() {
 
     var query = PlacesUtils.history.getNewQuery();
     var options = PlacesUtils.history.getNewQueryOptions();
-    // XXX Temporary, for preserving compatibility with Fx 3.0b4
-    try {
-        var root = PlacesUIUtils.allBookmarksFolderId;
-    }
-    catch (ex) {
-        root = PlacesUtils.allBookmarksFolderId;
-    }
-    query.setFolders([root], 1);
+    query.setFolders([PlacesUIUtils.allBookmarksFolderId], 1);
     options.excludeItems = true;
     placesTree.load([query], options);
 }
