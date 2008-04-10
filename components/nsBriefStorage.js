@@ -64,10 +64,6 @@ Components.utils.import('resource://gre/modules/utils.js');
 
 var places = PlacesUtils;
 
-// Shorthands for common functions.
-var executeSQL;
-var createStatement;
-
 __defineGetter__('observerService', function() {
     delete this.observerService;
     return this.observerService = Cc['@mozilla.org/observer-service;1'].
@@ -86,6 +82,10 @@ __defineGetter__('stringbundle', function() {
                                getService(Ci.nsIStringBundleService).
                                createBundle('chrome://brief/locale/brief.properties');
 });
+
+// Shorthands for common functions.
+__defineGetter__('executeSQL', function() gStorageService.dBConnection.executeSimpleSQL);
+__defineGetter__('createStatement', function() gStorageService.dBConnection.createStatement);
 
 
 var gStorageService = null;
@@ -114,12 +114,8 @@ BriefStorageService.prototype = {
                              getService(Ci.mozIStorageService);
         this.dBConnection = storageService.openUnsharedDatabase(databaseFile);
 
-        // Define shorthands for some common functions.
-        executeSQL = this.dBConnection.executeSimpleSQL;
-        createStatement = this.dBConnection.createStatement;
-
         if (!this.dBConnection.connectionReady) {
-            this.dBConnection.backupDB('brief-backup.sqlite');
+            storageService.backupDatabaseFile(databaseFile, 'brief-backup.sqlite');
             this.dBConnection.close();
             databaseFile.remove(false);
             this.dBConnection = storageService.openUnsharedDatabase(databaseFile);
