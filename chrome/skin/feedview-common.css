@@ -1,5 +1,9 @@
 .article-container {
-  -moz-binding: url('chrome://brief/content/bindings.xml#feedentry');
+  -moz-binding: url('chrome://brief/content/bindings.xml#article');
+}
+
+.article-header {
+    -moz-binding: url('chrome://brief/content/bindings.xml#article-header');
 }
 
 #feed-content[trash] .delete-entry {
@@ -97,7 +101,7 @@ pre, code {
 /* ----------------------  Adjustments for headlines view   ---------------------- */
 
 .article-container[collapsed] .article-controls,
-.article-container[collapsed] > .article-subheader {
+.article-container[collapsed] .article-authors {
   display: none;
 }
 

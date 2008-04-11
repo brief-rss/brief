@@ -8,80 +8,92 @@
           xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
           xmlns:html="http://www.w3.org/1999/xhtml">
 
-<binding id="feedentry">
-    <content>
-        <html:div class="article-header">
-            <html:div class="expand-button"/>
-            <html:div class="star-article" command="switchStarred"/>
-            <html:div class="article-controls">
-                <html:div class="mark-read" command="switchRead">
-                    <html:div class="mark-read-left" command="switchRead"/>
-                    <html:div class="mark-read-centre" command="switchRead"/>
-                    <html:div class="mark-read-right" command="switchRead"/>
-                </html:div>
-                <html:div class="delete-entry" command="delete"/>
-                <html:div class="restore-entry" command="restore"/>
-            </html:div>
-            <children includes="a"/>
-        </html:div>
+<!-- We use a seperate binding for article-header instead of making its content
+     a part of the article binding, because we need the article-header element to be
+     explicit. If it is anonymous, then we get wacky layout bugs related to mixing
+     the explicit article-content element with an anonymous one. Damn you, XBL. -->
+<binding id="article-header">
+    <xbl:content xmlns="http://www.w3.org/1999/xhtml">
+        <div class="expand-button"/>
+        <div class="star-article" command="switchStarred"/>
 
-        <html:div class="article-subheader">
-            <html:div class="article-date"/>
-            <html:div class="article-authors"/>
-            <html:div class="feed-name"/>
-        </html:div>
+        <div class="article-controls">
+            <div class="mark-read" command="switchRead">
+                <div class="mark-read-left" command="switchRead"/>
+                <div class="mark-read-centre" command="switchRead"/>
+                <div class="mark-read-right" command="switchRead"/>
+            </div>
+            <div class="delete-entry" command="delete"/>
+            <div class="restore-entry" command="restore"/>
+        </div>
 
-        <children/>
-    </content>
+        <div class="article-subheader">
+            <div class="article-date"/>
+            <div class="article-authors"/>
+            <div class="feed-name"/>
+        </div>
 
+        <xbl:children/>
+    </xbl:content>
+</binding>
+
+
+<binding id="article">
     <implementation>
         <constructor>
             <![CDATA[
-            // Find elements
-            var feedNameElem = this.getElement('feed-name');
-            var authorsElem  = this.getElement('article-authors');
-            var dateElem     = this.getElement('article-date');
-            var markReadElem = this.getElement('mark-read-centre');
-            var feedContent = document.getElementById('feed-content');
+            var header = document.createElement('div');
+            header.className = 'article-header';
+            this.appendChild(header);
+            this.header = header;
 
-            // Use innerHTML instead of textContent, so that the entities are resolved.
+            // Build the content of the header and the subheader. Use innerHTML
+            // instead of textContent, so that the entities are resolved.
+            var titleElem = document.createElement('a');
+            titleElem.className = 'article-title-link';
+            titleElem.setAttribute('href', this.getAttribute('entryURL'));
+            titleElem.innerHTML = this.getAttribute('entryTitle');
+            header.appendChild(titleElem);
+
+            var feedContent = document.getElementById('feed-content');
+            var feedNameElem = this.getElement('feed-name');
             if (feedContent.hasAttribute('showFeedNames'))
                 feedNameElem.innerHTML = this.getAttribute('feedName');
 
+            var dateElem     = this.getElement('article-date');
             dateElem.innerHTML = this.getAttribute('updated') || this.getAttribute('date');
+
+            var authorsElem  = this.getElement('article-authors');
             authorsElem.innerHTML = this.getAttribute('authors');
+
+            var markReadElem = this.getElement('mark-read-centre');
             markReadElem.textContent = this.read ? gConveyedData.markUnreadString
                                                  : gConveyedData.markReadString;
 
-            // Create article-content and article-title-link elements manually
-            // to make them explicit instead of anynymous. This makes the context
-            // menu work without the need of ugly and fragile hacks like modyfing
-            // nsContextMenu. It also increases the chance of compatibility with
-            // various other extensions which interact with the content.
+            // article-content and article-title-link elements are created manually,
+            // so that they are explicit instead of anynymous. This makes the context
+            // menu work on them without the need of ugly and fragile hacks.
+            // It also increases the chance of compatibility with various other
+            // extensions which interact with the content.
             var contentElem = document.createElement('div');
             contentElem.className = 'article-content';
             contentElem.innerHTML = this.getAttribute('content');
             this.appendChild(contentElem);
 
-            var titleElem = document.createElement('a');
-            titleElem.className = 'article-title-link';
-            titleElem.setAttribute('href', this.getAttribute('entryURL'));
-            titleElem.innerHTML = this.getAttribute('entryTitle');
-            this.appendChild(titleElem);
-
-            if (this.collapsed) {
+            if (this.collapsed)
                 $(contentElem).hide();
-                var headerElem = this.getElement('article-header');
-                headerElem.insertBefore(feedNameElem, titleElem);
-                headerElem.insertBefore(dateElem, titleElem);
-            }
             ]]>
         </constructor>
+
+        <field name="header">
+            null
+        </field>
 
         <method name="getElement">
             <parameter name="aClassName"/>
             <body>
-                return document.getAnonymousElementByAttribute(this, 'class', aClassName);
+                return document.getAnonymousElementByAttribute(this.header, 'class',
+                                                               aClassName);
             </body>
         </method>
 
@@ -109,19 +121,12 @@
                 if (aState == this.collapsed)
                     return;
 
-                var articleContent = this.getElement('article-content');
-                var feedName = this.getElement('feed-name');
-                var date = this.getElement('article-date');
+                var articleContent = this.getElementsByClassName('article-content')[0];
                 var self = this;
 
                 if (aState) {
                     function finish() {
                         self.setAttribute('collapsed', true);
-
-                        var title = self.getElement('article-title-link');
-                        var header = self.getElement('article-header');
-                        header.insertBefore(feedName, title);
-                        header.insertBefore(date, title);
                     }
 
                     if (aAnimate) {
@@ -135,11 +140,6 @@
 
                 else {
                     this.removeAttribute('collapsed');
-
-                    var subheader = self.getElement('article-subheader');
-                    var authors = self.getElement('article-authors');
-                    subheader.appendChild(feedName);
-                    subheader.insertBefore(date, authors);
 
                     function finish() {
                         self.sendEvent('EntryUncollapsed');

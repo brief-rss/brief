@@ -1,50 +1,50 @@
 body {
-  background: #fafcff;
-  font-family: Verdana, Helvetica, Arial, sans-serif;
-  font-size: 10px;
-  margin: 0;
-  padding: 0;
-  }
+    background: #fafcff;
+    font-family: Verdana, Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    margin: 0;
+    padding: 0;
+}
 
 
 
-/* ----------------------  Header ---------------------- */
+/* ----------------------  Header  ---------------------- */
 
 #header {
-  background: #314a59 url('chrome://brief/skin/header-bkg.png') repeat-x;
-  color: #ffffff;
-  text-decoration: none;
-  display: block;
-  padding: 5px 5% 5px;
-  overflow: auto; /* Clears contained floats */
-  }
+    background: #314a59 url('chrome://brief/skin/header-bkg.png') repeat-x;
+    color: #ffffff;
+    text-decoration: none;
+    display: block;
+    padding: 5px 5% 5px;
+    overflow: auto; /* Clears contained floats */
+}
 
 #feed-image {
-  border: none;
-  float: right;
-  margin: 0 10px 10px;
-  }
+    border: none;
+    float: right;
+    margin: 0 10px 10px;
+}
 
 #feed-title {
-  font-size: 20px;
-  font-weight: bold;
-  }
+    font-size: 20px;
+    font-weight: bold;
+}
 
 #feed-subtitle {
-  font-size: 13px;
-  margin-top: 3px;
-  }
+    font-size: 13px;
+    margin-top: 3px;
+}
 
 #feed-content {
-  padding: 20px 10px 10px;
-  }
+    padding: 20px 10px 10px;
+}
 
 #message {
-  font-size: 20px;
-  color: #4a6e85;
-  text-align: center;
-  display: none;
-  margin-top: 100px;
+    font-size: 20px;
+    color: #4a6e85;
+    text-align: center;
+    display: none;
+    margin-top: 100px;
 }
 
 
@@ -55,72 +55,74 @@ body {
    attributes. The first two are self-explanatory while "collapsed"
    means that the article's content is folded (headlines view) */
 .article-container {
-  background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
-  background-color: #ffffff;
-  border-top: 1px #abbfc9 solid;
-  border-right: 1px #e1e5da solid;
-  border-left: 1px #e1e5da solid;
-  border-bottom: 1px transparent solid; /* Placeholder for the selection border */
-  padding-bottom: 1px; /* Without this, the article is sometimes cut-off */
-  overflow: visible;   /* This is for the the expand/collapse dropmarker which is
-                          taken outside the box using negative margins */
-  position: relative;
-  margin: 0 auto;
-  min-width: -moz-min-content;
-  max-width: 70em;
-  }
+    background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
+    background-color: #ffffff;
+    border-top: 1px #abbfc9 solid;
+    border-right: 1px #e1e5da solid;
+    border-left: 1px #e1e5da solid;
+    border-bottom: 1px transparent solid; /* Placeholder for the selection border */
+    padding-bottom: 1px; /* Without this, the article is sometimes cut-off */
+    overflow: visible;   /* This is for the the expand/collapse dropmarker which is
+                            taken outside the box using negative margins */
+    position: relative;
+    margin: 0 auto;
+    min-width: -moz-min-content;
+    max-width: 70em;
+}
 
 .article-container:last-child {
-  border-bottom-color: #e1e5da;
+    border-bottom-color: #e1e5da;
 }
 
 
 /* ----------------------  Article header  ---------------------- */
 
 .article-header {
-  padding: 6px 5px 0 24px;
-  }
+    padding: 6px 5px 0 24px;
+}
 
 .article-title-link {
-  color: #00394f;
-  font-size: 13px;
-  font-weight: bold;
-  text-decoration: none;
-  }
+    color: #00394f;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+}
 
 
 
-/* ---------------------- Article controls  ---------------------- */
+/* ----------------------  Article controls  ---------------------- */
 
 .article-controls {
-  float: right;
-  margin: -3px 0 0 5px;
+    float: right;
+    margin: -3px 0 0 5px;
 }
 
 .star-article {
-  background: url(chrome://brief/skin/icons/star-entry.png) no-repeat;
-  background-position: 0 5px;
-  float: left;
-  margin: -6px 2px 0 -24px;
-  width: 24px;
-  height: 3.0em;
+    background: url(chrome://brief/skin/icons/star-entry.png) no-repeat;
+    background-position: 0 5px;
+    float: left;
+    margin: -6px 2px 0 -24px;
+    width: 24px;
+    height: 3.0em;
+    -moz-user-select: none; /* Prevent selecting the title when clicking */
 }
 
 .article-container:not([starred]) .star-article:hover {
-  background-position: -24px 5px;
-  }
+    background-position: -24px 5px;
+}
 
 .article-container[starred] .star-article {
-  background-position: -48px 5px;
+    background-position: -48px 5px;
 }
 
 .expand-button {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: -30px;
-  height: 6em;
-  width: 42px;
+    display: none;
+    position: absolute;
+    top: 0;
+    left: -30px;
+    height: 6em;
+    width: 42px;
+    -moz-user-select: none; /* Prevent selecting the title when clicking */
 }
 
 
@@ -128,121 +130,125 @@ body {
 /* ----------------------  Article subheader  ---------------------- */
 
 .article-subheader {
-  font-family: "Lucida Grande", Verdana, sans-serif;
-  color: #477900;
-  clear: both;
-  font-size: 12px;
-  padding: 10px 10px 0 40px;
-  overflow: auto; /* Clears contained floats */
+    font-family: "Lucida Grande", Verdana, sans-serif;
+    font-size: 12px;
+    line-height: 17px; /* Make the height the same for both Lucida and Verdana */
+    color: #477900;
+    clear: both;
+    float: left; /* It's got to float for the title appear before it */
+    width: -moz-available; /* Floating is just a trick, it still should be
+                              as wide as the containing box */
+    padding: 10px 10px 0 30px;
+    overflow: auto; /* Clears contained floats */
 }
 
 .article-authors, .article-date {
-  text-align: right;
-  float: right;
+    text-align: right;
+    float: right;
 }
 
 .article-authors {
-  margin-top: 2px;
-  clear: right;
+    clear: right;
 }
 
 .article-updated {
-  color: #de5b00;
+    color: #de5b00;
 }
 
 
 /* ----------------------  Article content area   ---------------------- */
 
 .article-content {
-  font-family: "Lucida Grande", Verdana, sans-serif;
-  font-size: 12px;
-  line-height: 1.4;
-  color: #272727;
-  margin-top: 10px;
-  padding: 0 25px 35px;
-  overflow: auto;
-  }
+    font-family: "Lucida Grande", Verdana, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #272727;
+    padding: 10px 25px 35px;
+    clear: both;
+    overflow: auto;
+}
 
 .article-content a {
-  color: #0a1f72;
-  }
+    color: #0a1f72;
+}
 
 .article-content a:visited {
-  color: #444b66;
-  }
+    color: #444b66;
+}
 
 
 
 /*  ----------------------  Adjustments for read articles  ---------------------- */
 
 .article-container[read] {
-  background-image: url('chrome://brief/skin/read-entry-bkg.png');
-  }
+    background-image: url('chrome://brief/skin/read-entry-bkg.png');
+}
 
 .article-container[read] .article-title-link {
-  font-weight: normal;
-  }
+    font-weight: normal;
+}
 
 
 
 /* ----------------------  Adjustments for headlines view   ---------------------- */
 
 .article-container[collapsed] {
-  background-image: none;
-  background-color: #ebf7ff;
-  border-right-color: #e1e8ef;
-  border-left-color: #e1e8ef;
-  min-height: 5.5em;
+    background-image: none;
+    background-color: #ebf7ff;
+    border-right-color: #e1e8ef;
+    border-left-color: #e1e8ef;
+    min-height: 50px;
 }
 
 .article-container[collapsed][read] {
-  background-color: #f5faff;
+    background-color: #f5faff;
 }
 
 .article-container[collapsed]:last-child {
-  border-bottom: 1px solid #abbfc9;
+    border-bottom: 1px solid #abbfc9;
 }
 
 .article-container[collapsed] .article-title-link {
-  font-size: 12px;
+    font-size: 12px;
 }
 
 .article-container[collapsed] .article-controls {
-  background-color: #ebf7ff;
-  position: absolute;
-  top: 3px;
-  right: 5px;
-  margin: 0;
-  padding-left: 10px;
+    background-color: #ebf7ff;
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    margin: 0;
+    padding-left: 10px;
 }
 
 .article-container[collapsed][read] .article-controls {
-  background-color: #f5faff;
+    background-color: #f5faff;
 }
 
-.article-container[collapsed] .article-date,
-.article-container[collapsed] .feed-name {
-  font-size: 12px;
-  color: #5c7933;
+.article-container[collapsed] .article-subheader {
+    color: #5c7933;
+    padding: 0 8px;
+    float: right;
+    clear: none;
+    width: -moz-max-content;
 }
 
 .article-container[collapsed] .article-date {
-  margin: 12px 8px 0;
-  clear: right;
+    float: none;
+    margin-bottom: 8px;
 }
 
 .article-container[collapsed] .feed-name {
-  margin: 0 8px;
-  max-width: 170px;
-  height: 1.3em; /* Height of a single line */
-  overflow: hidden;
-  float: right;
+    max-width: 170px;
+    height: 1.3em; /* Height of a single line */
+    overflow: hidden;
+    float: right;
 }
 
 
 
-/* ----------------------  Adjustments for the selected articles  -------------------- */
+/* ---------------------  Adjustments for the selected articles  ------------------- */
 
 .article-container[selected] {
-  border-color: #1474d6;
+    border-color: #1474d6;
 }
