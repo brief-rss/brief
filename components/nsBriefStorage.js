@@ -990,7 +990,7 @@ BriefStorageService.prototype = {
     },
 
     // nsINavBookmarkObserver
-    aOnItemVisited: function BriefStorage_aOnItemVisited(aItemID, aVisitID, aTime) { },
+    onItemVisited: function BriefStorage_aOnItemVisited(aItemID, aVisitID, aTime) { },
 
 
     // Returns TRUE if an item is a livemark or a folder and is in the home folder.
