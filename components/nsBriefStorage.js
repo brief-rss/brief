@@ -84,11 +84,12 @@ __defineGetter__('stringbundle', function() {
 });
 
 // Shorthands for common functions.
-__defineGetter__('executeSQL', function() gStorageService.dBConnection.executeSimpleSQL);
-__defineGetter__('createStatement', function() gStorageService.dBConnection.createStatement);
+__defineGetter__('executeSQL', function() gConnection.executeSimpleSQL);
+__defineGetter__('createStatement', function() gConnection.createStatement);
 
 
 var gStorageService = null;
+var gConnection = null;
 
 function BriefStorageService() {
     // The instantiation can't be done on app-startup, because the directory service
@@ -97,8 +98,6 @@ function BriefStorageService() {
 }
 
 BriefStorageService.prototype = {
-
-    dBConnection:  null,
 
     feedsAndFoldersCache:  null,
     feedsCache:            null,
@@ -112,19 +111,19 @@ BriefStorageService.prototype = {
 
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
-        this.dBConnection = storageService.openUnsharedDatabase(databaseFile);
+        gConnection = storageService.openUnsharedDatabase(databaseFile);
 
-        if (!this.dBConnection.connectionReady) {
+        if (!gConnection.connectionReady) {
             storageService.backupDatabaseFile(databaseFile, 'brief-backup.sqlite');
-            this.dBConnection.close();
+            gConnection.close();
             databaseFile.remove(false);
-            this.dBConnection = storageService.openUnsharedDatabase(databaseFile);
+            gConnection = storageService.openUnsharedDatabase(databaseFile);
             this.setupDatabase();
         }
         else if (databaseIsNew) {
             this.setupDatabase();
         }
-        else if (this.dBConnection.schemaVersion < DATABASE_VERSION) {
+        else if (gConnection.schemaVersion < DATABASE_VERSION) {
             this.migrateDatabase();
         }
 
@@ -145,12 +144,12 @@ BriefStorageService.prototype = {
         executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
         executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
 
-        this.dBConnection.schemaVersion = DATABASE_VERSION;
+        gConnection.schemaVersion = DATABASE_VERSION;
     },
 
 
     migrateDatabase: function BriefStorage_migrateDatabase() {
-        switch (this.dBConnection.schemaVersion) {
+        switch (gConnection.schemaVersion) {
 
         // Schema version checking has only been introduced in 0.8 beta 1. When migrating
         // from earlier releases we don't know the exact previous version, so we attempt
@@ -220,7 +219,7 @@ BriefStorageService.prototype = {
             // Fall through...
         }
 
-        this.dBConnection.schemaVersion = DATABASE_VERSION;
+        gConnection.schemaVersion = DATABASE_VERSION;
     },
 
 
@@ -232,7 +231,7 @@ BriefStorageService.prototype = {
                             'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   ' +
                             'entryAgeLimit, maxEntries, updateInterval, dateModified    ';
 
-        this.dBConnection.beginTransaction();
+        gConnection.beginTransaction();
         try {
             executeSQL('ALTER TABLE feeds ADD COLUMN dateModified INTEGER DEFAULT 0');
 
@@ -247,7 +246,7 @@ BriefStorageService.prototype = {
             this.reportError(ex);
         }
         finally {
-            this.dBConnection.commitTransaction();
+            gConnection.commitTransaction();
         }
     },
 
@@ -258,7 +257,7 @@ BriefStorageService.prototype = {
         const NEW_COLUMNS = 'id, feedID, secondaryID , providedID, entryURL, date, ' +
                             'authors, read, updated, starred, deleted, bookmarkID  ';
 
-        this.dBConnection.beginTransaction();
+        gConnection.beginTransaction();
         try {
             executeSQL('CREATE TABLE entries_copy (' + OLD_COLUMNS + ')');
             executeSQL('INSERT INTO entries_copy SELECT ' + OLD_COLUMNS + ' FROM entries');
@@ -280,7 +279,7 @@ BriefStorageService.prototype = {
             this.reportError(ex);
         }
         finally {
-            this.dBConnection.commitTransaction();
+            gConnection.commitTransaction();
         }
     },
 
@@ -298,7 +297,7 @@ BriefStorageService.prototype = {
             'WHERE starred = 1                                                          ');
         var update = createStatement('UPDATE entries SET bookmarkID = ? WHERE id = ?');
 
-        this.dBConnection.beginTransaction();
+        gConnection.beginTransaction();
         try {
             while (select.executeStep()) {
                 var uri = ioService.newURI(select.getString(0), null, null);
@@ -322,7 +321,7 @@ BriefStorageService.prototype = {
             this.reportError(ex);
         }
         finally {
-            this.dBConnection.commitTransaction();
+            gConnection.commitTransaction();
         }
     },
 
@@ -338,10 +337,10 @@ BriefStorageService.prototype = {
                                                        aArgs.getUTF8String(1))
         }
 
-        this.dBConnection.createFunction('hashString', 1, hashStringFunc);
-        this.dBConnection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
+        gConnection.createFunction('hashString', 1, hashStringFunc);
+        gConnection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
 
-        this.dBConnection.beginTransaction();
+        gConnection.beginTransaction();
         try {
             executeSQL('UPDATE OR IGNORE entries                                          ' +
                        'SET id = generateEntryHash(feedID, providedID)                    ' +
@@ -357,7 +356,7 @@ BriefStorageService.prototype = {
             this.reportError(ex);
         }
         finally {
-            this.dBConnection.commitTransaction();
+            gConnection.commitTransaction();
         }
     },
 
@@ -474,7 +473,7 @@ BriefStorageService.prototype = {
             unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
             var oldUnreadCount = unreadEntriesQuery.getEntriesCount();
 
-            this.dBConnection.beginTransaction();
+            gConnection.beginTransaction();
             try {
                 var entries = aFeed.getEntries({});
 
@@ -490,7 +489,7 @@ BriefStorageService.prototype = {
                 this.reportError(e);
             }
             finally {
-                this.dBConnection.commitTransaction();
+                gConnection.commitTransaction();
             }
 
             var newUnreadCount = unreadEntriesQuery.getEntriesCount();
@@ -727,7 +726,7 @@ BriefStorageService.prototype = {
         var removeFeeds = createStatement(
             'DELETE FROM feeds WHERE (?1 - feeds.hidden > ?2) AND feeds.hidden != 0');
 
-        this.dBConnection.beginTransaction()
+        gConnection.beginTransaction()
         try {
             if (aDeleteExpired) {
                 this.expireEntriesByAgeGlobal();
@@ -748,7 +747,7 @@ BriefStorageService.prototype = {
             this.reportError(ex);
         }
         finally {
-            this.dBConnection.commitTransaction();
+            gConnection.commitTransaction();
         }
 
         // Prefs can only store longs while Date is a long long.
@@ -1044,7 +1043,7 @@ BriefStorageService.prototype = {
                'SELECT COUNT(1) FROM feeds WHERE feeds.bookmarkID = ?2');
     },
 
-    get unstarEntry_stmt BriefStorage_get_unstarEntry_stmt() {
+    get unstarEntry_stmt BriefStorage_unstarEntry_stmt() {
         delete this.__proto__.unstarEntry_stmt;
         return this.__proto__.unstarEntry_stmt = createStatement(
                'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE bookmarkID = ?1');
@@ -1054,7 +1053,7 @@ BriefStorageService.prototype = {
     reportError: function BriefStorage_reportError(aException) {
         Components.utils.reportError(aException);
 
-        var dbError = this.dBConnection.lastErrorString;
+        var dbError = gConnection.lastErrorString;
         var consoleService = Cc['@mozilla.org/consoleservice;1'].
                              getService(Ci.nsIConsoleService);
         consoleService.logStringMessage('Brief database error:\n ' + dbError);
@@ -1094,7 +1093,7 @@ function BookmarksSynchronizer() {
 
     this.getBookmarks()
 
-    this.dBConnection.beginTransaction();
+    gConnection.beginTransaction();
     try {
         this.getFeeds();
 
@@ -1107,7 +1106,7 @@ function BookmarksSynchronizer() {
         }
     }
     finally {
-        this.dBConnection.commitTransaction();
+        gConnection.commitTransaction();
         if (this.feedListChanged) {
             gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
             observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
@@ -1118,8 +1117,6 @@ function BookmarksSynchronizer() {
 }
 
 BookmarksSynchronizer.prototype = {
-
-    get dBConnection() gStorageService.dBConnection,
 
     feeds:     null,
     newFeeds:  null,
@@ -1372,8 +1369,6 @@ BriefQuery.prototype = {
     // to compute actual folders list when creating the query.
     effectiveFolders: null,
 
-    get dBConnection() gStorageService.dBConnection,
-
     setConditions: function BriefQuery_setConditions(aFeeds, aEntries, aUnread) {
         this.feeds = aFeeds;
         this.entries = aEntries;
@@ -1410,7 +1405,7 @@ BriefQuery.prototype = {
                 entries.push(entry);
             }
         }
-        catch (ex if this.dBConnection.lastError == 1) {
+        catch (ex if gConnection.lastError == 1) {
             // Full-text search throws "SQL logic error or missing database" if the query
             // doesn't contain at least one non-excluded term.
         }
@@ -1437,7 +1432,7 @@ BriefQuery.prototype = {
                     feeds.push(feedID);
             }
         }
-        catch (ex if this.dBConnection.lastError == 1) {
+        catch (ex if gConnection.lastError == 1) {
             // Full-text search throws "SQL logic error or missing database" if the query
             // doesn't contain at least one non-excluded term.
         }
@@ -1466,7 +1461,7 @@ BriefQuery.prototype = {
             select.executeStep();
             count = select.getInt32(0);
         }
-        catch (ex if this.dBConnection.lastError == 1) {
+        catch (ex if gConnection.lastError == 1) {
             // Full-text search throws "SQL logic error or missing database" if the query
             // doesn't contain at least one non-excluded term.
         }
@@ -1483,7 +1478,7 @@ BriefQuery.prototype = {
                                      this.getQueryString())
         update.bindInt32Parameter(0, aState ? 1 : 0);
 
-        this.dBConnection.beginTransaction();
+        gConnection.beginTransaction();
         try {
             // Get the list of entries which we deleted, so we can pass it in the
             // notification. Never include those from hidden feeds though - nobody cares
@@ -1494,12 +1489,12 @@ BriefQuery.prototype = {
 
             update.execute();
         }
-        catch (ex if this.dBConnection.lastError == 1) {
+        catch (ex if gConnection.lastError == 1) {
             // Full-text search throws "SQL logic error or missing database" if the query
             // doesn't contain at least one non-excluded term.
         }
         finally {
-            this.dBConnection.commitTransaction();
+            gConnection.commitTransaction();
         }
 
         // If any entries were marked, dispatch the notifiaction.
@@ -1530,7 +1525,7 @@ BriefQuery.prototype = {
         }
 
         var statement = createStatement(statementString);
-        this.dBConnection.beginTransaction();
+        gConnection.beginTransaction();
         try {
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
             var changedEntries = this.getSerializedEntries();
@@ -1538,12 +1533,12 @@ BriefQuery.prototype = {
 
             statement.execute();
         }
-        catch (ex if this.dBConnection.lastError == 1) {
+        catch (ex if gConnection.lastError == 1) {
             // Full-text search throws "SQL logic error or missing database" if the query
             // doesn't contain at least one non-excluded term.
         }
         finally {
-            this.dBConnection.commitTransaction();
+            gConnection.commitTransaction();
         }
 
         if (changedEntries.getPropertyAsAString('entries')) {
@@ -1558,7 +1553,7 @@ BriefQuery.prototype = {
         var update = createStatement(
                      'UPDATE entries SET starred = ?1, bookmarkID = ?2 WHERE id = ?3');
 
-        this.dBConnection.beginTransaction();
+        gConnection.beginTransaction();
         try {
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
             var serializedChangedEntries = this.getSerializedEntries();
@@ -1596,7 +1591,7 @@ BriefQuery.prototype = {
             }
         }
         finally {
-            this.dBConnection.commitTransaction();
+            gConnection.commitTransaction();
         }
 
         if (serializedChangedEntries.getPropertyAsAString('entries')) {
