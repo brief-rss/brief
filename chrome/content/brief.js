@@ -664,7 +664,7 @@ var gPrefs = {
         this.branch.removeObserver('', this);
     },
 
-    get homeFolder() {
+    get homeFolder gPrefs_homeFolder() {
         var pref = this.getIntPref('homeFolder');
         return (pref != -1) ? pref : null;
     },

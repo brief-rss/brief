@@ -23,7 +23,7 @@ var gFeedList = {
 
     // Currently selected item. Returns the treeitem if a folder is selected or
     // the treecell if a feed is selected.
-    get selectedItem() {
+    get selectedItem gFeedList_selectedItem() {
         var item = null;
         var currentIndex = this.tree.currentIndex;
         if (currentIndex != -1 && currentIndex < this.tree.view.rowCount)
@@ -32,7 +32,7 @@ var gFeedList = {
     },
 
     // nsIBriefFeed object of the the currently selected feed, or null.
-    get selectedFeed() {
+    get selectedFeed gFeedList_selectedFeed() {
         if (!this.selectedItem)
             return null;
 

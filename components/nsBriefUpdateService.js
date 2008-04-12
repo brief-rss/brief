@@ -60,12 +60,12 @@ function BriefUpdateService() {
 BriefUpdateService.prototype = {
 
     // nsIBriefUpdateService
-    get totalFeedsCount() {
+    get totalFeedsCount BUS_totalFeedsCount() {
         return this.scheduledFeeds.length;
     },
 
     // nsIBriefUpdateService
-    get completedFeedsCount() {
+    get completedFeedsCount BUS_completedFeedsCount() {
         return this.completedFeeds.length;
     },
 
