@@ -535,56 +535,60 @@ function selectHomeFolder(aEvent) {
 // Creates and manages a FeedView displaying the search results,
 // based on the current input string and the search scope.
 var previousView = null;
-var previousSelectedIndex = 0;
+var previousSelectedIndex = -1;
 function performSearch(aEvent) {
     var searchbar = document.getElementById('searchbar');
 
-    if (searchbar.value) {
-
-        // If new search is being started, remember the old view to
-        // restore it after the search is finished.
-        if (!gFeedView.query.searchString) {
-            previousView = gFeedView;
-            previousSelectedIndex = gFeedList.tree.currentIndex;
-        }
-
-        var title = document.getElementById('main-bundle').
-                             getFormattedString('searchResults', [searchbar.value]);
-
-        // If the search scope is set to global but the view is not the
-        // global search view, then let's create it.
-        if (searchbar.searchScope == 1 && !gFeedView.isGlobalSearch) {
-            // Clear selection in the feed list.
-            gFeedList.ignoreSelectEvent = true;
-            gFeedList.tree.view.selection.clearSelection();
-            gFeedList.ignoreSelectEvent = false;
-
-            var query = new Query();
-            query.searchString = searchbar.value;
-            setView(new FeedView(title, query));
-        }
-        else {
-            gFeedView.titleOverride = title;
-            gFeedView.query.searchString = searchbar.value;
-            gFeedView.ensure();
-        }
+    // If new search is being started, remember the old view to
+    // restore it after the search is finished.
+    if (!gFeedView.query.searchString) {
+        previousView = gFeedView;
+        previousSelectedIndex = gFeedList.tree.currentIndex;
     }
 
-    // The search has finished.
+    var bundle = document.getElementById('main-bundle');
+    var titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
+
+    // If the search scope is set to global but the view is not the
+    // global search view, then let's create it.
+    if (searchbar.searchScope == 1 && !gFeedView.isGlobalSearch) {
+        gFeedList.ignoreSelectEvent = true;
+        gFeedList.tree.view.selection.clearSelection();
+        gFeedList.ignoreSelectEvent = false;
+
+        var query = new Query();
+        query.searchString = searchbar.value;
+        var title = bundle.getFormattedString('searchResults', ['']);
+        var view = new FeedView(title, query);
+        view.titleOverride = titleOverride;
+        setView(view);
+    }
     else {
+        gFeedView.titleOverride = searchbar.value ? titleOverride : '';
+        gFeedView.query.searchString = searchbar.value;
+        gFeedView.ensure();
+    }
+}
+
+// Restores the view and the tree selection from before the search was started.
+function finishSearch() {
+    if (previousSelectedIndex != -1) {
         gFeedList.ignoreSelectEvent = true;
         gFeedList.tree.view.selection.select(previousSelectedIndex);
         gFeedList.ignoreSelectEvent = false;
-
-        if (previousView != gFeedView) {
-            setView(previousView);
-            gFeedView.query.searchString = gFeedView.titleOverride = '';
-        }
-        else {
-            gFeedView.query.searchString = gFeedView.titleOverride = '';
-            gFeedView.ensure();
-        }
     }
+
+    if (previousView && previousView != gFeedView) {
+        setView(previousView);
+        gFeedView.query.searchString = gFeedView.titleOverride = '';
+    }
+    else {
+        gFeedView.query.searchString = gFeedView.titleOverride = '';
+        gFeedView.ensure();
+    }
+
+    previousView = null;
+    previousSelectedIndex = -1;
 }
 
 

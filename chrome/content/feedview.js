@@ -1,8 +1,7 @@
-/**
- * gFeedView is the instance of FeedView currently attached to the browser.
- */
+// gFeedView is the instance of FeedView currently attached to the browser.
 var gFeedView = null;
 
+// Attaches a view and detaches the previous one.
 function setView(aView) {
     // Detach the old view.
     if (gFeedView) {
@@ -18,7 +17,8 @@ function setView(aView) {
     // Clear the searchbar.
     if (!aView.query.searchString) {
         var searchbar = document.getElementById('searchbar');
-        searchbar.setAttribute('showingDescription', true);
+        searchbar.value = '';
+        searchbar.clearButton.hidden = true;
     }
 
     // If view is tied to specified intrinsic flags (e.g. the "Unread" view),
@@ -45,7 +45,7 @@ function setView(aView) {
  * This object represents the main feed display. It stores and manages
  * the display parameters.
  * The feed displayed using a local, unprivileged template page. We insert third-party
- * content in it (the entries are served with full HTML markup) the template page is
+ * content in it (entries are served with full HTML markup), so the template page is
  * untrusted and all the interaction respects XPCNativeWrappers.
  *
  * @param aTitle  Title of the view which will be shown in the header.
@@ -134,7 +134,7 @@ FeedView.prototype = {
 
     get isViewSearch FeedView_get_isGlobalSearch() {
         return (this.query.folders || this.query.feeds || this._flagsAreIntrinsic)
-               && gFeedView.query.searchString;
+               && this.query.searchString;
     },
 
 
