@@ -76,16 +76,15 @@ FeedView.prototype = {
     // feedview.shownEntries preference.
     _flagsAreIntrinsic: false,
 
-    // IDs of contained entries, used for determining if the view needs refreshing.
-    _entries: [],
-
     // Key elements.
     get browser FeedView_browser() {
         delete this.__proto__.browser;
         return this.__proto__.browser = document.getElementById('feed-view');
     },
 
-    get document FeedView_document() this.browser.contentDocument,
+    get document FeedView_document() {
+        return this.browser.contentDocument;
+    },
 
     feedContent: null,
 
@@ -111,8 +110,16 @@ FeedView.prototype = {
     },
 
 
-    pageCount:     0,
-    entriesCount:  0,
+    // IDs of contained entries, used to determine when the view needs to be refreshed.
+    _entries: [],
+
+    get entriesCount Feedview_entriesCount() {
+        return this._entries.length;
+    },
+
+    get pageCount FeedView_pageCount() {
+        return Math.ceil(this.entriesCount / gPrefs.entriesPerPage) || 1;
+    },
 
     __currentPage: 1,
     set currentPage FeedView_currentPage_set(aPageNumber) {
@@ -125,7 +132,9 @@ FeedView.prototype = {
 
 
     // Indicates whether the feed view is currently displayed in the browser.
-    get isActive FeedView_isActive() this.browser.currentURI.equals(gTemplateURI),
+    get isActive FeedView_isActive() {
+        this.browser.currentURI.equals(gTemplateURI);
+    },
 
     get isGlobalSearch FeedView_isGlobalSearch() {
         return !this.query.folders && !this.query.feeds && !this._flagsAreIntrinsic
@@ -555,9 +564,9 @@ FeedView.prototype = {
         if (!oldCount || !currentCount || oldCount != currentCount) {
 
             // If a different page is shown, we don't have to refresh the page,
-            // but we still need to update the state properties.
+            // but we still need to update the entry list.
             if (!this.isActive || this.browser.webProgress.isLoadingDocument)
-                this._computePages();
+                this._refreshEntryList();
             else if (oldCount - currentCount == 1)
                 this._refreshOnEntryRemoved();
             else
@@ -625,13 +634,13 @@ FeedView.prototype = {
         // recomputation of pages to make sure that they are correct and then we redo
         // the query.
         if (!entries.length) {
-            this._computePages();
+            this._refreshEntryList();
             query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
             query.limit = gPrefs.entriesPerPage;
             entries = query.getEntries({});
         }
         else {
-            async(this._computePages, 250, this);
+            async(this._refreshEntryList, 250, this);
         }
 
         for (var i = 0; i < entries.length; i++)
@@ -652,23 +661,22 @@ FeedView.prototype = {
     // entry having been removed, which allows us to gracefully remove
     // just it instead of completely refreshing the view.
     _refreshOnEntryRemoved: function FeedView__refreshOnEntryRemoved() {
-        var removedEntry = null;
-        var removedIndex;
         var oldEntries = this._entries;
-        var currentEntries = this.query.getSerializedEntries().
-                                        getPropertyAsAString('entries').
-                                        match(/[^ ]+/g);
+        this._refreshEntryList();
+        var currentEntries = this._entries;
 
-        var visibleEntriesCount = this.feedContent.childNodes.length;
-        if (visibleEntriesCount === 1 && currentEntries && this.currentPage === this.pageCount) {
+        if (this.feedContent.childNodes.length === 1 && currentEntries
+            && this.currentPage === this.pageCount) {
+            // If the last remaining entry on this page was removed,
+            // go to the previous page.
             this.currentPage--;
         }
         else {
             // Find the removed entry.
             for (var i = 0; i < oldEntries.length; i++) {
                 if (!currentEntries || currentEntries.indexOf(oldEntries[i]) === -1) {
-                    removedEntry = oldEntries[i];
-                    removedIndex = i;
+                    var removedEntry = oldEntries[i];
+                    var removedIndex = i;
                     break;
                 }
             }
@@ -676,7 +684,6 @@ FeedView.prototype = {
             var startPageIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
             var endPageIndex = startPageIndex + gPrefs.entriesPerPage - 1;
 
-            // If the removed entry wasn't on the current page then perform full refresh.
             if (removedIndex < startPageIndex || removedIndex > endPageIndex)
                 this._refresh();
             else
@@ -691,11 +698,10 @@ FeedView.prototype = {
 
         var entryWasSelected = (aEntry == this.selectedEntry);
         if (entryWasSelected) {
-            // Immediately deselect the entry, so that no futher commands can be sent.
+            // Immediately deselect the entry, so that no commands can be sent to it.
             this.selectEntry(null);
 
-            // Remember the next and previous siblings as we
-            // may need to select one of them.
+            // Remember these entry elements as we may need to select one of them.
             var nextSibling = entryElement.nextSibling;
             var previousSibling = entryElement.previousSibling;
         }
@@ -704,33 +710,28 @@ FeedView.prototype = {
         // use jQuery to to fade it gracefully.
         this._sendEvent(aEntry, 'DoRemoveEntry');
 
+        // Wait until the old entry is removed and append a new one.
+        async(finish, 310);
+
         var self = this;
         function finish() {
-            self._computePages();
-
-            // Pull the entry to be added to the current page, which happens
-            // to have been the first entry of the next page.
+            // Pull the entry to be added to the current page. If we're
+            // on the last page then there may be no new entry.
             var query = self.query;
             query.offset = gPrefs.entriesPerPage * self.currentPage - 1;
             query.limit = 1;
             var newEntry = query.getEntries({})[0];
 
-            // Append the entry. If we're on the last page then there may
-            // have been no futher entries to pull.
-            var appendedEntry = null;
             if (newEntry)
-                appendedEntry = self._appendEntry(newEntry);
+                var appendedEntry = self._appendEntry(newEntry);
 
             if (!self.feedContent.childNodes.length)
                 self._setEmptyViewMessage();
 
-            // Select another entry
+            // Select another entry.
             if (entryWasSelected)
                 self.selectEntry(nextSibling || appendedEntry || previousSibling || null);
         }
-
-        // Don't append the new entry until the old one is removed.
-        async(finish, 310);
     },
 
 
@@ -744,18 +745,20 @@ FeedView.prototype = {
     },
 
 
-    // Computes the current entries count, page counter, current page ordinal and
-    // refreshes the navigation UI.
-    _computePages: function FeedView__computePages() {
-        this.entriesCount = this.query.getEntriesCount();
-        this.pageCount = Math.ceil(this.entriesCount / gPrefs.entriesPerPage) || 1;
+    /**
+     * Refreshes the list of IDs of contained entries (also needed for entriesCount
+     * and pageCount), the current page number, and the navigation UI.
+     */
+    _refreshEntryList: function FeedView__refreshEntryList() {
+        this._entries = this.query.getSerializedEntries().
+                                   getPropertyAsAString('entries').
+                                   match(/[^ ]+/g);
 
         // This may happen for example when you are on the last page, and the
         // number of entries decreases (e.g. they are deleted).
         if (this.currentPage > this.pageCount)
             this.__currentPage = this.pageCount;
 
-        // Update the page commands and description
         var pageLabel = document.getElementById('page-desc');
         var prevPageButton = document.getElementById('prev-page');
         var nextPageButton = document.getElementById('next-page');
@@ -765,10 +768,6 @@ FeedView.prototype = {
         var stringbundle = document.getElementById('main-bundle');
         var params = [this.currentPage, this.pageCount];
         pageLabel.value = stringbundle.getFormattedString('pageNumberLabel', params);
-
-        this._entries = this.query.getSerializedEntries().
-                                   getPropertyAsAString('entries').
-                                   match(/[^ ]+/g);
     },
 
 
