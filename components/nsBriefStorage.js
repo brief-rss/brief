@@ -103,9 +103,10 @@ BriefStorageService.prototype = {
     feedsCache:            null,
 
     instantiate: function BriefStorage_instantiate() {
-        var databaseFile = Cc['@mozilla.org/file/directory_service;1'].
-                           getService(Ci.nsIProperties).
-                           get('ProfD', Ci.nsIFile);
+        var profileDir = Cc['@mozilla.org/file/directory_service;1'].
+                         getService(Ci.nsIProperties).
+                         get('ProfD', Ci.nsIFile);
+        var databaseFile = profileDir.clone();
         databaseFile.append('brief.sqlite');
         var databaseIsNew = !databaseFile.exists();
 
@@ -124,6 +125,20 @@ BriefStorageService.prototype = {
             this.setupDatabase();
         }
         else if (gConnection.schemaVersion < DATABASE_VERSION) {
+            // Remove the old backup file.
+            var filename = 'brief-backup' + (DATABASE_VERSION - 1) + '.sqlite';
+            var oldBackupFile = profileDir.clone();
+            oldBackupFile.append(filename);
+            if (oldBackupFile.exists())
+                oldBackupFile.remove(false);
+
+            // Backup the database before migration.
+            filename = 'brief-backup' + DATABASE_VERSION + '.sqlite';
+            var newBackupFile = profileDir;
+            newBackupFile.append(filename);
+            if (!newBackupFile.exists())
+                storageService.backupDatabaseFile(databaseFile, filename);
+
             this.migrateDatabase();
         }
 
@@ -160,7 +175,7 @@ BriefStorageService.prototype = {
                 executeSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
                 executeSQL('ALTER TABLE entries ADD COLUMN providedID TEXT');
             }
-            catch (e) {}
+            catch (ex) { }
 
             // Columns and indices added in 0.7.
             try {
@@ -174,7 +189,7 @@ BriefStorageService.prototype = {
                 executeSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
                 executeSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
             }
-            catch (e) {}
+            catch (ex) { }
             // Fall through...
 
         // To 0.8.
@@ -197,7 +212,7 @@ BriefStorageService.prototype = {
             try {
                 executeSQL('ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
             }
-            catch (e) { }
+            catch (ex) { }
             // Fall through...
 
         // To 1.0
@@ -244,7 +259,7 @@ BriefStorageService.prototype = {
             executeSQL('DROP TABLE feeds_copy');
         }
         catch (ex) {
-            this.reportError(ex);
+            reportError(ex, true);
         }
         finally {
             gConnection.commitTransaction();
@@ -277,7 +292,7 @@ BriefStorageService.prototype = {
             executeSQL('DROP TABLE entries_copy');
         }
         catch (ex) {
-            this.reportError(ex);
+            reportError(ex, true);
         }
         finally {
             gConnection.commitTransaction();
@@ -319,7 +334,7 @@ BriefStorageService.prototype = {
             select.reset();
         }
         catch (ex) {
-            this.reportError(ex);
+            reportError(ex, true);
         }
         finally {
             gConnection.commitTransaction();
@@ -354,7 +369,7 @@ BriefStorageService.prototype = {
             executeSQL('UPDATE OR IGNORE feeds SET feedID = hashString(feedURL) WHERE isFolder = 0');
         }
         catch (ex) {
-            this.reportError(ex);
+            reportError(ex, true);
         }
         finally {
             gConnection.commitTransaction();
@@ -481,7 +496,7 @@ BriefStorageService.prototype = {
                 this.updateFeedData(aFeed, oldestEntryDate);
             }
             catch (ex) {
-                this.reportError(ex);
+                reportError(ex);
             }
             finally {
                 gConnection.commitTransaction();
@@ -739,7 +754,7 @@ BriefStorageService.prototype = {
             removeFeeds.execute();
         }
         catch (ex) {
-            this.reportError(ex);
+            reportError(ex);
         }
         finally {
             gConnection.commitTransaction();
@@ -1042,16 +1057,6 @@ BriefStorageService.prototype = {
         delete this.__proto__.unstarEntry_stmt;
         return this.__proto__.unstarEntry_stmt = createStatement(
                'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE bookmarkID = ?1');
-    },
-
-
-    reportError: function BriefStorage_reportError(aException) {
-        Components.utils.reportError(aException);
-
-        var dbError = gConnection.lastErrorString;
-        var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                             getService(Ci.nsIConsoleService);
-        consoleService.logStringMessage('Brief database error:\n ' + dbError);
     },
 
 
@@ -1401,8 +1406,8 @@ BriefQuery.prototype = {
             }
         }
         catch (ex if gConnection.lastError == 1) {
-            // Full-text search throws "SQL logic error or missing database" if the query
-            // doesn't contain at least one non-excluded term.
+            // Ignore "SQL logic error or missing database" error which full-text search
+            // throws when the query doesn't contain at least one non-excluded term.
         }
         finally {
             select.reset();
@@ -1427,8 +1432,7 @@ BriefQuery.prototype = {
             }
         }
         catch (ex if gConnection.lastError == 1) {
-            // Full-text search throws "SQL logic error or missing database" if the query
-            // doesn't contain at least one non-excluded term.
+            // See BriefQuery.getEntries();
         }
         finally {
             select.reset();
@@ -1456,8 +1460,7 @@ BriefQuery.prototype = {
             count = select.getInt32(0);
         }
         catch (ex if gConnection.lastError == 1) {
-            // Full-text search throws "SQL logic error or missing database" if the query
-            // doesn't contain at least one non-excluded term.
+            // See BriefQuery.getEntries();
         }
         finally {
             select.reset();
@@ -1484,8 +1487,7 @@ BriefQuery.prototype = {
             update.execute();
         }
         catch (ex if gConnection.lastError == 1) {
-            // Full-text search throws "SQL logic error or missing database" if the query
-            // doesn't contain at least one non-excluded term.
+            // See BriefQuery.getEntries();
         }
         finally {
             gConnection.commitTransaction();
@@ -1528,8 +1530,7 @@ BriefQuery.prototype = {
             statement.execute();
         }
         catch (ex if gConnection.lastError == 1) {
-            // Full-text search throws "SQL logic error or missing database" if the query
-            // doesn't contain at least one non-excluded term.
+            // See BriefQuery.getEntries();
         }
         finally {
             gConnection.commitTransaction();
@@ -1757,6 +1758,19 @@ function hashString(aString) {
     }
     return hexrep.join('');
 }
+
+
+function reportError(aException, aRethrow) {
+    var dbError = gConnection.lastErrorString;
+    var consoleService = Cc['@mozilla.org/consoleservice;1'].
+                         getService(Ci.nsIConsoleService);
+    consoleService.logStringMessage('Brief database error:\n ' + dbError);
+    if (aRethrow)
+        throw(aException);
+    else
+        Components.utils.reportError(aException);
+}
+
 
 function log(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].
