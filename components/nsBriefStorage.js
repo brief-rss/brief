@@ -390,13 +390,10 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    getAllFeeds: function BriefStorage_getAllFeeds(aLength) {
+    getAllFeeds: function BriefStorage_getAllFeeds() {
         if (!this.feedsCache)
             this.buildFeedsCache();
 
-        // Set the |value| property of the out parameter object. XPConnect needs
-        // this in order to return a array.
-        aLength.value = this.feedsCache.length;
         return this.feedsCache;
     },
 
