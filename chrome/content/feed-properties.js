@@ -41,7 +41,7 @@ function setupWindow() {
     checkUpdatesTextbox.disabled = checkUpdatesMenulist.disabled = !checkUpdatesCheckbox.checked;
     initUpdateIntervalControls();
 
-    var allFeeds = gStorageService.getAllFeeds({});
+    var allFeeds = gStorageService.getAllFeeds();
     var currentIndex = allFeeds.indexOf(gFeed);
     var nextFeed = document.getElementById('next-feed');
     var previousFeed = document.getElementById('previous-feed');
@@ -50,7 +50,7 @@ function setupWindow() {
 }
 
 function previousFeed() {
-    var allFeeds = gStorageService.getAllFeeds({});
+    var allFeeds = gStorageService.getAllFeeds();
 
     // The reason we must re-get the feed is because the old feeds cache in
     // the storage component may have been destroyed after modifying the bookmarks
@@ -68,7 +68,7 @@ function previousFeed() {
 }
 
 function nextFeed() {
-    var allFeeds = gStorageService.getAllFeeds({});
+    var allFeeds = gStorageService.getAllFeeds();
     // see previousFeed()
     gFeed = gStorageService.getFeed(gFeed.feedID);
     var currentIndex = allFeeds.indexOf(gFeed);

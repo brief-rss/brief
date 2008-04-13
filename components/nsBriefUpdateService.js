@@ -108,7 +108,7 @@ BriefUpdateService.prototype = {
 
     // nsIBriefUpdateService
     fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
-        var feeds = briefStorage.getAllFeeds({});
+        var feeds = briefStorage.getAllFeeds();
         this.fetchFeeds(feeds, feeds.length, aInBackground);
 
         var roundedNow = Math.round(Date.now() / 1000);
@@ -117,7 +117,7 @@ BriefUpdateService.prototype = {
 
 
     // nsIBriefUpdateService
-    fetchFeeds: function BUS_fetchFeeds(aFeeds, aFeedsLength, aInBackground) {
+    fetchFeeds: function BUS_fetchFeeds(aFeeds, aInBackground) {
         // If only one feed is to be updated, we just do it right away without maintaining
         // the update queue.
         if (this.updateInProgress == NO_UPDATE && aFeeds.length == 1) {
@@ -191,7 +191,7 @@ BriefUpdateService.prototype = {
             var itsGlobalUpdateTime = globalUpdatingEnabled &&
                                       now - lastGlobalUpdateTime > globalInterval;
 
-            var feeds = briefStorage.getAllFeeds({});
+            var feeds = briefStorage.getAllFeeds();
 
             var feed, i, feedsToUpdate = [];
             for (i = 0; i < feeds.length; i++) {

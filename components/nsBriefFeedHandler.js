@@ -29,18 +29,13 @@ Feed.prototype = {
     parent:   '',
 
     wrappedFeed: null,
-    items: null,
+    entries: null,
 
     entryAgeLimit:  0,
     maxEntries:     0,
     updateInterval: 0,
 
     oldestEntryDate: 0,
-
-    getEntries: function BriefFeed_getEntries(entryCount) {
-        entryCount.value = this.items.length;
-        return this.items;
-    },
 
     wrapFeed: function BriefFeed_wrapFeed(aFeed) {
         this.wrappedFeed = aFeed;
@@ -60,15 +55,14 @@ Feed.prototype = {
             catch (e) {}
         }
         if (aFeed.items) {
-            var entries = [];
+            this.entries = [];
             for (var i = 0; i < aFeed.items.length; i++) {
                 var entry = aFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
                 var wrappedEntry = Cc['@ancestor/brief/feedentry;1'].
                                    createInstance(Ci.nsIBriefFeedEntry);
                 wrappedEntry.wrapEntry(entry);
-                entries.push(wrappedEntry);
+                this.entries.push(wrappedEntry);
             }
-            this.items = entries;
         }
     },
 

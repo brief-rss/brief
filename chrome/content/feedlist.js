@@ -66,18 +66,18 @@ var gFeedList = {
     },
 
     /**
-     * Returns an array of feedID's of all folders in the the parent chain of any of the
-     * given feeds.
+     * Returns an array of IDs of folders in the the parent chains of the given feeds.
      *
-     * @param   aFeeds  A feed or an array of them, represented by
-     *                  nsIBriefFeed object, feedID string, or treeitem XULElement.
-     * @returns Array of feedID's of folders.
+     * @param aFeeds  A feed or an array of feeds, represented by
+     *                nsIBriefFeed object, feedID string, or treeitem XULElement.
+     * @returns Array of IDs of folders.
      */
     getFoldersForFeeds: function gFeedList_getFoldersForFeeds(aFeeds) {
-        var feeds = aFeeds instanceof Array ? aFeeds : [aFeeds];
         var folders = [];
-
         var root = gPrefs.homeFolder;
+
+        // See refreshFeedTreeitems()
+        var feeds = (aFeeds.splice) ? aFeeds : [aFeeds];
 
         for (var i = 0; i < feeds.length; i++) {
             var feed = this.getBriefFeed(feeds[i]);
@@ -118,13 +118,13 @@ var gFeedList = {
         else if (selectedItem.hasAttribute('container')) {
             var feed = this.selectedFeed;
             query = new Query();
-            query.folders = feed.feedID;
+            query.folders = [feed.feedID];
             setView(new FeedView(feed.title, query));
         }
 
         else {
             var feed = this.selectedFeed;
-            query = new QuerySH(feed.feedID, null, null);
+            query = new QuerySH([feed.feedID], null, null);
             setView(new FeedView(feed.title, query));
         }
     },
@@ -293,7 +293,7 @@ var gFeedList = {
             query.starred = true;
         else if (aSpecialItem == 'trash-folder')
             query.deleted = ENTRY_STATE_TRASHED;
-        var unreadCount = query.getEntriesCount();
+        var unreadCount = query.getEntryCount();
 
         var name = treeitem.getAttribute('title');
 
@@ -321,9 +321,9 @@ var gFeedList = {
             }
             else {
                 query = new Query();
-                query.folders = folder.feedID;
+                query.folders = [folder.feedID];
                 query.unread = true;
-                unreadCount = query.getEntriesCount();
+                unreadCount = query.getEntryCount();
 
                 this._setLabel(treecell, folder.title, unreadCount);
             }
@@ -339,7 +339,10 @@ var gFeedList = {
      */
     refreshFeedTreeitems: function gFeedList_refreshFeedTreeitems(aFeeds) {
         var feed, treeitem, treecell, query, unreadCount;
-        var feeds = (aFeeds instanceof Array) ? aFeeds : [aFeeds];
+
+        // XXX Hack: arrays that traveled through XPConnect aren't instanceof Array,
+        // so we use the splice method to check if aFeeds is an array.
+        var feeds = (aFeeds.splice) ? aFeeds : [aFeeds];
 
         for (var i = 0; i < feeds.length; i++) {
             feed = this.getBriefFeed(feeds[i]);
@@ -347,8 +350,8 @@ var gFeedList = {
             treecell = treeitem.firstChild.firstChild;
 
             // Update the label.
-            query = new QuerySH(feed.feedID, null, true);
-            unreadCount = query.getEntriesCount();
+            query = new QuerySH([feed.feedID], null, true);
+            unreadCount = query.getEntryCount();
             this._setLabel(treecell, feed.title, unreadCount);
 
             // Update the favicon.
@@ -410,7 +413,7 @@ var gFeedList = {
             lastChild = topLevelChildren.lastChild
         }
 
-        this.feeds = gStorage.getFeedsAndFolders({});
+        this.feeds = gStorage.getAllFeedsAndFolders();
 
         // This a helper array used by _buildFolderChildren. As the function recurses,
         // the array stores the <treechildren> elements of all folders in the parent chain
@@ -611,7 +614,7 @@ var gContextMenuCommands = {
     markFeedRead: function ctxMenuCmds_markFeedRead(aEvent) {
         var item = gFeedList.ctx_targetItem;
         var feedID = gFeedList.ctx_targetItem.id;
-        var query = new QuerySH(feedID, null, null);
+        var query = new QuerySH([feedID], null, null);
         query.markEntriesRead(true);
     },
 
@@ -631,7 +634,7 @@ var gContextMenuCommands = {
         }
         else {
             var query = new Query();
-            query.folders = targetItem.id;
+            query.folders = [targetItem.id];
             query.markEntriesRead(true);
         }
     },
@@ -640,7 +643,7 @@ var gContextMenuCommands = {
     updateFeed: function ctxMenuCmds_updateFeed(aEvent) {
         var feedID = gFeedList.ctx_targetItem.id;
         var feed = gStorage.getFeed(feedID);
-        gUpdateService.fetchFeeds([feed], 1, false);
+        gUpdateService.fetchFeeds([feed], false);
     },
 
 
@@ -654,7 +657,7 @@ var gContextMenuCommands = {
             }
         }
 
-        gUpdateService.fetchFeeds(feeds, feeds.length, false);
+        gUpdateService.fetchFeeds(feeds, false);
     },
 
 
@@ -667,7 +670,7 @@ var gContextMenuCommands = {
 
     emptyFeed: function ctxMenuCmds_emptyFeed(aEvent) {
         var feedID = gFeedList.ctx_targetItem.id;
-        var query = new QuerySH(feedID, null, null);
+        var query = new QuerySH([feedID], null, null);
         query.unstarred = true;
         query.deleteEntries(ENTRY_STATE_TRASHED);
     },
@@ -684,7 +687,7 @@ var gContextMenuCommands = {
         }
         else {
             var query = new Query();
-            query.folders = targetItem.id;
+            query.folders = [targetItem.id];
             query.unstarred = true;
             query.deleteEntries(ENTRY_STATE_TRASHED);
         }

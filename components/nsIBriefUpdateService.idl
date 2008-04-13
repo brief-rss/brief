@@ -1,5 +1,6 @@
 #include "nsISupports.idl"
 interface nsIBriefFeed;
+interface nsIVariant;
 
 /**
  * nsIBriefUpdateService is responsible for downloading and parsing feeds. It
@@ -34,13 +35,10 @@ interface nsIBriefUpdateService : nsISupports {
    * database.
    *
    * @param feeds         Array of nsIBriefFeed's to be updated.
-   * @param feedCount     Length of the |feeds| array.
    * @param inBackground  Fetch feeds with longer delay, designed for updating in the
    *                      background.
    */
-  void fetchFeeds([const, array, size_is(feedCount)] in nsIBriefFeed feeds,
-                  in unsigned long feedCount,
-                  in boolean inBackground);
+  void fetchFeeds(in nsIVariant feeds, in boolean inBackground);
 
   /**
    * Download and check for updates all the feeds in the database.

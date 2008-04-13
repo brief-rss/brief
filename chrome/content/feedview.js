@@ -418,7 +418,7 @@ FeedView.prototype = {
         }
 
         if (entriesToMark.length) {
-            var query = new QuerySH(null, entriesToMark.join(' '), false);
+            var query = new QuerySH(null, entriesToMark, false);
             query.markEntriesRead(true);
         }
     },
@@ -559,7 +559,7 @@ FeedView.prototype = {
         }
 
         var oldCount = this.entriesCount;
-        var currentCount = this.query.getEntriesCount();
+        var currentCount = this.query.getEntryCount();
 
         if (!oldCount || !currentCount || oldCount != currentCount) {
 
@@ -622,7 +622,7 @@ FeedView.prototype = {
         query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
         query.limit = gPrefs.entriesPerPage;
 
-        var entries = query.getEntries({});
+        var entries = query.getEntries();
 
         // Important: for better performance we try to delay computing pages until
         // after the view is displayed.
@@ -637,7 +637,7 @@ FeedView.prototype = {
             this._refreshEntryList();
             query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
             query.limit = gPrefs.entriesPerPage;
-            entries = query.getEntries({});
+            entries = query.getEntries();
         }
         else {
             async(this._refreshEntryList, 250, this);
@@ -720,7 +720,7 @@ FeedView.prototype = {
             var query = self.query;
             query.offset = gPrefs.entriesPerPage * self.currentPage - 1;
             query.limit = 1;
-            var newEntry = query.getEntries({})[0];
+            var newEntry = query.getEntries()[0];
 
             if (newEntry)
                 var appendedEntry = self._appendEntry(newEntry);
@@ -750,9 +750,8 @@ FeedView.prototype = {
      * and pageCount), the current page number, and the navigation UI.
      */
     _refreshEntryList: function FeedView__refreshEntryList() {
-        this._entries = this.query.getSerializedEntries().
-                                   getPropertyAsAString('entries').
-                                   match(/[^ ]+/g);
+        this._entries = this.query.getSimpleEntryList().
+                                   getProperty('entries');
 
         // This may happen for example when you are on the last page, and the
         // number of entries decreases (e.g. they are deleted).
