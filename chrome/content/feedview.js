@@ -133,7 +133,7 @@ FeedView.prototype = {
 
     // Indicates whether the feed view is currently displayed in the browser.
     get isActive FeedView_isActive() {
-        this.browser.currentURI.equals(gTemplateURI);
+        return this.browser.currentURI.equals(gTemplateURI);
     },
 
     get isGlobalSearch FeedView_isGlobalSearch() {
