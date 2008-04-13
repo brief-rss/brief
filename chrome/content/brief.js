@@ -6,14 +6,12 @@ const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
 const LAST_MAJOR_VERSION = '1.1';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
 
-const XHTML_NS = 'http://www.w3.org/1999/xhtml';
-
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 const gUpdateService = Cc['@ancestor/brief/updateservice;1'].getService(Ci.nsIBriefUpdateService);
-var QuerySH = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery', 'setConditions');
+var QuerySH = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery', 'setConstraints');
 var Query = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery');
 
 const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
@@ -59,7 +57,7 @@ function init() {
                         QueryInterface(Ci.nsIInterfaceRequestor).
                         getInterface(Ci.nsIDOMWindow);
 
-    initToolbarsAndStrings()
+    initToolbarsAndStrings();
 
     document.addEventListener('keypress', onKeyPress, true);
 
@@ -198,11 +196,9 @@ var gObserver = {
     // Updates the approperiate treeitems in the feed list
     // and refreshes the feedview when necessary.
     onEntryStatusChanged: function gObserver_onEntryStatusChanged(aChangedItems, aChangeType) {
-        aChangedItems.QueryInterface(Ci.nsIWritablePropertyBag2);
-        var changedFeeds = aChangedItems.getPropertyAsAString('feeds').
-                                         match(/[^ ]+/g);
-        var changedEntries = aChangedItems.getPropertyAsAString('entries').
-                                           match(/[^ ]+/g);
+        aChangedItems.QueryInterface(Ci.nsIPropertyBag);
+        var changedFeeds = aChangedItems.getProperty('feeds');
+        var changedEntries = aChangedItems.getProperty('entries');
 
         var viewIsCool = gFeedView.ensure();
 
@@ -341,7 +337,7 @@ var gCommands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        var query = new QuerySH(null, aEntry, null);
+        var query = new QuerySH(null, [aEntry], null);
         query.deleted = ENTRY_STATE_ANY;
         query.markEntriesRead(aNewState);
 
@@ -355,7 +351,7 @@ var gCommands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        var query = new QuerySH(null, aEntry, null);
+        var query = new QuerySH(null, [aEntry], null);
         query.deleteEntries(ENTRY_STATE_TRASHED);
     },
 
@@ -365,7 +361,7 @@ var gCommands = {
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        var query = new QuerySH(null, aEntry, null);
+        var query = new QuerySH(null, [aEntry], null);
         query.deleted = ENTRY_STATE_TRASHED;
         query.deleteEntries(ENTRY_STATE_NORMAL);
     },
@@ -378,7 +374,7 @@ var gCommands = {
     },
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
-        var query = new QuerySH(null, aEntry, null);
+        var query = new QuerySH(null, [aEntry], null);
         query.starEntries(aNewState);
     },
 
@@ -401,8 +397,8 @@ var gCommands = {
         }
     },
 
-    openEntryLink: function cmd_openEntryLink(aEntry, aNewTab) {
-        var url = aEntry.getAttribute('entryURL');
+    openEntryLink: function cmd_openEntryLink(aEntryElement, aNewTab) {
+        var url = aEntryElement.getAttribute('entryURL');
 
         if (aNewTab) {
             var prefBranch = Cc['@mozilla.org/preferences-service;1'].
@@ -417,9 +413,9 @@ var gCommands = {
             gFeedView.browser.loadURI(url);
         }
 
-        if (!aEntry.hasAttribute('read')) {
-            aEntry.setAttribute('read', true);
-            var query = new QuerySH(null, aEntry.id, null);
+        if (!aEntryElement.hasAttribute('read')) {
+            aEntryElement.setAttribute('read', true);
+            var query = new QuerySH(null, [aEntryElement.id], null);
             query.markEntriesRead(true);
         }
     },
@@ -675,7 +671,7 @@ var gPrefs = {
 
         switch (aData) {
         case 'showFavicons':
-            var feeds = gStorage.getAllFeeds({});
+            var feeds = gStorage.getAllFeeds();
             gFeedList.refreshFeedTreeitems(feeds);
             break;
 

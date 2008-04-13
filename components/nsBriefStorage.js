@@ -214,6 +214,7 @@ BriefStorageService.prototype = {
             this.bookmarkStarredEntries();
             // Fall through...
 
+        // To 1.2a2
         case 5:
             this.migrateEntriesToFTS();
             // Fall through...
@@ -364,7 +365,7 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     getFeed: function BriefStorage_getFeed(aFeedID) {
         var foundFeed = null;
-        var feeds = this.getFeedsAndFolders({});
+        var feeds = this.getAllFeedsAndFolders();
         for (var i = 0; i < feeds.length; i++) {
             if (feeds[i].feedID == aFeedID) {
                 foundFeed = feeds[i];
@@ -377,7 +378,7 @@ BriefStorageService.prototype = {
 
     getFeedByBookmarkID: function BriefStorage_getFeedByBookmarkID(aBookmarkID) {
         var foundFeed = null;
-        var feeds = this.getFeedsAndFolders({});
+        var feeds = this.getAllFeedsAndFolders();
         for (var i = 0; i < feeds.length; i++) {
             if (feeds[i].bookmarkID == aBookmarkID) {
                 foundFeed = feeds[i];
@@ -401,13 +402,10 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    getFeedsAndFolders: function BriefStorage_getFeedsAndFolders(aLength) {
+    getAllFeedsAndFolders: function BriefStorage_getAllFeedsAndFolders() {
         if (!this.feedsAndFoldersCache)
             this.buildFeedsCache();
 
-        // Set the |value| property of the out parameter object. XPConnect needs
-        // this in order to return a array.
-        aLength.value = this.feedsAndFoldersCache.length;
         return this.feedsAndFoldersCache;
     },
 
@@ -470,13 +468,13 @@ BriefStorageService.prototype = {
             // Count the unread entries, to compare their number later.
             var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
                                      createInstance(Ci.nsIBriefQuery);
-            unreadEntriesQuery.setConditions(aFeed.feedID, null, true);
-            var oldUnreadCount = unreadEntriesQuery.getEntriesCount();
+            unreadEntriesQuery.setConstraints([aFeed.feedID], null, true);
+            var oldUnreadCount = unreadEntriesQuery.getEntryCount();
+
+            var entries = aFeed.entries;
 
             gConnection.beginTransaction();
             try {
-                var entries = aFeed.getEntries({});
-
                 for (var i = 0; i < entries.length; i++) {
                     this.processEntry(entries[i], aFeed);
                     if (entries[i].date && entries[i].date < oldestEntryDate)
@@ -485,14 +483,14 @@ BriefStorageService.prototype = {
 
                 this.updateFeedData(aFeed, oldestEntryDate);
             }
-            catch (e) {
-                this.reportError(e);
+            catch (ex) {
+                this.reportError(ex);
             }
             finally {
                 gConnection.commitTransaction();
             }
 
-            var newUnreadCount = unreadEntriesQuery.getEntriesCount();
+            var newUnreadCount = unreadEntriesQuery.getEntryCount();
             newEntriesCount = newUnreadCount - oldUnreadCount;
         }
 
@@ -790,7 +788,7 @@ BriefStorageService.prototype = {
                                         '      starred = 0 AND            ' +
                                         '      entries.date < ?3 AND      ' +
                                         '      feedID = ?4                ');
-        var feeds = this.getAllFeeds({});
+        var feeds = this.getAllFeeds();
         var now = Date.now();
 
         for each (feed in feeds) {
@@ -827,7 +825,7 @@ BriefStorageService.prototype = {
                                                      '      starred = 0 AND         ' +
                                                      '      deleted = ?2             ');
 
-        var feeds = this.getAllFeeds({});
+        var feeds = this.getAllFeeds();
         for each (feed in feeds) {
             // Count the number of entries in the feed.
             getEntriesCountForFeed.bindStringParameter(0, feed.feedID);
@@ -1291,7 +1289,7 @@ BookmarksSynchronizer.prototype = {
 
             var updateService = Cc['@ancestor/brief/updateservice;1'].
                                 getService(Ci.nsIBriefUpdateService);
-            updateService.fetchFeeds(feeds, feeds.length, false);
+            updateService.fetchFeeds(feeds, false);
         }
     },
 
@@ -1369,7 +1367,7 @@ BriefQuery.prototype = {
     // to compute actual folders list when creating the query.
     effectiveFolders: null,
 
-    setConditions: function BriefQuery_setConditions(aFeeds, aEntries, aUnread) {
+    setConstraints: function BriefQuery_setConstraints(aFeeds, aEntries, aUnread) {
         this.feeds = aFeeds;
         this.entries = aEntries;
         this.unread = aUnread;
@@ -1377,7 +1375,7 @@ BriefQuery.prototype = {
 
 
     // nsIBriefQuery
-    getEntries: function BriefQuery_getEntries(entryCount) {
+    getEntries: function BriefQuery_getEntries() {
         var select = createStatement(
                      'SELECT entries.id, entries.feedID, entries.entryURL,          ' +
                      '       entries.date, entries.authors, entries.read,           ' +
@@ -1413,13 +1411,12 @@ BriefQuery.prototype = {
             select.reset();
         }
 
-        entryCount.value = entries.length;
         return entries;
     },
 
 
     // nsIBriefQuery
-    getSerializedEntries: function BriefQuery_getSerializedEntries() {
+    getSimpleEntryList: function BriefQuery_getSimpleEntryList() {
         var select = createStatement('SELECT entries.id, entries.feedID ' +
                                      this.getQueryStringForSelect());
         var entries = [];
@@ -1441,16 +1438,16 @@ BriefQuery.prototype = {
         }
 
         var bag = Cc['@mozilla.org/hash-property-bag;1'].
-                  createInstance(Ci.nsIWritablePropertyBag2);
-        bag.setPropertyAsAString('entries', entries.join(' '));
-        bag.setPropertyAsAString('feeds', feeds.join(' '));
+                  createInstance(Ci.nsIWritablePropertyBag);
+        bag.setProperty('entries', entries);
+        bag.setProperty('feeds', feeds);
 
         return bag;
     },
 
 
     // nsIBriefQuery
-    getEntriesCount: function BriefQuery_getEntriesCount() {
+    getEntryCount: function BriefQuery_getEntryCount() {
         // Optimization: ignore sorting settings.
         [this.sortOrder, temp] = [Ci.nsIBriefQuery.NO_SORT, this.sortOrder];
         var select = createStatement('SELECT COUNT(1) ' + this.getQueryStringForSelect());
@@ -1484,7 +1481,7 @@ BriefQuery.prototype = {
             // notification. Never include those from hidden feeds though - nobody cares
             // about them nor expects to deal with them.
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
-            var changedEntries = this.getSerializedEntries();
+            var changedEntries = this.getSimpleEntryList();
             this.includeHiddenFeeds = false;
 
             update.execute();
@@ -1498,7 +1495,7 @@ BriefQuery.prototype = {
         }
 
         // If any entries were marked, dispatch the notifiaction.
-        if (changedEntries.getPropertyAsAString('entries')) {
+        if (changedEntries.getProperty('entries').length) {
             observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
                                             aState ? 'read' : 'unread');
         }
@@ -1528,7 +1525,7 @@ BriefQuery.prototype = {
         gConnection.beginTransaction();
         try {
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
-            var changedEntries = this.getSerializedEntries();
+            var changedEntries = this.getSimpleEntryList();
             this.includeHiddenFeeds = temp;
 
             statement.execute();
@@ -1541,7 +1538,7 @@ BriefQuery.prototype = {
             gConnection.commitTransaction();
         }
 
-        if (changedEntries.getPropertyAsAString('entries')) {
+        if (changedEntries.getProperty('entries').length) {
             observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
                                             'deleted');
         }
@@ -1556,7 +1553,7 @@ BriefQuery.prototype = {
         gConnection.beginTransaction();
         try {
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
-            var serializedChangedEntries = this.getSerializedEntries();
+            var changedEntriesList = this.getSimpleEntryList();
             this.includeHiddenFeeds = temp;
 
             var ioService = Cc['@mozilla.org/network/io-service;1'].
@@ -1567,7 +1564,7 @@ BriefQuery.prototype = {
             var bms = places.bookmarks;
             var annos = places.annotations;
 
-            var changedEntries = this.getEntries({});
+            var changedEntries = this.getEntries();
             for each (entry in changedEntries) {
                 if (aState) {
                     var uri = ioService.newURI(entry.entryURL, null, null);
@@ -1594,8 +1591,8 @@ BriefQuery.prototype = {
             gConnection.commitTransaction();
         }
 
-        if (serializedChangedEntries.getPropertyAsAString('entries')) {
-            observerService.notifyObservers(serializedChangedEntries,
+        if (changedEntriesList.getProperty('entries').length) {
+            observerService.notifyObservers(changedEntriesList,
                                             'brief:entry-status-changed',
                                             aState ? 'starred' : 'unstarred');
         }
@@ -1616,15 +1613,12 @@ BriefQuery.prototype = {
         }
 
         if (this.folders) {
-            this.effectiveFolders = this.folders.match(/[^ ]+/g);
+            this.effectiveFolders = this.folders;
 
             // Cache the items list to avoid retrieving it over and over when traversing.
-            this._items = Components.classes['@ancestor/brief/storage;1'].
-                                     getService(Ci.nsIBriefStorage).
-                                     getFeedsAndFolders({});
+            this._items = gStorageService.getAllFeedsAndFolders();
 
             var homeFolder = prefs.getIntPref('homeFolder');
-
             this.traverseFolderChildren(homeFolder);
 
             text += '(';
@@ -1637,7 +1631,7 @@ BriefQuery.prototype = {
         }
 
         if (this.feeds) {
-            var feeds = this.feeds.match(/[^ ]+/g);
+            var feeds = this.feeds;
 
             text += '(';
             for (var i = 0; i < feeds.length; i++) {
@@ -1649,7 +1643,7 @@ BriefQuery.prototype = {
         }
 
         if (this.entries) {
-            var entries = this.entries.match(/[^ ]+/g);
+            var entries = this.entries;
 
             text += '(';
             for (var i = 0; i < entries.length; i++) {

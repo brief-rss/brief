@@ -1,7 +1,7 @@
 const BRIEF_URL = 'chrome://brief/content/brief.xul';
 const BRIEF_FAVICON_URL = 'chrome://brief/skin/feed-icon-16x16.png';
 var BriefQuery = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery',
-                                        'setConditions');
+                                        'setConstraints');
 
 const gBrief = {
 
@@ -93,7 +93,7 @@ const gBrief = {
         var panel = document.getElementById('brief-status');
 
         var query = new BriefQuery(null, null, true);
-        var unreadEntriesCount = query.getEntriesCount();
+        var unreadEntriesCount = query.getEntryCount();
 
         counter.value = unreadEntriesCount;
         panel.setAttribute('unread', unreadEntriesCount > 0);
@@ -126,8 +126,7 @@ const gBrief = {
         var query = new BriefQuery(null, null, true);
         query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
         query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
-        var unreadFeeds = query.getSerializedEntries().getPropertyAsAString('feeds').
-                                                       match(/[^ ]+/g);
+        var unreadFeeds = query.getSimpleEntryList().getProperty('feeds');
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
         var value = bundle.getString('noUnreadFeedsTooltip');
@@ -146,8 +145,8 @@ const gBrief = {
             label.setAttribute('value', feedName);
             row.appendChild(label);
 
-            var query = new BriefQuery(unreadFeeds[i], null, true);
-            var unreadCount = query.getEntriesCount();
+            var query = new BriefQuery([unreadFeeds[i]], null, true);
+            var unreadCount = query.getEntryCount();
             label = document.createElement('label');
             label.setAttribute('class', 'unread-entries-count');
             label.setAttribute('value', unreadCount);

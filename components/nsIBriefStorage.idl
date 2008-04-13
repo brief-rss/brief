@@ -1,29 +1,29 @@
 #include "nsISupports.idl"
 interface nsIBriefFeed;
-interface nsIBriefFeedEntry;
-interface nsIWritablePropertyBag2;
+interface nsIPropertyBag;
+interface nsIVariant;
 
 /**
  * This interface represents a query to the Brief's database. Its attributes are
- * conditions specifying which entries are selected. The conditions are ANDed.
+ * constraints specifying which entries are selected. The constraints are ANDed.
  */
 [scriptable, uuid(be536868-2db5-408e-9622-42be8d0d00d5)]
 interface nsIBriefQuery : nsISupports {
 
     /**
-     * Space-separated list of ids of entries to be selected.
+     * Array of IDs of entries to be selected.
      */
-    attribute string entries;
+    attribute nsIVariant entries;
 
     /**
-     * Space-separated lists of ids of feeds containing the entries to be selected.
+     * Array of IDs of feeds containing the entries to be selected.
      */
-    attribute string feeds;
+    attribute nsIVariant feeds;
 
     /**
-     * Space-separated lists of ids of folders containing the entries to be selected.
+     * Array of IDs of folders containing the entries to be selected.
      */
-    attribute string folders;
+    attribute nsIVariant folders;
 
     /**
      * Entry status. Set any of these attributes to TRUE to limit query to entries with
@@ -106,32 +106,29 @@ interface nsIBriefQuery : nsISupports {
     attribute short sortDirection;
 
     /**
-     * Convenience function to set the most common constraint conditions.
+     * Convenience function to set the most common constraints.
      */
-    void setConditions(in string feeds, in string entries, in boolean unread);
+    void setConstraints(in nsIVariant feeds, in nsIVariant entries, in boolean unread);
 
     /**
-     * Returns selected entries in full.
-     *
-     * @param entryCount Empty object (required by XPConnect to return an array).
+     * Returns the selected entries.
      *
      * @returns Array of nsIBriefFeedEntry objects.
      */
-    void getEntries(out unsigned long entryCount,
-                    [retval, array, size_is(entryCount)] out nsIBriefFeedEntry entries);
+    nsIVariant getEntries();
 
     /**
-     * Returns a space-separated list of IDs of selected entries and a list of
-     * IDs of feeds which these entries belong to.
+     * Returns an array of IDs of selected entries and a an of IDs of feeds
+     * which these entries belong to.
      *
-     * @returns Property bag containing "entries" and "feeds" string properties.
+     * @returns Property bag containing "entries" and "feeds" properties.
      */
-    nsIWritablePropertyBag2 getSerializedEntries();
+    nsIPropertyBag getSimpleEntryList();
 
     /**
      * Returns the number of selected entries.
      */
-    unsigned long getEntriesCount();
+    unsigned long getEntryCount();
 
     /**
      * Marks selected entries as read/unread.
@@ -180,24 +177,20 @@ interface nsIBriefStorage : nsISupports {
   /**
    * Gets all feeds, without entries.
    *
-   * @param  feedCount  Empty object (required by XPConnect to return an array).
-   *
    * @returns array of nsIBriefFeed objects.
    */
-  void getAllFeeds(out unsigned long feedCount,
-                  [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
+  nsIVariant getAllFeeds();
 
   /**
    * Similar to |getAllFeeds| but also includes folders.
    */
-  void getFeedsAndFolders(out unsigned long feedCount,
-                          [retval, array, size_is(feedCount)] out nsIBriefFeed feeds);
+  nsIVariant getAllFeedsAndFolders();
 
   /**
-   * Synchronizes database with Live Bookmarks from home folder which RDF URI is
-   * specified by extensions.brief.liveBookmarksFolder.
+   * Synchronizes database with Live Bookmarks from home folder which ID is
+   * specified by extensions.brief.homeFolder.
    * Feeds that were removed from the home folder remain in the database in the hidden
-   * state for some time.
+   * state for some time in case they are added back.
    */
   void syncWithBookmarks();
 
@@ -211,8 +204,7 @@ interface nsIBriefStorage : nsISupports {
   void updateFeed(in nsIBriefFeed feed);
 
   /**
-   * Sets various feed's settings (currently entryAgeLimit, maxEntries,
-   * and updateInterval).
+   * Saves various feed settings: entryAgeLimit, maxEntries, and updateInterval.
    *
    * @param  feed  nIBriefFeed object with whose properties to update the respective
    *               fields in the database.
