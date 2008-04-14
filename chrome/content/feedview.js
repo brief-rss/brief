@@ -58,6 +58,8 @@ function FeedView(aTitle, aQuery) {
                               aQuery.unstarred || aQuery.deleted != ENTRY_STATE_NORMAL;
     this.query = aQuery;
     this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
+    if (this.query.unread && gPrefs.sortUnreadViewOldestFirst)
+        this.query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
 
     this.entriesMarkedUnread = [];
 }
