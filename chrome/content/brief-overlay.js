@@ -321,14 +321,13 @@ const gBrief = {
             break;
 
         case 'brief:feed-update-queued':
-            // Don't display progress for background updates.
-            if (aData == 'background')
+            var single = Ci.nsIBriefUpdateService.UPDATING_SINGLE_FEED;
+            if (this.updateService.status == single)
                 return;
-
-            var progressmeter = document.getElementById('brief-progressmeter');
 
             // Only show the progressmeter if Brief isn't opened in the currently
             // selected tab (no need to show two progressmeters on screen).
+            var progressmeter = document.getElementById('brief-progressmeter');
             if (gBrowser.selectedTab != this.tab)
                 progressmeter.hidden = false;
 

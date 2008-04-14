@@ -17,9 +17,10 @@ const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
 const STARTUP_DELAY = 20000; // 20 seconds
 const FEED_FETCHER_TIMEOUT = 15000; // 15 seconds
 
-const NO_UPDATE = Ci.nsIBriefUpdateService.NO_UPDATE;
-const NORMAL_UPDATE = Ci.nsIBriefUpdateService.NORMAL_UPDATE;
-const BACKGROUND_UPDATE = Ci.nsIBriefUpdateService.BACKGROUND_UPDATE;
+const NOT_UPDATING = Ci.nsIBriefUpdateService.NO_UPDATING;
+const UPDATING_SINGLE_FEED = Ci.nsIBriefUpdateService.UPDATING_SINGLE_FEED;
+const UPDATING_BATCH_NORMAL = Ci.nsIBriefUpdateService.UPDATING_BATCH_NORMAL;
+const UPDATING_BATCH_BACKGROUND = Ci.nsIBriefUpdateService.UPDATING_BATCH_BACKGROUND;
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
@@ -70,7 +71,7 @@ BriefUpdateService.prototype = {
     },
 
     // nsIBriefUpdateService
-    updateInProgress: NO_UPDATE,
+    status: NOT_UPDATING,
 
     scheduledFeeds: [],  // feeds to be updated in the current job (array of nsIBriefFeed's)
     updateQueue:    [],  // remaining feeds to be fetched
@@ -118,9 +119,10 @@ BriefUpdateService.prototype = {
 
     // nsIBriefUpdateService
     fetchFeeds: function BUS_fetchFeeds(aFeeds, aInBackground) {
-        // If only one feed is to be updated, we just do it right away without maintaining
-        // the update queue.
-        if (this.updateInProgress == NO_UPDATE && aFeeds.length == 1) {
+        // If only one feed is to be updated, we just do it right away
+        // without maintaining the update queue.
+        if (this.status == NOT_UPDATING && aFeeds.length == 1) {
+            this.status = UPDATING_SINGLE_FEED;
             new FeedFetcher(aFeeds[0], this);
             return;
         }
@@ -137,7 +139,7 @@ BriefUpdateService.prototype = {
 
         // Start updating if it isn't in progress yet. We will fetch feeds on an interval,
         // so we don't choke when downloading and processing all of them a once.
-        if (this.updateInProgress == NO_UPDATE) {
+        if (this.status == NOT_UPDATING) {
             var delay = aInBackground ? prefs.getIntPref('update.backgroundFetchDelay')
                                       : prefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
@@ -145,20 +147,20 @@ BriefUpdateService.prototype = {
 
         // If background update is in progress and foreground update is attempted,
         // we stop the background start continue with a foreground one.
-        if (this.updateInProgress == BACKGROUND_UPDATE && !aInBackground) {
+        if (this.status == UPDATING_BATCH_BACKGROUND && !aInBackground) {
             this.fetchDelayTimer.cancel();
             var delay = prefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
         }
 
-        if (this.updateInProgress != NORMAL_UPDATE)
-            this.updateInProgress = aInBackground ? BACKGROUND_UPDATE : NORMAL_UPDATE;
-
-        // If new feeds have ended up in the queue then send the proper notification.
-        if (newFeedsQueued) {
-            var data = this.updateInProgress == BACKGROUND_UPDATE ? 'background' : 'foreground';
-            observerService.notifyObservers(null, 'brief:feed-update-queued', data);
+        if (this.status != UPDATING_BATCH_NORMAL) {
+            this.status = aInBackground ? UPDATING_BATCH_BACKGROUND
+                                        : UPDATING_BATCH_NORMAL;
         }
+
+        // If new feeds have ended up in the queue then send the notification.
+        if (newFeedsQueued)
+            observerService.notifyObservers(null, 'brief:feed-update-queued', '');
     },
 
 
@@ -196,8 +198,8 @@ BriefUpdateService.prototype = {
             var feed, i, feedsToUpdate = [];
             for (i = 0; i < feeds.length; i++) {
                 feed = feeds[i];
-                if ((feed.updateInterval > 0 && now - feed.lastUpdated > feed.updateInterval) ||
-                   (feed.updateInterval == 0 && itsGlobalUpdateTime))
+                if ((feed.updateInterval > 0 && now - feed.lastUpdated > feed.updateInterval)
+                    || (feed.updateInterval == 0 && itsGlobalUpdateTime))
                     feedsToUpdate.push(feed);
             }
 
@@ -226,7 +228,7 @@ BriefUpdateService.prototype = {
 
 
     finishUpdate: function BUS_finishUpdate() {
-        this.updateInProgress = NO_UPDATE;
+        this.status = NOT_UPDATING;
         this.fetchDelayTimer.cancel();
 
         var showNotification = prefs.getBoolPref('update.showNotification');
@@ -271,7 +273,8 @@ BriefUpdateService.prototype = {
             if (aData == 'startup') {
                 // Delay enabling autoupdate, so not to slow down the startup. Plus,
                 // nsIBriefStorage is instantiated on profile-after-change.
-                this.startupDelayTimer.initWithCallback(this, STARTUP_DELAY, TIMER_TYPE_ONE_SHOT);
+                this.startupDelayTimer.initWithCallback(this, STARTUP_DELAY,
+                                                        TIMER_TYPE_ONE_SHOT);
 
                 // We add the observer here instead of in the constructor as prefs
                 // are changed during startup when assuming their user-set values.
@@ -279,15 +282,16 @@ BriefUpdateService.prototype = {
             }
             break;
 
-        // Count updated feeds, so we can show their number in the alert when
-        // updating is completed.
         case 'brief:feed-error':
         case 'brief:feed-updated':
-            // If |updateInProgress| is NO_UPDATE then it means that a single feed was
-            // requested - nothing to do here as batch update wasn't started.
-            if (this.updateInProgress == NO_UPDATE)
+            if (this.status == UPDATING_SINGLE_FEED) {
+                this.completedFeeds = [];
+                this.status = NOT_UPDATING;
                 return;
+            }
 
+            // Count updated feeds, so we can show their number in the alert when
+            // updating is completed.
             if (aSubject && aSubject.QueryInterface(Ci.nsIVariant) > 0) {
                 this.newEntriesCount += aSubject.QueryInterface(Ci.nsIVariant);
                 this.feedsWithNewEntriesCount++;
@@ -296,7 +300,6 @@ BriefUpdateService.prototype = {
             // We're done, all feeds updated.
             if (this.completedFeeds.length >= this.scheduledFeeds.length)
                 this.finishUpdate();
-
             break;
 
         // Notification from nsIAlertsService that user has clicked the link in
