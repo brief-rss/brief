@@ -36,6 +36,8 @@
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Display">
 <!ENTITY feedViewGroup.caption "Feed content view">
+<!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY authorsCheckbox.label "Show authors of the items">
 <!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Show">

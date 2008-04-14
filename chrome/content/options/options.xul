@@ -200,6 +200,9 @@
             <preference id="extensions.brief.feedview.customStylePath"
                         name="extensions.brief.feedview.customStylePath"
                         type="unichar"/>
+            <preference id="extensions.brief.feedview.sortUnreadViewOldestFirst"
+                        name="extensions.brief.feedview.sortUnreadViewOldestFirst"
+                        type="bool"/>
         </preferences>
 
         <groupbox>
@@ -217,6 +220,10 @@
                 <label value="&entriesPerPageAfter.label;"/>
             </hbox>
             <spacer height="5"/>
+            <checkbox id="unread-oldest-first-checkbox"
+                      label="&sortUnreadViewOldestFirst.label;"
+                      accesskey="&sortUnreadViewOldestFirst.accesskey;"
+                      preference="extensions.brief.feedview.sortUnreadViewOldestFirst"/>
             <checkbox id="authors-checkbox"
                       label="&authorsCheckbox.label;"
                       accesskey="&authorsCheckbox.accesskey;"

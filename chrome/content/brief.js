@@ -668,7 +668,8 @@ var gPrefs = {
          { name: 'feedview.entrySelectionEnabled',  propName: 'entrySelectionEnabled' },
          { name: 'feedview.autoMarkRead',           propName: 'autoMarkRead' },
          { name: 'feedview.shownEntries',           propName: 'shownEntries' },
-         { name: 'feedview.entriesPerPage',         propName: 'entriesPerPage' }],
+         { name: 'feedview.entriesPerPage',         propName: 'entriesPerPage' },
+         { name: 'feedview.sortUnreadViewOldestFirst', propName: 'sortUnreadViewOldestFirst' }],
 
     _updateCachedPref: function gPrefs__updateCachedPref(aPref) {
         switch (this._branch.getPrefType(aPref.name)) {
@@ -701,16 +702,13 @@ var gPrefs = {
                     gFeedView.ensure(true);
                 }
                 break;
-
             case 'feedview.useCustomStyle':
                 getFeedViewStyle();
                 gFeedView.ensure(true);
                 break;
-
             case 'feedview.entriesPerPage':
                 gFeedView.ensure(true);
                 break;
-
             case 'feedview.shownEntries':
                 var list = document.getElementById('view-constraint-list');
                 list.selectedIndex = this.shownEntries == 'all' ? 0 :
@@ -719,6 +717,14 @@ var gPrefs = {
             case 'feedview.autoMarkRead':
                 if (this.autoMarkRead && gFeedView)
                     gFeedView.markVisibleAsRead();
+                break;
+            case 'feedview.sortUnreadViewOldestFirst':
+                if (gFeedView.query.unread) {
+                    gFeedView.query.sortDirection = this.sortUnreadViewOldestFirst
+                                                    ? Ci.nsIBriefQuery.SORT_ASCENDING
+                                                    : Ci.nsIBriefQuery.SORT_DESCENDING;
+                    gFeedView.ensure(true);
+                }
                 break;
         }
     }
