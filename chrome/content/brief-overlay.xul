@@ -9,6 +9,9 @@
     <script type="application/x-javascript" src="brief-overlay.js"/>
 
     <keyset id="mainKeyset">
+        <key id="Brief_open" key="a" modifiers="control shift"
+             oncommand="gBrief.toggle()"/>
+
         <key id="Brief_selectNextEntry" key="k"
              oncommand="gBrief.doCommand('selectNextEntry')"/>
         <key id="Brief_selectPreviousEntry" key="j"

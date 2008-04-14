@@ -30,6 +30,20 @@ const gBrief = {
             gBrowser.loadURI(BRIEF_URL, null, null);
     },
 
+    toggle: function gBrief_toggle() {
+        if (this.tab == gBrowser.selectedTab)
+            gBrowser.removeTab(this.tab);
+        else
+            gBrief.openBrief(this.shouldOpenInNewTab());
+    },
+
+    shouldOpenInNewTab: function gBrief_shouldOpenInNewTab() {
+        var openInNewTab = this.prefs.getBoolPref('openInNewTab');
+        var isLoading = gBrowser.webProgress.isLoadingDocument;
+        var isBlank = (gBrowser.currentURI.spec == 'about:blank');
+        return openInNewTab && (!isBlank || isLoading);
+    },
+
 
     doCommand: function gBrief_doCommand(aCommand) {
         if (gBrowser.currentURI.spec != BRIEF_URL)
@@ -163,34 +177,17 @@ const gBrief = {
 
 
     onBriefButtonClick: function gBrief_onBriefButtonClick(aEvent) {
-        // We only care about left and middle clicks.
         if (aEvent.button != 0 && aEvent.button != 1)
             return;
 
-        // Clicking the button when Brief is open in current tab "unpresses" it and
-        // closes Brief.
-        if (gBrowser.selectedTab == this.tab && aEvent.button == 0) {
-
-            // If tabbar is hidden and there's only one tab, tabbrowser binding won't let
-            // us close it, so we have to add a blank tab first.
-            if (gBrowser.tabContainer.childNodes.length == 1 &&
-               gPrefService.getBoolPref('browser.tabs.autoHide')) {
-                gBrowser.addTab('about:blank', null, null, null, null, false);
-            }
-
+        // Clicking the button when Brief is open in current tab
+        // "unpresses" it and closes Brief.
+        if (gBrowser.selectedTab == this.tab && aEvent.button == 0)
             gBrowser.removeCurrentTab();
-            return;
-        }
-
-        var openInNewTab = this.prefs.getBoolPref('openInNewTab');
-
-        if (aEvent.button == 0 && !openInNewTab || gBrowser.currentURI.spec == 'about:blank'
-            && openInNewTab && !gBrowser.webProgress.isLoadingDocument) {
-            gBrief.openBrief(false);
-        }
-        else {
+        else if (aEvent.button == 1 || gBrief.shouldOpenInNewTab())
             gBrief.openBrief(true);
-        }
+        else
+            gBrief.openBrief(false);
     },
 
     onTabLoad: function gBrief_onTabLoad(aEvent) {
