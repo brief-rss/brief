@@ -62,25 +62,25 @@ const ENTRIES_TEXT_TABLE_SCHEMA = 'title, content';
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/utils.js');
 
-var places = PlacesUtils;
+var gPlaces = PlacesUtils;
 
-__defineGetter__('observerService', function() {
-    delete this.observerService;
-    return this.observerService = Cc['@mozilla.org/observer-service;1'].
-                                  getService(Ci.nsIObserverService);
+__defineGetter__('gObserverService', function() {
+    delete this.gObserverService;
+    return this.gObserverService = Cc['@mozilla.org/observer-service;1'].
+                                   getService(Ci.nsIObserverService);
 });
-__defineGetter__('prefs', function() {
-    delete this.prefs;
-    return this.prefs = Cc['@mozilla.org/preferences-service;1'].
-                        getService(Ci.nsIPrefService).
-                        getBranch('extensions.brief.').
-                        QueryInterface(Ci.nsIPrefBranch2);
+__defineGetter__('gPrefs', function() {
+    delete this.gPrefs;
+    return this.gPrefs = Cc['@mozilla.org/preferences-service;1'].
+                         getService(Ci.nsIPrefService).
+                         getBranch('extensions.brief.').
+                         QueryInterface(Ci.nsIPrefBranch2);
 });
-__defineGetter__('stringbundle', function() {
-    delete this.stringbundle;
-    return this.stringbundle = Cc['@mozilla.org/intl/stringbundle;1'].
-                               getService(Ci.nsIStringBundleService).
-                               createBundle('chrome://brief/locale/brief.properties');
+__defineGetter__('gStringbundle', function() {
+    delete this.gStringbundle;
+    return this.gStringbundle = Cc['@mozilla.org/intl/stringbundle;1'].
+                                getService(Ci.nsIStringBundleService).
+                                createBundle('chrome://brief/locale/brief.properties');
 });
 
 // Shorthands for common functions.
@@ -94,7 +94,7 @@ var gConnection = null;
 function BriefStorageService() {
     // The instantiation can't be done on app-startup, because the directory service
     // doesn't work yet, so we perform it on profile-after-change.
-    observerService.addObserver(this, 'profile-after-change', false);
+    gObserverService.addObserver(this, 'profile-after-change', false);
 }
 
 BriefStorageService.prototype = {
@@ -142,10 +142,10 @@ BriefStorageService.prototype = {
             this.migrateDatabase();
         }
 
-        this.homeFolderID = prefs.getIntPref('homeFolder');
-        prefs.addObserver('', this, false);
-        places.bookmarks.addObserver(this, false);
-        observerService.addObserver(this, 'quit-application', false);
+        this.homeFolderID = gPrefs.getIntPref('homeFolder');
+        gPrefs.addObserver('', this, false);
+        gPlaces.bookmarks.addObserver(this, false);
+        gObserverService.addObserver(this, 'quit-application', false);
     },
 
     setupDatabase: function BriefStorage_setupDatabase() {
@@ -303,8 +303,8 @@ BriefStorageService.prototype = {
     bookmarkStarredEntries: function BriefStorage_bookmarkStarredEntries() {
         var ioService = Cc['@mozilla.org/network/io-service;1'].
                         getService(Ci.nsIIOService);
-        var unfiledFolder = places.unfiledBookmarksFolderId;
-        var tagName = stringbundle.GetStringFromName('bookmarkedEntryTagName');
+        var unfiledFolder = gPlaces.unfiledBookmarksFolderId;
+        var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
         var bookmarkedEntries = [];
 
         var select = createStatement(
@@ -320,12 +320,12 @@ BriefStorageService.prototype = {
                 var title = select.getString(1);
                 var entryID = select.getString(2);
 
-                var bookmarkID = places.bookmarks.insertBookmark(unfiledFolder, uri,
-                                                                 -1, title);
-                places.annotations.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM,
-                                                     entryID, 0,
-                                                     places.annotations.EXPIRE_NEVER)
-                places.tagging.tagURI(uri, [tagName]);
+                var bookmarkID = gPlaces.bookmarks.insertBookmark(unfiledFolder, uri,
+                                                                  -1, title);
+                gPlaces.annotations.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM,
+                                                      entryID, 0,
+                                                      gPlaces.annotations.EXPIRE_NEVER)
+                gPlaces.tagging.tagURI(uri, [tagName]);
 
                 update.bindStringParameter(0, bookmarkID);
                 update.bindStringParameter(1, entryID);
@@ -508,7 +508,7 @@ BriefStorageService.prototype = {
 
         var subject = Cc['@mozilla.org/variant;1'].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
-        observerService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
+        gObserverService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
     },
 
 
@@ -762,17 +762,17 @@ BriefStorageService.prototype = {
 
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
-        prefs.setIntPref('database.lastPurgeTime', now);
+        gPrefs.setIntPref('database.lastPurgeTime', now);
     },
 
 
     // Expire old entries in feeds that don't have per-feed setting enabled.
     expireEntriesByAgeGlobal: function BriefStorage_expireEntriesByAgeGlobal() {
-        var shouldExpire = prefs.getBoolPref('database.expireEntries');
+        var shouldExpire = gPrefs.getBoolPref('database.expireEntries');
         if (!shouldExpire)
             return;
 
-        var expirationAge = prefs.getIntPref('database.entryExpirationAge');
+        var expirationAge = gPrefs.getIntPref('database.entryExpirationAge');
         // expirationAge is in days, convert it to miliseconds.
         var edgeDate = Date.now() - expirationAge * 86400000;
 
@@ -818,8 +818,8 @@ BriefStorageService.prototype = {
 
     // Delete entries exceeding the max number defined by global or per-feed settings.
     expireEntriesByNumber: function BriefStorage_expireEntriesByNumber() {
-        var useGlobalLimit = prefs.getBoolPref('database.limitStoredEntries');
-        var globalMaxEntriesNumber = prefs.getIntPref('database.maxStoredEntries');
+        var useGlobalLimit = gPrefs.getBoolPref('database.limitStoredEntries');
+        var globalMaxEntriesNumber = gPrefs.getIntPref('database.maxStoredEntries');
 
         var expireByNumber = createStatement('UPDATE entries SET deleted = ?1       ' +
                                              'WHERE id IN (                         ' +
@@ -876,14 +876,14 @@ BriefStorageService.prototype = {
             case 'quit-application':
                 // Integer prefs are longs while Date is a long long.
                 var now = Math.round(Date.now() / 1000);
-                var lastPurgeTime = prefs.getIntPref('database.lastPurgeTime');
+                var lastPurgeTime = gPrefs.getIntPref('database.lastPurgeTime');
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeEntries(true);
 
-                places.bookmarks.removeObserver(this);
-                prefs.removeObserver('', this);
-                observerService.removeObserver(this, 'quit-application');
-                observerService.removeObserver(this, 'profile-after-change');
+                gPlaces.bookmarks.removeObserver(this);
+                gPrefs.removeObserver('', this);
+                gObserverService.removeObserver(this, 'quit-application');
+                gObserverService.removeObserver(this, 'profile-after-change');
 
                 this.bookmarksObserverDelayTimer = null;
                 break;
@@ -896,7 +896,7 @@ BriefStorageService.prototype = {
             case 'nsPref:changed':
                 switch (aData) {
                     case 'homeFolder':
-                        this.homeFolderID = prefs.getIntPref('homeFolder');
+                        this.homeFolderID = gPrefs.getIntPref('homeFolder');
                         this.syncWithBookmarks();
                         break;
                 }
@@ -989,7 +989,7 @@ BriefStorageService.prototype = {
 
             feed.title = aValue; // Update the cached item.
 
-            observerService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
+            gObserverService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
             break;
 
         case 'livemark/feedURI':
@@ -1013,8 +1013,8 @@ BriefStorageService.prototype = {
         var inHome = false;
         if (this.isItemFolder(aItemID)) {
             var parent = aItemID;
-            while (parent !== places.placesRootId) {
-                parent = places.bookmarks.getFolderIdForItem(parent);
+            while (parent !== gPlaces.placesRootId) {
+                parent = gPlaces.bookmarks.getFolderIdForItem(parent);
                 if (parent === this.homeFolderID) {
                     inHome = true;
                     break;
@@ -1026,7 +1026,7 @@ BriefStorageService.prototype = {
     },
 
     isItemFolder: function BriefStorage_isItemFolder(aItemID) {
-        return places.bookmarks.getItemType(aItemID) === places.bookmarks.TYPE_FOLDER;
+        return gPlaces.bookmarks.getItemType(aItemID) === gPlaces.bookmarks.TYPE_FOLDER;
     },
 
     isItemStoredInDB: function BriefStorage_isItemStoredInDB(aItemID) {
@@ -1109,7 +1109,7 @@ function BookmarksSynchronizer() {
         gConnection.commitTransaction();
         if (this.feedListChanged) {
             gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
-            observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+            gObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
         }
     }
 
@@ -1125,7 +1125,7 @@ BookmarksSynchronizer.prototype = {
 
     checkHomeFolder: function BookmarksSync_checkHomeFolder() {
         var folderValid = true;
-        var homeFolder = prefs.getIntPref('homeFolder');
+        var homeFolder = gPrefs.getIntPref('homeFolder');
 
         if (homeFolder == -1) {
             var hideAllFeeds = createStatement('UPDATE feeds SET hidden = ?');
@@ -1133,16 +1133,16 @@ BookmarksSynchronizer.prototype = {
             hideAllFeeds.execute();
 
             gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
-            observerService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+            gObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
             folderValid = false;
         }
         else {
             try {
                 // This will throw if the home folder was deleted.
-                places.bookmarks.getItemTitle(homeFolder);
+                gPlaces.bookmarks.getItemTitle(homeFolder);
             }
             catch (e) {
-                prefs.clearUserPref('homeFolder');
+                gPrefs.clearUserPref('homeFolder');
                 folderValid = false;
             }
         }
@@ -1153,15 +1153,15 @@ BookmarksSynchronizer.prototype = {
 
     // Get all bookmarks in the user's home folder.
     getBookmarks: function BookmarksSync_getBookmarks() {
-        var homeFolder = prefs.getIntPref('homeFolder');
+        var homeFolder = gPrefs.getIntPref('homeFolder');
 
         // Get the current Live Bookmarks.
-        var options = places.history.getNewQueryOptions();
-        var query = places.history.getNewQuery();
+        var options = gPlaces.history.getNewQueryOptions();
+        var query = gPlaces.history.getNewQuery();
 
         query.setFolders([homeFolder], 1);
         options.excludeItems = true;
-        var result = places.history.executeQuery(query, options);
+        var result = gPlaces.history.executeQuery(query, options);
 
         this.bookmarks = [];
         this.traversePlacesQueryResults(result.root);
@@ -1261,7 +1261,7 @@ BookmarksSynchronizer.prototype = {
             gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
 
             // If only the title has changed, the feed list can be updated incrementally.
-            observerService.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
+            gObserverService.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
         }
     },
 
@@ -1306,13 +1306,13 @@ BookmarksSynchronizer.prototype = {
                 continue;
 
             item = {};
-            item.title = places.bookmarks.getItemTitle(node.itemId);
+            item.title = gPlaces.bookmarks.getItemTitle(node.itemId);
             item.bookmarkID = node.itemId;
             item.rowIndex = this.bookmarks.length;
             item.parent = aContainer.itemId;
 
-            if (places.livemarks.isLivemark(node.itemId)) {
-                var feedURL = places.livemarks.getFeedURI(node.itemId).spec;
+            if (gPlaces.livemarks.isLivemark(node.itemId)) {
+                var feedURL = gPlaces.livemarks.getFeedURI(node.itemId).spec;
                 item.feedURL = feedURL;
                 item.feedID = hashString(feedURL);
                 item.isFolder = false;
@@ -1495,8 +1495,8 @@ BriefQuery.prototype = {
 
         // If any entries were marked, dispatch the notifiaction.
         if (changedEntries.getProperty('entries').length) {
-            observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                            aState ? 'read' : 'unread');
+            gObserverService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                             aState ? 'read' : 'unread');
         }
     },
 
@@ -1537,8 +1537,8 @@ BriefQuery.prototype = {
         }
 
         if (changedEntries.getProperty('entries').length) {
-            observerService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                            'deleted');
+            gObserverService.notifyObservers(changedEntries, 'brief:entry-status-changed',
+                                             'deleted');
         }
     },
 
@@ -1558,19 +1558,19 @@ BriefQuery.prototype = {
                             getService(Ci.nsIIOService);
             var txnService = Cc['@mozilla.org/browser/placesTransactionsService;1'].
                              getService(Ci.nsIPlacesTransactionsService);
-            var tagName = stringbundle.GetStringFromName('bookmarkedEntryTagName');
-            var bms = places.bookmarks;
-            var annos = places.annotations;
+            var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
+            var bms = gPlaces.bookmarks;
+            var annos = gPlaces.annotations;
 
             var changedEntries = this.getEntries();
             for each (entry in changedEntries) {
                 if (aState) {
                     var uri = ioService.newURI(entry.entryURL, null, null);
-                    var bookmarkID = bms.insertBookmark(places.unfiledBookmarksFolderId,
+                    var bookmarkID = bms.insertBookmark(gPlaces.unfiledBookmarksFolderId,
                                                         uri, bms.DEFAULT_INDEX, entry.title);
                     annos.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM, entry.id, 0,
                                             annos.EXPIRE_NEVER);
-                    places.tagging.tagURI(uri, [tagName]);
+                    gPlaces.tagging.tagURI(uri, [tagName]);
                 }
                 else {
                     // We have to use a transaction, so that tags are removed too.
@@ -1590,21 +1590,29 @@ BriefQuery.prototype = {
         }
 
         if (changedEntriesList.getProperty('entries').length) {
-            observerService.notifyObservers(changedEntriesList,
-                                            'brief:entry-status-changed',
-                                            aState ? 'starred' : 'unstarred');
+            gObserverService.notifyObservers(changedEntriesList,
+                                             'brief:entry-status-changed',
+                                             aState ? 'starred' : 'unstarred');
         }
     },
 
 
+    /**
+     * Constructs SQL query constraints based on attributes of this nsIBriefQuery object.
+     *
+     * @param aForSelect Build a string optimized for a SELECT statement.
+     * @returns String containing the part of an SQL statement after the WHERE clause.
+     */
     getQueryString: function BriefQuery_getQueryString(aForSelect) {
         var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
 
         if (aForSelect) {
-            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID INNER JOIN entries_text ON entries.rowid = entries_text.rowid WHERE ';
+            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                       ' INNER JOIN entries_text ON entries.rowid = entries_text.rowid WHERE ';
         }
         else {
-            text = ' WHERE entries.rowid IN (SELECT entries.rowid FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ';
+            text = ' WHERE entries.rowid IN (SELECT entries.rowid FROM entries INNER JOIN ' +
+                   ' feeds ON entries.feedID = feeds.feedID ';
             if (this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
                 text += ' INNER JOIN entries_text ON entries.rowid = entries_text.rowid ';
             text += ' WHERE ';
@@ -1612,11 +1620,9 @@ BriefQuery.prototype = {
 
         if (this.folders) {
             this.effectiveFolders = this.folders;
+            var homeFolder = gPrefs.getIntPref('homeFolder');
 
-            // Cache the items list to avoid retrieving it over and over when traversing.
-            this._items = gStorageService.getAllFeedsAndFolders();
-
-            var homeFolder = prefs.getIntPref('homeFolder');
+            // Fill the list of effective folders.
             this.traverseFolderChildren(homeFolder);
 
             text += '(';
@@ -1716,14 +1722,14 @@ BriefQuery.prototype = {
     },
 
     traverseFolderChildren: function BriefQuery_traverseFolderChildren(aFolder) {
-        var isEffectiveFolder = this.effectiveFolders.indexOf(aFolder) != -1;
-        var item, i;
-        for (i = 0; i < this._items.length; i++) {
-            item = this._items[i];
-            if (item.parent == aFolder && item.isFolder) {
+        var isEffectiveFolder = (this.effectiveFolders.indexOf(aFolder) != -1);
+        var items = gStorageService.getAllFeedsAndFolders();
+
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].parent == aFolder && items[i].isFolder) {
                 if (isEffectiveFolder)
-                    this.effectiveFolders.push(item.feedID);
-                this.traverseFolderChildren(item.feedID);
+                    this.effectiveFolders.push(items[i].feedID);
+                this.traverseFolderChildren(items[i].feedID);
             }
         }
     },
