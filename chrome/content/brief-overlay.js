@@ -5,19 +5,40 @@ var BriefQuery = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuer
 
 const gBrief = {
 
-    tab: null,            // Tab in which Brief is loaded
-    statusIcon: null,     // Statusbar panel
-    storageService: null,
-    updateService: null,
-    prefs: null,
+    tab: null,  // Tab in which Brief is loaded
 
-    // We can't cache it like statusIcon, because it may be removed or added via Customize
-    // Toolbar.
-    get toolbarbutton() {
-        return document.getElementById('brief-button');
+    get statusIcon gBrief_toolbarbutton() {
+        delete this.statusIcon;
+        return this.statusIcon = document.getElementById('brief-status');
     },
 
-    openBrief: function gBrief_openBrief(aNewTab) {
+    get toolbarbutton gBrief_toolbarbutton() {
+        delete this.toolbarbutton;
+        return this.toolbarbutton = document.getElementById('brief-button');
+    },
+
+    get prefs gBrief_prefs() {
+        delete this.prefs;
+        return this.prefs = this.prefs = Cc['@mozilla.org/preferences-service;1'].
+                            getService(Ci.nsIPrefService).
+                            getBranch('extensions.brief.').
+                            QueryInterface(Ci.nsIPrefBranch2);
+    },
+
+    get storage gBrief_storage() {
+        delete this.storage;
+        return this.storage = Cc['@ancestor/brief/storage;1'].
+                              getService(Ci.nsIBriefStorage);
+    },
+
+    get updateService gBrief_updateService() {
+        delete this.updateService;
+        return this.updateService = Cc['@ancestor/brief/updateservice;1'].
+                                    getService(Ci.nsIBriefUpdateService);
+    },
+
+
+    open: function gBrief_open(aNewTab) {
         if (this.toolbarbutton)
             this.toolbarbutton.checked = true;
 
@@ -34,7 +55,7 @@ const gBrief = {
         if (this.tab == gBrowser.selectedTab)
             gBrowser.removeTab(this.tab);
         else
-            gBrief.openBrief(this.shouldOpenInNewTab());
+            gBrief.open(this.shouldOpenInNewTab());
     },
 
     shouldOpenInNewTab: function gBrief_shouldOpenInNewTab() {
@@ -97,7 +118,6 @@ const gBrief = {
     markFeedsAsRead: function gBrief_markFeedsAsRead() {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
         query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
-
         query.markEntriesRead(true);
     },
 
@@ -152,7 +172,7 @@ const gBrief = {
             row.setAttribute('class', 'unread-feed-row');
             row = rows.appendChild(row);
 
-            var feedName = this.storageService.getFeed(unreadFeeds[i]).title;
+            var feedName = this.storage.getFeed(unreadFeeds[i]).title;
             label = document.createElement('label');
             label.setAttribute('class', 'unread-feed-name');
             label.setAttribute('crop', 'right');
@@ -185,9 +205,9 @@ const gBrief = {
         if (gBrowser.selectedTab == this.tab && aEvent.button == 0)
             gBrowser.removeCurrentTab();
         else if (aEvent.button == 1 || gBrief.shouldOpenInNewTab())
-            gBrief.openBrief(true);
+            gBrief.open(true);
         else
-            gBrief.openBrief(false);
+            gBrief.open(false);
     },
 
     onTabLoad: function gBrief_onTabLoad(aEvent) {
@@ -233,17 +253,6 @@ const gBrief = {
         case 'load':
             window.removeEventListener('load', this, false);
 
-            this.statusIcon = document.getElementById('brief-status');
-            this.prefs = Cc['@mozilla.org/preferences-service;1'].
-                         getService(Ci.nsIPrefService).
-                         getBranch('extensions.brief.').
-                         QueryInterface(Ci.nsIPrefBranch2);
-            this.prefs.addObserver('', this, false);
-            this.storageService = Cc['@ancestor/brief/storage;1'].
-                                  getService(Ci.nsIBriefStorage);
-            this.updateService = Cc['@ancestor/brief/updateservice;1'].
-                                 getService(Ci.nsIBriefUpdateService);
-
             var firstRun = this.prefs.getBoolPref('firstRun');
             if (firstRun) {
                 // The timeout is necessary to avoid adding the button while
@@ -258,8 +267,8 @@ const gBrief = {
                 this.updateStatuspanel();
             }
 
-            // Observe changes to the feed database in order to keep the statusbar
-            // icon up-to-date.
+            // Observe changes to the feed database in order to keep
+            // the statusbar icon up-to-date.
             var observerService = Cc['@mozilla.org/observer-service;1'].
                                   getService(Ci.nsIObserverService);
             observerService.addObserver(this, 'brief:feed-updated', false);
@@ -275,6 +284,8 @@ const gBrief = {
             gBrowser.addEventListener('TabClose', this.onTabClose, false);
             gBrowser.addEventListener('TabSelect', this.onTabSelect, false);
             gBrowser.addEventListener('pageshow', this.onTabLoad, false);
+
+            this.prefs.addObserver('', this, false);
 
             window.addEventListener('unload', this, false);
             break;
