@@ -631,97 +631,95 @@ function onKeyPress(aEvent) {
 var gPrefs = {
 
     register: function gPrefs_register() {
-        this.branch = Cc['@mozilla.org/preferences-service;1'].
-                        getService(Ci.nsIPrefService).
-                        getBranch('extensions.brief.').
-                        QueryInterface(Ci.nsIPrefBranch2);
+        this._branch = Cc['@mozilla.org/preferences-service;1'].
+                       getService(Ci.nsIPrefService).
+                       getBranch('extensions.brief.').
+                       QueryInterface(Ci.nsIPrefBranch2);
 
-        this.getIntPref = this.branch.getIntPref;
-        this.getBoolPref = this.branch.getBoolPref;
-        this.getCharPref = this.branch.getCharPref;
-        this.getComplexValue = this.branch.getComplexValue;
+        this.getIntPref = this._branch.getIntPref;
+        this.getBoolPref = this._branch.getBoolPref;
+        this.getCharPref = this._branch.getCharPref;
+        this.getComplexValue = this._branch.getComplexValue;
 
-        this.setIntPref = this.branch.setIntPref;
-        this.setBoolPref = this.branch.setBoolPref;
-        this.setCharPref = this.branch.setCharPref;
+        this.setIntPref = this._branch.setIntPref;
+        this.setBoolPref = this._branch.setBoolPref;
+        this.setCharPref = this._branch.setCharPref;
 
-        // Cache prefs access to which is critical for performance.
-        this.entriesPerPage = this.getIntPref('feedview.entriesPerPage');
-        this.shownEntries = this.getCharPref('feedview.shownEntries');
-        this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
-        this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
-        this.showAuthors = this.getBoolPref('feedview.showAuthors');
-        this.entrySelectionEnabled = this.getBoolPref('feedview.entrySelectionEnabled');
-        this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
-        this.autoMarkRead = this.getBoolPref('feedview.autoMarkRead');
+        for each (pref in this._cachedPrefs)
+            this._updateCachedPref(pref);
 
-        this.branch.addObserver('', this, false);
+        this._branch.addObserver('', this, false);
     },
 
     unregister: function gPrefs_unregister() {
-        this.branch.removeObserver('', this);
+        this._branch.removeObserver('', this);
     },
+
 
     get homeFolder gPrefs_homeFolder() {
         var pref = this.getIntPref('homeFolder');
         return (pref != -1) ? pref : null;
     },
 
+    _cachedPrefs:
+        [{ name: 'feedview.doubleClickMarks',       propName: 'doubleClickMarks' },
+         { name: 'feedview.showHeadlinesOnly',      propName: 'showHeadlinesOnly' },
+         { name: 'feedview.showAuthors',            propName: 'showAuthors' },
+         { name: 'feedview.entrySelectionEnabled',  propName: 'entrySelectionEnabled' },
+         { name: 'feedview.autoMarkRead',           propName: 'autoMarkRead' },
+         { name: 'feedview.shownEntries',           propName: 'shownEntries' },
+         { name: 'feedview.entriesPerPage',         propName: 'entriesPerPage' }],
+
+    _updateCachedPref: function gPrefs__updateCachedPref(aPref) {
+        switch (this._branch.getPrefType(aPref.name)) {
+            case Ci.nsIPrefBranch.PREF_STRING:
+                this[aPref.propName] = this.getCharPref(aPref.name);
+                break;
+            case Ci.nsIPrefBranch.PREF_INT:
+                this[aPref.propName] = this.getIntPref(aPref.name);
+                break;
+            case Ci.nsIPrefBranch.PREF_BOOL:
+                this[aPref.propName] = this.getBoolPref(aPref.name);
+                break;
+        }
+    },
+
+
     observe: function gPrefs_observe(aSubject, aTopic, aData) {
         if (aTopic != 'nsPref:changed')
             return;
 
-        switch (aData) {
-        case 'showFavicons':
-            var feeds = gStorage.getAllFeeds();
-            gFeedList.refreshFeedTreeitems(feeds);
-            break;
+        for each (pref in this._cachedPrefs) {
+            if (aData == pref.name)
+                this._updateCachedPref(pref);
+        }
 
-        case 'feedview.customStylePath':
-            if (this.getBoolPref('feedview.useCustomStyle')) {
+        switch (aData) {
+            case 'feedview.customStylePath':
+                if (this.getBoolPref('feedview.useCustomStyle')) {
+                    getFeedViewStyle();
+                    gFeedView.ensure(true);
+                }
+                break;
+
+            case 'feedview.useCustomStyle':
                 getFeedViewStyle();
                 gFeedView.ensure(true);
-            }
-            break;
+                break;
 
-        case 'feedview.useCustomStyle':
-            getFeedViewStyle();
-            gFeedView.ensure(true);
-            break;
+            case 'feedview.entriesPerPage':
+                gFeedView.ensure(true);
+                break;
 
-        // Observers to keep the cached prefs up to date.
-        case 'feedview.entriesPerPage':
-            this.entriesPerPage = this.getIntPref('feedview.entriesPerPage');
-            gFeedView.ensure(true);
-            break;
-
-        case 'feedview.shownEntries':
-            this.shownEntries = this.getCharPref('feedview.shownEntries');
-            var viewConstraintList = document.getElementById('view-constraint-list');
-            viewConstraintList.selectedIndex = this.shownEntries == 'all' ? 0 :
-                                               this.shownEntries == 'unread' ? 1 : 2;
-            break;
-        case 'feedview.autoMarkRead':
-            this.autoMarkRead = this.getBoolPref('feedview.autoMarkRead');
-            if (this.autoMarkRead && gFeedView)
-                gFeedView.markVisibleAsRead();
-            break;
-
-        case 'feedview.doubleClickMarks':
-            this.doubleClickMarks = this.getBoolPref('feedview.doubleClickMarks');
-            break;
-        case 'feedview.showHeadlinesOnly':
-            this.showHeadlinesOnly = this.getBoolPref('feedview.showHeadlinesOnly');
-            break;
-        case 'feedview.showAuthors':
-            this.showAuthors = this.getBoolPref('feedview.showAuthors');
-            break;
-        case 'feedview.entrySelectionEnabled':
-            this.entrySelectionEnabled = this.getBoolPref('feedview.entrySelectionEnabled');
-            break;
-        case 'assumeStandardKeys':
-            this.assumeStandardKeys = this.getBoolPref('assumeStandardKeys');
-            break;
+            case 'feedview.shownEntries':
+                var list = document.getElementById('view-constraint-list');
+                list.selectedIndex = this.shownEntries == 'all' ? 0 :
+                                     this.shownEntries == 'unread' ? 1 : 2;
+                break;
+            case 'feedview.autoMarkRead':
+                if (this.autoMarkRead && gFeedView)
+                    gFeedView.markVisibleAsRead();
+                break;
         }
     }
 
