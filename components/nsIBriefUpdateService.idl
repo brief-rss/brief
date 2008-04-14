@@ -10,14 +10,15 @@ interface nsIVariant;
 interface nsIBriefUpdateService : nsISupports {
 
   /**
-   * Indicates if a batch update is in progress and whether it is a normal or a
+   * Indicates if updating is in progress and whether it is a normal or a
    * background one.
    */
-  const short NO_UPDATE = 0;
-  const short BACKGROUND_UPDATE = 1;
-  const short NORMAL_UPDATE = 2;
+  const short NOT_UPDATING = 0;
+  const short UPDATING_SINGLE_FEED = 1;
+  const short UPDATING_BATCH_BACKGROUND = 2;
+  const short UPDATING_BATCH_NORMAL = 3;
 
-  readonly attribute short updateInProgress;
+  readonly attribute short status;
 
   /**
    * Total number of feeds scheduled for current batch update (both completed and pending

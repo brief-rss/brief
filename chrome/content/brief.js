@@ -166,10 +166,12 @@ var gObserver = {
             var deck = document.getElementById('update-buttons-deck');
             deck.selectedIndex = 1;
 
-            var progressmeter = document.getElementById('update-progress');
-            progressmeter.hidden = false;
-            progressmeter.value = 100 * gUpdateService.completedFeedsCount /
-                                        gUpdateService.totalFeedsCount;
+            if (gUpdateService.status != Ci.nsIBriefUpdateService.UPDATING_SINGLE_FEED) {
+                var progressmeter = document.getElementById('update-progress');
+                progressmeter.hidden = false;
+                progressmeter.value = 100 * gUpdateService.completedFeedsCount /
+                                            gUpdateService.totalFeedsCount;
+            }
             break;
 
         case 'brief:feed-update-canceled':
