@@ -1,10 +1,12 @@
 <!ENTITY shortcutsPage.title "Brief - keyboard shortcuts">
 <!ENTITY navigation.header "Navigation">
 <!ENTITY or "or">
+<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
+<!ENTITY openBrief "Open Brief">
 <!ENTITY space.key "Space">
-<!ENTITY selectNext "Select next item">
+<!ENTITY showNextItem "Show next item">
 <!ENTITY backspace.key "Backspace">
-<!ENTITY selectPrevious "Select previous item">
+<!ENTITY showPreviousItem "Show previous item">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "Show next page">
 <!ENTITY altJ.key "Alt + J">
