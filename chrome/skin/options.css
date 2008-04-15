@@ -26,6 +26,10 @@ textbox[type="number"] > spinbuttons {
   margin: 0.5em 0 1em;
 }
 
+.content-box {
+  height: auto !important;
+}
+
 #show-shortcuts {
   list-style-image: url(chrome://brief/skin/icons/keyboard.png);
 }
