@@ -7,7 +7,7 @@ const gBrief = {
 
     tab: null,  // Tab in which Brief is loaded
 
-    get statusIcon gBrief_toolbarbutton() {
+    get statusIcon gBrief_statusIcon() {
         delete this.statusIcon;
         return this.statusIcon = document.getElementById('brief-status');
     },
@@ -19,7 +19,7 @@ const gBrief = {
 
     get prefs gBrief_prefs() {
         delete this.prefs;
-        return this.prefs = this.prefs = Cc['@mozilla.org/preferences-service;1'].
+        return this.prefs = Cc['@mozilla.org/preferences-service;1'].
                             getService(Ci.nsIPrefService).
                             getBranch('extensions.brief.').
                             QueryInterface(Ci.nsIPrefBranch2);
@@ -105,11 +105,12 @@ const gBrief = {
                 searchbar.focus();
                 break;
             case 'toggleEntrySelection':
-                win.gFeedView.toggleEntrySelection();
+                var oldValue = this.prefs.getBoolPref('feedview.entrySelectionEnabled');
+                this.prefs.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
                 break;
 
             default:
-                var func = win.gCommands[aCommand]();
+                win.gCommands[aCommand]();
                 break;
         }
     },

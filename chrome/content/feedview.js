@@ -380,8 +380,6 @@ FeedView.prototype = {
 
 
     toggleEntrySelection: function FeedView_toggleEntrySelection() {
-        gPrefs.setBoolPref('feedview.entrySelectionEnabled', !gPrefs.entrySelectionEnabled);
-
         if (gPrefs.entrySelectionEnabled)
             this.selectEntry(this._getMiddleEntryElement());
         else

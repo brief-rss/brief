@@ -602,10 +602,11 @@ function onKeyPress(aEvent) {
 
     // Brief takes over these shortcut keys, so we stop the default action.
     // Let's not prevent the user from typing in inputs that entries may contain, though.
-    if (gPrefs.assumeStandardKeys && aEvent.originalTarget.localName != 'input') {
+    if (gPrefs.getBoolPref('assumeStandardKeys') && aEvent.originalTarget.localName != 'input') {
 
         if (aEvent.keyCode == aEvent.DOM_VK_TAB && !aEvent.ctrlKey) {
-            gFeedView.toggleEntrySelection();
+            gPrefs.setBoolPref('feedview.entrySelectionEnabled',
+                               !gPrefs.entrySelectionEnabled);
             aEvent.preventDefault();
         }
         else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
@@ -725,6 +726,9 @@ var gPrefs = {
                                                     : Ci.nsIBriefQuery.SORT_DESCENDING;
                     gFeedView.ensure(true);
                 }
+                break;
+            case 'feedview.entrySelectionEnabled':
+                gFeedView.toggleEntrySelection();
                 break;
         }
     }

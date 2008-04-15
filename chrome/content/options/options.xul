@@ -203,6 +203,9 @@
             <preference id="extensions.brief.feedview.sortUnreadViewOldestFirst"
                         name="extensions.brief.feedview.sortUnreadViewOldestFirst"
                         type="bool"/>
+            <preference id="extensions.brief.feedview.entrySelectionEnabled"
+                        name="extensions.brief.feedview.entrySelectionEnabled"
+                        type="bool"/>
         </preferences>
 
         <groupbox>
@@ -243,14 +246,18 @@
             </hbox>
         </groupbox>
 
-        <spacer height="10"/>
-
-        <hbox>
+        <groupbox align="start">
+            <caption label="&keyboardGroup.caption;"/>
+            <checkbox id="enable-item-selection-checkbox"
+                      label="&enableItemSelection.label;"
+                      accesskey="&enableItemSelection.accesskey;"
+                      preference="extensions.brief.feedview.entrySelectionEnabled"/>
+            <spacer height="8"/>
             <button id="show-shortcuts"
                     label="&showShortcuts.label;"
                     accesskey="&showShortcuts.accesskey;"
                     oncommand="gDisplayPane.showShortcuts()"/>
-        </hbox>
+        </groupbox>
 
     </prefpane>
 
