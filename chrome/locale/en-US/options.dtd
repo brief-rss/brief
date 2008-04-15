@@ -47,6 +47,9 @@
 <!ENTITY enableCustomStyle.accesskey "U">
 <!ENTITY browseCustomStyle.label "Browse">
 <!ENTITY browseCustomStyle.accesskey "B">
+<!ENTITY keyboardGroup.caption "Keyboard shortcuts">
+<!ENTITY enableItemSelection.label "Enable selecting and managing items using keyboard">
+<!ENTITY enableItemSelection.accesskey "E">
 <!ENTITY showShortcuts.label "Show shortcuts">
 <!ENTITY showShortcuts.accesskey "w">
 <!ENTITY feedName.label "Name">
