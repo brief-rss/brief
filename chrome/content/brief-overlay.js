@@ -273,6 +273,7 @@ const gBrief = {
             var observerService = Cc['@mozilla.org/observer-service;1'].
                                   getService(Ci.nsIObserverService);
             observerService.addObserver(this, 'brief:feed-updated', false);
+            observerService.addObserver(this, 'brief:feed-error', false);
             observerService.addObserver(this, 'brief:invalidate-feedlist', false);
             observerService.addObserver(this, 'brief:entry-status-changed', false);
             observerService.addObserver(this, 'brief:feed-update-queued', false);
@@ -297,6 +298,7 @@ const gBrief = {
             var observerService = Cc['@mozilla.org/observer-service;1'].
                                   getService(Ci.nsIObserverService);
             observerService.removeObserver(this, 'brief:feed-updated');
+            observerService.removeObserver(this, 'brief:feed-error');
             observerService.removeObserver(this, 'brief:entry-status-changed');
             observerService.removeObserver(this, 'brief:invalidate-feedlist');
             observerService.removeObserver(this, 'brief:feed-update-queued');
