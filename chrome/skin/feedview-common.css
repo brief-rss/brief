@@ -101,8 +101,16 @@ pre, code {
 /* ----------------------  Adjustments for headlines view   ---------------------- */
 
 .article-container[collapsed] .article-controls,
-.article-container[collapsed] .article-authors {
+.article-container[collapsed] .article-subheader {
   display: none;
+}
+
+.collapsed-article-subheader {
+    display: none;
+}
+
+.article-container[collapsed] .collapsed-article-subheader {
+    display: block;
 }
 
 /* Shows controls on hover */

@@ -27,13 +27,16 @@
             <div class="restore-entry" command="restore"/>
         </div>
 
+        <div class="collapsed-article-subheader"/>
+
+        <xbl:children/>
+
         <div class="article-subheader">
             <div class="article-date"/>
             <div class="article-authors"/>
             <div class="feed-name"/>
         </div>
 
-        <xbl:children/>
     </xbl:content>
 </binding>
 
@@ -60,10 +63,10 @@
             if (feedContent.hasAttribute('showFeedNames'))
                 feedNameElem.innerHTML = this.getAttribute('feedName');
 
-            var dateElem     = this.getElement('article-date');
+            var dateElem = this.getElement('article-date');
             dateElem.innerHTML = this.getAttribute('updated') || this.getAttribute('date');
 
-            var authorsElem  = this.getElement('article-authors');
+            var authorsElem = this.getElement('article-authors');
             authorsElem.innerHTML = this.getAttribute('authors');
 
             var markReadElem = this.getElement('mark-read-centre');
@@ -80,8 +83,12 @@
             contentElem.innerHTML = this.getAttribute('content');
             this.appendChild(contentElem);
 
-            if (this.collapsed)
+            if (this.collapsed) {
+                var collapsedSubheader = this.getElement('collapsed-article-subheader');
+                collapsedSubheader.insertBefore(dateElem, null);
+                collapsedSubheader.insertBefore(feedNameElem, null);
                 $(contentElem).hide();
+            }
             ]]>
         </constructor>
 
@@ -122,11 +129,17 @@
                     return;
 
                 var articleContent = this.getElementsByClassName('article-content')[0];
+                var date = this.getElement('article-date');
+                var feedName = this.getElement('feed-name');
                 var self = this;
 
                 if (aState) {
                     function finish() {
                         self.setAttribute('collapsed', true);
+
+                        var collapsedSubheader = self.getElement('collapsed-article-subheader');
+                        collapsedSubheader.insertBefore(date, null);
+                        collapsedSubheader.insertBefore(feedName, null);
                     }
 
                     if (aAnimate) {
@@ -140,6 +153,10 @@
 
                 else {
                     this.removeAttribute('collapsed');
+
+                    var subheader = this.getElement('article-subheader');
+                    subheader.insertBefore(date, this.getElement('article-authors'));
+                    subheader.insertBefore(feedName, null);
 
                     function finish() {
                         self.sendEvent('EntryUncollapsed');
