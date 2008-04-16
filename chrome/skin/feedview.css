@@ -103,7 +103,7 @@ body {
     float: left;
     margin: -6px 2px 0 -24px;
     width: 24px;
-    height: 3.0em;
+    height: 30px;
     -moz-user-select: none; /* Prevent selecting the title when clicking */
 }
 
@@ -129,15 +129,15 @@ body {
 
 /* ----------------------  Article subheader  ---------------------- */
 
-.article-subheader {
+.article-subheader, .collapsed-article-subheader {
     font-family: "Lucida Grande", Verdana, sans-serif;
     font-size: 12px;
     line-height: 17px; /* Make the height the same for both Lucida and Verdana */
+}
+
+.article-subheader {
     color: #477900;
     clear: both;
-    float: left; /* It's got to float for the title appear before it */
-    width: -moz-available; /* Floating is just a trick, it still should be
-                              as wide as the containing box */
     padding: 10px 10px 0 30px;
     overflow: auto; /* Clears contained floats */
 }
@@ -225,11 +225,10 @@ body {
     background-color: #f5faff;
 }
 
-.article-container[collapsed] .article-subheader {
+.article-container[collapsed] .collapsed-article-subheader {
     color: #5c7933;
     padding: 0 8px;
     float: right;
-    clear: none;
     width: -moz-max-content;
 }
 
@@ -238,11 +237,11 @@ body {
     margin-bottom: 8px;
 }
 
+/* Crop feed names longer than 170px */
 .article-container[collapsed] .feed-name {
     max-width: 170px;
     height: 1.3em; /* Height of a single line */
     overflow: hidden;
-    float: right;
 }
 
 
