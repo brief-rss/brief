@@ -230,6 +230,7 @@ body {
     padding: 0 8px;
     float: right;
     width: -moz-max-content;
+    text-align: right;
 }
 
 .article-container[collapsed] .article-date {
