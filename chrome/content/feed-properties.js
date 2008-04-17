@@ -2,7 +2,7 @@ var Ci = Components.interfaces;
 var Cc = Components.classes;
 
 var gFeed = null;
-var gStorageService = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
+var gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 var gPrefs = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
                                                       getBranch('extensions.brief.');
 
@@ -19,7 +19,7 @@ function setupWindow() {
 
     if (!gFeed) {
         var feedID = window.arguments[0];
-        gFeed = gStorageService.getFeed(feedID);
+        gFeed = gStorage.getFeed(feedID);
     }
 
     var stringbundle = document.getElementById('options-bundle');
@@ -41,7 +41,7 @@ function setupWindow() {
     checkUpdatesTextbox.disabled = checkUpdatesMenulist.disabled = !checkUpdatesCheckbox.checked;
     initUpdateIntervalControls();
 
-    var allFeeds = gStorageService.getAllFeeds();
+    var allFeeds = gStorage.getAllFeeds();
     var currentIndex = allFeeds.indexOf(gFeed);
     var nextFeed = document.getElementById('next-feed');
     var previousFeed = document.getElementById('previous-feed');
@@ -49,36 +49,20 @@ function setupWindow() {
     previousFeed.disabled = (currentIndex == 0);
 }
 
-function previousFeed() {
-    var allFeeds = gStorageService.getAllFeeds();
+function showFeed(aDeltaIndex) {
+    var allFeeds = gStorage.getAllFeeds();
 
-    // The reason we must re-get the feed is because the old feeds cache in
-    // the storage component may have been destroyed after modifying the bookmarks
-    // database in saveChanges(). In such case gFeed would be a reference to the object
-    // in the destroyed cache, not in the array which we got from the above
-    // getAllFeeds() call.
-    gFeed = gStorageService.getFeed(gFeed.feedID);
+    for (var index = 0; index < allFeeds.length; index++) {
+        if (allFeeds[index].feedID == gFeed.feedID)
+            break;
+    }
 
-    var currentIndex = allFeeds.indexOf(gFeed);
-    if (currentIndex > 0) {
+    if (index > 0) {
         saveChanges();
-        gFeed = allFeeds[currentIndex - 1];
+        gFeed = allFeeds[index + aDeltaIndex];
         setupWindow();
     }
 }
-
-function nextFeed() {
-    var allFeeds = gStorageService.getAllFeeds();
-    // see previousFeed()
-    gFeed = gStorageService.getFeed(gFeed.feedID);
-    var currentIndex = allFeeds.indexOf(gFeed);
-    if (currentIndex < allFeeds.length - 1) {
-        saveChanges();
-        gFeed = allFeeds[currentIndex + 1];
-        setupWindow();
-    }
-}
-
 
 function initUpdateIntervalControls() {
     var interval = gFeed.updateInterval / 1000 || gPrefs.getIntPref('update.interval');
@@ -171,7 +155,7 @@ function saveChanges() {
         gFeed.updateInterval = 0;
     }
 
-    gStorageService.setFeedOptions(gFeed);
+    gStorage.setFeedOptions(gFeed);
 
     saveLivemarksData();
 

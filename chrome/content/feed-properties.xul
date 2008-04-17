@@ -84,13 +84,13 @@
             <button id="previous-feed"
                     label="&previousFeed.label;"
                     accesskey="&previousFeed.accesskey;"
-                    oncommand="previousFeed()"/>
+                    oncommand="showFeed(-1)"/>
         </hbox>
         <hbox flex="1" pack="end">
             <button id="next-feed"
                     label="&nextFeed.label;"
                     accesskey="&nextFeed.accesskey;"
-                    oncommand="nextFeed()"/>
+                    oncommand="showFeed(+1)"/>
         </hbox>
     </hbox>
 
