@@ -346,8 +346,12 @@ const gBrief = {
                                         this.updateService.totalFeedsCount;
             break;
 
-        case 'brief:feed-error':
         case 'brief:feed-updated':
+            if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
+                this.updateStatuspanel();
+            // Fall through...
+
+        case 'brief:feed-error':
             var progressmeter = document.getElementById('brief-progressmeter');
             var progress = 100 * this.updateService.completedFeedsCount /
                                  this.updateService.totalFeedsCount;
@@ -355,9 +359,7 @@ const gBrief = {
 
             if (progress == 100)
                 setTimeout(function() { progressmeter.hidden = true }, 500);
-
-            if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
-                this.updateStatuspanel();
+            break;
         }
     },
 
