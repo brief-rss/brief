@@ -34,7 +34,7 @@ function setView(aView) {
 
         // Do it asynchronously, because UI maybe waiting to be redrawn
         // (e.g. after selecting a treeitem).
-        async(aView._refresh, 0, aView);
+        async(aView._refresh, 0, aView, true);
     }
     else {
         aView.browser.loadURI(gTemplateURI.spec);
@@ -127,7 +127,7 @@ FeedView.prototype = {
     set currentPage FeedView_currentPage_set(aPageNumber) {
         if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
             this.__currentPage = aPageNumber;
-            this.ensure(true);
+            this._refresh(false);
         }
     },
     get currentPage FeedView_currentPage_get() this.__currentPage,
@@ -461,7 +461,7 @@ FeedView.prototype = {
                 if (this.isActive) {
                     toolbar.hidden = false;
                     this._setupTemplatePage();
-                    this._refresh();
+                    this._refresh(false);
                 }
                 else {
                     toolbar.hidden = true;
@@ -554,7 +554,7 @@ FeedView.prototype = {
      */
     ensure: function FeedView_ensure(aForceRefresh) {
         if (aForceRefresh) {
-            this._refresh();
+            this._refresh(true);
             return false;
         }
 
@@ -570,7 +570,7 @@ FeedView.prototype = {
             else if (oldCount - currentCount == 1)
                 this._refreshOnEntryRemoved();
             else
-                this._refresh();
+                this._refresh(true);
 
             return false;
         }
@@ -586,8 +586,13 @@ FeedView.prototype = {
     },
 
 
-    // Refreshes the feed view. Removes the old content and builds it from scratch.
-    _refresh: function FeedView_refresh() {
+    /**
+     * Refreshes the feed view. Removes the old content and builds the new one.
+     *
+     * @param aEntrySetModified Indicates that the set of entries in the view
+     *                          was changed and has to be recomputed.
+     */
+    _refresh: function FeedView_refresh(aEntrySetModified) {
         // Stop scrolling, so it doesn't continue after refreshing.
         clearInterval(this._smoothScrollInterval);
         this._smoothScrollInterval = null;
@@ -595,7 +600,7 @@ FeedView.prototype = {
         // Cancel auto-marking entries as read.
         clearTimeout(this._markVisibleTimeout);
 
-        // Suppress selecting entry until we refresh is finished.
+        // Suppress selecting entries until refreshing is finished.
         this._selectionSuppressed = true;
 
         // Remove the old content.
@@ -624,15 +629,15 @@ FeedView.prototype = {
 
         var entries = query.getEntries();
 
-        // Important: for better performance we try to delay computing pages until
+        // Important: for better performance we try to delay computing entry list until
         // after the view is displayed.
-        // The only time when recomputing pages may affect the currently displayed
+        // The only time when recompute entry list may affect the currently displayed
         // entry set is when currentPage goes out of range, because the view contains
         // less pages than before. This in turn makes the offset invalid and the query
         // returns no entries.
         // To avoid that, whenever the query returns no entries we force immediate
-        // recomputation of pages to make sure that they are correct and then we redo
-        // the query.
+        // recomputation of entry list to make sure the pages are correct and then
+        // we redo the query.
         if (!entries.length) {
             this._refreshEntryList();
             query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
@@ -640,7 +645,10 @@ FeedView.prototype = {
             entries = query.getEntries();
         }
         else {
-            async(this._refreshEntryList, 250, this);
+            if (aEntrySetModified)
+                async(this._refreshEntryList, 250, this);
+            else
+                this._refreshPageNavUI();
         }
 
         for (var i = 0; i < entries.length; i++)
@@ -668,8 +676,8 @@ FeedView.prototype = {
         if (this.feedContent.childNodes.length === 1 && currentEntries
             && this.currentPage === this.pageCount) {
             // If the last remaining entry on this page was removed,
-            // go to the previous page.
-            this.currentPage--;
+            // do a full refresh to display the previous page.
+            this._refresh(true);
         }
         else {
             // Find the removed entry.
@@ -685,7 +693,7 @@ FeedView.prototype = {
             var endPageIndex = startPageIndex + gPrefs.entriesPerPage - 1;
 
             if (removedIndex < startPageIndex || removedIndex > endPageIndex)
-                this._refresh();
+                this._refresh(true);
             else
                 this._removeEntry(removedEntry);
         }
@@ -753,6 +761,10 @@ FeedView.prototype = {
         this._entries = this.query.getSimpleEntryList().
                                    getProperty('entries');
 
+        this._refreshPageNavUI();
+    },
+
+    _refreshPageNavUI: function FeedView__refreshPageNavUI() {
         // This may happen for example when you are on the last page, and the
         // number of entries decreases (e.g. they are deleted).
         if (this.currentPage > this.pageCount)
