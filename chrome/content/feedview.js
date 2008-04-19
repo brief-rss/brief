@@ -196,10 +196,9 @@ FeedView.prototype = {
             return;
 
         if (gPrefs.entrySelectionEnabled) {
-            var entry = this.selectedElement.nextSibling.id;
-
-            if (entry)
-                this.selectEntry(entry, true, true);
+            var entryElement = this.selectedElement.nextSibling;
+            if (entryElement)
+                this.selectEntry(entryElement.id, true, true);
             else
                 this.currentPage++;
         }
@@ -213,13 +212,12 @@ FeedView.prototype = {
             return;
 
         if (gPrefs.entrySelectionEnabled) {
-            var entry = this.selectedElement.previousSibling.id;
-
-            if (entry) {
-                this.selectEntry(entry, true, true);
+            var entryElement = this.selectedElement.previousSibling;
+            if (entryElement) {
+                this.selectEntry(entryElement.id, true, true);
             }
             // Normally we wouldn't have to check |currentPage > 1|, because
-            // the setter validates the input. However, we don't want to set
+            // the setter validates its input. However, we don't want to set
             // _selectLastEntryOnRefresh and then not refresh.
             else if (this.currentPage > 1) {
                 this._selectLastEntryOnRefresh = true;
