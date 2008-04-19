@@ -203,7 +203,7 @@ FeedView.prototype = {
                 this.currentPage++;
         }
         else {
-            this.toggleEntrySelection();
+            gPrefs.setBoolPref('feedview.entrySelectionEnabled', true);
         }
     },
 
@@ -225,7 +225,7 @@ FeedView.prototype = {
             }
         }
         else {
-            this.toggleEntrySelection();
+            gPrefs.setBoolPref('feedview.entrySelectionEnabled', true);
         }
     },
 
