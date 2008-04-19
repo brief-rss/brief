@@ -41,27 +41,30 @@ function setupWindow() {
     checkUpdatesTextbox.disabled = checkUpdatesMenulist.disabled = !checkUpdatesCheckbox.checked;
     initUpdateIntervalControls();
 
-    var allFeeds = gStorage.getAllFeeds();
-    var currentIndex = allFeeds.indexOf(gFeed);
+    var index = getFeedIndex(gFeed);
+
     var nextFeed = document.getElementById('next-feed');
     var previousFeed = document.getElementById('previous-feed');
-    nextFeed.disabled = (currentIndex == allFeeds.length - 1);
-    previousFeed.disabled = (currentIndex == 0);
+    nextFeed.disabled = (index == gStorage.getAllFeeds().length - 1);
+    previousFeed.disabled = (index == 0);
 }
 
 function showFeed(aDeltaIndex) {
+    saveChanges();
+    gFeed = gStorage.getAllFeeds()[getFeedIndex(gFeed) + aDeltaIndex];
+    setupWindow();
+}
+
+function getFeedIndex(aFeed) {
+    var index = -1;
     var allFeeds = gStorage.getAllFeeds();
-
-    for (var index = 0; index < allFeeds.length; index++) {
-        if (allFeeds[index].feedID == gFeed.feedID)
+    for (let i = 0; index < allFeeds.length; i++) {
+        if (allFeeds[i].feedID == aFeed.feedID) {
+            index = i;
             break;
+        }
     }
-
-    if (index > 0) {
-        saveChanges();
-        gFeed = allFeeds[index + aDeltaIndex];
-        setupWindow();
-    }
+    return index;
 }
 
 function initUpdateIntervalControls() {
