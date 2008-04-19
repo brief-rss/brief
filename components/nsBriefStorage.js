@@ -476,19 +476,14 @@ BriefStorageService.prototype = {
 
         if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
             var oldestEntryDate = Date.now();
-
-            // Count the unread entries, to compare their number later.
-            var unreadEntriesQuery = Cc['@ancestor/brief/query;1'].
-                                     createInstance(Ci.nsIBriefQuery);
-            unreadEntriesQuery.setConstraints([aFeed.feedID], null, true);
-            var oldUnreadCount = unreadEntriesQuery.getEntryCount();
-
             var entries = aFeed.entries;
 
             gConnection.beginTransaction();
             try {
                 for (var i = 0; i < entries.length; i++) {
-                    this.processEntry(entries[i], aFeed);
+                    if (this.processEntry(entries[i], aFeed))
+                        newEntriesCount++;
+
                     if (entries[i].date && entries[i].date < oldestEntryDate)
                         oldestEntryDate = entries[i].date;
                 }
@@ -501,9 +496,6 @@ BriefStorageService.prototype = {
             finally {
                 gConnection.commitTransaction();
             }
-
-            var newUnreadCount = unreadEntriesQuery.getEntryCount();
-            newEntriesCount = newUnreadCount - oldUnreadCount;
         }
 
         var subject = Cc['@mozilla.org/variant;1'].createInstance(Ci.nsIWritableVariant);
@@ -612,6 +604,8 @@ BriefStorageService.prototype = {
             check.reset();
         }
 
+        var entryInserted = false;
+
         // If the entry is already present in the database, compare if the downloaded
         // entry has a newer date than the stored one and if so, update the data and
         // mark the entry as unread. Otherwise, insert it if it isn't present yet.
@@ -628,6 +622,8 @@ BriefStorageService.prototype = {
                 update.bindStringParameter(1, content);
                 update.bindStringParameter(2, primaryID);
                 update.execute();
+
+                entryInserted = true;
             }
         }
         else {
@@ -645,7 +641,11 @@ BriefStorageService.prototype = {
             insert.bindStringParameter(0, aEntry.title);
             insert.bindStringParameter(1, content);
             insert.execute();
+
+            entryInserted = true;
         }
+
+        return entryInserted;
     },
 
 
