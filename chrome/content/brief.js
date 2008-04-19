@@ -387,7 +387,12 @@ var gCommands = {
 
             gFeedView.collapseEntry(gFeedView.selectedEntry, newState, true);
 
-            async(selectedElement.scrollIntoView, 310, selectedElement, false);
+            function scroll() {
+                var win = gFeedView.document.defaultView;
+                var alignWithTop = (selectedElement.offsetHeight > win.innerHeight);
+                selectedElement.scrollIntoView(alignWithTop);
+            }
+            async(scroll, 310);
         }
     },
 
