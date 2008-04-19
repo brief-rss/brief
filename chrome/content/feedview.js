@@ -922,18 +922,14 @@ FeedView.prototype = {
         this._selectionSuppressed = false;
 
         if (gPrefs.entrySelectionEnabled) {
-            if (this.selectedElement) {
-                this.selectEntry(this.selectedEntry, true);
-            }
-            else if (this._selectLastEntryOnRefresh) {
+            if (this.selectedElement)
+                var entry = this.selectedElement
+            else if (this._selectLastEntryOnRefresh)
                 entry = this.feedContent.lastChild;
-                this.selectEntry(entry, true);
-            }
-            else {
+            else
                 entry = this.feedContent.firstChild;
-                this.selectEntry(entry);
-            }
 
+            this.selectEntry(entry, true);
             this._selectLastEntryOnRefresh = false;
         }
         else {
