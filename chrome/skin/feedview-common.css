@@ -74,6 +74,20 @@
   background-position: 0 -25px;
 }
 
+.star-article {
+    background: url(chrome://brief/skin/icons/star-entry.png) no-repeat;
+    background-position: 0 5px;
+    -moz-user-select: none; /* Prevent selecting the title when clicking */
+}
+
+.article-container:not([starred]) .star-article:hover {
+    background-position: -24px 5px;
+}
+
+.article-container[starred] .star-article {
+    background-position: -48px 5px;
+}
+
 
 /* ----------------------  Article content area   ---------------------- */
 
