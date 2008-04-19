@@ -12,9 +12,9 @@
         <key id="Brief_open" key="a" modifiers="control shift"
              oncommand="gBrief.toggle()"/>
 
-        <key id="Brief_selectNextEntry" key="k"
+        <key id="Brief_selectNextEntry" key="j"
              oncommand="gBrief.doCommand('selectNextEntry')"/>
-        <key id="Brief_selectPreviousEntry" key="j"
+        <key id="Brief_selectPreviousEntry" key="k"
              oncommand="gBrief.doCommand('selectPrevEntry')"/>
 
         <key id="Brief_switchSelectedEntryRead" key="m"
@@ -34,9 +34,9 @@
 
         <key id="Brief_switchHeadlinesView" key="f"
              oncommand="gBrief.doCommand('switchHeadlinesView')"/>
-        <key id="Brief_showNextPage" key="k" modifiers="alt"
+        <key id="Brief_showNextPage" key="j" modifiers="alt"
              oncommand="gBrief.doCommand('showNextPage')"/>
-        <key id="Brief_showPrevPage" key="j" modifiers="alt"
+        <key id="Brief_showPrevPage" key="k" modifiers="alt"
              oncommand="gBrief.doCommand('showPrevPage')"/>
         <key id="Brief_markCurrentViewRead" key="m" modifiers="accel"
              oncommand="gBrief.doCommand('markCurrentViewRead')"/>
