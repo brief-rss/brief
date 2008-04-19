@@ -11,11 +11,10 @@ body {
 /* ----------------------  Header  ---------------------- */
 
 #header {
-    background: #314a59 url('chrome://brief/skin/header-bkg.png') repeat-x;
-    color: #ffffff;
-    text-decoration: none;
-    display: block;
-    padding: 5px 5% 5px;
+    background: url('chrome://brief/skin/header-bkg.png') repeat-x bottom;
+    background-color: #345b74;
+    padding: 5px 5% 15px;
+    color: #f0fbff;
     overflow: auto; /* Clears contained floats */
 }
 
@@ -26,17 +25,28 @@ body {
 }
 
 #feed-title {
+    color: #f0fbff;
     font-size: 20px;
     font-weight: bold;
+    text-decoration: none;
+}
+
+#feed-title.feed-link:hover {
+    border-bottom: 1px solid #f0fbff;
 }
 
 #feed-subtitle {
     font-size: 13px;
     margin-top: 3px;
+    font-style: italic;
+}
+
+#feed-subtitle:empty {
+    display: none;
 }
 
 #feed-content {
-    padding: 20px 10px 10px;
+    padding: 10px 10px 10px;
 }
 
 #message {
@@ -55,12 +65,11 @@ body {
    attributes. The first two are self-explanatory while "collapsed"
    means that the article's content is folded (headlines view) */
 .article-container {
-    background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x;
-    background-color: #ffffff;
-    border-top: 1px #abbfc9 solid;
-    border-right: 1px #e1e5da solid;
-    border-left: 1px #e1e5da solid;
-    border-bottom: 1px transparent solid; /* Placeholder for the selection border */
+    background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x #ffffff;
+    border-right: 5px #e6e9ed solid;
+    -moz-border-right-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
+    border-left: 5px #e6e9ed solid;
+    -moz-border-left-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
     padding-bottom: 1px; /* Without this, the article is sometimes cut-off */
     overflow: visible;   /* This is for the the expand/collapse dropmarker which is
                             taken outside the box using negative margins */
@@ -71,14 +80,17 @@ body {
 }
 
 .article-container:last-child {
-    border-bottom-color: #e1e5da;
+    border-bottom: 5px #e6e9ed solid;
+    -moz-border-bottom-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
 }
 
 
 /* ----------------------  Article header  ---------------------- */
 
 .article-header {
+    border-top: 1px #abbfc9 solid;
     padding: 6px 5px 0 24px;
+    margin-bottom: 10px;
 }
 
 .article-title-link {
@@ -163,9 +175,12 @@ body {
     font-size: 12px;
     line-height: 1.4;
     color: #272727;
-    padding: 10px 25px 35px;
-    clear: both;
+    padding: 0 25px 25px;
     overflow: auto;
+}
+
+.article-content:empty {
+    display: none;
 }
 
 .article-content a {
@@ -195,17 +210,11 @@ body {
 .article-container[collapsed] {
     background-image: none;
     background-color: #ebf7ff;
-    border-right-color: #e1e8ef;
-    border-left-color: #e1e8ef;
     min-height: 50px;
 }
 
 .article-container[collapsed][read] {
     background-color: #f5faff;
-}
-
-.article-container[collapsed]:last-child {
-    border-bottom: 1px solid #abbfc9;
 }
 
 .article-container[collapsed] .article-title-link {
@@ -215,7 +224,7 @@ body {
 .article-container[collapsed] .article-controls {
     background-color: #ebf7ff;
     position: absolute;
-    top: 3px;
+    top: 4px;
     right: 5px;
     margin: 0;
     padding-left: 10px;
@@ -229,7 +238,6 @@ body {
     color: #5c7933;
     padding: 0 8px;
     float: right;
-    width: -moz-max-content;
     text-align: right;
 }
 
@@ -250,5 +258,14 @@ body {
 /* ---------------------  Adjustments for the selected articles  ------------------- */
 
 .article-container[selected] {
-    border-color: #1474d6;
+    -moz-border-left-colors: #fafcff #f7f9fc #d2e8ff #98cbff #1474d6;
+    -moz-border-right-colors: #fafcff #f7f9fc #d2e8ff #98cbff #1474d6;
+}
+
+.article-container[selected] > .article-header {
+    border-top-color: #1474d6;
+}
+
+.article-container[selected] + .article-container > .article-header {
+    border-top-color: #1474d6;
 }

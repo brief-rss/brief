@@ -646,7 +646,7 @@ FeedView.prototype = {
         }
         else {
             if (aEntrySetModified)
-                async(this._refreshEntryList, 250, this);
+                async(this._refreshEntryList, 500, this);
             else
                 this._refreshPageNavUI();
         }
@@ -784,21 +784,26 @@ FeedView.prototype = {
 
     _buildHeader: function FeedView__buildHeader(aFeed) {
         var header = this.document.getElementById('header');
-        var titleElement = this.document.getElementById('feed-title');
+        var feedTitle = this.document.getElementById('feed-title');
         var feedImage = this.document.getElementById('feed-image');
         var feedSubtitle = this.document.getElementById('feed-subtitle');
 
         // Reset the old header.
-        header.removeAttribute('href');
+        feedTitle.removeAttribute('href');
+        feedTitle.className = '';
         feedImage.setAttribute('src', '');
         feedImage.removeAttribute('title');
         feedSubtitle.innerHTML = '';
 
-        titleElement.textContent = this.titleOverride || this.title;
+        feedTitle.textContent = this.titleOverride || this.title;
 
         // When a single unfiltered feed is viewed, add subtitle, image, and link.
         if (aFeed) {
-            header.setAttribute('href', aFeed.websiteURL || aFeed.feedURL);
+            var link = aFeed.websiteURL || aFeed.feedURL;
+            if (link) {
+                feedTitle.setAttribute('href', link);
+                feedTitle.className = 'feed-link';
+            }
 
             if (aFeed.imageURL) {
                 feedImage.setAttribute('src', aFeed.imageURL);
