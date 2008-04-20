@@ -459,7 +459,7 @@ FeedView.prototype = {
                 if (this.isActive) {
                     toolbar.hidden = false;
                     this._setupTemplatePage();
-                    this._refresh(false);
+                    this._refresh(true);
                 }
                 else {
                     toolbar.hidden = true;
