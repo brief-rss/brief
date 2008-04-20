@@ -44,7 +44,10 @@
 <binding id="article">
     <implementation>
         <constructor>
-            <![CDATA[
+            // Some feeds include scripts that use document.write() which screw us up,
+            // because we insert them dynamically after the page is loaded.
+            document.write = function() { };
+
             var header = document.createElement('div');
             header.className = 'article-header';
             this.appendChild(header);
@@ -89,7 +92,6 @@
                 collapsedSubheader.insertBefore(feedNameElem, null);
                 $(contentElem).hide();
             }
-            ]]>
         </constructor>
 
         <field name="header">
@@ -124,7 +126,6 @@
             <parameter name="aState"/>
             <parameter name="aAnimate"/>
             <body>
-                <![CDATA[
                 if (aState == this.collapsed)
                     return;
 
@@ -170,7 +171,6 @@
                         finish();
                     }
                 }
-                ]]>
             </body>
         </method>
 
@@ -178,7 +178,6 @@
         <property name="read"
                   onget="return this.hasAttribute('read')">
             <setter>
-                <![CDATA[
                 if (val == this.read)
                     return;
 
@@ -201,7 +200,6 @@
                 }
 
                 return val;
-                ]]>
             </setter>
         </property>
 
@@ -280,7 +278,6 @@
 
         <!-- This event is how chrome sends us messages -->
         <handler event="ViewEvent">
-            <![CDATA[
             var state = (this.getAttribute('eventState') == 'true');
             switch (this.getAttribute('eventType')) {
                 case 'EntryMarkedRead':
@@ -304,7 +301,6 @@
                     this.collapse(state, true);
                     break;
             }
-            ]]>
         </handler>
 
     </handlers>
