@@ -258,3 +258,7 @@ body {
 .article-container[selected] + .article-container > .article-header {
     border-top-color: #1474d6;
 }
+
+.article-container[selected]:last-child {
+    -moz-border-bottom-colors: #fafcff #f7f9fc #d2e8ff #98cbff #1474d6;
+}
