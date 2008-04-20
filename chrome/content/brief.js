@@ -708,13 +708,12 @@ var gPrefs = {
 
         switch (aData) {
             case 'feedview.customStylePath':
-                if (this.getBoolPref('feedview.useCustomStyle')) {
-                    getFeedViewStyle();
-                    gFeedView.ensure(true);
-                }
-                break;
+                if (!this.getBoolPref('feedview.useCustomStyle'))
+                    return;
+                // Fall through...
             case 'feedview.useCustomStyle':
                 getFeedViewStyle();
+                gFeedView._setupTemplatePage();
                 gFeedView.ensure(true);
                 break;
             case 'feedview.entriesPerPage':
