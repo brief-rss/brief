@@ -203,12 +203,21 @@ const gBrief = {
 
         // Clicking the button when Brief is open in current tab
         // "unpresses" it and closes Brief.
-        if (gBrowser.selectedTab == this.tab && aEvent.button == 0)
+        if (gBrowser.selectedTab == this.tab && aEvent.button == 0) {
+
+            // Tabbrowser prevents closing the only tab when the tab bar is hidden.
+            var autohide = gPrefService.getBoolPref('browser.tabs.autoHide');
+            if (autohide && gBrowser.tabContainer.childNodes.length == 1)
+                gBrowser.addTab('about:blank', null, null, null, null, false);
+
             gBrowser.removeCurrentTab();
-        else if (aEvent.button == 1 || gBrief.shouldOpenInNewTab())
+        }
+        else if (aEvent.button == 1 || gBrief.shouldOpenInNewTab()) {
             gBrief.open(true);
-        else
+        }
+        else {
             gBrief.open(false);
+        }
     },
 
     onTabLoad: function gBrief_onTabLoad(aEvent) {
