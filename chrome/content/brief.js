@@ -474,27 +474,32 @@ function getFeedViewStyle() {
 
 
 function loadHomeview() {
-    // If Brief has been update, load the new version info page.
+    var query = new QuerySH(null, null, true);
+    var unreadFolder = document.getElementById('unread-folder');
+    var title = unreadFolder.getAttribute('title');
+    var view = new FeedView(title, query);
+
     var prevVersion = gPrefs.getCharPref('lastMajorVersion');
     var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
                         getService(Ci.nsIVersionComparator);
 
+    // If Brief has been updated, load the new version info page.
     if (verComparator.compare(prevVersion, LAST_MAJOR_VERSION) < 0) {
         var browser = document.getElementById('feed-view');
         browser.loadURI(RELEASE_NOTES_URL);
         gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
-    }
-    else if (gFeedList.tree && gFeedList.tree.view) {
-        gFeedList.tree.view.selection.select(0);
-        gFeedList.tree.focus();
+
+        gFeedView = view;
     }
     else {
-        // If the sidebar is hidden, then tree has no view and we have to manually
-        // create the FeedView.
-        var query = new QuerySH(null, null, true);
-        var unreadFolder = document.getElementById('unread-folder');
-        var title = unreadFolder.getAttribute('title');
-        setView(new FeedView(title, query));
+        setView(view);
+
+        if (gFeedList.tree && gFeedList.tree.view) {
+            gFeedList.ignoreSelectEvent = true;
+            gFeedList.tree.view.selection.select(0);
+            gFeedList.ignoreSelectEvent = false;
+            gFeedList.tree.focus();
+        }
     }
 }
 
