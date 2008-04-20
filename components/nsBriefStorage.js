@@ -610,7 +610,8 @@ BriefStorageService.prototype = {
         // entry has a newer date than the stored one and if so, update the data and
         // mark the entry as unread. Otherwise, insert it if it isn't present yet.
         if (entryAlreadyStored) {
-            if (aEntry.date && storedEntryDate < aEntry.date) {
+            var markUnread = gPrefs.getBoolPref('database.markUpdatedEntriesUnread');
+            if (markUnread && aEntry.date && storedEntryDate < aEntry.date) {
                 var update = this.updateEntry_stmt;
                 update.bindInt64Parameter(0, aEntry.date);
                 update.bindStringParameter(1, aEntry.authors);
