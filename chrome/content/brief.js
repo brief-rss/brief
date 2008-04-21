@@ -469,7 +469,7 @@ function getFeedViewStyle() {
         request.send(null);
     }
 
-    gFeedViewStyle = request.responseText;
+    return gFeedViewStyle = request.responseText;
 }
 
 
@@ -708,13 +708,9 @@ var gPrefs = {
 
         switch (aData) {
             case 'feedview.customStylePath':
-                if (!this.getBoolPref('feedview.useCustomStyle'))
-                    return;
-                // Fall through...
             case 'feedview.useCustomStyle':
-                getFeedViewStyle();
-                gFeedView._setupTemplatePage();
-                gFeedView.ensure(true);
+                var styleElem = gFeedView.document.getElementById('feedview-style');
+                styleElem.textContent = getFeedViewStyle();
                 break;
             case 'feedview.entriesPerPage':
                 gFeedView.ensure(true);
