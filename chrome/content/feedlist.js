@@ -215,9 +215,9 @@ var gFeedList = {
                                                     !targetIsSpecialFolder;
         getElement('ctx-update-feed').hidden = !targetIsFeed;
         getElement('ctx-update-folder').hidden = !targetIsContainer;
-        getElement('ctx-open-website').hidden = !targetIsFeed;
 
-        // Disable openWebsite if no websiteURL is available.
+        var openWebsite = getElement('ctx-open-website');
+        openWebsite.hidden = !targetIsFeed;
         if (targetIsFeed)
             openWebsite.disabled = !gStorage.getFeed(this.ctx_targetItem.id).websiteURL;
 
