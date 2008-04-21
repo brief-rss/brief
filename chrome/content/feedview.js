@@ -1,55 +1,18 @@
-// gFeedView is the instance of FeedView currently attached to the browser.
+/**
+ * The instance of FeedView currently attached to the browser.
+ */
 var gFeedView = null;
 
-// Attaches a view and detaches the previous one.
-function setView(aView) {
-    // Detach the old view.
-    if (gFeedView) {
-        gFeedView.browser.removeEventListener('load', gFeedView, false);
-        for each (event in gFeedView._events)
-            gFeedView.document.removeEventListener(event, gFeedView, true);
-
-        clearInterval(gFeedView._smoothScrollInterval);
-        gFeedView._smoothScrollInterval = null;
-        clearTimeout(gFeedView._markVisibleTimeout);
-    }
-
-    // Clear the searchbar.
-    if (!aView.query.searchString) {
-        var searchbar = document.getElementById('searchbar');
-        searchbar.value = '';
-        searchbar.clearButton.hidden = true;
-    }
-
-    // If view is tied to specified intrinsic flags (e.g. the "Unread" view),
-    // hide the UI to pick the flags.
-    var viewConstraintBox = document.getElementById('view-constraint-box');
-    viewConstraintBox.hidden = aView._flagsAreIntrinsic;
-
-    // Attach the new view.
-    gFeedView = aView;
-    aView.browser.addEventListener('load', aView, false);
-    if (aView.browser.currentURI.equals(gTemplateURI)) {
-        aView._setupTemplatePage();
-
-        // Do it asynchronously, because UI maybe waiting to be redrawn
-        // (e.g. after selecting a treeitem).
-        async(aView._refresh, 0, aView, true);
-    }
-    else {
-        aView.browser.loadURI(gTemplateURI.spec);
-    }
-}
-
 /**
- * This object represents the main feed display. It stores and manages
- * the display parameters.
+ * This object represents the main feed display. It stores and manages display parameters.
  * The feed displayed using a local, unprivileged template page. We insert third-party
  * content in it (entries are served with full HTML markup), so the template page is
- * untrusted and all the interaction respects XPCNativeWrappers.
+ * untrusted and we respect XPCNativeWrappers when interacting with it.
+ * Individual entries are inserted dynamically. Their structure and behaviour is defined
+ * by an XBL binding.
  *
  * @param aTitle  Title of the view which will be shown in the header.
- * @param aQuery  Query selecting entries to be displayed.
+ * @param aQuery  Query which selects contained entries.
  */
 function FeedView(aTitle, aQuery) {
     this.title = aTitle;
@@ -135,7 +98,7 @@ FeedView.prototype = {
 
     // Indicates whether the feed view is currently displayed in the browser.
     get isActive FeedView_isActive() {
-        return this.browser.currentURI.equals(gTemplateURI);
+        return this.browser.currentURI.equals(gTemplateURI) && gFeedView == this;
     },
 
     get isGlobalSearch FeedView_isGlobalSearch() {
@@ -419,6 +382,57 @@ FeedView.prototype = {
             var query = new QuerySH(null, entriesToMark, false);
             query.markEntriesRead(true);
         }
+    },
+
+
+    /**
+     * Displays the view, adds it as the listener for events in the template page,
+     * and sets it as the currently attached instance - under gFeedView.
+     */
+    attach: function FeedView_attach() {
+        if (gFeedView)
+            gFeedView.detach();
+        gFeedView = this;
+
+        // Clear the searchbar.
+        if (!this.query.searchString) {
+            var searchbar = document.getElementById('searchbar');
+            searchbar.value = '';
+            searchbar.clearButton.hidden = true;
+        }
+
+        // Hide the drop-down to pick view contraints if it is tied to
+        // specific contraints (e.g. the Unread folder).
+        var viewConstraintBox = document.getElementById('view-constraint-box');
+        viewConstraintBox.hidden = this._flagsAreIntrinsic;
+
+        this.browser.addEventListener('load', this, false);
+
+        if (this.browser.currentURI.equals(gTemplateURI)) {
+            this._setupTemplatePage();
+
+            // Do it asynchronously, because UI maybe waiting to be redrawn
+            // (e.g. after selecting a treeitem).
+            async(this._refresh, 0, this, true);
+        }
+        else {
+            this.browser.loadURI(gTemplateURI.spec);
+        }
+    },
+
+    /**
+     * Removes the view as the listener, cancels pending actions.
+     */
+    detach: function FeedView_detach() {
+        this.browser.removeEventListener('load', this, false);
+        for each (event in this._events)
+            this.document.removeEventListener(event, this, true);
+
+        clearInterval(this._smoothScrollInterval);
+        this._smoothScrollInterval = null;
+        clearTimeout(this._markVisibleTimeout);
+
+        gFeedView = null;
     },
 
 
