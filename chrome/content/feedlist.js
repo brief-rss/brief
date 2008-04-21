@@ -21,8 +21,7 @@ var gFeedList = {
     treeNotBuilt: false,
 
 
-    // Currently selected item. Returns the treeitem if a folder is selected or
-    // the treecell if a feed is selected.
+    // Currently selected treeitem.
     get selectedItem gFeedList_selectedItem() {
         var item = null;
         var currentIndex = this.tree.currentIndex;
@@ -93,7 +92,6 @@ var gFeedList = {
 
 
     onSelect: function gFeedList_onSelect(aEvent) {
-        var query;
         var selectedItem = this.selectedItem;
 
         if (!selectedItem || this.ignoreSelectEvent || this._prevSelectedItem == selectedItem)
@@ -112,21 +110,23 @@ var gFeedList = {
             query.starred = selectedItem.id == 'starred-folder';
             query.deleted = selectedItem.id == 'trash-folder' ? ENTRY_STATE_TRASHED
                                                               : ENTRY_STATE_NORMAL;
-            setView(new FeedView(title, query));
+            var view = new FeedView(title, query);
         }
 
         else if (selectedItem.hasAttribute('container')) {
             var feed = this.selectedFeed;
             query = new Query();
             query.folders = [feed.feedID];
-            setView(new FeedView(feed.title, query));
+            view = new FeedView(feed.title, query);
         }
 
         else {
             var feed = this.selectedFeed;
             query = new QuerySH([feed.feedID], null, null);
-            setView(new FeedView(feed.title, query));
+            view = new FeedView(feed.title, query);
         }
+
+        view.attach();
     },
 
     // Temporarily selects the target items of right-clicks, so to highlight

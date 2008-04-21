@@ -489,10 +489,10 @@ function loadHomeview() {
         browser.loadURI(RELEASE_NOTES_URL);
         gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
 
-        gFeedView = view;
+        gFeedView = view; // Set the view without attaching it.
     }
     else {
-        setView(view);
+        view.attach();
 
         if (gFeedList.tree && gFeedList.tree.view) {
             gFeedList.ignoreSelectEvent = true;
@@ -569,7 +569,7 @@ function performSearch(aEvent) {
         var title = bundle.getFormattedString('searchResults', ['']);
         var view = new FeedView(title, query);
         view.titleOverride = titleOverride;
-        setView(view);
+        view.attach();
     }
     else {
         gFeedView.titleOverride = searchbar.value ? titleOverride : '';
@@ -587,7 +587,7 @@ function finishSearch() {
     }
 
     if (previousView && previousView != gFeedView) {
-        setView(previousView);
+        previousView.attach();
         gFeedView.query.searchString = gFeedView.titleOverride = '';
     }
     else {
