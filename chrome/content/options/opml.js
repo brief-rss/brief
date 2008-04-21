@@ -85,14 +85,33 @@ var opml = {
                 break;
 
             case 'feed':
-                var siteURI = this.ioService.newURI(node.url, null, null);
-                var feedURI = this.ioService.newURI(node.feedURL, null, null);
+                var siteURI = null, feedURI = null;
+                try {
+                    var feedURI = this.ioService.newURI(node.feedURL, null, null);
+                }
+                catch (ex) {
+                    log('Brief\nFailed to import feed ' + node.title +
+                        '\nInvalid URI: ' + node.feedURL);
+                    break;
+                }
+                try {
+                    var siteURI = this.ioService.newURI(node.url, null, null);
+                }
+                catch (ex) {
+                    // We can live without siteURI.
+                }
+
                 this.livemarkService.createLivemark(createIn, node.title, siteURI,
                                                     feedURI, -1);
                 break;
 
             case 'link':
-                var uri = this.ioService.newURI(node.url, null, null);
+                try {
+                    var uri = this.ioService.newURI(node.url, null, null);
+                }
+                catch (ex) {
+                    break;
+                }
                 this.bookmarksService.insertBookmark(createIn, uri, -1, node.title);
                 break;
             }
@@ -310,4 +329,10 @@ var opml = {
             return '';
         }
     }
-};
+}
+
+function log(aMessage) {
+  var consoleService = Cc['@mozilla.org/consoleservice;1'].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage(aMessage);
+}
