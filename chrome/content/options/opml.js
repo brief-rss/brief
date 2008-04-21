@@ -113,7 +113,9 @@ var opml = {
         hash.title = node.getAttribute('text');
         hash.keyword = '';
 
-        if (node.childNodes.length > 0) {
+        if (node.childNodes.length > 0 || (!node.hasAttribute('xmlUrl')
+            && !node.hasAttribute('htmlUrl') && !node.hasAttribute('url'))) {
+
             hash.type = 'folder';
             hash.children = [];
 
