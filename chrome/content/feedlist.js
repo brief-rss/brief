@@ -5,7 +5,7 @@ var gFeedList = {
 
     get tree gFeedList_tree() {
         delete this.tree;
-        return this.tree = document.getElementById('feed-list');
+        return this.tree = getElement('feed-list');
     },
 
     items: null,  // All treeitems in the tree.
@@ -45,11 +45,11 @@ var gFeedList = {
     /**
      * Gets nsIBriefFeed representation of a given feed. We've got feeds floating around
      * represented in at least 3 different ways: nsIBriefFeed's, ID's of feeds, and
-     * treeitems). This function allows us to ensure that the argument is of nsIBriefFeed
-     * type, whenever we need it. It also makes it easy for other methods of gFeedList to
-     * accept any arguments of any type.
+     * treeitems. This function allows us to ensure that the argument is of nsIBriefFeed
+     * type. It makes it easy for other methods of gFeedList to accept any arguments
+     * of any type.
      *
-     * @param  aFeed  nsIBriefFeed object, feedID string, or treeitem XULElement.
+     * @param aFeed nsIBriefFeed object, feedID string, or treeitem XULElement.
      */
     getBriefFeed: function gFeedList_getBriefFeed(aFeed) {
         if (aFeed instanceof Ci.nsIBriefFeed)
@@ -177,14 +177,10 @@ var gFeedList = {
 
 
     onKeyUp: function gFeedList_onKeyUp(aEvent) {
-        if (aEvent.keyCode == aEvent.DOM_VK_RETURN) {
-            var selectedItem = this.selectedItem;
-
-            // See onClick.
-            if (selectedItem.hasAttribute('container')) {
-                this.refreshFolderTreeitems(selectedItem);
-                async(this._persistFolderState, 0, this);
-            }
+        var isContainer = this.selectedItem.hasAttribute('container');
+        if (isContainer && aEvent.keyCode == aEvent.DOM_VK_RETURN) {
+            this.refreshFolderTreeitems(this.selectedItem);
+            async(this._persistFolderState, 0, this);
         }
     },
 
@@ -200,7 +196,6 @@ var gFeedList = {
 
         this.ctx_targetItem = this.tree.view.getItemAtIndex(row);
 
-        // The target is a separator, don't show the context menu.
         if (this.ctx_targetItem.localName == 'treeseparator') {
             aEvent.preventDefault();
             return;
@@ -215,56 +210,32 @@ var gFeedList = {
         var targetIsSpecialFolder = targetIsUnreadFolder || targetIsStarredFolder ||
                                     targetIsTrashFolder;
 
-        var markFeedRead = document.getElementById('ctx-mark-feed-read');
-        markFeedRead.hidden = !targetIsFeed;
-
-        var markFolderRead = document.getElementById('ctx-mark-folder-read');
-        markFolderRead.hidden = !(targetIsContainer || targetIsSpecialFolder);
-
-        var updateFeed = document.getElementById('ctx-update-feed');
-        updateFeed.hidden = !targetIsFeed;
-
-        var updateFolder = document.getElementById('ctx-update-folder');
-        updateFolder.hidden = !targetIsContainer;
-
-        var openWebsite = document.getElementById('ctx-open-website');
-        openWebsite.hidden = !targetIsFeed;
+        getElement('ctx-mark-feed-read').hidden = !targetIsFeed;
+        getElement('ctx-mark-folder-read').hidden = !targetIsContainer &&
+                                                    !targetIsSpecialFolder;
+        getElement('ctx-update-feed').hidden = !targetIsFeed;
+        getElement('ctx-update-folder').hidden = !targetIsContainer;
+        getElement('ctx-open-website').hidden = !targetIsFeed;
 
         // Disable openWebsite if no websiteURL is available.
-        if (targetIsFeed) {
-            var feedID = this.ctx_targetItem.id;
-            openWebsite.disabled = !gStorage.getFeed(feedID).websiteURL;
-        }
+        if (targetIsFeed)
+            openWebsite.disabled = !gStorage.getFeed(this.ctx_targetItem.id).websiteURL;
 
-        var propertiesSeparator = document.getElementById('ctx-properties-separator');
-        propertiesSeparator.hidden = !targetIsFeed;
+        getElement('ctx-properties-separator').hidden = !targetIsFeed;
+        getElement('ctx-feed-properties').hidden = !targetIsFeed;
 
-        var showProperties = document.getElementById('ctx-feed-properties');
-        showProperties.hidden = !targetIsFeed;
-
-        // Menuitems relating to deleting feeds and folders
-        var dangerousSeparator = document.getElementById('ctx-dangerous-cmds-separator');
+        // Menuitems related to deleting feeds and folders.
+        var dangerousSeparator = getElement('ctx-dangerous-cmds-separator');
         dangerousSeparator.hidden = !(targetIsFeed || targetIsContainer ||
                                       targetIsUnreadFolder || targetIsTrashFolder);
+        getElement('ctx-delete-feed').hidden = !targetIsFeed;
+        getElement('ctx-delete-folder').hidden = !targetIsContainer;
 
-        var deleteFeed = document.getElementById('ctx-delete-feed');
-        deleteFeed.hidden = !targetIsFeed;
-
-        var deleteFolder = document.getElementById('ctx-delete-folder');
-        deleteFolder.hidden = !targetIsContainer;
-
-        // Menuitems related to emptying feeds and folders
-        var emptyFeed = document.getElementById('ctx-empty-feed');
-        emptyFeed.hidden = !targetIsFeed;
-
-        var emptyFolder = document.getElementById('ctx-empty-folder');
-        emptyFolder.hidden = !(targetIsContainer || targetIsUnreadFolder);
-
-        var restoreTrashed = document.getElementById('ctx-restore-trashed');
-        restoreTrashed.hidden = !targetIsTrashFolder;
-
-        var emptyTrash = document.getElementById('ctx-empty-trash');
-        emptyTrash.hidden = !targetIsTrashFolder;
+        // Menuitems related to emptying feeds and folders.
+        getElement('ctx-empty-feed').hidden = !targetIsFeed;
+        getElement('ctx-empty-folder').hidden = !(targetIsContainer || targetIsUnreadFolder);
+        getElement('ctx-restore-trashed').hidden = !targetIsTrashFolder;
+        getElement('ctx-empty-trash').hidden = !targetIsTrashFolder;
     },
 
     // Restores selection after it was temporarily changed to highlight the
@@ -285,7 +256,7 @@ var gFeedList = {
      * @param  aSpecialItem  Id if the special folder's treeitem.
      */
     refreshSpecialTreeitem: function gFeedList_refreshSpecialTreeitem(aSpecialItem) {
-        var treeitem = document.getElementById(aSpecialItem);
+        var treeitem = getElement(aSpecialItem);
         var treecell = treeitem.firstChild.firstChild;
 
         var query = new QuerySH(null, null, true);
@@ -312,7 +283,7 @@ var gFeedList = {
 
         for (var i = 0; i < folders.length; i++) {
             folder = this.getBriefFeed(folders[i]);
-            treeitem = document.getElementById(folder.feedID);
+            treeitem = getElement(folder.feedID);
             treecell = treeitem.firstChild.firstChild;
 
             if (treeitem.getAttribute('open') == 'true') {
@@ -346,7 +317,7 @@ var gFeedList = {
 
         for (var i = 0; i < feeds.length; i++) {
             feed = this.getBriefFeed(feeds[i]);
-            treeitem = document.getElementById(feed.feedID);
+            treeitem = getElement(feed.feedID);
             treecell = treeitem.firstChild.firstChild;
 
             // Update the label.
@@ -390,13 +361,13 @@ var gFeedList = {
 
     // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
+
+        // Can't build the tree if the tree is hidden and there's no view.
         if (!this.tree.view) {
             this.treeNotBuilt = true;
             return;
         }
         this.treeNotBuilt = false;
-
-        var topLevelChildren = document.getElementById('top-level-children');
 
         this.refreshSpecialTreeitem('unread-folder');
         this.refreshSpecialTreeitem('starred-folder');
@@ -407,6 +378,7 @@ var gFeedList = {
             this.feedIDToSelect = this.selectedFeed.feedID;
 
         // Clear the existing tree.
+        var topLevelChildren = getElement('top-level-children');
         var lastChild = topLevelChildren.lastChild;
         while (lastChild.id != 'special-folders-separator') {
             topLevelChildren.removeChild(lastChild);
@@ -542,9 +514,8 @@ var gFeedList = {
             this.rebuild();
             async(gFeedView.ensure, 0, gFeedView);
 
-            var deck = document.getElementById('feed-list-deck');
             if (gPrefs.homeFolder)
-                deck.selectedIndex = 0;
+                getElement('feed-list-deck').selectedIndex = 0;
             else
                 showHomeFolderPicker();
 
@@ -709,7 +680,7 @@ var gContextMenuCommands = {
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
 
-        var bundle = document.getElementById('main-bundle');
+        var bundle = getElement('main-bundle');
         var dialogTitle = bundle.getString('compactPromptTitle');
         var dialogText = bundle.getString('compactPromptText');
         var dialogConfirmLabel = bundle.getString('compactPromptConfirmButton');
@@ -736,7 +707,7 @@ var gContextMenuCommands = {
 
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
-        var stringbundle = document.getElementById('main-bundle');
+        var stringbundle = getElement('main-bundle');
         var title = stringbundle.getString('confirmFeedDeletionTitle');
         var text = stringbundle.getFormattedString('confirmFeedDeletionText', [feed.title]);
         var weHaveAGo = promptService.confirm(window, title, text);
@@ -756,7 +727,7 @@ var gContextMenuCommands = {
         // Ask for confirmation.
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
-        var stringbundle = document.getElementById('main-bundle');
+        var stringbundle = getElement('main-bundle');
         var title = stringbundle.getString('confirmFolderDeletionTitle');
         var text = stringbundle.getFormattedString('confirmFolderDeletionText', [folder.title]);
         var weHaveAGo = promptService.confirm(window, title, text);
