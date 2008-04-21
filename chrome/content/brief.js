@@ -79,19 +79,16 @@ function init() {
 
 
 function initToolbarsAndStrings() {
-    var headlinesCheckbox = document.getElementById('headlines-checkbox');
-    headlinesCheckbox.checked = gPrefs.showHeadlinesOnly;
-    var viewConstraintList = document.getElementById('view-constraint-list');
-    viewConstraintList.selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
-                                       gPrefs.shownEntries == 'unread' ? 1 : 2;
+    getElement('headlines-checkbox').checked = gPrefs.showHeadlinesOnly;
+    getElement('view-constraint-list').selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
+                                                       gPrefs.shownEntries == 'unread' ? 1 : 2;
 
     // Set show/hide sidebar button's tooltip.
-    var pane = document.getElementById('left-pane');
-    var bundle = document.getElementById('main-bundle');
-    var button = document.getElementById('toggle-sidebar');
+    var pane = getElement('left-pane');
+    var bundle = getElement('main-bundle');
     var tooltiptext = pane.hidden ? bundle.getString('showSidebarTooltip')
                                   : bundle.getString('hideSidebarTooltip');
-    button.setAttribute('tooltiptext', tooltiptext);
+    getElement('toggle-sidebar').setAttribute('tooltiptext', tooltiptext);
 
     // Cache the strings, so they don't have to retrieved every time when
     // refreshing the feed view.
@@ -132,7 +129,7 @@ var gObserver = {
         // and the feedview if necessary.
         case 'brief:feed-updated':
             var feedID = aData;
-            var item = document.getElementById(feedID);
+            var item = getElement(feedID);
             item.removeAttribute('error');
             item.removeAttribute('loading');
             gFeedList.refreshFeedTreeitems(item);
@@ -146,7 +143,7 @@ var gObserver = {
 
         // A feed was requested; show throbber as its icon.
         case 'brief:feed-loading':
-            var item = document.getElementById(aData);
+            var item = getElement(aData);
             item.setAttribute('loading', true);
             gFeedList.refreshFeedTreeitems(item);
             break;
@@ -154,7 +151,7 @@ var gObserver = {
         // An error occured when downloading or parsing a feed; show error icon.
         case 'brief:feed-error':
             var feedID = aData;
-            var item = document.getElementById(feedID);
+            var item = getElement(feedID);
             item.removeAttribute('loading');
             item.setAttribute('error', true);
             gFeedList.refreshFeedTreeitems(item);
@@ -163,11 +160,10 @@ var gObserver = {
 
         // Sets up the progressmeter and the stop button.
         case 'brief:feed-update-queued':
-            var deck = document.getElementById('update-buttons-deck');
-            deck.selectedIndex = 1;
+            getElement('update-buttons-deck').selectedIndex = 1;
 
             if (gUpdateService.status != Ci.nsIBriefUpdateService.UPDATING_SINGLE_FEED) {
-                var progressmeter = document.getElementById('update-progress');
+                var progressmeter = getElement('update-progress');
                 progressmeter.hidden = false;
                 progressmeter.value = 100 * gUpdateService.completedFeedsCount /
                                             gUpdateService.totalFeedsCount;
@@ -175,7 +171,7 @@ var gObserver = {
             break;
 
         case 'brief:feed-update-canceled':
-            var progressmeter = document.getElementById('update-progress');
+            var progressmeter = getElement('update-progress');
             progressmeter.hidden = true;
             progressmeter.value = 0;
 
@@ -255,10 +251,10 @@ var gObserver = {
 var gCommands = {
 
     toggleSidebar: function cmd_toggleLeftPane() {
-        var pane = document.getElementById('left-pane');
-        var splitter = document.getElementById('left-pane-splitter');
-        var button = document.getElementById('toggle-sidebar');
-        var bundle = document.getElementById('main-bundle');
+        var pane = getElement('left-pane');
+        var splitter = getElement('left-pane-splitter');
+        var button = getElement('toggle-sidebar');
+        var bundle = getElement('main-bundle');
 
         pane.hidden = splitter.hidden = !pane.hidden;
 
@@ -277,8 +273,7 @@ var gCommands = {
 
     stopUpdating: function cmd_stopUpdating() {
         gUpdateService.stopFetching();
-        var deck = document.getElementById('update-buttons-deck');
-        deck.selectedIndex = 0;
+        getElement('update-buttons-deck').selectedIndex = 0;
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
@@ -307,8 +302,7 @@ var gCommands = {
         var newState = !gPrefs.showHeadlinesOnly;
         gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
 
-        var checkbox = document.getElementById('headlines-checkbox');
-        checkbox.checked = newState;
+        getElement('headlines-checkbox').checked = newState;
 
         var entries = gFeedView.feedContent.childNodes;
         for (var i = 0; i < entries.length; i++)
@@ -437,17 +431,6 @@ var gCommands = {
 }
 
 
-/**
- * Executes given function asynchronously. All arguments besides
- * the first one are optional.
- */
-function async(aFunction, aDelay, aObject, arg1, arg2) {
-    function asc() {
-        aFunction.call(aObject || this, arg1, arg2);
-    }
-    return setTimeout(asc, aDelay || 0);
-}
-
 // Gets a string containing the CSS style of the feed view.
 function getFeedViewStyle() {
     var useCustomStyle = gPrefs.getBoolPref('feedview.useCustomStyle');
@@ -475,8 +458,7 @@ function getFeedViewStyle() {
 
 function loadHomeview() {
     var query = new QuerySH(null, null, true);
-    var unreadFolder = document.getElementById('unread-folder');
-    var title = unreadFolder.getAttribute('title');
+    var title = getElement('unread-folder').getAttribute('title');
     var view = new FeedView(title, query);
 
     var prevVersion = gPrefs.getCharPref('lastMajorVersion');
@@ -485,7 +467,7 @@ function loadHomeview() {
 
     // If Brief has been updated, load the new version info page.
     if (verComparator.compare(prevVersion, LAST_MAJOR_VERSION) < 0) {
-        var browser = document.getElementById('feed-view');
+        var browser = getElement('feed-view');
         browser.loadURI(RELEASE_NOTES_URL);
         gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
 
@@ -505,34 +487,31 @@ function loadHomeview() {
 
 
 function updateProgressMeter() {
-    var progressmeter = document.getElementById('update-progress');
+    var progressmeter = getElement('update-progress');
     var progress = 100 * gUpdateService.completedFeedsCount /
                          gUpdateService.totalFeedsCount;
     progressmeter.value = progress;
 
     if (progress == 100) {
         async(function() { progressmeter.hidden = true }, 500);
-        var deck = document.getElementById('update-buttons-deck');
-        deck.selectedIndex = 0;
+        getElement('update-buttons-deck').selectedIndex = 0;
     }
 }
 
 function showHomeFolderPicker() {
-    var deck = document.getElementById('feed-list-deck');
-    deck.selectedIndex = 1;
-
-    var placesTree = document.getElementById('places-tree');
+    getElement('feed-list-deck').selectedIndex = 1;
 
     var query = PlacesUtils.history.getNewQuery();
     var options = PlacesUtils.history.getNewQueryOptions();
     query.setFolders([PlacesUIUtils.allBookmarksFolderId], 1);
     options.excludeItems = true;
-    placesTree.load([query], options);
+
+    getElement('places-tree').load([query], options);
 }
 
 
 function selectHomeFolder(aEvent) {
-    var placesTree = document.getElementById('places-tree');
+    var placesTree = getElement('places-tree');
     if (placesTree.currentIndex != -1) {
         var folderId = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
         gPrefs.setIntPref('homeFolder', folderId);
@@ -545,7 +524,7 @@ function selectHomeFolder(aEvent) {
 var previousView = null;
 var previousSelectedIndex = -1;
 function performSearch(aEvent) {
-    var searchbar = document.getElementById('searchbar');
+    var searchbar = getElement('searchbar');
 
     // If new search is being started, remember the old view to
     // restore it after the search is finished.
@@ -554,7 +533,7 @@ function performSearch(aEvent) {
         previousSelectedIndex = gFeedList.tree.currentIndex;
     }
 
-    var bundle = document.getElementById('main-bundle');
+    var bundle = getElement('main-bundle');
     var titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
 
     // If the search scope is set to global but the view is not the
@@ -716,7 +695,7 @@ var gPrefs = {
                 gFeedView.ensure(true);
                 break;
             case 'feedview.shownEntries':
-                var list = document.getElementById('view-constraint-list');
+                var list = getElement('view-constraint-list');
                 list.selectedIndex = this.shownEntries == 'all' ? 0 :
                                      this.shownEntries == 'unread' ? 1 : 2;
                 break;
@@ -738,6 +717,23 @@ var gPrefs = {
         }
     }
 
+}
+
+
+// Utility functions.
+
+
+function getElement(aId) document.getElementById(aId);
+
+/**
+ * Executes given function asynchronously. All arguments besides
+ * the first one are optional.
+ */
+function async(aFunction, aDelay, aObject, arg1, arg2) {
+    function asc() {
+        aFunction.call(aObject || this, arg1, arg2);
+    }
+    return setTimeout(asc, aDelay || 0);
 }
 
 

@@ -44,7 +44,7 @@ FeedView.prototype = {
     // Key elements.
     get browser FeedView_browser() {
         delete this.__proto__.browser;
-        return this.__proto__.browser = document.getElementById('feed-view');
+        return this.__proto__.browser = getElement('feed-view');
     },
 
     get document FeedView_document() {
@@ -396,19 +396,20 @@ FeedView.prototype = {
 
         // Clear the searchbar.
         if (!this.query.searchString) {
-            var searchbar = document.getElementById('searchbar');
+            var searchbar = getElement('searchbar');
             searchbar.value = '';
             searchbar.clearButton.hidden = true;
         }
 
         // Hide the drop-down to pick view contraints if it is tied to
         // specific contraints (e.g. the Unread folder).
-        var viewConstraintBox = document.getElementById('view-constraint-box');
-        viewConstraintBox.hidden = this._flagsAreIntrinsic;
+        getElement('view-constraint-box').hidden = this._flagsAreIntrinsic;
 
         this.browser.addEventListener('load', this, false);
 
         if (this.browser.currentURI.equals(gTemplateURI)) {
+            // This has to be done also here (not only in onload), because load event
+            // wasn't sent if the page had been restored by SessionStore.
             this._setupTemplatePage();
 
             // Do it asynchronously, because UI maybe waiting to be redrawn
@@ -469,14 +470,11 @@ FeedView.prototype = {
                 break;
 
             case 'load':
-                var toolbar = document.getElementById('feed-view-toolbar');
+                getElement('feed-view-toolbar').hidden = !this.isActive;
+
                 if (this.isActive) {
-                    toolbar.hidden = false;
                     this._setupTemplatePage();
                     this._refresh(true);
-                }
-                else {
-                    toolbar.hidden = true;
                 }
                 break;
 
@@ -782,14 +780,14 @@ FeedView.prototype = {
         if (this.currentPage > this.pageCount)
             this.__currentPage = this.pageCount;
 
-        var pageLabel = document.getElementById('page-desc');
-        var prevPageButton = document.getElementById('prev-page');
-        var nextPageButton = document.getElementById('next-page');
-
+        var prevPageButton = getElement('prev-page');
+        var nextPageButton = getElement('next-page');
         prevPageButton.setAttribute('disabled', this.currentPage <= 1);
         nextPageButton.setAttribute('disabled', this.currentPage == this.pageCount);
-        var stringbundle = document.getElementById('main-bundle');
+
+        var stringbundle = getElement('main-bundle');
         var params = [this.currentPage, this.pageCount];
+        var pageLabel = getElement('page-desc');
         pageLabel.value = stringbundle.getFormattedString('pageNumberLabel', params);
     },
 
@@ -909,7 +907,7 @@ FeedView.prototype = {
 
     _setEmptyViewMessage: function FeedView__setEmptyViewMessage() {
         var paragraph = this.document.getElementById('message');
-        var bundle = document.getElementById('main-bundle');
+        var bundle = getElement('main-bundle');
         var message;
 
         if (this.query.searchString)
