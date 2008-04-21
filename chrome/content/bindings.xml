@@ -58,7 +58,8 @@
             var titleElem = document.createElement('a');
             titleElem.className = 'article-title-link';
             titleElem.setAttribute('href', this.getAttribute('entryURL'));
-            titleElem.innerHTML = this.getAttribute('entryTitle');
+            titleElem.innerHTML = this.getAttribute('entryTitle') ||
+                                  this.getAttribute('entryURL');
             header.appendChild(titleElem);
 
             var feedContent = document.getElementById('feed-content');
