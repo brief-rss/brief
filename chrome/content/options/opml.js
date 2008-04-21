@@ -40,6 +40,14 @@ var opml = {
             reader.send(null);
             var opmldoc = reader.responseXML;
 
+            if (opmldoc.documentElement.localName == 'parsererror') {
+                var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                                    getService(Ci.nsIPromptService);
+                promptService.alert(window, bundle.getString('invalidFileAlertTitle'),
+                                    bundle.getString('invalidFileAlertText'));
+                return;
+            }
+
             var results = [];
 
             // At this point, we have an XML doc in opmldoc
