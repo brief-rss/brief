@@ -133,7 +133,7 @@ var gObserver = {
             item.removeAttribute('error');
             item.removeAttribute('loading');
             gFeedList.refreshFeedTreeitems(item);
-            updateProgressMeter();
+            refreshProgressmeter();
 
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
                 gFeedList.refreshSpecialTreeitem('unread-folder');
@@ -155,18 +155,16 @@ var gObserver = {
             item.removeAttribute('loading');
             item.setAttribute('error', true);
             gFeedList.refreshFeedTreeitems(item);
-            updateProgressMeter();
+            refreshProgressmeter();
             break;
 
         // Sets up the progressmeter and the stop button.
         case 'brief:feed-update-queued':
             getElement('update-buttons-deck').selectedIndex = 1;
 
-            if (gUpdateService.status != Ci.nsIBriefUpdateService.UPDATING_SINGLE_FEED) {
-                var progressmeter = getElement('update-progress');
-                progressmeter.hidden = false;
-                progressmeter.value = 100 * gUpdateService.completedFeedsCount /
-                                            gUpdateService.totalFeedsCount;
+            if (gUpdateService.scheduledFeedsCount > 1) {
+                getElement('update-progress').hidden = false;
+                refreshProgressmeter();
             }
             break;
 
@@ -486,10 +484,10 @@ function loadHomeview() {
 }
 
 
-function updateProgressMeter() {
+function refreshProgressmeter() {
     var progressmeter = getElement('update-progress');
     var progress = 100 * gUpdateService.completedFeedsCount /
-                         gUpdateService.totalFeedsCount;
+                         gUpdateService.scheduledFeedsCount;
     progressmeter.value = progress;
 
     if (progress == 100) {

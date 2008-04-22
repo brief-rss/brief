@@ -134,6 +134,16 @@ const gBrief = {
         panel.setAttribute('unread', unreadEntriesCount > 0);
     },
 
+    refreshProgressmeter: function gBrief_refreshProgressmeter() {
+        var progressmeter = document.getElementById('brief-progressmeter');
+        var progress = 100 * this.updateService.completedFeedsCount /
+                             this.updateService.scheduledFeedsCount;
+        progressmeter.value = progress;
+
+        if (progress == 100)
+            setTimeout(function() { progressmeter.hidden = true }, 500);
+    },
+
 
     constructTooltip: function gBrief_constructTooltip(aEvent) {
         var bundle = document.getElementById('brief-bundle');
@@ -341,33 +351,25 @@ const gBrief = {
             break;
 
         case 'brief:feed-update-queued':
-            var single = Ci.nsIBriefUpdateService.UPDATING_SINGLE_FEED;
-            if (this.updateService.status == single)
-                return;
-
             // Only show the progressmeter if Brief isn't opened in the currently
             // selected tab (no need to show two progressmeters on screen).
-            var progressmeter = document.getElementById('brief-progressmeter');
-            if (gBrowser.selectedTab != this.tab)
-                progressmeter.hidden = false;
+            if (this.updateService.status == Ci.nsIBriefUpdateService.NORMAL_UPDATING
+                && this.updateService.scheduledFeedsCount > 1
+                && gBrowser.selectedTab != this.tab) {
 
-            progressmeter.value = 100 * this.updateService.completedFeedsCount /
-                                        this.updateService.totalFeedsCount;
+                document.getElementById('brief-progressmeter').hidden = false;
+                this.refreshProgressmeter();
+            }
             break;
 
         case 'brief:feed-updated':
+            this.refreshProgressmeter();
             if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
                 this.updateStatuspanel();
-            // Fall through...
+            break;
 
         case 'brief:feed-error':
-            var progressmeter = document.getElementById('brief-progressmeter');
-            var progress = 100 * this.updateService.completedFeedsCount /
-                                 this.updateService.totalFeedsCount;
-            progressmeter.value = progress;
-
-            if (progress == 100)
-                setTimeout(function() { progressmeter.hidden = true }, 500);
+            this.refreshProgressmeter();
             break;
         }
     },
