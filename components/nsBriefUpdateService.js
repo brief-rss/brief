@@ -20,30 +20,30 @@ const NOT_UPDATING = Ci.nsIBriefUpdateService.NOT_UPDATING;
 const NORMAL_UPDATING = Ci.nsIBriefUpdateService.NORMAL_UPDATING;
 const BACKGROUND_UPDATING = Ci.nsIBriefUpdateService.BACKGROUND_UPDATING;
 
+
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
-
-__defineGetter__('observerService', function() {
-    delete this.observerService;
-    return this.observerService = Cc['@mozilla.org/observer-service;1'].
-                                  getService(Ci.nsIObserverService);
+__defineGetter__('gObserverService', function() {
+    delete this.gObserverService;
+    return this.gObserverService = Cc['@mozilla.org/observer-service;1'].
+                                   getService(Ci.nsIObserverService);
 });
-__defineGetter__('prefs', function() {
-    delete this.prefs;
-    return this.prefs = Cc['@mozilla.org/preferences-service;1'].
-                        getService(Ci.nsIPrefService).
-                        getBranch('extensions.brief.').
-                        QueryInterface(Ci.nsIPrefBranch2);
+__defineGetter__('gPrefs', function() {
+    delete this.gPrefs;
+    return this.gPrefs = Cc['@mozilla.org/preferences-service;1'].
+                         getService(Ci.nsIPrefService).
+                         getBranch('extensions.brief.').
+                         QueryInterface(Ci.nsIPrefBranch2);
 });
-__defineGetter__('ioService', function() {
-    delete this.ioService;
-    return this.ioService = Cc['@mozilla.org/network/io-service;1'].
-                            getService(Ci.nsIIOService);
+__defineGetter__('gIOService', function() {
+    delete this.gIOService;
+    return this.gIOService = Cc['@mozilla.org/network/io-service;1'].
+                             getService(Ci.nsIIOService);
 });
-__defineGetter__('briefStorage', function() {
-    delete this.briefStorage;
-    return this.briefStorage = Cc['@ancestor/brief/storage;1'].
-                               getService(Ci.nsIBriefStorage);
+__defineGetter__('gStorage', function() {
+    delete this.gStorage;
+    return this.gStorage = Cc['@ancestor/brief/storage;1'].
+                           getService(Ci.nsIBriefStorage);
 });
 
 
@@ -51,9 +51,9 @@ gUpdateService = null;
 
 // Class definition
 function BriefUpdateService() {
-    observerService.addObserver(this, 'brief:feed-updated', false);
-    observerService.addObserver(this, 'brief:feed-error', false);
-    observerService.addObserver(this, 'profile-after-change', false);
+    gObserverService.addObserver(this, 'brief:feed-updated', false);
+    gObserverService.addObserver(this, 'brief:feed-error', false);
+    gObserverService.addObserver(this, 'profile-after-change', false);
 }
 
 BriefUpdateService.prototype = {
@@ -107,10 +107,10 @@ BriefUpdateService.prototype = {
 
     // nsIBriefUpdateService
     fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
-        this.fetchFeeds(briefStorage.getAllFeeds(), aInBackground);
+        this.fetchFeeds(gStorage.getAllFeeds(), aInBackground);
 
         var roundedNow = Math.round(Date.now() / 1000);
-        prefs.setIntPref('update.lastUpdateTime', roundedNow);
+        gPrefs.setIntPref('update.lastUpdateTime', roundedNow);
     },
 
 
@@ -129,8 +129,8 @@ BriefUpdateService.prototype = {
         // Start updating if it isn't in progress yet. We will fetch feeds on an interval,
         // so we don't choke when downloading and processing all of them a once.
         if (this.status == NOT_UPDATING) {
-            var delay = aInBackground ? prefs.getIntPref('update.backgroundFetchDelay')
-                                      : prefs.getIntPref('update.defaultFetchDelay');
+            var delay = aInBackground ? gPrefs.getIntPref('update.backgroundFetchDelay')
+                                      : gPrefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
         }
 
@@ -138,7 +138,7 @@ BriefUpdateService.prototype = {
         // we stop the background start continue with a foreground one.
         if (this.status == BACKGROUND_UPDATING && !aInBackground) {
             this.fetchDelayTimer.cancel();
-            var delay = prefs.getIntPref('update.defaultFetchDelay');
+            var delay = gPrefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
         }
 
@@ -149,12 +149,12 @@ BriefUpdateService.prototype = {
 
         // If new feeds have ended up in the queue then send the notification.
         if (newFeedsQueued)
-            observerService.notifyObservers(null, 'brief:feed-update-queued', '');
+            gObserverService.notifyObservers(null, 'brief:feed-update-queued', '');
     },
 
 
     stopFetching: function BUS_stopFetching() {
-        observerService.notifyObservers(null, 'brief:feed-update-canceled', '');
+        gObserverService.notifyObservers(null, 'brief:feed-update-canceled', '');
 
         // We must call this after sending brief:feed-update-canceled, because when a
         // feed fetcher receives it, it adds a feed to the completedFeeds stack. If we
@@ -173,16 +173,16 @@ BriefUpdateService.prototype = {
             // Fall through...
 
         case this.updateTimer:
-            var globalUpdatingEnabled = prefs.getBoolPref('update.enableAutoUpdate');
+            var globalUpdatingEnabled = gPrefs.getBoolPref('update.enableAutoUpdate');
             // Preferencos are in seconds, because they can only store 32 bit integers.
-            var globalInterval = prefs.getIntPref('update.interval') * 1000;
-            var lastGlobalUpdateTime = prefs.getIntPref('update.lastUpdateTime') * 1000;
+            var globalInterval = gPrefs.getIntPref('update.interval') * 1000;
+            var lastGlobalUpdateTime = gPrefs.getIntPref('update.lastUpdateTime') * 1000;
             var now = Date.now();
 
             var itsGlobalUpdateTime = globalUpdatingEnabled &&
                                       now - lastGlobalUpdateTime > globalInterval;
 
-            var feeds = briefStorage.getAllFeeds();
+            var feeds = gStorage.getAllFeeds();
 
             var feed, i, feedsToUpdate = [];
             for (i = 0; i < feeds.length; i++) {
@@ -198,7 +198,7 @@ BriefUpdateService.prototype = {
             if (itsGlobalUpdateTime) {
                 // Preferences can only store 32 bit integers, so round to seconds.
                 var roundedNow = Math.round(now / 1000);
-                prefs.setIntPref('update.lastUpdateTime', roundedNow);
+                gPrefs.setIntPref('update.lastUpdateTime', roundedNow);
             }
 
             break;
@@ -220,7 +220,7 @@ BriefUpdateService.prototype = {
         this.status = NOT_UPDATING;
         this.fetchDelayTimer.cancel();
 
-        var showNotification = prefs.getBoolPref('update.showNotification');
+        var showNotification = gPrefs.getBoolPref('update.showNotification');
         if (this.feedsWithNewEntriesCount > 0 && showNotification) {
 
             var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
@@ -267,7 +267,7 @@ BriefUpdateService.prototype = {
 
                 // We add the observer here instead of in the constructor as prefs
                 // are changed during startup when assuming their user-set values.
-                prefs.addObserver('', this, false);
+                gPrefs.addObserver('', this, false);
             }
             break;
 
@@ -339,8 +339,8 @@ BriefUpdateService.prototype = {
 function FeedFetcher(aFeed) {
     this.feed = aFeed;
 
-    observerService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
-    observerService.addObserver(this, 'brief:feed-update-canceled', false);
+    gObserverService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
+    gObserverService.addObserver(this, 'brief:feed-update-canceled', false);
 
     this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
@@ -380,7 +380,7 @@ FeedFetcher.prototype = {
         function onRequestLoad() {
             self.timeoutTimer.cancel();
 
-            var uri = ioService.newURI(self.feed.feedURL, null, null);
+            var uri = gIOService.newURI(self.feed.feedURL, null, null);
             var parser = Cc['@mozilla.org/feed-processor;1'].
                          createInstance(Ci.nsIFeedProcessor);
             parser.listener = self;
@@ -453,7 +453,7 @@ FeedFetcher.prototype = {
         this.finish(true);
 
         this.downloadedFeed.favicon = this.favicon;
-        briefStorage.updateFeed(this.downloadedFeed);
+        gStorage.updateFeed(this.downloadedFeed);
     },
 
 
@@ -473,11 +473,11 @@ FeedFetcher.prototype = {
 
         if (!aSuccess) {
             this.inError = true;
-            observerService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
+            gObserverService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
         }
 
         // Clean up, so that we don't leak (hopefully).
-        observerService.removeObserver(this, 'brief:feed-update-canceled');
+        gObserverService.removeObserver(this, 'brief:feed-update-canceled');
         this.request = null;
         this.timeoutTimer.cancel();
         this.timeoutTimer = null;
@@ -511,10 +511,10 @@ FeedFetcher.prototype = {
  * @param aFeedFetcher FeedFetcher to use for callback.
  */
 function FaviconFetcher(aWebsiteURL, aFeedFetcher) {
-    var websiteURI = ioService.newURI(aWebsiteURL, null, null)
-    var faviconURI = ioService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
+    var websiteURI = gIOService.newURI(aWebsiteURL, null, null)
+    var faviconURI = gIOService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
-    var chan = ioService.newChannelFromURI(faviconURI);
+    var chan = gIOService.newChannelFromURI(faviconURI);
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
