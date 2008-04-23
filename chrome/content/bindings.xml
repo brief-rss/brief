@@ -145,7 +145,8 @@
                     }
 
                     if (aAnimate) {
-                        $(articleContent).slideUp(200, finish);
+                        $(articleContent).animate({height: 'hide', opacity: 'hide'},
+                                                  200, 'linear', finish);
                     }
                     else {
                         $(articleContent).hide();
@@ -165,7 +166,8 @@
                     }
 
                     if (aAnimate) {
-                        $(articleContent).slideDown(200, finish);
+                        $(articleContent).animate({height: 'show', opacity: 'show'},
+                                                  200, 'linear', finish);
                     }
                     else {
                         $(articleContent).show();
@@ -293,7 +295,7 @@
                         var feedContent = document.getElementById('feed-content');
                         feedContent.removeChild(self);
                     }
-                    $(this).fadeOut(300, callback);
+                    $(this).fadeOut(200, callback);
                     break;
                 case 'DoCollapseEntry':
                     this.collapse(state, false);
