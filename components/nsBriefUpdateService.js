@@ -73,36 +73,23 @@ BriefUpdateService.prototype = {
 
     scheduledFeeds: [],  // feeds to be updated in the current job (array of nsIBriefFeed's)
     updateQueue:    [],  // remaining feeds to be fetched
-    completedFeeds: [],  // feeds which have been fetched and parsed
+    completedFeeds: [],  // feeds that have already been fetched and parsed
 
-    feedsWithNewEntriesCount: 0,  // number of updated feeds that have new entries
-    newEntriesCount:          0,  // total number of new entries in all updated feeds
+    feedsWithNewEntriesCount: 0,  // number of feeds updated in the current batch that have new entries
+    newEntriesCount:          0,  // total number of new entries in the current batch
 
 
-    __updateTimer: null,
-    get updateTimer BUS_updateTimer() {
-        if (!this.__updateTimer)
-            this.__updateTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        return this.__updateTimer;
-    },
+    get updateTimer BUS_updateTimer()
+        this.__updateTimer || (this.__updateTimer = Cc['@mozilla.org/timer;1'].
+                                                    createInstance(Ci.nsITimer)),
 
-    __startupDelayTimer: null,
-    get startupDelayTimer BUS_startupDelayTimer() {
-        if (!this.__startupDelayTimer) {
-            this.__startupDelayTimer = Cc['@mozilla.org/timer;1'].
-                                       createInstance(Ci.nsITimer);
-        }
-        return this.__startupDelayTimer;
-    },
+    get startupDelayTimer BUS_startupDelayTimer()
+        this.__startupDelayTimer || (this.__startupDelayTimer = Cc['@mozilla.org/timer;1'].
+                                                                createInstance(Ci.nsITimer)),
 
-    __fetchDelayTimer: null,
-    get fetchDelayTimer BUS_fetchDelayTimer() {
-        if (!this.__fetchDelayTimer) {
-            this.__fetchDelayTimer = Cc['@mozilla.org/timer;1'].
-                                     createInstance(Ci.nsITimer);
-        }
-        return this.__fetchDelayTimer;
-    },
+    get fetchDelayTimer BUS_fetchDelayTimer()
+        this.__fetchDelayTimer || (this.__fetchDelayTimer = Cc['@mozilla.org/timer;1'].
+                                                            createInstance(Ci.nsITimer)),
 
 
     // nsIBriefUpdateService
