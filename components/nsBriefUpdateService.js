@@ -382,7 +382,8 @@ FeedFetcher.prototype = {
 
         this.request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1'].
                        createInstance(Ci.nsIXMLHttpRequest);
-        this.request.mozBackgroundRequest = true;
+        if (gPrefs.getBoolPref('update.suppressSecurityDialogs'))
+            this.request.mozBackgroundRequest = true;
         this.request.open('GET', this.feed.feedURL, true);
         this.request.overrideMimeType('application/xml');
         this.request.onload = onRequestLoad;
