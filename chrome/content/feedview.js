@@ -268,10 +268,8 @@ FeedView.prototype = {
             targetPosition = entryElement.offsetTop - Math.floor(difference / 2);
         }
 
-        if (targetPosition < 0)
-            targetPosition = 0;
-        else if (targetPosition > win.scrollMaxY)
-            targetPosition = win.scrollMaxY;
+        targetPosition = Math.max(targetPosition, 0);
+        targetPosition = Math.min(targetPosition, win.scrollMaxY);
 
         if (targetPosition != win.pageYOffset) {
             if (aSmooth)
@@ -292,10 +290,15 @@ FeedView.prototype = {
         var win = this.document.defaultView;
 
         var delta = aTargetPosition - win.pageYOffset;
-        var jump = Math.round(delta / 10);
-        if (jump === 0)
-            jump = (delta > 0) ? 1 : -1;
+        with (Math) {
+            var absoluteJump = round(abs(delta) / 10);
+            absoluteJump = max(absoluteJump, 15);
+            absoluteJump = min(absoluteJump, 150);
+            var jump = (delta > 0) ? absoluteJump : -absoluteJump;
+        }
 
+        // Disallow selecting futher entries until scrolling is finished.
+        this._selectionSuppressed = true;
         var self = this;
 
         function scroll() {
@@ -312,10 +315,7 @@ FeedView.prototype = {
             }
         }
 
-        // Disallow selecting futher entries until scrolling is finished.
-        this._selectionSuppressed = true;
-
-        this._smoothScrollInterval = setInterval(scroll, 7);
+        this._smoothScrollInterval = setInterval(scroll, 10);
     },
 
 
@@ -330,7 +330,7 @@ FeedView.prototype = {
 
         // Get the element in the middle of the screen.
         for (var i = 0; i < elems.length - 1; i++) {
-            if (elems[i].offsetTop <= middleLine && elems[i + 1].offsetTop > middleLine) {
+            if ((elems[i].offsetTop <= middleLine) && (elems[i + 1].offsetTop > middleLine)) {
                 var middleElement = elems[i];
                 break;
             }
@@ -366,15 +366,15 @@ FeedView.prototype = {
         var win = this.document.defaultView;
         var winTop = win.pageYOffset;
         var winBottom = winTop + win.innerHeight;
-        var entriesToMark = [], entryTop, wasMarkedUnread, i;
-
         var entries = this.feedContent.childNodes;
 
-        for (i = 0; i < entries.length; i++) {
-            entryTop = entries[i].offsetTop;
-            wasMarkedUnread = (this.entriesMarkedUnread.indexOf(entries[i].id) != -1);
+        var entriesToMark = [];
 
-            if (entryTop >= winTop && entryTop < winBottom - 50 && !wasMarkedUnread)
+        for (let i = 0; i < entries.length; i++) {
+            let entryTop = entries[i].offsetTop;
+            let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(entries[i].id) != -1);
+
+            if ((entryTop >= winTop) && (entryTop < winBottom - 50) && !wasMarkedUnread)
                 entriesToMark.push(entries[i].id);
         }
 
