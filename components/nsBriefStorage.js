@@ -6,8 +6,6 @@ const QUERY_CLASS_ID = Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}');
 const QUERY_CLASS_NAME = 'Query to database of the Brief extension';
 const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
 
-const ANNO_BRIEF_FEED_ITEM = 'brief/bookmarkedItem';
-
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
@@ -322,9 +320,6 @@ BriefStorageService.prototype = {
 
                 var bookmarkID = gPlaces.bookmarks.insertBookmark(unfiledFolder, uri,
                                                                   -1, title);
-                gPlaces.annotations.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM,
-                                                      entryID, 0,
-                                                      gPlaces.annotations.EXPIRE_NEVER)
                 gPlaces.tagging.tagURI(uri, [tagName]);
 
                 update.bindStringParameter(0, bookmarkID);
@@ -1569,15 +1564,12 @@ BriefQuery.prototype = {
                     var uri = ioService.newURI(entry.entryURL, null, null);
                     var bookmarkID = bms.insertBookmark(gPlaces.unfiledBookmarksFolderId,
                                                         uri, bms.DEFAULT_INDEX, entry.title);
-                    annos.setItemAnnotation(bookmarkID, ANNO_BRIEF_FEED_ITEM, entry.id, 0,
-                                            annos.EXPIRE_NEVER);
                     gPlaces.tagging.tagURI(uri, [tagName]);
                 }
                 else {
                     // We have to use a transaction, so that tags are removed too.
                     var txn = txnService.removeItem(entry.bookmarkID);
                     txnService.doTransaction(txn);
-                    annos.removeItemAnnotation(entry.bookmarkID, ANNO_BRIEF_FEED_ITEM);
                 }
 
                 update.bindInt32Parameter(0, aState ? 1 : 0);
