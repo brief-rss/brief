@@ -519,9 +519,9 @@ BriefStorageService.prototype = {
                'UPDATE entries       ' +
                'SET date    = ?1,    ' +
                '    authors = ?2,    ' +
-               '    read    = 0,     ' +
+               '    read    = ?3,    ' +
                '    updated = 1      ' +
-               'WHERE id = ?3        ');
+               'WHERE id = ?4        ');
     },
 
     get updateEntryText_stmt BriefStorage_updateEntryText_stmt() {
@@ -605,12 +605,13 @@ BriefStorageService.prototype = {
         // entry has a newer date than the stored one and if so, update the data and
         // mark the entry as unread. Otherwise, insert it if it isn't present yet.
         if (entryAlreadyStored) {
-            var markUnread = gPrefs.getBoolPref('database.markUpdatedEntriesUnread');
-            if (markUnread && aEntry.date && storedEntryDate < aEntry.date) {
+            if (aEntry.date && storedEntryDate < aEntry.date) {
                 var update = this.updateEntry_stmt;
                 update.bindInt64Parameter(0, aEntry.date);
                 update.bindStringParameter(1, aEntry.authors);
-                update.bindStringParameter(2, primaryID);
+                let markUnread = gPrefs.getBoolPref('database.markUpdatedEntriesUnread');
+                update.bindInt32Parameter(2, markUnread ? 0 : 1);
+                update.bindStringParameter(3, primaryID);
                 update.execute();
 
                 update = this.updateEntryText_stmt;
