@@ -664,10 +664,18 @@ FeedView.prototype = {
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
-        if (!entries.length)
+        if (!entries.length) {
             this._setEmptyViewMessage();
-        else
+        }
+        else {
             this.document.getElementById('message').style.display = 'none';
+
+            // Highlight the search terms.
+            if (this.query.searchString) {
+                for each (word in this.query.searchString.match(/[A-Za-z0-9]+/g))
+                    this._highlightText(word);
+            }
+        }
 
         this._initSelection()
 
@@ -945,6 +953,40 @@ FeedView.prototype = {
         else {
             var win = this.document.defaultView;
             win.scroll(win.pageXOffset, 0);
+        }
+    },
+
+
+    _highlightText: function FeedView__highlightText(aWord) {
+        var finder = Cc['@mozilla.org/embedcomp/rangefind;1'].
+                     createInstance(Ci.nsIFind);
+        finder.caseSensitive = false;
+
+        var searchRange = this.document.createRange();
+        searchRange.setStart(this.feedContent, 0);
+        searchRange.setEnd(this.feedContent, this.feedContent.childNodes.length);
+
+        var startPoint = this.document.createRange();
+        startPoint.setStart(this.feedContent, 0);
+        startPoint.setEnd(this.feedContent, 0);
+
+        var endPoint = this.document.createRange();
+        endPoint.setStart(this.feedContent, this.feedContent.childNodes.length);
+        endPoint.setEnd(this.feedContent, this.feedContent.childNodes.length);
+
+        var baseNode = this.document.createElement('span');
+        baseNode.className = 'search-highlight';
+
+        var retRange;
+        while (retRange = finder.Find(aWord, searchRange, startPoint, endPoint)) {
+            let surroundingNode = baseNode.cloneNode(false);
+            surroundingNode.appendChild(retRange.extractContents());
+
+            let before = retRange.startContainer.splitText(retRange.startOffset);
+            before.parentNode.insertBefore(surroundingNode, before);
+
+            startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
+            startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
         }
     }
 

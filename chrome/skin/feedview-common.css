@@ -110,7 +110,10 @@ pre, code {
   font-size: 1em;
 }
 
-
+.search-highlight {
+    color: black;
+    background-color: yellow;
+}
 
 /* ----------------------  Adjustments for headlines view   ---------------------- */
 
