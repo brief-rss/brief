@@ -1,12 +1,15 @@
-/**
- * CSS rules that you define here will apply to all the
- * displayed feeds. Use !important to overide default rules.
- * You can find a few examples below.
- */
+/* You can define new CSS rules or override default
+   rules using !important.
+   Below you can find a few example customizations. */
 
-/* Don't show authors of items */
-/*
- .article-authors {
+/* Don't show authors of items */ /*
+.article-authors {
     display: none;
+}
+*/
+
+/* Increase the font size */ /*
+.article-content {
+    font-size: 13px !important;
 }
 */
