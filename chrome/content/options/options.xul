@@ -188,18 +188,9 @@
     <prefpane id="display-pane" label="&displayPane.label;">
 
         <preferences>
-            <preference id="extensions.brief.feedview.showAuthors"
-                        name="extensions.brief.feedview.showAuthors"
-                        type="bool"/>
             <preference id="extensions.brief.feedview.entriesPerPage"
                         name="extensions.brief.feedview.entriesPerPage"
                         type="int"/>
-            <preference id="extensions.brief.feedview.useCustomStyle"
-                        name="extensions.brief.feedview.useCustomStyle"
-                        type="bool"/>
-            <preference id="extensions.brief.feedview.customStylePath"
-                        name="extensions.brief.feedview.customStylePath"
-                        type="unichar"/>
             <preference id="extensions.brief.feedview.sortUnreadViewOldestFirst"
                         name="extensions.brief.feedview.sortUnreadViewOldestFirst"
                         type="bool"/>
@@ -208,7 +199,7 @@
                         type="bool"/>
         </preferences>
 
-        <groupbox>
+        <groupbox align="stretch">
             <caption label="&feedViewGroup.caption;"/>
             <hbox align="center">
                 <label value="&entriesPerPageBefore.label;"
@@ -227,22 +218,14 @@
                       label="&sortUnreadViewOldestFirst.label;"
                       accesskey="&sortUnreadViewOldestFirst.accesskey;"
                       preference="extensions.brief.feedview.sortUnreadViewOldestFirst"/>
-            <checkbox id="authors-checkbox"
-                      label="&authorsCheckbox.label;"
-                      accesskey="&authorsCheckbox.accesskey;"
-                      preference="extensions.brief.feedview.showAuthors"/>
-            <checkbox id="custom-style-checkbox"
-                      label="&enableCustomStyle.label;"
-                      accesskey="&enableCustomStyle.accesskey;"
-                      preference="extensions.brief.feedview.useCustomStyle"
-                      oncommand="gDisplayPane.updateCustomStyleDisabledState();"/>
+            <spacer height="8"/>
             <hbox align="center">
-                <textbox id="custom-style-path" flex="1"
-                         preference="extensions.brief.feedview.customStylePath"/>
-                <button id="browse-custom-style"
-                        label="&browseCustomStyle.label;"
-                        accesskey="&browseCustomStyle.accesskey;"
-                        oncommand="gDisplayPane.browseCustomStyle();"/>
+                <label value="&editStyleDescription.label;"/>
+                <spacer flex="1"/>
+                <button id="edit-custom-style"
+                        label="&editStyleButton.label;"
+                        accesskey="&editStyleButton.accesskey;"
+                        oncommand="gDisplayPane.editCustomStyle();"/>
             </hbox>
         </groupbox>
 

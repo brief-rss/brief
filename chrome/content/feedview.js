@@ -532,10 +532,6 @@ FeedView.prototype = {
         for each (event in this._events)
             this.document.addEventListener(event, this, true);
 
-        // Apply the CSS.
-        var style = this.document.getElementById('feedview-style');
-        style.textContent = gFeedViewStyle;
-
         // Pass some data which bindings need but don't have access to.
         // We can bypass XPCNW here, because untrusted content is not
         // inserted until the bindings are attached.
@@ -844,7 +840,7 @@ FeedView.prototype = {
         articleContainer.setAttribute('entryTitle', aEntry.title);
         articleContainer.setAttribute('content', aEntry.content);
 
-        if (gPrefs.showAuthors && aEntry.authors)
+        if (aEntry.authors)
             articleContainer.setAttribute('authors', this.authorPrefixStr + aEntry.authors);
         if (aEntry.read)
             articleContainer.setAttribute('read', true);

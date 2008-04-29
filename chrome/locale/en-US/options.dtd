@@ -38,20 +38,20 @@
 <!ENTITY feedViewGroup.caption "Feed content view">
 <!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
-<!ENTITY authorsCheckbox.label "Show authors of the items">
-<!ENTITY authorsCheckbox.accesskey "h">
 <!ENTITY entriesPerPageBefore.label "Show">
 <!ENTITY entriesPerPageAfter.label "items per page">
 <!ENTITY entriesPerPage.accesskey "S">
-<!ENTITY enableCustomStyle.label "Use custom style: ">
-<!ENTITY enableCustomStyle.accesskey "U">
-<!ENTITY browseCustomStyle.label "Browse">
-<!ENTITY browseCustomStyle.accesskey "B">
+<!ENTITY editStyleDescription.label "Customize the appearance of feeds">
+<!ENTITY editStyleButton.label "Customize">
+<!ENTITY editStyleButton.accesskey "C">
 <!ENTITY keyboardGroup.caption "Keyboard shortcuts">
 <!ENTITY enableItemSelection.label "Enable selecting and managing items using keyboard">
 <!ENTITY enableItemSelection.accesskey "E">
 <!ENTITY showShortcuts.label "Show shortcuts">
 <!ENTITY showShortcuts.accesskey "w">
+<!ENTITY styleEditor.title "Edit custom style">
+<!ENTITY seeCustomizationTips.label "Learn about customizing appearance with CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Location">
 <!ENTITY optionsGroupbox.caption "Feed settings">

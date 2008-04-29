@@ -1,0 +1,12 @@
+/**
+ * CSS rules that you define here will apply to all the
+ * displayed feeds. Use !important to overide default rules.
+ * You can find a few examples below.
+ */
+
+/* Don't show authors of items */
+/*
+ .article-authors {
+    display: none;
+}
+*/
