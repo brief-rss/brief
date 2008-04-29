@@ -37,3 +37,11 @@ textbox[type="number"] > spinbuttons {
 #show-shortcuts .button-icon {
   margin-right: 5px;
 }
+
+#custom-style-textbox {
+  margin: 0;
+}
+
+#learn-more-link {
+  margin: 5px 0;
+}

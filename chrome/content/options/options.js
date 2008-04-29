@@ -9,7 +9,6 @@ function init() {
     gFeedsPane.initUpdateIntervalControls();
     gFeedsPane.updateExpirationDisabledState();
     gFeedsPane.updateStoredEntriesDisabledState();
-    gDisplayPane.updateCustomStyleDisabledState();
 
     opml.init();
 }
@@ -152,31 +151,9 @@ var gFeedsPane = {
 
 var gDisplayPane = {
 
-    updateCustomStyleDisabledState: function() {
-        var pathTextbox = document.getElementById('custom-style-path');
-        var browseButton = document.getElementById('browse-custom-style');
-        var enableCustomStyle = document.getElementById('custom-style-checkbox');
-
-        pathTextbox.disabled = !enableCustomStyle.checked;
-        browseButton.disabled = !enableCustomStyle.checked;
-    },
-
-    browseCustomStyle: function() {
-        var picker = Cc['@mozilla.org/filepicker;1'].createInstance(Ci.nsIFilePicker);
-        var stringbundle = document.getElementById('options-bundle');
-        var pickerTitle = stringbundle.getString('stylePickerTitle');
-        var pickerFilterName = stringbundle.getString('stylePickerExtFilterName');
-        picker.init(window, pickerTitle, picker.modeOpen);
-        picker.appendFilter(pickerFilterName, '*.css');
-        picker.appendFilters(picker.filterAll);
-
-        var result = picker.show();
-        if (result == picker.returnOK) {
-            var pathTextbox = document.getElementById('custom-style-path');
-            pathTextbox.value = picker.file.path;
-            var pref = document.getElementById('extensions.brief.feedview.customStylePath');
-            pref.value = pathTextbox.value;
-        }
+    editCustomStyle: function() {
+        window.openDialog('chrome://brief/content/options/style-editor.xul',
+                          'Style editor', 'chrome,centerscreen,titlebar,resizable');
     },
 
     showShortcuts: function() {

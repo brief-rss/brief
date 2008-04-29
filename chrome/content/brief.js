@@ -21,11 +21,10 @@ const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
 var gTopWindow = null;
 var gTemplateURI = '';
-var gFeedViewStyle = '';
+
 
 function init() {
     gPrefs.register();
-    getFeedViewStyle();
 
     // Get the extension's directory.
     var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
@@ -61,7 +60,7 @@ function init() {
 
     document.addEventListener('keypress', onKeyPress, true);
 
-    var observerService = Cc["@mozilla.org/observer-service;1"].
+    var observerService = Cc['@mozilla.org/observer-service;1'].
                           getService(Ci.nsIObserverService);
 
     observerService.addObserver(gObserver, 'brief:feed-updated', false);
@@ -70,6 +69,7 @@ function init() {
     observerService.addObserver(gObserver, 'brief:entry-status-changed', false);
     observerService.addObserver(gObserver, 'brief:feed-update-queued', false);
     observerService.addObserver(gObserver, 'brief:feed-update-canceled', false);
+    observerService.addObserver(gObserver, 'brief:custom-style-changed', false);
 
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
@@ -186,6 +186,11 @@ var gObserver = {
         case 'brief:entry-status-changed':
             this.onEntryStatusChanged(aSubject, aData);
             break;
+
+        case 'brief:custom-style-changed':
+            gFeedView.browser.loadURI(gTemplateURI.spec);
+            break;
+
         }
     },
 
@@ -429,31 +434,6 @@ var gCommands = {
 }
 
 
-// Gets a string containing the CSS style of the feed view.
-function getFeedViewStyle() {
-    var useCustomStyle = gPrefs.getBoolPref('feedview.useCustomStyle');
-    var stylePath = gPrefs.getComplexValue('feedview.customStylePath',
-                                           Ci.nsISupportsString);
-
-    var url = (useCustomStyle && stylePath.data) ? 'file:///' + stylePath.data
-                                                 : DEFAULT_STYLE_URL;
-
-    var request = new XMLHttpRequest;
-    request.open('GET', url, false);
-    request.overrideMimeType('text/css');
-    try {
-        request.send(null);
-    }
-    catch (ex) {
-        // The file could not be found. Fetch the default style.
-        request.open('GET', DEFAULT_STYLE_URL, false);
-        request.send(null);
-    }
-
-    return gFeedViewStyle = request.responseText;
-}
-
-
 function loadHomeview() {
     var query = new QuerySH(null, null, true);
     var title = getElement('unread-folder').getAttribute('title');
@@ -652,7 +632,6 @@ var gPrefs = {
     _cachedPrefs:
         [{ name: 'feedview.doubleClickMarks',       propName: 'doubleClickMarks' },
          { name: 'feedview.showHeadlinesOnly',      propName: 'showHeadlinesOnly' },
-         { name: 'feedview.showAuthors',            propName: 'showAuthors' },
          { name: 'feedview.entrySelectionEnabled',  propName: 'entrySelectionEnabled' },
          { name: 'feedview.autoMarkRead',           propName: 'autoMarkRead' },
          { name: 'feedview.shownEntries',           propName: 'shownEntries' },
@@ -684,11 +663,6 @@ var gPrefs = {
         }
 
         switch (aData) {
-            case 'feedview.customStylePath':
-            case 'feedview.useCustomStyle':
-                var styleElem = gFeedView.document.getElementById('feedview-style');
-                styleElem.textContent = getFeedViewStyle();
-                break;
             case 'feedview.entriesPerPage':
                 gFeedView.ensure(true);
                 break;

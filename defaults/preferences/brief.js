@@ -9,12 +9,9 @@ pref("extensions.brief.assumeStandardKeys", true);
 pref("extensions.brief.feedview.showHeadlinesOnly", false);
 pref("extensions.brief.feedview.shownEntries", 'all');
 pref("extensions.brief.feedview.entriesPerPage", 15);
-pref("extensions.brief.feedview.customStylePath", '');
-pref("extensions.brief.feedview.useCustomStyle", false);
 pref("extensions.brief.feedview.openEntriesInTabs", false);
 pref("extensions.brief.feedview.doubleClickMarks", true);
 pref("extensions.brief.feedview.autoMarkRead", false);
-pref("extensions.brief.feedview.showAuthors", true);
 pref("extensions.brief.feedview.entrySelectionEnabled", false);
 pref("extensions.brief.feedview.sortUnreadViewOldestFirst", false);
 
