@@ -18,8 +18,8 @@ textbox[type="number"] > spinbuttons {
   margin-left: 4px;
 }
 
-#folders-tree, #places-tree {
-  height: 15em;
+#places-tree {
+  height: 18em;
 }
 
 #import-export-box {
@@ -30,16 +30,9 @@ textbox[type="number"] > spinbuttons {
   height: auto !important;
 }
 
-#show-shortcuts {
-  list-style-image: url(chrome://brief/skin/icons/keyboard.png);
-}
-
-#show-shortcuts .button-icon {
-  margin-right: 5px;
-}
-
 #custom-style-textbox {
   margin: 0;
+  font-family: monospace;
 }
 
 #learn-more-link {
