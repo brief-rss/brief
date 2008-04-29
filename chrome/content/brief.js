@@ -569,7 +569,7 @@ function finishSearch() {
     }
     else {
         gFeedView.query.searchString = gFeedView.titleOverride = '';
-        gFeedView.ensure();
+        gFeedView.ensure(true);
     }
 
     previousView = null;
