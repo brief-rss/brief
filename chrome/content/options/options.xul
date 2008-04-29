@@ -9,7 +9,7 @@
 
 <!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
 
-<prefwindow id="brief-options"
+<prefwindow id="brief-options2"
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             title="&optionsWindow.title;"
             persist="screenX screenY width height"
@@ -26,71 +26,17 @@
         </stringbundleset>
 
         <preferences>
-            <preference id="extensions.brief.homeFolder"
-                        name="extensions.brief.homeFolder"
-                        type="int"/>
-            <preference id="extensions.brief.openInNewTab"
-                        name="extensions.brief.openInNewTab"
-                        type="bool"/>
-            <preference id="extensions.brief.showStatusbarIcon"
-                        name="extensions.brief.showStatusbarIcon"
-                        type="bool"/>
-        </preferences>
-
-        <label value="&folderTree.label;"/>
-        <separator class="thin"/>
-
-        <tree id="places-tree"
-              class="placesTree"
-              type="places"
-              hidecolumnpicker="true"
-              onselect="gMainPane.onPlacesTreeSelect(event)">
-            <treecols>
-                <treecol id="title" flex="1"
-                         primary="true"
-                         hideheader="true"/>
-            </treecols>
-            <treechildren flex="1"/>
-        </tree>
-
-        <hbox id="import-export-box" pack="end">
-            <button id="import-opml"
-                    label="&importOPML.label;"
-                    accesskey="&importOPML.accesskey;"
-                    oncommand="opml.importOPML()"/>
-            <button id="export-opml"
-                    label="&exportOPML.label;"
-                    accesskey="&exportOPML.accesskey;"
-                    oncommand="opml.exportOPML()"/>
-        </hbox>
-
-        <groupbox>
-            <checkbox id="show-statusbar-icon"
-                      label="&showStatusbarIcon.label;"
-                      accesskey="&showStatusbarIcon.accesskey;"
-                      preference="extensions.brief.showStatusbarIcon"/>
-            <checkbox id="open-in-new-tab"
-                      label="&openInNewTab.label;"
-                      accesskey="&openInNewTab.accesskey;"
-                      preference="extensions.brief.openInNewTab"/>
-        </groupbox>
-
-    </prefpane>
-
-    <prefpane id="feeds-pane" label="&feedsPane.label;">
-
-        <preferences>
             <preference id="extensions.brief.update.interval"
                         name="extensions.brief.update.interval"
                         type="int"/>
             <preference id="extensions.brief.update.enableAutoUpdate"
                         name="extensions.brief.update.enableAutoUpdate"
                         type="bool"/>
+            <preference id="extensions.brief.openInNewTab"
+                        name="extensions.brief.openInNewTab"
+                        type="bool"/>
             <preference id="extensions.brief.feedview.openEntriesInTabs"
                         name="extensions.brief.feedview.openEntriesInTabs"
-                        type="bool"/>
-            <preference id="extensions.brief.feedview.autoMarkRead"
-                        name="extensions.brief.feedview.autoMarkRead"
                         type="bool"/>
             <preference id="extensions.brief.database.expireEntries"
                         name="extensions.brief.database.expireEntries"
@@ -136,12 +82,13 @@
 
         <groupbox>
             <caption label="&behaviorGroup.caption;"/>
+            <checkbox id="open-in-new-tab"
+                      label="&openInNewTab.label;"
+                      accesskey="&openInNewTab.accesskey;"
+                      preference="extensions.brief.openInNewTab"/>
             <checkbox label="&openEntriesInTabs.label;"
                       accesskey="&openEntriesInTabs.accesskey;"
                       preference="extensions.brief.feedview.openEntriesInTabs"/>
-            <checkbox label="&autoMarkRead.label;"
-                      accesskey="&autoMarkRead.accesskey;"
-                      preference="extensions.brief.feedview.autoMarkRead"/>
         </groupbox>
 
         <groupbox>
@@ -185,6 +132,43 @@
 
     </prefpane>
 
+    <prefpane id="feeds-pane" label="&feedsPane.label;">
+
+        <preferences>
+            <preference id="extensions.brief.homeFolder"
+                        name="extensions.brief.homeFolder"
+                        type="int"/>
+        </preferences>
+
+        <label value="&folderTree.label;"/>
+        <separator class="thin"/>
+
+        <tree id="places-tree"
+              class="placesTree"
+              type="places"
+              hidecolumnpicker="true"
+              onselect="gMainPane.onPlacesTreeSelect(event)">
+            <treecols>
+                <treecol id="title" flex="1"
+                         primary="true"
+                         hideheader="true"/>
+            </treecols>
+            <treechildren flex="1"/>
+        </tree>
+
+        <hbox id="import-export-box" pack="end">
+            <button id="import-opml"
+                    label="&importOPML.label;"
+                    accesskey="&importOPML.accesskey;"
+                    oncommand="opml.importOPML()"/>
+            <button id="export-opml"
+                    label="&exportOPML.label;"
+                    accesskey="&exportOPML.accesskey;"
+                    oncommand="opml.exportOPML()"/>
+        </hbox>
+
+    </prefpane>
+
     <prefpane id="display-pane" label="&displayPane.label;">
 
         <preferences>
@@ -194,13 +178,18 @@
             <preference id="extensions.brief.feedview.sortUnreadViewOldestFirst"
                         name="extensions.brief.feedview.sortUnreadViewOldestFirst"
                         type="bool"/>
+            <preference id="extensions.brief.feedview.autoMarkRead"
+                        name="extensions.brief.feedview.autoMarkRead"
+                        type="bool"/>
+            <preference id="extensions.brief.showStatusbarIcon"
+                        name="extensions.brief.showStatusbarIcon"
+                        type="bool"/>
             <preference id="extensions.brief.feedview.entrySelectionEnabled"
                         name="extensions.brief.feedview.entrySelectionEnabled"
                         type="bool"/>
         </preferences>
 
         <groupbox align="stretch">
-            <caption label="&feedViewGroup.caption;"/>
             <hbox align="center">
                 <label value="&entriesPerPageBefore.label;"
                        accesskey="&entriesPerPage.accesskey;"
@@ -218,28 +207,36 @@
                       label="&sortUnreadViewOldestFirst.label;"
                       accesskey="&sortUnreadViewOldestFirst.accesskey;"
                       preference="extensions.brief.feedview.sortUnreadViewOldestFirst"/>
-            <spacer height="8"/>
-            <hbox align="center">
-                <label value="&editStyleDescription.label;"/>
-                <spacer flex="1"/>
-                <button id="edit-custom-style"
-                        label="&editStyleButton.label;"
-                        accesskey="&editStyleButton.accesskey;"
-                        oncommand="gDisplayPane.editCustomStyle();"/>
-            </hbox>
+            <checkbox label="&autoMarkRead.label;"
+                      accesskey="&autoMarkRead.accesskey;"
+                      preference="extensions.brief.feedview.autoMarkRead"/>
+            <checkbox id="show-statusbar-icon"
+                      label="&showStatusbarIcon.label;"
+                      accesskey="&showStatusbarIcon.accesskey;"
+                      preference="extensions.brief.showStatusbarIcon"/>
         </groupbox>
 
-        <groupbox align="start">
+        <groupbox align="center" orient="horizontal">
             <caption label="&keyboardGroup.caption;"/>
             <checkbox id="enable-item-selection-checkbox"
                       label="&enableItemSelection.label;"
                       accesskey="&enableItemSelection.accesskey;"
                       preference="extensions.brief.feedview.entrySelectionEnabled"/>
-            <spacer height="8"/>
+            <spacer flex="1"/>
             <button id="show-shortcuts"
                     label="&showShortcuts.label;"
                     accesskey="&showShortcuts.accesskey;"
                     oncommand="gDisplayPane.showShortcuts()"/>
+        </groupbox>
+
+        <groupbox align="center" orient="horizontal">
+            <caption label="&customizeGroup.caption;"/>
+            <label value="&editStyleDescription.label;"/>
+            <spacer flex="1"/>
+            <button id="edit-custom-style"
+                    label="&editStyleButton.label;"
+                    accesskey="&editStyleButton.accesskey;"
+                    oncommand="gDisplayPane.editCustomStyle();"/>
         </groupbox>
 
     </prefpane>

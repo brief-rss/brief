@@ -1,15 +1,6 @@
 <!ENTITY optionsWindow.title "Brief options">
+
 <!ENTITY mainPane.label "Main">
-<!ENTITY folderTree.label "Folder containing your Live Bookmarks:">
-<!ENTITY importOPML.label "Import...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Export...">
-<!ENTITY exportOPML.accesskey "x">
-<!ENTITY showStatusbarIcon.label "Show statusbar icon">
-<!ENTITY showStatusbarIcon.accesskey "S">
-<!ENTITY openInNewTab.label "Open Brief in a new tab">
-<!ENTITY openInNewTab.accesskey "O">
-<!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Updating">
 <!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
 <!ENTITY checkForUpdates.accesskey "C">
@@ -17,13 +8,13 @@
 <!ENTITY updateIntervalHours.label "hours">
 <!ENTITY updateIntervalDays.label "days">
 <!ENTITY checkForUpdatesAfter.label "minutes">
-<!ENTITY showNotification.label "Show notification when updates are found">
-<!ENTITY showNotification.accesskey "n">
+<!ENTITY showNotification.label "Show a notification when new items are found">
+<!ENTITY showNotification.accesskey "S">
 <!ENTITY behaviorGroup.caption "Behavior">
+<!ENTITY openInNewTab.label "Open Brief in a new tab">
+<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY openEntriesInTabs.label "Open items in new tabs">
-<!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY autoMarkRead.label "Mark items as read when they are viewed">
-<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY openEntriesInTabs.accesskey "e">
 <!ENTITY storingGroup.caption "Storing">
 <!ENTITY expirationBefore.label "Remove downloaded items after">
 <!ENTITY expirationAfter.label "days">
@@ -31,27 +22,41 @@
 <!ENTITY starredItemsKept.tooltip "Starred items will be kept">
 <!ENTITY storedEntriesBefore.label "Store no more than">
 <!ENTITY storedEntriesAfter.label "latest items of each feed">
-<!ENTITY storedEntriesCheckbox.accesskey "e">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Clear all items...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
+
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY folderTree.label "Folder containing my Live Bookmarks:">
+<!ENTITY importOPML.label "Import...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Export...">
+<!ENTITY exportOPML.accesskey "E">
+
 <!ENTITY displayPane.label "Display">
-<!ENTITY feedViewGroup.caption "Feed content view">
-<!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">
-<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY entriesPerPageBefore.label "Show">
 <!ENTITY entriesPerPageAfter.label "items per page">
 <!ENTITY entriesPerPage.accesskey "S">
-<!ENTITY editStyleDescription.label "Customize the appearance of feeds">
-<!ENTITY editStyleButton.label "Customize">
-<!ENTITY editStyleButton.accesskey "C">
-<!ENTITY keyboardGroup.caption "Keyboard shortcuts">
-<!ENTITY enableItemSelection.label "Enable selecting and managing items using keyboard">
+<!ENTITY showStatusbarIcon.label "Show statusbar icon">
+<!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "Mark items as read after I see them">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY keyboardGroup.caption "Keyboard">
+<!ENTITY enableItemSelection.label "Enable managing items using keyboard">
 <!ENTITY enableItemSelection.accesskey "E">
 <!ENTITY showShortcuts.label "Show shortcuts">
 <!ENTITY showShortcuts.accesskey "w">
+<!ENTITY customizeGroup.caption "Appearance">
+<!ENTITY editStyleDescription.label "Customize the appearance of feeds">
+<!ENTITY editStyleButton.label "Customize">
+<!ENTITY editStyleButton.accesskey "C">
+
 <!ENTITY styleEditor.title "Edit custom style">
 <!ENTITY seeCustomizationTips.label "Learn about customizing appearance with CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Location">
 <!ENTITY optionsGroupbox.caption "Feed settings">

@@ -8,7 +8,7 @@
 <dialog id="brief-style-editor"
         title="&styleEditor.title;"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        width="400"
+        width="500"
         height="500"
         persist="screenX screenY width height"
         onload="init()"
@@ -19,6 +19,7 @@
 
     <textbox id="custom-style-textbox"
              multiline="true"
+             wrap="off"
              flex="1"/>
     <label id="learn-more-link"
            class="text-link"
