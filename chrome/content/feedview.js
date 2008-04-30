@@ -395,8 +395,8 @@ FeedView.prototype = {
         gFeedView = this;
 
         // Clear the searchbar.
-        if (!this.query.searchString) {
-            var searchbar = getElement('searchbar');
+        var searchbar = getElement('searchbar');
+        if (!this.query.searchString && searchbar.value) {
             searchbar.value = '';
             searchbar.clearButton.hidden = true;
         }
