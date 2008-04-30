@@ -34,7 +34,9 @@
             </row>
         </rows>
     </grid>
-    <spacer height="15"/>
+
+    <separator class="thin"/>
+
     <groupbox>
         <caption label="&optionsGroupbox.caption;"/>
         <hbox align="center">
@@ -65,18 +67,10 @@
                      min="1"/>
             <label value="&expireEntriesPerFeedAfter.label;"/>
         </hbox>
-        <hbox align="center">
-            <checkbox id="max-entries-checkbox"
-                      accesskey="&maxEntriesPerFeed.accesskey;"
-                      label="&maxEntriesPerFeedBefore.label;"
-                      oncommand="onMaxEntriesCheckboxCmd(event);"/>
-            <textbox id="max-entries-textbox"
-                     size="1"
-                     type="number"
-                     min="1"/>
-            <label value="&maxEntriesPerFeedAfter.label;"/>
-        </hbox>
-        <spacer height="10"/>
+        <checkbox id="updated-entries-checkbox"
+                  accesskey="&updatedEntries.accesskey;"
+                  label="&updatedEntries.label;"/>
+    <separator class="thin"/>
     </groupbox>
 
     <hbox>
@@ -94,6 +88,6 @@
         </hbox>
     </hbox>
 
-    <spacer height="15"/>
+    <separator class="thin"/>
 
 </dialog>
