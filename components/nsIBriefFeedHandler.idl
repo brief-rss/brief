@@ -126,6 +126,8 @@ interface nsIBriefFeed : nsISupports {
 
   attribute unsigned long long updateInterval;
 
+  attribute boolean markModifiedEntriesUnread;
+
   /**
    * The last time the feed was checked for updates.
    */

@@ -13,15 +13,15 @@ const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
 const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 
-// How often to manage entry expiration and removing deleted items.
+// How often to perform entry expiration and remove the deleted items.
 const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 
-// How long to keep entries from feeds no longer in the home folder.
+// How long to keep entries from feeds which are no longer in the home folder.
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const BOOKMARKS_OBSERVER_DELAY = 250;
 
-const DATABASE_VERSION = 6;
+const DATABASE_VERSION = 7;
 const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'feedURL         TEXT,                ' +
                            'websiteURL      TEXT,                ' +
@@ -231,6 +231,11 @@ BriefStorageService.prototype = {
         case 5:
             this.migrateEntriesToFTS();
             // Fall through...
+
+        // To 1.2b2
+        case 6:
+            executeSQL('ALTER TABLE feeds ADD COLUMN markModifiedEntriesUnread INTEGER DEFAULT 1');
+
         }
 
         gConnection.schemaVersion = DATABASE_VERSION;
@@ -426,7 +431,8 @@ BriefStorageService.prototype = {
                      '        imageURL, imageLink, imageTitle, dateModified,    ' +
                      '        favicon, lastUpdated, oldestEntryDate,            ' +
                      '        rowIndex, parent, isFolder, bookmarkID,           ' +
-                     '        entryAgeLimit, maxEntries, updateInterval         ' +
+                     '        entryAgeLimit, maxEntries, updateInterval,        ' +
+                     '        markModifiedEntriesUnread                         ' +
                      'FROM feeds                                                ' +
                      'WHERE hidden = 0                                          ' +
                      'ORDER BY rowIndex ASC                                     ');
@@ -452,6 +458,7 @@ BriefStorageService.prototype = {
                 feed.entryAgeLimit = select.getInt32(16);
                 feed.maxEntries = select.getInt32(17);
                 feed.updateInterval = select.getInt64(18);
+                feed.markModifiedEntriesUnread = (select.getInt32(19) == 1);
 
                 this.feedsAndFoldersCache.push(feed);
                 if (!feed.isFolder)
@@ -609,7 +616,7 @@ BriefStorageService.prototype = {
                 var update = this.updateEntry_stmt;
                 update.bindInt64Parameter(0, aEntry.date);
                 update.bindStringParameter(1, aEntry.authors);
-                let markUnread = gPrefs.getBoolPref('database.markUpdatedEntriesUnread');
+                let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
                 update.bindInt32Parameter(2, markUnread ? 0 : 1);
                 update.bindStringParameter(3, primaryID);
                 update.execute();
@@ -690,15 +697,17 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
-        var update = createStatement('UPDATE feeds             ' +
-                                     'SET entryAgeLimit  = ?1, ' +
-                                     '    maxEntries     = ?2, ' +
-                                     '    updateInterval = ?3  ' +
-                                     'WHERE feedID = ?4        ');
+        var update = createStatement('UPDATE feeds                       ' +
+                                     'SET entryAgeLimit  = ?1,           ' +
+                                     '    maxEntries     = ?2,           ' +
+                                     '    updateInterval = ?3,           ' +
+                                     '    markModifiedEntriesUnread = ?4 ' +
+                                     'WHERE feedID = ?5                  ');
         update.bindInt32Parameter(0, aFeed.entryAgeLimit);
         update.bindInt32Parameter(1, aFeed.maxEntries);
         update.bindInt64Parameter(2, aFeed.updateInterval);
-        update.bindStringParameter(3, aFeed.feedID);
+        update.bindInt32Parameter(3, aFeed.markModifiedEntriesUnread ? 1 : 0);
+        update.bindStringParameter(4, aFeed.feedID);
         update.execute();
 
         // Update the cache if neccassary (it may not be if nsIBriefFeed instance that was
@@ -708,6 +717,7 @@ BriefStorageService.prototype = {
             feed.entryAgeLimit = aFeed.entryAgeLimit;
             feed.maxEntries = aFeed.maxEntries;
             feed.updateInterval = aFeed.updateInterval;
+            feed.markModifiedEntriesUnread = aFeed.markModifiedEntriesUnread;
         }
     },
 
