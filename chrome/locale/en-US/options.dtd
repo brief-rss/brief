@@ -65,9 +65,8 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded items after">
 <!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "days">
-<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
-<!ENTITY maxEntriesPerFeed.accesskey "S">
-<!ENTITY maxEntriesPerFeedAfter.label "latest items">
+<!ENTITY updatedEntries.label "Don't mark updated items as unread">
+<!ENTITY updatedEntries.accesskey "D">
 <!ENTITY previousFeed.label "&lt; Previous">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Next &gt;">
