@@ -729,9 +729,9 @@ BriefStorageService.prototype = {
     },
 
 
-    // Moves expired entries to Trash and permanently removes the deleted items from
-    // database.
-    purgeEntries: function BriefStorage_purgeDeletedEntries(aDeleteExpired) {
+    // Moves expired entries to Trash and permanently removes
+    // the deleted items from database.
+    purgeEntries: function BriefStorage_purgeEntries(aDeleteExpired) {
         var removeEntries = createStatement(
             'DELETE FROM entries                                                      ' +
             'WHERE id IN (                                                            ' +
@@ -823,51 +823,42 @@ BriefStorageService.prototype = {
     },
 
 
-    // Delete entries exceeding the max number defined by global or per-feed settings.
+    // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
     expireEntriesByNumber: function BriefStorage_expireEntriesByNumber() {
-        var useGlobalLimit = gPrefs.getBoolPref('database.limitStoredEntries');
-        var globalMaxEntriesNumber = gPrefs.getIntPref('database.maxStoredEntries');
+        if (!gPrefs.getBoolPref('database.limitStoredEntries'))
+            return;
 
-        var expireByNumber = createStatement('UPDATE entries SET deleted = ?1       ' +
-                                             'WHERE id IN (                         ' +
-                                             '    SELECT id                         ' +
-                                             '    FROM entries                      ' +
-                                             '    WHERE deleted = ?2 AND            ' +
-                                             '          starred = 0 AND             ' +
-                                             '          feedID = ?3                 ' +
-                                             '    ORDER BY date ASC                 ' +
-                                             '    LIMIT ?4                          ' +
-                                             ')                                     ');
+        var maxEntries = gPrefs.getIntPref('database.maxStoredEntries');
 
-        var getEntriesCountForFeed = createStatement('SELECT COUNT(1) FROM entries  ' +
-                                                     'WHERE feedID = ?1 AND          ' +
-                                                     '      starred = 0 AND         ' +
-                                                     '      deleted = ?2             ');
+        var expireEntries = createStatement('UPDATE entries SET deleted = ?1 ' +
+                                            'WHERE rowid IN (                ' +
+                                            '    SELECT rowid                ' +
+                                            '    FROM entries                ' +
+                                            '    WHERE deleted = ?2 AND      ' +
+                                            '          starred = 0 AND       ' +
+                                            '          feedID = ?3           ' +
+                                            '    ORDER BY date ASC           ' +
+                                            '    LIMIT ?4                    ' +
+                                            ')                               ');
+        var getEntryCount = createStatement('SELECT COUNT(1) FROM entries  ' +
+                                            'WHERE feedID = ?1 AND         ' +
+                                            '      starred = 0 AND         ' +
+                                            '      deleted = ?2            ');
 
         var feeds = this.getAllFeeds();
         for each (feed in feeds) {
-            // Count the number of entries in the feed.
-            getEntriesCountForFeed.bindStringParameter(0, feed.feedID);
-            getEntriesCountForFeed.bindStringParameter(1, ENTRY_STATE_NORMAL);
-            getEntriesCountForFeed.executeStep()
-            var entryCount = getEntriesCountForFeed.getInt32(0);
-            getEntriesCountForFeed.reset();
+            getEntryCount.bindStringParameter(0, feed.feedID);
+            getEntryCount.bindStringParameter(1, ENTRY_STATE_NORMAL);
+            getEntryCount.executeStep();
+            let entryCount = getEntryCount.getInt32(0);
+            getEntryCount.reset();
 
-            // Calculate the difference between the current number of entries and the
-            // limit specified in either the per-feed preferences stored in the
-            // database or the global preference.
-            var difference = 0;
-            if (feed.maxEntries > 0)
-                difference = entryCount - feed.maxEntries;
-            else if (useGlobalLimit)
-                difference = entryCount - globalMaxEntriesNumber;
-
-            if (difference > 0) {
-                expireByNumber.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
-                expireByNumber.bindInt32Parameter(1, ENTRY_STATE_NORMAL)
-                expireByNumber.bindStringParameter(2, feed.feedID);
-                expireByNumber.bindInt64Parameter(3, difference);
-                expireByNumber.execute();
+            if (entryCount - maxEntries > 0) {
+                expireEntries.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
+                expireEntries.bindInt32Parameter(1, ENTRY_STATE_NORMAL)
+                expireEntries.bindStringParameter(2, feed.feedID);
+                expireEntries.bindInt64Parameter(3, entryCount - maxEntries);
+                expireEntries.execute();
             }
         }
     },
