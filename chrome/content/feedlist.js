@@ -785,8 +785,7 @@ var gContextMenuCommands = {
 
     showFeedProperties: function ctxMenuCmds_showFeedProperties(aEvent) {
         var feedID = gFeedList.ctx_targetItem.id;
-
-        openDialog('chrome://brief/content/feed-properties.xul', 'FeedProperties',
+        openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
                    'chrome,titlebar,toolbar,centerscreen,modal', feedID);
     }
 
