@@ -6,9 +6,20 @@
 <window id="brief-compacting-progress"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         title="&compactingWindow.title;"
-        style="padding: 2em 1em; max-width: 35em; text-align: center;"
+        style="padding: 1.5em 1em; max-width: 35em; text-align: center;"
         pack="center"
-        onload="setTimeout(function(){ Components.classes['@ancestor/brief/storage;1'].getService(Components.interfaces.nsIBriefStorage).compactDatabase(); window.close(); }, 100)">
+        onload="compact()">
+
+    <script type="application/x-javascript">
+        function compact() {
+            setTimeout(function() {
+                Components.classes['@ancestor/brief/storage;1'].
+                           getService(Components.interfaces.nsIBriefStorage).
+                           compactDatabase();
+                window.close();
+            }, 100)
+        }
+    </script>
 
     <label>
         &compactingInProgress.label;
