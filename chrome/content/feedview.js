@@ -56,11 +56,10 @@ FeedView.prototype = {
 
     // Query that selects entries contained by the view. It is the query to pull ALL the
     // entries, not only the ones displayed on the current page.
-    __query: null,
     set query FeedView_query_set(aQuery) {
-        this.__query = aQuery;
-        return aQuery;
+        return this.__query = aQuery;
     },
+
     get query FeedView_query_get() {
         if (!this._flagsAreIntrinsic) {
             this.__query.unread = (gPrefs.shownEntries == 'unread');
@@ -78,27 +77,31 @@ FeedView.prototype = {
     // IDs of contained entries, used to determine when the view needs to be refreshed.
     _entries: [],
 
-    get entriesCount Feedview_entriesCount() {
+    get entryCount Feedview_entryCount() {
         return this._entries.length;
     },
 
     get pageCount FeedView_pageCount() {
-        return Math.ceil(this.entriesCount / gPrefs.entriesPerPage) || 1;
+        return Math.max(Math.ceil(this.entryCount / gPrefs.entriesPerPage), 1);
     },
 
     __currentPage: 1,
-    set currentPage FeedView_currentPage_set(aPageNumber) {
-        if (aPageNumber != this.__currentPage && aPageNumber <= this.pageCount && aPageNumber > 0) {
-            this.__currentPage = aPageNumber;
+
+    set currentPage FeedView_currentPage_set(aPage) {
+        if (aPage != this.__currentPage && aPage <= this.pageCount && aPage > 0) {
+            this.__currentPage = aPage;
             this._refresh(false);
         }
     },
-    get currentPage FeedView_currentPage_get() this.__currentPage,
+
+    get currentPage FeedView_currentPage_get() {
+        return this.__currentPage;
+    },
 
 
     // Indicates whether the feed view is currently displayed in the browser.
     get isActive FeedView_isActive() {
-        return this.browser.currentURI.equals(gTemplateURI) && gFeedView == this;
+        return (this.browser.currentURI.equals(gTemplateURI) && gFeedView == this);
     },
 
     get isGlobalSearch FeedView_isGlobalSearch() {
@@ -564,7 +567,7 @@ FeedView.prototype = {
             return false;
         }
 
-        var oldCount = this.entriesCount;
+        var oldCount = this.entryCount;
         var currentCount = this.query.getEntryCount();
 
         if (!oldCount || !currentCount || oldCount != currentCount) {
@@ -599,15 +602,12 @@ FeedView.prototype = {
      *                          was changed and has to be recomputed.
      */
     _refresh: function FeedView_refresh(aEntrySetModified) {
-        // Stop scrolling, so it doesn't continue after refreshing.
+        // Stop scrolling.
         clearInterval(this._smoothScrollInterval);
         this._smoothScrollInterval = null;
 
-        // Cancel auto-marking entries as read.
+        // Cancel auto-marking entries as read timeout.
         clearTimeout(this._markVisibleTimeout);
-
-        // Suppress selecting entries until refreshing is finished.
-        this._selectionSuppressed = true;
 
         // Remove the old content.
         var container = this.document.getElementById('container');
@@ -622,6 +622,7 @@ FeedView.prototype = {
 
         this._buildHeader(feed);
 
+        // Pass parameters to the content.
         if (this.query.deleted == ENTRY_STATE_TRASHED)
             this.feedContent.setAttribute('trash', true);
         if (gPrefs.showHeadlinesOnly)
@@ -632,38 +633,33 @@ FeedView.prototype = {
         var query = this.query;
         query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
         query.limit = gPrefs.entriesPerPage;
-
         var entries = query.getEntries();
 
-        // Important: for better performance we try to delay computing entry list until
-        // after the view is displayed.
-        // The only time when recompute entry list may affect the currently displayed
-        // entry set is when currentPage goes out of range, because the view contains
-        // less pages than before. This in turn makes the offset invalid and the query
-        // returns no entries.
-        // To avoid that, whenever the query returns no entries we force immediate
-        // recomputation of entry list to make sure the pages are correct and then
-        // we redo the query.
+        // For better performance we try to refresh the entry list (and the navigation UI)
+        // asynchronously.
+        // However, sometimes the list has to be refreshed immediately, because it is
+        // required to correctly display the current page. It occurs when currentPage
+        // goes out of range, because the view contains less pages than before.
+        // The offset goes out of range too and the query returns no entries. Therefore,
+        // whenever the query returns no entries, we refresh the entry list immediately
+        // and then redo the query.
         if (!entries.length) {
             this._refreshEntryList();
             query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
-            query.limit = gPrefs.entriesPerPage;
             entries = query.getEntries();
         }
         else {
             if (aEntrySetModified)
-                async(this._refreshEntryList, 500, this);
+                async(this._refreshEntryList, 250, this);
             else
                 this._refreshPageNavUI();
         }
 
+        // Append the entries.
         for (var i = 0; i < entries.length; i++)
             this._appendEntry(entries[i]);
 
-        if (!entries.length) {
-            this._setEmptyViewMessage();
-        }
-        else {
+        if (entries.length) {
             this.document.getElementById('message').style.display = 'none';
 
             // Highlight the search terms.
@@ -672,8 +668,26 @@ FeedView.prototype = {
                     this._highlightText(word);
             }
         }
+        else {
+            this._setEmptyViewMessage();
+        }
 
-        this._initSelection()
+        // Initialize selection.
+        if (gPrefs.entrySelectionEnabled) {
+            if (this.selectedElement)
+                var entryElement = this.selectedElement;
+            else if (this._selectLastEntryOnRefresh)
+                entryElement = this.feedContent.lastChild;
+            else
+                entryElement = this.feedContent.firstChild;
+
+            this.selectEntry(entryElement, true);
+            this._selectLastEntryOnRefresh = false;
+        }
+        else {
+            var win = this.document.defaultView;
+            win.scroll(win.pageXOffset, 0);
+        }
 
         this.markVisibleAsRead();
     },
@@ -768,21 +782,17 @@ FeedView.prototype = {
 
 
     /**
-     * Refreshes the list of IDs of contained entries (also needed for entriesCount
+     * Refreshes the list of IDs of contained entries (also needed for entryCount
      * and pageCount), the current page number, and the navigation UI.
      */
     _refreshEntryList: function FeedView__refreshEntryList() {
-        this._entries = this.query.getSimpleEntryList().
-                                   getProperty('entries');
-
+        this._entries = this.query.getSimpleEntryList().getProperty('entries');
         this._refreshPageNavUI();
     },
 
     _refreshPageNavUI: function FeedView__refreshPageNavUI() {
-        // This may happen for example when you are on the last page, and the
-        // number of entries decreases (e.g. they are deleted).
-        if (this.currentPage > this.pageCount)
-            this.__currentPage = this.pageCount;
+        // The current page may go out of range if the number of entries decreases.
+        this.currentPage = Math.min(this.currentPage, this.pageCount);
 
         var prevPageButton = getElement('prev-page');
         var nextPageButton = getElement('next-page');
@@ -929,27 +939,6 @@ FeedView.prototype = {
 
         paragraph.textContent = message;
         paragraph.style.display = 'block';
-    },
-
-
-    _initSelection: function FeedView__initSelection() {
-        this._selectionSuppressed = false;
-
-        if (gPrefs.entrySelectionEnabled) {
-            if (this.selectedElement)
-                var entry = this.selectedElement
-            else if (this._selectLastEntryOnRefresh)
-                entry = this.feedContent.lastChild;
-            else
-                entry = this.feedContent.firstChild;
-
-            this.selectEntry(entry, true);
-            this._selectLastEntryOnRefresh = false;
-        }
-        else {
-            var win = this.document.defaultView;
-            win.scroll(win.pageXOffset, 0);
-        }
     },
 
 
