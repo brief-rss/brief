@@ -477,7 +477,7 @@ BriefStorageService.prototype = {
         var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
 
         if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
-            var oldestEntryDate = Date.now();
+            aFeed.oldestEntryDate = Date.now();
             var entries = aFeed.entries;
 
             gConnection.beginTransaction();
@@ -486,11 +486,34 @@ BriefStorageService.prototype = {
                     if (this.processEntry(entries[i], aFeed))
                         newEntriesCount++;
 
-                    if (entries[i].date && entries[i].date < oldestEntryDate)
-                        oldestEntryDate = entries[i].date;
+                    if (entries[i].date && entries[i].date < aFeed.oldestEntryDate)
+                        aFeed.oldestEntryDate = entries[i].date;
                 }
 
-                this.updateFeedData(aFeed, oldestEntryDate);
+                let updateFeed = this.updateFeed_stmt;
+                updateFeed.bindStringParameter(0, aFeed.websiteURL);
+                updateFeed.bindStringParameter(1, aFeed.subtitle);
+                updateFeed.bindStringParameter(2, aFeed.imageURL);
+                updateFeed.bindStringParameter(3, aFeed.imageLink);
+                updateFeed.bindStringParameter(4, aFeed.imageTitle);
+                updateFeed.bindStringParameter(5, aFeed.favicon);
+                updateFeed.bindInt64Parameter(6,  aFeed.oldestEntryDate);
+                updateFeed.bindInt64Parameter(7,  Date.now());
+                updateFeed.bindInt64Parameter(8,  dateModified);
+                updateFeed.bindStringParameter(9, aFeed.feedID);
+                updateFeed.execute();
+
+                // Update the cache.
+                var cachedFeed = this.getFeed(aFeed.feedID);
+                cachedFeed.websiteURL = aFeed.websiteURL;
+                cachedFeed.subtitle = aFeed.subtitle;
+                cachedFeed.imageURL = aFeed.imageURL;
+                cachedFeed.imageLink = aFeed.imageLink;
+                cachedFeed.imageTitle = aFeed.imageTitle;
+                cachedFeed.favicon = aFeed.favicon;
+                cachedFeed.lastUpdated = Date.now();
+                cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
+                cachedFeed.dateModified = dateModified;
             }
             catch (ex) {
                 reportError(ex);
@@ -505,6 +528,21 @@ BriefStorageService.prototype = {
         gObserverService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
     },
 
+    get updateFeed_stmt BriefStorage_updateFeed_stmt() {
+        delete this.__proto__.updateFeed_stmt;
+        return this.__proto__.updateFeed_stmt = createStatement(
+               'UPDATE feeds               ' +
+               'SET websiteURL  = ?1,      ' +
+               '    subtitle    = ?2,      ' +
+               '    imageURL    = ?3,      ' +
+               '    imageLink   = ?4,      ' +
+               '    imageTitle  = ?5,      ' +
+               '    favicon     = ?6,      ' +
+               '    oldestEntryDate = ?7,  ' +
+               '    lastUpdated = ?8,      ' +
+               '    dateModified = ?9      ' +
+               'WHERE feedID = ?10         ');
+    },
 
     get insertEntry_stmt BriefStorage_insertEntry_stmt() {
         delete this.__proto__.insertEntry_stmt;
@@ -650,48 +688,6 @@ BriefStorageService.prototype = {
         }
 
         return entryInserted;
-    },
-
-
-    updateFeedData: function BriefStorage_updateFeedData(aFeed, aOldestEntryDate) {
-        // Do not update the title, because it's taken from the bookmarks.
-        var updateFeed = createStatement('UPDATE feeds               ' +
-                                         'SET websiteURL  = ?1,      ' +
-                                         '    subtitle    = ?2,      ' +
-                                         '    imageURL    = ?3,      ' +
-                                         '    imageLink   = ?4,      ' +
-                                         '    imageTitle  = ?5,      ' +
-                                         '    favicon     = ?6,      ' +
-                                         '    oldestEntryDate = ?7,  ' +
-                                         '    lastUpdated = ?8,      ' +
-                                         '    dateModified = ?9      ' +
-                                         'WHERE feedID = ?10         ');
-
-        var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-
-        updateFeed.bindStringParameter(0, aFeed.websiteURL);
-        updateFeed.bindStringParameter(1, aFeed.subtitle);
-        updateFeed.bindStringParameter(2, aFeed.imageURL);
-        updateFeed.bindStringParameter(3, aFeed.imageLink);
-        updateFeed.bindStringParameter(4, aFeed.imageTitle);
-        updateFeed.bindStringParameter(5, aFeed.favicon);
-        updateFeed.bindInt64Parameter(6,  aOldestEntryDate);
-        updateFeed.bindInt64Parameter(7,  Date.now());
-        updateFeed.bindInt64Parameter(8,  dateModified);
-        updateFeed.bindStringParameter(9, aFeed.feedID);
-        updateFeed.execute();
-
-        // Update the cache.
-        var cachedFeed = this.getFeed(aFeed.feedID);
-        cachedFeed.websiteURL = aFeed.websiteURL;
-        cachedFeed.subtitle = aFeed.subtitle;
-        cachedFeed.imageURL = aFeed.imageURL;
-        cachedFeed.imageLink = aFeed.imageLink;
-        cachedFeed.imageTitle = aFeed.imageTitle;
-        cachedFeed.favicon = aFeed.favicon;
-        cachedFeed.lastUpdated = Date.now();
-        cachedFeed.oldestEntryDate = aOldestEntryDate;
-        cachedFeed.dateModified = dateModified;
     },
 
 
