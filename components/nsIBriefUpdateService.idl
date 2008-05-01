@@ -19,13 +19,13 @@ interface nsIBriefUpdateService : nsISupports {
   readonly attribute short status;
 
   /**
-   * Total number of feeds scheduled for current batch update (both completed
+   * Total number of feeds scheduled for current update batch (both completed
    * and pending ones).
    */
   readonly attribute unsigned long scheduledFeedsCount;
 
   /**
-   * Number of completed feed in the current batch update.
+   * Number of completed feed in the current update batch.
    */
   readonly attribute unsigned long completedFeedsCount;
 
@@ -33,20 +33,23 @@ interface nsIBriefUpdateService : nsISupports {
    * Download feeds and check them for updates. They must already be in the
    * database.
    *
-   * @param feeds         Array of nsIBriefFeed's to be updated.
-   * @param inBackground  Fetch feeds with longer delay, designed for updating in the
-   *                      background.
+   * @param feeds         Array of nsIBriefFeed's to be downloaded.
+   * @param inBackground  Use longer delay between requesting subsequent feeds
+   *                      in order to reduce the CPU load.
    */
   void fetchFeeds(in nsIVariant feeds, in boolean inBackground);
 
   /**
    * Download and check for updates all the feeds in the database.
    *
-   * @param inBackground  Fetch feeds with longer delay, designed for updating in the
-   *                      background.
+   * @param inBackground  Use longer delay between requesting subsequent feeds
+   *                      in order to reduce the CPU load.
    */
   void fetchAllFeeds(in boolean inBackground);
 
+  /**
+   * Cancel fetching of the feeds remaining in the current update batch.
+   */
   void stopFetching();
 
 };
