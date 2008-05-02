@@ -81,9 +81,18 @@ __defineGetter__('gStringbundle', function() {
                                 createBundle('chrome://brief/locale/brief.properties');
 });
 
-// Shorthands for common functions.
-__defineGetter__('executeSQL', function() gConnection.executeSimpleSQL);
-__defineGetter__('createStatement', function() gConnection.createStatement);
+
+function executeSQL(aSQLString) {
+    gConnection.executeSimpleSQL(aSQLString);
+}
+
+function createStatement(aSQLString) {
+    var statement = gConnection.createStatement(aSQLString);
+    var wrapper = Cc['@mozilla.org/storage/statement-wrapper;1'].
+                  createInstance(Ci.mozIStorageStatementWrapper);
+    wrapper.initialize(statement)
+    return wrapper;
+}
 
 
 var gStorageService = null;
@@ -314,29 +323,30 @@ BriefStorageService.prototype = {
             'SELECT entries.entryURL, entries.id, entries_text.title                    ' +
             'FROM entries INNER JOIN entries_text ON entries.rowid = entries_text.rowid ' +
             'WHERE starred = 1                                                          ');
-        var update = createStatement('UPDATE entries SET bookmarkID = ? WHERE id = ?');
+        var update = createStatement('UPDATE entries SET bookmarkID = :bookmarkID ' +
+                                     'WHERE id = :entryID                         ');
 
         gConnection.beginTransaction();
         try {
-            while (select.executeStep()) {
-                var uri = ioService.newURI(select.getString(0), null, null);
-                var title = select.getString(1);
-                var entryID = select.getString(2);
+            while (select.step()) {
+                var uri = ioService.newURI(select.row.entryURL, null, null);
+                var title = select.row.title;
+                var entryID = select.row.id;
 
                 var bookmarkID = gPlaces.bookmarks.insertBookmark(unfiledFolder, uri,
                                                                   -1, title);
                 gPlaces.tagging.tagURI(uri, [tagName]);
 
-                update.bindStringParameter(0, bookmarkID);
-                update.bindStringParameter(1, entryID);
+                update.params.bookmarkID = bookmarkID;
+                update.params.entryID = entryID;
                 update.execute();
             }
-            select.reset();
         }
         catch (ex) {
             reportError(ex, true);
         }
         finally {
+            select.reset();
             gConnection.commitTransaction();
         }
     },
@@ -426,39 +436,18 @@ BriefStorageService.prototype = {
         this.feedsCache = [];
         this.feedsAndFoldersCache = [];
 
-        var select = createStatement(
-                     'SELECT  feedID, feedURL, websiteURL, title, subtitle,     ' +
-                     '        imageURL, imageLink, imageTitle, dateModified,    ' +
-                     '        favicon, lastUpdated, oldestEntryDate,            ' +
-                     '        rowIndex, parent, isFolder, bookmarkID,           ' +
-                     '        entryAgeLimit, maxEntries, updateInterval,        ' +
-                     '        markModifiedEntriesUnread                         ' +
-                     'FROM feeds                                                ' +
-                     'WHERE hidden = 0                                          ' +
-                     'ORDER BY rowIndex ASC                                     ');
+        var cols = ['feedID', 'feedURL', 'websiteURL', 'title', 'subtitle', 'imageURL',
+                    'imageLink', 'imageTitle', 'dateModified', 'favicon', 'lastUpdated',
+                    'oldestEntryDate', 'rowIndex', 'parent', 'isFolder', 'bookmarkID',
+                    'entryAgeLimit', 'maxEntries', 'updateInterval', 'markModifiedEntriesUnread'];
+
+        var select = createStatement('SELECT ' + cols.join(', ') + ' FROM feeds ' +
+                                     'WHERE hidden = 0 ORDER BY rowIndex ASC    ');
         try {
-            while (select.executeStep()) {
+            while (select.step()) {
                 var feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
-                feed.feedID = select.getString(0);
-                feed.feedURL = select.getString(1);
-                feed.websiteURL = select.getString(2);
-                feed.title = select.getString(3);
-                feed.subtitle = select.getString(4);
-                feed.imageURL = select.getString(5);
-                feed.imageLink = select.getString(6);
-                feed.imageTitle = select.getString(7);
-                feed.dateModified = select.getInt64(8);
-                feed.favicon = select.getString(9);
-                feed.lastUpdated = select.getInt64(10);
-                feed.oldestEntryDate = select.getInt64(11);
-                feed.rowIndex = select.getInt32(12);
-                feed.parent = select.getString(13);
-                feed.isFolder = (select.getInt32(14) == 1);
-                feed.bookmarkID = select.getString(15);
-                feed.entryAgeLimit = select.getInt32(16);
-                feed.maxEntries = select.getInt32(17);
-                feed.updateInterval = select.getInt64(18);
-                feed.markModifiedEntriesUnread = (select.getInt32(19) == 1);
+                for (let i = 0; i < cols.length; i++)
+                    feed[cols[i]] = select.row[cols[i]]
 
                 this.feedsAndFoldersCache.push(feed);
                 if (!feed.isFolder)
@@ -482,7 +471,7 @@ BriefStorageService.prototype = {
 
             gConnection.beginTransaction();
             try {
-                for (var i = 0; i < entries.length; i++) {
+                for (let i = 0; i < entries.length; i++) {
                     if (this.processEntry(entries[i], aFeed))
                         newEntriesCount++;
 
@@ -490,30 +479,22 @@ BriefStorageService.prototype = {
                         aFeed.oldestEntryDate = entries[i].date;
                 }
 
-                let updateFeed = this.updateFeed_stmt;
-                updateFeed.bindStringParameter(0, aFeed.websiteURL);
-                updateFeed.bindStringParameter(1, aFeed.subtitle);
-                updateFeed.bindStringParameter(2, aFeed.imageURL);
-                updateFeed.bindStringParameter(3, aFeed.imageLink);
-                updateFeed.bindStringParameter(4, aFeed.imageTitle);
-                updateFeed.bindStringParameter(5, aFeed.favicon);
-                updateFeed.bindInt64Parameter(6,  aFeed.oldestEntryDate);
-                updateFeed.bindInt64Parameter(7,  Date.now());
-                updateFeed.bindInt64Parameter(8,  dateModified);
-                updateFeed.bindStringParameter(9, aFeed.feedID);
-                updateFeed.execute();
+                let stmt = this.updateFeed_stmt;
+                let cachedFeed = this.getFeed(aFeed.feedID);
 
-                // Update the cache.
-                var cachedFeed = this.getFeed(aFeed.feedID);
-                cachedFeed.websiteURL = aFeed.websiteURL;
-                cachedFeed.subtitle = aFeed.subtitle;
-                cachedFeed.imageURL = aFeed.imageURL;
-                cachedFeed.imageLink = aFeed.imageLink;
-                cachedFeed.imageTitle = aFeed.imageTitle;
-                cachedFeed.favicon = aFeed.favicon;
-                cachedFeed.lastUpdated = Date.now();
-                cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
-                cachedFeed.dateModified = dateModified;
+                // Update the properties of the feed (and the cache).
+                stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
+                stmt.params.subtitle    = cachedFeed.subtitle    = aFeed.subtitle;
+                stmt.params.imageURL    = cachedFeed.imageURL    = aFeed.imageURL;
+                stmt.params.imageLink   = cachedFeed.imageLink   = aFeed.imageLink;
+                stmt.params.imageTitle  = cachedFeed.imageTitle  = aFeed.imageTitle;
+                stmt.params.favicon     = cachedFeed.favicon     = aFeed.favicon;
+                stmt.params.lastUpdated = cachedFeed.lastUpdated = Date.now();
+                stmt.params.dateModified = cachedFeed.dateModified = dateModified;
+                stmt.params.oldestEntryDate = cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
+                stmt.params.feedID = aFeed.feedID;
+
+                stmt.execute();
             }
             catch (ex) {
                 reportError(ex);
@@ -531,63 +512,59 @@ BriefStorageService.prototype = {
     get updateFeed_stmt BriefStorage_updateFeed_stmt() {
         delete this.__proto__.updateFeed_stmt;
         return this.__proto__.updateFeed_stmt = createStatement(
-               'UPDATE feeds               ' +
-               'SET websiteURL  = ?1,      ' +
-               '    subtitle    = ?2,      ' +
-               '    imageURL    = ?3,      ' +
-               '    imageLink   = ?4,      ' +
-               '    imageTitle  = ?5,      ' +
-               '    favicon     = ?6,      ' +
-               '    oldestEntryDate = ?7,  ' +
-               '    lastUpdated = ?8,      ' +
-               '    dateModified = ?9      ' +
-               'WHERE feedID = ?10         ');
+               'UPDATE feeds                            ' +
+               'SET websiteURL = :websiteURL,           ' +
+               '    subtitle   = :subtitle,             ' +
+               '    imageURL   = :imageURL,             ' +
+               '    imageLink  = :imageLink,            ' +
+               '    imageTitle = :imageTitle,           ' +
+               '    favicon    = :favicon,              ' +
+               '    oldestEntryDate = :oldestEntryDate, ' +
+               '    lastUpdated  = :lastUpdated,        ' +
+               '    dateModified = :dateModified        ' +
+               'WHERE feedID = :feedID                  ');
     },
 
     get insertEntry_stmt BriefStorage_insertEntry_stmt() {
         delete this.__proto__.insertEntry_stmt;
         return this.__proto__.insertEntry_stmt = createStatement(
-               'INSERT INTO entries (feedID, id, secondaryID, providedID, entryURL, ' +
-               'date, authors) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                  ');
+        'INSERT INTO entries (feedID, id, secondaryID, providedID, entryURL, date, authors) ' +
+        'VALUES (:feedID, :id, :secondaryID, :providedID, :entryURL, :date, :authors)       ');
     },
 
     get insertEntryText_stmt BriefStorage_insertEntryText_stmt() {
         delete this.__proto__.insertEntryText_stmt;
         return this.__proto__.insertEntryText_stmt = createStatement(
                'INSERT INTO entries_text (rowid, title, content) ' +
-               'VALUES(last_insert_rowid(), ?1, ?2)              ');
+               'VALUES(last_insert_rowid(), :title, :content)    ');
     },
 
     get updateEntry_stmt BriefStorage_updateEntry_stmt() {
         delete this.__proto__.updateEntry_stmt;
         return this.__proto__.updateEntry_stmt = createStatement(
-               'UPDATE entries       ' +
-               'SET date    = ?1,    ' +
-               '    authors = ?2,    ' +
-               '    read    = ?3,    ' +
-               '    updated = 1      ' +
-               'WHERE id = ?4        ');
+               'UPDATE entries                                                   ' +
+               'SET date = :date, authors = :authors, read = :read, updated = 1  ' +
+               'WHERE id = :id                                                   ');
     },
 
     get updateEntryText_stmt BriefStorage_updateEntryText_stmt() {
         delete this.__proto__.updateEntryText_stmt;
         return this.__proto__.updateEntryText_stmt = createStatement(
-               'UPDATE entries_text                                     ' +
-               'SET title =   ?1,                                       ' +
-               '    content = ?2                                        ' +
-               'WHERE rowid = (SELECT rowid FROM entries WHERE id = ?3) ');
+               'UPDATE entries_text                                      ' +
+               'SET title = :title, content = :content                   ' +
+               'WHERE rowid = (SELECT rowid FROM entries WHERE id = :id) ');
     },
 
     get checkByPrimaryID_stmt BriefStorage_checkByPrimaryID_stmt() {
         delete this.__proto__.checkByPrimaryID_stmt;
         return this.__proto__.checkByPrimaryID_stmt = createStatement(
-               'SELECT date FROM entries WHERE id = ?');
+               'SELECT date FROM entries WHERE id = :id');
     },
 
     get checkBySecondaryID_stmt BriefStorage_checkBySecondaryID_stmt() {
         delete this.__proto__.checkBySecondaryID_stmt;
         return this.__proto__.checkBySecondaryID_stmt = createStatement(
-               'SELECT date FROM entries WHERE secondaryID = ?');
+               'SELECT date FROM entries WHERE secondaryID = :secondaryID');
     },
 
 
@@ -597,11 +574,9 @@ BriefStorageService.prototype = {
         // Strip tags
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : '';
 
-        // Now the fun part - the logic of computing unique entry IDs and inserting
-        // entries.
         // We have two types of IDs: primary and secondary. The former is used as a
         // unique identifier at all times, while the latter is only used during updating,
-        // to work around a bug (see later). Below are two sets of fields used to
+        // to work around a bug (see later). Below there are two sets of fields used to
         // produce each of the hashes.
         var primarySet = aEntry.id ? [aFeed.feedID, aEntry.id]
                                    : [aFeed.feedID, aEntry.entryURL];
@@ -620,7 +595,7 @@ BriefStorageService.prototype = {
         var secondaryID = hashString(secondarySet.join(''));
 
         // Sometimes the provided GUID is lost (maybe a bug in the parser?) and
-        // having an empty GUID effects in a different hash which leads to
+        // having an empty GUID effects in a different hash, which leads to
         // annoying duplication of entries. In such case, we work around it by
         // checking for entry's existance using the secondary hash, which doesn't
         // include the GUID and is therefore immune to that problem.
@@ -629,40 +604,35 @@ BriefStorageService.prototype = {
         // stored entry needs to be updated.
         if (!aEntry.id) {
             var check = this.checkBySecondaryID_stmt;
-            check.bindStringParameter(0, secondaryID);
-            var entryAlreadyStored = check.executeStep();
-            if (entryAlreadyStored)
-                var storedEntryDate = check.getInt64(0);
-            check.reset();
+            check.params.secondaryID = secondaryID;
         }
         else {
             check = this.checkByPrimaryID_stmt;
-            check.bindStringParameter(0, primaryID);
-            entryAlreadyStored = check.executeStep();
-            if (entryAlreadyStored)
-                storedEntryDate = check.getInt64(0);
-            check.reset();
+            check.params.id = primaryID;
         }
+        var entryAlreadyStored = check.step();
+        var storedEntryDate = entryAlreadyStored ? check.row.date : 0;;
+        check.reset();
 
         var entryInserted = false;
 
         // If the entry is already present in the database, compare if the downloaded
-        // entry has a newer date than the stored one and if so, update the data and
-        // mark the entry as unread. Otherwise, insert it if it isn't present yet.
+        // entry has a newer date than the stored one and if so, update it.
+        // Otherwise, insert it if it isn't present yet.
         if (entryAlreadyStored) {
             if (aEntry.date && storedEntryDate < aEntry.date) {
-                var update = this.updateEntry_stmt;
-                update.bindInt64Parameter(0, aEntry.date);
-                update.bindStringParameter(1, aEntry.authors);
                 let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
-                update.bindInt32Parameter(2, markUnread ? 0 : 1);
-                update.bindStringParameter(3, primaryID);
+                var update = this.updateEntry_stmt;
+                update.params.date = aEntry.date;
+                update.params.authors = aEntry.authors;
+                update.params.read = markUnread ? 0 : 1;
+                update.params.id = primaryID;
                 update.execute();
 
                 update = this.updateEntryText_stmt;
-                update.bindStringParameter(0, aEntry.title);
-                update.bindStringParameter(1, content);
-                update.bindStringParameter(2, primaryID);
+                update.params.title = aEntry.title;
+                update.params.content = content;
+                update.params.id = primaryID;
                 update.execute();
 
                 entryInserted = true;
@@ -670,18 +640,18 @@ BriefStorageService.prototype = {
         }
         else {
             var insert = this.insertEntry_stmt;
-            insert.bindStringParameter(0, aFeed.feedID);
-            insert.bindStringParameter(1, primaryID);
-            insert.bindStringParameter(2, secondaryID);
-            insert.bindStringParameter(3, aEntry.id);
-            insert.bindStringParameter(4, aEntry.entryURL);
-            insert.bindInt64Parameter(5, aEntry.date ? aEntry.date : Date.now());
-            insert.bindStringParameter(6, aEntry.authors);
+            insert.params.feedID = aFeed.feedID;
+            insert.params.id = primaryID;
+            insert.params.secondaryID = secondaryID;
+            insert.params.providedID = aEntry.id;
+            insert.params.entryURL = aEntry.entryURL;
+            insert.params.date = aEntry.date || Date.now();
+            insert.params.authors = aEntry.authors;
             insert.execute();
 
             insert = this.insertEntryText_stmt;
-            insert.bindStringParameter(0, aEntry.title);
-            insert.bindStringParameter(1, content);
+            insert.params.title = aEntry.title;
+            insert.params.content = content;
             insert.execute();
 
             entryInserted = true;
@@ -693,17 +663,17 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
-        var update = createStatement('UPDATE feeds                       ' +
-                                     'SET entryAgeLimit  = ?1,           ' +
-                                     '    maxEntries     = ?2,           ' +
-                                     '    updateInterval = ?3,           ' +
-                                     '    markModifiedEntriesUnread = ?4 ' +
-                                     'WHERE feedID = ?5                  ');
-        update.bindInt32Parameter(0, aFeed.entryAgeLimit);
-        update.bindInt32Parameter(1, aFeed.maxEntries);
-        update.bindInt64Parameter(2, aFeed.updateInterval);
-        update.bindInt32Parameter(3, aFeed.markModifiedEntriesUnread ? 1 : 0);
-        update.bindStringParameter(4, aFeed.feedID);
+        var update = createStatement('UPDATE feeds                                ' +
+                                     'SET entryAgeLimit  = :entryAgeLimit,        ' +
+                                     '    maxEntries     = :maxEntries,           ' +
+                                     '    updateInterval = :updateInterval,       ' +
+                                     '    markModifiedEntriesUnread = :markUnread ' +
+                                     'WHERE feedID = :feedID                      ');
+        update.params.entryAgeLimit = aFeed.entryAgeLimit;
+        update.params.maxEntries = aFeed.maxEntries;
+        update.params.updateInterval = aFeed.updateInterval;
+        update.params.markUnread = aFeed.markModifiedEntriesUnread ? 1 : 0;
+        update.params.feedID = aFeed.feedID;
         update.execute();
 
         // Update the cache if neccassary (it may not be if nsIBriefFeed instance that was
@@ -733,11 +703,13 @@ BriefStorageService.prototype = {
             'WHERE id IN (                                                            ' +
             '   SELECT entries.id                                                     ' +
             '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        ' +
-            '   WHERE (entries.deleted = ?1 AND feeds.oldestEntryDate > entries.date) ' +
-            '         OR (?2 - feeds.hidden > ?3 AND feeds.hidden != 0)               ' +
-            ')                                                                        ');
+            '   WHERE (entries.deleted = :oldState AND feeds.oldestEntryDate > entries.date) ' +
+            '         OR (:now - feeds.hidden > :retentionTime AND feeds.hidden != 0)        ' +
+            ')                                                                               ');
         var removeFeeds = createStatement(
-            'DELETE FROM feeds WHERE (?1 - feeds.hidden > ?2) AND feeds.hidden != 0');
+            'DELETE FROM feeds                                ' +
+            'WHERE :now - feeds.hidden > :retentionTime AND   ' +
+            '      feeds.hidden != 0                          ');
 
         gConnection.beginTransaction()
         try {
@@ -747,13 +719,13 @@ BriefStorageService.prototype = {
                 this.expireEntriesByNumber();
             }
 
-            removeEntries.bindInt32Parameter(0, ENTRY_STATE_DELETED);
-            removeEntries.bindInt64Parameter(1, Date.now());
-            removeEntries.bindInt64Parameter(2, DELETED_FEEDS_RETENTION_TIME);
+            removeEntries.params.oldState = ENTRY_STATE_DELETED;
+            removeEntries.params.now = Date.now();
+            removeEntries.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
             removeEntries.execute();
 
-            removeFeeds.bindInt64Parameter(0, Date.now());
-            removeFeeds.bindInt64Parameter(1, DELETED_FEEDS_RETENTION_TIME);
+            removeFeeds.params.now = Date.now();
+            removeFeeds.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
             removeFeeds.execute();
         }
         catch (ex) {
@@ -780,39 +752,39 @@ BriefStorageService.prototype = {
         var edgeDate = Date.now() - expirationAge * 86400000;
 
         var statement = createStatement(
-            'UPDATE entries SET deleted = ?1                                   ' +
+            'UPDATE entries SET deleted = :newState                            ' +
             'WHERE id IN (                                                     ' +
             '   SELECT entries.id                                              ' +
             '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-            '   WHERE entries.deleted = ?2 AND                                 ' +
+            '   WHERE entries.deleted = :oldState AND                          ' +
             '         feeds.entryAgeLimit = 0 AND                              ' +
             '         entries.starred = 0 AND                                  ' +
-            '         entries.date < ?3                                        ' +
+            '         entries.date < :edgeDate                                 ' +
             ')                                                                 ');
-        statement.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
-        statement.bindInt32Parameter(1, ENTRY_STATE_NORMAL)
-        statement.bindInt64Parameter(2, edgeDate);
+        statement.params.newState = ENTRY_STATE_TRASHED;
+        statement.params.oldState = ENTRY_STATE_NORMAL;
+        statement.params.edgeDate = edgeDate;
         statement.execute();
     },
 
 
     // Delete old entries based on the per-feed limit.
     expireEntriesByAgePerFeed: function BriefStorage_expireEntriesByAgePerFeed() {
-        var statement = createStatement('UPDATE entries SET deleted = ?1  ' +
-                                        'WHERE entries.deleted = ?2 AND   ' +
-                                        '      starred = 0 AND            ' +
-                                        '      entries.date < ?3 AND      ' +
-                                        '      feedID = ?4                ');
+        var statement = createStatement('UPDATE entries SET deleted = :newState  ' +
+                                        'WHERE entries.deleted = :oldState AND   ' +
+                                        '      starred = 0 AND                   ' +
+                                        '      entries.date < :edgeDate AND      ' +
+                                        '      feedID = :feedID                  ');
         var feeds = this.getAllFeeds();
         var now = Date.now();
 
         for each (feed in feeds) {
             if (feed.entryAgeLimit > 0) {
                 var edgeDate = now - feed.entryAgeLimit * 86400000;
-                statement.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
-                statement.bindInt32Parameter(1, ENTRY_STATE_NORMAL);
-                statement.bindInt64Parameter(2, edgeDate);
-                statement.bindStringParameter(3, feed.feedID);
+                statement.params.newState = ENTRY_STATE_TRASHED;
+                statement.params.oldState = ENTRY_STATE_NORMAL;
+                statement.params.edgeDate = edgeDate;
+                statement.params.feedID = feed.feedID;
                 statement.execute();
             }
         }
@@ -826,34 +798,34 @@ BriefStorageService.prototype = {
 
         var maxEntries = gPrefs.getIntPref('database.maxStoredEntries');
 
-        var expireEntries = createStatement('UPDATE entries SET deleted = ?1 ' +
-                                            'WHERE rowid IN (                ' +
-                                            '    SELECT rowid                ' +
-                                            '    FROM entries                ' +
-                                            '    WHERE deleted = ?2 AND      ' +
-                                            '          starred = 0 AND       ' +
-                                            '          feedID = ?3           ' +
-                                            '    ORDER BY date ASC           ' +
-                                            '    LIMIT ?4                    ' +
-                                            ')                               ');
-        var getEntryCount = createStatement('SELECT COUNT(1) FROM entries  ' +
-                                            'WHERE feedID = ?1 AND         ' +
-                                            '      starred = 0 AND         ' +
-                                            '      deleted = ?2            ');
+        var expireEntries = createStatement('UPDATE entries                    ' +
+                                            'SET deleted = :newState           ' +
+                                            'WHERE rowid IN (                  ' +
+                                            '    SELECT rowid                  ' +
+                                            '    FROM entries                  ' +
+                                            '    WHERE deleted = :oldState AND ' +
+                                            '          starred = 0 AND         ' +
+                                            '          feedID = :feedID        ' +
+                                            '    ORDER BY date ASC             ' +
+                                            '    LIMIT :limit                  ' +
+                                            ')                                 ');
+        var getEntryCount = createStatement('SELECT COUNT(1) AS count FROM entries  ' +
+                                            'WHERE feedID = :feedID AND             ' +
+                                            '      starred = 0 AND                  ' +
+                                            '      deleted = :deleted               ');
 
         var feeds = this.getAllFeeds();
         for each (feed in feeds) {
-            getEntryCount.bindStringParameter(0, feed.feedID);
-            getEntryCount.bindStringParameter(1, ENTRY_STATE_NORMAL);
-            getEntryCount.executeStep();
-            let entryCount = getEntryCount.getInt32(0);
-            getEntryCount.reset();
+            getEntryCount.feedID = feed.feedID;
+            getEntryCount.deleted = ENTRY_STATE_NORMAL;
+            getEntryCount.step();
+            let entryCount = getEntryCount.row.count;
 
             if (entryCount - maxEntries > 0) {
-                expireEntries.bindInt32Parameter(0, ENTRY_STATE_TRASHED);
-                expireEntries.bindInt32Parameter(1, ENTRY_STATE_NORMAL)
-                expireEntries.bindStringParameter(2, feed.feedID);
-                expireEntries.bindInt64Parameter(3, entryCount - maxEntries);
+                expireEntries.params.newState = ENTRY_STATE_TRASHED;
+                expireEntries.params.oldState = ENTRY_STATE_NORMAL;
+                expireEntries.params.feedID = feed.feedID;
+                expireEntries.params.limit = entryCount - maxEntries;
                 expireEntries.execute();
             }
         }
@@ -976,9 +948,9 @@ BriefStorageService.prototype = {
 
         switch (aProperty) {
         case 'title':
-            var update = createStatement('UPDATE feeds SET title = ? WHERE feedID = ?');
-            update.bindStringParameter(0, aValue);
-            update.bindStringParameter(1, feed.feedID);
+            var update = createStatement('UPDATE feeds SET title = :title WHERE feedID = :feedID');
+            update.params.title = aValue;
+            update.params.feedID = feed.feedID;
             update.execute();
 
             feed.title = aValue; // Update the cached item.
@@ -1025,9 +997,8 @@ BriefStorageService.prototype = {
 
     isItemStoredInDB: function BriefStorage_isItemStoredInDB(aItemID) {
         var stmt = this.checkItemByBookmarkID_stmt;
-        stmt.bindInt64Parameter(0, aItemID);
-        stmt.bindInt64Parameter(1, aItemID);
-        var isItemStored = stmt.executeStep();
+        stmt.params.bookmarkID = aItemID;
+        var isItemStored = stmt.step();
         stmt.reset();
         return isItemStored;
     },
@@ -1044,13 +1015,7 @@ BriefStorageService.prototype = {
     get checkItemByBookmarkID_stmt BriefStorage_checkItemByBookmarkID_stmt() {
         delete this.__proto__.checkForBookmarkID_stmt;
         return this.__proto__.checkForBookmarkID_stmt = createStatement(
-               'SELECT COUNT(1) FROM feeds WHERE feeds.bookmarkID = ?2');
-    },
-
-    get unstarEntry_stmt BriefStorage_unstarEntry_stmt() {
-        delete this.__proto__.unstarEntry_stmt;
-        return this.__proto__.unstarEntry_stmt = createStatement(
-               'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE bookmarkID = ?1');
+               'SELECT COUNT(1) FROM feeds WHERE feeds.bookmarkID = :bookmarkID');
     },
 
 
@@ -1122,8 +1087,8 @@ BookmarksSynchronizer.prototype = {
         var homeFolder = gPrefs.getIntPref('homeFolder');
 
         if (homeFolder == -1) {
-            var hideAllFeeds = createStatement('UPDATE feeds SET hidden = ?');
-            hideAllFeeds.bindInt64Parameter(0, Date.now());
+            var hideAllFeeds = createStatement('UPDATE feeds SET hidden = :hidden');
+            hideAllFeeds.params.hidden = Date.now();
             hideAllFeeds.execute();
 
             gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
@@ -1168,15 +1133,15 @@ BookmarksSynchronizer.prototype = {
                                         '       parent, bookmarkID, hidden FROM feeds ');
 
         this.feeds = [];
-        while (selectAll.executeStep()) {
+        while (selectAll.step()) {
             var feed = {};
-            feed.feedID = selectAll.getString(0);
-            feed.title = selectAll.getString(1);
-            feed.rowIndex = selectAll.getInt32(2);
-            feed.isFolder = (selectAll.getInt32(3) == 1);
-            feed.parent = selectAll.getString(4);
-            feed.bookmarkID = selectAll.getString(5);
-            feed.hidden = selectAll.getInt64(6);
+            feed.feedID = selectAll.row.feedID;
+            feed.title = selectAll.row.title;
+            feed.rowIndex = selectAll.row.rowIndex;
+            feed.isFolder = (selectAll.row.isFolder == 1);
+            feed.parent = selectAll.row.parent;
+            feed.bookmarkID = selectAll.row.bookmarkID;
+            feed.hidden = selectAll.row.hidden;
             this.feeds.push(feed);
         }
     },
@@ -1213,17 +1178,17 @@ BookmarksSynchronizer.prototype = {
 
     insertFeed: function BookmarksSync_insertFeed(aBookmark) {
         var insertFeed = createStatement(
-            'INSERT OR IGNORE INTO feeds                                      ' +
-            '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID) ' +
-            'VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)                              ');
+            'INSERT OR IGNORE INTO feeds                                                  ' +
+            '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID)             ' +
+            'VALUES :feedID, :feedURL, :title, :rowIndex, :isFolder, :parent, :bookmarkID)');
 
-        insertFeed.bindStringParameter(0, aBookmark.feedID);
-        insertFeed.bindStringParameter(1, aBookmark.feedURL || null);
-        insertFeed.bindStringParameter(2, aBookmark.title);
-        insertFeed.bindInt32Parameter(3, aBookmark.rowIndex)
-        insertFeed.bindInt32Parameter(4, aBookmark.isFolder ? 1 : 0);
-        insertFeed.bindStringParameter(5, aBookmark.parent);
-        insertFeed.bindStringParameter(6, aBookmark.bookmarkID);
+        insertFeed.params.feedID = aBookmark.feedID;
+        insertFeed.params.feedURL = aBookmark.feedURL || null;
+        insertFeed.params.title = aBookmark.title;
+        insertFeed.params.rowIndex = aBookmark.rowIndex;
+        insertFeed.params.isFolder = aBookmark.isFolder ? 1 : 0;
+        insertFeed.params.parent = aBookmark.parent;
+        insertFeed.params.bookmarkID = aBookmark.bookmarkID;
         insertFeed.execute();
 
         this.feedListChanged = true;
@@ -1236,15 +1201,15 @@ BookmarksSynchronizer.prototype = {
             return;
         }
 
-        var updateFeed = createStatement('UPDATE feeds                                ' +
-                                         'SET title = ?1, rowIndex = ?2, parent = ?3, ' +
-                                         '    bookmarkID = ?4, hidden = 0             ' +
-                                         'WHERE feedID = ?5                           ');
-        updateFeed.bindStringParameter(0, aItem.title);
-        updateFeed.bindInt32Parameter(1, aItem.rowIndex);
-        updateFeed.bindStringParameter(2, aItem.parent);
-        updateFeed.bindStringParameter(3, aItem.bookmarkID);
-        updateFeed.bindStringParameter(4, aItem.feedID);
+        var updateFeed = createStatement(
+            'UPDATE feeds SET title = :title, rowIndex = :rowIndex, parent = :parent, ' +
+            '                 bookmarkID = :bookmarkID, hidden = 0                    ' +
+            'WHERE feedID = ?5                                                        ');
+        updateFeed.params.title = aItem.title;
+        updateFeed.params.rowIndex = aItem.rowIndex;
+        updateFeed.params.parent = aItem.parent;
+        updateFeed.params.bookmarkID = aItem.bookmarkID;
+        updateFeed.params.feedID = aItem.feedID;
         updateFeed.execute();
 
         if (aItem.rowIndex != aFeed.rowIndex || aItem.parent != aFeed.parent || aFeed.hidden > 0) {
@@ -1262,14 +1227,14 @@ BookmarksSynchronizer.prototype = {
 
     hideFeed: function BookmarksSync_hideFeed(aFeed) {
         if (aFeed.isFolder) {
-            var removeFolder = createStatement('DELETE FROM feeds WHERE feedID = ?');
-            removeFolder.bindStringParameter(0, aFeed.feedID);
+            var removeFolder = createStatement('DELETE FROM feeds WHERE feedID = :feedID');
+            removeFolder.params.feedID = aFeed.feedID;
             removeFolder.execute();
         }
         else {
-            var hideFeed = createStatement('UPDATE feeds SET hidden = ? WHERE feedID =?');
-            hideFeed.bindInt64Parameter(0, Date.now());
-            hideFeed.bindStringParameter(1, aFeed.feedID);
+            var hideFeed = createStatement('UPDATE feeds SET hidden = :hidden WHERE feedID = :feedID');
+            hideFeed.params.hidden = Date.now();
+            hideFeed.params.feedID = aFeed.feedID;
             hideFeed.execute();
         }
 
@@ -1330,13 +1295,14 @@ BookmarksSynchronizer.prototype = {
 
 }
 
+
 function BriefQuery() { }
 
 BriefQuery.prototype = {
 
-    entries: '',
-    feeds:   '',
-    folders: '',
+    entries: null,
+    feeds:   null,
+    folders: null,
 
     read:      false,
     unread:    false,
@@ -1378,23 +1344,22 @@ BriefQuery.prototype = {
                      '       entries.starred, entries.updated, entries.bookmarkID,  ' +
                      '       entries_text.title, entries_text.content               ' +
                       this.getQueryStringForSelect());
-
         var entries = [];
         try {
-            while (select.executeStep()) {
+            while (select.step()) {
                 var entry = Cc['@ancestor/brief/feedentry;1'].
                             createInstance(Ci.nsIBriefFeedEntry);
-                entry.id = select.getString(0);
-                entry.feedID = select.getString(1);
-                entry.entryURL = select.getString(2);
-                entry.date = select.getInt64(3);
-                entry.authors = select.getString(4);
-                entry.read = (select.getInt32(5) == 1);
-                entry.starred = (select.getInt32(6) == 1);
-                entry.updated = (select.getInt32(7) == 1);
-                entry.bookmarkID = select.getInt64(8);
-                entry.title = select.getString(9);
-                entry.content = select.getString(10);
+                entry.id = select.row.id;
+                entry.feedID = select.row.feedID;
+                entry.entryURL = select.row.entryURL;
+                entry.date = select.row.date;
+                entry.authors = select.row.authors;
+                entry.read = (select.row.read == 1);
+                entry.starred = (select.row.starred == 1);
+                entry.updated = (select.row.updated == 1);
+                entry.bookmarkID = select.row.bookmarkID;
+                entry.title = select.row.title;
+                entry.content = select.row.content;
 
                 entries.push(entry);
             }
@@ -1418,9 +1383,9 @@ BriefQuery.prototype = {
         var entries = [];
         var feeds = [];
         try {
-            while (select.executeStep()) {
-                entries.push(select.getString(0));
-                var feedID = select.getString(1);
+            while (select.step()) {
+                entries.push(select.row.id);
+                var feedID = select.row.feedID;
                 if (feeds.indexOf(feedID) == -1)
                     feeds.push(feedID);
             }
@@ -1445,13 +1410,14 @@ BriefQuery.prototype = {
     getEntryCount: function BriefQuery_getEntryCount() {
         // Optimization: ignore sorting settings.
         [this.sortOrder, temp] = [Ci.nsIBriefQuery.NO_SORT, this.sortOrder];
-        var select = createStatement('SELECT COUNT(1) ' + this.getQueryStringForSelect());
+        var select = createStatement('SELECT COUNT(1) AS count ' +
+                                     this.getQueryStringForSelect());
         this.sortOrder = temp;
 
         var count = 0;
         try {
-            select.executeStep();
-            count = select.getInt32(0);
+            select.step();
+            count = select.row.count;
         }
         catch (ex if gConnection.lastError == 1) {
             // See BriefQuery.getEntries();
@@ -1465,9 +1431,9 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     markEntriesRead: function BriefQuery_markEntriesRead(aState) {
-        var update = createStatement('UPDATE entries SET read = ?, updated = 0 ' +
+        var update = createStatement('UPDATE entries SET read = :read, updated = 0 ' +
                                      this.getQueryString())
-        update.bindInt32Parameter(0, aState ? 1 : 0);
+        update.params.read = aState ? 1 : 0;
 
         gConnection.beginTransaction();
         try {
@@ -1570,9 +1536,9 @@ BriefQuery.prototype = {
                     txnService.doTransaction(txn);
                 }
 
-                update.bindInt32Parameter(0, aState ? 1 : 0);
-                update.bindInt64Parameter(1, aState ? bookmarkID : -1);
-                update.bindStringParameter(2, entry.id);
+                update.params.starred = aState ? 1 : 0;
+                update.params.bookmarkID = aState ? bookmarkID : -1;
+                update.params.id = entry.id;
                 update.execute();
             }
         }
@@ -1617,7 +1583,7 @@ BriefQuery.prototype = {
             this.traverseFolderChildren(homeFolder);
 
             text += '(';
-            for (var i = 0; i < this.effectiveFolders.length; i++) {
+            for (let i = 0; i < this.effectiveFolders.length; i++) {
                 text += 'feeds.parent = "' + this.effectiveFolders[i] + '"';
                 if (i < this.effectiveFolders.length - 1)
                     text += ' OR ';
@@ -1626,24 +1592,20 @@ BriefQuery.prototype = {
         }
 
         if (this.feeds) {
-            var feeds = this.feeds;
-
             text += '(';
-            for (var i = 0; i < feeds.length; i++) {
-                text += 'entries.feedID = "' + feeds[i] + '"';
-                if (i < feeds.length - 1)
+            for (let i = 0; i < this.feeds.length; i++) {
+                text += 'entries.feedID = "' + this.feeds[i] + '"';
+                if (i < this.feeds.length - 1)
                     text += ' OR ';
             }
             text += ') AND ';
         }
 
         if (this.entries) {
-            var entries = this.entries;
-
             text += '(';
-            for (var i = 0; i < entries.length; i++) {
-                text += 'entries.id = "' + entries[i] + '"';
-                if (i < entries.length - 1)
+            for (let i = 0; i < this.entries.length; i++) {
+                text += 'entries.id = "' + this.entries[i] + '"';
+                if (i < this.entries.length - 1)
                     text += ' OR ';
             }
             text += ') AND ';
