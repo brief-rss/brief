@@ -68,7 +68,7 @@
     </popupset>
 
     <hbox id="main-box" flex="1">
-        <vbox id='left-pane' persist="width hidden">
+        <vbox id="left-pane" persist="width hidden">
             <toolbox>
                 <toolbar id="feed-list-toolbar">
                     <deck id="update-buttons-deck" selectedIndex="0">
