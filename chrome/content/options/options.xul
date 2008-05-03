@@ -121,7 +121,7 @@
                          preference="extensions.brief.database.maxStoredEntries"/>
                 <label value="&storedEntriesAfter.label;"/>
             </hbox>
-            <spacer height="10"/>
+            <separator class="thin"/>
             <hbox pack="end">
                 <button id="clear-all-entries"
                         label="&clearAllEntriesButton.label;"
@@ -202,7 +202,7 @@
                          size="1"/>
                 <label value="&entriesPerPageAfter.label;"/>
             </hbox>
-            <spacer height="5"/>
+            <separator class="thin"/>
             <checkbox id="unread-oldest-first-checkbox"
                       label="&sortUnreadViewOldestFirst.label;"
                       accesskey="&sortUnreadViewOldestFirst.accesskey;"
