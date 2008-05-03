@@ -1268,7 +1268,7 @@ BookmarksSynchronizer.prototype = {
             item.title = gPlaces.bookmarks.getItemTitle(node.itemId);
             item.bookmarkID = node.itemId;
             item.rowIndex = this.bookmarks.length;
-            item.parent = aContainer.itemId;
+            item.parent = aContainer.itemId.toFixed().toString();
 
             if (gPlaces.livemarks.isLivemark(node.itemId)) {
                 var feedURL = gPlaces.livemarks.getFeedURI(node.itemId).spec;
@@ -1280,7 +1280,7 @@ BookmarksSynchronizer.prototype = {
             }
             else {
                 item.feedURL = '';
-                item.feedID = node.itemId;
+                item.feedID = node.itemId.toFixed().toString();
                 item.isFolder = true;
 
                 this.bookmarks.push(item);
