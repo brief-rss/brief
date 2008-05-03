@@ -54,6 +54,7 @@ function BriefUpdateService() {
     gObserverService.addObserver(this, 'brief:feed-updated', false);
     gObserverService.addObserver(this, 'brief:feed-error', false);
     gObserverService.addObserver(this, 'profile-after-change', false);
+    gObserverService.addObserver(this, 'quit-application', false);
 }
 
 BriefUpdateService.prototype = {
@@ -140,6 +141,7 @@ BriefUpdateService.prototype = {
     },
 
 
+    // nsIBriefUpdateService
     stopUpdating: function BUS_stopUpdating() {
         gObserverService.notifyObservers(null, 'brief:feed-update-canceled', '');
 
@@ -186,6 +188,7 @@ BriefUpdateService.prototype = {
             break;
         }
     },
+
 
     fetchNextFeed: function BUS_fetchNextFeed() {
         // All feeds in the update queue may have already been requested,
@@ -240,8 +243,8 @@ BriefUpdateService.prototype = {
         // so that the preferences are already initialized.
         case 'profile-after-change':
             if (aData == 'startup') {
-                // Delay enabling autoupdate, so not to slow down the startup. Plus,
-                // nsIBriefStorage is instantiated on profile-after-change.
+                // Delay the initial autoupdate check in order not to slow down the
+                // startup. Also, nsIBriefStorage is not ready yet.
                 this.startupDelayTimer.initWithCallback(this, STARTUP_DELAY,
                                                         TIMER_TYPE_ONE_SHOT);
 
@@ -277,16 +280,18 @@ BriefUpdateService.prototype = {
             break;
 
         case 'nsPref:changed':
-            switch (aData) {
-
-            // Force checking if we should update when the prefs are changed,
-            // so that the effects are visible immediately.
-            case 'update.enableAutoUpdate':
-            case 'update.interval':
+            if (aData == 'update.enableAutoUpdate' || aData == 'update.interval')
                 this.notify(this.updateTimer);
-                break;
-            }
             break;
+
+        case 'quit-application':
+            gObserverService.removeObserver(this, 'brief:feed-error');
+            gObserverService.removeObserver(this, 'brief:feed-updated');
+            gObserverService.removeObserver(this, 'quit-application');
+            gObserverService.removeObserver(this, 'profile-after-change');
+            gPrefs.removeObserver('', this);
+            break;
+
         }
     },
 
@@ -318,13 +323,10 @@ BriefUpdateService.prototype = {
  */
 function FeedFetcher(aFeed) {
     this.feed = aFeed;
+    this.favicon = this.feed.favicon;
 
     gObserverService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
     gObserverService.addObserver(this, 'brief:feed-update-canceled', false);
-
-    this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-
-    this.favicon = this.feed.favicon;
 
     this.requestFeed();
 }
@@ -332,7 +334,7 @@ function FeedFetcher(aFeed) {
 FeedFetcher.prototype = {
 
     feed:           null, // The passed feed, as currently stored in the database.
-    downloadedFeed: null, // The downloaded feed. Initially null.
+    downloadedFeed: null, // The downloaded feed.
 
     request:      null,
     timeoutTimer: null,
@@ -383,6 +385,7 @@ FeedFetcher.prototype = {
         this.request.onerror = onRequestError;
         this.request.send(null);
 
+        this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
         this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
     },
 
@@ -457,7 +460,7 @@ FeedFetcher.prototype = {
             gObserverService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
         }
 
-        // Clean up, so that we don't leak (hopefully).
+        // Clean up, so that we don't leak.
         gObserverService.removeObserver(this, 'brief:feed-update-canceled');
         this.request = null;
         this.timeoutTimer.cancel();
