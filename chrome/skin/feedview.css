@@ -90,7 +90,7 @@ body {
 .article-header {
     border-top: 1px #abbfc9 solid;
     padding: 6px 5px 0 24px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .article-title-link {
@@ -164,7 +164,7 @@ body {
     font-size: 12px;
     line-height: 1.4;
     color: #272727;
-    padding: 0 25px 25px;
+    padding: 5px 25px 25px;
     overflow: auto;
 }
 

@@ -112,7 +112,10 @@ pre, code {
 
 .search-highlight {
     color: black;
-    background-color: yellow;
+    background-color: #fffad1;
+    border: 1px solid #f4d900;
+    padding: 0 3px;
+    -moz-border-radius: 5px;
 }
 
 /* ----------------------  Adjustments for headlines view   ---------------------- */
