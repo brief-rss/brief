@@ -1204,7 +1204,7 @@ BookmarksSynchronizer.prototype = {
         var updateFeed = createStatement(
             'UPDATE feeds SET title = :title, rowIndex = :rowIndex, parent = :parent, ' +
             '                 bookmarkID = :bookmarkID, hidden = 0                    ' +
-            'WHERE feedID = ?5                                                        ');
+            'WHERE feedID = :feedID                                                   ');
         updateFeed.params.title = aItem.title;
         updateFeed.params.rowIndex = aItem.rowIndex;
         updateFeed.params.parent = aItem.parent;
