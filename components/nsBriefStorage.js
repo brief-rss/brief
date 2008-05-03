@@ -1178,9 +1178,9 @@ BookmarksSynchronizer.prototype = {
 
     insertFeed: function BookmarksSync_insertFeed(aBookmark) {
         var insertFeed = createStatement(
-            'INSERT OR IGNORE INTO feeds                                                  ' +
-            '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID)             ' +
-            'VALUES :feedID, :feedURL, :title, :rowIndex, :isFolder, :parent, :bookmarkID)');
+            'INSERT OR IGNORE INTO feeds                                                   ' +
+            '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID)              ' +
+            'VALUES (:feedID, :feedURL, :title, :rowIndex, :isFolder, :parent, :bookmarkID)');
 
         insertFeed.params.feedID = aBookmark.feedID;
         insertFeed.params.feedURL = aBookmark.feedURL || null;
