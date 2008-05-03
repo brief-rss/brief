@@ -9,7 +9,7 @@ var gFeedList = {
     },
 
     items: null,  // All treeitems in the tree.
-    ctx_targetItem: null,  // Current target item of the context menu.
+
     _prevSelectedItem: null,
 
     // If TRUE, prevents the onSelect function from running when
@@ -188,54 +188,18 @@ var gFeedList = {
     onContextMenuShowing: function gFeedList_onContextMenuShowing(aEvent) {
         var row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
 
-        // If the target is an empty space, don't show the context menu.
         if (row == -1) {
+            // If the target is an empty space, don't show the context menu.
             aEvent.preventDefault();
-            return;
         }
+        else {
+            var target = this.tree.view.getItemAtIndex(row);
 
-        this.ctx_targetItem = this.tree.view.getItemAtIndex(row);
-
-        if (this.ctx_targetItem.localName == 'treeseparator') {
-            aEvent.preventDefault();
-            return;
+            if (target.localName == 'treeseparator')
+                aEvent.preventDefault();
+            else
+                gContextMenu.init(target);
         }
-
-        // Convenience variables telling what kind the target is.
-        var targetIsFeed = this.ctx_targetItem.hasAttribute('url');
-        var targetIsContainer = this.ctx_targetItem.hasAttribute('container');
-        var targetIsUnreadFolder = this.ctx_targetItem.id == 'unread-folder';
-        var targetIsStarredFolder = this.ctx_targetItem.id == 'starred-folder';
-        var targetIsTrashFolder = this.ctx_targetItem.id == 'trash-folder';
-        var targetIsSpecialFolder = targetIsUnreadFolder || targetIsStarredFolder ||
-                                    targetIsTrashFolder;
-
-        getElement('ctx-mark-feed-read').hidden = !targetIsFeed;
-        getElement('ctx-mark-folder-read').hidden = !targetIsContainer &&
-                                                    !targetIsSpecialFolder;
-        getElement('ctx-update-feed').hidden = !targetIsFeed;
-        getElement('ctx-update-folder').hidden = !targetIsContainer;
-
-        var openWebsite = getElement('ctx-open-website');
-        openWebsite.hidden = !targetIsFeed;
-        if (targetIsFeed)
-            openWebsite.disabled = !gStorage.getFeed(this.ctx_targetItem.id).websiteURL;
-
-        getElement('ctx-properties-separator').hidden = !targetIsFeed;
-        getElement('ctx-feed-properties').hidden = !targetIsFeed;
-
-        // Menuitems related to deleting feeds and folders.
-        var dangerousSeparator = getElement('ctx-dangerous-cmds-separator');
-        dangerousSeparator.hidden = !(targetIsFeed || targetIsContainer ||
-                                      targetIsUnreadFolder || targetIsTrashFolder);
-        getElement('ctx-delete-feed').hidden = !targetIsFeed;
-        getElement('ctx-delete-folder').hidden = !targetIsContainer;
-
-        // Menuitems related to emptying feeds and folders.
-        getElement('ctx-empty-feed').hidden = !targetIsFeed;
-        getElement('ctx-empty-folder').hidden = !(targetIsContainer || targetIsUnreadFolder);
-        getElement('ctx-restore-trashed').hidden = !targetIsTrashFolder;
-        getElement('ctx-empty-trash').hidden = !targetIsTrashFolder;
     },
 
     // Restores selection after it was temporarily changed to highlight the
@@ -245,8 +209,6 @@ var gFeedList = {
         this.ignoreSelectEvent = true;
         treeSelection.select(treeSelection.currentIndex);
         this.ignoreSelectEvent = false;
-
-        this.ctx_targetItem = null;
     },
 
 
@@ -579,100 +541,130 @@ var gFeedList = {
 }
 
 
-// Feed list context menu commands.
-var gContextMenuCommands = {
 
-    markFeedRead: function ctxMenuCmds_markFeedRead(aEvent) {
-        var item = gFeedList.ctx_targetItem;
-        var feedID = gFeedList.ctx_targetItem.id;
-        var query = new QuerySH([feedID], null, null);
+var gContextMenu = {
+
+    targetItem: null,
+
+    get targetID() this.targetItem.id,
+    get targetFeed() gStorage.getFeed(this.targetID),
+
+    get targetIsFeed()          this.targetItem.hasAttribute('url'),
+    get targetIsContainer()     this.targetItem.hasAttribute('container'),
+    get targetIsUnreadFolder()  this.targetItem.id == 'unread-folder',
+    get targetIsStarredFolder() this.targetItem.id == 'starred-folder',
+    get targetIsTrashFolder()   this.targetItem.id == 'trash-folder',
+    get targetIsSpecialFolder() this.targetIsUnreadFolder || this.targetIsStarredFolder
+                                || this.targetIsTrashFolder,
+
+
+    init: function gContextMenu_init(aTargetItem) {
+        this.targetItem = aTargetItem;
+
+        getElement('ctx-mark-feed-read').hidden = !this.targetIsFeed;
+        getElement('ctx-mark-folder-read').hidden = !this.targetIsContainer &&
+                                                    !this.targetIsSpecialFolder;
+        getElement('ctx-update-feed').hidden = !this.targetIsFeed;
+        getElement('ctx-update-folder').hidden = !this.targetIsContainer;
+
+        var openWebsite = getElement('ctx-open-website');
+        openWebsite.hidden = !this.targetIsFeed;
+        if (this.targetIsFeed)
+            openWebsite.disabled = !gStorage.getFeed(this.targetItem.id).websiteURL;
+
+        getElement('ctx-properties-separator').hidden = !this.targetIsFeed;
+        getElement('ctx-feed-properties').hidden = !this.targetIsFeed;
+
+        // Menuitems related to deleting feeds and folders.
+        var dangerousSeparator = getElement('ctx-dangerous-cmds-separator');
+        dangerousSeparator.hidden = !(this.targetIsFeed || this.targetIsContainer ||
+                                      this.targetIsUnreadFolder || this.targetIsTrashFolder);
+        getElement('ctx-delete-feed').hidden = !this.targetIsFeed;
+        getElement('ctx-delete-folder').hidden = !this.targetIsContainer;
+
+        // Menuitems related to emptying feeds and folders.
+        getElement('ctx-empty-feed').hidden = !this.targetIsFeed;
+        getElement('ctx-empty-folder').hidden = !(this.targetIsContainer || this.targetIsUnreadFolder);
+        getElement('ctx-restore-trashed').hidden = !this.targetIsTrashFolder;
+        getElement('ctx-empty-trash').hidden = !this.targetIsTrashFolder;
+
+    },
+
+
+    markFeedRead: function gContextMenu_markFeedRead() {
+        var query = new QuerySH([this.targetID], null, null);
         query.markEntriesRead(true);
     },
 
 
-    markFolderRead: function ctxMenuCmds_markFolderRead(aEvent) {
-        var targetItem = gFeedList.ctx_targetItem;
+    markFolderRead: function gContextMenu_markFolderRead() {
+        var query = new Query();
 
-        if (targetItem.hasAttribute('specialFolder')) {
-            var query = new Query();
-            if (targetItem.id == 'unread-folder')
-                query.unread = true;
-            else if (targetItem.id == 'starred-folder')
-                query.starred = true;
-            else
-                query.deleted = ENTRY_STATE_TRASHED;
-            query.markEntriesRead(true);
-        }
-        else {
-            var query = new Query();
+        if (this.targetIsUnreadFolder)
+            query.unread = true;
+        else if (this.targetIsStarredFolder)
+            query.starred = true;
+        else if (this.targetIsTrashFolder)
+            query.deleted = ENTRY_STATE_TRASHED;
+        else
             query.folders = [targetItem.id];
-            query.markEntriesRead(true);
-        }
+
+        query.markEntriesRead(true);
     },
 
 
-    updateFeed: function ctxMenuCmds_updateFeed(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.id;
-        var feed = gStorage.getFeed(feedID);
-        gUpdateService.fetchFeeds([feed], false);
+    updateFeed: function gContextMenu_updateFeed() {
+        gUpdateService.fetchFeeds([this.targetFeed], false);
     },
 
 
-    updateFolder: function ctxMenuCmds_updateFolder(aEvent) {
-        var treeitems = gFeedList.ctx_targetItem.getElementsByTagName('treeitem');
-        var feedID, i, feeds = [];
-        for (i = 0; i < treeitems.length; i++) {
-            if (!treeitems[i].hasAttribute('container')) {
-                feedID = treeitems[i].id
-                feeds.push(gStorage.getFeed(feedID));
-            }
+    updateFolder: function gContextMenu_updateFolder() {
+        var items = this.targetItem.getElementsByTagName('treeitem');
+        var feeds = [];
+
+        for (let i = 0; i < items.length; i++) {
+            if (!items[i].hasAttribute('container'))
+                feeds.push(gStorage.getFeed(items[i].id));
         }
 
         gUpdateService.fetchFeeds(feeds, false);
     },
 
 
-    openWebsite: function ctxMenuCmds_openWebsite(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.id;
-        var url = gStorage.getFeed(feedID).websiteURL;
+    openWebsite: function gContextMenu_openWebsite() {
+        var url = this.targetFeed.websiteURL;
         gTopWindow.gBrowser.loadOneTab(url);
     },
 
 
-    emptyFeed: function ctxMenuCmds_emptyFeed(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.id;
-        var query = new QuerySH([feedID], null, null);
+    emptyFeed: function gContextMenu_emptyFeed() {
+        var query = new QuerySH([this.targetID], null, null);
         query.unstarred = true;
         query.deleteEntries(ENTRY_STATE_TRASHED);
     },
 
 
-    emptyFolder: function ctxMenuCmds_emptyFolder(aEvent) {
-        var targetItem = gFeedList.ctx_targetItem;
+    emptyFolder: function gContextMenu_emptyFolder() {
+        var query = new Query();
+        query.unstarred = true;
 
-        if (targetItem.id == 'unread-folder') {
-            var query = new Query();
-            query.unstarred = true;
+        if (this.targetIsUnreadFolder)
             query.unread = true;
-            query.deleteEntries(ENTRY_STATE_TRASHED);
-        }
-        else {
-            var query = new Query();
-            query.folders = [targetItem.id];
-            query.unstarred = true;
-            query.deleteEntries(ENTRY_STATE_TRASHED);
-        }
+        else
+            query.folders = [this.targetID];
+
+        query.deleteEntries(ENTRY_STATE_TRASHED);
     },
 
 
-    restoreTrashed: function ctxMenuCmds_restoreTrashed(aEvent) {
+    restoreTrashed: function gContextMenu_restoreTrashed() {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
         query.deleteEntries(ENTRY_STATE_NORMAL);
     },
 
 
-    emptyTrash: function ctxMenuCmds_emptyTrash(aEvent) {
+    emptyTrash: function gContextMenu_emptyTrash() {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
         query.deleteEntries(ENTRY_STATE_DELETED);
@@ -700,55 +692,46 @@ var gContextMenuCommands = {
     },
 
 
-    deleteFeed: function ctxMenuCmds_deleteFeed(aEvent) {
-        var targetTreeitem = gFeedList.ctx_targetItem;
-        var feedID = targetTreeitem.id;
-        var feed = gStorage.getFeed(feedID);
-
+    deleteFeed: function gContextMenu_deleteFeed() {
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
         var stringbundle = getElement('main-bundle');
         var title = stringbundle.getString('confirmFeedDeletionTitle');
-        var text = stringbundle.getFormattedString('confirmFeedDeletionText', [feed.title]);
+        var text = stringbundle.getFormattedString('confirmFeedDeletionText',
+                                                   [this.targetFeed.title]);
         var weHaveAGo = promptService.confirm(window, title, text);
 
         if (weHaveAGo) {
-            this._removeTreeitem(targetTreeitem);
-            this._deleteBookmarks([feed]);
+            this._removeTreeitem(this.targetItem);
+            this._deleteBookmarks([this.targetFeed]);
         }
     },
 
 
-    deleteFolder: function ctxMenuCmds_deleteFolder(aEvent) {
-        var targetTreeitem = gFeedList.ctx_targetItem;
-        var feedID = targetTreeitem.id;
-        var folder = gStorage.getFeed(feedID);
-
-        // Ask for confirmation.
+    deleteFolder: function gContextMenu_deleteFolder() {
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
         var stringbundle = getElement('main-bundle');
         var title = stringbundle.getString('confirmFolderDeletionTitle');
-        var text = stringbundle.getFormattedString('confirmFolderDeletionText', [folder.title]);
+        var text = stringbundle.getFormattedString('confirmFolderDeletionText',
+                                                   [this.targetFeed.title]);
         var weHaveAGo = promptService.confirm(window, title, text);
 
         if (weHaveAGo) {
-            this._removeTreeitem(targetTreeitem);
+            this._removeTreeitem(this.targetItem);
 
-            var treeitems = targetTreeitem.getElementsByTagName('treeitem');
-            var items = [folder];
-            for (var i = 0; i < treeitems.length; i++) {
-                feedID = treeitems[i].id;
-                items.push(gStorage.getFeed(feedID));
-            }
+            var items = this.targetItem.getElementsByTagName('treeitem');
+            var feeds = [this.targetFeed];
+            for (let i = 0; i < items.length; i++)
+                feeds.push(gStorage.getFeed(items[i].id));
 
-            this._deleteBookmarks(items);
+            this._deleteBookmarks(feeds);
         }
     },
 
 
     // Removes a treeitem and updates selection if it was selected.
-    _removeTreeitem: function ctxMenuCmds__removeTreeitem(aTreeitem) {
+    _removeTreeitem: function gContextMenu__removeTreeitem(aTreeitem) {
         var treeview = gFeedList.tree.view;
         var currentIndex = treeview.selection.currentIndex;
         var rowCount = treeview.rowCount;
@@ -770,7 +753,7 @@ var gContextMenuCommands = {
     },
 
 
-    _deleteBookmarks: function ctxMenuCmds__deleteBookmarks(aFeeds) {
+    _deleteBookmarks: function gContextMenu__deleteBookmarks(aFeeds) {
         var transactionsService = Cc['@mozilla.org/browser/placesTransactionsService;1'].
                                   getService(Ci.nsIPlacesTransactionsService);
 
@@ -783,10 +766,9 @@ var gContextMenuCommands = {
     },
 
 
-    showFeedProperties: function ctxMenuCmds_showFeedProperties(aEvent) {
-        var feedID = gFeedList.ctx_targetItem.id;
+    showFeedProperties: function gContextMenu_showFeedProperties() {
         openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
-                   'chrome,titlebar,toolbar,centerscreen,modal', feedID);
+                   'chrome,titlebar,toolbar,centerscreen,modal', this.targetID);
     }
 
 }
