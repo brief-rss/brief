@@ -656,16 +656,15 @@ FeedView.prototype = {
         }
 
         // Append the entries.
-        for (var i = 0; i < entries.length; i++)
-            this._appendEntry(entries[i]);
+        entries.forEach(this._appendEntry, this);
 
         if (entries.length) {
             this.document.getElementById('message').style.display = 'none';
 
             // Highlight the search terms.
             if (this.query.searchString) {
-                for each (word in this.query.searchString.match(/[A-Za-z0-9]+/g))
-                    this._highlightText(word);
+                let matches = this.query.searchString.match(/[A-Za-z0-9]+/g);
+                matches.forEach(this._highlightText, this);
             }
         }
         else {
