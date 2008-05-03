@@ -271,11 +271,11 @@ var gCommands = {
     },
 
     updateAllFeeds: function cmd_updateAllFeeds() {
-        gUpdateService.fetchAllFeeds(false);
+        gUpdateService.updateAllFeeds(false);
     },
 
     stopUpdating: function cmd_stopUpdating() {
-        gUpdateService.stopFetching();
+        gUpdateService.stopUpdating();
         getElement('update-buttons-deck').selectedIndex = 0;
     },
 
