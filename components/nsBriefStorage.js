@@ -1050,36 +1050,66 @@ function BookmarksSynchronizer() {
 
     this.newFeeds = [];
 
-    this.getBookmarks()
-
     gConnection.beginTransaction();
     try {
+        // Get the list of bookmarks and folders in the home folder.
+        this.getLiveBookmarks();
+
+        // Get the list of feeds stored in the database.
         this.getFeeds();
 
-        for each (bookmark in this.bookmarks)
-            this.syncBookmark(bookmark);
+        for each (bookmark in this.foundBookmarks) {
+            // Search for the bookmarked among the stored feeds.
+            let feed = null;
+            for (let i = 0; i < this.storedFeeds.length; i++) {
+                if (this.storedFeeds[i].feedID == bookmark.feedID) {
+                    feed = this.storedFeeds[i];
+                    break;
+                }
+            }
 
-        for each (feed in this.feeds) {
-            if (!feed.isInBookmarks && feed.hidden == 0)
+            if (feed) {
+                feed.bookmarked = true;
+                this.updateFeedFromBookmark(bookmark, feed);
+            }
+            else {
+                this.insertFeed(bookmark);
+                if (!bookmark.isFolder)
+                    this.newFeeds.push(feed);
+            }
+        }
+
+        for each (feed in this.storedFeeds) {
+            if (!feed.bookmarked && feed.hidden == 0)
                 this.hideFeed(feed);
         }
     }
     finally {
         gConnection.commitTransaction();
-        if (this.feedListChanged) {
-            gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
-            gObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
-        }
     }
 
-    this.updateNewFeeds();
+    if (this.feedListChanged) {
+        gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
+        gObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+    }
+
+    // Update the newly added feeds.
+    if (this.newFeeds.length) {
+        var feeds = [];
+        for each (feed in this.newFeeds)
+            feeds.push(gStorageService.getFeed(feed.feedID));
+
+        var updateService = Cc['@ancestor/brief/updateservice;1'].
+                            getService(Ci.nsIBriefUpdateService);
+        updateService.fetchFeeds(feeds, false);
+    }
 }
 
 BookmarksSynchronizer.prototype = {
 
-    feeds:     null,
-    newFeeds:  null,
-    bookmarks: null,
+    storedFeeds: null,
+    newFeeds: null,
+    foundBookmarks: null,
     feedListChanged: false,
 
     checkHomeFolder: function BookmarksSync_checkHomeFolder() {
@@ -1110,29 +1140,27 @@ BookmarksSynchronizer.prototype = {
     },
 
 
-    // Get all bookmarks in the user's home folder.
-    getBookmarks: function BookmarksSync_getBookmarks() {
+    // Get the list of Live Bookmarks in the user's home folder.
+    getLiveBookmarks: function BookmarksSync_getLiveBookmarks() {
         var homeFolder = gPrefs.getIntPref('homeFolder');
+        this.foundBookmarks = [];
 
-        // Get the current Live Bookmarks.
         var options = gPlaces.history.getNewQueryOptions();
         var query = gPlaces.history.getNewQuery();
-
         query.setFolders([homeFolder], 1);
         options.excludeItems = true;
-        var result = gPlaces.history.executeQuery(query, options);
 
-        this.bookmarks = [];
+        var result = gPlaces.history.executeQuery(query, options);
         this.traversePlacesQueryResults(result.root);
     },
 
 
-    // Gets all feeds currently in the database.
+    // Gets all feeds stored in the database.
     getFeeds: function BookmarksSync_getFeeds() {
         var selectAll = createStatement('SELECT feedID, title, rowIndex, isFolder,    ' +
                                         '       parent, bookmarkID, hidden FROM feeds ');
 
-        this.feeds = [];
+        this.storedFeeds = [];
         while (selectAll.step()) {
             var feed = {};
             feed.feedID = selectAll.row.feedID;
@@ -1142,54 +1170,25 @@ BookmarksSynchronizer.prototype = {
             feed.parent = selectAll.row.parent;
             feed.bookmarkID = selectAll.row.bookmarkID;
             feed.hidden = selectAll.row.hidden;
-            this.feeds.push(feed);
-        }
-    },
-
-
-    // Inserts a bookmark if there is no such feed yet and checks if the feed's data
-    // is up-to-date.
-    // It also sets isInBookmarks property on every feed which it finds, so that later
-    // feeds without this property and can be hidden as no longer bookmarked.
-    syncBookmark: function BookmarksSync_syncBookmark(aItem) {
-        var found = false;
-        var feedListChanged = false;
-
-        // Search for the bookmark by iterating over all the feeds in the database.
-        for (var i = 0; i < this.feeds.length; i++) {
-            var feed = this.feeds[i];
-            if (feed.feedID == aItem.feedID) {
-                found = true;
-                break;
-            }
-        }
-
-        if (found) {
-            feed.isInBookmarks = true;
-            this.updateFeedFromBookmark(aItem, feed);
-        }
-        else {
-            this.insertFeed(aItem);
-            if (!aItem.isFolder)
-                this.newFeeds.push(aItem.feedID);
+            this.storedFeeds.push(feed);
         }
     },
 
 
     insertFeed: function BookmarksSync_insertFeed(aBookmark) {
-        var insertFeed = createStatement(
+        var insert = createStatement(
             'INSERT OR IGNORE INTO feeds                                                   ' +
             '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID)              ' +
             'VALUES (:feedID, :feedURL, :title, :rowIndex, :isFolder, :parent, :bookmarkID)');
 
-        insertFeed.params.feedID = aBookmark.feedID;
-        insertFeed.params.feedURL = aBookmark.feedURL || null;
-        insertFeed.params.title = aBookmark.title;
-        insertFeed.params.rowIndex = aBookmark.rowIndex;
-        insertFeed.params.isFolder = aBookmark.isFolder ? 1 : 0;
-        insertFeed.params.parent = aBookmark.parent;
-        insertFeed.params.bookmarkID = aBookmark.bookmarkID;
-        insertFeed.execute();
+        insert.params.feedID = aBookmark.feedID;
+        insert.params.feedURL = aBookmark.feedURL || null;
+        insert.params.title = aBookmark.title;
+        insert.params.rowIndex = aBookmark.rowIndex;
+        insert.params.isFolder = aBookmark.isFolder ? 1 : 0;
+        insert.params.parent = aBookmark.parent;
+        insert.params.bookmarkID = aBookmark.bookmarkID;
+        insert.execute();
 
         this.feedListChanged = true;
     },
@@ -1218,8 +1217,6 @@ BookmarksSynchronizer.prototype = {
         else {
             // Invalidate feeds cache.
             gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
-
-            // If only the title has changed, the feed list can be updated incrementally.
             gObserverService.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
         }
     },
@@ -1242,19 +1239,6 @@ BookmarksSynchronizer.prototype = {
     },
 
 
-    updateNewFeeds: function BookmarksSync_updateNewFeeds() {
-        if (this.newFeeds.length > 0) {
-            var feeds = [];
-            for each (feedID in this.newFeeds)
-                feeds.push(gStorageService.getFeed(feedID));
-
-            var updateService = Cc['@ancestor/brief/updateservice;1'].
-                                getService(Ci.nsIBriefUpdateService);
-            updateService.fetchFeeds(feeds, false);
-        }
-    },
-
-
     traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer) {
         aContainer.containerOpen = true;
 
@@ -1267,7 +1251,7 @@ BookmarksSynchronizer.prototype = {
             item = {};
             item.title = gPlaces.bookmarks.getItemTitle(node.itemId);
             item.bookmarkID = node.itemId;
-            item.rowIndex = this.bookmarks.length;
+            item.rowIndex = this.foundBookmarks.length;
             item.parent = aContainer.itemId.toFixed().toString();
 
             if (gPlaces.livemarks.isLivemark(node.itemId)) {
@@ -1276,14 +1260,14 @@ BookmarksSynchronizer.prototype = {
                 item.feedID = hashString(feedURL);
                 item.isFolder = false;
 
-                this.bookmarks.push(item);
+                this.foundBookmarks.push(item);
             }
             else {
                 item.feedURL = '';
                 item.feedID = node.itemId.toFixed().toString();
                 item.isFolder = true;
 
-                this.bookmarks.push(item);
+                this.foundBookmarks.push(item);
 
                 if (node instanceof Ci.nsINavHistoryContainerResultNode)
                     this.traversePlacesQueryResults(node);
