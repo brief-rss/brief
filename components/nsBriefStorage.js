@@ -1101,7 +1101,7 @@ function BookmarksSynchronizer() {
 
         var updateService = Cc['@ancestor/brief/updateservice;1'].
                             getService(Ci.nsIBriefUpdateService);
-        updateService.fetchFeeds(feeds, false);
+        updateService.updateFeeds(feeds, false);
     }
 }
 

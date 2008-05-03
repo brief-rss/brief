@@ -93,8 +93,8 @@ BriefUpdateService.prototype = {
 
 
     // nsIBriefUpdateService
-    fetchAllFeeds: function BUS_fetchAllFeeds(aInBackground) {
-        this.fetchFeeds(gStorage.getAllFeeds(), aInBackground);
+    updateAllFeeds: function BUS_updateAllFeeds(aInBackground) {
+        this.updateFeeds(gStorage.getAllFeeds(), aInBackground);
 
         var roundedNow = Math.round(Date.now() / 1000);
         gPrefs.setIntPref('update.lastUpdateTime', roundedNow);
@@ -102,7 +102,7 @@ BriefUpdateService.prototype = {
 
 
     // nsIBriefUpdateService
-    fetchFeeds: function BUS_fetchFeeds(aFeeds, aInBackground) {
+    updateFeeds: function BUS_updateFeeds(aFeeds, aInBackground) {
         // Add feeds to the queue, but don't let the same feed be added twice.
         var newFeedsQueued = false;
         for each (feed in aFeeds) {
@@ -113,34 +113,34 @@ BriefUpdateService.prototype = {
             }
         }
 
-        // Start updating if it isn't in progress yet. We will fetch feeds on an interval,
-        // so we don't choke when downloading and processing all of them a once.
+        // Start an update if it isn't in progress yet. Subsequent feeds are requested
+        // on an interval, so that we don't choke when processing all of them a once.
         if (this.status == NOT_UPDATING) {
             var delay = aInBackground ? gPrefs.getIntPref('update.backgroundFetchDelay')
                                       : gPrefs.getIntPref('update.defaultFetchDelay');
-            this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
-        }
 
-        // If background update is in progress and foreground update is attempted,
-        // we stop the background start continue with a foreground one.
-        if (this.status == BACKGROUND_UPDATING && !aInBackground) {
+            this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
+            this.status = aInBackground ? BACKGROUND_UPDATING : NORMAL_UPDATING;
+
+            this.fetchNextFeed();
+        }
+        else if (this.status == BACKGROUND_UPDATING && !aInBackground) {
+            // Stop the background update and continue with a foreground one.
             this.fetchDelayTimer.cancel();
+
             var delay = gPrefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
+            this.status = NORMAL_UPDATING;
+
+            this.fetchNextFeed();
         }
 
-        if (this.status != NORMAL_UPDATING) {
-            this.status = aInBackground ? BACKGROUND_UPDATING
-                                        : NORMAL_UPDATING;
-        }
-
-        // If new feeds have ended up in the queue then send the notification.
         if (newFeedsQueued)
             gObserverService.notifyObservers(null, 'brief:feed-update-queued', '');
     },
 
 
-    stopFetching: function BUS_stopFetching() {
+    stopUpdating: function BUS_stopUpdating() {
         gObserverService.notifyObservers(null, 'brief:feed-update-canceled', '');
 
         // We must call this after sending brief:feed-update-canceled, because when a
@@ -169,37 +169,30 @@ BriefUpdateService.prototype = {
             var itsGlobalUpdateTime = globalUpdatingEnabled &&
                                       now - lastGlobalUpdateTime > globalInterval;
 
-            var feeds = gStorage.getAllFeeds();
-
-            var feed, i, feedsToUpdate = [];
-            for (i = 0; i < feeds.length; i++) {
-                feed = feeds[i];
-                if ((feed.updateInterval > 0 && now - feed.lastUpdated > feed.updateInterval)
-                    || (feed.updateInterval == 0 && itsGlobalUpdateTime))
-                    feedsToUpdate.push(feed);
-            }
+            function filter(f) (f.updateInterval == 0 && itsGlobalUpdateTime) ||
+                               (f.updateInterval > 0 && now - f.lastUpdated > f.updateInterval);
+            var feedsToUpdate = gStorage.getAllFeeds().filter(filter);
 
             if (feedsToUpdate.length)
-                this.fetchFeeds(feedsToUpdate, feedsToUpdate.length, true);
+                this.updateFeeds(feedsToUpdate, feedsToUpdate.length, true);
 
-            if (itsGlobalUpdateTime) {
-                // Preferences can only store 32 bit integers, so round to seconds.
-                var roundedNow = Math.round(now / 1000);
-                gPrefs.setIntPref('update.lastUpdateTime', roundedNow);
-            }
+            if (itsGlobalUpdateTime)
+                gPrefs.setIntPref('update.lastUpdateTime', Math.round(now / 1000));
 
             break;
 
         case this.fetchDelayTimer:
-            var feed = this.updateQueue.shift();
-
-            // All feeds in the update queue may have already been requested,
-            // because we don't cancel the timer until after all feeds are completed.
-            if (feed)
-                new FeedFetcher(feed, this);
-
+            this.fetchNextFeed();
             break;
         }
+    },
+
+    fetchNextFeed: function BUS_fetchNextFeed() {
+        // All feeds in the update queue may have already been requested,
+        // because we don't cancel the timer until after all feeds are completed.
+        var feed = this.updateQueue.shift();
+        if (feed)
+            new FeedFetcher(feed, this);
     },
 
 
