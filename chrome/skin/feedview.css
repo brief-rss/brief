@@ -11,9 +11,11 @@ body {
 /* ----------------------  Header  ---------------------- */
 
 #header {
-    background: url('chrome://brief/skin/header-bkg.png') repeat-x bottom;
+    background: url('chrome://brief/skin/header-bkg.png') no-repeat top right;
     background-color: #345b74;
-    padding: 5px 5% 15px;
+    padding: 5px 5% 5px;
+    border-bottom: 10px solid #acb5bf;
+    -moz-border-bottom-colors: #f6f9fc #f2f4f8 #eceff4 #e5eaee #dfe3e9 #d9dee3 #cdd3da #c1c8d0 #b5bec6 #acb5bf;
     color: #f0fbff;
     overflow: auto; /* Clears contained floats */
 }
@@ -26,7 +28,7 @@ body {
 
 #feed-title {
     color: #f0fbff;
-    font-size: 20px;
+    font-size: 19px;
     font-weight: bold;
     text-decoration: none;
 }
@@ -51,7 +53,7 @@ body {
 
 #message {
     font-size: 20px;
-    color: #4a6e85;
+    color: #3f855c;
     text-align: center;
     display: none;
     margin-top: 100px;
