@@ -20,6 +20,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const BOOKMARKS_OBSERVER_DELAY = 250;
+const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
 
 const DATABASE_VERSION = 7;
 const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
@@ -120,8 +121,16 @@ BriefStorageService.prototype = {
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
         gConnection = storageService.openUnsharedDatabase(databaseFile);
+        var schemaVersion = gConnection.schemaVersion;
+
+        // Remove the backup file after certain amount of time.
+        var backupFile = profileDir.clone();
+        backupFile.append('brief-backup-' + (schemaVersion - 1) + '.sqlite');
+        if (backupFile.exists() && Date.now() - backupFile.lastModifiedTime > BACKUP_FILE_EXPIRATION_AGE)
+            backupFile.remove(false);
 
         if (!gConnection.connectionReady) {
+            // The database was corrupted, back it up and create a new one.
             storageService.backupDatabaseFile(databaseFile, 'brief-backup.sqlite');
             gConnection.close();
             databaseFile.remove(false);
@@ -133,15 +142,12 @@ BriefStorageService.prototype = {
         }
         else if (gConnection.schemaVersion < DATABASE_VERSION) {
             // Remove the old backup file.
-            var filename = 'brief-backup' + (DATABASE_VERSION - 1) + '.sqlite';
-            var oldBackupFile = profileDir.clone();
-            oldBackupFile.append(filename);
-            if (oldBackupFile.exists())
-                oldBackupFile.remove(false);
+            if (backupFile.exists())
+                backupFile.remove(false);
 
             // Backup the database before migration.
-            filename = 'brief-backup' + DATABASE_VERSION + '.sqlite';
             var newBackupFile = profileDir;
+            var filename = 'brief-backup-' + schemaVersion + '.sqlite';
             newBackupFile.append(filename);
             if (!newBackupFile.exists())
                 storageService.backupDatabaseFile(databaseFile, filename);
