@@ -531,7 +531,7 @@ function performSearch(aEvent) {
     else {
         gFeedView.titleOverride = searchbar.value ? titleOverride : '';
         gFeedView.query.searchString = searchbar.value;
-        gFeedView.ensure();
+        gFeedView.ensure(true);
     }
 }
 
