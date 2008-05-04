@@ -1,9 +1,11 @@
 const EXT_ID = 'brief@mozdev.org';
 
 const TEMPLATE_FILENAME = 'feedview-template.html';
+const CUSTOM_STYLE_FILENAME = 'brief-custom-style.css';
+const EXAMPLE_CUSTOM_STYLE_FILENAME = 'example-custom-style.css';
 const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
 
-const LAST_MAJOR_VERSION = '1.1';
+const LAST_MAJOR_VERSION = '1.2';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
 
 var Cc = Components.classes;
@@ -26,19 +28,7 @@ var gTemplateURI = '';
 function init() {
     gPrefs.register();
 
-    // Get the extension's directory.
-    var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
-                       getService(Ci.nsIExtensionManager).
-                       getInstallLocation(EXT_ID).
-                       getItemLocation(EXT_ID);
-    // Get the template file.
-    itemLocation.append('defaults');
-    itemLocation.append('data');
-    itemLocation.append(TEMPLATE_FILENAME);
-    // Create URI of the template file.
-    gTemplateURI = Cc['@mozilla.org/network/protocol;1?name=file'].
-                   getService(Ci.nsIFileProtocolHandler).
-                   newFileURI(itemLocation);
+    initTemplateFile();
 
     if (gPrefs.homeFolder) {
         // Initiate the feed list (asynchronously, so that the window is displayed sooner).
@@ -75,6 +65,36 @@ function init() {
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
     async(loadHomeview);
+}
+
+
+function initTemplateFile() {
+    var dataDir = Cc['@mozilla.org/extensions/manager;1'].
+                  getService(Ci.nsIExtensionManager).
+                  getInstallLocation(EXT_ID).
+                  getItemLocation(EXT_ID);
+    dataDir.append('defaults');
+    dataDir.append('data');
+
+    // Get the URI of the template file.
+    var templateFile = dataDir.clone();
+    templateFile.append(TEMPLATE_FILENAME);
+    gTemplateURI = Cc['@mozilla.org/network/protocol;1?name=file'].
+                   getService(Ci.nsIFileProtocolHandler).
+                   newFileURI(templateFile);
+
+    // Put the custom CSS file in %PROFILE_DIR%/chrome.
+    var chromeDir = Cc['@mozilla.org/file/directory_service;1'].
+                    getService(Ci.nsIProperties).
+                    get('ProfD', Ci.nsIFile);
+    chromeDir.append('chrome');
+    var customStyleFile = chromeDir.clone();
+    customStyleFile.append(CUSTOM_STYLE_FILENAME);
+    if (!customStyleFile.exists()) {
+        var defaultCustomStyle = dataDir;
+        defaultCustomStyle.append(EXAMPLE_CUSTOM_STYLE_FILENAME);
+        defaultCustomStyle.copyTo(chromeDir, CUSTOM_STYLE_FILENAME);
+    }
 }
 
 
