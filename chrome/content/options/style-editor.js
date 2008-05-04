@@ -8,16 +8,18 @@ var gTextbox = null;
 function init() {
     sizeToContent();
 
-    gCustomStyleFile = Cc['@mozilla.org/extensions/manager;1'].
-                       getService(Ci.nsIExtensionManager).
-                       getInstallLocation(EXT_ID).
-                       getItemLocation(EXT_ID);
-    gCustomStyleFile.append('defaults');
-    gCustomStyleFile.append('data');
-    gCustomStyleFile.append('custom-style.css');
+    gCustomStyleFile = Cc['@mozilla.org/file/directory_service;1'].
+                       getService(Ci.nsIProperties).
+                       get('ProfD', Ci.nsIFile);
+    gCustomStyleFile.append('chrome');
+    gCustomStyleFile.append('brief-custom-style.css');
+
+    var uri = Cc['@mozilla.org/network/protocol;1?name=file'].
+              getService(Ci.nsIFileProtocolHandler).
+              newFileURI(gCustomStyleFile);
 
     var request = new XMLHttpRequest();
-    request.open('GET', 'file:///' + gCustomStyleFile.path, false);
+    request.open('GET', uri.spec, false);
     request.overrideMimeType('text/css');
     request.send(null);
 
