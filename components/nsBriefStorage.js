@@ -1495,8 +1495,13 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     starEntries: function BriefQuery_starEntries(aState) {
-        var update = createStatement(
-                     'UPDATE entries SET starred = ?1, bookmarkID = ?2 WHERE id = ?3');
+        var update = createStatement('UPDATE entries SET starred = :starred,  ' +
+                                     'bookmarkID = :bookmarkID WHERE id = :id ');
+        var ioService = Cc['@mozilla.org/network/io-service;1'].
+                        getService(Ci.nsIIOService);
+        var transactions = Cc['@mozilla.org/browser/placesTransactionsService;1'].
+                           getService(Ci.nsIPlacesTransactionsService);
+        var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
 
         gConnection.beginTransaction();
         try {
@@ -1504,26 +1509,20 @@ BriefQuery.prototype = {
             var changedEntriesList = this.getSimpleEntryList();
             this.includeHiddenFeeds = temp;
 
-            var ioService = Cc['@mozilla.org/network/io-service;1'].
-                            getService(Ci.nsIIOService);
-            var txnService = Cc['@mozilla.org/browser/placesTransactionsService;1'].
-                             getService(Ci.nsIPlacesTransactionsService);
-            var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
-            var bms = gPlaces.bookmarks;
-            var annos = gPlaces.annotations;
-
             var changedEntries = this.getEntries();
             for each (entry in changedEntries) {
                 if (aState) {
                     var uri = ioService.newURI(entry.entryURL, null, null);
-                    var bookmarkID = bms.insertBookmark(gPlaces.unfiledBookmarksFolderId,
-                                                        uri, bms.DEFAULT_INDEX, entry.title);
+                    var index = gPlaces.bookmarks.DEFAULT_INDEX;
+                    var folder = gPlaces.unfiledBookmarksFolderId;
+                    var bookmarkID = gPlaces.bookmarks.insertBookmark(folder, uri, index,
+                                                                      entry.title);
                     gPlaces.tagging.tagURI(uri, [tagName]);
                 }
                 else {
                     // We have to use a transaction, so that tags are removed too.
-                    var txn = txnService.removeItem(entry.bookmarkID);
-                    txnService.doTransaction(txn);
+                    var txn = transactions.removeItem(entry.bookmarkID);
+                    transactions.doTransaction(txn);
                 }
 
                 update.params.starred = aState ? 1 : 0;
@@ -1537,8 +1536,7 @@ BriefQuery.prototype = {
         }
 
         if (changedEntriesList.getProperty('entries').length) {
-            gObserverService.notifyObservers(changedEntriesList,
-                                             'brief:entry-status-changed',
+            gObserverService.notifyObservers(changedEntriesList, 'brief:entry-status-changed',
                                              aState ? 'starred' : 'unstarred');
         }
     },
