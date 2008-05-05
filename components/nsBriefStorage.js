@@ -325,10 +325,8 @@ BriefStorageService.prototype = {
         var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
         var bookmarkedEntries = [];
 
-        var select = createStatement(
-            'SELECT entries.entryURL, entries.id, entries_text.title                    ' +
-            'FROM entries INNER JOIN entries_text ON entries.rowid = entries_text.rowid ' +
-            'WHERE starred = 1                                                          ');
+        var select = createStatement('SELECT entryURL, id, title     ' +
+                                     'FROM entries WHERE starred = 1 ');
         var update = createStatement('UPDATE entries SET bookmarkID = :bookmarkID ' +
                                      'WHERE id = :entryID                         ');
 
@@ -349,7 +347,7 @@ BriefStorageService.prototype = {
             }
         }
         catch (ex) {
-            reportError(ex, true);
+            reportError(ex);
         }
         finally {
             select.reset();
