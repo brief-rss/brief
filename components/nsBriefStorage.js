@@ -890,7 +890,6 @@ BriefStorageService.prototype = {
     homeFolderContentModified: false,
     bookmarksObserverTimerIsRunning: false,
 
-    __bookmarksObserverDelayTimer: null,
     get bookmarksObserverDelayTimer BriefStorage_bookmarksObserverDelayTimer() {
         if (!this.__bookmarksObserverDelayTimer) {
             this.__bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
@@ -1005,7 +1004,7 @@ BriefStorageService.prototype = {
         var statement = this.checkItemByBookmarkID_stmt;
         statement.params.bookmarkID = aItemID;
         statement.step();
-        var retval = (statement.count > 0);
+        var retval = (statement.row.count > 0);
         statement.reset();
         return retval;
     },
