@@ -1052,7 +1052,7 @@ function BookmarksSynchronizer() {
     if (!this.checkHomeFolder())
         return;
 
-    this.newFeeds = [];
+    this.newLiveBookmarks = [];
 
     gConnection.beginTransaction();
     try {
@@ -1079,7 +1079,7 @@ function BookmarksSynchronizer() {
             else {
                 this.insertFeed(bookmark);
                 if (!bookmark.isFolder)
-                    this.newFeeds.push(feed);
+                    this.newLiveBookmarks.push(bookmark);
             }
         }
 
@@ -1098,10 +1098,10 @@ function BookmarksSynchronizer() {
     }
 
     // Update the newly added feeds.
-    if (this.newFeeds.length) {
+    if (this.newLiveBookmarks.length) {
         var feeds = [];
-        for each (feed in this.newFeeds)
-            feeds.push(gStorageService.getFeed(feed.feedID));
+        for each (bookmark in this.newLiveBookmarks)
+            feeds.push(gStorageService.getFeed(bookmark.feedID));
 
         var updateService = Cc['@ancestor/brief/updateservice;1'].
                             getService(Ci.nsIBriefUpdateService);
@@ -1112,7 +1112,7 @@ function BookmarksSynchronizer() {
 BookmarksSynchronizer.prototype = {
 
     storedFeeds: null,
-    newFeeds: null,
+    newLiveBookmarks: null,
     foundBookmarks: null,
     feedListChanged: false,
 
