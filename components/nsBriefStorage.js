@@ -1002,11 +1002,12 @@ BriefStorageService.prototype = {
     },
 
     isItemStoredInDB: function BriefStorage_isItemStoredInDB(aItemID) {
-        var stmt = this.checkItemByBookmarkID_stmt;
-        stmt.params.bookmarkID = aItemID;
-        var isItemStored = stmt.step();
-        stmt.reset();
-        return isItemStored;
+        var statement = this.checkItemByBookmarkID_stmt;
+        statement.params.bookmarkID = aItemID;
+        statement.step();
+        var retval = (statement.count > 0);
+        statement.reset();
+        return retval;
     },
 
     delayedBookmarksSync: function BriefStorage_delayedBookmarksSync() {
@@ -1021,7 +1022,7 @@ BriefStorageService.prototype = {
     get checkItemByBookmarkID_stmt BriefStorage_checkItemByBookmarkID_stmt() {
         delete this.__proto__.checkForBookmarkID_stmt;
         return this.__proto__.checkForBookmarkID_stmt = createStatement(
-               'SELECT COUNT(1) FROM feeds WHERE feeds.bookmarkID = :bookmarkID');
+               'SELECT COUNT(1) AS count FROM feeds WHERE feeds.bookmarkID = :bookmarkID');
     },
 
 
