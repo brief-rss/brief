@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>1.2b1</version>
+    <version>1.2b2</version>
     <type>2</type>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
     <iconURL>chrome://brief/skin/icon.png</iconURL>
@@ -20,6 +20,10 @@
         <maxVersion>3.0pre</maxVersion>
       </rdf:Description>
     </targetApplication>
+
+    <updateURL>
+        https://www.mozdev.org/p/updates/brief/brief@mozdev.org/update.rdf
+    </updateURL>
 
     <!-- Front End MetaData -->
     <name>Brief</name>
