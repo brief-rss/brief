@@ -88,11 +88,23 @@ __defineGetter__('gStringbundle', function() {
 
 
 function executeSQL(aSQLString) {
-    gConnection.executeSimpleSQL(aSQLString);
+    try {
+        gConnection.executeSimpleSQL(aSQLString);
+    }
+    catch (ex) {
+        log('SQL statement: ' + aSQLString);
+        reportError(ex, true);
+    }
 }
 
 function createStatement(aSQLString) {
-    var statement = gConnection.createStatement(aSQLString);
+    try {
+        var statement = gConnection.createStatement(aSQLString);
+    }
+    catch (ex) {
+        log('SQL statement: ' + aSQLString);
+        reportError(ex, true);
+    }
     var wrapper = Cc['@mozilla.org/storage/statement-wrapper;1'].
                   createInstance(Ci.mozIStorageStatementWrapper);
     wrapper.initialize(statement)
@@ -364,6 +376,9 @@ BriefStorageService.prototype = {
             // Drop the temporary copies.
             executeSQL('DROP TABLE entries_copy     ');
             executeSQL('DROP TABLE entries_text_copy');
+        }
+        catch (ex) {
+            reportError(ex, true);
         }
         finally {
             gConnection.commitTransaction();
@@ -1406,9 +1421,10 @@ BriefQuery.prototype = {
                 entries.push(entry);
             }
         }
-        catch (ex if gConnection.lastError == 1) {
+        catch (ex) {
             // Ignore "SQL logic error or missing database" error which full-text search
             // throws when the query doesn't contain at least one non-excluded term.
+            reportError(ex, gConnection.lastError != 1);
         }
         finally {
             select.reset();
@@ -1432,8 +1448,9 @@ BriefQuery.prototype = {
                     feeds.push(feedID);
             }
         }
-        catch (ex if gConnection.lastError == 1) {
-            // See BriefQuery.getEntries();
+        catch (ex) {
+            // See BriefQuery.getEntries()
+            reportError(ex, gConnection.lastError != 1);
         }
         finally {
             select.reset();
@@ -1461,8 +1478,9 @@ BriefQuery.prototype = {
             select.step();
             count = select.row.count;
         }
-        catch (ex if gConnection.lastError == 1) {
-            // See BriefQuery.getEntries();
+        catch (ex) {
+            // See BriefQuery.getEntries()
+            reportError(ex, gConnection.lastError != 1);
         }
         finally {
             select.reset();
@@ -1488,8 +1506,9 @@ BriefQuery.prototype = {
 
             update.execute();
         }
-        catch (ex if gConnection.lastError == 1) {
-            // See BriefQuery.getEntries();
+        catch (ex) {
+            // See BriefQuery.getEntries()
+            reportError(ex, gConnection.lastError != 1);
         }
         finally {
             gConnection.commitTransaction();
@@ -1505,24 +1524,20 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     deleteEntries: function BriefQuery_deleteEntries(aState) {
-        var statementString;
         switch (aState) {
             case ENTRY_STATE_NORMAL:
             case ENTRY_STATE_TRASHED:
             case ENTRY_STATE_DELETED:
-                statementString = 'UPDATE entries SET deleted = ' + aState +
-                                   this.getQueryString();
+                var statement = createStatement('UPDATE entries SET deleted = ' +aState+
+                                                 this.getQueryString());
                 break;
-
             case Ci.nsIBriefQuery.REMOVE_FROM_DATABASE:
-                statementString = 'DELETE FROM entries ' + this.getQueryString();
+                var statement = createStatement('DELETE FROM entries ' + this.getQueryString());
                 break;
-
             default:
                 throw('Invalid deleted state.');
         }
 
-        var statement = createStatement(statementString);
         gConnection.beginTransaction();
         try {
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
@@ -1531,8 +1546,9 @@ BriefQuery.prototype = {
 
             statement.execute();
         }
-        catch (ex if gConnection.lastError == 1) {
-            // See BriefQuery.getEntries();
+        catch (ex) {
+            // See BriefQuery.getEntries()
+            reportError(ex, gConnection.lastError != 1);
         }
         finally {
             gConnection.commitTransaction();
@@ -1582,6 +1598,9 @@ BriefQuery.prototype = {
                 update.params.id = entry.id;
                 update.execute();
             }
+        }
+        catch (ex) {
+            reportError(ex, true);
         }
         finally {
             gConnection.commitTransaction();
@@ -1760,14 +1779,14 @@ function hashString(aString) {
 
 
 function reportError(aException, aRethrow) {
-    var dbError = gConnection.lastErrorString;
-    var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                         getService(Ci.nsIConsoleService);
-    consoleService.logStringMessage('Brief database error:\n ' + dbError);
+    var message = aException.message;
+    message += 'Stack: ' + aException.stack;
+    message += 'Database error: ' + gConnection.lastErrorString;
+    var error = new Error(message, aException.fileName, aException.lineNumber);
     if (aRethrow)
-        throw(aException);
+        throw(error);
     else
-        Components.utils.reportError(aException);
+        Components.utils.reportError(error);
 }
 
 
