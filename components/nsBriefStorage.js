@@ -22,7 +22,8 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const BOOKMARKS_OBSERVER_DELAY = 250;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
 
-const DATABASE_VERSION = 7;
+const DATABASE_VERSION = 8;
+
 const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'feedURL         TEXT,                ' +
                            'websiteURL      TEXT,                ' +
@@ -44,19 +45,21 @@ const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'updateInterval  INTEGER DEFAULT 0,   ' +
                            'dateModified    INTEGER DEFAULT 0,   ' +
                            'markModifiedEntriesUnread INTEGER DEFAULT 1 ';
-const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
-                             'feedID      TEXT,               ' +
-                             'secondaryID TEXT,               ' +
-                             'providedID  TEXT,               ' +
-                             'entryURL    TEXT,               ' +
-                             'date        INTEGER,            ' +
-                             'authors     TEXT,               ' +
-                             'read        INTEGER DEFAULT 0,  ' +
-                             'updated     INTEGER DEFAULT 0,  ' +
-                             'starred     INTEGER DEFAULT 0,  ' +
-                             'deleted     INTEGER DEFAULT 0,  ' +
-                             'bookmarkID  INTEGER DEFAULT -1  ';
-const ENTRIES_TEXT_TABLE_SCHEMA = 'title, content';
+
+const ENTRIES_TABLE_SCHEMA = 'id            INTEGER PRIMARY KEY AUTOINCREMENT,' +
+                             'feedID        TEXT,               ' +
+                             'primaryHash   TEXT,               ' +
+                             'secondaryHash TEXT,               ' +
+                             'providedID    TEXT,               ' +
+                             'entryURL      TEXT,               ' +
+                             'date          INTEGER,            ' +
+                             'read          INTEGER DEFAULT 0,  ' +
+                             'updated       INTEGER DEFAULT 0,  ' +
+                             'starred       INTEGER DEFAULT 0,  ' +
+                             'deleted       INTEGER DEFAULT 0,  ' +
+                             'bookmarkID    INTEGER DEFAULT -1  ';
+
+const ENTRIES_TEXT_TABLE_SCHEMA = 'title, content, authors';
 
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
@@ -251,6 +254,11 @@ BriefStorageService.prototype = {
         // To 1.2b2
         case 6:
             executeSQL('ALTER TABLE feeds ADD COLUMN markModifiedEntriesUnread INTEGER DEFAULT 1');
+            // Fall through...
+
+        // To 1.2b3
+        case 7:
+            this.migrateToNumericIDs();
 
         }
 
@@ -316,6 +324,52 @@ BriefStorageService.prototype = {
         finally {
             gConnection.commitTransaction();
         }
+    },
+
+    migrateToNumericIDs: function BriefStorage_migrateToNumericIDs() {
+        var oldCols = 'id, feedID, secondaryID , providedID, entryURL, date, ' +
+                      'authors, read, updated, starred, deleted, bookmarkID  ';
+
+        gConnection.beginTransaction();
+        try {
+            // Create temporary copies of old tables.
+            executeSQL('CREATE TABLE entries_copy ('+oldCols+')                          ');
+            executeSQL('INSERT INTO entries_copy (rowid, '+oldCols+')                    ' +
+                       'SELECT rowid, '+oldCols+' FROM entries ORDER BY rowid ASC        ');
+            executeSQL('CREATE TABLE entries_text_copy (title, content)                  ');
+            executeSQL('INSERT INTO entries_text_copy (rowid, title, content)            ' +
+                       'SELECT rowid, title, content FROM entries_text ORDER BY rowid ASC');
+
+            // Drop the old tables
+            executeSQL('DROP TABLE entries       ');
+            executeSQL('DROP TABLE entries_text  ');
+
+            // Recreate tables and indices.
+            executeSQL('CREATE TABLE entries ('+ENTRIES_TABLE_SCHEMA+')                             ');
+            executeSQL('CREATE VIRTUAL TABLE entries_text using fts3('+ENTRIES_TEXT_TABLE_SCHEMA+') ');
+            executeSQL('CREATE INDEX entries_feedID_index ON entries (feedID)                       ');
+            executeSQL('CREATE INDEX entries_date_index ON entries (date)                           ');
+            executeSQL('CREATE INDEX entries_primaryHash_index ON entries (primaryHash)             ');
+
+            // Migrate entries table.
+            var cols = 'feedID, providedID, entryURL, date, read, updated, starred, deleted, bookmarkID';
+            executeSQL('INSERT INTO entries (primaryHash, secondaryHash, '+cols+') ' +
+                       'SELECT id, secondaryID, '+cols+' FROM entries_copy         ');
+
+            // Migrate entries_text table.
+            executeSQL('INSERT INTO entries_text (title, content, authors)                                            ' +
+                       'SELECT entries_text_copy.title, entries_text_copy.content, entries_copy.authors               ' +
+                       'FROM entries_text_copy INNER JOIN entries_copy ON entries_text_copy.rowid = entries_copy.rowid');
+
+            // Drop the temporary copies.
+            executeSQL('DROP TABLE entries_copy     ');
+            executeSQL('DROP TABLE entries_text_copy');
+        }
+        finally {
+            gConnection.commitTransaction();
+        }
+
+        executeSQL('VACUUM');
     },
 
 
@@ -533,58 +587,57 @@ BriefStorageService.prototype = {
     get insertEntry_stmt BriefStorage_insertEntry_stmt() {
         delete this.__proto__.insertEntry_stmt;
         return this.__proto__.insertEntry_stmt = createStatement(
-        'INSERT INTO entries (feedID, id, secondaryID, providedID, entryURL, date, authors) ' +
-        'VALUES (:feedID, :id, :secondaryID, :providedID, :entryURL, :date, :authors)       ');
+        'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
+        'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date)        ');
     },
 
     get insertEntryText_stmt BriefStorage_insertEntryText_stmt() {
         delete this.__proto__.insertEntryText_stmt;
         return this.__proto__.insertEntryText_stmt = createStatement(
-               'INSERT INTO entries_text (rowid, title, content) ' +
-               'VALUES(last_insert_rowid(), :title, :content)    ');
+               'INSERT INTO entries_text (rowid, title, content, authors) ' +
+               'VALUES(last_insert_rowid(), :title, :content, :authors)   ');
     },
 
     get updateEntry_stmt BriefStorage_updateEntry_stmt() {
         delete this.__proto__.updateEntry_stmt;
         return this.__proto__.updateEntry_stmt = createStatement(
-               'UPDATE entries                                                   ' +
-               'SET date = :date, authors = :authors, read = :read, updated = 1  ' +
-               'WHERE id = :id                                                   ');
+               'UPDATE entries                               ' +
+               'SET date = :date, read = :read, updated = 1  ' +
+               'WHERE primaryHash = :primaryHash             ');
     },
 
     get updateEntryText_stmt BriefStorage_updateEntryText_stmt() {
         delete this.__proto__.updateEntryText_stmt;
         return this.__proto__.updateEntryText_stmt = createStatement(
-               'UPDATE entries_text                                      ' +
-               'SET title = :title, content = :content                   ' +
-               'WHERE rowid = (SELECT rowid FROM entries WHERE id = :id) ');
+               'UPDATE entries_text                                                    ' +
+               'SET title = :title, content = :content, authors = :authors             ' +
+               'WHERE rowid = (SELECT id FROM entries WHERE primaryHash = :primaryHash)');
     },
 
-    get checkByPrimaryID_stmt BriefStorage_checkByPrimaryID_stmt() {
-        delete this.__proto__.checkByPrimaryID_stmt;
-        return this.__proto__.checkByPrimaryID_stmt = createStatement(
-               'SELECT date FROM entries WHERE id = :id');
+    get checkByPrimaryHash_stmt BriefStorage_checkByPrimaryHash_stmt() {
+        delete this.__proto__.checkByPrimaryHash_stmt;
+        return this.__proto__.checkByPrimaryHash_stmt = createStatement(
+               'SELECT date FROM entries WHERE primaryHash = :primaryHash');
     },
 
-    get checkBySecondaryID_stmt BriefStorage_checkBySecondaryID_stmt() {
-        delete this.__proto__.checkBySecondaryID_stmt;
-        return this.__proto__.checkBySecondaryID_stmt = createStatement(
-               'SELECT date FROM entries WHERE secondaryID = :secondaryID');
+    get checkBySecondaryHash_stmt BriefStorage_checkBySecondaryHash_stmt() {
+        delete this.__proto__.checkBySecondaryHash_stmt;
+        return this.__proto__.checkBySecondaryHash_stmt = createStatement(
+               'SELECT date FROM entries WHERE secondaryHash = :secondaryHash');
     },
 
 
     processEntry: function BriefStorage_processEntry(aEntry, aFeed) {
         var content = aEntry.content || aEntry.summary;
-
-        // Strip tags
-        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : '';
+        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
         // We have two types of IDs: primary and secondary. The former is used as a
         // unique identifier at all times, while the latter is only used during updating,
         // to work around a bug (see later). Below there are two sets of fields used to
         // produce each of the hashes.
-        var primarySet = aEntry.id ? [aFeed.feedID, aEntry.id]
-                                   : [aFeed.feedID, aEntry.entryURL];
+        var providedID = aEntry.wrappedEntry.id;
+        var primarySet = providedID ? [aFeed.feedID, providedID]
+                                    : [aFeed.feedID, aEntry.entryURL];
         var secondarySet = [aFeed.feedID, aEntry.entryURL];
 
         // Special case for MediaWiki feeds: include the date in the hash. In
@@ -594,10 +647,10 @@ BriefStorageService.prototype = {
         if (generator && generator.agent.match('MediaWiki')) {
             primarySet.push(aEntry.date);
             secondarySet.push(aEntry.date);
-         }
+        }
 
-        var primaryID = hashString(primarySet.join(''));
-        var secondaryID = hashString(secondarySet.join(''));
+        var primaryHash = hashString(primarySet.join(''));
+        var secondaryHash = hashString(secondarySet.join(''));
 
         // Sometimes the provided GUID is lost (maybe a bug in the parser?) and
         // having an empty GUID effects in a different hash, which leads to
@@ -607,13 +660,13 @@ BriefStorageService.prototype = {
         //
         // While checking, we also get the date which we'll need to see if the
         // stored entry needs to be updated.
-        if (!aEntry.id) {
-            var check = this.checkBySecondaryID_stmt;
-            check.params.secondaryID = secondaryID;
+        if (!providedID) {
+            var check = this.checkBySecondaryHash_stmt;
+            check.params.secondaryHash = secondaryHash;
         }
         else {
-            check = this.checkByPrimaryID_stmt;
-            check.params.id = primaryID;
+            check = this.checkByPrimaryHash_stmt;
+            check.params.primaryHash = primaryHash;
         }
         var entryAlreadyStored = check.step();
         var storedEntryDate = entryAlreadyStored ? check.row.date : 0;;
@@ -629,15 +682,15 @@ BriefStorageService.prototype = {
                 let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
                 var update = this.updateEntry_stmt;
                 update.params.date = aEntry.date;
-                update.params.authors = aEntry.authors;
                 update.params.read = markUnread ? 0 : 1;
-                update.params.id = primaryID;
+                update.params.primaryHash = primaryHash;
                 update.execute();
 
                 update = this.updateEntryText_stmt;
                 update.params.title = aEntry.title;
                 update.params.content = content;
-                update.params.id = primaryID;
+                update.params.authors = aEntry.authors;
+                update.params.primaryHash = primaryHash;
                 update.execute();
 
                 entryInserted = true;
@@ -646,17 +699,17 @@ BriefStorageService.prototype = {
         else {
             var insert = this.insertEntry_stmt;
             insert.params.feedID = aFeed.feedID;
-            insert.params.id = primaryID;
-            insert.params.secondaryID = secondaryID;
-            insert.params.providedID = aEntry.id;
+            insert.params.primaryHash = primaryHash;
+            insert.params.secondaryHash = secondaryHash;
+            insert.params.providedID = providedID;
             insert.params.entryURL = aEntry.entryURL;
             insert.params.date = aEntry.date || Date.now();
-            insert.params.authors = aEntry.authors;
             insert.execute();
 
             insert = this.insertEntryText_stmt;
             insert.params.title = aEntry.title;
             insert.params.content = content;
+            insert.params.authors = aEntry.authors;
             insert.execute();
 
             entryInserted = true;
@@ -1328,11 +1381,11 @@ BriefQuery.prototype = {
     // nsIBriefQuery
     getEntries: function BriefQuery_getEntries() {
         var select = createStatement(
-                     'SELECT entries.id, entries.feedID, entries.entryURL,          ' +
-                     '       entries.date, entries.authors, entries.read,           ' +
-                     '       entries.starred, entries.updated, entries.bookmarkID,  ' +
-                     '       entries_text.title, entries_text.content               ' +
-                      this.getQueryStringForSelect());
+            'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,        ' +
+            '       entries.read, entries.starred, entries.updated, entries.bookmarkID,' +
+            '       entries_text.title, entries_text.content, entries_text.authors     ' +
+            this.getQueryStringForSelect());
+
         var entries = [];
         try {
             while (select.step()) {
@@ -1552,10 +1605,10 @@ BriefQuery.prototype = {
 
         if (aForSelect) {
             var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                       ' INNER JOIN entries_text ON entries.rowid = entries_text.rowid WHERE ';
+                       ' INNER JOIN entries_text ON entries.id = entries_text.rowid WHERE ';
         }
         else {
-            text = ' WHERE entries.rowid IN (SELECT entries.rowid FROM entries INNER JOIN ' +
+            text = ' WHERE entries.id IN (SELECT entries.id FROM entries INNER JOIN ' +
                    ' feeds ON entries.feedID = feeds.feedID ';
             if (this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
                 text += ' INNER JOIN entries_text ON entries.rowid = entries_text.rowid ';

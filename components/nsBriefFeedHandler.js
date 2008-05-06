@@ -81,7 +81,7 @@ function FeedEntry() { }
 FeedEntry.prototype = {
 
     feedID:   '',
-    id:       '',
+    id:       0,
     entryURL: '',
     title:    '',
     summary:  '',
@@ -97,9 +97,6 @@ FeedEntry.prototype = {
 
     wrapEntry: function BriefFeedEntry_wrapEntry(aEntry) {
         this.wrappedEntry = aEntry;
-
-        if (aEntry.id)
-            this.id = aEntry.id;
 
         if (aEntry.title)
             this.title = aEntry.title.text;

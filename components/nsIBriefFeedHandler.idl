@@ -14,7 +14,7 @@ interface nsIBriefFeedEntry : nsISupports {
   /**
    * These attributes contain entry's data.
    */
-  attribute string id;
+  attribute unsigned long long id;
 
   attribute AUTF8String entryURL;
 
