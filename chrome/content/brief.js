@@ -291,7 +291,7 @@ var gCommands = {
     },
 
     updateAllFeeds: function cmd_updateAllFeeds() {
-        gUpdateService.updateAllFeeds(false);
+        gUpdateService.updateAllFeeds();
     },
 
     stopUpdating: function cmd_stopUpdating() {

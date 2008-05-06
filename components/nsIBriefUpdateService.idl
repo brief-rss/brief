@@ -30,21 +30,21 @@ interface nsIBriefUpdateService : nsISupports {
   readonly attribute unsigned long completedFeedsCount;
 
   /**
-   * Download feeds and check them for updates.
+   * Downloads feeds and check them for updates.
    *
-   * @param feeds         Array of nsIBriefFeed's to be downloaded.
-   * @param inBackground  Use longer delay between requesting subsequent feeds
-   *                      in order to reduce the CPU load.
+   * @param feeds Array of nsIBriefFeed's to be downloaded.
+   * @param background [optional] Use longer delay between requesting subsequent
+   *                   feeds in order to reduce the CPU load.
    */
-  void updateFeeds(in nsIVariant feeds, in boolean inBackground);
+  void updateFeeds(in nsIVariant feeds, [optional] in boolean background);
 
   /**
-   * Download and check for updates all the feeds in the database.
+   * Downloads and checks for updates all the feeds in the database.
    *
-   * @param inBackground  Use longer delay between requesting subsequent feeds
-   *                      in order to reduce the CPU load.
+   * @param background [optional] Use longer delay between requesting subsequent
+   *                   feeds in order to reduce the CPU load.
    */
-  void updateAllFeeds(in boolean inBackground);
+  void updateAllFeeds([optional] in boolean background);
 
   /**
    * Cancel the remaining update batch.

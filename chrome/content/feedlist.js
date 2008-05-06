@@ -614,7 +614,7 @@ var gContextMenu = {
 
 
     updateFeed: function gContextMenu_updateFeed() {
-        gUpdateService.updateFeeds([this.targetFeed], false);
+        gUpdateService.updateFeeds([this.targetFeed]);
     },
 
 
@@ -627,7 +627,7 @@ var gContextMenu = {
                 feeds.push(gStorage.getFeed(items[i].id));
         }
 
-        gUpdateService.updateFeeds(feeds, false);
+        gUpdateService.updateFeeds(feeds);
     },
 
 
