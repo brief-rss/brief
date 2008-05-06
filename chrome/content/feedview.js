@@ -164,7 +164,7 @@ FeedView.prototype = {
         if (gPrefs.entrySelectionEnabled) {
             var entryElement = this.selectedElement.nextSibling;
             if (entryElement)
-                this.selectEntry(entryElement.id, true, true);
+                this.selectEntry(parseInt(entryElement.id), true, true);
             else
                 this.currentPage++;
         }
@@ -180,7 +180,7 @@ FeedView.prototype = {
         if (gPrefs.entrySelectionEnabled) {
             var entryElement = this.selectedElement.previousSibling;
             if (entryElement) {
-                this.selectEntry(entryElement.id, true, true);
+                this.selectEntry(parseInt(entryElement.id), true, true);
             }
             // Normally we wouldn't have to check |currentPage > 1|, because
             // the setter validates its input. However, we don't want to set
@@ -206,7 +206,7 @@ FeedView.prototype = {
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollSmoothly) {
         if (this.isActive) {
-            var entry = (typeof aEntry == 'string' || !aEntry) ? aEntry : aEntry.id;
+            var entry = (typeof aEntry == 'string' || !aEntry) ? aEntry : parseInt(aEntry.id);
 
             if (this.selectedElement)
                 this.selectedElement.removeAttribute('selected');
@@ -234,7 +234,7 @@ FeedView.prototype = {
             var previousElement = middleElement.previousSibling;
 
         if (previousElement)
-            this.scrollToEntry(previousElement.id, aSmooth);
+            this.scrollToEntry(parseInt(previousElement.id), aSmooth);
     },
 
 
@@ -246,7 +246,7 @@ FeedView.prototype = {
             var nextElement = middleElement.nextSibling;
 
         if (nextElement)
-            this.scrollToEntry(nextElement.id, aSmooth);
+            this.scrollToEntry(parseInt(nextElement.id), aSmooth);
     },
 
 
@@ -375,10 +375,11 @@ FeedView.prototype = {
 
         for (let i = 0; i < entries.length; i++) {
             let entryTop = entries[i].offsetTop;
-            let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(entries[i].id) != -1);
+            let id = parseInt(entries[i].id);
+            let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(id) != -1);
 
             if ((entryTop >= winTop) && (entryTop < winBottom - 50) && !wasMarkedUnread)
-                entriesToMark.push(entries[i].id);
+                entriesToMark.push(id);
         }
 
         if (entriesToMark.length) {
@@ -448,28 +449,29 @@ FeedView.prototype = {
 
     handleEvent: function FeedView_handleEvent(aEvent) {
         var target = aEvent.target;
+        var id = parseInt(target.id);
 
         switch (aEvent.type) {
 
             // Forward commands from the view to the controller.
             case 'SwitchEntryRead':
                 var newState = target.hasAttribute('read');
-                gCommands.markEntryRead(target.id, newState);
+                gCommands.markEntryRead(id, newState);
                 break;
             case 'DeleteEntry':
-                gCommands.deleteEntry(target.id);
+                gCommands.deleteEntry(id);
                 break;
             case 'RestoreEntry':
-                gCommands.restoreEntry(target.id);
+                gCommands.restoreEntry(id);
                 break;
             case 'SwitchEntryStarred':
                 var newState = target.hasAttribute('starred');
-                gCommands.starEntry(target.id, newState);
+                gCommands.starEntry(id, newState);
                 break;
 
             case 'EntryUncollapsed':
                 if (gPrefs.autoMarkRead && !this.query.unread)
-                    gCommands.markEntryRead(target.id, true);
+                    gCommands.markEntryRead(id, true);
                 break;
 
             case 'load':
@@ -506,7 +508,7 @@ FeedView.prototype = {
         }
 
         if (gPrefs.entrySelectionEnabled && entryElement)
-            gFeedView.selectEntry(entryElement.id);
+            gFeedView.selectEntry(parseInt(entryElement.id));
 
         // We intercept clicks on the article title link, so that we can mark the
         // entry as read and force opening in a new tab if necessary. We can't
