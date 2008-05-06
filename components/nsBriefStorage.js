@@ -1399,7 +1399,7 @@ BriefQuery.prototype = {
             'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,        ' +
             '       entries.read, entries.starred, entries.updated, entries.bookmarkID,' +
             '       entries_text.title, entries_text.content, entries_text.authors     ' +
-            this.getQueryStringForSelect());
+            this.getQueryString(true, true));
 
         var entries = [];
         try {
@@ -1437,7 +1437,7 @@ BriefQuery.prototype = {
     // nsIBriefQuery
     getSimpleEntryList: function BriefQuery_getSimpleEntryList() {
         var select = createStatement('SELECT entries.id, entries.feedID ' +
-                                     this.getQueryStringForSelect());
+                                     this.getQueryString(true));
         var entries = [];
         var feeds = [];
         try {
@@ -1469,14 +1469,12 @@ BriefQuery.prototype = {
     getEntryCount: function BriefQuery_getEntryCount() {
         // Optimization: ignore sorting settings.
         [this.sortOrder, temp] = [Ci.nsIBriefQuery.NO_SORT, this.sortOrder];
-        var select = createStatement('SELECT COUNT(1) AS count ' +
-                                     this.getQueryStringForSelect());
+        var select = createStatement('SELECT COUNT(1) AS count ' + this.getQueryString(true));
         this.sortOrder = temp;
 
-        var count = 0;
         try {
             select.step();
-            count = select.row.count;
+            var count = select.row.count;
         }
         catch (ex) {
             // See BriefQuery.getEntries()
@@ -1485,6 +1483,7 @@ BriefQuery.prototype = {
         finally {
             select.reset();
         }
+
         return count;
     },
 
@@ -1616,23 +1615,26 @@ BriefQuery.prototype = {
     /**
      * Constructs SQL query constraints based on attributes of this nsIBriefQuery object.
      *
-     * @param aForSelect Build a string optimized for a SELECT statement.
+     * @param aForSelect       Build a string optimized for a SELECT statement.
+     * @param aJoinEntriesText Forces JOINing entries_text table (otherwise, it is
+     *                         JOINed only if it's used by the query constraints).
      * @returns String containing the part of an SQL statement after the WHERE clause.
      */
-    getQueryString: function BriefQuery_getQueryString(aForSelect) {
+    getQueryString: function BriefQuery_getQueryString(aForSelect, aJoinEntriesText) {
         var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
 
         if (aForSelect) {
-            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                       ' INNER JOIN entries_text ON entries.id = entries_text.rowid WHERE ';
+            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ';
         }
         else {
             text = ' WHERE entries.id IN (SELECT entries.id FROM entries INNER JOIN ' +
                    ' feeds ON entries.feedID = feeds.feedID ';
-            if (this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
-                text += ' INNER JOIN entries_text ON entries.rowid = entries_text.rowid ';
-            text += ' WHERE ';
         }
+
+        if (aJoinEntriesText || this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
+            text += ' INNER JOIN entries_text ON entries.id = entries_text.rowid ';
+
+        text += ' WHERE ';
 
         if (this.folders) {
             this.effectiveFolders = this.folders;
@@ -1729,10 +1731,6 @@ BriefQuery.prototype = {
         return text;
     },
 
-    getQueryStringForSelect: function BriefQuery_getQueryStringForSelect() {
-        return this.getQueryString(true);
-    },
-
     traverseFolderChildren: function BriefQuery_traverseFolderChildren(aFolder) {
         var isEffectiveFolder = (this.effectiveFolders.indexOf(aFolder) != -1);
         var items = gStorageService.getAllFeedsAndFolders();
@@ -1780,8 +1778,8 @@ function hashString(aString) {
 
 function reportError(aException, aRethrow) {
     var message = aException.message;
-    message += 'Stack: ' + aException.stack;
-    message += 'Database error: ' + gConnection.lastErrorString;
+    message += ' Stack: ' + aException.stack;
+    message += ' Database error: ' + gConnection.lastErrorString;
     var error = new Error(message, aException.fileName, aException.lineNumber);
     if (aRethrow)
         throw(error);
