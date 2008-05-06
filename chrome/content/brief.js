@@ -229,9 +229,10 @@ var gObserver = {
             // If view wasn't invalidated, we still may have to visually adjust entries.
             if (gFeedView.isActive && viewIsCool) {
                 var nodes = gFeedView.feedContent.childNodes;
-                for (i = 0; i < nodes.length; i++) {
-                    if (changedEntries.indexOf(nodes[i].id) != -1)
-                        gFeedView.onEntryMarkedRead(nodes[i].id, aChangeType == 'read');
+                for (let i = 0; i < nodes.length; i++) {
+                    let id = parseInt(nodes[i].id);
+                    if (changedEntries.indexOf(id) != -1)
+                        gFeedView.onEntryMarkedRead(id, aChangeType == 'read');
                 }
             }
 
@@ -250,9 +251,10 @@ var gObserver = {
             // If view wasn't invalidated, we still may have to visually adjust entries.
             if (gFeedView.isActive && viewIsCool) {
                 var nodes = gFeedView.feedContent.childNodes;
-                for (i = 0; i < nodes.length; i++) {
-                    if (changedEntries.indexOf(nodes[i].id) != -1)
-                        gFeedView.onEntryStarred(nodes[i].id, aChangeType == 'starred');
+                for (let i = 0; i < nodes.length; i++) {
+                    let id = parseInt(nodes[i].id);
+                    if (changedEntries.indexOf(id) != -1)
+                        gFeedView.onEntryStarred(id, aChangeType == 'starred');
                 }
             }
 
@@ -329,7 +331,7 @@ var gCommands = {
 
         var entries = gFeedView.feedContent.childNodes;
         for (var i = 0; i < entries.length; i++)
-            gFeedView.collapseEntry(entries[i].id, newState, false);
+            gFeedView.collapseEntry(parseInt(entries[i].id), newState, false);
 
         if (newState) {
             gFeedView.feedContent.setAttribute('showHeadlinesOnly', true);
@@ -439,7 +441,7 @@ var gCommands = {
 
         if (!aEntryElement.hasAttribute('read')) {
             aEntryElement.setAttribute('read', true);
-            var query = new QuerySH(null, [aEntryElement.id], null);
+            var query = new QuerySH(null, [parseInt(aEntryElement.id)], null);
             query.markEntriesRead(true);
         }
     },
