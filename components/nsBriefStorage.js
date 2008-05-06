@@ -42,7 +42,8 @@ const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'entryAgeLimit   INTEGER DEFAULT 0,   ' +
                            'maxEntries      INTEGER DEFAULT 0,   ' +
                            'updateInterval  INTEGER DEFAULT 0,   ' +
-                           'dateModified    INTEGER DEFAULT 0    ';
+                           'dateModified    INTEGER DEFAULT 0,   ' +
+                           'markModifiedEntriesUnread INTEGER DEFAULT 1 ';
 const ENTRIES_TABLE_SCHEMA = 'id          TEXT UNIQUE,        ' +
                              'feedID      TEXT,               ' +
                              'secondaryID TEXT,               ' +
