@@ -237,7 +237,6 @@
                         this.sendEvent('SwitchEntryRead', true);
                         break;
                     case 'switchStarred':
-                        this.starred = !this.starred;
                         this.sendEvent('SwitchEntryStarred');
                         break;
                     case 'delete':

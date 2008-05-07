@@ -465,7 +465,7 @@ FeedView.prototype = {
                 gCommands.restoreEntry(id);
                 break;
             case 'SwitchEntryStarred':
-                var newState = target.hasAttribute('starred');
+                var newState = !target.hasAttribute('starred');
                 gCommands.starEntry(id, newState);
                 break;
 

@@ -19,9 +19,8 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 // How long to keep entries from feeds which are no longer in the home folder.
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
-const BOOKMARKS_OBSERVER_DELAY = 250;
+const LIVEMARKS_SYNC_DELAY = 250;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-
 const DATABASE_VERSION = 8;
 
 const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
@@ -152,9 +151,11 @@ BriefStorageService.prototype = {
             databaseFile.remove(false);
             gConnection = storageService.openUnsharedDatabase(databaseFile);
             this.setupDatabase();
+            gConnection.schemaVersion = DATABASE_VERSION;
         }
         else if (databaseIsNew) {
             this.setupDatabase();
+            gConnection.schemaVersion = DATABASE_VERSION;
         }
         else if (gConnection.schemaVersion < DATABASE_VERSION) {
             // Remove the old backup file.
@@ -178,17 +179,19 @@ BriefStorageService.prototype = {
     },
 
     setupDatabase: function BriefStorage_setupDatabase() {
-        //executeSQL('DROP TABLE IF EXISTS feeds');
-        //executeSQL('DROP TABLE IF EXISTS entries');
-
-        executeSQL('CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA + ')');
-        executeSQL('CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA + ')');
-        executeSQL('CREATE VIRTUAL TABLE entries_text using fts3(' + ENTRIES_TEXT_TABLE_SCHEMA + ')');
+        executeSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')                  ');
+        executeSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')              ');
+        executeSQL('CREATE VIRTUAL TABLE entries_text using fts3('+ENTRIES_TEXT_TABLE_SCHEMA+')');
 
         executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
         executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
 
-        gConnection.schemaVersion = DATABASE_VERSION;
+        // Speed up lookup when checking for updates.
+        executeSQL('CREATE INDEX IF NOT EXISTS entries_primaryHash_index ON entries (primaryHash) ');
+
+        // Speed up SELECTs in the bookmarks observer.
+        executeSQL('CREATE INDEX IF NOT EXISTS entries_bookmarkID_index ON entries (bookmarkID) ');
+        executeSQL('CREATE INDEX IF NOT EXISTS entries_entryURL_index ON entries (entryURL)     ');
     },
 
 
@@ -356,12 +359,7 @@ BriefStorageService.prototype = {
             executeSQL('DROP TABLE entries       ');
             executeSQL('DROP TABLE entries_text  ');
 
-            // Recreate tables and indices.
-            executeSQL('CREATE TABLE entries ('+ENTRIES_TABLE_SCHEMA+')                             ');
-            executeSQL('CREATE VIRTUAL TABLE entries_text using fts3('+ENTRIES_TEXT_TABLE_SCHEMA+') ');
-            executeSQL('CREATE INDEX entries_feedID_index ON entries (feedID)                       ');
-            executeSQL('CREATE INDEX entries_date_index ON entries (date)                           ');
-            executeSQL('CREATE INDEX entries_primaryHash_index ON entries (primaryHash)             ');
+            this.setupDatabase();
 
             // Migrate entries table.
             var cols = 'feedID, providedID, entryURL, date, read, updated, starred, deleted, bookmarkID';
@@ -389,8 +387,6 @@ BriefStorageService.prototype = {
 
 
     bookmarkStarredEntries: function BriefStorage_bookmarkStarredEntries() {
-        var ioService = Cc['@mozilla.org/network/io-service;1'].
-                        getService(Ci.nsIIOService);
         var unfiledFolder = gPlaces.unfiledBookmarksFolderId;
         var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
         var bookmarkedEntries = [];
@@ -403,7 +399,7 @@ BriefStorageService.prototype = {
         gConnection.beginTransaction();
         try {
             while (select.step()) {
-                var uri = ioService.newURI(select.row.entryURL, null, null);
+                var uri = newURI(select.row.entryURL);
                 var title = select.row.title;
                 var entryID = select.row.id;
 
@@ -924,11 +920,11 @@ BriefStorageService.prototype = {
                 gObserverService.removeObserver(this, 'quit-application');
                 gObserverService.removeObserver(this, 'profile-after-change');
 
-                this.bookmarksObserverDelayTimer = null;
+                this.syncDelayTimer = null;
                 break;
 
             case 'timer-callback':
-                this.bookmarksObserverTimerIsRunning = false;
+                this.livemarksSyncPending = false;
                 this.syncWithBookmarks();
                 break;
 
@@ -953,61 +949,139 @@ BriefStorageService.prototype = {
     homeFolderID: -1,
 
     // State properties uses by the bookmarks observer.
-    batchUpdateInProgress: false,
+    bookmarksObserverBatching: false,
     homeFolderContentModified: false,
-    bookmarksObserverTimerIsRunning: false,
+    livemarksSyncPending: false,
 
-    get bookmarksObserverDelayTimer BriefStorage_bookmarksObserverDelayTimer() {
-        if (!this.__bookmarksObserverDelayTimer) {
-            this.__bookmarksObserverDelayTimer = Cc['@mozilla.org/timer;1'].
-                                                 createInstance(Ci.nsITimer);
-        }
-        return this.__bookmarksObserverDelayTimer;
+    get syncDelayTimer BriefStorage_syncDelayTimer() {
+        if (!this.__syncDelayTimer)
+            this.__syncDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+        return this.__syncDelayTimer;
     },
-
 
     // nsINavBookmarkObserver
     onEndUpdateBatch: function BriefStorage_onEndUpdateBatch() {
         if (this.homeFolderContentModified)
-            this.delayedBookmarksSync();
+            this.delayedLivemarksSync();
 
-        this.batchUpdateInProgress = false;
+        this.bookmarksObserverBatching = false;
         this.homeFolderContentModified = false;
     },
 
     // nsINavBookmarkObserver
     onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch() {
-        this.batchUpdateInProgress = true;
+        this.bookmarksObserverBatching = true;
     },
 
     // nsINavBookmarkObserver
     onItemAdded: function BriefStorage_onItemAdded(aItemID, aFolder, aIndex) {
-        if (this.isItemFolder(aItemID) && this.isItemInHomeFolder(aItemID)) {
-            if (this.batchUpdateInProgress)
+        if (isFolder(aItemID) && isInHomeFolder(aItemID)) {
+            if (this.bookmarksObserverBatching)
                 this.homeFolderContentModified = true;
             else
-                this.delayedBookmarksSync();
+                this.delayedLivemarksSync();
+        }
+        else if (!isLivemark(aFolder) && isBookmark(aItemID)) {
+            var select = gStatements.selectEntriesByURL;
+            select.params.url = gPlaces.bookmarks.getBookmarkURI(aItemID).spec;
+
+            var starredEntries = [];
+            try {
+                while (select.step() && !select.row.starred) {
+                    var update = gStatements.updateBookmarkID;
+                    update.params.bookmarkID = aItemID;
+                    update.params.id = select.row.id;
+                    update.execute();
+
+                    starredEntries.push(select.row.id);
+                }
+
+                if (starredEntries.length) {
+                    var query = Cc['@ancestor/brief/query;1'].
+                                createInstance(Ci.nsIBriefQuery);
+                    query.entries = starredEntries;
+                    var list = query.getSimpleEntryList();
+                    gObserverService.notifyObservers(list, 'brief:entry-status-changed',
+                                                     'starred');
+                }
+            }
+            catch (ex) {
+                reportError(ex, true);
+            }
+            finally {
+                select.reset();
+            }
         }
     },
 
     // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
-        if (this.isItemStoredInDB(aItemID) || aItemID == this.homeFolderID) {
-            if (this.batchUpdateInProgress)
+        if (this.isLivemarkStored(aItemID) || aItemID == this.homeFolderID) {
+            if (this.bookmarksObserverBatching)
                 this.homeFolderContentModified = true;
             else
-                this.delayedBookmarksSync();
+                this.delayedLivemarksSync();
+        }
+        else if (!isLivemark(aFolder)) {
+            var select = gStatements.selectEntriesByBookmarkID;
+            select.params.bookmarkID = aItemID;
+
+            var unstarredEntries = [];
+            var bms = gPlaces.bookmarks;
+
+            try {
+                while (select.step() && select.row.starred) {
+                    var id = select.row.id;
+
+                    var uri = newURI(select.row.entryURL);
+                    var bookmarkIDs = bms.getBookmarkIdsForURI(uri, {});
+                    for (let i = 0; i < bookmarkIDs.length; i++) {
+                        var folder = bms.getFolderIdForItem(bookmarkIDs[i]);
+                        if (isBookmark(bookmarkIDs[i]) && !isLivemark(folder)) {
+                            var update = gStatements.updateBookmarkID;
+                            update.params.bookmarkID = bookmarkIDs[i];
+                            update.params.id = id;
+                            update.execute();
+
+                            var entryStillBookmarked = true;
+                            break;
+                        }
+                    }
+
+                    if (!entryStillBookmarked) {
+                        gStatements.unstarEntry.params.id = id;
+                        gStatements.unstarEntry.execute();
+
+                        unstarredEntries.push(id);
+                    }
+                }
+
+                if (unstarredEntries.length) {
+                    var query = Cc['@ancestor/brief/query;1'].
+                                createInstance(Ci.nsIBriefQuery);
+                    query.entries = unstarredEntries;
+                    var list = query.getSimpleEntryList();
+                    gObserverService.notifyObservers(list, 'brief:entry-status-changed',
+                                                     'unstarred');
+                }
+            }
+            catch (ex) {
+                reportError(ex, true);
+            }
+            finally {
+                select.reset();
+            }
         }
     },
 
     // nsINavBookmarkObserver
     onItemMoved: function BriefStorage_onItemMoved(aItemID, aOldParent, aOldIndex,
                                                    aNewParent, aNewIndex) {
-        if (this.isItemStoredInDB(aItemID) || this.isItemInHomeFolder(aItemID)) {
-            if (this.batchUpdateInProgress)
+        if (this.isLivemarkStored(aItemID) || isInHomeFolder(aItemID)) {
+            if (this.bookmarksObserverBatching)
                 this.homeFolderContentModified = true;
             else
-                this.delayedBookmarksSync();
+                this.delayedLivemarksSync();
         }
     },
 
@@ -1031,7 +1105,7 @@ BriefStorageService.prototype = {
             break;
 
         case 'livemark/feedURI':
-            this.delayedBookmarksSync();
+            this.delayedLivemarksSync();
             break;
         }
     },
@@ -1039,56 +1113,16 @@ BriefStorageService.prototype = {
     // nsINavBookmarkObserver
     onItemVisited: function BriefStorage_aOnItemVisited(aItemID, aVisitID, aTime) { },
 
-
-    // Returns TRUE if an item is a livemark or a folder and is in the home folder.
-    isItemInHomeFolder: function BriefStorage_isItemInHomeFolder(aItemID) {
-        if (this.homeFolderID === -1)
-            return false;
-
-        if (this.homeFolderID === aItemID)
-            return true;
-
-        var inHome = false;
-        if (this.isItemFolder(aItemID)) {
-            var parent = aItemID;
-            while (parent !== gPlaces.placesRootId) {
-                parent = gPlaces.bookmarks.getFolderIdForItem(parent);
-                if (parent === this.homeFolderID) {
-                    inHome = true;
-                    break;
-                }
-            }
-        }
-
-        return inHome;
+    isLivemarkStored: function BriefStorage_isLivemarkStored(aItemID) {
+        return !!this.getFeedByBookmarkID(aItemID);
     },
 
-    isItemFolder: function BriefStorage_isItemFolder(aItemID) {
-        return gPlaces.bookmarks.getItemType(aItemID) === gPlaces.bookmarks.TYPE_FOLDER;
-    },
+    delayedLivemarksSync: function BriefStorage_delayedLivemarksSync() {
+        if (this.livemarksSyncPending)
+            this.syncDelayTimer.cancel();
 
-    isItemStoredInDB: function BriefStorage_isItemStoredInDB(aItemID) {
-        var statement = this.checkItemByBookmarkID_stmt;
-        statement.params.bookmarkID = aItemID;
-        statement.step();
-        var retval = (statement.row.count > 0);
-        statement.reset();
-        return retval;
-    },
-
-    delayedBookmarksSync: function BriefStorage_delayedBookmarksSync() {
-        if (this.bookmarksObserverTimerIsRunning)
-            this.bookmarksObserverDelayTimer.cancel();
-
-        this.bookmarksObserverDelayTimer.init(this, BOOKMARKS_OBSERVER_DELAY,
-                                              Ci.nsITimer.TYPE_ONE_SHOT);
-        this.bookmarksObserverTimerIsRunning = true;
-    },
-
-    get checkItemByBookmarkID_stmt BriefStorage_checkItemByBookmarkID_stmt() {
-        delete this.__proto__.checkForBookmarkID_stmt;
-        return this.__proto__.checkForBookmarkID_stmt = createStatement(
-               'SELECT COUNT(1) AS count FROM feeds WHERE feeds.bookmarkID = :bookmarkID');
+        this.syncDelayTimer.init(this, LIVEMARKS_SYNC_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
+        this.livemarksSyncPending = true;
     },
 
 
@@ -1113,9 +1147,41 @@ BriefStorageService.prototype = {
 }
 
 
+// Cached statements.
+var gStatements = {
+
+    get selectEntriesByURL() {
+        var sql = 'SELECT id, starred FROM entries WHERE entryURL = :url';
+        delete this.selectEntriesByURL;
+        return this.selectEntriesByURL = createStatement(sql);
+    },
+
+    get updateBookmarkID() {
+        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :id';
+        delete this.updateBookmarkID;
+        return this.updateBookmarkID = createStatement(sql);
+    },
+
+    get selectEntriesByBookmarkID() {
+        var sql = 'SELECT id, starred, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
+        delete this.selectEntriesByBookmarkID;
+        return this.selectEntriesByBookmarkID = createStatement(sql);
+    },
+
+    get unstarEntry() {
+        var sql = 'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE id = :id';
+        delete this.unstarEntry;
+        return this.unstarEntry = createStatement(sql);
+    }
+
+}
+
+
+
+
 /**
  * Synchronizes the list of feeds stored in the database with
- * the bookmarks available in the user's home folder.
+ * the bookmarks available in the Brief's home folder.
  */
 function BookmarksSynchronizer() {
     if (!this.checkHomeFolder())
@@ -1327,7 +1393,7 @@ BookmarksSynchronizer.prototype = {
             item.rowIndex = this.foundBookmarks.length;
             item.parent = aContainer.itemId.toFixed().toString();
 
-            if (gPlaces.livemarks.isLivemark(node.itemId)) {
+            if (isLivemark(node.itemId)) {
                 var feedURL = gPlaces.livemarks.getFeedURI(node.itemId).spec;
                 item.feedURL = feedURL;
                 item.feedID = hashString(feedURL);
@@ -1560,54 +1626,43 @@ BriefQuery.prototype = {
     },
 
 
-    // nsIBriefQuery
+    /**
+     * nsIBriefQuery
+     *
+     * This functions bookmarks URIs of the selected entries. It doesn't write to the
+     * database or send notifications, that part performed by the bookmarks observer
+     * implemented by BriefStorageService.
+     */
     starEntries: function BriefQuery_starEntries(aState) {
-        var update = createStatement('UPDATE entries SET starred = :starred,  ' +
-                                     'bookmarkID = :bookmarkID WHERE id = :id ');
-        var ioService = Cc['@mozilla.org/network/io-service;1'].
-                        getService(Ci.nsIIOService);
-        var transactions = Cc['@mozilla.org/browser/placesTransactionsService;1'].
-                           getService(Ci.nsIPlacesTransactionsService);
         var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
 
-        gConnection.beginTransaction();
-        try {
-            [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
-            var changedEntriesList = this.getSimpleEntryList();
-            this.includeHiddenFeeds = temp;
-
-            var changedEntries = this.getEntries();
-            for each (entry in changedEntries) {
-                if (aState) {
-                    var uri = ioService.newURI(entry.entryURL, null, null);
-                    var index = gPlaces.bookmarks.DEFAULT_INDEX;
-                    var folder = gPlaces.unfiledBookmarksFolderId;
-                    var bookmarkID = gPlaces.bookmarks.insertBookmark(folder, uri, index,
-                                                                      entry.title);
-                    gPlaces.tagging.tagURI(uri, [tagName]);
-                }
-                else {
-                    // We have to use a transaction, so that tags are removed too.
-                    var txn = transactions.removeItem(entry.bookmarkID);
-                    transactions.doTransaction(txn);
-                }
-
-                update.params.starred = aState ? 1 : 0;
-                update.params.bookmarkID = aState ? bookmarkID : -1;
-                update.params.id = entry.id;
-                update.execute();
+        var entries = this.getEntries();
+        for each (entry in entries) {
+            var uri = newURI(entry.entryURL);
+            if (aState) {
+                var index = gPlaces.bookmarks.DEFAULT_INDEX;
+                var folder = gPlaces.unfiledBookmarksFolderId;
+                gPlaces.bookmarks.insertBookmark(folder, uri, index, entry.title);
+                gPlaces.tagging.tagURI(uri, [tagName]);
+            }
+            else {
+                this.removeAllBookmarksForURI(uri);
             }
         }
-        catch (ex) {
-            reportError(ex, true);
-        }
-        finally {
-            gConnection.commitTransaction();
-        }
+    },
 
-        if (changedEntriesList.getProperty('entries').length) {
-            gObserverService.notifyObservers(changedEntriesList, 'brief:entry-status-changed',
-                                             aState ? 'starred' : 'unstarred');
+    removeAllBookmarksForURI: function BriefQuery_removeAllBookmarksForURI(aURI) {
+        var transactions = Cc['@mozilla.org/browser/placesTransactionsService;1'].
+                           getService(Ci.nsIPlacesTransactionsService);
+
+        var bookmarkIDs = gPlaces.bookmarks.getBookmarkIdsForURI(aURI, {});
+        for each (bookmarkID in bookmarkIDs) {
+            var folder = gPlaces.bookmarks.getFolderIdForItem(bookmarkID);
+            if (!isLivemark(folder)) {
+                // Use a transaction, so that tags are removed too.
+                var txn = transactions.removeItem(bookmarkID);
+                transactions.doTransaction(txn);
+            }
         }
     },
 
@@ -1748,6 +1803,52 @@ BriefQuery.prototype = {
     classID: QUERY_CLASS_ID,
     contractID: QUERY_CONTRACT_ID,
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefQuery])
+}
+
+
+
+// ---------------- Utility functions -----------------
+
+function newURI(aSpec) {
+    return Cc['@mozilla.org/network/io-service;1'].
+           getService(Ci.nsIIOService).
+           newURI(aSpec, null, null);
+}
+
+function isBookmark(aItemID) {
+    return (gPlaces.bookmarks.getItemType(aItemID) === gPlaces.bookmarks.TYPE_BOOKMARK);
+}
+
+function isLivemark(aItemID) {
+    return gPlaces.livemarks.isLivemark(aItemID);
+}
+
+function isFolder(aItemID) {
+    return (gPlaces.bookmarks.getItemType(aItemID) === gPlaces.bookmarks.TYPE_FOLDER);
+}
+
+// Returns TRUE if an item is a subfolder of Brief's home folder.
+function isInHomeFolder(aItemID) {
+    var homeID = gStorageService.homeFolderID;
+    if (homeID === -1)
+        return false;
+
+    if (homeID === aItemID)
+        return true;
+
+    var inHome = false;
+    if (gPlaces.bookmarks.getItemType(aItemID) === gPlaces.bookmarks.TYPE_FOLDER) {
+        var parent = aItemID;
+        while (parent !== gPlaces.placesRootId) {
+            parent = gPlaces.bookmarks.getFolderIdForItem(parent);
+            if (parent === homeID) {
+                inHome = true;
+                break;
+            }
+        }
+    }
+
+    return inHome;
 }
 
 
