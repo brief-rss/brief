@@ -19,7 +19,7 @@
 <!ENTITY foldEntry "Unfold or fold selected item (when in headlines view)">
 <!ENTITY entries.header "Items">
 <!ENTITY markRead "Mark selected item as read or unread">
-<!ENTITY starEntry "Star or unstar selected item">
+<!ENTITY starEntry "Bookmark or unbookmark selected item">
 <!ENTITY moveToTrash "Move selected item to Trash">
 <!ENTITY restoreEntry "Restore selected item (when in Trash)">
 <!ENTITY ctrlM.key "Ctrl + M">
@@ -29,7 +29,7 @@
 <!ENTITY toggleEntrySelection "Toggle entry selection">
 <!ENTITY view.header "View">
 <!ENTITY showAll "Show all items">
-<!ENTITY showStarred "Show starred items">
+<!ENTITY showStarred "Show bookmarked items">
 <!ENTITY showUnread "Show unread items">
 <!ENTITY headlinesView "Toggle headlines view">
 <!ENTITY focusSearchbar "Focus searchbar">
