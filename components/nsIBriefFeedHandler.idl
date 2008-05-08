@@ -5,17 +5,20 @@ interface nsIFeedEntry;
 interface nsIVariant;
 
 /**
- * This interface represents a feed entry. It stores entry's data as well as
- * some additional information about it stored in the database.
+ * This interface represents a feed entry. It is the carrier for
+ * entry's data and all properties associated with the entry.
  */
 [scriptable, uuid(8992831E-7F1D-11DB-B61C-02D955D89593)]
 interface nsIBriefFeedEntry : nsISupports {
 
   /**
-   * These attributes contain entry's data.
+   * Unique number identifying an entry in Brief's database.
    */
   attribute unsigned long long id;
 
+  /**
+   * These attributes contain entry's data.
+   */
   attribute AUTF8String entryURL;
 
   attribute AString title;
@@ -42,7 +45,9 @@ interface nsIBriefFeedEntry : nsISupports {
 
   attribute boolean updated;
 
-
+  /**
+   * ID if the corresponing bookmark, or -1 if entry isn't bookmarked.
+   */
   attribute long long bookmarkID;
 
   /**
@@ -56,7 +61,7 @@ interface nsIBriefFeedEntry : nsISupports {
   attribute nsIFeedEntry wrappedEntry;
 
   /**
-   * Wraps an instance of nsIFeedEntry, mapping some of its selected properties
+   * Wraps an instance of nsIFeedEntry, mapping some of its properties
    * for easier access.
    *
    * @param  feed  nsIFeedEntry object to wrap.
@@ -67,17 +72,20 @@ interface nsIBriefFeedEntry : nsISupports {
 
 
 /**
- * This interface represents a feed. It stores feed's data as well as some
- * additional information about the feed stored in the database.
+ * This interface represents a feed. It is the carrier for feed's
+ * data and all properties associated with the feed.
  */
 [scriptable, uuid(8308ABD6-7F1D-11DB-A716-FFD855D89593)]
 interface nsIBriefFeed : nsISupports {
 
   /**
-   * These attributes contain feed's data.
+   * Unique string identifying an entry in Brief's database.
    */
   attribute string feedID;
 
+  /**
+   * These attributes contain feed's data.
+   */
   attribute AUTF8String feedURL;
 
   attribute AUTF8String websiteURL;
@@ -94,20 +102,21 @@ interface nsIBriefFeed : nsISupports {
 
   attribute AString dateModified;
 
-
   /**
    * base64-encoded data: URI of the favicon of the site under websiteURL.
    */
   attribute string favicon;
 
   /**
-   * This flag indicates what was the date of the oldest entry last time when the feed
-   * was downloaded. This is used to determing which entries that user deleted can be
-   * permanently removed from the database without the risk of them being downloaded
-   * again.
+   * Date of the oldest entry that was available the last time
+   * when the feed was checked for updates.
    */
   attribute unsigned long long oldestEntryDate;
 
+  /**
+   * Index of the Live Bookmark relative to the Brief's home folder
+   * (not to the Live Bookmark's direct parent).
+   */
   attribute unsigned long rowIndex;
 
   attribute boolean isFolder;
@@ -123,7 +132,7 @@ interface nsIBriefFeed : nsISupports {
   attribute string bookmarkID;
 
   /**
-   * The below attributes carry various per-feed preferences.
+   * Feed-specific preferences.
    */
   attribute unsigned long entryAgeLimit;
 
@@ -134,7 +143,7 @@ interface nsIBriefFeed : nsISupports {
   attribute boolean markModifiedEntriesUnread;
 
   /**
-   * The last time the feed was checked for updates.
+   * Last time the feed was checked for updates.
    */
   attribute unsigned long long lastUpdated;
 
