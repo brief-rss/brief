@@ -1466,6 +1466,11 @@ BriefQuery.prototype = {
                 entry.title = select.row.title;
                 entry.content = select.row.content;
 
+                if (entry.starred) {
+                    uri = newURI(entry.entryURL);
+                    entry.tags = gPlaces.tagging.getTagsForURI(uri, {});
+                }
+
                 entries.push(entry);
             }
         }

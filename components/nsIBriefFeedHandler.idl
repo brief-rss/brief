@@ -46,6 +46,11 @@ interface nsIBriefFeedEntry : nsISupports {
   attribute long long bookmarkID;
 
   /**
+   * Array of tags for the entry's URI (if it is bookmarked).
+   */
+  attribute nsIVariant tags;
+
+  /**
    * The wrapped entry (if available).
    */
   attribute nsIFeedEntry wrappedEntry;

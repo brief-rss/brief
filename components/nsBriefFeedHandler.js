@@ -82,16 +82,20 @@ FeedEntry.prototype = {
 
     feedID:   '',
     id:       0,
+
     entryURL: '',
     title:    '',
     summary:  '',
     content:  '',
     date:     0,
     authors:  '',
+
     read:     false,
     starred:  false,
     updated:  false,
+
     bookmarkID: -1,
+    tags: null,
 
     wrappedEntry: null,
 
