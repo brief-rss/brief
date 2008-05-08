@@ -206,7 +206,7 @@ FeedView.prototype = {
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollSmoothly) {
         if (this.isActive) {
-            var entry = (typeof aEntry == 'string' || !aEntry) ? aEntry : parseInt(aEntry.id);
+            var entry = (typeof aEntry == 'number' || !aEntry) ? aEntry : aEntry.id;
 
             if (this.selectedElement)
                 this.selectedElement.removeAttribute('selected');
