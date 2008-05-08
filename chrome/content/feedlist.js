@@ -607,7 +607,7 @@ var gContextMenu = {
         else if (this.targetIsTrashFolder)
             query.deleted = ENTRY_STATE_TRASHED;
         else
-            query.folders = [targetItem.id];
+            query.folders = [this.targetID];
 
         query.markEntriesRead(true);
     },
