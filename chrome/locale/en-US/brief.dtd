@@ -5,7 +5,7 @@
 <!ENTITY headlinesCheckbox.tooltip "Use headlines view">
 <!ENTITY showAll.label "View all">
 <!ENTITY showUnread.label "View unread">
-<!ENTITY showStarred.label "View starred">
+<!ENTITY showStarred.label "View bookmarks">
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY searchScopeButton.tooltip "Change the search scope">
@@ -15,7 +15,7 @@
 <!ENTITY previousPage.tooltip "Show newer items">
 <!ENTITY nextPage.tooltip "Show older items">
 <!ENTITY unreadFolder.label "Unread">
-<!ENTITY starredFolder.label "Starred">
+<!ENTITY starredFolder.label "Bookmarks">
 <!ENTITY trashFolder.label "Trash">
 <!ENTITY ctxMarkFeedRead.label "Mark Feed As Read">
 <!ENTITY ctxMarkFeedUnread.label "Mark Feed As Unread">

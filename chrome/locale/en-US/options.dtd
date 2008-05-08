@@ -19,7 +19,7 @@
 <!ENTITY expirationBefore.label "Remove downloaded items after">
 <!ENTITY expirationAfter.label "days">
 <!ENTITY expirationCheckbox.accesskey "R">
-<!ENTITY starredItemsKept.tooltip "Starred items will be kept">
+<!ENTITY starredItemsKept.tooltip "Bookmarked items will be kept">
 <!ENTITY storedEntriesBefore.label "Store no more than">
 <!ENTITY storedEntriesAfter.label "latest items of each feed">
 <!ENTITY storedEntriesCheckbox.accesskey "n">
