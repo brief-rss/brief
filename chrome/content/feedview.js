@@ -205,25 +205,27 @@ FeedView.prototype = {
      *                         to the target position.
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollSmoothly) {
-        if (this.isActive) {
-            var entry = (typeof aEntry == 'number' || !aEntry) ? aEntry : aEntry.id;
+        if (!this.isActive)
+            return;
 
-            if (this.selectedElement)
-                this.selectedElement.removeAttribute('selected');
+        var entry = (typeof aEntry == 'number' || !aEntry) ? aEntry
+                                                           : parseInt(aEntry.id);
 
-            this.selectedEntry = entry;
+        if (this.selectedElement)
+            this.selectedElement.removeAttribute('selected');
 
-            if (entry) {
-                this.selectedElement.setAttribute('selected', true);
+        this.selectedEntry = entry;
 
-                if (aScroll)
-                    this.scrollToEntry(entry, aScrollSmoothly);
-            }
+        if (entry) {
+            this.selectedElement.setAttribute('selected', true);
+
+            if (aScroll)
+                this.scrollToEntry(entry, aScrollSmoothly);
         }
     },
 
     /**
-     * Scrolls to the next entry after the entry closest to the middle of the screen.
+     * Scrolls to the entry before the entry closest to the middle of the screen.
      *
      * @param aSmooth Set to TRUE to scroll smoothly, FALSE to jump directly to the
      *                target position.
@@ -822,7 +824,7 @@ FeedView.prototype = {
 
         feedTitle.textContent = this.titleOverride || this.title;
 
-        // When a single unfiltered feed is viewed, add subtitle, image, and link.
+        // When a single feed is shown, add subtitle, image, and link.
         if (aFeed) {
             var link = aFeed.websiteURL || aFeed.feedURL;
             if (link) {
