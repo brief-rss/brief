@@ -19,7 +19,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 // How long to keep entries from feeds which are no longer in the home folder.
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
-const LIVEMARKS_SYNC_DELAY = 250;
+const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
 const DATABASE_VERSION = 8;
 
@@ -202,15 +202,15 @@ BriefStorageService.prototype = {
         // from earlier releases we don't know the exact previous version, so we attempt
         // to apply all the changes since the beginning of time.
         case 0:
-            // Columns added in 0.6.
             try {
+                // Columns added in 0.6.
                 executeSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
                 executeSQL('ALTER TABLE entries ADD COLUMN providedID TEXT');
             }
             catch (ex) { }
 
-            // Columns and indices added in 0.7.
             try {
+                // Columns and indices added in 0.7.
                 executeSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
                 executeSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
                 executeSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
@@ -227,20 +227,11 @@ BriefStorageService.prototype = {
         // To 0.8.
         case 1:
             executeSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
-
-            // Abandon the summary column and always store the prefered data
-            // in the content column.
-            var updateEntryContent = createStatement(
-                'UPDATE entries SET content = summary, summary = "" WHERE content = ""');
-            updateEntryContent.execute();
+            executeSQL('UPDATE entries SET content = summary, summary = "" WHERE content = ""');
             // Fall through...
 
         // To 1.0 beta 1
         case 2:
-            // Due to a bug, the next step threw an exception in 1.0 and 1.0.1 for some
-            // users, which caused the below column to be added but the new user_version
-            // wasn't set. We have to catch an the exception caused by attempting to add
-            // an existing column to allow the migration to be completed for those users.
             try {
                 executeSQL('ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
             }
@@ -549,7 +540,7 @@ BriefStorageService.prototype = {
                         aFeed.oldestEntryDate = entries[i].date;
                 }
 
-                let stmt = this.updateFeed_stmt;
+                let stmt = gStatements.updateFeed;
                 let cachedFeed = this.getFeed(aFeed.feedID);
 
                 // Update the properties of the feed (and the cache).
@@ -577,64 +568,6 @@ BriefStorageService.prototype = {
         var subject = Cc['@mozilla.org/variant;1'].createInstance(Ci.nsIWritableVariant);
         subject.setAsInt32(newEntriesCount);
         gObserverService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
-    },
-
-    get updateFeed_stmt BriefStorage_updateFeed_stmt() {
-        delete this.__proto__.updateFeed_stmt;
-        return this.__proto__.updateFeed_stmt = createStatement(
-               'UPDATE feeds                            ' +
-               'SET websiteURL = :websiteURL,           ' +
-               '    subtitle   = :subtitle,             ' +
-               '    imageURL   = :imageURL,             ' +
-               '    imageLink  = :imageLink,            ' +
-               '    imageTitle = :imageTitle,           ' +
-               '    favicon    = :favicon,              ' +
-               '    oldestEntryDate = :oldestEntryDate, ' +
-               '    lastUpdated  = :lastUpdated,        ' +
-               '    dateModified = :dateModified        ' +
-               'WHERE feedID = :feedID                  ');
-    },
-
-    get insertEntry_stmt BriefStorage_insertEntry_stmt() {
-        delete this.__proto__.insertEntry_stmt;
-        return this.__proto__.insertEntry_stmt = createStatement(
-        'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
-        'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date)        ');
-    },
-
-    get insertEntryText_stmt BriefStorage_insertEntryText_stmt() {
-        delete this.__proto__.insertEntryText_stmt;
-        return this.__proto__.insertEntryText_stmt = createStatement(
-               'INSERT INTO entries_text (rowid, title, content, authors) ' +
-               'VALUES(last_insert_rowid(), :title, :content, :authors)   ');
-    },
-
-    get updateEntry_stmt BriefStorage_updateEntry_stmt() {
-        delete this.__proto__.updateEntry_stmt;
-        return this.__proto__.updateEntry_stmt = createStatement(
-               'UPDATE entries                               ' +
-               'SET date = :date, read = :read, updated = 1  ' +
-               'WHERE primaryHash = :primaryHash             ');
-    },
-
-    get updateEntryText_stmt BriefStorage_updateEntryText_stmt() {
-        delete this.__proto__.updateEntryText_stmt;
-        return this.__proto__.updateEntryText_stmt = createStatement(
-               'UPDATE entries_text                                                    ' +
-               'SET title = :title, content = :content, authors = :authors             ' +
-               'WHERE rowid = (SELECT id FROM entries WHERE primaryHash = :primaryHash)');
-    },
-
-    get checkByPrimaryHash_stmt BriefStorage_checkByPrimaryHash_stmt() {
-        delete this.__proto__.checkByPrimaryHash_stmt;
-        return this.__proto__.checkByPrimaryHash_stmt = createStatement(
-               'SELECT date FROM entries WHERE primaryHash = :primaryHash');
-    },
-
-    get checkBySecondaryHash_stmt BriefStorage_checkBySecondaryHash_stmt() {
-        delete this.__proto__.checkBySecondaryHash_stmt;
-        return this.__proto__.checkBySecondaryHash_stmt = createStatement(
-               'SELECT date FROM entries WHERE secondaryHash = :secondaryHash');
     },
 
 
@@ -672,16 +605,16 @@ BriefStorageService.prototype = {
         // While checking, we also get the date which we'll need to see if the
         // stored entry needs to be updated.
         if (!providedID) {
-            var check = this.checkBySecondaryHash_stmt;
-            check.params.secondaryHash = secondaryHash;
+            var select = gStatements.getEntryDateBySecondaryHash;
+            select.params.secondaryHash = secondaryHash;
         }
         else {
-            check = this.checkByPrimaryHash_stmt;
-            check.params.primaryHash = primaryHash;
+            select = gStatements.getEntryDateByPrimaryHash;
+            select.params.primaryHash = primaryHash;
         }
-        var entryAlreadyStored = check.step();
-        var storedEntryDate = entryAlreadyStored ? check.row.date : 0;;
-        check.reset();
+        var entryAlreadyStored = select.step();
+        var storedEntryDate = entryAlreadyStored ? select.row.date : 0;;
+        select.reset();
 
         var entryInserted = false;
 
@@ -691,13 +624,13 @@ BriefStorageService.prototype = {
         if (entryAlreadyStored) {
             if (aEntry.date && storedEntryDate < aEntry.date) {
                 let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
-                var update = this.updateEntry_stmt;
+                var update = gStatements.updateEntry;
                 update.params.date = aEntry.date;
                 update.params.read = markUnread ? 0 : 1;
                 update.params.primaryHash = primaryHash;
                 update.execute();
 
-                update = this.updateEntryText_stmt;
+                update = gStatements.updateEntryText;
                 update.params.title = aEntry.title;
                 update.params.content = content;
                 update.params.authors = aEntry.authors;
@@ -708,7 +641,7 @@ BriefStorageService.prototype = {
             }
         }
         else {
-            var insert = this.insertEntry_stmt;
+            var insert = gStatements.insertEntry;
             insert.params.feedID = aFeed.feedID;
             insert.params.primaryHash = primaryHash;
             insert.params.secondaryHash = secondaryHash;
@@ -717,7 +650,7 @@ BriefStorageService.prototype = {
             insert.params.date = aEntry.date || Date.now();
             insert.execute();
 
-            insert = this.insertEntryText_stmt;
+            insert = gStatements.insertEntryText;
             insert.params.title = aEntry.title;
             insert.params.content = content;
             insert.params.authors = aEntry.authors;
@@ -929,11 +862,9 @@ BriefStorageService.prototype = {
                 break;
 
             case 'nsPref:changed':
-                switch (aData) {
-                    case 'homeFolder':
-                        this.homeFolderID = gPrefs.getIntPref('homeFolder');
-                        this.syncWithBookmarks();
-                        break;
+                if (aData == 'homeFolder') {
+                    this.homeFolderID = gPrefs.getIntPref('homeFolder');
+                    this.syncWithBookmarks();
                 }
                 break;
         }
@@ -961,10 +892,9 @@ BriefStorageService.prototype = {
 
     // nsINavBookmarkObserver
     onEndUpdateBatch: function BriefStorage_onEndUpdateBatch() {
+        this.bookmarksObserverBatching = false;
         if (this.homeFolderContentModified)
             this.delayedLivemarksSync();
-
-        this.bookmarksObserverBatching = false;
         this.homeFolderContentModified = false;
     },
 
@@ -976,19 +906,18 @@ BriefStorageService.prototype = {
     // nsINavBookmarkObserver
     onItemAdded: function BriefStorage_onItemAdded(aItemID, aFolder, aIndex) {
         if (isFolder(aItemID) && isInHomeFolder(aItemID)) {
-            if (this.bookmarksObserverBatching)
-                this.homeFolderContentModified = true;
-            else
-                this.delayedLivemarksSync();
+            this.delayedLivemarksSync();
+            return;
         }
-        else if (!isLivemark(aFolder) && isBookmark(aItemID)) {
+
+        if (!isLivemark(aFolder) && isBookmark(aItemID)) {
             var select = gStatements.selectEntriesByURL;
             select.params.url = gPlaces.bookmarks.getBookmarkURI(aItemID).spec;
 
             var starredEntries = [];
             try {
                 while (select.step() && !select.row.starred) {
-                    var update = gStatements.updateBookmarkID;
+                    var update = gStatements.starEntry;
                     update.params.bookmarkID = aItemID;
                     update.params.id = select.row.id;
                     update.execute();
@@ -1017,12 +946,11 @@ BriefStorageService.prototype = {
     // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
         if (this.isLivemarkStored(aItemID) || aItemID == this.homeFolderID) {
-            if (this.bookmarksObserverBatching)
-                this.homeFolderContentModified = true;
-            else
-                this.delayedLivemarksSync();
+            this.delayedLivemarksSync();
+            return;
         }
-        else if (!isLivemark(aFolder)) {
+
+        if (!isLivemark(aFolder)) {
             var select = gStatements.selectEntriesByBookmarkID;
             select.params.bookmarkID = aItemID;
 
@@ -1032,13 +960,14 @@ BriefStorageService.prototype = {
             try {
                 while (select.step() && select.row.starred) {
                     var id = select.row.id;
-
                     var uri = newURI(select.row.entryURL);
                     var bookmarkIDs = bms.getBookmarkIdsForURI(uri, {});
+
                     for (let i = 0; i < bookmarkIDs.length; i++) {
                         var folder = bms.getFolderIdForItem(bookmarkIDs[i]);
+
                         if (isBookmark(bookmarkIDs[i]) && !isLivemark(folder)) {
-                            var update = gStatements.updateBookmarkID;
+                            var update = gStatements.starEntry;
                             update.params.bookmarkID = bookmarkIDs[i];
                             update.params.id = id;
                             update.execute();
@@ -1077,12 +1006,8 @@ BriefStorageService.prototype = {
     // nsINavBookmarkObserver
     onItemMoved: function BriefStorage_onItemMoved(aItemID, aOldParent, aOldIndex,
                                                    aNewParent, aNewIndex) {
-        if (this.isLivemarkStored(aItemID) || isInHomeFolder(aItemID)) {
-            if (this.bookmarksObserverBatching)
-                this.homeFolderContentModified = true;
-            else
-                this.delayedLivemarksSync();
-        }
+        if (this.isLivemarkStored(aItemID) || isInHomeFolder(aItemID))
+            this.delayedLivemarksSync();
     },
 
     // nsINavBookmarkObserver
@@ -1118,11 +1043,16 @@ BriefStorageService.prototype = {
     },
 
     delayedLivemarksSync: function BriefStorage_delayedLivemarksSync() {
-        if (this.livemarksSyncPending)
-            this.syncDelayTimer.cancel();
+        if (this.bookmarksObserverBatching) {
+            this.homeFolderContentModified = true;
+        }
+        else {
+            if (this.livemarksSyncPending)
+                this.syncDelayTimer.cancel();
 
-        this.syncDelayTimer.init(this, LIVEMARKS_SYNC_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
-        this.livemarksSyncPending = true;
+            this.syncDelayTimer.init(this, LIVEMARKS_SYNC_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
+            this.livemarksSyncPending = true;
+        }
     },
 
 
@@ -1150,22 +1080,74 @@ BriefStorageService.prototype = {
 // Cached statements.
 var gStatements = {
 
+    get updateFeed() {
+        var sql = 'UPDATE feeds                                                  ' +
+                  'SET websiteURL = :websiteURL, subtitle = :subtitle,           ' +
+                  '    imageURL = :imageURL, imageLink = :imageLink,             ' +
+                  '    imageTitle = :imageTitle, favicon = :favicon,             ' +
+                  '    lastUpdated = :lastUpdated, dateModified = :dateModified, ' +
+                  '    oldestEntryDate = :oldestEntryDate                        ' +
+                  'WHERE feedID = :feedID                                        ';
+        delete this.updateFeed;
+        return this.updateFeed = createStatement(sql);
+    },
+
+    get insertEntry() {
+        var sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
+                  'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date)        ';
+        delete this.insertEntry;
+        return this.insertEntry = createStatement(sql);
+    },
+
+    get insertEntryText() {
+        var sql = 'INSERT INTO entries_text (rowid, title, content, authors) ' +
+                  'VALUES(last_insert_rowid(), :title, :content, :authors)   ';
+        delete this.insertEntryText;
+        return this.insertEntryText = createStatement(sql);
+    },
+
+    get updateEntry() {
+        var sql = 'UPDATE entries SET date = :date, read = :read, updated = 1  ' +
+                  'WHERE primaryHash = :primaryHash                            ';
+        delete this.updateEntry;
+        return this.updateEntry = createStatement(sql);
+    },
+
+    get updateEntryText() {
+        var sql = 'UPDATE entries_text SET title = :title, content = :content, authors = :authors ' +
+                  'WHERE rowid = (SELECT id FROM entries WHERE primaryHash = :primaryHash)        ';
+        delete this.updateEntryText;
+        return this.updateEntryText = createStatement(sql);
+    },
+
+    get getEntryDateByPrimaryHash() {
+        var sql = 'SELECT date FROM entries WHERE primaryHash = :primaryHash';
+        delete this.getEntryDateByPrimaryHash;
+        return this.getEntryDateByPrimaryHash = createStatement(sql);
+    },
+
+    get getEntryDateBySecondaryHash() {
+        var sql = 'SELECT date FROM entries WHERE secondaryHash = :secondaryHash';
+        delete this.getEntryDateBySecondaryHash;
+        return this.getEntryDateBySecondaryHash = createStatement(sql);
+    },
+
     get selectEntriesByURL() {
         var sql = 'SELECT id, starred FROM entries WHERE entryURL = :url';
         delete this.selectEntriesByURL;
         return this.selectEntriesByURL = createStatement(sql);
     },
 
-    get updateBookmarkID() {
-        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :id';
-        delete this.updateBookmarkID;
-        return this.updateBookmarkID = createStatement(sql);
-    },
-
     get selectEntriesByBookmarkID() {
         var sql = 'SELECT id, starred, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
         delete this.selectEntriesByBookmarkID;
         return this.selectEntriesByBookmarkID = createStatement(sql);
+    },
+
+    get starEntry() {
+        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :id';
+        delete this.starEntry;
+        return this.starEntry = createStatement(sql);
     },
 
     get unstarEntry() {
@@ -1187,21 +1169,21 @@ function BookmarksSynchronizer() {
     if (!this.checkHomeFolder())
         return;
 
-    this.newLiveBookmarks = [];
+    this.newLivemarks = [];
 
     gConnection.beginTransaction();
     try {
-        // Get the list of bookmarks and folders in the home folder.
-        this.getLiveBookmarks();
+        // Get the list of livemarks and folders in the home folder.
+        this.getLivemarks();
 
         // Get the list of feeds stored in the database.
-        this.getFeeds();
+        this.getStoredFeeds();
 
-        for each (bookmark in this.foundBookmarks) {
+        for each (livemark in this.foundLivemarks) {
             // Search for the bookmarked among the stored feeds.
             let feed = null;
             for (let i = 0; i < this.storedFeeds.length; i++) {
-                if (this.storedFeeds[i].feedID == bookmark.feedID) {
+                if (this.storedFeeds[i].feedID == livemark.feedID) {
                     feed = this.storedFeeds[i];
                     break;
                 }
@@ -1209,12 +1191,12 @@ function BookmarksSynchronizer() {
 
             if (feed) {
                 feed.bookmarked = true;
-                this.updateFeedFromBookmark(bookmark, feed);
+                this.updateFeedFromLivemark(livemark, feed);
             }
             else {
-                this.insertFeed(bookmark);
-                if (!bookmark.isFolder)
-                    this.newLiveBookmarks.push(bookmark);
+                this.insertFeed(livemark);
+                if (!livemark.isFolder)
+                    this.newLivemarks.push(livemark);
             }
         }
 
@@ -1233,10 +1215,10 @@ function BookmarksSynchronizer() {
     }
 
     // Update the newly added feeds.
-    if (this.newLiveBookmarks.length) {
+    if (this.newLivemarks.length) {
         var feeds = [];
-        for each (bookmark in this.newLiveBookmarks)
-            feeds.push(gStorageService.getFeed(bookmark.feedID));
+        for each (livemark in this.newLivemarks)
+            feeds.push(gStorageService.getFeed(livemark.feedID));
 
         var updateService = Cc['@ancestor/brief/updateservice;1'].
                             getService(Ci.nsIBriefUpdateService);
@@ -1247,8 +1229,8 @@ function BookmarksSynchronizer() {
 BookmarksSynchronizer.prototype = {
 
     storedFeeds: null,
-    newLiveBookmarks: null,
-    foundBookmarks: null,
+    newLivemarks: null,
+    foundLivemarks: null,
     feedListChanged: false,
 
     checkHomeFolder: function BookmarksSync_checkHomeFolder() {
@@ -1280,9 +1262,9 @@ BookmarksSynchronizer.prototype = {
 
 
     // Get the list of Live Bookmarks in the user's home folder.
-    getLiveBookmarks: function BookmarksSync_getLiveBookmarks() {
+    getLivemarks: function BookmarksSync_getLivemarks() {
         var homeFolder = gPrefs.getIntPref('homeFolder');
-        this.foundBookmarks = [];
+        this.foundLivemarks = [];
 
         var options = gPlaces.history.getNewQueryOptions();
         var query = gPlaces.history.getNewQuery();
@@ -1295,7 +1277,7 @@ BookmarksSynchronizer.prototype = {
 
 
     // Gets all feeds stored in the database.
-    getFeeds: function BookmarksSync_getFeeds() {
+    getStoredFeeds: function BookmarksSync_getStoredFeeds() {
         var selectAll = createStatement('SELECT feedID, title, rowIndex, isFolder,    ' +
                                         '       parent, bookmarkID, hidden FROM feeds ');
 
@@ -1333,7 +1315,7 @@ BookmarksSynchronizer.prototype = {
     },
 
 
-    updateFeedFromBookmark: function BookmarksSync_updateFeedFromBookmark(aItem, aFeed) {
+    updateFeedFromLivemark: function BookmarksSync_updateFeedFromLivemark(aItem, aFeed) {
         if (aItem.rowIndex == aFeed.rowIndex && aItem.parent == aFeed.parent && aFeed.hidden == 0
             && aItem.title == aFeed.title && aItem.bookmarkID == aFeed.bookmarkID) {
             return;
@@ -1390,7 +1372,7 @@ BookmarksSynchronizer.prototype = {
             item = {};
             item.title = gPlaces.bookmarks.getItemTitle(node.itemId);
             item.bookmarkID = node.itemId;
-            item.rowIndex = this.foundBookmarks.length;
+            item.rowIndex = this.foundLivemarks.length;
             item.parent = aContainer.itemId.toFixed().toString();
 
             if (isLivemark(node.itemId)) {
@@ -1399,14 +1381,14 @@ BookmarksSynchronizer.prototype = {
                 item.feedID = hashString(feedURL);
                 item.isFolder = false;
 
-                this.foundBookmarks.push(item);
+                this.foundLivemarks.push(item);
             }
             else {
                 item.feedURL = '';
                 item.feedID = node.itemId.toFixed().toString();
                 item.isFolder = true;
 
-                this.foundBookmarks.push(item);
+                this.foundLivemarks.push(item);
 
                 if (node instanceof Ci.nsINavHistoryContainerResultNode)
                     this.traversePlacesQueryResults(node);
