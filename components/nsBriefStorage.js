@@ -58,7 +58,14 @@ const ENTRIES_TABLE_SCHEMA = 'id            INTEGER PRIMARY KEY AUTOINCREMENT,' 
                              'deleted       INTEGER DEFAULT 0,  ' +
                              'bookmarkID    INTEGER DEFAULT -1  ';
 
-const ENTRIES_TEXT_TABLE_SCHEMA = 'title, content, authors';
+const ENTRIES_TEXT_TABLE_SCHEMA = 'title   TEXT, '+
+                                  'content TEXT, '+
+                                  'authors TEXT, '+
+                                  'tags    TEXT  ';
+
+const ENTRY_TAGS_TABLE_SCHEMA = 'tagID    INTEGER UNIQUE, ' +
+                                'tagName  TEXT,           ' +
+                                'entryID  INTEGER         ';
 
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
@@ -84,6 +91,12 @@ __defineGetter__('gStringbundle', function() {
                                 getService(Ci.nsIStringBundleService).
                                 createBundle('chrome://brief/locale/brief.properties');
 });
+__defineGetter__('gBms', function() {
+    delete this.gBms;
+    return this.gBms = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
+                       getService(Ci.nsINavBookmarksService);
+});
+
 
 
 function executeSQL(aSQLString) {
@@ -174,14 +187,15 @@ BriefStorageService.prototype = {
 
         this.homeFolderID = gPrefs.getIntPref('homeFolder');
         gPrefs.addObserver('', this, false);
-        gPlaces.bookmarks.addObserver(this, false);
+        gBms.addObserver(this, false);
         gObserverService.addObserver(this, 'quit-application', false);
     },
 
     setupDatabase: function BriefStorage_setupDatabase() {
-        executeSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')                  ');
-        executeSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')              ');
-        executeSQL('CREATE VIRTUAL TABLE entries_text using fts3('+ENTRIES_TEXT_TABLE_SCHEMA+')');
+        executeSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')                   ');
+        executeSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')               ');
+        executeSQL('CREATE TABLE IF NOT EXISTS entry_tags ('+ENTRY_TAGS_TABLE_SCHEMA+')         ');
+        executeSQL('CREATE VIRTUAL TABLE entries_text USING fts3 ('+ENTRIES_TEXT_TABLE_SCHEMA+')');
 
         executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
         executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
@@ -249,7 +263,6 @@ BriefStorageService.prototype = {
             this.recreateFeedsTable();
             this.recomputeIDs();
             executeSQL('ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
-            this.bookmarkStarredEntries();
             // Fall through...
 
         // To 1.2a2
@@ -265,6 +278,7 @@ BriefStorageService.prototype = {
         // To 1.2b3
         case 7:
             this.migrateToNumericIDs();
+            this.bookmarkStarredEntries();
 
         }
 
@@ -378,29 +392,41 @@ BriefStorageService.prototype = {
 
 
     bookmarkStarredEntries: function BriefStorage_bookmarkStarredEntries() {
-        var unfiledFolder = gPlaces.unfiledBookmarksFolderId;
-        var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
-        var bookmarkedEntries = [];
-
-        var select = createStatement('SELECT entryURL, id, title     ' +
-                                     'FROM entries WHERE starred = 1 ');
-        var update = createStatement('UPDATE entries SET bookmarkID = :bookmarkID ' +
-                                     'WHERE id = :entryID                         ');
+        var folder = gBms.unfiledBookmarksFolder;
+        var select = gStm.selectStarredEntries;
+        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID '+
+                  'WHERE id = :entryID                                      ';
+        var update = createStatement(sql);
 
         gConnection.beginTransaction();
         try {
             while (select.step()) {
-                var uri = newURI(select.row.entryURL);
-                var title = select.row.title;
-                var entryID = select.row.id;
+                let alreadyBookmarked = false;
+                let uri = newURI(select.row.entryURL);
+                let title = select.row.title;
 
-                var bookmarkID = gPlaces.bookmarks.insertBookmark(unfiledFolder, uri,
-                                                                  -1, title);
-                gPlaces.tagging.tagURI(uri, [tagName]);
+                // Look for existing bookmarks for entry's URI.
+                if (gBms.isBookmarked(uri)) {
+                    let bookmarkIDs = gBms.getBookmarkIdsForURI(uri, {});
+                    for each (bookmarkID in bookmarkIDs) {
+                        let parent = gBms.getFolderIdForItem(bookmarkID);
+                        if (!isLivemark(parent)) {
+                            alreadyBookmarked = true;
+                            break;
+                        }
+                    }
+                }
 
-                update.params.bookmarkID = bookmarkID;
-                update.params.entryID = entryID;
-                update.execute();
+                if (alreadyBookmarked) {
+                    this.starEntry(true, select.row.id, bookmarkID);
+                }
+                else {
+                    let bookmarkID = gBms.insertBookmark(folder, uri, gBms.DEFAULT_INDEX,
+                                                         title);
+                    update.params.entryID = select.row.id;
+                    update.params.bookmarkID = bookmarkID;
+                    update.execute();
+                }
             }
         }
         catch (ex) {
@@ -540,7 +566,7 @@ BriefStorageService.prototype = {
                         aFeed.oldestEntryDate = entries[i].date;
                 }
 
-                let stmt = gStatements.updateFeed;
+                let stmt = gStm.updateFeed;
                 let cachedFeed = this.getFeed(aFeed.feedID);
 
                 // Update the properties of the feed (and the cache).
@@ -605,11 +631,11 @@ BriefStorageService.prototype = {
         // While checking, we also get the date which we'll need to see if the
         // stored entry needs to be updated.
         if (!providedID) {
-            var select = gStatements.getEntryDateBySecondaryHash;
+            var select = gStm.getEntryDateBySecondaryHash;
             select.params.secondaryHash = secondaryHash;
         }
         else {
-            select = gStatements.getEntryDateByPrimaryHash;
+            select = gStm.getEntryDateByPrimaryHash;
             select.params.primaryHash = primaryHash;
         }
         var entryAlreadyStored = select.step();
@@ -624,13 +650,13 @@ BriefStorageService.prototype = {
         if (entryAlreadyStored) {
             if (aEntry.date && storedEntryDate < aEntry.date) {
                 let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
-                var update = gStatements.updateEntry;
+                var update = gStm.updateEntry;
                 update.params.date = aEntry.date;
                 update.params.read = markUnread ? 0 : 1;
                 update.params.primaryHash = primaryHash;
                 update.execute();
 
-                update = gStatements.updateEntryText;
+                update = gStm.updateEntryText;
                 update.params.title = aEntry.title;
                 update.params.content = content;
                 update.params.authors = aEntry.authors;
@@ -641,7 +667,7 @@ BriefStorageService.prototype = {
             }
         }
         else {
-            var insert = gStatements.insertEntry;
+            var insert = gStm.insertEntry;
             insert.params.feedID = aFeed.feedID;
             insert.params.primaryHash = primaryHash;
             insert.params.secondaryHash = secondaryHash;
@@ -650,7 +676,7 @@ BriefStorageService.prototype = {
             insert.params.date = aEntry.date || Date.now();
             insert.execute();
 
-            insert = gStatements.insertEntryText;
+            insert = gStm.insertEntryText;
             insert.params.title = aEntry.title;
             insert.params.content = content;
             insert.params.authors = aEntry.authors;
@@ -848,7 +874,7 @@ BriefStorageService.prototype = {
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeEntries(true);
 
-                gPlaces.bookmarks.removeObserver(this);
+                gBms.removeObserver(this);
                 gPrefs.removeObserver('', this);
                 gObserverService.removeObserver(this, 'quit-application');
                 gObserverService.removeObserver(this, 'profile-after-change');
@@ -905,41 +931,41 @@ BriefStorageService.prototype = {
 
     // nsINavBookmarkObserver
     onItemAdded: function BriefStorage_onItemAdded(aItemID, aFolder, aIndex) {
-        if (isFolder(aItemID) && isInHomeFolder(aItemID)) {
+        if (isFolder(aItemID) && isInHomeFolder(aFolder)) {
             this.delayedLivemarksSync();
             return;
         }
 
-        if (!isLivemark(aFolder) && isBookmark(aItemID)) {
-            var select = gStatements.selectEntriesByURL;
-            select.params.url = gPlaces.bookmarks.getBookmarkURI(aItemID).spec;
+        // We only care about plain bookmarks and tags.
+        if (isLivemark(aFolder) || !isBookmark(aItemID))
+            return;
 
-            var starredEntries = [];
-            try {
-                while (select.step() && !select.row.starred) {
-                    var update = gStatements.starEntry;
-                    update.params.bookmarkID = aItemID;
-                    update.params.id = select.row.id;
-                    update.execute();
+        // Find entries with the same URI as the added item and tag or star them.
+        gConnection.beginTransaction();
+        try {
+            var url = gBms.getBookmarkURI(aItemID).spec;
+            var isTag = isTagFolder(aFolder);
+            var changedEntries = [];
 
-                    starredEntries.push(select.row.id);
-                }
+            for each (entry in this.getEntriesByURL(url)) {
+                if (isTag)
+                    this.tagEntry(true, entry.id, aItemID, gBms.getItemTitle(aFolder));
+                else if (!entry.starred)
+                    this.starEntry(true, entry.id, aItemID);
 
-                if (starredEntries.length) {
-                    var query = Cc['@ancestor/brief/query;1'].
-                                createInstance(Ci.nsIBriefQuery);
-                    query.entries = starredEntries;
-                    var list = query.getSimpleEntryList();
-                    gObserverService.notifyObservers(list, 'brief:entry-status-changed',
-                                                     'starred');
-                }
+                changedEntries.push(entry.id);
             }
-            catch (ex) {
-                reportError(ex, true);
-            }
-            finally {
-                select.reset();
-            }
+        }
+        catch (ex) {
+            reportError(ex, true);
+        }
+        finally {
+            gConnection.commitTransaction();
+        }
+
+        if (changedEntries.length) {
+            let changeType = isTag ? 'tagged' :'starred';
+            this.notifyOfBookmarkChanges(changedEntries, changeType);
         }
     },
 
@@ -950,87 +976,110 @@ BriefStorageService.prototype = {
             return;
         }
 
-        if (!isLivemark(aFolder)) {
-            var select = gStatements.selectEntriesByBookmarkID;
-            select.params.bookmarkID = aItemID;
+        // We only care about plain bookmarks and tags, but we can't check the type
+        // of the removed item, except for if it was a part of a Live Bookmark.
+        if (isLivemark(aFolder))
+            return;
 
-            var unstarredEntries = [];
-            var bms = gPlaces.bookmarks;
+        // Find entries with bookmarkID of the removed item and untag/unstar them.
+        gConnection.beginTransaction();
+        try {
+            var changedEntries = [];
+            var isTag = isTagFolder(aFolder);
 
-            try {
-                while (select.step() && select.row.starred) {
-                    var id = select.row.id;
-                    var uri = newURI(select.row.entryURL);
-                    var bookmarkIDs = bms.getBookmarkIdsForURI(uri, {});
-
-                    for (let i = 0; i < bookmarkIDs.length; i++) {
-                        var folder = bms.getFolderIdForItem(bookmarkIDs[i]);
-
-                        if (isBookmark(bookmarkIDs[i]) && !isLivemark(folder)) {
-                            var update = gStatements.starEntry;
-                            update.params.bookmarkID = bookmarkIDs[i];
-                            update.params.id = id;
-                            update.execute();
-
-                            var entryStillBookmarked = true;
-                            break;
-                        }
-                    }
-
-                    if (!entryStillBookmarked) {
-                        gStatements.unstarEntry.params.id = id;
-                        gStatements.unstarEntry.execute();
-
-                        unstarredEntries.push(id);
-                    }
-                }
-
-                if (unstarredEntries.length) {
-                    var query = Cc['@ancestor/brief/query;1'].
-                                createInstance(Ci.nsIBriefQuery);
-                    query.entries = unstarredEntries;
-                    var list = query.getSimpleEntryList();
-                    gObserverService.notifyObservers(list, 'brief:entry-status-changed',
-                                                     'unstarred');
+            if (isTag) {
+                for each (entry in this.getEntriesByTagID(aItemID)) {
+                    this.tagEntry(false, entry.id, aItemID);
+                    changedEntries.push(entry.id)
                 }
             }
-            catch (ex) {
-                reportError(ex, true);
+            else {
+                let entries = this.getEntriesByBookmarkID(aItemID);
+
+                // Look for other bookmarks for this URI.
+                if (entries.length) {
+                    let uri = newURI(entries[0].url);
+                    var bookmarks = gBms.getBookmarkIdsForURI(uri, {}).
+                                         filter(isNormalBookmark);
+                }
+
+                for each (entry in entries) {
+                    if (bookmarks.length) {
+                        // If there is another bookmark for this URI, don't unstar the
+                        // entry, but update its bookmarkID to point to that bookmark.
+                        this.starEntry(true, entry.id, bookmarks[0]);
+                    }
+                    else {
+                        this.starEntry(false, entry.id);
+                        changedEntries.push(entry.id);
+                    }
+                }
             }
-            finally {
-                select.reset();
-            }
+        }
+        catch (ex) {
+            reportError(ex, true);
+        }
+        finally {
+            gConnection.commitTransaction();
+        }
+
+        if (changedEntries.length) {
+            let changeType = isTag ? 'untagged' : 'unstarred';
+            this.notifyOfBookmarkChanges(changedEntries, changeType);
         }
     },
 
     // nsINavBookmarkObserver
     onItemMoved: function BriefStorage_onItemMoved(aItemID, aOldParent, aOldIndex,
                                                    aNewParent, aNewIndex) {
-        if (this.isLivemarkStored(aItemID) || isInHomeFolder(aItemID))
+        var wasInHome = this.isLivemarkStored(aItemID);
+        var isInHome = isFolder(aItemID) && isInHomeFolder(aNewParent);
+        if (wasInHome || isInHome)
             this.delayedLivemarksSync();
     },
 
     // nsINavBookmarkObserver
     onItemChanged: function BriefStorage_onItemChanged(aItemID, aProperty,
                                                        aIsAnnotationProperty, aValue) {
-        var feed = this.getFeedByBookmarkID(aItemID);
-        if (!feed)
-            return;
-
         switch (aProperty) {
         case 'title':
-            var update = createStatement('UPDATE feeds SET title = :title WHERE feedID = :feedID');
-            update.params.title = aValue;
-            update.params.feedID = feed.feedID;
-            update.execute();
+            let feed = this.getFeedByBookmarkID(aItemID);
+            if (!feed)
+                return;
 
-            feed.title = aValue; // Update the cached item.
+            gStm.setFeedTitle.params.title = aValue;
+            gStm.setFeedTitle.params.feedID = feed.feedID;
+            gStm.setFeedTitle.execute();
+
+            feed.title = aValue; // Update the cache.
 
             gObserverService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
             break;
 
         case 'livemark/feedURI':
-            this.delayedLivemarksSync();
+            if (this.isLivemarkStored(aItemID))
+                this.delayedLivemarksSync();
+            break;
+
+        case 'uri':
+            // Unstar any entries with the old URI.
+            let entries = this.getEntriesByBookmarkID(aItemID);
+            for each (entry in entries)
+                this.starEntry(false, entry.id);
+
+            let entryIDs = entries.map(function(e) e.id);
+            if (entries.length)
+                this.notifyOfBookmarkChanges(entryIDs, 'unstarred');
+
+            // Star any entries with the new URI.
+            entries = this.getEntriesByURL(aValue);
+            for each (entry in entries)
+                this.starEntry(true, entry.id, aItemID);
+
+            entryIDs = entries.map(function(e) e.id);
+            if (entries.length)
+                this.notifyOfBookmarkChanges(entryIDs, 'starred');
+
             break;
         }
     },
@@ -1055,6 +1104,106 @@ BriefStorageService.prototype = {
         }
     },
 
+    starEntry: function BriefStorage_starEntry(aState, aEntryID, aBookmarkID) {
+        if (aState) {
+            gStm.starEntry.params.bookmarkID = aBookmarkID;
+            gStm.starEntry.params.entryID = aEntryID;
+            gStm.starEntry.execute();
+        }
+        else {
+            gStm.unstarEntry.params.id = aEntryID;
+            gStm.unstarEntry.execute();
+        }
+    },
+
+    tagEntry: function BriefStorage_tagEntry(aState, aEntryID, aTagID, aTagName) {
+        if (aState) {
+            gStm.tagEntry.params.entryID = aEntryID;
+            gStm.tagEntry.params.tagName = aTagName;
+            gStm.tagEntry.params.tagID = aTagID;
+            gStm.tagEntry.execute();
+        }
+        else {
+            gStm.untagEntry.params.tagID = aTagID;
+            gStm.untagEntry.execute();
+        }
+
+        // Refresh the serialized list of tags stored in entries_text table.
+        try {
+            var tags = [];
+            gStm.getEntryTags.params.entryID = aEntryID;
+            while (gStm.getEntryTags.step())
+                tags.push(gStm.getEntryTags.row.tagName);
+
+            gStm.updateEntryTags.params.tags = tags.join(', ');
+            gStm.updateEntryTags.params.entryID = aEntryID;
+            gStm.updateEntryTags.execute();
+        }
+        finally {
+            gStm.getEntryTags.reset();
+        }
+    },
+
+    notifyOfBookmarkChanges: function BriefStorage_notifyOfBookmarkChanges(aEntries,
+                                                                           aChangeType) {
+        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+        query.entries = aEntries;
+        var list = query.getSimpleEntryList();
+        gObserverService.notifyObservers(list, 'brief:entry-status-changed', aChangeType);
+    },
+
+
+    getEntriesByURL: function BriefStorage_getEntriesByURL(aURL) {
+        try {
+            var entries = [];
+            var select = gStm.selectEntriesByURL;
+            select.params.url = aURL;
+            while (select.step()) {
+                entries.push({ id: select.row.id,
+                               starred: select.row.starred });
+            }
+        }
+        finally {
+            select.reset();
+        }
+
+        return entries;
+    },
+
+    getEntriesByBookmarkID: function BriefStorage_getEntriesByBookmarkID(aBookmarkID) {
+        try {
+            var entries = [];
+            var select = gStm.selectEntriesByBookmarkID;
+            select.params.bookmarkID = aBookmarkID;
+            while (select.step()) {
+                entries.push({ id: select.row.id,
+                               url: select.row.entryURL,
+                               starred: select.row.starred });
+            }
+        }
+        finally {
+            select.reset();
+        }
+
+        return entries;
+    },
+
+    getEntriesByTagID: function BriefStorage_getEntriesByTagID(aTagID) {
+        try {
+            var entries = [];
+            var select = gStm.selectEntriesByTagID;
+            select.params.tagID = aTagID;
+            while (select.step()) {
+                entries.push({ id: select.row.id,
+                               url: select.row.entryURL });
+            }
+        }
+        finally {
+            select.reset();
+        }
+
+        return entries;
+    },
 
     classDescription: STORAGE_CLASS_NAME,
     classID: STORAGE_CLASS_ID,
@@ -1078,7 +1227,7 @@ BriefStorageService.prototype = {
 
 
 // Cached statements.
-var gStatements = {
+var gStm = {
 
     get updateFeed() {
         var sql = 'UPDATE feeds                                                  ' +
@@ -1090,6 +1239,12 @@ var gStatements = {
                   'WHERE feedID = :feedID                                        ';
         delete this.updateFeed;
         return this.updateFeed = createStatement(sql);
+    },
+
+    get setFeedTitle() {
+        var sql = 'UPDATE feeds SET title = :title WHERE feedID = :feedID';
+        delete this.setFeedTitle;
+        return this.setFeedTitle = createStatement(sql);
     },
 
     get insertEntry() {
@@ -1144,8 +1299,16 @@ var gStatements = {
         return this.selectEntriesByBookmarkID = createStatement(sql);
     },
 
+    get selectEntriesByTagID() {
+        var sql = 'SELECT id, entryURL FROM entries WHERE id IN (          '+
+                  '    SELECT entryID FROM entry_tags WHERE tagID = :tagID '+
+                  ')                                                       ';
+        delete this.selectEntriesByTagID;
+        return this.selectEntriesByTagID = createStatement(sql);
+    },
+
     get starEntry() {
-        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :id';
+        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
         delete this.starEntry;
         return this.starEntry = createStatement(sql);
     },
@@ -1154,6 +1317,39 @@ var gStatements = {
         var sql = 'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE id = :id';
         delete this.unstarEntry;
         return this.unstarEntry = createStatement(sql);
+    },
+
+    get tagEntry() {
+        var sql = 'INSERT INTO entry_tags (entryID, tagName, tagID) '+
+                  'VALUES (:entryID, :tagName, :tagID)            ';
+        delete this.tagEntry;
+        return this.tagEntry = createStatement(sql);
+    },
+
+    get untagEntry() {
+        var sql = 'DELETE FROM entry_tags WHERE tagID = :tagID';
+        delete this.untagEntry;
+        return this.untagEntry = createStatement(sql);
+    },
+
+    get getEntryTags() {
+        var sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
+        delete this.getEntryTags;
+        return this.getEntryTags = createStatement(sql);
+    },
+
+    get updateEntryTags() {
+        var sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
+        delete this.updateEntryTags;
+        return this.updateEntryTags = createStatement(sql);
+    },
+
+    get selectStarredEntries() {
+        var sql = 'SELECT entries.entryURL, entries.id, entries_text.title                 '+
+                  'FROM entries INNER JOIN entries_text ON entries.id = entries_text.rowid '+
+                  'WHERE starred = 1                                                       ';
+        delete this.selectStarredEntries;
+        return this.selectStarredEntries = createStatement(sql);
     }
 
 }
@@ -1249,7 +1445,7 @@ BookmarksSynchronizer.prototype = {
         else {
             try {
                 // This will throw if the home folder was deleted.
-                gPlaces.bookmarks.getItemTitle(homeFolder);
+                gBms.getItemTitle(homeFolder);
             }
             catch (e) {
                 gPrefs.clearUserPref('homeFolder');
@@ -1370,7 +1566,7 @@ BookmarksSynchronizer.prototype = {
                 continue;
 
             item = {};
-            item.title = gPlaces.bookmarks.getItemTitle(node.itemId);
+            item.title = gBms.getItemTitle(node.itemId);
             item.bookmarkID = node.itemId;
             item.rowIndex = this.foundLivemarks.length;
             item.parent = aContainer.itemId.toFixed().toString();
@@ -1443,17 +1639,19 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     getEntries: function BriefQuery_getEntries() {
-        var select = createStatement(
-            'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,        ' +
-            '       entries.read, entries.starred, entries.updated, entries.bookmarkID,' +
-            '       entries_text.title, entries_text.content, entries_text.authors     ' +
-            this.getQueryString(true, true));
+        var sql = 'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,   '+
+                  '       entries.read, entries.starred, entries.updated,               '+
+                  '       entries.bookmarkID, entries_text.title, entries_text.content, '+
+                  '       entries_text.authors, entries_text.tags                       ';
+        sql += this.getQueryString(true, true);
+        var select = createStatement(sql);
 
         var entries = [];
         try {
             while (select.step()) {
                 var entry = Cc['@ancestor/brief/feedentry;1'].
                             createInstance(Ci.nsIBriefFeedEntry);
+
                 entry.id = select.row.id;
                 entry.feedID = select.row.feedID;
                 entry.entryURL = select.row.entryURL;
@@ -1465,11 +1663,7 @@ BriefQuery.prototype = {
                 entry.bookmarkID = select.row.bookmarkID;
                 entry.title = select.row.title;
                 entry.content = select.row.content;
-
-                if (entry.starred) {
-                    uri = newURI(entry.entryURL);
-                    entry.tags = gPlaces.tagging.getTagsForURI(uri, {});
-                }
+                entry.tags = select.row.tags;
 
                 entries.push(entry);
             }
@@ -1621,34 +1815,26 @@ BriefQuery.prototype = {
      * implemented by BriefStorageService.
      */
     starEntries: function BriefQuery_starEntries(aState) {
-        var tagName = gStringbundle.GetStringFromName('bookmarkedEntryTagName');
+        var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1'].
+                              getService(Ci.nsIPlacesTransactionsService);
+        var folder = gPlaces.unfiledBookmarksFolderId;
 
-        var entries = this.getEntries();
-        for each (entry in entries) {
-            var uri = newURI(entry.entryURL);
+        for each (entry in this.getEntries()) {
+            let uri = newURI(entry.entryURL);
+
             if (aState) {
-                var index = gPlaces.bookmarks.DEFAULT_INDEX;
-                var folder = gPlaces.unfiledBookmarksFolderId;
-                gPlaces.bookmarks.insertBookmark(folder, uri, index, entry.title);
-                gPlaces.tagging.tagURI(uri, [tagName]);
+                gBms.insertBookmark(folder, uri, gBms.DEFAULT_INDEX, entry.title);
             }
             else {
-                this.removeAllBookmarksForURI(uri);
-            }
-        }
-    },
+                let bookmarks = gBms.getBookmarkIdsForURI(uri, {}).
+                                     filter(isNormalBookmark);
+                let transactions = []
+                for (let i = bookmarks.length - 1; i >= 0; i--)
+                    transactions.push(transSrv.removeItem(bookmarks[i]));
 
-    removeAllBookmarksForURI: function BriefQuery_removeAllBookmarksForURI(aURI) {
-        var transactions = Cc['@mozilla.org/browser/placesTransactionsService;1'].
-                           getService(Ci.nsIPlacesTransactionsService);
-
-        var bookmarkIDs = gPlaces.bookmarks.getBookmarkIdsForURI(aURI, {});
-        for each (bookmarkID in bookmarkIDs) {
-            var folder = gPlaces.bookmarks.getFolderIdForItem(bookmarkID);
-            if (!isLivemark(folder)) {
-                // Use a transaction, so that tags are removed too.
-                var txn = transactions.removeItem(bookmarkID);
-                transactions.doTransaction(txn);
+                let transaction = transSrv.aggregateTransactions('Remove items',
+                                                                 transactions);
+                transSrv.doTransaction(transaction);
             }
         }
     },
@@ -1657,12 +1843,12 @@ BriefQuery.prototype = {
     /**
      * Constructs SQL query constraints based on attributes of this nsIBriefQuery object.
      *
-     * @param aForSelect       Build a string optimized for a SELECT statement.
-     * @param aJoinEntriesText Forces JOINing entries_text table (otherwise, it is
-     *                         JOINed only if it's used by the query constraints).
+     * @param aForSelect      Build a string optimized for a SELECT statement.
+     * @param aGetFullEntries Forces including entries_text table (otherwise, it is
+     *                        included only when it is used by the query constraints).
      * @returns String containing the part of an SQL statement after the WHERE clause.
      */
-    getQueryString: function BriefQuery_getQueryString(aForSelect, aJoinEntriesText) {
+    getQueryString: function BriefQuery_getQueryString(aForSelect, aGetFullEntries) {
         var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
 
         if (aForSelect) {
@@ -1673,7 +1859,7 @@ BriefQuery.prototype = {
                    ' feeds ON entries.feedID = feeds.feedID ';
         }
 
-        if (aJoinEntriesText || this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
+        if (aGetFullEntries || this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
             text += ' INNER JOIN entries_text ON entries.id = entries_text.rowid ';
 
         text += ' WHERE ';
@@ -1803,7 +1989,12 @@ function newURI(aSpec) {
 }
 
 function isBookmark(aItemID) {
-    return (gPlaces.bookmarks.getItemType(aItemID) === gPlaces.bookmarks.TYPE_BOOKMARK);
+    return (gBms.getItemType(aItemID) === gBms.TYPE_BOOKMARK);
+}
+
+function isNormalBookmark(aItemID) {
+    let parent = gBms.getFolderIdForItem(aItemID);
+    return !isLivemark(parent) && !isTagFolder(parent);
 }
 
 function isLivemark(aItemID) {
@@ -1811,7 +2002,11 @@ function isLivemark(aItemID) {
 }
 
 function isFolder(aItemID) {
-    return (gPlaces.bookmarks.getItemType(aItemID) === gPlaces.bookmarks.TYPE_FOLDER);
+    return (gBms.getItemType(aItemID) === gBms.TYPE_FOLDER);
+}
+
+function isTagFolder(aItemID) {
+    return (gBms.getFolderIdForItem(aItemID) === gPlaces.tagsFolderId);
 }
 
 // Returns TRUE if an item is a subfolder of Brief's home folder.
@@ -1824,14 +2019,12 @@ function isInHomeFolder(aItemID) {
         return true;
 
     var inHome = false;
-    if (gPlaces.bookmarks.getItemType(aItemID) === gPlaces.bookmarks.TYPE_FOLDER) {
-        var parent = aItemID;
-        while (parent !== gPlaces.placesRootId) {
-            parent = gPlaces.bookmarks.getFolderIdForItem(parent);
-            if (parent === homeID) {
-                inHome = true;
-                break;
-            }
+    var parent = aItemID;
+    while (parent !== gPlaces.placesRootId) {
+        parent = gBms.getFolderIdForItem(parent);
+        if (parent === homeID) {
+            inHome = true;
+            break;
         }
     }
 
