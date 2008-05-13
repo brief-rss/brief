@@ -90,7 +90,7 @@ FeedView.prototype = {
     set currentPage FeedView_currentPage_set(aPage) {
         if (aPage != this.__currentPage && aPage <= this.pageCount && aPage > 0) {
             this.__currentPage = aPage;
-            this._refresh(false);
+            this.refresh(true);
         }
     },
 
@@ -421,7 +421,7 @@ FeedView.prototype = {
 
             // Do it asynchronously, because UI maybe waiting to be redrawn
             // (e.g. after selecting a treeitem).
-            async(this._refresh, 0, this, true);
+            async(this.refresh, 0, this, false);
         }
         else {
             this.browser.loadURI(gTemplateURI.spec);
@@ -443,6 +443,23 @@ FeedView.prototype = {
         clearTimeout(this._markVisibleTimeout);
 
         gFeedView = null;
+    },
+
+
+    // This function sets up the page after it's loaded or after attaching a new FeedView.
+    // It does the initial work, which doesn't have to be done every time when refreshing.
+    _setupTemplatePage: function FeedView__setupTemplatePage() {
+        for each (event in this._events)
+            this.document.addEventListener(event, this, true);
+
+        // Pass some data which bindings need but don't have access to.
+        // We can bypass XPCNW here, because untrusted content is not
+        // inserted until the bindings are attached.
+        var data = {};
+        data.doubleClickMarks = gPrefs.doubleClickMarks;
+        data.markReadString = this.markAsReadStr;
+        data.markUnreadString = this.markAsUnreadStr;
+        this.document.defaultView.wrappedJSObject.gConveyedData = data;
     },
 
 
@@ -484,7 +501,7 @@ FeedView.prototype = {
 
                 if (this.isActive) {
                     this._setupTemplatePage();
-                    this._refresh(true);
+                    this.refresh();
                 }
                 break;
 
@@ -536,20 +553,21 @@ FeedView.prototype = {
     },
 
     onEntriesAdded: function FeedView_onEntriesAdded(aEntries) {
-        if (this.query.deleted === ENTRIES_STATE_NORMAL)
-            this.ensure();
+        if (this.query.deleted === ENTRY_STATE_NORMAL)
+            this._ensure(aEntries.IDs, true);
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntries) {
         var nodes = this.feedContent.childNodes;
         if (this.query.unread && this.entryCount != this.query.getEntryCount() ||
             intersect(nodes, aEntries.IDs)) {
-            this._refresh(true);
+            this.refresh();
         }
     },
 
     onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntries, aNewState) {
-        var entrySetValid = this.query.unread ? this.ensure() : true;
+        var entrySetValid = this.query.unread ? this._ensure(aEntries.IDs, !aNewState)
+                                              : true;
 
         // Refresh the state of visible entries.
         if (entrySetValid && this.isActive) {
@@ -563,7 +581,8 @@ FeedView.prototype = {
     },
 
     onEntriesStarred: function FeedView_onEntriesStarred(aEntries, aNewState) {
-        var entrySetValid = this.query.starred ? this.ensure() : true;
+        var entrySetValid = this.query.starred ? this._ensure(aEntries.IDs, !aEntries.IDs)
+                                               : true;
 
         // If view wasn't invalidated, we still may have to visually adjust entries.
         if (entrySetValid && this.isActive) {
@@ -581,83 +600,86 @@ FeedView.prototype = {
     },
 
     onEntriesDeleted: function FeedView_onEntriesDeleted(aEntries, aNewState) {
-        this.ensure();
-    },
-
-
-    // This function sets up the page after it's loaded or after attaching a new FeedView.
-    // It does the initial work, which doesn't have to be done every time when refreshing.
-    _setupTemplatePage: function FeedView__setupTemplatePage() {
-        for each (event in this._events)
-            this.document.addEventListener(event, this, true);
-
-        // Pass some data which bindings need but don't have access to.
-        // We can bypass XPCNW here, because untrusted content is not
-        // inserted until the bindings are attached.
-        var data = {};
-        data.doubleClickMarks = gPrefs.doubleClickMarks;
-        data.markReadString = this.markAsReadStr;
-        data.markUnreadString = this.markAsUnreadStr;
-        this.document.defaultView.wrappedJSObject.gConveyedData = data;
+        this._ensure(aEntries.IDs, false);
     },
 
 
     /**
-     * Checks if the view is up-to-date (i.e. contains the right set of entries and
-     * displays the correct title) and refreshes it if necessary.
-     * Note: the visual state of entries (read/unread, starred/unstarred) is not verified
-     * and it has to be maintained separately by calling onEntryMarkedRead and
-     * onEntryStarred whenever it is changed.
-     * Note: exhaustively comparing the old and the new entry sets would be very slow.
-     * To speed things up we compare just the numbers of entries, assuming that whenever
-     * the set changes, their number changes too. This assumption holds up for most of
-     * our purposes. If we are not sure if that's true in a particular case, we should
-     * force full refresh by passing TRUE as the parameter.
+     * Checks if the contained set of entries is should change and chooses the
+     * best way to refresh it.
      *
-     * @param aForceRefresh Forces full refresh, without checking.
-     * @returns TRUE if the view was up-to-date, FALSE if it needed refreshing.
+     * @param aModifiedEntries Array of modified entries.
+     * @param aPotentialChange TRUE if the modified entries should potentially be added,
+     *                         FALSE if they may need to be removed.
+     *
+     * @returns TRUE if the entry set was valid, FALSE if it wasn't and the view was
+     *          refreshed.
      */
-    ensure: function FeedView_ensure(aForceRefresh) {
-        if (aForceRefresh) {
-            this._refresh(true);
-            return false;
+    _ensure: function FeedView__ensure(aModifiedEntries, aPotentialChange) {
+        var entrySetChanged = false;
+
+        // The fastest way to check if any of the modified entries should be added
+        // comparing their counts.
+        if (aPotentialChange) {
+            if (this.entryCount != this.query.getEntryCount()) {
+                if (this.isActive && !this.browser.webProgress.isLoadingDocument)
+                    this.refresh();
+                else
+                    async(this._refreshEntryList, 250, this);
+
+                entrySetChanged = true;
+            }
+        }
+        else {
+            // The set of entries that should be removed is the intersection of
+            // the currently contained entries and the modified entries.
+            var indicesToRemove = [];
+            for (let i = 0; i < aModifiedEntries.length; i++) {
+                let index = this._entries.indexOf(aModifiedEntries[i]);
+                if (index != -1)
+                    indicesToRemove.push(index);
+            }
+
+            if (indicesToRemove.length) {
+                // We optimize the case of cutting a single entry from the current page
+                // by gracefully removing just it instead doing a full refresh.
+                if (indicesToRemove.length === 1) {
+                    let removedIndex = indicesToRemove[0];
+                    var singleRemovedEntry = this._entries[removedIndex];
+
+                    let pageStartIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
+                    let pageEndIndex = pageStartIndex + gPrefs.entriesPerPage - 1;
+                    var isVisible = removedIndex >= pageStartIndex &&
+                                    removedIndex <= pageEndIndex;
+
+                    var isLast = removedIndex === this.entryCount - 1 &&
+                                 this.feedContent.childNodes.length === 1;
+                }
+
+                // Cut the removed indices from the entry set.
+                var filter = function(val, i) indicesToRemove.indexOf(i) == -1;
+                this._entries = this._entries.filter(filter);
+
+                if (singleRemovedEntry && !isLast && isVisible)
+                    this._removeEntry(singleRemovedEntry);
+                else
+                    this.refresh(true);
+
+                entrySetChanged = true;
+            }
         }
 
-        var oldCount = this.entryCount;
-        var currentCount = this.query.getEntryCount();
-
-        if (!oldCount || !currentCount || oldCount != currentCount) {
-
-            // If a different page is shown, we don't have to refresh the page,
-            // but we still need to update the entry list.
-            if (!this.isActive || this.browser.webProgress.isLoadingDocument)
-                this._refreshEntryList();
-            else if (oldCount - currentCount == 1)
-                this._refreshOnEntryRemoved();
-            else
-                this._refresh(true);
-
-            return false;
-        }
-
-        var title = this.titleOverride || this.title;
-        var titleElement = this.document.getElementById('feed-title');
-        if (titleElement.textContent != title) {
-            titleElement.textContent = title;
-            return false;
-        }
-
-        return true;
+        return entrySetChanged;
     },
 
 
     /**
      * Refreshes the feed view. Removes the old content and builds the new one.
      *
-     * @param aEntrySetModified Indicates that the set of entries in the view
-     *                          was changed and has to be recomputed.
+     * @param aEntrySetValid Optional. Indicates that the contained set of entries isn't
+     *                       expected to have changed and doesn't have to be recomputed.
      */
-    _refresh: function FeedView_refresh(aEntrySetModified) {
+    refresh: function FeedView_refresh(aEntrySetValid) {
         // Stop scrolling.
         clearInterval(this._smoothScrollInterval);
         this._smoothScrollInterval = null;
@@ -686,29 +708,46 @@ FeedView.prototype = {
         if (!feed)
             this.feedContent.setAttribute('showFeedNames', true);
 
-        var query = this.query;
-        query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
-        query.limit = gPrefs.entriesPerPage;
-        var entries = query.getEntries();
+        var entries = [];
 
-        // For better performance we try to refresh the entry list (and the navigation UI)
-        // asynchronously.
-        // However, sometimes the list has to be refreshed immediately, because it is
-        // required to correctly display the current page. It occurs when currentPage
-        // goes out of range, because the view contains less pages than before.
-        // The offset goes out of range too and the query returns no entries. Therefore,
-        // whenever the query returns no entries, we refresh the entry list immediately
-        // and then redo the query.
-        if (!entries.length) {
-            this._refreshEntryList();
-            query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
-            entries = query.getEntries();
+        // If the entry set hasn't changed, we can pull the entries using
+        // their IDs, which is a big performance win.
+        if (aEntrySetValid) {
+            this._refreshPageNavUI();
+
+            let pageStartIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
+            let pageEndIndex = pageStartIndex + gPrefs.entriesPerPage - 1;
+            let entryIDs = [];
+            for (let i = pageStartIndex; i <= pageEndIndex && this._entries[i]; i++)
+                entryIDs.push(this._entries[i]);
+
+            if (entryIDs.length) {
+                let query = new Query();
+                query.entries = entryIDs;
+                entries = query.getEntries();
+            }
         }
         else {
-            if (aEntrySetModified)
+            let query = this.query;
+            query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
+            query.limit = gPrefs.entriesPerPage;
+            entries = query.getEntries();
+
+            // For better performance we try to refresh the entry list asynchronously.
+            // However, sometimes we have to refresh it immediately to correctly
+            // pick the select entries to display the current page. It occurs when
+            // currentPage goes out of range, because the view contains less pages than
+            // before. The offset goes out of range too and the query returns no entries.
+            // Therefore, whenever the query returns no entries, we refresh the entry list
+            // immediately and then redo the query.
+            if (!entries.length) {
+                this._refreshEntryList();
+                query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
+                entries = query.getEntries();
+            }
+            else {
                 async(this._refreshEntryList, 250, this);
-            else
-                this._refreshPageNavUI();
+            }
         }
 
         // Append the entries.
@@ -748,41 +787,6 @@ FeedView.prototype = {
     },
 
 
-    // Fast path for refreshing the view in the common case of a single
-    // entry having been removed, which allows us to gracefully remove
-    // just it instead of completely refreshing the view.
-    _refreshOnEntryRemoved: function FeedView__refreshOnEntryRemoved() {
-        var oldEntries = this._entries;
-        this._refreshEntryList();
-        var currentEntries = this._entries;
-
-        if (this.feedContent.childNodes.length === 1 && currentEntries
-            && this.currentPage === this.pageCount) {
-            // If the last remaining entry on this page was removed,
-            // do a full refresh to display the previous page.
-            this._refresh(true);
-        }
-        else {
-            // Find the removed entry.
-            for (var i = 0; i < oldEntries.length; i++) {
-                if (!currentEntries || currentEntries.indexOf(oldEntries[i]) === -1) {
-                    var removedEntry = oldEntries[i];
-                    var removedIndex = i;
-                    break;
-                }
-            }
-
-            var startPageIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
-            var endPageIndex = startPageIndex + gPrefs.entriesPerPage - 1;
-
-            if (removedIndex < startPageIndex || removedIndex > endPageIndex)
-                this._refresh(true);
-            else
-                this._removeEntry(removedEntry);
-        }
-    },
-
-
     // Removes an entry element from the current page and appends a new one.
     _removeEntry: function FeedView__removeEntry(aEntry) {
         var entryElement = this.document.getElementById(aEntry);
@@ -806,20 +810,21 @@ FeedView.prototype = {
 
         var self = this;
         function finish() {
-            // Pull the entry to be added to the current page. If we're
-            // on the last page then there may be no new entry.
-            var query = self.query;
-            query.offset = gPrefs.entriesPerPage * self.currentPage - 1;
-            query.limit = 1;
-            var newEntry = query.getEntries()[0];
-
-            if (newEntry)
-                var appendedEntry = self._appendEntry(newEntry);
-
-            if (!self.feedContent.childNodes.length)
+            // Pull the entry to be appended. If the last page is displayed
+            // then there may be no futher entries.
+            var pageEndIndex = gPrefs.entriesPerPage * (self.currentPage - 1)
+                               + gPrefs.entriesPerPage - 1;
+            var entryID = self._entries[pageEndIndex];
+            if (entryID) {
+                var query = new Query();
+                query.entries = [entryID];
+                var entry = query.getEntries()[0];
+                var appendedElement = self._appendEntry(entry);
+            }
+            else if (!self.feedContent.childNodes.length) {
                 self._setEmptyViewMessage();
+            }
 
-            // Select another entry.
             if (entryWasSelected)
                 self.selectEntry(nextSibling || appendedEntry || previousSibling || null);
         }
@@ -867,9 +872,9 @@ FeedView.prototype = {
 
         // When a single feed is shown, add subtitle, image, and link.
         if (aFeed) {
-            var link = aFeed.websiteURL || aFeed.feedURL;
-            if (link) {
-                feedTitle.setAttribute('href', link);
+            // Don't linkify the title when searching.
+            if (!this.query.searchString) {
+                feedTitle.setAttribute('href', aFeed.websiteURL || aFeed.feedURL);
                 feedTitle.className = 'feed-link';
             }
 
