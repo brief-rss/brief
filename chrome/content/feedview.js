@@ -412,6 +412,7 @@ FeedView.prototype = {
         getElement('view-constraint-box').hidden = this._flagsAreIntrinsic;
 
         this.browser.addEventListener('load', this, false);
+        gStorage.addObserver(this);
 
         if (this.browser.currentURI.equals(gTemplateURI)) {
             // This has to be done also here (not only in onload), because load event
@@ -434,6 +435,8 @@ FeedView.prototype = {
         this.browser.removeEventListener('load', this, false);
         for each (event in this._events)
             this.document.removeEventListener(event, this, true);
+
+        gStorage.removeObserver(this);
 
         clearInterval(this._smoothScrollInterval);
         this._smoothScrollInterval = null;
@@ -530,6 +533,55 @@ FeedView.prototype = {
             var newTab = (openInTabs || aEvent.button == 1);
             gCommands.openEntryLink(entryElement, newTab);
         }
+    },
+
+    onEntriesAdded: function FeedView_onEntriesAdded(aEntries) {
+        if (this.query.deleted === ENTRIES_STATE_NORMAL)
+            this.ensure();
+    },
+
+    onEntriesUpdated: function FeedView_onEntriesUpdated(aEntries) {
+        var nodes = this.feedContent.childNodes;
+        if (this.query.unread && this.entryCount != this.query.getEntryCount() ||
+            intersect(nodes, aEntries.IDs)) {
+            this._refresh(true);
+        }
+    },
+
+    onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntries, aNewState) {
+        var entrySetValid = this.query.unread ? this.ensure() : true;
+
+        // Refresh the state of visible entries.
+        if (entrySetValid && this.isActive) {
+            let nodes = this.feedContent.childNodes;
+            for (let i = 0; i < nodes.length; i++) {
+                let id = parseInt(nodes[i].id);
+                if (aEntries.IDs.indexOf(id) != -1)
+                    this._sendEvent(id, 'EntryMarkedRead', aNewState);
+            }
+        }
+    },
+
+    onEntriesStarred: function FeedView_onEntriesStarred(aEntries, aNewState) {
+        var entrySetValid = this.query.starred ? this.ensure() : true;
+
+        // If view wasn't invalidated, we still may have to visually adjust entries.
+        if (entrySetValid && this.isActive) {
+            let nodes = this.feedContent.childNodes;
+            for (let i = 0; i < nodes.length; i++) {
+                let id = parseInt(nodes[i].id);
+                if (aEntries.IDs.indexOf(id) != -1)
+                    this._sendEvent(id, 'EntryStarred', aNewState);
+            }
+        }
+    },
+
+    onEntriesTagged: function FeedView_onEntriesTagged(aEntries) {
+
+    },
+
+    onEntriesDeleted: function FeedView_onEntriesDeleted(aEntries, aNewState) {
+        this.ensure();
     },
 
 
@@ -773,23 +825,12 @@ FeedView.prototype = {
         }
     },
 
-
-    onEntryMarkedRead: function FeedView_onEntryMarkedRead(aEntry, aNewState) {
-        this._sendEvent(aEntry, 'EntryMarkedRead', aNewState);
-    },
-
-
-    onEntryStarred: function FeedView_onEntryStarred(aEntry, aNewState) {
-        this._sendEvent(aEntry, 'EntryStarred', aNewState);
-    },
-
-
     /**
      * Refreshes the list of IDs of contained entries (also needed for entryCount
      * and pageCount), the current page number, and the navigation UI.
      */
     _refreshEntryList: function FeedView__refreshEntryList() {
-        this._entries = this.query.getSimpleEntryList().getProperty('entries');
+        this._entries = this.query.getSimpleEntryList().IDs;
         this._refreshPageNavUI();
     },
 
@@ -976,6 +1017,15 @@ FeedView.prototype = {
             startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
             startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
         }
+    },
+
+    QueryInterface: function FeedView_QueryInterface(aIID) {
+        if (aIID.equals(Ci.nsISupports) ||
+            aIID.equals(Ci.nsIEventHandler) ||
+            aIID.equals(Ci.nsIBriefStorageObserver)) {
+            return this;
+        }
+        throw Components.results.NS_ERROR_NO_INTERFACE;
     }
 
 }

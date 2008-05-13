@@ -170,3 +170,28 @@ interface nsIBriefFeed : nsISupports {
   void wrapFeed(in nsIFeed feed);
 
 };
+
+
+/**
+ * A simple list of entries. It stores them as parallel arrays of their properties.
+ * If any of these arrays weren't set manually, they are automatically populated by
+ * their getters as long as IDs property array is set.
+ */
+[scriptable, uuid(6efa76a4-a1da-4751-9db7-08aba109fc0a)]
+interface nsIBriefEntryList : nsISupports {
+
+    readonly attribute long long length;
+
+    attribute nsIVariant IDs;
+
+    attribute nsIVariant feedIDs;
+
+    attribute nsIVariant read;
+
+    attribute nsIVariant starred;
+
+    attribute nsIVariant deleted;
+
+    attribute nsIVariant tags;
+
+};

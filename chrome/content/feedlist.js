@@ -493,6 +493,44 @@ var gFeedList = {
         }
     },
 
+
+    onEntriesAdded: function gFeedList_onEntriesAdded(aEntries) {
+        this.refreshSpecialTreeitem('unread-folder');
+    },
+
+    onEntriesUpdated: function gFeedList_onEntriesUpdated(aEntries) {
+        this.refreshSpecialTreeitem('unread-folder');
+    },
+
+    onEntriesMarkedRead: function gFeedList_onEntriesMarkedRead(aEntries, aNewState) {
+        // Do everything asychronously to speed up refreshing of the feed view.
+        async(this.refreshFeedTreeitems, 0, this, aEntries.feedIDs);
+
+        // We can't know if any of those need updating, so we have to
+        // update them all.
+        async(this.refreshSpecialTreeitem, 0, this, 'unread-folder');
+        async(this.refreshSpecialTreeitem, 0, this, 'starred-folder');
+        async(this.refreshSpecialTreeitem, 0, this, 'trash-folder');
+    },
+
+    onEntriesStarred: function gFeedList_onEntriesStarred(aEntries, aNewState) {
+        async(this.refreshSpecialTreeitem, 0, this, 'starred-folder');
+    },
+
+    onEntriesTagged: function gFeedList_onEntriesTagged(aEntries) {
+
+    },
+
+    onEntriesDeleted: function gFeedList_onEntriesDeleted(aEntries, aNewState) {
+        async(this.refreshFeedTreeitems, 0, this, aEntries.feedIDs);
+
+        async(this.refreshSpecialTreeitem, 0, this, 'unread-folder');
+        async(this.refreshSpecialTreeitem, 0, this, 'starred-folder');
+        async(this.refreshSpecialTreeitem, 0, this, 'trash-folder');
+
+    },
+
+
     _persistFolderState: function gFeedList_persistFolderState() {
         // Persist the folders open/closed state.
         var items = gFeedList.tree.getElementsByTagName('treeitem');
@@ -536,6 +574,15 @@ var gFeedList = {
     hasProperty: function gFeedList_hasProperty(aItem, aProperty) {
         var properties = aItem.getAttribute('properties');
         return properties.match(aProperty) ? true : false;
+    },
+
+    QueryInterface: function gFeedList_QueryInterface(aIID) {
+        if (aIID.equals(Ci.nsISupports) ||
+            aIID.equals(Ci.nsIObserver) ||
+            aIID.equals(Ci.nsIBriefStorageObserver)) {
+            return this;
+        }
+        throw Components.results.NS_ERROR_NO_INTERFACE;
     }
 
 }

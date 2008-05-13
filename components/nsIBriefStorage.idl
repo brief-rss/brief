@@ -1,5 +1,7 @@
 #include "nsISupports.idl"
 interface nsIBriefFeed;
+interface nsIBriefEntryList;
+interface nsIBriefStorageObserver;
 interface nsIPropertyBag;
 interface nsIVariant;
 
@@ -118,12 +120,15 @@ interface nsIBriefQuery : nsISupports {
     nsIVariant getEntries();
 
     /**
-     * Returns an array of IDs of selected entries and a an of IDs of feeds
-     * which these entries belong to.
+     * Gets selected entries in a simplified form of parallel arrays containing their
+     * basic attributes.
      *
-     * @returns Property bag containing "entries" and "feeds" properties.
+     * @param attributes Array of attributes to retrieve. Available attributes:
+     *                   "id", "feedID", "read", "starred", "deleted".
+     *                   If not specified, only "id" is retrieved.
+     * @returns Property bag containing arrays of the above attributes..
      */
-    nsIPropertyBag getSimpleEntryList();
+    nsIBriefEntryList getSimpleEntryList([optional] in nsIVariant attributes);
 
     /**
      * Returns the number of selected entries.
@@ -216,5 +221,27 @@ interface nsIBriefStorage : nsISupports {
    * disc space and defragment the database.
    */
   void compactDatabase();
+
+  void addObserver(in nsIBriefStorageObserver observer);
+
+  void removeObserver(in nsIBriefStorageObserver observer);
+
+};
+
+
+[scriptable, uuid(8105e6fa-cf93-48b7-8f15-157ffa04f345)]
+interface nsIBriefStorageObserver : nsISupports {
+
+  void onEntriesAdded(in nsIBriefEntryList entries);
+
+  void onEntriesUpdated(in nsIBriefEntryList entries);
+
+  void onEntriesMarkedRead(in nsIBriefEntryList entries, in boolean newState);
+
+  void onEntriesStarred(in nsIBriefEntryList entries, in boolean newState);
+
+  void onEntriesTagged(in nsIBriefEntryList entries);
+
+  void onEntriesDeleted(in nsIBriefEntryList entries, in short newState);
 
 };
