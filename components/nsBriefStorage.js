@@ -1,13 +1,5 @@
-const STORAGE_CLASS_ID = Components.ID('{4C468DA8-7F30-11DB-A690-EBF455D89593}');
-const STORAGE_CLASS_NAME = 'mozStorage database component for the Brief extension';
-const STORAGE_CONTRACT_ID = '@ancestor/brief/storage;1';
-
-const QUERY_CLASS_ID = Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}');
-const QUERY_CLASS_NAME = 'Query to database of the Brief extension';
-const QUERY_CONTRACT_ID = '@ancestor/brief/query;1';
-
-var Cc = Components.classes;
-var Ci = Components.interfaces;
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
 const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
 const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
@@ -1278,9 +1270,10 @@ BriefStorageService.prototype = {
         return entries;
     },
 
-    classDescription: STORAGE_CLASS_NAME,
-    classID: STORAGE_CLASS_ID,
-    contractID: STORAGE_CONTRACT_ID,
+
+    classDescription: 'Database component for the Brief extension',
+    classID: Components.ID('{4C468DA8-7F30-11DB-A690-EBF455D89593}'),
+    contractID: '@ancestor/brief/storage;1',
     _xpcom_categories: [ { category: 'app-startup', service: true } ],
     _xpcom_factory: {
         createInstance: function(aOuter, aIID) {
@@ -1790,7 +1783,8 @@ BriefQuery.prototype = {
             }
         }
 
-        var select = createStatement('SELECT ' + columns.join(', ') + this.getQueryString(true));
+        var select = createStatement('SELECT ' + columns.join(', ') +
+                                     this.getQueryString(true, getTags));
         try {
             while (select.step()) {
                 if (getIDs)
@@ -1962,82 +1956,72 @@ BriefQuery.prototype = {
     getQueryString: function BriefQuery_getQueryString(aForSelect, aGetFullEntries) {
         var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
 
-        if (aForSelect) {
-            var text = ' FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ';
-        }
-        else {
-            text = ' WHERE entries.id IN (SELECT entries.id FROM entries INNER JOIN ' +
-                   ' feeds ON entries.feedID = feeds.feedID ';
-        }
+        var text = aForSelect ? ' FROM entries '
+                              : ' WHERE entries.id IN (SELECT entries.id FROM entries ';
+
+        if (this.feeds || !this.feeds && !this.includeHiddenFeeds)
+            text += ' INNER JOIN feeds ON entries.feedID = feeds.feedID ';
 
         if (aGetFullEntries || this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
             text += ' INNER JOIN entries_text ON entries.id = entries_text.rowid ';
 
         text += ' WHERE ';
 
-        if (this.folders) {
-            this.effectiveFolders = this.folders;
-            var homeFolder = gPrefs.getIntPref('homeFolder');
+        var constraints = [];
 
+        if (this.folders && this.folders.length) {
             // Fill the list of effective folders.
-            this.traverseFolderChildren(homeFolder);
+            this.effectiveFolders = this.folders;
+            this.traverseFolderChildren(gStorageService.homeFolderID);
 
-            text += '(';
-            for (let i = 0; i < this.effectiveFolders.length; i++) {
-                text += 'feeds.parent = "' + this.effectiveFolders[i] + '"';
-                if (i < this.effectiveFolders.length - 1)
-                    text += ' OR ';
-            }
-            text += ') AND ';
+            let con = '(feeds.parent = "';
+            con += this.effectiveFolders.join('" OR feeds.parent = "');
+            con += '")';
+            constraints.push(con);
         }
 
-        if (this.feeds) {
-            text += '(';
-            for (let i = 0; i < this.feeds.length; i++) {
-                text += 'entries.feedID = "' + this.feeds[i] + '"';
-                if (i < this.feeds.length - 1)
-                    text += ' OR ';
-            }
-            text += ') AND ';
+        if (this.feeds && this.feeds.length) {
+            let con = '(entries.feedID = "';
+            con += this.feeds.join('" OR entries.feedID = "');
+            con += '")';
+            constraints.push(con);
         }
 
-        if (this.entries) {
-            text += '(';
-            for (let i = 0; i < this.entries.length; i++) {
-                text += 'entries.id = "' + this.entries[i] + '"';
-                if (i < this.entries.length - 1)
-                    text += ' OR ';
-            }
-            text += ') AND ';
+        if (this.entries && this.entries.length) {
+            let con = '(entries.id = ';
+            con += this.entries.join(' OR entries.id = ');
+            con += ')';
+            constraints.push(con);
         }
 
-        if (this.searchString)
-            text += 'entries_text MATCH \'' + this.searchString.replace("'",' ') +'\' AND ';
+        if (this.searchString) {
+            let con = 'entries_text MATCH \'' + this.searchString.replace("'",' ') + '\'';
+            constraints.push(con);
+        }
 
         if (this.read)
-            text += 'entries.read = 1 AND ';
+            constraints.push('entries.read = 1');
         if (this.unread)
-            text += 'entries.read = 0 AND ';
+            constraints.push('entries.read = 0');
         if (this.starred)
-            text += 'entries.starred = 1 AND ';
+            constraints.push('entries.starred = 1');
         if (this.unstarred)
-            text += 'entries.starred = 0 AND ';
+            constraints.push('entries.starred = 0');
 
         if (this.deleted != nsIBriefQuery.ENTRY_STATE_ANY)
-            text += 'entries.deleted = ' + this.deleted + ' AND ';
+            constraints.push('entries.deleted = ' + this.deleted);
 
         if (this.startDate > 0)
-            text += 'entries.date >= ' + this.startDate + ' AND ';
+            constraints.push('entries.date >= ' + this.startDate);
         if (this.endDate > 0)
-            text += 'entries.date <= ' + this.endDate + ' AND ';
+            constraints.push('entries.date <= ' + this.endDate);
 
-        if (!this.includeHiddenFeeds)
-            text += 'feeds.hidden = 0 ';
+        if (!this.includeHiddenFeeds && !this.feeds)
+            constraints.push('feeds.hidden = 0');
 
-        // Trim the trailing AND, if there is one.
-        text = text.replace(/AND $/, '');
-        // If the were no constraints (all entries are matched),
-        // we may end up with a dangling WHERE.
+        text += constraints.join(' AND ') + ' ';
+
+        // We may end up with a dangling WHERE if the are no contraints.
         text = text.replace(/WHERE $/, '');
 
         if (this.sortOrder != nsIBriefQuery.NO_SORT) {
@@ -2083,9 +2067,10 @@ BriefQuery.prototype = {
         }
     },
 
-    classDescription: QUERY_CLASS_NAME,
-    classID: QUERY_CLASS_ID,
-    contractID: QUERY_CONTRACT_ID,
+
+    classDescription: 'Query to database of the Brief extension',
+    classID: Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}'),
+    contractID: '@ancestor/brief/query;1',
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefQuery])
 }
 
