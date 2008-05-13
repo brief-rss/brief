@@ -286,7 +286,7 @@ var gCommands = {
         if (gPrefs.shownEntries != aConstraint) {
             gPrefs.setCharPref('feedview.shownEntries', aConstraint);
 
-            gFeedView.ensure(true);
+            gFeedView.refresh();
         }
     },
 
@@ -493,7 +493,7 @@ function performSearch(aEvent) {
     else {
         gFeedView.titleOverride = searchbar.value ? titleOverride : '';
         gFeedView.query.searchString = searchbar.value;
-        gFeedView.ensure(true);
+        gFeedView.refresh();
     }
 }
 
@@ -511,7 +511,7 @@ function finishSearch() {
     }
     else {
         gFeedView.query.searchString = gFeedView.titleOverride = '';
-        gFeedView.ensure(true);
+        gFeedView.refresh();
     }
 
     previousView = null;
@@ -626,7 +626,7 @@ var gPrefs = {
 
         switch (aData) {
             case 'feedview.entriesPerPage':
-                gFeedView.ensure(true);
+                gFeedView.refresh();
                 break;
             case 'feedview.shownEntries':
                 var list = getElement('view-constraint-list');
@@ -642,7 +642,7 @@ var gPrefs = {
                     gFeedView.query.sortDirection = this.sortUnreadViewOldestFirst
                                                     ? Ci.nsIBriefQuery.SORT_ASCENDING
                                                     : Ci.nsIBriefQuery.SORT_DESCENDING;
-                    gFeedView.ensure(true);
+                    gFeedView.refresh();
                 }
                 break;
             case 'feedview.entrySelectionEnabled':
@@ -672,10 +672,8 @@ function async(aFunction, aDelay, aObject, arg1, arg2) {
 
 function intersect(arr1, arr2) {
     for (let i = 0; i < arr1.length; i++) {
-        for (let j = 0; j < arr2.length; j++) {
-            if (arr1[i] === arr2[j])
-                return true;
-        }
+        if (arr2.indexOf(arr1[i]) != -1)
+            return true;
     }
     return false;
 }
