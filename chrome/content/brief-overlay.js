@@ -171,7 +171,7 @@ const gBrief = {
         var query = new BriefQuery(null, null, true);
         query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
         query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
-        var unreadFeeds = query.getSimpleEntryList().getProperty('feeds');
+        var unreadFeeds = query.getSimpleEntryList(['feedIDs']).feedID;
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
         var value = bundle.getString('noUnreadFeedsTooltip');

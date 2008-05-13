@@ -56,13 +56,14 @@ function init() {
     observerService.addObserver(gObserver, 'brief:feed-updated', false);
     observerService.addObserver(gObserver, 'brief:feed-loading', false);
     observerService.addObserver(gObserver, 'brief:feed-error', false);
-    observerService.addObserver(gObserver, 'brief:entry-status-changed', false);
     observerService.addObserver(gObserver, 'brief:feed-update-queued', false);
     observerService.addObserver(gObserver, 'brief:feed-update-canceled', false);
     observerService.addObserver(gObserver, 'brief:custom-style-changed', false);
 
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
+
+    gStorage.addObserver(gFeedList);
 
     async(loadHomeview);
 }
@@ -127,7 +128,6 @@ function unload() {
     observerService.removeObserver(gObserver, 'brief:feed-updated');
     observerService.removeObserver(gObserver, 'brief:feed-loading');
     observerService.removeObserver(gObserver, 'brief:feed-error');
-    observerService.removeObserver(gObserver, 'brief:entry-status-changed');
     observerService.removeObserver(gObserver, 'brief:feed-update-queued');
     observerService.removeObserver(gObserver, 'brief:feed-update-canceled');
 
@@ -135,6 +135,7 @@ function unload() {
     observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
 
     gPrefs.unregister();
+    gStorage.removeObserver(gFeedList);
 }
 
 
@@ -154,11 +155,6 @@ var gObserver = {
             item.removeAttribute('loading');
             gFeedList.refreshFeedTreeitems(item);
             refreshProgressmeter();
-
-            if (aSubject.QueryInterface(Ci.nsIVariant) > 0) {
-                gFeedList.refreshSpecialTreeitem('unread-folder');
-                gFeedView.ensure();
-            }
             break;
 
         // A feed was requested; show throbber as its icon.
@@ -211,62 +207,6 @@ var gObserver = {
             gFeedView.browser.loadURI(gTemplateURI.spec);
             break;
 
-        }
-    },
-
-    // Updates the approperiate treeitems in the feed list
-    // and refreshes the feedview when necessary.
-    onEntryStatusChanged: function gObserver_onEntryStatusChanged(aChangedItems, aChangeType) {
-        aChangedItems.QueryInterface(Ci.nsIPropertyBag);
-        var changedFeeds = aChangedItems.getProperty('feeds');
-        var changedEntries = aChangedItems.getProperty('entries');
-
-        var viewIsCool = gFeedView.ensure();
-
-        switch (aChangeType) {
-        case 'unread':
-        case 'read':
-            // If view wasn't invalidated, we still may have to visually adjust entries.
-            if (gFeedView.isActive && viewIsCool) {
-                var nodes = gFeedView.feedContent.childNodes;
-                for (let i = 0; i < nodes.length; i++) {
-                    let id = parseInt(nodes[i].id);
-                    if (changedEntries.indexOf(id) != -1)
-                        gFeedView.onEntryMarkedRead(id, aChangeType == 'read');
-                }
-            }
-
-            // Do everything asychronously to speed up refreshing of the feed view.
-            async(gFeedList.refreshFeedTreeitems, 0, gFeedList, changedFeeds);
-
-            // We can't know if any of those need updating, so we have to
-            // update them all.
-            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'unread-folder');
-            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'starred-folder');
-            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'trash-folder');
-            break;
-
-        case 'starred':
-        case 'unstarred':
-            // If view wasn't invalidated, we still may have to visually adjust entries.
-            if (gFeedView.isActive && viewIsCool) {
-                var nodes = gFeedView.feedContent.childNodes;
-                for (let i = 0; i < nodes.length; i++) {
-                    let id = parseInt(nodes[i].id);
-                    if (changedEntries.indexOf(id) != -1)
-                        gFeedView.onEntryStarred(id, aChangeType == 'starred');
-                }
-            }
-
-            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'starred-folder');
-            break;
-
-        case 'deleted':
-            async(gFeedList.refreshFeedTreeitems, 0, gFeedList, changedFeeds);
-
-            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'unread-folder');
-            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'starred-folder');
-            async(gFeedList.refreshSpecialTreeitem, 0, gFeedList, 'trash-folder');
         }
     }
 
@@ -729,6 +669,18 @@ function async(aFunction, aDelay, aObject, arg1, arg2) {
     }
     return setTimeout(asc, aDelay || 0);
 }
+
+function intersect(arr1, arr2) {
+    for (let i = 0; i < arr1.length; i++) {
+        for (let j = 0; j < arr2.length; j++) {
+            if (arr1[i] === arr2[j])
+                return true;
+        }
+    }
+    return false;
+}
+
+
 
 
 function log(aMessage) {

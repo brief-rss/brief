@@ -128,6 +128,8 @@ var gStorageService = null;
 var gConnection = null;
 
 function BriefStorageService() {
+    this.observers = [];
+
     // The instantiation can't be done on app-startup, because the directory service
     // doesn't work yet, so we perform it on profile-after-change.
     gObserverService.addObserver(this, 'profile-after-change', false);
@@ -547,23 +549,28 @@ BriefStorageService.prototype = {
     },
 
 
+    newEntries: [],
+    updatedEntries: [],
+
     // nsIBriefStorage
     updateFeed: function BriefStorage_updateFeed(aFeed) {
-        var newEntriesCount = 0;
+        this.newEntries = [];
+        this.updatedEntries = [];
         var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
 
         if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
             aFeed.oldestEntryDate = Date.now();
-            var entries = aFeed.entries;
+            var downloadedEntries = aFeed.entries;
 
             gConnection.beginTransaction();
             try {
-                for (let i = 0; i < entries.length; i++) {
-                    if (this.processEntry(entries[i], aFeed))
-                        newEntriesCount++;
+                for (let i = 0; i < downloadedEntries.length; i++) {
+                    let entry = downloadedEntries[i];
 
-                    if (entries[i].date && entries[i].date < aFeed.oldestEntryDate)
-                        aFeed.oldestEntryDate = entries[i].date;
+                    this.processEntry(entry, aFeed);
+
+                    if (entry.date && entry.date < aFeed.oldestEntryDate)
+                        aFeed.oldestEntryDate = entry.date;
                 }
 
                 let stmt = gStm.updateFeed;
@@ -592,8 +599,26 @@ BriefStorageService.prototype = {
         }
 
         var subject = Cc['@mozilla.org/variant;1'].createInstance(Ci.nsIWritableVariant);
-        subject.setAsInt32(newEntriesCount);
+        subject.setAsInt32(this.newEntries.length);
         gObserverService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
+
+        if (this.newEntries.length) {
+            let query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+            query.entries = this.newEntries;
+            let list = query.getSimpleEntryList(['IDs', 'feedIDs']);
+
+            for each (observer in this.observers)
+                observer.onEntriesAdded(list);
+        }
+
+        if (this.updatedEntries.length) {
+            let query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+            query.entries = this.updatedEntries;
+            let list = query.getSimpleEntryList(['IDs', 'feedIDs']);
+
+            for each (observer in this.observers)
+                observer.onEntriesUpdated(list);
+        }
     },
 
 
@@ -623,47 +648,50 @@ BriefStorageService.prototype = {
         var secondaryHash = hashString(secondarySet.join(''));
 
         // Sometimes the provided GUID is lost (maybe a bug in the parser?) and
-        // having an empty GUID effects in a different hash, which leads to
-        // annoying duplication of entries. In such case, we work around it by
-        // checking for entry's existance using the secondary hash, which doesn't
-        // include the GUID and is therefore immune to that problem.
-        //
-        // While checking, we also get the date which we'll need to see if the
-        // stored entry needs to be updated.
-        if (!providedID) {
-            var select = gStm.getEntryDateBySecondaryHash;
-            select.params.secondaryHash = secondaryHash;
-        }
-        else {
-            select = gStm.getEntryDateByPrimaryHash;
-            select.params.primaryHash = primaryHash;
-        }
-        var entryAlreadyStored = select.step();
-        var storedEntryDate = entryAlreadyStored ? select.row.date : 0;;
-        select.reset();
+        // having an empty GUID effects in a different hash, which leads to annoying
+        // duplication of entries. In such case, we work around it by checking for
+        // entry's existance using the secondary hash, which doesn't include the GUID
+        // and is therefore immune to that problem. By the way we also get the date
+        // which we'll need to see if the stored entry needs to be updated.
+        try {
+            if (providedID) {
+                var select = gStm.getEntryDateByPrimaryHash;
+                select.params.primaryHash = primaryHash;
+            }
+            else {
+                select = gStm.getEntryDateBySecondaryHash;
+                select.params.secondaryHash = secondaryHash;
+            }
 
-        var entryInserted = false;
+            if (select.step()) {
+                var storedEntryID = select.row.id;
+                var storedEntryDate = select.row.date;
+            }
+        }
+        finally {
+            select.reset();
+        }
 
         // If the entry is already present in the database, compare if the downloaded
         // entry has a newer date than the stored one and if so, update it.
-        // Otherwise, insert it if it isn't present yet.
-        if (entryAlreadyStored) {
+        // Otherwise, insert it if it isn't stored yet.
+        if (storedEntryID) {
             if (aEntry.date && storedEntryDate < aEntry.date) {
                 let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
                 var update = gStm.updateEntry;
                 update.params.date = aEntry.date;
                 update.params.read = markUnread ? 0 : 1;
-                update.params.primaryHash = primaryHash;
+                update.params.id = storedEntryID;
                 update.execute();
 
                 update = gStm.updateEntryText;
                 update.params.title = aEntry.title;
                 update.params.content = content;
                 update.params.authors = aEntry.authors;
-                update.params.primaryHash = primaryHash;
+                update.params.id = storedEntryID;
                 update.execute();
 
-                entryInserted = true;
+                this.updatedEntries.push(storedEntryID);
             }
         }
         else {
@@ -682,10 +710,26 @@ BriefStorageService.prototype = {
             insert.params.authors = aEntry.authors;
             insert.execute();
 
-            entryInserted = true;
-        }
+            let entryID = gConnection.lastInsertRowID;
 
-        return entryInserted;
+            let uri = newURI(aEntry.entryURL);
+            if (gBms.isBookmarked(uri)) {
+                let bookmarkIDs = gBms.getBookmarkIdsForURI(uri, {});
+
+                let bm = bookmarkIDs.filter(isNormalBookmark)[0];
+                if (bm)
+                    this.starEntry(true, entryID, bm);
+
+                let filter = function(b) { isTagFolder(gBms.getFolderIdForItem(b)) };
+                for each (tagID in bookmarkIDs.filter(filter)) {
+                    let tagFolderID = gBms.getFolderIdForItem(tagID);
+                    let tagName = gBms.getItemTitle(tagFolderID);
+                    this.tagEntry(true, entryID, tagID, tagName);
+                }
+            }
+
+            this.newEntries.push(entryID);
+        }
     },
 
 
@@ -903,6 +947,19 @@ BriefStorageService.prototype = {
     },
 
 
+    observers: [],
+
+    // nsIBriefStorage
+    addObserver: function BriefStorage_addObserver(aObserver) {
+        this.observers.push(aObserver);
+    },
+
+    // nsIBriefStorage
+    removeObserver: function BriefStorage_removeObserver(aObserver) {
+        this.observers.splice(this.observers.indexOf(aObserver), 1);
+    },
+
+
     homeFolderID: -1,
 
     // State properties uses by the bookmarks observer.
@@ -949,11 +1006,11 @@ BriefStorageService.prototype = {
 
             for each (entry in this.getEntriesByURL(url)) {
                 if (isTag)
-                    this.tagEntry(true, entry.id, aItemID, gBms.getItemTitle(aFolder));
+                    var newTags = this.tagEntry(true, entry.id, aItemID, gBms.getItemTitle(aFolder));
                 else if (!entry.starred)
                     this.starEntry(true, entry.id, aItemID);
 
-                changedEntries.push(entry.id);
+                changedEntries.push(entry);
             }
         }
         catch (ex) {
@@ -964,8 +1021,11 @@ BriefStorageService.prototype = {
         }
 
         if (changedEntries.length) {
-            let changeType = isTag ? 'tagged' :'starred';
-            this.notifyOfBookmarkChanges(changedEntries, changeType);
+            let entryIDs = changedEntries.map(function(e) e.id);
+            if (isTag)
+                this.notifyOfEntriesTagged(entryIDs, newTags);
+            else
+                this.notifyOfEntriesStarred(entryIDs, true);
         }
     },
 
@@ -989,8 +1049,8 @@ BriefStorageService.prototype = {
 
             if (isTag) {
                 for each (entry in this.getEntriesByTagID(aItemID)) {
-                    this.tagEntry(false, entry.id, aItemID);
-                    changedEntries.push(entry.id)
+                    var newTags = this.tagEntry(false, entry.id, aItemID);
+                    changedEntries.push(entry)
                 }
             }
             else {
@@ -1011,7 +1071,7 @@ BriefStorageService.prototype = {
                     }
                     else {
                         this.starEntry(false, entry.id);
-                        changedEntries.push(entry.id);
+                        changedEntries.push(entry);
                     }
                 }
             }
@@ -1024,8 +1084,11 @@ BriefStorageService.prototype = {
         }
 
         if (changedEntries.length) {
-            let changeType = isTag ? 'untagged' : 'unstarred';
-            this.notifyOfBookmarkChanges(changedEntries, changeType);
+            let entryIDs = changedEntries.map(function(e) e.id);
+            if (isTag)
+                this.notifyOfEntriesTagged(entryIDs, newTags);
+            else
+                this.notifyOfEntriesStarred(entryIDs, false);
         }
     },
 
@@ -1067,18 +1130,16 @@ BriefStorageService.prototype = {
             for each (entry in entries)
                 this.starEntry(false, entry.id);
 
-            let entryIDs = entries.map(function(e) e.id);
             if (entries.length)
-                this.notifyOfBookmarkChanges(entryIDs, 'unstarred');
+                this.notifyOfEntriesStarred(entries.map(function(e) e.id), false);
 
             // Star any entries with the new URI.
             entries = this.getEntriesByURL(aValue);
             for each (entry in entries)
                 this.starEntry(true, entry.id, aItemID);
 
-            entryIDs = entries.map(function(e) e.id);
             if (entries.length)
-                this.notifyOfBookmarkChanges(entryIDs, 'starred');
+                this.notifyOfEntriesStarred(entries.map(function(e) e.id), true);
 
             break;
         }
@@ -1142,16 +1203,28 @@ BriefStorageService.prototype = {
         finally {
             gStm.getEntryTags.reset();
         }
+
+        return tags;
     },
 
-    notifyOfBookmarkChanges: function BriefStorage_notifyOfBookmarkChanges(aEntries,
-                                                                           aChangeType) {
+    notifyOfEntriesStarred: function BriefStorage_notifyOfEntriesStarred(aEntries, aNewState) {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-        query.entries = aEntries;
-        var list = query.getSimpleEntryList();
-        gObserverService.notifyObservers(list, 'brief:entry-status-changed', aChangeType);
+        query.entries = entryIDs;
+        var list = query.getSimpleEntryList(['IDs', 'feedIDs']);
+
+        for each (observer in this.observers)
+            observer.onEntriesStarred(list, aNewState);
     },
 
+    notifyOfEntriesTagged: function BriefStorage_notifyOfEntriesTagged(aEntries, aNewTagSet) {
+        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+        query.entries = entryIDs;
+        var list = query.getSimpleEntryList(['IDs', 'feedIDs']);
+        list.tags = aNewTagSet;
+
+        for each (observer in this.observers)
+            observer.onEntriesTagged(list);
+    },
 
     getEntriesByURL: function BriefStorage_getEntriesByURL(aURL) {
         try {
@@ -1262,27 +1335,27 @@ var gStm = {
     },
 
     get updateEntry() {
-        var sql = 'UPDATE entries SET date = :date, read = :read, updated = 1  ' +
-                  'WHERE primaryHash = :primaryHash                            ';
+        var sql = 'UPDATE entries SET date = :date, read = :read, updated = 1 '+
+                  'WHERE id = :id                                             ';
         delete this.updateEntry;
         return this.updateEntry = createStatement(sql);
     },
 
     get updateEntryText() {
-        var sql = 'UPDATE entries_text SET title = :title, content = :content, authors = :authors ' +
-                  'WHERE rowid = (SELECT id FROM entries WHERE primaryHash = :primaryHash)        ';
+        var sql = 'UPDATE entries_text SET title = :title, content = :content, '+
+                  'authors = :authors WHERE rowid = :id                        ';
         delete this.updateEntryText;
         return this.updateEntryText = createStatement(sql);
     },
 
     get getEntryDateByPrimaryHash() {
-        var sql = 'SELECT date FROM entries WHERE primaryHash = :primaryHash';
+        var sql = 'SELECT id, date FROM entries WHERE primaryHash = :primaryHash';
         delete this.getEntryDateByPrimaryHash;
         return this.getEntryDateByPrimaryHash = createStatement(sql);
     },
 
     get getEntryDateBySecondaryHash() {
-        var sql = 'SELECT date FROM entries WHERE secondaryHash = :secondaryHash';
+        var sql = 'SELECT id, date FROM entries WHERE secondaryHash = :secondaryHash';
         delete this.getEntryDateBySecondaryHash;
         return this.getEntryDateBySecondaryHash = createStatement(sql);
     },
@@ -1682,17 +1755,56 @@ BriefQuery.prototype = {
 
 
     // nsIBriefQuery
-    getSimpleEntryList: function BriefQuery_getSimpleEntryList() {
-        var select = createStatement('SELECT entries.id, entries.feedID ' +
-                                     this.getQueryString(true));
-        var entries = [];
-        var feeds = [];
+    getSimpleEntryList: function BriefQuery_getSimpleEntryList(aProperties) {
+        // If no attributes are specified, the default is "id".
+        var properties = aProperties || ['IDs'];
+
+        // Create arrays to store values of each of the properties.
+        var arrays = {};
+        for each (prop in properties)
+            arrays[prop] = [];
+
+        // These variables are used for performance reasons, to avoid iterating
+        // over |arrays| with for...in when stepping the statement.
+        var getIDs = properties.indexOf('IDs') != -1;
+        var getFeedIDs = properties.indexOf('feedIDs') != -1;
+        var getRead = properties.indexOf('read') != -1;
+        var getStarred = properties.indexOf('starred') != -1;
+        var getDeleted = properties.indexOf('deleted') != -1;
+        var getTags = properties.indexOf('tags') != -1;
+
+        var columns = [];
+        for each (prop in properties) {
+            switch (prop) {
+                case 'IDs':
+                    columns.push('entries.id');
+                    break;
+                case 'feedIDs':
+                    columns.push('entries.feedID');
+                    break;
+                case 'tags':
+                    columns.push('entries_text.tags');
+                    break;
+                default:
+                    columns.push('entries.' + prop);
+            }
+        }
+
+        var select = createStatement('SELECT ' + columns.join(', ') + this.getQueryString(true));
         try {
             while (select.step()) {
-                entries.push(select.row.id);
-                var feedID = select.row.feedID;
-                if (feeds.indexOf(feedID) == -1)
-                    feeds.push(feedID);
+                if (getIDs)
+                    arrays.IDs.push(select.row.id);
+                if (getFeedIDs)
+                    arrays.feedIDs.push(select.row.feedID);
+                if (getRead)
+                    arrays.read.push(select.row.read);
+                if (getStarred)
+                    arrays.starred.push(select.row.starred);
+                if (getDeleted)
+                    arrays.deleted.push(select.row.deleted);
+                if (getTags)
+                    arrays.tags.push(select.row.tags);
             }
         }
         catch (ex) {
@@ -1703,12 +1815,12 @@ BriefQuery.prototype = {
             select.reset();
         }
 
-        var bag = Cc['@mozilla.org/hash-property-bag;1'].
-                  createInstance(Ci.nsIWritablePropertyBag);
-        bag.setProperty('entries', entries);
-        bag.setProperty('feeds', feeds);
+        var list = Cc['@ancestor/brief/entrylist;1'].
+                   createInstance(Ci.nsIBriefEntryList);
+        for (arrayName in arrays)
+            list[arrayName] = arrays[arrayName];
 
-        return bag;
+        return list;
     },
 
 
@@ -1747,7 +1859,7 @@ BriefQuery.prototype = {
             // notification. Never include those from hidden feeds though - nobody cares
             // about them nor expects to deal with them.
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
-            var changedEntries = this.getSimpleEntryList();
+            var list = this.getSimpleEntryList(['IDs', 'feedIDs']);
             this.includeHiddenFeeds = false;
 
             update.execute();
@@ -1760,10 +1872,9 @@ BriefQuery.prototype = {
             gConnection.commitTransaction();
         }
 
-        // If any entries were marked, dispatch the notifiaction.
-        if (changedEntries.getProperty('entries').length) {
-            gObserverService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                             aState ? 'read' : 'unread');
+        if (list.length) {
+            for each (observer in gStorageService.observers)
+                observer.onEntriesMarkedRead(list, aState);
         }
     },
 
@@ -1787,7 +1898,7 @@ BriefQuery.prototype = {
         gConnection.beginTransaction();
         try {
             [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
-            var changedEntries = this.getSimpleEntryList();
+            var list = this.getSimpleEntryList(['IDs', 'feedIDs']);
             this.includeHiddenFeeds = temp;
 
             statement.execute();
@@ -1800,9 +1911,9 @@ BriefQuery.prototype = {
             gConnection.commitTransaction();
         }
 
-        if (changedEntries.getProperty('entries').length) {
-            gObserverService.notifyObservers(changedEntries, 'brief:entry-status-changed',
-                                             'deleted');
+        if (list.length) {
+            for each (observer in gStorageService.observers)
+                observer.onEntriesDeleted(list, aState);
         }
     },
 

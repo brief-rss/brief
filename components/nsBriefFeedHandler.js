@@ -1,7 +1,7 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 // nsBriefFeed class definition
 function Feed() { }
@@ -143,11 +143,85 @@ FeedEntry.prototype = {
 }
 
 
-function dump(aMessage) {
-  var consoleService = Cc["@mozilla.org/consoleservice;1"].
-                       getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage('Brief:\n' + aMessage);
+// nsBriefFeed class definition
+function EntryList() { }
+
+EntryList.prototype = {
+
+    get length() {
+        for (prop in this) {
+            if (prop != 'length' && this[prop].splice) {
+                var array = this[prop];
+                break;
+            }
+        }
+        return array ? array.length : 0;
+    },
+
+    IDs: null,
+
+
+    __feedIDs: null,
+    get feedIDs() {
+        return this.getProperty('feedIDs');
+    },
+    set feedIDs(aVal) {
+        return this.__feedIDs = aVal;
+    },
+
+
+    __read: null,
+    get read() {
+        return this.getProperty('read');
+    },
+    set read(aVal) {
+        return this.__read = aVal;
+    },
+
+
+    __starred: null,
+    get starred() {
+        return this.getProperty('starred');
+    },
+    set starred(aVal) {
+        return this.__starred = aVal;
+    },
+
+
+    __deleted: null,
+    get deleted() {
+        return this.getProperty('deleted');
+    },
+    set deleted(aVal) {
+        return this.__deleted = aVal;
+    },
+
+
+    __tags: null,
+    get tags() {
+        return this.getProperty('tags');
+    },
+    set tags(aVal) {
+        return this.__tags = aVal;
+    },
+
+
+    getProperty: function EntryList_getProperty(aPropertyName) {
+        let privateName = '__' + aPropertyName;
+        if (!this[privateName] && this.IDs) {
+            let query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+            query.entries = this.IDs;
+            this[privateName] = query.getSimpleEntryList([aPropertyName]).aPropertyName;
+        }
+        return this[privateName];
+    },
+
+    classDescription: 'A simple list feed entry feed entries',
+    classID: Components.ID('{9a853d20-203d-11dd-bd0b-0800200c9a66}'),
+    contractID: '@ancestor/brief/entrylist;1',
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefEntryList])
+
 }
 
-
-function NSGetModule(compMgr, fileSpec) XPCOMUtils.generateModule([Feed, FeedEntry])
+var modules = [Feed, FeedEntry, EntryList];
+function NSGetModule(compMgr, fileSpec) XPCOMUtils.generateModule(modules)
