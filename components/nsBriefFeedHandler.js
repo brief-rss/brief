@@ -211,7 +211,8 @@ EntryList.prototype = {
         if (!this[privateName] && this.IDs) {
             let query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
             query.entries = this.IDs;
-            this[privateName] = query.getSimpleEntryList([aPropertyName]).aPropertyName;
+            let list = query.getSimpleEntryList([aPropertyName]);
+            this[privateName] = list[aPropertyName];
         }
         return this[privateName];
     },
