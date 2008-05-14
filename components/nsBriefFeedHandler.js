@@ -210,7 +210,7 @@ EntryList.prototype = {
 
     getProperty: function EntryList_getProperty(aPropertyName) {
         // There are only so many entry IDs that can be ORed...
-        let listSizeTooBig = aEntries.length > MAX_SQL_EXPRESSION_SIZE;
+        let listSizeTooBig = this.length > MAX_SQL_EXPRESSION_SIZE;
         let privateName = '__' + aPropertyName;
 
         if (!this[privateName] && this.IDs && !listSizeTooBig) {
