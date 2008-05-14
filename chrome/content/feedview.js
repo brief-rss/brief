@@ -54,8 +54,8 @@ FeedView.prototype = {
     feedContent: null,
 
 
-    // Query that selects entries contained by the view. It is the query to pull ALL the
-    // entries, not only the ones displayed on the current page.
+    // Query that selects entries contained by the view. It is set to to retrieve
+    // all the entries, not only the ones displayed on the current page.
     set query FeedView_query_set(aQuery) {
         return this.__query = aQuery;
     },
@@ -71,6 +71,17 @@ FeedView.prototype = {
         this.__query.offset = 1;
 
         return this.__query;
+    },
+
+    // It's much faster to retrieve entries by their IDs if we know them,
+    // we keep a separate query for that.
+    get _fastQuery FeedView_fastQuery() {
+        if (!this.__fastQuery) {
+            this.__fastQuery = new Query();
+            this.__fastQuery.sortOrder = this.query.sortOrder;
+            this.__fastQuery.sortDirection = this.query.sortDirection;
+        }
+        return this.__fastQuery;
     },
 
 
@@ -117,7 +128,7 @@ FeedView.prototype = {
 
     collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
         var eventType = aAnimate ? 'DoCollapseEntryAnimated' : 'DoCollapseEntry';
-        this._sendEvent(aEntry, eventType, aNewState);
+        this._sendEvent([aEntry], eventType, aNewState);
     },
 
 
@@ -126,21 +137,28 @@ FeedView.prototype = {
      * perform an action or update its state. This is the only way we can communicate
      * with the untrusted document.
      *
-     * @param aTargetEntry  ID of the target entry.
-     * @param aEventType    Type of the event.
-     * @param aState        Additional parameter, the new state of the entry.
+     * @param aTargetEntries Array of IDs of target entries.
+     * @param aEventType     Type of the event.
+     * @param aState         Additional parameter, the new state of the entry.
      */
-    _sendEvent: function FeedView__sendEvent(aTargetEntry, aEventType, aState) {
-        var evt = document.createEvent('Events');
-        evt.initEvent('ViewEvent', false, false);
+    _sendEvent: function FeedView__sendEvent(aTargetEntries, aEventType, aState) {
+        for (let i = 0; i < aTargetEntries.length; i++) {
+            let evt = document.createEvent('Events');
+            evt.initEvent('ViewEvent', false, false);
 
-        var element = this.document.getElementById(aTargetEntry);
-        element.setAttribute('eventType', aEventType);
-        element.setAttribute('eventState', aState);
+            let element = this.document.getElementById(aTargetEntries[i]);
+            element.setAttribute('eventType', aEventType);
+            element.setAttribute('eventState', aState);
 
-        element.dispatchEvent(evt);
+            element.dispatchEvent(evt);
+        }
     },
 
+    _getVisibleEntryIDs: function FeedView__getVisibleEntryIDs() {
+        let pageStartIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
+        let pageEndIndex = pageStartIndex + gPrefs.entriesPerPage - 1;
+        return this._entries.slice(pageStartIndex, pageEndIndex + 1);
+    },
 
     // ID of the selected entry.
     selectedEntry: '',
@@ -558,40 +576,30 @@ FeedView.prototype = {
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntries) {
-        var nodes = this.feedContent.childNodes;
-        if (this.query.unread && this.entryCount != this.query.getEntryCount() ||
-            intersect(nodes, aEntries.IDs)) {
-            this.refresh();
-        }
+        var refreshed = this.query.unread ? this._ensure(aEntries.IDs, true) : false;
+
+        var visibleEntries = intersect(this._getVisibleEntryIDs(), aEntries.IDs);
+        if (!refreshed && visibleEntries.length)
+            this.refresh(true);
     },
 
     onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntries, aNewState) {
-        var entrySetValid = this.query.unread ? this._ensure(aEntries.IDs, !aNewState)
-                                              : true;
+        var refreshed = this.query.unread ? this._ensure(aEntries.IDs, !aNewState)
+                                          : false;
 
-        // Refresh the state of visible entries.
-        if (entrySetValid && this.isActive) {
-            let nodes = this.feedContent.childNodes;
-            for (let i = 0; i < nodes.length; i++) {
-                let id = parseInt(nodes[i].id);
-                if (aEntries.IDs.indexOf(id) != -1)
-                    this._sendEvent(id, 'EntryMarkedRead', aNewState);
-            }
+        if (!refreshed && this.isActive) {
+            let entries = intersect(this._getVisibleEntryIDs(), aEntries.IDs);
+            this._sendEvent(entries, 'EntryMarkedRead', aNewState);
         }
     },
 
     onEntriesStarred: function FeedView_onEntriesStarred(aEntries, aNewState) {
-        var entrySetValid = this.query.starred ? this._ensure(aEntries.IDs, !aEntries.IDs)
-                                               : true;
+        var refreshed = this.query.starred ? this._ensure(aEntries.IDs, !aEntries.IDs)
+                                           : false;
 
-        // If view wasn't invalidated, we still may have to visually adjust entries.
-        if (entrySetValid && this.isActive) {
-            let nodes = this.feedContent.childNodes;
-            for (let i = 0; i < nodes.length; i++) {
-                let id = parseInt(nodes[i].id);
-                if (aEntries.IDs.indexOf(id) != -1)
-                    this._sendEvent(id, 'EntryStarred', aNewState);
-            }
+        if (!refreshed && this.isActive) {
+            let entries = intersect(this._getVisibleEntryIDs(), aEntries.IDs);
+            this._sendEvent(entries, 'EntryStarred', aNewState);
         }
     },
 
@@ -616,10 +624,8 @@ FeedView.prototype = {
      *          refreshed.
      */
     _ensure: function FeedView__ensure(aModifiedEntries, aPotentialChange) {
-        var entrySetChanged = false;
+        var refreshed = false;
 
-        // The fastest way to check if any of the modified entries should be added
-        // comparing their counts.
         if (aPotentialChange) {
             if (this.entryCount != this.query.getEntryCount()) {
                 if (this.isActive && !this.browser.webProgress.isLoadingDocument)
@@ -627,49 +633,40 @@ FeedView.prototype = {
                 else
                     async(this._refreshEntryList, 250, this);
 
-                entrySetChanged = true;
+                refreshed = true;
             }
         }
         else {
-            // The set of entries that should be removed is the intersection of
-            // the currently contained entries and the modified entries.
-            var indicesToRemove = [];
-            for (let i = 0; i < aModifiedEntries.length; i++) {
-                let index = this._entries.indexOf(aModifiedEntries[i]);
-                if (index != -1)
-                    indicesToRemove.push(index);
-            }
+            var entriesToRemove = intersect(aModifiedEntries, this._entries);
+            if (entriesToRemove.length) {
 
-            if (indicesToRemove.length) {
                 // We optimize the case of cutting a single entry from the current page
                 // by gracefully removing just it instead doing a full refresh.
-                if (indicesToRemove.length === 1) {
-                    let removedIndex = indicesToRemove[0];
-                    var singleRemovedEntry = this._entries[removedIndex];
+                if (entriesToRemove.length === 1) {
+                    var removedEntry = entriesToRemove[0];
 
-                    let pageStartIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
-                    let pageEndIndex = pageStartIndex + gPrefs.entriesPerPage - 1;
-                    var isVisible = removedIndex >= pageStartIndex &&
-                                    removedIndex <= pageEndIndex;
+                    let visibleEntries = this._getVisibleEntryIDs();
+                    var isVisible = visibleEntries.indexOf(removedEntry) !== -1;
 
+                    let removedIndex =  this._entries.indexOf(removedEntry);
                     var isLast = removedIndex === this.entryCount - 1 &&
                                  this.feedContent.childNodes.length === 1;
                 }
 
                 // Cut the removed indices from the entry set.
-                var filter = function(val, i) indicesToRemove.indexOf(i) == -1;
+                var filter = function(en) entriesToRemove.indexOf(en) === -1;
                 this._entries = this._entries.filter(filter);
 
-                if (singleRemovedEntry && !isLast && isVisible)
-                    this._removeEntry(singleRemovedEntry);
+                if (removedEntry && !isLast && isVisible)
+                    this._removeEntry(removedEntry);
                 else
                     this.refresh(true);
 
-                entrySetChanged = true;
+                refreshed = true;
             }
         }
 
-        return entrySetChanged;
+        return refreshed;
     },
 
 
@@ -678,6 +675,7 @@ FeedView.prototype = {
      *
      * @param aEntrySetValid Optional. Indicates that the contained set of entries isn't
      *                       expected to have changed and doesn't have to be recomputed.
+     *                       In practice, it is used when switching pages.
      */
     refresh: function FeedView_refresh(aEntrySetValid) {
         // Stop scrolling.
@@ -715,16 +713,10 @@ FeedView.prototype = {
         if (aEntrySetValid) {
             this._refreshPageNavUI();
 
-            let pageStartIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
-            let pageEndIndex = pageStartIndex + gPrefs.entriesPerPage - 1;
-            let entryIDs = [];
-            for (let i = pageStartIndex; i <= pageEndIndex && this._entries[i]; i++)
-                entryIDs.push(this._entries[i]);
-
+            let entryIDs = this._getVisibleEntryIDs();
             if (entryIDs.length) {
-                let query = new Query();
-                query.entries = entryIDs;
-                entries = query.getEntries();
+                this._fastQuery.entries = entryIDs;
+                entries = this._fastQuery.getEntries();
             }
         }
         else {
@@ -801,33 +793,28 @@ FeedView.prototype = {
             var previousSibling = entryElement.previousSibling;
         }
 
-        // Remove the entry. We don't do it directly, because we want to
-        // use jQuery to to fade it gracefully.
-        this._sendEvent(aEntry, 'DoRemoveEntry');
+        // Send an event to have the element gracefully removed by jQuery.
+        this._sendEvent([aEntry], 'DoRemoveEntry');
 
-        // Wait until the old entry is removed and append a new one.
-        async(finish, 310);
-
-        var self = this;
-        function finish() {
-            // Pull the entry to be appended. If the last page is displayed
-            // then there may be no futher entries.
-            var pageEndIndex = gPrefs.entriesPerPage * (self.currentPage - 1)
+        // Wait until the old entry is removed and append a new one. If the current page
+        // is the last one then there may be no futher entries.
+        async(function() {
+            var pageEndIndex = gPrefs.entriesPerPage * (this.currentPage - 1)
                                + gPrefs.entriesPerPage - 1;
-            var entryID = self._entries[pageEndIndex];
+            var entryID = this._entries[pageEndIndex];
             if (entryID) {
-                var query = new Query();
-                query.entries = [entryID];
-                var entry = query.getEntries()[0];
-                var appendedElement = self._appendEntry(entry);
+                this._fastQuery.entries = [entryID];
+                let entry = this._fastQuery.getEntries()[0];
+                var appendedElement = this._appendEntry(entry);
             }
-            else if (!self.feedContent.childNodes.length) {
-                self._setEmptyViewMessage();
+            else if (!this.feedContent.childNodes.length) {
+                this._setEmptyViewMessage();
             }
 
             if (entryWasSelected)
-                self.selectEntry(nextSibling || appendedEntry || previousSibling || null);
-        }
+                this.selectEntry(nextSibling || appendedEntry || previousSibling || null);
+
+        }, 250, this);
     },
 
     /**
