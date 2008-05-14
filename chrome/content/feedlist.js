@@ -474,7 +474,7 @@ var gFeedList = {
         // in-database list of feeds was synchronized.
         case 'brief:invalidate-feedlist':
             this.rebuild();
-            async(gFeedView.ensure, 0, gFeedView);
+            async(gFeedView.refresh, 0, gFeedView);
 
             if (gPrefs.homeFolder)
                 getElement('feed-list-deck').selectedIndex = 0;
@@ -495,22 +495,39 @@ var gFeedList = {
 
 
     onEntriesAdded: function gFeedList_onEntriesAdded(aEntries) {
-        this.refreshSpecialTreeitem('unread-folder');
+        async(function() {
+            var feeds = filterDuplicates(aEntries.feedIDs);
+            this.refreshFeedTreeitems(feeds);
+
+            this.refreshSpecialTreeitem('unread-folder');
+
+        }, 0, this)
     },
 
     onEntriesUpdated: function gFeedList_onEntriesUpdated(aEntries) {
-        this.refreshSpecialTreeitem('unread-folder');
+        async(function() {
+            var feeds = filterDuplicates(aEntries.feedIDs);
+            this.refreshFeedTreeitems(feeds);
+
+            this.refreshSpecialTreeitem('unread-folder');
+
+        }, 0, this)
     },
 
     onEntriesMarkedRead: function gFeedList_onEntriesMarkedRead(aEntries, aNewState) {
-        // Do everything asychronously to speed up refreshing of the feed view.
-        async(this.refreshFeedTreeitems, 0, this, aEntries.feedIDs);
+        async(function() {
+            var feeds = filterDuplicates(aEntries.feedIDs);
+            this.refreshFeedTreeitems(feeds);
 
-        // We can't know if any of those need updating, so we have to
-        // update them all.
-        async(this.refreshSpecialTreeitem, 0, this, 'unread-folder');
-        async(this.refreshSpecialTreeitem, 0, this, 'starred-folder');
-        async(this.refreshSpecialTreeitem, 0, this, 'trash-folder');
+            this.refreshSpecialTreeitem('unread-folder');
+
+            if (!aEntries.starred || aEntries.starred.indexOf(true))
+                this.refreshSpecialTreeitem('starred-folder');
+
+            if (!aEntries.deleted || aEntries.deleted.indexOf(ENTRY_STATE_TRASHED))
+                this.refreshSpecialTreeitem('trash-folder');
+
+        }, 0, this)
     },
 
     onEntriesStarred: function gFeedList_onEntriesStarred(aEntries, aNewState) {
@@ -522,12 +539,18 @@ var gFeedList = {
     },
 
     onEntriesDeleted: function gFeedList_onEntriesDeleted(aEntries, aNewState) {
-        async(this.refreshFeedTreeitems, 0, this, aEntries.feedIDs);
+        async(function() {
+            var feeds = filterDuplicates(aEntries.feedIDs);
+            this.refreshFeedTreeitems(feeds);
 
-        async(this.refreshSpecialTreeitem, 0, this, 'unread-folder');
-        async(this.refreshSpecialTreeitem, 0, this, 'starred-folder');
-        async(this.refreshSpecialTreeitem, 0, this, 'trash-folder');
+            this.refreshSpecialTreeitem('trash-folder');
 
+            if (!aEntries.read || aEntries.read.indexOf(false))
+                this.refreshSpecialTreeitem('unread-folder');
+            if (!aEntries.starred || aEntries.starred.indexOf(true))
+                this.refreshSpecialTreeitem('starred-folder');
+
+        }, 0, this)
     },
 
 
