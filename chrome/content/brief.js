@@ -123,7 +123,7 @@ function initToolbarsAndStrings() {
 
 
 function unload() {
-    var observerService = Cc["@mozilla.org/observer-service;1"].
+    var observerService = Cc['@mozilla.org/observer-service;1'].
                           getService(Ci.nsIObserverService);
     observerService.removeObserver(gObserver, 'brief:feed-updated');
     observerService.removeObserver(gObserver, 'brief:feed-loading');
@@ -145,29 +145,23 @@ var gObserver = {
     observe: function gObserver_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
 
-        // A feed update was finished and new entries are available. Restore the
-        // favicon instead of the throbber (or error icon), refresh the feed treeitem
-        // and the feedview if necessary.
         case 'brief:feed-updated':
-            var feedID = aData;
-            var item = getElement(feedID);
+            var item = getElement(aData);
             item.removeAttribute('error');
             item.removeAttribute('loading');
             gFeedList.refreshFeedTreeitems(item);
             refreshProgressmeter();
             break;
 
-        // A feed was requested; show throbber as its icon.
         case 'brief:feed-loading':
             var item = getElement(aData);
             item.setAttribute('loading', true);
             gFeedList.refreshFeedTreeitems(item);
             break;
 
-        // An error occured when downloading or parsing a feed; show error icon.
+        // Error occured when downloading or parsing the feed, show error icon.
         case 'brief:feed-error':
-            var feedID = aData;
-            var item = getElement(feedID);
+            var item = getElement(aData);
             item.removeAttribute('loading');
             item.setAttribute('error', true);
             gFeedList.refreshFeedTreeitems(item);
@@ -196,11 +190,6 @@ var gObserver = {
                     gFeedList.refreshFeedTreeitems(items[i]);
                 }
             }
-            break;
-
-        // Entries were marked as read/unread, starred, trashed, restored, or deleted.
-        case 'brief:entry-status-changed':
-            this.onEntryStatusChanged(aSubject, aData);
             break;
 
         case 'brief:custom-style-changed':
@@ -676,6 +665,15 @@ function intersect(arr1, arr2) {
             return true;
     }
     return false;
+}
+
+function filterDuplicates(arr) {
+    var retval = [];
+    for (let i = 0; i < arr.length; i++) {
+        if (retval.indexOf(arr[i]) == -1)
+            retval.push(arr[i]);
+    }
+    return retval;
 }
 
 
