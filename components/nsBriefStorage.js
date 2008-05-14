@@ -1201,7 +1201,7 @@ BriefStorageService.prototype = {
 
     notifyOfEntriesStarred: function BriefStorage_notifyOfEntriesStarred(aEntries, aNewState) {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-        query.entries = entryIDs;
+        query.entries = aEntries;
         var list = query.getSimpleEntryList(['IDs', 'feedIDs']);
 
         for each (observer in this.observers)
@@ -1210,7 +1210,7 @@ BriefStorageService.prototype = {
 
     notifyOfEntriesTagged: function BriefStorage_notifyOfEntriesTagged(aEntries, aNewTagSet) {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-        query.entries = entryIDs;
+        query.entries = aEntries;
         var list = query.getSimpleEntryList(['IDs', 'feedIDs']);
         list.tags = aNewTagSet;
 
@@ -1849,12 +1849,19 @@ BriefQuery.prototype = {
 
         gConnection.beginTransaction();
         try {
-            // Get the list of entries which we deleted, so we can pass it in the
-            // notification. Never include those from hidden feeds though - nobody cares
-            // about them nor expects to deal with them.
-            [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
+            let tempRead, tempUnread, tempHidden;
+            // Don't include hidden feeds in the list we pass to the notification.
+            [this.includeHiddenFeeds, tempHidden] = [false, this.includeHiddenFeeds];
+
+            // Don't include entries which already have the desired state.
+            [this.unread, tempUnread] = [!aState, this.unread]
+            [this.read, tempRead] = [aState, this.read]
+
             var list = this.getSimpleEntryList(['IDs', 'feedIDs']);
-            this.includeHiddenFeeds = false;
+
+            this.includeHiddenFeeds = tempHidden;
+            this.unread = tempUnread;
+            this.read = tempRead;
 
             update.execute();
         }
