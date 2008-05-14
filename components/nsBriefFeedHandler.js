@@ -1,6 +1,8 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+const MAX_SQL_EXPRESSION_SIZE = 950;
+
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 // nsBriefFeed class definition
@@ -207,8 +209,11 @@ EntryList.prototype = {
 
 
     getProperty: function EntryList_getProperty(aPropertyName) {
+        // There are only so many entry IDs that can be ORed...
+        let listSizeTooBig = aEntries.length > MAX_SQL_EXPRESSION_SIZE;
         let privateName = '__' + aPropertyName;
-        if (!this[privateName] && this.IDs) {
+
+        if (!this[privateName] && this.IDs && !listSizeTooBig) {
             let query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
             query.entries = this.IDs;
             let list = query.getSimpleEntryList([aPropertyName]);
