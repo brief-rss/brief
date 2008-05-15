@@ -1212,7 +1212,11 @@ BriefStorageService.prototype = {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
         query.entries = aEntries;
         var list = query.getSimpleEntryList(['IDs', 'feedIDs']);
-        list.tags = aNewTagSet;
+
+        var tags = [];
+        for (let i = 0; i < list.IDs.length; i++)
+            tags.push(aNewTagSet);
+        list.tags = tags;
 
         for each (observer in this.observers)
             observer.onEntriesTagged(list);
@@ -1821,9 +1825,10 @@ BriefQuery.prototype = {
     // nsIBriefQuery
     getEntryCount: function BriefQuery_getEntryCount() {
         // Optimization: ignore sorting settings.
-        [this.sortOrder, temp] = [Ci.nsIBriefQuery.NO_SORT, this.sortOrder];
+        var tempOrder = this.sortOrder;
+        this.sortOrder = Ci.nsIBriefQuery.NO_SORT;
         var select = createStatement('SELECT COUNT(1) AS count ' + this.getQueryString(true));
-        this.sortOrder = temp;
+        this.sortOrder = tempOrder;
 
         try {
             select.step();
@@ -1843,25 +1848,36 @@ BriefQuery.prototype = {
 
     // nsIBriefQuery
     markEntriesRead: function BriefQuery_markEntriesRead(aState) {
+        // We try not to include entries which already have the desired state,
+        // but we can't omit them if a specific range of the selected entries
+        // is meant to be marked.
+        if (!this.limit && this.offset === 1) {
+            var tempRead = this.read;
+            var tempUnread = this.unread;
+            this.read = aState;
+            this.unread = !aState;
+        }
+
         var update = createStatement('UPDATE entries SET read = :read, updated = 0 ' +
                                      this.getQueryString())
         update.params.read = aState ? 1 : 0;
 
         gConnection.beginTransaction();
         try {
-            let tempRead, tempUnread, tempHidden;
-            // Don't include hidden feeds in the list we pass to the notification.
-            [this.includeHiddenFeeds, tempHidden] = [false, this.includeHiddenFeeds];
+            // If we didn't exclude these entries before, we can at least exclude them
+            // from the changed entries list passed to the notification.
+            if (this.limit || this.offset !== 1) {
+                tempRead = this.read;
+                tempUnread = this.unread;
+                this.read = aState;
+                this.unread = !aState;
+            }
 
-            // Don't include entries which already have the desired state.
-            [this.unread, tempUnread] = [!aState, this.unread]
-            [this.read, tempRead] = [aState, this.read]
+            // Don't include hidden feeds in the list we pass to the notification.
+            var tempHidden = this.includeHiddenFeeds;
+            this.includeHiddenFeeds = false;
 
             var list = this.getSimpleEntryList(['IDs', 'feedIDs']);
-
-            this.includeHiddenFeeds = tempHidden;
-            this.unread = tempUnread;
-            this.read = tempRead;
 
             update.execute();
         }
@@ -1870,6 +1886,10 @@ BriefQuery.prototype = {
             reportError(ex, gConnection.lastError != 1);
         }
         finally {
+            this.includeHiddenFeeds = tempHidden;
+            this.unread = tempUnread;
+            this.read = tempRead;
+
             gConnection.commitTransaction();
         }
 
@@ -1898,9 +1918,10 @@ BriefQuery.prototype = {
 
         gConnection.beginTransaction();
         try {
-            [this.includeHiddenFeeds, temp] = [false, this.includeHiddenFeeds];
+            var tempHidden = this.includeHiddenFeeds;
+            this.includeHiddenFeeds = false;
             var list = this.getSimpleEntryList(['IDs', 'feedIDs']);
-            this.includeHiddenFeeds = temp;
+            this.includeHiddenFeeds = tempHidden;
 
             statement.execute();
         }
