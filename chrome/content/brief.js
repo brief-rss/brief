@@ -136,6 +136,7 @@ function unload() {
 
     gPrefs.unregister();
     gStorage.removeObserver(gFeedList);
+    gFeedView.detach();
 }
 
 
@@ -643,8 +644,7 @@ var gPrefs = {
 }
 
 
-// Utility functions.
-
+// ------- Utility functions --------
 
 function getElement(aId) document.getElementById(aId);
 
@@ -676,9 +676,6 @@ function filterDuplicates(arr) {
     }
     return retval;
 }
-
-
-
 
 function log(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].
