@@ -35,6 +35,7 @@
             <div class="article-date"/>
             <div class="article-authors"/>
             <div class="feed-name"/>
+            <div class="article-tags"/>
         </div>
 
     </xbl:content>
@@ -73,6 +74,9 @@
 
             var authorsElem = this.getElement('article-authors');
             authorsElem.innerHTML = this.getAttribute('authors');
+
+            var tagsElem = this.getElement('article-tags');
+            tagsElem.textContent = this.getAttribute('tags');
 
             var markReadElem = this.getElement('mark-read-centre');
             markReadElem.textContent = this.read ? gConveyedData.markUnreadString
@@ -232,27 +236,24 @@
 
             if (command) {
                 switch (command) {
-                    case 'switchRead':
-                        this.read = !this.read;
-                        this.sendEvent('SwitchEntryRead', true);
-                        break;
-                    case 'switchStarred':
-                        this.sendEvent('SwitchEntryStarred');
-                        break;
-                    case 'delete':
-                        this.sendEvent('DeleteEntry');
-                        break;
-                    case 'restore':
-                        this.sendEvent('RestoreEntry');
-                        break;
+                case 'switchRead':
+                    this.sendEvent('SwitchEntryRead');
+                    break;
+                case 'switchStarred':
+                    this.sendEvent('SwitchEntryStarred');
+                    break;
+                case 'delete':
+                    this.sendEvent('DeleteEntry');
+                    break;
+                case 'restore':
+                    this.sendEvent('RestoreEntry');
+                    break;
                 }
             }
-
             else if (this.collapsed) {
                 if (!target.hasAttribute(command))
                     this.collapse(false, true);
             }
-
             else {
                 var headlinesView = document.getElementById('feed-content').
                                              hasAttribute('showHeadlinesOnly');
@@ -288,6 +289,10 @@
                     break;
                 case 'EntryStarred':
                     this.starred = state;
+                    break;
+                case 'EntryTagged':
+                    var tagsElem = this.getElement('article-tags');
+                    tagsElem.textContent = this.getAttribute('tags');
                     break;
                 case 'DoRemoveEntry':
                     var self = this;
