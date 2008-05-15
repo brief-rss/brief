@@ -128,7 +128,7 @@ FeedView.prototype = {
 
     collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
         var eventType = aAnimate ? 'DoCollapseEntryAnimated' : 'DoCollapseEntry';
-        this._sendEvent([aEntry], eventType, aNewState);
+        this._sendEvent(aEntry, eventType, aNewState);
     },
 
 
@@ -142,11 +142,13 @@ FeedView.prototype = {
      * @param aState         Additional parameter, the new state of the entry.
      */
     _sendEvent: function FeedView__sendEvent(aTargetEntries, aEventType, aState) {
-        for (let i = 0; i < aTargetEntries.length; i++) {
+        var targetEntries = aTargetEntries.splice ? aTargetEntries : [aTargetEntries];
+
+        for (let i = 0; i < targetEntries.length; i++) {
             let evt = document.createEvent('Events');
             evt.initEvent('ViewEvent', false, false);
 
-            let element = this.document.getElementById(aTargetEntries[i]);
+            let element = this.document.getElementById(targetEntries[i]);
             element.setAttribute('eventType', aEventType);
             element.setAttribute('eventState', aState);
 
@@ -495,7 +497,7 @@ FeedView.prototype = {
 
             // Forward commands from the view to the controller.
             case 'SwitchEntryRead':
-                var newState = target.hasAttribute('read');
+                var newState = !target.hasAttribute('read');
                 gCommands.markEntryRead(id, newState);
                 break;
             case 'DeleteEntry':
@@ -604,7 +606,16 @@ FeedView.prototype = {
     },
 
     onEntriesTagged: function FeedView_onEntriesTagged(aEntries) {
+        if (!this.isActive)
+            return;
 
+        for (let i = 0; i < aEntries.length; i++) {
+            let elem = this.document.getElementById(aEntries.IDs[i]);
+            if (elem) {
+                elem.setAttribute('tags', aEntries.tags[i].join(', '));
+                this._sendEvent(aEntries.IDs[i], 'EntryTagged');
+            }
+        }
     },
 
     onEntriesDeleted: function FeedView_onEntriesDeleted(aEntries, aNewState) {
@@ -794,7 +805,7 @@ FeedView.prototype = {
         }
 
         // Send an event to have the element gracefully removed by jQuery.
-        this._sendEvent([aEntry], 'DoRemoveEntry');
+        this._sendEvent(aEntry, 'DoRemoveEntry');
 
         // Wait until the old entry is removed and append a new one. If the current page
         // is the last one then there may be no futher entries.
@@ -885,6 +896,7 @@ FeedView.prototype = {
         articleContainer.setAttribute('entryURL', aEntry.entryURL);
         articleContainer.setAttribute('entryTitle', aEntry.title);
         articleContainer.setAttribute('content', aEntry.content);
+        articleContainer.setAttribute('tags', aEntry.tags);
 
         if (aEntry.authors)
             articleContainer.setAttribute('authors', this.authorPrefixStr + aEntry.authors);
