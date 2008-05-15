@@ -102,30 +102,32 @@ var gFeedList = {
         // the new selected item is the same.
         this._prevSelectedItem = selectedItem;
 
-        if (selectedItem.hasAttribute('specialFolder')) {
-            var title = selectedItem.getAttribute('title');
-            var query = new Query();
+        var query = new Query();
+        var title;
 
+        if (selectedItem.hasAttribute('specialFolder')) {
+            title = selectedItem.getAttribute('title');
             query.unread = selectedItem.id == 'unread-folder';
             query.starred = selectedItem.id == 'starred-folder';
             query.deleted = selectedItem.id == 'trash-folder' ? ENTRY_STATE_TRASHED
                                                               : ENTRY_STATE_NORMAL;
-            var view = new FeedView(title, query);
         }
-
         else if (selectedItem.hasAttribute('container')) {
-            var feed = this.selectedFeed;
-            query = new Query();
-            query.folders = [feed.feedID];
-            view = new FeedView(feed.title, query);
+            title = this.selectedFeed.title;
+            query.folders = [this.selectedFeed.feedID];
         }
-
+        else if (selectedItem.parentNode.parentNode.id == 'starred-folder') {
+            let tagID = parseInt(selectedItem.id);
+            let index = this._tags.tagIDs.indexOf(tagID);
+            title = this._tags.tagNames[index];
+            query.tags = [tagID];
+        }
         else {
-            var feed = this.selectedFeed;
-            query = new QuerySH([feed.feedID], null, null);
-            view = new FeedView(feed.title, query);
+            query.feeds = [this.selectedFeed.feedID];
+            title = this.selectedFeed.title;
         }
 
+        var view = new FeedView(title, query);
         view.attach();
     },
 
@@ -160,7 +162,7 @@ var gFeedList = {
             var item = this.tree.view.getItemAtIndex(row);
 
             // Detect when folder is collapsed/expanded.
-            if (item.hasAttribute('container')) {
+            if (item.hasAttribute('container') && item.id != 'starred-folder') {
                 this.refreshFolderTreeitems(item);
 
                 // We have to persist folders immediatelly instead of when Brief is closed,
@@ -241,7 +243,7 @@ var gFeedList = {
      */
     refreshFolderTreeitems: function gFeedList_refreshFolderTreeitems(aFolders) {
         var treeitem, treecell, folder, query, unreadCount;
-        var folders = aFolders instanceof Array ? aFolders : [aFolders];
+        var folders = (aFolders.splice) ? aFolders : [aFolders];
 
         for (var i = 0; i < folders.length; i++) {
             folder = this.getBriefFeed(folders[i]);
@@ -307,6 +309,24 @@ var gFeedList = {
         }
     },
 
+    refreshTagTreeitems: function gFeedList_refreshTagTreeitems(aTagIDs) {
+        var tagIDs = (aTagIDs.splice) ? aTagIDs : [aTagIDs];
+
+        for (let i = 0; i < tagIDs.length; i++) {
+            let tagID = tagIDs[i];
+            let treeitem = getElement(tagID);
+            let treecell = treeitem.firstChild.firstChild;
+
+            // Update the label.
+            let index = this._tags.tagIDs.indexOf(tagID);
+            let title = this._tags.tagNames[index];
+            let query = new Query();
+            query.tags = [tagID];
+            query.unread = true;
+            this._setLabel(treecell, title, query.getEntryCount());
+        }
+    },
+
     _setLabel: function gFeedList__setUnreadCounter(aTreecell, aName, aUnreadCount) {
         var label;
         if (aUnreadCount > 0) {
@@ -323,8 +343,7 @@ var gFeedList = {
 
     // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
-
-        // Can't build the tree if the tree is hidden and there's no view.
+        // Can't build the tree if there's no view, because the tree is hidden.
         if (!this.tree.view) {
             this.treeNotBuilt = true;
             return;
@@ -335,9 +354,8 @@ var gFeedList = {
         this.refreshSpecialTreeitem('starred-folder');
         this.refreshSpecialTreeitem('trash-folder');
 
-        // Preserve selection.
-        if (this.selectedFeed)
-            this.feedIDToSelect = this.selectedFeed.feedID;
+        // Remember selection.
+        this.lastSelectedID = this.selectedItem ? this.selectedItem.id : '';
 
         // Clear the existing tree.
         var topLevelChildren = getElement('top-level-children');
@@ -347,29 +365,66 @@ var gFeedList = {
             lastChild = topLevelChildren.lastChild
         }
 
-        this.feeds = gStorage.getAllFeedsAndFolders();
+        // Clear the old tag list.
+        var starredFolder = getElement('starred-folder');
+        starredFolder.removeChild(starredFolder.lastChild);
+        var tagsTreechildren = document.createElement('treechildren');
+        starredFolder.appendChild(tagsTreechildren);
+
+        // Build the tag list.
+        var tags = gStorage.getAllTags();
+        this._tags = {};
+        this._tags.tagIDs = tags.getProperty('tagIDs');
+        this._tags.tagNames = tags.getProperty('tagNames');
+
+        if (this._tags.tagIDs.length)
+            starredFolder.setAttribute('container', true);
+        else
+            starredFolder.removeAttribute('container');
+
+        for (let i = 0; i < this._tags.tagIDs.length; i++) {
+            let fragment = this._flatRow.cloneNode(true);
+            let treeitem = fragment.firstChild;
+            treeitem.id = this._tags.tagIDs[i];
+
+            let treecell = treeitem.firstChild.firstChild;
+            treecell.setAttribute('properties', 'tag ');
+
+            tagsTreechildren.appendChild(fragment);
+
+            this.refreshTagTreeitems(this._tags.tagIDs[i]);
+        }
+
+        this.feeds = gStorage.getAllFeeds(true);
 
         // This a helper array used by _buildFolderChildren. As the function recurses,
-        // the array stores the <treechildren> elements of all folders in the parent chain
-        // of the currently processed folder. This is how it tracks where to append the
-        // items.
+        // the array stores the <treechildren> elements of all folders in the parent
+        // chain of the currently processed folder. This is how it tracks where to
+        // append the items.
         this._folderParentChain = [topLevelChildren];
 
         this._buildFolderChildren(gPrefs.homeFolder);
+
+        var itemToSelect = this.lastSelectedID ? getElement(this.lastSelectedID) : null;
+        var index = itemToSelect ? this.tree.view.getIndexOfItem(itemToSelect) : 0;
+        this.ignoreSelectEvent = true;
+        this.tree.view.selection.select(index);
+        this.ignoreSelectEvent = false;
+        this.lastSelectedID = '';
 
         // Fill the items cache.
         this.items = this.tree.getElementsByTagName('treeitem');
     },
 
     // Cached document fragments, "bricks" used to build the tree.
-    get _folderRow gFeedList__folderRow() {
-        delete this._folderRow;
+    get _containerRow gFeedList__containerRow() {
+        delete this._containerRow;
 
-        this._folderRow = document.createDocumentFragment();
+        this._containerRow = document.createDocumentFragment();
 
         var treeitem = document.createElement('treeitem');
         treeitem.setAttribute('container', 'true');
-        treeitem = this._folderRow.appendChild(treeitem);
+        treeitem = this._containerRow.appendChild(treeitem);
 
         var treerow = document.createElement('treerow');
         treerow = treeitem.appendChild(treerow);
@@ -380,26 +435,24 @@ var gFeedList = {
         var treechildren = document.createElement('treechildren');
         treechildren = treeitem.appendChild(treechildren);
 
-        return this._folderRow;
+        return this._containerRow;
     },
 
-    get _feedRow gFeedList__feedRow() {
-        delete this._feedRow;
+    get _flatRow gFeedList__flatRow() {
+        delete this._flatRow;
 
-        this._feedRow = document.createDocumentFragment();
+        this._flatRow = document.createDocumentFragment();
 
         var treeitem = document.createElement('treeitem');
-        treeitem = this._feedRow.appendChild(treeitem);
+        treeitem = this._flatRow.appendChild(treeitem);
 
         var treerow = document.createElement('treerow');
-        treerow.setAttribute('properties', 'feed-item ');
         treeitem.appendChild(treerow);
 
         var treecell = document.createElement('treecell');
-        treecell.setAttribute('properties', 'feed-item '); // Mind the whitespace
         treerow.appendChild(treecell);
 
-        return this._feedRow;
+        return this._flatRow;
     },
 
     /**
@@ -409,32 +462,25 @@ var gFeedList = {
      * @param aParentFolder feedID of the folder.
      */
     _buildFolderChildren: function gFeedList__buildFolderChildren(aParentFolder) {
-
-        // Iterate over all the children.
+        // Iterate over all the feeds to find the children.
         for (var i = 0; i < this.feeds.length; i++) {
             var feed = this.feeds[i];
 
             if (feed.parent != aParentFolder)
                 continue;
 
+            var parent = this._folderParentChain[this._folderParentChain.length - 1];
+
             if (feed.isFolder) {
-                var parent = this._folderParentChain[this._folderParentChain.length - 1];
                 var closedFolders = this.tree.getAttribute('closedFolders');
                 var isOpen = !closedFolders.match(escape(feed.feedID));
 
-                var fragment = this._folderRow.cloneNode(true);
+                var fragment = this._containerRow.cloneNode(true);
                 var treeitem = fragment.firstChild;
                 treeitem.setAttribute('open', isOpen);
                 treeitem.setAttribute('id', feed.feedID);
 
                 parent.appendChild(fragment);
-
-                if (feed.feedID == this.feedIDToSelect) {
-                    this.ignoreSelectEvent = true;
-                    this.tree.view.selection.select(this.tree.view.rowCount - 1);
-                    this.ignoreSelectEvent = false;
-                    this.feedIDToSelect = null;
-                }
 
                 this.refreshFolderTreeitems(treeitem);
 
@@ -442,23 +488,16 @@ var gFeedList = {
 
                 this._buildFolderChildren(feed.feedID);
             }
-
             else {
-                var parent = this._folderParentChain[this._folderParentChain.length - 1];
-
-                var fragment = this._feedRow.cloneNode(true);
+                var fragment = this._flatRow.cloneNode(true);
                 var treeitem = fragment.firstChild;
                 treeitem.setAttribute('id', feed.feedID);
                 treeitem.setAttribute('url', feed.feedURL);
 
-                parent.appendChild(fragment);
+                var treecell = treeitem.firstChild.firstChild;
+                treecell.setAttribute('properties', 'feed-item ');
 
-                if (feed.feedID == this.feedIDToSelect) {
-                    this.ignoreSelectEvent = true;
-                    this.tree.view.selection.select(this.tree.view.rowCount - 1);
-                    this.ignoreSelectEvent = false;
-                    this.feedIDToSelect = null;
-                }
+                parent.appendChild(fragment);
 
                 this.refreshFeedTreeitems(treeitem);
             }

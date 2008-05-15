@@ -28,6 +28,11 @@ interface nsIBriefQuery : nsISupports {
     attribute nsIVariant folders;
 
     /**
+     * Array of IDs of tags which selected entries must have.
+     */
+    attribute nsIVariant tags;
+
+    /**
      * Entry status. Set any of these attributes to TRUE to limit query to entries with
      * respetive status.
      */
@@ -124,7 +129,7 @@ interface nsIBriefQuery : nsISupports {
      * basic attributes.
      *
      * @param attributes Array of attributes to retrieve. Available attributes:
-     *                   "id", "feedID", "read", "starred", "deleted".
+     *                   "IDs", "feedIDs", "read", "starred", "deleted", "tags".
      *                   If not specified, only "id" is retrieved.
      * @returns Property bag containing arrays of the above attributes..
      */
@@ -182,14 +187,17 @@ interface nsIBriefStorage : nsISupports {
   /**
    * Gets all feeds, without entries.
    *
+   * @param includeFolders
    * @returns array of nsIBriefFeed objects.
    */
-  nsIVariant getAllFeeds();
+  nsIVariant getAllFeeds([optional] in boolean includeFolders);
 
   /**
-   * Similar to |getAllFeeds| but also includes folders.
+   * Gets all tags.
+   *
+   * @returns Property bag containing "tagNames" and "tagIDs" arrays.
    */
-  nsIVariant getAllFeedsAndFolders();
+  nsIPropertyBag getAllTags();
 
   /**
    * Synchronizes database with Live Bookmarks from home folder which ID is
