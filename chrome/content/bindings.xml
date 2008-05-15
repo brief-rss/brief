@@ -95,7 +95,7 @@
             if (this.collapsed) {
                 var collapsedSubheader = this.getElement('collapsed-article-subheader');
                 collapsedSubheader.insertBefore(dateElem, null);
-                collapsedSubheader.insertBefore(feedNameElem, tagsElem);
+                collapsedSubheader.insertBefore(feedNameElem, null);
                 $(contentElem).hide();
             }
         </constructor>
