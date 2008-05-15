@@ -177,7 +177,7 @@ body {
 }
 
 .article-content:empty {
-    display: none !important;
+    padding: 0 0 10px !important;
 }
 
 .article-content a {
