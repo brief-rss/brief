@@ -48,7 +48,7 @@ splitter {
 }
 
 #feed-list > treechildren::-moz-tree-row {
-  height: 22px;
+  height: 21px;
 }
 
 
@@ -85,19 +85,25 @@ splitter {
   list-style-image: url('chrome://browser/skin/feeds/feedIcon16.png') !important;
 }
 
+#feed-list > treechildren::-moz-tree-image(tag) {
+  list-style-image: url('chrome://mozapps/skin/places/tagContainerIcon.png') !important;
+  width: 16px;
+  height: 16px;
+  padding-right: 4px;
+}
 
 /* ---- Fixed images for predefined special folders ---- */
 
 #feed-list > treechildren::-moz-tree-image(unreadFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(0px, 16px, 16px, 0px);
-  padding-right: 4px;
+  padding: 0 4px 0 2px;
   }
 
 #feed-list > treechildren::-moz-tree-image(trashFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(32px, 16px, 48px, 0px);
-  padding-right: 4px;
+  padding: 0 4px 0 2px;
   }
 
 #feed-list > treechildren::-moz-tree-image(starredFolder) {

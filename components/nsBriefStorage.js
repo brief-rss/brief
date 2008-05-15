@@ -471,7 +471,7 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     getFeed: function BriefStorage_getFeed(aFeedID) {
         var foundFeed = null;
-        var feeds = this.getAllFeedsAndFolders();
+        var feeds = this.getAllFeeds(true);
         for (var i = 0; i < feeds.length; i++) {
             if (feeds[i].feedID == aFeedID) {
                 foundFeed = feeds[i];
@@ -484,7 +484,7 @@ BriefStorageService.prototype = {
 
     getFeedByBookmarkID: function BriefStorage_getFeedByBookmarkID(aBookmarkID) {
         var foundFeed = null;
-        var feeds = this.getAllFeedsAndFolders();
+        var feeds = this.getAllFeeds(true);
         for (var i = 0; i < feeds.length; i++) {
             if (feeds[i].bookmarkID == aBookmarkID) {
                 foundFeed = feeds[i];
@@ -496,20 +496,11 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    getAllFeeds: function BriefStorage_getAllFeeds() {
+    getAllFeeds: function BriefStorage_getAllFeeds(aIncludeFolders) {
         if (!this.feedsCache)
             this.buildFeedsCache();
 
-        return this.feedsCache;
-    },
-
-
-    // nsIBriefStorage
-    getAllFeedsAndFolders: function BriefStorage_getAllFeedsAndFolders() {
-        if (!this.feedsAndFoldersCache)
-            this.buildFeedsCache();
-
-        return this.feedsAndFoldersCache;
+        return aIncludeFolders ? this.feedsAndFoldersCache : this.feedsCache;
     },
 
 
@@ -538,6 +529,35 @@ BriefStorageService.prototype = {
         finally {
             select.reset();
         }
+    },
+
+
+    // nsIBriefStorage
+    getAllTags: function BriefStorage_getAllTags() {
+        var tagIDs = [];
+        var tagNames = [];
+
+        var sql = 'SELECT tagName, tagID FROM entry_tags ORDER BY tagName';
+        var select = createStatement(sql);
+        try {
+            while (select.step()) {
+                let tagName = select.row.tagName;
+                if (tagName != tagNames[tagNames.length - 1]) {
+                    tagNames.push(tagName);
+                    tagIDs.push(select.row.tagID);
+                }
+            }
+        }
+        finally {
+            select.reset();
+        }
+
+        var bag = Cc['@mozilla.org/hash-property-bag;1'].
+                  createInstance(Ci.nsIWritablePropertyBag);
+        bag.setProperty('tagNames', tagNames);
+        bag.setProperty('tagIDs', tagIDs);
+
+        return bag
     },
 
 
@@ -1674,6 +1694,7 @@ BriefQuery.prototype = {
     entries: null,
     feeds:   null,
     folders: null,
+    tags:    null,
 
     read:      false,
     unread:    false,
@@ -1984,6 +2005,9 @@ BriefQuery.prototype = {
         if (aGetFullEntries || this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
             text += ' INNER JOIN entries_text ON entries.id = entries_text.rowid ';
 
+        if (this.tags)
+            text += ' INNER JOIN entry_tags ON entries.id = entry_tags.entryID ';
+
         text += ' WHERE ';
 
         var constraints = [];
@@ -2009,6 +2033,13 @@ BriefQuery.prototype = {
         if (this.entries && this.entries.length) {
             let con = '(entries.id = ';
             con += this.entries.join(' OR entries.id = ');
+            con += ')';
+            constraints.push(con);
+        }
+
+        if (this.tags && this.tags.length) {
+            let con = '(entry_tags.tagID = ';
+            con += this.tags.join(' OR entry_tags.tagID = ');
             con += ')';
             constraints.push(con);
         }
@@ -2075,7 +2106,7 @@ BriefQuery.prototype = {
 
     traverseFolderChildren: function BriefQuery_traverseFolderChildren(aFolder) {
         var isEffectiveFolder = (this.effectiveFolders.indexOf(aFolder) != -1);
-        var items = gStorageService.getAllFeedsAndFolders();
+        var items = gStorageService.getAllFeeds(true);
 
         for (var i = 0; i < items.length; i++) {
             if (items[i].parent == aFolder && items[i].isFolder) {

@@ -124,6 +124,7 @@
                             <treerow>
                                 <treecell properties="starredFolder "/>
                             </treerow>
+                            <treechildren/>
                         </treeitem>
                         <treeitem id="trash-folder"
                                   specialFolder="true"
