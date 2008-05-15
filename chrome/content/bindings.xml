@@ -95,7 +95,7 @@
             if (this.collapsed) {
                 var collapsedSubheader = this.getElement('collapsed-article-subheader');
                 collapsedSubheader.insertBefore(dateElem, null);
-                collapsedSubheader.insertBefore(feedNameElem, null);
+                collapsedSubheader.insertBefore(feedNameElem, tagsElem);
                 $(contentElem).hide();
             }
         </constructor>
@@ -136,6 +136,7 @@
                     return;
 
                 var articleContent = this.getElementsByClassName('article-content')[0];
+                var tagsElem = this.getElement('article-tags');
                 var date = this.getElement('article-date');
                 var feedName = this.getElement('feed-name');
                 var self = this;
@@ -164,7 +165,7 @@
 
                     var subheader = this.getElement('article-subheader');
                     subheader.insertBefore(date, this.getElement('article-authors'));
-                    subheader.insertBefore(feedName, null);
+                    subheader.insertBefore(feedName, tagsElem);
 
                     function finish() {
                         self.sendEvent('EntryUncollapsed');

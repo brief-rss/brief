@@ -759,10 +759,10 @@ FeedView.prototype = {
         if (entries.length) {
             this.document.getElementById('message').style.display = 'none';
 
-            // Highlight the search terms.
+            // Highlight search terms.
             if (this.query.searchString) {
-                let matches = this.query.searchString.match(/[A-Za-z0-9]+/g);
-                matches.forEach(this._highlightText, this);
+                for each (term in this.query.searchString.match(/[A-Za-z0-9]+/g))
+                    this._highlightText(term, this.feedContent);
             }
         }
         else {
@@ -923,6 +923,20 @@ FeedView.prototype = {
 
         this.feedContent.appendChild(articleContainer);
 
+        // Highlight search terms in the anonymous content.
+        if (this.query.searchString) {
+            let header = articleContainer.firstChild;
+            let tags = this.document.getAnonymousElementByAttribute(header, 'class',
+                                                                    'article-tags');
+            let authors = this.document.getAnonymousElementByAttribute(header, 'class',
+                                                                       'article-authors');
+            let terms = this.query.searchString.match(/[A-Za-z0-9]+/g);
+            for each (term in terms) {
+                this._highlightText(term, authors);
+                this._highlightText(term, tags);
+            }
+        }
+
         return articleContainer;
     },
 
@@ -990,28 +1004,33 @@ FeedView.prototype = {
     },
 
 
-    _highlightText: function FeedView__highlightText(aWord) {
-        var finder = Cc['@mozilla.org/embedcomp/rangefind;1'].
-                     createInstance(Ci.nsIFind);
-        finder.caseSensitive = false;
+    get _finder FeedView__finder() {
+        if (!this.__finder) {
+            this.__finder = Cc['@mozilla.org/embedcomp/rangefind;1'].
+                            createInstance(Ci.nsIFind);
+            this.__finder.caseSensitive = false;
+        }
+        return this.__finder;
+    },
 
+    _highlightText: function FeedView__highlightText(aWord, aContainer) {
         var searchRange = this.document.createRange();
-        searchRange.setStart(this.feedContent, 0);
-        searchRange.setEnd(this.feedContent, this.feedContent.childNodes.length);
+        searchRange.setStart(aContainer, 0);
+        searchRange.setEnd(aContainer, aContainer.childNodes.length);
 
         var startPoint = this.document.createRange();
-        startPoint.setStart(this.feedContent, 0);
-        startPoint.setEnd(this.feedContent, 0);
+        startPoint.setStart(aContainer, 0);
+        startPoint.setEnd(aContainer, 0);
 
         var endPoint = this.document.createRange();
-        endPoint.setStart(this.feedContent, this.feedContent.childNodes.length);
-        endPoint.setEnd(this.feedContent, this.feedContent.childNodes.length);
+        endPoint.setStart(aContainer, aContainer.childNodes.length);
+        endPoint.setEnd(aContainer, aContainer.childNodes.length);
 
         var baseNode = this.document.createElement('span');
         baseNode.className = 'search-highlight';
 
         var retRange;
-        while (retRange = finder.Find(aWord, searchRange, startPoint, endPoint)) {
+        while (retRange = this._finder.Find(aWord, searchRange, startPoint, endPoint)) {
             let surroundingNode = baseNode.cloneNode(false);
             surroundingNode.appendChild(retRange.extractContents());
 
