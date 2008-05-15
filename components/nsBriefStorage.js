@@ -1851,11 +1851,11 @@ BriefQuery.prototype = {
         // We try not to include entries which already have the desired state,
         // but we can't omit them if a specific range of the selected entries
         // is meant to be marked.
+        var tempRead = this.read;
+        var tempUnread = this.unread;
         if (!this.limit && this.offset === 1) {
-            var tempRead = this.read;
-            var tempUnread = this.unread;
-            this.read = aState;
-            this.unread = !aState;
+            this.read = !aState;
+            this.unread = aState;
         }
 
         var update = createStatement('UPDATE entries SET read = :read, updated = 0 ' +
@@ -1864,15 +1864,6 @@ BriefQuery.prototype = {
 
         gConnection.beginTransaction();
         try {
-            // If we didn't exclude these entries before, we can at least exclude them
-            // from the changed entries list passed to the notification.
-            if (this.limit || this.offset !== 1) {
-                tempRead = this.read;
-                tempUnread = this.unread;
-                this.read = aState;
-                this.unread = !aState;
-            }
-
             // Don't include hidden feeds in the list we pass to the notification.
             var tempHidden = this.includeHiddenFeeds;
             this.includeHiddenFeeds = false;
