@@ -660,11 +660,12 @@ function async(aFunction, aDelay, aObject, arg1, arg2) {
 }
 
 function intersect(arr1, arr2) {
+    var commonPart = [];
     for (let i = 0; i < arr1.length; i++) {
         if (arr2.indexOf(arr1[i]) != -1)
-            return true;
+            commonPart.push(arr1[i]);
     }
-    return false;
+    return commonPart;
 }
 
 function filterDuplicates(arr) {
