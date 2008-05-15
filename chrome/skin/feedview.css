@@ -52,7 +52,7 @@ body {
 }
 
 #message {
-    font-size: 20px;
+    font-size: 19px;
     color: #3f855c;
     text-align: center;
     display: none;
@@ -141,8 +141,7 @@ body {
 .article-subheader {
     color: #477900;
     clear: both;
-    padding: 10px 10px 0 30px;
-    overflow: auto; /* Clears contained floats */
+    padding: 10px 10px 0 15px;
 }
 
 .article-authors, .article-date {
@@ -152,6 +151,12 @@ body {
 
 .article-authors {
     clear: right;
+}
+
+.article-tags {
+    padding-left: 20px;
+    margin-top: 2px;
+    background: url(chrome://mozapps/skin/places/tagContainerIcon.png) 1px no-repeat;
 }
 
 .article-updated {
@@ -166,8 +171,9 @@ body {
     font-size: 12px;
     line-height: 1.4;
     color: #272727;
-    padding: 5px 25px 25px;
+    padding: 10px 25px 25px;
     overflow: auto;
+    clear: both;
 }
 
 .article-content:empty {
