@@ -10,15 +10,14 @@ var gFeedList = {
 
     items: null,  // All treeitems in the tree.
 
-    _prevSelectedItem: null,
+    _lastSelectedItem: null,
 
     // If TRUE, prevents the onSelect function from running when
     // "select" event is occurs.
     ignoreSelectEvent: false,
 
-    // Flag set when the sidebar was hidden and the tree wasn't built,
-    // so that we know to rebuild it when unhiding the sidebar.
-    treeNotBuilt: false,
+    // Indicates that the tree has been built.
+    treeReady: false,
 
 
     // Currently selected treeitem.
@@ -94,13 +93,13 @@ var gFeedList = {
     onSelect: function gFeedList_onSelect(aEvent) {
         var selectedItem = this.selectedItem;
 
-        if (!selectedItem || this.ignoreSelectEvent || this._prevSelectedItem == selectedItem)
+        if (!selectedItem || this.ignoreSelectEvent || this._lastSelectedItem == selectedItem)
             return;
 
         // Clicking the twisty also triggers the select event, although the selection
         // doesn't change. We remember the previous selected item and do nothing when
         // the new selected item is the same.
-        this._prevSelectedItem = selectedItem;
+        this._lastSelectedItem = selectedItem;
 
         var query = new Query();
         var title;
@@ -242,23 +241,25 @@ var gFeedList = {
      *                   nsIBriefFeed object, feedID string, or treeitem XULElement.
      */
     refreshFolderTreeitems: function gFeedList_refreshFolderTreeitems(aFolders) {
-        var treeitem, treecell, folder, query, unreadCount;
+        if (!this.treeReady)
+            return;
+
         var folders = (aFolders.splice) ? aFolders : [aFolders];
 
         for (var i = 0; i < folders.length; i++) {
-            folder = this.getBriefFeed(folders[i]);
-            treeitem = getElement(folder.feedID);
-            treecell = treeitem.firstChild.firstChild;
+            let folder = this.getBriefFeed(folders[i]);
+            let treeitem = getElement(folder.feedID);
+            let treecell = treeitem.firstChild.firstChild;
 
             if (treeitem.getAttribute('open') == 'true') {
                 this.removeProperty(treecell, 'unread');
                 treecell.setAttribute('label', folder.title);
             }
             else {
-                query = new Query();
+                let query = new Query();
                 query.folders = [folder.feedID];
                 query.unread = true;
-                unreadCount = query.getEntryCount();
+                let unreadCount = query.getEntryCount();
 
                 this._setLabel(treecell, folder.title, unreadCount);
             }
@@ -273,20 +274,21 @@ var gFeedList = {
      *                 nsIBriefFeed object, feedID string, or treeitem XULElement.
      */
     refreshFeedTreeitems: function gFeedList_refreshFeedTreeitems(aFeeds) {
-        var feed, treeitem, treecell, query, unreadCount;
+        if (!this.treeReady)
+            return;
 
-        // XXX Hack: arrays that traveled through XPConnect aren't instanceof Array,
+        // Hack: arrays that traveled through XPConnect aren't instanceof Array,
         // so we use the splice method to check if aFeeds is an array.
         var feeds = (aFeeds.splice) ? aFeeds : [aFeeds];
 
         for (var i = 0; i < feeds.length; i++) {
-            feed = this.getBriefFeed(feeds[i]);
-            treeitem = getElement(feed.feedID);
-            treecell = treeitem.firstChild.firstChild;
+            let feed = this.getBriefFeed(feeds[i]);
+            let treeitem = getElement(feed.feedID);
+            let treecell = treeitem.firstChild.firstChild;
 
             // Update the label.
-            query = new QuerySH([feed.feedID], null, true);
-            unreadCount = query.getEntryCount();
+            let query = new QuerySH([feed.feedID], null, true);
+            let unreadCount = query.getEntryCount();
             this._setLabel(treecell, feed.title, unreadCount);
 
             // Update the favicon.
@@ -310,6 +312,9 @@ var gFeedList = {
     },
 
     refreshTagTreeitems: function gFeedList_refreshTagTreeitems(aTagIDs) {
+        if (!this.treeReady)
+            return;
+
         var tagIDs = (aTagIDs.splice) ? aTagIDs : [aTagIDs];
 
         for (let i = 0; i < tagIDs.length; i++) {
@@ -344,11 +349,10 @@ var gFeedList = {
     // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
         // Can't build the tree if there's no view, because the tree is hidden.
-        if (!this.tree.view) {
-            this.treeNotBuilt = true;
+        if (!this.tree.view)
             return;
-        }
-        this.treeNotBuilt = false;
+
+        this.treeReady = true;
 
         this.refreshSpecialTreeitem('unread-folder');
         this.refreshSpecialTreeitem('starred-folder');
@@ -462,7 +466,7 @@ var gFeedList = {
      * @param aParentFolder feedID of the folder.
      */
     _buildFolderChildren: function gFeedList__buildFolderChildren(aParentFolder) {
-        // Iterate over all the feeds to find the children.
+        // Iterate over all feeds to find the children.
         for (var i = 0; i < this.feeds.length; i++) {
             var feed = this.feeds[i];
 
@@ -528,6 +532,62 @@ var gFeedList = {
                 this.refreshFolderTreeitems(feed);
             else
                 this.refreshFeedTreeitems(aData);
+            break;
+
+        case 'brief:feed-updated':
+            if (this.treeReady) {
+                let item = getElement(aData);
+                item.removeAttribute('error');
+                item.removeAttribute('loading');
+                this.refreshFeedTreeitems(item);
+            }
+            refreshProgressmeter();
+            break;
+
+        case 'brief:feed-loading':
+            if (this.treeReady) {
+                let item = getElement(aData);
+                item.setAttribute('loading', true);
+                this.refreshFeedTreeitems(item);
+            }
+            break;
+
+        // Error occured when downloading or parsing the feed, show error icon.
+        case 'brief:feed-error':
+            if (this.treeReady) {
+                let item = getElement(aData);
+                item.removeAttribute('loading');
+                item.setAttribute('error', true);
+                this.refreshFeedTreeitems(item);
+            }
+            refreshProgressmeter();
+            break;
+
+        case 'brief:feed-update-queued':
+            getElement('update-buttons-deck').selectedIndex = 1;
+
+            if (gUpdateService.scheduledFeedsCount > 1) {
+                getElement('update-progress').hidden = false;
+                refreshProgressmeter();
+            }
+            break;
+
+        case 'brief:feed-update-canceled':
+            var progressmeter = getElement('update-progress');
+            progressmeter.hidden = true;
+            progressmeter.value = 0;
+
+            var items = gFeedList.items;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].hasAttribute('loading')) {
+                    items[i].removeAttribute('loading');
+                    this.refreshFeedTreeitems(items[i]);
+                }
+            }
+            break;
+
+        case 'brief:custom-style-changed':
+            gFeedView.browser.loadURI(gTemplateURI.spec);
             break;
         }
     },
@@ -606,36 +666,18 @@ var gFeedList = {
     },
 
 
-    /**
-     * Sets a property on a content tree item.
-     *
-     * Trees cannot be styled using normal DOM attributes and "properties" attribute
-     * whose value contains space-separated pseudo-attributes has to be used
-     * instead. This is a convenience function to make setting a property work
-     * the same and be as easy as setting an attribute.
-     *
-     * @param aItem     Subject tree element.
-     * @param aProperty Property to be set.
-     */
     setProperty: function gFeedList_setProperty(aItem, aProperty) {
         var properties = aItem.getAttribute('properties');
         if (!properties.match(aProperty + ' '))
             aItem.setAttribute('properties', properties + aProperty + ' ');
     },
 
-    // Cf. with |setProperty|
     removeProperty: function gFeedList_removeProperty(aItem, aProperty) {
         var properties = aItem.getAttribute('properties');
         if (properties.match(aProperty)) {
             properties = properties.replace(aProperty + ' ', '');
             aItem.setAttribute('properties', properties);
         }
-    },
-
-    // Cf. with |setProperty|
-    hasProperty: function gFeedList_hasProperty(aItem, aProperty) {
-        var properties = aItem.getAttribute('properties');
-        return properties.match(aProperty) ? true : false;
     },
 
     QueryInterface: function gFeedList_QueryInterface(aIID) {
