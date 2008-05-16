@@ -22,7 +22,7 @@ const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
 var gTopWindow = null;
-var gTemplateURI = '';
+var gTemplateURI = null;
 
 
 function init() {
@@ -53,15 +53,17 @@ function init() {
     var observerService = Cc['@mozilla.org/observer-service;1'].
                           getService(Ci.nsIObserverService);
 
-    observerService.addObserver(gObserver, 'brief:feed-updated', false);
-    observerService.addObserver(gObserver, 'brief:feed-loading', false);
-    observerService.addObserver(gObserver, 'brief:feed-error', false);
-    observerService.addObserver(gObserver, 'brief:feed-update-queued', false);
-    observerService.addObserver(gObserver, 'brief:feed-update-canceled', false);
-    observerService.addObserver(gObserver, 'brief:custom-style-changed', false);
-
+    observerService.addObserver(gFeedList, 'brief:feed-update-queued', false);
+    observerService.addObserver(gFeedList, 'brief:feed-update-canceled', false);
+    observerService.addObserver(gFeedList, 'brief:feed-updated', false);
+    observerService.addObserver(gFeedList, 'brief:feed-loading', false);
+    observerService.addObserver(gFeedList, 'brief:feed-error', false);
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
+
+    // This notification doesn't belong to gFeedList, but there's no point in
+    // seting up a new observer object just for it.
+    observerService.addObserver(gFeedList, 'brief:custom-style-changed', false);
 
     gStorage.addObserver(gFeedList);
 
@@ -125,81 +127,17 @@ function initToolbarsAndStrings() {
 function unload() {
     var observerService = Cc['@mozilla.org/observer-service;1'].
                           getService(Ci.nsIObserverService);
-    observerService.removeObserver(gObserver, 'brief:feed-updated');
-    observerService.removeObserver(gObserver, 'brief:feed-loading');
-    observerService.removeObserver(gObserver, 'brief:feed-error');
-    observerService.removeObserver(gObserver, 'brief:feed-update-queued');
-    observerService.removeObserver(gObserver, 'brief:feed-update-canceled');
-
+    observerService.removeObserver(gFeedList, 'brief:feed-updated');
+    observerService.removeObserver(gFeedList, 'brief:feed-loading');
+    observerService.removeObserver(gFeedList, 'brief:feed-error');
+    observerService.removeObserver(gFeedList, 'brief:feed-update-queued');
+    observerService.removeObserver(gFeedList, 'brief:feed-update-canceled');
     observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
     observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
 
     gPrefs.unregister();
     gStorage.removeObserver(gFeedList);
     gFeedView.detach();
-}
-
-
-// Storage and UpdateService components communicate with us through global notifications.
-var gObserver = {
-
-    observe: function gObserver_observe(aSubject, aTopic, aData) {
-        switch (aTopic) {
-
-        case 'brief:feed-updated':
-            var item = getElement(aData);
-            item.removeAttribute('error');
-            item.removeAttribute('loading');
-            gFeedList.refreshFeedTreeitems(item);
-            refreshProgressmeter();
-            break;
-
-        case 'brief:feed-loading':
-            var item = getElement(aData);
-            item.setAttribute('loading', true);
-            gFeedList.refreshFeedTreeitems(item);
-            break;
-
-        // Error occured when downloading or parsing the feed, show error icon.
-        case 'brief:feed-error':
-            var item = getElement(aData);
-            item.removeAttribute('loading');
-            item.setAttribute('error', true);
-            gFeedList.refreshFeedTreeitems(item);
-            refreshProgressmeter();
-            break;
-
-        // Sets up the progressmeter and the stop button.
-        case 'brief:feed-update-queued':
-            getElement('update-buttons-deck').selectedIndex = 1;
-
-            if (gUpdateService.scheduledFeedsCount > 1) {
-                getElement('update-progress').hidden = false;
-                refreshProgressmeter();
-            }
-            break;
-
-        case 'brief:feed-update-canceled':
-            var progressmeter = getElement('update-progress');
-            progressmeter.hidden = true;
-            progressmeter.value = 0;
-
-            var items = gFeedList.items;
-            for (var i = 0; i < items.length; i++) {
-                if (items[i].hasAttribute('loading')) {
-                    items[i].removeAttribute('loading');
-                    gFeedList.refreshFeedTreeitems(items[i]);
-                }
-            }
-            break;
-
-        case 'brief:custom-style-changed':
-            gFeedView.browser.loadURI(gTemplateURI.spec);
-            break;
-
-        }
-    }
-
 }
 
 
