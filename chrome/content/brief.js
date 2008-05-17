@@ -264,6 +264,7 @@ var gCommands = {
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
         var query = new QuerySH(null, [aEntry], null);
+        query.deleted = ENTRY_STATE_ANY;
         query.starEntries(aNewState);
     },
 
