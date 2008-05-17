@@ -173,25 +173,41 @@ interface nsIBriefFeed : nsISupports {
 
 
 /**
- * A simple list of entries. It stores them as parallel arrays of their properties.
- * If any of these arrays weren't set manually, they are automatically populated by
- * their getters as long as IDs property array is set.
+ * A simple list of entries that provides utility functions. Designed primarily
+ * as carrier for the list of changed entries passed to nsIBriefStorageObserver.
  */
 [scriptable, uuid(6efa76a4-a1da-4751-9db7-08aba109fc0a)]
 interface nsIBriefEntryList : nsISupports {
 
+    /**
+     * Number of entries in the list.
+     */
     readonly attribute long long length;
 
+    /**
+     * Array of entry IDs.
+     */
     attribute nsIVariant IDs;
 
+    /**
+     * Array of distinct feeds to which entries in the list belong.
+     */
     attribute nsIVariant feedIDs;
 
-    attribute nsIVariant read;
-
-    attribute nsIVariant starred;
-
-    attribute nsIVariant deleted;
-
+    /**
+     * Array of distinct tags which entries in the list have.
+     */
     attribute nsIVariant tags;
+
+
+    boolean containsFeed(in string feedID);
+
+    boolean containsTagged(in AString tag);
+
+    boolean containsUnread();
+
+    boolean containsStarred();
+
+    boolean containsTrashed();
 
 };

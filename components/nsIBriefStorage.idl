@@ -28,7 +28,7 @@ interface nsIBriefQuery : nsISupports {
     attribute nsIVariant folders;
 
     /**
-     * Array of IDs of tags which selected entries must have.
+     * Array of tags which selected entries must have.
      */
     attribute nsIVariant tags;
 
@@ -84,7 +84,8 @@ interface nsIBriefQuery : nsISupports {
 
     /**
      * Include hidden feeds i.e. the ones whose Live Bookmarks are no longer to be found
-     * in our home bookmarks folder.
+     * in Brief home folder. This attribute is ignored if the list of feeds is explicitly
+     * specified by |feeds| attribute.
      *
      * @default value is FALSE
      */
@@ -118,27 +119,38 @@ interface nsIBriefQuery : nsISupports {
     void setConstraints(in nsIVariant feeds, in nsIVariant entries, in boolean unread);
 
     /**
-     * Returns the selected entries.
-     *
-     * @returns Array of nsIBriefFeedEntry objects.
+     * Indicates if there are any entries that match this query.
      */
-    nsIVariant getEntries();
-
-    /**
-     * Gets selected entries in a simplified form of parallel arrays containing their
-     * basic attributes.
-     *
-     * @param attributes Array of attributes to retrieve. Available attributes:
-     *                   "IDs", "feedIDs", "read", "starred", "deleted", "tags".
-     *                   If not specified, only "id" is retrieved.
-     * @returns Property bag containing arrays of the above attributes..
-     */
-    nsIBriefEntryList getSimpleEntryList([optional] in nsIVariant attributes);
+    boolean hasMatches();
 
     /**
      * Returns the number of selected entries.
      */
-    unsigned long getEntryCount();
+    unsigned long long getEntryCount();
+
+    /**
+     * Returns a list of IDs of selected entries.
+     *
+     * @returns Array if IDs of selected entries.
+     */
+    nsIVariant getEntries();
+
+    /**
+     * Returns the selected entries with all their properties.
+     *
+     * @returns Array of nsIBriefFeedEntry objects.
+     */
+    nsIVariant getFullEntries();
+
+    /**
+     * Returns value of a property for each of the selected entries.
+     *
+     * @param propertyName Name of the property (see the database schema
+     *                     for the list of properties).
+     * @returns Array of JS objects containing the requested property
+     *          and ID of the corresponding entry.
+     */
+    nsIVariant getProperty(in string propertyName);
 
     /**
      * Marks selected entries as read/unread.
@@ -148,7 +160,7 @@ interface nsIBriefQuery : nsISupports {
     void markEntriesRead(in boolean state);
 
     /**
-     * Mark selected entries as starred/unstarred.
+     * Marks selected entries as starred/unstarred.
      *
      * @param  state  New state of entries (TRUE for starred, FALSE for not starred).
      */
@@ -195,9 +207,9 @@ interface nsIBriefStorage : nsISupports {
   /**
    * Gets all tags.
    *
-   * @returns Property bag containing "tagNames" and "tagIDs" arrays.
+   * @returns Array of tag names.
    */
-  nsIPropertyBag getAllTags();
+  nsIVariant getAllTags();
 
   /**
    * Synchronizes database with Live Bookmarks from home folder which ID is
@@ -240,16 +252,16 @@ interface nsIBriefStorage : nsISupports {
 [scriptable, uuid(8105e6fa-cf93-48b7-8f15-157ffa04f345)]
 interface nsIBriefStorageObserver : nsISupports {
 
-  void onEntriesAdded(in nsIBriefEntryList entries);
+  void onEntriesAdded(in nsIBriefEntryList entryList);
 
-  void onEntriesUpdated(in nsIBriefEntryList entries);
+  void onEntriesUpdated(in nsIBriefEntryList entryList);
 
-  void onEntriesMarkedRead(in nsIBriefEntryList entries, in boolean newState);
+  void onEntriesMarkedRead(in nsIBriefEntryList entryList, in boolean newState);
 
-  void onEntriesStarred(in nsIBriefEntryList entries, in boolean newState);
+  void onEntriesStarred(in nsIBriefEntryList entryList, in boolean newState);
 
-  void onEntriesTagged(in nsIBriefEntryList entries);
+  void onEntriesTagged(in nsIBriefEntryList entryList, in boolean newState, in AString tagName);
 
-  void onEntriesDeleted(in nsIBriefEntryList entries, in short newState);
+  void onEntriesDeleted(in nsIBriefEntryList entryList, in short newState);
 
 };

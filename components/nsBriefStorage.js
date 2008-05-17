@@ -4,6 +4,7 @@ const Ci = Components.interfaces;
 const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
 const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
+const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
 // How often to perform entry expiration and remove the deleted items.
 const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
@@ -200,6 +201,8 @@ BriefStorageService.prototype = {
         // Speed up SELECTs in the bookmarks observer.
         executeSQL('CREATE INDEX IF NOT EXISTS entries_bookmarkID_index ON entries (bookmarkID) ');
         executeSQL('CREATE INDEX IF NOT EXISTS entries_entryURL_index ON entries (entryURL)     ');
+
+        executeSQL('CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagNames)');
     },
 
 
@@ -534,30 +537,27 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     getAllTags: function BriefStorage_getAllTags() {
-        var tagIDs = [];
-        var tagNames = [];
-
-        var sql = 'SELECT tagName, tagID FROM entry_tags ORDER BY tagName';
-        var select = createStatement(sql);
         try {
+            var tags = [];
+
+            var sql = 'SELECT entry_tags.tagName                                             '+
+                      'FROM entry_tags INNER JOIN entries ON entry_tags.entryID = entries.id '+
+                      'WHERE entries.deleted = :deletedState                                 '+
+                      'ORDER BY entry_tags.tagName                                           ';
+            var select = createStatement(sql);
+            select.params.deletedState = ENTRY_STATE_NORMAL;
+
             while (select.step()) {
-                let tagName = select.row.tagName;
-                if (tagName != tagNames[tagNames.length - 1]) {
-                    tagNames.push(tagName);
-                    tagIDs.push(select.row.tagID);
-                }
+                let tag = select.row.tagName;
+                if (tag != tags[tags.length - 1])
+                    tags.push(tag);
             }
         }
         finally {
             select.reset();
         }
 
-        var bag = Cc['@mozilla.org/hash-property-bag;1'].
-                  createInstance(Ci.nsIWritablePropertyBag);
-        bag.setProperty('tagNames', tagNames);
-        bag.setProperty('tagIDs', tagIDs);
-
-        return bag
+        return tags;
     },
 
 
@@ -615,18 +615,18 @@ BriefStorageService.prototype = {
         gObserverService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
 
         if (this.newEntries.length) {
-            let query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+            let query = new BriefQuery();
             query.entries = this.newEntries;
-            let list = query.getSimpleEntryList(['IDs', 'feedIDs']);
+            let list = query.getEntryList();
 
             for each (observer in this.observers)
                 observer.onEntriesAdded(list);
         }
 
         if (this.updatedEntries.length) {
-            let query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+            let query = new BriefQuery();
             query.entries = this.updatedEntries;
-            let list = query.getSimpleEntryList(['IDs', 'feedIDs']);
+            let list = query.getEntryList();
 
             for each (observer in this.observers)
                 observer.onEntriesUpdated(list);
@@ -1018,7 +1018,7 @@ BriefStorageService.prototype = {
 
             for each (entry in this.getEntriesByURL(url)) {
                 if (isTag)
-                    var newTags = this.tagEntry(true, entry.id, aItemID, gBms.getItemTitle(aFolder));
+                    var changedTag = this.tagEntry(true, entry.id, aItemID, gBms.getItemTitle(aFolder));
                 else if (!entry.starred)
                     this.starEntry(true, entry.id, aItemID);
 
@@ -1035,7 +1035,7 @@ BriefStorageService.prototype = {
         if (changedEntries.length) {
             let entryIDs = changedEntries.map(function(e) e.id);
             if (isTag)
-                this.notifyOfEntriesTagged(entryIDs, newTags);
+                this.notifyOfEntriesTagged(entryIDs, true, changedTag);
             else
                 this.notifyOfEntriesStarred(entryIDs, true);
         }
@@ -1061,7 +1061,7 @@ BriefStorageService.prototype = {
 
             if (isTag) {
                 for each (entry in this.getEntriesByTagID(aItemID)) {
-                    var newTags = this.tagEntry(false, entry.id, aItemID);
+                    var changedTag = this.tagEntry(false, entry.id, aItemID);
                     changedEntries.push(entry)
                 }
             }
@@ -1098,7 +1098,7 @@ BriefStorageService.prototype = {
         if (changedEntries.length) {
             let entryIDs = changedEntries.map(function(e) e.id);
             if (isTag)
-                this.notifyOfEntriesTagged(entryIDs, newTags);
+                this.notifyOfEntriesTagged(entryIDs, false, changedTag);
             else
                 this.notifyOfEntriesStarred(entryIDs, false);
         }
@@ -1190,19 +1190,23 @@ BriefStorageService.prototype = {
     },
 
     tagEntry: function BriefStorage_tagEntry(aState, aEntryID, aTagID, aTagName) {
-        if (aState) {
-            gStm.tagEntry.params.entryID = aEntryID;
-            gStm.tagEntry.params.tagName = aTagName;
-            gStm.tagEntry.params.tagID = aTagID;
-            gStm.tagEntry.execute();
-        }
-        else {
-            gStm.untagEntry.params.tagID = aTagID;
-            gStm.untagEntry.execute();
-        }
-
-        // Refresh the serialized list of tags stored in entries_text table.
         try {
+            if (aState) {
+                gStm.tagEntry.params.entryID = aEntryID;
+                gStm.tagEntry.params.tagName = aTagName;
+                gStm.tagEntry.params.tagID = aTagID;
+                gStm.tagEntry.execute();
+            }
+            else {
+                gStm.getTagName.params.tagID = aTagID;
+                gStm.getTagName.step();
+                var tagName = gStm.getTagName.row.tagName
+
+                gStm.untagEntry.params.tagID = aTagID;
+                gStm.untagEntry.execute();
+            }
+
+            // Refresh the serialized list of tags stored in entries_text table.
             var tags = [];
             gStm.getEntryTags.params.entryID = aEntryID;
             while (gStm.getEntryTags.step())
@@ -1214,32 +1218,31 @@ BriefStorageService.prototype = {
         }
         finally {
             gStm.getEntryTags.reset();
+            gStm.getTagName.reset();
         }
 
-        return tags;
+        return aTagName || tagName;
     },
 
     notifyOfEntriesStarred: function BriefStorage_notifyOfEntriesStarred(aEntries, aNewState) {
-        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+        var query = new BriefQuery();
         query.entries = aEntries;
-        var list = query.getSimpleEntryList(['IDs', 'feedIDs']);
+        query.deleted = ENTRY_STATE_ANY;
+        var list = query.getEntryList();
 
         for each (observer in this.observers)
             observer.onEntriesStarred(list, aNewState);
     },
 
-    notifyOfEntriesTagged: function BriefStorage_notifyOfEntriesTagged(aEntries, aNewTagSet) {
-        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+    notifyOfEntriesTagged: function BriefStorage_notifyOfEntriesTagged(aEntries, aNewState,
+                                                                       aChangedTag) {
+        var query = new BriefQuery();
         query.entries = aEntries;
-        var list = query.getSimpleEntryList(['IDs', 'feedIDs']);
-
-        var tags = [];
-        for (let i = 0; i < list.IDs.length; i++)
-            tags.push(aNewTagSet);
-        list.tags = tags;
+        query.deleted = ENTRY_STATE_ANY;
+        var list = query.getEntryList();
 
         for each (observer in this.observers)
-            observer.onEntriesTagged(list);
+            observer.onEntriesTagged(list, aNewState, aChangedTag);
     },
 
     getEntriesByURL: function BriefStorage_getEntriesByURL(aURL) {
@@ -1426,6 +1429,12 @@ var gStm = {
         var sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
         delete this.getEntryTags;
         return this.getEntryTags = createStatement(sql);
+    },
+
+    get getTagName() {
+        var sql = 'SELECT tagName FROM entry_tags WHERE tagID = :tagID';
+        delete this.getTagName;
+        return this.getTagName = createStatement(sql);
     },
 
     get updateEntryTags() {
@@ -1721,6 +1730,7 @@ BriefQuery.prototype = {
     // to compute actual folders list when creating the query.
     effectiveFolders: null,
 
+    // nsIBriefQuery
     setConstraints: function BriefQuery_setConstraints(aFeeds, aEntries, aUnread) {
         this.feeds = aFeeds;
         this.entries = aEntries;
@@ -1729,7 +1739,45 @@ BriefQuery.prototype = {
 
 
     // nsIBriefQuery
+    hasMatches: function BriefQuery_hasMatches() {
+        try {
+            var sql = 'SELECT EXISTS (SELECT entries.id ' + this.getQueryString(true) + ') AS found';
+            var select = createStatement(sql);
+            select.step();
+            var exists = select.row.found;
+        }
+        catch (ex) {
+            reportError(ex, gConnection.lastError != 1);
+        }
+        finally {
+            select.reset();
+        }
+
+        return exists;
+    },
+
+    // nsIBriefQuery
     getEntries: function BriefQuery_getEntries() {
+        try {
+            var sql = 'SELECT entries.id ' + this.getQueryString(true);
+            var select = createStatement(sql);
+            var entries = [];
+            while (select.step())
+                entries.push(select.row.id);
+        }
+        catch (ex) {
+            reportError(ex, gConnection.lastError != 1);
+        }
+        finally {
+            select.reset();
+        }
+
+        return entries;
+    },
+
+
+    // nsIBriefQuery
+    getFullEntries: function BriefQuery_getFullEntries() {
         var sql = 'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,   '+
                   '       entries.read, entries.starred, entries.updated,               '+
                   '       entries.bookmarkID, entries_text.title, entries_text.content, '+
@@ -1748,9 +1796,9 @@ BriefQuery.prototype = {
                 entry.entryURL = select.row.entryURL;
                 entry.date = select.row.date;
                 entry.authors = select.row.authors;
-                entry.read = (select.row.read == 1);
-                entry.starred = (select.row.starred == 1);
-                entry.updated = (select.row.updated == 1);
+                entry.read = select.row.read;
+                entry.starred = select.row.starred;
+                entry.updated = select.row.updated;
                 entry.bookmarkID = select.row.bookmarkID;
                 entry.title = select.row.title;
                 entry.content = select.row.content;
@@ -1773,73 +1821,40 @@ BriefQuery.prototype = {
 
 
     // nsIBriefQuery
-    getSimpleEntryList: function BriefQuery_getSimpleEntryList(aProperties) {
-        // If no attributes are specified, the default is "id".
-        var properties = aProperties || ['IDs'];
+    getProperty: function BriefQuery_getProperty(aPropertyName) {
+        var rows = [];
 
-        // Create arrays to store values of each of the properties.
-        var arrays = {};
-        for each (prop in properties)
-            arrays[prop] = [];
-
-        // These variables are used for performance reasons, to avoid iterating
-        // over |arrays| with for...in when stepping the statement.
-        var getIDs = properties.indexOf('IDs') != -1;
-        var getFeedIDs = properties.indexOf('feedIDs') != -1;
-        var getRead = properties.indexOf('read') != -1;
-        var getStarred = properties.indexOf('starred') != -1;
-        var getDeleted = properties.indexOf('deleted') != -1;
-        var getTags = properties.indexOf('tags') != -1;
-
-        var columns = [];
-        for each (prop in properties) {
-            switch (prop) {
-                case 'IDs':
-                    columns.push('entries.id');
-                    break;
-                case 'feedIDs':
-                    columns.push('entries.feedID');
-                    break;
-                case 'tags':
-                    columns.push('entries_text.tags');
-                    break;
-                default:
-                    columns.push('entries.' + prop);
-            }
+        switch (aPropertyName) {
+            case 'content':
+            case 'title':
+            case 'authors':
+            case 'tags':
+                var table = 'entries_text.';
+                var getEntriesText = true;
+                break;
+            default:
+                table = 'entries.';
         }
 
-        var select = createStatement('SELECT ' + columns.join(', ') +
-                                     this.getQueryString(true, getTags));
         try {
+            var select = createStatement('SELECT entries.id, ' + table + aPropertyName +
+                                         this.getQueryString(true, getEntriesText));
+
             while (select.step()) {
-                if (getIDs)
-                    arrays.IDs.push(select.row.id);
-                if (getFeedIDs)
-                    arrays.feedIDs.push(select.row.feedID);
-                if (getRead)
-                    arrays.read.push(select.row.read);
-                if (getStarred)
-                    arrays.starred.push(select.row.starred);
-                if (getDeleted)
-                    arrays.deleted.push(select.row.deleted);
-                if (getTags)
-                    arrays.tags.push(select.row.tags);
+                let row = { };
+                row[aPropertyName] = select.row[aPropertyName];
+                row.ID = select.row.id;
+                rows.push(row);
             }
         }
         catch (ex) {
-            // See BriefQuery.getEntries()
             reportError(ex, gConnection.lastError != 1);
         }
         finally {
             select.reset();
         }
 
-        var list = Cc['@ancestor/brief/entrylist;1'].
-                   createInstance(Ci.nsIBriefEntryList);
-        for (arrayName in arrays)
-            list[arrayName] = arrays[arrayName];
-
-        return list;
+        return rows;
     },
 
 
@@ -1856,7 +1871,6 @@ BriefQuery.prototype = {
             var count = select.row.count;
         }
         catch (ex) {
-            // See BriefQuery.getEntries()
             reportError(ex, gConnection.lastError != 1);
         }
         finally {
@@ -1864,6 +1878,56 @@ BriefQuery.prototype = {
         }
 
         return count;
+    },
+
+
+    /**
+     * Used to get nsIBriefEntryList of changed entries, so that it can be passed to
+     * nsIBriefStorageObserver's.
+     */
+    getEntryList: function BriefQuery_getEntryList() {
+        try {
+            var entryIDs = [];
+            var feedIDs = [];
+            var tags = [];
+
+            var tempHidden = this.includeHiddenFeeds;
+            this.includeHiddenFeeds = false;
+
+            var sql = 'SELECT entries.id, entries.feedID, entries_text.tags ';
+            var select = createStatement(sql + this.getQueryString(true, true));
+            while (select.step()) {
+                entryIDs.push(select.row.id);
+
+                let feedID = select.row.feedID;
+                if (feedIDs.indexOf(feedID) == -1)
+                    feedIDs.push(feedID);
+
+                let tagSet = select.row.tags;
+                if (tagSet) {
+                    tagSet = tagSet.split(', ');
+                    for (let i = 0; i < tagSet.length; i++) {
+                        if (tags.indexOf(tagSet[i]) == -1)
+                            tags.push(tagSet[i]);
+                    }
+                }
+            }
+        }
+        catch (ex) {
+            reportError(ex, gConnection.lastError != 1);
+        }
+        finally {
+            select.reset();
+            this.includeHiddenFeeds = tempHidden;
+        }
+
+        var list = Cc['@ancestor/brief/entrylist;1'].
+                   createInstance(Ci.nsIBriefEntryList);
+        list.IDs = entryIDs;
+        list.feedIDs = feedIDs;
+        list.tags = tags;
+
+        return list;
     },
 
 
@@ -1885,20 +1949,13 @@ BriefQuery.prototype = {
 
         gConnection.beginTransaction();
         try {
-            // Don't include hidden feeds in the list we pass to the notification.
-            var tempHidden = this.includeHiddenFeeds;
-            this.includeHiddenFeeds = false;
-
-            var list = this.getSimpleEntryList(['IDs', 'feedIDs']);
-
+            var list = this.getEntryList();
             update.execute();
         }
         catch (ex) {
-            // See BriefQuery.getEntries()
             reportError(ex, gConnection.lastError != 1);
         }
         finally {
-            this.includeHiddenFeeds = tempHidden;
             this.unread = tempUnread;
             this.read = tempRead;
 
@@ -1925,20 +1982,15 @@ BriefQuery.prototype = {
                 var statement = createStatement('DELETE FROM entries ' + this.getQueryString());
                 break;
             default:
-                throw('Invalid deleted state.');
+                throw Components.results.NS_ERROR_INVALID_ARG;
         }
 
         gConnection.beginTransaction();
         try {
-            var tempHidden = this.includeHiddenFeeds;
-            this.includeHiddenFeeds = false;
-            var list = this.getSimpleEntryList(['IDs', 'feedIDs']);
-            this.includeHiddenFeeds = tempHidden;
-
+            var list = this.getEntryList();
             statement.execute();
         }
         catch (ex) {
-            // See BriefQuery.getEntries()
             reportError(ex, gConnection.lastError != 1);
         }
         finally {
@@ -1961,27 +2013,30 @@ BriefQuery.prototype = {
      */
     starEntries: function BriefQuery_starEntries(aState) {
         var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1'].
-                              getService(Ci.nsIPlacesTransactionsService);
+                       getService(Ci.nsIPlacesTransactionsService);
         var folder = gPlaces.unfiledBookmarksFolderId;
+        var transactions = []
 
-        for each (entry in this.getEntries()) {
+        for each (entry in this.getFullEntries()) {
             let uri = newURI(entry.entryURL);
 
             if (aState) {
-                gBms.insertBookmark(folder, uri, gBms.DEFAULT_INDEX, entry.title);
+                let trans = transSrv.createItem(uri, folder, gBms.DEFAULT_INDEX,
+                                                entry.title);
+                transactions.push(trans);
             }
             else {
                 let bookmarks = gBms.getBookmarkIdsForURI(uri, {}).
                                      filter(isNormalBookmark);
-                let transactions = []
-                for (let i = bookmarks.length - 1; i >= 0; i--)
-                    transactions.push(transSrv.removeItem(bookmarks[i]));
-
-                let transaction = transSrv.aggregateTransactions('Remove items',
-                                                                 transactions);
-                transSrv.doTransaction(transaction);
+                for (let i = bookmarks.length - 1; i >= 0; i--) {
+                    let trans = transSrv.removeItem(bookmarks[i]);
+                    transactions.push(trans);
+                }
             }
         }
+
+        var aggregatedTrans = transSrv.aggregateTransactions('', transactions);
+        transSrv.doTransaction(aggregatedTrans);
     },
 
 
@@ -2038,9 +2093,9 @@ BriefQuery.prototype = {
         }
 
         if (this.tags && this.tags.length) {
-            let con = '(entry_tags.tagID = ';
-            con += this.tags.join(' OR entry_tags.tagID = ');
-            con += ')';
+            let con = '(entry_tags.tagName = "';
+            con += this.tags.join('" OR entry_tags.tagName = "');
+            con += '")';
             constraints.push(con);
         }
 
@@ -2086,7 +2141,7 @@ BriefQuery.prototype = {
                     sortOrder = 'entries_text.title ';
                     break;
                 default:
-                    throw('BriefQuery: wrong sort order, use one the defined constants.');
+                    throw Components.results.NS_ERROR_ILLEGAL_VALUE;
             }
 
             var sortDir = (this.sortDirection == nsIBriefQuery.SORT_ASCENDING) ? 'ASC' : 'DESC';
