@@ -104,26 +104,29 @@ var gFeedList = {
         var query = new Query();
         var title;
 
-        if (selectedItem.hasAttribute('specialFolder')) {
+        if (selectedItem.id == 'unread-folder') {
             title = selectedItem.getAttribute('title');
-            query.unread = selectedItem.id == 'unread-folder';
-            query.starred = selectedItem.id == 'starred-folder';
-            query.deleted = selectedItem.id == 'trash-folder' ? ENTRY_STATE_TRASHED
-                                                              : ENTRY_STATE_NORMAL;
+            query.unread = true;
+        }
+        else if (selectedItem.id == 'starred-folder') {
+            title = selectedItem.getAttribute('title');
+            query.starred = true;
+        }
+        else if (selectedItem.id == 'trash-folder') {
+            title = selectedItem.getAttribute('title');
+            query.deleted = ENTRY_STATE_TRASHED;
         }
         else if (selectedItem.hasAttribute('container')) {
             title = this.selectedFeed.title;
             query.folders = [this.selectedFeed.feedID];
         }
         else if (selectedItem.parentNode.parentNode.id == 'starred-folder') {
-            let tagID = parseInt(selectedItem.id);
-            let index = this._tags.tagIDs.indexOf(tagID);
-            title = this._tags.tagNames[index];
-            query.tags = [tagID];
+            title = this.selectedItem.id;
+            query.tags = [this.selectedItem.id];
         }
         else {
-            query.feeds = [this.selectedFeed.feedID];
             title = this.selectedFeed.title;
+            query.feeds = [this.selectedFeed.feedID];
         }
 
         var view = new FeedView(title, query);
@@ -161,11 +164,13 @@ var gFeedList = {
             var item = this.tree.view.getItemAtIndex(row);
 
             // Detect when folder is collapsed/expanded.
-            if (item.hasAttribute('container') && item.id != 'starred-folder') {
-                this.refreshFolderTreeitems(item);
+            if (item.hasAttribute('container')) {
+                if (item.id != 'starred-folder')
+                    this.refreshFolderTreeitems(item);
 
-                // We have to persist folders immediatelly instead of when Brief is closed,
-                // because otherwise if the feedlist was rebuilt, the changes would be lost.
+                // Folder states must be persisted immediatelly instead of when
+                // Brief is closed, because otherwise if the feedlist was rebuilt,
+                // the changes would be lost.
                 async(this._persistFolderState, 0, this);
             }
 
@@ -180,7 +185,9 @@ var gFeedList = {
     onKeyUp: function gFeedList_onKeyUp(aEvent) {
         var isContainer = this.selectedItem.hasAttribute('container');
         if (isContainer && aEvent.keyCode == aEvent.DOM_VK_RETURN) {
-            this.refreshFolderTreeitems(this.selectedItem);
+            if (this.selectedItem.id != 'starred-folder')
+                this.refreshFolderTreeitems(this.selectedItem);
+
             async(this._persistFolderState, 0, this);
         }
     },
@@ -311,24 +318,50 @@ var gFeedList = {
         }
     },
 
-    refreshTagTreeitems: function gFeedList_refreshTagTreeitems(aTagIDs) {
+    /**
+     * Refresh the treeitem of a tag.
+     *
+     * @param aTags            A tag string or an array of tag strings.
+     * @param aPossibleAdded   Indicates that the tag may not be in the list of tags yet.
+     * @param aPossiblyRemoved Indicates that there may be no remaining entries with
+     *                         the tag.
+     */
+    refreshTagTreeitems: function gFeedList_refreshTagTreeitems(aTags, aPossiblyAdded,
+                                                                aPossiblyRemoved) {
         if (!this.treeReady)
             return;
 
-        var tagIDs = (aTagIDs.splice) ? aTagIDs : [aTagIDs];
+        var tags = (aTags.splice) ? aTags : [aTags];
 
-        for (let i = 0; i < tagIDs.length; i++) {
-            let tagID = tagIDs[i];
-            let treeitem = getElement(tagID);
-            let treecell = treeitem.firstChild.firstChild;
+        for (let i = 0; i < tags.length; i++) {
+            let tag = tags[i];
 
-            // Update the label.
-            let index = this._tags.tagIDs.indexOf(tagID);
-            let title = this._tags.tagNames[index];
-            let query = new Query();
-            query.tags = [tagID];
-            query.unread = true;
-            this._setLabel(treecell, title, query.getEntryCount());
+            if (aPossiblyAdded) {
+                if (this.tags.indexOf(tag) == -1) {
+                    this._rebuildTags();
+                    break;
+                }
+            }
+            else if (aPossiblyRemoved) {
+                let query = new Query();
+                query.tags = [tag];
+                if (!query.hasMatches()) {
+                    this._rebuildTags();
+
+                    if (gFeedView.query.tags && gFeedView.query.tags[0] === tag)
+                        this.tree.view.selection.select(0);
+
+                    break;
+                }
+            }
+            else {
+                // Update the label.
+                let query = new Query();
+                query.tags = [tag];
+                query.unread = true;
+                let treecell = getElement(tag).firstChild.firstChild;
+                this._setLabel(treecell, tag, query.getEntryCount());
+            }
         }
     },
 
@@ -369,35 +402,7 @@ var gFeedList = {
             lastChild = topLevelChildren.lastChild
         }
 
-        // Clear the old tag list.
-        var starredFolder = getElement('starred-folder');
-        starredFolder.removeChild(starredFolder.lastChild);
-        var tagsTreechildren = document.createElement('treechildren');
-        starredFolder.appendChild(tagsTreechildren);
-
-        // Build the tag list.
-        var tags = gStorage.getAllTags();
-        this._tags = {};
-        this._tags.tagIDs = tags.getProperty('tagIDs');
-        this._tags.tagNames = tags.getProperty('tagNames');
-
-        if (this._tags.tagIDs.length)
-            starredFolder.setAttribute('container', true);
-        else
-            starredFolder.removeAttribute('container');
-
-        for (let i = 0; i < this._tags.tagIDs.length; i++) {
-            let fragment = this._flatRow.cloneNode(true);
-            let treeitem = fragment.firstChild;
-            treeitem.id = this._tags.tagIDs[i];
-
-            let treecell = treeitem.firstChild.firstChild;
-            treecell.setAttribute('properties', 'tag ');
-
-            tagsTreechildren.appendChild(fragment);
-
-            this.refreshTagTreeitems(this._tags.tagIDs[i]);
-        }
+        this._rebuildTags();
 
         this.feeds = gStorage.getAllFeeds(true);
 
@@ -509,6 +514,38 @@ var gFeedList = {
         this._folderParentChain.pop();
     },
 
+    _rebuildTags: function gFeedList__rebuildTags() {
+        var starredFolder = getElement('starred-folder');
+
+        // Clear the old tag list.
+        starredFolder.removeChild(starredFolder.lastChild);
+        var tagsTreechildren = document.createElement('treechildren');
+        starredFolder.appendChild(tagsTreechildren);
+
+        // Build the tag list.
+        this.tags = gStorage.getAllTags();
+
+        if (this.tags.length)
+            starredFolder.setAttribute('container', true);
+        else
+            starredFolder.removeAttribute('container');
+
+        starredFolder.setAttribute('open', starredFolder.getAttribute('wasOpen'));
+
+        for (let i = 0; i < this.tags.length; i++) {
+            let fragment = this._flatRow.cloneNode(true);
+            let treeitem = fragment.firstChild;
+            treeitem.id = this.tags[i];
+
+            let treecell = treeitem.firstChild.firstChild;
+            treecell.setAttribute('properties', 'tag ');
+
+            tagsTreechildren.appendChild(fragment);
+
+            this.refreshTagTreeitems(this.tags[i]);
+        }
+    },
+
 
     observe: function gFeedList_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
@@ -593,61 +630,77 @@ var gFeedList = {
     },
 
 
-    onEntriesAdded: function gFeedList_onEntriesAdded(aEntries) {
+    // nsIBriefStorageObserver
+    onEntriesAdded: function gFeedList_onEntriesAdded(aEntryList) {
         async(function() {
-            var feeds = filterDuplicates(aEntries.feedIDs);
-            this.refreshFeedTreeitems(feeds);
-
+            this.refreshFeedTreeitems(aEntryList.feedIDs);
             this.refreshSpecialTreeitem('unread-folder');
+            this.refreshTagTreeitems(aEntryList.tags);
 
         }, 0, this)
     },
 
-    onEntriesUpdated: function gFeedList_onEntriesUpdated(aEntries) {
+    // nsIBriefStorageObserver
+    onEntriesUpdated: function gFeedList_onEntriesUpdated(aEntryList) {
         async(function() {
-            var feeds = filterDuplicates(aEntries.feedIDs);
-            this.refreshFeedTreeitems(feeds);
-
-            this.refreshSpecialTreeitem('unread-folder');
+            if (aEntryList.containsUnread()) {
+                this.refreshFeedTreeitems(aEntryList.feedIDs);
+                this.refreshSpecialTreeitem('unread-folder');
+                this.refreshTagTreeitems(aEntryList.tags);
+            }
 
         }, 0, this)
     },
 
-    onEntriesMarkedRead: function gFeedList_onEntriesMarkedRead(aEntries, aNewState) {
+    // nsIBriefStorageObserver
+    onEntriesMarkedRead: function gFeedList_onEntriesMarkedRead(aEntryList, aNewState) {
         async(function() {
-            var feeds = filterDuplicates(aEntries.feedIDs);
-            this.refreshFeedTreeitems(feeds);
-
+            this.refreshFeedTreeitems(aEntryList.feedIDs);
             this.refreshSpecialTreeitem('unread-folder');
 
-            if (!aEntries.starred || aEntries.starred.indexOf(true))
+            if (aEntryList.containsStarred())
                 this.refreshSpecialTreeitem('starred-folder');
 
-            if (!aEntries.deleted || aEntries.deleted.indexOf(ENTRY_STATE_TRASHED))
+            if (aEntryList.containsTrashed())
                 this.refreshSpecialTreeitem('trash-folder');
 
+            this.refreshTagTreeitems(aEntryList.tags);
+
         }, 0, this)
     },
 
-    onEntriesStarred: function gFeedList_onEntriesStarred(aEntries, aNewState) {
-        async(this.refreshSpecialTreeitem, 0, this, 'starred-folder');
-    },
-
-    onEntriesTagged: function gFeedList_onEntriesTagged(aEntries) {
-
-    },
-
-    onEntriesDeleted: function gFeedList_onEntriesDeleted(aEntries, aNewState) {
+    // nsIBriefStorageObserver
+    onEntriesStarred: function gFeedList_onEntriesStarred(aEntryList, aNewState) {
         async(function() {
-            var feeds = filterDuplicates(aEntries.feedIDs);
-            this.refreshFeedTreeitems(feeds);
-
-            this.refreshSpecialTreeitem('trash-folder');
-
-            if (!aEntries.read || aEntries.read.indexOf(false))
-                this.refreshSpecialTreeitem('unread-folder');
-            if (!aEntries.starred || aEntries.starred.indexOf(true))
+            if (aEntryList.containsUnread())
                 this.refreshSpecialTreeitem('starred-folder');
+
+        }, 0, this)
+    },
+
+    // nsIBriefStorageObserver
+    onEntriesTagged: function gFeedList_onEntriesTagged(aEntryList, aNewState, aTag) {
+        async(function() {
+            this.refreshTagTreeitems(aTag, aNewState, !aNewState);
+
+        }, 0, this)
+    },
+
+    // nsIBriefStorageObserver
+    onEntriesDeleted: function gFeedList_onEntriesDeleted(aEntryList, aNewState) {
+        async(function() {
+            if (aEntryList.containsUnread()) {
+                this.refreshFeedTreeitems(aEntryList.feedIDs);
+                this.refreshSpecialTreeitem('unread-folder');
+
+                this.refreshSpecialTreeitem('trash-folder');
+
+                if (aEntryList.containsStarred())
+                    this.refreshSpecialTreeitem('starred-folder');
+            }
+
+            var entriesRestored = (aNewState == ENTRY_STATE_NORMAL);
+            this.refreshTagTreeitems(aEntryList.tags, entriesRestored, !entriesRestored);
 
         }, 0, this)
     },
@@ -655,14 +708,16 @@ var gFeedList = {
 
     _persistFolderState: function gFeedList_persistFolderState() {
         // Persist the folders open/closed state.
-        var items = gFeedList.tree.getElementsByTagName('treeitem');
         var closedFolders = '';
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
+        for (var i = 0; i < this.items.length; i++) {
+            var item = this.items[i];
             if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
                 closedFolders += item.id;
         }
         gFeedList.tree.setAttribute('closedFolders', escape(closedFolders));
+
+        var starredFolder = getElement('starred-folder');
+        starredFolder.setAttribute('wasOpen', starredFolder.getAttribute('open'));
     },
 
 
@@ -701,7 +756,9 @@ var gContextMenu = {
     get targetFeed() gStorage.getFeed(this.targetID),
 
     get targetIsFeed()          this.targetItem.hasAttribute('url'),
-    get targetIsContainer()     this.targetItem.hasAttribute('container'),
+    get targetIsFolder()        this.targetItem.hasAttribute('container')
+                                && !this.targetIsStarredFolder,
+    get targetIsTag()           this.targetItem.parentNode.parentNode.id == 'starred-folder',
     get targetIsUnreadFolder()  this.targetItem.id == 'unread-folder',
     get targetIsStarredFolder() this.targetItem.id == 'starred-folder',
     get targetIsTrashFolder()   this.targetItem.id == 'trash-folder',
@@ -713,10 +770,11 @@ var gContextMenu = {
         this.targetItem = aTargetItem;
 
         getElement('ctx-mark-feed-read').hidden = !this.targetIsFeed;
-        getElement('ctx-mark-folder-read').hidden = !this.targetIsContainer &&
+        getElement('ctx-mark-folder-read').hidden = !this.targetIsFolder &&
                                                     !this.targetIsSpecialFolder;
+        getElement('ctx-mark-tag-read').hidden = !this.targetIsTag;
         getElement('ctx-update-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-update-folder').hidden = !this.targetIsContainer;
+        getElement('ctx-update-folder').hidden = !this.targetIsFolder;
 
         var openWebsite = getElement('ctx-open-website');
         openWebsite.hidden = !this.targetIsFeed;
@@ -728,14 +786,14 @@ var gContextMenu = {
 
         // Menuitems related to deleting feeds and folders.
         var dangerousSeparator = getElement('ctx-dangerous-cmds-separator');
-        dangerousSeparator.hidden = !(this.targetIsFeed || this.targetIsContainer ||
-                                      this.targetIsUnreadFolder || this.targetIsTrashFolder);
+        dangerousSeparator.hidden = this.targetIsStarredFolder;
         getElement('ctx-delete-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-delete-folder').hidden = !this.targetIsContainer;
+        getElement('ctx-delete-folder').hidden = !this.targetIsFolder;
+        getElement('ctx-delete-tag').hidden = !this.targetIsTag;
 
         // Menuitems related to emptying feeds and folders.
         getElement('ctx-empty-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-empty-folder').hidden = !(this.targetIsContainer || this.targetIsUnreadFolder);
+        getElement('ctx-empty-folder').hidden = !(this.targetIsFolder || this.targetIsUnreadFolder);
         getElement('ctx-restore-trashed').hidden = !this.targetIsTrashFolder;
         getElement('ctx-empty-trash').hidden = !this.targetIsTrashFolder;
 
@@ -760,6 +818,13 @@ var gContextMenu = {
         else
             query.folders = [this.targetID];
 
+        query.markEntriesRead(true);
+    },
+
+
+    markTagRead: function gContextMenu_markTagRead() {
+        var query = new Query();
+        query.tags = [this.targetItem.id];
         query.markEntriesRead(true);
     },
 
@@ -877,6 +942,34 @@ var gContextMenu = {
                 feeds.push(gStorage.getFeed(items[i].id));
 
             this._deleteBookmarks(feeds);
+        }
+    },
+
+
+    deleteTag: function gContextMenu_deleteTag() {
+        var ioService = Cc['@mozilla.org/network/io-service;1'].
+                            getService(Ci.nsIIOService);
+        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                            getService(Ci.nsIPromptService);
+        var tag = this.targetItem.id;
+
+        var bundle = getElement('main-bundle');
+        var dialogTitle = bundle.getString('confirmTagDeletionTitle');
+        var dialogText = bundle.getFormattedString('confirmTagDeletionText', [tag]);
+
+        var weHaveAGo = promptService.confirm(window, dialogTitle, dialogText);
+
+        if (weHaveAGo) {
+            var query = new Query();
+            query.tags = [tag];
+            var entries = query.getProperty('entryURL');
+            var urls = entries.map(function(e) e.entryURL);
+            var distinctURLs = filterDuplicates(urls);
+
+            for (let i = 0; i < distinctURLs.length; i++) {
+                let uri = ioService.newURI(distinctURLs[i], null, null);
+                PlacesUtils.tagging.untagURI(uri, [tag]);
+            }
         }
     },
 

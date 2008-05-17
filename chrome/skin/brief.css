@@ -97,20 +97,27 @@ splitter {
 #feed-list > treechildren::-moz-tree-image(unreadFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(0px, 16px, 16px, 0px);
-  padding: 0 4px 0 2px;
+  padding-right: 4px;
+  padding-left: 2px;
   }
 
 #feed-list > treechildren::-moz-tree-image(trashFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(32px, 16px, 48px, 0px);
-  padding: 0 4px 0 2px;
+  padding-right: 4px;
+  padding-left: 2px;
   }
 
 #feed-list > treechildren::-moz-tree-image(starredFolder) {
   list-style-image: url('icons/folders.png') !important;
   -moz-image-region: rect(16px, 16px, 32px, 0px);
   padding-right: 4px;
+  padding-left: 2px;
   }
+
+#feed-list > treechildren::-moz-tree-image(starredFolder, container) {
+  padding-left: 0;
+}
 
 
 

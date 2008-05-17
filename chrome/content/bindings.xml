@@ -288,13 +288,28 @@
                 case 'EntryMarkedRead':
                     this.read = state;
                     break;
+
                 case 'EntryStarred':
                     this.starred = state;
                     break;
+
                 case 'EntryTagged':
-                    var tagsElem = this.getElement('article-tags');
-                    tagsElem.textContent = this.getAttribute('tags');
+                    let changedTag = this.getAttribute('changedTag');
+                    let tags = this.getAttribute('tags').split(', ');
+
+                    if (state) {
+                        tags.push(changedTag);
+                    }
+                    else {
+                        let index = tags.indexOf(changedTag);
+                        tags.splice(index, 1);
+                    }
+
+                    tags = tags.join(', ');
+                    this.setAttribute('tags', tags);
+                    this.getElement('article-tags').textContent = tags;
                     break;
+
                 case 'DoRemoveEntry':
                     var self = this;
                     function callback() {
@@ -303,9 +318,11 @@
                     }
                     $(this).fadeOut(200, callback);
                     break;
+
                 case 'DoCollapseEntry':
                     this.collapse(state, false);
                     break;
+
                 case 'DoCollapseEntryAnimated':
                     this.collapse(state, true);
                     break;

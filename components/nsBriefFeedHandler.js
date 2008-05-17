@@ -150,79 +150,60 @@ function EntryList() { }
 
 EntryList.prototype = {
 
-    get length() {
-        for (prop in this) {
-            if (prop != 'length' && this[prop].splice) {
-                var array = this[prop];
+    get length() this.IDs ? this.IDs.length : 0,
+
+    // nsIBriefEntryList
+    IDs:   null,
+
+    feeds: null,
+    tags:  null,
+
+
+    containsFeed: function EntryList_containsFeed(aFeedID) {
+        return this.feeds.indexOf(aFeedID) != -1;
+    },
+
+    containsTagged: function EntryList_containsTagged(aTagName) {
+        return this.tags.indexOf(aTagName) != -1;
+    },
+
+    containsUnread: function EntryList_containsUnread() {
+        return this.contains('unread');
+    },
+
+    containsStarred: function EntryList_containsStarred() {
+        return this.contains('starred');
+    },
+
+    containsTrashed: function EntryList_containsTrashed() {
+        return this.contains('trashed');
+    },
+
+
+    contains: function EntryList_contains(aWhat) {
+        if (this.length > MAX_SQL_EXPRESSION_SIZE)
+            return true;
+
+        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+        query.entries = this.IDs;
+        query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
+        switch (aWhat) {
+            case 'unread':
+                query.unread = true;
                 break;
-            }
+            case 'starred':
+                query.starred = true;
+                break;
+            case 'trashed':
+                query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
+                break;
         }
-        return array ? array.length : 0;
-    },
 
-    IDs: null,
-
-
-    __feedIDs: null,
-    get feedIDs() {
-        return this.getProperty('feedIDs');
-    },
-    set feedIDs(aVal) {
-        return this.__feedIDs = aVal;
+        return query.hasMatches();
     },
 
 
-    __read: null,
-    get read() {
-        return this.getProperty('read');
-    },
-    set read(aVal) {
-        return this.__read = aVal;
-    },
-
-
-    __starred: null,
-    get starred() {
-        return this.getProperty('starred');
-    },
-    set starred(aVal) {
-        return this.__starred = aVal;
-    },
-
-
-    __deleted: null,
-    get deleted() {
-        return this.getProperty('deleted');
-    },
-    set deleted(aVal) {
-        return this.__deleted = aVal;
-    },
-
-
-    __tags: null,
-    get tags() {
-        return this.getProperty('tags');
-    },
-    set tags(aVal) {
-        return this.__tags = aVal;
-    },
-
-
-    getProperty: function EntryList_getProperty(aPropertyName) {
-        // There are only so many entry IDs that can be ORed...
-        let listSizeTooBig = this.length > MAX_SQL_EXPRESSION_SIZE;
-        let privateName = '__' + aPropertyName;
-
-        if (!this[privateName] && this.IDs && !listSizeTooBig) {
-            let query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-            query.entries = this.IDs;
-            let list = query.getSimpleEntryList([aPropertyName]);
-            this[privateName] = list[aPropertyName];
-        }
-        return this[privateName];
-    },
-
-    classDescription: 'A simple list feed entry feed entries',
+    classDescription: 'A simple list of feed entries',
     classID: Components.ID('{9a853d20-203d-11dd-bd0b-0800200c9a66}'),
     contractID: '@ancestor/brief/entrylist;1',
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefEntryList])

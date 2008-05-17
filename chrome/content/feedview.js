@@ -572,54 +572,65 @@ FeedView.prototype = {
         }
     },
 
-    onEntriesAdded: function FeedView_onEntriesAdded(aEntries) {
+    // nsIBriefStorageObserver
+    onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
         if (this.query.deleted === ENTRY_STATE_NORMAL)
-            this._ensure(aEntries.IDs, true);
+            this._ensure(aEntryList.IDs, true);
     },
 
-    onEntriesUpdated: function FeedView_onEntriesUpdated(aEntries) {
-        var refreshed = this.query.unread ? this._ensure(aEntries.IDs, true) : false;
+    // nsIBriefStorageObserver
+    onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
+        var refreshed = this.query.unread ? this._ensure(aEntryList.IDs, true) : false;
 
-        var visibleEntries = intersect(this._getVisibleEntryIDs(), aEntries.IDs);
+        var visibleEntries = intersect(this._getVisibleEntryIDs(), aEntryList.IDs);
         if (!refreshed && visibleEntries.length)
             this.refresh(true);
     },
 
-    onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntries, aNewState) {
-        var refreshed = this.query.unread ? this._ensure(aEntries.IDs, !aNewState)
+    // nsIBriefStorageObserver
+    onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntryList, aNewState) {
+        var refreshed = this.query.unread ? this._ensure(aEntryList.IDs, !aNewState)
                                           : false;
 
         if (!refreshed && this.isActive) {
-            let entries = intersect(this._getVisibleEntryIDs(), aEntries.IDs);
+            let entries = intersect(this._getVisibleEntryIDs(), aEntryList.IDs);
             this._sendEvent(entries, 'EntryMarkedRead', aNewState);
         }
     },
 
-    onEntriesStarred: function FeedView_onEntriesStarred(aEntries, aNewState) {
-        var refreshed = this.query.starred ? this._ensure(aEntries.IDs, !aEntries.IDs)
+    // nsIBriefStorageObserver
+    onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
+        var refreshed = this.query.starred ? this._ensure(aEntryList.IDs, aNewState)
                                            : false;
 
         if (!refreshed && this.isActive) {
-            let entries = intersect(this._getVisibleEntryIDs(), aEntries.IDs);
+            let entries = intersect(this._getVisibleEntryIDs(), aEntryList.IDs);
             this._sendEvent(entries, 'EntryStarred', aNewState);
         }
     },
 
-    onEntriesTagged: function FeedView_onEntriesTagged(aEntries) {
-        if (!this.isActive)
+    // nsIBriefStorageObserver
+    onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
+        var refreshed = false;
+        if (this.query.tags && this.query.tags[0] === aTag)
+            refreshed = this._ensure(aEntryList.IDs, aNewState);
+
+        if (refreshed || !this.isActive)
             return;
 
-        for (let i = 0; i < aEntries.length; i++) {
-            let elem = this.document.getElementById(aEntries.IDs[i]);
+        for (let i = 0; i < aEntryList.IDs.length; i++) {
+            let id = aEntryList.IDs[i];
+            let elem = this.document.getElementById(id);
             if (elem) {
-                elem.setAttribute('tags', aEntries.tags[i].join(', '));
-                this._sendEvent(aEntries.IDs[i], 'EntryTagged');
+                elem.setAttribute('changedTag', aTag);
+                this._sendEvent(id, 'EntryTagged', aNewState);
             }
         }
     },
 
-    onEntriesDeleted: function FeedView_onEntriesDeleted(aEntries, aNewState) {
-        this._ensure(aEntries.IDs, false);
+    // nsIBriefStorageObserver
+    onEntriesDeleted: function FeedView_onEntriesDeleted(aEntryList, aNewState) {
+        this._ensure(aEntryList.IDs, false);
     },
 
 
@@ -727,14 +738,14 @@ FeedView.prototype = {
             let entryIDs = this._getVisibleEntryIDs();
             if (entryIDs.length) {
                 this._fastQuery.entries = entryIDs;
-                entries = this._fastQuery.getEntries();
+                entries = this._fastQuery.getFullEntries();
             }
         }
         else {
             let query = this.query;
             query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
             query.limit = gPrefs.entriesPerPage;
-            entries = query.getEntries();
+            entries = query.getFullEntries();
 
             // For better performance we try to refresh the entry list asynchronously.
             // However, sometimes we have to refresh it immediately to correctly
@@ -746,7 +757,7 @@ FeedView.prototype = {
             if (!entries.length) {
                 this._refreshEntryList();
                 query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
-                entries = query.getEntries();
+                entries = query.getFullEntries();
             }
             else {
                 async(this._refreshEntryList, 250, this);
@@ -815,7 +826,7 @@ FeedView.prototype = {
             var entryID = this._entries[pageEndIndex];
             if (entryID) {
                 this._fastQuery.entries = [entryID];
-                let entry = this._fastQuery.getEntries()[0];
+                let entry = this._fastQuery.getFullEntries()[0];
                 var appendedElement = this._appendEntry(entry);
             }
             else if (!this.feedContent.childNodes.length) {
@@ -833,7 +844,7 @@ FeedView.prototype = {
      * and pageCount), the current page number, and the navigation UI.
      */
     _refreshEntryList: function FeedView__refreshEntryList() {
-        this._entries = this.query.getSimpleEntryList().IDs;
+        this._entries = this.query.getEntries();
         this._refreshPageNavUI();
     },
 

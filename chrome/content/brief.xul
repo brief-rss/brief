@@ -32,6 +32,9 @@
             <menuitem id="ctx-mark-folder-read"
                       label="&ctxMarkFolderRead.label;"
                       oncommand="gContextMenu.markFolderRead()"/>
+            <menuitem id="ctx-mark-tag-read"
+                      label="&ctxMarkTagRead.label;"
+                      oncommand="gContextMenu.markTagRead()"/>
             <menuitem id="ctx-update-feed"
                       label="&ctxUpdateFeed.label;"
                       oncommand="gContextMenu.updateFeed()"/>
@@ -51,6 +54,9 @@
             <menuitem id="ctx-delete-folder"
                       label="&ctxDeleteFolder.label;"
                       oncommand="gContextMenu.deleteFolder()"/>
+            <menuitem id="ctx-delete-tag"
+                      label="&ctxDeleteTag.label;"
+                      oncommand="gContextMenu.deleteTag()"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
                       oncommand="gContextMenu.emptyFeed()"/>
@@ -120,6 +126,8 @@
                         </treeitem>
                         <treeitem id="starred-folder"
                                   specialFolder="true"
+                                  wasOpen="false"
+                                  persist="wasOpen"
                                   title="&starredFolder.label;">
                             <treerow>
                                 <treecell properties="starredFolder "/>

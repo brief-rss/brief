@@ -171,7 +171,7 @@ const gBrief = {
         var query = new BriefQuery(null, null, true);
         query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
         query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
-        var unreadFeeds = query.getSimpleEntryList(['feedIDs']).feedID;
+        var unreadFeeds = query.getProperty('feedID').map(function(e) e.feedID);
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
         var value = bundle.getString('noUnreadFeedsTooltip');
@@ -307,18 +307,19 @@ const gBrief = {
             gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
             this.prefs.addObserver('', this, false);
+            this.storage.addObserver(this);
 
             window.addEventListener('unload', this, false);
             break;
 
         case 'unload':
             this.prefs.removeObserver('', this);
+            this.storage.removeObserver(this);
 
             var observerService = Cc['@mozilla.org/observer-service;1'].
                                   getService(Ci.nsIObserverService);
             observerService.removeObserver(this, 'brief:feed-updated');
             observerService.removeObserver(this, 'brief:feed-error');
-            observerService.removeObserver(this, 'brief:entry-status-changed');
             observerService.removeObserver(this, 'brief:invalidate-feedlist');
             observerService.removeObserver(this, 'brief:feed-update-queued');
             break;
@@ -333,20 +334,13 @@ const gBrief = {
                 this.updateStatuspanel();
             break;
 
-        case 'brief:entry-status-changed':
-            if ((aData == 'read' || aData == 'unread' || aData == 'deleted') && !this.statusIcon.hidden)
-                setTimeout(this.updateStatuspanel, 0);
-            break;
-
         case 'nsPref:changed':
-            switch (aData) {
-            case 'showStatusbarIcon':
+            if (aData == 'showStatusbarIcon') {
                 var newValue = this.prefs.getBoolPref('showStatusbarIcon');
                 var statusIcon = document.getElementById('brief-status');
                 statusIcon.hidden = !newValue;
                 if (newValue)
                     this.updateStatuspanel();
-                break;
             }
             break;
 
@@ -363,16 +357,38 @@ const gBrief = {
             break;
 
         case 'brief:feed-updated':
-            this.refreshProgressmeter();
-            if (aSubject.QueryInterface(Ci.nsIVariant) > 0 && !this.statusIcon.hidden)
-                this.updateStatuspanel();
-            break;
-
         case 'brief:feed-error':
             this.refreshProgressmeter();
             break;
         }
     },
+
+    // nsIBriefStorageObserver
+    onEntriesAdded: function gBrief_onEntriesAdded(aEntryList) {
+        if (!this.statusIcon.hidden)
+            setTimeout(this.updateStatuspanel, 0);
+    },
+
+    // nsIBriefStorageObserver
+    onEntriesUpdated: function gBrief_onEntriesUpdated(aEntryList) {
+        if (!this.statusIcon.hidden)
+            setTimeout(this.updateStatuspanel, 0);
+    },
+
+    // nsIBriefStorageObserver
+    onEntriesMarkedRead: function gBrief_onEntriesMarkedRead(aEntryList, aState) {
+        if (!this.statusIcon.hidden)
+            setTimeout(this.updateStatuspanel, 0);
+    },
+
+    // nsIBriefStorageObserver
+    onEntriesDeleted: function gBrief_onEntriesDeleted(aEntryList, aState) {
+        if (!this.statusIcon.hidden && aEntryList.containsUnread())
+            setTimeout(this.updateStatuspanel, 0);
+    },
+
+    onEntriesTagged: function() { },
+    onEntriesStarred: function() { },
 
 
     onFirstRun: function gBrief_onFirstRun() {
@@ -386,6 +402,16 @@ const gBrief = {
         BrowserToolboxCustomizeDone(true);
 
         gBrief.prefs.setBoolPref('firstRun', false);
+    },
+
+
+    QueryInterface: function gBrief_QueryInterface(aIID) {
+        if (aIID.equals(Ci.nsISupports) ||
+            aIID.equals(Ci.nsIEventHandler) ||
+            aIID.equals(Ci.nsIBriefStorageObserver)) {
+            return this;
+        }
+        throw Components.results.NS_ERROR_NO_INTERFACE;
     }
 
 }
