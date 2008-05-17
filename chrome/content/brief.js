@@ -390,17 +390,17 @@ function selectHomeFolder(aEvent) {
 
 // Creates and manages a FeedView displaying the search results,
 // based on the current input string and the search scope.
-var previousView = null;
-var previousSelectedIndex = -1;
 function performSearch(aEvent) {
     var searchbar = getElement('searchbar');
 
     // If new search is being started, remember the old view to
     // restore it after the search is finished.
-    if (!gFeedView.query.searchString) {
-        previousView = gFeedView;
-        previousSelectedIndex = gFeedList.tree.currentIndex;
+    if (!searchbar.searchInProgress) {
+        searchbar.previousView = gFeedView;
+        searchbar.previousSelectedIndex = gFeedList.tree.currentIndex;
     }
+
+    searchbar.searchInProgress = true;
 
     var bundle = getElement('main-bundle');
     var titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
@@ -428,14 +428,20 @@ function performSearch(aEvent) {
 
 // Restores the view and the tree selection from before the search was started.
 function finishSearch() {
-    if (previousSelectedIndex != -1) {
+    var searchbar = getElement('searchbar');
+    if (!searchbar.searchInProgress)
+        return;
+
+    searchbar.searchInProgress = false;
+
+    if (searchbar.previousSelectedIndex != -1) {
         gFeedList.ignoreSelectEvent = true;
-        gFeedList.tree.view.selection.select(previousSelectedIndex);
+        gFeedList.tree.view.selection.select(searchbar.previousSelectedIndex);
         gFeedList.ignoreSelectEvent = false;
     }
 
-    if (previousView && previousView != gFeedView) {
-        previousView.attach();
+    if (searchbar.previousView && searchbar.previousView != gFeedView) {
+        searchbar.previousView.attach();
         gFeedView.query.searchString = gFeedView.titleOverride = '';
     }
     else {
@@ -443,8 +449,8 @@ function finishSearch() {
         gFeedView.refresh();
     }
 
-    previousView = null;
-    previousSelectedIndex = -1;
+    searchbar.previousView = null;
+    searchbar.previousSelectedIndex = -1;
 }
 
 

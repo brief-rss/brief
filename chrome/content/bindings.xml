@@ -390,12 +390,15 @@
             </setter>
         </property>
 
+        <field name="searchInProgress">
+            false
+        </field>
+
         <method name="clear">
             <body>
                 this.value = '';
                 this.clearButton.hidden = true;
                 this.inputField.blur();
-                finishSearch();
             </body>
         </method>
 

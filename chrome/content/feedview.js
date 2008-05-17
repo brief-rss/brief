@@ -422,9 +422,9 @@ FeedView.prototype = {
 
         // Clear the searchbar.
         var searchbar = getElement('searchbar');
-        if (!this.query.searchString && searchbar.value) {
-            searchbar.value = '';
-            searchbar.clearButton.hidden = true;
+        if (!this.query.searchString && searchbar.searchInProgress) {
+            searchbar.searchInProgress = false;
+            searchbar.clear();
         }
 
         // Hide the drop-down to pick view contraints if it is tied to
