@@ -202,7 +202,7 @@ BriefStorageService.prototype = {
         executeSQL('CREATE INDEX IF NOT EXISTS entries_bookmarkID_index ON entries (bookmarkID) ');
         executeSQL('CREATE INDEX IF NOT EXISTS entries_entryURL_index ON entries (entryURL)     ');
 
-        executeSQL('CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagNames)');
+        executeSQL('CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagName)');
     },
 
 
@@ -2028,9 +2028,18 @@ BriefQuery.prototype = {
             else {
                 let bookmarks = gBms.getBookmarkIdsForURI(uri, {}).
                                      filter(isNormalBookmark);
-                for (let i = bookmarks.length - 1; i >= 0; i--) {
-                    let trans = transSrv.removeItem(bookmarks[i]);
-                    transactions.push(trans);
+                if (bookmarks.length) {
+                    for (let i = bookmarks.length - 1; i >= 0; i--) {
+                        let trans = transSrv.removeItem(bookmarks[i]);
+                        transactions.push(trans);
+                    }
+                }
+                else {
+                    // If there are no bookmarks for an URL that is starred in our
+                    // database, it means that the database is out of sync. We've
+                    // got to update the database directly.
+                    gStorageService.starEntry(false, entry.id);
+                    gStorageService.notifyOfEntriesStarred([entry.id], false);
                 }
             }
         }
