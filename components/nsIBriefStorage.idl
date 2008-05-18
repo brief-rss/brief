@@ -2,7 +2,6 @@
 interface nsIBriefFeed;
 interface nsIBriefEntryList;
 interface nsIBriefStorageObserver;
-interface nsIPropertyBag;
 interface nsIVariant;
 
 /**
@@ -57,7 +56,8 @@ interface nsIBriefQuery : nsISupports {
     attribute short deleted;
 
     /**
-     * String that must be contained by either title or content of the selected entries.
+     * String that must be contained by title, content, authors or tags of the
+     * selected entries.
      */
     attribute AString searchString;
 
@@ -155,25 +155,25 @@ interface nsIBriefQuery : nsISupports {
     /**
      * Marks selected entries as read/unread.
      *
-     * @param  state  New state of entries (TRUE for read, FALSE for unread).
+     * @param state New state of entries (TRUE for read, FALSE for unread).
      */
     void markEntriesRead(in boolean state);
 
     /**
-     * Marks selected entries as starred/unstarred.
+     * Bookmarks or unbookmarks URLs of the selected entries.
      *
-     * @param  state  New state of entries (TRUE for starred, FALSE for not starred).
+     * @param state New state of entries. TRUE to bookmark, FALSE to unbookmark.
      */
     void starEntries(in boolean state);
 
     /**
      * Sets the deleted state of the selected entries or removes them from the database.
      *
-     * @param  state  The new deleted state (as defined above, near nsIBriefQuery.deleted
-     *                attribute) or instruction to physically remove the entries from the
-     *                database (REMOVE_FROM_DATABASE constant below).
+     * @param state The new deleted state (as defined above, near nsIBriefQuery.deleted
+     *              attribute) or instruction to physically remove the entries from the
+     *              database (REMOVE_FROM_DATABASE constant below).
      *
-     * @throws on invalid |state| parameter.
+     * @throws NS_ERROR_INVALID_ARG on invalid |state| parameter.
      */
     const short REMOVE_FROM_DATABASE = 4;
 
@@ -205,7 +205,7 @@ interface nsIBriefStorage : nsISupports {
   nsIVariant getAllFeeds([optional] in boolean includeFolders);
 
   /**
-   * Gets all tags.
+   * Gets a list of distinct tags for URLs of entries stored in the database.
    *
    * @returns Array of tag names.
    */
@@ -215,24 +215,24 @@ interface nsIBriefStorage : nsISupports {
    * Synchronizes database with Live Bookmarks from home folder which ID is
    * specified by extensions.brief.homeFolder.
    * Feeds that were removed from the home folder remain in the database in the hidden
-   * state for some time in case they are added back.
+   * state for a certain amount of time in case they are added back.
    */
-  void syncWithBookmarks();
+  void syncWithLivemarks();
 
   /**
-   * Updates the feed properties such as title based on the provided nsIBriefFeed.
-   * Evaluates the provided entries, inserting any new items and updating existing
-   * items when newer versions are available.
+   * Evaluates provided entries, inserting any new items and updating existing
+   * items when newer versions are found. Also updates feed's properties.
    *
-   * @param  feed  Contains the feed and the entries to evaluate for new data.
+   * @param feed Contains the feed and the entries to evaluate.
    */
   void updateFeed(in nsIBriefFeed feed);
 
   /**
-   * Saves various feed settings: entryAgeLimit, maxEntries, and updateInterval.
+   * Saves feed settings: entryAgeLimit, maxEntries, updateInterval and
+   * markModifiedEntriesUnread.
    *
-   * @param  feed  nIBriefFeed object with whose properties to update the respective
-   *               fields in the database.
+   * @param feed nIBriefFeed object whose properties to use to update the respective
+   *             columns in the database.
    */
   void setFeedOptions(in nsIBriefFeed feed);
 
@@ -242,26 +242,58 @@ interface nsIBriefStorage : nsISupports {
    */
   void compactDatabase();
 
+  /**
+   * Registers an object implementing nsIBriefStorageObserver to be notified
+   * of entry changes. The storage service keeps a strong reference to this object,
+   * so all observers have to be removed using nsIBriefStorage.removeObserver() to
+   * prevent leaks.
+   */
   void addObserver(in nsIBriefStorageObserver observer);
 
+  /**
+   * Unregisters an object implementing nsIBriefStorageObserver.
+   */
   void removeObserver(in nsIBriefStorageObserver observer);
 
 };
 
 
+/**
+ * Consumers can implement this interface to be notified about changes made to
+ * entries stored in the database.
+ */
 [scriptable, uuid(8105e6fa-cf93-48b7-8f15-157ffa04f345)]
 interface nsIBriefStorageObserver : nsISupports {
 
+  /**
+   * Called when new entries are added to the database.
+   */
   void onEntriesAdded(in nsIBriefEntryList entryList);
 
+  /**
+   * Called when properties of existing entries, such as title, content, authors
+   * and date, are changed. When entries are updated, they also may be marked as unread.
+   */
   void onEntriesUpdated(in nsIBriefEntryList entryList);
 
+  /**
+   * Called when the read/unread state of entries changes.
+   */
   void onEntriesMarkedRead(in nsIBriefEntryList entryList, in boolean newState);
 
+  /**
+   * Called when URLs of entries are bookmarked/unbookmarked.
+   */
   void onEntriesStarred(in nsIBriefEntryList entryList, in boolean newState);
 
+  /**
+   * Called when a tag is added or removed from entries.
+   */
   void onEntriesTagged(in nsIBriefEntryList entryList, in boolean newState, in AString tagName);
 
+  /**
+   * Called when the deleted state of entries changes.
+   */
   void onEntriesDeleted(in nsIBriefEntryList entryList, in short newState);
 
 };

@@ -33,7 +33,7 @@ function init() {
     if (gPrefs.homeFolder) {
         // Initiate the feed list (asynchronously, so that the window is displayed sooner).
         async(gFeedList.rebuild, 0, gFeedList);
-        async(gStorage.syncWithBookmarks, 1000, gStorage);
+        async(gStorage.syncWithLivemarks, 2000, gStorage);
     }
     else {
         showHomeFolderPicker();
