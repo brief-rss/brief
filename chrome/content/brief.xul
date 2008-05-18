@@ -126,7 +126,7 @@
                         </treeitem>
                         <treeitem id="starred-folder"
                                   specialFolder="true"
-                                  wasOpen="false"
+                                  wasOpen="true"
                                   persist="wasOpen"
                                   title="&starredFolder.label;">
                             <treerow>
