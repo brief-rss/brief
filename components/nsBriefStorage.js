@@ -1747,7 +1747,7 @@ BriefQuery.prototype = {
             var exists = select.row.found;
         }
         catch (ex) {
-            reportError(ex, gConnection.lastError != 1);
+            if (gConnection.lastError != 1) reportError(ex, true);
         }
         finally {
             select.reset();
@@ -1766,7 +1766,7 @@ BriefQuery.prototype = {
                 entries.push(select.row.id);
         }
         catch (ex) {
-            reportError(ex, gConnection.lastError != 1);
+            if (gConnection.lastError != 1) reportError(ex, true);
         }
         finally {
             select.reset();
@@ -1810,7 +1810,7 @@ BriefQuery.prototype = {
         catch (ex) {
             // Ignore "SQL logic error or missing database" error which full-text search
             // throws when the query doesn't contain at least one non-excluded term.
-            reportError(ex, gConnection.lastError != 1);
+            if (gConnection.lastError != 1) reportError(ex, true);
         }
         finally {
             select.reset();
@@ -1848,7 +1848,7 @@ BriefQuery.prototype = {
             }
         }
         catch (ex) {
-            reportError(ex, gConnection.lastError != 1);
+            if (gConnection.lastError != 1) reportError(ex, true);
         }
         finally {
             select.reset();
@@ -1871,7 +1871,7 @@ BriefQuery.prototype = {
             var count = select.row.count;
         }
         catch (ex) {
-            reportError(ex, gConnection.lastError != 1);
+            if (gConnection.lastError != 1) reportError(ex, true);
         }
         finally {
             select.reset();
@@ -1914,7 +1914,7 @@ BriefQuery.prototype = {
             }
         }
         catch (ex) {
-            reportError(ex, gConnection.lastError != 1);
+            if (gConnection.lastError != 1) reportError(ex, true);
         }
         finally {
             select.reset();
@@ -1953,7 +1953,7 @@ BriefQuery.prototype = {
             update.execute();
         }
         catch (ex) {
-            reportError(ex, gConnection.lastError != 1);
+            if (gConnection.lastError != 1) reportError(ex, true);
         }
         finally {
             this.unread = tempUnread;
@@ -1991,7 +1991,7 @@ BriefQuery.prototype = {
             statement.execute();
         }
         catch (ex) {
-            reportError(ex, gConnection.lastError != 1);
+            if (gConnection.lastError != 1) reportError(ex, true);
         }
         finally {
             gConnection.commitTransaction();
