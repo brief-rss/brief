@@ -27,7 +27,7 @@ splitter {
 /* ----------------- Feed list tree ------------------ */
 
 #feed-list > treechildren {
-  -moz-binding: url('chrome://brief/content/bindings.xml#feedlist-treebody');
+  -moz-binding: url(chrome://brief/content/bindings.xml#feedlist-treebody);
   }
 
 #feed-list {
@@ -51,23 +51,44 @@ splitter {
   height: 22px;
 }
 
-
-/* ------------ Icons and twisty images ------------ */
-
-#feed-list > treechildren::-moz-tree-twisty(container) {
-  list-style-image: url('icons/tree-dropmarker.png');
-  width: 11px;
-  height: 11px;
+#feed-list > treechildren::-moz-tree-indentation {
+  width: 12px;
 }
 
-#feed-list > treechildren::-moz-tree-twisty(container, open) {
-  list-style-image: url('icons/tree-dropmarker-open.png');
+
+/* ------------ Twisty ------------ */
+
+#feed-list > treechildren::-moz-tree-twisty {
+  -moz-padding-end: 2px;
+  padding-top: 1px;
+  width: 9px;
+  list-style-image: url(icons/twisty-closed.png);
+}
+
+#feed-list > treechildren::-moz-tree-twisty(open) {
+  list-style-image: url(icons/twisty-open.png);
+}
+
+
+#feed-list > treechildren::-moz-tree-twisty(hover) {
+  list-style-image: url(icons/twisty-closed-hover.png);
+}
+
+#feed-list > treechildren::-moz-tree-twisty(hover, open) {
+  list-style-image: url(icons/twisty-open-hover.png);
+}
+
+
+/* ------------ Icons ------------ */
+
+#feed-list > treechildren::-moz-tree-image {
+  -moz-padding-end: 4px;
+  -moz-padding-start: 2px;
 }
 
 #feed-list > treechildren::-moz-tree-image(container) {
-  list-style-image: url('chrome://global/skin/icons/folder-item.png') !important;
+  list-style-image: url(chrome://global/skin/icons/folder-item.png) !important;
   -moz-image-region: rect(0px, 32px, 16px, 16px);
-  padding-right: 4px;
 }
 
 #feed-list > treechildren::-moz-tree-image(container, open) {
@@ -75,50 +96,38 @@ splitter {
 }
 
 #feed-list > treechildren::-moz-tree-image(feed-item) {
-  list-style-image: url('chrome://browser/skin/feeds/feedIcon16.png') !important;
+  list-style-image: url(chrome://browser/skin/feeds/feedIcon16.png) !important;
   width: 16px;
   height: 16px;
-  padding-right: 4px;
 }
 
 #feed-list > treechildren::-moz-tree-image(feed-item, unread) {
-  list-style-image: url('chrome://browser/skin/feeds/feedIcon16.png') !important;
+  list-style-image: url(chrome://browser/skin/feeds/feedIcon16.png) !important;
 }
 
 #feed-list > treechildren::-moz-tree-image(tag) {
-  list-style-image: url('chrome://mozapps/skin/places/tagContainerIcon.png') !important;
+  list-style-image: url(chrome://mozapps/skin/places/tagContainerIcon.png) !important;
   width: 16px;
   height: 16px;
-  padding-right: 4px;
 }
+
 
 /* ---- Fixed images for predefined special folders ---- */
 
 #feed-list > treechildren::-moz-tree-image(unreadFolder) {
-  list-style-image: url('icons/folders.png') !important;
+  list-style-image: url(icons/folders.png) !important;
   -moz-image-region: rect(0px, 16px, 16px, 0px);
-  padding-right: 4px;
-  padding-left: 2px;
   }
 
 #feed-list > treechildren::-moz-tree-image(trashFolder) {
-  list-style-image: url('icons/folders.png') !important;
+  list-style-image: url(icons/folders.png) !important;
   -moz-image-region: rect(32px, 16px, 48px, 0px);
-  padding-right: 4px;
-  padding-left: 2px;
   }
 
 #feed-list > treechildren::-moz-tree-image(starredFolder) {
-  list-style-image: url('icons/folders.png') !important;
+  list-style-image: url(icons/folders.png) !important;
   -moz-image-region: rect(16px, 16px, 32px, 0px);
-  padding-right: 4px;
-  padding-left: 2px;
   }
-
-#feed-list > treechildren::-moz-tree-image(starredFolder, container) {
-  padding-left: 0;
-}
-
 
 
 /* ----------------------  Toolbars  ----------------------- */
@@ -150,24 +159,28 @@ toolbarbutton {
   }
 
 #searchbar {
-  -moz-binding: url('chrome://brief/content/bindings.xml#searchbar');
+  -moz-binding: url(chrome://brief/content/bindings.xml#searchbar);
   }
 
 #update-button {
-  list-style-image: url('toolbar-buttons-1.png');
+  list-style-image: url(toolbar-buttons-1.png);
   -moz-image-region: rect(0, 24px, 24px, 0);
   }
 
 #stop-updating-button {
-  list-style-image: url('toolbar-buttons-1.png');
+  list-style-image: url(toolbar-buttons-1.png);
   -moz-image-region: rect(0, 48px, 24px, 24px);
   }
 
 #options-button {
-  list-style-image: url('toolbar-buttons-1.png');
+  list-style-image: url(toolbar-buttons-1.png);
   -moz-image-region: rect(0, 72px, 24px, 48px);
   }
 
+#left-pane-splitter {
+  min-width: 5px;
+  border-right-width: 1px;
+}
 
 #toggle-sidebar {
   list-style-image: url(chrome://brief/skin/sidebar-button.png);
@@ -189,13 +202,13 @@ toolbarbutton {
 }
 
 #mark-view-read {
-  list-style-image: url('toolbar-buttons-1.png');
+  list-style-image: url(toolbar-buttons-1.png);
   -moz-image-region: rect(0, 96px, 24px, 72px);
   margin-right: 5px;
   }
 
 #headlines-checkbox {
-  list-style-image: url('toolbar-buttons-1.png');
+  list-style-image: url(toolbar-buttons-1.png);
   -moz-image-region: rect(0, 120px, 24px, 96px);
   margin-right: 5px;
 }
@@ -213,7 +226,7 @@ toolbarbutton {
   }
 
 #navigation-box > toolbarbutton {
-  list-style-image: url('toolbar-buttons-2.png');
+  list-style-image: url(toolbar-buttons-2.png);
 }
 
 #prev-page {
@@ -258,14 +271,14 @@ toolbarbutton {
 
 .searchbar-button-image {
   margin: 0px;
-  list-style-image: url('icons/search.png');
+  list-style-image: url(icons/search.png);
   }
 
 .searchbar-clearbutton {
   -moz-appearance: none;
   border: none !important;
   cursor: default;
-  list-style-image: url('icons/searchbar-clear.png');
+  list-style-image: url(icons/searchbar-clear.png);
   -moz-image-region: rect(0px, 16px, 16px, 0px);
   -moz-margin-start: 4px;
   -moz-margin-end: 2px;
