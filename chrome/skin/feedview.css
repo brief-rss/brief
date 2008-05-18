@@ -11,12 +11,12 @@ body {
 /* ----------------------  Header  ---------------------- */
 
 #header {
-    background: url('chrome://brief/skin/header-bkg.png') no-repeat top right;
+    background: url('chrome://brief/skin/header-bkg.png') repeat-y top right;
     background-color: #345b74;
     padding: 5px 5% 5px;
     border-bottom: 10px solid #acb5bf;
     -moz-border-bottom-colors: #f6f9fc #f2f4f8 #eceff4 #e5eaee #dfe3e9 #d9dee3 #cdd3da #c1c8d0 #b5bec6 #acb5bf;
-    color: #f0fbff;
+    color: #e7f1f5;
     overflow: auto; /* Clears contained floats */
 }
 
@@ -27,19 +27,20 @@ body {
 }
 
 #feed-title {
-    color: #f0fbff;
+    color: #e7f1f5;
     font-size: 19px;
     font-weight: bold;
     text-decoration: none;
+    padding-bottom: 1px;
 }
 
 #feed-title.feed-link:hover {
-    border-bottom: 1px solid #f0fbff;
+    border-bottom: 1px solid #e7f1f5;
 }
 
 #feed-subtitle {
     font-size: 13px;
-    margin-top: 3px;
+    margin-top: 2px;
     font-style: italic;
 }
 
