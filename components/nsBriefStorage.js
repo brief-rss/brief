@@ -940,13 +940,13 @@ BriefStorageService.prototype = {
 
             case 'timer-callback':
                 this.livemarksSyncPending = false;
-                this.syncWithBookmarks();
+                this.syncWithLivemarks();
                 break;
 
             case 'nsPref:changed':
                 if (aData == 'homeFolder') {
                     this.homeFolderID = gPrefs.getIntPref('homeFolder');
-                    this.syncWithBookmarks();
+                    this.syncWithLivemarks();
                 }
                 break;
         }
@@ -954,7 +954,7 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    syncWithBookmarks: function BriefStorage_syncWithBookmarks() {
+    syncWithLivemarks: function BriefStorage_syncWithLivemarks() {
         new BookmarksSynchronizer();
     },
 
