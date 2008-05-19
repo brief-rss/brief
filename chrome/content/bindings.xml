@@ -272,11 +272,8 @@
         <handler event="click" button="0" clickcount="2">
             <![CDATA[
             var isCommandElement = event.originalTarget.hasAttribute('command');
-
-            if (gConveyedData.doubleClickMarks && !isCommandElement) {
-                this.read = !this.read;
-                this.sendEvent('SwitchEntryRead', true);
-            }
+            if (gConveyedData.doubleClickMarks && !isCommandElement)
+                this.sendEvent('SwitchEntryRead');
             ]]>
         </handler>
 
