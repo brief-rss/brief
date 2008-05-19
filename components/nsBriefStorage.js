@@ -1821,8 +1821,9 @@ BriefQuery.prototype = {
 
 
     // nsIBriefQuery
-    getProperty: function BriefQuery_getProperty(aPropertyName) {
+    getProperty: function BriefQuery_getProperty(aPropertyName, aDistinct) {
         var rows = [];
+        var values = [];
 
         switch (aPropertyName) {
             case 'content':
@@ -1841,8 +1842,14 @@ BriefQuery.prototype = {
                                          this.getQueryString(true, getEntriesText));
 
             while (select.step()) {
+                let propertyValue = select.row[aPropertyName];
+                if (aDistinct && values.indexOf(propertyValue) != -1)
+                    continue;
+
+                values.push(propertyValue);
+
                 let row = { };
-                row[aPropertyName] = select.row[aPropertyName];
+                row[aPropertyName] = propertyValue;
                 row.ID = select.row.id;
                 rows.push(row);
             }

@@ -147,10 +147,11 @@ interface nsIBriefQuery : nsISupports {
      *
      * @param propertyName Name of the property (see the database schema
      *                     for the list of properties).
+     * @param distinct     Don't include multiple entries with the same value.
      * @returns Array of JS objects containing the requested property
      *          and ID of the corresponding entry.
      */
-    nsIVariant getProperty(in string propertyName);
+    nsIVariant getProperty(in string propertyName, [optional] in boolean distinct);
 
     /**
      * Marks selected entries as read/unread.
