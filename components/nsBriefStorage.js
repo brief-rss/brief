@@ -1019,7 +1019,7 @@ BriefStorageService.prototype = {
             for each (entry in this.getEntriesByURL(url)) {
                 if (isTag)
                     var changedTag = this.tagEntry(true, entry.id, aItemID, gBms.getItemTitle(aFolder));
-                else if (!entry.starred)
+                else
                     this.starEntry(true, entry.id, aItemID);
 
                 changedEntries.push(entry);
