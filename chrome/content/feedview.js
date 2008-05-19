@@ -5,9 +5,9 @@ var gFeedView = null;
 
 /**
  * This object represents the main feed display. It stores and manages display parameters.
- * The feed displayed using a local, unprivileged template page. We insert third-party
- * content in it (entries are served with full HTML markup), so the template page is
- * untrusted and we respect XPCNativeWrappers when interacting with it.
+ * The feed is displayed using a local, unprivileged template page. We insert third-party
+ * content in it (entries are served with full HTML markup), so the template page has to
+ * be untrusted and we respect XPCNativeWrappers when interacting with it.
  * Individual entries are inserted dynamically. Their structure and behaviour is defined
  * by an XBL binding.
  *
@@ -41,7 +41,7 @@ FeedView.prototype = {
     // feedview.shownEntries preference.
     _flagsAreIntrinsic: false,
 
-    // Key elements.
+
     get browser FeedView_browser() {
         delete this.__proto__.browser;
         return this.__proto__.browser = getElement('feed-view');
@@ -85,7 +85,7 @@ FeedView.prototype = {
     },
 
 
-    // IDs of contained entries, used to determine when the view needs to be refreshed.
+    // Ordered array IDs of entries that the view contains.
     _entries: [],
 
     get entryCount Feedview_entryCount() {
@@ -106,11 +106,9 @@ FeedView.prototype = {
     },
 
     get currentPage FeedView_currentPage_get() {
-        if (this.__currentPage > this.pageCount) {
-            // The current page may have gone out of range if the
-            // number of entries decreased.
+        // currentPage may have gone out of range if the number of entries decreased.
+        if (this.__currentPage > this.pageCount)
             this.__currentPage = this.pageCount;
-        }
         return this.__currentPage;
     },
 
@@ -327,7 +325,7 @@ FeedView.prototype = {
             var jump = (delta > 0) ? absoluteJump : -absoluteJump;
         }
 
-        // Disallow selecting futher entries until scrolling is finished.
+        // Disallow selecting further entries until scrolling is finished.
         this._selectionSuppressed = true;
         var self = this;
 
@@ -378,9 +376,9 @@ FeedView.prototype = {
     },
 
 
-    // This array stores the list of entries marked as unread by the user.
-    // They become excluded from auto-marking, in order to prevent them from
-    // being immediately re-marked as read when autoMarkRead is on.
+    // This array stores the list of entries marked as unread by the user. They become
+    // excluded from auto-marking, in order to prevent them from being immediately
+    // re-marked as read when autoMarkRead is on.
     entriesMarkedUnread: [],
 
     _markVisibleTimeout: null,
@@ -432,8 +430,8 @@ FeedView.prototype = {
             searchbar.clear();
         }
 
-        // Hide the drop-down to pick view contraints if it is tied to
-        // specific contraints (e.g. the Unread folder).
+        // Hide the drop-down to pick view constraints if it is tied to
+        // specific constraints (e.g. the Unread folder).
         getElement('view-constraint-box').hidden = this._flagsAreIntrinsic;
 
         this.browser.addEventListener('load', this, false);
@@ -488,7 +486,7 @@ FeedView.prototype = {
     },
 
 
-    // Events to which we listen to in the template page. Entry binding communicates with
+    // Events to which we listen in the template page. Entry binding communicates with
     // chrome to perform actions that require full privileges by sending custom events.
     _events: ['SwitchEntryRead', 'SwitchEntryStarred', 'ShowBookmarkPopup',
               'DeleteEntry', 'RestoreEntry', 'EntryUncollapsed', 'click',
@@ -515,7 +513,6 @@ FeedView.prototype = {
                 var newState = !target.hasAttribute('starred');
                 gCommands.starEntry(id, newState);
                 break;
-
             case 'EntryUncollapsed':
                 if (gPrefs.autoMarkRead && !this.query.unread)
                     gCommands.markEntryRead(id, true);
@@ -523,7 +520,6 @@ FeedView.prototype = {
 
             case 'load':
                 getElement('feed-view-toolbar').hidden = !this.isActive;
-
                 if (this.isActive) {
                     this._setupTemplatePage();
                     this.refresh();
@@ -557,10 +553,10 @@ FeedView.prototype = {
         if (gPrefs.entrySelectionEnabled && entryElement)
             gFeedView.selectEntry(parseInt(entryElement.id));
 
-        // We intercept clicks on the article title link, so that we can mark the
-        // entry as read and force opening in a new tab if necessary. We can't
-        // dispatch a custom event like we do with other actions, because for
-        // whatever reason the binding handlers don't catch middle-clicks.
+        // We intercept clicks on the article title link, so that we can mark the entry as
+        // read and force opening in a new tab if necessary. We can't dispatch a custom
+        // event like we do with other actions, because for whatever reason the binding
+        // handlers don't catch middle-clicks.
         if (aEvent.target.className == 'article-title-link'
             && (aEvent.button == 0 || aEvent.button == 1)) {
 
@@ -753,12 +749,12 @@ FeedView.prototype = {
             entries = query.getFullEntries();
 
             // For better performance we try to refresh the entry list asynchronously.
-            // However, sometimes we have to refresh it immediately to correctly
-            // pick entries to display the current page. It occurs when currentPage goes
-            // out of range, because the view contains less pages than before. The offset
-            // goes out of range too and the query returns no entries. Therefore,
-            // whenever the query returns no entries, we refresh the entry list
-            // immediately and then redo the query.
+            // However, sometimes we have to refresh it immediately to correctly pick
+            // entries to display the current page. It occurs when currentPage goes out of
+            // range, because the view contains less pages than before. The offset goes
+            // out of range too and the query returns no entries. Therefore, whenever the
+            // query returns no entries, we refresh the entry list immediately and then
+            // redo the query.
             if (!entries.length) {
                 this._refreshEntryList();
                 query.offset = gPrefs.entriesPerPage * (this.currentPage - 1);
@@ -824,7 +820,7 @@ FeedView.prototype = {
         this._sendEvent(aEntry, 'DoRemoveEntry');
 
         // Wait until the old entry is removed and append a new one. If the current page
-        // is the last one then there may be no futher entries.
+        // is the last one then there may be no further entries.
         async(function() {
             var pageEndIndex = gPrefs.entriesPerPage * (this.currentPage - 1)
                                + gPrefs.entriesPerPage - 1;
