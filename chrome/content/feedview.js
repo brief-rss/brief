@@ -106,6 +106,11 @@ FeedView.prototype = {
     },
 
     get currentPage FeedView_currentPage_get() {
+        if (this.__currentPage > this.pageCount) {
+            // The current page may have gone out of range if the
+            // number of entries decreased.
+            this.__currentPage = this.pageCount;
+        }
         return this.__currentPage;
     },
 
@@ -749,10 +754,10 @@ FeedView.prototype = {
 
             // For better performance we try to refresh the entry list asynchronously.
             // However, sometimes we have to refresh it immediately to correctly
-            // pick the select entries to display the current page. It occurs when
-            // currentPage goes out of range, because the view contains less pages than
-            // before. The offset goes out of range too and the query returns no entries.
-            // Therefore, whenever the query returns no entries, we refresh the entry list
+            // pick entries to display the current page. It occurs when currentPage goes
+            // out of range, because the view contains less pages than before. The offset
+            // goes out of range too and the query returns no entries. Therefore,
+            // whenever the query returns no entries, we refresh the entry list
             // immediately and then redo the query.
             if (!entries.length) {
                 this._refreshEntryList();
@@ -834,7 +839,7 @@ FeedView.prototype = {
             }
 
             if (entryWasSelected)
-                this.selectEntry(nextSibling || appendedEntry || previousSibling || null);
+                this.selectEntry(nextSibling || appendedElement || previousSibling || null);
 
         }, 250, this);
     },
@@ -849,9 +854,6 @@ FeedView.prototype = {
     },
 
     _refreshPageNavUI: function FeedView__refreshPageNavUI() {
-        // The current page may go out of range if the number of entries decreases.
-        this.currentPage = Math.min(this.currentPage, this.pageCount);
-
         var prevPageButton = getElement('prev-page');
         var nextPageButton = getElement('next-page');
         prevPageButton.setAttribute('disabled', this.currentPage <= 1);
