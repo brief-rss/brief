@@ -321,12 +321,13 @@ FeedView.prototype = {
 
         var win = this.document.defaultView;
 
-        var delta = aTargetPosition - win.pageYOffset;
+        var distance = aTargetPosition - win.pageYOffset;
         with (Math) {
-            var absoluteJump = round(abs(delta) / 10);
-            absoluteJump = max(absoluteJump, 15);
-            absoluteJump = min(absoluteJump, 150);
-            var jump = (delta > 0) ? absoluteJump : -absoluteJump;
+            var jumpCount = log(abs(distance) / 100) * 8 + 2;
+            jumpCount = max(jumpCount, 7);
+            jumpCount = min(jumpCount, 20);
+
+            var jump = round(distance / jumpCount);
         }
 
         // Disallow selecting further entries until scrolling is finished.
