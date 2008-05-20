@@ -15,7 +15,7 @@
 <binding id="article-header">
     <xbl:content xmlns="http://www.w3.org/1999/xhtml">
         <div class="expand-button"/>
-        <div class="star-article" command="switchStarred"/>
+        <div class="article-star" command="star"/>
 
         <div class="article-controls">
             <div class="mark-read" command="switchRead">
@@ -240,11 +240,11 @@
                 case 'switchRead':
                     this.sendEvent('SwitchEntryRead');
                     break;
-                case 'switchStarred':
+                case 'star':
                     if (this.hasAttribute('starred'))
                         this.sendEvent('ShowBookmarkPanel');
                     else
-                        this.sendEvent('SwitchEntryStarred');
+                        this.sendEvent('StarEntry');
                     break;
                 case 'delete':
                     this.sendEvent('DeleteEntry');

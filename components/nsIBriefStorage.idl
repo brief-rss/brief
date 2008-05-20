@@ -168,6 +168,19 @@ interface nsIBriefQuery : nsISupports {
     void starEntries(in boolean state);
 
     /**
+     * The starred status of entries is automatically kept in sync with user's bookmarks
+     * by the storage service. However, there's always a possibility that it goes out of
+     * sync, for example while Brief is disabled or uninstalled. This method verifies
+     * status of the selected entries.
+     * If an entry is starred, but no bookmarks are found for its URI, then a new bookmark
+     * is added. If an entry isn't starred, but there is a bookmark for its URI, this
+     * function stars the entry. Tags are also verified.
+     *
+     * @returns TRUE if the starred status was in sync, FALSE otherwise.
+     */
+    boolean verifyEntriesStarredStatus();
+
+    /**
      * Sets the deleted state of the selected entries or removes them from the database.
      *
      * @param state The new deleted state (as defined above, near nsIBriefQuery.deleted
