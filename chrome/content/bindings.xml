@@ -401,6 +401,7 @@
                 this.value = '';
                 this.clearButton.hidden = true;
                 this.inputField.blur();
+                finishSearch();
             </body>
         </method>
 
