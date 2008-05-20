@@ -241,7 +241,10 @@
                     this.sendEvent('SwitchEntryRead');
                     break;
                 case 'switchStarred':
-                    this.sendEvent('SwitchEntryStarred');
+                    if (this.hasAttribute('starred'))
+                        this.sendEvent('ShowBookmarkPanel');
+                    else
+                        this.sendEvent('SwitchEntryStarred');
                     break;
                 case 'delete':
                     this.sendEvent('DeleteEntry');
@@ -292,10 +295,12 @@
 
                 case 'EntryTagged':
                     let changedTag = this.getAttribute('changedTag');
-                    let tags = this.getAttribute('tags').split(', ');
+                    let tags = this.getAttribute('tags');
+                    tags = tags ? tags.split(', ') : [];
 
                     if (state) {
                         tags.push(changedTag);
+                        tags.sort();
                     }
                     else {
                         let index = tags.indexOf(changedTag);

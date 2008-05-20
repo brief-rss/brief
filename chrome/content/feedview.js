@@ -159,6 +159,10 @@ FeedView.prototype = {
         }
     },
 
+    _getAnonElement: function FeedView__getAnonElement(aRoot, aAttrVal) {
+        return this.document.getAnonymousElementByAttribute(aRoot, 'class', aAttrVal);
+    },
+
     _getVisibleEntryIDs: function FeedView__getVisibleEntryIDs() {
         let pageStartIndex = gPrefs.entriesPerPage * (this.currentPage - 1);
         let pageEndIndex = pageStartIndex + gPrefs.entriesPerPage - 1;
@@ -489,8 +493,8 @@ FeedView.prototype = {
     // Events to which we listen in the template page. Entry binding communicates with
     // chrome to perform actions that require full privileges by sending custom events.
     _events: ['SwitchEntryRead', 'SwitchEntryStarred', 'ShowBookmarkPopup',
-              'DeleteEntry', 'RestoreEntry', 'EntryUncollapsed', 'click',
-              'mousedown', 'scroll', 'keypress'],
+              'DeleteEntry', 'RestoreEntry', 'EntryUncollapsed', 'ShowBookmarkPanel',
+              'click', 'mousedown', 'scroll', 'keypress'],
 
     handleEvent: function FeedView_handleEvent(aEvent) {
         var target = aEvent.target;
@@ -516,6 +520,14 @@ FeedView.prototype = {
             case 'EntryUncollapsed':
                 if (gPrefs.autoMarkRead && !this.query.unread)
                     gCommands.markEntryRead(id, true);
+                break;
+            case 'ShowBookmarkPanel':
+                let query = new Query();
+                query.entries = [id];
+                let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
+
+                let starElem = this._getAnonElement(target.firstChild, 'star-article');
+                gTopWindow.StarUI.showEditBookmarkPopup(itemID, starElem, 'after_start');
                 break;
 
             case 'load':
@@ -935,10 +947,8 @@ FeedView.prototype = {
         // Highlight search terms in the anonymous content.
         if (this.query.searchString) {
             let header = articleContainer.firstChild;
-            let tags = this.document.getAnonymousElementByAttribute(header, 'class',
-                                                                    'article-tags');
-            let authors = this.document.getAnonymousElementByAttribute(header, 'class',
-                                                                       'article-authors');
+            let tags = this._getAnonElement(header, 'article-tags');
+            let authors = this._getAnonElement(header, 'article-authors');
             let terms = this.query.searchString.match(/[A-Za-z0-9]+/g);
             for each (term in terms) {
                 this._highlightText(term, authors);
