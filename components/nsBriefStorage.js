@@ -638,10 +638,9 @@ BriefStorageService.prototype = {
         var content = aEntry.content || aEntry.summary;
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
-        // We have two types of IDs: primary and secondary. The former is used as a
-        // unique identifier at all times, while the latter is only used during updating,
-        // to work around a bug (see later). Below there are two sets of fields used to
-        // produce each of the hashes.
+        // We have two hashes: primary and secondary. The secondary hash is used to work
+        // around a bug (see later), when the feed provides no unique ID for an item.
+        // Below there are two sets of fields used to produce each of the hashes.
         var providedID = aEntry.wrappedEntry.id;
         var primarySet = providedID ? [aFeed.feedID, providedID]
                                     : [aFeed.feedID, aEntry.entryURL];
@@ -729,14 +728,9 @@ BriefStorageService.prototype = {
                 let bookmarkIDs = gBms.getBookmarkIdsForURI(uri, {});
 
                 let bm = bookmarkIDs.filter(isNormalBookmark)[0];
-                if (bm)
+                if (bm) {
                     this.starEntry(true, entryID, bm);
-
-                let filter = function(b) { isTagFolder(gBms.getFolderIdForItem(b)) };
-                for each (tagID in bookmarkIDs.filter(filter)) {
-                    let tagFolderID = gBms.getFolderIdForItem(tagID);
-                    let tagName = gBms.getItemTitle(tagFolderID);
-                    this.tagEntry(true, entryID, tagID, tagName);
+                    this.refreshTagsForEntry(entryID, bookmarkIDs);
                 }
             }
 
@@ -955,7 +949,7 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     syncWithLivemarks: function BriefStorage_syncWithLivemarks() {
-        new BookmarksSynchronizer();
+        new LivemarksSynchronizer();
     },
 
 
@@ -1017,10 +1011,13 @@ BriefStorageService.prototype = {
             var changedEntries = [];
 
             for each (entry in this.getEntriesByURL(url)) {
-                if (isTag)
-                    var changedTag = this.tagEntry(true, entry.id, aItemID, gBms.getItemTitle(aFolder));
-                else
+                if (isTag) {
+                    var tagName = gBms.getItemTitle(aFolder)
+                    this.tagEntry(true, entry.id, tagName, aItemID);
+                }
+                else {
                     this.starEntry(true, entry.id, aItemID);
+                }
 
                 changedEntries.push(entry);
             }
@@ -1035,7 +1032,7 @@ BriefStorageService.prototype = {
         if (changedEntries.length) {
             let entryIDs = changedEntries.map(function(e) e.id);
             if (isTag)
-                this.notifyOfEntriesTagged(entryIDs, true, changedTag);
+                this.notifyOfEntriesTagged(entryIDs, true, tagName);
             else
                 this.notifyOfEntriesStarred(entryIDs, true);
         }
@@ -1061,7 +1058,8 @@ BriefStorageService.prototype = {
 
             if (isTag) {
                 for each (entry in this.getEntriesByTagID(aItemID)) {
-                    var changedTag = this.tagEntry(false, entry.id, aItemID);
+                    var tagName = gBms.getItemTitle(aFolder);
+                    this.tagEntry(false, entry.id, tagName);
                     changedEntries.push(entry)
                 }
             }
@@ -1098,7 +1096,7 @@ BriefStorageService.prototype = {
         if (changedEntries.length) {
             let entryIDs = changedEntries.map(function(e) e.id);
             if (isTag)
-                this.notifyOfEntriesTagged(entryIDs, false, changedTag);
+                this.notifyOfEntriesTagged(entryIDs, false, tagName);
             else
                 this.notifyOfEntriesStarred(entryIDs, false);
         }
@@ -1177,6 +1175,13 @@ BriefStorageService.prototype = {
         }
     },
 
+    /**
+     * Sets starred status of an entry.
+     *
+     * @param aState      New state. TRUE for starred, FALSE for not starred.
+     * @param aEntryID    Subject entry.
+     * @param aBookmarkID ItemId of the corresponding bookmark in Places database.
+     */
     starEntry: function BriefStorage_starEntry(aState, aEntryID, aBookmarkID) {
         if (aState) {
             gStm.starEntry.params.bookmarkID = aBookmarkID;
@@ -1189,40 +1194,94 @@ BriefStorageService.prototype = {
         }
     },
 
-    tagEntry: function BriefStorage_tagEntry(aState, aEntryID, aTagID, aTagName) {
+    /**
+     * Adds or removes a tag for an entry.
+     *
+     * @param aState   TRUE to add the tag, FALSE to remove it.
+     * @param aEntryID Subject entry.
+     * @param aTagName Name of the tag.
+     * @param aTagID   ItemId of the tag's bookmark item in Places database. Only
+     *                 required when adding a tag.
+     */
+    tagEntry: function BriefStorage_tagEntry(aState, aEntryID, aTagName, aTagID) {
+        if (aState) {
+            gStm.tagEntry.params.entryID = aEntryID;
+            gStm.tagEntry.params.tagName = aTagName;
+            gStm.tagEntry.params.tagID = aTagID;
+            gStm.tagEntry.execute();
+        }
+        else {
+            gStm.untagEntry.params.tagName = aTagName;
+            gStm.untagEntry.execute();
+        }
+
+        // Refresh the serialized list of tags stored in entries_text table.
+        var tags = this.getTagsForEntry(aEntryID);
+        gStm.setSerializedTagList.params.tags = tags.join(', ');
+        gStm.setSerializedTagList.params.entryID = aEntryID;
+        gStm.setSerializedTagList.execute();
+    },
+
+
+    /**
+     * Refreshes tags for an entry by comparing stored tags with the current tags in the
+     * Places database. This function should only be used when the caller doesn't know
+     * which tags may have been changed, otherwise tagEntry() should be used. This
+     * function does not notify observers of any changes it makes.
+     *
+     * @param aEntryID    Entry whose tags to refresh.
+     * @param aBoookmarks Array of itemIds of bookmark items for the entry's URI.
+     * @returns An array of added tags and an array of removed tags.
+     */
+    refreshTagsForEntry: function BriefStorage_refreshTagsForEntry(aEntryID, aBookmarks) {
+        var addedTags = [];
+        var removedTags = [];
+
+        var storedTags = this.getTagsForEntry(aEntryID);
+
+        // Get the list of current tags for this entry's URI.
+        var currentTagNames = [];
+        var currentTagIDs = [];
+        for each (itemID in aBookmarks) {
+            let parent = gBms.getFolderIdForItem(itemID);
+            if (isTagFolder(parent)) {
+                currentTagIDs.push(itemID);
+                currentTagNames.push(gBms.getItemTitle(parent));
+            }
+        }
+
+        for each (tag in storedTags) {
+            if (currentTagNames.indexOf(tag) === -1) {
+                this.tagEntry(false, aEntryID, tag);
+                removedTags.push(tag);
+            }
+        }
+
+        for (let i = 0; i < currentTagNames.length; i++) {
+            let tag = currentTagNames[i];
+            if (storedTags.indexOf(tag) === -1) {
+                this.tagEntry(true, aEntryID, tag, currentTagIDs[i])
+                addedTags.push(tag);
+            }
+        }
+
+        return [addedTags, removedTags];
+    },
+
+
+    getTagsForEntry: function BriefStorage_getTagsForEntry(aEntryID) {
         try {
-            if (aState) {
-                gStm.tagEntry.params.entryID = aEntryID;
-                gStm.tagEntry.params.tagName = aTagName;
-                gStm.tagEntry.params.tagID = aTagID;
-                gStm.tagEntry.execute();
-            }
-            else {
-                gStm.getTagName.params.tagID = aTagID;
-                gStm.getTagName.step();
-                var tagName = gStm.getTagName.row.tagName
-
-                gStm.untagEntry.params.tagID = aTagID;
-                gStm.untagEntry.execute();
-            }
-
-            // Refresh the serialized list of tags stored in entries_text table.
             var tags = [];
-            gStm.getEntryTags.params.entryID = aEntryID;
-            while (gStm.getEntryTags.step())
-                tags.push(gStm.getEntryTags.row.tagName);
-
-            gStm.updateEntryTags.params.tags = tags.join(', ');
-            gStm.updateEntryTags.params.entryID = aEntryID;
-            gStm.updateEntryTags.execute();
+            gStm.getTagsForEntry.params.entryID = aEntryID;
+            while (gStm.getTagsForEntry.step())
+                tags.push(gStm.getTagsForEntry.row.tagName);
         }
         finally {
-            gStm.getEntryTags.reset();
-            gStm.getTagName.reset();
+            gStm.getTagsForEntry.reset();
         }
-
-        return aTagName || tagName;
+        return tags;
     },
+
 
     notifyOfEntriesStarred: function BriefStorage_notifyOfEntriesStarred(aEntries, aNewState) {
         var query = new BriefQuery();
@@ -1420,27 +1479,21 @@ var gStm = {
     },
 
     get untagEntry() {
-        var sql = 'DELETE FROM entry_tags WHERE tagID = :tagID';
+        var sql = 'DELETE FROM entry_tags WHERE tagName = :tagName';
         delete this.untagEntry;
         return this.untagEntry = createStatement(sql);
     },
 
-    get getEntryTags() {
+    get getTagsForEntry() {
         var sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
-        delete this.getEntryTags;
-        return this.getEntryTags = createStatement(sql);
+        delete this.getTagsForEntry;
+        return this.getTagsForEntry = createStatement(sql);
     },
 
-    get getTagName() {
-        var sql = 'SELECT tagName FROM entry_tags WHERE tagID = :tagID';
-        delete this.getTagName;
-        return this.getTagName = createStatement(sql);
-    },
-
-    get updateEntryTags() {
+    get setSerializedTagList() {
         var sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
-        delete this.updateEntryTags;
-        return this.updateEntryTags = createStatement(sql);
+        delete this.setSerializedTagList;
+        return this.setSerializedTagList = createStatement(sql);
     },
 
     get selectStarredEntries() {
@@ -1458,9 +1511,9 @@ var gStm = {
 
 /**
  * Synchronizes the list of feeds stored in the database with
- * the bookmarks available in the Brief's home folder.
+ * the livemarks available in the Brief's home folder.
  */
-function BookmarksSynchronizer() {
+function LivemarksSynchronizer() {
     if (!this.checkHomeFolder())
         return;
 
@@ -1521,7 +1574,7 @@ function BookmarksSynchronizer() {
     }
 }
 
-BookmarksSynchronizer.prototype = {
+LivemarksSynchronizer.prototype = {
 
     storedFeeds: null,
     newLivemarks: null,
@@ -2055,6 +2108,35 @@ BriefQuery.prototype = {
         transSrv.doTransaction(aggregatedTrans);
     },
 
+
+    verifyEntriesStarredStatus: function BriefQuery_verifyEntriesStarredStatus() {
+        var statusOK = true;
+
+        for each (entry in this.getFullEntries()) {
+            let uri = newURI(entry.entryURL);
+            let bookmarks = gBms.getBookmarkIdsForURI(uri, {});
+            let normalBookmarks = bookmarks.filter(isNormalBookmark)
+
+            if (!entry.starred || entry.starred && !normalBookmarks.length) {
+                let query = new BriefQuery();
+                query.entries = [entry.id];
+                query.starEntries(true);
+                statusOK = false;
+            }
+
+            let addedTags, removedTags;
+            [addedTags, removedTags] = gStorageService.refreshTagsForEntry(entry.id, bookmarks);
+
+            for each (tag in addedTags)
+                gStorageService.notifyOfEntriesTagged([entry.id], true, tag);
+            for each (tag in removedTags)
+                gStorageService.notifyOfEntriesTagged([entry.id], false, tag);
+
+            statusOK = !addedTags.length && !removedTags.length;
+        }
+
+        return statusOK;
+    },
 
     /**
      * Constructs SQL query constraints based on attributes of this nsIBriefQuery object.

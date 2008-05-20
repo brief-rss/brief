@@ -635,7 +635,11 @@ var gFeedList = {
         async(function() {
             this.refreshFeedTreeitems(aEntryList.feedIDs);
             this.refreshSpecialTreeitem('unread-folder');
-            this.refreshTagTreeitems(aEntryList.tags);
+
+            if (aEntryList.containsStarred()) {
+                this.refreshSpecialTreeitem('starred-folder');
+                this.refreshTagTreeitems(aEntryList.tags, true);
+            }
 
         }, 0, this)
     },
@@ -658,13 +662,13 @@ var gFeedList = {
             this.refreshFeedTreeitems(aEntryList.feedIDs);
             this.refreshSpecialTreeitem('unread-folder');
 
-            if (aEntryList.containsStarred())
+            if (aEntryList.containsStarred()) {
                 this.refreshSpecialTreeitem('starred-folder');
+                this.refreshTagTreeitems(aEntryList.tags);
+            }
 
             if (aEntryList.containsTrashed())
                 this.refreshSpecialTreeitem('trash-folder');
-
-            this.refreshTagTreeitems(aEntryList.tags);
 
         }, 0, this)
     },

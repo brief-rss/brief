@@ -492,9 +492,9 @@ FeedView.prototype = {
 
     // Events to which we listen in the template page. Entry binding communicates with
     // chrome to perform actions that require full privileges by sending custom events.
-    _events: ['SwitchEntryRead', 'SwitchEntryStarred', 'ShowBookmarkPopup',
-              'DeleteEntry', 'RestoreEntry', 'EntryUncollapsed', 'ShowBookmarkPanel',
-              'click', 'mousedown', 'scroll', 'keypress'],
+    _events: ['SwitchEntryRead', 'StarEntry', 'ShowBookmarkPopup', 'DeleteEntry',
+              'RestoreEntry', 'EntryUncollapsed', 'ShowBookmarkPanel', 'click',
+              'mousedown', 'scroll', 'keypress'],
 
     handleEvent: function FeedView_handleEvent(aEvent) {
         var target = aEvent.target;
@@ -504,8 +504,7 @@ FeedView.prototype = {
 
             // Forward commands from the view to the controller.
             case 'SwitchEntryRead':
-                var newState = !target.hasAttribute('read');
-                gCommands.markEntryRead(id, newState);
+                gCommands.markEntryRead(id, !target.hasAttribute('read'));
                 break;
             case 'DeleteEntry':
                 gCommands.deleteEntry(id);
@@ -513,20 +512,22 @@ FeedView.prototype = {
             case 'RestoreEntry':
                 gCommands.restoreEntry(id);
                 break;
-            case 'SwitchEntryStarred':
-                var newState = !target.hasAttribute('starred');
-                gCommands.starEntry(id, newState);
+            case 'StarEntry':
+                gCommands.starEntry(id, true);
                 break;
+
             case 'EntryUncollapsed':
                 if (gPrefs.autoMarkRead && !this.query.unread)
                     gCommands.markEntryRead(id, true);
                 break;
+
             case 'ShowBookmarkPanel':
                 let query = new Query();
                 query.entries = [id];
+                query.verifyEntriesStarredStatus();
                 let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
 
-                let starElem = this._getAnonElement(target.firstChild, 'star-article');
+                let starElem = this._getAnonElement(target.firstChild, 'article-star');
                 gTopWindow.StarUI.showEditBookmarkPopup(itemID, starElem, 'after_start');
                 break;
 
