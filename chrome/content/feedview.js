@@ -715,6 +715,9 @@ FeedView.prototype = {
      *                       In practice, it is used when switching pages.
      */
     refresh: function FeedView_refresh(aEntrySetValid) {
+        if (!this.isActive)
+            return;
+
         // Stop scrolling.
         clearInterval(this._smoothScrollInterval);
         this._smoothScrollInterval = null;
