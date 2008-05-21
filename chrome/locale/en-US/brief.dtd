@@ -36,3 +36,5 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
 <!ENTITY compactingWindow.title "Compacting feeds">
 <!ENTITY compactingInProgress.label "Brief is compacting stored feeds. This may take a few minutes...">
+<!ENTITY migrationProgress.title "Migrating feeds">
+<!ENTITY migrationProgress.description "Brief is migrating stored feeds...">
