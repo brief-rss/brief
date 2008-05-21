@@ -257,7 +257,6 @@ BriefStorageService.prototype = {
 
         // To 1.2a1
         case 4:
-            this.recreateFeedsTable();
             this.recomputeIDs();
             executeSQL('ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
             // Fall through...
@@ -269,7 +268,7 @@ BriefStorageService.prototype = {
 
         // To 1.2b2
         case 6:
-            executeSQL('ALTER TABLE feeds ADD COLUMN markModifiedEntriesUnread INTEGER DEFAULT 1');
+            this.recreateFeedsTable();
             // Fall through...
 
         // To 1.2b3
@@ -286,21 +285,23 @@ BriefStorageService.prototype = {
     recreateFeedsTable: function BriefStorage_recreateFeedsTable() {
         // Columns in this list must be in the same order as the respective columns
         // in the new schema.
-        const OLD_COLUMNS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,    ' +
-                            'imageLink, imageTitle, favicon, RDF_URI, rowIndex, parent, ' +
-                            'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   ' +
-                            'entryAgeLimit, maxEntries, updateInterval, dateModified    ';
+        const OLD_COLS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,    '+
+                         'imageLink, imageTitle, favicon, RDF_URI, rowIndex, parent, '+
+                         'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   '+
+                         'entryAgeLimit, maxEntries, updateInterval                  ';
+        const NEW_COLS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,       '+
+                         'imageLink, imageTitle, favicon, bookmarkID, rowIndex, parent, '+
+                         'isFolder, hidden, lastUpdated, oldestEntryDate,               '+
+                         'entryAgeLimit, maxEntries, updateInterval                     ';
 
         gConnection.beginTransaction();
         try {
-            executeSQL('ALTER TABLE feeds ADD COLUMN dateModified INTEGER DEFAULT 0');
-
-            executeSQL('CREATE TABLE feeds_copy (' + OLD_COLUMNS + ')');
-            executeSQL('INSERT INTO feeds_copy SELECT ' + OLD_COLUMNS + ' FROM feeds');
-            executeSQL('DROP TABLE feeds');
-            executeSQL('CREATE TABLE feeds (' + FEEDS_TABLE_SCHEMA + ')');
-            executeSQL('INSERT INTO feeds SELECT * FROM feeds_copy');
-            executeSQL('DROP TABLE feeds_copy');
+            executeSQL('CREATE TABLE feeds_copy ('+OLD_COLS+')                               ');
+            executeSQL('INSERT INTO feeds_copy SELECT '+OLD_COLS+' FROM feeds                ');
+            executeSQL('DROP TABLE feeds                                                     ');
+            executeSQL('CREATE TABLE feeds ('+FEEDS_TABLE_SCHEMA+')                          ');
+            executeSQL('INSERT INTO feeds ('+NEW_COLS+') SELECT '+OLD_COLS+' FROM feeds_copy ');
+            executeSQL('DROP TABLE feeds_copy                                                ');
         }
         catch (ex) {
             reportError(ex, true);
@@ -324,8 +325,8 @@ BriefStorageService.prototype = {
             executeSQL('DROP TABLE entries');
 
             // This will recreate the entries table and its indices.
-            executeSQL('CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA + ')');
-            executeSQL('CREATE VIRTUAL TABLE entries_text using fts3(' + ENTRIES_TEXT_TABLE_SCHEMA + ')');
+            executeSQL('CREATE TABLE IF NOT EXISTS entries (' + NEW_COLUMNS + ')');
+            executeSQL('CREATE VIRTUAL TABLE entries_text using fts3(title, content)');
             executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
             executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
 
@@ -457,7 +458,7 @@ BriefStorageService.prototype = {
                        'WHERE rowid IN (                                                  ' +
                        '   SELECT entries.rowid                                           ' +
                        '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                       '   WHERE entries.date >= feeds.oldestEntryDate AND                ' +
+                       '   WHERE entries.date >= feeds.oldestAvailableEntryDate AND       ' +
                        '         entries.providedID != ""                                 ' +
                        ')                                                                 ');
             executeSQL('UPDATE OR IGNORE feeds SET feedID = hashString(feedURL) WHERE isFolder = 0');
