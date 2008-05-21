@@ -340,6 +340,7 @@ function loadHomeview() {
         browser.loadURI(RELEASE_NOTES_URL);
         gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
 
+        getElement('feed-view-toolbar').hidden = true;
         gFeedView = view; // Set the view without attaching it.
     }
     else {
