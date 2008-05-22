@@ -1212,6 +1212,7 @@ BriefStorageService.prototype = {
             gStm.tagEntry.execute();
         }
         else {
+            gStm.untagEntry.params.entryID = aEntryID;
             gStm.untagEntry.params.tagName = aTagName;
             gStm.untagEntry.execute();
         }
@@ -1480,7 +1481,7 @@ var gStm = {
     },
 
     get untagEntry() {
-        var sql = 'DELETE FROM entry_tags WHERE tagName = :tagName';
+        var sql = 'DELETE FROM entry_tags WHERE entryID = :entryID AND tagName = :tagName';
         delete this.untagEntry;
         return this.untagEntry = createStatement(sql);
     },
@@ -2109,7 +2110,7 @@ BriefQuery.prototype = {
         transSrv.doTransaction(aggregatedTrans);
     },
 
-
+    // nsIBriefQuery
     verifyEntriesStarredStatus: function BriefQuery_verifyEntriesStarredStatus() {
         var statusOK = true;
 
@@ -2145,7 +2146,7 @@ BriefQuery.prototype = {
      * @param aForSelect      Build a string optimized for a SELECT statement.
      * @param aGetFullEntries Forces including entries_text table (otherwise, it is
      *                        included only when it is used by the query constraints).
-     * @returns String containing the part of an SQL statement after the WHERE clause.
+     * @returns String containing the part of an SQL statement after WHERE clause.
      */
     getQueryString: function BriefQuery_getQueryString(aForSelect, aGetFullEntries) {
         var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
@@ -2161,8 +2162,6 @@ BriefQuery.prototype = {
 
         if (this.tags)
             text += ' INNER JOIN entry_tags ON entries.id = entry_tags.entryID ';
-
-        text += ' WHERE ';
 
         var constraints = [];
 
@@ -2223,10 +2222,8 @@ BriefQuery.prototype = {
         if (!this.includeHiddenFeeds && !this.feeds)
             constraints.push('feeds.hidden = 0');
 
-        text += constraints.join(' AND ') + ' ';
-
-        // We may end up with a dangling WHERE if the are no contraints.
-        text = text.replace(/WHERE $/, '');
+        if (constraints.length)
+            text += ' WHERE ' + constraints.join(' AND ') + ' ';
 
         if (this.sortOrder != nsIBriefQuery.NO_SORT) {
             switch (this.sortOrder) {
