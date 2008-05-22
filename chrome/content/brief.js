@@ -1,9 +1,9 @@
 const EXT_ID = 'brief@mozdev.org';
 
-const TEMPLATE_FILENAME = 'feedview-template.html';
 const CUSTOM_STYLE_FILENAME = 'brief-custom-style.css';
 const EXAMPLE_CUSTOM_STYLE_FILENAME = 'example-custom-style.css';
 const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
+const TEMPLATE_URL = 'resource://brief-content/feedview-template.html';
 
 const LAST_MAJOR_VERSION = '1.2';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
@@ -21,14 +21,27 @@ const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
-var gTopWindow = null;
-var gTemplateURI = null;
+__defineGetter__('gTemplateURI', function() {
+    delete this.gTemplateURI;
+    return this.gTemplateURI = Cc['@mozilla.org/network/io-service;1'].
+                               getService(Ci.nsIIOService).
+                               newURI(TEMPLATE_URL, null, null);
+});
+__defineGetter__('gTopWindow', function() {
+    delete this.gTopWindow;
+    return this.gTopWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
+                                    getInterface(Ci.nsIWebNavigation).
+                                    QueryInterface(Ci.nsIDocShellTreeItem).
+                                    rootTreeItem.
+                                    QueryInterface(Ci.nsIInterfaceRequestor).
+                                    getInterface(Ci.nsIDOMWindow);
+});
 
 
 function init() {
     gPrefs.register();
 
-    initTemplateFile();
+    initCustomCSSFile();
 
     if (gPrefs.homeFolder) {
         // Initiate the feed list (asynchronously, so that the window is displayed sooner).
@@ -38,13 +51,6 @@ function init() {
     else {
         showHomeFolderPicker();
     }
-
-    gTopWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
-                        getInterface(Ci.nsIWebNavigation).
-                        QueryInterface(Ci.nsIDocShellTreeItem).
-                        rootTreeItem.
-                        QueryInterface(Ci.nsIInterfaceRequestor).
-                        getInterface(Ci.nsIDOMWindow);
 
     initToolbarsAndStrings();
 
@@ -71,32 +77,31 @@ function init() {
 }
 
 
-function initTemplateFile() {
-    var dataDir = Cc['@mozilla.org/extensions/manager;1'].
-                  getService(Ci.nsIExtensionManager).
-                  getInstallLocation(EXT_ID).
-                  getItemLocation(EXT_ID);
-    dataDir.append('defaults');
-    dataDir.append('data');
-
-    // Get the URI of the template file.
-    var templateFile = dataDir.clone();
-    templateFile.append(TEMPLATE_FILENAME);
-    gTemplateURI = Cc['@mozilla.org/network/protocol;1?name=file'].
-                   getService(Ci.nsIFileProtocolHandler).
-                   newFileURI(templateFile);
-
-    // Put the custom CSS file in %PROFILE_DIR%/chrome.
+function initCustomCSSFile() {
     var chromeDir = Cc['@mozilla.org/file/directory_service;1'].
                     getService(Ci.nsIProperties).
                     get('ProfD', Ci.nsIFile);
     chromeDir.append('chrome');
+
+    // Register %profile%/chrome directory under a resource URI.
+    var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+    var chromeDirURI = ioService.newFileURI(chromeDir);
+    var resourceProtocol = ioService.getProtocolHandler('resource').
+                                     QueryInterface(Ci.nsIResProtocolHandler);
+    resourceProtocol.setSubstitution('profile-chrome-dir', chromeDirURI);
+
+    // If the custom CSS file doesn't exist, create it by copying the example file.
     var customStyleFile = chromeDir.clone();
     customStyleFile.append(CUSTOM_STYLE_FILENAME);
     if (!customStyleFile.exists()) {
-        var defaultCustomStyle = dataDir;
-        defaultCustomStyle.append(EXAMPLE_CUSTOM_STYLE_FILENAME);
-        defaultCustomStyle.copyTo(chromeDir, CUSTOM_STYLE_FILENAME);
+        var exampleCustomStyle = Cc['@mozilla.org/extensions/manager;1'].
+                                 getService(Ci.nsIExtensionManager).
+                                 getInstallLocation(EXT_ID).
+                                 getItemLocation(EXT_ID);
+        exampleCustomStyle.append('defaults');
+        exampleCustomStyle.append('data');
+        exampleCustomStyle.append(EXAMPLE_CUSTOM_STYLE_FILENAME);
+        exampleCustomStyle.copyTo(chromeDir, CUSTOM_STYLE_FILENAME);
     }
 }
 
