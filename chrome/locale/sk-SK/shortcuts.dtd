@@ -1,12 +1,8 @@
 <!ENTITY shortcutsPage.title "Brief - klávesové skratky">
 <!ENTITY navigation.header "Navigácia">
-<!ENTITY k.key "K">
 <!ENTITY or "alebo">
 <!ENTITY space.key "Space">
-<!ENTITY selectNext "Vybrať ďalšiu položku">
-<!ENTITY j.key "J">
 <!ENTITY backspace.key "Backspace">
-<!ENTITY selectPrevious "Vybrať predchádzajúcu položku">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "Zobraziť ďalšiu stranu">
 <!ENTITY altJ.key "Alt + J">
@@ -16,33 +12,20 @@
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
 <!ENTITY cmdEnter.key "Cmd + Enter">
 <!ENTITY openEntryTab "Otvoriť položku na novej karte">
-<!ENTITY n.key "N">
 <!ENTITY foldEntry "Nezahrnúť alebo zahrnúť zvolenú položku (pri náhľade titulky)">
 <!ENTITY entries.header "Položka">
-<!ENTITY m.key "M">
 <!ENTITY markRead "Označiť zvolenú položku ako prečítanú alebo neprečítanú">
-<!ENTITY b.key "B">
 <!ENTITY starEntry "Zvolená položka s hviezdičkou alebo bez">
-<!ENTITY t.key "T">
 <!ENTITY moveToTrash "Presunúť zvolenú položku do Koša">
-<!ENTITY r.key "R">
 <!ENTITY restoreEntry "Obnoviť zvolenú položku (keď je v Koši)">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Označiť všetky zobrazené položky ako prečítané">
-<!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
-<!ENTITY deselectEntries "Odznačiť položky">
 <!ENTITY view.header "Zobraziť">
-<!ENTITY a.key "A">
 <!ENTITY showAll "Zobraziť všetky položky">
-<!ENTITY s.key "S">
 <!ENTITY showStarred "Zobraziť položky s hviezdičkou">
-<!ENTITY d.key "D">
 <!ENTITY showUnread "Zobraziť neprečítané položky">
-<!ENTITY f.key "F">
 <!ENTITY headlinesView "Prepnúť náhľad tituliek">
-<!ENTITY slash.key "/">
 <!ENTITY focusSearchbar "Zamerať vyhľadávací panel">
-<!ENTITY questionMark.key "?">
 <!ENTITY displayShortcuts "Zobraziť zoznam klávesových skratiek">

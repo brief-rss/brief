@@ -10,8 +10,7 @@
 <!ENTITY stopUpdatingButton.tooltip "Przerwij aktualizowanie kanałów">
 <!ENTITY searchScopeButton.tooltip "Określ zakres wyszukiwania">
 <!ENTITY showOptions.tooltip "Otwórz opcje rozszerzenia">
-<!ENTITY markAllRead.label "Przeczytane">
-<!ENTITY markViewRead.tooltip "Oznacz wszystkie wiadomości jako przeczytane">
+<!ENTITY markViewRead.tooltip "Oznacza wszystkie wiadomości jako przeczytane (z wciśniętym klawiszem Ctrl tylko wiadomości na aktywnej stronie)">
 <!ENTITY viewConstraintList.tooltip "Wybierz typ wiadomości do wyświetlenia">
 <!ENTITY previousPage.tooltip "Wyświetl nowsze wiadomości">
 <!ENTITY nextPage.tooltip "Wyświetl starsze wiadomości">

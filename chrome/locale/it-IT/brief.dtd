@@ -1,8 +1,6 @@
-<!ENTITY selectHomeFolder.label "Selezionare la cartella contenente i segnalibri Live:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Attualmente visti">
 <!ENTITY searchAllFeeds.label "Tutti i feed">
-<!ENTITY headlinesCheckbox.tooltip "Attiva/disattiva la visualizzazione delle anteprime">
 <!ENTITY showAll.label "Mostra tutti">
 <!ENTITY showUnread.label "Mostra non letti">
 <!ENTITY showStarred.label "Mostra segnati con stella">
@@ -10,8 +8,6 @@
 <!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
 <!ENTITY searchScopeButton.tooltip "Cambia l&apos;ambito della ricerca ">
 <!ENTITY showOptions.tooltip "Opzioni...">
-<!ENTITY markAllRead.label "Segna tutti come letti">
-<!ENTITY markViewRead.tooltip "Segna elementi attualmente visti come letti">
 <!ENTITY viewConstraintList.tooltip "Seleziona il tipo di elementi da visualizzare">
 <!ENTITY previousPage.tooltip "Mostra pagina precedente">
 <!ENTITY nextPage.tooltip "Mostra pagina successiva">

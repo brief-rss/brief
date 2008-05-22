@@ -1,58 +1,64 @@
-<!ENTITY optionsWindow.title "Opções Brief">
+<!ENTITY optionsWindow.title "Opções do Brief">
 <!ENTITY mainPane.label "Principal">
-<!ENTITY folderTree.label "Pasta contendo seus Favoritos Dinâmicos:">
-<!ENTITY showStatusbarIcon.label "Exibir ícones na barra de estatus">
-
-<!ENTITY openInNewTab.label "Abrir Brief em nova aba">
-
+<!ENTITY folderTree.label "Pasta que contém seus feeds favoritos:">
+<!ENTITY importOPML.label "Importar...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportar...">
+<!ENTITY exportOPML.accesskey "x">
+<!ENTITY showStatusbarIcon.label "Mostrar ícone na barra de status">
+<!ENTITY showStatusbarIcon.accesskey "c">
+<!ENTITY openInNewTab.label "Abrir o Brief em nova aba">
+<!ENTITY openInNewTab.accesskey "A">
 <!ENTITY feedsPane.label "Feeds">
-<!ENTITY updateGroup.caption "Atualizando">
-<!ENTITY checkForUpdatesBefore.label "Verificar feeds para atualização a cada">
-
+<!ENTITY updateGroup.caption "Atualização">
+<!ENTITY checkForUpdatesBefore.label "Verificar se há atualizações a cada">
+<!ENTITY checkForUpdates.accesskey "V">
 <!ENTITY updateIntervalMinutes.label "minutos">
 <!ENTITY updateIntervalHours.label "horas">
 <!ENTITY updateIntervalDays.label "dias">
 <!ENTITY checkForUpdatesAfter.label "minutos">
-<!ENTITY showNotification.label "Exibir notificação quando houver atualizações disponíveis">
-
+<!ENTITY showNotification.label "Mostrar notificação quando houver atualizações">
+<!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "Comportamento">
-<!ENTITY openEntriesInTabs.label "Abrir itens em novas abas">
-
-<!ENTITY doubleClickMarks.label "Marcar itens como lidos ao dar duplo clique neles">
-
-<!ENTITY storingGroup.caption "Armazenando">
-<!ENTITY expirationBefore.label "Excluir itens baixados depois de">
+<!ENTITY openEntriesInTabs.label "Abrir itens em nova aba">
+<!ENTITY openEntriesInTabs.accesskey "b">
+<!ENTITY autoMarkRead.label "Marcar itens como lidos quando forem visualizados">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY storingGroup.caption "Armazenamento">
+<!ENTITY expirationBefore.label "Remover itens recebidos após">
 <!ENTITY expirationAfter.label "dias">
-
-
-<!ENTITY storedEntriesBefore.label "Armazenar no máximo">
-<!ENTITY storedEntriesAfter.label "últimos itens de cada fonte">
-
-<!ENTITY clearAllEntriesButton.label "Limpar todos os Ítens">
-
-<!ENTITY displayPane.label "Exibição">
-
-<!ENTITY authorsCheckbox.label "Exibir os autores dos itens">
-
-<!ENTITY entriesPerPageBefore.label "Exibir">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "Itens com estrela serão mantidos">
+<!ENTITY storedEntriesBefore.label "Armazenar apenas os">
+<!ENTITY storedEntriesAfter.label "itens mais recentes por feed">
+<!ENTITY storedEntriesCheckbox.accesskey "z">
+<!ENTITY clearAllEntriesButton.label "Limpar todos os itens...">
+<!ENTITY clearAllEntriesButton.accesskey "L">
+<!ENTITY displayPane.label "Exibir">
+<!ENTITY feedViewGroup.caption "Visualização do conteúdo do feed">
+<!ENTITY authorsCheckbox.label "Mostrar autores dos itens">
+<!ENTITY authorsCheckbox.accesskey "u">
+<!ENTITY entriesPerPageBefore.label "Mostrar">
 <!ENTITY entriesPerPageAfter.label "itens por página">
-<!ENTITY enableCustomStyle.label "Usar estilo personalizado para conteúdo do feed">
-
+<!ENTITY entriesPerPage.accesskey "o">
+<!ENTITY enableCustomStyle.label "Usar estilo personalizado:">
+<!ENTITY enableCustomStyle.accesskey "s">
 <!ENTITY browseCustomStyle.label "Procurar">
-
-
-
-
-
-
+<!ENTITY browseCustomStyle.accesskey "P">
+<!ENTITY showShortcuts.label "Mostrar atalhos do teclado">
+<!ENTITY showShortcuts.accesskey "t">
 <!ENTITY feedName.label "Nome">
-<!ENTITY feedURL.label "Caminho">
-<!ENTITY optionsGroupbox.caption "Configurações da Fontes">
-<!ENTITY checkUpdatesPerFeedBefore.label "Verificar atualizações a cada">
-
-<!ENTITY expireEntriesPerFeedBefore.label "Excluir ítens baixados depois de">
-
+<!ENTITY feedURL.label "Endereço">
+<!ENTITY optionsGroupbox.caption "Configurações do feed">
+<!ENTITY checkUpdatesPerFeedBefore.label "Verificar se há atualizações a cada">
+<!ENTITY checkUpdatesPerFeed.accesskey "V">
+<!ENTITY expireEntriesPerFeedBefore.label "Remover itens recebidos após">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "dias">
-<!ENTITY maxEntriesPerFeedBefore.label "Armazenar no máximo">
-
-<!ENTITY maxEntriesPerFeedAfter.label "últimos ítens">
+<!ENTITY maxEntriesPerFeedBefore.label "Armazenar apenas os">
+<!ENTITY maxEntriesPerFeed.accesskey "z">
+<!ENTITY maxEntriesPerFeedAfter.label "itens mais recentes">
+<!ENTITY previousFeed.label "&lt; Anterior">
+<!ENTITY previousFeed.accesskey "A">
+<!ENTITY nextFeed.label "Próximo &gt;">
+<!ENTITY nextFeed.accesskey "P">

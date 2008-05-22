@@ -1,0 +1,64 @@
+<!ENTITY optionsWindow.title "Briefin asetukset">
+<!ENTITY mainPane.label "Yleiset">
+<!ENTITY folderTree.label "Kansio, johon live-kirjanmerkit on tallennettu:">
+<!ENTITY importOPML.label "Tuo...">
+<!ENTITY importOPML.accesskey "T">
+<!ENTITY exportOPML.label "Vie...">
+<!ENTITY exportOPML.accesskey "V">
+<!ENTITY showStatusbarIcon.label "Näytä kuvake tilarivillä">
+<!ENTITY showStatusbarIcon.accesskey "N">
+<!ENTITY openInNewTab.label "Avaa Brief uuteen välilehteen">
+<!ENTITY openInNewTab.accesskey "A">
+<!ENTITY feedsPane.label "Syöte">
+<!ENTITY updateGroup.caption "Päivitykset">
+<!ENTITY checkForUpdatesBefore.label "Tarkistusväli syötteiden päivityksille:">
+<!ENTITY checkForUpdates.accesskey "T">
+<!ENTITY updateIntervalMinutes.label "minuuttia">
+<!ENTITY updateIntervalHours.label "tuntia">
+<!ENTITY updateIntervalDays.label "päivää">
+<!ENTITY checkForUpdatesAfter.label "minuuttia">
+<!ENTITY showNotification.label "Näytä ilmoitus päivittyneistä syötteistä">
+<!ENTITY showNotification.accesskey "N">
+<!ENTITY behaviorGroup.caption "Toimintatapa">
+<!ENTITY openEntriesInTabs.label "Avaa merkinnät uuteen välilehteen">
+<!ENTITY openEntriesInTabs.accesskey "A">
+<!ENTITY autoMarkRead.label "Merkinnän avaus merkitsee sen luetuksi">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY storingGroup.caption "Merkintöjen säilytys">
+<!ENTITY expirationBefore.label "Poista ladatut merkinnät">
+<!ENTITY expirationAfter.label "päivän jälkeen">
+<!ENTITY expirationCheckbox.accesskey "P">
+<!ENTITY starredItemsKept.tooltip "Säilytä tähdellä merkityt">
+<!ENTITY storedEntriesBefore.label "Säilytä syötteestä enintään">
+<!ENTITY storedEntriesAfter.label "merkintää">
+<!ENTITY storedEntriesCheckbox.accesskey "S">
+<!ENTITY clearAllEntriesButton.label "Poista kaikki merkinnät...">
+<!ENTITY clearAllEntriesButton.accesskey "o">
+<!ENTITY displayPane.label "Esitys">
+<!ENTITY feedViewGroup.caption "Syötteen esitystapa">
+<!ENTITY authorsCheckbox.label "Näytä merkinnän kirjoittaja">
+<!ENTITY authorsCheckbox.accesskey "N">
+<!ENTITY entriesPerPageBefore.label "Yhdellä sivulla on">
+<!ENTITY entriesPerPageAfter.label "merkintää">
+<!ENTITY entriesPerPage.accesskey "Y">
+<!ENTITY enableCustomStyle.label "Käytä tyylitiedostoa:">
+<!ENTITY enableCustomStyle.accesskey "K">
+<!ENTITY browseCustomStyle.label "Selaa">
+<!ENTITY browseCustomStyle.accesskey "S">
+<!ENTITY showShortcuts.label "Näytä näppäinkomennot">
+<!ENTITY showShortcuts.accesskey "p">
+<!ENTITY feedName.label "Nimi">
+<!ENTITY feedURL.label "Osoite">
+<!ENTITY optionsGroupbox.caption "Syötteen asetukset">
+<!ENTITY checkUpdatesPerFeedBefore.label "Tarkistusväli päivityksille">
+<!ENTITY checkUpdatesPerFeed.accesskey "T">
+<!ENTITY expireEntriesPerFeedBefore.label "Poista ladatut merkinnät">
+<!ENTITY expireEntriesPerFeed.accesskey "P">
+<!ENTITY expireEntriesPerFeedAfter.label "päivän jälkeen">
+<!ENTITY maxEntriesPerFeedBefore.label "Säilytä enintään">
+<!ENTITY maxEntriesPerFeed.accesskey "S">
+<!ENTITY maxEntriesPerFeedAfter.label "viimeistä merkintää">
+<!ENTITY previousFeed.label "&lt; Edellinen">
+<!ENTITY previousFeed.accesskey "E">
+<!ENTITY nextFeed.label "Seuraava &gt;">
+<!ENTITY nextFeed.accesskey "S">

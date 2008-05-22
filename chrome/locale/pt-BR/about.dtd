@@ -1,8 +1,10 @@
 <!ENTITY createdBy.headline "Criado por">
-<!ENTITY homepage.label "Visite Página">
+<!ENTITY homepage.label "Visitar o site">
 <!ENTITY contributors.headline "Colaboradores">
 <!ENTITY credits.headline "Créditos">
 <!ENTITY translators.headline "Tradutores">
-<!ENTITY extdevThanks.paragraph "Obrigado a todas as grandes pessoas do #extdev no irc.mozilla.org">
-<!ENTITY iconsThanks.paragraph "Alguns dos ícones são cortesia do talentoso Arvid Axelsson.">
+<!ENTITY extdevThanks.paragraph "Obrigado a todas as pessoas do #extdev na irc.mozilla.org:">
+<!ENTITY iconsThanks.paragraph "Alguns dos ícones foram cortesia do talentoso Arvid Axelsson.">
 <!ENTITY testingThanks.paragraph "Obrigado a Stefan Plewako por testar.">
+<!ENTITY keyboardIconsCredit.paragraph "Ícones de teclado por Alan Who? - http://alanwho.com/">
+<!ENTITY toolbarIconsCredits.paragraph "Alguns dos ícones da barra de ferramentas foram feitos como parte do Tango Desktop Project">

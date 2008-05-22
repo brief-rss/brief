@@ -1,12 +1,8 @@
 <!ENTITY shortcutsPage.title "Brief - 快捷鍵">
 <!ENTITY navigation.header "瀏覽">
-<!ENTITY k.key "K">
 <!ENTITY or "或">
 <!ENTITY space.key "空白鍵">
-<!ENTITY selectNext "選取下一項">
-<!ENTITY j.key "J">
 <!ENTITY backspace.key "退位鍵">
-<!ENTITY selectPrevious "選取上一項">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "顯示下一頁">
 <!ENTITY altJ.key "Alt + J">
@@ -16,33 +12,20 @@
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
 <!ENTITY cmdEnter.key "Cmd + Enter">
 <!ENTITY openEntryTab "在新分頁中開啟項目">
-<!ENTITY n.key "N">
 <!ENTITY foldEntry "在只顯示標題時，展開或收褶起所選的項目。">
 <!ENTITY entries.header "項目">
-<!ENTITY m.key "M">
-<!ENTITY markRead "所選項目標為已讀或未讀">
-<!ENTITY b.key "B">
-<!ENTITY starEntry "在所選項目上標記星號或移除星號">
-<!ENTITY t.key "T">
-<!ENTITY moveToTrash "所選項目移至垃圾桶">
-<!ENTITY r.key "R">
-<!ENTITY restoreEntry "還原垃圾桶中所選項目">
+<!ENTITY markRead "將所選的項目標為已讀或未讀">
+<!ENTITY starEntry "在所選的項目上標記星號或移除星號">
+<!ENTITY moveToTrash "將所選的項目移至垃圾桶">
+<!ENTITY restoreEntry "還原垃圾桶中所選的項目">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "所見項目全標為已讀">
-<!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
-<!ENTITY deselectEntries "取消選取項目">
 <!ENTITY view.header "顯示">
-<!ENTITY a.key "A">
 <!ENTITY showAll "顯示所有項目">
-<!ENTITY s.key "S">
 <!ENTITY showStarred "顯示星號項目">
-<!ENTITY d.key "D">
 <!ENTITY showUnread "顯示未讀項目">
-<!ENTITY f.key "F">
 <!ENTITY headlinesView "切換是否要只顯示標題">
-<!ENTITY slash.key "/">
 <!ENTITY focusSearchbar "游標移至搜尋列">
-<!ENTITY questionMark.key "?">
 <!ENTITY displayShortcuts "顯示快捷鍵列表">

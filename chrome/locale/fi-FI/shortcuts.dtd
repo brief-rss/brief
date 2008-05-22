@@ -1,0 +1,31 @@
+<!ENTITY shortcutsPage.title "Brief - näppäinkomennot">
+<!ENTITY navigation.header "Siirtyminen">
+<!ENTITY or "tai">
+<!ENTITY space.key "välilyönti">
+<!ENTITY backspace.key "askelpalautin">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "Siirry seuraavalle sivulle">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Siirry edelliselle sivulle">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Avaa merkintä">
+<!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY cmdEnter.key "Komento + Enter">
+<!ENTITY openEntryTab "Avaa merkintä uuteen välilehteen">
+<!ENTITY foldEntry "Laajenna tai supista valittu merkintä (otsikkonäkymässä)">
+<!ENTITY entries.header "Syötemerkinnät">
+<!ENTITY markRead "Merkitse valittu merkintä luetuksi tai lukematta olevaksi">
+<!ENTITY starEntry "Merkitse valittu merkintä tähdellä tai poista tähti">
+<!ENTITY moveToTrash "Siirrä valittu merkintä roskakoriin">
+<!ENTITY restoreEntry "Palauta valittu merkintä (roskakorista)">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY cmdM.key "Komento + M">
+<!ENTITY markAllAsRead "Merkitse kaikki merkinnät luetuiksi">
+<!ENTITY tab.key "sarkain">
+<!ENTITY view.header "Merkintöjen näyttö">
+<!ENTITY showAll "Näytä kaikki merkinnät">
+<!ENTITY showStarred "Näytä tähdellä merkityt">
+<!ENTITY showUnread "Näytä lukematta olevat merkinnät">
+<!ENTITY headlinesView "Ota käyttöön tai poista otsikkonäkymä käytöstä">
+<!ENTITY focusSearchbar "Valitse hakupalkki">
+<!ENTITY displayShortcuts "Näytä listä näppäinkomennoista">

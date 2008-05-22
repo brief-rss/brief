@@ -1,12 +1,8 @@
 <!ENTITY shortcutsPage.title "Brief — клавиатурные сокращения">
 <!ENTITY navigation.header "Навигация">
-<!ENTITY k.key "K">
 <!ENTITY or "или">
 <!ENTITY space.key "Пробел">
-<!ENTITY selectNext "Выбрать следующую запись">
-<!ENTITY j.key "J">
 <!ENTITY backspace.key "Backspace">
-<!ENTITY selectPrevious "Выбрать предыдущую запись">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "Показать следующую страницу">
 <!ENTITY altJ.key "Alt + J">
@@ -16,33 +12,20 @@
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
 <!ENTITY cmdEnter.key "Cmd + Enter">
 <!ENTITY openEntryTab "Открыть запись в новой вкладке">
-<!ENTITY n.key "N">
 <!ENTITY foldEntry "Свернуть/развернуть выделенную запись (в режиме просмотра заголовков)">
 <!ENTITY entries.header "Записи">
-<!ENTITY m.key "M">
 <!ENTITY markRead "Отметить выделенную запись (не)прочитанной">
-<!ENTITY b.key "B">
-<!ENTITY starEntry "Добавить пометку">
-<!ENTITY t.key "T">
+<!ENTITY starEntry "Добавить/снять пометку">
 <!ENTITY moveToTrash "Переместить запись в Корзину">
-<!ENTITY r.key "R">
 <!ENTITY restoreEntry "Восстановить запись (в Корзине)">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Отметить все просмотренные записи как прочитанные">
-<!ENTITY q.key "Q">
 <!ENTITY tab.key "Tab">
-<!ENTITY deselectEntries "Отменить выделение записей">
 <!ENTITY view.header "Вид">
-<!ENTITY a.key "A">
 <!ENTITY showAll "Показать все записи">
-<!ENTITY s.key "S">
 <!ENTITY showStarred "Показать помеченные записи">
-<!ENTITY d.key "D">
 <!ENTITY showUnread "Показать непрочитанные записи">
-<!ENTITY f.key "F">
 <!ENTITY headlinesView "Переключить вид заголовков">
-<!ENTITY slash.key "/">
 <!ENTITY focusSearchbar "Переместить фокус в строку поиска">
-<!ENTITY questionMark.key "?">
 <!ENTITY displayShortcuts "Показывать список клавиатурных сокращений">

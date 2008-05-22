@@ -1,8 +1,6 @@
-<!ENTITY selectHomeFolder.label "ライブブックマークを含むフォルダを選択:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "現在の表示から検索">
 <!ENTITY searchAllFeeds.label "すべてのフィードを検索">
-<!ENTITY headlinesCheckbox.tooltip "見出し表示を利用します">
 <!ENTITY showAll.label "すべて見る">
 <!ENTITY showUnread.label "未読を見る">
 <!ENTITY showStarred.label "スター済みを見る">
@@ -10,8 +8,6 @@
 <!ENTITY stopUpdatingButton.tooltip "フィードの更新確認を停止します">
 <!ENTITY searchScopeButton.tooltip "検索範囲を変更します">
 <!ENTITY showOptions.tooltip "Brief のオプションを開きます">
-<!ENTITY markAllRead.label "すべてを既読にする">
-<!ENTITY markViewRead.tooltip "すべての項目を既読にします">
 <!ENTITY viewConstraintList.tooltip "表示する項目の種類を選びます">
 <!ENTITY previousPage.tooltip "より新たな項目を表示します">
 <!ENTITY nextPage.tooltip "より古い項目を表示します">
