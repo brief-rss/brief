@@ -323,7 +323,7 @@ FeedView.prototype = {
 
         var distance = aTargetPosition - win.pageYOffset;
         with (Math) {
-            var jumpCount = log(abs(distance) / 100) * 8 + 2;
+            var jumpCount = log(abs(distance) / 100) * 5 + 4;
             jumpCount = max(jumpCount, 7);
             jumpCount = min(jumpCount, 20);
 
