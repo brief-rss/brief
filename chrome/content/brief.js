@@ -40,18 +40,7 @@ __defineGetter__('gTopWindow', function() {
 
 function init() {
     gPrefs.register();
-
     initCustomCSSFile();
-
-    if (gPrefs.homeFolder) {
-        // Initiate the feed list (asynchronously, so that the window is displayed sooner).
-        async(gFeedList.rebuild, 0, gFeedList);
-        async(gStorage.syncWithLivemarks, 2000, gStorage);
-    }
-    else {
-        showHomeFolderPicker();
-    }
-
     initToolbarsAndStrings();
 
     document.addEventListener('keypress', onKeyPress, true);
@@ -73,7 +62,14 @@ function init() {
 
     gStorage.addObserver(gFeedList);
 
+    if (gPrefs.homeFolder)
+        async(gFeedList.rebuild, 0, gFeedList);
+    else
+        showHomeFolderPicker();
+
     async(loadHomeview);
+
+    async(gStorage.syncWithLivemarks, 2000, gStorage);
 }
 
 
