@@ -1,8 +1,6 @@
-<!ENTITY selectHomeFolder.label "選取放有即時書籤的資料夾:">
 <!ENTITY confirmHomeFolder.label "確定">
 <!ENTITY searchCurrentView.label "搜尋目前顯示中的">
 <!ENTITY searchAllFeeds.label "搜尋所有消息來源">
-<!ENTITY headlinesCheckbox.tooltip "Use headlines view">
 <!ENTITY showAll.label "顯示所有項目">
 <!ENTITY showUnread.label "顯示未讀項目">
 <!ENTITY showStarred.label "顯示星號項目">
@@ -10,8 +8,6 @@
 <!ENTITY stopUpdatingButton.tooltip "停止繼續檢查消息來源的更新">
 <!ENTITY searchScopeButton.tooltip "變更搜尋範圍">
 <!ENTITY showOptions.tooltip "開啟 Brief 選項">
-<!ENTITY markAllRead.label "全標為已讀">
-<!ENTITY markViewRead.tooltip "項目全標為已讀">
 <!ENTITY viewConstraintList.tooltip "選擇要顯示哪種類型的項目">
 <!ENTITY previousPage.tooltip "顯示較新的項目">
 <!ENTITY nextPage.tooltip "顯示較舊的項目">

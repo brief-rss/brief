@@ -22,7 +22,7 @@
 <!ENTITY behaviorGroup.caption "动作">
 <!ENTITY openEntriesInTabs.label "在新标签页打开信息">
 <!ENTITY openEntriesInTabs.accesskey "t">
-<!ENTITY autoMarkRead.label "Mark items as read when they are viewed">
+<!ENTITY autoMarkRead.label "标记被查看过的信息为已读">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "保存">
 <!ENTITY expirationBefore.label "在">

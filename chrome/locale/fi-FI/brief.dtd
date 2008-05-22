@@ -1,0 +1,34 @@
+<!ENTITY confirmHomeFolder.label "OK">
+<!ENTITY searchCurrentView.label "Etsi avoimesta näkymästä">
+<!ENTITY searchAllFeeds.label "Etsi kaikista syötteistä">
+<!ENTITY showAll.label "Näytä kaikki">
+<!ENTITY showUnread.label "Näytä lukematta olevat">
+<!ENTITY showStarred.label "Näytä tähdellä merkityt">
+<!ENTITY updateButton.tooltip "Tarkista kaikki syötteet päivitysten varalta">
+<!ENTITY stopUpdatingButton.tooltip "Keskeytä syötteiden tarkistus">
+<!ENTITY searchScopeButton.tooltip "Muuta haun kattavuutta">
+<!ENTITY showOptions.tooltip "Avaa Briefin asetukset">
+<!ENTITY viewConstraintList.tooltip "Valitse merkinnät, jotka näytetään">
+<!ENTITY previousPage.tooltip "Näytä uudemmat merkinnät">
+<!ENTITY nextPage.tooltip "Näytä vanhemmat merkinnät">
+<!ENTITY unreadFolder.label "Lukematta olevat">
+<!ENTITY starredFolder.label "Tähdellä merkityt">
+<!ENTITY trashFolder.label "Roskakori">
+<!ENTITY ctxMarkFeedRead.label "Merkitse syöte luetuksi">
+<!ENTITY ctxMarkFeedUnread.label "Merkitse syöte lukematta olevaksi">
+<!ENTITY ctxMarkFolderRead.label "Merkitse kansio luetuksi">
+<!ENTITY ctxMarkFolderUnread.label "Merkitse kansio lukematta olevaksi">
+<!ENTITY ctxUpdateFeed.label "Päivitä syöte">
+<!ENTITY ctxUpdateFolder.label "Päivitä kansio">
+<!ENTITY ctxOpenWebsite.label "Avaa sivusto">
+<!ENTITY ctxDeleteFeed.label "Poista syöte">
+<!ENTITY ctxDeleteFolder.label "Poista kansio">
+<!ENTITY ctxEmptyFeed.label "Tyhjennä syöte">
+<!ENTITY ctxEmptyFolder.label "Tyhjennä kansio">
+<!ENTITY ctxRestoreTrashed.label "Palauta kaikki merkinnät">
+<!ENTITY ctxEmptyTrash.label "Tyhjennä roskakori">
+<!ENTITY ctxFeedProperties.label "Ominaisuudet">
+<!ENTITY ctxUpdateFeeds.label "Päivitä syötteet">
+<!ENTITY ctxMarkFeedsAsRead.label "Merkitse kaikki syötteet luetuiksi">
+<!ENTITY compactingWindow.title "Tiivistetään syötteitä">
+<!ENTITY compactingInProgress.label "Brief tiivistää tallennettuja syötteitä. Tämä voi kestää muutaman minuutin...">

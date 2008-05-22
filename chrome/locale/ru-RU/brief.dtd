@@ -1,8 +1,6 @@
-<!ENTITY selectHomeFolder.label "Выберите папку, содержащую ленты новостей:">
 <!ENTITY confirmHomeFolder.label "ОК">
 <!ENTITY searchCurrentView.label "Поиск в текущем виде">
 <!ENTITY searchAllFeeds.label "Поиск во всех лентах">
-<!ENTITY headlinesCheckbox.tooltip "Показывать только заголовки">
 <!ENTITY showAll.label "Все записи">
 <!ENTITY showUnread.label "Непрочитанные записи">
 <!ENTITY showStarred.label "Помеченные записи">
@@ -10,8 +8,6 @@
 <!ENTITY stopUpdatingButton.tooltip "Остановить проверку обновления">
 <!ENTITY searchScopeButton.tooltip "Изменить область действия поиска">
 <!ENTITY showOptions.tooltip "Открыть настройки Brief">
-<!ENTITY markAllRead.label "Всё прочитано">
-<!ENTITY markViewRead.tooltip "Отметить всё как прочитанное">
 <!ENTITY viewConstraintList.tooltip "Выберите, какие записи следует отображать">
 <!ENTITY previousPage.tooltip "Показать новые записи">
 <!ENTITY nextPage.tooltip "Показать старые записи">

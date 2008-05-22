@@ -1,8 +1,6 @@
-<!ENTITY selectHomeFolder.label "选取放置实时书签的文件夹：">
 <!ENTITY confirmHomeFolder.label "完成">
 <!ENTITY searchCurrentView.label "搜索当前阅读的聚合">
 <!ENTITY searchAllFeeds.label "搜索所有聚合">
-<!ENTITY headlinesCheckbox.tooltip "只显示信息标题">
 <!ENTITY showAll.label "查看全部信息">
 <!ENTITY showUnread.label "查看未读的信息">
 <!ENTITY showStarred.label "查看带星号的信息">
@@ -10,8 +8,6 @@
 <!ENTITY stopUpdatingButton.tooltip "停止更新聚合">
 <!ENTITY searchScopeButton.tooltip "改变搜索范围">
 <!ENTITY showOptions.tooltip "打开 Brief 设置">
-<!ENTITY markAllRead.label "标记所有信息为已读">
-<!ENTITY markViewRead.tooltip "标记所有信息为已读">
 <!ENTITY viewConstraintList.tooltip "选择显示哪种信息">
 <!ENTITY previousPage.tooltip "显示新的信息">
 <!ENTITY nextPage.tooltip "显示旧的信息">

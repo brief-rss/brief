@@ -1,8 +1,6 @@
-<!ENTITY selectHomeFolder.label "Velg mappa med levende bokmerker:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Søk i nyhetskilden">
 <!ENTITY searchAllFeeds.label "Søk i alle nyhetskilder">
-<!ENTITY headlinesCheckbox.tooltip "Bruk overskriftsvisning">
 <!ENTITY showAll.label "Vis alle">
 <!ENTITY showUnread.label "Vis ulest">
 <!ENTITY showStarred.label "Vis merket med stjerne">
@@ -10,8 +8,6 @@
 <!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskilder">
 <!ENTITY searchScopeButton.tooltip "Endre søk">
 <!ENTITY showOptions.tooltip "Innstillinger for Brief">
-<!ENTITY markAllRead.label "Merk alle som lest">
-<!ENTITY markViewRead.tooltip "Merk alle elementer som lest">
 <!ENTITY viewConstraintList.tooltip "Velg hvilke elementer som skal vises">
 <!ENTITY previousPage.tooltip "Vis nyere elementer">
 <!ENTITY nextPage.tooltip "Vis eldre elementer">

@@ -1,31 +1,34 @@
-
-
-<!ENTITY searchCurrentView.label "Procurar na vizualização atual">
-<!ENTITY searchAllFeeds.label "Procurar em todos os feeds">
-<!ENTITY updateButton.tooltip "Marcar todos os feeds para atualização">
-<!ENTITY stopUpdatingButton.tooltip "Para de verificar atualizações das fontes">
-<!ENTITY searchScopeButton.tooltip "Alterar o escopo da busca">
-<!ENTITY showOptions.tooltip "Opções Brief">
-
-<!ENTITY viewConstraintList.tooltip "Escolha que tipos de itens exibir">
-<!ENTITY previousPage.tooltip "Exibir novos itens">
-<!ENTITY nextPage.tooltip "Exibir velhos itens">
+<!ENTITY confirmHomeFolder.label "OK">
+<!ENTITY searchCurrentView.label "Pesquisar visualização atual">
+<!ENTITY searchAllFeeds.label "Pesquisar todos os feeds">
+<!ENTITY showAll.label "Ver todos">
+<!ENTITY showUnread.label "Ver não lidos">
+<!ENTITY showStarred.label "Ver com estrela">
+<!ENTITY updateButton.tooltip "Verificar se há atualizações para os feeds">
+<!ENTITY stopUpdatingButton.tooltip "Parar de verificar se há atualizações para os feeds">
+<!ENTITY searchScopeButton.tooltip "Alterar escopo da pesquisa">
+<!ENTITY showOptions.tooltip "Abrir opções do Brief">
+<!ENTITY viewConstraintList.tooltip "Escolher o tipo de itens a serem exibidos">
+<!ENTITY previousPage.tooltip "Mostrar itens mais recentes">
+<!ENTITY nextPage.tooltip "Mostrar itens mais antigos">
 <!ENTITY unreadFolder.label "Não lidos">
-<!ENTITY starredFolder.label "Estrela">
+<!ENTITY starredFolder.label "Com estrela">
 <!ENTITY trashFolder.label "Lixeira">
-<!ENTITY ctxMarkFeedRead.label "Marcar Feed como lido">
-
-<!ENTITY ctxMarkFolderRead.label "Marcar Pasta como lido">
-
-<!ENTITY ctxUpdateFeed.label "Atualizar Feed">
-<!ENTITY ctxUpdateFolder.label "Atualizar Pasta">
-<!ENTITY ctxOpenWebsite.label "Abrir Página">
-<!ENTITY ctxDeleteFeed.label "Excluir Fonte">
-<!ENTITY ctxDeleteFolder.label "Excluir Pasta">
-<!ENTITY ctxEmptyFeed.label "Esvaziar Feed">
-<!ENTITY ctxEmptyFolder.label "Esvaziar Pasta">
-<!ENTITY ctxRestoreTrashed.label "Restaurar Entradas da Lixeira">
-<!ENTITY ctxEmptyTrash.label "Esvaziar Lixeira">
+<!ENTITY ctxMarkFeedRead.label "Marcar feed como lido">
+<!ENTITY ctxMarkFeedUnread.label "Marcar feed como não lido">
+<!ENTITY ctxMarkFolderRead.label "Marcar pasta como lida">
+<!ENTITY ctxMarkFolderUnread.label "Marcar pasta como não lida">
+<!ENTITY ctxUpdateFeed.label "Atualizar feed">
+<!ENTITY ctxUpdateFolder.label "Atualizar pasta">
+<!ENTITY ctxOpenWebsite.label "Abrir o site">
+<!ENTITY ctxDeleteFeed.label "Excluir feed">
+<!ENTITY ctxDeleteFolder.label "Excluir pasta">
+<!ENTITY ctxEmptyFeed.label "Esvaziar feed">
+<!ENTITY ctxEmptyFolder.label "Esvaziar pasta">
+<!ENTITY ctxRestoreTrashed.label "Restaurar todos os itens">
+<!ENTITY ctxEmptyTrash.label "Esvaziar lixeira">
 <!ENTITY ctxFeedProperties.label "Propriedades">
-<!ENTITY ctxUpdateFeeds.label "Atualizar Feeds Agora">
-<!ENTITY ctxMarkFeedsAsRead.label "Marcar todas as fontes Como Lida">
+<!ENTITY ctxUpdateFeeds.label "Atualizar feeds agora">
+<!ENTITY ctxMarkFeedsAsRead.label "Marcar todos os feeds como lidos">
+<!ENTITY compactingWindow.title "Compactando feeds">
+<!ENTITY compactingInProgress.label "O Brief está compactando os feeds armazenados. Isto pode levar alguns minutos...">

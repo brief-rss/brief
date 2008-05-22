@@ -1,8 +1,6 @@
-<!ENTITY selectHomeFolder.label "Selecteer de map met uw Live Bladwijzers:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Zoeken in huidige weergave">
 <!ENTITY searchAllFeeds.label "Zoeken in alle feeds">
-<!ENTITY headlinesCheckbox.tooltip "Koptekstweergave">
 <!ENTITY showAll.label "Alles bekijken">
 <!ENTITY showUnread.label "Ongelezen bekijken">
 <!ENTITY showStarred.label "Met ster bekijken">
@@ -10,8 +8,6 @@
 <!ENTITY stopUpdatingButton.tooltip "Feeds niet meer op updates controleren">
 <!ENTITY searchScopeButton.tooltip "De zoekopdracht wijzigen">
 <!ENTITY showOptions.tooltip "Brief opties openen">
-<!ENTITY markAllRead.label "Alles gelezen">
-<!ENTITY markViewRead.tooltip "Alle berichten als gelezen markeren">
 <!ENTITY viewConstraintList.tooltip "Kies welke berichten moeten worden weergegeven">
 <!ENTITY previousPage.tooltip "Nieuwere onderwerpen weergeven">
 <!ENTITY nextPage.tooltip "Oudere onderwerpen weergeven">
