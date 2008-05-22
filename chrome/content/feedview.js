@@ -725,6 +725,8 @@ FeedView.prototype = {
         // Cancel auto-marking entries as read timeout.
         clearTimeout(this._markVisibleTimeout);
 
+        gTopWindow.StarUI.panel.hidePopup();
+
         // Remove the old content.
         var container = this.document.getElementById('container');
         var oldContent = this.document.getElementById('feed-content');
@@ -832,6 +834,8 @@ FeedView.prototype = {
             var nextSibling = entryElement.nextSibling;
             var previousSibling = entryElement.previousSibling;
         }
+
+        gTopWindow.StarUI.panel.hidePopup();
 
         // Send an event to have the element gracefully removed by jQuery.
         this._sendEvent(aEntry, 'DoRemoveEntry');
