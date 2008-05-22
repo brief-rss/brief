@@ -402,7 +402,7 @@ var gFeedList = {
             lastChild = topLevelChildren.lastChild
         }
 
-        this._rebuildTags();
+        this._rebuildTags(true);
 
         this.feeds = gStorage.getAllFeeds(true);
 
@@ -414,12 +414,7 @@ var gFeedList = {
 
         this._buildFolderChildren(gPrefs.homeFolder);
 
-        var itemToSelect = this.lastSelectedID ? getElement(this.lastSelectedID) : null;
-        var index = itemToSelect ? this.tree.view.getIndexOfItem(itemToSelect) : 0;
-        this.ignoreSelectEvent = true;
-        this.tree.view.selection.select(index);
-        this.ignoreSelectEvent = false;
-        this.lastSelectedID = '';
+        this._restoreSelection();
 
         // Fill the items cache.
         this.items = this.tree.getElementsByTagName('treeitem');
@@ -514,7 +509,10 @@ var gFeedList = {
         this._folderParentChain.pop();
     },
 
-    _rebuildTags: function gFeedList__rebuildTags() {
+    _rebuildTags: function gFeedList__rebuildTags(aDontRestoreSelection) {
+        if (!aDontRestoreSelection)
+            this.lastSelectedID = this.selectedItem ? this.selectedItem.id : '';
+
         var starredFolder = getElement('starred-folder');
 
         // Clear the old tag list.
@@ -544,6 +542,19 @@ var gFeedList = {
 
             this.refreshTagTreeitems(this.tags[i]);
         }
+
+        if (!aDontRestoreSelection)
+            this._restoreSelection()
+    },
+
+
+    _restoreSelection: function gFeedList__restoreSelection() {
+        var itemToSelect = this.lastSelectedID ? getElement(this.lastSelectedID) : null;
+        var index = itemToSelect ? this.tree.view.getIndexOfItem(itemToSelect) : 0;
+        this.ignoreSelectEvent = true;
+        this.tree.view.selection.select(index);
+        this.ignoreSelectEvent = false;
+        this.lastSelectedID = '';
     },
 
 
