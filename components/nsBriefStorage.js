@@ -963,7 +963,9 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     removeObserver: function BriefStorage_removeObserver(aObserver) {
-        this.observers.splice(this.observers.indexOf(aObserver), 1);
+        var index = this.observers.indexOf(aObserver);
+        if (index !== -1)
+            this.observers.splice(index, 1);
     },
 
 
