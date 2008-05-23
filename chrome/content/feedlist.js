@@ -565,12 +565,14 @@ var gFeedList = {
         // in-database list of feeds was synchronized.
         case 'brief:invalidate-feedlist':
             this.rebuild();
-            async(gFeedView.refresh, 0, gFeedView);
 
+            let deck = getElement('feed-list-deck');
             if (gPrefs.homeFolder)
-                getElement('feed-list-deck').selectedIndex = 0;
-            else
+                deck.selectedIndex = 0;
+            else if (deck.selectedIndex == 0)
                 showHomeFolderPicker();
+
+            async(gFeedView.refresh, 0, gFeedView);
 
             break;
 
