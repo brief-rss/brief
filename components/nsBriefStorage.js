@@ -258,22 +258,20 @@ BriefStorageService.prototype = {
         // To 1.2a1
         case 4:
             this.recomputeIDs();
+            this.recreateFeedsTable();
             executeSQL('ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
             // Fall through...
 
-        // To 1.2a2
-        case 5:
-            this.migrateEntriesToFTS();
-            // Fall through...
-
         // To 1.2b2
+        case 5:
         case 6:
-            this.recreateFeedsTable();
+            if (gConnection.schemaVersion > 4)
+                executeSQL('ALTER TABLE feeds ADD COLUMN markModifiedEntriesUnread INTEGER DEFAULT 1');
             // Fall through...
 
         // To 1.2b3
         case 7:
-            this.migrateToNumericIDs();
+            this.migrateEntries();
             this.bookmarkStarredEntries();
 
         }
@@ -312,71 +310,61 @@ BriefStorageService.prototype = {
     },
 
 
-    migrateEntriesToFTS: function BriefStorage_migrateEntriesToFTS() {
-        const OLD_COLUMNS = 'id, feedID, secondaryID , providedID, entryURL, title, content, ' +
-                            'date, authors, read, updated, starred, deleted, bookmarkID      ';
-        const NEW_COLUMNS = 'id, feedID, secondaryID , providedID, entryURL, date, ' +
-                            'authors, read, updated, starred, deleted, bookmarkID  ';
+    migrateEntries: function BriefStorage_migrateEntries() {
+        var dbVersion = gConnection.schemaVersion;
 
         gConnection.beginTransaction();
         try {
-            executeSQL('CREATE TABLE entries_copy (' + OLD_COLUMNS + ')');
-            executeSQL('INSERT INTO entries_copy SELECT ' + OLD_COLUMNS + ' FROM entries');
-            executeSQL('DROP TABLE entries');
+            if (dbVersion < 6) {
+                let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
+                           'read, updated, starred, deleted, bookmarkID, title, content   ';
 
-            // This will recreate the entries table and its indices.
-            executeSQL('CREATE TABLE IF NOT EXISTS entries (' + NEW_COLUMNS + ')');
-            executeSQL('CREATE VIRTUAL TABLE entries_text using fts3(title, content)');
-            executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
-            executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
+                executeSQL('CREATE TABLE entries_copy ('+cols+')                  ');
+                executeSQL('INSERT INTO entries_copy SELECT '+cols+' FROM entries ');
+                executeSQL('DROP TABLE entries                                    ');
+            }
+            else {
+                let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
+                           'read, updated, starred, deleted, bookmarkID                   ';
 
-            executeSQL('INSERT INTO entries (rowid, ' + NEW_COLUMNS + ')' +
-                       'SELECT rowid, ' + NEW_COLUMNS + ' FROM entries_copy ');
-            executeSQL('INSERT INTO entries_text (title, content) ' +
-                       'SELECT title, content FROM entries_copy   ');
-            executeSQL('DROP TABLE entries_copy');
-        }
-        catch (ex) {
-            reportError(ex, true);
-        }
-        finally {
-            gConnection.commitTransaction();
-        }
-    },
+                executeSQL('CREATE TABLE entries_copy ('+cols+')                   ');
+                executeSQL('INSERT INTO entries_copy (rowid, '+cols+')             ' +
+                           'SELECT rowid, '+cols+' FROM entries ORDER BY rowid ASC ');
 
-    migrateToNumericIDs: function BriefStorage_migrateToNumericIDs() {
-        var oldCols = 'id, feedID, secondaryID , providedID, entryURL, date, ' +
-                      'authors, read, updated, starred, deleted, bookmarkID  ';
+                executeSQL('CREATE TABLE entries_text_copy (title, content)                  ');
+                executeSQL('INSERT INTO entries_text_copy (rowid, title, content)            ' +
+                           'SELECT rowid, title, content FROM entries_text ORDER BY rowid ASC');
 
-        gConnection.beginTransaction();
-        try {
-            // Create temporary copies of old tables.
-            executeSQL('CREATE TABLE entries_copy ('+oldCols+')                          ');
-            executeSQL('INSERT INTO entries_copy (rowid, '+oldCols+')                    ' +
-                       'SELECT rowid, '+oldCols+' FROM entries ORDER BY rowid ASC        ');
-            executeSQL('CREATE TABLE entries_text_copy (title, content)                  ');
-            executeSQL('INSERT INTO entries_text_copy (rowid, title, content)            ' +
-                       'SELECT rowid, title, content FROM entries_text ORDER BY rowid ASC');
-
-            // Drop the old tables
-            executeSQL('DROP TABLE entries       ');
-            executeSQL('DROP TABLE entries_text  ');
+                executeSQL('DROP TABLE entries      ');
+                executeSQL('DROP TABLE entries_text ');
+            }
 
             this.setupDatabase();
 
-            // Migrate entries table.
-            var cols = 'feedID, providedID, entryURL, date, read, updated, starred, deleted, bookmarkID';
-            executeSQL('INSERT INTO entries (primaryHash, secondaryHash, '+cols+') ' +
-                       'SELECT id, secondaryID, '+cols+' FROM entries_copy         ');
+            if (dbVersion < 6) {
+                let fromCols = 'feedID, providedID, entryURL, date, read, updated,       '+
+                               'starred, deleted, bookmarkID, id, secondaryID            ';
+                let toCols =   'feedID, providedID, entryURL, date, read, updated,       '+
+                               'starred, deleted, bookmarkID, primaryHash, secondaryHash ';
 
-            // Migrate entries_text table.
-            executeSQL('INSERT INTO entries_text (title, content, authors)                                            ' +
-                       'SELECT entries_text_copy.title, entries_text_copy.content, entries_copy.authors               ' +
-                       'FROM entries_text_copy INNER JOIN entries_copy ON entries_text_copy.rowid = entries_copy.rowid');
+                executeSQL('INSERT INTO entries ('+toCols+')                                '+
+                           'SELECT '+fromCols+' FROM entries_copy ORDER BY rowid            ');
+                executeSQL('INSERT INTO entries_text (title, content, authors)              '+
+                           'SELECT title, content, authors FROM entries_copy ORDER BY rowid ');
+                executeSQL('DROP TABLE entries_copy                                         ');
+            }
+            else {
+                let cols = 'feedID, providedID, entryURL, date, read, updated, starred, deleted, bookmarkID';
+                executeSQL('INSERT INTO entries (primaryHash, secondaryHash, '+cols+') ' +
+                           'SELECT id, secondaryID, '+cols+' FROM entries_copy         ');
 
-            // Drop the temporary copies.
-            executeSQL('DROP TABLE entries_copy     ');
-            executeSQL('DROP TABLE entries_text_copy');
+                executeSQL('INSERT INTO entries_text (title, content, authors)                                            ' +
+                           'SELECT entries_text_copy.title, entries_text_copy.content, entries_copy.authors               ' +
+                           'FROM entries_text_copy INNER JOIN entries_copy ON entries_text_copy.rowid = entries_copy.rowid');
+
+                executeSQL('DROP TABLE entries_copy     ');
+                executeSQL('DROP TABLE entries_text_copy');
+            }
         }
         catch (ex) {
             reportError(ex, true);
@@ -387,7 +375,6 @@ BriefStorageService.prototype = {
 
         executeSQL('VACUUM');
     },
-
 
     bookmarkStarredEntries: function BriefStorage_bookmarkStarredEntries() {
         var folder = gBms.unfiledBookmarksFolder;
