@@ -77,9 +77,11 @@ FeedView.prototype = {
     // we keep a separate query for that.
     get _fastQuery FeedView_fastQuery() {
         if (!this.__fastQuery) {
-            this.__fastQuery = new Query();
-            this.__fastQuery.sortOrder = this.query.sortOrder;
-            this.__fastQuery.sortDirection = this.query.sortDirection;
+            let query = new Query();
+            query.sortOrder = this.query.sortOrder;
+            query.sortDirection = this.query.sortDirection;
+            query.deleted = ENTRY_STATE_ANY;
+            this.__fastQuery = query;
         }
         return this.__fastQuery;
     },
@@ -525,6 +527,7 @@ FeedView.prototype = {
             case 'ShowBookmarkPanel':
                 let query = new Query();
                 query.entries = [id];
+                query.deleted = ENTRY_STATE_ANY;
                 query.verifyEntriesStarredStatus();
                 let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
 
