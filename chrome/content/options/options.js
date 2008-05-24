@@ -137,7 +137,6 @@ var gFeedsPane = {
         var result = promptService.confirmCheck(window, title, text, checkboxLabel, checked);
         if (result) {
             var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-            query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
             query.unstarred = checked.value;
             query.includeHiddenFeeds = true;
             query.deleteEntries(Ci.nsIBriefQuery.ENTRY_STATE_DELETED);

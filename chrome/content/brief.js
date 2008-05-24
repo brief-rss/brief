@@ -13,7 +13,7 @@ var Ci = Components.interfaces;
 
 const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 const gUpdateService = Cc['@ancestor/brief/updateservice;1'].getService(Ci.nsIBriefUpdateService);
-var QuerySH = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery', 'setConstraints');
+var QuerySH = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery', 'setEntries');
 var Query = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery');
 
 const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
@@ -144,7 +144,7 @@ function unload() {
 
 var gCommands = {
 
-    toggleSidebar: function cmd_toggleLeftPane() {
+    toggleSidebar: function cmd_toggleSidebar() {
         var pane = getElement('left-pane');
         var splitter = getElement('left-pane-splitter');
         var button = getElement('toggle-sidebar');
@@ -227,8 +227,7 @@ var gCommands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        var query = new QuerySH(null, [aEntry], null);
-        query.deleted = ENTRY_STATE_ANY;
+        var query = new QuerySH([aEntry]);
         query.markEntriesRead(aNewState);
 
         if (gPrefs.autoMarkRead && !aNewState)
@@ -241,7 +240,7 @@ var gCommands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        var query = new QuerySH(null, [aEntry], null);
+        var query = new QuerySH([aEntry]);
         query.deleteEntries(ENTRY_STATE_TRASHED);
     },
 
@@ -251,8 +250,7 @@ var gCommands = {
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        var query = new QuerySH(null, [aEntry], null);
-        query.deleted = ENTRY_STATE_TRASHED;
+        var query = new QuerySH([aEntry]);
         query.deleteEntries(ENTRY_STATE_NORMAL);
     },
 
@@ -264,8 +262,7 @@ var gCommands = {
     },
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
-        var query = new QuerySH(null, [aEntry], null);
-        query.deleted = ENTRY_STATE_ANY;
+        var query = new QuerySH([aEntry]);
         query.starEntries(aNewState);
     },
 
@@ -311,7 +308,8 @@ var gCommands = {
 
         if (!aEntryElement.hasAttribute('read')) {
             aEntryElement.setAttribute('read', true);
-            var query = new QuerySH(null, [parseInt(aEntryElement.id)], null);
+            let entryID = parseInt(aEntryElement.id);
+            var query = new QuerySH([entryID]);
             query.markEntriesRead(true);
         }
     },
@@ -327,7 +325,9 @@ var gCommands = {
 
 
 function loadHomeview() {
-    var query = new QuerySH(null, null, true);
+    var query = new Query();
+    query.deleted = ENTRY_STATE_NORMAL;
+    query.unread = true;
     var title = getElement('unread-folder').getAttribute('title');
     var view = new FeedView(title, query);
 

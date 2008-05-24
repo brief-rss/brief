@@ -46,7 +46,7 @@ interface nsIBriefQuery : nsISupports {
     /**
      * Deleted state of entries to be selected.
      *
-     * @default value is ENTRY_STATE_NORMAL.
+     * @default value is ENTRY_STATE_ANY.
      */
     const short ENTRY_STATE_NORMAL = 0;
     const short ENTRY_STATE_TRASHED = 1;
@@ -114,9 +114,9 @@ interface nsIBriefQuery : nsISupports {
     attribute short sortDirection;
 
     /**
-     * Convenience function to set the most common constraints.
+     * Convenience function to be used by Components.Constructor.
      */
-    void setConstraints(in nsIVariant feeds, in nsIVariant entries, in boolean unread);
+    void setEntries(in nsIVariant entries);
 
     /**
      * Indicates if there are any entries that match this query.

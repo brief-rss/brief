@@ -102,6 +102,7 @@ var gFeedList = {
         this._lastSelectedItem = selectedItem;
 
         var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
         var title;
 
         if (selectedItem.id == 'unread-folder') {
@@ -229,11 +230,15 @@ var gFeedList = {
         var treeitem = getElement(aSpecialItem);
         var treecell = treeitem.firstChild.firstChild;
 
-        var query = new QuerySH(null, null, true);
+        var query = new Query();
+        query.unread = true;
+        query.deleted = ENTRY_STATE_NORMAL;
+
         if (aSpecialItem == 'starred-folder')
             query.starred = true;
         else if (aSpecialItem == 'trash-folder')
             query.deleted = ENTRY_STATE_TRASHED;
+
         var unreadCount = query.getEntryCount();
 
         var name = treeitem.getAttribute('title');
@@ -264,6 +269,7 @@ var gFeedList = {
             }
             else {
                 let query = new Query();
+                query.deleted = ENTRY_STATE_NORMAL;
                 query.folders = [folder.feedID];
                 query.unread = true;
                 let unreadCount = query.getEntryCount();
@@ -294,7 +300,10 @@ var gFeedList = {
             let treecell = treeitem.firstChild.firstChild;
 
             // Update the label.
-            let query = new QuerySH([feed.feedID], null, true);
+            let query = new Query();
+            query.deleted = ENTRY_STATE_NORMAL;
+            query.feeds = [feed.feedID];
+            query.unread = true;
             let unreadCount = query.getEntryCount();
             this._setLabel(treecell, feed.title, unreadCount);
 
@@ -357,6 +366,7 @@ var gFeedList = {
             else {
                 // Update the label.
                 let query = new Query();
+                query.deleted = ENTRY_STATE_NORMAL;
                 query.tags = [tag];
                 query.unread = true;
                 let treecell = getElement(tag).firstChild.firstChild;
@@ -818,13 +828,16 @@ var gContextMenu = {
 
 
     markFeedRead: function gContextMenu_markFeedRead() {
-        var query = new QuerySH([this.targetID], null, null);
+        var query = new Query();
+        query.feeds = [this.targetID];
+        query.deleted = ENTRY_STATE_NORMAL;
         query.markEntriesRead(true);
     },
 
 
     markFolderRead: function gContextMenu_markFolderRead() {
         var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
 
         if (this.targetIsUnreadFolder)
             query.unread = true;
@@ -841,6 +854,7 @@ var gContextMenu = {
 
     markTagRead: function gContextMenu_markTagRead() {
         var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
         query.tags = [this.targetItem.id];
         query.markEntriesRead(true);
     },
@@ -871,7 +885,9 @@ var gContextMenu = {
 
 
     emptyFeed: function gContextMenu_emptyFeed() {
-        var query = new QuerySH([this.targetID], null, null);
+        var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+        query.feeds = [this.targetID];
         query.unstarred = true;
         query.deleteEntries(ENTRY_STATE_TRASHED);
     },
@@ -879,6 +895,7 @@ var gContextMenu = {
 
     emptyFolder: function gContextMenu_emptyFolder() {
         var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
         query.unstarred = true;
 
         if (this.targetIsUnreadFolder)
