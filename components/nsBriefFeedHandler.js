@@ -186,7 +186,6 @@ EntryList.prototype = {
 
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
         query.entries = this.IDs;
-        query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
         switch (aWhat) {
             case 'unread':
                 query.unread = true;

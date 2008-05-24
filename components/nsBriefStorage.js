@@ -1290,7 +1290,6 @@ BriefStorageService.prototype = {
     notifyOfEntriesStarred: function BriefStorage_notifyOfEntriesStarred(aEntries, aNewState) {
         var query = new BriefQuery();
         query.entries = aEntries;
-        query.deleted = ENTRY_STATE_ANY;
         var list = query.getEntryList();
 
         for each (observer in this.observers)
@@ -1301,7 +1300,6 @@ BriefStorageService.prototype = {
                                                                        aChangedTag) {
         var query = new BriefQuery();
         query.entries = aEntries;
-        query.deleted = ENTRY_STATE_ANY;
         var list = query.getEntryList();
 
         for each (observer in this.observers)
@@ -1766,7 +1764,7 @@ BriefQuery.prototype = {
     unread:    false,
     starred:   false,
     unstarred: false,
-    deleted:   ENTRY_STATE_NORMAL,
+    deleted:   ENTRY_STATE_ANY,
 
     searchString: '',
 
@@ -1788,10 +1786,8 @@ BriefQuery.prototype = {
     effectiveFolders: null,
 
     // nsIBriefQuery
-    setConstraints: function BriefQuery_setConstraints(aFeeds, aEntries, aUnread) {
-        this.feeds = aFeeds;
+    setEntries: function BriefQuery_setEntries(aEntries) {
         this.entries = aEntries;
-        this.unread = aUnread;
     },
 
 
@@ -2213,7 +2209,7 @@ BriefQuery.prototype = {
         if (this.unstarred)
             constraints.push('entries.starred = 0');
 
-        if (this.deleted != nsIBriefQuery.ENTRY_STATE_ANY)
+        if (this.deleted != ENTRY_STATE_ANY)
             constraints.push('entries.deleted = ' + this.deleted);
 
         if (this.startDate > 0)

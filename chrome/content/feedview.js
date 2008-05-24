@@ -80,7 +80,6 @@ FeedView.prototype = {
             let query = new Query();
             query.sortOrder = this.query.sortOrder;
             query.sortDirection = this.query.sortDirection;
-            query.deleted = ENTRY_STATE_ANY;
             this.__fastQuery = query;
         }
         return this.__fastQuery;
@@ -415,7 +414,7 @@ FeedView.prototype = {
         }
 
         if (entriesToMark.length) {
-            var query = new QuerySH(null, entriesToMark, false);
+            var query = new QuerySH(entriesToMark);
             query.markEntriesRead(true);
         }
     },
@@ -525,9 +524,7 @@ FeedView.prototype = {
                 break;
 
             case 'ShowBookmarkPanel':
-                let query = new Query();
-                query.entries = [id];
-                query.deleted = ENTRY_STATE_ANY;
+                let query = new QuerySH([id]);
                 query.verifyEntriesStarredStatus();
                 let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
 

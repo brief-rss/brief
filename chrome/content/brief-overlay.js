@@ -1,9 +1,7 @@
-const BRIEF_URL = 'chrome://brief/content/brief.xul';
-const BRIEF_FAVICON_URL = 'chrome://brief/skin/feed-icon-16x16.png';
-var BriefQuery = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery',
-                                        'setConstraints');
-
 const gBrief = {
+
+    BRIEF_URL: 'chrome://brief/content/brief.xul',
+    BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
 
     tab: null,  // Tab in which Brief is loaded
 
@@ -46,9 +44,9 @@ const gBrief = {
         if (this.tab)
             gBrowser.selectedTab = this.tab;
         else if (aNewTab)
-            gBrowser.loadOneTab(BRIEF_URL, null, null, null, false, false);
+            gBrowser.loadOneTab(this.BRIEF_URL, null, null, null, false, false);
         else
-            gBrowser.loadURI(BRIEF_URL, null, null);
+            gBrowser.loadURI(this.BRIEF_URL, null, null);
     },
 
     toggle: function gBrief_toggle() {
@@ -67,7 +65,7 @@ const gBrief = {
 
 
     doCommand: function gBrief_doCommand(aCommand) {
-        if (gBrowser.currentURI.spec != BRIEF_URL)
+        if (gBrowser.currentURI.spec != this.BRIEF_URL)
             return;
 
         var win = gBrowser.contentDocument.defaultView.wrappedJSObject;
@@ -118,7 +116,6 @@ const gBrief = {
 
     markFeedsAsRead: function gBrief_markFeedsAsRead() {
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-        query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
         query.markEntriesRead(true);
     },
 
@@ -127,7 +124,9 @@ const gBrief = {
         var counter = document.getElementById('brief-status-counter');
         var panel = document.getElementById('brief-status');
 
-        var query = new BriefQuery(null, null, true);
+        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+        query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+        query.unread = true;
         var unreadEntriesCount = query.getEntryCount();
 
         counter.value = unreadEntriesCount;
@@ -168,10 +167,13 @@ const gBrief = {
         while (rows.lastChild)
             rows.removeChild(rows.lastChild);
 
-        var query = new BriefQuery(null, null, true);
+        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+        query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+        query.unread = true;
         query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
         query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
-        var unreadFeeds = query.getProperty('feedID', true).map(function(e) e.feedID);
+        var unreadFeeds = query.getProperty('feedID', true).
+                                map(function(e) e.feedID);
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
         var value = bundle.getString('noUnreadFeedsTooltip');
@@ -190,7 +192,10 @@ const gBrief = {
             label.setAttribute('value', feedName);
             row.appendChild(label);
 
-            var query = new BriefQuery([unreadFeeds[i]], null, true);
+            var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+            query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+            query.feeds = [unreadFeeds[i]];
+            query.unread = true;
             var unreadCount = query.getEntryCount();
             label = document.createElement('label');
             label.setAttribute('class', 'unread-entries-count');
@@ -233,7 +238,7 @@ const gBrief = {
     onTabLoad: function gBrief_onTabLoad(aEvent) {
         var targetDoc = aEvent.target;
 
-        if (targetDoc && targetDoc.documentURI == BRIEF_URL) {
+        if (targetDoc && targetDoc.documentURI == gBrief.BRIEF_URL) {
 
             if (!gBrief.tab) {
                 var targetBrowser = gBrowser.getBrowserForDocument(targetDoc);
@@ -246,12 +251,12 @@ const gBrief = {
                 }
             }
 
-            gBrowser.setIcon(gBrief.tab, BRIEF_FAVICON_URL);
+            gBrowser.setIcon(gBrief.tab, gBrief.BRIEF_FAVICON_URL);
             if (gBrief.toolbarbutton)
                 gBrief.toolbarbutton.checked = (gBrowser.selectedTab == gBrief.tab);
         }
 
-        else if (gBrief.tab && gBrief.tab.linkedBrowser.currentURI.spec != BRIEF_URL) {
+        else if (gBrief.tab && gBrief.tab.linkedBrowser.currentURI.spec != gBrief.BRIEF_URL) {
             gBrief.tab = null;
             if (gBrief.toolbarbutton)
                 gBrief.toolbarbutton.checked = (gBrowser.selectedTab == gBrief.tab);
