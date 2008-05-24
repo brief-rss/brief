@@ -356,22 +356,19 @@ var gFeedList = {
                 query.tags = [tag];
                 if (!query.hasMatches()) {
                     this._rebuildTags();
-
                     if (gFeedView.query.tags && gFeedView.query.tags[0] === tag)
                         this.tree.view.selection.select(0);
-
                     break;
                 }
             }
-            else {
-                // Update the label.
-                let query = new Query();
-                query.deleted = ENTRY_STATE_NORMAL;
-                query.tags = [tag];
-                query.unread = true;
-                let treecell = getElement(tag).firstChild.firstChild;
-                this._setLabel(treecell, tag, query.getEntryCount());
-            }
+
+            // Update the label.
+            let query = new Query();
+            query.deleted = ENTRY_STATE_NORMAL;
+            query.tags = [tag];
+            query.unread = true;
+            let treecell = getElement(tag).firstChild.firstChild;
+            this._setLabel(treecell, tag, query.getEntryCount());
         }
     },
 
