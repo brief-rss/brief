@@ -17,8 +17,8 @@ var gFeedView = null;
 function FeedView(aTitle, aQuery) {
     this.title = aTitle;
 
-    this._flagsAreIntrinsic = aQuery.read || aQuery.unread || aQuery.starred ||
-                              aQuery.unstarred || aQuery.deleted != ENTRY_STATE_NORMAL;
+    this._constrained = aQuery.unread || aQuery.starred || aQuery.tags
+                        || aQuery.deleted === ENTRY_STATE_TRASHED;
     this.query = aQuery;
     this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
     if (this.query.unread && gPrefs.sortUnreadViewOldestFirst)
@@ -37,9 +37,9 @@ FeedView.prototype = {
     // It used for searching, when the search string is displayed in place of the title.
     titleOverride: '',
 
-    // Indicates if the view was created with intrinsic flags which override the
+    // Indicates if the view was created with intrinsic constriants which override
     // feedview.shownEntries preference.
-    _flagsAreIntrinsic: false,
+    _constrained: false,
 
 
     get browser FeedView_browser() {
@@ -61,7 +61,7 @@ FeedView.prototype = {
     },
 
     get query FeedView_query_get() {
-        if (!this._flagsAreIntrinsic) {
+        if (!this._constrained) {
             this.__query.unread = (gPrefs.shownEntries == 'unread');
             this.__query.starred = (gPrefs.shownEntries == 'starred');
             this.__query.deleted = gPrefs.shownEntries == 'trashed' ? ENTRY_STATE_TRASHED
@@ -120,12 +120,12 @@ FeedView.prototype = {
     },
 
     get isGlobalSearch FeedView_isGlobalSearch() {
-        return !this.query.folders && !this.query.feeds && !this._flagsAreIntrinsic
+        return !this.query.folders && !this.query.feeds && !this._constrained
                && this.query.searchString;
     },
 
     get isViewSearch FeedView_isGlobalSearch() {
-        return (this.query.folders || this.query.feeds || this._flagsAreIntrinsic)
+        return (this.query.folders || this.query.feeds || this._constrained)
                && this.query.searchString;
     },
 
@@ -438,7 +438,7 @@ FeedView.prototype = {
 
         // Hide the drop-down to pick view constraints if it is tied to
         // specific constraints (e.g. the Unread folder).
-        getElement('view-constraint-box').hidden = this._flagsAreIntrinsic;
+        getElement('view-constraint-box').hidden = this._constrained;
 
         this.browser.addEventListener('load', this, false);
         gStorage.addObserver(this);
@@ -1018,7 +1018,7 @@ FeedView.prototype = {
             message = bundle.getString('noEntriesFound');
         else if (this.query.unread)
             message = bundle.getString('noUnreadEntries');
-        else if (this.query.starred && this._flagsAreIntrinsic)
+        else if (this.query.starred && this._constrained)
             message = bundle.getString('noStarredEntries');
         else if (this.query.starred)
             message = bundle.getString('noStarredEntriesInFeed');
