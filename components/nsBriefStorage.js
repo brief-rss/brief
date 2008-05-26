@@ -93,9 +93,11 @@ __defineGetter__('gStringbundle', function() {
 });
 
 __defineGetter__('gBms', function() {
+    // XXX Getting bookmarks service at startup sometimes throws an exception.
+    var bms = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
+              getService(Ci.nsINavBookmarksService);
     delete this.gBms;
-    return this.gBms = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
-                       getService(Ci.nsINavBookmarksService);
+    return this.gBms = bms;
 });
 
 
@@ -190,8 +192,10 @@ BriefStorageService.prototype = {
 
         this.homeFolderID = gPrefs.getIntPref('homeFolder');
         gPrefs.addObserver('', this, false);
-        gBms.addObserver(this, false);
         gObserverService.addObserver(this, 'quit-application', false);
+
+        // This has to be on the end, in case getting bookmarks service throws.
+        gBms.addObserver(this, false);
     },
 
     setupDatabase: function BriefStorage_setupDatabase() {
@@ -1270,6 +1274,13 @@ BriefStorageService.prototype = {
     },
 
 
+    /**
+     * Syncs tags when a tag folder is renamed by removing tags with the old name
+     * and re-tagging the entries using the new one.
+     *
+     * @param aTagFolderID itemId of the tag folder that was renamed.
+     * @param aNewName     New name of the tag folder, i.e. new name of the tag.
+     */
     renameTag: function BriefStorage_renameTag(aTagFolderID, aNewName) {
         try {
             // Get bookmarks in the renamed tag folder.
