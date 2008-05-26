@@ -1115,16 +1115,18 @@ BriefStorageService.prototype = {
         switch (aProperty) {
         case 'title':
             let feed = this.getFeedByBookmarkID(aItemID);
-            if (!feed)
-                return;
+            if (feed) {
+                gStm.setFeedTitle.params.title = aValue;
+                gStm.setFeedTitle.params.feedID = feed.feedID;
+                gStm.setFeedTitle.execute();
 
-            gStm.setFeedTitle.params.title = aValue;
-            gStm.setFeedTitle.params.feedID = feed.feedID;
-            gStm.setFeedTitle.execute();
+                feed.title = aValue; // Update the cache.
 
-            feed.title = aValue; // Update the cache.
-
-            gObserverService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
+                gObserverService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
+            }
+            else if (isTagFolder(aItemID)) {
+                this.renameTag(aItemID, aValue);
+            }
             break;
 
         case 'livemark/feedURI':
@@ -1265,6 +1267,49 @@ BriefStorageService.prototype = {
         }
 
         return [addedTags, removedTags];
+    },
+
+
+    renameTag: function BriefStorage_renameTag(aTagFolderID, aNewName) {
+        try {
+            // Get bookmarks in the renamed tag folder.
+            var options = gPlaces.history.getNewQueryOptions();
+            var query = gPlaces.history.getNewQuery();
+            query.setFolders([aTagFolderID], 1);
+            var result = gPlaces.history.executeQuery(query, options);
+            result.root.containerOpen = true;
+
+            var oldTagName = '';
+
+            for (let i = 0; i < result.root.childCount; i++) {
+                let tagID = result.root.getChild(i).itemId;
+                let entries = this.getEntriesByTagID(tagID).
+                                   map(function(e) e.id);
+
+                for each (entry in entries) {
+                    if (!oldTagName) {
+                        // The bookmark observer doesn't provide the old name,
+                        // so we have to look it up in our database.
+                        gStm.getNameForTagID.params.tagID = tagID;
+                        gStm.getNameForTagID.step();
+                        oldTagName = gStm.getNameForTagID.row.tagName;
+                    }
+
+                    this.tagEntry(false, entry, oldTagName);
+                    this.tagEntry(true, entry, aNewName, tagID);
+                }
+
+                if (entries.length) {
+                    this.notifyOfEntriesTagged(entries, false, oldTagName);
+                    this.notifyOfEntriesTagged(entries, true, aNewName);
+                }
+            }
+
+            result.root.containerOpen = false;
+        }
+        finally {
+            gStm.getNameForTagID.reset();
+        }
     },
 
 
@@ -1485,6 +1530,12 @@ var gStm = {
         var sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
         delete this.getTagsForEntry;
         return this.getTagsForEntry = createStatement(sql);
+    },
+
+    get getNameForTagID() {
+        var sql = 'SELECT tagName FROM entry_tags WHERE tagID = :tagID LIMIT 1';
+        delete this.getNameForTagID;
+        return this.getNameForTagID = createStatement(sql);
     },
 
     get setSerializedTagList() {
