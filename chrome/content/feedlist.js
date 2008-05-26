@@ -557,10 +557,16 @@ var gFeedList = {
 
     _restoreSelection: function gFeedList__restoreSelection() {
         var itemToSelect = this.lastSelectedID ? getElement(this.lastSelectedID) : null;
-        var index = itemToSelect ? this.tree.view.getIndexOfItem(itemToSelect) : 0;
-        this.ignoreSelectEvent = true;
-        this.tree.view.selection.select(index);
-        this.ignoreSelectEvent = false;
+        if (itemToSelect) {
+            let index = this.tree.view.getIndexOfItem(itemToSelect);
+            this.ignoreSelectEvent = true;
+            this.tree.view.selection.select(index);
+            this.ignoreSelectEvent = false;
+        }
+        else {
+            this.tree.view.selection.select(0);
+        }
+
         this.lastSelectedID = '';
     },
 
