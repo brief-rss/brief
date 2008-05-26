@@ -62,15 +62,21 @@ const ENTRY_TAGS_TABLE_SCHEMA = 'tagID    INTEGER UNIQUE, ' +
 
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-Components.utils.import('resource://gre/modules/utils.js');
 
-var gPlaces = PlacesUtils;
+
+__defineGetter__('gPlaces', function() {
+    delete this.gPlaces;
+    var tempScope = {};
+    Components.utils.import('resource://gre/modules/utils.js', tempScope);
+    return this.gPlaces = tempScope.PlacesUtils;
+});
 
 __defineGetter__('gObserverService', function() {
     delete this.gObserverService;
     return this.gObserverService = Cc['@mozilla.org/observer-service;1'].
                                    getService(Ci.nsIObserverService);
 });
+
 __defineGetter__('gPrefs', function() {
     delete this.gPrefs;
     return this.gPrefs = Cc['@mozilla.org/preferences-service;1'].
@@ -78,12 +84,14 @@ __defineGetter__('gPrefs', function() {
                          getBranch('extensions.brief.').
                          QueryInterface(Ci.nsIPrefBranch2);
 });
+
 __defineGetter__('gStringbundle', function() {
     delete this.gStringbundle;
     return this.gStringbundle = Cc['@mozilla.org/intl/stringbundle;1'].
                                 getService(Ci.nsIStringBundleService).
                                 createBundle('chrome://brief/locale/brief.properties');
 });
+
 __defineGetter__('gBms', function() {
     delete this.gBms;
     return this.gBms = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
