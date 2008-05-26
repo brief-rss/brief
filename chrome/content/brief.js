@@ -27,6 +27,7 @@ __defineGetter__('gTemplateURI', function() {
                                getService(Ci.nsIIOService).
                                newURI(TEMPLATE_URL, null, null);
 });
+
 __defineGetter__('gTopWindow', function() {
     delete this.gTopWindow;
     return this.gTopWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
@@ -395,12 +396,8 @@ function selectHomeFolder(aEvent) {
 function performSearch(aEvent) {
     var searchbar = getElement('searchbar');
 
-    // If new search is being started, remember the old view to
-    // restore it after the search is finished.
-    if (!searchbar.searchInProgress) {
+    if (!searchbar.searchInProgress)
         searchbar.previousView = gFeedView;
-        searchbar.previousSelectedIndex = gFeedList.tree.currentIndex;
-    }
 
     searchbar.searchInProgress = true;
 
@@ -410,10 +407,6 @@ function performSearch(aEvent) {
     // If the search scope is set to global but the view is not the
     // global search view, then let's create it.
     if (searchbar.searchScope == 1 && !gFeedView.isGlobalSearch) {
-        gFeedList.ignoreSelectEvent = true;
-        gFeedList.tree.view.selection.clearSelection();
-        gFeedList.ignoreSelectEvent = false;
-
         var query = new Query();
         query.searchString = searchbar.value;
         var title = bundle.getFormattedString('searchResults', ['']);
@@ -428,19 +421,13 @@ function performSearch(aEvent) {
     }
 }
 
-// Restores the view and the tree selection from before the search was started.
+// Restores the view from before the search was started.
 function finishSearch() {
     var searchbar = getElement('searchbar');
     if (!searchbar.searchInProgress)
         return;
 
     searchbar.searchInProgress = false;
-
-    if (searchbar.previousSelectedIndex != -1) {
-        gFeedList.ignoreSelectEvent = true;
-        gFeedList.tree.view.selection.select(searchbar.previousSelectedIndex);
-        gFeedList.ignoreSelectEvent = false;
-    }
 
     if (searchbar.previousView && searchbar.previousView != gFeedView) {
         searchbar.previousView.attach();
@@ -452,7 +439,6 @@ function finishSearch() {
     }
 
     searchbar.previousView = null;
-    searchbar.previousSelectedIndex = -1;
 }
 
 
