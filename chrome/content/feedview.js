@@ -427,7 +427,6 @@ FeedView.prototype = {
     attach: function FeedView_attach() {
         if (gFeedView)
             gFeedView.detach();
-        gFeedView = this;
 
         // Clear the searchbar.
         var searchbar = getElement('searchbar');
@@ -436,25 +435,30 @@ FeedView.prototype = {
             searchbar.clear();
         }
 
-        // Hide the drop-down to pick view constraints if it is tied to
-        // specific constraints (e.g. the Unread folder).
+        // Hide the drop-down to pick constraints if the view is intrinsically
+        // constrained, like for example the Unread folder.
         getElement('view-constraint-box').hidden = this._constrained;
 
         this.browser.addEventListener('load', this, false);
         gStorage.addObserver(this);
 
-        if (this.browser.currentURI.equals(gTemplateURI)) {
-            // This has to be done also here (not only in onload), because load event
-            // wasn't sent if the page had been restored by SessionStore.
-            this._setupTemplatePage();
+        // Load the template page if it isn't loaded yet. We also have to make sure to
+        // load it at startup, when no view is attached yet, because the template page may
+        // have been restored by SessionStore, in which case the load event wasn't fired
+        // and the template wasn't set up properly.
+        if (!this.browser.currentURI.equals(gTemplateURI) || !gFeedView) {
+            this.browser.loadURI(gTemplateURI.spec);
+        }
+        else {
+            for each (event in this._events)
+                this.document.addEventListener(event, this, true);
 
-            // Do it asynchronously, because UI maybe waiting to be redrawn
+            // Refresh asynchronously, because UI maybe waiting to be redrawn
             // (e.g. after selecting a treeitem).
             async(this.refresh, 0, this, false);
         }
-        else {
-            this.browser.loadURI(gTemplateURI.spec);
-        }
+
+        gFeedView = this;
     },
 
     /**
@@ -472,23 +476,6 @@ FeedView.prototype = {
         clearTimeout(this._markVisibleTimeout);
 
         gFeedView = null;
-    },
-
-
-    // This function sets up the page after it's loaded or after attaching a new FeedView.
-    // It does the initial work, which doesn't have to be done every time when refreshing.
-    _setupTemplatePage: function FeedView__setupTemplatePage() {
-        for each (event in this._events)
-            this.document.addEventListener(event, this, true);
-
-        // Pass some data which bindings need but don't have access to.
-        // We can bypass XPCNW here, because untrusted content is not
-        // inserted until the bindings are attached.
-        var data = {};
-        data.doubleClickMarks = gPrefs.doubleClickMarks;
-        data.markReadString = this.markAsReadStr;
-        data.markUnreadString = this.markAsUnreadStr;
-        this.document.defaultView.wrappedJSObject.gConveyedData = data;
     },
 
 
@@ -532,10 +519,22 @@ FeedView.prototype = {
                 gTopWindow.StarUI.showEditBookmarkPopup(itemID, starElem, 'after_start');
                 break;
 
+            // Set up the template page when it's loaded.
             case 'load':
                 getElement('feed-view-toolbar').hidden = !this.isActive;
+
                 if (this.isActive) {
-                    this._setupTemplatePage();
+                    for each (event in this._events)
+                        this.document.addEventListener(event, this, true);
+
+                    // Pass some data which bindings need but don't have access to.
+                    // We can bypass XPCNW here, because untrusted content is not
+                    // inserted until the bindings are attached.
+                    var data = {};
+                    data.doubleClickMarks = gPrefs.doubleClickMarks;
+                    data.markReadString = this.markAsReadStr;
+                    data.markUnreadString = this.markAsUnreadStr;
+                    this.document.defaultView.wrappedJSObject.gConveyedData = data;
                     this.refresh();
                 }
                 break;
