@@ -56,9 +56,9 @@ const ENTRIES_TEXT_TABLE_SCHEMA = 'title   TEXT, '+
                                   'authors TEXT, '+
                                   'tags    TEXT  ';
 
-const ENTRY_TAGS_TABLE_SCHEMA = 'tagID    INTEGER UNIQUE, ' +
-                                'tagName  TEXT,           ' +
-                                'entryID  INTEGER         ';
+const ENTRY_TAGS_TABLE_SCHEMA = 'tagID    INTEGER, ' +
+                                'tagName  TEXT,    ' +
+                                'entryID  INTEGER  ';
 
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
@@ -1014,7 +1014,7 @@ BriefStorageService.prototype = {
 
             for each (entry in this.getEntriesByURL(url)) {
                 if (isTag) {
-                    var tagName = gBms.getItemTitle(aFolder)
+                    var tagName = gBms.getItemTitle(aFolder);
                     this.tagEntry(true, entry.id, tagName, aItemID);
                 }
                 else {
@@ -1525,7 +1525,9 @@ var gStm = {
     },
 
     get tagEntry() {
-        var sql = 'INSERT INTO entry_tags (entryID, tagName, tagID) '+
+        // XXX |OR IGNORE| is necessary, because some beta users mistakingly ended
+        // up with tagID column marked as UNIQUE.
+        var sql = 'INSERT OR IGNORE INTO entry_tags (entryID, tagName, tagID) '+
                   'VALUES (:entryID, :tagName, :tagID)            ';
         delete this.tagEntry;
         return this.tagEntry = createStatement(sql);
