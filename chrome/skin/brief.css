@@ -48,7 +48,7 @@ splitter {
 }
 
 #feed-list > treechildren::-moz-tree-row {
-  height: 22px;
+  height: 20px;
 }
 
 #feed-list > treechildren::-moz-tree-indentation {
