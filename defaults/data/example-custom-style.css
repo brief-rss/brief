@@ -1,6 +1,7 @@
-/* You can define new CSS rules or override default
-   rules using !important.
-   Below you can find a few example customizations. */
+/* This stylesheet is stored as brief-custom-style.css
+   and can be found in /chrome folder in your profile.
+   You can override the default rules using !important.
+   Here are a few example customizations. */
 
 /* Don't show authors of items */ /*
 .article-authors {
