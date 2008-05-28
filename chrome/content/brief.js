@@ -82,10 +82,12 @@ function initCustomCSSFile() {
 
     // Register %profile%/chrome directory under a resource URI.
     var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-    var chromeDirURI = ioService.newFileURI(chromeDir);
     var resourceProtocol = ioService.getProtocolHandler('resource').
                                      QueryInterface(Ci.nsIResProtocolHandler);
-    resourceProtocol.setSubstitution('profile-chrome-dir', chromeDirURI);
+    if (!resourceProtocol.hasSubstitution('profile-chrome-dir')) {
+        let chromeDirURI = ioService.newFileURI(chromeDir);
+        resourceProtocol.setSubstitution('profile-chrome-dir', chromeDirURI);
+    }
 
     // If the custom CSS file doesn't exist, create it by copying the example file.
     var customStyleFile = chromeDir.clone();
@@ -136,6 +138,7 @@ function unload() {
     observerService.removeObserver(gFeedList, 'brief:feed-update-canceled');
     observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
     observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
+    observerService.removeObserver(gFeedList, 'brief:custom-style-changed');
 
     gPrefs.unregister();
     gStorage.removeObserver(gFeedList);
