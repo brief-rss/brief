@@ -427,6 +427,8 @@ FeedView.prototype = {
     attach: function FeedView_attach() {
         if (gFeedView)
             gFeedView.detach();
+        else
+            var noExistingView = true;
 
         // Clear the searchbar.
         var searchbar = getElement('searchbar');
@@ -443,10 +445,10 @@ FeedView.prototype = {
         gStorage.addObserver(this);
 
         // Load the template page if it isn't loaded yet. We also have to make sure to
-        // load it at startup, when no view is attached yet, because the template page may
-        // have been restored by SessionStore, in which case the load event wasn't fired
-        // and the template wasn't set up properly.
-        if (!this.browser.currentURI.equals(gTemplateURI) || !gFeedView) {
+        // load it at startup, when no view was attached yet, because the template page
+        // may have been restored by SessionStore - before the custom CSS file was
+        // registered as a resource and before any FeedView was attached.
+        if (!this.browser.currentURI.equals(gTemplateURI) || noExistingView) {
             this.browser.loadURI(gTemplateURI.spec);
         }
         else {
