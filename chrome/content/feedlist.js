@@ -556,7 +556,10 @@ var gFeedList = {
 
 
     _restoreSelection: function gFeedList__restoreSelection() {
-        var itemToSelect = this.lastSelectedID ? getElement(this.lastSelectedID) : null;
+        if (!this.lastSelectedID)
+            return;
+
+        var itemToSelect = getElement(this.lastSelectedID);
         if (itemToSelect) {
             let index = this.tree.view.getIndexOfItem(itemToSelect);
             this.ignoreSelectEvent = true;
