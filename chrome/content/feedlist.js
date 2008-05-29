@@ -1002,12 +1002,11 @@ var gContextMenu = {
         if (weHaveAGo) {
             var query = new Query();
             query.tags = [tag];
-            var entries = query.getProperty('entryURL');
-            var urls = entries.map(function(e) e.entryURL);
-            var distinctURLs = filterDuplicates(urls);
+            var urls = query.getProperty('entryURL', true).
+                             map(function(e) e.entryURL);
 
-            for (let i = 0; i < distinctURLs.length; i++) {
-                let uri = ioService.newURI(distinctURLs[i], null, null);
+            for (let i = 0; i < urls.length; i++) {
+                let uri = ioService.newURI(urls[i], null, null);
                 PlacesUtils.tagging.untagURI(uri, [tag]);
             }
         }

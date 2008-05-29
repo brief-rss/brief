@@ -604,15 +604,6 @@ function intersect(arr1, arr2) {
     return commonPart;
 }
 
-function filterDuplicates(arr) {
-    var retval = [];
-    for (let i = 0; i < arr.length; i++) {
-        if (retval.indexOf(arr[i]) == -1)
-            retval.push(arr[i]);
-    }
-    return retval;
-}
-
 function log(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].
                        getService(Ci.nsIConsoleService);
