@@ -324,9 +324,9 @@ FeedView.prototype = {
 
         var distance = aTargetPosition - win.pageYOffset;
         with (Math) {
-            var jumpCount = log(abs(distance) / 100) * 5 + 4;
+            var jumpCount = exp(abs(distance) / 400) + 6;
             jumpCount = max(jumpCount, 7);
-            jumpCount = min(jumpCount, 20);
+            jumpCount = min(jumpCount, 15);
 
             var jump = round(distance / jumpCount);
         }
@@ -651,11 +651,11 @@ FeedView.prototype = {
 
 
     /**
-     * Checks if the contained set of entries is should change and chooses the
-     * best way to refresh it.
+     * Checks if the view contains the right set of entries and if not,
+     * chooses the best way to refresh it.
      *
      * @param aModifiedEntries Array of modified entries.
-     * @param aPotentialChange TRUE if the modified entries should potentially be added,
+     * @param aPotentialChange TRUE if the modified entries may need to be added,
      *                         FALSE if they may need to be removed.
      *
      * @returns TRUE if the entry set was valid, FALSE if it wasn't and the view was
