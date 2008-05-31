@@ -860,6 +860,8 @@ FeedView.prototype = {
                 this.selectEntry(nextSibling || appendedElement || previousSibling || null);
 
         }, 250, this);
+
+        this._refreshPageNavUI();
     },
 
     /**
