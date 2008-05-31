@@ -399,12 +399,16 @@ const gBrief = {
     onFirstRun: function gBrief_onFirstRun() {
         // Add the toolbar button to the Navigation Bar.
         var navbar = document.getElementById('nav-bar');
-        var newset = navbar.currentSet.replace('urlbar-container,',
-                                               'brief-button,urlbar-container,');
-        navbar.currentSet = newset;
-        navbar.setAttribute('currentset', newset);
-        document.persist('nav-bar', 'currentset');
-        BrowserToolboxCustomizeDone(true);
+        var currentSet = navbar.currentSet;
+        if (!currentSet.match('brief-button')) {
+            let newset = currentSet.replace('urlbar-container,', 'brief-button,urlbar-container,');
+            navbar.currentSet = newset;
+            navbar.setAttribute('currentset', newset);
+            document.persist('nav-bar', 'currentset');
+            BrowserToolboxCustomizeDone(true);
+        }
+
+        gBrief.open(true);
 
         gBrief.prefs.setBoolPref('firstRun', false);
     },
