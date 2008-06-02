@@ -1,12 +1,3 @@
-#show-shortcuts image {
-    display: none;
-}
-
-.article-controls > button {
-  opacity: 1.0 !important;
-  margin-top: 1px !important;
-}
-
 #feed-list treechildren::-moz-tree-image(container, primary) {
   list-style-image: url('chrome://browser/skin/bookmarks/bookmark-folder.png') !important;
   -moz-image-region: auto;
