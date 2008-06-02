@@ -217,15 +217,15 @@
         </groupbox>
 
         <groupbox align="center" orient="horizontal">
-            <caption label="&keyboardGroup.caption;"/>
+            <caption label="&shortcutsGroup.caption;"/>
             <checkbox id="enable-item-selection-checkbox"
-                      label="&enableItemSelection.label;"
-                      accesskey="&enableItemSelection.accesskey;"
+                      label="&enableItemHightlight.label;"
+                      accesskey="&enableItemHightlight.accesskey;"
                       preference="extensions.brief.feedview.entrySelectionEnabled"/>
             <spacer flex="1"/>
             <button id="show-shortcuts"
-                    label="&showShortcuts.label;"
-                    accesskey="&showShortcuts.accesskey;"
+                    label="&keyboardShortcuts.label;"
+                    accesskey="&keyboardShortcuts.accesskey;"
                     oncommand="gDisplayPane.showShortcuts()"/>
         </groupbox>
 
