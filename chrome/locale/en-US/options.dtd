@@ -43,11 +43,11 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Mark items as read after I see them">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY keyboardGroup.caption "Keyboard">
-<!ENTITY enableItemSelection.label "Enable managing items using keyboard">
-<!ENTITY enableItemSelection.accesskey "E">
-<!ENTITY showShortcuts.label "Show shortcuts">
-<!ENTITY showShortcuts.accesskey "w">
+<!ENTITY shortcutsGroup.caption "Shortcuts">
+<!ENTITY enableItemHightlight.label "Always highlight the current item">
+<!ENTITY enableItemHightlight.accesskey "A">
+<!ENTITY keyboardShortcuts.label "Keyboard shortcuts">
+<!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Appearance">
 <!ENTITY editStyleDescription.label "Customize the appearance of feeds">
 <!ENTITY editStyleButton.label "Customize">
@@ -65,7 +65,7 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded items after">
 <!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "days">
-<!ENTITY updatedEntries.label "Don't mark changed items as unread">
+<!ENTITY updatedEntries.label "Don't mark changed items back as unread">
 <!ENTITY updatedEntries.accesskey "D">
 <!ENTITY previousFeed.label "&lt; Previous">
 <!ENTITY previousFeed.accesskey "P">
