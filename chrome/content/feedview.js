@@ -182,11 +182,11 @@ FeedView.prototype = {
     // entry when the topmost entry is selected.
     _selectLastEntryOnRefresh: false,
 
-    // Temporarily disable selecting entries.
-    _selectionSuppressed: false,
+    // Suppresses automatically selecting the central item after the next scroll event.
+    _suppressScrollSelection: false,
 
     selectNextEntry: function FeedView_selectNextEntry() {
-        if (this._selectionSuppressed)
+        if (this._scrolling)
             return;
 
         if (gPrefs.entrySelectionEnabled) {
@@ -202,7 +202,7 @@ FeedView.prototype = {
     },
 
     selectPrevEntry: function FeedView_selectPrevEntry() {
-        if (this._selectionSuppressed)
+        if (this._scrolling)
             return;
 
         if (gPrefs.entrySelectionEnabled) {
@@ -312,12 +312,12 @@ FeedView.prototype = {
         }
     },
 
-
-    _smoothScrollInterval: null,
+    // Indicates the smooth scrolling is in progress and by the way stores the
+    // ID of the scrolling interval.
+    _scrolling: null,
 
     _scrollSmoothly: function FeedView__scrollSmoothly(aTargetPosition) {
-        // Don't start if scrolling is already in progress.
-        if (this._smoothScrollInterval)
+        if (this._scrolling)
             return;
 
         var win = this.document.defaultView;
@@ -331,8 +331,6 @@ FeedView.prototype = {
             var jump = round(distance / jumpCount);
         }
 
-        // Disallow selecting further entries until scrolling is finished.
-        this._selectionSuppressed = true;
         var self = this;
 
         function scroll() {
@@ -340,16 +338,21 @@ FeedView.prototype = {
             // then scroll directly to the target position.
             if (Math.abs(aTargetPosition - win.pageYOffset) <= Math.abs(jump)) {
                 win.scroll(win.pageXOffset, aTargetPosition)
-                clearInterval(self._smoothScrollInterval);
-                self._smoothScrollInterval = null;
-                self._selectionSuppressed = false;
+                clearInterval(self._scrolling);
+                self._scrolling = null;
+
+                // One more scroll event will be sent but _scrolling is already null,
+                // so the event handler will try to automatically select the central
+                // entry. This has to be prevented, because it may deselect the entry
+                // that the user has just selected manually.
+                self._suppressScrollSelection = true;
             }
             else {
                 win.scroll(win.pageXOffset, win.pageYOffset + jump);
             }
         }
 
-        this._smoothScrollInterval = setInterval(scroll, 10);
+        this._scrolling = setInterval(scroll, 10);
     },
 
 
@@ -473,8 +476,8 @@ FeedView.prototype = {
 
         gStorage.removeObserver(this);
 
-        clearInterval(this._smoothScrollInterval);
-        this._smoothScrollInterval = null;
+        clearInterval(this._scrolling);
+        this._scrolling = null;
         clearTimeout(this._markVisibleTimeout);
 
         gFeedView = null;
@@ -542,8 +545,20 @@ FeedView.prototype = {
                 break;
 
             case 'scroll':
+                if (gPrefs.entrySelectionEnabled && !this._scrolling && !this._suppressScrollSelection) {
+                    clearTimeout(this._scrollSelectionTimeout);
+
+                    function selectCentralEntry() {
+                        let elem = this._getMiddleEntryElement();
+                        this.selectEntry(elem);
+                    }
+                    this._scrollSelectionTimeout = async(selectCentralEntry, 250, this);
+                }
+                this._suppressScrollSelection = false;
+
                 this.markVisibleAsRead();
                 break;
+
             case 'click':
                 this._onClick(aEvent);
                 break;
@@ -720,8 +735,8 @@ FeedView.prototype = {
             return;
 
         // Stop scrolling.
-        clearInterval(this._smoothScrollInterval);
-        this._smoothScrollInterval = null;
+        clearInterval(this._scrolling);
+        this._scrolling = null;
 
         // Cancel auto-marking entries as read timeout.
         clearTimeout(this._markVisibleTimeout);
@@ -817,6 +832,10 @@ FeedView.prototype = {
             var win = this.document.defaultView;
             win.scroll(win.pageXOffset, 0);
         }
+
+        // Rebuilding the content may cause a scroll event, but we don't want it to
+        // mess with selection.
+        this._suppressScrollSelection = true;
 
         this.markVisibleAsRead();
     },
