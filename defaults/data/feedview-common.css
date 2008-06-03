@@ -54,6 +54,20 @@
   background-position: -7px -25px;
 }
 
+.mark-read:active > .mark-read-right {
+  background-position: -7px -50px;
+}
+
+.mark-read:hover > .mark-read-centre,
+.mark-read:hover > .mark-read-left {
+  background-position: 0 -25px;
+}
+
+.mark-read:active > .mark-read-centre,
+.mark-read:active > .mark-read-left {
+  background-position: 0 -50px;
+}
+
 .delete-entry, .restore-entry {
   width: 29px;
   height: 25px;
@@ -68,10 +82,13 @@
 }
 
 .delete-entry:hover,
-.restore-entry:hover,
-.mark-read:hover > .mark-read-centre,
-.mark-read:hover > .mark-read-left {
+.restore-entry:hover {
   background-position: 0 -25px;
+}
+
+.delete-entry:active,
+.restore-entry:active {
+  background-position: 0 -50px;
 }
 
 .article-star {
