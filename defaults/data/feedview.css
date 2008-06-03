@@ -54,7 +54,7 @@ body {
 
 #message {
     font-size: 19px;
-    color: #3f855c;
+    color: #274b5d;
     text-align: center;
     display: none;
     margin-top: 100px;
@@ -253,7 +253,7 @@ body {
 
 
 
-/* ---------------------  Adjustments for the selected articles  ------------------- */
+/* ---------------------  Adjustments for the selected article  ------------------- */
 
 .article-container[selected] {
     -moz-border-left-colors: #fafcff #f7f9fc #d2e8ff #98cbff #1474d6;
