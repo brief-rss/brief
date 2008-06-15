@@ -73,7 +73,6 @@ body {
     -moz-border-right-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
     border-left: 5px #e6e9ed solid;
     -moz-border-left-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
-    padding-bottom: 1px; /* Without this, the article is sometimes cut-off */
     overflow: visible;   /* This is for the the expand/collapse dropmarker which is
                             taken outside the box using negative margins */
     position: relative;
@@ -109,7 +108,7 @@ body {
 
 .article-controls {
     float: right;
-    margin: -3px 0 0 5px;
+    margin: -2px 0 0 5px;
 }
 
 .article-star {
@@ -173,6 +172,7 @@ body {
     line-height: 1.4;
     color: #272727;
     padding: 10px 25px 25px;
+    border-bottom: 1px solid #ffffff; /* Placeholder for selection border */
     overflow: auto;
     clear: both;
 }
@@ -264,7 +264,11 @@ body {
     border-top-color: #1474d6;
 }
 
-.article-container[selected] + .article-container > .article-header {
+.article-container[selected]:not(:last-child) > .article-content {
+    border-bottom-color: #1474d6;
+}
+
+.article-container[selected][collapsed] + .article-container > .article-header {
     border-top-color: #1474d6;
 }
 

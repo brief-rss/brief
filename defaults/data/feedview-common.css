@@ -137,6 +137,7 @@ blockquote {
 pre, code {
   font-family: "Courier New", monospace;
   font-size: 1em;
+  white-space: pre-wrap;
 }
 
 .search-highlight {
