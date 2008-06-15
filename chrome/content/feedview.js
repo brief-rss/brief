@@ -552,7 +552,7 @@ FeedView.prototype = {
                         let elem = this._getMiddleEntryElement();
                         this.selectEntry(elem);
                     }
-                    this._scrollSelectionTimeout = async(selectCentralEntry, 250, this);
+                    this._scrollSelectionTimeout = async(selectCentralEntry, 100, this);
                 }
                 this._suppressScrollSelection = false;
 
