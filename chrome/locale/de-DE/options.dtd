@@ -1,15 +1,5 @@
 <!ENTITY optionsWindow.title "Brief - Einstellungen">
 <!ENTITY mainPane.label "Allgemein">
-<!ENTITY folderTree.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
-<!ENTITY importOPML.label "Importieren...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportieren...">
-<!ENTITY exportOPML.accesskey "x">
-<!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
-<!ENTITY showStatusbarIcon.accesskey "S">
-<!ENTITY openInNewTab.label "Brief in einem neuen Tab öffnen">
-<!ENTITY openInNewTab.accesskey "T">
-<!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Aktualisierung">
 <!ENTITY checkForUpdatesBefore.label "Feeds überprüfen alle">
 <!ENTITY checkForUpdates.accesskey "F">
@@ -20,33 +10,48 @@
 <!ENTITY showNotification.label "Benachrichtigen, wenn neue Einträge gefunden wurden">
 <!ENTITY showNotification.accesskey "B">
 <!ENTITY behaviorGroup.caption "Verhalten">
+<!ENTITY openInNewTab.label "Brief in neuem Tab öffnen">
+<!ENTITY openInNewTab.accesskey "T">
 <!ENTITY openEntriesInTabs.label "Einträge in neuen Tabs öffnen">
 <!ENTITY openEntriesInTabs.accesskey "E">
-<!ENTITY autoMarkRead.label "Angesehene Einträge als gelesen markieren">
-<!ENTITY autoMarkRead.accesskey "m">
 <!ENTITY storingGroup.caption "Speicherung">
 <!ENTITY expirationBefore.label "Heruntergeladene Einträge für">
 <!ENTITY expirationAfter.label "Tage speichern">
 <!ENTITY expirationCheckbox.accesskey "H">
-<!ENTITY starredItemsKept.tooltip "Gekennzeichnete Einträge bleiben erhalten">
+<!ENTITY starredItemsKept.tooltip "Als Lesezeichen markierte Einträge werden gespeichert">
 <!ENTITY storedEntriesBefore.label "Nicht mehr als">
 <!ENTITY storedEntriesAfter.label "Einträge pro Feed speichern">
-<!ENTITY storedEntriesCheckbox.accesskey "m">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Alle Einträge löschen...">
 <!ENTITY clearAllEntriesButton.accesskey "A">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY folderTree.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
+<!ENTITY importOPML.label "Importieren...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportieren...">
+<!ENTITY exportOPML.accesskey "x">
 <!ENTITY displayPane.label "Anzeige">
-<!ENTITY feedViewGroup.caption "Anzeige des Feed-Inhalts">
-<!ENTITY authorsCheckbox.label "Autoren der Einträge anzeigen">
-<!ENTITY authorsCheckbox.accesskey "u">
 <!ENTITY entriesPerPageBefore.label "Pro Seite">
 <!ENTITY entriesPerPageAfter.label "Einträge anzeigen">
 <!ENTITY entriesPerPage.accesskey "S">
-<!ENTITY enableCustomStyle.label "Benutzerdefinierter Style:">
-<!ENTITY enableCustomStyle.accesskey "f">
-<!ENTITY browseCustomStyle.label "Durchsuchen...">
-<!ENTITY browseCustomStyle.accesskey "D">
-<!ENTITY showShortcuts.label "Tastaturkürzel anzeigen">
-<!ENTITY showShortcuts.accesskey "k">
+<!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
+<!ENTITY showStatusbarIcon.accesskey "S">
+<!ENTITY sortUnreadViewOldestFirst.label "Bei Anzeige ungelesener Einträge älteste zuerst anzeigen">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "u">
+<!ENTITY autoMarkRead.label "Einträge nach Anzeige in der Liste als gelesen markieren">
+<!ENTITY autoMarkRead.accesskey "A">
+<!ENTITY shortcutsGroup.caption "Tastaturkürzel">
+<!ENTITY enableItemHightlight.label "Den aktuellen Eintrag immer hervorheben">
+<!ENTITY enableItemHightlight.accesskey "a">
+<!ENTITY keyboardShortcuts.label "Tastaturkürzel">
+<!ENTITY keyboardShortcuts.accesskey "T">
+<!ENTITY customizeGroup.caption "Anzeige">
+<!ENTITY editStyleDescription.label "Darstellung der Feeds anpassen">
+<!ENTITY editStyleButton.label "Anpassen...">
+<!ENTITY editStyleButton.accesskey "A">
+<!ENTITY styleEditor.title "Benutzerdefinierten Stil bearbeiten">
+<!ENTITY seeCustomizationTips.label "Mehr über benutzerdefinierte Stile mit CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Name:">
 <!ENTITY feedURL.label "Feed-Adresse:">
 <!ENTITY optionsGroupbox.caption "Feed-Einstellungen">
@@ -55,9 +60,8 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Heruntergeladene Einträge für">
 <!ENTITY expireEntriesPerFeed.accesskey "H">
 <!ENTITY expireEntriesPerFeedAfter.label "Tage speichern">
-<!ENTITY maxEntriesPerFeedBefore.label "Nicht mehr als">
-<!ENTITY maxEntriesPerFeed.accesskey "m">
-<!ENTITY maxEntriesPerFeedAfter.label "Einträge speichern">
+<!ENTITY updatedEntries.label "Aktualisierte Einträge nicht als ungelesen markieren">
+<!ENTITY updatedEntries.accesskey "u">
 <!ENTITY previousFeed.label "&lt; Vorheriger">
 <!ENTITY previousFeed.accesskey "V">
 <!ENTITY nextFeed.label "Nächster &gt;">

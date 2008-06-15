@@ -3,8 +3,6 @@
 <!ENTITY contributors.headline "協力者">
 <!ENTITY credits.headline "クレジット">
 <!ENTITY translators.headline "翻訳者">
-<!ENTITY extdevThanks.paragraph "irc.mozilla.org の #extdev の偉大な皆さんに感謝します:">
-<!ENTITY iconsThanks.paragraph "いくつかのアイコンは才能ある Arvid Axelsson の好意によるものです。">
-<!ENTITY testingThanks.paragraph "テストしてくれた Stefan Plewako に感謝します。">
-<!ENTITY keyboardIconsCredit.paragraph "Alan Who? によるキーボードアイコン - http://alanwho.com/">
-<!ENTITY toolbarIconsCredits.paragraph "いくつかのツールバーアイコンは Tango Desktop Project の一部として作られたものです">
+<!ENTITY extdevThanks.paragraph "irc.mozilla.org #extdev の偉大な皆さんに感謝します:">
+<!ENTITY iconsThanks.paragraph "一部のアイコンは才能ある Arvid Axelsson の好意によるものです。">
+<!ENTITY toolbarIconsCredits.paragraph "一部のツールバーアイコンは Tango Desktop Project の一部として作られたものです">

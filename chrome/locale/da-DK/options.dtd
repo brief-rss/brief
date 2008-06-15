@@ -1,15 +1,5 @@
 <!ENTITY optionsWindow.title "Brief indstillinger">
 <!ENTITY mainPane.label "Hoved">
-<!ENTITY folderTree.label "Mappe indeholdende dine Live-bogmærker">
-<!ENTITY importOPML.label "Import...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Eksport...">
-<!ENTITY exportOPML.accesskey "k">
-<!ENTITY showStatusbarIcon.label "Vis statuslinjeikon">
-<!ENTITY showStatusbarIcon.accesskey "S">
-<!ENTITY openInNewTab.label "Åbn Brief i et nyt faneblad">
-<!ENTITY openInNewTab.accesskey "F">
-<!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Opdaterer">
 <!ENTITY checkForUpdatesBefore.label "Tjek feeds for opdateringer hver">
 <!ENTITY checkForUpdates.accesskey "T">
@@ -17,34 +7,21 @@
 <!ENTITY updateIntervalHours.label "timer">
 <!ENTITY updateIntervalDays.label "dage">
 <!ENTITY checkForUpdatesAfter.label "minutter">
-<!ENTITY showNotification.label "Vis notifikation når der findes opdateringer">
-<!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "Opførsel">
 <!ENTITY openEntriesInTabs.label "Åbn emner i nye faneblade">
 <!ENTITY openEntriesInTabs.accesskey "b">
-<!ENTITY autoMarkRead.label "Marker emne som læst når de er blevet vist">
-<!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "Opbevaring">
 <!ENTITY expirationBefore.label "Fjern downloadede emner efter">
 <!ENTITY expirationAfter.label "dage">
 <!ENTITY expirationCheckbox.accesskey "j">
-<!ENTITY starredItemsKept.tooltip "Stjernemarkerede emner bliver bevaret">
 <!ENTITY storedEntriesBefore.label "Gem ikke flere end">
 <!ENTITY storedEntriesAfter.label "seneste indlæg af hver emne">
-<!ENTITY storedEntriesCheckbox.accesskey "e">
 <!ENTITY clearAllEntriesButton.label "Ryd alle emner...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY displayPane.label "Vis">
-<!ENTITY feedViewGroup.caption "Fed indholdsvisning">
-<!ENTITY authorsCheckbox.label "Vis forfattere på emner">
-<!ENTITY authorsCheckbox.accesskey "V">
 <!ENTITY entriesPerPageBefore.label "Vis">
 <!ENTITY entriesPerPageAfter.label "indlæg pr. side">
 <!ENTITY entriesPerPage.accesskey "S">
-<!ENTITY enableCustomStyle.label "Brug brugertilrettet stil:">
-<!ENTITY enableCustomStyle.accesskey "f">
-<!ENTITY browseCustomStyle.label "Gennemse">
-<!ENTITY browseCustomStyle.accesskey "G">
 <!ENTITY showShortcuts.label "Vis genveje">
 <!ENTITY showShortcuts.accesskey "i">
 <!ENTITY feedName.label "Navn">
@@ -55,9 +32,6 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Fjern downloadede emner efter">
 <!ENTITY expireEntriesPerFeed.accesskey "r">
 <!ENTITY expireEntriesPerFeedAfter.label "dage">
-<!ENTITY maxEntriesPerFeedBefore.label "Vis ikke mere end">
-<!ENTITY maxEntriesPerFeed.accesskey "V">
-<!ENTITY maxEntriesPerFeedAfter.label "seneste emner">
 <!ENTITY previousFeed.label "&lt; Foregående">
 <!ENTITY previousFeed.accesskey "F">
 <!ENTITY nextFeed.label "Næste &gt;">

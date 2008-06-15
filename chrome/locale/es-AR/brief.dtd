@@ -1,31 +1,40 @@
-
-
-<!ENTITY searchCurrentView.label "Buscar en la vista actual">
-<!ENTITY searchAllFeeds.label "Buscar en todas las Fuentes">
-<!ENTITY updateButton.tooltip "Buscar actualización de todas las Fuentes">
-<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
-<!ENTITY searchScopeButton.tooltip "Cambiar el modo de búsqueda">
-<!ENTITY showOptions.tooltip "Abrir las Opciones de Brief">
-
-<!ENTITY viewConstraintList.tooltip "Escoger que tipo de Titulares mostrar">
-<!ENTITY previousPage.tooltip "Mostrar Titulares nuevos">
-<!ENTITY nextPage.tooltip "Mostrar Titulares antiguos">
-<!ENTITY unreadFolder.label "No Leído">
-<!ENTITY starredFolder.label "Con estrella">
-<!ENTITY trashFolder.label "Basura">
-<!ENTITY ctxMarkFeedRead.label "Marcar Fuente como Leída">
-
-<!ENTITY ctxMarkFolderRead.label "Marcar carpeta como Leída">
-
-<!ENTITY ctxUpdateFeed.label "Actualizar Fuente">
-<!ENTITY ctxUpdateFolder.label "Update Folder">
-<!ENTITY ctxOpenWebsite.label "Abrir el sitio web">
-<!ENTITY ctxDeleteFeed.label "Delete Feed">
-<!ENTITY ctxDeleteFolder.label "Delete Folder">
-<!ENTITY ctxEmptyFeed.label "Vaciar Fuente">
-<!ENTITY ctxEmptyFolder.label "Vaciar Carpeta">
-<!ENTITY ctxRestoreTrashed.label "Restaurar los Titulares eliminados">
-<!ENTITY ctxEmptyTrash.label "Vaciar papelera">
-<!ENTITY ctxFeedProperties.label "Properties">
-<!ENTITY ctxUpdateFeeds.label "Actualizar Fuentes ahora">
-<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
+<!ENTITY selectHomeFolder.label "Seleccionar carpeta con sus Live Bookmarks:">
+<!ENTITY confirmHomeFolder.label "Aceptar">
+<!ENTITY searchCurrentView.label "Buscar vista actual">
+<!ENTITY searchAllFeeds.label "Buscar todos los Feeds">
+<!ENTITY headlinesCheckbox.tooltip "Usar vista por titulares">
+<!ENTITY showAll.label "Ver todo">
+<!ENTITY showUnread.label "Ver no leído">
+<!ENTITY showStarred.label "Ver marcadores">
+<!ENTITY updateButton.tooltip "Comprobar todos los Feeds para actualizaciones">
+<!ENTITY stopUpdatingButton.tooltip "Parar la comprobación de Feeds para actualizaciones">
+<!ENTITY searchScopeButton.tooltip "Cambiar el ámbito de búsqueda">
+<!ENTITY showOptions.tooltip "Abrir opciones de Brief">
+<!ENTITY markViewRead.tooltip "Marcar todos los elementos como leídos (mantener apretado Ctrl para marcar sólo la página actual)">
+<!ENTITY viewConstraintList.tooltip "Elegir el tipo de elementos a mostrar">
+<!ENTITY previousPage.tooltip "Mostrar elementos nuevos">
+<!ENTITY nextPage.tooltip "Mostrar elementos antiguos">
+<!ENTITY unreadFolder.label "No leído">
+<!ENTITY starredFolder.label "Marcadores">
+<!ENTITY trashFolder.label "Papelera">
+<!ENTITY ctxMarkFeedRead.label "Marcar Feed como leído">
+<!ENTITY ctxMarkFeedUnread.label "Marcar Feed como no leído">
+<!ENTITY ctxMarkFolderRead.label "Marcar carpeta como leída">
+<!ENTITY ctxMarkTagRead.label "Marcar elementos etiquetados como leídos">
+<!ENTITY ctxUpdateFeed.label "Actualizar Feed">
+<!ENTITY ctxUpdateFolder.label "Actualizar Carpeta">
+<!ENTITY ctxOpenWebsite.label "Abrir sitio web">
+<!ENTITY ctxDeleteFeed.label "Eliminar Feed">
+<!ENTITY ctxDeleteFolder.label "Eliminar Carpeta">
+<!ENTITY ctxDeleteTag.label "Eliminar Etiqueta">
+<!ENTITY ctxEmptyFeed.label "Feed vacío">
+<!ENTITY ctxEmptyFolder.label "Carpeta vacía">
+<!ENTITY ctxRestoreTrashed.label "Restaurar todos los elementos">
+<!ENTITY ctxEmptyTrash.label "Papelera vacía">
+<!ENTITY ctxFeedProperties.label "Propiedades">
+<!ENTITY ctxUpdateFeeds.label "Actualizar Feeds ahora">
+<!ENTITY ctxMarkFeedsAsRead.label "Marcar todos los Feeds como leídos">
+<!ENTITY compactingWindow.title "Compactando Feeds">
+<!ENTITY compactingInProgress.label "Brief está compactando los Feeds almacenados. Esto tomará algunos minutos...">
+<!ENTITY migrationProgress.title "Migrando Feeds">
+<!ENTITY migrationProgress.description "Brief está migrando Feeds almacenados">

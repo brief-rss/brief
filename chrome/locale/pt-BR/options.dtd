@@ -1,15 +1,5 @@
 <!ENTITY optionsWindow.title "Opções do Brief">
 <!ENTITY mainPane.label "Principal">
-<!ENTITY folderTree.label "Pasta que contém seus feeds favoritos:">
-<!ENTITY importOPML.label "Importar...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportar...">
-<!ENTITY exportOPML.accesskey "x">
-<!ENTITY showStatusbarIcon.label "Mostrar ícone na barra de status">
-<!ENTITY showStatusbarIcon.accesskey "c">
-<!ENTITY openInNewTab.label "Abrir o Brief em nova aba">
-<!ENTITY openInNewTab.accesskey "A">
-<!ENTITY feedsPane.label "Feeds">
 <!ENTITY updateGroup.caption "Atualização">
 <!ENTITY checkForUpdatesBefore.label "Verificar se há atualizações a cada">
 <!ENTITY checkForUpdates.accesskey "V">
@@ -17,34 +7,21 @@
 <!ENTITY updateIntervalHours.label "horas">
 <!ENTITY updateIntervalDays.label "dias">
 <!ENTITY checkForUpdatesAfter.label "minutos">
-<!ENTITY showNotification.label "Mostrar notificação quando houver atualizações">
-<!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "Comportamento">
 <!ENTITY openEntriesInTabs.label "Abrir itens em nova aba">
 <!ENTITY openEntriesInTabs.accesskey "b">
-<!ENTITY autoMarkRead.label "Marcar itens como lidos quando forem visualizados">
-<!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY storingGroup.caption "Armazenamento">
 <!ENTITY expirationBefore.label "Remover itens recebidos após">
 <!ENTITY expirationAfter.label "dias">
 <!ENTITY expirationCheckbox.accesskey "R">
-<!ENTITY starredItemsKept.tooltip "Itens com estrela serão mantidos">
 <!ENTITY storedEntriesBefore.label "Armazenar apenas os">
 <!ENTITY storedEntriesAfter.label "itens mais recentes por feed">
-<!ENTITY storedEntriesCheckbox.accesskey "z">
 <!ENTITY clearAllEntriesButton.label "Limpar todos os itens...">
 <!ENTITY clearAllEntriesButton.accesskey "L">
 <!ENTITY displayPane.label "Exibir">
-<!ENTITY feedViewGroup.caption "Visualização do conteúdo do feed">
-<!ENTITY authorsCheckbox.label "Mostrar autores dos itens">
-<!ENTITY authorsCheckbox.accesskey "u">
 <!ENTITY entriesPerPageBefore.label "Mostrar">
 <!ENTITY entriesPerPageAfter.label "itens por página">
 <!ENTITY entriesPerPage.accesskey "o">
-<!ENTITY enableCustomStyle.label "Usar estilo personalizado:">
-<!ENTITY enableCustomStyle.accesskey "s">
-<!ENTITY browseCustomStyle.label "Procurar">
-<!ENTITY browseCustomStyle.accesskey "P">
 <!ENTITY showShortcuts.label "Mostrar atalhos do teclado">
 <!ENTITY showShortcuts.accesskey "t">
 <!ENTITY feedName.label "Nome">
@@ -55,9 +32,6 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Remover itens recebidos após">
 <!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "dias">
-<!ENTITY maxEntriesPerFeedBefore.label "Armazenar apenas os">
-<!ENTITY maxEntriesPerFeed.accesskey "z">
-<!ENTITY maxEntriesPerFeedAfter.label "itens mais recentes">
 <!ENTITY previousFeed.label "&lt; Anterior">
 <!ENTITY previousFeed.accesskey "A">
 <!ENTITY nextFeed.label "Próximo &gt;">

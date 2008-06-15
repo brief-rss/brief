@@ -15,7 +15,6 @@
 <!ENTITY foldEntry "Свернуть/развернуть выделенную запись (в режиме просмотра заголовков)">
 <!ENTITY entries.header "Записи">
 <!ENTITY markRead "Отметить выделенную запись (не)прочитанной">
-<!ENTITY starEntry "Добавить/снять пометку">
 <!ENTITY moveToTrash "Переместить запись в Корзину">
 <!ENTITY restoreEntry "Восстановить запись (в Корзине)">
 <!ENTITY ctrlM.key "Ctrl + M">
@@ -24,7 +23,6 @@
 <!ENTITY tab.key "Tab">
 <!ENTITY view.header "Вид">
 <!ENTITY showAll "Показать все записи">
-<!ENTITY showStarred "Показать помеченные записи">
 <!ENTITY showUnread "Показать непрочитанные записи">
 <!ENTITY headlinesView "Переключить вид заголовков">
 <!ENTITY focusSearchbar "Переместить фокус в строку поиска">

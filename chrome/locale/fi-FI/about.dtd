@@ -5,6 +5,4 @@
 <!ENTITY translators.headline "Kääntäjät">
 <!ENTITY extdevThanks.paragraph "Kiitokset ihmisille irc.mozilla.orgin #extdev-kanavalla:">
 <!ENTITY iconsThanks.paragraph "Jotkin kuvakkeista ovat lahjakkaan Arvid Axelsson käsialaa.">
-<!ENTITY testingThanks.paragraph "Kiitokset Stefan Plewakolle testauksesta.">
-<!ENTITY keyboardIconsCredit.paragraph "Näppäimistökuvakkeet on tehnyt Alan Who? - http://alanwho.com/">
 <!ENTITY toolbarIconsCredits.paragraph "Osa työkalupalkin kuvakkeista ovat osa Tango Desktop -projektia">

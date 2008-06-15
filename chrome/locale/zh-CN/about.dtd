@@ -1,10 +1,8 @@
 <!ENTITY createdBy.headline "作者">
-<!ENTITY homepage.label "网站首页">
+<!ENTITY homepage.label "扩展主页">
 <!ENTITY contributors.headline "贡献者">
 <!ENTITY credits.headline "感谢">
 <!ENTITY translators.headline "译者">
-<!ENTITY extdevThanks.paragraph "感谢 irc.mozilla.org/#extdev 上伟大的各位：">
-<!ENTITY iconsThanks.paragraph "某些图标得到聪明的 Arvid Axelsson 的许可使用。">
-<!ENTITY testingThanks.paragraph "感谢 Stefan Plewako 帮助测试。">
-<!ENTITY keyboardIconsCredit.paragraph "Alan Who 的键盘图标。http://alanwho.com/">
+<!ENTITY extdevThanks.paragraph "irc.mozilla.org 的 #extdev 频道上伟大的人们：">
+<!ENTITY iconsThanks.paragraph "某些图标得到聪明的 Arvid Axelsson 的许可使用">
 <!ENTITY toolbarIconsCredits.paragraph "某些工具栏图标来自 Tango Desktop Project">

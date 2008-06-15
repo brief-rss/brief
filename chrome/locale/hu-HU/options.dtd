@@ -1,15 +1,5 @@
 <!ENTITY optionsWindow.title "Rövid hírforrások - beállítások">
 <!ENTITY mainPane.label "Általános">
-<!ENTITY folderTree.label "Élő könyvjelzőket tartalmazó mappa:">
-<!ENTITY importOPML.label "Importálás...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportálás...">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY showStatusbarIcon.label "Állapotsor ikon megjelenítése">
-<!ENTITY showStatusbarIcon.accesskey "k">
-<!ENTITY openInNewTab.label "Rövid hírforrások megnyitása új lapon">
-<!ENTITY openInNewTab.accesskey "m">
-<!ENTITY feedsPane.label "Hírforrások">
 <!ENTITY updateGroup.caption "Frissítés">
 <!ENTITY checkForUpdatesBefore.label "Hírforrások frissítése minden">
 <!ENTITY checkForUpdates.accesskey "H">
@@ -17,36 +7,51 @@
 <!ENTITY updateIntervalHours.label "óra">
 <!ENTITY updateIntervalDays.label "nap">
 <!ENTITY checkForUpdatesAfter.label "percben">
-<!ENTITY showNotification.label "Értesítés megjelenítése új tartalom esetén">
-<!ENTITY showNotification.accesskey "m">
+<!ENTITY showNotification.label "Értesítés új elemek találatakor">
+<!ENTITY showNotification.accesskey "t">
 <!ENTITY behaviorGroup.caption "Viselkedés">
+<!ENTITY openInNewTab.label "Brief megnyitása új lapon">
+<!ENTITY openInNewTab.accesskey "l">
 <!ENTITY openEntriesInTabs.label "Bejegyzések megnyitása új lapon">
 <!ENTITY openEntriesInTabs.accesskey "B">
-<!ENTITY autoMarkRead.label "Megtekintett bejegyzések megjelölése olvasottként">
-<!ENTITY autoMarkRead.accesskey "o">
 <!ENTITY storingGroup.caption "Tárolás">
 <!ENTITY expirationBefore.label "Letöltött bejegyzések eltávolítása">
 <!ENTITY expirationAfter.label "nap elteltével">
 <!ENTITY expirationCheckbox.accesskey "L">
-<!ENTITY starredItemsKept.tooltip "Jelölt bejegyzések megtartása">
+<!ENTITY starredItemsKept.tooltip "Hozzáadott könyvjelzők eltárolása">
 <!ENTITY storedEntriesBefore.label "Ne tároljon többet mint">
 <!ENTITY storedEntriesAfter.label "bejegyzés hírforrásonként">
-<!ENTITY storedEntriesCheckbox.accesskey "N">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Minden bejegyzés törlése...">
 <!ENTITY clearAllEntriesButton.accesskey "t">
+<!ENTITY feedsPane.label "Hírforrások">
+<!ENTITY folderTree.label "Saját élő könyvjelzőket tartalmazó mappa:">
+<!ENTITY importOPML.label "Importálás...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportálás...">
+<!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Megjelenítés">
-<!ENTITY feedViewGroup.caption "Stíluslap bejegyzések">
-<!ENTITY authorsCheckbox.label "Bejegyzések szerzőinek megjelenítése">
-<!ENTITY authorsCheckbox.accesskey "B">
 <!ENTITY entriesPerPageBefore.label "Oldalanként">
 <!ENTITY entriesPerPageAfter.label "bejegyzés megjelenítése">
 <!ENTITY entriesPerPage.accesskey "O">
-<!ENTITY enableCustomStyle.label "Saját stílus:">
-<!ENTITY enableCustomStyle.accesskey "S">
-<!ENTITY browseCustomStyle.label "Tallózás">
-<!ENTITY browseCustomStyle.accesskey "T">
-<!ENTITY showShortcuts.label "Rövidítések megjelenítése">
-<!ENTITY showShortcuts.accesskey "R">
+<!ENTITY showStatusbarIcon.label "Állapotsor ikon megjelenítése">
+<!ENTITY showStatusbarIcon.accesskey "s">
+<!ENTITY sortUnreadViewOldestFirst.label "Az olvasatlan nézetben a régebbi elemek megjelenítése először">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "Elem megtekintése után annak megjelölése olvasottként">
+<!ENTITY autoMarkRead.accesskey "m">
+<!ENTITY shortcutsGroup.caption "Gyors elérés">
+<!ENTITY enableItemHightlight.label "Elem kiemelése mindig">
+<!ENTITY enableItemHightlight.accesskey "k">
+<!ENTITY keyboardShortcuts.label "Gyorsbillentyűk">
+<!ENTITY keyboardShortcuts.accesskey "y">
+<!ENTITY customizeGroup.caption "Megjelenés">
+<!ENTITY editStyleDescription.label "Hírforrások megjelenésének testreszabása">
+<!ENTITY editStyleButton.label "Testreszabás">
+<!ENTITY editStyleButton.accesskey "T">
+<!ENTITY styleEditor.title "Felhasználói stílus szerkesztése">
+<!ENTITY seeCustomizationTips.label "Megjelenés testreszabása CSS segítségével">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Név">
 <!ENTITY feedURL.label "Hely">
 <!ENTITY optionsGroupbox.caption "Hírforrás beállítások">
@@ -55,9 +60,8 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Letöltött bejegyzések eltávolítása">
 <!ENTITY expireEntriesPerFeed.accesskey "e">
 <!ENTITY expireEntriesPerFeedAfter.label "nap elteltével">
-<!ENTITY maxEntriesPerFeedBefore.label "Ne tároljon többet mint">
-<!ENTITY maxEntriesPerFeed.accesskey "N">
-<!ENTITY maxEntriesPerFeedAfter.label "bejegyzés hírforrásonként">
+<!ENTITY updatedEntries.label "Ne jelölje olvasatlannak a módosított elemeket">
+<!ENTITY updatedEntries.accesskey "N">
 <!ENTITY previousFeed.label "&lt; Előző">
 <!ENTITY previousFeed.accesskey "E">
 <!ENTITY nextFeed.label "Következő &gt;">

@@ -3,7 +3,6 @@
 <!ENTITY searchAllFeeds.label "Søg alle feeds">
 <!ENTITY showAll.label "Vis alle">
 <!ENTITY showUnread.label "Vis ulæste">
-<!ENTITY showStarred.label "Vis stjernemarkerede">
 <!ENTITY updateButton.tooltip "Tjek alle feeds for opdateringer">
 <!ENTITY stopUpdatingButton.tooltip "Stop tjek af feeds for opdateringer">
 <!ENTITY searchScopeButton.tooltip "Skift søgerækkevidde">
@@ -11,13 +10,11 @@
 <!ENTITY viewConstraintList.tooltip "Vælg hvilke slags emner der skal vises">
 <!ENTITY previousPage.tooltip "Vis nyere elementer">
 <!ENTITY nextPage.tooltip "Vis ældre elementer">
-<!ENTITY unreadFolder.label "Ulæst">
 <!ENTITY starredFolder.label "Stjernemarkeret">
 <!ENTITY trashFolder.label "Skraldespand">
 <!ENTITY ctxMarkFeedRead.label "Marker alle feeds som læste">
 <!ENTITY ctxMarkFeedUnread.label "Marker feed som ulæst">
 <!ENTITY ctxMarkFolderRead.label "Marker mappe som læst">
-<!ENTITY ctxMarkFolderUnread.label "Marker mappe som ulæst">
 <!ENTITY ctxUpdateFeed.label "Opdater feed">
 <!ENTITY ctxUpdateFolder.label "Opdater mappe">
 <!ENTITY ctxOpenWebsite.label "Åbn webside">

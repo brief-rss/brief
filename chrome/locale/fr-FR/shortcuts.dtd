@@ -1,27 +1,32 @@
 <!ENTITY shortcutsPage.title "Brief - raccourcis clavier">
 <!ENTITY navigation.header "Navigation">
 <!ENTITY or "ou">
+<!ENTITY ctrlShiftA.key "Ctrl + Maj + A">
+<!ENTITY openBrief "Ouvrir Brief">
 <!ENTITY space.key "Espace">
+<!ENTITY showNextItem "Afficher l&apos;article suivant">
 <!ENTITY backspace.key "Retour arrière">
+<!ENTITY showPreviousItem "Afficher l&apos;article précédent">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "Afficher la page suivante">
 <!ENTITY altJ.key "Alt + J">
 <!ENTITY previousPage "Afficher la page précédente">
 <!ENTITY enter.key "Entrée">
-<!ENTITY openEntry "Ouvrir l&apos;article">
+<!ENTITY openEntry "Ouvrir l&apos;article courant">
 <!ENTITY ctrlEnter.key "Ctrl + Entrée">
 <!ENTITY cmdEnter.key "Cmd + Entrée">
-<!ENTITY openEntryTab "Ouvrir l&apos;article dans un nouvel onglet">
-<!ENTITY foldEntry "Afficher ou réduire l&apos;article sélectionné (en mode d&apos;affichage des titres)">
+<!ENTITY openEntryTab "Ouvrir l&apos;article courant dans un nouvel onglet">
+<!ENTITY foldEntry "Dérouler ou replier l&apos;article courant (mode d&apos;affichage des titres)">
 <!ENTITY entries.header "Articles">
-<!ENTITY markRead "Marquer l&apos;article sélectionné comme lu ou non lu">
-<!ENTITY starEntry "Marquer ou supprimer la marque de l&apos;article">
-<!ENTITY moveToTrash "Envoyer l&apos;article sélectionné à la corbeille">
-<!ENTITY restoreEntry "Restaurer l&apos;article sélectionné (dans la corbeille)">
+<!ENTITY markRead "Marquer l&apos;article courant comme lu ou non lu">
+<!ENTITY starEntry "Marquer ou ne plus marquer l&apos;article courant">
+<!ENTITY moveToTrash "Déplacer l&apos;article courant dans la corbeille">
+<!ENTITY restoreEntry "Restaurer l&apos;article courant de la corbeille">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Marquer les articles courants comme lus">
 <!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Activer le surlignage de l&apos;article courant">
 <!ENTITY view.header "Affichage">
 <!ENTITY showAll "Afficher tous les articles">
 <!ENTITY showStarred "Afficher les articles marqués">
