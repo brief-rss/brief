@@ -14,7 +14,7 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 8;
+const DATABASE_VERSION = 9;
 
 const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
                            'feedURL         TEXT,                ' +
@@ -204,8 +204,8 @@ BriefStorageService.prototype = {
         executeSQL('CREATE TABLE IF NOT EXISTS entry_tags ('+ENTRY_TAGS_TABLE_SCHEMA+')         ');
         executeSQL('CREATE VIRTUAL TABLE entries_text USING fts3 ('+ENTRIES_TEXT_TABLE_SCHEMA+')');
 
-        executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_index ON entries (feedID) ');
-        executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)     ');
+        executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)                ');
+        executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
 
         // Speed up lookup when checking for updates.
         executeSQL('CREATE INDEX IF NOT EXISTS entries_primaryHash_index ON entries (primaryHash) ');
@@ -285,6 +285,12 @@ BriefStorageService.prototype = {
         case 7:
             this.migrateEntries();
             this.bookmarkStarredEntries();
+            // Fall through...
+
+        // To 1.2
+        case 8:
+            executeSQL('DROP INDEX IF EXISTS entries_feedID_index');
+            executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
 
         }
 
@@ -914,7 +920,10 @@ BriefStorageService.prototype = {
     observe: function BriefStorage_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'profile-after-change':
-                this.instantiate();
+                if (aData === 'startup') {
+                    this.instantiate();
+                    gObserverService.removeObserver(this, 'profile-after-change');
+                }
                 break;
 
             case 'quit-application':
@@ -927,7 +936,6 @@ BriefStorageService.prototype = {
                 gBms.removeObserver(this);
                 gPrefs.removeObserver('', this);
                 gObserverService.removeObserver(this, 'quit-application');
-                gObserverService.removeObserver(this, 'profile-after-change');
 
                 this.syncDelayTimer = null;
                 break;
