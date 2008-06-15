@@ -1,28 +1,32 @@
+<!ENTITY selectHomeFolder.label "Selecteer de map met uw Live Bladwijzers:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Zoeken in huidige weergave">
 <!ENTITY searchAllFeeds.label "Zoeken in alle feeds">
+<!ENTITY headlinesCheckbox.tooltip "Koptekstweergave gebruiken">
 <!ENTITY showAll.label "Alles bekijken">
 <!ENTITY showUnread.label "Ongelezen bekijken">
-<!ENTITY showStarred.label "Met ster bekijken">
+<!ENTITY showStarred.label "Bladwijzers bekijken">
 <!ENTITY updateButton.tooltip "Alle feeds controleren op updates">
 <!ENTITY stopUpdatingButton.tooltip "Feeds niet meer op updates controleren">
 <!ENTITY searchScopeButton.tooltip "De zoekopdracht wijzigen">
 <!ENTITY showOptions.tooltip "Brief opties openen">
+<!ENTITY markViewRead.tooltip "Alle berichten als gelezen markeren (houd Ctrl ingedrukt om alleen de huidige pagina te markeren)">
 <!ENTITY viewConstraintList.tooltip "Kies welke berichten moeten worden weergegeven">
 <!ENTITY previousPage.tooltip "Nieuwere onderwerpen weergeven">
 <!ENTITY nextPage.tooltip "Oudere onderwerpen weergeven">
 <!ENTITY unreadFolder.label "Ongelezen">
-<!ENTITY starredFolder.label "Voorzien van ster">
+<!ENTITY starredFolder.label "Bladwijzers">
 <!ENTITY trashFolder.label "Prullenbak">
 <!ENTITY ctxMarkFeedRead.label "Feed als gelezen markeren">
 <!ENTITY ctxMarkFeedUnread.label "Als ongelezen markeren">
 <!ENTITY ctxMarkFolderRead.label "Map als gelezen markeren">
-<!ENTITY ctxMarkFolderUnread.label "Map als ongelezen markeren">
+<!ENTITY ctxMarkTagRead.label "Gelabelde berichten als gelezen markeren">
 <!ENTITY ctxUpdateFeed.label "Feed bijwerken">
 <!ENTITY ctxUpdateFolder.label "Map bijwerken">
 <!ENTITY ctxOpenWebsite.label "Website openen">
 <!ENTITY ctxDeleteFeed.label "Feed verwijderen">
 <!ENTITY ctxDeleteFolder.label "Map verwijderen">
+<!ENTITY ctxDeleteTag.label "Label verwijderen">
 <!ENTITY ctxEmptyFeed.label "Lege feed">
 <!ENTITY ctxEmptyFolder.label "Lege map">
 <!ENTITY ctxRestoreTrashed.label "Weggegooide berichten herstellen">
@@ -32,3 +36,5 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Alle feeds als gelezen markeren">
 <!ENTITY compactingWindow.title "Feeds compacteren">
 <!ENTITY compactingInProgress.label "Brief compacteert opgeslagen feeds. Dit kan enkele minuten duren...">
+<!ENTITY migrationProgress.title "Feeds overzetten">
+<!ENTITY migrationProgress.description "Brief zet opgeslagen feeds over...">

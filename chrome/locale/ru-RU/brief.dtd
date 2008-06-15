@@ -3,7 +3,6 @@
 <!ENTITY searchAllFeeds.label "Поиск во всех лентах">
 <!ENTITY showAll.label "Все записи">
 <!ENTITY showUnread.label "Непрочитанные записи">
-<!ENTITY showStarred.label "Помеченные записи">
 <!ENTITY updateButton.tooltip "Проверить обновления для всех лент">
 <!ENTITY stopUpdatingButton.tooltip "Остановить проверку обновления">
 <!ENTITY searchScopeButton.tooltip "Изменить область действия поиска">
@@ -11,13 +10,11 @@
 <!ENTITY viewConstraintList.tooltip "Выберите, какие записи следует отображать">
 <!ENTITY previousPage.tooltip "Показать новые записи">
 <!ENTITY nextPage.tooltip "Показать старые записи">
-<!ENTITY unreadFolder.label "Непрочитанные">
 <!ENTITY starredFolder.label "Помеченные">
 <!ENTITY trashFolder.label "Корзина">
 <!ENTITY ctxMarkFeedRead.label "Отметить ленту как прочитанную">
 <!ENTITY ctxMarkFeedUnread.label "Отметить ленту как непрочитанную">
 <!ENTITY ctxMarkFolderRead.label "Отметить папку как прочитанную">
-<!ENTITY ctxMarkFolderUnread.label "Отметить папку как непрочитанную">
 <!ENTITY ctxUpdateFeed.label "Обновить ленту">
 <!ENTITY ctxUpdateFolder.label "Обновить папку">
 <!ENTITY ctxOpenWebsite.label "Открыть веб-сайт">

@@ -1,30 +1,35 @@
 <!ENTITY shortcutsPage.title "Brief - näppäinkomennot">
 <!ENTITY navigation.header "Siirtyminen">
 <!ENTITY or "tai">
+<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
+<!ENTITY openBrief "Open Brief">
 <!ENTITY space.key "välilyönti">
+<!ENTITY showNextItem "Show next item">
 <!ENTITY backspace.key "askelpalautin">
+<!ENTITY showPreviousItem "Show previous item">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "Siirry seuraavalle sivulle">
 <!ENTITY altJ.key "Alt + J">
 <!ENTITY previousPage "Siirry edelliselle sivulle">
 <!ENTITY enter.key "Enter">
-<!ENTITY openEntry "Avaa merkintä">
+<!ENTITY openEntry "Open current item">
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
 <!ENTITY cmdEnter.key "Komento + Enter">
-<!ENTITY openEntryTab "Avaa merkintä uuteen välilehteen">
-<!ENTITY foldEntry "Laajenna tai supista valittu merkintä (otsikkonäkymässä)">
+<!ENTITY openEntryTab "Open current item in new tab">
+<!ENTITY foldEntry "Unfold or fold current item (in headlines view)">
 <!ENTITY entries.header "Syötemerkinnät">
-<!ENTITY markRead "Merkitse valittu merkintä luetuksi tai lukematta olevaksi">
-<!ENTITY starEntry "Merkitse valittu merkintä tähdellä tai poista tähti">
-<!ENTITY moveToTrash "Siirrä valittu merkintä roskakoriin">
-<!ENTITY restoreEntry "Palauta valittu merkintä (roskakorista)">
+<!ENTITY markRead "Mark current item as read or unread">
+<!ENTITY starEntry "Bookmark or unbookmark current item">
+<!ENTITY moveToTrash "Move current item to Trash">
+<!ENTITY restoreEntry "Restore current item from Trash">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY cmdM.key "Komento + M">
 <!ENTITY markAllAsRead "Merkitse kaikki merkinnät luetuiksi">
 <!ENTITY tab.key "sarkain">
+<!ENTITY enableEntryHightlight "Enable highlighting of the current item">
 <!ENTITY view.header "Merkintöjen näyttö">
 <!ENTITY showAll "Näytä kaikki merkinnät">
-<!ENTITY showStarred "Näytä tähdellä merkityt">
+<!ENTITY showStarred "Show bookmarked items">
 <!ENTITY showUnread "Näytä lukematta olevat merkinnät">
 <!ENTITY headlinesView "Ota käyttöön tai poista otsikkonäkymä käytöstä">
 <!ENTITY focusSearchbar "Valitse hakupalkki">

@@ -15,7 +15,6 @@
 <!ENTITY foldEntry "Mostra/nasconde l&apos;anteprima dell&apos;elemento selezionato">
 <!ENTITY entries.header "Elementi">
 <!ENTITY markRead "Segna elemento selezionato come letto/non letto">
-<!ENTITY starEntry "Segna/non segna con stella l&apos;elemento selezionato">
 <!ENTITY moveToTrash "Sposta l&apos;elemento selezionato nel cestino">
 <!ENTITY restoreEntry "Ripristina l&apos;elemento selezionato dal cestino">
 <!ENTITY ctrlM.key "Ctrl + M">
@@ -24,7 +23,6 @@
 <!ENTITY tab.key "Tab">
 <!ENTITY view.header "Visualizzazione">
 <!ENTITY showAll "Mostra tutti gli elementi">
-<!ENTITY showStarred "Mostra elementi segnati con stella">
 <!ENTITY showUnread "Mostra elementi non letti">
 <!ENTITY headlinesView "Mostra/nasconde le anteprime di tutti gli elementi">
 <!ENTITY focusSearchbar "Seleziona la barra di ricerca">

@@ -1,15 +1,5 @@
 <!ENTITY optionsWindow.title "Opzioni di Brief">
 <!ENTITY mainPane.label "Principali">
-<!ENTITY folderTree.label "Cartella contenente i segnalibri Live:">
-<!ENTITY importOPML.label "Importa...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Esporta...">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY showStatusbarIcon.label "Mostra l&apos;icona nella barra di stato">
-<!ENTITY showStatusbarIcon.accesskey "M">
-<!ENTITY openInNewTab.label "Apri Brief in una nuova scheda">
-<!ENTITY openInNewTab.accesskey "A">
-<!ENTITY feedsPane.label "Feed">
 <!ENTITY updateGroup.caption "Aggiornamenti">
 <!ENTITY checkForUpdatesBefore.label "Periodo di tempo prima del controllo successivo:">
 <!ENTITY checkForUpdates.accesskey "P">
@@ -17,34 +7,21 @@
 <!ENTITY updateIntervalHours.label "ora/e">
 <!ENTITY updateIntervalDays.label "giorno/i">
 <!ENTITY checkForUpdatesAfter.label "">
-<!ENTITY showNotification.label "Mostra la finestra di notifica quando ci sono aggiornamenti">
-<!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "Comportamento">
 <!ENTITY openEntriesInTabs.label "Apri elementi in nuove schede">
 <!ENTITY openEntriesInTabs.accesskey "s">
-<!ENTITY autoMarkRead.label "Marca come letti gli elementi che vengono visualizzati">
-<!ENTITY autoMarkRead.accesskey "l">
 <!ENTITY storingGroup.caption "Memorizzazione">
 <!ENTITY expirationBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
 <!ENTITY expirationAfter.label "">
 <!ENTITY expirationCheckbox.accesskey "G">
-<!ENTITY starredItemsKept.tooltip "Gli elementi segnati con stella verranno mantenuti">
 <!ENTITY storedEntriesBefore.label "Numero massimo di elementi per feed da memorizzare:">
 <!ENTITY storedEntriesAfter.label "">
-<!ENTITY storedEntriesCheckbox.accesskey "u">
 <!ENTITY clearAllEntriesButton.label "Elimina tutti gli elementi...">
 <!ENTITY clearAllEntriesButton.accesskey "t">
 <!ENTITY displayPane.label "Aspetto">
-<!ENTITY feedViewGroup.caption "Contenuto dei feed">
-<!ENTITY authorsCheckbox.label "Mostra gli autori degli elementi">
-<!ENTITY authorsCheckbox.accesskey "M">
 <!ENTITY entriesPerPageBefore.label "Elementi da visualizzare per pagina:">
 <!ENTITY entriesPerPageAfter.label "">
 <!ENTITY entriesPerPage.accesskey "E">
-<!ENTITY enableCustomStyle.label "Applica il seguente stile: ">
-<!ENTITY enableCustomStyle.accesskey "A">
-<!ENTITY browseCustomStyle.label "Sfoglia...">
-<!ENTITY browseCustomStyle.accesskey "S">
 <!ENTITY showShortcuts.label "Scorciatoie da tastiera...">
 <!ENTITY showShortcuts.accesskey "r">
 <!ENTITY feedName.label "Nome:">
@@ -55,9 +32,6 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
 <!ENTITY expireEntriesPerFeed.accesskey "G">
 <!ENTITY expireEntriesPerFeedAfter.label "">
-<!ENTITY maxEntriesPerFeedBefore.label "Numero massimo di ultimi elementi da memorizzare:">
-<!ENTITY maxEntriesPerFeed.accesskey "N">
-<!ENTITY maxEntriesPerFeedAfter.label "">
 <!ENTITY previousFeed.label "&lt; Precedente">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Successivo &gt;">

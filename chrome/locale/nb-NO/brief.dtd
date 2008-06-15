@@ -1,28 +1,32 @@
+<!ENTITY selectHomeFolder.label "Velg mappe med levende bokmerker:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Søk i nyhetskilden">
 <!ENTITY searchAllFeeds.label "Søk i alle nyhetskilder">
+<!ENTITY headlinesCheckbox.tooltip "Bruk overskriftsvisning">
 <!ENTITY showAll.label "Vis alle">
 <!ENTITY showUnread.label "Vis ulest">
-<!ENTITY showStarred.label "Vis merket med stjerne">
+<!ENTITY showStarred.label "Vis bokmerker">
 <!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
 <!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskilder">
 <!ENTITY searchScopeButton.tooltip "Endre søk">
 <!ENTITY showOptions.tooltip "Innstillinger for Brief">
+<!ENTITY markViewRead.tooltip "Merk alle elementer som lest (hold Ctrl for å kun merke gjeldende side)">
 <!ENTITY viewConstraintList.tooltip "Velg hvilke elementer som skal vises">
 <!ENTITY previousPage.tooltip "Vis nyere elementer">
 <!ENTITY nextPage.tooltip "Vis eldre elementer">
 <!ENTITY unreadFolder.label "Ulest">
-<!ENTITY starredFolder.label "Merket med stjerne">
+<!ENTITY starredFolder.label "Bokmerker">
 <!ENTITY trashFolder.label "Papirkurv">
 <!ENTITY ctxMarkFeedRead.label "Merk nyhetskilden som lest">
 <!ENTITY ctxMarkFeedUnread.label "Merk nyhetskilden som ulest">
 <!ENTITY ctxMarkFolderRead.label "Merk mappe som lest">
-<!ENTITY ctxMarkFolderUnread.label "Merk mappe som ulest">
+<!ENTITY ctxMarkTagRead.label "Merk elementer med merkelapper som lest">
 <!ENTITY ctxUpdateFeed.label "Oppdater nyhetskilde">
 <!ENTITY ctxUpdateFolder.label "Oppdater mappe">
 <!ENTITY ctxOpenWebsite.label "Åpne nettside">
 <!ENTITY ctxDeleteFeed.label "Slett nyhetskilde">
 <!ENTITY ctxDeleteFolder.label "Slett mappe">
+<!ENTITY ctxDeleteTag.label "Slett merkelapp">
 <!ENTITY ctxEmptyFeed.label "Tøm nyhetskilde">
 <!ENTITY ctxEmptyFolder.label "Tøm mappe">
 <!ENTITY ctxRestoreTrashed.label "Gjenopprett elementer">
@@ -32,3 +36,5 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Merk alle nyhetskilder som lest">
 <!ENTITY compactingWindow.title "Komprimerer nyhetskilder">
 <!ENTITY compactingInProgress.label "Brief komprimerer lagrede nyhetskilder. Dette kan ta noen minutter ...">
+<!ENTITY migrationProgress.title "Migrering av nyhetskilder">
+<!ENTITY migrationProgress.description "Brief migrerer lagrede nyhetskilder ...">

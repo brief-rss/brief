@@ -1,28 +1,32 @@
+<!ENTITY selectHomeFolder.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "In aktueller Ansicht suchen">
 <!ENTITY searchAllFeeds.label "In allen Feeds suchen">
+<!ENTITY headlinesCheckbox.tooltip "Überschriftenmodus verwenden">
 <!ENTITY showAll.label "Alle anzeigen">
 <!ENTITY showUnread.label "Ungelesene anzeigen">
-<!ENTITY showStarred.label "Gekennzeichnete anzeigen">
+<!ENTITY showStarred.label "Als Lesezeichen markierte anzeigen">
 <!ENTITY updateButton.tooltip "Alle Feeds auf Aktualisierungen prüfen">
 <!ENTITY stopUpdatingButton.tooltip "Überprüfung abbrechen">
 <!ENTITY searchScopeButton.tooltip "Suchbereich ändern">
 <!ENTITY showOptions.tooltip "Einstellungen öffnen">
+<!ENTITY markViewRead.tooltip "Alle Einträge als gelesen markieren (Strg drücken, um nur die aktuelle Seite als gelesen zu markieren)">
 <!ENTITY viewConstraintList.tooltip "Art der anzuzeigenden Einträge auswählen">
 <!ENTITY previousPage.tooltip "Aktuellere Einträge anzeigen">
 <!ENTITY nextPage.tooltip "Ältere Einträge anzeigen">
 <!ENTITY unreadFolder.label "Ungelesen">
-<!ENTITY starredFolder.label "Gekennzeichnet">
+<!ENTITY starredFolder.label "Lesezeichen">
 <!ENTITY trashFolder.label "Papierkorb">
 <!ENTITY ctxMarkFeedRead.label "Feed als gelesen markieren">
 <!ENTITY ctxMarkFeedUnread.label "Feed als ungelesen markieren">
 <!ENTITY ctxMarkFolderRead.label "Ordner als gelesen markieren">
-<!ENTITY ctxMarkFolderUnread.label "Ordner als ungelesen markieren">
+<!ENTITY ctxMarkTagRead.label "Mit Schlagwörtern versehene Einträge als gelesen markieren">
 <!ENTITY ctxUpdateFeed.label "Feed aktualisieren">
 <!ENTITY ctxUpdateFolder.label "Ordner aktualisieren">
 <!ENTITY ctxOpenWebsite.label "Homepage öffnen">
 <!ENTITY ctxDeleteFeed.label "Feed löschen">
 <!ENTITY ctxDeleteFolder.label "Ordner löschen">
+<!ENTITY ctxDeleteTag.label "Schlagwort löschen">
 <!ENTITY ctxEmptyFeed.label "Feed-Einträge löschen">
 <!ENTITY ctxEmptyFolder.label "Einträge des Feed-Ordners löschen">
 <!ENTITY ctxRestoreTrashed.label "Einträge aus dem Papierkorb wiederherstellen">
@@ -32,3 +36,5 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Alle Feeds als gelesen markieren">
 <!ENTITY compactingWindow.title "Feeds komprimieren">
 <!ENTITY compactingInProgress.label "Gespeicherte Feeds werden komprimiert. Dies kann einige Minuten in Anspruch nehmen...">
+<!ENTITY migrationProgress.title "Feeds werden migriert">
+<!ENTITY migrationProgress.description "Brief migriert gespeichert Feeds...">

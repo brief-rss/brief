@@ -1,28 +1,32 @@
+<!ENTITY selectHomeFolder.label "Valitse live-kirjanmerkkisi sisältävä kansio:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Etsi avoimesta näkymästä">
 <!ENTITY searchAllFeeds.label "Etsi kaikista syötteistä">
+<!ENTITY headlinesCheckbox.tooltip "Käytä otsikkonäkymää">
 <!ENTITY showAll.label "Näytä kaikki">
 <!ENTITY showUnread.label "Näytä lukematta olevat">
-<!ENTITY showStarred.label "Näytä tähdellä merkityt">
+<!ENTITY showStarred.label "Näytä kirjanmerkit">
 <!ENTITY updateButton.tooltip "Tarkista kaikki syötteet päivitysten varalta">
 <!ENTITY stopUpdatingButton.tooltip "Keskeytä syötteiden tarkistus">
 <!ENTITY searchScopeButton.tooltip "Muuta haun kattavuutta">
 <!ENTITY showOptions.tooltip "Avaa Briefin asetukset">
+<!ENTITY markViewRead.tooltip "Merkitse kaikki luetuiksi (paina samalla Ctrl merkitseäksesi vain avoin sivu)">
 <!ENTITY viewConstraintList.tooltip "Valitse merkinnät, jotka näytetään">
 <!ENTITY previousPage.tooltip "Näytä uudemmat merkinnät">
 <!ENTITY nextPage.tooltip "Näytä vanhemmat merkinnät">
-<!ENTITY unreadFolder.label "Lukematta olevat">
-<!ENTITY starredFolder.label "Tähdellä merkityt">
+<!ENTITY unreadFolder.label "Lukematta">
+<!ENTITY starredFolder.label "Kirjanmerkit">
 <!ENTITY trashFolder.label "Roskakori">
 <!ENTITY ctxMarkFeedRead.label "Merkitse syöte luetuksi">
 <!ENTITY ctxMarkFeedUnread.label "Merkitse syöte lukematta olevaksi">
 <!ENTITY ctxMarkFolderRead.label "Merkitse kansio luetuksi">
-<!ENTITY ctxMarkFolderUnread.label "Merkitse kansio lukematta olevaksi">
+<!ENTITY ctxMarkTagRead.label "Merkitse avainsanalla merkityt luetuiksi">
 <!ENTITY ctxUpdateFeed.label "Päivitä syöte">
 <!ENTITY ctxUpdateFolder.label "Päivitä kansio">
 <!ENTITY ctxOpenWebsite.label "Avaa sivusto">
 <!ENTITY ctxDeleteFeed.label "Poista syöte">
 <!ENTITY ctxDeleteFolder.label "Poista kansio">
+<!ENTITY ctxDeleteTag.label "Poista avainsana">
 <!ENTITY ctxEmptyFeed.label "Tyhjennä syöte">
 <!ENTITY ctxEmptyFolder.label "Tyhjennä kansio">
 <!ENTITY ctxRestoreTrashed.label "Palauta kaikki merkinnät">
@@ -32,3 +36,5 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Merkitse kaikki syötteet luetuiksi">
 <!ENTITY compactingWindow.title "Tiivistetään syötteitä">
 <!ENTITY compactingInProgress.label "Brief tiivistää tallennettuja syötteitä. Tämä voi kestää muutaman minuutin...">
+<!ENTITY migrationProgress.title "Muutetaan syötteitä">
+<!ENTITY migrationProgress.description "Brief muuttaa tallennettuja syötteitä...">

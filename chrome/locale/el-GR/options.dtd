@@ -1,15 +1,5 @@
 <!ENTITY optionsWindow.title "Επιλογές Brief">
 <!ENTITY mainPane.label "Γενικά">
-<!ENTITY folderTree.label "Κατάλογος δυναμικών σελιδοδεικτών">
-<!ENTITY importOPML.label "Εισαγωγή...">
-<!ENTITY importOPML.accesskey "ω">
-<!ENTITY exportOPML.label "Εξαγωγή...">
-<!ENTITY exportOPML.accesskey "ξ">
-<!ENTITY showStatusbarIcon.label "Προβολή εικονίδιου στη γραμμή κατάστασης">
-<!ENTITY showStatusbarIcon.accesskey "ρ">
-<!ENTITY openInNewTab.label "Άνοιγμα του Brief σε νέα καρτέλα">
-<!ENTITY openInNewTab.accesskey "ν">
-<!ENTITY feedsPane.label "Αρχεία ροής">
 <!ENTITY updateGroup.caption "Ενημερώσεις">
 <!ENTITY checkForUpdatesBefore.label "Έλεγχος ενημερώσεων αρχείων ροής κάθε">
 <!ENTITY checkForUpdates.accesskey "λ">
@@ -17,36 +7,51 @@
 <!ENTITY updateIntervalHours.label "ώρες">
 <!ENTITY updateIntervalDays.label "ημέρες">
 <!ENTITY checkForUpdatesAfter.label "λεπτά">
-<!ENTITY showNotification.label "Προβολή ειδοποίησης όταν υπάρχουν ενημερώσεις">
-<!ENTITY showNotification.accesskey "β">
+<!ENTITY showNotification.label "Προβολή ειδοποίησης όταν υπάρχουν νέες εγγραφές">
+<!ENTITY showNotification.accesskey "Π">
 <!ENTITY behaviorGroup.caption "Συμπεριφορά">
+<!ENTITY openInNewTab.label "Άνοιγμα του Brief σε νέα καρτέλα">
+<!ENTITY openInNewTab.accesskey "α">
 <!ENTITY openEntriesInTabs.label "Άνοιγμα εγγραφών σε νέες καρτέλες">
 <!ENTITY openEntriesInTabs.accesskey "ι">
-<!ENTITY autoMarkRead.label "Σημείωση εγγραφών ως αναγνωσμένων με την εμφάνιση τους">
-<!ENTITY autoMarkRead.accesskey "μ">
 <!ENTITY storingGroup.caption "Αποθήκευση">
 <!ENTITY expirationBefore.label "Αφαίρεση εμφανισμένων εγγγραφών μετά από">
 <!ENTITY expirationAfter.label "ημέρες">
 <!ENTITY expirationCheckbox.accesskey "φ">
-<!ENTITY starredItemsKept.tooltip "Εγγραφές με αστέρι θα αποθηκεύονται">
+<!ENTITY starredItemsKept.tooltip "Εγγραφές με σελιδοδείκτες θα διατηρούνται">
 <!ENTITY storedEntriesBefore.label "Αποθήκευση το πολύ">
 <!ENTITY storedEntriesAfter.label "πρόσφατων εγγραφών από κάθε αρχείο ροής">
-<!ENTITY storedEntriesCheckbox.accesskey "θ">
+<!ENTITY storedEntriesCheckbox.accesskey "ο">
 <!ENTITY clearAllEntriesButton.label "Εκκαθάριση όλων των εγγραφών">
 <!ENTITY clearAllEntriesButton.accesskey "α">
+<!ENTITY feedsPane.label "Αρχεία ροής">
+<!ENTITY folderTree.label "Κατάλογος που περιέχει δυναμικούς σελιδοδείκτες:">
+<!ENTITY importOPML.label "Εισαγωγή...">
+<!ENTITY importOPML.accesskey "ι">
+<!ENTITY exportOPML.label "Εξαγωγή...">
+<!ENTITY exportOPML.accesskey "ω">
 <!ENTITY displayPane.label "Εμφάνιση">
-<!ENTITY feedViewGroup.caption "Εμφάνιση περιεχόμενου αρχείου ροής">
-<!ENTITY authorsCheckbox.label "Προβολή συντακτών εγγραφών">
-<!ENTITY authorsCheckbox.accesskey "υ">
 <!ENTITY entriesPerPageBefore.label "Προβολή">
 <!ENTITY entriesPerPageAfter.label "εγγραφών ανά σελίδα">
-<!ENTITY entriesPerPage.accesskey "σ">
-<!ENTITY enableCustomStyle.label "Χρήση προσαρμοσμένου στυλ:">
-<!ENTITY enableCustomStyle.accesskey "π">
-<!ENTITY browseCustomStyle.label "Εντοπισμός">
-<!ENTITY browseCustomStyle.accesskey "Ε">
-<!ENTITY showShortcuts.label "Προβολή συντομεύσεων πληκτρολογίου">
-<!ENTITY showShortcuts.accesskey "ω">
+<!ENTITY entriesPerPage.accesskey "ο">
+<!ENTITY showStatusbarIcon.label "Προβολή εικονίδιου στη γραμμή κατάστασης">
+<!ENTITY showStatusbarIcon.accesskey "κ">
+<!ENTITY sortUnreadViewOldestFirst.label "Εμφάνιση των παλαιότερων πρώτα στην εμφάνιση μόνο μη αναγνωσμένων">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "η">
+<!ENTITY autoMarkRead.label "Σημείωση εγγραφών ως αναγνωσμένων μετά την προβολή τους">
+<!ENTITY autoMarkRead.accesskey "ε">
+<!ENTITY shortcutsGroup.caption "Συντομεύσεις">
+<!ENTITY enableItemHightlight.label "Πάντα επισήμανση της τρέχουσας εγγραφής">
+<!ENTITY enableItemHightlight.accesskey "α">
+<!ENTITY keyboardShortcuts.label "Συντομεύσεις πληκτρολογίου">
+<!ENTITY keyboardShortcuts.accesskey "κ">
+<!ENTITY customizeGroup.caption "Εμφάνιση">
+<!ENTITY editStyleDescription.label "Προσαρμογή της εμφάνισης των αρχείων ροής">
+<!ENTITY editStyleButton.label "Προσαρμογή">
+<!ENTITY editStyleButton.accesskey "Π">
+<!ENTITY styleEditor.title "Επεξεργασία προσαρμοσμένου στυλ">
+<!ENTITY seeCustomizationTips.label "Μάθετε περισσότερα σχετικά με την προσαρμογή της εμφάνισης με χρήση CSS (Αγγλικά)">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Όνομα">
 <!ENTITY feedURL.label "Τοποθεσία">
 <!ENTITY optionsGroupbox.caption "Ρυθμίσεις αρχείου ροής">
@@ -55,9 +60,8 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Αφαίρεση εμφανισμένων εγγραφών μετά από">
 <!ENTITY expireEntriesPerFeed.accesskey "φ">
 <!ENTITY expireEntriesPerFeedAfter.label "ημέρες">
-<!ENTITY maxEntriesPerFeedBefore.label "Αποθήκευση το πολύ">
-<!ENTITY maxEntriesPerFeed.accesskey "π">
-<!ENTITY maxEntriesPerFeedAfter.label "πρόσφατων εγγραφών">
+<!ENTITY updatedEntries.label "Να μη σημειωθούν εγγραφές που έχουν υποστεί μεταβολές ως μη αναγνωσμένες">
+<!ENTITY updatedEntries.accesskey "η">
 <!ENTITY previousFeed.label "&lt; Προηγούμενο">
 <!ENTITY previousFeed.accesskey "Π">
 <!ENTITY nextFeed.label "Επόμενο &gt;">

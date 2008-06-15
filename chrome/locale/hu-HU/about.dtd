@@ -5,6 +5,4 @@
 <!ENTITY translators.headline "Fordítók">
 <!ENTITY extdevThanks.paragraph "Köszönet illeti meg a következő nagyszerű embereket az irc.mozilla.org #extdev csatornájáról:">
 <!ENTITY iconsThanks.paragraph "Néhány ikon Arvid Axelsson tehetségét dicséri.">
-<!ENTITY testingThanks.paragraph "Köszönet Stefan Plewako-nak a tesztelésért.">
-<!ENTITY keyboardIconsCredit.paragraph "A gombok ikonjait Alan Who? készítette - http://alanwho.com/">
 <!ENTITY toolbarIconsCredits.paragraph "Az eszköztár néhány ikonja a Tango Desktop Project részeként lett létrehozva">

@@ -15,7 +15,6 @@
 <!ENTITY foldEntry "Sammenfold eller udfold valgte emne (i overskrift-visning)">
 <!ENTITY entries.header "Emner">
 <!ENTITY markRead "Marker valgte emne som læst eller ulæst">
-<!ENTITY starEntry "Stjernemarker eller fjern markering fra valgte emne">
 <!ENTITY moveToTrash "Flyt valgte emne til Skraldespand">
 <!ENTITY restoreEntry "Genetabler valgte element (i Skraldespand)">
 <!ENTITY ctrlM.key "Ctrl + M">
@@ -24,7 +23,6 @@
 <!ENTITY tab.key "Tab">
 <!ENTITY view.header "Vis">
 <!ENTITY showAll "Vis alle emner">
-<!ENTITY showStarred "Vis stjernemarkerede emner">
 <!ENTITY showUnread "Vis ulæste emner">
 <!ENTITY headlinesView "Slå overskrift-visning til/fra">
 <!ENTITY focusSearchbar "Fokusér søgelinje">

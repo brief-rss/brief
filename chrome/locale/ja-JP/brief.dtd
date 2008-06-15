@@ -1,34 +1,40 @@
-<!ENTITY confirmHomeFolder.label "OK">
+<!ENTITY selectHomeFolder.label "ライブブックマークフォルダを選択:">
+<!ENTITY confirmHomeFolder.label "承認">
 <!ENTITY searchCurrentView.label "現在の表示から検索">
 <!ENTITY searchAllFeeds.label "すべてのフィードを検索">
+<!ENTITY headlinesCheckbox.tooltip "ヘッドライン表示を利用します">
 <!ENTITY showAll.label "すべて見る">
 <!ENTITY showUnread.label "未読を見る">
-<!ENTITY showStarred.label "スター済みを見る">
-<!ENTITY updateButton.tooltip "すべてのフィードを更新確認します">
-<!ENTITY stopUpdatingButton.tooltip "フィードの更新確認を停止します">
+<!ENTITY showStarred.label "ブックマークを見る">
+<!ENTITY updateButton.tooltip "全フィードの更新を確認します">
+<!ENTITY stopUpdatingButton.tooltip "フィード更新の確認を停止します">
 <!ENTITY searchScopeButton.tooltip "検索範囲を変更します">
 <!ENTITY showOptions.tooltip "Brief のオプションを開きます">
+<!ENTITY markViewRead.tooltip "すべての項目を既読にします (現在のページのみを既読にするためには Ctrl を押したままにします)">
 <!ENTITY viewConstraintList.tooltip "表示する項目の種類を選びます">
 <!ENTITY previousPage.tooltip "より新たな項目を表示します">
 <!ENTITY nextPage.tooltip "より古い項目を表示します">
 <!ENTITY unreadFolder.label "未読">
-<!ENTITY starredFolder.label "スター済み">
+<!ENTITY starredFolder.label "ブックマーク">
 <!ENTITY trashFolder.label "ごみ箱">
 <!ENTITY ctxMarkFeedRead.label "フィードを既読にする">
 <!ENTITY ctxMarkFeedUnread.label "フィードを未読にする">
 <!ENTITY ctxMarkFolderRead.label "フォルダを既読にする">
-<!ENTITY ctxMarkFolderUnread.label "フォルダを未読にする">
+<!ENTITY ctxMarkTagRead.label "タグ付けされた項目を既読にする">
 <!ENTITY ctxUpdateFeed.label "フィードを更新する">
 <!ENTITY ctxUpdateFolder.label "フォルダを更新する">
 <!ENTITY ctxOpenWebsite.label "ウェブサイトを開く">
 <!ENTITY ctxDeleteFeed.label "フィードを削除する">
 <!ENTITY ctxDeleteFolder.label "フォルダを削除する">
+<!ENTITY ctxDeleteTag.label "タグを削除する">
 <!ENTITY ctxEmptyFeed.label "フィードを空にする">
 <!ENTITY ctxEmptyFolder.label "フォルダを空にする">
 <!ENTITY ctxRestoreTrashed.label "すべての項目を元に戻す">
 <!ENTITY ctxEmptyTrash.label "ごみ箱を空にする">
 <!ENTITY ctxFeedProperties.label "プロパティ">
-<!ENTITY ctxUpdateFeeds.label "今すぐフィードを更新">
-<!ENTITY ctxMarkFeedsAsRead.label "すべてのフィードを既読とする">
+<!ENTITY ctxUpdateFeeds.label "今すぐフィードを更新する">
+<!ENTITY ctxMarkFeedsAsRead.label "すべてのフィードを既読にする">
 <!ENTITY compactingWindow.title "フィード圧縮中">
 <!ENTITY compactingInProgress.label "Brief は保管済みフィードを圧縮しています。しばらく時間がかかるでしょう...">
+<!ENTITY migrationProgress.title "フィードの移行">
+<!ENTITY migrationProgress.description "Brief は保管済みフィードを移行しています...">

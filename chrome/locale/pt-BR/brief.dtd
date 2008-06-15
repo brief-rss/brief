@@ -3,7 +3,6 @@
 <!ENTITY searchAllFeeds.label "Pesquisar todos os feeds">
 <!ENTITY showAll.label "Ver todos">
 <!ENTITY showUnread.label "Ver não lidos">
-<!ENTITY showStarred.label "Ver com estrela">
 <!ENTITY updateButton.tooltip "Verificar se há atualizações para os feeds">
 <!ENTITY stopUpdatingButton.tooltip "Parar de verificar se há atualizações para os feeds">
 <!ENTITY searchScopeButton.tooltip "Alterar escopo da pesquisa">
@@ -11,13 +10,11 @@
 <!ENTITY viewConstraintList.tooltip "Escolher o tipo de itens a serem exibidos">
 <!ENTITY previousPage.tooltip "Mostrar itens mais recentes">
 <!ENTITY nextPage.tooltip "Mostrar itens mais antigos">
-<!ENTITY unreadFolder.label "Não lidos">
 <!ENTITY starredFolder.label "Com estrela">
 <!ENTITY trashFolder.label "Lixeira">
 <!ENTITY ctxMarkFeedRead.label "Marcar feed como lido">
 <!ENTITY ctxMarkFeedUnread.label "Marcar feed como não lido">
 <!ENTITY ctxMarkFolderRead.label "Marcar pasta como lida">
-<!ENTITY ctxMarkFolderUnread.label "Marcar pasta como não lida">
 <!ENTITY ctxUpdateFeed.label "Atualizar feed">
 <!ENTITY ctxUpdateFolder.label "Atualizar pasta">
 <!ENTITY ctxOpenWebsite.label "Abrir o site">

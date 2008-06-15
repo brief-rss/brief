@@ -1,10 +1,8 @@
 <!ENTITY createdBy.headline "Créée par">
-<!ENTITY homepage.label "Visiter la page Web de l&apos;extension">
+<!ENTITY homepage.label "Visiter le site Web de l&apos;extension">
 <!ENTITY contributors.headline "Contributeurs">
 <!ENTITY credits.headline "Remerciements">
 <!ENTITY translators.headline "Traducteurs">
 <!ENTITY extdevThanks.paragraph "Merci à tous les formidables participants de #extdev sur irc.mozilla.org :">
 <!ENTITY iconsThanks.paragraph "Certaines icônes sont utilisées avec la gracieuse permission du talentueux Arvid Axelsson.">
-<!ENTITY testingThanks.paragraph "Merci aussi à Stefan Plewako pour ses tests.">
-<!ENTITY keyboardIconsCredit.paragraph "Icônes du clavier par Alan Who? - http://alanwho.com/">
 <!ENTITY toolbarIconsCredits.paragraph "Certaines icônes de la barre d&apos;outils proviennent du Tango Desktop Project">

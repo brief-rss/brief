@@ -5,6 +5,4 @@
 <!ENTITY translators.headline "Übersetzer">
 <!ENTITY extdevThanks.paragraph "Dank an die großartigen Leute von #extdev bei irc.mozilla.org:">
 <!ENTITY iconsThanks.paragraph "Einige der Symbole mit freundlicher Genehmigung von Arvid Axelsson.">
-<!ENTITY testingThanks.paragraph "Dank an Stefan Plewako für das Testen">
-<!ENTITY keyboardIconsCredit.paragraph "Tastatursymbole von Alan Who? - http://alanwho.com/">
 <!ENTITY toolbarIconsCredits.paragraph "Einige der Werkzeugleistensymbole wurden im Rahmen des Tango Desktop Project erstellt">

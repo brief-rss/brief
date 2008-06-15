@@ -5,6 +5,4 @@
 <!ENTITY translators.headline "Переводчики">
 <!ENTITY extdevThanks.paragraph "Спасибо всем замечательным людям с irc-канала #extdev в irc.mozilla.org:">
 <!ENTITY iconsThanks.paragraph "Некоторые значки любезно предоставлены Arvid Axelsson.">
-<!ENTITY testingThanks.paragraph "Спасибо Stefan Plewako за тестирование.">
-<!ENTITY keyboardIconsCredit.paragraph "Клавиатурные значки созданы Alan Who? - http://alanwho.com/">
 <!ENTITY toolbarIconsCredits.paragraph "Некоторые из значков были созданы в рамках проекта Tango Desktop">
