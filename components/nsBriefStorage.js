@@ -1,64 +1,59 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
-const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
-const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
-const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
-
-// How often to perform entry expiration and remove the deleted items.
 const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
-
-// How long to keep entries from feeds which are no longer in the home folder.
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
-
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
 const DATABASE_VERSION = 9;
 
-const FEEDS_TABLE_SCHEMA = 'feedID          TEXT UNIQUE,         ' +
-                           'feedURL         TEXT,                ' +
-                           'websiteURL      TEXT,                ' +
-                           'title           TEXT,                ' +
-                           'subtitle        TEXT,                ' +
-                           'imageURL        TEXT,                ' +
-                           'imageLink       TEXT,                ' +
-                           'imageTitle      TEXT,                ' +
-                           'favicon         TEXT,                ' +
-                           'bookmarkID      TEXT,                ' +
-                           'rowIndex        INTEGER,             ' +
-                           'parent          TEXT,                ' +
-                           'isFolder        INTEGER,             ' +
-                           'hidden          INTEGER DEFAULT 0,   ' +
-                           'lastUpdated     INTEGER DEFAULT 0,   ' +
-                           'oldestEntryDate INTEGER,             ' +
-                           'entryAgeLimit   INTEGER DEFAULT 0,   ' +
-                           'maxEntries      INTEGER DEFAULT 0,   ' +
-                           'updateInterval  INTEGER DEFAULT 0,   ' +
-                           'dateModified    INTEGER DEFAULT 0,   ' +
-                           'markModifiedEntriesUnread INTEGER DEFAULT 1 ';
+const FEEDS_TABLE_SCHEMA =
+    'feedID          TEXT UNIQUE,         ' +
+    'feedURL         TEXT,                ' +
+    'websiteURL      TEXT,                ' +
+    'title           TEXT,                ' +
+    'subtitle        TEXT,                ' +
+    'imageURL        TEXT,                ' +
+    'imageLink       TEXT,                ' +
+    'imageTitle      TEXT,                ' +
+    'favicon         TEXT,                ' +
+    'bookmarkID      TEXT,                ' +
+    'rowIndex        INTEGER,             ' +
+    'parent          TEXT,                ' +
+    'isFolder        INTEGER,             ' +
+    'hidden          INTEGER DEFAULT 0,   ' +
+    'lastUpdated     INTEGER DEFAULT 0,   ' +
+    'oldestEntryDate INTEGER,             ' +
+    'entryAgeLimit   INTEGER DEFAULT 0,   ' +
+    'maxEntries      INTEGER DEFAULT 0,   ' +
+    'updateInterval  INTEGER DEFAULT 0,   ' +
+    'dateModified    INTEGER DEFAULT 0,   ' +
+    'markModifiedEntriesUnread INTEGER DEFAULT 1 ';
 
-const ENTRIES_TABLE_SCHEMA = 'id            INTEGER PRIMARY KEY AUTOINCREMENT,' +
-                             'feedID        TEXT,               ' +
-                             'primaryHash   TEXT,               ' +
-                             'secondaryHash TEXT,               ' +
-                             'providedID    TEXT,               ' +
-                             'entryURL      TEXT,               ' +
-                             'date          INTEGER,            ' +
-                             'read          INTEGER DEFAULT 0,  ' +
-                             'updated       INTEGER DEFAULT 0,  ' +
-                             'starred       INTEGER DEFAULT 0,  ' +
-                             'deleted       INTEGER DEFAULT 0,  ' +
-                             'bookmarkID    INTEGER DEFAULT -1  ';
+const ENTRIES_TABLE_SCHEMA =
+    'id            INTEGER PRIMARY KEY AUTOINCREMENT,' +
+    'feedID        TEXT,               ' +
+    'primaryHash   TEXT,               ' +
+    'secondaryHash TEXT,               ' +
+    'providedID    TEXT,               ' +
+    'entryURL      TEXT,               ' +
+    'date          INTEGER,            ' +
+    'read          INTEGER DEFAULT 0,  ' +
+    'updated       INTEGER DEFAULT 0,  ' +
+    'starred       INTEGER DEFAULT 0,  ' +
+    'deleted       INTEGER DEFAULT 0,  ' +
+    'bookmarkID    INTEGER DEFAULT -1  ';
 
-const ENTRIES_TEXT_TABLE_SCHEMA = 'title   TEXT, '+
-                                  'content TEXT, '+
-                                  'authors TEXT, '+
-                                  'tags    TEXT  ';
+const ENTRIES_TEXT_TABLE_SCHEMA =
+    'title   TEXT, ' +
+    'content TEXT, ' +
+    'authors TEXT, ' +
+    'tags    TEXT  ';
 
-const ENTRY_TAGS_TABLE_SCHEMA = 'tagID    INTEGER, ' +
-                                'tagName  TEXT,    ' +
-                                'entryID  INTEGER  ';
+const ENTRY_TAGS_TABLE_SCHEMA =
+    'tagID    INTEGER, ' +
+    'tagName  TEXT,    ' +
+    'entryID  INTEGER  ';
 
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
@@ -83,13 +78,6 @@ __defineGetter__('gPrefs', function() {
                          getService(Ci.nsIPrefService).
                          getBranch('extensions.brief.').
                          QueryInterface(Ci.nsIPrefBranch2);
-});
-
-__defineGetter__('gStringbundle', function() {
-    delete this.gStringbundle;
-    return this.gStringbundle = Cc['@mozilla.org/intl/stringbundle;1'].
-                                getService(Ci.nsIStringBundleService).
-                                createBundle('chrome://brief/locale/brief.properties');
 });
 
 __defineGetter__('gBms', function() {
@@ -1816,6 +1804,12 @@ LivemarksSynchronizer.prototype = {
     }
 
 }
+
+
+const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
+const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
+const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
 
 function BriefQuery() { }
