@@ -833,8 +833,7 @@ FeedView.prototype = {
             win.scroll(win.pageXOffset, 0);
         }
 
-        // Rebuilding the content may cause a scroll event, but we don't want it to
-        // mess with selection.
+        // Changing content may cause a scroll event that should ignored.
         this._suppressScrollSelection = true;
 
         this.markVisibleAsRead();
@@ -856,6 +855,9 @@ FeedView.prototype = {
         }
 
         gTopWindow.StarUI.panel.hidePopup();
+
+        // Changing content may cause a scroll event that should ignored.
+        this._suppressScrollSelection = true;
 
         // Send an event to have the element gracefully removed by jQuery.
         this._sendEvent(aEntry, 'DoRemoveEntry');
