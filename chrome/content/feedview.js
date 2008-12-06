@@ -910,15 +910,18 @@ FeedView.prototype = {
     _buildHeader: function FeedView__buildHeader(aFeed) {
         var header = this.document.getElementById('header');
         var feedTitle = this.document.getElementById('feed-title');
-        var feedImage = this.document.getElementById('feed-image');
         var feedSubtitle = this.document.getElementById('feed-subtitle');
 
         // Reset the old header.
         feedTitle.removeAttribute('href');
         feedTitle.className = '';
-        feedImage.setAttribute('src', '');
-        feedImage.removeAttribute('title');
         feedSubtitle.innerHTML = '';
+
+        //XXX Workaround for bug 468263
+        header.removeChild(header.firstChild);
+        var feedImage = this.document.createElement('img');
+        feedImage.id = 'feed-image';
+        header.insertBefore(feedImage, header.firstChild);
 
         feedTitle.textContent = this.titleOverride || this.title;
 
