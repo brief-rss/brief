@@ -124,7 +124,7 @@ FeedView.prototype = {
                && this.query.searchString;
     },
 
-    get isViewSearch FeedView_isGlobalSearch() {
+    get isViewSearch FeedView_isViewSearch() {
         return (this.query.folders || this.query.feeds || this._constrained)
                && this.query.searchString;
     },
@@ -910,18 +910,17 @@ FeedView.prototype = {
     _buildHeader: function FeedView__buildHeader(aFeed) {
         var header = this.document.getElementById('header');
         var feedTitle = this.document.getElementById('feed-title');
+        var feedImage = this.document.getElementById('feed-image');
         var feedSubtitle = this.document.getElementById('feed-subtitle');
 
         // Reset the old header.
         feedTitle.removeAttribute('href');
         feedTitle.className = '';
+        // Removing src attribute doesn't hide the image in Fx 3.0, so we have
+        // to set it to an empty value for backwards-compatibility.
+        feedImage.setAttribute('src', '');
+        feedImage.removeAttribute('title');
         feedSubtitle.innerHTML = '';
-
-        //XXX Workaround for bug 468263
-        header.removeChild(header.firstChild);
-        var feedImage = this.document.createElement('img');
-        feedImage.id = 'feed-image';
-        header.insertBefore(feedImage, header.firstChild);
 
         feedTitle.textContent = this.titleOverride || this.title;
 
