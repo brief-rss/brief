@@ -216,9 +216,10 @@ const gBrief = {
         if (aEvent.button != 0 && aEvent.button != 1)
             return;
 
-        // Clicking the button when Brief is open in current tab
+        // Clicking the toolbar button when Brief is open in current tab
         // "unpresses" it and closes Brief.
-        if (gBrowser.selectedTab == this.tab && aEvent.button == 0) {
+        if (aEvent.target.id == 'brief-button' && gBrowser.selectedTab == this.tab
+            && aEvent.button == 0) {
 
             // Tabbrowser prevents closing the only tab when the tab bar is hidden.
             var autohide = gPrefService.getBoolPref('browser.tabs.autoHide');
