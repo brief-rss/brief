@@ -600,7 +600,7 @@ FeedView.prototype = {
                 aEvent.stopPropagation();
 
             var openInTabs = gPrefs.getBoolPref('feedview.openEntriesInTabs');
-            var newTab = (openInTabs || aEvent.button == 1);
+            var newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
             gCommands.openEntryLink(entryElement, newTab);
         }
     },
