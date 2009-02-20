@@ -601,9 +601,20 @@ BriefStorageService.prototype = {
         var content = aEntry.content || aEntry.summary;
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
-        // We have two hashes: primary and secondary. The secondary hash is used to work
-        // around a bug (see later), when the feed provides no unique ID for an item.
-        // Below there are two sets of fields used to produce each of the hashes.
+        // This function checks whether a downloaded entry is already in the database or
+        // it is a new one. To do this we need a way to uniquely identify entries. Many
+        // feeds don't provide unique identifiers for their entries, so we have to use
+        // hashes for this purpose. There are two hashes.
+        // The primary hash is used as a standard unique ID throught the codebase.
+        // Ideally, we just compute it from the GUID provided by the feed. Otherwise, we
+        // use the entry's URL.
+        // There is a problem, though. Even when a feed does provide its own GUID, it
+        // seems to randomly get lost (maybe a bug in the parser?). This means that the
+        // same entry may sometimes be hashed using the GUID and other times using the
+        // URL. Different hashes lead to the entry being duplicated.
+        // This is why we need a secondary hash, which is always based on the URL. If the
+        // GUID is empty (either because it was lost or because it wasn't provided to
+        // begin with), we look up the entry using the secondary hash.
         var providedID = aEntry.wrappedEntry.id;
         var primarySet = providedID ? [aFeed.feedID, providedID]
                                     : [aFeed.feedID, aEntry.entryURL];
@@ -621,12 +632,7 @@ BriefStorageService.prototype = {
         var primaryHash = hashString(primarySet.join(''));
         var secondaryHash = hashString(secondarySet.join(''));
 
-        // Sometimes the provided GUID is lost (maybe a bug in the parser?) and
-        // having an empty GUID effects in a different hash, which leads to annoying
-        // duplication of entries. In such case, we work around it by checking for
-        // entry's existance using the secondary hash, which doesn't include the GUID
-        // and is therefore immune to that problem. By the way we also get the date
-        // which we'll need to see if the stored entry needs to be updated.
+        // Look up if the entry is already present in the database.
         try {
             if (providedID) {
                 var select = gStm.getEntryByPrimaryHash;
@@ -2098,9 +2104,9 @@ BriefQuery.prototype = {
     /**
      * nsIBriefQuery
      *
-     * This functions bookmarks URIs of the selected entries. It doesn't write to the
-     * database or send notifications, that part performed by the bookmarks observer
-     * implemented by BriefStorageService.
+     * This function bookmarks URIs of the selected entries. It doesn't star the entries
+     * in the database or send notifications - that part performed by the bookmarks
+     * observer implemented by BriefStorageService.
      */
     starEntries: function BriefQuery_starEntries(aState) {
         var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1'].
@@ -2128,7 +2134,8 @@ BriefQuery.prototype = {
                 else {
                     // If there are no bookmarks for an URL that is starred in our
                     // database, it means that the database is out of sync. We've
-                    // got to update the database directly.
+                    // got to update the database directly instead of relying on
+                    // the bookmarks observer implemented by BriefStorageService.
                     gStorageService.starEntry(false, entry.id);
                     gStorageService.notifyOfEntriesStarred([entry.id], false);
                 }
