@@ -629,17 +629,18 @@ BriefStorageService.prototype = {
         // which we'll need to see if the stored entry needs to be updated.
         try {
             if (providedID) {
-                var select = gStm.getEntryDateByPrimaryHash;
+                var select = gStm.getEntryByPrimaryHash;
                 select.params.primaryHash = primaryHash;
             }
             else {
-                select = gStm.getEntryDateBySecondaryHash;
+                select = gStm.getEntryBySecondaryHash;
                 select.params.secondaryHash = secondaryHash;
             }
 
             if (select.step()) {
                 var storedEntryID = select.row.id;
                 var storedEntryDate = select.row.date;
+                var isStoredEntryRead = !!select.row.read;
             }
         }
         finally {
@@ -654,7 +655,7 @@ BriefStorageService.prototype = {
                 let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
                 var update = gStm.updateEntry;
                 update.params.date = aEntry.date;
-                update.params.read = markUnread ? 0 : 1;
+                update.params.read = markUnread || !isStoredEntryRead ? 0 : 1;
                 update.params.id = storedEntryID;
                 update.execute();
 
@@ -1445,16 +1446,16 @@ var gStm = {
         return this.updateEntryText = createStatement(sql);
     },
 
-    get getEntryDateByPrimaryHash() {
-        var sql = 'SELECT id, date FROM entries WHERE primaryHash = :primaryHash';
-        delete this.getEntryDateByPrimaryHash;
-        return this.getEntryDateByPrimaryHash = createStatement(sql);
+    get getEntryByPrimaryHash() {
+        var sql = 'SELECT id, date, read FROM entries WHERE primaryHash = :primaryHash';
+        delete this.getEntryByPrimaryHash;
+        return this.getEntryByPrimaryHash = createStatement(sql);
     },
 
-    get getEntryDateBySecondaryHash() {
-        var sql = 'SELECT id, date FROM entries WHERE secondaryHash = :secondaryHash';
-        delete this.getEntryDateBySecondaryHash;
-        return this.getEntryDateBySecondaryHash = createStatement(sql);
+    get getEntryBySecondaryHash() {
+        var sql = 'SELECT id, date, read FROM entries WHERE secondaryHash = :secondaryHash';
+        delete this.getEntryBySecondaryHash;
+        return this.getEntryBySecondaryHash = createStatement(sql);
     },
 
     get selectEntriesByURL() {
