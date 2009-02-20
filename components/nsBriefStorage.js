@@ -321,56 +321,25 @@ BriefStorageService.prototype = {
 
         gConnection.beginTransaction();
         try {
-            if (dbVersion < 6) {
-                let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
-                           'read, updated, starred, deleted, bookmarkID, title, content   ';
+            let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
+                       'read, updated, starred, deleted, bookmarkID, title, content   ';
 
-                executeSQL('CREATE TABLE entries_copy ('+cols+')                  ');
-                executeSQL('INSERT INTO entries_copy SELECT '+cols+' FROM entries ');
-                executeSQL('DROP TABLE entries                                    ');
-            }
-            else {
-                let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
-                           'read, updated, starred, deleted, bookmarkID                   ';
-
-                executeSQL('CREATE TABLE entries_copy ('+cols+')                   ');
-                executeSQL('INSERT INTO entries_copy (rowid, '+cols+')             ' +
-                           'SELECT rowid, '+cols+' FROM entries ORDER BY rowid ASC ');
-
-                executeSQL('CREATE TABLE entries_text_copy (title, content)                  ');
-                executeSQL('INSERT INTO entries_text_copy (rowid, title, content)            ' +
-                           'SELECT rowid, title, content FROM entries_text ORDER BY rowid ASC');
-
-                executeSQL('DROP TABLE entries      ');
-                executeSQL('DROP TABLE entries_text ');
-            }
+            executeSQL('CREATE TABLE entries_copy ('+cols+')                  ');
+            executeSQL('INSERT INTO entries_copy SELECT '+cols+' FROM entries ');
+            executeSQL('DROP TABLE entries                                    ');
 
             this.setupDatabase();
 
-            if (dbVersion < 6) {
-                let fromCols = 'feedID, providedID, entryURL, date, read, updated,       '+
-                               'starred, deleted, bookmarkID, id, secondaryID            ';
-                let toCols =   'feedID, providedID, entryURL, date, read, updated,       '+
-                               'starred, deleted, bookmarkID, primaryHash, secondaryHash ';
+            let fromCols = 'feedID, providedID, entryURL, date, read, updated,       '+
+                           'starred, deleted, bookmarkID, id, secondaryID            ';
+            let toCols =   'feedID, providedID, entryURL, date, read, updated,       '+
+                           'starred, deleted, bookmarkID, primaryHash, secondaryHash ';
 
-                executeSQL('INSERT INTO entries ('+toCols+')                                '+
-                           'SELECT '+fromCols+' FROM entries_copy ORDER BY rowid            ');
-                executeSQL('INSERT INTO entries_text (title, content, authors)              '+
-                           'SELECT title, content, authors FROM entries_copy ORDER BY rowid ');
-                executeSQL('DROP TABLE entries_copy                                         ');
-            }
-            else {
-                let cols = 'feedID, providedID, entryURL, date, read, updated, starred, deleted, bookmarkID';
-                executeSQL('INSERT INTO entries (primaryHash, secondaryHash, '+cols+') ' +
-                           'SELECT id, secondaryID, '+cols+' FROM entries_copy         ');
-
-                executeSQL('INSERT INTO entries_text (title, content, authors)                                            ' +
-                           'SELECT entries_text_copy.title, entries_text_copy.content, entries_copy.authors               ' +
-                           'FROM entries_text_copy INNER JOIN entries_copy ON entries_text_copy.rowid = entries_copy.rowid');
-
-                executeSQL('DROP TABLE entries_copy     ');
-                executeSQL('DROP TABLE entries_text_copy');
-            }
+            executeSQL('INSERT INTO entries ('+toCols+')                                '+
+                       'SELECT '+fromCols+' FROM entries_copy ORDER BY rowid            ');
+            executeSQL('INSERT INTO entries_text (title, content, authors)              '+
+                       'SELECT title, content, authors FROM entries_copy ORDER BY rowid ');
+            executeSQL('DROP TABLE entries_copy                                         ');
         }
         catch (ex) {
             reportError(ex, true);
