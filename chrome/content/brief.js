@@ -57,7 +57,7 @@ function init() {
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
 
-    // This notification doesn't belong to gFeedList, but there's no point in
+    // This notification doesn't really fit in gFeedList, but there's no point in
     // seting up a new observer object just for it.
     observerService.addObserver(gFeedList, 'brief:custom-style-changed', false);
 
@@ -382,6 +382,18 @@ function showHomeFolderPicker() {
     options.excludeItems = true;
 
     getElement('places-tree').load([query], options);
+}
+
+function onHomeFolderPickerSelect(aEvent) {
+    var placesTree = getElement('places-tree');
+    var okButton = getElement('confirm-home-folder');
+
+    var selectedItem = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
+    if (selectedItem) {
+        var selectedItemType = PlacesUtils.bookmarks.getItemType(selectedItem);
+        okButton.disabled = selectedItemType != PlacesUtils.bookmarks.TYPE_FOLDER
+                            || PlacesUtils.livemarks.isLivemark(selectedItem);
+    }
 }
 
 

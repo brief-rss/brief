@@ -150,7 +150,8 @@
                     </label>
                     <tree id="places-tree"
                           type="places"
-                          hidecolumnpicker="true">
+                          hidecolumnpicker="true"
+                          onselect="onHomeFolderPickerSelect(event)">
                         <treecols>
                             <treecol id="title" flex="1"
                                      primary="true"
@@ -161,6 +162,7 @@
                     <hbox pack="end">
                         <button id="confirm-home-folder"
                                 label="&confirmHomeFolder.label;"
+                                disabled="true"
                                 oncommand="selectHomeFolder(event)"/>
                     </hbox>
                 </vbox>
