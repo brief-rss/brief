@@ -21,9 +21,6 @@ function FeedView(aTitle, aQuery) {
                         || aQuery.deleted === ENTRY_STATE_TRASHED;
     this.query = aQuery;
     this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
-    if (this.query.unread && gPrefs.sortUnreadViewOldestFirst)
-        this.query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
-
     this.entriesMarkedUnread = [];
 }
 
@@ -69,6 +66,11 @@ FeedView.prototype = {
         }
         this.__query.limit = 0;
         this.__query.offset = 1;
+
+        if (this.__query.unread && gPrefs.sortUnreadViewOldestFirst)
+            this.__query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
+        else
+            this.__query.sortDirection = Ci.nsIBriefQuery.SORT_DESCENDING;
 
         return this.__query;
     },
