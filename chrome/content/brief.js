@@ -396,7 +396,6 @@ function onHomeFolderPickerSelect(aEvent) {
     }
 }
 
-
 function selectHomeFolder(aEvent) {
     var placesTree = getElement('places-tree');
     if (placesTree.currentIndex != -1) {
@@ -464,7 +463,7 @@ function finishSearch() {
  */
 function onKeyPress(aEvent) {
     // Stop propagation of character keys, to disable FAYT.
-    if (aEvent.charCode)
+    if (aEvent.charCode && aEvent.originalTarget.parentNode.parentNode.id != 'searchbar')
         aEvent.stopPropagation();
 
     // Brief takes over these shortcut keys, so we stop the default action.
