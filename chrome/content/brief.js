@@ -457,18 +457,21 @@ function finishSearch() {
 
 
 /**
- * We can't leave handling of Space, Tab, and Backspace can't be captured using <key>
- * XUL elements, so we handle them manually using a listener.
- * Additionally, unlike other keys, they have to be default-prevented.
+ * Space, Tab, and Backspace can't be captured using <key/> XUL elements, so we handle
+ * them manually using a listener. Additionally, unlike other keys, they have to
+ * be default-prevented.
  */
 function onKeyPress(aEvent) {
-    // Stop propagation of character keys, to disable FAYT.
-    if (aEvent.charCode && aEvent.originalTarget.parentNode.parentNode.id != 'searchbar')
+    // Don't do anything if the user is typing in an input field.
+    if (aEvent.originalTarget.localName == 'input')
+        return;
+
+    // Stop propagation of character keys in order to disable Find-As-You-Type.
+    if (aEvent.charCode)
         aEvent.stopPropagation();
 
     // Brief takes over these shortcut keys, so we stop the default action.
-    // Let's not prevent the user from typing in inputs that entries may contain, though.
-    if (gPrefs.getBoolPref('assumeStandardKeys') && aEvent.originalTarget.localName != 'input') {
+    if (gPrefs.getBoolPref('assumeStandardKeys')) {
 
         if (aEvent.keyCode == aEvent.DOM_VK_TAB && !aEvent.ctrlKey) {
             gPrefs.setBoolPref('feedview.entrySelectionEnabled',
