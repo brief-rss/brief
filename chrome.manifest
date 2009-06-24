@@ -7,16 +7,21 @@ overlay   chrome://browser/content/browser.xul   chrome://brief/content/brief-ov
 style   chrome://global/content/customizeToolbar.xul   chrome://brief/skin/overlay.css
 
 locale  brief   en-US  chrome/locale/en-US/
+locale  brief   cs-CZ  chrome/locale/cs-CZ/
+locale  brief   da-DK  chrome/locale/da-DK/
 locale  brief   de-DE  chrome/locale/de-DE/
 locale  brief   el-GR  chrome/locale/el-GR/
 locale  brief   es-AR  chrome/locale/es-AR/
 locale  brief   fi-FI  chrome/locale/fi-FI/
 locale  brief   fr-FR  chrome/locale/fr-FR/
 locale  brief   hu-HU  chrome/locale/hu-HU/
+locale  brief   it-IT  chrome/locale/it-IT/
 locale  brief   ja-JP  chrome/locale/ja-JP/
 locale  brief   nb-NO  chrome/locale/nb-NO/
 locale  brief   nl-NL  chrome/locale/nl-NL/
 locale  brief   pl-PL  chrome/locale/pl-PL/
+locale  brief   ru-RU  chrome/locale/ru-RU/
 locale  brief   sk-SK  chrome/locale/sk-SK/
+locale  brief   tr-TR  chrome/locale/tr-TR/
 locale  brief   zh-CN  chrome/locale/zh-CN/
 locale  brief   zh-TW  chrome/locale/zh-TW/
