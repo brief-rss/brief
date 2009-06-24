@@ -138,6 +138,7 @@ pre, code {
   font-family: "Courier New", monospace;
   font-size: 1em;
   white-space: pre-wrap;
+  width: -moz-available;
 }
 
 .search-highlight {
