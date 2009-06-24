@@ -18,7 +18,7 @@
 <!ENTITY expirationBefore.label "Usuń pobrane wiadomości po">
 <!ENTITY expirationAfter.label "dniach">
 <!ENTITY expirationCheckbox.accesskey "B">
-<!ENTITY starredItemsKept.tooltip "Wiadomości oznaczone gwiazdką zostaną zachowane">
+<!ENTITY starredItemsKept.tooltip "Wiadomości posiadające zakładki zostaną zachowane">
 <!ENTITY storedEntriesBefore.label "Przechowuj do">
 <!ENTITY storedEntriesAfter.label "ostatnich wiadomości w kanale">
 <!ENTITY storedEntriesCheckbox.accesskey "P">
@@ -41,16 +41,16 @@
 <!ENTITY autoMarkRead.label "Oznaczaj wyświetlone wiadomości jako przeczytane">
 <!ENTITY autoMarkRead.accesskey "C">
 <!ENTITY shortcutsGroup.caption "Skróty">
-<!ENTITY enableItemHightlight.label "Wyróżniaj zawsze aktywny element">
-<!ENTITY enableItemHightlight.accesskey "Z">
+<!ENTITY enableItemHightlight.label "Wyróżniaj aktywną wiadomość">
+<!ENTITY enableItemHightlight.accesskey "W">
 <!ENTITY keyboardShortcuts.label "Skróty klawiaturowe">
 <!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Wygląd">
-<!ENTITY editStyleDescription.label "Konfigurowanie wyglądu kanałów">
-<!ENTITY editStyleButton.label "Konfiguruj">
-<!ENTITY editStyleButton.accesskey "N">
-<!ENTITY styleEditor.title "Konfigurowanie wyglądu kanałów">
-<!ENTITY seeCustomizationTips.label "Informacje o konfigurowaniu wyglądu">
+<!ENTITY editStyleDescription.label "Dostosuj wygląd kanałów">
+<!ENTITY editStyleButton.label "Dostosuj">
+<!ENTITY editStyleButton.accesskey "D">
+<!ENTITY styleEditor.title "Dostosowywanie wyglądu kanałów">
+<!ENTITY seeCustomizationTips.label "Informacje o dostosowywaniu wyglądu za pomocą CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Nazwa">
 <!ENTITY feedURL.label "Lokalizacja">
