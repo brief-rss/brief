@@ -1,29 +1,36 @@
 <!ENTITY shortcutsPage.title "Brief — клавиатурные сокращения">
 <!ENTITY navigation.header "Навигация">
 <!ENTITY or "или">
+<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
+<!ENTITY openBrief "Открыть Brief">
 <!ENTITY space.key "Пробел">
+<!ENTITY showNextItem "Следующая запись">
 <!ENTITY backspace.key "Backspace">
+<!ENTITY showPreviousItem "Предыдущая запись">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "Показать следующую страницу">
 <!ENTITY altJ.key "Alt + J">
 <!ENTITY previousPage "Показать предыдущую страницу">
 <!ENTITY enter.key "Enter">
-<!ENTITY openEntry "Открыть запись">
+<!ENTITY openEntry "Открыть текущую запись">
 <!ENTITY ctrlEnter.key "Ctrl + Enter">
 <!ENTITY cmdEnter.key "Cmd + Enter">
-<!ENTITY openEntryTab "Открыть запись в новой вкладке">
-<!ENTITY foldEntry "Свернуть/развернуть выделенную запись (в режиме просмотра заголовков)">
+<!ENTITY openEntryTab "Открыть текущую запись в новой вкладке">
+<!ENTITY foldEntry "Закрыть/раскрыть текущую запись (в режиме просмотра заголовков)">
 <!ENTITY entries.header "Записи">
-<!ENTITY markRead "Отметить выделенную запись (не)прочитанной">
-<!ENTITY moveToTrash "Переместить запись в Корзину">
-<!ENTITY restoreEntry "Восстановить запись (в Корзине)">
+<!ENTITY markRead "Отметить текущую запись (не)прочитанной">
+<!ENTITY starEntry "Поставить/снять отметку на текущей записи">
+<!ENTITY moveToTrash "Переместить текущую запись в корзину">
+<!ENTITY restoreEntry "Восстановить текущую запись из корзины">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY cmdM.key "Cmd + M">
 <!ENTITY markAllAsRead "Отметить все просмотренные записи как прочитанные">
 <!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Включить подсветку текущей записи">
 <!ENTITY view.header "Вид">
 <!ENTITY showAll "Показать все записи">
+<!ENTITY showStarred "Показать отмеченные записи">
 <!ENTITY showUnread "Показать непрочитанные записи">
-<!ENTITY headlinesView "Переключить вид заголовков">
+<!ENTITY headlinesView "Переключить режим просмотра заголовков">
 <!ENTITY focusSearchbar "Переместить фокус в строку поиска">
-<!ENTITY displayShortcuts "Показывать список клавиатурных сокращений">
+<!ENTITY displayShortcuts "Показать список клавиатурных сокращений">
