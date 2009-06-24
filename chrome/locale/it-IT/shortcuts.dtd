@@ -1,8 +1,12 @@
 <!ENTITY shortcutsPage.title "Scorciatoie da tastiera di Brief">
 <!ENTITY navigation.header "Navigazione">
 <!ENTITY or "o">
+<!ENTITY ctrlShiftA.key "Ctrl + Maiusc + A">
+<!ENTITY openBrief "Apre Brief">
 <!ENTITY space.key "Spazio">
+<!ENTITY showNextItem "Mostra elemento successivo">
 <!ENTITY backspace.key "Backspace">
+<!ENTITY showPreviousItem "Mostra elemento precedente">
 <!ENTITY altK.key "Alt + K">
 <!ENTITY nextPage "Mostra pagina successiva">
 <!ENTITY altJ.key "Alt + J">
@@ -14,15 +18,18 @@
 <!ENTITY openEntryTab "Apre elemento in una nuova scheda">
 <!ENTITY foldEntry "Mostra/nasconde l&apos;anteprima dell&apos;elemento selezionato">
 <!ENTITY entries.header "Elementi">
-<!ENTITY markRead "Segna elemento selezionato come letto/non letto">
+<!ENTITY markRead "Segna l&apos;elemento selezionato come letto/non letto">
+<!ENTITY starEntry "Aggiunge/toglie l&apos;elemento selezionato fra quelli catalogati">
 <!ENTITY moveToTrash "Sposta l&apos;elemento selezionato nel cestino">
 <!ENTITY restoreEntry "Ripristina l&apos;elemento selezionato dal cestino">
 <!ENTITY ctrlM.key "Ctrl + M">
 <!ENTITY cmdM.key "Cmd + M">
-<!ENTITY markAllAsRead "Segna elementi attualmente visti come letti">
+<!ENTITY markAllAsRead "Segna tutti gli elementi come letti">
 <!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Attiva l&apos;evidenziatura dell&apos;elemento attuale">
 <!ENTITY view.header "Visualizzazione">
 <!ENTITY showAll "Mostra tutti gli elementi">
+<!ENTITY showStarred "Mostra elementi non catalogati">
 <!ENTITY showUnread "Mostra elementi non letti">
 <!ENTITY headlinesView "Mostra/nasconde le anteprime di tutti gli elementi">
 <!ENTITY focusSearchbar "Seleziona la barra di ricerca">
