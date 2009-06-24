@@ -1,25 +1,32 @@
+<!ENTITY selectHomeFolder.label "Selezionare la cartella contenente i segnalibri Live:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Attualmente visti">
 <!ENTITY searchAllFeeds.label "Tutti i feed">
+<!ENTITY headlinesCheckbox.tooltip "Attiva/disattiva la visualizzazione delle anteprime">
 <!ENTITY showAll.label "Mostra tutti">
 <!ENTITY showUnread.label "Mostra non letti">
+<!ENTITY showStarred.label "Mostra non catalogati">
 <!ENTITY updateButton.tooltip "Controlla gli aggiornamenti di tutti i feed">
 <!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
 <!ENTITY searchScopeButton.tooltip "Cambia l&apos;ambito della ricerca ">
 <!ENTITY showOptions.tooltip "Opzioni...">
+<!ENTITY markViewRead.tooltip "Segna tutti gli elementi come letti (tenere premuto Ctrl per segnare solo gli elementi attualmente visti)">
 <!ENTITY viewConstraintList.tooltip "Seleziona il tipo di elementi da visualizzare">
 <!ENTITY previousPage.tooltip "Mostra pagina precedente">
 <!ENTITY nextPage.tooltip "Mostra pagina successiva">
-<!ENTITY starredFolder.label "Segnati con stella">
+<!ENTITY unreadFolder.label "Non letti">
+<!ENTITY starredFolder.label "Non catalogati">
 <!ENTITY trashFolder.label "Cestino">
 <!ENTITY ctxMarkFeedRead.label "Segna feed come letto">
 <!ENTITY ctxMarkFeedUnread.label "Segna feed come non letto">
 <!ENTITY ctxMarkFolderRead.label "Segna cartella come letta">
+<!ENTITY ctxMarkTagRead.label "Segna elementi con etichetta come letti">
 <!ENTITY ctxUpdateFeed.label "Aggiorna feed">
 <!ENTITY ctxUpdateFolder.label "Aggiorna cartella">
 <!ENTITY ctxOpenWebsite.label "Apri sito web">
 <!ENTITY ctxDeleteFeed.label "Elimina feed">
 <!ENTITY ctxDeleteFolder.label "Elimina cartella">
+<!ENTITY ctxDeleteTag.label "Elimina etichetta">
 <!ENTITY ctxEmptyFeed.label "Svuota feed">
 <!ENTITY ctxEmptyFolder.label "Svuota cartella">
 <!ENTITY ctxRestoreTrashed.label "Ripristina elementi eliminati">
@@ -29,3 +36,5 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Segna tutti i feed come letti">
 <!ENTITY compactingWindow.title "Compattazione dei feed">
 <!ENTITY compactingInProgress.label "Brief sta compattando i feed memorizzati. Potrebbero essere necessari alcuni minuti...">
+<!ENTITY migrationProgress.title "Spostamento dei feed">
+<!ENTITY migrationProgress.description "Brief sta spostando i feed memorizzati. Potrebbero essere necessari alcuni minuti...">
