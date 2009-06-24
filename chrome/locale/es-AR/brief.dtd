@@ -27,10 +27,10 @@
 <!ENTITY ctxDeleteFeed.label "Eliminar Feed">
 <!ENTITY ctxDeleteFolder.label "Eliminar Carpeta">
 <!ENTITY ctxDeleteTag.label "Eliminar Etiqueta">
-<!ENTITY ctxEmptyFeed.label "Feed vacío">
+<!ENTITY ctxEmptyFeed.label "Vaciar Feed">
 <!ENTITY ctxEmptyFolder.label "Carpeta vacía">
 <!ENTITY ctxRestoreTrashed.label "Restaurar todos los elementos">
-<!ENTITY ctxEmptyTrash.label "Papelera vacía">
+<!ENTITY ctxEmptyTrash.label "Vaciar Papelera">
 <!ENTITY ctxFeedProperties.label "Propiedades">
 <!ENTITY ctxUpdateFeeds.label "Actualizar Feeds ahora">
 <!ENTITY ctxMarkFeedsAsRead.label "Marcar todos los Feeds como leídos">
