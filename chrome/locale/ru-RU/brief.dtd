@@ -1,25 +1,32 @@
+<!ENTITY selectHomeFolder.label "Выберите папку с закладками на ленты новостей:">
 <!ENTITY confirmHomeFolder.label "ОК">
 <!ENTITY searchCurrentView.label "Поиск в текущем виде">
 <!ENTITY searchAllFeeds.label "Поиск во всех лентах">
+<!ENTITY headlinesCheckbox.tooltip "Режим просмотра заголовков">
 <!ENTITY showAll.label "Все записи">
 <!ENTITY showUnread.label "Непрочитанные записи">
+<!ENTITY showStarred.label "Просмотреть отмеченные записи">
 <!ENTITY updateButton.tooltip "Проверить обновления для всех лент">
 <!ENTITY stopUpdatingButton.tooltip "Остановить проверку обновления">
 <!ENTITY searchScopeButton.tooltip "Изменить область действия поиска">
 <!ENTITY showOptions.tooltip "Открыть настройки Brief">
+<!ENTITY markViewRead.tooltip "Отметить все записи прочитанными (нажмите Ctrl, чтобы отметить только текущую страницу)">
 <!ENTITY viewConstraintList.tooltip "Выберите, какие записи следует отображать">
 <!ENTITY previousPage.tooltip "Показать новые записи">
 <!ENTITY nextPage.tooltip "Показать старые записи">
-<!ENTITY starredFolder.label "Помеченные">
+<!ENTITY unreadFolder.label "Непрочитанные">
+<!ENTITY starredFolder.label "Отмеченные записи">
 <!ENTITY trashFolder.label "Корзина">
 <!ENTITY ctxMarkFeedRead.label "Отметить ленту как прочитанную">
 <!ENTITY ctxMarkFeedUnread.label "Отметить ленту как непрочитанную">
 <!ENTITY ctxMarkFolderRead.label "Отметить папку как прочитанную">
+<!ENTITY ctxMarkTagRead.label "Отметить закладки с метками как прочитанные">
 <!ENTITY ctxUpdateFeed.label "Обновить ленту">
 <!ENTITY ctxUpdateFolder.label "Обновить папку">
 <!ENTITY ctxOpenWebsite.label "Открыть веб-сайт">
 <!ENTITY ctxDeleteFeed.label "Удалить ленту">
 <!ENTITY ctxDeleteFolder.label "Удалить папку">
+<!ENTITY ctxDeleteTag.label "Удалить метку">
 <!ENTITY ctxEmptyFeed.label "Очистить ленту">
 <!ENTITY ctxEmptyFolder.label "Очистить папку">
 <!ENTITY ctxRestoreTrashed.label "Восстановить удалённые записи">
@@ -29,3 +36,5 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Отметить все ленты как прочитанные">
 <!ENTITY compactingWindow.title "Сжатие лент…">
 <!ENTITY compactingInProgress.label "Brief выполняет сжатие сохранённых лент. Выполнение данной операции может занять несколько минут…">
+<!ENTITY migrationProgress.title "Миграция лент">
+<!ENTITY migrationProgress.description "Миграция сохраненных новостей…">
