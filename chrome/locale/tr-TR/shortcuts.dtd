@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Brief - klavye kısayolları">
+<!ENTITY navigation.header "Navigasyon">
+<!ENTITY or "ya da">
+<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
+<!ENTITY openBrief "Brief&apos;i aç">
+<!ENTITY space.key "Space">
+<!ENTITY showNextItem "Sonraki öğreyi göster">
+<!ENTITY backspace.key "Backspace">
+<!ENTITY showPreviousItem "Önceki öğeyi göster">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "Sonraki sayfayı göster">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Önceki sayfayı göster">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Geçerli öğeyi aç">
+<!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY cmdEnter.key "Cmd + Enter">
+<!ENTITY openEntryTab "Geçerli öğeyi yeni sekmede aç">
+<!ENTITY foldEntry "Seçili öğeyi genişlet ya da daralt (başlık görünümünde)">
+<!ENTITY entries.header "Öğeler">
+<!ENTITY markRead "Seçili öğeyi okundu ya da okunmadı olarak işaretle">
+<!ENTITY starEntry "Seçili öğeyi işaretle ya da işaretini kaldır">
+<!ENTITY moveToTrash "Seçili öğeyi çöp kutusuna taşı">
+<!ENTITY restoreEntry "Seçili öğeyi geri yükle">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY cmdM.key "Cmd + M">
+<!ENTITY markAllAsRead "Görülmüş tüm öğeleri okundu olarak işaretle">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Seçili öğenin belirginleştirilmesini etkinleştir.">
+<!ENTITY view.header "Göster(view)">
+<!ENTITY showAll "Tüm öğeleri göster">
+<!ENTITY showStarred "İşaretlenmiş öğeleri göster">
+<!ENTITY showUnread "Okunmamış öğeleri göster">
+<!ENTITY headlinesView "Başlık görünümünü değiştir">
+<!ENTITY focusSearchbar "Arama çubuğuna odaklan">
+<!ENTITY displayShortcuts "Kısayol tuşlarının listesini göster">

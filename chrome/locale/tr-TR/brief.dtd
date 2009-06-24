@@ -1,31 +1,40 @@
-
-
-<!ENTITY searchCurrentView.label "Search current view">
-<!ENTITY searchAllFeeds.label "Search all feeds">
-<!ENTITY updateButton.tooltip "Check all feeds for updates">
-<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
-<!ENTITY searchScopeButton.tooltip "Change the search scope">
-<!ENTITY showOptions.tooltip "Open Brief options">
-
-<!ENTITY viewConstraintList.tooltip "Choose what kind of entries to display">
-<!ENTITY previousPage.tooltip "Show newer entries">
-<!ENTITY nextPage.tooltip "Show older entries">
-<!ENTITY unreadFolder.label "Unread">
-<!ENTITY starredFolder.label "Starred">
-<!ENTITY trashFolder.label "Trash">
-<!ENTITY ctxMarkFeedRead.label "Mark Feed As Read">
-
-<!ENTITY ctxMarkFolderRead.label "Mark Folder As Read">
-
-<!ENTITY ctxUpdateFeed.label "Update Feed">
-<!ENTITY ctxUpdateFolder.label "Update Folder">
-<!ENTITY ctxOpenWebsite.label "Open Website">
-<!ENTITY ctxDeleteFeed.label "Delete Feed">
-<!ENTITY ctxDeleteFolder.label "Delete Folder">
-<!ENTITY ctxEmptyFeed.label "Empty Feed">
-<!ENTITY ctxEmptyFolder.label "Empty Folder">
-<!ENTITY ctxRestoreTrashed.label "Restore Trashed Entries">
-<!ENTITY ctxEmptyTrash.label "Empty Trash">
-<!ENTITY ctxFeedProperties.label "Properties">
-<!ENTITY ctxUpdateFeeds.label "Update Feeds Now">
-<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
+<!ENTITY selectHomeFolder.label "Canlı yer imlerinizi içeren klasörü seçin:">
+<!ENTITY confirmHomeFolder.label "Tamam">
+<!ENTITY searchCurrentView.label "Seçili görünümü ara">
+<!ENTITY searchAllFeeds.label "Tüm beslemeleri ara">
+<!ENTITY headlinesCheckbox.tooltip "Başlık görünümünü kullan">
+<!ENTITY showAll.label "Tümü">
+<!ENTITY showUnread.label "Okunmayanlar">
+<!ENTITY showStarred.label "İşaretliler">
+<!ENTITY updateButton.tooltip "Tüm beslemeleri güncellemeler için kontrol et">
+<!ENTITY stopUpdatingButton.tooltip "Beslemelerin güncellenmesini durdur">
+<!ENTITY searchScopeButton.tooltip "Arama alanını değiştir">
+<!ENTITY showOptions.tooltip "Brief seçeneklerini aç">
+<!ENTITY markViewRead.tooltip "Tüm öğeleri okundu olarak işaretle (Sadece geçerli sayfayı işaretlemek için CTRL&apos;ye basılı tutun)">
+<!ENTITY viewConstraintList.tooltip "Ne tür öğelerin gösterileceğini seçin">
+<!ENTITY previousPage.tooltip "Daha yeni öğeleri göster">
+<!ENTITY nextPage.tooltip "Daha eski öğeleri göster">
+<!ENTITY unreadFolder.label "Okunmamış">
+<!ENTITY starredFolder.label "İşaretlenmiş">
+<!ENTITY trashFolder.label "Çöp Kutusu">
+<!ENTITY ctxMarkFeedRead.label "Beslemeyi Okundu Olarak İşaretle">
+<!ENTITY ctxMarkFeedUnread.label "Beslemeyi Okunmadı Olarak İşaretle">
+<!ENTITY ctxMarkFolderRead.label "Klasörü Okundu Olarak İşaretle">
+<!ENTITY ctxMarkTagRead.label "Etiketlenmiş Öğeleri Okundu Olarak İşaretle">
+<!ENTITY ctxUpdateFeed.label "Beslemeyi Güncelle">
+<!ENTITY ctxUpdateFolder.label "Klasörü Güncelle">
+<!ENTITY ctxOpenWebsite.label "Web Sitesini Aç">
+<!ENTITY ctxDeleteFeed.label "Beslemeyi Sil">
+<!ENTITY ctxDeleteFolder.label "Klasörü Sil">
+<!ENTITY ctxDeleteTag.label "Etiketi Sil">
+<!ENTITY ctxEmptyFeed.label "Beslemeyi Temizle">
+<!ENTITY ctxEmptyFolder.label "Klasörü Temizle">
+<!ENTITY ctxRestoreTrashed.label "Tüm Öğeleri Geri Yükle">
+<!ENTITY ctxEmptyTrash.label "Çöp Kutusu&apos;nu Boşalt">
+<!ENTITY ctxFeedProperties.label "Özellikler">
+<!ENTITY ctxUpdateFeeds.label "Beslemeleri Şimdi Güncelle">
+<!ENTITY ctxMarkFeedsAsRead.label "Tüm Beslemeleri Okundu Olarak İşaretle">
+<!ENTITY compactingWindow.title "Beslemeler sıkıştırılıyor">
+<!ENTITY compactingInProgress.label "Brief, depolanmış beslemeleri sıkıştırıyor. Bu birkaç dakika sürebilir...">
+<!ENTITY migrationProgress.title "Beslemeler taşınıyor">
+<!ENTITY migrationProgress.description "Brief depolanmış beslemeleri taşıyor...">
