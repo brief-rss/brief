@@ -7,31 +7,61 @@
 <!ENTITY updateIntervalHours.label "timer">
 <!ENTITY updateIntervalDays.label "dage">
 <!ENTITY checkForUpdatesAfter.label "minutter">
+<!ENTITY showNotification.label "Vis notifikation når nye emner findes">
+<!ENTITY showNotification.accesskey "V">
 <!ENTITY behaviorGroup.caption "Opførsel">
+<!ENTITY openInNewTab.label "Åbn Brief i et nyt faneblad">
+<!ENTITY openInNewTab.accesskey "Å">
 <!ENTITY openEntriesInTabs.label "Åbn emner i nye faneblade">
 <!ENTITY openEntriesInTabs.accesskey "b">
 <!ENTITY storingGroup.caption "Opbevaring">
-<!ENTITY expirationBefore.label "Fjern downloadede emner efter">
+<!ENTITY expirationBefore.label "Fjern hentede emner efter">
 <!ENTITY expirationAfter.label "dage">
 <!ENTITY expirationCheckbox.accesskey "j">
+<!ENTITY starredItemsKept.tooltip "Bogmærkede emner bevares">
 <!ENTITY storedEntriesBefore.label "Gem ikke flere end">
 <!ENTITY storedEntriesAfter.label "seneste indlæg af hver emne">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Ryd alle emner...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY folderTree.label "Mappe der indeholder mine Live-bogmærker">
+<!ENTITY importOPML.label "Importér...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Eksportér...">
+<!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Vis">
 <!ENTITY entriesPerPageBefore.label "Vis">
 <!ENTITY entriesPerPageAfter.label "indlæg pr. side">
 <!ENTITY entriesPerPage.accesskey "S">
-<!ENTITY showShortcuts.label "Vis genveje">
-<!ENTITY showShortcuts.accesskey "i">
+<!ENTITY showStatusbarIcon.label "Vis statuslinje-ikon">
+<!ENTITY showStatusbarIcon.accesskey "u">
+<!ENTITY sortUnreadViewOldestFirst.label "Sortér ældste emner først i ulæste-visning">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "Markér emner som læste efter jeg har set dem">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY shortcutsGroup.caption "Genveje">
+<!ENTITY enableItemHightlight.label "Fremhæv altid nuværende emne">
+<!ENTITY enableItemHightlight.accesskey "F">
+<!ENTITY keyboardShortcuts.label "Tastaturgenveje">
+<!ENTITY keyboardShortcuts.accesskey "g">
+<!ENTITY customizeGroup.caption "Udseende">
+<!ENTITY editStyleDescription.label "Tilret udseendet for feeds">
+<!ENTITY editStyleButton.label "Tilret">
+<!ENTITY editStyleButton.accesskey "r">
+<!ENTITY styleEditor.title "Redigér brugertilpasset stilark">
+<!ENTITY seeCustomizationTips.label "Lær mere om at tilpasse udseendet med CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Navn">
 <!ENTITY feedURL.label "Placering">
 <!ENTITY optionsGroupbox.caption "Feed-indstillinger">
 <!ENTITY checkUpdatesPerFeedBefore.label "Tjek for opdateringer hver">
 <!ENTITY checkUpdatesPerFeed.accesskey "T">
-<!ENTITY expireEntriesPerFeedBefore.label "Fjern downloadede emner efter">
+<!ENTITY expireEntriesPerFeedBefore.label "Fjern hentede emner efter">
 <!ENTITY expireEntriesPerFeed.accesskey "r">
 <!ENTITY expireEntriesPerFeedAfter.label "dage">
+<!ENTITY updatedEntries.label "Markér ikke ændrede emner som ulæste">
+<!ENTITY updatedEntries.accesskey "M">
 <!ENTITY previousFeed.label "&lt; Foregående">
 <!ENTITY previousFeed.accesskey "F">
 <!ENTITY nextFeed.label "Næste &gt;">
