@@ -1,58 +1,68 @@
-<!ENTITY optionsWindow.title "Brief options">
-<!ENTITY mainPane.label "Main">
-<!ENTITY folderTree.label "Folder containing your Live Bookmarks:">
-<!ENTITY showStatusbarIcon.label "Show statusbar icon">
-
-<!ENTITY openInNewTab.label "Open Brief in a new tab">
-
-<!ENTITY feedsPane.label "Feeds">
-<!ENTITY updateGroup.caption "Updating">
-<!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
-
-<!ENTITY updateIntervalMinutes.label "minutes">
-<!ENTITY updateIntervalHours.label "hours">
-<!ENTITY updateIntervalDays.label "days">
-<!ENTITY checkForUpdatesAfter.label "minutes">
-<!ENTITY showNotification.label "Show notification when updates are found">
-
-<!ENTITY behaviorGroup.caption "Behavior">
-<!ENTITY openEntriesInTabs.label "Open entries in new tabs">
-
-<!ENTITY doubleClickMarks.label "Mark entries as read when double-clicking on them">
-
-<!ENTITY storingGroup.caption "Storing">
-<!ENTITY expirationBefore.label "Remove downloaded entries after">
-<!ENTITY expirationAfter.label "days">
-
-
-<!ENTITY storedEntriesBefore.label "Store no more than">
-<!ENTITY storedEntriesAfter.label "latest entries of each feed">
-
-<!ENTITY clearAllEntriesButton.label "Clear All Entries">
-
-<!ENTITY displayPane.label "Display">
-
-<!ENTITY authorsCheckbox.label "Show authors of the entries">
-
-<!ENTITY entriesPerPageBefore.label "Show">
-<!ENTITY entriesPerPageAfter.label "entries per page">
-<!ENTITY enableCustomStyle.label "Use custom style of the feed content">
-
-<!ENTITY browseCustomStyle.label "Browse">
-
-
-
-
-
-
-<!ENTITY feedName.label "Name">
-<!ENTITY feedURL.label "Location">
-<!ENTITY optionsGroupbox.caption "Feed settings">
-<!ENTITY checkUpdatesPerFeedBefore.label "Check for updates every">
-
-<!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded entries after">
-
-<!ENTITY expireEntriesPerFeedAfter.label "days">
-<!ENTITY maxEntriesPerFeedBefore.label "Store no more than">
-
-<!ENTITY maxEntriesPerFeedAfter.label "latest entries">
+<!ENTITY optionsWindow.title "Brief seçenekleri">
+<!ENTITY mainPane.label "Genel">
+<!ENTITY updateGroup.caption "Güncelleme">
+<!ENTITY checkForUpdatesBefore.label "Beslemelerin güncellenme süresi:">
+<!ENTITY checkForUpdates.accesskey "C">
+<!ENTITY updateIntervalMinutes.label "dakika">
+<!ENTITY updateIntervalHours.label "saat">
+<!ENTITY updateIntervalDays.label "gün">
+<!ENTITY checkForUpdatesAfter.label "dakika">
+<!ENTITY showNotification.label "Yeni öğeler bulununca uyarı göster">
+<!ENTITY showNotification.accesskey "S">
+<!ENTITY behaviorGroup.caption "Davranış">
+<!ENTITY openInNewTab.label "Brief&apos;i yeni sekmede aç">
+<!ENTITY openInNewTab.accesskey "A">
+<!ENTITY openEntriesInTabs.label "Öğeleri yeni sekmede aç">
+<!ENTITY openEntriesInTabs.accesskey "E">
+<!ENTITY storingGroup.caption "Depolama">
+<!ENTITY expirationBefore.label "İndirilmiş öğeleri şu süreden sonra sil:">
+<!ENTITY expirationAfter.label "gün">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "İşaretlenmiş öğeler saklanacak">
+<!ENTITY storedEntriesBefore.label "Her canlı yer imi için en fazla">
+<!ENTITY storedEntriesAfter.label "öğe sakla">
+<!ENTITY storedEntriesCheckbox.accesskey "N">
+<!ENTITY clearAllEntriesButton.label "Tüm öğeleri temizle...">
+<!ENTITY clearAllEntriesButton.accesskey "T">
+<!ENTITY feedsPane.label "Beslemeler">
+<!ENTITY folderTree.label "Canlı yer imlerini içeren klasör:">
+<!ENTITY importOPML.label "İçe aktar...">
+<!ENTITY importOPML.accesskey "İ">
+<!ENTITY exportOPML.label "Dışa aktar...">
+<!ENTITY exportOPML.accesskey "D">
+<!ENTITY displayPane.label "Görünüm">
+<!ENTITY entriesPerPageBefore.label "Her sayfada">
+<!ENTITY entriesPerPageAfter.label "öğe göster">
+<!ENTITY entriesPerPage.accesskey "S">
+<!ENTITY showStatusbarIcon.label "Durum çubuğunda simge göster">
+<!ENTITY showStatusbarIcon.accesskey "R">
+<!ENTITY sortUnreadViewOldestFirst.label "Okunmadı görünümünde önce en eski öğeleri göster">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "O">
+<!ENTITY autoMarkRead.label "Öğeleri gördükten sonra okundu olarak işaretle">
+<!ENTITY autoMarkRead.accesskey "S">
+<!ENTITY shortcutsGroup.caption "Kısayollar">
+<!ENTITY enableItemHightlight.label "Seçili öğeyi her zaman vurgula">
+<!ENTITY enableItemHightlight.accesskey "A">
+<!ENTITY keyboardShortcuts.label "Klavye kısayolları">
+<!ENTITY keyboardShortcuts.accesskey "K">
+<!ENTITY customizeGroup.caption "Dış Görünüm">
+<!ENTITY editStyleDescription.label "Beslemelerin görünümünü özelleştir">
+<!ENTITY editStyleButton.label "Özelleştir">
+<!ENTITY editStyleButton.accesskey "Z">
+<!ENTITY styleEditor.title "Özel stili düzenle">
+<!ENTITY seeCustomizationTips.label "CSS&apos;le görünümü özelleştirmeyi öğrenin">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "İsim">
+<!ENTITY feedURL.label "Konum">
+<!ENTITY optionsGroupbox.caption "Canlı yer imi ayarları">
+<!ENTITY checkUpdatesPerFeedBefore.label "Güncellenmeler için kontrol etme süresi:">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "İndirilmiş öğeleri şu süreden sonra sil:">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "gün">
+<!ENTITY updatedEntries.label "Değiştirilmiş öğeleri yeniden okunmadı olarak işaretleme">
+<!ENTITY updatedEntries.accesskey "D">
+<!ENTITY previousFeed.label "&lt; Önceki">
+<!ENTITY previousFeed.accesskey "Ö">
+<!ENTITY nextFeed.label "Sonraki &gt;">
+<!ENTITY nextFeed.accesskey "S">

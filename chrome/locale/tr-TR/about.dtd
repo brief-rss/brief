@@ -1,8 +1,8 @@
-<!ENTITY createdBy.headline "Created by">
-<!ENTITY homepage.label "Visit Home Page">
-<!ENTITY contributors.headline "Contributors">
+<!ENTITY createdBy.headline "Hazırlayan">
+<!ENTITY homepage.label "Ana Sayfayı Ziyaret Et">
+<!ENTITY contributors.headline "Katkıda Bulunanlar">
 <!ENTITY credits.headline "Credits">
-<!ENTITY translators.headline "Translators">
-<!ENTITY extdevThanks.paragraph "Thanks to all the great people from #extdev at irc.mozilla.org:">
-<!ENTITY iconsThanks.paragraph "Some of the icons courtesy of the talented Arvid Axelsson.">
-<!ENTITY testingThanks.paragraph "Thanks to Stefan Plewako for testing.">
+<!ENTITY translators.headline "Tercümanlar">
+<!ENTITY extdevThanks.paragraph "#extdev at irc.mozilla.org&apos;daki tüm harika insanlara teşekkürler: ">
+<!ENTITY iconsThanks.paragraph "Simgelerin bazıları, yetenekli Arvid Axelsson&apos;ın nezaketinin ürünüdür.">
+<!ENTITY toolbarIconsCredits.paragraph "Bazı araç çubuğu simgeleri Tango Masaüstü Projesi(Tango Desktop Project)&apos;nin bir parçası olarak hazırlanmıştır.">
