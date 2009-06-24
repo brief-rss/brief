@@ -1,4 +1,4 @@
-<!ENTITY selectHomeFolder.label "Valitse live-kirjanmerkkisi sisältävä kansio:">
+<!ENTITY selectHomeFolder.label "Valitse live-kirjanmerkit sisältävä kansio:">
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchCurrentView.label "Etsi avoimesta näkymästä">
 <!ENTITY searchAllFeeds.label "Etsi kaikista syötteistä">
@@ -37,4 +37,4 @@
 <!ENTITY compactingWindow.title "Tiivistetään syötteitä">
 <!ENTITY compactingInProgress.label "Brief tiivistää tallennettuja syötteitä. Tämä voi kestää muutaman minuutin...">
 <!ENTITY migrationProgress.title "Muutetaan syötteitä">
-<!ENTITY migrationProgress.description "Brief muuttaa tallennettuja syötteitä...">
+<!ENTITY migrationProgress.description "Brief siirtää tallennettuja syötteitä...">
