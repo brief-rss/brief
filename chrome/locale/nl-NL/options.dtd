@@ -25,7 +25,7 @@
 <!ENTITY clearAllEntriesButton.label "Alle berichten wissen...">
 <!ENTITY clearAllEntriesButton.accesskey "A">
 <!ENTITY feedsPane.label "Feeds">
-<!ENTITY folderTree.label "Map met mijn Live Bladwijzers:">
+<!ENTITY folderTree.label "Map met mijn livebladwijzers:">
 <!ENTITY importOPML.label "Importeren...">
 <!ENTITY importOPML.accesskey "I">
 <!ENTITY exportOPML.label "Exporteren...">
