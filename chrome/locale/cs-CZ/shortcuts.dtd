@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Brief - klávesové zkratky">
+<!ENTITY navigation.header "Navigace">
+<!ENTITY or "nebo">
+<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
+<!ENTITY openBrief "Otevřít Brief">
+<!ENTITY space.key "Mezerník">
+<!ENTITY showNextItem "Zobrazit následující položku">
+<!ENTITY backspace.key "Backspace">
+<!ENTITY showPreviousItem "Zobrazit předchozí položku">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "Zobrazit následující stránku">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Zobrazit předchozí stránku">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Otevřít aktuální položku">
+<!ENTITY ctrlEnter.key "Ctrl + Enter">
+<!ENTITY cmdEnter.key "Cmd + Enter">
+<!ENTITY openEntryTab "Otevřít aktuální položku v novém panelu">
+<!ENTITY foldEntry "Rozbalit nebo zabalit aktuální položku (v zobrazení záhlaví)">
+<!ENTITY entries.header "Položky">
+<!ENTITY markRead "Označit aktuální položku za přečtenou nebo nepřečtenou">
+<!ENTITY starEntry "Uložit nebo odstranit aktuální položku ze záložek">
+<!ENTITY moveToTrash "Přesunout aktuální položku do Koše">
+<!ENTITY restoreEntry "Obnovit aktuální položku z Koše">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY cmdM.key "Cmd + M">
+<!ENTITY markAllAsRead "Označit všechny zobrazené položky jako přečtené">
+<!ENTITY tab.key "Tabulátor">
+<!ENTITY enableEntryHightlight "Povolit zvýrazňování aktuální položky">
+<!ENTITY view.header "Zobrazit">
+<!ENTITY showAll "Zobrazit všechny položky">
+<!ENTITY showStarred "Zobrazit položky uložené do záložek">
+<!ENTITY showUnread "Zobrazit nepřečtené položky">
+<!ENTITY headlinesView "Přepnout zobrazení záhlaví">
+<!ENTITY focusSearchbar "Přenést zaměření na vyhledávání">
+<!ENTITY displayShortcuts "Zobrazit seznam klávesových zkratek">

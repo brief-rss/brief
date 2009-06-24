@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline "Vytvořil">
+<!ENTITY homepage.label "Navštívit domovskou stránku">
+<!ENTITY contributors.headline "Přispěvatelé">
+<!ENTITY credits.headline "Credits">
+<!ENTITY translators.headline "Překladatelé">
+<!ENTITY extdevThanks.paragraph "Díky všem skvělým lidem z #extdev na irc.mozilla.org:">
+<!ENTITY iconsThanks.paragraph "Některé ikonky jsou dílem talentovaného Arvida Axelssona.">
+<!ENTITY toolbarIconsCredits.paragraph "Některé ikonky z nástrojové lišty byly vytvořeny jako součástí Tango Desktop Project.">
