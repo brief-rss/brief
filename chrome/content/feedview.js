@@ -1100,7 +1100,7 @@ FeedView.prototype = {
 
     QueryInterface: function FeedView_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
-            aIID.equals(Ci.nsIEventHandler) ||
+            aIID.equals(Ci.nsIDOMEventListener) ||
             aIID.equals(Ci.nsIBriefStorageObserver)) {
             return this;
         }
