@@ -1,8 +1,6 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const MAX_SQL_EXPRESSION_SIZE = 950;
-
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 // nsBriefFeed class definition
@@ -145,7 +143,7 @@ FeedEntry.prototype = {
 }
 
 
-// nsBriefFeed class definition
+// nsIBriefEntryList class definition
 function EntryList() { }
 
 EntryList.prototype = {
@@ -181,7 +179,12 @@ EntryList.prototype = {
 
 
     contains: function EntryList_contains(aWhat) {
-        if (this.length > MAX_SQL_EXPRESSION_SIZE)
+        // Maximum depth of expression tree in sqlite is 1000, so there are only
+        // so many entries you can OR in a statement. If that limit is exceeded,
+        // we return true even though we don't know if there were any matches.
+        // nsIBriefEntryList.contains() is used primarly by views and it's better
+        // for them to be unnecessarily refreshed than not be refreshed when they should.
+        if (this.length > 500)
             return true;
 
         var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
