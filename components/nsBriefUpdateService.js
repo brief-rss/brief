@@ -13,7 +13,7 @@ const ICON_DATAURL_PREFIX = 'data:image/x-icon;base64,';
 const FEED_ICON_URL       = 'chrome://brief/skin/icon.png';
 
 const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
-const STARTUP_DELAY = 20000; // 20 seconds
+const STARTUP_DELAY = 40000; // 40 seconds
 const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
 
 const NOT_UPDATING = Ci.nsIBriefUpdateService.NOT_UPDATING;
