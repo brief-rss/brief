@@ -116,9 +116,9 @@ FeedEntry.prototype = {
 
         // We prefer |updated| to |published|
         if (aEntry.updated)
-            this.date = new Date(aEntry.updated).getTime();
+            this.date = new RFC822Date(aEntry.updated).getTime();
         else if (aEntry.published)
-            this.date = new Date(aEntry.published).getTime();
+            this.date = new RFC822Date(aEntry.published).getTime();
 
         try {
             if (aEntry.authors) {
@@ -210,6 +210,38 @@ EntryList.prototype = {
     contractID: '@ancestor/brief/entrylist;1',
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefEntryList])
 
+}
+
+// The built-in date parser doesn't handle military timezone codes, even though
+// they are part of RFC822. This function attempts to manually replace the military
+// timezone code with the actual timezone.
+function RFC822Date(aDateString) {
+    var date = new Date(aDateString);
+    if (date.toString().match('invalid','i')) {
+        var timezoneCode = aDateString.match('\\s[a-ik-zA-IK-Z]$')[0];
+        if (timezoneCode) {
+            // Strip whitespace and normalize to upper case.
+            timezoneCode = timezoneCode.replace(/^\s+/,'')[0].toUpperCase();
+            let timezone = militaryTimezoneCodes[timezoneCode];
+            var fixedDateString = aDateString.replace(/\s[a-ik-zA-IK-Z]$/, ' ' + timezone);
+            date = new Date(fixedDateString);
+        }
+    }
+    return date;
+}
+
+// Conversion table for military coded timezones.
+var militaryTimezoneCodes = {
+    A: '-1',  B: '-2',  C: '-3',  D: '-4', E: '-5',  F: '-6',  G: '-7',  H: '-8', I: '-9',
+    K: '-10', L: '-11', M: '-12', N: '+1', O: '+2',  P: '+3',  Q: '+4',  R: '+5',
+    S: '+6',  T: '+7',  U: '+8',  V: '+9', W: '+10', X: '+11', Y: '+12', Z: 'UT',
+}
+
+
+function log(aMessage) {
+  var consoleService = Cc['@mozilla.org/consoleservice;1'].
+                       getService(Ci.nsIConsoleService);
+  consoleService.logStringMessage(aMessage);
 }
 
 var modules = [Feed, FeedEntry, EntryList];
