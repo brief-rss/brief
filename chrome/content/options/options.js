@@ -156,27 +156,12 @@ var gDisplayPane = {
     },
 
     showShortcuts: function() {
-        const EXT_ID = 'brief@mozdev.org';
-        const SHORTCUTS_FILENAME = 'keyboard-shortcuts.xhtml';
-
-        var itemLocation = Cc['@mozilla.org/extensions/manager;1'].
-                           getService(Ci.nsIExtensionManager).
-                           getInstallLocation(EXT_ID).
-                           getItemLocation(EXT_ID);
-        // Get the template file.
-        itemLocation.append('defaults');
-        itemLocation.append('data');
-        itemLocation.append(SHORTCUTS_FILENAME);
-        // Create URI of the template file.
-        gShortcutsURI = Cc['@mozilla.org/network/protocol;1?name=file'].
-                       getService(Ci.nsIFileProtocolHandler).
-                       newFileURI(itemLocation);
-
         var screenHeight = window.screen.availHeight;
         var height = screenHeight < 620 ? screenHeight : 620;
         var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
+        var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
-        window.openDialog(gShortcutsURI.spec, 'Brief shortcuts', features);
+        window.openDialog(url, 'Brief shortcuts', features);
     }
 
 }

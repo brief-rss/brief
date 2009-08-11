@@ -18,32 +18,11 @@
                     link.setAttribute('href', 'chrome://brief-mac/skin/mac.css');
                 }
             }
-
-            function displayShortcuts() {
-                var frame = document.getElementById('shortcuts-frame');
-                frame.src = 'keyboard-shortcuts.xhtml';
-
-                var height = (window.innerHeight < 600) ? window.innerHeight - 35 : 620;
-                var width = (window.innerWidth < 500) ? window.innerWidth - 30 : 500;
-
-                frame.setAttribute('height', height - 10);
-                frame.setAttribute('width', width);
-
-                var params = document.location + '#TB_inline?';
-                params += 'width=' + width + '&height=' + height;
-                params += '&inlineId=shortcuts';
-                tb_show(null, params, false);
-            }
-            document.addEventListener('DisplayShortcuts', displayShortcuts, true);
         </script>
     </head>
 
     <body onload="applyMacStyleOverride()">
         <div id="container">
-            <div id="shortcuts" style="display: none">
-                <iframe id="shortcuts-frame" frameborder="0"></iframe>
-            </div>
-
             <div id="header">
                 <img id="feed-image">
                 <a id="feed-title" target="_blank"></a>
