@@ -1,5 +1,4 @@
 <!ENTITY optionsWindow.title "Brief options">
-
 <!ENTITY mainPane.label "Main">
 <!ENTITY updateGroup.caption "Updating">
 <!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
@@ -25,14 +24,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Clear all items...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
-
 <!ENTITY feedsPane.label "Feeds">
 <!ENTITY folderTree.label "Folder containing my Live Bookmarks:">
 <!ENTITY importOPML.label "Import...">
 <!ENTITY importOPML.accesskey "I">
 <!ENTITY exportOPML.label "Export...">
 <!ENTITY exportOPML.accesskey "E">
-
 <!ENTITY displayPane.label "Display">
 <!ENTITY entriesPerPageBefore.label "Show">
 <!ENTITY entriesPerPageAfter.label "items per page">
@@ -52,11 +49,9 @@
 <!ENTITY editStyleDescription.label "Customize the appearance of feeds">
 <!ENTITY editStyleButton.label "Customize">
 <!ENTITY editStyleButton.accesskey "C">
-
 <!ENTITY styleEditor.title "Edit custom style">
 <!ENTITY seeCustomizationTips.label "Learn about customizing appearance with CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
-
 <!ENTITY feedName.label "Name">
 <!ENTITY feedURL.label "Location">
 <!ENTITY optionsGroupbox.caption "Feed settings">
@@ -65,7 +60,7 @@
 <!ENTITY expireEntriesPerFeedBefore.label "Remove downloaded items after">
 <!ENTITY expireEntriesPerFeed.accesskey "R">
 <!ENTITY expireEntriesPerFeedAfter.label "days">
-<!ENTITY updatedEntries.label "Don't mark changed items back as unread">
+<!ENTITY updatedEntries.label "Don&apos;t mark changed items back as unread">
 <!ENTITY updatedEntries.accesskey "D">
 <!ENTITY previousFeed.label "&lt; Previous">
 <!ENTITY previousFeed.accesskey "P">
