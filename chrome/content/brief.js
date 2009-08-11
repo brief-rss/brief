@@ -320,11 +320,12 @@ var gCommands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        if (gFeedView.isActive) {
-            var evt = document.createEvent('Events');
-            evt.initEvent('DisplayShortcuts', false, false);
-            gFeedView.document.dispatchEvent(evt);
-        }
+        var screenHeight = window.screen.availHeight;
+        var height = screenHeight < 620 ? screenHeight : 620;
+        var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
+        var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
+
+        window.openDialog(url, 'Brief shortcuts', features);
     }
 }
 

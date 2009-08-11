@@ -2,11 +2,46 @@
 <!DOCTYPE html SYSTEM "chrome://brief/locale/shortcuts.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
-
     <head>
         <title>&shortcutsPage.title;</title>
-        <link rel="stylesheet" href="feedview-common.css" type="text/css" media="screen"/>
         <link id="mac-override" rel="stylesheet" type="text/css" media="screen"/>
+        <style type="text/css">
+            body {
+              margin: 0;
+            }
+
+            #shortcuts-table {
+                font-size: 12px;
+                font-family: "Lucida Grande", Verdana, sans-serif;
+                border-spacing: 0;
+                margin: 0 auto;
+            }
+
+            #shortcuts-table td {
+                padding: 4px 10px;
+                border-bottom: 1px solid lightgray;
+            }
+
+            .shortcut-key {
+                border-right: 1px solid lightgray;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            .shortcuts-plain {
+                font-weight: normal;
+            }
+
+            #shortcuts-table .shortucts-header {
+                font-size: 14px;
+                text-align: center;
+                padding-top: 20px;
+            }
+
+            .onlyMac {
+              display: none;
+            }
+        </style>
         <script type="text/javascript">
             function applyMacOverride() {
                 if (window.navigator.platform.match('Mac')) {
@@ -14,10 +49,18 @@
                     link.setAttribute('href', 'chrome://brief-mac/skin/mac.css');
                 }
             }
+
+            function onKeypress(aEvent) {
+                if (aEvent.keyCode == aEvent.DOM_VK_ESCAPE)
+                    window.close();
+            }
+
+            window.addEventListener('load', applyMacOverride, false);
+            document.addEventListener('keypress', onKeypress, false);
         </script>
     </head>
 
-    <body id="shortcuts-body" onload="applyMacOverride()">
+    <body >
         <table id="shortcuts-table">
             <tr>
                 <td colspan="2" class="shortucts-header" style="padding-top: 10px;">&navigation.header;</td>
