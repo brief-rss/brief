@@ -145,9 +145,6 @@
                     </treechildren>
                 </tree>
                 <vbox>
-                    <label id="select-home-folder-label">
-                        &selectHomeFolder.label;
-                    </label>
                     <tree id="places-tree"
                           type="places"
                           hidecolumnpicker="true"
