@@ -4,7 +4,7 @@ const CUSTOM_STYLE_FILENAME = 'brief-custom-style.css';
 const EXAMPLE_CUSTOM_STYLE_FILENAME = 'example-custom-style.css';
 const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
 const TEMPLATE_URL = 'resource://brief-content/feedview-template.html';
-const INTRO_PAGE_URL = 'resource://brief-content/intro.xhtml';
+const GUIDE_PAGE_URL = 'resource://brief-content/guide.xhtml';
 
 const LAST_MAJOR_VERSION = '1.2';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
@@ -338,7 +338,7 @@ function loadHomeview() {
     var view = new FeedView(title, query);
 
     if (!gPrefs.homeFolder) {
-        getElement('feed-view').loadURI(INTRO_PAGE_URL);
+        getElement('feed-view').loadURI(GUIDE_PAGE_URL);
         getElement('feed-view-toolbar').hidden = true;
         gFeedView = view; // Set the view without attaching it.
         return;
