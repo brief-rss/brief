@@ -4,6 +4,7 @@ const CUSTOM_STYLE_FILENAME = 'brief-custom-style.css';
 const EXAMPLE_CUSTOM_STYLE_FILENAME = 'example-custom-style.css';
 const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
 const TEMPLATE_URL = 'resource://brief-content/feedview-template.html';
+const INTRO_PAGE_URL = 'resource://brief-content/intro.xhtml';
 
 const LAST_MAJOR_VERSION = '1.2';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
@@ -335,6 +336,13 @@ function loadHomeview() {
     var title = getElement('unread-folder').getAttribute('title');
     var view = new FeedView(title, query);
 
+    if (!gPrefs.homeFolder) {
+        getElement('feed-view').loadURI(INTRO_PAGE_URL);
+        getElement('feed-view-toolbar').hidden = true;
+        gFeedView = view; // Set the view without attaching it.
+        return;
+    }
+
     var prevVersion = gPrefs.getCharPref('lastMajorVersion');
     var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
                         getService(Ci.nsIVersionComparator);
@@ -401,6 +409,7 @@ function selectHomeFolder(aEvent) {
     if (placesTree.currentIndex != -1) {
         var folderId = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
         gPrefs.setIntPref('homeFolder', folderId);
+        gFeedList.tree.view.selection.select(0);
     }
 }
 
