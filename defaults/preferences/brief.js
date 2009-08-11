@@ -19,8 +19,8 @@ pref("extensions.brief.update.interval", 3600);
 pref("extensions.brief.update.lastUpdateTime", 0);
 pref("extensions.brief.update.enableAutoUpdate", true);
 pref("extensions.brief.update.showNotification", true);
-pref("extensions.brief.update.defaultFetchDelay", 1000);
-pref("extensions.brief.update.backgroundFetchDelay", 2000);
+pref("extensions.brief.update.defaultFetchDelay", 2000);
+pref("extensions.brief.update.backgroundFetchDelay", 6000);
 pref("extensions.brief.update.suppressSecurityDialogs", true);
 
 pref("extensions.brief.database.expireEntries", false);
