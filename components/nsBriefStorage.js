@@ -864,10 +864,11 @@ BriefStorageService.prototype = {
 
         var feeds = this.getAllFeeds();
         for each (feed in feeds) {
-            getEntryCount.feedID = feed.feedID;
-            getEntryCount.deleted = ENTRY_STATE_NORMAL;
+            getEntryCount.params.feedID = feed.feedID;
+            getEntryCount.params.deleted = ENTRY_STATE_NORMAL;
             getEntryCount.step();
             let entryCount = getEntryCount.row.count;
+            getEntryCount.reset();
 
             if (entryCount - maxEntries > 0) {
                 expireEntries.params.newState = ENTRY_STATE_TRASHED;
