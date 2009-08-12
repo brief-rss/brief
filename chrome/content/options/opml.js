@@ -70,10 +70,18 @@ var opml = {
 
     importLevel: function(aNodes, aCreateIn) {
         var createIn = aCreateIn;
+
+        // If aCreateIn is null then we are in the root level of the file.
         if (!createIn) {
-            var home = document.getElementById('extensions.brief.homeFolder').value;
-            var createIn = (home != -1) ? home
-                                        : this.bookmarksService.bookmarksMenuFolder;
+            let home = document.getElementById('extensions.brief.homeFolder');
+            if (home != -1) {
+                createIn = home.value;
+            }
+            else {
+                // If there is no home folder set, then import livemarks into the
+                // bookmarks folder and set it as the home folder.
+                createIn = home.value = this.bookmarksService.bookmarksMenuFolder;
+            }
         }
 
         for (var i = 0; i < aNodes.length; i++) {
