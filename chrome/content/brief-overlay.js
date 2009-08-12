@@ -221,11 +221,11 @@ const gBrief = {
         if (aEvent.target.id == 'brief-button' && gBrowser.selectedTab == this.tab
             && aEvent.button == 0) {
 
-            // Tabbrowser prevents closing the only tab when the tab bar is hidden.
-            var autohide = gPrefService.getBoolPref('browser.tabs.autoHide');
-            if (autohide && gBrowser.tabContainer.childNodes.length == 1)
+            // Closing the last tab closes the application when tab bar is visible,
+            // and is impossible when it is hidden. In either case, if Brief is the
+            // last tab we have to add another one before closing it.
+            if (gBrowser.tabContainer.childNodes.length == 1)
                 gBrowser.addTab('about:blank', null, null, null, null, false);
-
             gBrowser.removeCurrentTab();
         }
         else if (aEvent.button == 1 || gBrief.shouldOpenInNewTab()) {
