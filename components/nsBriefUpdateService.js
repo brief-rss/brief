@@ -12,8 +12,7 @@ const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
 const ICON_DATAURL_PREFIX = 'data:image/x-icon;base64,';
 const FEED_ICON_URL       = 'chrome://brief/skin/icon.png';
 
-const UPDATE_TIMER_INTERVAL = 120000; // 2 minutes
-const STARTUP_DELAY = 40000; // 40 seconds
+const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
 const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
 
 const NOT_UPDATING = Ci.nsIBriefUpdateService.NOT_UPDATING;
@@ -162,6 +161,9 @@ BriefUpdateService.prototype = {
             // Fall through...
 
         case this.updateTimer:
+            if (this.status != NOT_UPDATING)
+                return;
+
             var globalUpdatingEnabled = gPrefs.getBoolPref('update.enableAutoUpdate');
             // Preferencos are in seconds, because they can only store 32 bit integers.
             var globalInterval = gPrefs.getIntPref('update.interval') * 1000;
@@ -171,6 +173,8 @@ BriefUpdateService.prototype = {
             var itsGlobalUpdateTime = globalUpdatingEnabled &&
                                       now - lastGlobalUpdateTime > globalInterval;
 
+            // Filter feeds which need to be updated, according to either the global
+            // update interval or their own feed-specific interval.
             function filter(f) (f.updateInterval == 0 && itsGlobalUpdateTime) ||
                                (f.updateInterval > 0 && now - f.lastUpdated > f.updateInterval);
             var feedsToUpdate = gStorage.getAllFeeds().filter(filter);
@@ -245,8 +249,8 @@ BriefUpdateService.prototype = {
             if (aData == 'startup') {
                 // Delay the initial autoupdate check in order not to slow down the
                 // startup. Also, nsIBriefStorage is not ready yet.
-                this.startupDelayTimer.initWithCallback(this, STARTUP_DELAY,
-                                                        TIMER_TYPE_ONE_SHOT);
+                let startupDelay = gPrefs.getIntPref('update.startupDelay');
+                this.startupDelayTimer.initWithCallback(this, startupDelay, TIMER_TYPE_ONE_SHOT);
 
                 // We add the observer here instead of in the constructor as prefs
                 // are changed during startup when assuming their user-set values.
