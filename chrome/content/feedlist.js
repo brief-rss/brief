@@ -306,15 +306,7 @@ var gFeedList = {
             let unreadCount = query.getEntryCount();
             this._setLabel(treecell, feed.title, unreadCount);
 
-            // Update the favicon.
-            if (treeitem.hasAttribute('loading'))
-                treecell.setAttribute('src', THROBBER_URL);
-            else if (treeitem.hasAttribute('error'))
-                treecell.setAttribute('src', ERROR_ICON_URL);
-            else if (feed.favicon != 'no-favicon')
-                treecell.setAttribute('src', feed.favicon);
-            else
-                treecell.removeAttribute('src');
+            this._refreshFavicon(feed.feedID);
         }
 
         // |this.items| is null before the tree finishes building. We don't need to
@@ -384,6 +376,21 @@ var gFeedList = {
         aTreecell.setAttribute('label', label);
     },
 
+    _refreshFavicon: function gFeedList__refreshFavicon(aFeedID) {
+        var feed = gStorage.getFeed(aFeedID);
+        var treeitem = getElement(aFeedID);
+        var treecell = treeitem.firstChild.firstChild;
+
+        // Update the favicon.
+        if (treeitem.hasAttribute('loading'))
+            treecell.setAttribute('src', THROBBER_URL);
+        else if (treeitem.hasAttribute('error'))
+            treecell.setAttribute('src', ERROR_ICON_URL);
+        else if (feed.favicon != 'no-favicon')
+            treecell.setAttribute('src', feed.favicon);
+        else
+            treecell.removeAttribute('src');
+    },
 
     // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
@@ -596,7 +603,7 @@ var gFeedList = {
             if (feed.isFolder)
                 this.refreshFolderTreeitems(feed);
             else
-                this.refreshFeedTreeitems(aData);
+                this.refreshFeedTreeitems(feed);
             break;
 
         case 'brief:feed-updated':
@@ -604,7 +611,7 @@ var gFeedList = {
                 let item = getElement(aData);
                 item.removeAttribute('error');
                 item.removeAttribute('loading');
-                this.refreshFeedTreeitems(item);
+                this._refreshFavicon(aData);
             }
             refreshProgressmeter();
             break;
@@ -613,7 +620,7 @@ var gFeedList = {
             if (this.treeReady) {
                 let item = getElement(aData);
                 item.setAttribute('loading', true);
-                this.refreshFeedTreeitems(item);
+                this._refreshFavicon(aData);
             }
             break;
 
@@ -623,7 +630,7 @@ var gFeedList = {
                 let item = getElement(aData);
                 item.removeAttribute('loading');
                 item.setAttribute('error', true);
-                this.refreshFeedTreeitems(item);
+                this._refreshFavicon(aData);
             }
             refreshProgressmeter();
             break;
@@ -642,11 +649,11 @@ var gFeedList = {
             progressmeter.hidden = true;
             progressmeter.value = 0;
 
-            var items = gFeedList.items;
-            for (var i = 0; i < items.length; i++) {
-                if (items[i].hasAttribute('loading')) {
-                    items[i].removeAttribute('loading');
-                    this.refreshFeedTreeitems(items[i]);
+            for each (feed in gStorage.getAllFeeds(false)) {
+                let item = getElement(feed.feedID);
+                if (item.hasAttribute('loading')) {
+                    item.removeAttribute('loading');
+                    this._refreshFavicon(feed.feedID);
                 }
             }
             break;
