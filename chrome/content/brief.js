@@ -47,6 +47,13 @@ function init() {
 
     document.addEventListener('keypress', onKeyPress, true);
 
+    // This listener has to use capturing, because it handles persisting of open/collapsed
+    // folder state. If the tree is scrolled as a result of collapsing a folder, we can
+    // no longer find the target of the click event, because event.clientY points to
+    // where it used to be before scrolling occurred. Therefore, we have to catch the
+    // click event before the folder is actually collapsed.
+    gFeedList.tree.addEventListener('click', gFeedList.onClick, true);
+
     var observerService = Cc['@mozilla.org/observer-service;1'].
                           getService(Ci.nsIObserverService);
 
