@@ -42,11 +42,10 @@ var gFeedList = {
     },
 
     /**
-     * Gets nsIBriefFeed representation of a given feed. We've got feeds floating around
-     * represented in at least 3 different ways: nsIBriefFeed's, ID's of feeds, and
-     * treeitems. This function allows us to ensure that the argument is of nsIBriefFeed
-     * type. It makes it easy for other methods of gFeedList to accept any arguments
-     * of any type.
+     * Returns the given feed in form of nsIBriefFeed. We've got feeds passed around
+     * in 3 different forms: nsIBriefFeed's, ID's of feeds, and treeitems. This function
+     * allows us to ensure that the argument is of nsIBriefFeed type. It makes it easy
+     * for other methods of gFeedList to accept any arguments of any type.
      *
      * @param aFeed nsIBriefFeed object, feedID string, or treeitem XULElement.
      */
@@ -134,8 +133,8 @@ var gFeedList = {
         view.attach();
     },
 
-    // Temporarily selects the target items of right-clicks, so to highlight
-    // them when context menu is shown.
+    // Temporarily selects the target items of right-clicks to highlight
+    // it when the context menu is shown.
     onMouseDown: function gFeedList_onMouseDown(aEvent) {
         if (aEvent.button == 2) {
             var treeSelection = this.tree.view.selection;
@@ -170,8 +169,8 @@ var gFeedList = {
                     this.refreshFolderTreeitems(item);
 
                 // Folder states must be persisted immediatelly instead of when
-                // Brief is closed, because otherwise if the feedlist was rebuilt,
-                // the changes would be lost.
+                // Brief is closed, because otherwise if the feedlist is rebuilt,
+                // the changes will be lost.
                 async(this._persistFolderState, 0, this);
             }
 
@@ -249,7 +248,7 @@ var gFeedList = {
     /**
      * Refresh the folder's label.
      *
-     * @param  aFolders  Either a single folder or an array of them, represented by
+     * @param  aFolders  Either a single folder or an array of folders, in the form of
      *                   nsIBriefFeed object, feedID string, or treeitem XULElement.
      */
     refreshFolderTreeitems: function gFeedList_refreshFolderTreeitems(aFolders) {
@@ -258,7 +257,7 @@ var gFeedList = {
 
         var folders = (aFolders.splice) ? aFolders : [aFolders];
 
-        for (var i = 0; i < folders.length; i++) {
+        for (let i = 0; i < folders.length; i++) {
             let folder = this.getBriefFeed(folders[i]);
             let treeitem = getElement(folder.feedID);
             let treecell = treeitem.firstChild.firstChild;
@@ -280,21 +279,21 @@ var gFeedList = {
     },
 
     /**
-     * Refresh the feed treeitem's label and favicon. Also refreshes folders in the feed's
-     * parent chain.
+     * Refresh the feed treeitem's label and favicon. Also refreshes folders
+     * in the feed's parent chain.
      *
-     * @param  aFeeds  Either a single feed or an array of them, represented by
+     * @param  aFeeds  Either a single feed or an array of feeds, in the form of
      *                 nsIBriefFeed object, feedID string, or treeitem XULElement.
      */
     refreshFeedTreeitems: function gFeedList_refreshFeedTreeitems(aFeeds) {
         if (!this.treeReady)
             return;
 
-        // Hack: arrays that traveled through XPConnect aren't instanceof Array,
+        // Hack: arrays that travelled through XPConnect aren't instanceof Array,
         // so we use the splice method to check if aFeeds is an array.
         var feeds = (aFeeds.splice) ? aFeeds : [aFeeds];
 
-        for (var i = 0; i < feeds.length; i++) {
+        for (let i = 0; i < feeds.length; i++) {
             let feed = this.getBriefFeed(feeds[i]);
             let treeitem = getElement(feed.feedID);
             let treecell = treeitem.firstChild.firstChild;
@@ -331,7 +330,7 @@ var gFeedList = {
      * Refresh the treeitem of a tag.
      *
      * @param aTags            A tag string or an array of tag strings.
-     * @param aPossibleAdded   Indicates that the tag may not be in the list of tags yet.
+     * @param aPossiblyAdded   Indicates that the tag may not be in the list of tags yet.
      * @param aPossiblyRemoved Indicates that there may be no remaining entries with
      *                         the tag.
      */
@@ -372,7 +371,7 @@ var gFeedList = {
         }
     },
 
-    _setLabel: function gFeedList__setUnreadCounter(aTreecell, aName, aUnreadCount) {
+    _setLabel: function gFeedList__setLabel(aTreecell, aName, aUnreadCount) {
         var label;
         if (aUnreadCount > 0) {
             label = aName + ' (' + aUnreadCount +')';
@@ -388,7 +387,7 @@ var gFeedList = {
 
     // Rebuilds the feedlist tree.
     rebuild: function gFeedList_rebuild() {
-        // Can't build the tree if there's no view, because the tree is hidden.
+        // Can't build the tree if it is hidden and has no view.
         if (!this.tree.view)
             return;
 
