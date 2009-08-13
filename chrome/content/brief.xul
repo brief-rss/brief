@@ -107,7 +107,6 @@
                       persist="closedFolders"
                       onselect="gFeedList.onSelect(event)"
                       onmousedown="gFeedList.onMouseDown(event)"
-                      onclick="gFeedList.onClick(event)"
                       onkeyup="gFeedList.onKeyUp(event)">
 
                     <treecols>

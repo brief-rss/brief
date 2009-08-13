@@ -159,24 +159,24 @@ var gFeedList = {
 
 
     onClick: function gFeedList_onClick(aEvent) {
-        var row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
+        var row = gFeedList.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
         if (row != -1) {
-            var item = this.tree.view.getItemAtIndex(row);
+            var item = gFeedList.tree.view.getItemAtIndex(row);
 
             // Detect when folder is collapsed/expanded.
             if (item.hasAttribute('container')) {
                 if (item.id != 'starred-folder')
-                    this.refreshFolderTreeitems(item);
+                    gFeedList.refreshFolderTreeitems(item);
 
                 // Folder states must be persisted immediatelly instead of when
                 // Brief is closed, because otherwise if the feedlist is rebuilt,
                 // the changes will be lost.
-                async(this._persistFolderState, 0, this);
+                async(gFeedList._persistFolderState, 0, gFeedList);
             }
 
             // If there is a webpage open in the browser then clicking on
             // the already selected item, should bring back the feed view.
-            if (!gFeedView.isActive && item == this.selectedItem && aEvent.button == 0)
+            if (!gFeedView.isActive && item == gFeedList.selectedItem && aEvent.button == 0)
                 gFeedView.browser.loadURI(gTemplateURI.spec);
         }
     },
