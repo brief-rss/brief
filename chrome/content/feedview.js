@@ -570,11 +570,17 @@ FeedView.prototype = {
         }
     },
 
-
+    // This event handler is responsible for selecting entries when clicked,
+    // forcing opening links in new tabs depending on openEntriesInTabs pref,
+    // and marking entries as read when opened.
     _onClick: function FeedView__onClick(aEvent) {
-        // Look for the article container in the target's parent chain.
+        // This loops walks the parent chain of the even target to check if the
+        // article-container and/or an anchor were clicked.
         var elem = aEvent.target;
         while (elem != this.document.documentElement) {
+            if (elem.localName == 'A')
+                var anchor = elem;
+
             if (elem.className == 'article-container') {
                 var entryElement = elem;
                 break;
@@ -585,23 +591,20 @@ FeedView.prototype = {
         if (gPrefs.entrySelectionEnabled && entryElement)
             gFeedView.selectEntry(parseInt(entryElement.id));
 
-        // We intercept clicks on the article title link, so that we can mark the entry as
-        // read and force opening in a new tab if necessary. We can't dispatch a custom
-        // event like we do with other actions, because for whatever reason the binding
-        // handlers don't catch middle-clicks.
-        if (aEvent.target.className == 'article-title-link'
-            && (aEvent.button == 0 || aEvent.button == 1)) {
-
+        if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
+            // preventDefault doesn't stop the default action for middle-clicks,
+            // so we've got stop propagation as well.
             aEvent.preventDefault();
-
-            // Prevent default doesn't seem to stop the default action when
-            // middle-clicking, so we've got stop propagation as well.
             if (aEvent.button == 1)
                 aEvent.stopPropagation();
 
             var openInTabs = gPrefs.getBoolPref('feedview.openEntriesInTabs');
             var newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
-            gCommands.openEntryLink(entryElement, newTab);
+
+            if (anchor.className == 'article-title-link')
+                gCommands.openEntryLink(entryElement, newTab);
+            else if (anchor.hasAttribute('href'))
+                gCommands.openLink(anchor.getAttribute('href'), newTab);
         }
     },
 

@@ -304,25 +304,28 @@ var gCommands = {
 
     openEntryLink: function cmd_openEntryLink(aEntryElement, aNewTab) {
         var url = aEntryElement.getAttribute('entryURL');
+        gCommands.openLink(url, aNewTab);
+        
+        if (!aEntryElement.hasAttribute('read')) {
+            aEntryElement.setAttribute('read', true);
+            let entryID = parseInt(aEntryElement.id);
+            let query = new QuerySH([entryID]);
+            query.markEntriesRead(true);
+        }
+    },
 
+    openLink: function cmd_openLink(aURL, aNewTab) {
         if (aNewTab) {
             var prefBranch = Cc['@mozilla.org/preferences-service;1'].
                              getService(Ci.nsIPrefBranch);
             var whereToOpen = prefBranch.getIntPref('browser.link.open_newwindow');
             if (whereToOpen == 2)
-                openDialog('chrome://browser/content/browser.xul', '_blank', 'chrome,all,dialog=no', url);
+                openDialog('chrome://browser/content/browser.xul', '_blank', 'chrome,all,dialog=no', aURL);
             else
-                gTopWindow.gBrowser.loadOneTab(url);
+                gTopWindow.gBrowser.loadOneTab(aURL);
         }
         else {
-            gFeedView.browser.loadURI(url);
-        }
-
-        if (!aEntryElement.hasAttribute('read')) {
-            aEntryElement.setAttribute('read', true);
-            let entryID = parseInt(aEntryElement.id);
-            var query = new QuerySH([entryID]);
-            query.markEntriesRead(true);
+            gFeedView.browser.loadURI(aURL);
         }
     },
 
