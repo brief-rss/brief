@@ -4,7 +4,7 @@ const CUSTOM_STYLE_FILENAME = 'brief-custom-style.css';
 const EXAMPLE_CUSTOM_STYLE_FILENAME = 'example-custom-style.css';
 const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
 const TEMPLATE_URL = 'resource://brief-content/feedview-template.html';
-const GUIDE_PAGE_URL = 'resource://brief-content/guide.xhtml';
+const GUIDE_PAGE_URL = 'http://brief.mozdev.org/guide/guide.html';
 
 const LAST_MAJOR_VERSION = '1.2';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
