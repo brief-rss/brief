@@ -114,11 +114,8 @@ FeedEntry.prototype = {
         if (aEntry.content)
             this.content = aEntry.content.text;
 
-        // We prefer |updated| to |published|
-        if (aEntry.updated)
-            this.date = new RFC822Date(aEntry.updated).getTime();
-        else if (aEntry.published)
-            this.date = new RFC822Date(aEntry.published).getTime();
+        var date = aEntry.updated || aEntry.published || Date.now();
+        this.date = new RFC822Date(date).getTime();
 
         try {
             if (aEntry.authors) {
@@ -212,21 +209,30 @@ EntryList.prototype = {
 
 }
 
-// The built-in date parser doesn't handle military timezone codes, even though
-// they are part of RFC822. This function attempts to manually replace the military
-// timezone code with the actual timezone.
+
 function RFC822Date(aDateString) {
     var date = new Date(aDateString);
+
+    // If the date is invalid, it may be caused by the fact that the built-in date parser
+    // doesn't handle military timezone codes, even though they are part of RFC822.
+    // We can fix this by manually replacing the military timezone code with the actual
+    // timezone.
     if (date.toString().match('invalid','i')) {
-        var timezoneCode = aDateString.match('\\s[a-ik-zA-IK-Z]$')[0];
-        if (timezoneCode) {
+        let codeArray = aDateString.match('\\s[a-ik-zA-IK-Z]$');
+        if (codeArray) {
+            let timezoneCode = codeArray[0];
             // Strip whitespace and normalize to upper case.
             timezoneCode = timezoneCode.replace(/^\s+/,'')[0].toUpperCase();
             let timezone = militaryTimezoneCodes[timezoneCode];
-            var fixedDateString = aDateString.replace(/\s[a-ik-zA-IK-Z]$/, ' ' + timezone);
+            let fixedDateString = aDateString.replace(/\s[a-ik-zA-IK-Z]$/, ' ' + timezone);
             date = new Date(fixedDateString);
         }
+
+        // If the date is still invalid, just use the current date.
+        if (date.toString().match('invalid','i'))
+            date = new Date(fixedDateString);
     }
+
     return date;
 }
 

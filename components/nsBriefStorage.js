@@ -317,8 +317,6 @@ BriefStorageService.prototype = {
 
 
     migrateEntries: function BriefStorage_migrateEntries() {
-        var dbVersion = gConnection.schemaVersion;
-
         gConnection.beginTransaction();
         try {
             let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
@@ -682,7 +680,7 @@ BriefStorageService.prototype = {
             insert.params.secondaryHash = secondaryHash;
             insert.params.providedID = providedID;
             insert.params.entryURL = aEntry.entryURL;
-            insert.params.date = aEntry.date || Date.now();
+            insert.params.date = aEntry.date;
             insert.execute();
 
             insert = gStm.insertEntryText;
