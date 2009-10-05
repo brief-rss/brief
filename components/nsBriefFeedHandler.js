@@ -57,9 +57,10 @@ Feed.prototype = {
         }
         if (aFeed.items) {
             this.entries = [];
-            for (var i = 0; i < aFeed.items.length; i++) {
-                var entry = aFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
-                var wrappedEntry = Cc['@ancestor/brief/feedentry;1'].
+            // Counting down, because the order of items is reversed after parsing.
+            for (let i = aFeed.items.length - 1; i >= 0; i--) {
+                let entry = aFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
+                let wrappedEntry = Cc['@ancestor/brief/feedentry;1'].
                                    createInstance(Ci.nsIBriefFeedEntry);
                 wrappedEntry.wrapEntry(entry);
                 this.entries.push(wrappedEntry);
