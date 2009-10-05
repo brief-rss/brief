@@ -628,11 +628,9 @@ var gFeedList = {
         case 'brief:feed-error':
             if (this.treeReady) {
                 let item = getElement(aData);
-                item.removeAttribute('loading');
                 item.setAttribute('error', true);
                 this._refreshFavicon(aData);
             }
-            refreshProgressmeter();
             break;
 
         case 'brief:feed-update-queued':

@@ -51,7 +51,6 @@ gUpdateService = null;
 // Class definition
 function BriefUpdateService() {
     gObserverService.addObserver(this, 'brief:feed-updated', false);
-    gObserverService.addObserver(this, 'brief:feed-error', false);
     gObserverService.addObserver(this, 'profile-after-change', false);
     gObserverService.addObserver(this, 'quit-application', false);
 }
@@ -258,7 +257,6 @@ BriefUpdateService.prototype = {
             }
             break;
 
-        case 'brief:feed-error':
         case 'brief:feed-updated':
             // Count updated feeds, so we can show their number in
             // the alert when updating is completed.
@@ -289,7 +287,6 @@ BriefUpdateService.prototype = {
             break;
 
         case 'quit-application':
-            gObserverService.removeObserver(this, 'brief:feed-error');
             gObserverService.removeObserver(this, 'brief:feed-updated');
             gObserverService.removeObserver(this, 'quit-application');
             gObserverService.removeObserver(this, 'profile-after-change');
@@ -347,6 +344,11 @@ FeedFetcher.prototype = {
     // parsing error) and has sent 'brief:feed-error' notification.
     inError: false,
 
+    // The feed processor sets the bozo bit when a feed triggers a fatal error during XML
+    // parsing. There may still be feed metadata and entries that were parsed before the
+    // error occurred.
+    bozo: false,
+
     requestFeed: function FeedFetcher_requestFeed() {
         var self = this;
 
@@ -359,7 +361,7 @@ FeedFetcher.prototype = {
                 self.requestFeed();
             }
             else {
-                self.finish(false);
+                self.finish(true);
             }
         }
 
@@ -375,7 +377,7 @@ FeedFetcher.prototype = {
                 parser.parseFromString(self.request.responseText, uri);
             }
             catch (ex) {
-                self.finish(false);
+                self.finish(true);
             }
         }
 
@@ -396,10 +398,11 @@ FeedFetcher.prototype = {
 
     // nsIFeedResultListener
     handleResult: function FeedFetcher_handleResult(aResult) {
-        if (!aResult || !aResult.doc || aResult.bozo) {
-            this.finish(false);
+        if (!aResult || !aResult.doc) {
+            this.finish(true);
             return;
         }
+        this.bozo = aResult.bozo;
 
         var feed = aResult.doc.QueryInterface(Ci.nsIFeed);
 
@@ -438,14 +441,14 @@ FeedFetcher.prototype = {
 
 
     passDataToStorage: function FeedFetcher_passDataToStorage() {
-        this.finish(true);
+        this.finish(this.bozo);
 
         this.downloadedFeed.favicon = this.favicon;
         gStorage.updateFeed(this.downloadedFeed);
     },
 
 
-    finish: function FeedFetcher_finish(aSuccess) {
+    finish: function FeedFetcher_finish(aError) {
         // For whatever reason, if nsIFeedProcessor gets a parsing error it sometimes
         // calls handleResult() twice. We check the inError flag to avoid doing finish()
         // again, because it would seriously mess up the batch update by adding the
@@ -459,7 +462,9 @@ FeedFetcher.prototype = {
         // be refreshed properly, because of outdated count of completed feeds.
         gUpdateService.completedFeeds.push(this.feed);
 
-        if (!aSuccess) {
+        gObserverService.notifyObservers(null, 'brief:feed-updated', this.feed.feedID);
+
+        if (aError) {
             this.inError = true;
             gObserverService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
         }
@@ -475,12 +480,12 @@ FeedFetcher.prototype = {
         switch (aTopic) {
         case 'timer-callback':
             this.request.abort();
-            this.finish(false);
+            this.finish(true);
             break;
 
         case 'brief:feed-update-canceled':
             this.request.abort();
-            this.finish(true);
+            this.finish(false);
             break;
         }
     },
