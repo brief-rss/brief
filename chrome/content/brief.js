@@ -169,7 +169,7 @@ var gCommands = {
         button.setAttribute('tooltiptext', tooltiptext);
         button.setAttribute('sidebarHidden', pane.hidden);
 
-        if (gFeedList.treeNotBuilt)
+        if (!gFeedList.treeReady)
             gFeedList.rebuild();
     },
 
@@ -305,7 +305,7 @@ var gCommands = {
     openEntryLink: function cmd_openEntryLink(aEntryElement, aNewTab) {
         var url = aEntryElement.getAttribute('entryURL');
         gCommands.openLink(url, aNewTab);
-        
+
         if (!aEntryElement.hasAttribute('read')) {
             aEntryElement.setAttribute('read', true);
             let entryID = parseInt(aEntryElement.id);
