@@ -579,10 +579,6 @@ BriefStorageService.prototype = {
             }
         }
 
-        var subject = Cc['@mozilla.org/variant;1'].createInstance(Ci.nsIWritableVariant);
-        subject.setAsInt32(this.newEntries.length);
-        gObserverService.notifyObservers(subject, 'brief:feed-updated', aFeed.feedID);
-
         if (this.newEntries.length) {
             let query = new BriefQuery();
             query.entries = this.newEntries;
