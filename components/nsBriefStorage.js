@@ -680,7 +680,7 @@ BriefStorageService.prototype = {
             insert.params.secondaryHash = secondaryHash;
             insert.params.providedID = providedID;
             insert.params.entryURL = aEntry.entryURL;
-            insert.params.date = aEntry.date;
+            insert.params.date = aEntry.date || Date.now();
             insert.execute();
 
             insert = gStm.insertEntryText;
