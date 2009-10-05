@@ -114,8 +114,10 @@ FeedEntry.prototype = {
         if (aEntry.content)
             this.content = aEntry.content.text;
 
-        var date = aEntry.updated || aEntry.published || Date.now();
-        this.date = new RFC822Date(date).getTime();
+        if (aEntry.updated)
+            this.date = new RFC822Date(aEntry.updated).getTime();
+        else if (aEntry.published)
+            this.date = new RFC822Date(aEntry.published).getTime();
 
         try {
             if (aEntry.authors) {
