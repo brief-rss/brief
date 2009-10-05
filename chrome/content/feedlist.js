@@ -1012,7 +1012,12 @@ var gContextMenu = {
                              map(function(e) e.entryURL);
 
             for (let i = 0; i < urls.length; i++) {
-                let uri = ioService.newURI(urls[i], null, null);
+                try {
+                    let uri = ioService.newURI(urls[i], null, null);
+                }
+                catch (ex) {
+                    continue;
+                }
                 PlacesUtils.tagging.untagURI(uri, [tag]);
             }
         }

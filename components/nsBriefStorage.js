@@ -79,6 +79,11 @@ __defineGetter__('gPrefs', function() {
                          getBranch('extensions.brief.').
                          QueryInterface(Ci.nsIPrefBranch2);
 });
+__defineGetter__('gIOService', function() {
+    delete this.gIOService;
+    return this.gIOService = Cc['@mozilla.org/network/io-service;1'].
+                             getService(Ci.nsIIOService);
+});
 
 __defineGetter__('gBms', function() {
     // XXX Getting bookmarks service at startup sometimes throws an exception.
@@ -359,9 +364,12 @@ BriefStorageService.prototype = {
         gConnection.beginTransaction();
         try {
             while (select.step()) {
-                let alreadyBookmarked = false;
                 let uri = newURI(select.row.entryURL);
+                if (!uri)
+                    continue;
+
                 let title = select.row.title;
+                let alreadyBookmarked = false;
 
                 // Look for existing bookmarks for entry's URI.
                 if (gBms.isBookmarked(uri)) {
@@ -692,7 +700,7 @@ BriefStorageService.prototype = {
             let entryID = gConnection.lastInsertRowID;
 
             let uri = newURI(aEntry.entryURL);
-            if (gBms.isBookmarked(uri)) {
+            if (uri && gBms.isBookmarked(uri)) {
                 let bookmarkIDs = gBms.getBookmarkIdsForURI(uri, {});
 
                 let bm = bookmarkIDs.filter(isNormalBookmark)[0];
@@ -2115,6 +2123,8 @@ BriefQuery.prototype = {
 
         for each (entry in this.getFullEntries()) {
             let uri = newURI(entry.entryURL);
+            if (!uri)
+                continue;
 
             if (aState) {
                 let trans = transSrv.createItem(uri, folder, gBms.DEFAULT_INDEX,
@@ -2151,6 +2161,9 @@ BriefQuery.prototype = {
 
         for each (entry in this.getFullEntries()) {
             let uri = newURI(entry.entryURL);
+            if (!uri)
+                continue;
+
             let bookmarks = gBms.getBookmarkIdsForURI(uri, {});
             let normalBookmarks = bookmarks.filter(isNormalBookmark)
 
@@ -2315,9 +2328,13 @@ BriefQuery.prototype = {
 // ---------------- Utility functions -----------------
 
 function newURI(aSpec) {
-    return Cc['@mozilla.org/network/io-service;1'].
-           getService(Ci.nsIIOService).
-           newURI(aSpec, null, null);
+    try {
+        var uri = gIOService.newURI(aSpec, null, null);
+    }
+    catch (ex) {
+        uri = null;
+    }
+    return uri;
 }
 
 function isBookmark(aItemID) {
