@@ -109,6 +109,7 @@ function initCustomCSSFile() {
         exampleCustomStyle.append('data');
         exampleCustomStyle.append(EXAMPLE_CUSTOM_STYLE_FILENAME);
         exampleCustomStyle.copyTo(chromeDir, CUSTOM_STYLE_FILENAME);
+        exampleCustomStyle.permissions = 777;
     }
 }
 
