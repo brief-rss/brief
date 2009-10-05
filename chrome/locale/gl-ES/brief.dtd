@@ -1,0 +1,40 @@
+<!ENTITY selectHomeFolder.label "Seleccione o cartafol cos marcadores dinámicos:">
+<!ENTITY confirmHomeFolder.label "Aceptar">
+<!ENTITY searchCurrentView.label "Buscar na vista actual">
+<!ENTITY searchAllFeeds.label "Procurar en todas as fontes">
+<!ENTITY headlinesCheckbox.tooltip "Ver cabeceiras">
+<!ENTITY showAll.label "Ver todo">
+<!ENTITY showUnread.label "Ver os non lidos">
+<!ENTITY showStarred.label "Ver marcadores">
+<!ENTITY updateButton.tooltip "Actualizar todas as fontes">
+<!ENTITY stopUpdatingButton.tooltip "Deter actualización de fontes">
+<!ENTITY searchScopeButton.tooltip "Cambiar o ámbito da procura">
+<!ENTITY showOptions.tooltip "Abrir opcións de Brief">
+<!ENTITY markViewRead.tooltip "Marcar todos os elementos como lidos (premer Ctrl para marcar unicamente a páxina actual)">
+<!ENTITY viewConstraintList.tooltip "Escoller que clase de elementos amosar">
+<!ENTITY previousPage.tooltip "Amosar os elementos máis recentes">
+<!ENTITY nextPage.tooltip "Amosar os elementos máis antigos">
+<!ENTITY unreadFolder.label "Sen ler">
+<!ENTITY starredFolder.label "Marcadores">
+<!ENTITY trashFolder.label "Lixo">
+<!ENTITY ctxMarkFeedRead.label "Marcar a fonte como lida">
+<!ENTITY ctxMarkFeedUnread.label "Marcar a fonte como non lida">
+<!ENTITY ctxMarkFolderRead.label "Marcar o cartafol como lido">
+<!ENTITY ctxMarkTagRead.label "Marcar elementos etiquetados como lidos">
+<!ENTITY ctxUpdateFeed.label "Actualizar a fonte">
+<!ENTITY ctxUpdateFolder.label "Actualizar o cartafol">
+<!ENTITY ctxOpenWebsite.label "Abrir a páxina web">
+<!ENTITY ctxDeleteFeed.label "Borrar fonte">
+<!ENTITY ctxDeleteFolder.label "Borrar cartafol">
+<!ENTITY ctxDeleteTag.label "Borrar etiqueta">
+<!ENTITY ctxEmptyFeed.label "Baleirar fonte">
+<!ENTITY ctxEmptyFolder.label "Cartafol baleiro">
+<!ENTITY ctxRestoreTrashed.label "Restaurar todos os elementos">
+<!ENTITY ctxEmptyTrash.label "Baleirar o lixo">
+<!ENTITY ctxFeedProperties.label "Propiedades">
+<!ENTITY ctxUpdateFeeds.label "Actualizar as fontes">
+<!ENTITY ctxMarkFeedsAsRead.label "Marcar todas as fontes como lidas">
+<!ENTITY compactingWindow.title "Compactar fontes">
+<!ENTITY compactingInProgress.label "O Brief está a compactar as fontes almacenadas. Este proceso pode levar algún tempo...">
+<!ENTITY migrationProgress.title "Migrar fontes">
+<!ENTITY migrationProgress.description "O Brief está a migrar as fontes almacenadas...">

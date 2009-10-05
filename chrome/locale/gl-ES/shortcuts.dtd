@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Brief - Atallos do teclado">
+<!ENTITY navigation.header "Navegación">
+<!ENTITY or "ou">
+<!ENTITY ctrlShiftA.key "Ctrl + MAIÚS. + A">
+<!ENTITY openBrief "Abrir o Brief">
+<!ENTITY space.key "Espazo">
+<!ENTITY showNextItem "Amosar elemento seguinte">
+<!ENTITY backspace.key "Retroceso">
+<!ENTITY showPreviousItem "Amosar elemento anterior">
+<!ENTITY altK.key "Alt + K">
+<!ENTITY nextPage "Amosar páxina seguinte">
+<!ENTITY altJ.key "Alt + J">
+<!ENTITY previousPage "Amosar páxina anterior">
+<!ENTITY enter.key "Intro">
+<!ENTITY openEntry "Abrir o elmento actual">
+<!ENTITY ctrlEnter.key "Ctrl + Intro">
+<!ENTITY cmdEnter.key "Cmd + Intro">
+<!ENTITY openEntryTab "Abrir o elemento actual nunha nova pestana">
+<!ENTITY foldEntry "Estender ou pregar o elemento actual (vista de cabeceiras)">
+<!ENTITY entries.header "Elementos">
+<!ENTITY markRead "Marcar o elemento actual como lido ou non lido">
+<!ENTITY starEntry "Marcar ou desmarcar o elemento actual">
+<!ENTITY moveToTrash "Mover o elemento actual para o lixo">
+<!ENTITY restoreEntry "Restaurar o elemento actual do lixo">
+<!ENTITY ctrlM.key "Ctrl + M">
+<!ENTITY cmdM.key "Cmd + M">
+<!ENTITY markAllAsRead "Marcar como lidos os elementos vistos">
+<!ENTITY tab.key "Pestana">
+<!ENTITY enableEntryHightlight "Activar o resaltado do elemento actual">
+<!ENTITY view.header "Vista">
+<!ENTITY showAll "Amosar todos os elementos">
+<!ENTITY showStarred "Amosar elementos marcados">
+<!ENTITY showUnread "Amosar elementos non lidos">
+<!ENTITY headlinesView "Mudar a vista de cabeceiras">
+<!ENTITY focusSearchbar "Foco na barra de procura">
+<!ENTITY displayShortcuts "Amosar a listaxe de atallos">
