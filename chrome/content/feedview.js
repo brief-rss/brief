@@ -38,6 +38,7 @@ FeedView.prototype = {
     // feedview.shownEntries preference.
     _constrained: false,
 
+    _refreshPending: false,
 
     get browser FeedView_browser() {
         delete this.__proto__.browser;
@@ -449,6 +450,9 @@ FeedView.prototype = {
         this.browser.addEventListener('load', this, false);
         gStorage.addObserver(this);
 
+        // Used to perform deferred refreshes.
+        gTopWindow.gBrowser.addEventListener('TabSelect', this, false);
+
         // Load the template page if it isn't loaded yet. We also have to make sure to
         // load it at startup, when no view was attached yet, because the template page
         // may have been restored by SessionStore - before the custom CSS file was
@@ -472,6 +476,7 @@ FeedView.prototype = {
      * Removes the view as the listener, cancels pending actions.
      */
     detach: function FeedView_detach() {
+        gTopWindow.gBrowser.removeEventListener('TabSelect', this, false);
         this.browser.removeEventListener('load', this, false);
         for each (event in this._events)
             this.document.removeEventListener(event, this, true);
@@ -572,6 +577,12 @@ FeedView.prototype = {
                 break;
             case 'keypress':
                 onKeyPress(aEvent);
+                break;
+            case 'TabSelect':
+                if (aEvent.originalTarget == gTopWindow.gBrief.tab && this._refreshPending) {
+                    this.refresh();
+                    this._refreshPending = false;
+                }
                 break;
         }
     },
@@ -744,6 +755,12 @@ FeedView.prototype = {
     refresh: function FeedView_refresh(aEntrySetValid) {
         if (!this.isActive)
             return;
+
+        // Defer refreshing if Brief isn't visible.
+        if (gTopWindow.gBrowser.selectedTab != gTopWindow.gBrief.tab) {
+            this._refreshPending = true;
+            return;
+        }
 
         // Stop scrolling.
         clearInterval(this._scrolling);
