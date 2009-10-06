@@ -52,8 +52,7 @@ FeedView.prototype = {
     feedContent: null,
 
 
-    // Query that selects entries contained by the view. It is set to to retrieve
-    // all the entries, not only the ones displayed on the current page.
+    // Query that selects all entries contained by the view (not only the current page).
     set query FeedView_query_set(aQuery) {
         return this.__query = aQuery;
     },
@@ -76,7 +75,7 @@ FeedView.prototype = {
         return this.__query;
     },
 
-    // It's much faster to retrieve entries by their IDs if we know them,
+    // It's much faster to retrieve entries by their IDs when possible,
     // we keep a separate query for that.
     get _fastQuery FeedView_fastQuery() {
         if (!this.__fastQuery) {
@@ -118,7 +117,7 @@ FeedView.prototype = {
 
 
     // Indicates whether the feed view is currently displayed in the browser.
-    get isActive FeedView_isActive() {
+    get active FeedView_active() {
         return (this.browser.currentURI.equals(gTemplateURI) && gFeedView == this);
     },
 
@@ -236,7 +235,7 @@ FeedView.prototype = {
      *                         to the target position.
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollSmoothly) {
-        if (!this.isActive)
+        if (!this.active)
             return;
 
         var entry = (typeof aEntry == 'number' || !aEntry) ? aEntry
@@ -539,9 +538,9 @@ FeedView.prototype = {
 
             // Set up the template page when it's loaded.
             case 'load':
-                getElement('feed-view-toolbar').hidden = !this.isActive;
+                getElement('feed-view-toolbar').hidden = !this.active;
 
-                if (this.isActive) {
+                if (this.active) {
                     for each (event in this._events)
                         this.document.addEventListener(event, this, true);
 
@@ -645,7 +644,7 @@ FeedView.prototype = {
         var refreshed = this.query.unread ? this._ensure(aEntryList.IDs, !aNewState)
                                           : false;
 
-        if (!refreshed && this.isActive) {
+        if (!refreshed && this.active) {
             let entries = intersect(this._getVisibleEntryIDs(), aEntryList.IDs);
             this._sendEvent(entries, 'EntryMarkedRead', aNewState);
         }
@@ -656,7 +655,7 @@ FeedView.prototype = {
         var refreshed = this.query.starred ? this._ensure(aEntryList.IDs, aNewState)
                                            : false;
 
-        if (!refreshed && this.isActive) {
+        if (!refreshed && this.active) {
             let entries = intersect(this._getVisibleEntryIDs(), aEntryList.IDs);
             this._sendEvent(entries, 'EntryStarred', aNewState);
         }
@@ -668,7 +667,7 @@ FeedView.prototype = {
         if (this.query.tags && this.query.tags[0] === aTag)
             refreshed = this._ensure(aEntryList.IDs, aNewState);
 
-        if (refreshed || !this.isActive)
+        if (refreshed || !this.active)
             return;
 
         for (let i = 0; i < aEntryList.IDs.length; i++) {
@@ -703,7 +702,7 @@ FeedView.prototype = {
 
         if (aPotentialChange) {
             if (this.entryCount != this.query.getEntryCount()) {
-                if (this.isActive && !this.browser.webProgress.isLoadingDocument)
+                if (this.active && !this.browser.webProgress.isLoadingDocument)
                     this.refresh();
                 else
                     async(this._refreshEntryList, 250, this);
@@ -753,7 +752,7 @@ FeedView.prototype = {
      *                       In practice, it is used when switching pages.
      */
     refresh: function FeedView_refresh(aEntrySetValid) {
-        if (!this.isActive)
+        if (!this.active)
             return;
 
         // Defer refreshing if Brief isn't visible.
