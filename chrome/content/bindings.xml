@@ -340,25 +340,13 @@
     <content>
         <children/>
         <xul:hbox class="searchbar-textbox textbox-input-box" flex="1">
-            <xul:button class="search-scope-button" popup="_child"
-                        tooltiptext="&searchScopeButton.tooltip;">
-                <xul:menupopup anonid="searchbar-popup" position="after_start">
-                      <xul:menuitem anonid="search-current"
-                                    label="&searchCurrentView.label;"
-                                    type="radio"
-                                    value="0"/>
-                      <xul:menuitem anonid="search-all"
-                                    label="&searchAllFeeds.label;"
-                                    type="radio"
-                                    value="1"/>
-                </xul:menupopup>
-                <xul:image class="searchbar-button-image"/>
-            </xul:button>
-
             <html:input class="searchbar-textbox textbox-input" anonid="input"
                         allowevents="true"
                         flex="1"
                         xbl:inherits="onfocus,onblur,value,type,maxlength,disabled,size,readonly,tabindex,accesskey"/>
+            <xul:image anonid="searchbar-glass-image"
+                       class="searchbar-button-image"
+                       onclick="getElement('searchbar').focus()"/>
         </xul:hbox>
 
         <xul:toolbarbutton anonid="searchbar-clearbutton"
@@ -369,28 +357,17 @@
         <constructor>
             this.clearButton = document.getAnonymousElementByAttribute(this, 'anonid',
                                                                  'searchbar-clearbutton');
-            var menuitem = document.getAnonymousElementByAttribute(this, 'value',
-                                                                   this.searchScope);
-            menuitem.setAttribute('checked', true);
-            this.emptyText = menuitem.label;
+            this.glassImage = document.getAnonymousElementByAttribute(this, 'anonid',
+                                                                 'searchbar-glass-image');
         </constructor>
 
         <field name="clearButton">
             null
         </field>
 
-        <property name="searchScope"
-                  onget="return this.getAttribute('searchScope');">
-            <setter>
-                if (val != this.searchScope) {
-                    this.setAttribute('searchScope', val.toString());
-                    if (this.value)
-                        performSearch();
-                }
-
-                return val;
-            </setter>
-        </property>
+        <field name="glassImage">
+            null
+        </field>
 
         <field name="searchInProgress">
             false
@@ -400,6 +377,7 @@
             <body>
                 this.value = '';
                 this.clearButton.hidden = true;
+                this.glassImage.hidden = false;
                 this.inputField.blur();
                 finishSearch();
             </body>
@@ -412,12 +390,9 @@
             var target = event.originalTarget;
             var anonid = target.getAttribute('anonid');
 
-            if (anonid == 'search-current' || anonid == 'search-all') {
-                this.emptyText = target.label;
-                this.searchScope = target.value;
-            }
-            else if (target == this) {
+            if (target == this) {
                 this.clearButton.hidden = !this.value;
+                this.glassImage.hidden = !!this.value;
                 async(performSearch);
             }
             else if (anonid == 'searchbar-clearbutton') {

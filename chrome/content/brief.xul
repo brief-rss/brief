@@ -90,8 +90,7 @@
                                  spellcheck="false"
                                  type="timed"
                                  timeout="500"
-                                 searchScope="0"
-                                 persist="searchScope"/>
+                                 emptytext="&searchBox.label;"/>
                     </toolbaritem>
                     <toolbarbutton id="options-button"
                                    tooltiptext="&showOptions.tooltip;"
@@ -116,15 +115,20 @@
                     </treecols>
 
                     <treechildren id="top-level-children">
+                        <treeitem id="all-items-folder"
+                                  title="&allItemsFolder.label;">
+                            <treerow>
+                                <treecell label="&allItemsFolder.label;"
+                                          properties="allItemsFolder "/>
+                            </treerow>
+                        </treeitem>
                         <treeitem id="unread-folder"
-                                  specialFolder="true"
                                   title="&unreadFolder.label;">
                             <treerow>
                                 <treecell properties="unreadFolder "/>
                             </treerow>
                         </treeitem>
                         <treeitem id="starred-folder"
-                                  specialFolder="true"
                                   wasOpen="true"
                                   persist="wasOpen"
                                   title="&starredFolder.label;">
@@ -134,7 +138,6 @@
                             <treechildren/>
                         </treeitem>
                         <treeitem id="trash-folder"
-                                  specialFolder="true"
                                   title="&trashFolder.label;">
                             <treerow>
                                 <treecell properties="trashFolder "/>

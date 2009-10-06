@@ -13,13 +13,13 @@ var gFeedView = null;
  *
  * @param aTitle  Title of the view which will be shown in the header.
  * @param aQuery  Query which selects contained entries.
+ * @param aFixed  Indicates if the view constraints are fixed and it isn't affected
+ *                by feedview.shownEntries pref (e.g. Unread folder)
  */
-function FeedView(aTitle, aQuery) {
+function FeedView(aTitle, aQuery, aFixed) {
     this.title = aTitle;
-
-    this._constrained = aQuery.unread || aQuery.starred || aQuery.tags
-                        || aQuery.deleted === ENTRY_STATE_TRASHED;
     this.query = aQuery;
+    this.fixed = aFixed;
     this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
     this.entriesMarkedUnread = [];
 }
@@ -34,9 +34,8 @@ FeedView.prototype = {
     // It used for searching, when the search string is displayed in place of the title.
     titleOverride: '',
 
-    // Indicates if the view was created with intrinsic constriants which override
-    // feedview.shownEntries preference.
-    _constrained: false,
+    // Indicates the view isn't affected by feedview.showEntries pref.
+    fixed: false,
 
     _refreshPending: false,
 
@@ -58,7 +57,7 @@ FeedView.prototype = {
     },
 
     get query FeedView_query_get() {
-        if (!this._constrained) {
+        if (!this.fixed) {
             this.__query.unread = (gPrefs.shownEntries == 'unread');
             this.__query.starred = (gPrefs.shownEntries == 'starred');
             this.__query.deleted = gPrefs.shownEntries == 'trashed' ? ENTRY_STATE_TRASHED
@@ -119,16 +118,6 @@ FeedView.prototype = {
     // Indicates whether the feed view is currently displayed in the browser.
     get active FeedView_active() {
         return (this.browser.currentURI.equals(gTemplateURI) && gFeedView == this);
-    },
-
-    get isGlobalSearch FeedView_isGlobalSearch() {
-        return !this.query.folders && !this.query.feeds && !this._constrained
-               && this.query.searchString;
-    },
-
-    get isViewSearch FeedView_isViewSearch() {
-        return (this.query.folders || this.query.feeds || this._constrained)
-               && this.query.searchString;
     },
 
 
@@ -444,7 +433,7 @@ FeedView.prototype = {
 
         // Hide the drop-down to pick constraints if the view is intrinsically
         // constrained, like for example the Unread folder.
-        getElement('view-constraint-box').hidden = this._constrained;
+        getElement('view-constraint-box').hidden = this.fixed;
 
         this.browser.addEventListener('load', this, false);
         gStorage.addObserver(this);
@@ -1071,7 +1060,7 @@ FeedView.prototype = {
             message = bundle.getString('noEntriesFound');
         else if (this.query.unread)
             message = bundle.getString('noUnreadEntries');
-        else if (this.query.starred && this._constrained)
+        else if (this.query.starred && this.fixed)
             message = bundle.getString('noStarredEntries');
         else if (this.query.starred)
             message = bundle.getString('noStarredEntriesInFeed');

@@ -102,19 +102,26 @@ var gFeedList = {
 
         var query = new Query();
         query.deleted = ENTRY_STATE_NORMAL;
-        var title;
+        var fixedView = false;
 
-        if (selectedItem.id == 'unread-folder') {
+        if (selectedItem.id == 'all-items-folder') {
+            var title = selectedItem.getAttribute('title');
+            fixedView = true;
+        }
+        else if (selectedItem.id == 'unread-folder') {
             title = selectedItem.getAttribute('title');
             query.unread = true;
+            fixedView = true;
         }
         else if (selectedItem.id == 'starred-folder') {
             title = selectedItem.getAttribute('title');
             query.starred = true;
+            fixedView = true;
         }
         else if (selectedItem.id == 'trash-folder') {
             title = selectedItem.getAttribute('title');
             query.deleted = ENTRY_STATE_TRASHED;
+            fixedView = true;
         }
         else if (selectedItem.hasAttribute('container')) {
             title = this.selectedFeed.title;
@@ -123,13 +130,14 @@ var gFeedList = {
         else if (selectedItem.parentNode.parentNode.id == 'starred-folder') {
             title = this.selectedItem.id;
             query.tags = [this.selectedItem.id];
+            fixedView = true;
         }
         else {
             title = this.selectedFeed.title;
             query.feeds = [this.selectedFeed.feedID];
         }
 
-        var view = new FeedView(title, query);
+        var view = new FeedView(title, query, fixedView);
         view.attach();
     },
 
@@ -231,12 +239,13 @@ var gFeedList = {
 
         var query = new Query();
         query.unread = true;
-        query.deleted = ENTRY_STATE_NORMAL;
 
         if (aSpecialItem == 'starred-folder')
             query.starred = true;
-        else if (aSpecialItem == 'trash-folder')
+        if (aSpecialItem == 'trash-folder')
             query.deleted = ENTRY_STATE_TRASHED;
+        else
+            query.deleted = ENTRY_STATE_NORMAL;
 
         var unreadCount = query.getEntryCount();
 
@@ -729,7 +738,6 @@ var gFeedList = {
             if (aEntryList.containsUnread()) {
                 this.refreshFeedTreeitems(aEntryList.feedIDs);
                 this.refreshSpecialTreeitem('unread-folder');
-
                 this.refreshSpecialTreeitem('trash-folder');
 
                 if (aEntryList.containsStarred())
