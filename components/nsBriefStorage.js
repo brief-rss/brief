@@ -1753,7 +1753,7 @@ LivemarksSynchronizer.prototype = {
             if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
                 continue;
 
-            item = {};
+            var item = {};
             item.title = gBms.getItemTitle(node.itemId);
             item.bookmarkID = node.itemId;
             item.rowIndex = this.foundLivemarks.length;
