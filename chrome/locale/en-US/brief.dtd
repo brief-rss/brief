@@ -1,6 +1,5 @@
 <!ENTITY confirmHomeFolder.label "OK">
-<!ENTITY searchCurrentView.label "Search current view">
-<!ENTITY searchAllFeeds.label "Search all feeds">
+<!ENTITY searchBox.label "Search">
 <!ENTITY headlinesCheckbox.tooltip "Use headlines view">
 <!ENTITY showAll.label "View all">
 <!ENTITY showUnread.label "View unread">
@@ -13,6 +12,7 @@
 <!ENTITY viewConstraintList.tooltip "Choose what kind of items to display">
 <!ENTITY previousPage.tooltip "Show newer items">
 <!ENTITY nextPage.tooltip "Show older items">
+<!ENTITY allItemsFolder.label "All items">
 <!ENTITY unreadFolder.label "Unread">
 <!ENTITY starredFolder.label "Bookmarks">
 <!ENTITY trashFolder.label "Trash">

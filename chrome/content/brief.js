@@ -344,9 +344,8 @@ var gCommands = {
 function loadHomeview() {
     var query = new Query();
     query.deleted = ENTRY_STATE_NORMAL;
-    query.unread = true;
-    var title = getElement('unread-folder').getAttribute('title');
-    var view = new FeedView(title, query);
+    var title = getElement('all-items-folder').getAttribute('title');
+    var view = new FeedView(title, query, true);
 
     if (!gPrefs.homeFolder) {
         getElement('feed-view').loadURI(GUIDE_PAGE_URL);
@@ -426,8 +425,7 @@ function selectHomeFolder(aEvent) {
 }
 
 
-// Creates and manages a FeedView displaying the search results,
-// based on the current input string and the search scope.
+// Creates and manages a FeedView displaying the search results.
 function performSearch(aEvent) {
     var searchbar = getElement('searchbar');
 
@@ -439,41 +437,20 @@ function performSearch(aEvent) {
     var bundle = getElement('main-bundle');
     var titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
 
-    // If the search scope is set to global but the view is not the
-    // global search view, then let's create it.
-    if (searchbar.searchScope == 1 && !gFeedView.isGlobalSearch) {
-        var query = new Query();
-        query.searchString = searchbar.value;
-        var title = bundle.getFormattedString('searchResults', ['']);
-        var view = new FeedView(title, query);
-        view.titleOverride = titleOverride;
-        view.attach();
-    }
-    else {
-        gFeedView.titleOverride = searchbar.value ? titleOverride : '';
-        gFeedView.query.searchString = searchbar.value;
-        gFeedView.refresh();
-    }
+    gFeedView.titleOverride = searchbar.value ? titleOverride : '';
+    gFeedView.query.searchString = searchbar.value;
+    gFeedView.refresh();
 }
 
-// Restores the view from before the search was started.
 function finishSearch() {
     var searchbar = getElement('searchbar');
+
     if (!searchbar.searchInProgress)
         return;
-
     searchbar.searchInProgress = false;
 
-    if (searchbar.previousView && searchbar.previousView != gFeedView) {
-        searchbar.previousView.attach();
-        gFeedView.query.searchString = gFeedView.titleOverride = '';
-    }
-    else {
-        gFeedView.query.searchString = gFeedView.titleOverride = '';
-        gFeedView.refresh();
-    }
-
-    searchbar.previousView = null;
+    gFeedView.query.searchString = gFeedView.titleOverride = '';
+    gFeedView.refresh();
 }
 
 

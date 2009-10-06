@@ -114,20 +114,27 @@ splitter {
 
 /* ---- Fixed images for predefined special folders ---- */
 
-#feed-list > treechildren::-moz-tree-image(unreadFolder) {
-  list-style-image: url(icons/folders.png) !important;
-  -moz-image-region: rect(0px, 16px, 16px, 0px);
-  }
+#feed-list > treechildren::-moz-tree-image(allItemsFolder) {
+    list-style-image: url(icons/folders.png) !important;
+    -moz-image-region: rect(0px, 16px, 16px, 0px);
+}
 
-#feed-list > treechildren::-moz-tree-image(trashFolder) {
-  list-style-image: url(icons/folders.png) !important;
-  -moz-image-region: rect(32px, 16px, 48px, 0px);
-  }
+#feed-list > treechildren::-moz-tree-image(unreadFolder) {
+    list-style-image: url(icons/folders.png) !important;
+    -moz-image-region: rect(16px, 16px, 32px, 0px);
+}
 
 #feed-list > treechildren::-moz-tree-image(starredFolder) {
-  list-style-image: url(icons/folders.png) !important;
-  -moz-image-region: rect(16px, 16px, 32px, 0px);
-  }
+    list-style-image: url(icons/folders.png) !important;
+    -moz-image-region: rect(32px, 16px, 48px, 0px);
+}
+
+#feed-list > treechildren::-moz-tree-image(trashFolder) {
+    list-style-image: url(icons/folders.png) !important;
+    -moz-image-region: rect(48px, 16px, 64px, 0px);
+}
+
+
 
 
 /* ----------------------  Toolbars  ----------------------- */
@@ -140,17 +147,13 @@ toolbar {
   padding: 1px 0 1px;
 }
 
-#feed-list-toolbar {
-  overflow: hidden;
-  }
-
 toolbarbutton {
   padding: 4px 4px 3px 4px;
   min-width: 0;
   }
 
-#feed-view-toolbar {
-  padding-right: 10px;
+#feed-list-toolbar {
+  overflow: hidden;
   }
 
 #searchbar-container {
@@ -160,6 +163,48 @@ toolbarbutton {
 
 #searchbar {
   -moz-binding: url(chrome://brief/content/bindings.xml#searchbar);
+  }
+
+#searchbar[showingDescription]  {
+  color: GrayText;
+}
+
+.searchbar-textbox {
+  -moz-box-align: center;
+  -moz-box-pack: end;
+}
+
+.searchbar-button-image {
+  margin-top: 0;
+  margin-bottom: 0;
+  -moz-margin-start: 4px;
+  -moz-margin-end: 0;
+  list-style-image: url(icons/search.png);
+}
+
+.searchbar-clearbutton {
+  -moz-appearance: none;
+  border: none !important;
+  cursor: default;
+  list-style-image: url(icons/searchbar-clear.png);
+  -moz-image-region: rect(0px, 16px, 16px, 0px);
+  -moz-margin-start: 4px;
+  -moz-margin-end: 2px;
+  padding: 0px !important;
+  }
+
+.searchbar-clearbutton > .toolbarbutton-icon {
+  -moz-margin-end: 0px; /* override toolkit's default value */
+  }
+
+.searchbar-clearbutton:hover {
+  -moz-image-region: rect(0px, 32px, 16px, 16px);
+  padding: 0px !important;
+  }
+
+.searchbar-clearbutton:hover:active {
+  -moz-image-region: rect(0px, 48px, 16px, 32px);
+  padding: 0px !important;
   }
 
 #update-button {
@@ -181,6 +226,10 @@ toolbarbutton {
   min-width: 5px;
   border-right-width: 1px;
 }
+
+#feed-view-toolbar {
+  padding-right: 10px;
+  }
 
 #toggle-sidebar {
   list-style-image: url(chrome://brief/skin/sidebar-button.png);
@@ -217,7 +266,7 @@ toolbarbutton {
   padding-top: 4px !important;
   padding-bottom: 3px !important;
   -moz-padding-start: 4px !important;
-  -moz-padding-end: 0px !important;
+  -moz-padding-end: 4px !important;
 }
 
 #view-constraint-box {
@@ -248,53 +297,3 @@ toolbarbutton {
 #navigation-box > label {
   margin-left: 5px;
 }
-
-#searchbar[showingDescription]  {
-  color: GrayText;
-}
-
-.searchbar-textbox {
-  -moz-box-align: center;
-}
-
-.search-scope-button {
-  -moz-appearance: none;
-  -moz-binding: none;
-  -moz-box-align: center;
-  cursor: default;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  -moz-margin-start: 0px;
-  -moz-margin-end: 4px;
-  -moz-user-focus: none;
-  }
-
-.searchbar-button-image {
-  margin: 0px;
-  list-style-image: url(icons/search.png);
-  }
-
-.searchbar-clearbutton {
-  -moz-appearance: none;
-  border: none !important;
-  cursor: default;
-  list-style-image: url(icons/searchbar-clear.png);
-  -moz-image-region: rect(0px, 16px, 16px, 0px);
-  -moz-margin-start: 4px;
-  -moz-margin-end: 2px;
-  padding: 0px !important;
-  }
-
-.searchbar-clearbutton > .toolbarbutton-icon {
-  -moz-margin-end: 0px; /* override toolkit's default value */
-  }
-
-.searchbar-clearbutton:hover {
-  -moz-image-region: rect(0px, 32px, 16px, 16px);
-  padding: 0px !important;
-  }
-
-.searchbar-clearbutton:hover:active {
-  -moz-image-region: rect(0px, 48px, 16px, 32px);
-  padding: 0px !important;
-  }
