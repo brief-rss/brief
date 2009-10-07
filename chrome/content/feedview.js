@@ -78,12 +78,11 @@ FeedView.prototype = {
     // It's much faster to retrieve entries by their IDs when possible,
     // we keep a separate query for that.
     get _fastQuery FeedView_fastQuery() {
-        if (!this.__fastQuery) {
-            let query = new Query();
-            query.sortOrder = this.query.sortOrder;
-            query.sortDirection = this.query.sortDirection;
-            this.__fastQuery = query;
-        }
+        if (!this.__fastQuery)
+            this.__fastQuery = new Query();
+
+        this.__fastQuery.sortOrder = this.query.sortOrder;
+        this.__fastQuery.sortDirection = this.query.sortDirection;
         return this.__fastQuery;
     },
 
