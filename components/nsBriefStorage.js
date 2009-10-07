@@ -1812,7 +1812,7 @@ BriefQuery.prototype = {
     endDate:   0,
 
     limit:  0,
-    offset: 1,
+    offset: 0,
 
     sortOrder: Ci.nsIBriefQuery.NO_SORT,
     sortDirection: Ci.nsIBriefQuery.SORT_DESCENDING,
