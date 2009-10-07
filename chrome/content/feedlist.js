@@ -173,8 +173,11 @@ var gFeedList = {
 
             // Detect when folder is collapsed/expanded.
             if (item.hasAttribute('container')) {
-                if (item.id != 'starred-folder')
-                    gFeedList.refreshFolderTreeitems(item);
+                if (item.id != 'starred-folder') {
+                    // This must be done asynchronously, because this listener was called
+                    // during capture and the folder hasn't actually been opened or closed yet.
+                    async(function() gFeedList.refreshFolderTreeitems(item));
+                }
 
                 // Folder states must be persisted immediatelly instead of when
                 // Brief is closed, because otherwise if the feedlist is rebuilt,
