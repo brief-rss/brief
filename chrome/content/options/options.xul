@@ -172,9 +172,6 @@
     <prefpane id="display-pane" label="&displayPane.label;">
 
         <preferences>
-            <preference id="extensions.brief.feedview.entriesPerPage"
-                        name="extensions.brief.feedview.entriesPerPage"
-                        type="int"/>
             <preference id="extensions.brief.feedview.sortUnreadViewOldestFirst"
                         name="extensions.brief.feedview.sortUnreadViewOldestFirst"
                         type="bool"/>
@@ -190,18 +187,6 @@
         </preferences>
 
         <groupbox align="stretch">
-            <hbox align="center">
-                <label value="&entriesPerPageBefore.label;"
-                       accesskey="&entriesPerPage.accesskey;"
-                       control="entriesPerPage"/>
-                <textbox id="entriesPerPage"
-                         type="number"
-                         min="1"
-                         max="100"
-                         preference="extensions.brief.feedview.entriesPerPage"
-                         size="1"/>
-                <label value="&entriesPerPageAfter.label;"/>
-            </hbox>
             <separator class="thin"/>
             <checkbox id="unread-oldest-first-checkbox"
                       label="&sortUnreadViewOldestFirst.label;"

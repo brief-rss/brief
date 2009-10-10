@@ -34,10 +34,6 @@
 
         <key id="Brief_switchHeadlinesView" key="f"
              oncommand="gBrief.doCommand('switchHeadlinesView')"/>
-        <key id="Brief_showNextPage" key="j" modifiers="alt"
-             oncommand="gBrief.doCommand('showNextPage')"/>
-        <key id="Brief_showPrevPage" key="k" modifiers="alt"
-             oncommand="gBrief.doCommand('showPrevPage')"/>
         <key id="Brief_markCurrentViewRead" key="m" modifiers="accel"
              oncommand="gBrief.doCommand('markCurrentViewRead')"/>
         <key id="Brief_showAllEntries" key="a"

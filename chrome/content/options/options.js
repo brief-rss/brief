@@ -156,8 +156,7 @@ var gDisplayPane = {
     },
 
     showShortcuts: function() {
-        var screenHeight = window.screen.availHeight;
-        var height = screenHeight < 620 ? screenHeight : 620;
+        var height = Math.min(window.screen.availHeight, 580);
         var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
         var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
