@@ -80,8 +80,8 @@
             tagsElem.textContent = this.getAttribute('tags');
 
             var markReadElem = this.getElement('mark-read-centre');
-            markReadElem.textContent = this.read ? gConveyedData.markUnreadString
-                                                 : gConveyedData.markReadString;
+            markReadElem.textContent = this.read ? gData.markUnreadString
+                                                 : gData.markReadString;
 
             // article-content and article-title-link elements are created manually,
             // so that they are explicit instead of anynymous. This makes the context
@@ -195,7 +195,7 @@
 
                 if (val) {
                     this.setAttribute('read', 'true');
-                    markReadButton.textContent = gConveyedData.markUnreadString;
+                    markReadButton.textContent = gData.markUnreadString;
 
                     if (this.hasAttribute('updated')) {
                         this.removeAttribute('updated');
@@ -206,7 +206,7 @@
 
                 else {
                     this.removeAttribute('read');
-                    markReadButton.textContent = gConveyedData.markReadString;
+                    markReadButton.textContent = gData.markReadString;
                 }
 
                 return val;
@@ -276,7 +276,7 @@
         <handler event="click" button="0" clickcount="2">
             <![CDATA[
             var isCommandElement = event.originalTarget.hasAttribute('command');
-            if (gConveyedData.doubleClickMarks && !isCommandElement)
+            if (gData.doubleClickMarks && !isCommandElement)
                 this.sendEvent('SwitchEntryRead');
             ]]>
         </handler>

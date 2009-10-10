@@ -22,6 +22,11 @@ const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
+var gPrefBranch = Cc['@mozilla.org/preferences-service;1'].
+                    getService(Ci.nsIPrefService).
+                    getBranch('extensions.brief.').
+                    QueryInterface(Ci.nsIPrefBranch2);
+
 __defineGetter__('gTemplateURI', function() {
     delete this.gTemplateURI;
     return this.gTemplateURI = Cc['@mozilla.org/network/io-service;1'].
@@ -200,18 +205,13 @@ var gCommands = {
 
     switchHeadlinesView: function cmd_switchHeadlinesView() {
         var newState = !gPrefs.showHeadlinesOnly;
-        gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
-
-        gFeedView.toggleHeadlinesView();
+        gPrefBranch.setBoolPref('feedview.showHeadlinesOnly', newState);
         getElement('headlines-checkbox').checked = newState;
     },
 
     changeViewConstraint: function cmd_changeViewConstraint(aConstraint) {
-        if (gPrefs.shownEntries != aConstraint) {
-            gPrefs.setCharPref('feedview.shownEntries', aConstraint);
-
-            gFeedView.refresh();
-        }
+        if (gPrefs.shownEntries != aConstraint)
+            gPrefBranch.setCharPref('feedview.shownEntries', aConstraint);
     },
 
     switchSelectedEntryRead: function cmd_switchSelectedEntryRead() {
@@ -265,22 +265,14 @@ var gCommands = {
         if (gFeedView.selectedEntry && gPrefs.showHeadlinesOnly) {
             var selectedElement = gFeedView.selectedElement;
             var newState = !selectedElement.hasAttribute('collapsed');
-
             gFeedView.collapseEntry(gFeedView.selectedEntry, newState, true);
-
-            function scroll() {
-                var win = gFeedView.document.defaultView;
-                var alignWithTop = (selectedElement.offsetHeight > win.innerHeight);
-                selectedElement.scrollIntoView(alignWithTop);
-            }
-            async(scroll, 310);
         }
     },
 
 
     openSelectedEntryLink: function cmd_openSelectedEntryLink(aForceNewTab) {
         if (gFeedView.selectedEntry) {
-            var newTab = gPrefs.getBoolPref('feedview.openEntriesInTabs') || aForceNewTab;
+            var newTab = gPrefBranch.getBoolPref('feedview.openEntriesInTabs') || aForceNewTab;
             gCommands.openEntryLink(gFeedView.selectedElement, newTab);
         }
     },
@@ -336,7 +328,7 @@ function loadHomeview() {
         return;
     }
 
-    var prevVersion = gPrefs.getCharPref('lastMajorVersion');
+    var prevVersion = gPrefBranch.getCharPref('lastMajorVersion');
     var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
                         getService(Ci.nsIVersionComparator);
 
@@ -344,7 +336,7 @@ function loadHomeview() {
     if (verComparator.compare(prevVersion, LAST_MAJOR_VERSION) < 0) {
         var browser = getElement('feed-view');
         browser.loadURI(RELEASE_NOTES_URL);
-        gPrefs.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
+        gPrefBranch.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
 
         getElement('feed-view-toolbar').hidden = true;
         gFeedView = view; // Set the view without attaching it.
@@ -401,7 +393,7 @@ function selectHomeFolder(aEvent) {
     var placesTree = getElement('places-tree');
     if (placesTree.currentIndex != -1) {
         var folderId = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
-        gPrefs.setIntPref('homeFolder', folderId);
+        gPrefBranch.setIntPref('homeFolder', folderId);
         gFeedList.tree.view.selection.select(0);
     }
 }
@@ -451,11 +443,11 @@ function onKeyPress(aEvent) {
         aEvent.stopPropagation();
 
     // Brief takes over these shortcut keys, so we stop the default action.
-    if (gPrefs.getBoolPref('assumeStandardKeys')) {
+    if (gPrefBranch.getBoolPref('assumeStandardKeys')) {
 
         if (aEvent.keyCode == aEvent.DOM_VK_TAB && !aEvent.ctrlKey) {
-            gPrefs.setBoolPref('feedview.entrySelectionEnabled',
-                               !gPrefs.entrySelectionEnabled);
+            gPrefBranch.setBoolPref('feedview.entrySelectionEnabled',
+                                    !gPrefs.entrySelectionEnabled);
             aEvent.preventDefault();
         }
         else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
@@ -478,58 +470,47 @@ function onKeyPress(aEvent) {
 }
 
 
+// Preferences cache and observer.
 var gPrefs = {
 
     register: function gPrefs_register() {
-        this._branch = Cc['@mozilla.org/preferences-service;1'].
-                       getService(Ci.nsIPrefService).
-                       getBranch('extensions.brief.').
-                       QueryInterface(Ci.nsIPrefBranch2);
-
-        this.getIntPref = this._branch.getIntPref;
-        this.getBoolPref = this._branch.getBoolPref;
-        this.getCharPref = this._branch.getCharPref;
-        this.getComplexValue = this._branch.getComplexValue;
-
-        this.setIntPref = this._branch.setIntPref;
-        this.setBoolPref = this._branch.setBoolPref;
-        this.setCharPref = this._branch.setCharPref;
-
         for each (pref in this._cachedPrefs)
             this._updateCachedPref(pref);
 
-        this._branch.addObserver('', this, false);
+        gPrefBranch.addObserver('', this, false);
     },
 
     unregister: function gPrefs_unregister() {
-        this._branch.removeObserver('', this);
+        gPrefBranch.removeObserver('', this);
     },
 
 
     get homeFolder gPrefs_homeFolder() {
-        var pref = this.getIntPref('homeFolder');
+        var pref = gPrefBranch.getIntPref('homeFolder');
         return (pref != -1) ? pref : null;
     },
 
     _cachedPrefs:
-        [{ name: 'feedview.doubleClickMarks',       propName: 'doubleClickMarks' },
-         { name: 'feedview.showHeadlinesOnly',      propName: 'showHeadlinesOnly' },
-         { name: 'feedview.entrySelectionEnabled',  propName: 'entrySelectionEnabled' },
-         { name: 'feedview.autoMarkRead',           propName: 'autoMarkRead' },
-         { name: 'feedview.shownEntries',           propName: 'shownEntries' },
-         { name: 'feedview.minInitialEntries',      propName: 'minInitialEntries'},
-         { name: 'feedview.sortUnreadViewOldestFirst', propName: 'sortUnreadViewOldestFirst' }],
+    [
+        { name: 'feedview.doubleClickMarks',       propName: 'doubleClickMarks' },
+        { name: 'feedview.showHeadlinesOnly',      propName: 'showHeadlinesOnly' },
+        { name: 'feedview.entrySelectionEnabled',  propName: 'entrySelectionEnabled' },
+        { name: 'feedview.autoMarkRead',           propName: 'autoMarkRead' },
+        { name: 'feedview.shownEntries',           propName: 'shownEntries' },
+        { name: 'feedview.minInitialEntries',      propName: 'minInitialEntries'},
+        { name: 'feedview.sortUnreadViewOldestFirst', propName: 'sortUnreadViewOldestFirst' }
+    ],
 
     _updateCachedPref: function gPrefs__updateCachedPref(aPref) {
-        switch (this._branch.getPrefType(aPref.name)) {
+        switch (gPrefBranch.getPrefType(aPref.name)) {
             case Ci.nsIPrefBranch.PREF_STRING:
-                this[aPref.propName] = this.getCharPref(aPref.name);
+                this[aPref.propName] = gPrefBranch.getCharPref(aPref.name);
                 break;
             case Ci.nsIPrefBranch.PREF_INT:
-                this[aPref.propName] = this.getIntPref(aPref.name);
+                this[aPref.propName] = gPrefBranch.getIntPref(aPref.name);
                 break;
             case Ci.nsIPrefBranch.PREF_BOOL:
-                this[aPref.propName] = this.getBoolPref(aPref.name);
+                this[aPref.propName] = gPrefBranch.getBoolPref(aPref.name);
                 break;
         }
     },
@@ -549,21 +530,6 @@ var gPrefs = {
                 var list = getElement('view-constraint-list');
                 list.selectedIndex = this.shownEntries == 'all' ? 0 :
                                      this.shownEntries == 'unread' ? 1 : 2;
-                break;
-            case 'feedview.autoMarkRead':
-                if (this.autoMarkRead && gFeedView)
-                    gFeedView.markVisibleAsRead();
-                break;
-            case 'feedview.sortUnreadViewOldestFirst':
-                if (gFeedView.query.unread) {
-                    gFeedView.query.sortDirection = this.sortUnreadViewOldestFirst
-                                                    ? Ci.nsIBriefQuery.SORT_ASCENDING
-                                                    : Ci.nsIBriefQuery.SORT_DESCENDING;
-                    gFeedView.refresh();
-                }
-                break;
-            case 'feedview.entrySelectionEnabled':
-                gFeedView.toggleEntrySelection();
                 break;
         }
     }
