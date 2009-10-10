@@ -86,7 +86,7 @@ __defineGetter__('gIOService', function() {
 });
 
 __defineGetter__('gBms', function() {
-    // XXX Getting bookmarks service at startup sometimes throws an exception.
+    // Getting bookmarks service at startup sometimes throws an exception.
     var bms = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
               getService(Ci.nsINavBookmarksService);
     delete this.gBms;
@@ -1500,7 +1500,7 @@ var gStm = {
     },
 
     get tagEntry() {
-        // XXX |OR IGNORE| is necessary, because some beta users mistakingly ended
+        // |OR IGNORE| is necessary, because some beta users mistakingly ended
         // up with tagID column marked as UNIQUE.
         var sql = 'INSERT OR IGNORE INTO entry_tags (entryID, tagName, tagID) '+
                   'VALUES (:entryID, :tagName, :tagID)            ';
@@ -2209,7 +2209,10 @@ BriefQuery.prototype = {
 
         var constraints = [];
 
-        if (this.folders && this.folders.length) {
+        if (this.folders) {
+            if (!this.folders.length)
+                throw Components.results.NS_ERROR_INVALID_ARG;
+
             // Fill the list of effective folders.
             this.effectiveFolders = this.folders;
             this.traverseFolderChildren(gStorageService.homeFolderID);
@@ -2220,21 +2223,30 @@ BriefQuery.prototype = {
             constraints.push(con);
         }
 
-        if (this.feeds && this.feeds.length) {
+        if (this.feeds) {
+            if (!this.feeds.length)
+                throw Components.results.NS_ERROR_INVALID_ARG;
+
             let con = '(entries.feedID = "';
             con += this.feeds.join('" OR entries.feedID = "');
             con += '")';
             constraints.push(con);
         }
 
-        if (this.entries && this.entries.length) {
+        if (this.entries) {
+            if (!this.entries.length)
+                throw Components.results.NS_ERROR_INVALID_ARG;
+
             let con = '(entries.id = ';
             con += this.entries.join(' OR entries.id = ');
             con += ')';
             constraints.push(con);
         }
 
-        if (this.tags && this.tags.length) {
+        if (this.tags) {
+            if (!this.tags.length)
+                throw Components.results.NS_ERROR_INVALID_ARG;
+
             let con = '(entry_tags.tagName = "';
             con += this.tags.join('" OR entry_tags.tagName = "');
             con += '")';
