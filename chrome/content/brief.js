@@ -195,33 +195,15 @@ var gCommands = {
     },
 
     markViewRead: function cmd_markViewRead(aEvent) {
-        var query = gFeedView.query;
-
-        if (aEvent.ctrlKey) {
-            query.offset = gPrefs.entriesPerPage * (gFeedView.currentPage - 1);
-            query.limit = gPrefs.entriesPerPage;
-        }
-
-        query.markEntriesRead(true);
+        gFeedView.query.markEntriesRead(true);
     },
 
     switchHeadlinesView: function cmd_switchHeadlinesView() {
         var newState = !gPrefs.showHeadlinesOnly;
         gPrefs.setBoolPref('feedview.showHeadlinesOnly', newState);
 
+        gFeedView.toggleHeadlinesView();
         getElement('headlines-checkbox').checked = newState;
-
-        var entries = gFeedView.feedContent.childNodes;
-        for (var i = 0; i < entries.length; i++)
-            gFeedView.collapseEntry(parseInt(entries[i].id), newState, false);
-
-        if (newState) {
-            gFeedView.feedContent.setAttribute('showHeadlinesOnly', true);
-        }
-        else {
-            gFeedView.feedContent.removeAttribute('showHeadlinesOnly');
-            gFeedView.markVisibleAsRead();
-        }
     },
 
     changeViewConstraint: function cmd_changeViewConstraint(aConstraint) {
@@ -535,7 +517,7 @@ var gPrefs = {
          { name: 'feedview.entrySelectionEnabled',  propName: 'entrySelectionEnabled' },
          { name: 'feedview.autoMarkRead',           propName: 'autoMarkRead' },
          { name: 'feedview.shownEntries',           propName: 'shownEntries' },
-         { name: 'feedview.entriesPerPage',         propName: 'entriesPerPage' },
+         { name: 'feedview.minInitialEntries',      propName: 'minInitialEntries'},
          { name: 'feedview.sortUnreadViewOldestFirst', propName: 'sortUnreadViewOldestFirst' }],
 
     _updateCachedPref: function gPrefs__updateCachedPref(aPref) {
@@ -563,9 +545,6 @@ var gPrefs = {
         }
 
         switch (aData) {
-            case 'feedview.entriesPerPage':
-                gFeedView.refresh();
-                break;
             case 'feedview.shownEntries':
                 var list = getElement('view-constraint-list');
                 list.selectedIndex = this.shownEntries == 'all' ? 0 :

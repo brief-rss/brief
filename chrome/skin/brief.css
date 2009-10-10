@@ -273,27 +273,3 @@ toolbarbutton {
   margin-right: 5px;
   font-size: 13px;
   }
-
-#navigation-box > toolbarbutton {
-  list-style-image: url(toolbar-buttons-2.png);
-}
-
-#prev-page {
-  -moz-image-region: rect(0, 26px, 24px, 0);
-  }
-
-#prev-page[disabled='true'] {
-  -moz-image-region: rect(24px, 26px, 48px, 0);
-  }
-
-#next-page {
-  -moz-image-region: rect(0, 52px, 24px, 26px);
-  }
-
-#next-page[disabled='true'] {
-  -moz-image-region: rect(24px, 52px, 48px, 26px);
-  }
-
-#navigation-box > label {
-  margin-left: 5px;
-}

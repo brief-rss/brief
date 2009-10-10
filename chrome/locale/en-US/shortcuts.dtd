@@ -7,10 +7,6 @@
 <!ENTITY showNextItem "Show next item">
 <!ENTITY backspace.key "Backspace">
 <!ENTITY showPreviousItem "Show previous item">
-<!ENTITY altK.key "Alt + K">
-<!ENTITY nextPage "Show next page">
-<!ENTITY altJ.key "Alt + J">
-<!ENTITY previousPage "Show previous page">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Open current item">
 <!ENTITY ctrlEnter.key "Ctrl + Enter">

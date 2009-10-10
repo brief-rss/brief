@@ -70,7 +70,8 @@
                 feedNameElem.innerHTML = this.getAttribute('feedName');
 
             var dateElem = this.getElement('article-date');
-            dateElem.innerHTML = this.getAttribute('updated') || this.getAttribute('date');
+            dateElem.innerHTML = this.getAttribute('updatedString') ||
+                                 this.getAttribute('dateString');
 
             var authorsElem = this.getElement('article-authors');
             authorsElem.innerHTML = this.getAttribute('authors');
@@ -199,7 +200,7 @@
                     if (this.hasAttribute('updated')) {
                         this.removeAttribute('updated');
                         var dateElement = this.getElement('article-date');
-                        dateElement.innerHTML = this.getAttribute('date');
+                        dateElement.innerHTML = this.getAttribute('dateString');
                     }
                 }
 

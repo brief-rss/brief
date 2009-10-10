@@ -80,12 +80,6 @@ const gBrief = {
             case 'openSelectedEntryLinkInTab':
                 win.gCommands.openSelectedEntryLink(true);
                 break;
-            case 'showNextPage':
-                win.gFeedView.currentPage++;
-                break;
-            case 'showPrevPage':
-                win.gFeedView.currentPage--;
-                break;
             case 'markCurrentViewRead':
                 win.gFeedView.query.markEntriesRead(true);
                 break;

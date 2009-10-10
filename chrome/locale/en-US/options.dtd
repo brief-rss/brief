@@ -31,9 +31,6 @@
 <!ENTITY exportOPML.label "Export...">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Display">
-<!ENTITY entriesPerPageBefore.label "Show">
-<!ENTITY entriesPerPageAfter.label "items per page">
-<!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY showStatusbarIcon.label "Show statusbar icon">
 <!ENTITY showStatusbarIcon.accesskey "h">
 <!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">

@@ -199,15 +199,6 @@
                             </menupopup>
                         </menulist>
                     </toolbaritem>
-                    <toolbaritem id="navigation-box">
-                        <toolbarbutton id="prev-page"
-                                       tooltiptext="&previousPage.tooltip;"
-                                       oncommand="gFeedView.currentPage--;"/>
-                        <label id="page-desc"/>
-                        <toolbarbutton id="next-page"
-                                       tooltiptext="&nextPage.tooltip;"
-                                       oncommand="gFeedView.currentPage++;"/>
-                    </toolbaritem>
                 </toolbar>
             </toolbox>
             <browser id="feed-view" flex="1"

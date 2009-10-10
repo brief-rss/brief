@@ -8,10 +8,8 @@
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY searchScopeButton.tooltip "Change the search scope">
 <!ENTITY showOptions.tooltip "Open Brief options">
-<!ENTITY markViewRead.tooltip "Mark all items as read (hold Ctrl to mark only current page)">
+<!ENTITY markViewRead.tooltip "Mark all items as read">
 <!ENTITY viewConstraintList.tooltip "Choose what kind of items to display">
-<!ENTITY previousPage.tooltip "Show newer items">
-<!ENTITY nextPage.tooltip "Show older items">
 <!ENTITY allItemsFolder.label "All items">
 <!ENTITY unreadFolder.label "Unread">
 <!ENTITY starredFolder.label "Bookmarks">

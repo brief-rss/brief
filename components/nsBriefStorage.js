@@ -2286,6 +2286,11 @@ BriefQuery.prototype = {
 
             var sortDir = (this.sortDirection == nsIBriefQuery.SORT_ASCENDING) ? 'ASC' : 'DESC';
             text += 'ORDER BY ' + sortOrder + sortDir;
+
+            // Sort by rowid, so that entries that are equal in respect of primary
+            // sorting criteria are always returned in the same (as opposed to
+            // undefined) order.
+            text += ', entries.rowid ' + sortDir;
         }
 
         if (this.limit)
