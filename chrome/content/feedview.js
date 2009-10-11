@@ -444,7 +444,6 @@ FeedView.prototype = {
 
         this.browser.addEventListener('load', this, false);
         gStorage.addObserver(this);
-        gPrefBranch.addObserver('', this, false);
 
         // Load the template page if it isn't loaded yet. We also have to make sure to
         // load it at startup, when no view was attached yet, because the template page
@@ -476,7 +475,6 @@ FeedView.prototype = {
             this.document.removeEventListener(event, this, true);
 
         gStorage.removeObserver(this);
-        gPrefBranch.removeObserver('', this, false);
 
         this._stopSmoothScrolling();
         clearTimeout(this._markVisibleTimeout);
@@ -1111,35 +1109,6 @@ FeedView.prototype = {
 
             startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
             startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
-        }
-    },
-
-    observe: function FeedView_observe(aSubject, aTopic, aData) {
-        if (aTopic != 'nsPref:changed')
-            return;
-
-        switch (aData) {
-            case 'feedview.autoMarkRead':
-                this._markVisibleAsRead();
-                break;
-            case 'feedview.sortUnreadViewOldestFirst':
-                if (this.query.unread)
-                    this.refresh();
-                break;
-            case 'feedview.entrySelectionEnabled':
-                // Can't use gPrefs cache here, because pref observers are called in
-                // an undefined order, so it may not be up-to-date yet.
-                if (gPrefBranch.getBoolPref('feedview.entrySelectionEnabled'))
-                    this.selectEntry(this._getMiddleEntryElement());
-                else
-                    this.selectEntry(null);
-                break;
-            case 'feedview.showHeadlinesOnly':
-                this._toggleHeadlinesView();
-                break;
-            case 'feedview.shownEntries':
-                this.refresh();
-                break;
         }
     },
 

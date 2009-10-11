@@ -528,8 +528,29 @@ var gPrefs = {
         switch (aData) {
             case 'feedview.shownEntries':
                 var list = getElement('view-constraint-list');
-                list.selectedIndex = this.shownEntries == 'all' ? 0 :
-                                     this.shownEntries == 'unread' ? 1 : 2;
+                list.selectedIndex = gFeedView.shownEntries == 'all' ? 0 :
+                                     gFeedView.shownEntries == 'unread' ? 1 : 2;
+                gFeedView.refresh();
+                break;
+
+            case 'feedview.autoMarkRead':
+                gFeedView._markVisibleAsRead();
+                break;
+
+            case 'feedview.sortUnreadViewOldestFirst':
+                if (gFeedView.query.unread)
+                    gFeedView.refresh();
+                break;
+
+            case 'feedview.entrySelectionEnabled':
+                if (gPrefs..entrySelectionEnabled)
+                    gFeedView.selectEntry(gFeedView._getMiddleEntryElement());
+                else
+                    gFeedView.selectEntry(null);
+                break;
+
+            case 'feedview.showHeadlinesOnly':
+                gFeedView._toggleHeadlinesView();
                 break;
         }
     }
