@@ -29,6 +29,7 @@
 <!ENTITY ctxFeedProperties.label "Properties">
 <!ENTITY ctxUpdateFeeds.label "Update Feeds Now">
 <!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
+<!ENTITY ctxShowOptions.label "Options">
 <!ENTITY compactingWindow.title "Compacting feeds">
 <!ENTITY compactingInProgress.label "Brief is compacting stored feeds. This may take a few minutes...">
 <!ENTITY migrationProgress.title "Migrating feeds">

@@ -104,6 +104,17 @@ const gBrief = {
         query.markEntriesRead(true);
     },
 
+    showOptions: function cmd_showOptions() {
+        var prefBranch = Cc['@mozilla.org/preferences-service;1'].
+                         getService(Ci.nsIPrefBranch);
+        var instantApply = prefBranch.getBoolPref('browser.preferences.instantApply');
+        var features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
+        features += instantApply ? 'modal=no,dialog=no' : 'modal';
+
+        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
+                          features);
+    },
+
 
     updateStatuspanel: function gBrief_updateStatuspanel() {
         var counter = document.getElementById('brief-status-counter');
