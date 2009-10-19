@@ -221,26 +221,26 @@ function RFC822Date(aDateString) {
     // We can fix this by manually replacing the military timezone code with the actual
     // timezone.
     if (date.toString().match('invalid','i')) {
-        let codeArray = aDateString.match('\\s[a-ik-zA-IK-Z]$');
-        if (codeArray) {
-            let timezoneCode = codeArray[0];
+        let timezoneCodes = aDateString.match(/\s[a-ik-zA-IK-Z]$/);
+        if (timezoneCodes) {
+            let timezoneCode = timezoneCodes[0];
             // Strip whitespace and normalize to upper case.
             timezoneCode = timezoneCode.replace(/^\s+/,'')[0].toUpperCase();
-            let timezone = militaryTimezoneCodes[timezoneCode];
+            let timezone = milTimezoneCodesMap[timezoneCode];
             let fixedDateString = aDateString.replace(/\s[a-ik-zA-IK-Z]$/, ' ' + timezone);
             date = new Date(fixedDateString);
         }
 
         // If the date is still invalid, just use the current date.
         if (date.toString().match('invalid','i'))
-            date = new Date(fixedDateString);
+            date = new Date();
     }
 
     return date;
 }
 
 // Conversion table for military coded timezones.
-var militaryTimezoneCodes = {
+var milTimezoneCodesMap = {
     A: '-1',  B: '-2',  C: '-3',  D: '-4', E: '-5',  F: '-6',  G: '-7',  H: '-8', I: '-9',
     K: '-10', L: '-11', M: '-12', N: '+1', O: '+2',  P: '+3',  Q: '+4',  R: '+5',
     S: '+6',  T: '+7',  U: '+8',  V: '+9', W: '+10', X: '+11', Y: '+12', Z: 'UT',
