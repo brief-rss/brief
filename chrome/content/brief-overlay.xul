@@ -59,6 +59,10 @@
             <menuitem id="brief-ctx-mark-read"
                      label="&ctxMarkFeedsAsRead.label;"
                      oncommand="gBrief.markFeedsAsRead();"/>
+            <menuseparator/>
+            <menuitem id="brief-ctx-show-options"
+                      label="&ctxShowOptions.label;"
+                      oncommand="gBrief.showOptions();"/>
         </popup>
 
         <tooltip id="brief-tooltip"
