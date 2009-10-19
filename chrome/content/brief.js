@@ -1,11 +1,5 @@
-const EXT_ID = 'brief@mozdev.org';
-
-const CUSTOM_STYLE_FILENAME = 'brief-custom-style.css';
-const EXAMPLE_CUSTOM_STYLE_FILENAME = 'example-custom-style.css';
-const DEFAULT_STYLE_URL = 'chrome://brief/skin/feedview.css';
 const TEMPLATE_URL = 'resource://brief-content/feedview-template.html';
 const GUIDE_PAGE_URL = 'http://brief.mozdev.org/guide/guide.html';
-
 const LAST_MAJOR_VERSION = '1.2';
 const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
 
@@ -47,7 +41,6 @@ __defineGetter__('gTopWindow', function() {
 
 function init() {
     gPrefs.register();
-    initCustomCSSFile();
     initToolbarsAndStrings();
 
     document.addEventListener('keypress', onKeyPress, true);
@@ -87,52 +80,14 @@ function init() {
 }
 
 
-function initCustomCSSFile() {
-    var chromeDir = Cc['@mozilla.org/file/directory_service;1'].
-                    getService(Ci.nsIProperties).
-                    get('ProfD', Ci.nsIFile);
-    chromeDir.append('chrome');
-
-    // Register %profile%/chrome directory under a resource URI.
-    var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-    var resourceProtocol = ioService.getProtocolHandler('resource').
-                                     QueryInterface(Ci.nsIResProtocolHandler);
-    if (!resourceProtocol.hasSubstitution('profile-chrome-dir')) {
-        let chromeDirURI = ioService.newFileURI(chromeDir);
-        resourceProtocol.setSubstitution('profile-chrome-dir', chromeDirURI);
-    }
-
-    // If the custom CSS file doesn't exist, create it by copying the example file.
-    var customStyleFile = chromeDir.clone();
-    customStyleFile.append(CUSTOM_STYLE_FILENAME);
-    if (!customStyleFile.exists()) {
-        var exampleCustomStyle = Cc['@mozilla.org/extensions/manager;1'].
-                                 getService(Ci.nsIExtensionManager).
-                                 getInstallLocation(EXT_ID).
-                                 getItemLocation(EXT_ID);
-        exampleCustomStyle.append('defaults');
-        exampleCustomStyle.append('data');
-        exampleCustomStyle.append(EXAMPLE_CUSTOM_STYLE_FILENAME);
-        exampleCustomStyle.copyTo(chromeDir, CUSTOM_STYLE_FILENAME);
-        exampleCustomStyle.permissions = 777;
-    }
-}
-
-
 function initToolbarsAndStrings() {
     getElement('headlines-checkbox').checked = gPrefs.showHeadlinesOnly;
-    getElement('view-constraint-list').selectedIndex = gPrefs.shownEntries == 'all' ? 0 :
-                                                       gPrefs.shownEntries == 'unread' ? 1 : 2;
-
-    // Set show/hide sidebar button's tooltip.
-    var pane = getElement('left-pane');
-    var bundle = getElement('main-bundle');
-    var tooltiptext = pane.hidden ? bundle.getString('showSidebarTooltip')
-                                  : bundle.getString('hideSidebarTooltip');
-    getElement('toggle-sidebar').setAttribute('tooltiptext', tooltiptext);
+    getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
+    getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
 
     // Cache the strings, so they don't have to retrieved every time when
     // refreshing the feed view.
+    var bundle = getElement('main-bundle');
     FeedView.prototype.todayStr = bundle.getString('today');
     FeedView.prototype.yesterdayStr = bundle.getString('yesterday');
     FeedView.prototype.authorPrefixStr = bundle.getString('authorIntroductionPrefix') + ' ';
@@ -209,9 +164,26 @@ var gCommands = {
         getElement('headlines-checkbox').checked = newState;
     },
 
-    changeViewConstraint: function cmd_changeViewConstraint(aConstraint) {
-        if (gPrefs.shownEntries != aConstraint)
-            gPrefBranch.setCharPref('feedview.shownEntries', aConstraint);
+    showAllEntries: function cmd_showAllEntries() {
+        gPrefBranch.setBoolPref('feedview.filterUnread', false);
+        getElement('filter-unread-checkbox').checked = false;
+
+        gPrefBranch.setBoolPref('feedview.filterStarred', false);
+        getElement('filter-starred-checkbox').checked = false;
+
+        gFeedView.refresh();
+    },
+
+    toggleUnreadEntriesFilter: function cmd_toggleUnreadEntriesFilter() {
+        gPrefBranch.setBoolPref('feedview.filterUnread', !gPrefs.filterUnread);
+        getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
+        gFeedView.refresh();
+    },
+
+    toggleStarredEntriesFilter: function cmd_toggleStarredEntriesFilter() {
+        gPrefBranch.setBoolPref('feedview.filterStarred', !gPrefs.filterStarred);
+        getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
+        gFeedView.refresh();
     },
 
     switchSelectedEntryRead: function cmd_switchSelectedEntryRead() {
@@ -305,8 +277,7 @@ var gCommands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        var screenHeight = window.screen.availHeight;
-        var height = screenHeight < 620 ? screenHeight : 620;
+        var height = Math.min(window.screen.availHeight, 580);
         var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
         var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
@@ -319,7 +290,7 @@ function loadHomeview() {
     var query = new Query();
     query.deleted = ENTRY_STATE_NORMAL;
     var title = getElement('all-items-folder').getAttribute('title');
-    var view = new FeedView(title, query, true);
+    var view = new FeedView(title, query);
 
     if (!gPrefs.homeFolder) {
         getElement('feed-view').loadURI(GUIDE_PAGE_URL);
@@ -496,7 +467,8 @@ var gPrefs = {
         { name: 'feedview.showHeadlinesOnly',      propName: 'showHeadlinesOnly' },
         { name: 'feedview.entrySelectionEnabled',  propName: 'entrySelectionEnabled' },
         { name: 'feedview.autoMarkRead',           propName: 'autoMarkRead' },
-        { name: 'feedview.shownEntries',           propName: 'shownEntries' },
+        { name: 'feedview.filterUnread',           propName: 'filterUnread' },
+        { name: 'feedview.filterStarred',          propName: 'filterStarred' },
         { name: 'feedview.minInitialEntries',      propName: 'minInitialEntries'},
         { name: 'feedview.sortUnreadViewOldestFirst', propName: 'sortUnreadViewOldestFirst' }
     ],
@@ -526,13 +498,6 @@ var gPrefs = {
         }
 
         switch (aData) {
-            case 'feedview.shownEntries':
-                var list = getElement('view-constraint-list');
-                list.selectedIndex = gFeedView.shownEntries == 'all' ? 0 :
-                                     gFeedView.shownEntries == 'unread' ? 1 : 2;
-                gFeedView.refresh();
-                break;
-
             case 'feedview.autoMarkRead':
                 gFeedView._markVisibleAsRead();
                 break;

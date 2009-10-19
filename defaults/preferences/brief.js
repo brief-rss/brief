@@ -7,7 +7,8 @@ pref("extensions.brief@mozdev.org.description", "chrome://brief/locale/brief.pro
 pref("extensions.brief.assumeStandardKeys", true);
 
 pref("extensions.brief.feedview.showHeadlinesOnly", false);
-pref("extensions.brief.feedview.shownEntries", 'all');
+pref("extensions.brief.feedview.filterUnread", false);
+pref("extensions.brief.feedview.filterStarred", false);
 pref("extensions.brief.feedview.minInitialEntries", 5);
 pref("extensions.brief.feedview.openEntriesInTabs", true);
 pref("extensions.brief.feedview.doubleClickMarks", true);

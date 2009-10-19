@@ -1,0 +1,196 @@
+#feed-view-header {
+    -moz-box-align: center;
+    height: 38px;
+    padding: 0 10px;
+    background: url('header-background.png') repeat-x top right;
+    background-color: #b6c8d0;
+    border-bottom: 1px solid #7c909f;
+    font-family: Verdana, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+}
+
+.feed-header-button {
+    min-width: 0;
+    border: none;
+    margin: 0;
+    background-color: transparent;
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    -moz-box-flex: 0;
+    -moz-appearance: none;
+    -moz-user-focus: none;
+}
+
+.feed-header-button > .button-box {
+    padding: 0 !important;
+    border: none;
+}
+
+#mark-view-read {
+    padding-top: 4px;
+    margin-right: 5px;
+    list-style-image: url(mark-read-checkmark.png);
+    -moz-image-region: rect(0px, 32px, 32px, 0px);
+}
+
+#mark-view-read:hover {
+    -moz-image-region: rect(32px, 32px, 64px, 0px);
+}
+
+#mark-view-read:hover:active {
+    -moz-image-region: rect(64px, 32px, 96px, 0px);
+}
+
+
+#feed-title-box {
+    display: -moz-box;
+    margin-right: 10px;
+    /* These are to cut off the later lines when the title wraps. */
+    overflow: hidden;
+    line-height: 36px;
+    max-height: 36px;
+}
+
+#feed-title {
+    color: #203f4f;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#feed-title.feed-link:hover {
+    text-decoration: underline;
+}
+
+#headlines-checkbox {
+    padding-top: 6px;
+    margin-right: 7px;
+    list-style-image: url(headlines-button.png);
+    -moz-image-region: rect(0px, 25px, 25px, 0px);
+}
+
+#headlines-checkbox:hover,
+#headlines-checkbox[checked]:hover:active {
+    -moz-image-region: rect(25px, 25px, 50px, 0px);
+}
+
+#headlines-checkbox[checked] {
+    -moz-image-region: rect(50px, 25px, 75px, 0px);
+}
+
+#headlines-checkbox[checked]:hover,
+#headlines-checkbox:hover:active {
+    -moz-image-region: rect(75px, 25px, 100px, 0px);
+}
+
+#filter-unread-checkbox {
+    padding-top: 5px;
+    margin-right: 2px;
+    list-style-image: url(filter-unread.png);
+    -moz-image-region: rect(0px, 25px, 26px, 0px);
+}
+
+#filter-unread-checkbox:hover,
+#filter-unread-checkbox[checked]:hover:active {
+    -moz-image-region: rect(26px, 25px, 52px, 0px);
+}
+
+#filter-unread-checkbox[checked] {
+    -moz-image-region: rect(52px, 25px, 78px, 0px);
+}
+
+#filter-unread-checkbox:hover:active,
+#filter-unread-checkbox[checked]:hover {
+    -moz-image-region: rect(78px, 25px, 104px, 0px);
+}
+
+#filter-unread-checkbox[disabled] {
+    -moz-image-region: rect(104px, 25px, 130px, 0px);
+}
+
+
+#filter-starred-checkbox {
+    padding-top: 3px;
+    margin-right: 5px;
+    list-style-image: url(filter-starred.png);
+    -moz-image-region: rect(0px, 28px, 28px, 0px);
+}
+
+#filter-starred-checkbox:hover,
+#filter-starred-checkbox[checked]:hover:active {
+    -moz-image-region: rect(28px, 28px, 56px, 0px);
+}
+
+#filter-starred-checkbox[checked] {
+    -moz-image-region: rect(56px, 28px, 84px, 0px);
+}
+
+#filter-starred-checkbox:hover:active,
+#filter-starred-checkbox[checked]:hover {
+    -moz-image-region: rect(84px, 28px, 112px, 0px);
+}
+
+#filter-starred-checkbox[disabled] {
+    -moz-image-region: rect(112px, 28px, 140px, 0px);
+}
+
+
+#searchbar {
+    margin: 6px 0 6px 10px;
+    width: 150px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border: 1px solid #7c909f;
+    -moz-border-radius: 4px;
+    -moz-binding: url(chrome://brief/content/bindings.xml#searchbar);
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    -moz-appearance: none;
+}
+
+
+#searchbar[empty="true"]  {
+    color: #7c909f;
+}
+
+.searchbar-textbox {
+    -moz-box-align: center;
+    -moz-box-pack: end;
+}
+
+.searchbar-button-image {
+    margin-top: 0;
+    margin-bottom: 0;
+    -moz-margin-start: 4px;
+    -moz-margin-end: 0;
+    list-style-image: url(icons/search.png);
+}
+
+.searchbar-clearbutton {
+    -moz-appearance: none;
+    border: none !important;
+    cursor: default;
+    list-style-image: url(icons/searchbar-clear.png);
+    -moz-image-region: rect(0px, 16px, 16px, 0px);
+    -moz-margin-start: 4px;
+    -moz-margin-end: 2px;
+    padding: 0px !important;
+}
+
+.searchbar-clearbutton > .toolbarbutton-icon {
+    -moz-margin-end: 0px;
+}
+
+.searchbar-clearbutton:hover {
+    -moz-image-region: rect(0px, 32px, 16px, 16px);
+    padding: 0px !important;
+}
+
+.searchbar-clearbutton:hover:active {
+    -moz-image-region: rect(0px, 48px, 16px, 32px);
+    padding: 0px !important;
+}

@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
+<?xml-stylesheet href="chrome://brief/skin/feedview-header.css"?>
+<?xml-stylesheet href="resource://profile-chrome-dir/brief-custom-style.css"?>
 <?xml-stylesheet href="chrome://browser/content/places/places.css"?>
 <?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
 
@@ -10,6 +12,7 @@
 
 <page id="brief-window"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+      xmlns:html="http://www.w3.org/1999/xhtml"
       title="Brief"
       onload="init()"
       onunload="unload()">
@@ -75,28 +78,6 @@
 
     <hbox id="main-box" flex="1">
         <vbox id="left-pane" persist="width hidden">
-            <toolbox>
-                <toolbar id="feed-list-toolbar">
-                    <deck id="update-buttons-deck" selectedIndex="0">
-                        <toolbarbutton id="update-button"
-                                       tooltiptext="&updateButton.tooltip;"
-                                       oncommand="gCommands.updateAllFeeds()"/>
-                        <toolbarbutton id="stop-updating-button"
-                                       tooltiptext="&stopUpdatingButton.tooltip;"
-                                       oncommand="gCommands.stopUpdating()"/>
-                    </deck>
-                    <toolbaritem id="searchbar-container" flex="1">
-                        <textbox id="searchbar" flex="1"
-                                 spellcheck="false"
-                                 type="timed"
-                                 timeout="500"
-                                 emptytext="&searchBox.label;"/>
-                    </toolbaritem>
-                    <toolbarbutton id="options-button"
-                                   tooltiptext="&showOptions.tooltip;"
-                                   oncommand="gCommands.openOptions()"/>
-                </toolbar>
-            </toolbox>
             <progressmeter id="update-progress" hidden="true"/>
             <deck id="feed-list-deck" selectedIndex="0" flex="1">
                 <tree id="feed-list" flex="1"
@@ -169,38 +150,38 @@
         </vbox>
         <splitter id="left-pane-splitter" persist="hidden"/>
         <vbox flex="1">
-            <toolbox>
-                <toolbar id="feed-view-toolbar">
-                    <toolbarbutton id="toggle-sidebar"
-                                   oncommand="gCommands.toggleSidebar()"/>
-                    <toolbarspring/>
-                    <toolbarbutton id="mark-view-read"
-                                   tooltiptext="&markViewRead.tooltip;"
-                                   onclick="gCommands.markViewRead(event)"/>
-                    <toolbarbutton id="headlines-checkbox"
-                                   type="checkbox"
-                                   autoCheck="false"
-                                   tooltiptext="&headlinesCheckbox.tooltip;"
-                                   oncommand="gCommands.switchHeadlinesView()"/>
-                    <toolbaritem id="view-constraint-box">
-                        <menulist id="view-constraint-list"
-                                  tooltiptext="&viewConstraintList.tooltip;"
-                                  oncommand="gCommands.changeViewConstraint(event.target.getAttribute('constraint'))">
-                            <menupopup>
-                                <menuitem id="show-all"
-                                          constraint="all"
-                                          label="&showAll.label;"/>
-                                <menuitem id="show-unread"
-                                          constraint="unread"
-                                          label="&showUnread.label;"/>
-                                <menuitem id="show-starred"
-                                          constraint="starred"
-                                          label="&showStarred.label;"/>
-                            </menupopup>
-                        </menulist>
-                    </toolbaritem>
-                </toolbar>
-            </toolbox>
+            <hbox id="feed-view-header">
+                <button id="mark-view-read"
+                        class="feed-header-button"
+                        tooltiptext="&markViewRead.tooltip;"
+                        onclick="gCommands.markViewRead(event)"/>
+                <html:div id="feed-title-box"
+                          flex="1">
+                    <html:a id="feed-title" target="_blank"/>
+                </html:div>
+                <button id="headlines-checkbox"
+                        class="feed-header-button"
+                        type="checkbox"
+                        autoCheck="false"
+                        tooltiptext="&headlinesCheckbox.tooltip;"
+                        oncommand="gCommands.switchHeadlinesView()"/>
+                <button id="filter-unread-checkbox"
+                        class="feed-header-button"
+                        tooltiptext="&filterUnread.tooltip;"
+                        type="checkbox"
+                        oncommand="gCommands.toggleUnreadEntriesFilter()"/>
+                <button id="filter-starred-checkbox"
+                        class="feed-header-button"
+                        tooltiptext="&filterStarred.tooltip;"
+                        type="checkbox"
+                        oncommand="gCommands.toggleStarredEntriesFilter()"/>
+                <textbox id="searchbar"
+                         spellcheck="false"
+                         type="timed"
+                         timeout="500"
+                         emptytext="&searchBox.label;"/>
+            </hbox>
+
             <browser id="feed-view" flex="1"
                      disablehistory="true"
                      type="content"/>
