@@ -9,6 +9,24 @@ const WINDOW_HEIGHTS_LOAD = 1;
 const LOAD_STEP_SIZE = 5;
 
 
+__defineGetter__("gSecurityManager", function() {
+    delete this.gSecurityManager;
+    return this.gSecurityManager = Cc['@mozilla.org/scriptsecuritymanager;1'].
+                                   getService(Ci.nsIScriptSecurityManager);
+});
+
+__defineGetter__("gBriefPrincipal", function() {
+    var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+    var uri = ioService.newURI(document.documentURI, null, null)
+    var resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1'].
+                      getService(Ci.nsIChromeRegistry).
+                      convertChromeURL(uri);
+
+    delete this.gBriefPrincipal;
+    return this.gBriefPrincipal = gSecurityManager.getCodebasePrincipal(resolvedURI);
+});
+
+
 /**
  * The instance of FeedView currently attached to the browser.
  */
@@ -24,13 +42,16 @@ var gFeedView = null;
  *
  * @param aTitle  Title of the view which will be shown in the header.
  * @param aQuery  Query which selects contained entries.
- * @param aFixed  Indicates if the view constraints are fixed and it isn't affected
- *                by feedview.shownEntries pref (e.g. Unread folder)
+ * @param aUnreadFixed  Indicates that the "unread" query parameter is fixed and the view
+ *                      affected by feedview.filterUnread pref.
+ * @param aStarredFixed  Indicates that the "starred" query parameter is fixed and the
+ *                       view affected by feedview.filterStarred pref.
  */
-function FeedView(aTitle, aQuery, aFixed) {
+function FeedView(aTitle, aQuery, aUnreadFixed, aStarredFixed) {
     this.title = aTitle;
     this.query = aQuery;
-    this.fixed = aFixed;
+    this.unreadParamFixed = aUnreadFixed;
+    this.starredParamFixed = aStarredFixed;
     this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
     this.entriesMarkedUnread = [];
 }
@@ -45,8 +66,8 @@ FeedView.prototype = {
     // It used for searching, when the search string is displayed in place of the title.
     titleOverride: '',
 
-    // Indicates the view isn't affected by feedview.shownEntries pref.
-    fixed: false,
+    unreadParamFixed: false,
+    starredParamFixed: false,
 
     get browser FeedView_browser() {
         delete this.__proto__.browser;
@@ -72,12 +93,10 @@ FeedView.prototype = {
     },
 
     get query FeedView_query_get() {
-        if (!this.fixed) {
-            this.__query.unread = (gPrefs.shownEntries == 'unread');
-            this.__query.starred = (gPrefs.shownEntries == 'starred');
-            this.__query.deleted = gPrefs.shownEntries == 'trashed' ? ENTRY_STATE_TRASHED
-                                                                    : ENTRY_STATE_NORMAL;
-        }
+        if (!this.unreadParamFixed)
+            this.__query.unread = gPrefs.filterUnread;
+        if (!this.starredParamFixed)
+            this.__query.starred = gPrefs.filterStarred;
 
         if (this.__query.unread && gPrefs.sortUnreadViewOldestFirst)
             this.__query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
@@ -439,8 +458,9 @@ FeedView.prototype = {
             searchbar.clear();
         }
 
-        // Hide the All/Unread/Bookmarks drop-down for views with fixed constraints.
-        getElement('view-constraint-box').hidden = this.fixed;
+        // Disable filters for views with fixed parameters.
+        getElement('filter-unread-checkbox').disabled = this.unreadParamFixed;
+        getElement('filter-starred-checkbox').disabled = this.starredParamFixed;
 
         this.browser.addEventListener('load', this, false);
         gStorage.addObserver(this);
@@ -531,7 +551,7 @@ FeedView.prototype = {
 
             // Set up the template page when it's loaded.
             case 'load':
-                getElement('feed-view-toolbar').hidden = !this.active;
+                getElement('feed-view-header').hidden = !this.active;
 
                 if (this.active) {
                     this.window.addEventListener('resize', this, false);
@@ -1018,37 +1038,31 @@ FeedView.prototype = {
     },
 
     _buildHeader: function FeedView__buildHeader(aFeed) {
-        var header = this.document.getElementById('header');
-        var feedTitle = this.document.getElementById('feed-title');
-        var feedImage = this.document.getElementById('feed-image');
-        var feedSubtitle = this.document.getElementById('feed-subtitle');
+        var feedTitle = getElement('feed-title');
 
         // Reset the old header.
         feedTitle.removeAttribute('href');
         feedTitle.className = '';
-        // Removing src attribute doesn't hide the image in Fx 3.0, so we have
-        // to set it to an empty value for backwards-compatibility.
-        feedImage.setAttribute('src', '');
-        feedImage.removeAttribute('title');
-        feedSubtitle.innerHTML = '';
 
         feedTitle.textContent = this.titleOverride || this.title;
 
-        // When a single feed is shown, add subtitle, image, and link.
         if (aFeed) {
-            // Don't linkify the title when searching.
-            if (!this.query.searchString) {
-                feedTitle.setAttribute('href', aFeed.websiteURL || aFeed.feedURL);
+            let url = aFeed.websiteURL || aFeed.feedURL;
+            let flags = Ci.nsIScriptSecurityManager.DISALLOW_INHERIT_PRINCIPAL;
+            let securityCheckOK = true;
+            try {
+                gSecurityManager.checkLoadURIStrWithPrincipal(gBriefPrincipal, url,
+                                                              flags);
+            }
+            catch (ex) {
+                log('Brief: security error.' + ex);
+                securityCheckOK = false;
+            }
+
+            if (securityCheckOK && !this.query.searchString) {
+                feedTitle.setAttribute('href', url);
                 feedTitle.className = 'feed-link';
             }
-
-            if (aFeed.imageURL) {
-                feedImage.setAttribute('src', aFeed.imageURL);
-                feedImage.setAttribute('title', aFeed.imageTitle);
-            }
-
-            if (aFeed.subtitle)
-                feedSubtitle.innerHTML = aFeed.subtitle;
         }
     },
 
@@ -1066,7 +1080,7 @@ FeedView.prototype = {
             message = bundle.getString('noEntriesFound');
         else if (this.query.unread)
             message = bundle.getString('noUnreadEntries');
-        else if (this.query.starred && this.fixed)
+        else if (this.query.starred && this.starredParamFixed)
             message = bundle.getString('noStarredEntries');
         else if (this.query.starred)
             message = bundle.getString('noStarredEntriesInFeed');
@@ -1100,7 +1114,7 @@ FeedView.prototype = {
         finder.caseSensitive = false;
 
         var retRange;
-        while (retRange = this._finder.Find(aWord, searchRange, startPoint, endPoint)) {
+        while (retRange = finder.Find(aWord, searchRange, startPoint, endPoint)) {
             let surroundingNode = baseNode.cloneNode(false);
             surroundingNode.appendChild(retRange.extractContents());
 

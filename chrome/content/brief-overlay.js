@@ -83,15 +83,6 @@ const gBrief = {
             case 'markCurrentViewRead':
                 win.gFeedView.query.markEntriesRead(true);
                 break;
-            case 'showAllEntries':
-                win.gCommands.changeViewConstraint('all');
-                break;
-            case 'showUnreadEntries':
-                win.gCommands.changeViewConstraint('unread');
-                break;
-            case 'showStarredEntries':
-                win.gCommands.changeViewConstraint('starred');
-                break;
             case 'focusSearchbar':
                 var searchbar = win.document.getElementById('searchbar');
                 searchbar.focus();
@@ -405,6 +396,21 @@ const gBrief = {
         gBrief.prefs.setBoolPref('firstRun', false);
     },
 
+    // Registers %profile%/chrome directory under a resource URI.
+    registerCustomStyle: function gBrief_registerCustomStyle() {
+        var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+        var resourceProtocolHandler = ioService.getProtocolHandler('resource').
+                                                QueryInterface(Ci.nsIResProtocolHandler);
+        if (!resourceProtocolHandler.hasSubstitution('profile-chrome-dir')) {
+            let chromeDir = Cc['@mozilla.org/file/directory_service;1'].
+                            getService(Ci.nsIProperties).
+                            get('ProfD', Ci.nsIFile);
+            chromeDir.append('chrome');
+            let chromeDirURI = ioService.newFileURI(chromeDir);
+            resourceProtocolHandler.setSubstitution('profile-chrome-dir', chromeDirURI);
+        }
+    },
+
 
     QueryInterface: function gBrief_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
@@ -418,3 +424,4 @@ const gBrief = {
 }
 
 window.addEventListener('load', gBrief, false);
+gBrief.registerCustomStyle();

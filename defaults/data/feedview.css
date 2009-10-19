@@ -6,48 +6,6 @@ body {
     padding: 0;
 }
 
-
-
-/* ----------------------  Header  ---------------------- */
-
-#header {
-    background: url('chrome://brief/skin/header-bkg.png') repeat-x top right;
-    background-color: #203f4f;
-    padding: 5px 5% 5px;
-    border-bottom: 10px solid #acb5bf;
-    -moz-border-bottom-colors: #f6f9fc #f2f4f8 #eceff4 #e5eaee #dfe3e9 #d9dee3 #cdd3da #c1c8d0 #b5bec6 #acb5bf;
-    color: #cedbe0;
-    overflow: auto; /* Clears contained floats */
-}
-
-#feed-image {
-    border: none;
-    float: right;
-    margin: 0 10px 10px;
-}
-
-#feed-title {
-    color: #cedbe0;
-    font-size: 19px;
-    font-weight: bold;
-    text-decoration: none;
-    padding-bottom: 1px;
-}
-
-#feed-title.feed-link:hover {
-    text-decoration: underline;
-}
-
-#feed-subtitle {
-    font-size: 13px;
-    margin-top: 2px;
-    font-style: italic;
-}
-
-#feed-subtitle:empty {
-    display: none;
-}
-
 #feed-content {
     padding: 10px 10px 10px;
 }

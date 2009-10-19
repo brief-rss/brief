@@ -348,11 +348,10 @@
             <xul:image anonid="searchbar-glass-image"
                        class="searchbar-button-image"
                        onclick="getElement('searchbar').focus()"/>
+            <xul:toolbarbutton anonid="searchbar-clearbutton"
+                               class="searchbar-clearbutton"
+                               hidden="true"/>
         </xul:hbox>
-
-        <xul:toolbarbutton anonid="searchbar-clearbutton"
-                           class="searchbar-clearbutton"
-                           hidden="true"/>
     </content>
     <implementation>
         <constructor>

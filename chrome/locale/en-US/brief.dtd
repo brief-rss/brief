@@ -1,12 +1,10 @@
 <!ENTITY confirmHomeFolder.label "OK">
 <!ENTITY searchBox.label "Search">
-<!ENTITY headlinesCheckbox.tooltip "Use headlines view">
-<!ENTITY showAll.label "View all">
-<!ENTITY showUnread.label "View unread">
-<!ENTITY showStarred.label "View bookmarks">
+<!ENTITY headlinesCheckbox.tooltip "View headlines">
+<!ENTITY filterUnread.tooltip "View only unread items">
+<!ENTITY filterStarred.tooltip "View only bookmarks">
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
-<!ENTITY searchScopeButton.tooltip "Change the search scope">
 <!ENTITY showOptions.tooltip "Open Brief options">
 <!ENTITY markViewRead.tooltip "Mark all items as read">
 <!ENTITY viewConstraintList.tooltip "Choose what kind of items to display">

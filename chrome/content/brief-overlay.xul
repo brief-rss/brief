@@ -39,9 +39,9 @@
         <key id="Brief_showAllEntries" key="a"
              oncommand="gBrief.doCommand('showAllEntries')"/>
         <key id="Brief_showStarredEntries" key="s"
-             oncommand="gBrief.doCommand('showStarredEntries')"/>
+             oncommand="gBrief.doCommand('toggleStarredEntriesFilter')"/>
         <key id="Brief_showUnreadEntries" key="d"
-             oncommand="gBrief.doCommand('showUnreadEntries')"/>
+             oncommand="gBrief.doCommand('toggleUnreadEntriesFilter')"/>
         <key id="Brief_focusSearchbar" key="/"
              oncommand="gBrief.doCommand('focusSearchbar')"/>
         <key id="Brief_toggleEntrySelection" key="q"

@@ -28,5 +28,5 @@
 <!ENTITY showStarred "Show bookmarked items">
 <!ENTITY showUnread "Show unread items">
 <!ENTITY headlinesView "Toggle headlines view">
-<!ENTITY focusSearchbar "Focus searchbar">
+<!ENTITY focusSearchbar "Focus search box">
 <!ENTITY displayShortcuts "Display list of shortcuts keys">

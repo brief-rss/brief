@@ -1,9 +1,13 @@
 #left-pane {
-  width: 20em;
+  width: 250px;
 }
 
-splitter {
-  border-left: 0;
+#left-pane-splitter {
+  min-width: 2px;
+  border-width: 0;
+  -moz-border-left-colors: none;
+  -moz-border-right-colors: none;
+  background-color: #7c909f;
 }
 
 #select-home-folder-label {
@@ -31,12 +35,18 @@ splitter {
   }
 
 #feed-list {
-  border-right: 0;
   margin: 0;
+  border: none;
+  -moz-appearance: none;
 }
 
 #feed-list > treechildren::-moz-tree-line {
   visibility: hidden;
+}
+
+#feed-list > treechildren::-moz-tree-separator {
+    border-top: none;
+    border-bottom: 1px solid #7c909f;
 }
 
 #feed-list > treechildren::-moz-tree-cell-text {
@@ -139,98 +149,6 @@ splitter {
 
 /* ----------------------  Toolbars  ----------------------- */
 
-toolbar, toolbaritem {
-  -moz-box-align: center;
-  }
-
-toolbar {
-  padding: 1px 0 1px;
-}
-
-toolbarbutton {
-  padding: 4px 4px 3px 4px;
-  min-width: 0;
-  }
-
-#feed-list-toolbar {
-  overflow: hidden;
-  }
-
-#searchbar-container {
-  min-width: 10em;
-  max-width: 20em;
-  }
-
-#searchbar {
-  -moz-binding: url(chrome://brief/content/bindings.xml#searchbar);
-  }
-
-#searchbar[showingDescription]  {
-  color: GrayText;
-}
-
-.searchbar-textbox {
-  -moz-box-align: center;
-  -moz-box-pack: end;
-}
-
-.searchbar-button-image {
-  margin-top: 0;
-  margin-bottom: 0;
-  -moz-margin-start: 4px;
-  -moz-margin-end: 0;
-  list-style-image: url(icons/search.png);
-}
-
-.searchbar-clearbutton {
-  -moz-appearance: none;
-  border: none !important;
-  cursor: default;
-  list-style-image: url(icons/searchbar-clear.png);
-  -moz-image-region: rect(0px, 16px, 16px, 0px);
-  -moz-margin-start: 4px;
-  -moz-margin-end: 2px;
-  padding: 0px !important;
-  }
-
-.searchbar-clearbutton > .toolbarbutton-icon {
-  -moz-margin-end: 0px; /* override toolkit's default value */
-  }
-
-.searchbar-clearbutton:hover {
-  -moz-image-region: rect(0px, 32px, 16px, 16px);
-  padding: 0px !important;
-  }
-
-.searchbar-clearbutton:hover:active {
-  -moz-image-region: rect(0px, 48px, 16px, 32px);
-  padding: 0px !important;
-  }
-
-#update-button {
-  list-style-image: url(toolbar-buttons-1.png);
-  -moz-image-region: rect(0, 24px, 24px, 0);
-  }
-
-#stop-updating-button {
-  list-style-image: url(toolbar-buttons-1.png);
-  -moz-image-region: rect(0, 48px, 24px, 24px);
-  }
-
-#options-button {
-  list-style-image: url(toolbar-buttons-1.png);
-  -moz-image-region: rect(0, 72px, 24px, 48px);
-  }
-
-#left-pane-splitter {
-  min-width: 5px;
-  border-right-width: 1px;
-}
-
-#feed-view-toolbar {
-  padding-right: 10px;
-  }
-
 #toggle-sidebar {
   list-style-image: url(chrome://brief/skin/sidebar-button.png);
   -moz-image-region: rect(0, 16px, 24px, 0);
@@ -249,27 +167,3 @@ toolbarbutton {
 #toggle-sidebar[sidebarHidden="true"]:hover {
   -moz-image-region: rect(24px, 32px, 48px, 16px);
 }
-
-#mark-view-read {
-  list-style-image: url(toolbar-buttons-1.png);
-  -moz-image-region: rect(0, 96px, 24px, 72px);
-  margin-right: 5px;
-  }
-
-#headlines-checkbox {
-  list-style-image: url(toolbar-buttons-1.png);
-  -moz-image-region: rect(0, 120px, 24px, 96px);
-  margin-right: 5px;
-}
-
-#headlines-checkbox[checked="true"] {
-  padding-top: 4px !important;
-  padding-bottom: 3px !important;
-  -moz-padding-start: 4px !important;
-  -moz-padding-end: 4px !important;
-}
-
-#view-constraint-box {
-  margin-right: 5px;
-  font-size: 13px;
-  }
