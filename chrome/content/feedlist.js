@@ -24,7 +24,6 @@ var gViewList = {
     init: function gViewList_init() {
         this.refreshItem('unread-folder');
         this.refreshItem('starred-folder');
-        this.refreshItem('trash-folder');
 
         // Even though the tags are inserted lazily, tag list has to be ready
         // for view observers to use.
@@ -111,13 +110,10 @@ var gViewList = {
         var item = getElement(aItemID);
 
         var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
         query.unread = true;
         if (aItemID == 'starred-folder')
             query.starred = true;
-        if (aItemID == 'trash-folder')
-            query.deleted = ENTRY_STATE_TRASHED;
-        else
-            query.deleted = ENTRY_STATE_NORMAL;
 
         var name = item.getAttribute('name');
         this._setLabel(item, name, query.getEntryCount());
@@ -181,14 +177,14 @@ var gViewList = {
             let item = document.createElement('richlistitem');
             item.id = this.tags[i];
             item.setAttribute('tagView', true);
-            item.className = 'tag-view';
+            item.className = 'tag-view-item';
 
             let image = document.createElement('image');
             image.className = 'view-icon';
             item.appendChild(image);
 
             let label = document.createElement('label');
-            label.className = 'view-label';
+            label.className = 'view-list-item view-label';
             item.appendChild(label);
 
             this.richlistbox.insertBefore(item, trashFolder);
@@ -759,10 +755,6 @@ var gFeedList = {
                 gViewList.refreshItem('starred-folder');
                 gViewList.refreshTags(aEntryList.tags);
             }
-
-            if (aEntryList.containsTrashed())
-                gViewList.refreshItem('trash-folder');
-
         }, 0, this)
     },
 
@@ -788,7 +780,6 @@ var gFeedList = {
             if (aEntryList.containsUnread()) {
                 this.refreshFeedTreeitems(aEntryList.feedIDs);
                 gViewList.refreshItem('unread-folder');
-                gViewList.refreshItem('trash-folder');
 
                 if (aEntryList.containsStarred())
                     gViewList.refreshItem('starred-folder');
