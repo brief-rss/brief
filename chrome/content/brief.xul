@@ -94,21 +94,25 @@
                                  onselect="gViewList.onSelect(event)"
                                  onclick="gViewList.onClick(event)">
                         <richlistitem id="all-items-folder"
+                                      class="view-list-item"
                                       name="&allItemsFolder.label;">
                             <image class="view-icon"/>
                             <label value="&allItemsFolder.label;"/>
                         </richlistitem>
                         <richlistitem id="unread-folder"
+                                      class="view-list-item"
                                       name="&unreadFolder.label;">
                             <image class="view-icon"/>
                             <label value="&unreadFolder.label;"/>
                         </richlistitem>
                         <richlistitem id="starred-folder"
+                                      class="view-list-item"
                                       name="&starredFolder.label;">
                             <image class="view-icon"/>
                             <label value="&starredFolder.label;"/>
                         </richlistitem>
                         <richlistitem id="trash-folder"
+                                      class="view-list-item"
                                       name="&trashFolder.label;">
                             <image class="view-icon"/>
                             <label value="&trashFolder.label;"/>
