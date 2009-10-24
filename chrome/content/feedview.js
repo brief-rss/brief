@@ -532,7 +532,6 @@ FeedView.prototype = {
                 gCommands.restoreEntry(id);
                 break;
             case 'StarEntry':
-                debugger;
                 gCommands.starEntry(id, true);
                 break;
 
