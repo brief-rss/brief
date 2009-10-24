@@ -65,36 +65,9 @@ const gBrief = {
 
 
     doCommand: function gBrief_doCommand(aCommand) {
-        if (gBrowser.currentURI.spec != this.BRIEF_URL)
-            return;
-
-        var win = gBrowser.contentDocument.defaultView.wrappedJSObject;
-
-        switch (aCommand) {
-            case 'selectNextEntry':
-                win.gFeedView.selectNextEntry();
-                break;
-            case 'selectPrevEntry':
-                win.gFeedView.selectPrevEntry();
-                break;
-            case 'openSelectedEntryLinkInTab':
-                win.gCommands.openSelectedEntryLink(true);
-                break;
-            case 'markCurrentViewRead':
-                win.gFeedView.query.markEntriesRead(true);
-                break;
-            case 'focusSearchbar':
-                var searchbar = win.document.getElementById('searchbar');
-                searchbar.focus();
-                break;
-            case 'toggleEntrySelection':
-                var oldValue = this.prefs.getBoolPref('feedview.entrySelectionEnabled');
-                this.prefs.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
-                break;
-
-            default:
-                win.gCommands[aCommand]();
-                break;
+        if (gBrowser.currentURI.spec == this.BRIEF_URL) {
+            let win = gBrowser.contentDocument.defaultView.wrappedJSObject;
+            win.gCommands[aCommand]();
         }
     },
 

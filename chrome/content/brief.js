@@ -178,16 +178,47 @@ var gCommands = {
         gFeedView.refresh();
     },
 
+    showUnreadEntries: function cmd_showUnreadEntries() {
+        if (!gPrefs.filterUnread)
+            gCommands.toggleUnreadEntriesFilter();
+    },
+
     toggleUnreadEntriesFilter: function cmd_toggleUnreadEntriesFilter() {
         gPrefBranch.setBoolPref('feedview.filterUnread', !gPrefs.filterUnread);
         getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
         gFeedView.refresh();
     },
 
+    showStarredEntries: function cmd_showStarredEntries() {
+        if (!gPrefs.filterStarred)
+            gCommands.toggleStarredEntriesFilter();
+    },
+
     toggleStarredEntriesFilter: function cmd_toggleStarredEntriesFilter() {
         gPrefBranch.setBoolPref('feedview.filterStarred', !gPrefs.filterStarred);
         getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
         gFeedView.refresh();
+    },
+
+    selectNextEntry: function cmd_selectNextEntry() {
+        gFeedView.selectNextEntry();
+    },
+
+    selectPrevEntry: function cmd_selectPrevEntry() {
+        gFeedView.selectPrevEntry();
+    },
+
+    openSelectedEntryLinkInTab: function cmd_openSelectedEntryLinkInTab() {
+        gCommands.openSelectedEntryLink(true);
+    },
+
+    focusSearchbar: function cmd_focusSearchbar() {
+        getElement('searchbar').focus();
+    },
+
+    toggleEntrySelection: function toggleEntrySelection() {
+        var oldValue = gPrefs.entrySelectionEnabled;
+        gPrefBranch.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
     },
 
     switchSelectedEntryRead: function cmd_switchSelectedEntryRead() {
@@ -510,7 +541,7 @@ var gPrefs = {
                 break;
 
             case 'feedview.entrySelectionEnabled':
-                if (gPrefs..entrySelectionEnabled)
+                if (gPrefs.entrySelectionEnabled)
                     gFeedView.selectEntry(gFeedView._getMiddleEntryElement());
                 else
                     gFeedView.selectEntry(null);
