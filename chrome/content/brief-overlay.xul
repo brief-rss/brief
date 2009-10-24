@@ -35,13 +35,13 @@
         <key id="Brief_switchHeadlinesView" key="f"
              oncommand="gBrief.doCommand('switchHeadlinesView')"/>
         <key id="Brief_markCurrentViewRead" key="m" modifiers="accel"
-             oncommand="gBrief.doCommand('markCurrentViewRead')"/>
+             oncommand="gBrief.doCommand('markViewRead')"/>
         <key id="Brief_showAllEntries" key="a"
              oncommand="gBrief.doCommand('showAllEntries')"/>
         <key id="Brief_showStarredEntries" key="s"
-             oncommand="gBrief.doCommand('toggleStarredEntriesFilter')"/>
+             oncommand="gBrief.doCommand('showStarredEntries')"/>
         <key id="Brief_showUnreadEntries" key="d"
-             oncommand="gBrief.doCommand('toggleUnreadEntriesFilter')"/>
+             oncommand="gBrief.doCommand('showUnreadEntries')"/>
         <key id="Brief_focusSearchbar" key="/"
              oncommand="gBrief.doCommand('focusSearchbar')"/>
         <key id="Brief_toggleEntrySelection" key="q"
