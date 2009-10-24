@@ -1,4 +1,5 @@
-* {
+/* Reset these properties on everything but context menu popups */
+page, page > hbox, page > hbox * {
     -moz-appearance: none;
     height: auto;
     width: auto;
@@ -131,33 +132,33 @@ page {
     color: #000000;
 }
 
-richlistitem {
+.view-list-item {
     padding: 1px 0 1px 15px;
 }
 
-#view-list:not([showTags]) > richlistitem.tag-view {
+#view-list:not([showTags]) > .tag-view-item {
     display: none;
 }
 
-richlistitem.tag-view {
+.tag-view-item {
     padding-left: 25px;
 }
 
-richlistitem[selected="true"] {
+.view-list-item[selected="true"] {
     background-color: #d5ecfd;
     color: #00344f;
 }
 
-richlistbox:focus > richlistitem[selected="true"] {
+#view-list:focus > .view-list-item[selected="true"] {
     background-color: #d5ecfd;
     color: #00344f;
 }
 
-richlistitem[unread] {
+.view-list-item[unread] {
     font-weight: bold;
 }
 
-richlistitem > label {
+.view-list-item > label {
     padding: 1px 4px 0 5px;
 }
 
@@ -297,8 +298,4 @@ richlistitem > label {
 .brief-button {
     -moz-box-flex: 0;
     -moz-user-focus: none;
-}
-
-#main-box {
-    margin: 0;
 }
