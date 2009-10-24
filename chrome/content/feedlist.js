@@ -1,6 +1,232 @@
 const THROBBER_URL = 'chrome://global/skin/throbber/Throbber-small.gif';
 const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
+var gViewList = {
+
+    get richlistbox gViewList_richlistbox() {
+        delete this.richlistbox;
+        return this.richlistbox = getElement('view-list');
+    },
+
+    get selectedItem gViewList_selectedItem_get() {
+        return this.richlistbox.selectedItem;
+    },
+
+    set selectedItem gViewList_selectedItem_set(aItem) {
+        this.richlistbox.selectedItem = aItem;
+        return aItem;
+    },
+
+    tagsReady: false, // Tags are inserted lazily.
+
+    tags: null, // Array of all tag names.
+
+    init: function gViewList_init() {
+        this.refreshItem('unread-folder');
+        this.refreshItem('starred-folder');
+        this.refreshItem('trash-folder');
+
+        // Even though the tags are inserted lazily, tag list has to be ready
+        // for view observers to use.
+        this.tags = gStorage.getAllTags();
+    },
+
+    onSelect: function gViewList_onSelect(aEvent) {
+        if (!this.selectedItem) {
+            this.richlistbox.removeAttribute('showTags');
+            return;
+        }
+
+        gFeedList.tree.view.selection.select(-1);
+
+        var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+
+        switch (this.selectedItem.id) {
+            case 'all-items-folder':
+                var title = this.selectedItem.getAttribute('name');
+                this.richlistbox.removeAttribute('showTags');
+                break;
+
+            case 'unread-folder':
+                title = this.selectedItem.getAttribute('name');
+                query.unread = true;
+                var unreadParamFixed = true;
+                this.richlistbox.removeAttribute('showTags');
+                break;
+
+            case 'starred-folder':
+                title = this.selectedItem.getAttribute('name');
+                query.starred = true;
+                var starredParamFixed = true;
+
+                if (!this.tagsReady)
+                    this._rebuildTags();
+                this.richlistbox.setAttribute('showTags', true);
+                break;
+
+            case 'trash-folder':
+                title = this.selectedItem.getAttribute('name');
+                query.deleted = ENTRY_STATE_TRASHED;
+                this.richlistbox.removeAttribute('showTags');
+                break;
+
+            default:
+                if (this.selectedItem.hasAttribute('tagView')) {
+                    title = this.selectedItem.id;
+                    query.tags = [this.selectedItem.id];
+                    var starredParamFixed = true;
+                    this.richlistbox.setAttribute('showTags', true);
+                }
+        }
+
+        var view = new FeedView(title, query, unreadParamFixed, starredParamFixed);
+        view.attach();
+    },
+
+    // If there is a webpage open in the browser then clicking on
+    // the already selected item, should bring back the feed view.
+    onClick: function gViewList_onClick(aEvent) {
+        // Find the target richlistitem in the event target's parent chain
+        var targetItem = aEvent.target;
+        while (targetItem) {
+            if (targetItem.localName == 'richlistitem')
+                break;
+            targetItem = targetItem.parentNode;
+        }
+
+        if (!gFeedView.active && targetItem && aEvent.button == 0)
+            gFeedView.browser.loadURI(gTemplateURI.spec);
+    },
+
+    // Sets the visibility of context menuitem depending on the target.
+    onContextMenuShowing: function gFeedList_onContextMenuShowing(aEvent) {
+        gViewListContextMenu.init(this.selectedItem);
+    },
+
+    /**
+     * Refreshes item's label.
+     */
+    refreshItem: function gViewList_refreshItem(aItemID) {
+        var item = getElement(aItemID);
+
+        var query = new Query();
+        query.unread = true;
+        if (aItemID == 'starred-folder')
+            query.starred = true;
+        if (aItemID == 'trash-folder')
+            query.deleted = ENTRY_STATE_TRASHED;
+        else
+            query.deleted = ENTRY_STATE_NORMAL;
+
+        var name = item.getAttribute('name');
+        this._setLabel(item, name, query.getEntryCount());
+    },
+
+    /**
+     * Refreshes tags.
+     *
+     * @param aTags            A tag string or an array of tag strings.
+     * @param aPossiblyAdded   Indicates that the tag may not be in the list of tags yet.
+     * @param aPossiblyRemoved Indicates that there may be no remaining entries with
+     *                         the tag.
+     */
+    refreshTags: function gViewList_refreshTags(aTags, aPossiblyAdded, aPossiblyRemoved) {
+        if (!this.tagsReady)
+            return;
+
+        var tags = (aTags.splice) ? aTags : [aTags];
+
+        for (let i = 0; i < tags.length; i++) {
+            let tag = tags[i];
+
+            if (aPossiblyAdded) {
+                if (this.tags.indexOf(tag) == -1) {
+                    this._rebuildTags();
+                    break;
+                }
+            }
+            else if (aPossiblyRemoved) {
+                let query = new Query();
+                query.tags = [tag];
+                if (!query.hasMatches()) {
+                    this._rebuildTags();
+                    if (gFeedView.query.tags && gFeedView.query.tags[0] === tag)
+                        this.selectedItem = getElement('all-items-folder');
+                    break;
+                }
+            }
+
+            // Update the label.
+            let query = new Query();
+            query.deleted = ENTRY_STATE_NORMAL;
+            query.tags = [tag];
+            query.unread = true;
+            this._setLabel(getElement(tags), tag, query.getEntryCount());
+        }
+    },
+
+    _rebuildTags: function gViewList__rebuildTags() {
+        var lastSelectedIndex = this.richlistbox.selectedIndex;
+
+        // Clear the old tag list.
+        var tagItems = document.getElementsByAttribute('tagView', 'true');
+        while (tagItems.length)
+            this.richlistbox.removeChild(tagItems[tagItems.length - 1]);
+
+        this.tags = gStorage.getAllTags();
+        var trashFolder = getElement('trash-folder');
+
+        for (let i = 0; i < this.tags.length; i++) {
+            let item = document.createElement('richlistitem');
+            item.id = this.tags[i];
+            item.setAttribute('tagView', true);
+            item.className = 'tag-view';
+
+            let image = document.createElement('image');
+            image.className = 'view-icon';
+            item.appendChild(image);
+
+            let label = document.createElement('label');
+            label.className = 'view-label';
+            item.appendChild(label);
+
+            this.richlistbox.insertBefore(item, trashFolder);
+
+            let query = new Query();
+            query.deleted = ENTRY_STATE_NORMAL;
+            query.tags = [this.tags[i]];
+            query.unread = true;
+            this._setLabel(item, this.tags[i], query.getEntryCount());
+        }
+
+        // Restore selection if necessary.
+        if (lastSelectedIndex != -1) {
+            var item = this.richlistbox.getItemAtIndex(lastSelectedIndex);
+            if (item.id == 'trash-folder' && this.tags.length)
+                this.richlistbox.selectedIndex = lastSelectedIndex - 1;
+            else
+                this.richlistbox.selectedIndex = lastSelectedIndex;
+        }
+
+        this.tagsReady = true;
+    },
+
+    _setLabel: function gViewList__setLabel(aItem, aName, aUnreadCount) {
+        var name = aName;
+        if (aUnreadCount > 0) {
+            name += ' (' + aUnreadCount +')';
+            aItem.setAttribute('unread', true);
+        }
+        else {
+            aItem.removeAttribute('unread');
+        }
+        var label = aItem.getElementsByTagName('label')[0];
+        label.setAttribute('value', name);
+    }
+
+}
+
 var gFeedList = {
 
     get tree gFeedList_tree() {
@@ -91,9 +317,15 @@ var gFeedList = {
 
     onSelect: function gFeedList_onSelect(aEvent) {
         var selectedItem = this.selectedItem;
-
-        if (!selectedItem || this.ignoreSelectEvent || this._lastSelectedItem == selectedItem)
+        if (!selectedItem) {
+            this._lastSelectedItem = null;
             return;
+        }
+
+        if (this.ignoreSelectEvent || this._lastSelectedItem == selectedItem)
+            return;
+
+        gViewList.richlistbox.selectedIndex = -1;
 
         // Clicking the twisty also triggers the select event, although the selection
         // doesn't change. We remember the previous selected item and do nothing when
@@ -103,63 +335,13 @@ var gFeedList = {
         var query = new Query();
         query.deleted = ENTRY_STATE_NORMAL;
 
-        if (selectedItem.id == 'all-items-folder') {
-            var title = selectedItem.getAttribute('title');
-        }
-        else if (selectedItem.id == 'unread-folder') {
-            title = selectedItem.getAttribute('title');
-            query.unread = true;
-            var unreadParamFixed = true;
-        }
-        else if (selectedItem.id == 'starred-folder') {
-            title = selectedItem.getAttribute('title');
-            query.starred = true;
-            var starredParamFixed = true;
-        }
-        else if (selectedItem.id == 'trash-folder') {
-            title = selectedItem.getAttribute('title');
-            query.deleted = ENTRY_STATE_TRASHED;
-        }
-        else if (selectedItem.hasAttribute('container')) {
-            title = this.selectedFeed.title;
+        if (selectedItem.hasAttribute('container'))
             query.folders = [this.selectedFeed.feedID];
-        }
-        else if (selectedItem.parentNode.parentNode.id == 'starred-folder') {
-            title = this.selectedItem.id;
-            query.tags = [this.selectedItem.id];
-            var starredParamFixed = true;
-        }
-        else {
-            title = this.selectedFeed.title;
+        else
             query.feeds = [this.selectedFeed.feedID];
-        }
 
-        var view = new FeedView(title, query, unreadParamFixed, starredParamFixed);
+        var view = new FeedView(this.selectedFeed.title, query);
         view.attach();
-    },
-
-    // Temporarily selects the target items of right-clicks to highlight
-    // it when the context menu is shown.
-    onMouseDown: function gFeedList_onMouseDown(aEvent) {
-        if (aEvent.button == 2) {
-            var treeSelection = this.tree.view.selection;
-            var row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
-
-            if (row >= 0 && !treeSelection.isSelected(row)) {
-
-                // Don't highlight separators.
-                var targetItem = this.tree.view.getItemAtIndex(row);
-                if (targetItem.localName == 'treeseparator')
-                    return;
-
-                var saveCurrentIndex = treeSelection.currentIndex;
-                treeSelection.selectEventsSuppressed = true;
-                treeSelection.select(row);
-                treeSelection.currentIndex = saveCurrentIndex;
-                this.tree.treeBoxObject.ensureRowIsVisible(row);
-                treeSelection.selectEventsSuppressed = false;
-            }
-        }
     },
 
 
@@ -170,11 +352,9 @@ var gFeedList = {
 
             // Detect when folder is collapsed/expanded.
             if (item.hasAttribute('container')) {
-                if (item.id != 'starred-folder') {
-                    // This must be done asynchronously, because this listener was called
-                    // during capture and the folder hasn't actually been opened or closed yet.
-                    async(function() gFeedList.refreshFolderTreeitems(item));
-                }
+                // This must be done asynchronously, because this listener was called
+                // during capture and the folder hasn't actually been opened or closed yet.
+                async(function() gFeedList.refreshFolderTreeitems(item));
 
                 // Folder states must be persisted immediatelly instead of when
                 // Brief is closed, because otherwise if the feedlist is rebuilt,
@@ -214,44 +394,8 @@ var gFeedList = {
             if (target.localName == 'treeseparator')
                 aEvent.preventDefault();
             else
-                gContextMenu.init(target);
+                gFeedListContextMenu.init(target);
         }
-    },
-
-    // Restores selection after it was temporarily changed to highlight the
-    // context menu target.
-    onContextMenuHiding: function gFeedList_onContextMenuHiding(aEvent) {
-        var treeSelection = this.tree.view.selection;
-        this.ignoreSelectEvent = true;
-        treeSelection.select(treeSelection.currentIndex);
-        this.ignoreSelectEvent = false;
-    },
-
-
-    /**
-     * Refreshes the label of a special folder.
-     *
-     * @param  aSpecialItem  Id if the special folder's treeitem.
-     */
-    refreshSpecialTreeitem: function gFeedList_refreshSpecialTreeitem(aSpecialItem) {
-        var treeitem = getElement(aSpecialItem);
-        var treecell = treeitem.firstChild.firstChild;
-
-        var query = new Query();
-        query.unread = true;
-
-        if (aSpecialItem == 'starred-folder')
-            query.starred = true;
-        if (aSpecialItem == 'trash-folder')
-            query.deleted = ENTRY_STATE_TRASHED;
-        else
-            query.deleted = ENTRY_STATE_NORMAL;
-
-        var unreadCount = query.getEntryCount();
-
-        var name = treeitem.getAttribute('title');
-
-        this._setLabel(treecell, name, unreadCount);
     },
 
     /**
@@ -327,51 +471,6 @@ var gFeedList = {
         }
     },
 
-    /**
-     * Refresh the treeitem of a tag.
-     *
-     * @param aTags            A tag string or an array of tag strings.
-     * @param aPossiblyAdded   Indicates that the tag may not be in the list of tags yet.
-     * @param aPossiblyRemoved Indicates that there may be no remaining entries with
-     *                         the tag.
-     */
-    refreshTagTreeitems: function gFeedList_refreshTagTreeitems(aTags, aPossiblyAdded,
-                                                                aPossiblyRemoved) {
-        if (!this.treeReady)
-            return;
-
-        var tags = (aTags.splice) ? aTags : [aTags];
-
-        for (let i = 0; i < tags.length; i++) {
-            let tag = tags[i];
-
-            if (aPossiblyAdded) {
-                if (this.tags.indexOf(tag) == -1) {
-                    this._rebuildTags();
-                    break;
-                }
-            }
-            else if (aPossiblyRemoved) {
-                let query = new Query();
-                query.tags = [tag];
-                if (!query.hasMatches()) {
-                    this._rebuildTags();
-                    if (gFeedView.query.tags && gFeedView.query.tags[0] === tag)
-                        this.tree.view.selection.select(0);
-                    break;
-                }
-            }
-
-            // Update the label.
-            let query = new Query();
-            query.deleted = ENTRY_STATE_NORMAL;
-            query.tags = [tag];
-            query.unread = true;
-            let treecell = getElement(tag).firstChild.firstChild;
-            this._setLabel(treecell, tag, query.getEntryCount());
-        }
-    },
-
     _setLabel: function gFeedList__setLabel(aTreecell, aName, aUnreadCount) {
         var label;
         if (aUnreadCount > 0) {
@@ -395,7 +494,7 @@ var gFeedList = {
             treecell.setAttribute('src', THROBBER_URL);
         else if (treeitem.hasAttribute('error'))
             treecell.setAttribute('src', ERROR_ICON_URL);
-        else if (feed.favicon != 'no-favicon')
+        else if (gPrefs.showFavicons && feed.favicon != 'no-favicon')
             treecell.setAttribute('src', feed.favicon);
         else
             treecell.removeAttribute('src');
@@ -409,22 +508,13 @@ var gFeedList = {
 
         this.treeReady = true;
 
-        this.refreshSpecialTreeitem('unread-folder');
-        this.refreshSpecialTreeitem('starred-folder');
-        this.refreshSpecialTreeitem('trash-folder');
-
         // Remember selection.
         this.lastSelectedID = this.selectedItem ? this.selectedItem.id : '';
 
         // Clear the existing tree.
         var topLevelChildren = getElement('top-level-children');
-        var lastChild = topLevelChildren.lastChild;
-        while (lastChild.id != 'special-folders-separator') {
-            topLevelChildren.removeChild(lastChild);
-            lastChild = topLevelChildren.lastChild
-        }
-
-        this._rebuildTags(true);
+        while (topLevelChildren.hasChildNodes())
+            topLevelChildren.removeChild(topLevelChildren.lastChild);
 
         this.feeds = gStorage.getAllFeeds(true);
 
@@ -531,45 +621,6 @@ var gFeedList = {
         this._folderParentChain.pop();
     },
 
-    _rebuildTags: function gFeedList__rebuildTags(aDontRestoreSelection) {
-        if (!aDontRestoreSelection)
-            this.lastSelectedID = this.selectedItem ? this.selectedItem.id : '';
-
-        var starredFolder = getElement('starred-folder');
-
-        // Clear the old tag list.
-        starredFolder.removeChild(starredFolder.lastChild);
-        var tagsTreechildren = document.createElement('treechildren');
-        starredFolder.appendChild(tagsTreechildren);
-
-        // Build the tag list.
-        this.tags = gStorage.getAllTags();
-
-        if (this.tags.length)
-            starredFolder.setAttribute('container', true);
-        else
-            starredFolder.removeAttribute('container');
-
-        starredFolder.setAttribute('open', starredFolder.getAttribute('wasOpen'));
-
-        for (let i = 0; i < this.tags.length; i++) {
-            let fragment = this._flatRow.cloneNode(true);
-            let treeitem = fragment.firstChild;
-            treeitem.id = this.tags[i];
-
-            let treecell = treeitem.firstChild.firstChild;
-            treecell.setAttribute('properties', 'tag ');
-
-            tagsTreechildren.appendChild(fragment);
-
-            this.refreshTagTreeitems(this.tags[i]);
-        }
-
-        if (!aDontRestoreSelection)
-            this._restoreSelection()
-    },
-
-
     _restoreSelection: function gFeedList__restoreSelection() {
         if (!this.lastSelectedID)
             return;
@@ -597,7 +648,7 @@ var gFeedList = {
         case 'brief:invalidate-feedlist':
             this.rebuild();
 
-            let deck = getElement('feed-list-deck');
+            let deck = getElement('left-pane-deck');
             if (gPrefs.homeFolder)
                 deck.selectedIndex = 0;
             else if (deck.selectedIndex == 0)
@@ -646,14 +697,14 @@ var gFeedList = {
             getElement('update-buttons-deck').selectedIndex = 1;
 
             if (gUpdateService.scheduledFeedsCount > 1) {
-                getElement('update-progress').hidden = false;
+                getElement('update-progress-deck').selectedIndex = 1;
                 refreshProgressmeter();
             }
             break;
 
         case 'brief:feed-update-canceled':
             var progressmeter = getElement('update-progress');
-            progressmeter.hidden = true;
+            getElement('update-progress-deck').selectedIndex = 0;
             progressmeter.value = 0;
 
             for each (feed in gStorage.getAllFeeds(false)) {
@@ -676,11 +727,11 @@ var gFeedList = {
     onEntriesAdded: function gFeedList_onEntriesAdded(aEntryList) {
         async(function() {
             this.refreshFeedTreeitems(aEntryList.feedIDs);
-            this.refreshSpecialTreeitem('unread-folder');
+            gViewList.refreshItem('unread-folder');
 
             if (aEntryList.containsStarred()) {
-                this.refreshSpecialTreeitem('starred-folder');
-                this.refreshTagTreeitems(aEntryList.tags, true);
+                gViewList.refreshItem('starred-folder');
+                gViewList.refreshTags(aEntryList.tags, true);
             }
 
         }, 0, this)
@@ -691,8 +742,8 @@ var gFeedList = {
         async(function() {
             if (aEntryList.containsUnread()) {
                 this.refreshFeedTreeitems(aEntryList.feedIDs);
-                this.refreshSpecialTreeitem('unread-folder');
-                this.refreshTagTreeitems(aEntryList.tags);
+                gViewList.refreshItem('unread-folder');
+                gViewList.refreshTags(aEntryList.tags);
             }
 
         }, 0, this)
@@ -702,15 +753,15 @@ var gFeedList = {
     onEntriesMarkedRead: function gFeedList_onEntriesMarkedRead(aEntryList, aNewState) {
         async(function() {
             this.refreshFeedTreeitems(aEntryList.feedIDs);
-            this.refreshSpecialTreeitem('unread-folder');
+            gViewList.refreshItem('unread-folder');
 
             if (aEntryList.containsStarred()) {
-                this.refreshSpecialTreeitem('starred-folder');
-                this.refreshTagTreeitems(aEntryList.tags);
+                gViewList.refreshItem('starred-folder');
+                gViewList.refreshTags(aEntryList.tags);
             }
 
             if (aEntryList.containsTrashed())
-                this.refreshSpecialTreeitem('trash-folder');
+                gViewList.refreshItem('trash-folder');
 
         }, 0, this)
     },
@@ -719,7 +770,7 @@ var gFeedList = {
     onEntriesStarred: function gFeedList_onEntriesStarred(aEntryList, aNewState) {
         async(function() {
             if (aEntryList.containsUnread())
-                this.refreshSpecialTreeitem('starred-folder');
+                gViewList.refreshItem('starred-folder');
 
         }, 0, this)
     },
@@ -727,8 +778,7 @@ var gFeedList = {
     // nsIBriefStorageObserver
     onEntriesTagged: function gFeedList_onEntriesTagged(aEntryList, aNewState, aTag) {
         async(function() {
-            this.refreshTagTreeitems(aTag, aNewState, !aNewState);
-
+            gViewList.refreshTags(aTag, aNewState, !aNewState);
         }, 0, this)
     },
 
@@ -737,15 +787,15 @@ var gFeedList = {
         async(function() {
             if (aEntryList.containsUnread()) {
                 this.refreshFeedTreeitems(aEntryList.feedIDs);
-                this.refreshSpecialTreeitem('unread-folder');
-                this.refreshSpecialTreeitem('trash-folder');
+                gViewList.refreshItem('unread-folder');
+                gViewList.refreshItem('trash-folder');
 
                 if (aEntryList.containsStarred())
-                    this.refreshSpecialTreeitem('starred-folder');
+                    gViewList.refreshItem('starred-folder');
             }
 
             var entriesRestored = (aNewState == ENTRY_STATE_NORMAL);
-            this.refreshTagTreeitems(aEntryList.tags, entriesRestored, !entriesRestored);
+            gViewList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);
 
         }, 0, this)
     },
@@ -793,146 +843,75 @@ var gFeedList = {
 
 
 
-var gContextMenu = {
+var gViewListContextMenu = {
 
     targetItem: null,
 
     get targetID() this.targetItem.id,
-    get targetFeed() gStorage.getFeed(this.targetID),
 
-    get targetIsFeed()          this.targetItem.hasAttribute('url'),
-    get targetIsFolder()        this.targetItem.hasAttribute('container')
-                                && !this.targetIsStarredFolder,
-    get targetIsTag()           this.targetItem.parentNode.parentNode.id == 'starred-folder',
-    get targetIsUnreadFolder()  this.targetItem.id == 'unread-folder',
-    get targetIsStarredFolder() this.targetItem.id == 'starred-folder',
-    get targetIsTrashFolder()   this.targetItem.id == 'trash-folder',
-    get targetIsSpecialFolder() this.targetIsUnreadFolder || this.targetIsStarredFolder
-                                || this.targetIsTrashFolder,
+    get targetIsTag()            this.targetItem.hasAttribute('tagView'),
+    get targetIsAllItemsFolder() this.targetItem.id == 'all-items-folder',
+    get targetIsUnreadFolder()   this.targetItem.id == 'unread-folder',
+    get targetIsStarredFolder()  this.targetItem.id == 'starred-folder',
+    get targetIsTrashFolder()    this.targetItem.id == 'trash-folder',
 
-
-    init: function gContextMenu_init(aTargetItem) {
+    init: function gViewListContextMenu_init(aTargetItem) {
         this.targetItem = aTargetItem;
 
-        getElement('ctx-mark-feed-read').hidden = !this.targetIsFeed;
-        getElement('ctx-mark-folder-read').hidden = !this.targetIsFolder &&
-                                                    !this.targetIsSpecialFolder;
+        getElement('ctx-mark-special-folder-read').hidden = !this.targetIsUnreadFolder &&
+                                                            !this.targetIsTrashFolder &&
+                                                            !this.targetIsStarredFolder &&
+                                                            !this.targetIsAllItemsFolder;
         getElement('ctx-mark-tag-read').hidden = !this.targetIsTag;
-        getElement('ctx-update-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-update-folder').hidden = !this.targetIsFolder;
-
-        var openWebsite = getElement('ctx-open-website');
-        openWebsite.hidden = !this.targetIsFeed;
-        if (this.targetIsFeed)
-            openWebsite.disabled = !gStorage.getFeed(this.targetItem.id).websiteURL;
-
-        getElement('ctx-properties-separator').hidden = !this.targetIsFeed;
-        getElement('ctx-feed-properties').hidden = !this.targetIsFeed;
-
-        // Menuitems related to deleting feeds and folders.
-        var dangerousSeparator = getElement('ctx-dangerous-cmds-separator');
-        dangerousSeparator.hidden = this.targetIsStarredFolder;
-        getElement('ctx-delete-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-delete-folder').hidden = !this.targetIsFolder;
-        getElement('ctx-delete-tag').hidden = !this.targetIsTag;
-
-        // Menuitems related to emptying feeds and folders.
-        getElement('ctx-empty-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-empty-folder').hidden = !(this.targetIsFolder || this.targetIsUnreadFolder);
         getElement('ctx-restore-trashed').hidden = !this.targetIsTrashFolder;
+        getElement('ctx-view-list-separator').hidden = !this.targetIsTag &&
+                                                       !this.targetIsTrashFolder &&
+                                                       !this.targetIsUnreadFolder;
+        getElement('ctx-delete-tag').hidden = !this.targetIsTag;
+        getElement('ctx-empty-unread-folder').hidden = !this.targetIsUnreadFolder;
         getElement('ctx-empty-trash').hidden = !this.targetIsTrashFolder;
-
     },
 
-
-    markFeedRead: function gContextMenu_markFeedRead() {
+    markFolderRead: function gViewListContextMenu_markFolderRead() {
         var query = new Query();
-        query.feeds = [this.targetID];
-        query.deleted = ENTRY_STATE_NORMAL;
-        query.markEntriesRead(true);
-    },
 
-
-    markFolderRead: function gContextMenu_markFolderRead() {
-        var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
-
-        if (this.targetIsUnreadFolder)
+        if (this.targetIsUnreadFolder) {
+            query.deleted = ENTRY_STATE_NORMAL;
             query.unread = true;
-        else if (this.targetIsStarredFolder)
+        }
+        else if (this.targetIsStarredFolder) {
+            query.deleted = ENTRY_STATE_NORMAL;
             query.starred = true;
-        else if (this.targetIsTrashFolder)
+        }
+        else if (this.targetIsTrashFolder) {
             query.deleted = ENTRY_STATE_TRASHED;
-        else
-            query.folders = [this.targetID];
+        }
 
         query.markEntriesRead(true);
     },
 
-
-    markTagRead: function gContextMenu_markTagRead() {
+    markTagRead: function gViewListContextMenu_markTagRead() {
         var query = new Query();
         query.deleted = ENTRY_STATE_NORMAL;
         query.tags = [this.targetItem.id];
         query.markEntriesRead(true);
     },
 
-
-    updateFeed: function gContextMenu_updateFeed() {
-        gUpdateService.updateFeeds([this.targetFeed]);
-    },
-
-
-    updateFolder: function gContextMenu_updateFolder() {
-        var items = this.targetItem.getElementsByTagName('treeitem');
-        var feeds = [];
-
-        for (let i = 0; i < items.length; i++) {
-            if (!items[i].hasAttribute('container'))
-                feeds.push(gStorage.getFeed(items[i].id));
-        }
-
-        gUpdateService.updateFeeds(feeds);
-    },
-
-
-    openWebsite: function gContextMenu_openWebsite() {
-        var url = this.targetFeed.websiteURL;
-        gTopWindow.gBrowser.loadOneTab(url);
-    },
-
-
-    emptyFeed: function gContextMenu_emptyFeed() {
-        var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
-        query.feeds = [this.targetID];
-        query.unstarred = true;
-        query.deleteEntries(ENTRY_STATE_TRASHED);
-    },
-
-
-    emptyFolder: function gContextMenu_emptyFolder() {
-        var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
-        query.unstarred = true;
-
-        if (this.targetIsUnreadFolder)
-            query.unread = true;
-        else
-            query.folders = [this.targetID];
-
-        query.deleteEntries(ENTRY_STATE_TRASHED);
-    },
-
-
-    restoreTrashed: function gContextMenu_restoreTrashed() {
+    restoreTrashed: function gViewListContextMenu_restoreTrashed() {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
         query.deleteEntries(ENTRY_STATE_NORMAL);
     },
 
+    emptyUnreadFolder: function gViewListContextMenu_emptyUnreadFolder() {
+        var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+        query.unstarred = true;
+        query.unread = true;
+        query.deleteEntries(ENTRY_STATE_TRASHED);
+    },
 
-    emptyTrash: function gContextMenu_emptyTrash() {
+    emptyTrash: function gFeedViewContextMenu_emptyTrash() {
         var query = new Query();
         query.deleted = ENTRY_STATE_TRASHED;
         query.deleteEntries(ENTRY_STATE_DELETED);
@@ -959,8 +938,136 @@ var gContextMenu = {
         }
     },
 
+    deleteTag: function gViewListContextMenu_deleteTag() {
+        var ioService = Cc['@mozilla.org/network/io-service;1'].
+                            getService(Ci.nsIIOService);
+        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
+                            getService(Ci.nsIPromptService);
+        var tag = this.targetItem.id;
 
-    deleteFeed: function gContextMenu_deleteFeed() {
+        var bundle = getElement('main-bundle');
+        var dialogTitle = bundle.getString('confirmTagDeletionTitle');
+        var dialogText = bundle.getFormattedString('confirmTagDeletionText', [tag]);
+
+        var weHaveAGo = promptService.confirm(window, dialogTitle, dialogText);
+
+        if (weHaveAGo) {
+            var query = new Query();
+            query.tags = [tag];
+            var urls = query.getProperty('entryURL', true).
+                             map(function(e) e.entryURL);
+
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    var uri = ioService.newURI(urls[i], null, null);
+                }
+                catch (ex) {
+                    continue;
+                }
+                PlacesUtils.tagging.untagURI(uri, [tag]);
+            }
+        }
+    }
+
+}
+
+
+var gFeedListContextMenu = {
+
+    targetItem: null,
+
+    get targetID() this.targetItem.id,
+    get targetFeed() gStorage.getFeed(this.targetID),
+
+    get targetIsFeed()          this.targetItem.hasAttribute('url'),
+    get targetIsFolder()        this.targetItem.hasAttribute('container'),
+
+
+    init: function gFeedListContextMenu_init(aTargetItem) {
+        this.targetItem = aTargetItem;
+
+        getElement('ctx-mark-feed-read').hidden = !this.targetIsFeed;
+        getElement('ctx-mark-folder-read').hidden = !this.targetIsFolder;
+        getElement('ctx-update-feed').hidden = !this.targetIsFeed;
+        getElement('ctx-update-folder').hidden = !this.targetIsFolder;
+
+        var openWebsite = getElement('ctx-open-website');
+        openWebsite.hidden = !this.targetIsFeed;
+        if (this.targetIsFeed)
+            openWebsite.disabled = !gStorage.getFeed(this.targetItem.id).websiteURL;
+
+        getElement('ctx-properties-separator').hidden = !this.targetIsFeed;
+        getElement('ctx-feed-properties').hidden = !this.targetIsFeed;
+
+        // Menuitems related to deleting feeds and folders.
+        getElement('ctx-delete-feed').hidden = !this.targetIsFeed;
+        getElement('ctx-delete-folder').hidden = !this.targetIsFolder;
+
+        // Menuitems related to emptying feeds and folders.
+        getElement('ctx-empty-feed').hidden = !this.targetIsFeed;
+        getElement('ctx-empty-folder').hidden = !this.targetIsFolder;
+    },
+
+
+    markFeedRead: function gFeedListContextMenu_markFeedRead() {
+        var query = new Query();
+        query.feeds = [this.targetID];
+        query.deleted = ENTRY_STATE_NORMAL;
+        query.markEntriesRead(true);
+    },
+
+
+    markFolderRead: function gFeedListContextMenu_markFolderRead() {
+        var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+        query.folders = [this.targetID];
+        query.markEntriesRead(true);
+    },
+
+
+    updateFeed: function gFeedListContextMenu_updateFeed() {
+        gUpdateService.updateFeeds([this.targetFeed]);
+    },
+
+
+    updateFolder: function gFeedListContextMenu_updateFolder() {
+        var items = this.targetItem.getElementsByTagName('treeitem');
+        var feeds = [];
+
+        for (let i = 0; i < items.length; i++) {
+            if (!items[i].hasAttribute('container'))
+                feeds.push(gStorage.getFeed(items[i].id));
+        }
+
+        gUpdateService.updateFeeds(feeds);
+    },
+
+
+    openWebsite: function gFeedListContextMenu_openWebsite() {
+        var url = this.targetFeed.websiteURL;
+        gTopWindow.gBrowser.loadOneTab(url);
+    },
+
+
+    emptyFeed: function gFeedListContextMenu_emptyFeed() {
+        var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+        query.feeds = [this.targetID];
+        query.unstarred = true;
+        query.deleteEntries(ENTRY_STATE_TRASHED);
+    },
+
+
+    emptyFolder: function gFeedListContextMenu_emptyFolder() {
+        var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+        query.unstarred = true;
+        query.folders = [this.targetID];
+        query.deleteEntries(ENTRY_STATE_TRASHED);
+    },
+
+
+    deleteFeed: function gFeedListContextMenu_deleteFeed() {
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
         var stringbundle = getElement('main-bundle');
@@ -976,7 +1083,7 @@ var gContextMenu = {
     },
 
 
-    deleteFolder: function gContextMenu_deleteFolder() {
+    deleteFolder: function gFeedListContextMenu_deleteFolder() {
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
         var stringbundle = getElement('main-bundle');
@@ -998,40 +1105,8 @@ var gContextMenu = {
     },
 
 
-    deleteTag: function gContextMenu_deleteTag() {
-        var ioService = Cc['@mozilla.org/network/io-service;1'].
-                            getService(Ci.nsIIOService);
-        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
-                            getService(Ci.nsIPromptService);
-        var tag = this.targetItem.id;
-
-        var bundle = getElement('main-bundle');
-        var dialogTitle = bundle.getString('confirmTagDeletionTitle');
-        var dialogText = bundle.getFormattedString('confirmTagDeletionText', [tag]);
-
-        var weHaveAGo = promptService.confirm(window, dialogTitle, dialogText);
-
-        if (weHaveAGo) {
-            var query = new Query();
-            query.tags = [tag];
-            var urls = query.getProperty('entryURL', true).
-                             map(function(e) e.entryURL);
-
-            for (let i = 0; i < urls.length; i++) {
-                try {
-                    let uri = ioService.newURI(urls[i], null, null);
-                }
-                catch (ex) {
-                    continue;
-                }
-                PlacesUtils.tagging.untagURI(uri, [tag]);
-            }
-        }
-    },
-
-
     // Removes a treeitem and updates selection if it was selected.
-    _removeTreeitem: function gContextMenu__removeTreeitem(aTreeitem) {
+    _removeTreeitem: function gFeedListContextMenu__removeTreeitem(aTreeitem) {
         var treeview = gFeedList.tree.view;
         var currentIndex = treeview.selection.currentIndex;
         var rowCount = treeview.rowCount;
@@ -1053,7 +1128,7 @@ var gContextMenu = {
     },
 
 
-    _deleteBookmarks: function gContextMenu__deleteBookmarks(aFeeds) {
+    _deleteBookmarks: function gFeedListContextMenu__deleteBookmarks(aFeeds) {
         var transactionsService = Cc['@mozilla.org/browser/placesTransactionsService;1'].
                                   getService(Ci.nsIPlacesTransactionsService);
 
@@ -1066,7 +1141,7 @@ var gContextMenu = {
     },
 
 
-    showFeedProperties: function gContextMenu_showFeedProperties() {
+    showFeedProperties: function gFeedListContextMenu_showFeedProperties() {
         openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
                    'chrome,titlebar,toolbar,centerscreen,modal', this.targetID);
     }

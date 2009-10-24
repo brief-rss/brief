@@ -1,10 +1,9 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/content/places/places.css"?>
+<?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
 <?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/feedview-header.css"?>
 <?xml-stylesheet href="resource://profile-chrome-dir/brief-custom-style.css"?>
-<?xml-stylesheet href="chrome://browser/content/places/places.css"?>
-<?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
 
 <?xul-overlay href="chrome://browser/content/places/placesOverlay.xul"?>
 
@@ -26,107 +25,139 @@
     </stringbundleset>
 
     <popupset id="main-popupset">
-        <menupopup id="feed-list-popup"
-                   onpopupshowing="gFeedList.onContextMenuShowing(event)"
-                   onpopuphiding="gFeedList.onContextMenuHiding(event)">
-            <menuitem id="ctx-mark-feed-read"
-                      label="&ctxMarkFeedRead.label;"
-                      oncommand="gContextMenu.markFeedRead()"/>
-            <menuitem id="ctx-mark-folder-read"
+        <menupopup id="view-list-popup"
+                   onpopupshowing="gViewList.onContextMenuShowing(event)">
+            <menuitem id="ctx-mark-special-folder-read"
                       label="&ctxMarkFolderRead.label;"
-                      oncommand="gContextMenu.markFolderRead()"/>
+                      oncommand="gViewListContextMenu.markFolderRead()"/>
             <menuitem id="ctx-mark-tag-read"
                       label="&ctxMarkTagRead.label;"
-                      oncommand="gContextMenu.markTagRead()"/>
-            <menuitem id="ctx-update-feed"
-                      label="&ctxUpdateFeed.label;"
-                      oncommand="gContextMenu.updateFeed()"/>
-            <menuitem id="ctx-update-folder"
-                      label="&ctxUpdateFolder.label;"
-                      oncommand="gContextMenu.updateFolder()"/>
-            <menuitem id="ctx-open-website"
-                      label="&ctxOpenWebsite.label;"
-                      oncommand="gContextMenu.openWebsite()"/>
+                      oncommand="gViewListContextMenu.markTagRead()"/>
             <menuitem id="ctx-restore-trashed"
                       label="&ctxRestoreTrashed.label;"
-                      oncommand="gContextMenu.restoreTrashed()"/>
+                      oncommand="gViewListContextMenu.restoreTrashed()"/>
+            <menuseparator id="ctx-view-list-separator"/>
+            <menuitem id="ctx-empty-unread-folder"
+                      label="&ctxEmptyFolder.label;"
+                      oncommand="gViewListContextMenu.emptyUnreadFolder()"/>
+            <menuitem id="ctx-delete-tag"
+                      label="&ctxDeleteTag.label;"
+                      oncommand="gViewListContextMenu.deleteTag()"/>
+            <menuitem id="ctx-empty-trash"
+                      label="&ctxEmptyTrash.label;"
+                      oncommand="gViewListContextMenu.emptyTrash()"/>
+        </menupopup>
+        <menupopup id="feed-list-popup"
+                   onpopupshowing="gFeedList.onContextMenuShowing(event)">
+            <menuitem id="ctx-mark-feed-read"
+                      label="&ctxMarkFeedRead.label;"
+                      oncommand="gFeedListContextMenu.markFeedRead()"/>
+            <menuitem id="ctx-mark-folder-read"
+                      label="&ctxMarkFolderRead.label;"
+                      oncommand="gFeedListContextMenu.markFolderRead()"/>
+            <menuitem id="ctx-update-feed"
+                      label="&ctxUpdateFeed.label;"
+                      oncommand="gFeedListContextMenu.updateFeed()"/>
+            <menuitem id="ctx-update-folder"
+                      label="&ctxUpdateFolder.label;"
+                      oncommand="gFeedListContextMenu.updateFolder()"/>
+            <menuitem id="ctx-open-website"
+                      label="&ctxOpenWebsite.label;"
+                      oncommand="gFeedListContextMenu.openWebsite()"/>
             <menuseparator id="ctx-dangerous-cmds-separator"/>
             <menuitem id="ctx-delete-feed"
                       label="&ctxDeleteFeed.label;"
-                      oncommand="gContextMenu.deleteFeed()"/>
+                      oncommand="gFeedListContextMenu.deleteFeed()"/>
             <menuitem id="ctx-delete-folder"
                       label="&ctxDeleteFolder.label;"
-                      oncommand="gContextMenu.deleteFolder()"/>
-            <menuitem id="ctx-delete-tag"
-                      label="&ctxDeleteTag.label;"
-                      oncommand="gContextMenu.deleteTag()"/>
+                      oncommand="gFeedListContextMenu.deleteFolder()"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
-                      oncommand="gContextMenu.emptyFeed()"/>
+                      oncommand="gFeedListContextMenu.emptyFeed()"/>
             <menuitem id="ctx-empty-folder"
                       label="&ctxEmptyFolder.label;"
-                      oncommand="gContextMenu.emptyFolder()"/>
-            <menuitem id="ctx-empty-trash"
-                      label="&ctxEmptyTrash.label;"
-                      oncommand="gContextMenu.emptyTrash()"/>
+                      oncommand="gFeedListContextMenu.emptyFolder()"/>
             <menuseparator id="ctx-properties-separator"/>
             <menuitem id="ctx-feed-properties"
                       label="&ctxFeedProperties.label;"
-                      oncommand="gContextMenu.showFeedProperties()"/>
+                      oncommand="gFeedListContextMenu.showFeedProperties()"/>
         </menupopup>
     </popupset>
 
     <hbox id="main-box" flex="1">
         <vbox id="left-pane" persist="width hidden">
-            <progressmeter id="update-progress" hidden="true"/>
-            <deck id="feed-list-deck" selectedIndex="0" flex="1">
-                <tree id="feed-list" flex="1"
-                      hidecolumnpicker="true"
-                      seltype="single"
-                      contextmenu="feed-list-popup"
-                      persist="closedFolders"
-                      onselect="gFeedList.onSelect(event)"
-                      onmousedown="gFeedList.onMouseDown(event)"
-                      onkeyup="gFeedList.onKeyUp(event)">
+            <deck id="left-pane-deck" selectedIndex="0" flex="1">
+                <vbox id="left-pane-box">
+                    <richlistbox id="view-list"
+                                 suppressonselect="true"
+                                 context="view-list-popup"
+                                 onselect="gViewList.onSelect(event)"
+                                 onclick="gViewList.onClick(event)">
+                        <richlistitem id="all-items-folder"
+                                      name="&allItemsFolder.label;">
+                            <image class="view-icon"/>
+                            <label value="&allItemsFolder.label;"/>
+                        </richlistitem>
+                        <richlistitem id="unread-folder"
+                                      name="&unreadFolder.label;">
+                            <image class="view-icon"/>
+                            <label value="&unreadFolder.label;"/>
+                        </richlistitem>
+                        <richlistitem id="starred-folder"
+                                      name="&starredFolder.label;">
+                            <image class="view-icon"/>
+                            <label value="&starredFolder.label;"/>
+                        </richlistitem>
+                        <richlistitem id="trash-folder"
+                                      name="&trashFolder.label;">
+                            <image class="view-icon"/>
+                            <label value="&trashFolder.label;"/>
+                        </richlistitem>
+                    </richlistbox>
 
-                    <treecols>
-                        <treecol id="name" flex="1"
-                                 primary="true"
-                                 hideheader="true"/>
-                    </treecols>
+                    <hbox id="left-pane-toolbar">
+                        <deck id="update-progress-deck" flex="1"
+                              selectedIndex="0">
+                            <vbox pack="center">
+                                <hbox id="left-pane-separator"/>
+                            </vbox>
+                            <progressmeter id="update-progress"/>
+                        </deck>
+                        <hbox id="left-pane-buttons">
+                            <deck id="update-buttons-deck" selectedIndex="0">
+                                <button id="update-button"
+                                        class="brief-button sidebar-button"
+                                        tooltiptext="&updateButton.tooltip;"
+                                        oncommand="gCommands.updateAllFeeds()"/>
+                                <button id="stop-updating-button"
+                                        class="brief-button sidebar-button"
+                                        tooltiptext="&stopUpdatingButton.tooltip;"
+                                        oncommand="gCommands.stopUpdating()"/>
+                            </deck>
+                            <button id="options-button"
+                                    class="brief-button sidebar-button"
+                                    tooltiptext="&showOptions.tooltip;"
+                                    oncommand="gCommands.openOptions()"/>
+                        </hbox>
+                    </hbox>
 
-                    <treechildren id="top-level-children">
-                        <treeitem id="all-items-folder"
-                                  title="&allItemsFolder.label;">
-                            <treerow>
-                                <treecell label="&allItemsFolder.label;"
-                                          properties="allItemsFolder "/>
-                            </treerow>
-                        </treeitem>
-                        <treeitem id="unread-folder"
-                                  title="&unreadFolder.label;">
-                            <treerow>
-                                <treecell properties="unreadFolder "/>
-                            </treerow>
-                        </treeitem>
-                        <treeitem id="starred-folder"
-                                  wasOpen="true"
-                                  persist="wasOpen"
-                                  title="&starredFolder.label;">
-                            <treerow>
-                                <treecell properties="starredFolder "/>
-                            </treerow>
-                            <treechildren/>
-                        </treeitem>
-                        <treeitem id="trash-folder"
-                                  title="&trashFolder.label;">
-                            <treerow>
-                                <treecell properties="trashFolder "/>
-                            </treerow>
-                        </treeitem>
-                        <treeseparator id="special-folders-separator"/>
-                    </treechildren>
-                </tree>
+                    <tree id="feed-list" flex="1"
+                          hidecolumnpicker="true"
+                          seltype="single"
+                          contextmenu="feed-list-popup"
+                          persist="closedFolders"
+                          onselect="gFeedList.onSelect(event)"
+                          onkeyup="gFeedList.onKeyUp(event)">
+
+                        <treecols>
+                            <treecol id="name" flex="1"
+                                     primary="true"
+                                     hideheader="true"/>
+                        </treecols>
+
+                        <treechildren id="top-level-children"/>
+                    </tree>
+                </vbox>
                 <vbox>
                     <tree id="places-tree"
                           type="places"
@@ -148,11 +179,17 @@
                 </vbox>
             </deck>
         </vbox>
-        <splitter id="left-pane-splitter" persist="hidden"/>
+
+        <splitter id="left-pane-splitter"
+                  tooltiptext="&sidebarSplitter.tooltip;"
+                  persist="hidden"
+                  ondblclick="gCommands.hideSidebar()"/>
+
         <vbox flex="1">
-            <hbox id="feed-view-header">
+            <hbox id="feed-view-header"
+                  hidden="true">
                 <button id="mark-view-read"
-                        class="feed-header-button"
+                        class="brief-button feed-header-button"
                         tooltiptext="&markViewRead.tooltip;"
                         onclick="gCommands.markViewRead(event)"/>
                 <html:div id="feed-title-box"
@@ -160,18 +197,18 @@
                     <html:a id="feed-title" target="_blank"/>
                 </html:div>
                 <button id="headlines-checkbox"
-                        class="feed-header-button"
+                        class="brief-button feed-header-button"
                         type="checkbox"
                         autoCheck="false"
                         tooltiptext="&headlinesCheckbox.tooltip;"
                         oncommand="gCommands.switchHeadlinesView()"/>
                 <button id="filter-unread-checkbox"
-                        class="feed-header-button"
+                        class="brief-button feed-header-button"
                         tooltiptext="&filterUnread.tooltip;"
                         type="checkbox"
                         oncommand="gCommands.toggleUnreadEntriesFilter()"/>
                 <button id="filter-starred-checkbox"
-                        class="feed-header-button"
+                        class="brief-button feed-header-button"
                         tooltiptext="&filterStarred.tooltip;"
                         type="checkbox"
                         oncommand="gCommands.toggleStarredEntriesFilter()"/>
@@ -182,9 +219,16 @@
                          emptytext="&searchBox.label;"/>
             </hbox>
 
-            <browser id="feed-view" flex="1"
-                     disablehistory="true"
-                     type="content"/>
+            <hbox flex="1">
+                <button id="reveal-sidebar-button"
+                        class="brief-button"
+                        hidden="true"
+                        tooltiptext="&revealSidebar.tooltip;"
+                        oncommand="gCommands.revealSidebar()"/>
+                <browser id="feed-view" flex="1"
+                         disablehistory="true"
+                         type="content"/>
+            </hbox>
         </vbox>
     </hbox>
 

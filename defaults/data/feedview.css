@@ -114,7 +114,7 @@ body {
 .article-tags {
     padding-left: 20px;
     margin-top: 2px;
-    background: url(chrome://mozapps/skin/places/tagContainerIcon.png) 1px no-repeat;
+    background: url(chrome://brief/skin/icons/tag.png) 1px no-repeat;
 }
 
 .article-updated {

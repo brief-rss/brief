@@ -1,169 +1,304 @@
+* {
+    -moz-appearance: none;
+    height: auto;
+    width: auto;
+    min-height: 0;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    background-image: none;
+    border: 0;
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+}
+
+page {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #ffffff;
+}
+
 #left-pane {
-  width: 250px;
+    width: 250px;
+}
+
+#left-pane * {
+    overflow: hidden;
 }
 
 #left-pane-splitter {
-  min-width: 2px;
-  border-width: 0;
-  -moz-border-left-colors: none;
-  -moz-border-right-colors: none;
-  background-color: #7c909f;
+    border-left: 5px solid #ffffff;
+    border-right: 1px solid #7c909f;
 }
 
+#left-pane-splitter:hover {
+    border-right-color: #ffb754;
+    -moz-border-left-colors: #ffffff #ffebd2 #ffdfb1 #ffd090 #ffc36f;
+}
+
+#reveal-sidebar-button {
+    list-style-image: url(reveal-sidebar.png);
+    -moz-image-region: rect(0px, 12px, 20px, 0px);
+    padding: 0 2px 0 2px;
+    border-right: 1px solid #20699f;
+    background: #fafcff;
+}
+
+#reveal-sidebar-button:hover {
+    -moz-image-region: rect(20px, 12px, 40px, 0px);
+    border-right-color: #ffac62;
+}
+
+#left-pane-box {
+    overflow: auto !important;
+}
+
+#left-pane-toolbar {
+    min-height: 20px;
+}
+
+#left-pane-separator {
+    border-bottom: 1px solid #7c909f;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#update-progress {
+    border: 1px solid #c4cdd5;
+    margin-right: 15px;
+    margin-left: 14px;
+    height: 10px;
+}
+
+#update-progress > .progress-bar {
+    background: #00ab2f;
+}
+
+
+.sidebar-button {
+    list-style-image: url(sidebar-buttons.png);
+    margin-right: 5px;
+    opacity: 0.7;
+}
+.sidebar-button:hover {
+    opacity: 1;
+}
+
+
+#update-button {
+    -moz-image-region: rect(0px, 32px, 16px, 16px);
+}
+#update-button:hover {
+    -moz-image-region: rect(16px, 32px, 32px, 16px);
+}
+#stop-updating-button {
+    -moz-image-region: rect(0px, 16px, 16px, 0px);
+}
+#stop-updating-button {
+    -moz-image-region: rect(16px, 16px, 32px, 0px);
+}
+#options-button {
+    -moz-image-region: rect(0px, 48px, 16px, 32px);
+}
+#options-button:hover {
+    -moz-image-region: rect(16px, 48px, 32px, 32px);
+}
+
+
 #select-home-folder-label {
-  margin: 7px 0 7px 5px;
-  font-weight: bold;
+    margin: 7px 0 7px 5px;
+    font-weight: bold;
 }
 
 #places-tree {
-  -moz-box-flex: 1;
-  max-height: 400px;
-  border-right: 0;
-  margin: 0;
+    -moz-box-flex: 1;
+    max-height: 400px;
 }
 
 #confirm-home-folder {
-  margin: 5px 3px 5px 0;
-  width: 100px;
+    margin: 5px 3px 5px 0;
+    width: 100px;
 }
 
 
-/* ----------------- Feed list tree ------------------ */
+/* =========== View list richlistbox =========== */
 
-#feed-list > treechildren {
-  -moz-binding: url(chrome://brief/content/bindings.xml#feedlist-treebody);
-  }
+#view-list {
+    padding-top: 4px;
+    font-size: 13px !important;
+    color: #000000;
+}
+
+richlistitem {
+    padding: 1px 0 1px 15px;
+}
+
+#view-list:not([showTags]) > richlistitem.tag-view {
+    display: none;
+}
+
+richlistitem.tag-view {
+    padding-left: 25px;
+}
+
+richlistitem[selected="true"] {
+    background-color: #d5ecfd;
+    color: #00344f;
+}
+
+richlistbox:focus > richlistitem[selected="true"] {
+    background-color: #d5ecfd;
+    color: #00344f;
+}
+
+richlistitem[unread] {
+    font-weight: bold;
+}
+
+richlistitem > label {
+    padding: 1px 4px 0 5px;
+}
+
+.view-icon {
+    padding: 1px 0 2px;
+    list-style-image: url(icons/folders.png);
+}
+
+
+#all-items-folder > .view-icon {
+    -moz-image-region: rect(0px, 16px, 16px, 0px);
+}
+#unread-folder > .view-icon {
+    -moz-image-region: rect(16px, 16px, 32px, 0px);
+}
+#starred-folder > .view-icon {
+    -moz-image-region: rect(32px, 16px, 48px, 0px);
+}
+#trash-folder > .view-icon {
+    -moz-image-region: rect(48px, 16px, 64px, 0px);
+}
+.tag-view > .view-icon {
+    list-style-image: url(icons/tag.png);
+}
+
+
+
+/* =========== Feed list tree =========== */
 
 #feed-list {
-  margin: 0;
-  border: none;
-  -moz-appearance: none;
+    -moz-appearance: none;
+    margin-top: 2px;
+    color: #000000;
 }
 
-#feed-list > treechildren::-moz-tree-line {
-  visibility: hidden;
-}
-
-#feed-list > treechildren::-moz-tree-separator {
-    border-top: none;
-    border-bottom: 1px solid #7c909f;
-}
-
-#feed-list > treechildren::-moz-tree-cell-text {
-  font-size: 12px !important;
-}
-
-#feed-list > treechildren::-moz-tree-cell-text(unread) {
-  font-weight: bold;
-}
 
 #feed-list > treechildren::-moz-tree-row {
-  height: 20px;
+    height: 20px;
+    padding-bottom: 2px;
+    border: 0 !important;
+}
+#feed-list > treechildren::-moz-tree-row(selected) {
+    background-color: #d5ecfd;
+    border: none;
+}
+#feed-list > treechildren::-moz-tree-row(selected, focus) {
+    background-color: #d5ecfd;
+}
+#feed-list > treechildren::-moz-tree-row(current, focus),
+#feed-list > treechildren::-moz-tree-row(selected, current, focus) {
+    border: none;
+}
+#feed-list > treechildren::-moz-tree-row(container) {
+    border-bottom: 1px solid #c4cdd5 !important;
+    margin-bottom: 2px;
+    padding-bottom: 0px;
+}
+
+
+#feed-list > treechildren::-moz-tree-cell(feed-item) {
+    -moz-padding-start: 10px !important;
+}
+
+
+#feed-list > treechildren::-moz-tree-cell-text {
+    font-size: 12px !important;
+}
+#feed-list > treechildren::-moz-tree-cell-text(unread) {
+    font-weight: bold;
+}
+#feed-list > treechildren::-moz-tree-cell-text(selected),
+#feed-list > treechildren::-moz-tree-cell-text(selected, focus) {
+    color: #00344f;
+}
+#feed-list > treechildren::-moz-tree-cell-text(container) {
+    font-size: 13px !important;
+    font-weight: bold;
+    color: #203f4f;
+    padding-left: 6px;
+}
+
+
+#feed-list > treechildren::-moz-tree-line {
+    visibility: hidden;
 }
 
 #feed-list > treechildren::-moz-tree-indentation {
-  width: 12px;
+    width: 11px;
 }
 
 
-/* ------------ Twisty ------------ */
-
-#feed-list > treechildren::-moz-tree-twisty {
-  -moz-padding-end: 2px;
-  padding-top: 1px;
-  width: 9px;
-  list-style-image: url(icons/twisty-closed.png);
+#feed-list > treechildren::-moz-tree-twisty(container) {
+    -moz-padding-end: 0;
+    -moz-padding-start: 2px;
+    width: 11px;
+    height: 11px;
+    list-style-image: url(icons/twisty.png);
+    -moz-image-region: rect(0px, 11px, 11px, 0px);
 }
-
 #feed-list > treechildren::-moz-tree-twisty(open) {
-  list-style-image: url(icons/twisty-open.png);
+    -moz-image-region: rect(11px, 11px, 22px, 0px);
 }
 
-
-#feed-list > treechildren::-moz-tree-twisty(hover) {
-  list-style-image: url(icons/twisty-closed-hover.png);
+#feed-list > treechildren::-moz-tree-twisty(feed-item) {
+    width: 0 !important;
+    -moz-padding-end: 0;
+    -moz-padding-start: 0;
 }
 
-#feed-list > treechildren::-moz-tree-twisty(hover, open) {
-  list-style-image: url(icons/twisty-open-hover.png);
-}
-
-
-/* ------------ Icons ------------ */
 
 #feed-list > treechildren::-moz-tree-image {
-  -moz-padding-end: 4px;
-  -moz-padding-start: 2px;
+    -moz-padding-end: 6px;
+    -moz-padding-start: 2px;
 }
-
 #feed-list > treechildren::-moz-tree-image(container) {
-  list-style-image: url(chrome://global/skin/icons/folder-item.png) !important;
-  -moz-image-region: rect(0px, 32px, 16px, 16px);
+    -moz-padding-end: 0;
+    -moz-padding-start: 0;
+    width: 0;
 }
-
-#feed-list > treechildren::-moz-tree-image(container, open) {
-  -moz-image-region: rect(16px, 32px, 32px, 16px);
-}
-
 #feed-list > treechildren::-moz-tree-image(feed-item) {
-  list-style-image: url(chrome://browser/skin/feeds/feedIcon16.png) !important;
-  width: 16px;
-  height: 16px;
+    list-style-image: url(icons/feed-favicon.png) !important;
+    width: 16px;
+    height: 16px;
 }
-
 #feed-list > treechildren::-moz-tree-image(feed-item, unread) {
-  list-style-image: url(chrome://browser/skin/feeds/feedIcon16.png) !important;
-}
-
-#feed-list > treechildren::-moz-tree-image(tag) {
-  list-style-image: url(chrome://mozapps/skin/places/tagContainerIcon.png) !important;
-  width: 16px;
-  height: 16px;
-}
-
-
-/* ---- Fixed images for predefined special folders ---- */
-
-#feed-list > treechildren::-moz-tree-image(allItemsFolder) {
-    list-style-image: url(icons/folders.png) !important;
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
-}
-
-#feed-list > treechildren::-moz-tree-image(unreadFolder) {
-    list-style-image: url(icons/folders.png) !important;
-    -moz-image-region: rect(16px, 16px, 32px, 0px);
-}
-
-#feed-list > treechildren::-moz-tree-image(starredFolder) {
-    list-style-image: url(icons/folders.png) !important;
-    -moz-image-region: rect(32px, 16px, 48px, 0px);
-}
-
-#feed-list > treechildren::-moz-tree-image(trashFolder) {
-    list-style-image: url(icons/folders.png) !important;
-    -moz-image-region: rect(48px, 16px, 64px, 0px);
+    list-style-image: url(icons/feed-favicon.png) !important;
 }
 
 
 
+/* ======= Reset default properties ======= */
 
-/* ----------------------  Toolbars  ----------------------- */
-
-#toggle-sidebar {
-  list-style-image: url(chrome://brief/skin/sidebar-button.png);
-  -moz-image-region: rect(0, 16px, 24px, 0);
-  -moz-appearance: none;
-  border: none !important;
+#update-progress {
+    background-image: none !important;
 }
 
-#toggle-sidebar:hover {
-  -moz-image-region: rect(24px, 16px, 48px, 0);
+.brief-button {
+    -moz-box-flex: 0;
+    -moz-user-focus: none;
 }
 
-#toggle-sidebar[sidebarHidden="true"] {
-  -moz-image-region: rect(0, 32px, 24px, 16px);
-}
-
-#toggle-sidebar[sidebarHidden="true"]:hover {
-  -moz-image-region: rect(24px, 32px, 48px, 16px);
+#main-box {
+    margin: 0;
 }

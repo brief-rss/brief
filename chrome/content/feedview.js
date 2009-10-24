@@ -532,6 +532,7 @@ FeedView.prototype = {
                 gCommands.restoreEntry(id);
                 break;
             case 'StarEntry':
+                debugger;
                 gCommands.starEntry(id, true);
                 break;
 
@@ -684,7 +685,7 @@ FeedView.prototype = {
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
         }
 
-        var entries = intersect(this._loadedEntries(), aEntryList.IDs);
+        var entries = intersect(this._loadedEntries, aEntryList.IDs);
         this._sendEvent(entries, 'EntryStarred', aNewState);
     },
 
@@ -693,21 +694,21 @@ FeedView.prototype = {
         if (!this.active)
             return;
 
+        var entries = intersect(this._loadedEntries, aEntryList.IDs);
+        for (let i = 0; i < entries.length; i++) {
+            let elem = this.document.getElementById(entries[i]);
+            if (elem) {
+                elem.setAttribute('changedTag', aTag);
+                this._sendEvent(id, 'EntryTagged', aNewState);
+            }
+        }
+
         if (this.query.tags && this.query.tags[0] === aTag) {
             let delta = this.query.getEntryCount() - this.entryCount;
             if (delta > 0)
                 this._onEntriesAdded(aEntryList.IDs);
             else if (delta < 0)
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
-        }
-
-        for (let i = 0; i < aEntryList.IDs.length; i++) {
-            let id = aEntryList.IDs[i];
-            let elem = this.document.getElementById(id);
-            if (elem) {
-                elem.setAttribute('changedTag', aTag);
-                this._sendEvent(id, 'EntryTagged', aNewState);
-            }
         }
     },
 

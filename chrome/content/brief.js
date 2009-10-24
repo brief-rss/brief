@@ -69,10 +69,13 @@ function init() {
 
     gStorage.addObserver(gFeedList);
 
-    if (gPrefs.homeFolder)
+    if (gPrefs.homeFolder) {
+        gViewList.init();
         async(gFeedList.rebuild, 0, gFeedList);
-    else
+    }
+    else {
         showHomeFolderPicker();
+    }
 
     async(loadHomeview);
 
@@ -84,6 +87,7 @@ function initToolbarsAndStrings() {
     getElement('headlines-checkbox').checked = gPrefs.showHeadlinesOnly;
     getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
     getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
+    getElement('reveal-sidebar-button').hidden = !getElement('left-pane').hidden;
 
     // Cache the strings, so they don't have to retrieved every time when
     // refreshing the feed view.
@@ -117,18 +121,18 @@ function unload() {
 
 var gCommands = {
 
-    toggleSidebar: function cmd_toggleSidebar() {
+    hideSidebar: function cmd_hideSidebar() {
         var pane = getElement('left-pane');
         var splitter = getElement('left-pane-splitter');
-        var button = getElement('toggle-sidebar');
-        var bundle = getElement('main-bundle');
+        pane.hidden = splitter.hidden = true;
+        getElement('reveal-sidebar-button').hidden = false;
+    },
 
-        pane.hidden = splitter.hidden = !pane.hidden;
-
-        var tooltiptext = pane.hidden ? bundle.getString('showSidebarTooltip')
-                                      : bundle.getString('hideSidebarTooltip');
-        button.setAttribute('tooltiptext', tooltiptext);
-        button.setAttribute('sidebarHidden', pane.hidden);
+    revealSidebar: function cmd_revealSidebar() {
+        var pane = getElement('left-pane');
+        var splitter = getElement('left-pane-splitter');
+        pane.hidden = splitter.hidden = false;
+        getElement('reveal-sidebar-button').hidden = true;
 
         if (!gFeedList.treeReady)
             gFeedList.rebuild();
@@ -289,12 +293,12 @@ var gCommands = {
 function loadHomeview() {
     var query = new Query();
     query.deleted = ENTRY_STATE_NORMAL;
-    var title = getElement('all-items-folder').getAttribute('title');
-    var view = new FeedView(title, query);
+    var name = getElement('all-items-folder').getAttribute('name');
+    var view = new FeedView(name, query);
 
     if (!gPrefs.homeFolder) {
         getElement('feed-view').loadURI(GUIDE_PAGE_URL);
-        getElement('feed-view-toolbar').hidden = true;
+        getElement('feed-view-header').hidden = true;
         gFeedView = view; // Set the view without attaching it.
         return;
     }
@@ -315,12 +319,9 @@ function loadHomeview() {
     else {
         view.attach();
 
-        if (gFeedList.tree && gFeedList.tree.view) {
-            gFeedList.ignoreSelectEvent = true;
-            gFeedList.tree.view.selection.select(0);
-            gFeedList.ignoreSelectEvent = false;
-            gFeedList.tree.focus();
-        }
+        gViewList.richlistbox.suppressOnSelect = true;
+        gViewList.selectedItem = getElement('all-items-folder');
+        gViewList.richlistbox.suppressOnSelect = false;
     }
 }
 
@@ -332,13 +333,13 @@ function refreshProgressmeter() {
     progressmeter.value = progress;
 
     if (progress == 100) {
-        async(function() { progressmeter.hidden = true }, 500);
+        async(function() { getElement('update-progress-deck').selectedIndex = 0 }, 500);
         getElement('update-buttons-deck').selectedIndex = 0;
     }
 }
 
 function showHomeFolderPicker() {
-    getElement('feed-list-deck').selectedIndex = 1;
+    getElement('left-pane-deck').selectedIndex = 1;
 
     var query = PlacesUtils.history.getNewQuery();
     var options = PlacesUtils.history.getNewQueryOptions();
@@ -470,7 +471,8 @@ var gPrefs = {
         { name: 'feedview.filterUnread',           propName: 'filterUnread' },
         { name: 'feedview.filterStarred',          propName: 'filterStarred' },
         { name: 'feedview.minInitialEntries',      propName: 'minInitialEntries'},
-        { name: 'feedview.sortUnreadViewOldestFirst', propName: 'sortUnreadViewOldestFirst' }
+        { name: 'feedview.sortUnreadViewOldestFirst', propName: 'sortUnreadViewOldestFirst' },
+        { name: 'showFavicons', propName: 'showFavicons' }
     ],
 
     _updateCachedPref: function gPrefs__updateCachedPref(aPref) {

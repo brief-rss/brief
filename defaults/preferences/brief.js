@@ -5,6 +5,7 @@ pref("extensions.brief.firstRun", true);
 pref("extensions.brief.lastMajorVersion", "0");
 pref("extensions.brief@mozdev.org.description", "chrome://brief/locale/brief.properties");
 pref("extensions.brief.assumeStandardKeys", true);
+pref("extensions.brief.showFavicons", true);
 
 pref("extensions.brief.feedview.showHeadlinesOnly", false);
 pref("extensions.brief.feedview.filterUnread", false);
