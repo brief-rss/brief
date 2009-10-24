@@ -9,25 +9,6 @@
     overflow: hidden;
 }
 
-.feed-header-button {
-    min-width: 0;
-    border: none;
-    margin: 0;
-    background-color: transparent;
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    -moz-box-flex: 0;
-    -moz-appearance: none;
-    -moz-user-focus: none;
-}
-
-.feed-header-button > .button-box {
-    padding: 0 !important;
-    border: none;
-}
-
 #mark-view-read {
     padding-top: 4px;
     margin-right: 5px;
@@ -55,6 +36,7 @@
 
 #feed-title {
     color: #203f4f;
+    font-family: Verdana, Helvetica, Arial, sans-serif;
     font-size: 18px;
     font-weight: bold;
     text-decoration: none;
@@ -138,18 +120,14 @@
 
 
 #searchbar {
-    margin: 6px 0 6px 10px;
+    -moz-binding: url(chrome://brief/content/bindings.xml#searchbar);
     width: 150px;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    margin: 6px 0 6px 10px;
+    padding: 0 3px 0 5px;
     border: 1px solid #7c909f;
     -moz-border-radius: 4px;
-    -moz-binding: url(chrome://brief/content/bindings.xml#searchbar);
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    -moz-appearance: none;
+    background-color: #ffffff;
+    font-size: 12px;
 }
 
 

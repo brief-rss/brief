@@ -6,6 +6,8 @@
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY showOptions.tooltip "Open Brief options">
+<!ENTITY sidebarSplitter.tooltip "Double-click to hide the sidebar">
+<!ENTITY revealSidebar.tooltip "Reveal the sidebar">
 <!ENTITY markViewRead.tooltip "Mark all items as read">
 <!ENTITY viewConstraintList.tooltip "Choose what kind of items to display">
 <!ENTITY allItemsFolder.label "All items">
