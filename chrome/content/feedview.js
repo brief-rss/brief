@@ -593,7 +593,7 @@ FeedView.prototype = {
         // article-container and/or an anchor were clicked.
         var elem = aEvent.target;
         while (elem != this.document.documentElement) {
-            if (elem.localName == 'A')
+            if (elem.localName.toUpperCase() == 'A')
                 var anchor = elem;
 
             if (elem.className == 'article-container') {
