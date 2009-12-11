@@ -1016,6 +1016,9 @@ BriefStorageService.prototype = {
     },
 
     // nsINavBookmarkObserver
+    onBeforeItemRemoved: function BriefStorage_onBeforeItemRemoved() { },
+    
+    // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
         if (this.isLivemarkStored(aItemID) || aItemID == this.homeFolderID) {
             this.delayedLivemarksSync();
