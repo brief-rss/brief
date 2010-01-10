@@ -886,15 +886,10 @@ FeedView.prototype = {
             query.limit = LOAD_STEP_SIZE;
         }
 
+        this._highlightSearchTerms();
         this._asyncRefreshEntryList();
         this._setEmptyViewMessage();
         this._markVisibleAsRead();
-
-        // Highlight search terms.
-        if (this.query.searchString) {
-            for each (term in this.query.searchString.match(/[A-Za-z0-9]+/g))
-                this._highlightText(term, this.feedContent);
-        }
 
         // Initialize selection.
         if (gPrefs.entrySelectionEnabled) {
@@ -938,6 +933,8 @@ FeedView.prototype = {
             let entries = this._entries.slice(startIndex, endIndex + 1);
             this._getFastQuery(entries).getFullEntries().forEach(this._appendEntry, this);
         }
+
+        this._highlightSearchTerms();
     },
 
     _appendEntry: function FeedView__appendEntry(aEntry) {
@@ -1093,6 +1090,14 @@ FeedView.prototype = {
         paragraph.style.display = 'block';
     },
 
+
+    _highlightSearchTerms: function FeedView__highlightSearchTerms() {
+        // Highlight search terms.
+        if (this.query.searchString) {
+            for each (term in this.query.searchString.match(/[A-Za-z0-9]+/g))
+                this._highlightText(term, this.feedContent);
+        }
+    },
 
     _highlightText: function FeedView__highlightText(aWord, aContainer) {
         var searchRange = this.document.createRange();
