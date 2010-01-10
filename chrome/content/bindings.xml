@@ -47,7 +47,7 @@
         <constructor>
             // Some feeds include scripts that use document.write() which screw us up,
             // because we insert them dynamically after the page is loaded.
-            document.write = function() { };
+            document.write = document.writeln = function() { };
 
             var header = document.createElement('div');
             header.className = 'article-header';
