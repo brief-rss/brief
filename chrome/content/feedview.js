@@ -1,9 +1,9 @@
 // Minimal number of window heights worth of entries loaded ahead of the
 // current scrolling position at any given time.
-const MIN_LOADED_WINDOW_HEIGHTS = 0.5;
+const MIN_LOADED_WINDOW_HEIGHTS = 1;
 
 // Number of window heights worth of entries to load when the above threshold is crossed.
-const WINDOW_HEIGHTS_LOAD = 1;
+const WINDOW_HEIGHTS_LOAD = 2;
 
 // Number of entries queried in each incremental step until they fill the defined height.
 const LOAD_STEP_SIZE = 5;
@@ -794,8 +794,7 @@ FeedView.prototype = {
             // The element will be gracefully removed by jQuery.
             this._sendEvent(entryID, 'DoRemoveEntry');
             this._loadedEntries.splice(indices[0], 1);
-
-            async(fun, 250, this);
+            this._entries.splice(indices[0], 1);
         }
         else {
             indices.sort(function(a, b) a - b);
@@ -812,28 +811,20 @@ FeedView.prototype = {
                 }
 
                 this._loadedEntries.splice(indices[i], 1);
+                this._entries.splice(indices[i], 1);
             }
-
-            fun.apply(this);
         }
 
-        function fun() {
-            if (aLoadNewEntries) {
-                this._entries = this.query.getEntries();
-                this._loadEntries();
-            }
-            else {
-                this._asyncRefreshEntryList();
-            }
+        if (aLoadNewEntries)
+            this._loadEntries();
 
-            this._setEmptyViewMessage();
+        this._setEmptyViewMessage();
 
-            if (this._loadedEntries.length) {
-                let newSelection = this._loadedEntries[selectedEntryIndex] != -1
-                                   ? this._loadedEntries[selectedEntryIndex]
-                                   : this._loadedEntries[this._loadedEntries.length - 1];
-                this.selectEntry(newSelection);
-            }
+        if (this._loadedEntries.length) {
+            let newSelection = this._loadedEntries[selectedEntryIndex] != -1
+                               ? this._loadedEntries[selectedEntryIndex]
+                               : this._loadedEntries[this._loadedEntries.length - 1];
+            this.selectEntry(newSelection);
         }
     },
 
