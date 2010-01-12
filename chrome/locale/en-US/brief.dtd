@@ -1,4 +1,4 @@
-<!ENTITY confirmHomeFolder.label "OK">
+<!ENTITY confirmHomeFolder.label "Choose folder">
 <!ENTITY searchBox.label "Search">
 <!ENTITY headlinesCheckbox.tooltip "View headlines">
 <!ENTITY filterUnread.tooltip "View only unread items">

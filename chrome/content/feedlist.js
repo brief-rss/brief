@@ -177,14 +177,14 @@ var gViewList = {
             let item = document.createElement('richlistitem');
             item.id = this.tags[i];
             item.setAttribute('tagView', true);
-            item.className = 'tag-view-item';
+            item.className = 'view-list-item tag-view';
 
             let image = document.createElement('image');
             image.className = 'view-icon';
             item.appendChild(image);
 
             let label = document.createElement('label');
-            label.className = 'view-list-item view-label';
+            label.className = 'view-label';
             item.appendChild(label);
 
             this.richlistbox.insertBefore(item, trashFolder);

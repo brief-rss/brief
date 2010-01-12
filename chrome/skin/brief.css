@@ -1,5 +1,5 @@
 /* Reset these properties on everything but context menu popups */
-page, page > hbox, page > hbox * {
+* {
     -moz-appearance: none;
     height: auto;
     width: auto;
@@ -19,6 +19,28 @@ page, page > hbox, page > hbox * {
 page {
     font-family: Arial, Helvetica, sans-serif;
     background: #ffffff;
+}
+
+menupopup {
+    border: 1px solid #aca899;
+    padding: 2px;
+    background-color: #fafcff;
+}
+
+menuseparator {
+   -moz-appearance: menuseparator;
+   padding: 3px 1px 4px 1px;
+   border-top: 1px solid #aca899;
+   border-bottom: 1px solid #aca899;
+}
+
+menuitem {
+    height: 22px;
+}
+
+menuitem:hover {
+    background-color: #d5ecfd;
+    color: #267fc0;
 }
 
 #left-pane {
@@ -116,12 +138,40 @@ page {
 #places-tree {
     -moz-box-flex: 1;
     max-height: 400px;
+    border-bottom: 1px solid #7c909f;
+    font-size: 13px;
+}
+
+
+#confirm-home-folder {
+    margin: 10px 3px 5px 0;
+    border: 1px solid #7c909f;
 }
 
 #confirm-home-folder {
-    margin: 5px 3px 5px 0;
-    width: 100px;
+  -moz-appearance: button;
+  border: 3px solid;
+  -moz-border-top-colors: transparent ThreeDHighlight ThreeDLightShadow;
+  -moz-border-right-colors: transparent ThreeDDarkShadow ThreeDShadow;
+  -moz-border-bottom-colors: transparent ThreeDDarkShadow ThreeDShadow;
+  -moz-border-left-colors: transparent ThreeDHighlight ThreeDLightShadow;
+  background-color: ThreeDFace;
+  color: ButtonText;
 }
+
+#confirm-home-folder .button-box {
+  border: 1px solid transparent;
+  padding-top: 1px;
+  padding-bottom: 2px;
+  -moz-padding-start: 3px;
+  -moz-padding-end: 4px;
+}
+
+#confirm-home-folder .button-text {
+  margin: 0 !important;
+  text-align: center;
+}
+
 
 
 /* =========== View list richlistbox =========== */
@@ -136,11 +186,11 @@ page {
     padding: 1px 0 1px 15px;
 }
 
-#view-list:not([showTags]) > .tag-view-item {
+#view-list:not([showTags]) > .tag-view {
     display: none;
 }
 
-.tag-view-item {
+.tag-view {
     padding-left: 25px;
 }
 
