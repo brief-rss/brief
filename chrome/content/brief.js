@@ -438,7 +438,7 @@ function finishSearch() {
  */
 function onKeyPress(aEvent) {
     // Don't do anything if the user is typing in an input field.
-    if (aEvent.originalTarget.localName == 'input')
+    if (aEvent.originalTarget.localName.toUpperCase() == 'INPUT')
         return;
 
     // Stop propagation of character keys in order to disable Find-As-You-Type.
