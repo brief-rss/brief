@@ -359,6 +359,9 @@ function refreshProgressmeter() {
 }
 
 function showFirstRunUI() {
+    if (gFeedView)
+        gFeedView.detach();
+        
     getElement('left-pane-deck').selectedIndex = 1;
 
     var query = PlacesUtils.history.getNewQuery();
