@@ -1016,6 +1016,9 @@ BriefStorageService.prototype = {
     },
 
     // nsINavBookmarkObserver
+    onBeforeItemRemoved: function BriefStorage_onBeforeItemRemoved() { },
+
+    // nsINavBookmarkObserver
     onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
         if (this.isLivemarkStored(aItemID) || aItemID == this.homeFolderID) {
             this.delayedLivemarksSync();
@@ -2038,7 +2041,7 @@ BriefQuery.prototype = {
         // is meant to be marked.
         var tempRead = this.read;
         var tempUnread = this.unread;
-        if (!this.limit && this.offset === 1) {
+        if (!this.limit && !this.offset) {
             this.read = !aState;
             this.unread = aState;
         }
@@ -2198,7 +2201,7 @@ BriefQuery.prototype = {
         var text = aForSelect ? ' FROM entries '
                               : ' WHERE entries.id IN (SELECT entries.id FROM entries ';
 
-        if (this.feeds || !this.feeds && !this.includeHiddenFeeds)
+        if (!this.feeds && !this.includeHiddenFeeds)
             text += ' INNER JOIN feeds ON entries.feedID = feeds.feedID ';
 
         if (aGetFullEntries || this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
