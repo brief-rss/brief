@@ -648,7 +648,7 @@ var gFeedList = {
             if (gPrefs.homeFolder)
                 deck.selectedIndex = 0;
             else if (deck.selectedIndex == 0)
-                showHomeFolderPicker();
+                showFirstRunUI();
 
             async(gFeedView.refresh, 0, gFeedView);
 

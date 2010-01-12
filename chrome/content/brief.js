@@ -72,12 +72,11 @@ function init() {
     if (gPrefs.homeFolder) {
         gViewList.init();
         async(gFeedList.rebuild, 0, gFeedList);
+        async(loadHomeview);
     }
     else {
-        showHomeFolderPicker();
+        showFirstRunUI();
     }
-
-    async(loadHomeview);
 
     async(gStorage.syncWithLivemarks, 2000, gStorage);
 }
@@ -322,32 +321,22 @@ var gCommands = {
 
 
 function loadHomeview() {
-    var query = new Query();
-    query.deleted = ENTRY_STATE_NORMAL;
-    var name = getElement('all-items-folder').getAttribute('name');
-    var view = new FeedView(name, query);
-
-    if (!gPrefs.homeFolder) {
-        getElement('feed-view').loadURI(GUIDE_PAGE_URL);
-        getElement('feed-view-header').hidden = true;
-        gFeedView = view; // Set the view without attaching it.
-        return;
-    }
-
     var prevVersion = gPrefBranch.getCharPref('lastMajorVersion');
     var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
                         getService(Ci.nsIVersionComparator);
 
     // If Brief has been updated, load the new version info page.
     if (verComparator.compare(prevVersion, LAST_MAJOR_VERSION) < 0) {
-        var browser = getElement('feed-view');
+        let browser = getElement('feed-view');
         browser.loadURI(RELEASE_NOTES_URL);
         gPrefBranch.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
-
         getElement('feed-view-toolbar').hidden = true;
-        gFeedView = view; // Set the view without attaching it.
     }
     else {
+        let query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+        let name = getElement('all-items-folder').getAttribute('name');
+        view = new FeedView(name, query);
         view.attach();
 
         gViewList.richlistbox.suppressOnSelect = true;
@@ -369,7 +358,7 @@ function refreshProgressmeter() {
     }
 }
 
-function showHomeFolderPicker() {
+function showFirstRunUI() {
     getElement('left-pane-deck').selectedIndex = 1;
 
     var query = PlacesUtils.history.getNewQuery();
@@ -378,6 +367,9 @@ function showHomeFolderPicker() {
     options.excludeItems = true;
 
     getElement('places-tree').load([query], options);
+
+    getElement('feed-view').loadURI(GUIDE_PAGE_URL);
+    getElement('feed-view-header').hidden = true;
 }
 
 function onHomeFolderPickerSelect(aEvent) {
@@ -397,7 +389,8 @@ function selectHomeFolder(aEvent) {
     if (placesTree.currentIndex != -1) {
         var folderId = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
         gPrefBranch.setIntPref('homeFolder', folderId);
-        gFeedList.tree.view.selection.select(0);
+        gViewList.richlistbox.selectedIndex = 0;
+        gViewList.onSelect();
     }
 }
 
