@@ -238,8 +238,9 @@ interface nsIBriefStorage : nsISupports {
    * items when newer versions are found. Also updates feed's properties.
    *
    * @param feed Contains the feed and the entries to evaluate.
+   * @returns the number of new entries added to the database.
    */
-  void updateFeed(in nsIBriefFeed feed);
+  unsigned long updateFeed(in nsIBriefFeed feed);
 
   /**
    * Saves feed settings: entryAgeLimit, maxEntries, updateInterval and

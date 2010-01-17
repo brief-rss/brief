@@ -534,10 +534,11 @@ BriefStorageService.prototype = {
     updatedEntries: [],
 
     // nsIBriefStorage
-    updateFeed: function BriefStorage_updateFeed(aFeed) {
+    updateFeed: function BriefStorage_updateFeed(aFeed, aCallback) {
         this.newEntries = [];
         this.updatedEntries = [];
         var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
+        var cachedFeed = this.getFeed(aFeed.feedID);
 
         if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
             aFeed.oldestEntryDate = Date.now();
@@ -554,10 +555,8 @@ BriefStorageService.prototype = {
                         aFeed.oldestEntryDate = entry.date;
                 }
 
-                let stmt = gStm.updateFeed;
-                let cachedFeed = this.getFeed(aFeed.feedID);
-
                 // Update the properties of the feed (and the cache).
+                let stmt = gStm.updateFeed;
                 stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
                 stmt.params.subtitle    = cachedFeed.subtitle    = aFeed.subtitle;
                 stmt.params.imageURL    = cachedFeed.imageURL    = aFeed.imageURL;
@@ -596,6 +595,8 @@ BriefStorageService.prototype = {
             for each (observer in this.observers)
                 observer.onEntriesUpdated(list);
         }
+
+        return this.newEntries.length;
     },
 
 
@@ -607,7 +608,7 @@ BriefStorageService.prototype = {
         // it is a new one. To do this we need a way to uniquely identify entries. Many
         // feeds don't provide unique identifiers for their entries, so we have to use
         // hashes for this purpose. There are two hashes.
-        // The primary hash is used as a standard unique ID throught the codebase.
+        // The primary hash is used as a standard unique ID throughout the codebase.
         // Ideally, we just compute it from the GUID provided by the feed. Otherwise, we
         // use the entry's URL.
         // There is a problem, though. Even when a feed does provide its own GUID, it
