@@ -1,5 +1,4 @@
 #include "nsISupports.idl"
-interface nsIBriefFeed;
 interface nsIVariant;
 
 /**
