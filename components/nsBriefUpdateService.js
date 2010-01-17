@@ -142,11 +142,6 @@ BriefUpdateService.prototype = {
     // nsIBriefUpdateService
     stopUpdating: function BUS_stopUpdating() {
         gObserverService.notifyObservers(null, 'brief:feed-update-canceled', '');
-
-        // We must call this after sending brief:feed-update-canceled, because when a
-        // feed fetcher receives it, it adds a feed to the completedFeeds stack. If we
-        // called finishUpdate before that, the completedStack wouldn't be cleaned,
-        // thus messing up subsequent updates.
         this.finishUpdate();
     },
 
@@ -160,6 +155,10 @@ BriefUpdateService.prototype = {
             // Fall through...
 
         case this.updateTimer:
+            // XXX This may have broken update service for some reason, it looks
+            // like FeedFetcher doesn't always call finish() and I don't know why.
+            // Let's hope the refactoring fixed this, otherwise this will have to be
+            // removed.
             if (this.status != NOT_UPDATING)
                 return;
 
@@ -198,7 +197,22 @@ BriefUpdateService.prototype = {
         // because we don't cancel the timer until after all feeds are completed.
         var feed = this.updateQueue.shift();
         if (feed)
-            new FeedFetcher(feed, this);
+            new FeedFetcher(feed);
+    },
+
+
+    onFeedUpdated: function BUS_onFeedFetched(aFeed, aError, aNewEntriesCount) {
+        this.completedFeeds.push(aFeed);
+        this.newEntriesCount += aNewEntriesCount;
+        if (aNewEntriesCount > 0)
+            this.feedsWithNewEntriesCount++;
+
+        gObserverService.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
+        if (aError)
+            gObserverService.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
+
+        if (this.completedFeeds.length == this.scheduledFeeds.length)
+            this.finishUpdate();
     },
 
 
@@ -230,7 +244,6 @@ BriefUpdateService.prototype = {
             }
         }
 
-        // Reset the properties after updating is finished.
         this.newEntriesCount = this.feedsWithNewEntriesCount = 0;
         this.completedFeeds = [];
         this.scheduledFeeds = [];
@@ -255,18 +268,6 @@ BriefUpdateService.prototype = {
                 // are changed during startup when assuming their user-set values.
                 gPrefs.addObserver('', this, false);
             }
-            break;
-
-        case 'brief:feed-updated':
-            // Count updated feeds, so we can show their number in
-            // the alert when updating is completed.
-            if (aSubject && aSubject.QueryInterface(Ci.nsIVariant) > 0) {
-                this.newEntriesCount += aSubject.QueryInterface(Ci.nsIVariant);
-                this.feedsWithNewEntriesCount++;
-            }
-
-            if (this.completedFeeds.length == this.scheduledFeeds.length)
-                this.finishUpdate();
             break;
 
         // Notification from nsIAlertsService that user has clicked the link in
@@ -324,7 +325,8 @@ BriefUpdateService.prototype = {
  */
 function FeedFetcher(aFeed) {
     this.feed = aFeed;
-    this.favicon = this.feed.favicon;
+    this.parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
+    this.parser.listener = this;
 
     gObserverService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
     gObserverService.addObserver(this, 'brief:feed-update-canceled', false);
@@ -339,10 +341,6 @@ FeedFetcher.prototype = {
 
     request:      null,
     timeoutTimer: null,
-
-    // Indicates if the request has encountered an error (either a connection error or
-    // parsing error) and has sent 'brief:feed-error' notification.
-    inError: false,
 
     // The feed processor sets the bozo bit when a feed triggers a fatal error during XML
     // parsing. There may still be feed metadata and entries that were parsed before the
@@ -367,14 +365,9 @@ FeedFetcher.prototype = {
 
         function onRequestLoad() {
             self.timeoutTimer.cancel();
-
-            var uri = gIOService.newURI(self.feed.feedURL, null, null);
-            var parser = Cc['@mozilla.org/feed-processor;1'].
-                         createInstance(Ci.nsIFeedProcessor);
-            parser.listener = self;
-
             try {
-                parser.parseFromString(self.request.responseText, uri);
+                let uri = gIOService.newURI(self.feed.feedURL, null, null);
+                self.parser.parseFromString(self.request.responseText, uri);
             }
             catch (ex) {
                 self.finish(true);
@@ -398,14 +391,18 @@ FeedFetcher.prototype = {
 
     // nsIFeedResultListener
     handleResult: function FeedFetcher_handleResult(aResult) {
+        // Prevent handleResult from being called twice, which seems to
+        // sometimes happen with parsing errors.
+        this.parser.listener = null;
+
         if (!aResult || !aResult.doc) {
             this.finish(true);
             return;
         }
+
         this.bozo = aResult.bozo;
 
         var feed = aResult.doc.QueryInterface(Ci.nsIFeed);
-
         this.downloadedFeed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
         this.downloadedFeed.wrapFeed(feed);
 
@@ -415,65 +412,33 @@ FeedFetcher.prototype = {
         this.downloadedFeed.feedURL = this.feed.feedURL;
         this.downloadedFeed.feedID = this.feed.feedID;
 
-        if (!this.favicon) {
+        if (!this.feed.favicon) {
             // We use websiteURL instead of feedURL for resolving the favicon URL,
             // because many websites use services like Feedburner for generating their
-            // feeds and we'd get the Feedburner's favicon instead of the website's
-            // favicon.
+            // feeds and we'd get the Feedburner's favicon instead.
             if (this.downloadedFeed.websiteURL) {
-                new FaviconFetcher(this.downloadedFeed.websiteURL, this);
+                let self = this;
+                let callback = function(aFavicon) {
+                    self.downloadedFeed.favicon = aFavicon;
+                    let newEntriesCount = gStorage.updateFeed(self.downloadedFeed);
+                    self.finish(self.bozo, newEntriesCount);
+                }
+                new FaviconFetcher(this.downloadedFeed.websiteURL, callback);
+                return;
             }
             else {
-                this.favicon = 'no-favicon';
-                this.passDataToStorage();
+                this.downloadedFeed.favicon = 'no-favicon';
             }
         }
-        else {
-            this.passDataToStorage();
-        }
+
+        var newEntriesCount = gStorage.updateFeed(this.downloadedFeed);
+        this.finish(this.bozo, newEntriesCount);
     },
 
 
-    onFaviconReady: function FeedFetcher_onFaviconReady(aFavicon) {
-        this.favicon = aFavicon;
-        this.passDataToStorage();
-    },
-
-
-    passDataToStorage: function FeedFetcher_passDataToStorage() {
-        this.finish(this.bozo);
-
-        this.downloadedFeed.favicon = this.favicon;
-        gStorage.updateFeed(this.downloadedFeed);
-    },
-
-
-    finish: function FeedFetcher_finish(aError) {
-        // For whatever reason, if nsIFeedProcessor gets a parsing error it sometimes
-        // calls handleResult() twice. We check the inError flag to avoid doing finish()
-        // again, because it would seriously mess up the batch update by adding the
-        // feed to the completedFeeds stack twice.
-        if (this.inError)
-            return;
-
-        // We can't push the feed to the |completedFeeds| stack in brief:feed-updated
-        // observer in the main class, because we have to ensure this is done before any
-        // other observers receive this notification. Otherwise the progressmeters won't
-        // be refreshed properly, because of outdated count of completed feeds.
-        gUpdateService.completedFeeds.push(this.feed);
-
-        gObserverService.notifyObservers(null, 'brief:feed-updated', this.feed.feedID);
-
-        if (aError) {
-            this.inError = true;
-            gObserverService.notifyObservers(null, 'brief:feed-error', this.feed.feedID);
-        }
-
-        // Clean up, so that we don't leak.
-        gObserverService.removeObserver(this, 'brief:feed-update-canceled');
-        this.request = null;
-        this.timeoutTimer.cancel();
-        this.timeoutTimer = null;
+    finish: function FeedFetcher_finish(aError, aNewEntriesCount) {
+        gUpdateService.onFeedUpdated(this.feed, aError, aNewEntriesCount || 0);
+        this.cleanup();
     },
 
     observe: function FeedFetcher_observe(aSubject, aTopic, aData) {
@@ -485,14 +450,19 @@ FeedFetcher.prototype = {
 
         case 'brief:feed-update-canceled':
             this.request.abort();
-            this.finish(false);
+            this.cleanup();
             break;
         }
     },
 
+    cleanup: function FeedFetcher_cleanup() {
+        gObserverService.removeObserver(this, 'brief:feed-update-canceled');
+        this.request = null;
+        this.timeoutTimer.cancel();
+        this.timeoutTimer = null;
+    },
 
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver],
-                                          [Ci.nsIFeedResultListener])
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver, Ci.nsIFeedResultListener])
 
 }
 
@@ -501,9 +471,9 @@ FeedFetcher.prototype = {
  *
  * @param aWebsiteURL  URL of webpage which favicon to download (not URI of the
  *                     favicon itself).
- * @param aFeedFetcher FeedFetcher to use for callback.
+ * @param aCallback    Callback to use when finished.
  */
-function FaviconFetcher(aWebsiteURL, aFeedFetcher) {
+function FaviconFetcher(aWebsiteURL, aCallback) {
     var websiteURI = gIOService.newURI(aWebsiteURL, null, null)
     var faviconURI = gIOService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
@@ -511,14 +481,14 @@ function FaviconFetcher(aWebsiteURL, aFeedFetcher) {
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
-    this.feedFetcher = aFeedFetcher;
+    this.callback = aCallback;
     this.websiteURI = websiteURI;
     this._channel = chan;
     this._bytes = [];
 }
 
 FaviconFetcher.prototype = {
-    feedFetcher: null,
+
     websiteURI:  null,
 
     _channel:   null,
@@ -544,7 +514,7 @@ FaviconFetcher.prototype = {
             favicon = 'no-favicon';
         }
 
-        this.feedFetcher.onFaviconReady(favicon);
+        this.callback(favicon);
 
         this._channel = null;
         this._element  = null;
