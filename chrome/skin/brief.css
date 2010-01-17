@@ -1,5 +1,6 @@
 /* Reset these properties on everything but context menu popups */
-* {
+page, hbox, vbox, deck, richlistbox, richlistitem, image, button, progressmeter,
+progressmeter *, textbox, tree, treecols, treecol, treechildren, splitter, browser {
     -moz-appearance: none;
     height: auto;
     width: auto;
@@ -19,28 +20,6 @@
 page {
     font-family: Arial, Helvetica, sans-serif;
     background: #ffffff;
-}
-
-menupopup {
-    border: 1px solid #aca899;
-    padding: 2px;
-    background-color: #fafcff;
-}
-
-menuseparator {
-   -moz-appearance: menuseparator;
-   padding: 3px 1px 4px 1px;
-   border-top: 1px solid #aca899;
-   border-bottom: 1px solid #aca899;
-}
-
-menuitem {
-    height: 22px;
-}
-
-menuitem:hover {
-    background-color: #d5ecfd;
-    color: #267fc0;
 }
 
 #left-pane {
@@ -91,12 +70,13 @@ menuitem:hover {
 #update-progress {
     border: 1px solid #c4cdd5;
     margin-right: 15px;
-    margin-left: 14px;
-    height: 10px;
+    margin-left: 13px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 #update-progress > .progress-bar {
-    background: #00ab2f;
+    background: url(progressmeter.png) repeat-x;
 }
 
 
@@ -119,7 +99,7 @@ menuitem:hover {
 #stop-updating-button {
     -moz-image-region: rect(0px, 16px, 16px, 0px);
 }
-#stop-updating-button {
+#stop-updating-button:hover {
     -moz-image-region: rect(16px, 16px, 32px, 0px);
 }
 #options-button {
@@ -239,7 +219,6 @@ menuitem:hover {
 /* =========== Feed list tree =========== */
 
 #feed-list {
-    -moz-appearance: none;
     margin-top: 2px;
     color: #000000;
 }
