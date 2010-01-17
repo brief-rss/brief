@@ -201,18 +201,18 @@
                     <html:a id="feed-title" target="_blank"/>
                 </html:div>
                 <button id="headlines-checkbox"
-                        class="brief-button feed-header-button"
+                        class="brief-button view-button"
                         type="checkbox"
                         autoCheck="false"
                         tooltiptext="&headlinesCheckbox.tooltip;"
                         oncommand="gCommands.switchHeadlinesView()"/>
                 <button id="filter-unread-checkbox"
-                        class="brief-button feed-header-button"
+                        class="brief-button view-button"
                         tooltiptext="&filterUnread.tooltip;"
                         type="checkbox"
                         oncommand="gCommands.toggleUnreadEntriesFilter()"/>
                 <button id="filter-starred-checkbox"
-                        class="brief-button feed-header-button"
+                        class="brief-button view-button"
                         tooltiptext="&filterStarred.tooltip;"
                         type="checkbox"
                         oncommand="gCommands.toggleStarredEntriesFilter()"/>
