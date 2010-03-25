@@ -11,15 +11,23 @@ progressmeter *, textbox, tree, treecols, treecol, treechildren, splitter, brows
     background-color: transparent;
     background-image: none;
     border: 0;
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
+    -moz-border-bottom-colors: none !important;
+    -moz-border-left-colors: none !important;
+    -moz-border-right-colors: none !important;
+    -moz-border-top-colors: none !important;
 }
 
 page {
     font-family: Arial, Helvetica, sans-serif;
     background: #ffffff;
+}
+
+.brief-button > .button-box {
+    padding: 0 !important;
+}
+
+.brief-button .button-text {
+    margin: 0 !important;
 }
 
 #left-pane {
@@ -126,6 +134,9 @@ page {
 #confirm-home-folder {
     margin: 10px 3px 5px 0;
     border: 1px solid #7c909f;
+    padding: 3px 6px;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 #confirm-home-folder {
