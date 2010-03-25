@@ -296,18 +296,14 @@ var gCommands = {
     },
 
     openLink: function cmd_openLink(aURL, aNewTab) {
-        if (aNewTab) {
-            var prefBranch = Cc['@mozilla.org/preferences-service;1'].
-                             getService(Ci.nsIPrefBranch);
-            var whereToOpen = prefBranch.getIntPref('browser.link.open_newwindow');
-            if (whereToOpen == 2)
-                openDialog('chrome://browser/content/browser.xul', '_blank', 'chrome,all,dialog=no', aURL);
-            else
-                gTopWindow.gBrowser.loadOneTab(aURL);
-        }
-        else {
+        var docURI = Cc['@mozilla.org/network/io-service;1'].
+                     getService(Ci.nsIIOService).
+                     newURI(document.documentURI, null, null);
+
+        if (aNewTab)
+            gTopWindow.gBrowser.loadOneTab(aURL, docURI);
+        else
             gFeedView.browser.loadURI(aURL);
-        }
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
@@ -361,7 +357,7 @@ function refreshProgressmeter() {
 function showFirstRunUI() {
     if (gFeedView)
         gFeedView.detach();
-        
+    
     getElement('left-pane-deck').selectedIndex = 1;
 
     var query = PlacesUtils.history.getNewQuery();
