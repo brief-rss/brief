@@ -93,7 +93,8 @@ __defineGetter__('gBms', function() {
     return this.gBms = bms;
 });
 
-
+const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
+const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
 function executeSQL(aSQLString) {
     try {
@@ -113,10 +114,7 @@ function createStatement(aSQLString) {
         log('SQL statement: ' + aSQLString);
         reportError(ex, true);
     }
-    var wrapper = Cc['@mozilla.org/storage/statement-wrapper;1'].
-                  createInstance(Ci.mozIStorageStatementWrapper);
-    wrapper.initialize(statement)
-    return wrapper;
+    return statement;
 }
 
 
@@ -530,76 +528,119 @@ BriefStorageService.prototype = {
     },
 
 
-    newEntries: [],
-    updatedEntries: [],
-
     // nsIBriefStorage
     updateFeed: function BriefStorage_updateFeed(aFeed, aCallback) {
-        this.newEntries = [];
+        this.newEntriesCount = 0;
         this.updatedEntries = [];
-        var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-        var cachedFeed = this.getFeed(aFeed.feedID);
 
+        var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
         if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
             aFeed.oldestEntryDate = Date.now();
-            var downloadedEntries = aFeed.entries;
 
-            gConnection.beginTransaction();
-            try {
-                for (let i = 0; i < downloadedEntries.length; i++) {
-                    let entry = downloadedEntries[i];
+            this.updateEntryParamsArray = gStm.updateEntry.newBindingParamsArray();
+            this.updateEntryTextParamsArray = gStm.updateEntryText.newBindingParamsArray();
+            this.insertEntryParamsArray = gStm.insertEntry.newBindingParamsArray();
+            this.insertEntryTextParamsArray = gStm.insertEntryText.newBindingParamsArray();
 
-                    this.processEntry(entry, aFeed);
+            for (let i = 0; i < aFeed.entries.length; i++) {
+                let entry = aFeed.entries[i];
+                this.processEntry(entry, aFeed);
 
-                    if (entry.date && entry.date < aFeed.oldestEntryDate)
-                        aFeed.oldestEntryDate = entry.date;
+                if (entry.date && entry.date < aFeed.oldestEntryDate)
+                    aFeed.oldestEntryDate = entry.date;
+            }
+
+            // Update the properties of the feed (and the cache).
+            let cachedFeed = this.getFeed(aFeed.feedID);
+            let stmt = gStm.updateFeed;
+            stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
+            stmt.params.subtitle    = cachedFeed.subtitle    = aFeed.subtitle;
+            stmt.params.imageURL    = cachedFeed.imageURL    = aFeed.imageURL;
+            stmt.params.imageLink   = cachedFeed.imageLink   = aFeed.imageLink;
+            stmt.params.imageTitle  = cachedFeed.imageTitle  = aFeed.imageTitle;
+            stmt.params.favicon     = cachedFeed.favicon     = aFeed.favicon;
+            stmt.params.lastUpdated = cachedFeed.lastUpdated = Date.now();
+            stmt.params.dateModified = cachedFeed.dateModified = dateModified;
+            stmt.params.oldestEntryDate = cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
+            stmt.params.feedID = aFeed.feedID;
+
+            stmt.executeAsync({
+                handleCompletion: function(aReason) {},
+                handleError: function(aError) {
+                    reportError(aError.message);
                 }
-
-                // Update the properties of the feed (and the cache).
-                let stmt = gStm.updateFeed;
-                stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
-                stmt.params.subtitle    = cachedFeed.subtitle    = aFeed.subtitle;
-                stmt.params.imageURL    = cachedFeed.imageURL    = aFeed.imageURL;
-                stmt.params.imageLink   = cachedFeed.imageLink   = aFeed.imageLink;
-                stmt.params.imageTitle  = cachedFeed.imageTitle  = aFeed.imageTitle;
-                stmt.params.favicon     = cachedFeed.favicon     = aFeed.favicon;
-                stmt.params.lastUpdated = cachedFeed.lastUpdated = Date.now();
-                stmt.params.dateModified = cachedFeed.dateModified = dateModified;
-                stmt.params.oldestEntryDate = cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
-                stmt.params.feedID = aFeed.feedID;
-
-                stmt.execute();
-            }
-            catch (ex) {
-                reportError(ex);
-            }
-            finally {
-                gConnection.commitTransaction();
-            }
+            });
         }
 
-        if (this.newEntries.length) {
-            let query = new BriefQuery();
-            query.entries = this.newEntries;
-            let list = query.getEntryList();
+        // Execute the insertions and notify observers.
+        var observers = this.observers;
+        if (this.newEntriesCount) {
+            let newEntries = [];
 
-            for each (observer in this.observers)
-                observer.onEntriesAdded(list);
+            gStm.insertEntry.bindParameters(this.insertEntryParamsArray);
+            gStm.insertEntryText.bindParameters(this.insertEntryTextParamsArray);
+            gStm.getLastRowids.params.count = this.newEntriesCount;
+            let statements = [gStm.insertEntry, gStm.insertEntryText, gStm.getLastRowids];
+
+            gConnection.executeAsync(statements, statements.length, {
+                handleResult: function(aResultSet) {
+                    var row;
+                    while (row = aResultSet.getNextRow())
+                        newEntries.push(row.getResultByIndex(0));
+                },
+                handleCompletion: function(aReason) {
+                    if (aReason != REASON_FINISHED)
+                        return;
+
+                    // Notify observers.
+                    var query = new BriefQuery();
+                    query.entries = newEntries;
+                    let list = query.getEntryList();
+                    for each (observer in observers)
+                        observer.onEntriesAdded(list);
+
+                    // TODO This should be optimized and/or be asynchronous
+                    query.verifyEntriesStarredStatus();
+                },
+                handleError: function(aError) {
+                    reportError(aError.message);
+                }
+            });
         }
 
+        // Execute the updates and notify observers.
         if (this.updatedEntries.length) {
-            let query = new BriefQuery();
-            query.entries = this.updatedEntries;
-            let list = query.getEntryList();
+            var updatedEntries = this.updatedEntries;
 
-            for each (observer in this.observers)
-                observer.onEntriesUpdated(list);
+            gStm.updateEntry.bindParameters(this.updateEntryParamsArray);
+            gStm.updateEntryText.bindParameters(this.updateEntryTextParamsArray);
+            let statements = [gStm.updateEntry, gStm.updateEntryText];
+
+            gConnection.executeAsync(statements, statements.length, {
+                handleCompletion: function(aReason) {
+                    if (aReason != REASON_FINISHED)
+                        return;
+
+                    // Notify observers.
+                    let query = new BriefQuery();
+                    query.entries = updatedEntries;
+                    let list = query.getEntryList();
+                    for each (observer in observers)
+                        observer.onEntriesUpdated(list);
+                },
+                handleError: function(aError) {
+                    reportError(aError.message);
+                }
+            });
         }
 
-        return this.newEntries.length;
+        return this.newEntriesCount;
     },
 
-
+    /**
+     * Computes entry's hash and checks if it is already stored. If necessary
+     * creates a statement to insert it or update it and adds it to the queue.
+     */
     processEntry: function BriefStorage_processEntry(aEntry, aFeed) {
         var content = aEntry.content || aEntry.summary;
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
@@ -662,52 +703,39 @@ BriefStorageService.prototype = {
         if (storedEntryID) {
             if (aEntry.date && storedEntryDate < aEntry.date) {
                 let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
-                var update = gStm.updateEntry;
-                update.params.date = aEntry.date;
-                update.params.read = markUnread || !isStoredEntryRead ? 0 : 1;
-                update.params.id = storedEntryID;
-                update.execute();
+                let params = this.updateEntryParamsArray.newBindingParams();
+                params.bindByName('date', aEntry.date);
+                params.bindByName('read', markUnread || !isStoredEntryRead ? 0 : 1);
+                params.bindByName('id', storedEntryID);
+                this.updateEntryParamsArray.addParams(params);
 
-                update = gStm.updateEntryText;
-                update.params.title = aEntry.title;
-                update.params.content = content;
-                update.params.authors = aEntry.authors;
-                update.params.id = storedEntryID;
-                update.execute();
+                params = this.updateEntryTextParamsArray.newBindingParams();
+                params.bindByName('title', aEntry.title);
+                params.bindByName('content', content);
+                params.bindByName('authors', aEntry.authors);
+                params.bindByName('id', storedEntryID);
+                this.updateEntryTextParamsArray.addParams(params);
 
                 this.updatedEntries.push(storedEntryID);
             }
         }
         else {
-            var insert = gStm.insertEntry;
-            insert.params.feedID = aFeed.feedID;
-            insert.params.primaryHash = primaryHash;
-            insert.params.secondaryHash = secondaryHash;
-            insert.params.providedID = providedID;
-            insert.params.entryURL = aEntry.entryURL;
-            insert.params.date = aEntry.date || Date.now();
-            insert.execute();
+            let params = this.insertEntryParamsArray.newBindingParams();
+            params.bindByName('feedID', aFeed.feedID);
+            params.bindByName('primaryHash', primaryHash);
+            params.bindByName('secondaryHash', secondaryHash);
+            params.bindByName('providedID', providedID);
+            params.bindByName('entryURL', aEntry.entryURL);
+            params.bindByName('date', aEntry.date || Date.now());
+            this.insertEntryParamsArray.addParams(params);
 
-            insert = gStm.insertEntryText;
-            insert.params.title = aEntry.title;
-            insert.params.content = content;
-            insert.params.authors = aEntry.authors;
-            insert.execute();
+            params = this.insertEntryTextParamsArray.newBindingParams();
+            params.bindByName('title', aEntry.title);
+            params.bindByName('content', content);
+            params.bindByName('authors', aEntry.authors);
+            this.insertEntryTextParamsArray.addParams(params);
 
-            let entryID = gConnection.lastInsertRowID;
-
-            let uri = newURI(aEntry.entryURL);
-            if (uri && gBms.isBookmarked(uri)) {
-                let bookmarkIDs = gBms.getBookmarkIdsForURI(uri, {});
-
-                let bm = bookmarkIDs.filter(isNormalBookmark)[0];
-                if (bm) {
-                    this.starEntry(true, entryID, bm);
-                    this.refreshTagsForEntry(entryID, bookmarkIDs);
-                }
-            }
-
-            this.newEntries.push(entryID);
+            this.newEntriesCount++;
         }
     },
 
@@ -1439,8 +1467,8 @@ var gStm = {
     },
 
     get insertEntryText() {
-        var sql = 'INSERT INTO entries_text (rowid, title, content, authors) ' +
-                  'VALUES(last_insert_rowid(), :title, :content, :authors)   ';
+        var sql = 'INSERT INTO entries_text (title, content, authors) ' +
+                  'VALUES(:title, :content, :authors)   ';
         delete this.insertEntryText;
         return this.insertEntryText = createStatement(sql);
     },
@@ -1457,6 +1485,12 @@ var gStm = {
                   'authors = :authors WHERE rowid = :id                        ';
         delete this.updateEntryText;
         return this.updateEntryText = createStatement(sql);
+    },
+
+    get getLastRowids() {
+        var sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT :count';
+        delete this.getLastRowids;
+        return this.getLastRowids = createStatement(sql);
     },
 
     get getEntryByPrimaryHash() {
@@ -2164,10 +2198,9 @@ BriefQuery.prototype = {
             if (!uri)
                 continue;
 
-            let bookmarks = gBms.getBookmarkIdsForURI(uri, {});
-            let normalBookmarks = bookmarks.filter(isNormalBookmark)
+            let bookmarks = gBms.getBookmarkIdsForURI(uri, {}).filter(isNormalBookmark)
 
-            if (!entry.starred || entry.starred && !normalBookmarks.length) {
+            if (entry.starred != !!bookmarks.length) {
                 let query = new BriefQuery();
                 query.entries = [entry.id];
                 query.starEntries(true);
@@ -2424,9 +2457,9 @@ function hashString(aString) {
 
 
 function reportError(aException, aRethrow) {
-    var message = aException.message;
-    message += ' Stack: ' + aException.stack;
-    message += ' Database error: ' + gConnection.lastErrorString;
+    var message = typeof aException == 'string' ? aException : aException.message;
+    message += '\nStack: ' + aException.stack;
+    message += '\nDatabase error: ' + gConnection.lastErrorString;
     var error = new Error(message, aException.fileName, aException.lineNumber);
     if (aRethrow)
         throw(error);
