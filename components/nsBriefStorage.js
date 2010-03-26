@@ -511,13 +511,15 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     updateFeed: function BriefStorage_updateFeed(aFeed, aCallback) {
+        this.updateFeedProperties(aFeed);
+
         this.newEntriesCount = 0;
         this.updatedEntries = [];
 
         var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
         if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
             aFeed.oldestEntryDate = Date.now();
-
+            log('here');
             this.updateEntryParamsArray = gStm.updateEntry.newBindingParamsArray();
             this.updateEntryTextParamsArray = gStm.updateEntryText.newBindingParamsArray();
             this.insertEntryParamsArray = gStm.insertEntry.newBindingParamsArray();
@@ -530,27 +532,6 @@ BriefStorageService.prototype = {
                 if (entry.date && entry.date < aFeed.oldestEntryDate)
                     aFeed.oldestEntryDate = entry.date;
             }
-
-            // Update the properties of the feed (and the cache).
-            let cachedFeed = this.getFeed(aFeed.feedID);
-            let stmt = gStm.updateFeed;
-            stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
-            stmt.params.subtitle    = cachedFeed.subtitle    = aFeed.subtitle;
-            stmt.params.imageURL    = cachedFeed.imageURL    = aFeed.imageURL;
-            stmt.params.imageLink   = cachedFeed.imageLink   = aFeed.imageLink;
-            stmt.params.imageTitle  = cachedFeed.imageTitle  = aFeed.imageTitle;
-            stmt.params.favicon     = cachedFeed.favicon     = aFeed.favicon;
-            stmt.params.lastUpdated = cachedFeed.lastUpdated = Date.now();
-            stmt.params.dateModified = cachedFeed.dateModified = dateModified;
-            stmt.params.oldestEntryDate = cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
-            stmt.params.feedID = aFeed.feedID;
-
-            stmt.executeAsync({
-                handleCompletion: function(aReason) {},
-                handleError: function(aError) {
-                    reportError(aError.message);
-                }
-            });
         }
 
         // Execute the insertions and notify observers.
@@ -720,6 +701,30 @@ BriefStorageService.prototype = {
         }
     },
 
+    // Updates properties of the feed (and refreshes the cache).
+    updateFeedProperties: function BriefStorage_updateFeedProperties(aFeed) {
+        var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
+        let cachedFeed = this.getFeed(aFeed.feedID);
+        let stmt = gStm.updateFeed;
+        
+        stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
+        stmt.params.subtitle    = cachedFeed.subtitle    = aFeed.subtitle;
+        stmt.params.imageURL    = cachedFeed.imageURL    = aFeed.imageURL;
+        stmt.params.imageLink   = cachedFeed.imageLink   = aFeed.imageLink;
+        stmt.params.imageTitle  = cachedFeed.imageTitle  = aFeed.imageTitle;
+        stmt.params.favicon     = cachedFeed.favicon     = aFeed.favicon;
+        stmt.params.lastUpdated = cachedFeed.lastUpdated = Date.now();
+        stmt.params.dateModified = cachedFeed.dateModified = dateModified;
+        stmt.params.oldestEntryDate = cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
+        stmt.params.feedID = aFeed.feedID;
+
+        stmt.executeAsync({
+            handleCompletion: function(aReason) {},
+            handleError: function(aError) {
+                reportError(aError.message);
+            }
+        });
+    },
 
     // nsIBriefStorage
     setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
