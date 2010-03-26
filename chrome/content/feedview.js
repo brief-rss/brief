@@ -59,11 +59,8 @@ function FeedView(aTitle, aQuery, aUnreadFixed, aStarredFixed) {
 
 FeedView.prototype = {
 
-    // Title of the view which is displayed in the header.
-    title: '',
-
-    // This property is used to temporarily override the title without losing the old one.
-    // It used for searching, when the search string is displayed in place of the title.
+    // Used to temporarily override the title. It used for searching,
+    // when the search string is displayed in place of the title.
     titleOverride: '',
 
     unreadParamFixed: false,
@@ -877,7 +874,6 @@ FeedView.prototype = {
             query.limit = LOAD_STEP_SIZE;
         }
 
-        this._highlightSearchTerms();
         this._asyncRefreshEntryList();
         this._setEmptyViewMessage();
         this._markVisibleAsRead();
@@ -924,8 +920,6 @@ FeedView.prototype = {
             let entries = this._entries.slice(startIndex, endIndex + 1);
             this._getFastQuery(entries).getFullEntries().forEach(this._appendEntry, this);
         }
-
-        this._highlightSearchTerms();
     },
 
     _appendEntry: function FeedView__appendEntry(aEntry) {
@@ -970,13 +964,14 @@ FeedView.prototype = {
         var nextEntry = this.feedContent.childNodes[aPosition];
         this.feedContent.insertBefore(articleContainer, nextEntry);
 
-        // Highlight search terms in the anonymous content.
+        // Highlight search terms.
         if (this.query.searchString) {
             let header = articleContainer.firstChild;
             let tags = this._getAnonElement(header, 'article-tags');
             let authors = this._getAnonElement(header, 'article-authors');
             let terms = this.query.searchString.match(/[A-Za-z0-9]+/g);
             for each (term in terms) {
+                this._highlightText(term, articleContainer);
                 this._highlightText(term, authors);
                 this._highlightText(term, tags);
             }
@@ -1081,14 +1076,6 @@ FeedView.prototype = {
         paragraph.style.display = 'block';
     },
 
-
-    _highlightSearchTerms: function FeedView__highlightSearchTerms() {
-        // Highlight search terms.
-        if (this.query.searchString) {
-            for each (term in this.query.searchString.match(/[A-Za-z0-9]+/g))
-                this._highlightText(term, this.feedContent);
-        }
-    },
 
     _highlightText: function FeedView__highlightText(aWord, aContainer) {
         var searchRange = this.document.createRange();
