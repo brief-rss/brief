@@ -1,7 +1,3 @@
-const CLASS_ID    = Components.ID('{13A031E4-7EE9-11DB-8E2E-A58155D89593}');
-const CLASS_NAME  = 'Feed updating service for the Brief extension';
-const CONTRACT_ID = '@ancestor/brief/updateservice;1';
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -19,32 +15,18 @@ const NOT_UPDATING = Ci.nsIBriefUpdateService.NOT_UPDATING;
 const NORMAL_UPDATING = Ci.nsIBriefUpdateService.NORMAL_UPDATING;
 const BACKGROUND_UPDATING = Ci.nsIBriefUpdateService.BACKGROUND_UPDATING;
 
-
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
-__defineGetter__('gObserverService', function() {
-    delete this.gObserverService;
-    return this.gObserverService = Cc['@mozilla.org/observer-service;1'].
-                                   getService(Ci.nsIObserverService);
-});
-__defineGetter__('gPrefs', function() {
-    delete this.gPrefs;
-    return this.gPrefs = Cc['@mozilla.org/preferences-service;1'].
-                         getService(Ci.nsIPrefService).
-                         getBranch('extensions.brief.').
-                         QueryInterface(Ci.nsIPrefBranch2);
-});
-__defineGetter__('gIOService', function() {
-    delete this.gIOService;
-    return this.gIOService = Cc['@mozilla.org/network/io-service;1'].
-                             getService(Ci.nsIIOService);
-});
-__defineGetter__('gStorage', function() {
-    delete this.gStorage;
-    return this.gStorage = Cc['@ancestor/brief/storage;1'].
-                           getService(Ci.nsIBriefStorage);
-});
+XPCOMUtils.defineLazyServiceGetter(this, 'gObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
+XPCOMUtils.defineLazyServiceGetter(this, 'gIOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
+XPCOMUtils.defineLazyServiceGetter(this, 'gStorage', '@ancestor/brief/storage;1', 'nsIBriefStorage');
 
+XPCOMUtils.defineLazyGetter(this, 'gPrefs', function() {
+    return Cc['@mozilla.org/preferences-service;1'].
+           getService(Ci.nsIPrefService).
+           getBranch('extensions.brief.').
+           QueryInterface(Ci.nsIPrefBranch2);
+});
 
 gUpdateService = null;
 
@@ -297,9 +279,9 @@ BriefUpdateService.prototype = {
         }
     },
 
-    classDescription: CLASS_NAME,
-    classID: CLASS_ID,
-    contractID: CONTRACT_ID,
+    classDescription: 'Feed updating service for the Brief extension',
+    classID: Components.ID('{13A031E4-7EE9-11DB-8E2E-A58155D89593}'),
+    contractID: '@ancestor/brief/updateservice;1',
     _xpcom_categories: [ { category: 'app-startup', service: true } ],
     _xpcom_factory: {
         createInstance: function(aOuter, aIID) {
@@ -411,8 +393,9 @@ FeedFetcher.prototype = {
         // here, because that's the one which is stored in the Live Bookmark.
         this.downloadedFeed.feedURL = this.feed.feedURL;
         this.downloadedFeed.feedID = this.feed.feedID;
+        this.downloadedFeed.favicon = this.feed.favicon;
 
-        if (!this.feed.favicon) {
+        if (!this.downloadedFeed.favicon) {
             // We use websiteURL instead of feedURL for resolving the favicon URL,
             // because many websites use services like Feedburner for generating their
             // feeds and we'd get the Feedburner's favicon instead.
@@ -424,15 +407,15 @@ FeedFetcher.prototype = {
                     self.finish(self.bozo, newEntriesCount);
                 }
                 new FaviconFetcher(this.downloadedFeed.websiteURL, callback);
-                return;
             }
             else {
                 this.downloadedFeed.favicon = 'no-favicon';
             }
         }
-
-        var newEntriesCount = gStorage.updateFeed(this.downloadedFeed);
-        this.finish(this.bozo, newEntriesCount);
+        else {
+            var newEntriesCount = gStorage.updateFeed(this.downloadedFeed);
+            this.finish(this.bozo, newEntriesCount);
+        }
     },
 
 
