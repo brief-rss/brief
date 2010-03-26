@@ -5,7 +5,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 9;
+const DATABASE_VERSION = 10;
 
 const FEEDS_TABLE_SCHEMA =
     'feedID          TEXT UNIQUE,         ' +
@@ -263,7 +263,22 @@ BriefStorageService.prototype = {
         case 8:
             executeSQL('DROP INDEX IF EXISTS entries_feedID_index');
             executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
+            // Fall through...
 
+        // To 1.5
+        case 9:
+            // Remove dead rows from entries_text.
+            executeSQL('DELETE FROM entries_text                       '+
+                       'WHERE rowid IN (                               '+
+                       '     SELECT entries_text.rowid                 '+
+                       '     FROM entries_text LEFT JOIN entries       '+
+                       '          ON entries_text.rowid = entries.id   '+
+                       '     WHERE NOT EXISTS (                        '+
+                       '         SELECT id                             '+
+                       '         FROM entries                          '+
+                       '         WHERE entries_text.rowid = entries.id '+
+                       '     )                                         '+
+                       ')                                              ');
         }
 
         gConnection.schemaVersion = DATABASE_VERSION;
@@ -511,15 +526,13 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     updateFeed: function BriefStorage_updateFeed(aFeed, aCallback) {
-        this.updateFeedProperties(aFeed);
-
         this.newEntriesCount = 0;
         this.updatedEntries = [];
 
         var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
         if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
             aFeed.oldestEntryDate = Date.now();
-            log('here');
+
             this.updateEntryParamsArray = gStm.updateEntry.newBindingParamsArray();
             this.updateEntryTextParamsArray = gStm.updateEntryText.newBindingParamsArray();
             this.insertEntryParamsArray = gStm.insertEntry.newBindingParamsArray();
@@ -533,6 +546,9 @@ BriefStorageService.prototype = {
                     aFeed.oldestEntryDate = entry.date;
             }
         }
+
+        // Must do it after processing entries in order to get the new oldestEntryDate.
+        this.updateFeedProperties(aFeed);
 
         // Execute the insertions and notify observers.
         var observers = this.observers;
@@ -557,7 +573,7 @@ BriefStorageService.prototype = {
                     // Notify observers.
                     var query = new BriefQuery();
                     query.entries = newEntries;
-                    let list = query.getEntryList();
+                    var list = query.getEntryList();
                     for each (observer in observers)
                         observer.onEntriesAdded(list);
 
@@ -572,7 +588,7 @@ BriefStorageService.prototype = {
 
         // Execute the updates and notify observers.
         if (this.updatedEntries.length) {
-            var updatedEntries = this.updatedEntries;
+            let updatedEntries = this.updatedEntries;
 
             gStm.updateEntry.bindParameters(this.updateEntryParamsArray);
             gStm.updateEntryText.bindParameters(this.updateEntryTextParamsArray);
@@ -584,9 +600,9 @@ BriefStorageService.prototype = {
                         return;
 
                     // Notify observers.
-                    let query = new BriefQuery();
+                    var query = new BriefQuery();
                     query.entries = updatedEntries;
-                    let list = query.getEntryList();
+                    var list = query.getEntryList();
                     for each (observer in observers)
                         observer.onEntriesUpdated(list);
                 },
@@ -706,7 +722,7 @@ BriefStorageService.prototype = {
         var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
         let cachedFeed = this.getFeed(aFeed.feedID);
         let stmt = gStm.updateFeed;
-        
+
         stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
         stmt.params.subtitle    = cachedFeed.subtitle    = aFeed.subtitle;
         stmt.params.imageURL    = cachedFeed.imageURL    = aFeed.imageURL;
@@ -763,19 +779,6 @@ BriefStorageService.prototype = {
     // Moves expired entries to Trash and permanently removes
     // the deleted items from database.
     purgeEntries: function BriefStorage_purgeEntries(aDeleteExpired) {
-        var removeEntries = createStatement(
-            'DELETE FROM entries                                                      ' +
-            'WHERE id IN (                                                            ' +
-            '   SELECT entries.id                                                     ' +
-            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        ' +
-            '   WHERE (entries.deleted = :oldState AND feeds.oldestEntryDate > entries.date) ' +
-            '         OR (:now - feeds.hidden > :retentionTime AND feeds.hidden != 0)        ' +
-            ')                                                                               ');
-        var removeFeeds = createStatement(
-            'DELETE FROM feeds                                ' +
-            'WHERE :now - feeds.hidden > :retentionTime AND   ' +
-            '      feeds.hidden != 0                          ');
-
         gConnection.beginTransaction()
         try {
             if (aDeleteExpired) {
@@ -784,14 +787,19 @@ BriefStorageService.prototype = {
                 this.expireEntriesByNumber();
             }
 
-            removeEntries.params.oldState = ENTRY_STATE_DELETED;
-            removeEntries.params.now = Date.now();
-            removeEntries.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
-            removeEntries.execute();
+            gStm.purgeDeletedEntriesText.params.deletedState = ENTRY_STATE_DELETED;
+            gStm.purgeDeletedEntriesText.params.currentDate = Date.now();
+            gStm.purgeDeletedEntriesText.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
+            gStm.purgeDeletedEntriesText.execute();
 
-            removeFeeds.params.now = Date.now();
-            removeFeeds.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
-            removeFeeds.execute();
+            gStm.purgeDeletedEntries.params.deletedState = ENTRY_STATE_DELETED;
+            gStm.purgeDeletedEntries.params.currentDate = Date.now();
+            gStm.purgeDeletedEntries.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
+            gStm.purgeDeletedEntries.execute();
+
+            gStm.purgeDeletedFeeds.params.currentDate = Date.now();
+            gStm.purgeDeletedFeeds.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
+            gStm.purgeDeletedFeeds.execute();
         }
         catch (ex) {
             reportError(ex);
@@ -1477,6 +1485,38 @@ var gStm = {
         var sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT :count';
         delete this.getLastRowids;
         return this.getLastRowids = createStatement(sql);
+    },
+
+    get purgeDeletedEntriesText() {
+        var sql = 'DELETE FROM entries_text                                                 '+
+                  'WHERE rowid IN (                                                         '+
+                  '   SELECT entries.id                                                     '+
+                  '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
+                  '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
+                  '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
+                  ')                                                                                   ';
+        delete this.purgeDeletedEntriesText;
+        return this.purgeDeletedEntriesText = createStatement(sql);
+    },
+
+    get purgeDeletedEntries() {
+        var sql = 'DELETE FROM entries                                                      '+
+                  'WHERE id IN (                                                            '+
+                  '   SELECT entries.id                                                     '+
+                  '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
+                  '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
+                  '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
+                  ')                                                                                   ';
+        delete this.purgeDeletedEntries;
+        return this.purgeDeletedEntries = createStatement(sql);
+    },
+
+    get purgeDeletedFeeds() {
+        var sql = 'DELETE FROM feeds                                      '+
+                  'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
+                  '      feeds.hidden != 0                                ';
+        delete this.purgeDeletedFeeds;
+        return this.purgeDeletedFeeds = createStatement(sql);
     },
 
     get getEntryByPrimaryHash() {
