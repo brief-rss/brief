@@ -55,46 +55,27 @@ const ENTRY_TAGS_TABLE_SCHEMA =
     'tagName  TEXT,    ' +
     'entryID  INTEGER  ';
 
+const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
+const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
+XPCOMUtils.defineLazyServiceGetter(this, 'gObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
+XPCOMUtils.defineLazyServiceGetter(this, 'gIOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
+XPCOMUtils.defineLazyServiceGetter(this, 'gStorage', '@ancestor/brief/storage;1', 'nsIBriefStorage');
+XPCOMUtils.defineLazyServiceGetter(this, 'gBms', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
-__defineGetter__('gPlaces', function() {
-    delete this.gPlaces;
+XPCOMUtils.defineLazyGetter(this, 'gPrefs', function() {
+    return Cc['@mozilla.org/preferences-service;1'].
+           getService(Ci.nsIPrefService).
+           getBranch('extensions.brief.').
+           QueryInterface(Ci.nsIPrefBranch2);
+});
+XPCOMUtils.defineLazyGetter(this, 'gPlaces', function() {
     var tempScope = {};
     Components.utils.import('resource://gre/modules/utils.js', tempScope);
-    return this.gPlaces = tempScope.PlacesUtils;
+    return tempScope.PlacesUtils;
 });
-
-__defineGetter__('gObserverService', function() {
-    delete this.gObserverService;
-    return this.gObserverService = Cc['@mozilla.org/observer-service;1'].
-                                   getService(Ci.nsIObserverService);
-});
-
-__defineGetter__('gPrefs', function() {
-    delete this.gPrefs;
-    return this.gPrefs = Cc['@mozilla.org/preferences-service;1'].
-                         getService(Ci.nsIPrefService).
-                         getBranch('extensions.brief.').
-                         QueryInterface(Ci.nsIPrefBranch2);
-});
-__defineGetter__('gIOService', function() {
-    delete this.gIOService;
-    return this.gIOService = Cc['@mozilla.org/network/io-service;1'].
-                             getService(Ci.nsIIOService);
-});
-
-__defineGetter__('gBms', function() {
-    // Getting bookmarks service at startup sometimes throws an exception.
-    var bms = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
-              getService(Ci.nsINavBookmarksService);
-    delete this.gBms;
-    return this.gBms = bms;
-});
-
-const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
-const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
 function executeSQL(aSQLString) {
     try {
@@ -111,7 +92,7 @@ function createStatement(aSQLString) {
         var statement = gConnection.createStatement(aSQLString);
     }
     catch (ex) {
-        log('SQL statement: ' + aSQLString);
+        log('SQL statement:\n' + aSQLString);
         reportError(ex, true);
     }
     return statement;
