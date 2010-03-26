@@ -1,4 +1,4 @@
-const THROBBER_URL = 'chrome://global/skin/throbber/Throbber-small.gif';
+const THROBBER_URL = 'chrome://brief/skin/throbber.gif';
 const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
 var gViewList = {
