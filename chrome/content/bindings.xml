@@ -318,6 +318,10 @@
                     function callback() {
                         var feedContent = document.getElementById('feed-content');
                         feedContent.removeChild(self);
+
+                        var evt = document.createEvent('Events');
+                        evt.initEvent('EntryRemoved', false, false);
+                        document.dispatchEvent(evt);
                     }
                     $(this).fadeOut(200, callback);
                     break;
