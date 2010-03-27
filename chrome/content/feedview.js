@@ -780,6 +780,23 @@ FeedView.prototype = {
         // Remember index of selected entry if it is removed.
         var selectedEntryIndex = -1;
 
+        let self = this;
+        function finish() {
+            self.document.removeEventListener('EntryRemoved', finish, true);
+
+            if (aLoadNewEntries)
+                self._loadEntries();
+
+            self._setEmptyViewMessage();
+
+            if (self._loadedEntries.length) {
+                let newSelection = self._loadedEntries[selectedEntryIndex] != -1
+                                   ? self._loadedEntries[selectedEntryIndex]
+                                   : self._loadedEntries[self._loadedEntries.length - 1];
+                self.selectEntry(newSelection);
+            }
+        }
+
         if (indices.length == 1 && aAnimate) {
             let entryID = this._loadedEntries[indices[0]];
 
@@ -788,8 +805,11 @@ FeedView.prototype = {
                 selectedEntryIndex = indices[0];
             }
 
-            // The element will be gracefully removed by jQuery.
+            // Gracefully fade the entry using jQuery. For callback, the binding
+            // will send EntryRemoved event when it's finished.
+            this.document.addEventListener('EntryRemoved', finish, true);
             this._sendEvent(entryID, 'DoRemoveEntry');
+
             this._loadedEntries.splice(indices[0], 1);
             this._entries.splice(indices[0], 1);
         }
@@ -798,7 +818,7 @@ FeedView.prototype = {
 
             // Start from the oldest entry so that we don't change the relative
             // insertion positions of consecutive entries.
-            for (let i = indices.length -1; i >= 0; i--) {
+            for (let i = indices.length - 1; i >= 0; i--) {
                 let element = this.feedContent.childNodes[indices[i]];
                 this.feedContent.removeChild(element);
 
@@ -810,18 +830,8 @@ FeedView.prototype = {
                 this._loadedEntries.splice(indices[i], 1);
                 this._entries.splice(indices[i], 1);
             }
-        }
 
-        if (aLoadNewEntries)
-            this._loadEntries();
-
-        this._setEmptyViewMessage();
-
-        if (this._loadedEntries.length) {
-            let newSelection = this._loadedEntries[selectedEntryIndex] != -1
-                               ? this._loadedEntries[selectedEntryIndex]
-                               : this._loadedEntries[this._loadedEntries.length - 1];
-            this.selectEntry(newSelection);
+            finish();
         }
     },
 
