@@ -1,32 +1,31 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
+const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
+
+const FEED_ICON_URL = 'chrome://brief/skin/icon.png';
+
 const TIMER_TYPE_ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
 const TIMER_TYPE_PRECISE  = Ci.nsITimer.TYPE_REPEATING_PRECISE;
 const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
 
-const ICON_DATAURL_PREFIX = 'data:image/x-icon;base64,';
-const FEED_ICON_URL       = 'chrome://brief/skin/icon.png';
-
-const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
-const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
-
 const NOT_UPDATING = Ci.nsIBriefUpdateService.NOT_UPDATING;
 const NORMAL_UPDATING = Ci.nsIBriefUpdateService.NORMAL_UPDATING;
 const BACKGROUND_UPDATING = Ci.nsIBriefUpdateService.BACKGROUND_UPDATING;
+
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 XPCOMUtils.defineLazyServiceGetter(this, 'gObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
 XPCOMUtils.defineLazyServiceGetter(this, 'gIOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
 XPCOMUtils.defineLazyServiceGetter(this, 'gStorage', '@ancestor/brief/storage;1', 'nsIBriefStorage');
+XPCOMUtils.defineLazyGetter(this, 'gPrefs', function()
+    Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
+                                             getBranch('extensions.brief.').
+                                             QueryInterface(Ci.nsIPrefBranch2)
+);
 
-XPCOMUtils.defineLazyGetter(this, 'gPrefs', function() {
-    return Cc['@mozilla.org/preferences-service;1'].
-           getService(Ci.nsIPrefService).
-           getBranch('extensions.brief.').
-           QueryInterface(Ci.nsIPrefBranch2);
-});
 
 gUpdateService = null;
 
@@ -35,6 +34,13 @@ function BriefUpdateService() {
     gObserverService.addObserver(this, 'brief:feed-updated', false);
     gObserverService.addObserver(this, 'profile-after-change', false);
     gObserverService.addObserver(this, 'quit-application', false);
+
+    XPCOMUtils.defineLazyGetter(this, 'updateTimer', function()
+        Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer));
+    XPCOMUtils.defineLazyGetter(this, 'startupDelayTimer', function()
+        Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer));
+    XPCOMUtils.defineLazyGetter(this, 'fetchDelayTimer', function()
+         Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer));
 }
 
 BriefUpdateService.prototype = {
@@ -52,26 +58,12 @@ BriefUpdateService.prototype = {
     // nsIBriefUpdateService
     status: NOT_UPDATING,
 
-    scheduledFeeds: [],  // feeds to be updated in the current job (array of nsIBriefFeed's)
-    updateQueue:    [],  // remaining feeds to be fetched
+    scheduledFeeds: [],  // current batch of feeds to be updated (array of nsIBriefFeed's)
+    updateQueue:    [],  // remaining feeds to be fetched in the current batch
     completedFeeds: [],  // feeds that have already been fetched and parsed
 
     feedsWithNewEntriesCount: 0,  // number of feeds updated in the current batch that have new entries
     newEntriesCount:          0,  // total number of new entries in the current batch
-
-
-    get updateTimer BUS_updateTimer()
-        this.__updateTimer || (this.__updateTimer = Cc['@mozilla.org/timer;1'].
-                                                    createInstance(Ci.nsITimer)),
-
-    get startupDelayTimer BUS_startupDelayTimer()
-        this.__startupDelayTimer || (this.__startupDelayTimer = Cc['@mozilla.org/timer;1'].
-                                                                createInstance(Ci.nsITimer)),
-
-    get fetchDelayTimer BUS_fetchDelayTimer()
-        this.__fetchDelayTimer || (this.__fetchDelayTimer = Cc['@mozilla.org/timer;1'].
-                                                            createInstance(Ci.nsITimer)),
-
 
     // nsIBriefUpdateService
     updateAllFeeds: function BUS_updateAllFeeds(aInBackground) {
@@ -137,10 +129,6 @@ BriefUpdateService.prototype = {
             // Fall through...
 
         case this.updateTimer:
-            // XXX This may have broken update service for some reason, it looks
-            // like FeedFetcher doesn't always call finish() and I don't know why.
-            // Let's hope the refactoring fixed this, otherwise this will have to be
-            // removed.
             if (this.status != NOT_UPDATING)
                 return;
 
@@ -490,8 +478,8 @@ FaviconFetcher.prototype = {
             requestFailed = !aRequest.requestSucceeded;
 
         if (!requestFailed && this._countRead != 0) {
-            var base64DataString =  btoa(String.fromCharCode.apply(null, this._bytes))
-            var favicon = ICON_DATAURL_PREFIX + base64DataString;
+            let base64DataString =  btoa(String.fromCharCode.apply(null, this._bytes))
+            var favicon = 'data:image/x-icon;base64,' + base64DataString;
         }
         else {
             favicon = 'no-favicon';
