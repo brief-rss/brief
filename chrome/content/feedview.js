@@ -769,6 +769,8 @@ FeedView.prototype = {
      */
     _onEntriesRemoved: function FeedView__onEntriesRemoved(aRemovedEntries, aAnimate,
                                                            aLoadNewEntries) {
+        this._entries = this._entries.filter(function(e) aRemovedEntries.indexOf(e) == -1);
+
         var indices = aRemovedEntries.map(function(e) this._loadedEntries.indexOf(e), this).
                                       filter(function(i) i != -1);
         if (!indices.length)
@@ -812,7 +814,6 @@ FeedView.prototype = {
             this._sendEvent(entryID, 'DoRemoveEntry');
 
             this._loadedEntries.splice(indices[0], 1);
-            this._entries.splice(indices[0], 1);
         }
         else {
             indices.sort(function(a, b) a - b);
@@ -829,7 +830,6 @@ FeedView.prototype = {
                 }
 
                 this._loadedEntries.splice(indices[i], 1);
-                this._entries.splice(indices[i], 1);
             }
 
             finish();
