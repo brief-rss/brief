@@ -376,8 +376,9 @@ FeedView.prototype = {
         var middleLine = this.window.pageYOffset + Math.round(this.window.innerHeight / 2);
 
         // Get the element in the middle of the screen.
-        for (var i = 0; i < elems.length - 1; i++) {
-            if ((elems[i].offsetTop <= middleLine) && (elems[i + 1].offsetTop > middleLine)) {
+        for (let i = elems.length - 1; i >= 0; i--) {
+            if ((elems[i].offsetTop <= middleLine)
+                && (!elems[i + 1] || elems[i + 1].offsetTop > middleLine)) {
                 var middleElement = elems[i];
                 break;
             }
@@ -919,11 +920,15 @@ FeedView.prototype = {
      */
     _loadEntries: function FeedView__loadEntries() {
         var win = this.document.defaultView;
+        var middleEntry = this._getMiddleEntryElement();
 
-        if (win.scrollMaxY - win.pageYOffset > win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS)
+        if (win.scrollMaxY - win.pageYOffset > win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS
+            && middleEntry != this.feedContent.lastChild) {
             return;
+        }
 
-        while (win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD
+        while ((win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD
+                || middleEntry == this.feedContent.lastChild)
                && this._loadedEntries.length < this._entries.length) {
             let startIndex = this._loadedEntries.length;
             let endIndex = Math.min(startIndex + LOAD_STEP_SIZE, this._entries.length - 1);
