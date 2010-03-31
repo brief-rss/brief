@@ -58,6 +58,7 @@ const ENTRY_TAGS_TABLE_SCHEMA =
 const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
 const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
+
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 XPCOMUtils.defineLazyServiceGetter(this, 'gObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
@@ -65,12 +66,11 @@ XPCOMUtils.defineLazyServiceGetter(this, 'gIOService', '@mozilla.org/network/io-
 XPCOMUtils.defineLazyServiceGetter(this, 'gStorage', '@ancestor/brief/storage;1', 'nsIBriefStorage');
 XPCOMUtils.defineLazyServiceGetter(this, 'gBms', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
-XPCOMUtils.defineLazyGetter(this, 'gPrefs', function() {
-    return Cc['@mozilla.org/preferences-service;1'].
-           getService(Ci.nsIPrefService).
-           getBranch('extensions.brief.').
-           QueryInterface(Ci.nsIPrefBranch2);
-});
+XPCOMUtils.defineLazyGetter(this, 'gPrefs', function()
+    Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
+                                             getBranch('extensions.brief.').
+                                             QueryInterface(Ci.nsIPrefBranch2)
+);
 XPCOMUtils.defineLazyGetter(this, 'gPlaces', function() {
     var tempScope = {};
     Components.utils.import('resource://gre/modules/utils.js', tempScope);
