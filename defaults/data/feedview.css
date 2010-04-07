@@ -16,8 +16,8 @@ body {
     text-align: center;
     display: none;
     margin-top: 100px;
+    -moz-user-select: none;
 }
-
 
 
 /* ---------------------------  Article  ------------------------ */
