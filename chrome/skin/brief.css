@@ -45,7 +45,7 @@ page {
 
 #left-pane-splitter:hover {
     border-right-color: #ffb754;
-    -moz-border-left-colors: #ffffff #ffebd2 #ffdfb1 #ffd090 #ffc36f;
+    -moz-border-left-colors: #ffffff #ffebd2 #ffdfb1 #ffd090 #ffc36f !important;
 }
 
 #reveal-sidebar-button {
