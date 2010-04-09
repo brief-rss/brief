@@ -550,7 +550,7 @@ FeedView.prototype = {
                 let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
 
                 let starElem = this._getAnonElement(target.firstChild, 'article-star');
-                gTopWindow.StarUI.showEditBookmarkPopup(itemID, starElem, 'after_start');
+                getTopWindow().StarUI.showEditBookmarkPopup(itemID, starElem, 'after_start');
                 break;
 
             // Set up the template page when it's loaded.
@@ -784,7 +784,7 @@ FeedView.prototype = {
 
         // Removing content may cause a scroll event, which should be ignored.
         this._ignoreScrollEvent = true;
-        gTopWindow.StarUI.panel.hidePopup();
+        getTopWindow().StarUI.panel.hidePopup();
 
         // Remember index of selected entry if it is removed.
         var selectedEntryIndex = -1;
@@ -852,7 +852,7 @@ FeedView.prototype = {
 
         this._stopSmoothScrolling();
         clearTimeout(this._markVisibleTimeout);
-        gTopWindow.StarUI.panel.hidePopup();
+        getTopWindow().StarUI.panel.hidePopup();
 
         // Clear the old entries.
         var container = this.document.getElementById('container');

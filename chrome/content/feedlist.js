@@ -1077,7 +1077,7 @@ var gFeedListContextMenu = {
 
     openWebsite: function gFeedListContextMenu_openWebsite() {
         var url = this.targetFeed.websiteURL;
-        gTopWindow.gBrowser.loadOneTab(url);
+        getTopWindow().gBrowser.loadOneTab(url);
     },
 
 

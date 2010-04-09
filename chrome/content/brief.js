@@ -28,16 +28,6 @@ __defineGetter__('gTemplateURI', function() {
                                newURI(TEMPLATE_URL, null, null);
 });
 
-__defineGetter__('gTopWindow', function() {
-    delete this.gTopWindow;
-    return this.gTopWindow = window.QueryInterface(Ci.nsIInterfaceRequestor).
-                                    getInterface(Ci.nsIWebNavigation).
-                                    QueryInterface(Ci.nsIDocShellTreeItem).
-                                    rootTreeItem.
-                                    QueryInterface(Ci.nsIInterfaceRequestor).
-                                    getInterface(Ci.nsIDOMWindow);
-});
-
 
 function init() {
     gPrefs.register();
@@ -301,7 +291,7 @@ var gCommands = {
                      newURI(document.documentURI, null, null);
 
         if (aNewTab)
-            gTopWindow.gBrowser.loadOneTab(aURL, docURI);
+            getTopWindow().gBrowser.loadOneTab(aURL, docURI);
         else
             gFeedView.browser.loadURI(aURL);
     },
@@ -462,6 +452,15 @@ function onKeyPress(aEvent) {
             aEvent.preventDefault();
         }
     }
+}
+
+function getTopWindow() {
+    return window.QueryInterface(Ci.nsIInterfaceRequestor).
+           getInterface(Ci.nsIWebNavigation).
+           QueryInterface(Ci.nsIDocShellTreeItem).
+           rootTreeItem.
+           QueryInterface(Ci.nsIInterfaceRequestor).
+           getInterface(Ci.nsIDOMWindow);
 }
 
 
