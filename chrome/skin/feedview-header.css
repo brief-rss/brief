@@ -106,7 +106,6 @@
 
 
 #searchbar {
-    -moz-binding: url(chrome://brief/content/bindings.xml#searchbar);
     width: 150px;
     margin: 6px 0 6px 10px;
     padding: 0 3px 0 5px;
@@ -119,42 +118,4 @@
 
 #searchbar[isempty="true"]  {
     color: #7c909f;
-}
-
-.searchbar-textbox {
-    -moz-box-align: center;
-    -moz-box-pack: end;
-}
-
-.searchbar-button-image {
-    margin-top: 0;
-    margin-bottom: 0;
-    -moz-margin-start: 4px;
-    -moz-margin-end: 0;
-    list-style-image: url(icons/search.png);
-}
-
-.searchbar-clearbutton {
-    -moz-appearance: none;
-    border: none !important;
-    cursor: default;
-    list-style-image: url(icons/searchbar-clear.png);
-    -moz-image-region: rect(0px, 16px, 16px, 0px);
-    -moz-margin-start: 4px;
-    -moz-margin-end: 2px;
-    padding: 0px !important;
-}
-
-.searchbar-clearbutton > .toolbarbutton-icon {
-    -moz-margin-end: 0px;
-}
-
-.searchbar-clearbutton:hover {
-    -moz-image-region: rect(0px, 32px, 16px, 16px);
-    padding: 0px !important;
-}
-
-.searchbar-clearbutton:hover:active {
-    -moz-image-region: rect(0px, 48px, 16px, 32px);
-    padding: 0px !important;
 }

@@ -449,12 +449,8 @@ FeedView.prototype = {
         else
             var noExistingView = true;
 
-        // Clear the searchbar.
-        var searchbar = getElement('searchbar');
-        if (!this.query.searchString && searchbar.searchInProgress) {
-            searchbar.searchInProgress = false;
-            searchbar.clear();
-        }
+        if (!this.query.searchString)
+            getElement('searchbar').value = '';
 
         // Disable filters for views with fixed parameters.
         getElement('filter-unread-checkbox').disabled = this.unreadParamFixed;
