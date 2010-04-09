@@ -86,7 +86,7 @@ function initToolbarsAndStrings() {
     getElement('headlines-checkbox').checked = gPrefs.showHeadlinesOnly;
     getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
     getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
-    getElement('reveal-sidebar-button').hidden = !getElement('left-pane').hidden;
+    getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
     // Cache the strings, so they don't have to retrieved every time when
     // refreshing the feed view.
@@ -121,15 +121,15 @@ function unload() {
 var gCommands = {
 
     hideSidebar: function cmd_hideSidebar() {
-        var pane = getElement('left-pane');
-        var splitter = getElement('left-pane-splitter');
+        var pane = getElement('sidebar');
+        var splitter = getElement('sidebar-splitter');
         pane.hidden = splitter.hidden = true;
         getElement('reveal-sidebar-button').hidden = false;
     },
 
     revealSidebar: function cmd_revealSidebar() {
-        var pane = getElement('left-pane');
-        var splitter = getElement('left-pane-splitter');
+        var pane = getElement('sidebar');
+        var splitter = getElement('sidebar-splitter');
         pane.hidden = splitter.hidden = false;
         getElement('reveal-sidebar-button').hidden = true;
 
@@ -357,8 +357,8 @@ function refreshProgressmeter() {
 function showFirstRunUI() {
     if (gFeedView)
         gFeedView.detach();
-    
-    getElement('left-pane-deck').selectedIndex = 1;
+
+    getElement('sidebar-deck').selectedIndex = 1;
 
     var query = PlacesUtils.history.getNewQuery();
     var options = PlacesUtils.history.getNewQueryOptions();

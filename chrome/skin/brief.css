@@ -1,6 +1,7 @@
 /* Reset these properties on everything but context menu popups */
 page, hbox, vbox, deck, richlistbox, richlistitem, image, button, progressmeter,
-progressmeter *, textbox, tree, treecols, treecol, treechildren, splitter, browser {
+progressmeter *, textbox, tree, treecols, treecol, treechildren, splitter, browser,
+listbox, listitem, label {
     -moz-appearance: none;
     height: auto;
     width: auto;
@@ -30,20 +31,24 @@ page {
     margin: 0 !important;
 }
 
-#left-pane {
+#sidebar {
     width: 250px;
 }
 
-#left-pane * {
+#sidebar-box {
+    overflow: auto !important;
+}
+
+#sidebar-box * {
     overflow: hidden;
 }
 
-#left-pane-splitter {
+#sidebar-splitter {
     border-left: 5px solid #ffffff;
     border-right: 1px solid #7c909f;
 }
 
-#left-pane-splitter:hover {
+#sidebar-splitter:hover {
     border-right-color: #ffb754;
     -moz-border-left-colors: #ffffff #ffebd2 #ffdfb1 #ffd090 #ffc36f !important;
 }
@@ -61,15 +66,11 @@ page {
     border-right-color: #ffac62;
 }
 
-#left-pane-box {
-    overflow: auto !important;
-}
-
-#left-pane-toolbar {
+#sidebar-toolbar {
     min-height: 20px;
 }
 
-#left-pane-separator {
+#sidebar-separator {
     border-bottom: 1px solid #7c909f;
     margin-left: 5px;
     margin-right: 5px;
@@ -117,53 +118,9 @@ page {
     -moz-image-region: rect(16px, 48px, 32px, 32px);
 }
 
-
-#select-home-folder-label {
-    margin: 7px 0 7px 5px;
-    font-weight: bold;
+#tags-button {
+    list-style-image: url(icons/tag.png);
 }
-
-#places-tree {
-    -moz-box-flex: 1;
-    max-height: 400px;
-    border-bottom: 1px solid #7c909f;
-    font-size: 13px;
-}
-
-
-#confirm-home-folder {
-    margin: 10px 3px 5px 0;
-    border: 1px solid #7c909f;
-    padding: 3px 6px;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-#confirm-home-folder {
-  -moz-appearance: button;
-  border: 3px solid;
-  -moz-border-top-colors: transparent ThreeDHighlight ThreeDLightShadow;
-  -moz-border-right-colors: transparent ThreeDDarkShadow ThreeDShadow;
-  -moz-border-bottom-colors: transparent ThreeDDarkShadow ThreeDShadow;
-  -moz-border-left-colors: transparent ThreeDHighlight ThreeDLightShadow;
-  background-color: ThreeDFace;
-  color: ButtonText;
-}
-
-#confirm-home-folder .button-box {
-  border: 1px solid transparent;
-  padding-top: 1px;
-  padding-bottom: 2px;
-  -moz-padding-start: 3px;
-  -moz-padding-end: 4px;
-}
-
-#confirm-home-folder .button-text {
-  margin: 0 !important;
-  text-align: center;
-}
-
-
 
 /* =========== View list richlistbox =========== */
 
@@ -175,14 +132,6 @@ page {
 
 .view-list-item {
     padding: 1px 0 1px 15px;
-}
-
-#view-list:not([showTags]) > .tag-view {
-    display: none;
-}
-
-.tag-view {
-    padding-left: 25px;
 }
 
 .view-list-item[selected="true"] {
@@ -221,10 +170,30 @@ page {
 #trash-folder > .view-icon {
     -moz-image-region: rect(48px, 16px, 64px, 0px);
 }
-.tag-view > .view-icon {
-    list-style-image: url(icons/tag.png);
+
+
+/* =========== Tag listbox ========== */
+
+#tag-list {
+    border-left: 1px solid #7c909f;
 }
 
+.tag-list-item {
+    width: 120px;
+    padding: 2px 3px;
+    font-size: 13px !important;
+    color: #000000;
+}
+
+.tag-list-item[selected="true"] {
+    background-color: #d5ecfd;
+    color: #00344f;
+    outline: none;
+}
+
+.tag-list-item[unread] {
+    font-weight: bold;
+}
 
 
 /* =========== Feed list tree =========== */
@@ -327,6 +296,51 @@ page {
     list-style-image: url(icons/feed-favicon.png) !important;
 }
 
+
+#select-home-folder-label {
+    margin: 7px 0 7px 5px;
+    font-weight: bold;
+}
+
+#places-tree {
+    -moz-box-flex: 1;
+    max-height: 400px;
+    border-bottom: 1px solid #7c909f;
+    font-size: 13px;
+}
+
+
+#confirm-home-folder {
+    margin: 10px 3px 5px 0;
+    border: 1px solid #7c909f;
+    padding: 3px 6px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#confirm-home-folder {
+  -moz-appearance: button;
+  border: 3px solid;
+  -moz-border-top-colors: transparent ThreeDHighlight ThreeDLightShadow;
+  -moz-border-right-colors: transparent ThreeDDarkShadow ThreeDShadow;
+  -moz-border-bottom-colors: transparent ThreeDDarkShadow ThreeDShadow;
+  -moz-border-left-colors: transparent ThreeDHighlight ThreeDLightShadow;
+  background-color: ThreeDFace;
+  color: ButtonText;
+}
+
+#confirm-home-folder .button-box {
+  border: 1px solid transparent;
+  padding-top: 1px;
+  padding-bottom: 2px;
+  -moz-padding-start: 3px;
+  -moz-padding-end: 4px;
+}
+
+#confirm-home-folder .button-text {
+  margin: 0 !important;
+  text-align: center;
+}
 
 
 /* ======= Reset default properties ======= */

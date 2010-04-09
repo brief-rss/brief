@@ -26,7 +26,7 @@
 
     <popupset id="main-popupset">
         <menupopup id="view-list-popup"
-                   onpopupshowing="gViewList.onContextMenuShowing(event)">
+                   onpopupshowing="gViewListContextMenu.init(gViewList.selectedItem)">
             <menuitem id="ctx-mark-special-folder-read"
                       label="&ctxMarkFolderRead.label;"
                       oncommand="gViewListContextMenu.markFolderRead()"/>
@@ -46,6 +46,16 @@
             <menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
                       oncommand="gViewListContextMenu.emptyTrash()"/>
+        </menupopup>
+        <menupopup id="tag-list-popup"
+                   onpopupshowing="gTagListContextMenu.targetItem = gTagList.selectedItem">
+            <menuitem id="ctx-mark-tag-read"
+                      label="&ctxMarkTagRead.label;"
+                      oncommand="gTagListContextMenu.markTagRead()"/>
+            <menuseparator id="ctx-tag-list-separator"/>
+            <menuitem id="ctx-delete-tag"
+                      label="&ctxDeleteTag.label;"
+                      oncommand="gTagListContextMenu.deleteTag()"/>
         </menupopup>
         <menupopup id="feed-list-popup"
                    onpopupshowing="gFeedList.onContextMenuShowing(event)">
@@ -85,9 +95,9 @@
     </popupset>
 
     <hbox id="main-box" flex="1">
-        <vbox id="left-pane" persist="width hidden">
-            <deck id="left-pane-deck" selectedIndex="0" flex="1">
-                <vbox id="left-pane-box">
+        <hbox id="sidebar" persist="width hidden">
+            <deck id="sidebar-deck" selectedIndex="0" flex="2">
+                <vbox id="sidebar-box">
                     <richlistbox id="view-list"
                                  suppressonselect="true"
                                  context="view-list-popup"
@@ -119,15 +129,15 @@
                         </richlistitem>
                     </richlistbox>
 
-                    <hbox id="left-pane-toolbar">
+                    <hbox id="sidebar-toolbar">
                         <deck id="update-progress-deck" flex="1"
                               selectedIndex="0">
                             <vbox pack="center">
-                                <hbox id="left-pane-separator"/>
+                                <hbox id="sidebar-separator"/>
                             </vbox>
                             <progressmeter id="update-progress"/>
                         </deck>
-                        <hbox id="left-pane-buttons">
+                        <hbox id="sidebar-buttons">
                             <deck id="update-buttons-deck" selectedIndex="0">
                                 <button id="update-button"
                                         class="brief-button sidebar-button"
@@ -182,9 +192,15 @@
                     </hbox>
                 </vbox>
             </deck>
-        </vbox>
 
-        <splitter id="left-pane-splitter"
+            <listbox id="tag-list"
+                     hidden="true"
+                     context="tag-list-popup"
+                     onselect="gTagList.onSelect(event)"
+                     onclick="gTagList.onClick(event)"/>
+        </hbox>
+
+        <splitter id="sidebar-splitter"
                   tooltiptext="&sidebarSplitter.tooltip;"
                   persist="hidden"
                   ondblclick="gCommands.hideSidebar()"/>
