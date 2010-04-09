@@ -471,7 +471,6 @@ FeedView.prototype = {
             this.browser.loadURI(gTemplateURI.spec);
         }
         else {
-            this.window.addEventListener('resize', this, false);
             for each (event in this._events)
                 this.document.addEventListener(event, this, true);
 
@@ -496,6 +495,13 @@ FeedView.prototype = {
 
         this._stopSmoothScrolling();
         clearTimeout(this._markVisibleTimeout);
+
+        // Remove entries.
+        var container = this.document.getElementById('container');
+        container.removeChild(this.feedContent);
+        var content = this.document.createElement('div');
+        content.id = 'feed-content';
+        container.appendChild(content);
 
         gFeedView = null;
     },
@@ -874,6 +880,11 @@ FeedView.prototype = {
         var query = this.getQuery();
         query.limit = gPrefs.minInitialEntries;
         var win = this.window;
+
+        // Temporarily remove the listener because reading window.innerHeight
+        // can trigger a resize event (!?).
+        this.window.removeEventListener('resize', this, false);
+
         while (win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD) {
             let entries = query.getFullEntries();
             if (!entries.length)
@@ -884,6 +895,11 @@ FeedView.prototype = {
             query.offset += query.limit;
             query.limit = LOAD_STEP_SIZE;
         }
+
+        // Resize events can be dispatched asynchronously, so this listener can't be
+        // added in FeedView.attach() like the others, because it could be triggered
+        // before the initial refresh.
+        this.window.addEventListener('resize', this, false);
 
         this._asyncRefreshEntryList();
         this._setEmptyViewMessage();

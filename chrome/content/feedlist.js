@@ -17,26 +17,21 @@ var gViewList = {
         return aItem;
     },
 
-    tagsReady: false, // Tags are inserted lazily.
-
-    tags: null, // Array of all tag names.
-
     init: function gViewList_init() {
         this.refreshItem('unread-folder');
         this.refreshItem('starred-folder');
+    },
 
-        // Even though the tags are inserted lazily, tag list has to be ready
-        // for view observers to use.
-        this.tags = gStorage.getAllTags();
+    deselect: function gViewList_deselect() {
+        this.richlistbox.selectedIndex = -1;
     },
 
     onSelect: function gViewList_onSelect(aEvent) {
-        if (!this.selectedItem) {
-            this.richlistbox.removeAttribute('showTags');
+        if (!this.selectedItem)
             return;
-        }
 
-        gFeedList.tree.view.selection.select(-1);
+        gTagList.deselect();
+        gFeedList.deselect();
 
         var query = new Query();
         query.deleted = ENTRY_STATE_NORMAL;
@@ -44,39 +39,26 @@ var gViewList = {
         switch (this.selectedItem.id) {
             case 'all-items-folder':
                 var title = this.selectedItem.getAttribute('name');
-                this.richlistbox.removeAttribute('showTags');
                 break;
 
             case 'unread-folder':
                 title = this.selectedItem.getAttribute('name');
                 query.unread = true;
                 var unreadParamFixed = true;
-                this.richlistbox.removeAttribute('showTags');
                 break;
 
             case 'starred-folder':
                 title = this.selectedItem.getAttribute('name');
                 query.starred = true;
                 var starredParamFixed = true;
-
-                if (!this.tagsReady)
-                    this._rebuildTags();
-                this.richlistbox.setAttribute('showTags', true);
+                if (gTagList.tags.length)
+                    gTagList.show();
                 break;
 
             case 'trash-folder':
                 title = this.selectedItem.getAttribute('name');
                 query.deleted = ENTRY_STATE_TRASHED;
-                this.richlistbox.removeAttribute('showTags');
                 break;
-
-            default:
-                if (this.selectedItem.hasAttribute('tagView')) {
-                    title = this.selectedItem.id;
-                    query.tags = [this.selectedItem.id];
-                    var starredParamFixed = true;
-                    this.richlistbox.setAttribute('showTags', true);
-                }
         }
 
         var view = new FeedView(title, query, unreadParamFixed, starredParamFixed);
@@ -98,14 +80,6 @@ var gViewList = {
             gFeedView.browser.loadURI(gTemplateURI.spec);
     },
 
-    // Sets the visibility of context menuitem depending on the target.
-    onContextMenuShowing: function gFeedList_onContextMenuShowing(aEvent) {
-        gViewListContextMenu.init(this.selectedItem);
-    },
-
-    /**
-     * Refreshes item's label.
-     */
     refreshItem: function gViewList_refreshItem(aItemID) {
         var item = getElement(aItemID);
 
@@ -114,21 +88,104 @@ var gViewList = {
         query.unread = true;
         if (aItemID == 'starred-folder')
             query.starred = true;
+        var unreadCount = query.getEntryCount();
 
         var name = item.getAttribute('name');
-        this._setLabel(item, name, query.getEntryCount());
+        if (unreadCount > 0) {
+            name += ' (' + unreadCount +')';
+            item.setAttribute('unread', true);
+        }
+        else {
+            item.removeAttribute('unread');
+        }
+
+        var label = item.getElementsByTagName('label')[0];
+        label.setAttribute('value', name);
+    }
+
+}
+
+var gTagList = {
+
+    ready: false,
+
+    get tags gTagList_tags_get() {
+        if (!this.__tags)
+            this.__tags = gStorage.getAllTags();
+        return this.__tags;
+    },
+
+    set tags gTagList_tags_set(aTags) {
+        this.__tags = aTags;
+        return aTags;
+    },
+
+    get selectedItem gTagList_selectedItem() {
+        return this._listbox.selectedItem;
+    },
+
+    get _listbox gTagList__listBox() {
+        delete this._listbox;
+        return this._listbox = getElement('tag-list');
+    },
+
+    show: function gTagList_show() {
+        if (!this.ready)
+            this._rebuild();
+
+        if (this._listbox.hidden) {
+            this._listbox.hidden = false;
+            let sidebar = getElement('sidebar');
+            sidebar.width = parseInt(sidebar.width) + this._listbox.boxObject.width;
+        }
+    },
+
+    hide: function gTagList_hide() {
+        if (!this._listbox.hidden) {
+            let sidebar = getElement('sidebar');
+            sidebar.width = parseInt(sidebar.width) - this._listbox.boxObject.width;
+            this._listbox.hidden = true;
+        }
+    },
+
+    deselect: function gTagList_deselect() {
+        this._listbox.selectedIndex = -1;
+    },
+
+    onSelect: function gTagList_onSelect(aEvent) {
+        if (!this.selectedItem) {
+            this.hide();
+            return;
+        }
+
+        gViewList.deselect();
+        gFeedList.deselect();
+
+        var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+        query.tags = [this.selectedItem.id];
+
+        var view = new FeedView(this.selectedItem.id, query, false, true);
+        view.attach();
+    },
+
+    // If there is a webpage open in the browser then clicking on
+    // the already selected item, should bring back the feed view.
+    onClick: function gTagList_onClick(aEvent) {
+        if (!gFeedView.active && aEvent.target.localName != 'listitem' && aEvent.button == 0)
+            gFeedView.browser.loadURI(gTemplateURI.spec);
     },
 
     /**
-     * Refreshes tags.
+     * Refreshes tag listitems.
      *
      * @param aTags            A tag string or an array of tag strings.
      * @param aPossiblyAdded   Indicates that the tag may not be in the list of tags yet.
      * @param aPossiblyRemoved Indicates that there may be no remaining entries with
      *                         the tag.
      */
-    refreshTags: function gViewList_refreshTags(aTags, aPossiblyAdded, aPossiblyRemoved) {
-        if (!this.tagsReady)
+    refreshTags: function gTagList_refreshTags(aTags, aPossiblyAdded, aPossiblyRemoved) {
+        if (!this.ready)
             return;
 
         var tags = (aTags.splice) ? aTags : [aTags];
@@ -138,7 +195,7 @@ var gViewList = {
 
             if (aPossiblyAdded) {
                 if (this.tags.indexOf(tag) == -1) {
-                    this._rebuildTags();
+                    this._rebuild();
                     break;
                 }
             }
@@ -146,9 +203,9 @@ var gViewList = {
                 let query = new Query();
                 query.tags = [tag];
                 if (!query.hasMatches()) {
-                    this._rebuildTags();
+                    this._rebuild();
                     if (gFeedView.query.tags && gFeedView.query.tags[0] === tag)
-                        this.selectedItem = getElement('all-items-folder');
+                        gViewList.selectedItem = getElement('starred-folder');
                     break;
                 }
             }
@@ -158,36 +215,22 @@ var gViewList = {
             query.deleted = ENTRY_STATE_NORMAL;
             query.tags = [tag];
             query.unread = true;
-            this._setLabel(getElement(tags), tag, query.getEntryCount());
+            this._setLabel(getElement(tag), tag, query.getEntryCount());
         }
     },
 
-    _rebuildTags: function gViewList__rebuildTags() {
-        var lastSelectedIndex = this.richlistbox.selectedIndex;
-
-        // Clear the old tag list.
-        var tagItems = document.getElementsByAttribute('tagView', 'true');
-        while (tagItems.length)
-            this.richlistbox.removeChild(tagItems[tagItems.length - 1]);
+    _rebuild: function gTagList__rebuild() {
+        while (this._listbox.hasChildNodes())
+            this._listbox.removeChild(this._listbox.lastChild);
 
         this.tags = gStorage.getAllTags();
-        var trashFolder = getElement('trash-folder');
 
         for (let i = 0; i < this.tags.length; i++) {
-            let item = document.createElement('richlistitem');
+            let item = document.createElement('listitem');
             item.id = this.tags[i];
-            item.setAttribute('tagView', true);
-            item.className = 'view-list-item tag-view';
+            item.className = 'tag-list-item';
 
-            let image = document.createElement('image');
-            image.className = 'view-icon';
-            item.appendChild(image);
-
-            let label = document.createElement('label');
-            label.className = 'view-label';
-            item.appendChild(label);
-
-            this.richlistbox.insertBefore(item, trashFolder);
+            this._listbox.appendChild(item);
 
             let query = new Query();
             query.deleted = ENTRY_STATE_NORMAL;
@@ -196,19 +239,10 @@ var gViewList = {
             this._setLabel(item, this.tags[i], query.getEntryCount());
         }
 
-        // Restore selection if necessary.
-        if (lastSelectedIndex != -1) {
-            var item = this.richlistbox.getItemAtIndex(lastSelectedIndex);
-            if (item.id == 'trash-folder' && this.tags.length)
-                this.richlistbox.selectedIndex = lastSelectedIndex - 1;
-            else
-                this.richlistbox.selectedIndex = lastSelectedIndex;
-        }
-
-        this.tagsReady = true;
+        this.ready = true;
     },
 
-    _setLabel: function gViewList__setLabel(aItem, aName, aUnreadCount) {
+    _setLabel: function gTagList__setLabel(aItem, aName, aUnreadCount) {
         var name = aName;
         if (aUnreadCount > 0) {
             name += ' (' + aUnreadCount +')';
@@ -217,8 +251,7 @@ var gViewList = {
         else {
             aItem.removeAttribute('unread');
         }
-        var label = aItem.getElementsByTagName('label')[0];
-        label.setAttribute('value', name);
+        aItem.setAttribute('label', name);
     }
 
 }
@@ -310,6 +343,9 @@ var gFeedList = {
         return folders;
     },
 
+    deselect: function gFeedList_deselect() {
+        this.tree.view.selection.select(-1);
+    },
 
     onSelect: function gFeedList_onSelect(aEvent) {
         var selectedItem = this.selectedItem;
@@ -321,7 +357,8 @@ var gFeedList = {
         if (this.ignoreSelectEvent || this._lastSelectedItem == selectedItem)
             return;
 
-        gViewList.richlistbox.selectedIndex = -1;
+        gViewList.deselect();
+        gTagList.deselect();
 
         // Clicking the twisty also triggers the select event, although the selection
         // doesn't change. We remember the previous selected item and do nothing when
@@ -727,7 +764,7 @@ var gFeedList = {
 
             if (aEntryList.containsStarred()) {
                 gViewList.refreshItem('starred-folder');
-                gViewList.refreshTags(aEntryList.tags, true);
+                gTagList.refreshTags(aEntryList.tags, true);
             }
 
         }, 0, this)
@@ -739,7 +776,7 @@ var gFeedList = {
             if (aEntryList.containsUnread()) {
                 this.refreshFeedTreeitems(aEntryList.feedIDs);
                 gViewList.refreshItem('unread-folder');
-                gViewList.refreshTags(aEntryList.tags);
+                gTagList.refreshTags(aEntryList.tags);
             }
 
         }, 0, this)
@@ -753,7 +790,7 @@ var gFeedList = {
 
             if (aEntryList.containsStarred()) {
                 gViewList.refreshItem('starred-folder');
-                gViewList.refreshTags(aEntryList.tags);
+                gTagList.refreshTags(aEntryList.tags);
             }
         }, 0, this)
     },
@@ -770,7 +807,7 @@ var gFeedList = {
     // nsIBriefStorageObserver
     onEntriesTagged: function gFeedList_onEntriesTagged(aEntryList, aNewState, aTag) {
         async(function() {
-            gViewList.refreshTags(aTag, aNewState, !aNewState);
+            gTagList.refreshTags(aTag, aNewState, !aNewState);
         }, 0, this)
     },
 
@@ -786,7 +823,7 @@ var gFeedList = {
             }
 
             var entriesRestored = (aNewState == ENTRY_STATE_NORMAL);
-            gViewList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);
+            gTagList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);
 
         }, 0, this)
     },
@@ -838,9 +875,6 @@ var gViewListContextMenu = {
 
     targetItem: null,
 
-    get targetID() this.targetItem.id,
-
-    get targetIsTag()            this.targetItem.hasAttribute('tagView'),
     get targetIsAllItemsFolder() this.targetItem.id == 'all-items-folder',
     get targetIsUnreadFolder()   this.targetItem.id == 'unread-folder',
     get targetIsStarredFolder()  this.targetItem.id == 'starred-folder',
@@ -878,13 +912,6 @@ var gViewListContextMenu = {
             query.deleted = ENTRY_STATE_TRASHED;
         }
 
-        query.markEntriesRead(true);
-    },
-
-    markTagRead: function gViewListContextMenu_markTagRead() {
-        var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
-        query.tags = [this.targetItem.id];
         query.markEntriesRead(true);
     },
 
@@ -927,9 +954,23 @@ var gViewListContextMenu = {
             window.openDialog('chrome://brief/content/compacting-progress.xul', 'Brief',
                               'chrome,titlebar,centerscreen');
         }
+    }
+
+}
+
+
+var gTagListContextMenu = {
+
+    targetItem: null,
+
+    markTagRead: function gTagListContextMenu_markTagRead() {
+        var query = new Query();
+        query.deleted = ENTRY_STATE_NORMAL;
+        query.tags = [this.targetItem.id];
+        query.markEntriesRead(true);
     },
 
-    deleteTag: function gViewListContextMenu_deleteTag() {
+    deleteTag: function gTagListContextMenu_deleteTag() {
         var ioService = Cc['@mozilla.org/network/io-service;1'].
                             getService(Ci.nsIIOService);
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
