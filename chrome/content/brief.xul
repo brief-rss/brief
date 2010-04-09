@@ -234,9 +234,10 @@
                         oncommand="gCommands.toggleStarredEntriesFilter()"/>
                 <textbox id="searchbar"
                          spellcheck="false"
-                         type="timed"
+                         type="search"
                          timeout="500"
-                         emptytext="&searchBox.label;"/>
+                         emptytext="&searchBox.label;"
+                         oncommand="onSearchbarCommand()"/>
             </hbox>
 
             <hbox flex="1">

@@ -383,32 +383,13 @@ function selectHomeFolder(aEvent) {
     }
 }
 
-
-// Creates and manages a FeedView displaying the search results.
-function performSearch(aEvent) {
+function onSearchbarCommand() {
     var searchbar = getElement('searchbar');
-
-    if (!searchbar.searchInProgress)
-        searchbar.previousView = gFeedView;
-
-    searchbar.searchInProgress = true;
-
     var bundle = getElement('main-bundle');
-    var titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
-
-    gFeedView.titleOverride = searchbar.value ? titleOverride : '';
+    gFeedView.titleOverride = searchbar.value ?
+                              bundle.getFormattedString('searchResults', [searchbar.value]) :
+                              '';
     gFeedView.query.searchString = searchbar.value;
-    gFeedView.refresh();
-}
-
-function finishSearch() {
-    var searchbar = getElement('searchbar');
-
-    if (!searchbar.searchInProgress)
-        return;
-    searchbar.searchInProgress = false;
-
-    gFeedView.query.searchString = gFeedView.titleOverride = '';
     gFeedView.refresh();
 }
 
