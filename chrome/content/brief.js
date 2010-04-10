@@ -104,7 +104,7 @@ function unload() {
 
     gPrefs.unregister();
     gStorage.removeObserver(gFeedList);
-    gFeedView.detach();
+    gFeedView.uninit();
 }
 
 
@@ -322,8 +322,7 @@ function loadHomeview() {
         let query = new Query();
         query.deleted = ENTRY_STATE_NORMAL;
         let name = getElement('all-items-folder').getAttribute('name');
-        view = new FeedView(name, query);
-        view.attach();
+        gFeedView = new FeedView(name, query);
 
         gViewList.richlistbox.suppressOnSelect = true;
         gViewList.selectedItem = getElement('all-items-folder');
@@ -346,7 +345,7 @@ function refreshProgressmeter() {
 
 function showFirstRunUI() {
     if (gFeedView)
-        gFeedView.detach();
+        gFeedView.uninit();
 
     getElement('sidebar-deck').selectedIndex = 1;
 

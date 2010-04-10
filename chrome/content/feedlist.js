@@ -61,8 +61,7 @@ var gViewList = {
                 break;
         }
 
-        var view = new FeedView(title, query, unreadParamFixed, starredParamFixed);
-        view.attach();
+        gFeedView = new FeedView(title, query, unreadParamFixed, starredParamFixed);
     },
 
     // If there is a webpage open in the browser then clicking on
@@ -165,8 +164,7 @@ var gTagList = {
         query.deleted = ENTRY_STATE_NORMAL;
         query.tags = [this.selectedItem.id];
 
-        var view = new FeedView(this.selectedItem.id, query, false, true);
-        view.attach();
+        gFeedView = new FeedView(this.selectedItem.id, query, false, true);
     },
 
     // If there is a webpage open in the browser then clicking on
@@ -373,8 +371,7 @@ var gFeedList = {
         else
             query.feeds = [this.selectedFeed.feedID];
 
-        var view = new FeedView(this.selectedFeed.title, query);
-        view.attach();
+        gFeedView = new FeedView(this.selectedFeed.title, query);
     },
 
 
