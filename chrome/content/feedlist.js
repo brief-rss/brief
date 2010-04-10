@@ -678,14 +678,13 @@ var gFeedList = {
         case 'brief:invalidate-feedlist':
             this.rebuild();
 
-            let deck = getElement('left-pane-deck');
+            let deck = getElement('sidebar-deck');
             if (gPrefs.homeFolder)
                 deck.selectedIndex = 0;
             else if (deck.selectedIndex == 0)
                 showFirstRunUI();
 
             async(gFeedView.refresh, 0, gFeedView);
-
             break;
 
         case 'brief:feed-title-changed':
