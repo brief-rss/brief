@@ -933,10 +933,9 @@ var gViewListContextMenu = {
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
 
-        var bundle = getElement('main-bundle');
-        var dialogTitle = bundle.getString('compactPromptTitle');
-        var dialogText = bundle.getString('compactPromptText');
-        var dialogConfirmLabel = bundle.getString('compactPromptConfirmButton');
+        var dialogTitle = gStringBundle.getString('compactPromptTitle');
+        var dialogText = gStringBundle.getString('compactPromptText');
+        var dialogConfirmLabel = gStringBundle.getString('compactPromptConfirmButton');
 
         var buttonFlags = promptService.BUTTON_POS_0 * promptService.BUTTON_TITLE_IS_STRING +
                           promptService.BUTTON_POS_1 * promptService.BUTTON_TITLE_NO +
@@ -973,9 +972,8 @@ var gTagListContextMenu = {
                             getService(Ci.nsIPromptService);
         var tag = this.targetItem.id;
 
-        var bundle = getElement('main-bundle');
-        var dialogTitle = bundle.getString('confirmTagDeletionTitle');
-        var dialogText = bundle.getFormattedString('confirmTagDeletionText', [tag]);
+        var dialogTitle = gStringBundle.getString('confirmTagDeletionTitle');
+        var dialogText = gStringBundle.getFormattedString('confirmTagDeletionText', [tag]);
 
         var weHaveAGo = promptService.confirm(window, dialogTitle, dialogText);
 
@@ -1098,9 +1096,8 @@ var gFeedListContextMenu = {
     deleteFeed: function gFeedListContextMenu_deleteFeed() {
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
-        var stringbundle = getElement('main-bundle');
-        var title = stringbundle.getString('confirmFeedDeletionTitle');
-        var text = stringbundle.getFormattedString('confirmFeedDeletionText',
+        var title = gStringBundle.getString('confirmFeedDeletionTitle');
+        var text = gStringBundle.getFormattedString('confirmFeedDeletionText',
                                                    [this.targetFeed.title]);
         var weHaveAGo = promptService.confirm(window, title, text);
 
@@ -1114,9 +1111,8 @@ var gFeedListContextMenu = {
     deleteFolder: function gFeedListContextMenu_deleteFolder() {
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
-        var stringbundle = getElement('main-bundle');
-        var title = stringbundle.getString('confirmFolderDeletionTitle');
-        var text = stringbundle.getFormattedString('confirmFolderDeletionText',
+        var title = gStringBundle.getString('confirmFolderDeletionTitle');
+        var text = gStringBundle.getFormattedString('confirmFolderDeletionText',
                                                    [this.targetFeed.title]);
         var weHaveAGo = promptService.confirm(window, title, text);
 
