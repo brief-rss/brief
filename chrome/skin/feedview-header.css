@@ -1,17 +1,17 @@
 #feed-view-header {
     -moz-box-align: center;
-    height: 38px;
-    padding: 0 10px;
-    background: url('header-background.png') repeat-x top right;
-    background-color: #b6c8d0;
-    border-bottom: 1px solid #7c909f;
+    height: 38px !important;
+    padding: 0 10px !important;
+    background: url('header-background.png') repeat-x top right !important;
+    background-color: #b6c8d0 !important;
+    border-bottom: 1px solid #7c909f !important;
     font-family: Verdana, Helvetica, Arial, sans-serif;
     overflow: hidden;
 }
 
 #mark-view-read {
-    padding-top: 4px;
-    margin-right: 5px;
+    padding-top: 4px !important;
+    margin-right: 5px !important;
     list-style-image: url(mark-read-checkmark.png);
     -moz-image-region: rect(0px, 32px, 32px, 0px);
 }
@@ -27,11 +27,11 @@
 
 #feed-title-box {
     display: -moz-box;
-    margin-right: 10px;
+    margin-right: 10px !important;
     /* These are to cut off the later lines when the title wraps. */
     overflow: hidden;
     line-height: 36px;
-    max-height: 36px;
+    max-height: 36px !important;
 }
 
 #feed-title {
@@ -48,9 +48,9 @@
 
 
 .view-button {
-    border-left: 1px solid transparent; /* Placeholder for checked state border */
-    margin-top: 3px;
-    margin-bottom: 2px;
+    border-left: 1px solid transparent !important; /* Placeholder for checked state border */
+    margin-top: 3px !important;
+    margin-bottom: 2px !important;
     -moz-image-region: rect(0px, 28px, 31px, 0px);
 }
 
@@ -74,7 +74,7 @@
 
 .view-button:not([disabled])[checked],
 .view-button:not([disabled]):active {
-    border-left-color: #7898b0;
+    border-left-color: #7898b0 !important;
 }
 
 .view-button:not([disabled])[checked] + .view-button,
@@ -83,12 +83,12 @@
 }
 
 #filter-starred-checkbox {
-    border-right: 1px solid transparent;
+    border-right: 1px solid transparent !important;
 }
 
 #filter-starred-checkbox:not([disabled])[checked],
 #filter-starred-checkbox:not([disabled]):active {
-    border-right-color: #7898b0;
+    border-right-color: #7898b0 !important;
 }
 
 
@@ -107,15 +107,16 @@
 
 #searchbar {
     width: 150px;
-    margin: 6px 0 6px 10px;
-    padding: 0 3px 0 5px;
-    border: 1px solid #7c909f;
+    margin: 6px 0 6px 10px !important;
+    padding: 0 3px 0 5px !important;
+    border: 1px solid #7c909f !important;
     -moz-border-radius: 4px;
-    background-color: #ffffff;
+    background-color: #ffffff !important;
     font-size: 12px;
 }
 
 
-#searchbar[isempty="true"]  {
-    color: #7c909f;
+#searchbar[isempty="true"] .textbox-input {
+    color: #7c909f !important;
+    font-style: normal !important;
 }
