@@ -1050,7 +1050,7 @@ FeedView.prototype = {
     _buildHeader: function FeedView__buildHeader(aFeed) {
         var feedTitle = getElement('feed-title');
 
-        // Reset the old header.
+        // Reset the header.
         feedTitle.removeAttribute('href');
         feedTitle.className = '';
 
@@ -1061,8 +1061,7 @@ FeedView.prototype = {
             let flags = Ci.nsIScriptSecurityManager.DISALLOW_INHERIT_PRINCIPAL;
             let securityCheckOK = true;
             try {
-                gSecurityManager.checkLoadURIStrWithPrincipal(gBriefPrincipal, url,
-                                                              flags);
+                gSecurityManager.checkLoadURIStrWithPrincipal(gBriefPrincipal, url, flags);
             }
             catch (ex) {
                 log('Brief: security error.' + ex);
@@ -1073,6 +1072,8 @@ FeedView.prototype = {
                 feedTitle.setAttribute('href', url);
                 feedTitle.className = 'feed-link';
             }
+
+            feedTitle.setAttribute('tooltiptext', aFeed.subtitle);
         }
     },
 
