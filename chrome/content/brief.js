@@ -27,11 +27,19 @@ __defineGetter__('gTemplateURI', function() {
                                getService(Ci.nsIIOService).
                                newURI(TEMPLATE_URL, null, null);
 });
+__defineGetter__('gStringBundle', function() {
+    delete this.gStringBundle;
+    return this.gStringBundle = getElement('main-bundle');
+});
 
 
 function init() {
     gPrefs.register();
-    initToolbarsAndStrings();
+
+    getElement('headlines-checkbox').checked = gPrefs.showHeadlinesOnly;
+    getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
+    getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
+    getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
     document.addEventListener('keypress', onKeyPress, true);
 
@@ -52,9 +60,6 @@ function init() {
     observerService.addObserver(gFeedList, 'brief:feed-error', false);
     observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
-
-    // This notification doesn't really fit in gFeedList, but there's no point in
-    // seting up a new observer object just for it.
     observerService.addObserver(gFeedList, 'brief:custom-style-changed', false);
 
     gStorage.addObserver(gFeedList);
@@ -69,24 +74,6 @@ function init() {
     }
 
     async(gStorage.syncWithLivemarks, 2000, gStorage);
-}
-
-
-function initToolbarsAndStrings() {
-    getElement('headlines-checkbox').checked = gPrefs.showHeadlinesOnly;
-    getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
-    getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
-    getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
-
-    // Cache the strings, so they don't have to retrieved every time when
-    // refreshing the feed view.
-    var bundle = getElement('main-bundle');
-    FeedView.prototype.todayStr = bundle.getString('today');
-    FeedView.prototype.yesterdayStr = bundle.getString('yesterday');
-    FeedView.prototype.authorPrefixStr = bundle.getString('authorIntroductionPrefix') + ' ';
-    FeedView.prototype.updatedStr = bundle.getString('entryWasUpdated');
-    FeedView.prototype.markAsReadStr = bundle.getString('markEntryAsRead');
-    FeedView.prototype.markAsUnreadStr = bundle.getString('markEntryAsUnread');
 }
 
 
@@ -384,10 +371,10 @@ function selectHomeFolder(aEvent) {
 
 function onSearchbarCommand() {
     var searchbar = getElement('searchbar');
-    var bundle = getElement('main-bundle');
-    gFeedView.titleOverride = searchbar.value ?
-                              bundle.getFormattedString('searchResults', [searchbar.value]) :
-                              '';
+    var titleOverride = searchbar.value
+                        ? bundle.getFormattedString('searchResults', [searchbar.value])
+                        : '';
+    gFeedView.titleOverride = titleOverride;
     gFeedView.query.searchString = searchbar.value;
     gFeedView.refresh();
 }

@@ -517,8 +517,8 @@ FeedView.prototype = {
                     // Pass some data which bindings need but don't have access to.
                     var data = {};
                     data.doubleClickMarks = gPrefs.doubleClickMarks;
-                    data.markReadString = this.markAsReadStr;
-                    data.markUnreadString = this.markAsUnreadStr;
+                    data.markReadString = this._strings.markAsReadStr;
+                    data.markUnreadString = this._strings.markAsUnreadStr;
                     this.window.wrappedJSObject.gData = data;
                     this.refresh();
                 }
@@ -924,7 +924,7 @@ FeedView.prototype = {
         articleContainer.setAttribute('tags', aEntry.tags);
 
         if (aEntry.authors)
-            articleContainer.setAttribute('authors', this.authorPrefixStr + aEntry.authors);
+            articleContainer.setAttribute('authors', this._strings.authorPrefixStr + aEntry.authors);
         if (aEntry.read)
             articleContainer.setAttribute('read', true);
         if (aEntry.starred)
@@ -935,8 +935,8 @@ FeedView.prototype = {
         var dateString = this._constructEntryDate(aEntry);
         articleContainer.setAttribute('dateString', dateString);
         if (aEntry.updated) {
-            dateString += ' <span class="article-updated">' + this.updatedStr + '</span>'
-            articleContainer.setAttribute('updatedString', dateString);
+            dateString += ' <span class="article-updated">' + this._strings.updatedStr + '</span>'
+            articleContainer.setAttribute('_strings.updatedString', dateString);
             articleContainer.setAttribute('updated', true);
         }
 
@@ -982,11 +982,11 @@ FeedView.prototype = {
         switch (true) {
             case deltaDays === 0:
                 string = entryDate.toLocaleFormat(', %X ');
-                string = this.todayStr + string;
+                string = this._strings.todayStr + string;
                 break;
             case deltaDays === 1:
                 string = entryDate.toLocaleFormat(', %X ');
-                string = this.yesterdayStr + string
+                string = this._strings.yesterdayStr + string
                 break;
             case deltaDays < 7:
                 string = entryDate.toLocaleFormat('%A, %X ');
@@ -1036,30 +1036,47 @@ FeedView.prototype = {
     },
 
     _setEmptyViewMessage: function FeedView__setEmptyViewMessage() {
+        var messageBox = this.document.getElementById('message-box');
         if (this._loadedEntries.length) {
-            this.document.getElementById('message').style.display = 'none';
+            messageBox.style.display = 'none';
             return;
         }
 
-        var paragraph = this.document.getElementById('message');
-        var bundle = getElement('main-bundle');
-        var message;
+        var mainMessage = '', secondaryMessage = '';
 
-        if (this.query.searchString)
-            message = bundle.getString('noEntriesFound');
-        else if (this.query.unread)
-            message = bundle.getString('noUnreadEntries');
-        else if (this.query.starred && this.starredParamFixed)
-            message = bundle.getString('noStarredEntries');
-        else if (this.query.starred)
-            message = bundle.getString('noStarredEntriesInFeed');
-        else if (this.query.deleted == ENTRY_STATE_TRASHED)
-            message = bundle.getString('trashIsEmpty');
-        else
-            message = bundle.getString('noEntries');
+        if (this.query.searchString) {
+            mainMessage = gStringBundle.getString('noEntriesFound');
+        }
+        else if (this.query.unread) {
+            mainMessage = gStringBundle.getString('noUnreadEntries');
+        }
+        else if (this.query.starred) {
+            mainMessage = gStringBundle.getString('noStarredEntries');
+            secondaryMessage = gStringBundle.getString('noStarredEntriesAdvice');
+        }
+        else if (this.query.deleted == ENTRY_STATE_TRASHED) {
+            mainMessage = gStringBundle.getString('trashIsEmpty');
+        }
+        else {
+            mainMessage = gStringBundle.getString('noEntries');
+        }
 
-        paragraph.textContent = message;
-        paragraph.style.display = 'block';
+        this.document.getElementById('main-message').textContent = mainMessage;
+        this.document.getElementById('secondary-message').textContent = secondaryMessage;
+
+        messageBox.style.display = 'block';
+    },
+
+    get _strings FeedView__strings_get() {
+        delete this.__proto__._strings;
+        return this.__proto__._strings = {
+            todayStr: gStringBundle.getString('today'),
+            yesterdayStr: gStringBundle.getString('yesterday'),
+            authorPrefixStr: gStringBundle.getString('authorIntroductionPrefix') + ' ',
+            updatedStr: gStringBundle.getString('entryWasUpdated'),
+            markAsReadStr: gStringBundle.getString('markEntryAsRead'),
+            markAsUnreadStr: gStringBundle.getString('markEntryAsUnread'),
+        }
     },
 
 
