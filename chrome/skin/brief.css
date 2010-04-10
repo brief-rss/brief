@@ -1,7 +1,7 @@
 /* Reset these properties on everything but context menu popups */
 page, hbox, vbox, deck, richlistbox, richlistitem, image, button, progressmeter,
 progressmeter *, textbox, tree, treecols, treecol, treechildren, splitter, browser,
-listbox, listitem, label {
+listbox, listitem {
     -moz-appearance: none;
     height: auto !important;
     width: auto !important;
@@ -61,7 +61,7 @@ page {
 }
 
 #sidebar-toolbar {
-    min-height: 20px;
+    min-height: 20px !important;
 }
 
 #sidebar-separator {
@@ -72,11 +72,11 @@ page {
 
 #update-progress {
     border: 1px solid #c4cdd5 !important;
-    margin: 2px 15px 2x 13px !important;
+    margin: 2px 15px 2px 13px !important;
 }
 
 #update-progress > .progress-bar {
-    background: url(progressmeter.png) repeat-x;
+    background: url(progressmeter.png) repeat-x !important;
 }
 
 
@@ -300,35 +300,31 @@ page {
 }
 
 #confirm-home-folder {
-  -moz-appearance: button;
-  border: 3px solid !important;
-  -moz-border-top-colors: transparent ThreeDHighlight ThreeDLightShadow;
-  -moz-border-right-colors: transparent ThreeDDarkShadow ThreeDShadow;
-  -moz-border-bottom-colors: transparent ThreeDDarkShadow ThreeDShadow;
-  -moz-border-left-colors: transparent ThreeDHighlight ThreeDLightShadow;
-  background-color: ThreeDFace;
-  color: ButtonText !important;
+    -moz-appearance: button;
+    border: 3px solid !important;
+    -moz-border-top-colors: transparent ThreeDHighlight ThreeDLightShadow;
+    -moz-border-right-colors: transparent ThreeDDarkShadow ThreeDShadow;
+    -moz-border-bottom-colors: transparent ThreeDDarkShadow ThreeDShadow;
+    -moz-border-left-colors: transparent ThreeDHighlight ThreeDLightShadow;
+    background-color: ThreeDFace;
+    color: ButtonText !important;
 }
 
 #confirm-home-folder .button-box {
-  border: 1px solid transparent !important;
-  padding-top: 1px !important;
-  padding-bottom: 2px !important;
-  -moz-padding-start: 3px !important;
-  -moz-padding-end: 4px !important;
+    border: 1px solid transparent !important;
+    padding-top: 1px !important;
+    padding-bottom: 2px !important;
+    -moz-padding-start: 3px !important;
+    -moz-padding-end: 4px !important;
 }
 
 #confirm-home-folder .button-text {
-  margin: 0 !important;
-  text-align: center;
+    margin: 0 !important;
+    text-align: center;
 }
 
 
 /* ======= Reset default properties ======= */
-
-#update-progress {
-    background-image: none !important;
-}
 
 .brief-button {
     -moz-box-flex: 0;
