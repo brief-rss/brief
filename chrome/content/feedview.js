@@ -9,66 +9,53 @@ const WINDOW_HEIGHTS_LOAD = 2;
 const LOAD_STEP_SIZE = 5;
 
 
-__defineGetter__("gSecurityManager", function() {
-    delete this.gSecurityManager;
-    return this.gSecurityManager = Cc['@mozilla.org/scriptsecuritymanager;1'].
-                                   getService(Ci.nsIScriptSecurityManager);
-});
-
-__defineGetter__("gBriefPrincipal", function() {
-    var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-    var uri = ioService.newURI(document.documentURI, null, null)
-    var resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1'].
-                      getService(Ci.nsIChromeRegistry).
-                      convertChromeURL(uri);
-
-    delete this.gBriefPrincipal;
-    return this.gBriefPrincipal = gSecurityManager.getCodebasePrincipal(resolvedURI);
-});
-
-
-/**
- * The instance of FeedView currently attached to the browser.
- */
+// The currently active instance of FeedView.
 var gFeedView = null;
 
 /**
  * This object represents the main feed display. It stores and manages display parameters.
  * The feed is displayed using a local, unprivileged template page. We insert third-party
  * content in it (entries are served with full HTML markup), so the template page has to
- * be untrusted and we respect XPCNativeWrappers when interacting with it.
- * Individual entries are inserted dynamically. Their structure and behaviour is defined
- * by an XBL binding.
+ * be untrusted and we respect XPCNativeWrappers when interacting with it. Individual
+ * entries are inserted dynamically and have their own XBL bindings.
  *
  * @param aTitle  Title of the view which will be shown in the header.
  * @param aQuery  Query which selects contained entries.
  * @param aUnreadFixed  Indicates that the "unread" query parameter is fixed and the view
- *                      affected by feedview.filterUnread pref.
+ *                      isn't affected by feedview.filterUnread pref.
  * @param aStarredFixed  Indicates that the "starred" query parameter is fixed and the
- *                       view affected by feedview.filterStarred pref.
+ *                       isn't view affected by feedview.filterStarred pref.
  */
 function FeedView(aTitle, aQuery, aUnreadFixed, aStarredFixed) {
     this.title = aTitle;
+
     this.query = aQuery;
+    this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
+
     this.unreadParamFixed = aUnreadFixed;
     this.starredParamFixed = aStarredFixed;
-    this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
+
+    // Temporarliy override the title without losing the old one.
+    this.titleOverride = '';
+
+    // Ordered array of IDs of entries that have been loaded.
+    this._loadedEntries = [];
+
+    // ID of the selected entry.
+    this.selectedEntry = null;
+
+    // List of entries manually marked as unread by the user. They won't be
+    // marked as read again when autoMarkRead is on.
     this.entriesMarkedUnread = [];
+
+    this._init();
 }
 
 
 FeedView.prototype = {
 
-    // Used to temporarily override the title. It used for searching,
-    // when the search string is displayed in place of the title.
-    titleOverride: '',
-
-    unreadParamFixed: false,
-    starredParamFixed: false,
-
     get browser FeedView_browser() {
-        delete this.__proto__.browser;
-        return this.__proto__.browser = getElement('feed-view');
+        return getElement('feed-view');
     },
 
     get document FeedView_document() {
@@ -84,7 +71,7 @@ FeedView.prototype = {
     },
 
 
-    // Query that selects all entries contained by the view.
+    // Query which selects all entries contained by the view.
     set query FeedView_query_set(aQuery) {
         return this.__query = aQuery;
     },
@@ -127,7 +114,7 @@ FeedView.prototype = {
     },
 
 
-    // Ordered array of IDs of all entries that the view contains.
+    // Ordered array of IDs of entries contained by the view.
     get _entries FeedView__entries_get() {
         if (!this.__entries)
             this.__entries = this.query.getEntries();
@@ -137,9 +124,6 @@ FeedView.prototype = {
     set _entries FeedView__entries_set(aEntries) {
         this.__entries = aEntries;
     },
-
-    // Ordered array of IDs of entries that have been loaded.
-    _loadedEntries: [],
 
     get entryCount Feedview_entryCount() {
         return this._entries.length;
@@ -192,17 +176,10 @@ FeedView.prototype = {
         return this.document.getAnonymousElementByAttribute(aRoot, 'class', aAttrVal);
     },
 
-    // ID of the selected entry.
-    selectedEntry: null,
-
     get selectedElement FeedView_selectedElement() {
         return this.selectedEntry ? this.document.getElementById(this.selectedEntry)
                                   : null;
     },
-
-
-    // Indicates that the next scroll event will be ignored.
-    _ignoreScrollEvent: false,
 
     selectNextEntry: function FeedView_selectNextEntry() {
         if (this._scrolling)
@@ -320,10 +297,6 @@ FeedView.prototype = {
         }
     },
 
-    // Indicates the smooth scrolling is in progress and by the way stores the
-    // ID of the scrolling interval.
-    _scrolling: null,
-
     _scrollSmoothly: function FeedView__scrollSmoothly(aTargetPosition) {
         if (this._scrolling)
             return;
@@ -352,7 +325,7 @@ FeedView.prototype = {
                 // so the event handler will try to automatically select the central
                 // entry. This has to be prevented, because it may deselect the entry
                 // that the user has just selected manually.
-                self._ignoreScrollEvent = true;
+                self._ignoreNextScrollEvent = true;
             }
             else {
                 win.scroll(win.pageXOffset, win.pageYOffset + jump);
@@ -386,13 +359,6 @@ FeedView.prototype = {
 
         return middleElement || elems[elems.length - 1];
     },
-
-    // This array stores the list of entries marked as unread by the user. They become
-    // excluded from auto-marking, in order to prevent them from being immediately
-    // re-marked as read when autoMarkRead is on.
-    entriesMarkedUnread: [],
-
-    _markVisibleTimeout: null,
 
     _markVisibleAsRead: function FeedView__markVisibleAsRead() {
         if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !this.query.unread) {
@@ -440,12 +406,11 @@ FeedView.prototype = {
 
 
     /**
-     * Displays the view, adds it as the listener for events in the template page,
-     * and sets it as the currently attached instance - under gFeedView.
+     * Initializes the view.
      */
-    attach: function FeedView_attach() {
+    _init: function FeedView__init() {
         if (gFeedView)
-            gFeedView.detach();
+            gFeedView.uninit();
         else
             var noExistingView = true;
 
@@ -474,14 +439,12 @@ FeedView.prototype = {
             // (e.g. after selecting a treeitem).
             async(this.refresh, 0, this);
         }
-
-        gFeedView = this;
     },
 
     /**
-     * Removes the view as the listener, cancels pending actions.
+     * Deactivates the view.
      */
-    detach: function FeedView_detach() {
+    uninit: function FeedView_uninit() {
         this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
         for each (event in this._events)
@@ -491,20 +454,13 @@ FeedView.prototype = {
 
         this._stopSmoothScrolling();
         clearTimeout(this._markVisibleTimeout);
-
-        // Remove entries.
-        var container = this.document.getElementById('container');
-        container.removeChild(this.feedContent);
-        var content = this.document.createElement('div');
-        content.id = 'feed-content';
-        container.appendChild(content);
-
-        gFeedView = null;
     },
 
 
-    // Events to which we listen in the template page. Entry binding communicates with
-    // chrome to perform actions that require full privileges by sending custom events.
+    /**
+     * Events which the view listens to in the template page. Entry binding
+     * communicates with chrome by sending custom events.
+     */
     _events: ['SwitchEntryRead', 'StarEntry', 'ShowBookmarkPopup', 'DeleteEntry',
               'RestoreEntry', 'EntryUncollapsed', 'ShowBookmarkPanel', 'click',
               'mousedown', 'scroll', 'keypress'],
@@ -571,8 +527,8 @@ FeedView.prototype = {
             case 'scroll':
                 this._markVisibleAsRead();
 
-                if (this._ignoreScrollEvent) {
-                    this._ignoreScrollEvent = false;
+                if (this._ignoreNextScrollEvent) {
+                    this._ignoreNextScrollEvent = false;
                     break;
                 }
 
@@ -602,9 +558,11 @@ FeedView.prototype = {
         }
     },
 
-    // This event handler is responsible for selecting entries when clicked,
-    // forcing opening links in new tabs depending on openEntriesInTabs pref,
-    // and marking entries as read when opened.
+    /**
+     * This event handler is responsible for selecting entries when clicked,
+     * forcing opening links in new tabs depending on openEntriesInTabs pref,
+     * and marking entries as read when opened.
+     */
     _onClick: function FeedView__onClick(aEvent) {
         // This loops walks the parent chain of the even target to check if the
         // article-container and/or an anchor were clicked.
@@ -621,7 +579,7 @@ FeedView.prototype = {
         }
 
         if (gPrefs.entrySelectionEnabled && entryElement)
-            gFeedView.selectEntry(parseInt(entryElement.id));
+            this.selectEntry(parseInt(entryElement.id));
 
         if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
             // preventDefault doesn't stop the default action for middle-clicks,
@@ -779,7 +737,7 @@ FeedView.prototype = {
             return;
 
         // Removing content may cause a scroll event, which should be ignored.
-        this._ignoreScrollEvent = true;
+        this._ignoreNextScrollEvent = true;
         getTopWindow().StarUI.panel.hidePopup();
 
         // Remember index of selected entry if it is removed.
@@ -913,11 +871,11 @@ FeedView.prototype = {
         }
 
         // Changing content may cause a scroll event which should be ignored.
-        this._ignoreScrollEvent = true;
+        this._ignoreNextScrollEvent = true;
     },
 
     /**
-     * Asynchronously refreshes the list of IDs of all contained entries.
+     * Asynchronously refreshes the list of entries contained by the view.
      */
     _asyncRefreshEntryList: function FeedView__asyncRefreshEntryList() {
         this._entries = null;
@@ -1140,11 +1098,28 @@ FeedView.prototype = {
     QueryInterface: function FeedView_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
             aIID.equals(Ci.nsIDOMEventListener) ||
-            aIID.equals(Ci.nsIBriefStorageObserver) ||
-            aIID.equals(Ci.nsIObserver)) {
+            aIID.equals(Ci.nsIBriefStorageObserver)) {
             return this;
         }
         throw Components.results.NS_ERROR_NO_INTERFACE;
     }
 
 }
+
+
+__defineGetter__("gSecurityManager", function() {
+    delete this.gSecurityManager;
+    return this.gSecurityManager = Cc['@mozilla.org/scriptsecuritymanager;1'].
+                                   getService(Ci.nsIScriptSecurityManager);
+});
+
+__defineGetter__("gBriefPrincipal", function() {
+    var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+    var uri = ioService.newURI(document.documentURI, null, null)
+    var resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1'].
+                      getService(Ci.nsIChromeRegistry).
+                      convertChromeURL(uri);
+
+    delete this.gBriefPrincipal;
+    return this.gBriefPrincipal = gSecurityManager.getCodebasePrincipal(resolvedURI);
+});
