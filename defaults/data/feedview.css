@@ -10,13 +10,24 @@ body {
     padding: 10px 10px 10px;
 }
 
-#message {
+#message-box {
+    -moz-user-select: none;
+    padding: 0 15px;
+}
+
+#main-message {
+    margin-top: 200px;
+    text-align: center;
     font-size: 19px;
     color: #274b5d;
+}
+
+#secondary-message {
+    margin: 75px auto 0;
+    max-width: 500px;
     text-align: center;
-    display: none;
-    margin-top: 100px;
-    -moz-user-select: none;
+    font-size: 14px;
+    color: #4b606c;
 }
 
 
