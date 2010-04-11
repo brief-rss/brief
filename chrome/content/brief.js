@@ -64,7 +64,7 @@ function init() {
 
     gStorage.addObserver(gFeedList);
 
-    if (gPrefs.homeFolder) {
+    if (gPrefs.homeFolder != -1) {
         gViewList.init();
         async(gFeedList.rebuild, 0, gFeedList);
         async(loadHomeview);
@@ -442,8 +442,8 @@ function getTopWindow() {
 var gPrefs = {
 
     register: function gPrefs_register() {
-        for each (pref in this._cachedPrefs)
-            this._updateCachedPref(pref);
+        for (key in this._cachedPrefs)
+            this._updateCachedPref(key);
 
         gPrefBranch.addObserver('', this, false);
     },
@@ -452,47 +452,44 @@ var gPrefs = {
         gPrefBranch.removeObserver('', this);
     },
 
-
-    get homeFolder gPrefs_homeFolder() {
-        var pref = gPrefBranch.getIntPref('homeFolder');
-        return (pref != -1) ? pref : null;
+    // Hash table of prefs which are cached and available as properties
+    // of gPrefs. These properties are named after the respective keys.
+    _cachedPrefs: {
+        doubleClickMarks:          'feedview.doubleClickMarks',
+        showHeadlinesOnly:         'feedview.showHeadlinesOnly',
+        entrySelectionEnabled:     'feedview.entrySelectionEnabled',
+        autoMarkRead:              'feedview.autoMarkRead',
+        filterUnread:              'feedview.filterUnread',
+        filterStarred:             'feedview.filterStarred',
+        minInitialEntries:         'feedview.minInitialEntries',
+        sortUnreadViewOldestFirst: 'feedview.sortUnreadViewOldestFirst',
+        showFavicons:              'showFavicons',
+        homeFolder:                'homeFolder'
     },
 
-    _cachedPrefs:
-    [
-        { name: 'feedview.doubleClickMarks',       propName: 'doubleClickMarks' },
-        { name: 'feedview.showHeadlinesOnly',      propName: 'showHeadlinesOnly' },
-        { name: 'feedview.entrySelectionEnabled',  propName: 'entrySelectionEnabled' },
-        { name: 'feedview.autoMarkRead',           propName: 'autoMarkRead' },
-        { name: 'feedview.filterUnread',           propName: 'filterUnread' },
-        { name: 'feedview.filterStarred',          propName: 'filterStarred' },
-        { name: 'feedview.minInitialEntries',      propName: 'minInitialEntries'},
-        { name: 'feedview.sortUnreadViewOldestFirst', propName: 'sortUnreadViewOldestFirst' },
-        { name: 'showFavicons', propName: 'showFavicons' }
-    ],
+    _updateCachedPref: function gPrefs__updateCachedPref(aKey) {
+        var prefName = this._cachedPrefs[aKey];
 
-    _updateCachedPref: function gPrefs__updateCachedPref(aPref) {
-        switch (gPrefBranch.getPrefType(aPref.name)) {
+        switch (gPrefBranch.getPrefType(prefName)) {
             case Ci.nsIPrefBranch.PREF_STRING:
-                this[aPref.propName] = gPrefBranch.getCharPref(aPref.name);
+                this[aKey] = gPrefBranch.getCharPref(prefName);
                 break;
             case Ci.nsIPrefBranch.PREF_INT:
-                this[aPref.propName] = gPrefBranch.getIntPref(aPref.name);
+                this[aKey] = gPrefBranch.getIntPref(prefName);
                 break;
             case Ci.nsIPrefBranch.PREF_BOOL:
-                this[aPref.propName] = gPrefBranch.getBoolPref(aPref.name);
+                this[aKey] = gPrefBranch.getBoolPref(prefName);
                 break;
         }
     },
-
 
     observe: function gPrefs_observe(aSubject, aTopic, aData) {
         if (aTopic != 'nsPref:changed')
             return;
 
-        for each (pref in this._cachedPrefs) {
-            if (aData == pref.name)
-                this._updateCachedPref(pref);
+        for (key in this._cachedPrefs) {
+            if (aData == this._cachedPrefs[key])
+                this._updateCachedPref(key);
         }
 
         switch (aData) {
