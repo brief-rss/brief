@@ -5,6 +5,9 @@ const MIN_LOADED_WINDOW_HEIGHTS = 1;
 // Number of window heights worth of entries to load when the above threshold is crossed.
 const WINDOW_HEIGHTS_LOAD = 2;
 
+// Number of window heights worth of entries to load when creating a view.
+const INITIAL_WINDOW_HEIGHTS_LOAD = 2;
+
 // Number of entries queried in each incremental step until they fill the defined height.
 const LOAD_STEP_SIZE = 5;
 
@@ -28,12 +31,11 @@ var gFeedView = null;
  */
 function FeedView(aTitle, aQuery, aUnreadFixed, aStarredFixed) {
     this.title = aTitle;
+    this.unreadParamFixed = aUnreadFixed || false;
+    this.starredParamFixed = aStarredFixed || false;
 
+    aQuery.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
     this.query = aQuery;
-    this.query.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
-
-    this.unreadParamFixed = aUnreadFixed;
-    this.starredParamFixed = aStarredFixed;
 
     // Temporarliy override the title without losing the old one.
     this.titleOverride = '';
@@ -70,10 +72,17 @@ FeedView.prototype = {
         return this.document.getElementById('feed-content');
     },
 
+    // Indicates whether the feed view is currently displayed in the browser.
+    get active FeedView_active() {
+        return (this.browser.currentURI.equals(gTemplateURI) && gFeedView == this);
+    },
 
-    // Query which selects all entries contained by the view.
+    /**
+     * Query which selects all entries contained by the view.
+     */
     set query FeedView_query_set(aQuery) {
-        return this.__query = aQuery;
+        this.__query = aQuery;
+        return aQuery;
     },
 
     get query FeedView_query_get() {
@@ -90,9 +99,11 @@ FeedView.prototype = {
         return this.__query;
     },
 
-    // Returns a copy of the query that selects all entries contained by the view.
-    // Use this function when you want to modify the query before using it, without
-    // permanently changing the view parameters.
+    /**
+     * Returns a copy of the query that selects all entries contained by the view.
+     * Use this function when you want to modify the query before using it, without
+     * permanently changing the view parameters.
+     */
     getQuery: function FeedView_getQuery() {
         var query = this.query;
         var copy = new Query();
@@ -101,8 +112,7 @@ FeedView.prototype = {
         return copy;
     },
 
-    // It's much faster to retrieve entries by their IDs when possible,
-    // we keep a separate query for that.
+    // It is faster to query entries by their IDs, when possible.
     _getFastQuery: function FeedView_getFastQuery(aEntries) {
         if (!this.__fastQuery)
             this.__fastQuery = new Query();
@@ -110,6 +120,7 @@ FeedView.prototype = {
         this.__fastQuery.sortOrder = this.query.sortOrder;
         this.__fastQuery.sortDirection = this.query.sortDirection;
         this.__fastQuery.entries = aEntries;
+
         return this.__fastQuery;
     },
 
@@ -127,24 +138,6 @@ FeedView.prototype = {
 
     get entryCount Feedview_entryCount() {
         return this._entries.length;
-    },
-
-    // Indicates whether the feed view is currently displayed in the browser.
-    get active FeedView_active() {
-        return (this.browser.currentURI.equals(gTemplateURI) && gFeedView == this);
-    },
-
-
-    collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
-        var eventType = aAnimate ? 'DoCollapseEntryAnimated' : 'DoCollapseEntry';
-        this._sendEvent(aEntry, eventType, aNewState);
-
-        if (aEntry == this.selectedEntry) {
-            async(function() {
-                alignWithTop = (this.selectedElement.offsetHeight > this.window.innerHeight);
-                this.selectedElement.scrollIntoView(alignWithTop);
-            }, 310, this);
-        }
     },
 
 
@@ -169,6 +162,18 @@ FeedView.prototype = {
             element.setAttribute('eventState', aState);
 
             element.dispatchEvent(evt);
+        }
+    },
+
+    collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
+        var eventType = aAnimate ? 'DoCollapseEntryAnimated' : 'DoCollapseEntry';
+        this._sendEvent(aEntry, eventType, aNewState);
+
+        if (aEntry == this.selectedEntry) {
+            async(function() {
+                alignWithTop = (this.selectedElement.offsetHeight > this.window.innerHeight);
+                this.selectedElement.scrollIntoView(alignWithTop);
+            }, 310, this);
         }
     },
 
@@ -360,33 +365,31 @@ FeedView.prototype = {
         return middleElement || elems[elems.length - 1];
     },
 
-    _markVisibleAsRead: function FeedView__markVisibleAsRead() {
-        if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !this.query.unread) {
+    _markVisibleEntriesRead: function FeedView__markVisibleEntriesRead() {
+        if (gPrefs.autoMarkRead && !this.query.unread) {
             clearTimeout(this._markVisibleTimeout);
-            this._markVisibleTimeout = async(this._doMarkVisibleAsRead, 1000, this);
-        }
-    },
 
-    _doMarkVisibleAsRead: function FeedView__doMarkVisibleAsRead() {
-        var win = this.window;
-        var winTop = win.pageYOffset;
-        var winBottom = winTop + win.innerHeight;
-        var entries = this.feedContent.childNodes;
+            this._markVisibleTimeout = async(function() {
+                var winTop = this.window.pageYOffset;
+                var winBottom = winTop + this.window.innerHeight;
+                var entries = this.feedContent.childNodes;
 
-        var entriesToMark = [];
+                var entriesToMark = [];
 
-        for (let i = 0; i < entries.length; i++) {
-            let entryTop = entries[i].offsetTop;
-            let id = parseInt(entries[i].id);
-            let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(id) != -1);
+                for (let i = entries.length - 1; i >= 0; i--) {
+                    let entryTop = entries[i].offsetTop;
+                    let id = parseInt(entries[i].id);
+                    let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(id) != -1);
 
-            if ((entryTop >= winTop) && (entryTop < winBottom - 50) && !wasMarkedUnread)
-                entriesToMark.push(id);
-        }
+                    if (entryTop >= winTop && entryTop < winBottom - 50 && !wasMarkedUnread)
+                        entriesToMark.push(id);
+                }
 
-        if (entriesToMark.length) {
-            var query = new QuerySH(entriesToMark);
-            query.markEntriesRead(true);
+                if (entriesToMark.length) {
+                    var query = new QuerySH(entriesToMark);
+                    query.markEntriesRead(true);
+                }
+            }, 1000, this);
         }
     },
 
@@ -400,7 +403,7 @@ FeedView.prototype = {
         }
         else {
             this.feedContent.removeAttribute('showHeadlinesOnly');
-            this._markVisibleAsRead();
+            this._markVisibleEntriesRead();
         }
     },
 
@@ -517,15 +520,15 @@ FeedView.prototype = {
                     // Pass some data which bindings need but don't have access to.
                     var data = {};
                     data.doubleClickMarks = gPrefs.doubleClickMarks;
-                    data.markReadString = this._strings.markAsReadStr;
-                    data.markUnreadString = this._strings.markAsUnreadStr;
+                    data.markReadString = this._strings.markAsRead;
+                    data.markUnreadString = this._strings.markAsUnread;
                     this.window.wrappedJSObject.gData = data;
                     this.refresh();
                 }
                 break;
 
             case 'scroll':
-                this._markVisibleAsRead();
+                this._markVisibleEntriesRead();
 
                 if (this._ignoreNextScrollEvent) {
                     this._ignoreNextScrollEvent = false;
@@ -839,7 +842,7 @@ FeedView.prototype = {
         // can trigger a resize event (!?).
         this.window.removeEventListener('resize', this, false);
 
-        while (win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD) {
+        while (win.scrollMaxY - win.pageYOffset < win.innerHeight * INITIAL_WINDOW_HEIGHTS_LOAD) {
             let entries = query.getFullEntries();
             if (!entries.length)
                 break;
@@ -857,7 +860,7 @@ FeedView.prototype = {
 
         this._asyncRefreshEntryList();
         this._setEmptyViewMessage();
-        this._markVisibleAsRead();
+        this._markVisibleEntriesRead();
 
         // Initialize selection.
         if (gPrefs.entrySelectionEnabled) {
@@ -924,7 +927,7 @@ FeedView.prototype = {
         articleContainer.setAttribute('tags', aEntry.tags);
 
         if (aEntry.authors)
-            articleContainer.setAttribute('authors', this._strings.authorPrefixStr + aEntry.authors);
+            articleContainer.setAttribute('authors', this._strings.authorPrefix + aEntry.authors);
         if (aEntry.read)
             articleContainer.setAttribute('read', true);
         if (aEntry.starred)
@@ -935,8 +938,8 @@ FeedView.prototype = {
         var dateString = this._constructEntryDate(aEntry);
         articleContainer.setAttribute('dateString', dateString);
         if (aEntry.updated) {
-            dateString += ' <span class="article-updated">' + this._strings.updatedStr + '</span>'
-            articleContainer.setAttribute('_strings.updatedString', dateString);
+            dateString += ' <span class="article-updated">' + this._strings.entryUpdated + '</span>'
+            articleContainer.setAttribute('_strings.entryUpdateding', dateString);
             articleContainer.setAttribute('updated', true);
         }
 
@@ -982,11 +985,11 @@ FeedView.prototype = {
         switch (true) {
             case deltaDays === 0:
                 string = entryDate.toLocaleFormat(', %X ');
-                string = this._strings.todayStr + string;
+                string = this._strings.today + string;
                 break;
             case deltaDays === 1:
                 string = entryDate.toLocaleFormat(', %X ');
-                string = this._strings.yesterdayStr + string
+                string = this._strings.yesterday + string
                 break;
             case deltaDays < 7:
                 string = entryDate.toLocaleFormat('%A, %X ');
@@ -1070,12 +1073,12 @@ FeedView.prototype = {
     get _strings FeedView__strings_get() {
         delete this.__proto__._strings;
         return this.__proto__._strings = {
-            todayStr: gStringBundle.getString('today'),
-            yesterdayStr: gStringBundle.getString('yesterday'),
-            authorPrefixStr: gStringBundle.getString('authorIntroductionPrefix') + ' ',
-            updatedStr: gStringBundle.getString('entryWasUpdated'),
-            markAsReadStr: gStringBundle.getString('markEntryAsRead'),
-            markAsUnreadStr: gStringBundle.getString('markEntryAsUnread'),
+            today: gStringBundle.getString('today'),
+            yesterday: gStringBundle.getString('yesterday'),
+            authorPrefix: gStringBundle.getString('authorIntroductionPrefix') + ' ',
+            entryUpdated: gStringBundle.getString('entryWasUpdated'),
+            markAsRead: gStringBundle.getString('markEntryAsRead'),
+            markAsUnread: gStringBundle.getString('markEntryAsUnread'),
         }
     },
 
