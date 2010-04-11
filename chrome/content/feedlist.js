@@ -134,16 +134,14 @@ var gTagList = {
 
         if (this._listbox.hidden) {
             this._listbox.hidden = false;
-            let sidebar = getElement('sidebar');
-            sidebar.width = parseInt(sidebar.width) + this._listbox.boxObject.width;
+            getElement('tag-list-splitter').hidden = false;
         }
     },
 
     hide: function gTagList_hide() {
         if (!this._listbox.hidden) {
-            let sidebar = getElement('sidebar');
-            sidebar.width = parseInt(sidebar.width) - this._listbox.boxObject.width;
             this._listbox.hidden = true;
+            getElement('tag-list-splitter').hidden = true;
         }
     },
 

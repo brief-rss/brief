@@ -98,16 +98,23 @@ function unload() {
 var gCommands = {
 
     hideSidebar: function cmd_hideSidebar() {
-        var pane = getElement('sidebar');
-        var splitter = getElement('sidebar-splitter');
-        pane.hidden = splitter.hidden = true;
+        getElement('sidebar').hidden = true;
+        getElement('sidebar-splitter').hidden = true;
+        getElement('tag-list').hidden = true;
+        getElement('tag-list-splitter').hidden = true;
+
         getElement('reveal-sidebar-button').hidden = false;
     },
 
     revealSidebar: function cmd_revealSidebar() {
-        var pane = getElement('sidebar');
-        var splitter = getElement('sidebar-splitter');
-        pane.hidden = splitter.hidden = false;
+        getElement('sidebar').hidden = false;
+        getElement('sidebar-splitter').hidden = false;
+
+        if (gViewList.selectedItem == getElement('starred-folder') || gTagList.selectedItem) {
+            getElement('tag-list').hidden = false;
+            getElement('tag-list-splitter').hidden = false;
+        }
+
         getElement('reveal-sidebar-button').hidden = true;
 
         if (!gFeedList.treeReady)
