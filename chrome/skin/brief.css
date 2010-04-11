@@ -33,7 +33,7 @@ page {
     margin: 0 !important;
 }
 
-#sidebar {
+#sidebar-deck {
     width: 250px !important;
 }
 
@@ -45,6 +45,14 @@ page {
 #sidebar-splitter:hover {
     border-right-color: #ffb754 !important;
     -moz-border-left-colors: #ffffff #ffebd2 #ffdfb1 #ffd090 #ffc36f !important;
+}
+
+#tag-list-splitter {
+    border-right: 1px solid #7c909f !important;
+}
+
+#tag-list-splitter:hover {
+    border-right-color: #ffb754 !important;
 }
 
 #reveal-sidebar-button {
@@ -164,10 +172,6 @@ page {
 
 
 /* =========== Tag listbox ========== */
-
-#tag-list {
-    border-left: 1px solid #7c909f !important;
-}
 
 .tag-list-item {
     width: 120px !important;

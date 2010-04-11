@@ -192,18 +192,23 @@
                     </hbox>
                 </vbox>
             </deck>
-
-            <listbox id="tag-list"
-                     hidden="true"
-                     context="tag-list-popup"
-                     onselect="gTagList.onSelect(event)"
-                     onclick="gTagList.onClick(event)"/>
         </hbox>
 
         <splitter id="sidebar-splitter"
+                  resizeafter="farthest"
                   tooltiptext="&sidebarSplitter.tooltip;"
                   persist="hidden"
                   ondblclick="gCommands.hideSidebar()"/>
+
+        <listbox id="tag-list"
+                 hidden="true"
+                 persist="width"
+                 context="tag-list-popup"
+                 onselect="gTagList.onSelect(event)"
+                 onclick="gTagList.onClick(event)"/>
+
+        <splitter id="tag-list-splitter"
+                  hidden="true"/>
 
         <vbox flex="1">
             <hbox id="feed-view-header"
