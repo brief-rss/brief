@@ -378,10 +378,14 @@ function selectHomeFolder(aEvent) {
 
 function onSearchbarCommand() {
     var searchbar = getElement('searchbar');
-    var titleOverride = searchbar.value
-                        ? bundle.getFormattedString('searchResults', [searchbar.value])
-                        : '';
-    gFeedView.titleOverride = titleOverride;
+    if (searchbar.value) {
+        gFeedView.titleOverride = gStringBundle.getFormattedString('searchResults',
+                                                                   [searchbar.value]);
+    }
+    else {
+        gFeedView.titleOverride = '';
+    }
+
     gFeedView.query.searchString = searchbar.value;
     gFeedView.refresh();
 }
