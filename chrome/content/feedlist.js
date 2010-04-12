@@ -44,13 +44,13 @@ var gViewList = {
             case 'unread-folder':
                 query.deleted = ENTRY_STATE_NORMAL;
                 query.unread = true;
-                var unreadParamFixed = true;
+                var fixedUnread = true;
                 break;
 
             case 'starred-folder':
                 query.deleted = ENTRY_STATE_NORMAL;
                 query.starred = true;
-                var starredParamFixed = true;
+                var fixedStarred = true;
 
                 if (gTagList.tags.length)
                     gTagList.show();
@@ -61,7 +61,7 @@ var gViewList = {
                 break;
         }
 
-        gFeedView = new FeedView(title, query, unreadParamFixed, starredParamFixed);
+        gFeedView = new FeedView(title, query, fixedUnread, fixedStarred);
     },
 
     // If there is a webpage open in the browser then clicking on
