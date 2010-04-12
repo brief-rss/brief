@@ -514,7 +514,7 @@ var gPrefs = {
                 break;
 
             case 'feedview.showHeadlinesOnly':
-                gFeedView._toggleHeadlinesView();
+                gFeedView.toggleHeadlinesView();
                 break;
         }
     }

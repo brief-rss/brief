@@ -24,15 +24,15 @@ var gFeedView = null;
  *
  * @param aTitle  Title of the view which will be shown in the header.
  * @param aQuery  Query which selects contained entries.
- * @param aUnreadFixed  Indicates that the "unread" query parameter is fixed and the view
+ * @param aFixedUnread  Indicates that the "unread" query parameter is fixed and the view
  *                      isn't affected by feedview.filterUnread pref.
- * @param aStarredFixed  Indicates that the "starred" query parameter is fixed and the
+ * @param aFixedStarred  Indicates that the "starred" query parameter is fixed and the
  *                       isn't view affected by feedview.filterStarred pref.
  */
-function FeedView(aTitle, aQuery, aUnreadFixed, aStarredFixed) {
+function FeedView(aTitle, aQuery, aFixedUnread, aFixedStarred) {
     this.title = aTitle;
-    this.unreadParamFixed = aUnreadFixed || false;
-    this.starredParamFixed = aStarredFixed || false;
+    this.fixedUnread = aFixedUnread || false;
+    this.fixedStarred = aFixedStarred || false;
 
     aQuery.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
     this.query = aQuery;
@@ -72,7 +72,6 @@ FeedView.prototype = {
         return this.document.getElementById('feed-content');
     },
 
-    // Indicates whether the feed view is currently displayed in the browser.
     get active FeedView_active() {
         return (this.browser.currentURI.equals(gTemplateURI) && gFeedView == this);
     },
@@ -86,9 +85,9 @@ FeedView.prototype = {
     },
 
     get query FeedView_query_get() {
-        if (!this.unreadParamFixed)
+        if (!this.fixedUnread)
             this.__query.unread = gPrefs.filterUnread;
-        if (!this.starredParamFixed)
+        if (!this.fixedStarred)
             this.__query.starred = gPrefs.filterStarred;
 
         if (this.__query.unread && gPrefs.sortUnreadViewOldestFirst)
@@ -125,7 +124,9 @@ FeedView.prototype = {
     },
 
 
-    // Ordered array of IDs of entries contained by the view.
+    /**
+     * Ordered array of IDs of entries contained by the view.
+     */
     get _entries FeedView__entries_get() {
         if (!this.__entries)
             this.__entries = this.query.getEntries();
@@ -393,7 +394,7 @@ FeedView.prototype = {
         }
     },
 
-    _toggleHeadlinesView: function FeedView__toggleHeadlinesView() {
+    toggleHeadlinesView: function FeedView_toggleHeadlinesView() {
         for (let i = 0; i < this._loadedEntries.length; i++)
             this.collapseEntry(this._loadedEntries[i], gPrefs.showHeadlinesOnly, false);
 
@@ -421,8 +422,8 @@ FeedView.prototype = {
             getElement('searchbar').value = '';
 
         // Disable filters for views with fixed parameters.
-        getElement('filter-unread-checkbox').disabled = this.unreadParamFixed;
-        getElement('filter-starred-checkbox').disabled = this.starredParamFixed;
+        getElement('filter-unread-checkbox').disabled = this.fixedUnread;
+        getElement('filter-starred-checkbox').disabled = this.fixedStarred;
 
         this.browser.addEventListener('load', this, false);
         gStorage.addObserver(this);
@@ -1070,7 +1071,7 @@ FeedView.prototype = {
         messageBox.style.display = 'block';
     },
 
-    get _strings FeedView__strings_get() {
+    get _strings FeedView__strings() {
         delete this.__proto__._strings;
         return this.__proto__._strings = {
             today: gStringBundle.getString('today'),
