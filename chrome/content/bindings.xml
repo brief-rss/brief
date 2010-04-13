@@ -315,15 +315,19 @@
 
                 case 'DoRemoveEntry':
                     var self = this;
-                    function callback() {
+                    $(this).fadeOut(200, function() {
                         var feedContent = document.getElementById('feed-content');
-                        feedContent.removeChild(self);
 
-                        var evt = document.createEvent('Events');
-                        evt.initEvent('EntryRemoved', false, false);
-                        document.dispatchEvent(evt);
-                    }
-                    $(this).fadeOut(200, callback);
+                        // The entry may have been removed if the view
+                        // was refreshed in the meantime.
+                        if (self.parentNode == feedContent) {
+                            feedContent.removeChild(self);
+
+                            let evt = document.createEvent('Events');
+                            evt.initEvent('EntryRemoved', false, false);
+                            document.dispatchEvent(evt);
+                        }
+                    });
                     break;
 
                 case 'DoCollapseEntry':

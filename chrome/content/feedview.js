@@ -449,6 +449,7 @@ FeedView.prototype = {
      * Deactivates the view.
      */
     uninit: function FeedView_uninit() {
+        this.document.removeEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
         this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
         for each (event in this._events)
@@ -748,18 +749,17 @@ FeedView.prototype = {
         var selectedEntryIndex = -1;
 
         let self = this;
-        function finish() {
-            self.document.removeEventListener('EntryRemoved', finish, true);
+        this._onEntriesRemovedFinish = function() {
+            self.document.removeEventListener('EntryRemoved', arguments.callee, true);
 
             if (aLoadNewEntries)
                 self._loadEntries();
 
             self._setEmptyViewMessage();
 
-            if (self._loadedEntries.length) {
-                let newSelection = self._loadedEntries[selectedEntryIndex] != -1
-                                   ? self._loadedEntries[selectedEntryIndex]
-                                   : self._loadedEntries[self._loadedEntries.length - 1];
+            if (self._loadedEntries.length && selectedEntryIndex != -1) {
+                let newSelection = self._loadedEntries[selectedEntryIndex] ||
+                                   self._loadedEntries[self._loadedEntries.length - 1];
                 self.selectEntry(newSelection);
             }
         }
@@ -774,7 +774,7 @@ FeedView.prototype = {
 
             // Gracefully fade the entry using jQuery. For callback, the binding
             // will send EntryRemoved event when it's finished.
-            this.document.addEventListener('EntryRemoved', finish, true);
+            this.document.addEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
             this._sendEvent(entryID, 'DoRemoveEntry');
 
             this._loadedEntries.splice(indices[0], 1);
@@ -796,7 +796,7 @@ FeedView.prototype = {
                 this._loadedEntries.splice(indices[i], 1);
             }
 
-            finish();
+            this._onEntriesRemovedFinish();
         }
     },
 
@@ -809,6 +809,7 @@ FeedView.prototype = {
             return;
 
         this._stopSmoothScrolling();
+        this.document.removeEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
         clearTimeout(this._markVisibleTimeout);
         getTopWindow().StarUI.panel.hidePopup();
 
