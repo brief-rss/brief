@@ -395,15 +395,15 @@ FeedFetcher.prototype = {
                     self.finish(self.bozo, newEntriesCount);
                 }
                 new FaviconFetcher(this.downloadedFeed.websiteURL, callback);
+                return;
             }
             else {
                 this.downloadedFeed.favicon = 'no-favicon';
             }
         }
-        else {
-            var newEntriesCount = gStorage.updateFeed(this.downloadedFeed);
-            this.finish(this.bozo, newEntriesCount);
-        }
+
+        var newEntriesCount = gStorage.updateFeed(this.downloadedFeed);
+        this.finish(this.bozo, newEntriesCount);
     },
 
 
