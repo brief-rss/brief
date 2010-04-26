@@ -144,6 +144,10 @@
 
                 if (aState) {
                     function finish() {
+                        var feedContent = document.getElementById('feed-content');
+                        if (self.parentNode != feedContent)
+                            return;
+                        
                         self.setAttribute('collapsed', true);
 
                         var collapsedSubheader = self.getElement('collapsed-article-subheader');
@@ -169,7 +173,9 @@
                     subheader.insertBefore(feedName, tagsElem);
 
                     function finish() {
-                        self.sendEvent('EntryUncollapsed');
+                        var feedContent = document.getElementById('feed-content');
+                        if (self.parentNode == feedContent)
+                            self.sendEvent('EntryUncollapsed');
                     }
 
                     if (aAnimate) {
