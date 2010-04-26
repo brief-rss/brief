@@ -141,8 +141,12 @@ var gCommands = {
                           features, aPaneID);
     },
 
-    markViewRead: function cmd_markViewRead(aEvent) {
+    markViewRead: function cmd_markViewRead() {
         gFeedView.query.markEntriesRead(true);
+    },
+
+    markVisibleEntriesRead: function cmd_markVisibleEntriesRead() {
+        gFeedView.markVisibleEntriesRead();
     },
 
     switchHeadlinesView: function cmd_switchHeadlinesView() {
@@ -189,10 +193,6 @@ var gCommands = {
 
     selectPrevEntry: function cmd_selectPrevEntry() {
         gFeedView.selectPrevEntry();
-    },
-
-    openSelectedEntryLinkInTab: function cmd_openSelectedEntryLinkInTab() {
-        gCommands.openSelectedEntryLink(true);
     },
 
     focusSearchbar: function cmd_focusSearchbar() {
@@ -260,9 +260,9 @@ var gCommands = {
     },
 
 
-    openSelectedEntryLink: function cmd_openSelectedEntryLink(aForceNewTab) {
+    openSelectedEntryLink: function cmd_openSelectedEntryLink() {
         if (gFeedView.selectedEntry) {
-            var newTab = gPrefBranch.getBoolPref('feedview.openEntriesInTabs') || aForceNewTab;
+            let newTab = gPrefBranch.getBoolPref('feedview.openEntriesInTabs');
             gCommands.openEntryLink(gFeedView.selectedElement, newTab);
         }
     },
@@ -430,6 +430,13 @@ function onKeyPress(aEvent) {
             aEvent.preventDefault();
         }
     }
+}
+
+function onMarkViewReadClick(aEvent) {
+    if (aEvent.ctrlKey)
+        gCommands.markVisibleEntriesRead();
+    else
+        gCommands.markViewRead();
 }
 
 function getTopWindow() {

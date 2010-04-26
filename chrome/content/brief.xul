@@ -216,7 +216,7 @@
                 <button id="mark-view-read"
                         class="brief-button feed-header-button"
                         tooltiptext="&markViewRead.tooltip;"
-                        oncommand="gCommands.markViewRead(event)"/>
+                        onclick="onMarkViewReadClick(event)"/>
                 <html:div id="feed-title-box"
                           flex="1">
                     <html:a id="feed-title" target="_blank"/>

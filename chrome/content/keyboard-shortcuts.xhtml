@@ -37,25 +37,13 @@
                 text-align: center;
                 padding-top: 20px;
             }
-
-            .onlyMac {
-              display: none;
-            }
         </style>
         <script type="text/javascript">
-            function applyMacOverride() {
-                if (window.navigator.platform.match('Mac')) {
-                    var link = document.getElementById('mac-override');
-                    link.setAttribute('href', 'chrome://brief-mac/skin/mac.css');
-                }
-            }
-
             function onKeypress(aEvent) {
                 if (aEvent.keyCode == aEvent.DOM_VK_ESCAPE)
                     window.close();
             }
 
-            window.addEventListener('load', applyMacOverride, false);
             document.addEventListener('keypress', onKeypress, false);
         </script>
     </head>
@@ -71,25 +59,18 @@
             </tr>
             <tr>
                 <td class="shortcut-key">J <span class="shortcuts-plain">&or;</span> &space.key;</td>
-                <td>&showNextItem;</td>
+                <td>&selectNextItem;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">K <span class="shortcuts-plain">&or;</span> &backspace.key;</td>
-                <td>&showPreviousItem;</td>
+                <td>&selectPreviousItem;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">&enter.key;</td>
                 <td>&openEntry;</td>
             </tr>
             <tr>
-                <td class="shortcut-key">
-                    <span class="onlyMac">&cmdEnter.key;</span>
-                    <span class="noMac">&ctrlEnter.key;</span>
-                </td>
-                <td>&openEntryTab;</td>
-            </tr>
-            <tr>
-                <td class="shortcut-key">N</td>
+                <td class="shortcut-key">H</td>
                 <td>&foldEntry;</td>
             </tr>
             <tr>
@@ -98,6 +79,14 @@
             <tr>
                 <td class="shortcut-key">M</td>
                 <td>&markRead;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">N</td>
+                <td>&markVisibleRead;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">&altN.key;</td>
+                <td>&markAllAsRead;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">B</td>
@@ -110,13 +99,6 @@
             <tr>
                 <td class="shortcut-key">R</td>
                 <td>&restoreEntry;</td>
-            </tr>
-            <tr>
-                <td class="shortcut-key">
-                    <span class="onlyMac">&cmdM.key;</span>
-                    <span class="noMac">&ctrlM.key;</span>
-                </td>
-                <td>&markAllAsRead;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">Q <span class="shortcuts-plain">&or;</span> &tab.key;</td>
