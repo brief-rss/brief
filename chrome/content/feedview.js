@@ -366,31 +366,32 @@ FeedView.prototype = {
         return middleElement || elems[elems.length - 1];
     },
 
-    _markVisibleEntriesRead: function FeedView__markVisibleEntriesRead() {
+    _autoMarkRead: function FeedView__autoMarkRead() {
         if (gPrefs.autoMarkRead && !this.query.unread) {
             clearTimeout(this._markVisibleTimeout);
+            this._markVisibleTimeout = async(this.markVisibleEntriesRead, 1000, this);
+        }
+    },
 
-            this._markVisibleTimeout = async(function() {
-                var winTop = this.window.pageYOffset;
-                var winBottom = winTop + this.window.innerHeight;
-                var entries = this.feedContent.childNodes;
+    markVisibleEntriesRead: function FeedView_markVisibleEntriesRead() {
+        var winTop = this.window.pageYOffset;
+        var winBottom = winTop + this.window.innerHeight;
+        var entries = this.feedContent.childNodes;
 
-                var entriesToMark = [];
+        var entriesToMark = [];
 
-                for (let i = entries.length - 1; i >= 0; i--) {
-                    let entryTop = entries[i].offsetTop;
-                    let id = parseInt(entries[i].id);
-                    let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(id) != -1);
+        for (let i = entries.length - 1; i >= 0; i--) {
+            let entryTop = entries[i].offsetTop;
+            let id = parseInt(entries[i].id);
+            let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(id) != -1);
 
-                    if (entryTop >= winTop && entryTop < winBottom - 50 && !wasMarkedUnread)
-                        entriesToMark.push(id);
-                }
+            if (entryTop >= winTop && entryTop < winBottom - 50 && !wasMarkedUnread)
+                entriesToMark.push(id);
+        }
 
-                if (entriesToMark.length) {
-                    var query = new QuerySH(entriesToMark);
-                    query.markEntriesRead(true);
-                }
-            }, 1000, this);
+        if (entriesToMark.length) {
+            var query = new QuerySH(entriesToMark);
+            query.markEntriesRead(true);
         }
     },
 
@@ -404,7 +405,7 @@ FeedView.prototype = {
         }
         else {
             this.feedContent.removeAttribute('showHeadlinesOnly');
-            this._markVisibleEntriesRead();
+            this._autoMarkRead();
         }
     },
 
@@ -530,7 +531,7 @@ FeedView.prototype = {
                 break;
 
             case 'scroll':
-                this._markVisibleEntriesRead();
+                this._autoMarkRead();
 
                 if (this._ignoreNextScrollEvent) {
                     this._ignoreNextScrollEvent = false;
@@ -862,7 +863,7 @@ FeedView.prototype = {
 
         this._asyncRefreshEntryList();
         this._setEmptyViewMessage();
-        this._markVisibleEntriesRead();
+        this._autoMarkRead();
 
         // Initialize selection.
         if (gPrefs.entrySelectionEnabled) {
