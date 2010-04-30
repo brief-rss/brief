@@ -16,6 +16,10 @@
              oncommand="gBrief.doCommand('selectNextEntry')"/>
         <key id="Brief_selectPreviousEntry" key="k"
              oncommand="gBrief.doCommand('selectPrevEntry')"/>
+        <key id="Brief_skipDown" key="u"
+             oncommand="gBrief.doCommand('skipDown')"/>
+        <key id="Brief_skipUp" key="i"
+             oncommand="gBrief.doCommand('skipUp')"/>
 
         <key id="Brief_switchSelectedEntryRead" key="m"
              oncommand="gBrief.doCommand('switchSelectedEntryRead')"/>
@@ -23,10 +27,8 @@
              oncommand="gBrief.doCommand('markVisibleEntriesRead')"/>
         <key id="Brief_markCurrentViewRead" key="n" modifiers="alt"
              oncommand="gBrief.doCommand('markViewRead')"/>
-        <key id="Brief_deleteSelectedEntry" key="t"
-             oncommand="gBrief.doCommand('deleteSelectedEntry')"/>
-        <key id="Brief_restoreSelectedEntry" key="r"
-             oncommand="gBrief.doCommand('restoreSelectedEntry')"/>
+        <key id="Brief_deleteOrRestoreSelectedEntry" key="t"
+             oncommand="gBrief.doCommand('deleteOrRestoreSelectedEntry')"/>
         <key id="Brief_switchSelectedEntryStarred" key="b"
              oncommand="gBrief.doCommand('switchSelectedEntryStarred')"/>
         <key id="Brief_switchSelectedEntryCollapsed" key="h"
@@ -44,8 +46,6 @@
              oncommand="gBrief.doCommand('showUnreadEntries')"/>
         <key id="Brief_focusSearchbar" key="/"
              oncommand="gBrief.doCommand('focusSearchbar')"/>
-        <key id="Brief_toggleEntrySelection" key="q"
-             oncommand="gBrief.doCommand('toggleEntrySelection')"/>
 
         <key id="Brief_displayShortcuts" key="?" modifiers="shift"
              oncommand="gBrief.doCommand('displayShortcuts')"/>
