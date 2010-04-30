@@ -1,29 +1,35 @@
 <!ENTITY shortcutsPage.title "Brief - keyboard shortcuts">
-<!ENTITY navigation.header "Navigation">
 <!ENTITY or "or">
-<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
-<!ENTITY openBrief "Open Brief">
+
+<!ENTITY navigation.header "Navigation">
 <!ENTITY space.key "Space">
-<!ENTITY selectNextItem "Select the next item">
-<!ENTITY backspace.key "Backspace">
-<!ENTITY selectPreviousItem "Select the previous item">
+<!ENTITY nextItem "Go to the next item">
+<!ENTITY previousItem "Go to the previous item">
+<!ENTITY skipDown "Skip down by 10 items">
+<!ENTITY skipUp "Skip up by 10 items">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Open the current item">
-<!ENTITY foldEntry "Unfold or fold the current item (in headlines view)">
+<!ENTITY showItem "Show/hide the current item (in headlines view)">
+
 <!ENTITY entries.header "Items">
-<!ENTITY markRead "Mark the current item as read or unread">
-<!ENTITY markVisibleRead "Mark all items on the screen as read">
-<!ENTITY altN.key "Alt + N">
-<!ENTITY markAllAsRead "Mark all items in the feed as read">
-<!ENTITY starEntry "Bookmark or unbookmark the current item">
-<!ENTITY moveToTrash "Move the current item to Trash">
-<!ENTITY restoreEntry "Restore the current item from Trash">
 <!ENTITY tab.key "Tab">
 <!ENTITY enableEntryHightlight "Enable highlighting of the current item">
+<!ENTITY markCurrentItemRead "Mark the current item as read/unread">
+<!ENTITY markVisibleRead "Mark all items on the screen as read">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Mark all items as read">
+<!ENTITY starItem "Bookmark the current item">
+<!ENTITY moveToTrash "Move the current item to Trash">
+
 <!ENTITY view.header "View">
 <!ENTITY showAll "Show all items">
 <!ENTITY showStarred "Show bookmarked items">
 <!ENTITY showUnread "Show unread items">
 <!ENTITY headlinesView "Toggle headlines view">
+
+<!ENTITY general.header "General">
+<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
+<!ENTITY cmdShiftA.key "Cmd + Shift + A">
+<!ENTITY openBrief "Open Brief">
 <!ENTITY focusSearchbar "Focus the search box">
 <!ENTITY displayShortcuts "Display the list of keyboard shortcuts">

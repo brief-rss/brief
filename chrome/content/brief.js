@@ -195,6 +195,14 @@ var gCommands = {
         gFeedView.selectPrevEntry();
     },
 
+    skipDown: function cmd_skipDown() {
+        gFeedView.skipDown();
+    },
+
+    skipUp: function cmd_skipUp() {
+        gFeedView.skipUp();
+    },
+
     focusSearchbar: function cmd_focusSearchbar() {
         getElement('searchbar').focus();
     },
@@ -219,19 +227,18 @@ var gCommands = {
             gFeedView.entriesMarkedUnread.push(aEntry);
     },
 
-    deleteSelectedEntry: function cmd_deleteSelectedEntry() {
-        if (gFeedView.selectedEntry)
-            this.deleteEntry(gFeedView.selectedEntry);
+    deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
+        if (gFeedView.selectedEntry) {
+            if (gFeedView.query.deleted == ENTRY_STATE_TRASHED)
+                this.restoreEntry(gFeedView.selectedEntry);
+            else
+                this.deleteEntry(gFeedView.selectedEntry);
+        }
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
         var query = new QuerySH([aEntry]);
         query.deleteEntries(ENTRY_STATE_TRASHED);
-    },
-
-    restoreSelectedEntry: function cmd_restoreSelectedEntry() {
-        if (gFeedView.selectedEntry)
-            this.restoreEntry(gFeedView.selectedEntry);
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
@@ -291,7 +298,7 @@ var gCommands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        var height = Math.min(window.screen.availHeight, 580);
+        var height = Math.min(window.screen.availHeight, 630);
         var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
         var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
@@ -392,7 +399,7 @@ function onSearchbarCommand() {
 
 
 /**
- * Space, Tab, and Backspace can't be captured using <key/> XUL elements, so we handle
+ * Space and Tab can't be captured using <key/> XUL elements, so we handle
  * them manually using a listener. Additionally, unlike other keys, they have to
  * be default-prevented.
  */
@@ -418,14 +425,6 @@ function onKeyPress(aEvent) {
                 gFeedView.selectNextEntry();
             else
                 gFeedView.scrollToNextEntry(true);
-
-            aEvent.preventDefault();
-        }
-        else if (aEvent.keyCode == aEvent.DOM_VK_BACK_SPACE) {
-            if (gPrefs.entrySelectionEnabled)
-                gFeedView.selectPrevEntry();
-            else
-                gFeedView.scrollToPrevEntry(true);
 
             aEvent.preventDefault();
         }

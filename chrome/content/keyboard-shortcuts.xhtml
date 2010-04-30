@@ -37,13 +37,25 @@
                 text-align: center;
                 padding-top: 20px;
             }
+
+            .onlyMac {
+              display: none;
+            }
         </style>
         <script type="text/javascript">
+            function applyMacOverride() {
+                if (window.navigator.platform.match('Mac')) {
+                    var link = document.getElementById('mac-override');
+                    link.setAttribute('href', 'mac.css');
+                }
+            }
+
             function onKeypress(aEvent) {
                 if (aEvent.keyCode == aEvent.DOM_VK_ESCAPE)
                     window.close();
             }
 
+            window.addEventListener('load', applyMacOverride, false);
             document.addEventListener('keypress', onKeypress, false);
         </script>
     </head>
@@ -54,16 +66,20 @@
                 <td colspan="2" class="shortucts-header" style="padding-top: 10px;">&navigation.header;</td>
             </tr>
             <tr>
-                <td class="shortcut-key">&ctrlShiftA.key;</td>
-                <td>&openBrief;</td>
+                <td class="shortcut-key">&space.key; <span class="shortcuts-plain">&or;</span> J</td>
+                <td>&nextItem;</td>
             </tr>
             <tr>
-                <td class="shortcut-key">J <span class="shortcuts-plain">&or;</span> &space.key;</td>
-                <td>&selectNextItem;</td>
+                <td class="shortcut-key">K</td>
+                <td>&previousItem;</td>
             </tr>
             <tr>
-                <td class="shortcut-key">K <span class="shortcuts-plain">&or;</span> &backspace.key;</td>
-                <td>&selectPreviousItem;</td>
+                <td class="shortcut-key">U</td>
+                <td>&skipDown;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">I</td>
+                <td>&skipUp;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">&enter.key;</td>
@@ -71,14 +87,18 @@
             </tr>
             <tr>
                 <td class="shortcut-key">H</td>
-                <td>&foldEntry;</td>
+                <td>&showItem;</td>
             </tr>
             <tr>
                 <td colspan="2" class="shortucts-header">&entries.header;</td>
             </tr>
             <tr>
+                <td class="shortcut-key">&tab.key;</td>
+                <td>&enableEntryHightlight;</td>
+            </tr>
+            <tr>
                 <td class="shortcut-key">M</td>
-                <td>&markRead;</td>
+                <td>&markCurrentItemRead;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">N</td>
@@ -86,24 +106,17 @@
             </tr>
             <tr>
                 <td class="shortcut-key">&altN.key;</td>
-                <td>&markAllAsRead;</td>
+                <td>&markAllRead;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">B</td>
-                <td>&starEntry;</td>
+                <td>&starItem;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">T</td>
                 <td>&moveToTrash;</td>
             </tr>
-            <tr>
-                <td class="shortcut-key">R</td>
-                <td>&restoreEntry;</td>
-            </tr>
-            <tr>
-                <td class="shortcut-key">Q <span class="shortcuts-plain">&or;</span> &tab.key;</td>
-                <td>&enableEntryHightlight;</td>
-            </tr>
+
             <tr>
                 <td colspan="2" class="shortucts-header">&view.header;</td>
             </tr>
@@ -122,6 +135,17 @@
             <tr>
                 <td class="shortcut-key">F</td>
                 <td>&headlinesView;</td>
+            </tr>
+
+            <tr>
+                <td colspan="2" class="shortucts-header">&general.header;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">
+                    <span class="noMac">&ctrlShiftA.key;</span>
+                    <span class="onlyMac">&cmdShiftA.key;</span>
+                </td>
+                <td>&openBrief;</td>
             </tr>
             <tr>
                 <td class="shortcut-key">/</td>
