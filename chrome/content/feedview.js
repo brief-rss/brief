@@ -394,7 +394,7 @@ FeedView.prototype = {
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
-        if (gPrefs.autoMarkRead && !this.query.unread) {
+        if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !this.query.unread) {
             clearTimeout(this._markVisibleTimeout);
             this._markVisibleTimeout = async(this.markVisibleEntriesRead, 1000, this);
         }
