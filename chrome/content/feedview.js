@@ -932,8 +932,8 @@ FeedView.prototype = {
             return;
 
         if (aCount) {
-            let startIndex = this._loadedEntries.length - 1;
-            let endIndex = Math.min(startIndex + aCount, this._entries.length - 1);
+            let startIndex = this._loadedEntries.length;
+            let endIndex = Math.min(startIndex + aCount, this._entries.length);
             let entries = this._entries.slice(startIndex, endIndex);
             this._getFastQuery(entries).getFullEntries().forEach(this._appendEntry, this);
             return;
@@ -950,7 +950,7 @@ FeedView.prototype = {
         while ((win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD
                 || middleEntry == this.feedContent.lastChild)
                && this._loadedEntries.length < this._entries.length) {
-            let startIndex = this._loadedEntries.length - 1;
+            let startIndex = this._loadedEntries.length;
             let endIndex = Math.min(startIndex + LOAD_STEP_SIZE, this._entries.length);
             let entries = this._entries.slice(startIndex, endIndex);
             this._getFastQuery(entries).getFullEntries().forEach(this._appendEntry, this);
