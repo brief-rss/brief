@@ -270,6 +270,32 @@ FeedView.prototype = {
             this.scrollToEntry(parseInt(nextElement.id), aSmooth);
     },
 
+    skipDown: function FeedView_skipDown() {
+        var middleEntry = parseInt(this._getMiddleEntryElement().id);
+        var index = this._loadedEntries.indexOf(middleEntry);
+        if (index + 10 > this._loadedEntries.length - 1)
+            this._loadEntries(10);
+
+        var targetEntry = this._loadedEntries[index + 10] ||
+                          this._loadedEntries[this._loadedEntries.length - 1];
+
+        if (gPrefs.entrySelectionEnabled)
+            this.selectEntry(targetEntry, true, true);
+        else
+            this.scrollToEntry(targetEntry, true);
+    },
+
+    skipUp: function FeedView_skipUp() {
+        var middleEntry = parseInt(this._getMiddleEntryElement().id);
+        var index = this._loadedEntries.indexOf(middleEntry);
+        var targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
+
+        if (gPrefs.entrySelectionEnabled)
+            this.selectEntry(targetEntry, true, true);
+        else
+            this.scrollToEntry(targetEntry, true);
+    },
+
 
     /**
      * Scroll entry into view. If the entry is taller than the height of the screen,
@@ -354,7 +380,8 @@ FeedView.prototype = {
 
         var middleLine = this.window.pageYOffset + Math.round(this.window.innerHeight / 2);
 
-        // Get the element in the middle of the screen.
+        // Iterate starting from the last entry, because the scroll position is
+        // likely to be closer to the end than to the beginning of the page.
         for (let i = elems.length - 1; i >= 0; i--) {
             if ((elems[i].offsetTop <= middleLine)
                 && (!elems[i + 1] || elems[i + 1].offsetTop > middleLine)) {
@@ -380,6 +407,8 @@ FeedView.prototype = {
 
         var entriesToMark = [];
 
+        // Iterate starting from the last entry, because the scroll position is
+        // likely to be closer to the end than to the beginning of the page.
         for (let i = entries.length - 1; i >= 0; i--) {
             let entryTop = entries[i].offsetTop;
             let id = parseInt(entries[i].id);
@@ -857,8 +886,8 @@ FeedView.prototype = {
         }
 
         // Resize events can be dispatched asynchronously, so this listener can't be
-        // added in FeedView.attach() like the others, because it could be triggered
-        // before the initial refresh.
+        // added in FeedView.attach() like the others, because then it could be
+        // triggered before the initial refresh.
         this.window.addEventListener('resize', this, false);
 
         this._asyncRefreshEntryList();
@@ -893,8 +922,23 @@ FeedView.prototype = {
 
     /**
      * Incrementally loads the next part of entries.
+     *
+     * @param aCount If provided, specifies the number of entries to be loaded.
+     *               Otherwise, entries are loaded until they fill WINDOW_HEIGHTS_LOAD
+     *               of window heights.
      */
-    _loadEntries: function FeedView__loadEntries() {
+    _loadEntries: function FeedView__loadEntries(aCount) {
+        if (this._loadedEntries.length == this._entries.length)
+            return;
+
+        if (aCount) {
+            let startIndex = this._loadedEntries.length - 1;
+            let endIndex = Math.min(startIndex + aCount, this._entries.length - 1);
+            let entries = this._entries.slice(startIndex, endIndex);
+            this._getFastQuery(entries).getFullEntries().forEach(this._appendEntry, this);
+            return;
+        }
+
         var win = this.document.defaultView;
         var middleEntry = this._getMiddleEntryElement();
 
@@ -906,9 +950,9 @@ FeedView.prototype = {
         while ((win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD
                 || middleEntry == this.feedContent.lastChild)
                && this._loadedEntries.length < this._entries.length) {
-            let startIndex = this._loadedEntries.length;
-            let endIndex = Math.min(startIndex + LOAD_STEP_SIZE, this._entries.length - 1);
-            let entries = this._entries.slice(startIndex, endIndex + 1);
+            let startIndex = this._loadedEntries.length - 1;
+            let endIndex = Math.min(startIndex + LOAD_STEP_SIZE, this._entries.length);
+            let entries = this._entries.slice(startIndex, endIndex);
             this._getFastQuery(entries).getFullEntries().forEach(this._appendEntry, this);
         }
     },
