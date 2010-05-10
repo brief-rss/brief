@@ -2,6 +2,7 @@ const gBrief = {
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
+    FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
     tab: null,  // Tab in which Brief is loaded
 
@@ -375,8 +376,22 @@ const gBrief = {
             BrowserToolboxCustomizeDone(true);
         }
 
-        gBrief.open(true);
+        // Create the default feeds folder.
+        var name = Cc['@mozilla.org/intl/stringbundle;1'].
+                     getService(Ci.nsIStringBundleService).
+                     createBundle('chrome://brief/locale/brief.properties').
+                     GetStringFromName('defaultFeedsFolderName');
+        var bookmarks = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
+                        getService(Ci.nsINavBookmarksService);
+        var folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
+                                              bookmarks.DEFAULT_INDEX);
+        gBrief.prefs.setIntPref('homeFolder', folderID);
 
+        // Load the first run page.
+        gBrowser.loadOneTab(gBrief.FIRST_RUN_PAGE_URL, {
+            relatedToCurrent: false,
+            inBackground: false
+        });
         gBrief.prefs.setBoolPref('firstRun', false);
     },
 

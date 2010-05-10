@@ -64,14 +64,9 @@ function init() {
 
     gStorage.addObserver(gFeedList);
 
-    if (gPrefs.homeFolder != -1) {
-        gViewList.init();
-        async(gFeedList.rebuild, 0, gFeedList);
-        async(loadHomeview);
-    }
-    else {
-        showFirstRunUI();
-    }
+    gViewList.init();
+    async(gFeedList.rebuild, 0, gFeedList);
+    async(loadHomeview);
 
     async(gStorage.syncWithLivemarks, 2000, gStorage);
 }
@@ -344,44 +339,6 @@ function refreshProgressmeter() {
     }
 }
 
-function showFirstRunUI() {
-    if (gFeedView)
-        gFeedView.uninit();
-
-    getElement('sidebar-deck').selectedIndex = 1;
-
-    var query = PlacesUtils.history.getNewQuery();
-    var options = PlacesUtils.history.getNewQueryOptions();
-    query.setFolders([PlacesUIUtils.allBookmarksFolderId], 1);
-    options.excludeItems = true;
-
-    getElement('places-tree').load([query], options);
-
-    getElement('feed-view').loadURI(GUIDE_PAGE_URL);
-    getElement('feed-view-header').hidden = true;
-}
-
-function onHomeFolderPickerSelect(aEvent) {
-    var placesTree = getElement('places-tree');
-    var okButton = getElement('confirm-home-folder');
-
-    var selectedItem = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
-    if (selectedItem) {
-        var selectedItemType = PlacesUtils.bookmarks.getItemType(selectedItem);
-        okButton.disabled = selectedItemType != PlacesUtils.bookmarks.TYPE_FOLDER
-                            || PlacesUtils.livemarks.isLivemark(selectedItem);
-    }
-}
-
-function selectHomeFolder(aEvent) {
-    var placesTree = getElement('places-tree');
-    if (placesTree.currentIndex != -1) {
-        var folderId = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
-        gPrefBranch.setIntPref('homeFolder', folderId);
-        gViewList.richlistbox.selectedIndex = 0;
-        gViewList.onSelect();
-    }
-}
 
 function onSearchbarCommand() {
     var searchbar = getElement('searchbar');
