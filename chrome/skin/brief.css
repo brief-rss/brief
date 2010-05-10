@@ -33,10 +33,6 @@ page {
     margin: 0 !important;
 }
 
-#sidebar-deck {
-    width: 250px !important;
-}
-
 #sidebar-splitter {
     border-left: 5px solid #ffffff !important;
     border-right: 1px solid #7c909f !important;

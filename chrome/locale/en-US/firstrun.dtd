@@ -1,0 +1,6 @@
+<!ENTITY pageTitle "Brief">
+<!ENTITY thankYou.header "Thanks for installing Brief">
+<!ENTITY subscribingStep1.description "Click on the icon in the Location Bar to preview the feed.">
+<!ENTITY subscribingStep2.description "Select <strong>Live Bookmarks</strong> and click <strong>Subscribe Now</strong>.">
+<!ENTITY subscribingStep3.description "Choose <strong>Subscribed Feeds</strong> folder in the Bookmarks Menu.">
+<!ENTITY getStartedButton.label "Get Started">

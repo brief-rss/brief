@@ -1,11 +1,7 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://browser/content/places/places.css"?>
-<?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
 <?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/feedview-header.css"?>
 <?xml-stylesheet href="resource://profile-chrome-dir/brief-custom-style.css"?>
-
-<?xul-overlay href="chrome://browser/content/places/placesOverlay.xul"?>
 
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
@@ -95,104 +91,81 @@
     </popupset>
 
     <hbox id="main-box" flex="1">
-        <hbox id="sidebar" persist="width hidden">
-            <deck id="sidebar-deck" selectedIndex="0" flex="2">
-                <vbox id="sidebar-box">
-                    <richlistbox id="view-list"
-                                 suppressonselect="true"
-                                 context="view-list-popup"
-                                 onselect="gViewList.onSelect(event)"
-                                 onclick="gViewList.onClick(event)">
-                        <richlistitem id="all-items-folder"
-                                      class="view-list-item"
-                                      name="&allItemsFolder.label;">
-                            <image class="view-icon"/>
-                            <label value="&allItemsFolder.label;"/>
-                        </richlistitem>
-                        <richlistitem id="unread-folder"
-                                      class="view-list-item"
-                                      name="&unreadFolder.label;">
-                            <image class="view-icon"/>
-                            <label value="&unreadFolder.label;"/>
-                        </richlistitem>
-                        <richlistitem id="starred-folder"
-                                      class="view-list-item"
-                                      name="&starredFolder.label;">
-                            <image class="view-icon"/>
-                            <label value="&starredFolder.label;"/>
-                        </richlistitem>
-                        <richlistitem id="trash-folder"
-                                      class="view-list-item"
-                                      name="&trashFolder.label;">
-                            <image class="view-icon"/>
-                            <label value="&trashFolder.label;"/>
-                        </richlistitem>
-                    </richlistbox>
+        <vbox id="sidebar" persist="width hidden">
+            <richlistbox id="view-list"
+                         suppressonselect="true"
+                         context="view-list-popup"
+                         onselect="gViewList.onSelect(event)"
+                         onclick="gViewList.onClick(event)">
+                <richlistitem id="all-items-folder"
+                              class="view-list-item"
+                              name="&allItemsFolder.label;">
+                    <image class="view-icon"/>
+                    <label value="&allItemsFolder.label;"/>
+                </richlistitem>
+                <richlistitem id="unread-folder"
+                              class="view-list-item"
+                              name="&unreadFolder.label;">
+                    <image class="view-icon"/>
+                    <label value="&unreadFolder.label;"/>
+                </richlistitem>
+                <richlistitem id="starred-folder"
+                              class="view-list-item"
+                              name="&starredFolder.label;">
+                    <image class="view-icon"/>
+                    <label value="&starredFolder.label;"/>
+                </richlistitem>
+                <richlistitem id="trash-folder"
+                              class="view-list-item"
+                              name="&trashFolder.label;">
+                    <image class="view-icon"/>
+                    <label value="&trashFolder.label;"/>
+                </richlistitem>
+            </richlistbox>
 
-                    <hbox id="sidebar-toolbar">
-                        <deck id="update-progress-deck" flex="1"
-                              selectedIndex="0">
-                            <vbox pack="center">
-                                <hbox id="sidebar-separator"/>
-                            </vbox>
-                            <progressmeter id="update-progress"/>
-                        </deck>
-                        <hbox id="sidebar-buttons">
-                            <deck id="update-buttons-deck" selectedIndex="0">
-                                <button id="update-button"
-                                        class="brief-button sidebar-button"
-                                        tooltiptext="&updateButton.tooltip;"
-                                        oncommand="gCommands.updateAllFeeds()"/>
-                                <button id="stop-updating-button"
-                                        class="brief-button sidebar-button"
-                                        tooltiptext="&stopUpdatingButton.tooltip;"
-                                        oncommand="gCommands.stopUpdating()"/>
-                            </deck>
-                            <button id="options-button"
-                                    class="brief-button sidebar-button"
-                                    tooltiptext="&showOptions.tooltip;"
-                                    oncommand="gCommands.openOptions()"/>
-                        </hbox>
-                    </hbox>
+            <hbox id="sidebar-toolbar">
+                <deck id="update-progress-deck" flex="1"
+                      selectedIndex="0">
+                    <vbox pack="center">
+                        <hbox id="sidebar-separator"/>
+                    </vbox>
+                    <progressmeter id="update-progress"/>
+                </deck>
+                <hbox id="sidebar-buttons">
+                    <deck id="update-buttons-deck" selectedIndex="0">
+                        <button id="update-button"
+                                class="brief-button sidebar-button"
+                                tooltiptext="&updateButton.tooltip;"
+                                oncommand="gCommands.updateAllFeeds()"/>
+                        <button id="stop-updating-button"
+                                class="brief-button sidebar-button"
+                                tooltiptext="&stopUpdatingButton.tooltip;"
+                                oncommand="gCommands.stopUpdating()"/>
+                    </deck>
+                    <button id="options-button"
+                            class="brief-button sidebar-button"
+                            tooltiptext="&showOptions.tooltip;"
+                            oncommand="gCommands.openOptions()"/>
+                </hbox>
+            </hbox>
 
-                    <tree id="feed-list" flex="1"
-                          hidecolumnpicker="true"
-                          seltype="single"
-                          contextmenu="feed-list-popup"
-                          persist="closedFolders"
-                          onselect="gFeedList.onSelect(event)"
-                          onkeyup="gFeedList.onKeyUp(event)">
+            <tree id="feed-list" flex="1"
+                  hidecolumnpicker="true"
+                  seltype="single"
+                  contextmenu="feed-list-popup"
+                  persist="closedFolders"
+                  onselect="gFeedList.onSelect(event)"
+                  onkeyup="gFeedList.onKeyUp(event)">
 
-                        <treecols>
-                            <treecol id="name" flex="1"
-                                     primary="true"
-                                     hideheader="true"/>
-                        </treecols>
+                <treecols>
+                    <treecol id="name" flex="1"
+                             primary="true"
+                             hideheader="true"/>
+                </treecols>
 
-                        <treechildren id="top-level-children"/>
-                    </tree>
-                </vbox>
-                <vbox>
-                    <tree id="places-tree"
-                          type="places"
-                          hidecolumnpicker="true"
-                          onselect="onHomeFolderPickerSelect(event)">
-                        <treecols>
-                            <treecol id="title" flex="1"
-                                     primary="true"
-                                     hideheader="true"/>
-                        </treecols>
-                        <treechildren flex="1"/>
-                    </tree>
-                    <hbox pack="end">
-                        <button id="confirm-home-folder"
-                                label="&confirmHomeFolder.label;"
-                                disabled="true"
-                                oncommand="selectHomeFolder(event)"/>
-                    </hbox>
-                </vbox>
-            </deck>
-        </hbox>
+                <treechildren id="top-level-children"/>
+            </tree>
+        </vbox>
 
         <splitter id="sidebar-splitter"
                   resizeafter="farthest"
@@ -253,7 +226,8 @@
                         oncommand="gCommands.revealSidebar()"/>
                 <browser id="feed-view" flex="1"
                          disablehistory="true"
-                         type="content"/>
+                         type="content"
+                         src="resource://brief-content/feedview-template.html"/>
             </hbox>
         </vbox>
     </hbox>

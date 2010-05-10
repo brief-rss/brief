@@ -615,13 +615,6 @@ var gFeedList = {
         // in-database list of feeds was synchronized.
         case 'brief:invalidate-feedlist':
             this.rebuild();
-
-            let deck = getElement('sidebar-deck');
-            if (gPrefs.homeFolder != -1)
-                deck.selectedIndex = 0;
-            else if (deck.selectedIndex == 0)
-                showFirstRunUI();
-
             async(gFeedView.refresh, 0, gFeedView);
             break;
 
@@ -908,6 +901,9 @@ var gTagListContextMenu = {
                             getService(Ci.nsIIOService);
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
+        var taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
+                             getService(Ci.nsITaggingService);
+
         var tag = this.targetItem.id;
 
         var dialogTitle = gStringBundle.getString('confirmTagDeletionTitle');
@@ -928,7 +924,7 @@ var gTagListContextMenu = {
                 catch (ex) {
                     continue;
                 }
-                PlacesUtils.tagging.untagURI(uri, [tag]);
+                taggingService.untagURI(uri, [tag]);
             }
         }
     }
