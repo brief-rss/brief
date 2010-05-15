@@ -354,6 +354,15 @@ function onSearchbarCommand() {
     gFeedView.refresh();
 }
 
+function onSearchbarBlur() {
+    var searchbar = getElement('searchbar');
+    if (!searchbar.value && gFeedView.query.searchString) {
+        gFeedView.titleOverride = '';
+        gFeedView.query.searchString = searchbar.value;
+        gFeedView.refresh();
+    }
+}
+
 
 /**
  * Space and Tab can't be captured using <key/> XUL elements, so we handle

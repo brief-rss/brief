@@ -213,9 +213,10 @@
                 <textbox id="searchbar"
                          spellcheck="false"
                          type="search"
-                         timeout="500"
+                         searchbutton="true"
                          emptytext="&searchBox.label;"
-                         oncommand="onSearchbarCommand()"/>
+                         oncommand="onSearchbarCommand()"
+                         onblur="onSearchbarBlur()"/>
             </hbox>
 
             <hbox flex="1">
