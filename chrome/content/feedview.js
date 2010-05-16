@@ -50,6 +50,8 @@ function FeedView(aTitle, aQuery, aFixedUnread, aFixedStarred) {
     // marked as read again when autoMarkRead is on.
     this.entriesMarkedUnread = [];
 
+    this._refreshPending = false;
+
     this._init();
 }
 
@@ -456,6 +458,7 @@ FeedView.prototype = {
         getElement('filter-starred-checkbox').disabled = this.fixedStarred;
 
         this.browser.addEventListener('load', this, false);
+        getTopWindow().gBrowser.addEventListener('TabSelect', this, false);
         gStorage.addObserver(this);
 
         // Load the template page if it isn't loaded yet. We also have to make sure to
@@ -479,6 +482,7 @@ FeedView.prototype = {
      * Deactivates the view.
      */
     uninit: function FeedView_uninit() {
+        getTopWindow().gBrowser.removeEventListener('TabSelect', this, false);
         this.document.removeEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
         this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
@@ -587,8 +591,16 @@ FeedView.prototype = {
             case 'click':
                 this._onClick(aEvent);
                 break;
+
             case 'keypress':
                 onKeyPress(aEvent);
+                break;
+
+            case 'TabSelect':
+                if (aEvent.originalTarget == getTopWindow().gBrief.tab && this._refreshPending) {
+                    this.refresh();
+                    this._refreshPending = false;
+                }
                 break;
         }
     },
@@ -635,12 +647,22 @@ FeedView.prototype = {
 
     // nsIBriefStorageObserver
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
+        if (getTopWindow().gBrowser.selectedTab != getTopWindow().gBrief.tab) {
+            this._refreshPending = true;
+            return;
+        }
+
         if (this.active && this.entryCount < this.query.getEntryCount())
             this._onEntriesAdded(aEntryList.IDs);
     },
 
     // nsIBriefStorageObserver
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
+        if (getTopWindow().gBrowser.selectedTab != getTopWindow().gBrief.tab) {
+            this._refreshPending = true;
+            return;
+        }
+
         if (this.active) {
             this._onEntriesRemoved(aEntryList.IDs, false, false);
             this._onEntriesAdded(aEntryList.IDs);
