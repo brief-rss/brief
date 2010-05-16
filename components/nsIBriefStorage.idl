@@ -196,6 +196,13 @@ interface nsIBriefQuery : nsISupports {
 };
 
 
+[scriptable, function, uuid(258e8bb0-6060-11df-a08a-0800200c9a66)]
+interface nsIBriefFeedProcessingCallback : nsISupports {
+
+    void onFeedProcessed(in unsigned long newEntriesCount);
+
+};
+
 /**
  * This interface is implemented as a service and manages the feed database.
  */
@@ -238,9 +245,9 @@ interface nsIBriefStorage : nsISupports {
    * items when newer versions are found. Also updates feed's properties.
    *
    * @param feed Contains the feed and the entries to evaluate.
-   * @returns the number of new entries added to the database.
+   * @param callback Callback after the database is updated.
    */
-  unsigned long updateFeed(in nsIBriefFeed feed);
+  void processFeed(in nsIBriefFeed feed, in nsIBriefFeedProcessingCallback callback);
 
   /**
    * Saves feed settings: entryAgeLimit, maxEntries, updateInterval and

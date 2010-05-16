@@ -99,6 +99,67 @@ function createStatement(aSQLString) {
 }
 
 
+function ExecuteStatementsAsync(aStatements, aCallback) {
+    var nativeStatements = [];
+
+    for (let i = 0; i < aStatements.length; i++) {
+        aStatements[i]._bindParams();
+        nativeStatements.push(aStatements[i]._wrappedStatement);
+    }
+
+    gConnection.executeAsync(nativeStatements, nativeStatements.length, aCallback);
+}
+
+function Statement(aSQLString) {
+    this._wrappedStatement = createStatement(aSQLString);
+    this.paramSets = [];
+    this.params = {};
+}
+
+Statement.prototype = {
+
+    execute: function Statement_execute() {
+        this._bindParams();
+        this._wrappedStatement.execute();
+    },
+
+    executeAsync: function Statement_executeAsync(aCallback) {
+        this._bindParams();
+        this._wrappedStatement.executeAsync(aCallback);
+    },
+
+    _bindParams: function Statement__bindParams() {
+        if (!this.paramSets.length) {
+            for (column in this.params)
+                this._wrappedStatement.params[column] = this.params[column];
+        }
+        else {
+            var bindingParamsArray = this._wrappedStatement.newBindingParamsArray();
+
+            for (let i = 0; i < this.paramSets.length; i++) {
+                let set = this.paramSets[i];
+                let bp = bindingParamsArray.newBindingParams();
+                for (column in set)
+                    bp.bindByName(column, set[column])
+                bindingParamsArray.addParams(bp);
+            }
+
+            this._wrappedStatement.bindParameters(bindingParamsArray);
+        }
+
+        this.paramSets = [];
+        this.params = {};
+    },
+
+    reset: function Statement_reset() {
+        this.paramSets = [];
+        this.params = {};
+        this._wrappedStatement.reset();
+    }
+
+}
+
+
 var gStorageService = null;
 var gConnection = null;
 
@@ -525,221 +586,8 @@ BriefStorageService.prototype = {
 
 
     // nsIBriefStorage
-    updateFeed: function BriefStorage_updateFeed(aFeed, aCallback) {
-        this.newEntriesCount = 0;
-        this.updatedEntries = [];
-
-        var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-        if (!dateModified || dateModified > this.getFeed(aFeed.feedID).dateModified) {
-            aFeed.oldestEntryDate = Date.now();
-
-            this.updateEntryParamsArray = gStm.updateEntry.newBindingParamsArray();
-            this.updateEntryTextParamsArray = gStm.updateEntryText.newBindingParamsArray();
-            this.insertEntryParamsArray = gStm.insertEntry.newBindingParamsArray();
-            this.insertEntryTextParamsArray = gStm.insertEntryText.newBindingParamsArray();
-
-            for (let i = 0; i < aFeed.entries.length; i++) {
-                let entry = aFeed.entries[i];
-                this.processEntry(entry, aFeed);
-
-                if (entry.date && entry.date < aFeed.oldestEntryDate)
-                    aFeed.oldestEntryDate = entry.date;
-            }
-        }
-
-        // Must do it after processing entries in order to get the new oldestEntryDate.
-        this.updateFeedProperties(aFeed);
-
-        // Execute the insertions and notify observers.
-        var observers = this.observers;
-        if (this.newEntriesCount) {
-            let newEntries = [];
-
-            gStm.insertEntry.bindParameters(this.insertEntryParamsArray);
-            gStm.insertEntryText.bindParameters(this.insertEntryTextParamsArray);
-            gStm.getLastRowids.params.count = this.newEntriesCount;
-            let statements = [gStm.insertEntry, gStm.insertEntryText, gStm.getLastRowids];
-
-            gConnection.executeAsync(statements, statements.length, {
-                handleResult: function(aResultSet) {
-                    var row;
-                    while (row = aResultSet.getNextRow())
-                        newEntries.push(row.getResultByIndex(0));
-                },
-                handleCompletion: function(aReason) {
-                    if (aReason != REASON_FINISHED)
-                        return;
-
-                    // Notify observers.
-                    var query = new BriefQuery();
-                    query.entries = newEntries;
-                    var list = query.getEntryList();
-                    for each (observer in observers)
-                        observer.onEntriesAdded(list);
-
-                    // TODO This should be optimized and/or be asynchronous
-                    query.verifyEntriesStarredStatus();
-                },
-                handleError: function(aError) {
-                    reportError(aError.message);
-                }
-            });
-        }
-
-        // Execute the updates and notify observers.
-        if (this.updatedEntries.length) {
-            let updatedEntries = this.updatedEntries;
-
-            gStm.updateEntry.bindParameters(this.updateEntryParamsArray);
-            gStm.updateEntryText.bindParameters(this.updateEntryTextParamsArray);
-            let statements = [gStm.updateEntry, gStm.updateEntryText];
-
-            gConnection.executeAsync(statements, statements.length, {
-                handleCompletion: function(aReason) {
-                    if (aReason != REASON_FINISHED)
-                        return;
-
-                    // Notify observers.
-                    var query = new BriefQuery();
-                    query.entries = updatedEntries;
-                    var list = query.getEntryList();
-                    for each (observer in observers)
-                        observer.onEntriesUpdated(list);
-                },
-                handleError: function(aError) {
-                    reportError(aError.message);
-                }
-            });
-        }
-
-        return this.newEntriesCount;
-    },
-
-    /**
-     * Computes entry's hash and checks if it is already stored. If necessary
-     * creates a statement to insert it or update it and adds it to the queue.
-     */
-    processEntry: function BriefStorage_processEntry(aEntry, aFeed) {
-        var content = aEntry.content || aEntry.summary;
-        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
-
-        // This function checks whether a downloaded entry is already in the database or
-        // it is a new one. To do this we need a way to uniquely identify entries. Many
-        // feeds don't provide unique identifiers for their entries, so we have to use
-        // hashes for this purpose. There are two hashes.
-        // The primary hash is used as a standard unique ID throughout the codebase.
-        // Ideally, we just compute it from the GUID provided by the feed. Otherwise, we
-        // use the entry's URL.
-        // There is a problem, though. Even when a feed does provide its own GUID, it
-        // seems to randomly get lost (maybe a bug in the parser?). This means that the
-        // same entry may sometimes be hashed using the GUID and other times using the
-        // URL. Different hashes lead to the entry being duplicated.
-        // This is why we need a secondary hash, which is always based on the URL. If the
-        // GUID is empty (either because it was lost or because it wasn't provided to
-        // begin with), we look up the entry using the secondary hash.
-        var providedID = aEntry.wrappedEntry.id;
-        var primarySet = providedID ? [aFeed.feedID, providedID]
-                                    : [aFeed.feedID, aEntry.entryURL];
-        var secondarySet = [aFeed.feedID, aEntry.entryURL];
-
-        // Special case for MediaWiki feeds: include the date in the hash. In
-        // "Recent changes" feeds, entries for subsequent edits of a page differ
-        // only in date (not in URL or GUID).
-        var generator = aFeed.wrappedFeed.generator;
-        if (generator && generator.agent.match('MediaWiki')) {
-            primarySet.push(aEntry.date);
-            secondarySet.push(aEntry.date);
-        }
-
-        var primaryHash = hashString(primarySet.join(''));
-        var secondaryHash = hashString(secondarySet.join(''));
-
-        // Look up if the entry is already present in the database.
-        try {
-            if (providedID) {
-                var select = gStm.getEntryByPrimaryHash;
-                select.params.primaryHash = primaryHash;
-            }
-            else {
-                select = gStm.getEntryBySecondaryHash;
-                select.params.secondaryHash = secondaryHash;
-            }
-
-            if (select.step()) {
-                var storedEntryID = select.row.id;
-                var storedEntryDate = select.row.date;
-                var isStoredEntryRead = !!select.row.read;
-            }
-        }
-        finally {
-            select.reset();
-        }
-
-        // If the entry is already present in the database, compare if the downloaded
-        // entry has a newer date than the stored one and if so, update it.
-        // Otherwise, insert it if it isn't stored yet.
-        if (storedEntryID) {
-            if (aEntry.date && storedEntryDate < aEntry.date) {
-                let markUnread = this.getFeed(aFeed.feedID).markModifiedEntriesUnread;
-                let params = this.updateEntryParamsArray.newBindingParams();
-                params.bindByName('date', aEntry.date);
-                params.bindByName('read', markUnread || !isStoredEntryRead ? 0 : 1);
-                params.bindByName('id', storedEntryID);
-                this.updateEntryParamsArray.addParams(params);
-
-                params = this.updateEntryTextParamsArray.newBindingParams();
-                params.bindByName('title', aEntry.title);
-                params.bindByName('content', content);
-                params.bindByName('authors', aEntry.authors);
-                params.bindByName('id', storedEntryID);
-                this.updateEntryTextParamsArray.addParams(params);
-
-                this.updatedEntries.push(storedEntryID);
-            }
-        }
-        else {
-            let params = this.insertEntryParamsArray.newBindingParams();
-            params.bindByName('feedID', aFeed.feedID);
-            params.bindByName('primaryHash', primaryHash);
-            params.bindByName('secondaryHash', secondaryHash);
-            params.bindByName('providedID', providedID);
-            params.bindByName('entryURL', aEntry.entryURL);
-            params.bindByName('date', aEntry.date || Date.now());
-            this.insertEntryParamsArray.addParams(params);
-
-            params = this.insertEntryTextParamsArray.newBindingParams();
-            params.bindByName('title', aEntry.title);
-            params.bindByName('content', content);
-            params.bindByName('authors', aEntry.authors);
-            this.insertEntryTextParamsArray.addParams(params);
-
-            this.newEntriesCount++;
-        }
-    },
-
-    // Updates properties of the feed (and refreshes the cache).
-    updateFeedProperties: function BriefStorage_updateFeedProperties(aFeed) {
-        var dateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-        let cachedFeed = this.getFeed(aFeed.feedID);
-        let stmt = gStm.updateFeed;
-
-        stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
-        stmt.params.subtitle    = cachedFeed.subtitle    = aFeed.subtitle;
-        stmt.params.imageURL    = cachedFeed.imageURL    = aFeed.imageURL;
-        stmt.params.imageLink   = cachedFeed.imageLink   = aFeed.imageLink;
-        stmt.params.imageTitle  = cachedFeed.imageTitle  = aFeed.imageTitle;
-        stmt.params.favicon     = cachedFeed.favicon     = aFeed.favicon;
-        stmt.params.lastUpdated = cachedFeed.lastUpdated = Date.now();
-        stmt.params.dateModified = cachedFeed.dateModified = dateModified;
-        stmt.params.oldestEntryDate = cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
-        stmt.params.feedID = aFeed.feedID;
-
-        stmt.executeAsync({
-            handleCompletion: function(aReason) {},
-            handleError: function(aError) {
-                reportError(aError.message);
-            }
-        });
+    processFeed: function BriefStorage_processFeed(aFeed, aCallback) {
+        new FeedProcessor(aFeed, aCallback);
     },
 
     // nsIBriefStorage
@@ -1432,6 +1280,238 @@ BriefStorageService.prototype = {
 }
 
 
+/**
+ * Evaluates the provided entries, inserting any new items and updating existing
+ * items when newer versions are found. Also updates feed's properties.
+ */
+function FeedProcessor(aFeed, aCallback) {
+    this.feed = aFeed;
+    this.callback = aCallback;
+
+    this.remainingEntriesCount = aFeed.entries.length;
+    this.entriesToUpdateCount = 0;
+    this.entriesToInsertCount = 0;
+
+    this.updatedEntries = [];
+    this.insertedEntries = [];
+
+    var newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
+    var prevDateModified = gStorageService.getFeed(aFeed.feedID).dateModified;
+    if (aFeed.entries.length && (!newDateModified || newDateModified > prevDateModified)) {
+        aFeed.oldestEntryDate = Date.now();
+
+        for (let i = 0; i < aFeed.entries.length; i++) {
+            let entry = aFeed.entries[i];
+            this.processEntry(entry);
+
+            if (entry.date && entry.date < aFeed.oldestEntryDate)
+                aFeed.oldestEntryDate = entry.date;
+        }
+    }
+    else {
+        aCallback.onFeedProcessed(0);
+    }
+
+    // Update properties of the feed (and refresh the cache).
+    var cachedFeed = gStorageService.getFeed(aFeed.feedID);
+    var stmt = gStm.updateFeed;
+
+    stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
+    stmt.params.subtitle = cachedFeed.subtitle = aFeed.subtitle;
+    stmt.params.favicon = cachedFeed.favicon = aFeed.favicon;
+    stmt.params.lastUpdated = cachedFeed.lastUpdated = Date.now();
+    stmt.params.dateModified = cachedFeed.dateModified = newDateModified;
+    stmt.params.oldestEntryDate = cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
+    stmt.params.feedID = aFeed.feedID;
+
+    stmt.executeAsync({
+        handleCompletion: function(aReason) {},
+        handleError: function(aError) {
+            reportError(aError.message);
+        }
+    });
+}
+
+FeedProcessor.prototype = {
+
+    processEntry: function FeedProcessor_processEntry(aEntry) {
+        // This function checks whether a downloaded entry is already in the database or
+        // it is a new one. To do this we need a way to uniquely identify entries. Many
+        // feeds don't provide unique identifiers for their entries, so we have to use
+        // hashes for this purpose. There are two hashes.
+        // The primary hash is used as a standard unique ID throughout the codebase.
+        // Ideally, we just compute it from the GUID provided by the feed. Otherwise, we
+        // use the entry's URL.
+        // There is a problem, though. Even when a feed does provide its own GUID, it
+        // seems to randomly get lost (maybe a bug in the parser?). This means that the
+        // same entry may sometimes be hashed using the GUID and other times using the
+        // URL. Different hashes lead to the entry being duplicated.
+        // This is why we need a secondary hash, which is always based on the URL. If the
+        // GUID is empty (either because it was lost or because it wasn't provided to
+        // begin with), we look up the entry using the secondary hash.
+        var providedID = aEntry.wrappedEntry.id;
+        var primarySet = providedID ? [this.feed.feedID, providedID]
+                                    : [this.feed.feedID, aEntry.entryURL];
+        var secondarySet = [this.feed.feedID, aEntry.entryURL];
+
+        // Special case for MediaWiki feeds: include the date in the hash. In
+        // "Recent changes" feeds, entries for subsequent edits of a page differ
+        // only in date (not in URL or GUID).
+        var generator = this.feed.wrappedFeed.generator;
+        if (generator && generator.agent.match('MediaWiki')) {
+            primarySet.push(aEntry.date);
+            secondarySet.push(aEntry.date);
+        }
+
+        var primaryHash = hashString(primarySet.join(''));
+        var secondaryHash = hashString(secondarySet.join(''));
+
+        // Look up if the entry is already present in the database.
+        if (providedID) {
+            var select = gStm.getEntryByPrimaryHash;
+            select.params.primaryHash = primaryHash;
+        }
+        else {
+            select = gStm.getEntryBySecondaryHash;
+            select.params.secondaryHash = secondaryHash;
+        }
+
+        var storedID, storedDate, isEntryRead;
+        var self = this;
+
+        select.executeAsync({
+            handleResult: function(aResultSet) {
+                var row = aResultSet.getNextRow();
+                storedID = row.getResultByIndex('id');
+                storedDate = row.getResultByName('date');
+                isEntryRead = row.getResultByName('read');
+            },
+
+            handleCompletion: function(aReason) {
+                if (aReason == REASON_FINISHED) {
+                    if (storedID) {
+                        if (aEntry.date && storedDate < aEntry.date) {
+                            self.addUpdateParams(aEntry, storedID, isEntryRead);
+                        }
+                    }
+                    else {
+                        self.addInsertParams(aEntry, primaryHash, secondaryHash);
+                    }
+                }
+
+                self.remainingEntriesCount--;
+                if (!self.remainingEntriesCount)
+                    self.exacuteAndNotify();
+            },
+
+            handleError: function(aError) {
+                reportError(aError.message);
+            }
+        });
+    },
+
+    addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
+        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
+        var markUnread = gStorageService.getFeed(this.feed.feedID).markModifiedEntriesUnread;
+
+        gStm.updateEntry.paramSets.push({
+            'date': aEntry.date,
+            'read': markUnread || !aIsRead ? 0 : 1,
+            'id': aStoredEntryID
+        });
+
+        gStm.updateEntryText.paramSets.push({
+            'title': title,
+            'content': aEntry.content || aEntry.summary,
+            'authors': aEntry.authors,
+            'id': aStoredEntryID
+        });
+
+        this.entriesToUpdateCount++;
+        this.updatedEntries.push(aStoredEntryID);
+    },
+
+    addInsertParams: function FeedProcessor_addInsertParams(aEntry, aPrimaryHash, aSecondaryHash) {
+        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
+
+        gStm.insertEntry.paramSets.push({
+            'feedID': this.feed.feedID,
+            'primaryHash': aPrimaryHash,
+            'secondaryHash': aSecondaryHash,
+            'providedID': aEntry.wrappedEntry.id,
+            'entryURL': aEntry.entryURL,
+            'date': aEntry.date || Date.now()
+        });
+
+        gStm.insertEntryText.paramSets.push({
+            'title': title,
+            'content': aEntry.content || aEntry.summary,
+            'authors': aEntry.authors
+        });
+
+        this.entriesToInsertCount++;
+    },
+
+    exacuteAndNotify: function FeedProcessor_exacuteAndNotify() {
+        var self = this;
+
+        if (this.entriesToInsertCount) {
+            gStm.getLastRowids.params.count = this.entriesToInsertCount;
+            let statements = [gStm.insertEntry, gStm.insertEntryText, gStm.getLastRowids];
+
+            ExecuteStatementsAsync(statements, {
+
+                handleResult: function(aResultSet) {
+                    var row;
+                    while (row = aResultSet.getNextRow()) {
+                        let entryID = row.getResultByIndex(0);
+                        self.insertedEntries.push(entryID);
+                    }
+                },
+
+                handleCompletion: function(aReason) {
+                    // Notify observers.
+                    let query = new BriefQuery();
+                    query.entries = self.insertedEntries;
+                    let list = query.getEntryList();
+                    for each (observer in gStorageService.observers)
+                        observer.onEntriesAdded(list);
+
+                    // XXX This should be optimized and/or be asynchronous
+                    query.verifyEntriesStarredStatus();
+                },
+
+                handleError: function(aError) {
+                    reportError(aError.message);
+                }
+            });
+        }
+
+        if (this.entriesToUpdateCount) {
+            let statements = [gStm.updateEntry, gStm.updateEntryText];
+
+            ExecuteStatementsAsync(statements, {
+
+                handleCompletion: function(aReason) {
+                    // Notify observers.
+                    let query = new BriefQuery();
+                    query.entries = self.updatedEntries;
+                    let list = query.getEntryList();
+                    for each (observer in gStorageService.observers)
+                        observer.onEntriesUpdated(list);
+                },
+
+                handleError: function(aError) {
+                    reportError(aError.message);
+                }
+            });
+        }
+
+        this.callback.onFeedProcessed(this.entriesToInsertCount);
+    }
+}
+
+
 // Cached statements.
 var gStm = {
 
@@ -1457,34 +1537,34 @@ var gStm = {
         var sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
                   'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date)        ';
         delete this.insertEntry;
-        return this.insertEntry = createStatement(sql);
+        return this.insertEntry = new Statement(sql);
     },
 
     get insertEntryText() {
         var sql = 'INSERT INTO entries_text (title, content, authors) ' +
                   'VALUES(:title, :content, :authors)   ';
         delete this.insertEntryText;
-        return this.insertEntryText = createStatement(sql);
+        return this.insertEntryText = new Statement(sql);
     },
 
     get updateEntry() {
         var sql = 'UPDATE entries SET date = :date, read = :read, updated = 1 '+
                   'WHERE id = :id                                             ';
         delete this.updateEntry;
-        return this.updateEntry = createStatement(sql);
+        return this.updateEntry = new Statement(sql);
     },
 
     get updateEntryText() {
         var sql = 'UPDATE entries_text SET title = :title, content = :content, '+
                   'authors = :authors WHERE rowid = :id                        ';
         delete this.updateEntryText;
-        return this.updateEntryText = createStatement(sql);
+        return this.updateEntryText = new Statement(sql);
     },
 
     get getLastRowids() {
         var sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT :count';
         delete this.getLastRowids;
-        return this.getLastRowids = createStatement(sql);
+        return this.getLastRowids = new Statement(sql);
     },
 
     get purgeDeletedEntriesText() {
@@ -1522,13 +1602,13 @@ var gStm = {
     get getEntryByPrimaryHash() {
         var sql = 'SELECT id, date, read FROM entries WHERE primaryHash = :primaryHash';
         delete this.getEntryByPrimaryHash;
-        return this.getEntryByPrimaryHash = createStatement(sql);
+        return this.getEntryByPrimaryHash = new Statement(sql);
     },
 
     get getEntryBySecondaryHash() {
         var sql = 'SELECT id, date, read FROM entries WHERE secondaryHash = :secondaryHash';
         delete this.getEntryBySecondaryHash;
-        return this.getEntryBySecondaryHash = createStatement(sql);
+        return this.getEntryBySecondaryHash = new Statement(sql);
     },
 
     get selectEntriesByURL() {
@@ -1605,8 +1685,6 @@ var gStm = {
     }
 
 }
-
-
 
 
 /**
