@@ -271,6 +271,7 @@ const gBrief = {
             observerService.addObserver(this, 'brief:invalidate-feedlist', false);
             observerService.addObserver(this, 'brief:entry-status-changed', false);
             observerService.addObserver(this, 'brief:feed-update-queued', false);
+            observerService.addObserver(this, 'brief:feed-update-canceled', false);
 
             // Stores the tab in which Brief is loaded so we can ensure only
             // instance can be open at a time. This is an UI choice, not a technical
@@ -296,6 +297,7 @@ const gBrief = {
             observerService.removeObserver(this, 'brief:feed-updated');
             observerService.removeObserver(this, 'brief:invalidate-feedlist');
             observerService.removeObserver(this, 'brief:feed-update-queued');
+            observerService.removeObserver(this, 'brief:feed-update-canceled');
             break;
         }
     },
@@ -328,6 +330,11 @@ const gBrief = {
                 document.getElementById('brief-progressmeter').hidden = false;
                 this.refreshProgressmeter();
             }
+            break;
+
+        case 'brief:feed-update-canceled':
+            var progressmeter = document.getElementById('brief-progressmeter');
+            progressmeter.hidden = true;
             break;
 
         case 'brief:feed-updated':
