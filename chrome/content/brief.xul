@@ -9,6 +9,7 @@
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       xmlns:html="http://www.w3.org/1999/xhtml"
       title="Brief"
+      orient="horizontal"
       onload="init()"
       onunload="unload()">
 
@@ -90,147 +91,143 @@
         </menupopup>
     </popupset>
 
-    <hbox id="main-box" flex="1">
-        <vbox id="sidebar" persist="width hidden">
-            <richlistbox id="view-list"
-                         suppressonselect="true"
-                         context="view-list-popup"
-                         onselect="gViewList.onSelect(event)"
-                         onclick="gViewList.onClick(event)">
-                <richlistitem id="all-items-folder"
-                              class="view-list-item"
-                              name="&allItemsFolder.label;">
-                    <image class="view-icon"/>
-                    <label value="&allItemsFolder.label;"/>
-                </richlistitem>
-                <richlistitem id="unread-folder"
-                              class="view-list-item"
-                              name="&unreadFolder.label;">
-                    <image class="view-icon"/>
-                    <label value="&unreadFolder.label;"/>
-                </richlistitem>
-                <richlistitem id="starred-folder"
-                              class="view-list-item"
-                              name="&starredFolder.label;">
-                    <image class="view-icon"/>
-                    <label value="&starredFolder.label;"/>
-                </richlistitem>
-                <richlistitem id="trash-folder"
-                              class="view-list-item"
-                              name="&trashFolder.label;">
-                    <image class="view-icon"/>
-                    <label value="&trashFolder.label;"/>
-                </richlistitem>
-            </richlistbox>
+    <vbox id="sidebar" persist="width hidden">
+        <richlistbox id="view-list"
+                     suppressonselect="true"
+                     context="view-list-popup"
+                     onselect="gViewList.onSelect(event)"
+                     onclick="gViewList.onClick(event)">
+            <richlistitem id="all-items-folder"
+                          class="view-list-item"
+                          name="&allItemsFolder.label;">
+                <image class="view-icon"/>
+                <label value="&allItemsFolder.label;"/>
+            </richlistitem>
+            <richlistitem id="unread-folder"
+                          class="view-list-item"
+                          name="&unreadFolder.label;">
+                <image class="view-icon"/>
+                <label value="&unreadFolder.label;"/>
+            </richlistitem>
+            <richlistitem id="starred-folder"
+                          class="view-list-item"
+                          name="&starredFolder.label;">
+                <image class="view-icon"/>
+                <label value="&starredFolder.label;"/>
+            </richlistitem>
+            <richlistitem id="trash-folder"
+                          class="view-list-item"
+                          name="&trashFolder.label;">
+                <image class="view-icon"/>
+                <label value="&trashFolder.label;"/>
+            </richlistitem>
+        </richlistbox>
 
-            <hbox id="sidebar-toolbar">
-                <deck id="update-progress-deck" flex="1"
-                      selectedIndex="0">
-                    <vbox pack="center">
-                        <hbox id="sidebar-separator"/>
-                    </vbox>
-                    <progressmeter id="update-progress"/>
-                </deck>
-                <hbox id="sidebar-buttons">
-                    <deck id="update-buttons-deck" selectedIndex="0">
-                        <button id="update-button"
-                                class="brief-button sidebar-button"
-                                tooltiptext="&updateButton.tooltip;"
-                                oncommand="gCommands.updateAllFeeds()"/>
-                        <button id="stop-updating-button"
-                                class="brief-button sidebar-button"
-                                tooltiptext="&stopUpdatingButton.tooltip;"
-                                oncommand="gCommands.stopUpdating()"/>
-                    </deck>
-                    <button id="options-button"
+        <hbox id="sidebar-toolbar">
+            <deck id="update-progress-deck" flex="1"
+                  selectedIndex="0">
+                <vbox pack="center">
+                    <hbox id="sidebar-separator"/>
+                </vbox>
+                <progressmeter id="update-progress"/>
+            </deck>
+            <hbox id="sidebar-buttons">
+                <deck id="update-buttons-deck" selectedIndex="0">
+                    <button id="update-button"
                             class="brief-button sidebar-button"
-                            tooltiptext="&showOptions.tooltip;"
-                            oncommand="gCommands.openOptions()"/>
-                </hbox>
+                            tooltiptext="&updateButton.tooltip;"
+                            oncommand="gCommands.updateAllFeeds()"/>
+                    <button id="stop-updating-button"
+                            class="brief-button sidebar-button"
+                            tooltiptext="&stopUpdatingButton.tooltip;"
+                            oncommand="gCommands.stopUpdating()"/>
+                </deck>
+                <button id="options-button"
+                        class="brief-button sidebar-button"
+                        tooltiptext="&showOptions.tooltip;"
+                        oncommand="gCommands.openOptions()"/>
             </hbox>
+        </hbox>
 
-            <tree id="feed-list" flex="1"
-                  hidecolumnpicker="true"
-                  seltype="single"
-                  contextmenu="feed-list-popup"
-                  persist="closedFolders"
-                  onselect="gFeedList.onSelect(event)"
-                  onkeyup="gFeedList.onKeyUp(event)">
+        <tree id="feed-list" flex="1"
+              hidecolumnpicker="true"
+              seltype="single"
+              contextmenu="feed-list-popup"
+              persist="closedFolders"
+              onselect="gFeedList.onSelect(event)"
+              onkeyup="gFeedList.onKeyUp(event)">
 
-                <treecols>
-                    <treecol id="name" flex="1"
-                             primary="true"
-                             hideheader="true"/>
-                </treecols>
+            <treecols>
+                <treecol id="name" flex="1"
+                         primary="true"
+                         hideheader="true"/>
+            </treecols>
 
-                <treechildren id="top-level-children"/>
-            </tree>
-        </vbox>
+            <treechildren id="top-level-children"/>
+        </tree>
+    </vbox>
 
-        <splitter id="sidebar-splitter"
-                  resizeafter="farthest"
-                  tooltiptext="&sidebarSplitter.tooltip;"
-                  persist="hidden"
-                  ondblclick="gCommands.hideSidebar()"/>
+    <splitter id="sidebar-splitter"
+              resizeafter="farthest"
+              tooltiptext="&sidebarSplitter.tooltip;"
+              persist="hidden"
+              ondblclick="gCommands.hideSidebar()"/>
 
-        <listbox id="tag-list"
-                 hidden="true"
-                 persist="width"
-                 context="tag-list-popup"
-                 onselect="gTagList.onSelect(event)"
-                 onclick="gTagList.onClick(event)"/>
+    <listbox id="tag-list"
+             hidden="true"
+             persist="width"
+             context="tag-list-popup"
+             onselect="gTagList.onSelect(event)"
+             onclick="gTagList.onClick(event)"/>
 
-        <splitter id="tag-list-splitter"
-                  hidden="true"/>
+    <splitter id="tag-list-splitter"
+              hidden="true"/>
 
-        <vbox flex="1">
-            <hbox id="feed-view-header"
-                  hidden="true">
-                <button id="mark-view-read"
-                        class="brief-button feed-header-button"
-                        tooltiptext="&markViewRead.tooltip;"
-                        onclick="onMarkViewReadClick(event)"/>
-                <html:div id="feed-title-box"
-                          flex="1">
-                    <html:a id="feed-title" target="_blank"/>
-                </html:div>
-                <button id="headlines-checkbox"
-                        class="brief-button view-button"
-                        type="checkbox"
-                        autoCheck="false"
-                        tooltiptext="&headlinesCheckbox.tooltip;"
-                        oncommand="gCommands.switchHeadlinesView()"/>
-                <button id="filter-unread-checkbox"
-                        class="brief-button view-button"
-                        tooltiptext="&filterUnread.tooltip;"
-                        type="checkbox"
-                        oncommand="gCommands.toggleUnreadEntriesFilter()"/>
-                <button id="filter-starred-checkbox"
-                        class="brief-button view-button"
-                        tooltiptext="&filterStarred.tooltip;"
-                        type="checkbox"
-                        oncommand="gCommands.toggleStarredEntriesFilter()"/>
-                <textbox id="searchbar"
-                         spellcheck="false"
-                         type="search"
-                         searchbutton="true"
-                         emptytext="&searchBox.label;"
-                         oncommand="onSearchbarCommand()"
-                         onblur="onSearchbarBlur()"/>
-            </hbox>
+    <vbox flex="1">
+        <hbox id="feed-view-header" hidden="true">
+            <button id="mark-view-read"
+                    class="brief-button feed-header-button"
+                    tooltiptext="&markViewRead.tooltip;"
+                    onclick="onMarkViewReadClick(event)"/>
+            <html:div id="feed-title-box" flex="1">
+                <html:a id="feed-title" target="_blank"/>
+            </html:div>
+            <button id="headlines-checkbox"
+                    class="brief-button view-button"
+                    type="checkbox"
+                    autoCheck="false"
+                    tooltiptext="&headlinesCheckbox.tooltip;"
+                    oncommand="gCommands.switchHeadlinesView()"/>
+            <button id="filter-unread-checkbox"
+                    class="brief-button view-button"
+                    tooltiptext="&filterUnread.tooltip;"
+                    type="checkbox"
+                    oncommand="gCommands.toggleUnreadEntriesFilter()"/>
+            <button id="filter-starred-checkbox"
+                    class="brief-button view-button"
+                    tooltiptext="&filterStarred.tooltip;"
+                    type="checkbox"
+                    oncommand="gCommands.toggleStarredEntriesFilter()"/>
+            <textbox id="searchbar"
+                     spellcheck="false"
+                     type="search"
+                     searchbutton="true"
+                     emptytext="&searchBox.label;"
+                     oncommand="onSearchbarCommand()"
+                     onblur="onSearchbarBlur()"/>
+        </hbox>
 
-            <hbox flex="1">
-                <button id="reveal-sidebar-button"
-                        class="brief-button"
-                        hidden="true"
-                        tooltiptext="&revealSidebar.tooltip;"
-                        oncommand="gCommands.revealSidebar()"/>
-                <browser id="feed-view" flex="1"
-                         disablehistory="true"
-                         type="content"
-                         src="resource://brief-content/feedview-template.html"/>
-            </hbox>
-        </vbox>
-    </hbox>
+        <hbox flex="1">
+            <button id="reveal-sidebar-button"
+                    class="brief-button"
+                    hidden="true"
+                    tooltiptext="&revealSidebar.tooltip;"
+                    oncommand="gCommands.revealSidebar()"/>
+            <browser id="feed-view" flex="1"
+                     disablehistory="true"
+                     type="content"
+                     src="resource://brief-content/feedview-template.html"/>
+        </hbox>
+    </vbox>
 
 </page>
