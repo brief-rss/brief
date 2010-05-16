@@ -171,7 +171,7 @@ BriefUpdateService.prototype = {
     },
 
 
-    onFeedUpdated: function BUS_onFeedFetched(aFeed, aError, aNewEntriesCount) {
+    onFeedUpdated: function BUS_onFeedUpdated(aFeed, aError, aNewEntriesCount) {
         this.completedFeeds.push(aFeed);
         this.newEntriesCount += aNewEntriesCount;
         if (aNewEntriesCount > 0)
@@ -383,18 +383,21 @@ FeedFetcher.prototype = {
         this.downloadedFeed.feedID = this.feed.feedID;
         this.downloadedFeed.favicon = this.feed.favicon;
 
+        var self = this;
+
         if (!this.downloadedFeed.favicon) {
             // We use websiteURL instead of feedURL for resolving the favicon URL,
             // because many websites use services like Feedburner for generating their
             // feeds and we'd get the Feedburner's favicon instead.
             if (this.downloadedFeed.websiteURL) {
-                let self = this;
-                let callback = function(aFavicon) {
+                new FaviconFetcher(this.downloadedFeed.websiteURL, function(aFavicon) {
                     self.downloadedFeed.favicon = aFavicon;
-                    let newEntriesCount = gStorage.updateFeed(self.downloadedFeed);
-                    self.finish(self.bozo, newEntriesCount);
-                }
-                new FaviconFetcher(this.downloadedFeed.websiteURL, callback);
+                    gStorage.processFeed(self.downloadedFeed, {
+                        onFeedProcessed: function(aNewEntriesCount) {
+                           self.finish(self.bozo, aNewEntriesCount);
+                        }
+                    });
+                });
                 return;
             }
             else {
@@ -402,8 +405,11 @@ FeedFetcher.prototype = {
             }
         }
 
-        var newEntriesCount = gStorage.updateFeed(this.downloadedFeed);
-        this.finish(this.bozo, newEntriesCount);
+        gStorage.processFeed(this.downloadedFeed, {
+            onFeedProcessed: function(aNewEntriesCount) {
+                self.finish(self.bozo, aNewEntriesCount);
+            }
+        });
     },
 
 
