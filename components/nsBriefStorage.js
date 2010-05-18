@@ -61,43 +61,41 @@ const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
-XPCOMUtils.defineLazyServiceGetter(this, 'gObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
-XPCOMUtils.defineLazyServiceGetter(this, 'gIOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
-XPCOMUtils.defineLazyServiceGetter(this, 'gStorage', '@ancestor/brief/storage;1', 'nsIBriefStorage');
-XPCOMUtils.defineLazyServiceGetter(this, 'gBms', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
+XPCOMUtils.defineLazyServiceGetter(this, 'ObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
+XPCOMUtils.defineLazyServiceGetter(this, 'Bookmarks', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
-XPCOMUtils.defineLazyGetter(this, 'gPrefs', function()
+XPCOMUtils.defineLazyGetter(this, 'Prefs', function()
     Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
                                              getBranch('extensions.brief.').
                                              QueryInterface(Ci.nsIPrefBranch2)
 );
-XPCOMUtils.defineLazyGetter(this, 'gPlaces', function() {
+XPCOMUtils.defineLazyGetter(this, 'Places', function() {
     var tempScope = {};
     Components.utils.import('resource://gre/modules/utils.js', tempScope);
     return tempScope.PlacesUtils;
 });
 
-function executeSQL(aSQLString) {
+
+function ExecuteSQL(aSQLString) {
     try {
-        gConnection.executeSimpleSQL(aSQLString);
+        Connection.executeSimpleSQL(aSQLString);
     }
     catch (ex) {
         log('SQL statement: ' + aSQLString);
-        reportError(ex, true);
+        ReportError(ex, true);
     }
 }
 
-function createStatement(aSQLString) {
+function CreateStatement(aSQLString) {
     try {
-        var statement = gConnection.createStatement(aSQLString);
+        var statement = Connection.createStatement(aSQLString);
     }
     catch (ex) {
         log('SQL statement:\n' + aSQLString);
-        reportError(ex, true);
+        ReportError(ex, true);
     }
     return statement;
 }
-
 
 function ExecuteStatementsAsync(aStatements, aCallback) {
     var nativeStatements = [];
@@ -107,39 +105,67 @@ function ExecuteStatementsAsync(aStatements, aCallback) {
         nativeStatements.push(aStatements[i]._wrappedStatement);
     }
 
-    gConnection.executeAsync(nativeStatements, nativeStatements.length, aCallback);
+    var callback = aCallback || {};
+    if (!callback.handleError) {
+        callback.handleError = function(aError) {
+            ReportError(aError.message);
+        }
+    }
+    if (!callback.handleCompletion) {
+        callback.handleCompletion = function() {}
+    }
+
+    Connection.executeAsync(nativeStatements, nativeStatements.length, callback);
 }
 
-function Statement(aSQLString) {
-    this._wrappedStatement = createStatement(aSQLString);
+function Statement(aSQLString, aDefaultParams) {
+    this._wrappedStatement = CreateStatement(aSQLString);
+    this._defaultParams = aDefaultParams;
     this.paramSets = [];
     this.params = {};
 }
 
 Statement.prototype = {
 
-    execute: function Statement_execute() {
+    execute: function Statement_execute(aParams) {
+        if (aParams)
+            this.params = aParams;
+
         this._bindParams();
         this._wrappedStatement.execute();
     },
 
     executeAsync: function Statement_executeAsync(aCallback) {
+        var callback = aCallback || {};
+
+        if (!callback.handleError) {
+            callback.handleError = function(aError) {
+                ReportError(aError.message);
+            }
+        }
+        if (!callback.handleCompletion) {
+            callback.handleCompletion = function() {}
+        }
+
         this._bindParams();
-        this._wrappedStatement.executeAsync(aCallback);
+        this._wrappedStatement.executeAsync(callback);
     },
 
     _bindParams: function Statement__bindParams() {
+        for (let column in this._defaultParams)
+            this._wrappedStatement.params[column] = this._defaultParams[column];
+
         if (!this.paramSets.length) {
-            for (column in this.params)
+            for (let column in this.params)
                 this._wrappedStatement.params[column] = this.params[column];
         }
         else {
-            var bindingParamsArray = this._wrappedStatement.newBindingParamsArray();
+            let bindingParamsArray = this._wrappedStatement.newBindingParamsArray();
 
             for (let i = 0; i < this.paramSets.length; i++) {
                 let set = this.paramSets[i];
                 let bp = bindingParamsArray.newBindingParams();
-                for (column in set)
+                for (let column in set)
                     bp.bindByName(column, set[column])
                 bindingParamsArray.addParams(bp);
             }
@@ -151,6 +177,54 @@ Statement.prototype = {
         this.params = {};
     },
 
+    getResults: function Statement_getResults(aParams) {
+        if (aParams)
+            this.params = aParams;
+
+        this._bindParams();
+
+        var columnCount = this._wrappedStatement.columnCount;
+
+        try {
+            while (true) {
+                let row = null;
+                if (this._wrappedStatement.step()) {
+                    row = {};
+                    for (let i = 0; i < columnCount; i++) {
+                        let column = this._wrappedStatement.getColumnName(i);
+                        row[column] = this._wrappedStatement.row[column];
+                    }
+                }
+
+                yield row;
+            }
+        }
+        finally {
+            this._wrappedStatement.reset();
+        }
+    },
+
+    getSingleResult: function Statement_getSingleResult(aParams) {
+        if (aParams)
+            this.params = aParams;
+
+        this._bindParams();
+
+        try {
+            this._wrappedStatement.step();
+            var row = {};
+            for (let i = 0; i < this._wrappedStatement.columnCount; i++) {
+                let column = this._wrappedStatement.getColumnName(i);
+                row[column] = this._wrappedStatement.row[column];
+            }
+        }
+        finally {
+            this._wrappedStatement.reset();
+        }
+
+        return row;
+    },
+
     reset: function Statement_reset() {
         this.paramSets = [];
         this.params = {};
@@ -160,15 +234,15 @@ Statement.prototype = {
 }
 
 
-var gStorageService = null;
-var gConnection = null;
+var StorageService = null;
+var Connection = null;
 
 function BriefStorageService() {
     this.observers = [];
 
     // The instantiation can't be done on app-startup, because the directory service
     // doesn't work yet, so we perform it on profile-after-change.
-    gObserverService.addObserver(this, 'profile-after-change', false);
+    ObserverService.addObserver(this, 'profile-after-change', false);
 }
 
 BriefStorageService.prototype = {
@@ -186,8 +260,8 @@ BriefStorageService.prototype = {
 
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
-        gConnection = storageService.openUnsharedDatabase(databaseFile);
-        var schemaVersion = gConnection.schemaVersion;
+        Connection = storageService.openUnsharedDatabase(databaseFile);
+        var schemaVersion = Connection.schemaVersion;
 
         // Remove the backup file after certain amount of time.
         var backupFile = profileDir.clone();
@@ -195,20 +269,20 @@ BriefStorageService.prototype = {
         if (backupFile.exists() && Date.now() - backupFile.lastModifiedTime > BACKUP_FILE_EXPIRATION_AGE)
             backupFile.remove(false);
 
-        if (!gConnection.connectionReady) {
+        if (!Connection.connectionReady) {
             // The database was corrupted, back it up and create a new one.
             storageService.backupDatabaseFile(databaseFile, 'brief-backup.sqlite');
-            gConnection.close();
+            Connection.close();
             databaseFile.remove(false);
-            gConnection = storageService.openUnsharedDatabase(databaseFile);
+            Connection = storageService.openUnsharedDatabase(databaseFile);
             this.setupDatabase();
-            gConnection.schemaVersion = DATABASE_VERSION;
+            Connection.schemaVersion = DATABASE_VERSION;
         }
         else if (databaseIsNew) {
             this.setupDatabase();
-            gConnection.schemaVersion = DATABASE_VERSION;
+            Connection.schemaVersion = DATABASE_VERSION;
         }
-        else if (gConnection.schemaVersion < DATABASE_VERSION) {
+        else if (Connection.schemaVersion < DATABASE_VERSION) {
             // Remove the old backup file.
             if (backupFile.exists())
                 backupFile.remove(false);
@@ -220,278 +294,34 @@ BriefStorageService.prototype = {
             if (!newBackupFile.exists())
                 storageService.backupDatabaseFile(databaseFile, filename);
 
-            this.migrateDatabase();
+            Migration.upgradeDatabase();
         }
 
-        this.homeFolderID = gPrefs.getIntPref('homeFolder');
-        gPrefs.addObserver('', this, false);
-        gObserverService.addObserver(this, 'quit-application', false);
+        this.homeFolderID = Prefs.getIntPref('homeFolder');
+        Prefs.addObserver('', this, false);
+        ObserverService.addObserver(this, 'quit-application', false);
 
         // This has to be on the end, in case getting bookmarks service throws.
-        gBms.addObserver(this, false);
+        Bookmarks.addObserver(BookmarkObserver, false);
     },
 
     setupDatabase: function BriefStorage_setupDatabase() {
-        executeSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')                   ');
-        executeSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')               ');
-        executeSQL('CREATE TABLE IF NOT EXISTS entry_tags ('+ENTRY_TAGS_TABLE_SCHEMA+')         ');
-        executeSQL('CREATE VIRTUAL TABLE entries_text USING fts3 ('+ENTRIES_TEXT_TABLE_SCHEMA+')');
+        ExecuteSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')                   ');
+        ExecuteSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')               ');
+        ExecuteSQL('CREATE TABLE IF NOT EXISTS entry_tags ('+ENTRY_TAGS_TABLE_SCHEMA+')         ');
+        ExecuteSQL('CREATE VIRTUAL TABLE entries_text USING fts3 ('+ENTRIES_TEXT_TABLE_SCHEMA+')');
 
-        executeSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)                ');
-        executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
+        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)                ');
+        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
 
         // Speed up lookup when checking for updates.
-        executeSQL('CREATE INDEX IF NOT EXISTS entries_primaryHash_index ON entries (primaryHash) ');
+        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_primaryHash_index ON entries (primaryHash) ');
 
         // Speed up SELECTs in the bookmarks observer.
-        executeSQL('CREATE INDEX IF NOT EXISTS entries_bookmarkID_index ON entries (bookmarkID) ');
-        executeSQL('CREATE INDEX IF NOT EXISTS entries_entryURL_index ON entries (entryURL)     ');
+        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_bookmarkID_index ON entries (bookmarkID) ');
+        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_entryURL_index ON entries (entryURL)     ');
 
-        executeSQL('CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagName)');
-    },
-
-
-    migrateDatabase: function BriefStorage_migrateDatabase() {
-        switch (gConnection.schemaVersion) {
-
-        // Schema version checking has only been introduced in 0.8 beta 1. When migrating
-        // from earlier releases we don't know the exact previous version, so we attempt
-        // to apply all the changes since the beginning of time.
-        case 0:
-            try {
-                // Columns added in 0.6.
-                executeSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
-                executeSQL('ALTER TABLE entries ADD COLUMN providedID TEXT');
-            }
-            catch (ex) { }
-
-            try {
-                // Columns and indices added in 0.7.
-                executeSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
-                executeSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
-                executeSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
-                executeSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
-                executeSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
-                executeSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
-                executeSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
-                executeSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
-                executeSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
-            }
-            catch (ex) { }
-            // Fall through...
-
-        // To 0.8.
-        case 1:
-            executeSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
-            executeSQL('UPDATE entries SET content = summary, summary = "" WHERE content = ""');
-            // Fall through...
-
-        // To 1.0 beta 1
-        case 2:
-            try {
-                executeSQL('ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
-            }
-            catch (ex) { }
-            // Fall through...
-
-        // To 1.0
-        case 3:
-            executeSQL('DROP INDEX IF EXISTS entries_id_index');
-            executeSQL('DROP INDEX IF EXISTS feeds_feedID_index');
-            // Fall through...
-
-        // To 1.2a1
-        case 4:
-            this.recomputeIDs();
-            this.recreateFeedsTable();
-            executeSQL('ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
-            // Fall through...
-
-        // To 1.2b2
-        case 5:
-        case 6:
-            if (gConnection.schemaVersion > 4)
-                executeSQL('ALTER TABLE feeds ADD COLUMN markModifiedEntriesUnread INTEGER DEFAULT 1');
-            // Fall through...
-
-        // To 1.2b3
-        case 7:
-            this.migrateEntries();
-            this.bookmarkStarredEntries();
-            // Fall through...
-
-        // To 1.2
-        case 8:
-            executeSQL('DROP INDEX IF EXISTS entries_feedID_index');
-            executeSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
-            // Fall through...
-
-        // To 1.5
-        case 9:
-            // Remove dead rows from entries_text.
-            executeSQL('DELETE FROM entries_text                       '+
-                       'WHERE rowid IN (                               '+
-                       '     SELECT entries_text.rowid                 '+
-                       '     FROM entries_text LEFT JOIN entries       '+
-                       '          ON entries_text.rowid = entries.id   '+
-                       '     WHERE NOT EXISTS (                        '+
-                       '         SELECT id                             '+
-                       '         FROM entries                          '+
-                       '         WHERE entries_text.rowid = entries.id '+
-                       '     )                                         '+
-                       ')                                              ');
-        }
-
-        gConnection.schemaVersion = DATABASE_VERSION;
-    },
-
-
-    recreateFeedsTable: function BriefStorage_recreateFeedsTable() {
-        // Columns in this list must be in the same order as the respective columns
-        // in the new schema.
-        const OLD_COLS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,    '+
-                         'imageLink, imageTitle, favicon, RDF_URI, rowIndex, parent, '+
-                         'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   '+
-                         'entryAgeLimit, maxEntries, updateInterval                  ';
-        const NEW_COLS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,       '+
-                         'imageLink, imageTitle, favicon, bookmarkID, rowIndex, parent, '+
-                         'isFolder, hidden, lastUpdated, oldestEntryDate,               '+
-                         'entryAgeLimit, maxEntries, updateInterval                     ';
-
-        gConnection.beginTransaction();
-        try {
-            executeSQL('CREATE TABLE feeds_copy ('+OLD_COLS+')                               ');
-            executeSQL('INSERT INTO feeds_copy SELECT '+OLD_COLS+' FROM feeds                ');
-            executeSQL('DROP TABLE feeds                                                     ');
-            executeSQL('CREATE TABLE feeds ('+FEEDS_TABLE_SCHEMA+')                          ');
-            executeSQL('INSERT INTO feeds ('+NEW_COLS+') SELECT '+OLD_COLS+' FROM feeds_copy ');
-            executeSQL('DROP TABLE feeds_copy                                                ');
-        }
-        catch (ex) {
-            reportError(ex, true);
-        }
-        finally {
-            gConnection.commitTransaction();
-        }
-    },
-
-
-    migrateEntries: function BriefStorage_migrateEntries() {
-        gConnection.beginTransaction();
-        try {
-            let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
-                       'read, updated, starred, deleted, bookmarkID, title, content   ';
-
-            executeSQL('CREATE TABLE entries_copy ('+cols+')                  ');
-            executeSQL('INSERT INTO entries_copy SELECT '+cols+' FROM entries ');
-            executeSQL('DROP TABLE entries                                    ');
-
-            this.setupDatabase();
-
-            let fromCols = 'feedID, providedID, entryURL, date, read, updated,       '+
-                           'starred, deleted, bookmarkID, id, secondaryID            ';
-            let toCols =   'feedID, providedID, entryURL, date, read, updated,       '+
-                           'starred, deleted, bookmarkID, primaryHash, secondaryHash ';
-
-            executeSQL('INSERT INTO entries ('+toCols+')                                '+
-                       'SELECT '+fromCols+' FROM entries_copy ORDER BY rowid            ');
-            executeSQL('INSERT INTO entries_text (title, content, authors)              '+
-                       'SELECT title, content, authors FROM entries_copy ORDER BY rowid ');
-            executeSQL('DROP TABLE entries_copy                                         ');
-        }
-        catch (ex) {
-            reportError(ex, true);
-        }
-        finally {
-            gConnection.commitTransaction();
-        }
-
-        executeSQL('VACUUM');
-    },
-
-    bookmarkStarredEntries: function BriefStorage_bookmarkStarredEntries() {
-        var folder = gBms.unfiledBookmarksFolder;
-        var select = gStm.selectStarredEntries;
-        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID '+
-                  'WHERE id = :entryID                                      ';
-        var update = createStatement(sql);
-
-        gConnection.beginTransaction();
-        try {
-            while (select.step()) {
-                let uri = newURI(select.row.entryURL);
-                if (!uri)
-                    continue;
-
-                let title = select.row.title;
-                let alreadyBookmarked = false;
-
-                // Look for existing bookmarks for entry's URI.
-                if (gBms.isBookmarked(uri)) {
-                    let bookmarkIDs = gBms.getBookmarkIdsForURI(uri, {});
-                    for each (bookmarkID in bookmarkIDs) {
-                        let parent = gBms.getFolderIdForItem(bookmarkID);
-                        if (!isLivemark(parent)) {
-                            alreadyBookmarked = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (alreadyBookmarked) {
-                    this.starEntry(true, select.row.id, bookmarkID);
-                }
-                else {
-                    let bookmarkID = gBms.insertBookmark(folder, uri, gBms.DEFAULT_INDEX,
-                                                         title);
-                    update.params.entryID = select.row.id;
-                    update.params.bookmarkID = bookmarkID;
-                    update.execute();
-                }
-            }
-        }
-        catch (ex) {
-            reportError(ex);
-        }
-        finally {
-            select.reset();
-            gConnection.commitTransaction();
-        }
-    },
-
-
-    recomputeIDs: function BriefStorage_recomputeIDs() {
-        var hashStringFunc = {
-            QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
-            onFunctionCall: function(aArgs) hashString(aArgs.getUTF8String(0))
-        }
-        var generateEntryHashFunc = {
-            QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
-            onFunctionCall: function(aArgs) hashString(aArgs.getUTF8String(0) +
-                                                       aArgs.getUTF8String(1))
-        }
-
-        gConnection.createFunction('hashString', 1, hashStringFunc);
-        gConnection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
-
-        gConnection.beginTransaction();
-        try {
-            executeSQL('UPDATE OR IGNORE entries                                          ' +
-                       'SET id = generateEntryHash(feedID, providedID)                    ' +
-                       'WHERE rowid IN (                                                  ' +
-                       '   SELECT entries.rowid                                           ' +
-                       '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                       '   WHERE entries.date >= feeds.oldestAvailableEntryDate AND       ' +
-                       '         entries.providedID != ""                                 ' +
-                       ')                                                                 ');
-            executeSQL('UPDATE OR IGNORE feeds SET feedID = hashString(feedURL) WHERE isFolder = 0');
-        }
-        catch (ex) {
-            reportError(ex, true);
-        }
-        finally {
-            gConnection.commitTransaction();
-        }
+        ExecuteSQL('CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagName)');
     },
 
 
@@ -508,20 +338,6 @@ BriefStorageService.prototype = {
         return foundFeed;
     },
 
-
-    getFeedByBookmarkID: function BriefStorage_getFeedByBookmarkID(aBookmarkID) {
-        var foundFeed = null;
-        var feeds = this.getAllFeeds(true);
-        for (var i = 0; i < feeds.length; i++) {
-            if (feeds[i].bookmarkID == aBookmarkID) {
-                foundFeed = feeds[i];
-                break;
-            }
-        }
-        return foundFeed;
-    },
-
-
     // nsIBriefStorage
     getAllFeeds: function BriefStorage_getAllFeeds(aIncludeFolders) {
         if (!this.feedsCache)
@@ -530,56 +346,32 @@ BriefStorageService.prototype = {
         return aIncludeFolders ? this.feedsAndFoldersCache : this.feedsCache;
     },
 
-
     buildFeedsCache: function BriefStorage_buildFeedsCache() {
         this.feedsCache = [];
         this.feedsAndFoldersCache = [];
 
-        var cols = ['feedID', 'feedURL', 'websiteURL', 'title', 'subtitle', 'imageURL',
-                    'imageLink', 'imageTitle', 'dateModified', 'favicon', 'lastUpdated',
-                    'oldestEntryDate', 'rowIndex', 'parent', 'isFolder', 'bookmarkID',
-                    'entryAgeLimit', 'maxEntries', 'updateInterval', 'markModifiedEntriesUnread'];
+        var results = Stm.getAllFeeds.getResults();
+        for (let row = results.next(); row; row = results.next()) {
 
-        var select = createStatement('SELECT ' + cols.join(', ') + ' FROM feeds ' +
-                                     'WHERE hidden = 0 ORDER BY rowIndex ASC    ');
-        try {
-            while (select.step()) {
-                var feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
-                for (let i = 0; i < cols.length; i++)
-                    feed[cols[i]] = select.row[cols[i]]
+            let feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
+            for (let column in row)
+                feed[column] = row[column];
 
-                this.feedsAndFoldersCache.push(feed);
-                if (!feed.isFolder)
-                    this.feedsCache.push(feed);
-            }
+            this.feedsAndFoldersCache.push(feed);
+            if (!feed.isFolder)
+                this.feedsCache.push(feed);
         }
-        finally {
-            select.reset();
-        }
+        results.close();
     },
-
 
     // nsIBriefStorage
     getAllTags: function BriefStorage_getAllTags() {
-        try {
-            var tags = [];
+        var tags = [];
 
-            var sql = 'SELECT entry_tags.tagName                                             '+
-                      'FROM entry_tags INNER JOIN entries ON entry_tags.entryID = entries.id '+
-                      'WHERE entries.deleted = :deletedState                                 '+
-                      'ORDER BY entry_tags.tagName                                           ';
-            var select = createStatement(sql);
-            select.params.deletedState = ENTRY_STATE_NORMAL;
-
-            while (select.step()) {
-                let tag = select.row.tagName;
-                if (tag != tags[tags.length - 1])
-                    tags.push(tag);
-            }
-        }
-        finally {
-            select.reset();
-        }
+        var results = Stm.getAllTags.getResults();
+        for (row = results.next(); row; row = results.next())
+            tags.push(row.tagName);
+        results.close();
 
         return tags;
     },
@@ -592,18 +384,13 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
-        var update = createStatement('UPDATE feeds                                ' +
-                                     'SET entryAgeLimit  = :entryAgeLimit,        ' +
-                                     '    maxEntries     = :maxEntries,           ' +
-                                     '    updateInterval = :updateInterval,       ' +
-                                     '    markModifiedEntriesUnread = :markUnread ' +
-                                     'WHERE feedID = :feedID                      ');
-        update.params.entryAgeLimit = aFeed.entryAgeLimit;
-        update.params.maxEntries = aFeed.maxEntries;
-        update.params.updateInterval = aFeed.updateInterval;
-        update.params.markUnread = aFeed.markModifiedEntriesUnread ? 1 : 0;
-        update.params.feedID = aFeed.feedID;
-        update.execute();
+        Stm.setFeedOptions.execute({
+            'entryAgeLimit': aFeed.entryAgeLimit,
+            'maxEntries': aFeed.maxEntries,
+            'updateInterval': aFeed.updateInterval,
+            'markUnread': aFeed.markModifiedEntriesUnread ? 1 : 0,
+            'feedID': aFeed.feedID
+        });
 
         // Update the cache if neccassary (it may not be if nsIBriefFeed instance that was
         // passed to us was itself taken from the cache).
@@ -620,139 +407,89 @@ BriefStorageService.prototype = {
     // nsIBriefStorage
     compactDatabase: function BriefStorage_compactDatabase() {
         this.purgeEntries(false);
-        executeSQL('VACUUM');
+        ExecuteSQL('VACUUM');
     },
 
 
     // Moves expired entries to Trash and permanently removes
     // the deleted items from database.
     purgeEntries: function BriefStorage_purgeEntries(aDeleteExpired) {
-        gConnection.beginTransaction()
+        Connection.beginTransaction()
         try {
             if (aDeleteExpired) {
-                this.expireEntriesByAgeGlobal();
-                this.expireEntriesByAgePerFeed();
-                this.expireEntriesByNumber();
+                // Delete old entries in feeds that don't have per-feed setting enabled.
+                if (Prefs.getBoolPref('database.expireEntries')) {
+                    let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
+
+                    Stm.expireEntriesByAgeGlobal.execute({
+                        'oldState': ENTRY_STATE_NORMAL,
+                        'newState': ENTRY_STATE_TRASHED,
+                        'edgeDate': Date.now() - expirationAge * 86400000
+                    });
+                }
+
+                // Delete old entries based on per-feed limit.
+                for each (let feed in this.getAllFeeds()) {
+                    if (feed.entryAgeLimit > 0) {
+                        Stm.expireEntriesByAgePerFeed.execute({
+                            'oldState': ENTRY_STATE_NORMAL,
+                            'newState': ENTRY_STATE_TRASHED,
+                            'edgeDate': Date.now() - feed.entryAgeLimit * 86400000,
+                            'feedID': feed.feedID
+                        });
+                    }
+                }
+
+                // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
+                if (Prefs.getBoolPref('database.limitStoredEntries')) {
+                    let maxEntries = Prefs.getIntPref('database.maxStoredEntries');
+
+                    for each (let feed in this.getAllFeeds()) {
+                        let row = Stm.getDeletedEntriesCount.getSingleResult({
+                            'feedID': feed.feedID,
+                            'deletedState': ENTRY_STATE_NORMAL
+                        })
+
+                        if (row.entryCount - maxEntries > 0) {
+                            Stm.expireEntriesByNumber.execute({
+                                'oldState': ENTRY_STATE_NORMAL,
+                                'newState': ENTRY_STATE_TRASHED,
+                                'feedID': feed.feedID,
+                                'limit': row.entryCount - maxEntries
+                            });
+                        }
+                    }
+                }
             }
 
-            gStm.purgeDeletedEntriesText.params.deletedState = ENTRY_STATE_DELETED;
-            gStm.purgeDeletedEntriesText.params.currentDate = Date.now();
-            gStm.purgeDeletedEntriesText.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
-            gStm.purgeDeletedEntriesText.execute();
+            Stm.purgeDeletedEntriesText.execute({
+                'deletedState': ENTRY_STATE_DELETED,
+                'currentDate': Date.now(),
+                'retentionTime': DELETED_FEEDS_RETENTION_TIME
+            });
 
-            gStm.purgeDeletedEntries.params.deletedState = ENTRY_STATE_DELETED;
-            gStm.purgeDeletedEntries.params.currentDate = Date.now();
-            gStm.purgeDeletedEntries.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
-            gStm.purgeDeletedEntries.execute();
+            Stm.purgeDeletedEntries.execute({
+                'deletedState': ENTRY_STATE_DELETED,
+                'currentDate': Date.now(),
+                'retentionTime': DELETED_FEEDS_RETENTION_TIME
+            });
 
-            gStm.purgeDeletedFeeds.params.currentDate = Date.now();
-            gStm.purgeDeletedFeeds.params.retentionTime = DELETED_FEEDS_RETENTION_TIME;
-            gStm.purgeDeletedFeeds.execute();
+            Stm.purgeDeletedFeeds.execute({
+                'currentDate': Date.now(),
+                'retentionTime': DELETED_FEEDS_RETENTION_TIME
+            });
         }
         catch (ex) {
-            reportError(ex);
+            ReportError(ex);
         }
         finally {
-            gConnection.commitTransaction();
+            Connection.commitTransaction();
         }
 
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
-        gPrefs.setIntPref('database.lastPurgeTime', now);
+        Prefs.setIntPref('database.lastPurgeTime', now);
     },
-
-
-    // Expire old entries in feeds that don't have per-feed setting enabled.
-    expireEntriesByAgeGlobal: function BriefStorage_expireEntriesByAgeGlobal() {
-        var shouldExpire = gPrefs.getBoolPref('database.expireEntries');
-        if (!shouldExpire)
-            return;
-
-        var expirationAge = gPrefs.getIntPref('database.entryExpirationAge');
-        // expirationAge is in days, convert it to miliseconds.
-        var edgeDate = Date.now() - expirationAge * 86400000;
-
-        var statement = createStatement(
-            'UPDATE entries SET deleted = :newState                            ' +
-            'WHERE id IN (                                                     ' +
-            '   SELECT entries.id                                              ' +
-            '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-            '   WHERE entries.deleted = :oldState AND                          ' +
-            '         feeds.entryAgeLimit = 0 AND                              ' +
-            '         entries.starred = 0 AND                                  ' +
-            '         entries.date < :edgeDate                                 ' +
-            ')                                                                 ');
-        statement.params.newState = ENTRY_STATE_TRASHED;
-        statement.params.oldState = ENTRY_STATE_NORMAL;
-        statement.params.edgeDate = edgeDate;
-        statement.execute();
-    },
-
-
-    // Delete old entries based on the per-feed limit.
-    expireEntriesByAgePerFeed: function BriefStorage_expireEntriesByAgePerFeed() {
-        var statement = createStatement('UPDATE entries SET deleted = :newState  ' +
-                                        'WHERE entries.deleted = :oldState AND   ' +
-                                        '      starred = 0 AND                   ' +
-                                        '      entries.date < :edgeDate AND      ' +
-                                        '      feedID = :feedID                  ');
-        var feeds = this.getAllFeeds();
-        var now = Date.now();
-
-        for each (feed in feeds) {
-            if (feed.entryAgeLimit > 0) {
-                var edgeDate = now - feed.entryAgeLimit * 86400000;
-                statement.params.newState = ENTRY_STATE_TRASHED;
-                statement.params.oldState = ENTRY_STATE_NORMAL;
-                statement.params.edgeDate = edgeDate;
-                statement.params.feedID = feed.feedID;
-                statement.execute();
-            }
-        }
-    },
-
-
-    // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
-    expireEntriesByNumber: function BriefStorage_expireEntriesByNumber() {
-        if (!gPrefs.getBoolPref('database.limitStoredEntries'))
-            return;
-
-        var maxEntries = gPrefs.getIntPref('database.maxStoredEntries');
-
-        var expireEntries = createStatement('UPDATE entries                    ' +
-                                            'SET deleted = :newState           ' +
-                                            'WHERE rowid IN (                  ' +
-                                            '    SELECT rowid                  ' +
-                                            '    FROM entries                  ' +
-                                            '    WHERE deleted = :oldState AND ' +
-                                            '          starred = 0 AND         ' +
-                                            '          feedID = :feedID        ' +
-                                            '    ORDER BY date ASC             ' +
-                                            '    LIMIT :limit                  ' +
-                                            ')                                 ');
-        var getEntryCount = createStatement('SELECT COUNT(1) AS count FROM entries  ' +
-                                            'WHERE feedID = :feedID AND             ' +
-                                            '      starred = 0 AND                  ' +
-                                            '      deleted = :deleted               ');
-
-        var feeds = this.getAllFeeds();
-        for each (feed in feeds) {
-            getEntryCount.params.feedID = feed.feedID;
-            getEntryCount.params.deleted = ENTRY_STATE_NORMAL;
-            getEntryCount.step();
-            let entryCount = getEntryCount.row.count;
-            getEntryCount.reset();
-
-            if (entryCount - maxEntries > 0) {
-                expireEntries.params.newState = ENTRY_STATE_TRASHED;
-                expireEntries.params.oldState = ENTRY_STATE_NORMAL;
-                expireEntries.params.feedID = feed.feedID;
-                expireEntries.params.limit = entryCount - maxEntries;
-                expireEntries.execute();
-            }
-        }
-    },
-
 
     // nsIObserver
     observe: function BriefStorage_observe(aSubject, aTopic, aData) {
@@ -760,32 +497,27 @@ BriefStorageService.prototype = {
             case 'profile-after-change':
                 if (aData === 'startup') {
                     this.instantiate();
-                    gObserverService.removeObserver(this, 'profile-after-change');
+                    ObserverService.removeObserver(this, 'profile-after-change');
                 }
                 break;
 
             case 'quit-application':
                 // Integer prefs are longs while Date is a long long.
                 var now = Math.round(Date.now() / 1000);
-                var lastPurgeTime = gPrefs.getIntPref('database.lastPurgeTime');
+                var lastPurgeTime = Prefs.getIntPref('database.lastPurgeTime');
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeEntries(true);
 
-                gBms.removeObserver(this);
-                gPrefs.removeObserver('', this);
-                gObserverService.removeObserver(this, 'quit-application');
+                Bookmarks.removeObserver(BookmarkObserver);
+                Prefs.removeObserver('', this);
+                ObserverService.removeObserver(this, 'quit-application');
 
-                this.syncDelayTimer = null;
-                break;
-
-            case 'timer-callback':
-                this.livemarksSyncPending = false;
-                this.syncWithLivemarks();
+                BookmarkObserver.syncDelayTimer = null;
                 break;
 
             case 'nsPref:changed':
                 if (aData == 'homeFolder') {
-                    this.homeFolderID = gPrefs.getIntPref('homeFolder');
+                    this.homeFolderID = Prefs.getIntPref('homeFolder');
                     this.syncWithLivemarks();
                 }
                 break;
@@ -795,9 +527,8 @@ BriefStorageService.prototype = {
 
     // nsIBriefStorage
     syncWithLivemarks: function BriefStorage_syncWithLivemarks() {
-        new LivemarksSynchronizer();
+        new LivemarksSync();
     },
-
 
     observers: [],
 
@@ -813,219 +544,22 @@ BriefStorageService.prototype = {
             this.observers.splice(index, 1);
     },
 
+    notifyOfEntriesStarred: function BriefStorage_notifyOfEntriesStarred(aEntries, aNewState) {
+        var query = new BriefQuery();
+        query.entries = aEntries;
+        var list = query.getEntryList();
 
-    homeFolderID: -1,
-
-    // State properties uses by the bookmarks observer.
-    bookmarksObserverBatching: false,
-    homeFolderContentModified: false,
-    livemarksSyncPending: false,
-
-    get syncDelayTimer BriefStorage_syncDelayTimer() {
-        if (!this.__syncDelayTimer)
-            this.__syncDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        return this.__syncDelayTimer;
+        for each (let observer in this.observers)
+            observer.onEntriesStarred(list, aNewState);
     },
 
-    // nsINavBookmarkObserver
-    onEndUpdateBatch: function BriefStorage_onEndUpdateBatch() {
-        this.bookmarksObserverBatching = false;
-        if (this.homeFolderContentModified)
-            this.delayedLivemarksSync();
-        this.homeFolderContentModified = false;
-    },
+    notifyOfEntriesTagged: function BriefStorage_notifyOfEntriesTagged(aEntries, aNewState, aChangedTag) {
+        var query = new BriefQuery();
+        query.entries = aEntries;
+        var list = query.getEntryList();
 
-    // nsINavBookmarkObserver
-    onBeginUpdateBatch: function BriefStorage_onBeginUpdateBatch() {
-        this.bookmarksObserverBatching = true;
-    },
-
-    // nsINavBookmarkObserver
-    onItemAdded: function BriefStorage_onItemAdded(aItemID, aFolder, aIndex) {
-        if (isFolder(aItemID) && isInHomeFolder(aFolder)) {
-            this.delayedLivemarksSync();
-            return;
-        }
-
-        // We only care about plain bookmarks and tags.
-        if (isLivemark(aFolder) || !isBookmark(aItemID))
-            return;
-
-        // Find entries with the same URI as the added item and tag or star them.
-        gConnection.beginTransaction();
-        try {
-            var url = gBms.getBookmarkURI(aItemID).spec;
-            var isTag = isTagFolder(aFolder);
-            var changedEntries = [];
-
-            for each (entry in this.getEntriesByURL(url)) {
-                if (isTag) {
-                    var tagName = gBms.getItemTitle(aFolder);
-                    this.tagEntry(true, entry.id, tagName, aItemID);
-                }
-                else {
-                    this.starEntry(true, entry.id, aItemID);
-                }
-
-                changedEntries.push(entry);
-            }
-        }
-        catch (ex) {
-            reportError(ex, true);
-        }
-        finally {
-            gConnection.commitTransaction();
-        }
-
-        if (changedEntries.length) {
-            let entryIDs = changedEntries.map(function(e) e.id);
-            if (isTag)
-                this.notifyOfEntriesTagged(entryIDs, true, tagName);
-            else
-                this.notifyOfEntriesStarred(entryIDs, true);
-        }
-    },
-
-    // nsINavBookmarkObserver
-    onBeforeItemRemoved: function BriefStorage_onBeforeItemRemoved() { },
-
-    // nsINavBookmarkObserver
-    onItemRemoved: function BriefStorage_onItemRemoved(aItemID, aFolder, aIndex) {
-        if (this.isLivemarkStored(aItemID) || aItemID == this.homeFolderID) {
-            this.delayedLivemarksSync();
-            return;
-        }
-
-        // We only care about plain bookmarks and tags, but we can't check the type
-        // of the removed item, except for if it was a part of a Live Bookmark.
-        if (isLivemark(aFolder))
-            return;
-
-        // Find entries with bookmarkID of the removed item and untag/unstar them.
-        gConnection.beginTransaction();
-        try {
-            var changedEntries = [];
-            var isTag = isTagFolder(aFolder);
-
-            if (isTag) {
-                for each (entry in this.getEntriesByTagID(aItemID)) {
-                    var tagName = gBms.getItemTitle(aFolder);
-                    this.tagEntry(false, entry.id, tagName);
-                    changedEntries.push(entry)
-                }
-            }
-            else {
-                let entries = this.getEntriesByBookmarkID(aItemID);
-
-                // Look for other bookmarks for this URI.
-                if (entries.length) {
-                    let uri = newURI(entries[0].url);
-                    var bookmarks = gBms.getBookmarkIdsForURI(uri, {}).
-                                         filter(isNormalBookmark);
-                }
-
-                for each (entry in entries) {
-                    if (bookmarks.length) {
-                        // If there is another bookmark for this URI, don't unstar the
-                        // entry, but update its bookmarkID to point to that bookmark.
-                        this.starEntry(true, entry.id, bookmarks[0]);
-                    }
-                    else {
-                        this.starEntry(false, entry.id);
-                        changedEntries.push(entry);
-                    }
-                }
-            }
-        }
-        catch (ex) {
-            reportError(ex, true);
-        }
-        finally {
-            gConnection.commitTransaction();
-        }
-
-        if (changedEntries.length) {
-            let entryIDs = changedEntries.map(function(e) e.id);
-            if (isTag)
-                this.notifyOfEntriesTagged(entryIDs, false, tagName);
-            else
-                this.notifyOfEntriesStarred(entryIDs, false);
-        }
-    },
-
-    // nsINavBookmarkObserver
-    onItemMoved: function BriefStorage_onItemMoved(aItemID, aOldParent, aOldIndex,
-                                                   aNewParent, aNewIndex) {
-        var wasInHome = this.isLivemarkStored(aItemID);
-        var isInHome = isFolder(aItemID) && isInHomeFolder(aNewParent);
-        if (wasInHome || isInHome)
-            this.delayedLivemarksSync();
-    },
-
-    // nsINavBookmarkObserver
-    onItemChanged: function BriefStorage_onItemChanged(aItemID, aProperty,
-                                                       aIsAnnotationProperty, aValue) {
-        switch (aProperty) {
-        case 'title':
-            let feed = this.getFeedByBookmarkID(aItemID);
-            if (feed) {
-                gStm.setFeedTitle.params.title = aValue;
-                gStm.setFeedTitle.params.feedID = feed.feedID;
-                gStm.setFeedTitle.execute();
-
-                feed.title = aValue; // Update the cache.
-
-                gObserverService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
-            }
-            else if (isTagFolder(aItemID)) {
-                this.renameTag(aItemID, aValue);
-            }
-            break;
-
-        case 'livemark/feedURI':
-            if (this.isLivemarkStored(aItemID))
-                this.delayedLivemarksSync();
-            break;
-
-        case 'uri':
-            // Unstar any entries with the old URI.
-            let entries = this.getEntriesByBookmarkID(aItemID);
-            for each (entry in entries)
-                this.starEntry(false, entry.id);
-
-            if (entries.length)
-                this.notifyOfEntriesStarred(entries.map(function(e) e.id), false);
-
-            // Star any entries with the new URI.
-            entries = this.getEntriesByURL(aValue);
-            for each (entry in entries)
-                this.starEntry(true, entry.id, aItemID);
-
-            if (entries.length)
-                this.notifyOfEntriesStarred(entries.map(function(e) e.id), true);
-
-            break;
-        }
-    },
-
-    // nsINavBookmarkObserver
-    onItemVisited: function BriefStorage_aOnItemVisited(aItemID, aVisitID, aTime) { },
-
-    isLivemarkStored: function BriefStorage_isLivemarkStored(aItemID) {
-        return !!this.getFeedByBookmarkID(aItemID);
-    },
-
-    delayedLivemarksSync: function BriefStorage_delayedLivemarksSync() {
-        if (this.bookmarksObserverBatching) {
-            this.homeFolderContentModified = true;
-        }
-        else {
-            if (this.livemarksSyncPending)
-                this.syncDelayTimer.cancel();
-
-            this.syncDelayTimer.init(this, LIVEMARKS_SYNC_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
-            this.livemarksSyncPending = true;
-        }
+        for each (let observer in this.observers)
+            observer.onEntriesTagged(list, aNewState, aChangedTag);
     },
 
     /**
@@ -1036,15 +570,10 @@ BriefStorageService.prototype = {
      * @param aBookmarkID ItemId of the corresponding bookmark in Places database.
      */
     starEntry: function BriefStorage_starEntry(aState, aEntryID, aBookmarkID) {
-        if (aState) {
-            gStm.starEntry.params.bookmarkID = aBookmarkID;
-            gStm.starEntry.params.entryID = aEntryID;
-            gStm.starEntry.execute();
-        }
-        else {
-            gStm.unstarEntry.params.id = aEntryID;
-            gStm.unstarEntry.execute();
-        }
+        if (aState)
+            Stm.starEntry.execute({ 'bookmarkID': aBookmarkID, 'entryID': aEntryID });
+        else
+            Stm.unstarEntry.execute({ 'id': aEntryID });
     },
 
     /**
@@ -1058,22 +587,24 @@ BriefStorageService.prototype = {
      */
     tagEntry: function BriefStorage_tagEntry(aState, aEntryID, aTagName, aTagID) {
         if (aState) {
-            gStm.tagEntry.params.entryID = aEntryID;
-            gStm.tagEntry.params.tagName = aTagName;
-            gStm.tagEntry.params.tagID = aTagID;
-            gStm.tagEntry.execute();
+            Stm.tagEntry.execute({
+                'entryID': aEntryID,
+                'tagName': aTagName,
+                'tagID': aTagID
+            });
         }
         else {
-            gStm.untagEntry.params.entryID = aEntryID;
-            gStm.untagEntry.params.tagName = aTagName;
-            gStm.untagEntry.execute();
+            Stm.untagEntry.execute({
+                'entryID': aEntryID,
+                'tagName': aTagName
+            });
         }
 
-        // Refresh the serialized list of tags stored in entries_text table.
-        var tags = this.getTagsForEntry(aEntryID);
-        gStm.setSerializedTagList.params.tags = tags.join(', ');
-        gStm.setSerializedTagList.params.entryID = aEntryID;
-        gStm.setSerializedTagList.execute();
+        // Update the serialized list of tags stored in entries_text table.
+        Stm.setSerializedTagList.execute({
+            'tags': Utils.getTagsForEntry(aEntryID).join(', '),
+            'entryID': aEntryID
+        });
     },
 
 
@@ -1091,20 +622,20 @@ BriefStorageService.prototype = {
         var addedTags = [];
         var removedTags = [];
 
-        var storedTags = this.getTagsForEntry(aEntryID);
+        var storedTags = Utils.getTagsForEntry(aEntryID);
 
         // Get the list of current tags for this entry's URI.
         var currentTagNames = [];
         var currentTagIDs = [];
-        for each (itemID in aBookmarks) {
-            let parent = gBms.getFolderIdForItem(itemID);
-            if (isTagFolder(parent)) {
+        for each (let itemID in aBookmarks) {
+            let parent = Bookmarks.getFolderIdForItem(itemID);
+            if (Utils.isTagFolder(parent)) {
                 currentTagIDs.push(itemID);
-                currentTagNames.push(gBms.getItemTitle(parent));
+                currentTagNames.push(Bookmarks.getItemTitle(parent));
             }
         }
 
-        for each (tag in storedTags) {
+        for each (let tag in storedTags) {
             if (currentTagNames.indexOf(tag) === -1) {
                 this.tagEntry(false, aEntryID, tag);
                 removedTags.push(tag);
@@ -1123,142 +654,6 @@ BriefStorageService.prototype = {
     },
 
 
-    /**
-     * Syncs tags when a tag folder is renamed by removing tags with the old name
-     * and re-tagging the entries using the new one.
-     *
-     * @param aTagFolderID itemId of the tag folder that was renamed.
-     * @param aNewName     New name of the tag folder, i.e. new name of the tag.
-     */
-    renameTag: function BriefStorage_renameTag(aTagFolderID, aNewName) {
-        try {
-            // Get bookmarks in the renamed tag folder.
-            var options = gPlaces.history.getNewQueryOptions();
-            var query = gPlaces.history.getNewQuery();
-            query.setFolders([aTagFolderID], 1);
-            var result = gPlaces.history.executeQuery(query, options);
-            result.root.containerOpen = true;
-
-            var oldTagName = '';
-
-            for (let i = 0; i < result.root.childCount; i++) {
-                let tagID = result.root.getChild(i).itemId;
-                let entries = this.getEntriesByTagID(tagID).
-                                   map(function(e) e.id);
-
-                for each (entry in entries) {
-                    if (!oldTagName) {
-                        // The bookmark observer doesn't provide the old name,
-                        // so we have to look it up in our database.
-                        gStm.getNameForTagID.params.tagID = tagID;
-                        gStm.getNameForTagID.step();
-                        oldTagName = gStm.getNameForTagID.row.tagName;
-                    }
-
-                    this.tagEntry(false, entry, oldTagName);
-                    this.tagEntry(true, entry, aNewName, tagID);
-                }
-
-                if (entries.length) {
-                    this.notifyOfEntriesTagged(entries, false, oldTagName);
-                    this.notifyOfEntriesTagged(entries, true, aNewName);
-                }
-            }
-
-            result.root.containerOpen = false;
-        }
-        finally {
-            gStm.getNameForTagID.reset();
-        }
-    },
-
-
-    getTagsForEntry: function BriefStorage_getTagsForEntry(aEntryID) {
-        try {
-            var tags = [];
-            gStm.getTagsForEntry.params.entryID = aEntryID;
-            while (gStm.getTagsForEntry.step())
-                tags.push(gStm.getTagsForEntry.row.tagName);
-        }
-        finally {
-            gStm.getTagsForEntry.reset();
-        }
-        return tags;
-    },
-
-
-    notifyOfEntriesStarred: function BriefStorage_notifyOfEntriesStarred(aEntries, aNewState) {
-        var query = new BriefQuery();
-        query.entries = aEntries;
-        var list = query.getEntryList();
-
-        for each (observer in this.observers)
-            observer.onEntriesStarred(list, aNewState);
-    },
-
-    notifyOfEntriesTagged: function BriefStorage_notifyOfEntriesTagged(aEntries, aNewState,
-                                                                       aChangedTag) {
-        var query = new BriefQuery();
-        query.entries = aEntries;
-        var list = query.getEntryList();
-
-        for each (observer in this.observers)
-            observer.onEntriesTagged(list, aNewState, aChangedTag);
-    },
-
-    getEntriesByURL: function BriefStorage_getEntriesByURL(aURL) {
-        try {
-            var entries = [];
-            var select = gStm.selectEntriesByURL;
-            select.params.url = aURL;
-            while (select.step()) {
-                entries.push({ id: select.row.id,
-                               starred: select.row.starred });
-            }
-        }
-        finally {
-            select.reset();
-        }
-
-        return entries;
-    },
-
-    getEntriesByBookmarkID: function BriefStorage_getEntriesByBookmarkID(aBookmarkID) {
-        try {
-            var entries = [];
-            var select = gStm.selectEntriesByBookmarkID;
-            select.params.bookmarkID = aBookmarkID;
-            while (select.step()) {
-                entries.push({ id: select.row.id,
-                               url: select.row.entryURL,
-                               starred: select.row.starred });
-            }
-        }
-        finally {
-            select.reset();
-        }
-
-        return entries;
-    },
-
-    getEntriesByTagID: function BriefStorage_getEntriesByTagID(aTagID) {
-        try {
-            var entries = [];
-            var select = gStm.selectEntriesByTagID;
-            select.params.tagID = aTagID;
-            while (select.step()) {
-                entries.push({ id: select.row.id,
-                               url: select.row.entryURL });
-            }
-        }
-        finally {
-            select.reset();
-        }
-
-        return entries;
-    },
-
-
     classDescription: 'Database component for the Brief extension',
     classID: Components.ID('{4C468DA8-7F30-11DB-A690-EBF455D89593}'),
     contractID: '@ancestor/brief/storage;1',
@@ -1268,15 +663,13 @@ BriefStorageService.prototype = {
             if (aOuter != null)
                 throw Components.results.NS_ERROR_NO_AGGREGATION;
 
-            if (!gStorageService)
-                gStorageService = new BriefStorageService();
+            if (!StorageService)
+                StorageService = new BriefStorageService();
 
-            return gStorageService.QueryInterface(aIID);
+            return StorageService.QueryInterface(aIID);
         }
     },
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefStorage,
-                                           Ci.nsIObserver,
-                                           Ci.nsINavBookmarkObserver])
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefStorage, Ci.nsIObserver])
 }
 
 
@@ -1289,14 +682,13 @@ function FeedProcessor(aFeed, aCallback) {
     this.callback = aCallback;
 
     this.remainingEntriesCount = aFeed.entries.length;
-    this.entriesToUpdateCount = 0;
-    this.entriesToInsertCount = 0;
 
     this.updatedEntries = [];
     this.insertedEntries = [];
 
     var newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-    var prevDateModified = gStorageService.getFeed(aFeed.feedID).dateModified;
+    var prevDateModified = StorageService.getFeed(aFeed.feedID).dateModified;
+
     if (aFeed.entries.length && (!newDateModified || newDateModified > prevDateModified)) {
         aFeed.oldestEntryDate = Date.now();
 
@@ -1312,27 +704,29 @@ function FeedProcessor(aFeed, aCallback) {
         aCallback.onFeedProcessed(0);
     }
 
-    // Update properties of the feed (and refresh the cache).
-    var cachedFeed = gStorageService.getFeed(aFeed.feedID);
-    var stmt = gStm.updateFeed;
+    var properties = {
+        'websiteURL': aFeed.websiteURL,
+        'subtitle': aFeed.subtitle,
+        'favicon': aFeed.favicon,
+        'lastUpdated': Date.now(),
+        'dateModified': newDateModified,
+        'oldestEntryDate': aFeed.oldestEntryDate,
+        'feedID': aFeed.feedID
+    }
 
-    stmt.params.websiteURL  = cachedFeed.websiteURL  = aFeed.websiteURL;
-    stmt.params.subtitle = cachedFeed.subtitle = aFeed.subtitle;
-    stmt.params.favicon = cachedFeed.favicon = aFeed.favicon;
-    stmt.params.lastUpdated = cachedFeed.lastUpdated = Date.now();
-    stmt.params.dateModified = cachedFeed.dateModified = newDateModified;
-    stmt.params.oldestEntryDate = cachedFeed.oldestEntryDate = aFeed.oldestEntryDate;
-    stmt.params.feedID = aFeed.feedID;
+    Stm.updateFeed.params = properties;
+    Stm.updateFeed.executeAsync();
 
-    stmt.executeAsync({
-        handleCompletion: function(aReason) {},
-        handleError: function(aError) {
-            reportError(aError.message);
-        }
-    });
+    // Keep cache up to date.
+    var cachedFeed = StorageService.getFeed(aFeed.feedID);
+    for (let p in properties)
+        cachedFeed[p] = properties[p];
 }
 
 FeedProcessor.prototype = {
+
+    entriesToUpdateCount: 0,
+    entriesToInsertCount: 0,
 
     processEntry: function FeedProcessor_processEntry(aEntry) {
         // This function checks whether a downloaded entry is already in the database or
@@ -1363,16 +757,16 @@ FeedProcessor.prototype = {
             secondarySet.push(aEntry.date);
         }
 
-        var primaryHash = hashString(primarySet.join(''));
-        var secondaryHash = hashString(secondarySet.join(''));
+        var primaryHash = Utils.hashString(primarySet.join(''));
+        var secondaryHash = Utils.hashString(secondarySet.join(''));
 
         // Look up if the entry is already present in the database.
         if (providedID) {
-            var select = gStm.getEntryByPrimaryHash;
+            var select = Stm.getEntryByPrimaryHash;
             select.params.primaryHash = primaryHash;
         }
         else {
-            select = gStm.getEntryBySecondaryHash;
+            select = Stm.getEntryBySecondaryHash;
             select.params.secondaryHash = secondaryHash;
         }
 
@@ -1402,25 +796,21 @@ FeedProcessor.prototype = {
                 self.remainingEntriesCount--;
                 if (!self.remainingEntriesCount)
                     self.exacuteAndNotify();
-            },
-
-            handleError: function(aError) {
-                reportError(aError.message);
             }
         });
     },
 
     addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
-        var markUnread = gStorageService.getFeed(this.feed.feedID).markModifiedEntriesUnread;
+        var markUnread = StorageService.getFeed(this.feed.feedID).markModifiedEntriesUnread;
 
-        gStm.updateEntry.paramSets.push({
+        Stm.updateEntry.paramSets.push({
             'date': aEntry.date,
             'read': markUnread || !aIsRead ? 0 : 1,
             'id': aStoredEntryID
         });
 
-        gStm.updateEntryText.paramSets.push({
+        Stm.updateEntryText.paramSets.push({
             'title': title,
             'content': aEntry.content || aEntry.summary,
             'authors': aEntry.authors,
@@ -1434,7 +824,7 @@ FeedProcessor.prototype = {
     addInsertParams: function FeedProcessor_addInsertParams(aEntry, aPrimaryHash, aSecondaryHash) {
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
-        gStm.insertEntry.paramSets.push({
+        Stm.insertEntry.paramSets.push({
             'feedID': this.feed.feedID,
             'primaryHash': aPrimaryHash,
             'secondaryHash': aSecondaryHash,
@@ -1443,7 +833,7 @@ FeedProcessor.prototype = {
             'date': aEntry.date || Date.now()
         });
 
-        gStm.insertEntryText.paramSets.push({
+        Stm.insertEntryText.paramSets.push({
             'title': title,
             'content': aEntry.content || aEntry.summary,
             'authors': aEntry.authors
@@ -1456,8 +846,8 @@ FeedProcessor.prototype = {
         var self = this;
 
         if (this.entriesToInsertCount) {
-            gStm.getLastRowids.params.count = this.entriesToInsertCount;
-            let statements = [gStm.insertEntry, gStm.insertEntryText, gStm.getLastRowids];
+            Stm.getLastRowids.params.count = this.entriesToInsertCount;
+            let statements = [Stm.insertEntry, Stm.insertEntryText, Stm.getLastRowids];
 
             ExecuteStatementsAsync(statements, {
 
@@ -1474,21 +864,17 @@ FeedProcessor.prototype = {
                     let query = new BriefQuery();
                     query.entries = self.insertedEntries;
                     let list = query.getEntryList();
-                    for each (observer in gStorageService.observers)
+                    for each (let observer in StorageService.observers)
                         observer.onEntriesAdded(list);
 
                     // XXX This should be optimized and/or be asynchronous
                     query.verifyEntriesStarredStatus();
-                },
-
-                handleError: function(aError) {
-                    reportError(aError.message);
                 }
             });
         }
 
         if (this.entriesToUpdateCount) {
-            let statements = [gStm.updateEntry, gStm.updateEntryText];
+            let statements = [Stm.updateEntry, Stm.updateEntryText];
 
             ExecuteStatementsAsync(statements, {
 
@@ -1497,12 +883,8 @@ FeedProcessor.prototype = {
                     let query = new BriefQuery();
                     query.entries = self.updatedEntries;
                     let list = query.getEntryList();
-                    for each (observer in gStorageService.observers)
+                    for each (let observer in StorageService.observers)
                         observer.onEntriesUpdated(list);
-                },
-
-                handleError: function(aError) {
-                    reportError(aError.message);
                 }
             });
         }
@@ -1512,426 +894,10 @@ FeedProcessor.prototype = {
 }
 
 
-// Cached statements.
-var gStm = {
-
-    get updateFeed() {
-        var sql = 'UPDATE feeds                                                  ' +
-                  'SET websiteURL = :websiteURL, subtitle = :subtitle,           ' +
-                  '    imageURL = :imageURL, imageLink = :imageLink,             ' +
-                  '    imageTitle = :imageTitle, favicon = :favicon,             ' +
-                  '    lastUpdated = :lastUpdated, dateModified = :dateModified, ' +
-                  '    oldestEntryDate = :oldestEntryDate                        ' +
-                  'WHERE feedID = :feedID                                        ';
-        delete this.updateFeed;
-        return this.updateFeed = createStatement(sql);
-    },
-
-    get setFeedTitle() {
-        var sql = 'UPDATE feeds SET title = :title WHERE feedID = :feedID';
-        delete this.setFeedTitle;
-        return this.setFeedTitle = createStatement(sql);
-    },
-
-    get insertEntry() {
-        var sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
-                  'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date)        ';
-        delete this.insertEntry;
-        return this.insertEntry = new Statement(sql);
-    },
-
-    get insertEntryText() {
-        var sql = 'INSERT INTO entries_text (title, content, authors) ' +
-                  'VALUES(:title, :content, :authors)   ';
-        delete this.insertEntryText;
-        return this.insertEntryText = new Statement(sql);
-    },
-
-    get updateEntry() {
-        var sql = 'UPDATE entries SET date = :date, read = :read, updated = 1 '+
-                  'WHERE id = :id                                             ';
-        delete this.updateEntry;
-        return this.updateEntry = new Statement(sql);
-    },
-
-    get updateEntryText() {
-        var sql = 'UPDATE entries_text SET title = :title, content = :content, '+
-                  'authors = :authors WHERE rowid = :id                        ';
-        delete this.updateEntryText;
-        return this.updateEntryText = new Statement(sql);
-    },
-
-    get getLastRowids() {
-        var sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT :count';
-        delete this.getLastRowids;
-        return this.getLastRowids = new Statement(sql);
-    },
-
-    get purgeDeletedEntriesText() {
-        var sql = 'DELETE FROM entries_text                                                 '+
-                  'WHERE rowid IN (                                                         '+
-                  '   SELECT entries.id                                                     '+
-                  '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
-                  '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
-                  '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
-                  ')                                                                                   ';
-        delete this.purgeDeletedEntriesText;
-        return this.purgeDeletedEntriesText = createStatement(sql);
-    },
-
-    get purgeDeletedEntries() {
-        var sql = 'DELETE FROM entries                                                      '+
-                  'WHERE id IN (                                                            '+
-                  '   SELECT entries.id                                                     '+
-                  '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
-                  '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
-                  '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
-                  ')                                                                                   ';
-        delete this.purgeDeletedEntries;
-        return this.purgeDeletedEntries = createStatement(sql);
-    },
-
-    get purgeDeletedFeeds() {
-        var sql = 'DELETE FROM feeds                                      '+
-                  'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
-                  '      feeds.hidden != 0                                ';
-        delete this.purgeDeletedFeeds;
-        return this.purgeDeletedFeeds = createStatement(sql);
-    },
-
-    get getEntryByPrimaryHash() {
-        var sql = 'SELECT id, date, read FROM entries WHERE primaryHash = :primaryHash';
-        delete this.getEntryByPrimaryHash;
-        return this.getEntryByPrimaryHash = new Statement(sql);
-    },
-
-    get getEntryBySecondaryHash() {
-        var sql = 'SELECT id, date, read FROM entries WHERE secondaryHash = :secondaryHash';
-        delete this.getEntryBySecondaryHash;
-        return this.getEntryBySecondaryHash = new Statement(sql);
-    },
-
-    get selectEntriesByURL() {
-        var sql = 'SELECT id, starred FROM entries WHERE entryURL = :url';
-        delete this.selectEntriesByURL;
-        return this.selectEntriesByURL = createStatement(sql);
-    },
-
-    get selectEntriesByBookmarkID() {
-        var sql = 'SELECT id, starred, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
-        delete this.selectEntriesByBookmarkID;
-        return this.selectEntriesByBookmarkID = createStatement(sql);
-    },
-
-    get selectEntriesByTagID() {
-        var sql = 'SELECT id, entryURL FROM entries WHERE id IN (          '+
-                  '    SELECT entryID FROM entry_tags WHERE tagID = :tagID '+
-                  ')                                                       ';
-        delete this.selectEntriesByTagID;
-        return this.selectEntriesByTagID = createStatement(sql);
-    },
-
-    get starEntry() {
-        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
-        delete this.starEntry;
-        return this.starEntry = createStatement(sql);
-    },
-
-    get unstarEntry() {
-        var sql = 'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE id = :id';
-        delete this.unstarEntry;
-        return this.unstarEntry = createStatement(sql);
-    },
-
-    get tagEntry() {
-        // |OR IGNORE| is necessary, because some beta users mistakingly ended
-        // up with tagID column marked as UNIQUE.
-        var sql = 'INSERT OR IGNORE INTO entry_tags (entryID, tagName, tagID) '+
-                  'VALUES (:entryID, :tagName, :tagID)            ';
-        delete this.tagEntry;
-        return this.tagEntry = createStatement(sql);
-    },
-
-    get untagEntry() {
-        var sql = 'DELETE FROM entry_tags WHERE entryID = :entryID AND tagName = :tagName';
-        delete this.untagEntry;
-        return this.untagEntry = createStatement(sql);
-    },
-
-    get getTagsForEntry() {
-        var sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
-        delete this.getTagsForEntry;
-        return this.getTagsForEntry = createStatement(sql);
-    },
-
-    get getNameForTagID() {
-        var sql = 'SELECT tagName FROM entry_tags WHERE tagID = :tagID LIMIT 1';
-        delete this.getNameForTagID;
-        return this.getNameForTagID = createStatement(sql);
-    },
-
-    get setSerializedTagList() {
-        var sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
-        delete this.setSerializedTagList;
-        return this.setSerializedTagList = createStatement(sql);
-    },
-
-    get selectStarredEntries() {
-        var sql = 'SELECT entries.entryURL, entries.id, entries_text.title                 '+
-                  'FROM entries INNER JOIN entries_text ON entries.id = entries_text.rowid '+
-                  'WHERE starred = 1                                                       ';
-        delete this.selectStarredEntries;
-        return this.selectStarredEntries = createStatement(sql);
-    }
-
-}
-
-
-/**
- * Synchronizes the list of feeds stored in the database with
- * the livemarks available in the Brief's home folder.
- */
-function LivemarksSynchronizer() {
-    if (!this.checkHomeFolder())
-        return;
-
-    this.newLivemarks = [];
-
-    gConnection.beginTransaction();
-    try {
-        // Get the list of livemarks and folders in the home folder.
-        this.getLivemarks();
-
-        // Get the list of feeds stored in the database.
-        this.getStoredFeeds();
-
-        for each (livemark in this.foundLivemarks) {
-            // Search for the bookmarked among the stored feeds.
-            let feed = null;
-            for (let i = 0; i < this.storedFeeds.length; i++) {
-                if (this.storedFeeds[i].feedID == livemark.feedID) {
-                    feed = this.storedFeeds[i];
-                    break;
-                }
-            }
-
-            if (feed) {
-                feed.bookmarked = true;
-                this.updateFeedFromLivemark(livemark, feed);
-            }
-            else {
-                this.insertFeed(livemark);
-                if (!livemark.isFolder)
-                    this.newLivemarks.push(livemark);
-            }
-        }
-
-        for each (feed in this.storedFeeds) {
-            if (!feed.bookmarked && feed.hidden == 0)
-                this.hideFeed(feed);
-        }
-    }
-    finally {
-        gConnection.commitTransaction();
-    }
-
-    if (this.feedListChanged) {
-        gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
-        gObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
-    }
-
-    // Update the newly added feeds.
-    if (this.newLivemarks.length) {
-        var feeds = [];
-        for each (livemark in this.newLivemarks)
-            feeds.push(gStorageService.getFeed(livemark.feedID));
-
-        var updateService = Cc['@ancestor/brief/updateservice;1'].
-                            getService(Ci.nsIBriefUpdateService);
-        updateService.updateFeeds(feeds);
-    }
-}
-
-LivemarksSynchronizer.prototype = {
-
-    storedFeeds: null,
-    newLivemarks: null,
-    foundLivemarks: null,
-    feedListChanged: false,
-
-    checkHomeFolder: function BookmarksSync_checkHomeFolder() {
-        var folderValid = true;
-        var homeFolder = gPrefs.getIntPref('homeFolder');
-
-        if (homeFolder == -1) {
-            var hideAllFeeds = createStatement('UPDATE feeds SET hidden = :hidden');
-            hideAllFeeds.params.hidden = Date.now();
-            hideAllFeeds.execute();
-
-            gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
-            gObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
-            folderValid = false;
-        }
-        else {
-            try {
-                // This will throw if the home folder was deleted.
-                gBms.getItemTitle(homeFolder);
-            }
-            catch (e) {
-                gPrefs.clearUserPref('homeFolder');
-                folderValid = false;
-            }
-        }
-
-        return folderValid;
-    },
-
-
-    // Get the list of Live Bookmarks in the user's home folder.
-    getLivemarks: function BookmarksSync_getLivemarks() {
-        var homeFolder = gPrefs.getIntPref('homeFolder');
-        this.foundLivemarks = [];
-
-        var options = gPlaces.history.getNewQueryOptions();
-        var query = gPlaces.history.getNewQuery();
-        query.setFolders([homeFolder], 1);
-        options.excludeItems = true;
-
-        var result = gPlaces.history.executeQuery(query, options);
-        this.traversePlacesQueryResults(result.root);
-    },
-
-
-    // Gets all feeds stored in the database.
-    getStoredFeeds: function BookmarksSync_getStoredFeeds() {
-        var selectAll = createStatement('SELECT feedID, title, rowIndex, isFolder,    ' +
-                                        '       parent, bookmarkID, hidden FROM feeds ');
-
-        this.storedFeeds = [];
-        while (selectAll.step()) {
-            var feed = {};
-            feed.feedID = selectAll.row.feedID;
-            feed.title = selectAll.row.title;
-            feed.rowIndex = selectAll.row.rowIndex;
-            feed.isFolder = (selectAll.row.isFolder == 1);
-            feed.parent = selectAll.row.parent;
-            feed.bookmarkID = selectAll.row.bookmarkID;
-            feed.hidden = selectAll.row.hidden;
-            this.storedFeeds.push(feed);
-        }
-    },
-
-
-    insertFeed: function BookmarksSync_insertFeed(aBookmark) {
-        var insert = createStatement(
-            'INSERT OR IGNORE INTO feeds                                                   ' +
-            '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID)              ' +
-            'VALUES (:feedID, :feedURL, :title, :rowIndex, :isFolder, :parent, :bookmarkID)');
-
-        insert.params.feedID = aBookmark.feedID;
-        insert.params.feedURL = aBookmark.feedURL || null;
-        insert.params.title = aBookmark.title;
-        insert.params.rowIndex = aBookmark.rowIndex;
-        insert.params.isFolder = aBookmark.isFolder ? 1 : 0;
-        insert.params.parent = aBookmark.parent;
-        insert.params.bookmarkID = aBookmark.bookmarkID;
-        insert.execute();
-
-        this.feedListChanged = true;
-    },
-
-
-    updateFeedFromLivemark: function BookmarksSync_updateFeedFromLivemark(aItem, aFeed) {
-        if (aItem.rowIndex == aFeed.rowIndex && aItem.parent == aFeed.parent && aFeed.hidden == 0
-            && aItem.title == aFeed.title && aItem.bookmarkID == aFeed.bookmarkID) {
-            return;
-        }
-
-        var updateFeed = createStatement(
-            'UPDATE feeds SET title = :title, rowIndex = :rowIndex, parent = :parent, ' +
-            '                 bookmarkID = :bookmarkID, hidden = 0                    ' +
-            'WHERE feedID = :feedID                                                   ');
-        updateFeed.params.title = aItem.title;
-        updateFeed.params.rowIndex = aItem.rowIndex;
-        updateFeed.params.parent = aItem.parent;
-        updateFeed.params.bookmarkID = aItem.bookmarkID;
-        updateFeed.params.feedID = aItem.feedID;
-        updateFeed.execute();
-
-        if (aItem.rowIndex != aFeed.rowIndex || aItem.parent != aFeed.parent || aFeed.hidden > 0) {
-            this.feedListChanged = true;
-        }
-        else {
-            // Invalidate feeds cache.
-            gStorageService.feedsCache = gStorageService.feedsAndFoldersCache = null;
-            gObserverService.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
-        }
-    },
-
-
-    hideFeed: function BookmarksSync_hideFeed(aFeed) {
-        if (aFeed.isFolder) {
-            var removeFolder = createStatement('DELETE FROM feeds WHERE feedID = :feedID');
-            removeFolder.params.feedID = aFeed.feedID;
-            removeFolder.execute();
-        }
-        else {
-            var hideFeed = createStatement('UPDATE feeds SET hidden = :hidden WHERE feedID = :feedID');
-            hideFeed.params.hidden = Date.now();
-            hideFeed.params.feedID = aFeed.feedID;
-            hideFeed.execute();
-        }
-
-        this.feedListChanged = true;
-    },
-
-
-    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer) {
-        aContainer.containerOpen = true;
-
-        for (var i = 0; i < aContainer.childCount; i++) {
-            var node = aContainer.getChild(i);
-
-            if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
-                continue;
-
-            var item = {};
-            item.title = gBms.getItemTitle(node.itemId);
-            item.bookmarkID = node.itemId;
-            item.rowIndex = this.foundLivemarks.length;
-            item.parent = aContainer.itemId.toFixed().toString();
-
-            if (isLivemark(node.itemId)) {
-                var feedURL = gPlaces.livemarks.getFeedURI(node.itemId).spec;
-                item.feedURL = feedURL;
-                item.feedID = hashString(feedURL);
-                item.isFolder = false;
-
-                this.foundLivemarks.push(item);
-            }
-            else {
-                item.feedURL = '';
-                item.feedID = node.itemId.toFixed().toString();
-                item.isFolder = true;
-
-                this.foundLivemarks.push(item);
-
-                if (node instanceof Ci.nsINavHistoryContainerResultNode)
-                    this.traversePlacesQueryResults(node);
-            }
-        }
-
-        aContainer.containerOpen = false;
-    }
-
-}
-
-
 const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
 const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
-
 
 function BriefQuery() { }
 
@@ -1977,12 +943,12 @@ BriefQuery.prototype = {
     hasMatches: function BriefQuery_hasMatches() {
         try {
             var sql = 'SELECT EXISTS (SELECT entries.id ' + this.getQueryString(true) + ') AS found';
-            var select = createStatement(sql);
+            var select = CreateStatement(sql);
             select.step();
             var exists = select.row.found;
         }
         catch (ex) {
-            if (gConnection.lastError != 1) reportError(ex, true);
+            if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
             select.reset();
@@ -1995,13 +961,13 @@ BriefQuery.prototype = {
     getEntries: function BriefQuery_getEntries() {
         try {
             var sql = 'SELECT entries.id ' + this.getQueryString(true);
-            var select = createStatement(sql);
+            var select = CreateStatement(sql);
             var entries = [];
             while (select.step())
                 entries.push(select.row.id);
         }
         catch (ex) {
-            if (gConnection.lastError != 1) reportError(ex, true);
+            if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
             select.reset();
@@ -2018,7 +984,7 @@ BriefQuery.prototype = {
                   '       entries.bookmarkID, entries_text.title, entries_text.content, '+
                   '       entries_text.authors, entries_text.tags                       ';
         sql += this.getQueryString(true, true);
-        var select = createStatement(sql);
+        var select = CreateStatement(sql);
 
         var entries = [];
         try {
@@ -2045,7 +1011,7 @@ BriefQuery.prototype = {
         catch (ex) {
             // Ignore "SQL logic error or missing database" error which full-text search
             // throws when the query doesn't contain at least one non-excluded term.
-            if (gConnection.lastError != 1) reportError(ex, true);
+            if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
             select.reset();
@@ -2073,7 +1039,7 @@ BriefQuery.prototype = {
         }
 
         try {
-            var select = createStatement('SELECT entries.id, ' + table + aPropertyName +
+            var select = CreateStatement('SELECT entries.id, ' + table + aPropertyName +
                                          this.getQueryString(true, getEntriesText));
 
             while (select.step()) {
@@ -2090,7 +1056,7 @@ BriefQuery.prototype = {
             }
         }
         catch (ex) {
-            if (gConnection.lastError != 1) reportError(ex, true);
+            if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
             select.reset();
@@ -2105,7 +1071,7 @@ BriefQuery.prototype = {
         // Optimization: ignore sorting settings.
         var tempOrder = this.sortOrder;
         this.sortOrder = Ci.nsIBriefQuery.NO_SORT;
-        var select = createStatement('SELECT COUNT(1) AS count ' + this.getQueryString(true));
+        var select = CreateStatement('SELECT COUNT(1) AS count ' + this.getQueryString(true));
         this.sortOrder = tempOrder;
 
         try {
@@ -2113,7 +1079,7 @@ BriefQuery.prototype = {
             var count = select.row.count;
         }
         catch (ex) {
-            if (gConnection.lastError != 1) reportError(ex, true);
+            if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
             select.reset();
@@ -2137,7 +1103,7 @@ BriefQuery.prototype = {
             this.includeHiddenFeeds = false;
 
             var sql = 'SELECT entries.id, entries.feedID, entries_text.tags ';
-            var select = createStatement(sql + this.getQueryString(true, true));
+            var select = CreateStatement(sql + this.getQueryString(true, true));
             while (select.step()) {
                 entryIDs.push(select.row.id);
 
@@ -2156,7 +1122,7 @@ BriefQuery.prototype = {
             }
         }
         catch (ex) {
-            if (gConnection.lastError != 1) reportError(ex, true);
+            if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
             select.reset();
@@ -2185,27 +1151,27 @@ BriefQuery.prototype = {
             this.unread = aState;
         }
 
-        var update = createStatement('UPDATE entries SET read = :read, updated = 0 ' +
+        var update = CreateStatement('UPDATE entries SET read = :read, updated = 0 ' +
                                      this.getQueryString())
         update.params.read = aState ? 1 : 0;
 
-        gConnection.beginTransaction();
+        Connection.beginTransaction();
         try {
             var list = this.getEntryList();
             update.execute();
         }
         catch (ex) {
-            if (gConnection.lastError != 1) reportError(ex, true);
+            if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
             this.unread = tempUnread;
             this.read = tempRead;
 
-            gConnection.commitTransaction();
+            Connection.commitTransaction();
         }
 
         if (list.length) {
-            for each (observer in gStorageService.observers)
+            for each (let observer in StorageService.observers)
                 observer.onEntriesMarkedRead(list, aState);
         }
     },
@@ -2217,30 +1183,30 @@ BriefQuery.prototype = {
             case ENTRY_STATE_NORMAL:
             case ENTRY_STATE_TRASHED:
             case ENTRY_STATE_DELETED:
-                var statement = createStatement('UPDATE entries SET deleted = ' +aState+
+                var statement = CreateStatement('UPDATE entries SET deleted = ' +aState+
                                                  this.getQueryString());
                 break;
             case Ci.nsIBriefQuery.REMOVE_FROM_DATABASE:
-                var statement = createStatement('DELETE FROM entries ' + this.getQueryString());
+                var statement = CreateStatement('DELETE FROM entries ' + this.getQueryString());
                 break;
             default:
                 throw Components.results.NS_ERROR_INVALID_ARG;
         }
 
-        gConnection.beginTransaction();
+        Connection.beginTransaction();
         try {
             var list = this.getEntryList();
             statement.execute();
         }
         catch (ex) {
-            if (gConnection.lastError != 1) reportError(ex, true);
+            if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
-            gConnection.commitTransaction();
+            Connection.commitTransaction();
         }
 
         if (list.length) {
-            for each (observer in gStorageService.observers)
+            for each (let observer in StorageService.observers)
                 observer.onEntriesDeleted(list, aState);
         }
     },
@@ -2256,22 +1222,22 @@ BriefQuery.prototype = {
     starEntries: function BriefQuery_starEntries(aState) {
         var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1'].
                        getService(Ci.nsIPlacesTransactionsService);
-        var folder = gPlaces.unfiledBookmarksFolderId;
+        var folder = Places.unfiledBookmarksFolderId;
         var transactions = []
 
-        for each (entry in this.getFullEntries()) {
-            let uri = newURI(entry.entryURL);
+        for each (let entry in this.getFullEntries()) {
+            let uri = Utils.newURI(entry.entryURL);
             if (!uri)
                 continue;
 
             if (aState) {
-                let trans = transSrv.createItem(uri, folder, gBms.DEFAULT_INDEX,
+                let trans = transSrv.createItem(uri, folder, Bookmarks.DEFAULT_INDEX,
                                                 entry.title);
                 transactions.push(trans);
             }
             else {
-                let bookmarks = gBms.getBookmarkIdsForURI(uri, {}).
-                                     filter(isNormalBookmark);
+                let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
+                                          filter(Utils.isNormalBookmark);
                 if (bookmarks.length) {
                     for (let i = bookmarks.length - 1; i >= 0; i--) {
                         let trans = transSrv.removeItem(bookmarks[i]);
@@ -2283,8 +1249,8 @@ BriefQuery.prototype = {
                     // database, it means that the database is out of sync. We've
                     // got to update the database directly instead of relying on
                     // the bookmarks observer implemented by BriefStorageService.
-                    gStorageService.starEntry(false, entry.id);
-                    gStorageService.notifyOfEntriesStarred([entry.id], false);
+                    StorageService.starEntry(false, entry.id);
+                    StorageService.notifyOfEntriesStarred([entry.id], false);
                 }
             }
         }
@@ -2297,12 +1263,13 @@ BriefQuery.prototype = {
     verifyEntriesStarredStatus: function BriefQuery_verifyEntriesStarredStatus() {
         var statusOK = true;
 
-        for each (entry in this.getFullEntries()) {
-            let uri = newURI(entry.entryURL);
+        for each (let entry in this.getFullEntries()) {
+            let uri = Utils.newURI(entry.entryURL);
             if (!uri)
                 continue;
 
-            let bookmarks = gBms.getBookmarkIdsForURI(uri, {}).filter(isNormalBookmark)
+            let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
+                                      filter(Utils.isNormalBookmark)
 
             if (entry.starred != !!bookmarks.length) {
                 let query = new BriefQuery();
@@ -2312,12 +1279,12 @@ BriefQuery.prototype = {
             }
 
             let addedTags, removedTags;
-            [addedTags, removedTags] = gStorageService.refreshTagsForEntry(entry.id, bookmarks);
+            [addedTags, removedTags] = StorageService.refreshTagsForEntry(entry.id, bookmarks);
 
-            for each (tag in addedTags)
-                gStorageService.notifyOfEntriesTagged([entry.id], true, tag);
-            for each (tag in removedTags)
-                gStorageService.notifyOfEntriesTagged([entry.id], false, tag);
+            for each (let tag in addedTags)
+                StorageService.notifyOfEntriesTagged([entry.id], true, tag);
+            for each (let tag in removedTags)
+                StorageService.notifyOfEntriesTagged([entry.id], false, tag);
 
             statusOK = !addedTags.length && !removedTags.length;
         }
@@ -2356,7 +1323,7 @@ BriefQuery.prototype = {
 
             // Fill the list of effective folders.
             this.effectiveFolders = this.folders;
-            this.traverseFolderChildren(gStorageService.homeFolderID);
+            this.traverseFolderChildren(StorageService.homeFolderID);
 
             let con = '(feeds.parent = "';
             con += this.effectiveFolders.join('" OR feeds.parent = "');
@@ -2459,7 +1426,7 @@ BriefQuery.prototype = {
 
     traverseFolderChildren: function BriefQuery_traverseFolderChildren(aFolder) {
         var isEffectiveFolder = (this.effectiveFolders.indexOf(aFolder) != -1);
-        var items = gStorageService.getAllFeeds(true);
+        var items = StorageService.getAllFeeds(true);
 
         for (var i = 0; i < items.length; i++) {
             if (items[i].parent == aFolder && items[i].isFolder) {
@@ -2470,7 +1437,6 @@ BriefQuery.prototype = {
         }
     },
 
-
     classDescription: 'Query to database of the Brief extension',
     classID: Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}'),
     contractID: '@ancestor/brief/query;1',
@@ -2478,92 +1444,1164 @@ BriefQuery.prototype = {
 }
 
 
+var Migration = {
 
-// ---------------- Utility functions -----------------
+    upgradeDatabase: function Migration_upgradeDatabase() {
+        switch (Connection.schemaVersion) {
 
-function newURI(aSpec) {
-    try {
-        var uri = gIOService.newURI(aSpec, null, null);
-    }
-    catch (ex) {
-        uri = null;
-    }
-    return uri;
-}
+        // Schema version checking has only been introduced in 0.8 beta 1. When migrating
+        // from earlier releases we don't know the exact previous version, so we attempt
+        // to apply all the changes since the beginning of time.
+        case 0:
+            try {
+                // Columns added in 0.6.
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
+                ExecuteSQL('ALTER TABLE entries ADD COLUMN providedID TEXT');
+            }
+            catch (ex) { }
 
-function isBookmark(aItemID) {
-    return (gBms.getItemType(aItemID) === gBms.TYPE_BOOKMARK);
-}
+            try {
+                // Columns and indices added in 0.7.
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
+                ExecuteSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
+            }
+            catch (ex) { }
+            // Fall through...
 
-function isNormalBookmark(aItemID) {
-    let parent = gBms.getFolderIdForItem(aItemID);
-    return !isLivemark(parent) && !isTagFolder(parent);
-}
+        // To 0.8.
+        case 1:
+            ExecuteSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
+            ExecuteSQL('UPDATE entries SET content = summary, summary = "" WHERE content = ""');
+            // Fall through...
 
-function isLivemark(aItemID) {
-    return gPlaces.livemarks.isLivemark(aItemID);
-}
+        // To 1.0 beta 1
+        case 2:
+            try {
+                ExecuteSQL('ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
+            }
+            catch (ex) { }
+            // Fall through...
 
-function isFolder(aItemID) {
-    return (gBms.getItemType(aItemID) === gBms.TYPE_FOLDER);
-}
+        // To 1.0
+        case 3:
+            ExecuteSQL('DROP INDEX IF EXISTS entries_id_index');
+            ExecuteSQL('DROP INDEX IF EXISTS feeds_feedID_index');
+            // Fall through...
 
-function isTagFolder(aItemID) {
-    return (gBms.getFolderIdForItem(aItemID) === gPlaces.tagsFolderId);
-}
+        // To 1.2a1
+        case 4:
+            this.recomputeIDs();
+            this.recreateFeedsTable();
+            ExecuteSQL('ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
+            // Fall through...
 
-// Returns TRUE if an item is a subfolder of Brief's home folder.
-function isInHomeFolder(aItemID) {
-    var homeID = gStorageService.homeFolderID;
-    if (homeID === -1)
-        return false;
+        // To 1.2b2
+        case 5:
+        case 6:
+            if (Connection.schemaVersion > 4)
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN markModifiedEntriesUnread INTEGER DEFAULT 1');
+            // Fall through...
 
-    if (homeID === aItemID)
-        return true;
+        // To 1.2b3
+        case 7:
+            this.migrateEntries();
+            this.bookmarkStarredEntries();
+            // Fall through...
 
-    var inHome = false;
-    var parent = aItemID;
-    while (parent !== gPlaces.placesRootId) {
-        parent = gBms.getFolderIdForItem(parent);
-        if (parent === homeID) {
-            inHome = true;
-            break;
+        // To 1.2
+        case 8:
+            ExecuteSQL('DROP INDEX IF EXISTS entries_feedID_index');
+            ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
+            // Fall through...
+
+        // To 1.5
+        case 9:
+            // Remove dead rows from entries_text.
+            ExecuteSQL('DELETE FROM entries_text                       '+
+                       'WHERE rowid IN (                               '+
+                       '     SELECT entries_text.rowid                 '+
+                       '     FROM entries_text LEFT JOIN entries       '+
+                       '          ON entries_text.rowid = entries.id   '+
+                       '     WHERE NOT EXISTS (                        '+
+                       '         SELECT id                             '+
+                       '         FROM entries                          '+
+                       '         WHERE entries_text.rowid = entries.id '+
+                       '     )                                         '+
+                       ')                                              ');
+        }
+
+        Connection.schemaVersion = DATABASE_VERSION;
+    },
+
+
+    recreateFeedsTable: function Migration_recreateFeedsTable() {
+        // Columns in this list must be in the same order as the respective columns
+        // in the new schema.
+        const OLD_COLS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,    '+
+                         'imageLink, imageTitle, favicon, RDF_URI, rowIndex, parent, '+
+                         'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   '+
+                         'entryAgeLimit, maxEntries, updateInterval                  ';
+        const NEW_COLS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,       '+
+                         'imageLink, imageTitle, favicon, bookmarkID, rowIndex, parent, '+
+                         'isFolder, hidden, lastUpdated, oldestEntryDate,               '+
+                         'entryAgeLimit, maxEntries, updateInterval                     ';
+
+        Connection.beginTransaction();
+        try {
+            ExecuteSQL('CREATE TABLE feeds_copy ('+OLD_COLS+')                               ');
+            ExecuteSQL('INSERT INTO feeds_copy SELECT '+OLD_COLS+' FROM feeds                ');
+            ExecuteSQL('DROP TABLE feeds                                                     ');
+            ExecuteSQL('CREATE TABLE feeds ('+FEEDS_TABLE_SCHEMA+')                          ');
+            ExecuteSQL('INSERT INTO feeds ('+NEW_COLS+') SELECT '+OLD_COLS+' FROM feeds_copy ');
+            ExecuteSQL('DROP TABLE feeds_copy                                                ');
+        }
+        catch (ex) {
+            ReportError(ex, true);
+        }
+        finally {
+            Connection.commitTransaction();
+        }
+    },
+
+
+    migrateEntries: function Migration_migrateEntries() {
+        Connection.beginTransaction();
+        try {
+            let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
+                       'read, updated, starred, deleted, bookmarkID, title, content   ';
+
+            ExecuteSQL('CREATE TABLE entries_copy ('+cols+')                  ');
+            ExecuteSQL('INSERT INTO entries_copy SELECT '+cols+' FROM entries ');
+            ExecuteSQL('DROP TABLE entries                                    ');
+
+            StorageService.setupDatabase();
+
+            let fromCols = 'feedID, providedID, entryURL, date, read, updated,       '+
+                           'starred, deleted, bookmarkID, id, secondaryID            ';
+            let toCols =   'feedID, providedID, entryURL, date, read, updated,       '+
+                           'starred, deleted, bookmarkID, primaryHash, secondaryHash ';
+
+            ExecuteSQL('INSERT INTO entries ('+toCols+')                                '+
+                       'SELECT '+fromCols+' FROM entries_copy ORDER BY rowid            ');
+            ExecuteSQL('INSERT INTO entries_text (title, content, authors)              '+
+                       'SELECT title, content, authors FROM entries_copy ORDER BY rowid ');
+            ExecuteSQL('DROP TABLE entries_copy                                         ');
+        }
+        catch (ex) {
+            ReportError(ex, true);
+        }
+        finally {
+            Connection.commitTransaction();
+        }
+
+        ExecuteSQL('VACUUM');
+    },
+
+    bookmarkStarredEntries: function Migration_bookmarkStarredEntries() {
+        var folder = Bookmarks.unfiledBookmarksFolder;
+
+        var sql = 'SELECT entries.entryURL, entries.id, entries_text.title                 '+
+                  'FROM entries INNER JOIN entries_text ON entries.id = entries_text.rowid '+
+                  'WHERE starred = 1                                                       ';
+        var select = CreateStatement(sql);
+
+        sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
+        var update = CreateStatement(sql);
+
+        Connection.beginTransaction();
+        try {
+            while (select.step()) {
+                let uri = Utils.newURI(select.row.entryURL);
+                if (!uri)
+                    continue;
+
+                let title = select.row.title;
+                let alreadyBookmarked = false;
+
+                // Look for existing bookmarks for entry's URI.
+                if (Bookmarks.isBookmarked(uri)) {
+                    let bookmarkIDs = Bookmarks.getBookmarkIdsForURI(uri, {});
+                    for each (let bookmarkID in bookmarkIDs) {
+                        let parent = Bookmarks.getFolderIdForItem(bookmarkID);
+                        if (!Utils.isLivemark(parent)) {
+                            alreadyBookmarked = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (alreadyBookmarked) {
+                    StorageService.starEntry(true, select.row.id, bookmarkID);
+                }
+                else {
+                    let bookmarkID = Bookmarks.insertBookmark(folder, uri, Bookmarks.DEFAULT_INDEX,
+                                                              title);
+                    update.params.entryID = select.row.id;
+                    update.params.bookmarkID = bookmarkID;
+                    update.execute();
+                }
+            }
+        }
+        catch (ex) {
+            ReportError(ex);
+        }
+        finally {
+            select.reset();
+            Connection.commitTransaction();
+        }
+    },
+
+
+    recomputeIDs: function Migration_recomputeIDs() {
+        var hashStringFunc = {
+            QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
+            onFunctionCall: function(aArgs) Utils.hashString(aArgs.getUTF8String(0))
+        }
+        var generateEntryHashFunc = {
+            QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
+            onFunctionCall: function(aArgs) Utils.hashString(aArgs.getUTF8String(0) +
+                                                             aArgs.getUTF8String(1))
+        }
+
+        Connection.createFunction('hashString', 1, hashStringFunc);
+        Connection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
+
+        Connection.beginTransaction();
+        try {
+            ExecuteSQL('UPDATE OR IGNORE entries                                          ' +
+                       'SET id = generateEntryHash(feedID, providedID)                    ' +
+                       'WHERE rowid IN (                                                  ' +
+                       '   SELECT entries.rowid                                           ' +
+                       '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                       '   WHERE entries.date >= feeds.oldestAvailableEntryDate AND       ' +
+                       '         entries.providedID != ""                                 ' +
+                       ')                                                                 ');
+            ExecuteSQL('UPDATE OR IGNORE feeds SET feedID = hashString(feedURL) WHERE isFolder = 0');
+        }
+        catch (ex) {
+            ReportError(ex, true);
+        }
+        finally {
+            Connection.commitTransaction();
         }
     }
 
-    return inHome;
 }
 
 
-function hashString(aString) {
-    // nsICryptoHash can read the data either from an array or a stream.
-    // Creating a stream ought to be faster than converting a long string
-    // into an array using JS.
-    var unicodeConverter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].
-                           createInstance(Ci.nsIScriptableUnicodeConverter);
-    unicodeConverter.charset = 'UTF-8';
-    var stream = unicodeConverter.convertToInputStream(aString);
+var BookmarkObserver = {
 
-    var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
-    hasher.init(Ci.nsICryptoHash.MD5);
-    hasher.updateFromStream(stream, stream.available());
-    var hash = hasher.finish(false);
+    livemarksSyncPending: false,
+    batching: false,
+    homeFolderContentModified: false,
 
-    // Convert the hash to a hex-encoded string.
-    var hexchars = '0123456789ABCDEF';
-    var hexrep = new Array(hash.length * 2);
-    for (var i = 0; i < hash.length; ++i) {
-        hexrep[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 15);
-        hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
+    get syncDelayTimer BookmarkObserver_syncDelayTimer() {
+        if (!this.__syncDelayTimer)
+            this.__syncDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+        return this.__syncDelayTimer;
+    },
+
+    // nsINavBookmarkObserver
+    onEndUpdateBatch: function BookmarkObserver_onEndUpdateBatch() {
+        this.batching = false;
+        if (this.homeFolderContentModified)
+            this.delayedLivemarksSync();
+        this.homeFolderContentModified = false;
+    },
+
+    // nsINavBookmarkObserver
+    onBeginUpdateBatch: function BookmarkObserver_onBeginUpdateBatch() {
+        this.batching = true;
+    },
+
+    // nsINavBookmarkObserver
+    onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aFolder, aIndex) {
+        if (Utils.isFolder(aItemID) && Utils.isInHomeFolder(aFolder)) {
+            this.delayedLivemarksSync();
+            return;
+        }
+
+        // We only care about plain bookmarks and tags.
+        if (Utils.isLivemark(aFolder) || !Utils.isBookmark(aItemID))
+            return;
+
+        // Find entries with the same URI as the added item and tag or star them.
+        Connection.beginTransaction();
+        try {
+            var url = Bookmarks.getBookmarkURI(aItemID).spec;
+            var isTag = Utils.isTagFolder(aFolder);
+            var changedEntries = [];
+
+            for each (let entry in Utils.getEntriesByURL(url)) {
+                if (isTag) {
+                    let tagName = Bookmarks.getItemTitle(aFolder);
+                    StorageService.tagEntry(true, entry.id, tagName, aItemID);
+                }
+                else {
+                    StorageService.starEntry(true, entry.id, aItemID);
+                }
+
+                changedEntries.push(entry);
+            }
+        }
+        catch (ex) {
+            ReportError(ex, true);
+        }
+        finally {
+            Connection.commitTransaction();
+        }
+
+        if (changedEntries.length) {
+            let entryIDs = changedEntries.map(function(e) e.id);
+
+            if (isTag)
+                StorageService.notifyOfEntriesTagged(entryIDs, true, tagName);
+            else
+                StorageService.notifyOfEntriesStarred(entryIDs, true);
+        }
+    },
+
+
+    // nsINavBookmarkObserver
+    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved() { },
+
+
+    // nsINavBookmarkObserver
+    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex) {
+        if (Utils.isLivemarkStored(aItemID) || aItemID == StorageService.homeFolderID) {
+            this.delayedLivemarksSync();
+            return;
+        }
+
+        // We only care about plain bookmarks and tags, but we can't check the type
+        // of the removed item, except for if it was a part of a Live Bookmark.
+        if (Utils.isLivemark(aFolder))
+            return;
+
+        // Find entries with bookmarkID of the removed item and untag/unstar them.
+        Connection.beginTransaction();
+        try {
+            var changedEntries = [];
+            var isTag = Utils.isTagFolder(aFolder);
+
+            if (isTag) {
+                for each (let entry in Utils.getEntriesByTagID(aItemID)) {
+                    var tagName = Bookmarks.getItemTitle(aFolder);
+                    StorageService.tagEntry(false, entry.id, tagName);
+                    changedEntries.push(entry)
+                }
+            }
+            else {
+                let entries = Utils.getEntriesByBookmarkID(aItemID);
+
+                // Look for other bookmarks for this URI.
+                if (entries.length) {
+                    let uri = Utils.newURI(entries[0].url);
+                    var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
+                                              filter(Utils.isNormalBookmark);
+                }
+
+                for each (let entry in entries) {
+                    if (bookmarks.length) {
+                        // If there is another bookmark for this URI, don't unstar the
+                        // entry, but update its bookmarkID to point to that bookmark.
+                        StorageService.starEntry(true, entry.id, bookmarks[0]);
+                    }
+                    else {
+                        StorageService.starEntry(false, entry.id);
+                        changedEntries.push(entry);
+                    }
+                }
+            }
+        }
+        catch (ex) {
+            ReportError(ex, true);
+        }
+        finally {
+            Connection.commitTransaction();
+        }
+
+        if (changedEntries.length) {
+            let entryIDs = changedEntries.map(function(e) e.id);
+            if (isTag)
+                StorageService.notifyOfEntriesTagged(entryIDs, false, tagName);
+            else
+                StorageService.notifyOfEntriesStarred(entryIDs, false);
+        }
+    },
+
+    // nsINavBookmarkObserver
+    onItemMoved: function BookmarkObserver_onItemMoved(aItemID, aOldParent, aOldIndex,
+                                                   aNewParent, aNewIndex) {
+        var wasInHome = Utils.isLivemarkStored(aItemID);
+        var isInHome = Utils.isFolder(aItemID) && Utils.isInHomeFolder(aNewParent);
+        if (wasInHome || isInHome)
+            this.delayedLivemarksSync();
+    },
+
+    // nsINavBookmarkObserver
+    onItemChanged: function BookmarkObserver_onItemChanged(aItemID, aProperty,
+                                                       aIsAnnotationProperty, aValue) {
+        switch (aProperty) {
+        case 'title':
+            let feed = Utils.getFeedByBookmarkID(aItemID);
+            if (feed) {
+                Stm.setFeedTitle.execute({ 'title': aValue, 'feedID': feed.feedID });
+                feed.title = aValue; // Update the cache.
+
+                ObserverService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
+            }
+            else if (Utils.isTagFolder(aItemID)) {
+                this.renameTag(aItemID, aValue);
+            }
+            break;
+
+        case 'livemark/feedURI':
+            if (Utils.isLivemarkStored(aItemID))
+                this.delayedLivemarksSync();
+            break;
+
+        case 'uri':
+            // Unstar any entries with the old URI.
+            let entries = Utils.getEntriesByBookmarkID(aItemID);
+            for each (let entry in entries)
+                StorageService.starEntry(false, entry.id);
+
+            if (entries.length)
+                StorageService.notifyOfEntriesStarred(entries.map(function(e) e.id), false);
+
+            // Star any entries with the new URI.
+            entries = Utils.getEntriesByURL(aValue);
+            for each (let entry in entries)
+                StorageService.starEntry(true, entry.id, aItemID);
+
+            if (entries.length)
+                StorageService.notifyOfEntriesStarred(entries.map(function(e) e.id), true);
+
+            break;
+        }
+    },
+
+    // nsINavBookmarkObserver
+    onItemVisited: function BookmarkObserver_aOnItemVisited(aItemID, aVisitID, aTime) { },
+
+    delayedLivemarksSync: function BookmarkObserver_delayedLivemarksSync() {
+        if (this.batching) {
+            this.homeFolderContentModified = true;
+        }
+        else {
+            if (this.livemarksSyncPending)
+                this.syncDelayTimer.cancel();
+
+            this.syncDelayTimer.init(this, LIVEMARKS_SYNC_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
+            this.livemarksSyncPending = true;
+        }
+    },
+
+    /**
+     * Syncs tags when a tag folder is renamed by removing tags with the old name
+     * and re-tagging the entries using the new one.
+     *
+     * @param aTagFolderID itemId of the tag folder that was renamed.
+     * @param aNewName     New name of the tag folder, i.e. new name of the tag.
+     */
+    renameTag: function BookmarkObserver_renameTag(aTagFolderID, aNewName) {
+        try {
+            // Get bookmarks in the renamed tag folder.
+            var options = Places.history.getNewQueryOptions();
+            var query = Places.history.getNewQuery();
+            query.setFolders([aTagFolderID], 1);
+            var result = Places.history.executeQuery(query, options);
+            result.root.containerOpen = true;
+
+            var oldTagName = '';
+
+            for (let i = 0; i < result.root.childCount; i++) {
+                let tagID = result.root.getChild(i).itemId;
+                let entries = Utils.getEntriesByTagID(tagID).
+                                    map(function(e) e.id);
+
+                for each (let entry in entries) {
+                    if (!oldTagName) {
+                        // The bookmark observer doesn't provide the old name,
+                        // so we have to look it up in our database.
+                        let row = Stm.getNameForTagID.getSingleResult({ 'tagID': tagID });
+                        oldTagName = row.tagName;
+                    }
+
+                    StorageService.tagEntry(false, entry, oldTagName);
+                    StorageService.tagEntry(true, entry, aNewName, tagID);
+                }
+
+                if (entries.length) {
+                    StorageService.notifyOfEntriesTagged(entries, false, oldTagName);
+                    StorageService.notifyOfEntriesTagged(entries, true, aNewName);
+                }
+            }
+
+            result.root.containerOpen = false;
+        }
+        finally {
+            Stm.getNameForTagID.reset();
+        }
+    },
+
+    observe: function BookmarkObserver_observe(aSubject, aTopic, aData) {
+        if (aTopic == 'timer-callback') {
+            this.livemarksSyncPending = false;
+            StorageService.syncWithLivemarks();
+        }
+    },
+
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsINavBookmarkObserver, Ci.nsIObserver])
+
+}
+
+
+/**
+ * Synchronizes the list of feeds stored in the database with
+ * the livemarks available in the Brief's home folder.
+ */
+function LivemarksSync() {
+    if (!this.checkHomeFolder())
+        return;
+
+    this.newLivemarks = [];
+
+    Connection.beginTransaction();
+    try {
+        // Get the list of livemarks and folders in the home folder.
+        this.getLivemarks();
+
+        // Get the list of feeds stored in the database.
+        this.getStoredFeeds();
+
+        for each (let livemark in this.foundLivemarks) {
+            let feed = null;
+            for (let i = 0; i < this.storedFeeds.length; i++) {
+                if (this.storedFeeds[i].feedID == livemark.feedID) {
+                    feed = this.storedFeeds[i];
+                    break;
+                }
+            }
+
+            if (feed) {
+                feed.bookmarked = true;
+                this.updateFeedFromLivemark(livemark, feed);
+            }
+            else {
+                this.insertFeed(livemark);
+                if (!livemark.isFolder)
+                    this.newLivemarks.push(livemark);
+            }
+        }
+
+        for each (let feed in this.storedFeeds) {
+            if (!feed.bookmarked && feed.hidden == 0)
+                this.hideFeed(feed);
+        }
     }
-    return hexrep.join('');
+    finally {
+        Connection.commitTransaction();
+    }
+
+    if (this.feedListChanged) {
+        StorageService.feedsCache = StorageService.feedsAndFoldersCache = null;
+        ObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+    }
+
+    // Update the newly added feeds.
+    if (this.newLivemarks.length) {
+        var feeds = [];
+        for each (let livemark in this.newLivemarks)
+            feeds.push(StorageService.getFeed(livemark.feedID));
+
+        var updateService = Cc['@ancestor/brief/updateservice;1'].
+                            getService(Ci.nsIBriefUpdateService);
+        updateService.updateFeeds(feeds);
+    }
+}
+
+LivemarksSync.prototype = {
+
+    storedFeeds: null,
+    newLivemarks: null,
+    foundLivemarks: null,
+    feedListChanged: false,
+
+    checkHomeFolder: function BookmarksSync_checkHomeFolder() {
+        var folderValid = true;
+        var homeFolder = Prefs.getIntPref('homeFolder');
+
+        if (homeFolder == -1) {
+            let hideAllFeeds = new Statement('UPDATE feeds SET hidden = :hidden');
+            hideAllFeeds.execute({ 'hidden': Date.now() });
+
+            StorageService.feedsCache = StorageService.feedsAndFoldersCache = null;
+            ObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
+            folderValid = false;
+        }
+        else {
+            try {
+                // This will throw if the home folder was deleted.
+                Bookmarks.getItemTitle(homeFolder);
+            }
+            catch (e) {
+                Prefs.clearUserPref('homeFolder');
+                folderValid = false;
+            }
+        }
+
+        return folderValid;
+    },
+
+
+    // Get the list of Live Bookmarks in the user's home folder.
+    getLivemarks: function BookmarksSync_getLivemarks() {
+        var homeFolder = Prefs.getIntPref('homeFolder');
+        this.foundLivemarks = [];
+
+        var options = Places.history.getNewQueryOptions();
+        var query = Places.history.getNewQuery();
+        query.setFolders([homeFolder], 1);
+        options.excludeItems = true;
+
+        var result = Places.history.executeQuery(query, options);
+        this.traversePlacesQueryResults(result.root);
+    },
+
+
+    // Gets all feeds stored in the database.
+    getStoredFeeds: function BookmarksSync_getStoredFeeds() {
+        var sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
+
+        this.storedFeeds = [];
+        var results = new Statement(sql).getResults();
+        for (let row = results.next(); row; row = results.next())
+            this.storedFeeds.push(row);
+        results.close();
+    },
+
+
+    insertFeed: function BookmarksSync_insertFeed(aBookmark) {
+        var sql = 'INSERT OR IGNORE INTO feeds                                                   ' +
+                  '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID)              ' +
+                  'VALUES (:feedID, :feedURL, :title, :rowIndex, :isFolder, :parent, :bookmarkID)';
+
+        new Statement(sql).execute({
+            'feedID': aBookmark.feedID,
+            'feedURL': aBookmark.feedURL || null,
+            'title': aBookmark.title,
+            'rowIndex': aBookmark.rowIndex,
+            'isFolder': aBookmark.isFolder ? 1 : 0,
+            'parent': aBookmark.parent,
+            'bookmarkID': aBookmark.bookmarkID
+        });
+
+        this.feedListChanged = true;
+    },
+
+
+    updateFeedFromLivemark: function BookmarksSync_updateFeedFromLivemark(aItem, aFeed) {
+        var properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
+        if (!aFeed.hidden && properties.every(function(p) aFeed[p] == aItem[p]))
+            return;
+
+        var sql = 'UPDATE feeds SET title = :title, rowIndex = :rowIndex, parent = :parent, ' +
+                  '                 bookmarkID = :bookmarkID, hidden = 0                    ' +
+                  'WHERE feedID = :feedID                                                   ';
+
+        new Statement(sql).execute({
+            'title': aItem.title,
+            'rowIndex': aItem.rowIndex,
+            'parent': aItem.parent,
+            'bookmarkID': aItem.bookmarkID,
+            'feedID': aItem.feedID
+        });
+
+        if (aItem.rowIndex != aFeed.rowIndex || aItem.parent != aFeed.parent || aFeed.hidden > 0) {
+            this.feedListChanged = true;
+        }
+        else {
+            // Invalidate feeds cache.
+            StorageService.feedsCache = StorageService.feedsAndFoldersCache = null;
+            ObserverService.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
+        }
+    },
+
+
+    hideFeed: function BookmarksSync_hideFeed(aFeed) {
+        if (aFeed.isFolder) {
+            let hideFolder = new Statement('DELETE FROM feeds WHERE feedID = :feedID');
+            hideFolder.execute({ 'feedID': aFeed.feedID });
+        }
+        else {
+            let hideFeed = new Statement('UPDATE feeds SET hidden = :hidden WHERE feedID = :feedID');
+            hideFeed.execute({ 'hidden': Date.now(), 'feedID': aFeed.feedID });
+        }
+
+        this.feedListChanged = true;
+    },
+
+
+    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer) {
+        aContainer.containerOpen = true;
+
+        for (var i = 0; i < aContainer.childCount; i++) {
+            var node = aContainer.getChild(i);
+
+            if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
+                continue;
+
+            var item = {};
+            item.title = Bookmarks.getItemTitle(node.itemId);
+            item.bookmarkID = node.itemId;
+            item.rowIndex = this.foundLivemarks.length;
+            item.parent = aContainer.itemId.toFixed().toString();
+
+            if (Utils.isLivemark(node.itemId)) {
+                var feedURL = Places.livemarks.getFeedURI(node.itemId).spec;
+                item.feedURL = feedURL;
+                item.feedID = Utils.hashString(feedURL);
+                item.isFolder = false;
+
+                this.foundLivemarks.push(item);
+            }
+            else {
+                item.feedURL = '';
+                item.feedID = node.itemId.toFixed().toString();
+                item.isFolder = true;
+
+                this.foundLivemarks.push(item);
+
+                if (node instanceof Ci.nsINavHistoryContainerResultNode)
+                    this.traversePlacesQueryResults(node);
+            }
+        }
+
+        aContainer.containerOpen = false;
+    }
+
 }
 
 
-function reportError(aException, aRethrow) {
+// Cached statements.
+var Stm = {
+
+    get getAllFeeds() {
+        var sql = 'SELECT feedID, feedURL, websiteURL, title, subtitle, dateModified, ' +
+                  '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,    ' +
+                  '       isFolder, bookmarkID, entryAgeLimit, maxEntries,            ' +
+                  '       updateInterval, markModifiedEntriesUnread                   ' +
+                  'FROM feeds                                                         ' +
+                  'WHERE hidden = 0                                                   ' +
+                  'ORDER BY rowIndex ASC                                              ';
+        delete this.getAllFeeds;
+        return this.getAllFeeds = new Statement(sql);
+    },
+
+    get getAllTags() {
+        var sql = 'SELECT DISTINCT entry_tags.tagName                                    '+
+                  'FROM entry_tags INNER JOIN entries ON entry_tags.entryID = entries.id '+
+                  'WHERE entries.deleted = :deletedState                                 '+
+                  'ORDER BY entry_tags.tagName                                           ';
+        delete this.getAllTags;
+        return this.getAllTags = new Statement(sql, { 'deletedState': ENTRY_STATE_NORMAL });
+    },
+
+    get updateFeed() {
+        var sql = 'UPDATE feeds                                                  ' +
+                  'SET websiteURL = :websiteURL, subtitle = :subtitle,           ' +
+                  '    imageURL = :imageURL, imageLink = :imageLink,             ' +
+                  '    imageTitle = :imageTitle, favicon = :favicon,             ' +
+                  '    lastUpdated = :lastUpdated, dateModified = :dateModified, ' +
+                  '    oldestEntryDate = :oldestEntryDate                        ' +
+                  'WHERE feedID = :feedID                                        ';
+        delete this.updateFeed;
+        return this.updateFeed = new Statement(sql);
+    },
+
+    get setFeedTitle() {
+        var sql = 'UPDATE feeds SET title = :title WHERE feedID = :feedID';
+        delete this.setFeedTitle;
+        return this.setFeedTitle = new Statement(sql);
+    },
+
+    get setFeedOptions() {
+        var sql = 'UPDATE feeds                                ' +
+                  'SET entryAgeLimit  = :entryAgeLimit,        ' +
+                  '    maxEntries     = :maxEntries,           ' +
+                  '    updateInterval = :updateInterval,       ' +
+                  '    markModifiedEntriesUnread = :markUnread ' +
+                  'WHERE feedID = :feedID                      ';
+        delete this.setFeedOptions;
+        return this.setFeedOptions = new Statement(sql);
+    },
+
+    get insertEntry() {
+        var sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
+                  'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date)        ';
+        delete this.insertEntry;
+        return this.insertEntry = new Statement(sql);
+    },
+
+    get insertEntryText() {
+        var sql = 'INSERT INTO entries_text (title, content, authors) ' +
+                  'VALUES(:title, :content, :authors)   ';
+        delete this.insertEntryText;
+        return this.insertEntryText = new Statement(sql);
+    },
+
+    get updateEntry() {
+        var sql = 'UPDATE entries SET date = :date, read = :read, updated = 1 '+
+                  'WHERE id = :id                                             ';
+        delete this.updateEntry;
+        return this.updateEntry = new Statement(sql);
+    },
+
+    get updateEntryText() {
+        var sql = 'UPDATE entries_text SET title = :title, content = :content, '+
+                  'authors = :authors WHERE rowid = :id                        ';
+        delete this.updateEntryText;
+        return this.updateEntryText = new Statement(sql);
+    },
+
+    get getLastRowids() {
+        var sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT :count';
+        delete this.getLastRowids;
+        return this.getLastRowids = new Statement(sql);
+    },
+
+    get purgeDeletedEntriesText() {
+        var sql = 'DELETE FROM entries_text                                                 '+
+                  'WHERE rowid IN (                                                         '+
+                  '   SELECT entries.id                                                     '+
+                  '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
+                  '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
+                  '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
+                  ')                                                                                   ';
+        delete this.purgeDeletedEntriesText;
+        return this.purgeDeletedEntriesText = new Statement(sql);
+    },
+
+    get purgeDeletedEntries() {
+        var sql = 'DELETE FROM entries                                                      '+
+                  'WHERE id IN (                                                            '+
+                  '   SELECT entries.id                                                     '+
+                  '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
+                  '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
+                  '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
+                  ')                                                                                   ';
+        delete this.purgeDeletedEntries;
+        return this.purgeDeletedEntries = new Statement(sql);
+    },
+
+    get purgeDeletedFeeds() {
+        var sql = 'DELETE FROM feeds                                      '+
+                  'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
+                  '      feeds.hidden != 0                                ';
+        delete this.purgeDeletedFeeds;
+        return this.purgeDeletedFeeds = new Statement(sql);
+    },
+
+    get expireEntriesByAgeGlobal() {
+        var sql = 'UPDATE entries SET deleted = :newState                            ' +
+                  'WHERE id IN (                                                     ' +
+                  '   SELECT entries.id                                              ' +
+                  '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
+                  '   WHERE entries.deleted = :oldState AND                          ' +
+                  '         feeds.entryAgeLimit = 0 AND                              ' +
+                  '         entries.starred = 0 AND                                  ' +
+                  '         entries.date < :edgeDate                                 ' +
+                  ')                                                                 ';
+        delete expireEntriesByAgeGlobal;
+        return expireEntriesByAgeGlobal = new Statement(sql);
+    },
+
+    get expireEntriesByAgePerFeed() {
+        var sql = 'UPDATE entries SET deleted = :newState  ' +
+                  'WHERE entries.deleted = :oldState AND   ' +
+                  '      starred = 0 AND                   ' +
+                  '      entries.date < :edgeDate AND      ' +
+                  '      feedID = :feedID                  ';
+        delete expireEntriesByAgePerFeed;
+        return expireEntriesByAgePerFeed = new Statement(sql);
+    },
+
+    get expireEntriesByNumber() {
+        var sql = 'UPDATE entries                    ' +
+                  'SET deleted = :newState           ' +
+                  'WHERE rowid IN (                  ' +
+                  '    SELECT rowid                  ' +
+                  '    FROM entries                  ' +
+                  '    WHERE deleted = :oldState AND ' +
+                  '          starred = 0 AND         ' +
+                  '          feedID = :feedID        ' +
+                  '    ORDER BY date ASC             ' +
+                  '    LIMIT :limit                  ' +
+                  ')                                 ';
+        delete this.expireEntriesByNumber;
+        return this.expireEntriesByNumber = new Statement(sql);
+    },
+
+    get getDeletedEntriesCount() {
+        var sql = 'SELECT COUNT(1) AS entryCount FROM entries  ' +
+                  'WHERE feedID = :feedID AND                  ' +
+                  '      starred = 0 AND                       ' +
+                  '      deleted = :deletedState               ';
+        delete this.getDeletedEntriesCount;
+        return this.getDeletedEntriesCount = new Statement(sql);
+    },
+
+    get getEntryByPrimaryHash() {
+        var sql = 'SELECT id, date, read FROM entries WHERE primaryHash = :primaryHash';
+        delete this.getEntryByPrimaryHash;
+        return this.getEntryByPrimaryHash = new Statement(sql);
+    },
+
+    get getEntryBySecondaryHash() {
+        var sql = 'SELECT id, date, read FROM entries WHERE secondaryHash = :secondaryHash';
+        delete this.getEntryBySecondaryHash;
+        return this.getEntryBySecondaryHash = new Statement(sql);
+    },
+
+    get selectEntriesByURL() {
+        var sql = 'SELECT id, starred FROM entries WHERE entryURL = :url';
+        delete this.selectEntriesByURL;
+        return this.selectEntriesByURL = new Statement(sql);
+    },
+
+    get selectEntriesByBookmarkID() {
+        var sql = 'SELECT id, starred, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
+        delete this.selectEntriesByBookmarkID;
+        return this.selectEntriesByBookmarkID = new Statement(sql);
+    },
+
+    get selectEntriesByTagID() {
+        var sql = 'SELECT id, entryURL FROM entries WHERE id IN (          '+
+                  '    SELECT entryID FROM entry_tags WHERE tagID = :tagID '+
+                  ')                                                       ';
+        delete this.selectEntriesByTagID;
+        return this.selectEntriesByTagID = new Statement(sql);
+    },
+
+    get starEntry() {
+        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
+        delete this.starEntry;
+        return this.starEntry = new Statement(sql);
+    },
+
+    get unstarEntry() {
+        var sql = 'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE id = :id';
+        delete this.unstarEntry;
+        return this.unstarEntry = new Statement(sql);
+    },
+
+    get tagEntry() {
+        // |OR IGNORE| is necessary, because some beta users mistakingly ended
+        // up with tagID column marked as UNIQUE.
+        var sql = 'INSERT OR IGNORE INTO entry_tags (entryID, tagName, tagID) '+
+                  'VALUES (:entryID, :tagName, :tagID)            ';
+        delete this.tagEntry;
+        return this.tagEntry = new Statement(sql);
+    },
+
+    get untagEntry() {
+        var sql = 'DELETE FROM entry_tags WHERE entryID = :entryID AND tagName = :tagName';
+        delete this.untagEntry;
+        return this.untagEntry = new Statement(sql);
+    },
+
+    get getTagsForEntry() {
+        var sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
+        delete this.getTagsForEntry;
+        return this.getTagsForEntry = new Statement(sql);
+    },
+
+    get getNameForTagID() {
+        var sql = 'SELECT tagName FROM entry_tags WHERE tagID = :tagID LIMIT 1';
+        delete this.getNameForTagID;
+        return this.getNameForTagID = new Statement(sql);
+    },
+
+    get setSerializedTagList() {
+        var sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
+        delete this.setSerializedTagList;
+        return this.setSerializedTagList = new Statement(sql);
+    }
+
+}
+
+
+var Utils = {
+
+    getTagsForEntry: function getTagsForEntry(aEntryID) {
+        var tags = [];
+
+        var results = Stm.getTagsForEntry.getResults({ 'entryID': aEntryID });
+        for (let row = results.next(); row; row = results.next())
+            tags.push(row.tagName);
+        results.close();
+
+        return tags;
+    },
+
+    getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
+        var foundFeed = null;
+        var feeds = StorageService.getAllFeeds(true);
+        for (let i = 0; i < feeds.length; i++) {
+            if (feeds[i].bookmarkID == aBookmarkID) {
+                foundFeed = feeds[i];
+                break;
+            }
+        }
+        return foundFeed;
+    },
+
+    isLivemarkStored: function isLivemarkStored(aItemID) {
+        return !!Utils.getFeedByBookmarkID(aItemID);
+    },
+
+    getEntriesByURL: function getEntriesByURL(aURL) {
+        var entries = [];
+
+        var results = Stm.selectEntriesByURL.getResults({ 'url': aURL });
+        for (let row = results.next(); row; row = results.next()) {
+            entries.push({
+                id: row.id,
+                starred: row.starred
+            });
+        }
+        results.close();
+
+        return entries;
+    },
+
+    getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID) {
+        var entries = [];
+
+        var results = Stm.selectEntriesByBookmarkID.getResults({ 'bookmarkID': aBookmarkID });
+        for (let row = results.next(); row; row = results.next()) {
+            entries.push({
+                id: row.id,
+                url: row.entryURL,
+                starred: row.starred
+            });
+        }
+        results.close();
+
+        return entries;
+    },
+
+    getEntriesByTagID: function getEntriesByTagID(aTagID) {
+        var entries = [];
+
+        var results = Stm.selectEntriesByTagID.getResults({ 'tagID': aTagID });
+        for (let row = results.next(); row; row = results.next()) {
+            entries.push({
+                id: row.id,
+                url: row.entryURL
+            });
+        }
+        results.close();
+
+        return entries;
+    },
+
+    newURI: function(aSpec) {
+        if (!this.ioService)
+            this.ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+
+        try {
+            var uri = this.ioService.newURI(aSpec, null, null);
+        }
+        catch (ex) {
+            uri = null;
+        }
+        return uri;
+    },
+
+    isBookmark: function(aItemID) {
+        return (Bookmarks.getItemType(aItemID) === Bookmarks.TYPE_BOOKMARK);
+    },
+
+    isNormalBookmark: function(aItemID) {
+        let parent = Bookmarks.getFolderIdForItem(aItemID);
+        return !Utils.isLivemark(parent) && !Utils.isTagFolder(parent);
+    },
+
+    isLivemark: function(aItemID) {
+        return Places.livemarks.isLivemark(aItemID);
+    },
+
+    isFolder: function(aItemID) {
+        return (Bookmarks.getItemType(aItemID) === Bookmarks.TYPE_FOLDER);
+    },
+
+    isTagFolder: function(aItemID) {
+        return (Bookmarks.getFolderIdForItem(aItemID) === Places.tagsFolderId);
+    },
+
+    // Returns TRUE if an item is a subfolder of Brief's home folder.
+    isInHomeFolder: function(aItemID) {
+        var homeID = StorageService.homeFolderID;
+        if (homeID === -1)
+            return false;
+
+        if (homeID === aItemID)
+            return true;
+
+        var inHome = false;
+        var parent = aItemID;
+        while (parent !== Places.placesRootId) {
+            parent = Bookmarks.getFolderIdForItem(parent);
+            if (parent === homeID) {
+                inHome = true;
+                break;
+            }
+        }
+
+        return inHome;
+    },
+
+    hashString: function(aString) {
+        // nsICryptoHash can read the data either from an array or a stream.
+        // Creating a stream ought to be faster than converting a long string
+        // into an array using JS.
+        var unicodeConverter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].
+                               createInstance(Ci.nsIScriptableUnicodeConverter);
+        unicodeConverter.charset = 'UTF-8';
+        var stream = unicodeConverter.convertToInputStream(aString);
+
+        var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
+        hasher.init(Ci.nsICryptoHash.MD5);
+        hasher.updateFromStream(stream, stream.available());
+        var hash = hasher.finish(false);
+
+        // Convert the hash to a hex-encoded string.
+        var hexchars = '0123456789ABCDEF';
+        var hexrep = new Array(hash.length * 2);
+        for (var i = 0; i < hash.length; ++i) {
+            hexrep[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 15);
+            hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
+        }
+        return hexrep.join('');
+    }
+
+}
+
+
+function ReportError(aException, aRethrow) {
     var message = typeof aException == 'string' ? aException : aException.message;
     message += '\nStack: ' + aException.stack;
-    message += '\nDatabase error: ' + gConnection.lastErrorString;
+    message += '\nDatabase error: ' + Connection.lastErrorString;
     var error = new Error(message, aException.fileName, aException.lineNumber);
     if (aRethrow)
         throw(error);
