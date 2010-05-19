@@ -37,26 +37,26 @@ function FeedView(aTitle, aQuery, aFixedUnread, aFixedStarred) {
     aQuery.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
     this.query = aQuery;
 
-    // Temporarliy override the title without losing the old one.
-    this.titleOverride = '';
-
     // Ordered array of IDs of entries that have been loaded.
     this._loadedEntries = [];
-
-    // ID of the selected entry.
-    this.selectedEntry = null;
 
     // List of entries manually marked as unread by the user. They won't be
     // marked as read again when autoMarkRead is on.
     this.entriesMarkedUnread = [];
-
-    this._refreshPending = false;
 
     this._init();
 }
 
 
 FeedView.prototype = {
+
+    // Temporarliy override the title without losing the old one.
+    titleOverride: '',
+
+    // ID of the selected entry.
+    selectedEntry: null,
+
+    _refreshPending: false,
 
     get browser FeedView_browser() {
         return getElement('feed-view');
@@ -105,10 +105,10 @@ FeedView.prototype = {
      * Use this function when you want to modify the query before using it, without
      * permanently changing the view parameters.
      */
-    getQuery: function FeedView_getQuery() {
+    getQueryCopy: function FeedView_getQueryCopy() {
         var query = this.query;
         var copy = new Query();
-        for (property in query)
+        for (let property in query)
             copy[property] = query[property];
         return copy;
     },
@@ -469,7 +469,7 @@ FeedView.prototype = {
             this.browser.loadURI(gTemplateURI.spec);
         }
         else {
-            for each (event in this._events)
+            for each (let event in this._events)
                 this.document.addEventListener(event, this, true);
 
             // Refresh asynchronously, because UI maybe waiting to be redrawn
@@ -486,7 +486,7 @@ FeedView.prototype = {
         this.document.removeEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
         this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
-        for each (event in this._events)
+        for each (let event in this._events)
             this.document.removeEventListener(event, this, true);
 
         gStorage.removeObserver(this);
@@ -537,7 +537,7 @@ FeedView.prototype = {
 
             case 'ShowBookmarkPanel':
                 let query = new QuerySH([id]);
-                query.verifyEntriesStarredStatus();
+                query.verifyBookmarksAndTags();
                 let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
 
                 let starElem = this._getAnonElement(target.firstChild, 'article-star');
@@ -550,7 +550,7 @@ FeedView.prototype = {
 
                 if (this.active) {
                     this.window.addEventListener('resize', this, false);
-                    for each (event in this._events)
+                    for each (let event in this._events)
                         this.document.addEventListener(event, this, true);
 
                     // Pass some data which bindings need but don't have access to.
@@ -713,7 +713,7 @@ FeedView.prototype = {
             let elem = this.document.getElementById(entries[i]);
             if (elem) {
                 elem.setAttribute('changedTag', aTag);
-                this._sendEvent(id, 'EntryTagged', aNewState);
+                this._sendEvent(entries[i], 'EntryTagged', aNewState);
             }
         }
 
@@ -757,7 +757,7 @@ FeedView.prototype = {
 
         // Get the current list of entries that should be loaded,
         // using the date of the last loaded entry as an anchor.
-        var query = this.getQuery();
+        var query = this.getQueryCopy();
         query.startDate = parseInt(this.feedContent.lastChild.getAttribute('date'));
         this._loadedEntries = query.getEntries();
 
@@ -888,7 +888,7 @@ FeedView.prototype = {
 
         // Append the predefined initial number of entries and if necessary, keep
         // appending more until they fill WINDOW_HEIGHTS_LOAD + 1 of window heights.
-        var query = this.getQuery();
+        var query = this.getQueryCopy();
         query.limit = gPrefs.minInitialEntries;
         var win = this.window;
 
@@ -1027,7 +1027,7 @@ FeedView.prototype = {
             let tags = this._getAnonElement(header, 'article-tags');
             let authors = this._getAnonElement(header, 'article-authors');
             let terms = this.query.searchString.match(/[A-Za-z0-9]+/g);
-            for each (term in terms) {
+            for each (let term in terms) {
                 this._highlightText(term, articleContainer);
                 this._highlightText(term, authors);
                 this._highlightText(term, tags);
