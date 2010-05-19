@@ -178,7 +178,7 @@ interface nsIBriefQuery : nsISupports {
      *
      * @returns TRUE if the starred status was in sync, FALSE otherwise.
      */
-    boolean verifyEntriesStarredStatus();
+    boolean verifyBookmarksAndTags();
 
     /**
      * Sets the deleted state of the selected entries or removes them from the database.

@@ -205,22 +205,9 @@ Statement.prototype = {
     },
 
     getSingleResult: function Statement_getSingleResult(aParams) {
-        if (aParams)
-            this.params = aParams;
-
-        this._bindParams();
-
-        try {
-            this._wrappedStatement.step();
-            var row = {};
-            for (let i = 0; i < this._wrappedStatement.columnCount; i++) {
-                let column = this._wrappedStatement.getColumnName(i);
-                row[column] = this._wrappedStatement.row[column];
-            }
-        }
-        finally {
-            this._wrappedStatement.reset();
-        }
+        var results = this.getResults(aParams);
+        var row = results.next();
+        results.close();
 
         return row;
     },
@@ -544,24 +531,6 @@ BriefStorageService.prototype = {
             this.observers.splice(index, 1);
     },
 
-    notifyOfEntriesStarred: function BriefStorage_notifyOfEntriesStarred(aEntries, aNewState) {
-        var query = new BriefQuery();
-        query.entries = aEntries;
-        var list = query.getEntryList();
-
-        for each (let observer in this.observers)
-            observer.onEntriesStarred(list, aNewState);
-    },
-
-    notifyOfEntriesTagged: function BriefStorage_notifyOfEntriesTagged(aEntries, aNewState, aChangedTag) {
-        var query = new BriefQuery();
-        query.entries = aEntries;
-        var list = query.getEntryList();
-
-        for each (let observer in this.observers)
-            observer.onEntriesTagged(list, aNewState, aChangedTag);
-    },
-
     /**
      * Sets starred status of an entry.
      *
@@ -569,11 +538,22 @@ BriefStorageService.prototype = {
      * @param aEntryID    Subject entry.
      * @param aBookmarkID ItemId of the corresponding bookmark in Places database.
      */
-    starEntry: function BriefStorage_starEntry(aState, aEntryID, aBookmarkID) {
+    starEntry: function BriefStorage_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
         if (aState)
             Stm.starEntry.execute({ 'bookmarkID': aBookmarkID, 'entryID': aEntryID });
         else
             Stm.unstarEntry.execute({ 'id': aEntryID });
+
+        if (aDontNotify)
+            return;
+
+        // Notify observers.
+        var query = new BriefQuery();
+        query.entries = [aEntryID];
+        var list = query.getEntryList();
+
+        for each (let observer in this.observers)
+            observer.onEntriesStarred(list, aState);
     },
 
     /**
@@ -605,6 +585,14 @@ BriefStorageService.prototype = {
             'tags': Utils.getTagsForEntry(aEntryID).join(', '),
             'entryID': aEntryID
         });
+
+        // Notify observers.
+        var query = new BriefQuery();
+        query.entries = [aEntryID];
+        var list = query.getEntryList();
+
+        for each (let observer in this.observers)
+            observer.onEntriesTagged(list, aState, aTagName);
     },
 
 
@@ -1216,13 +1204,12 @@ BriefQuery.prototype = {
      * nsIBriefQuery
      *
      * This function bookmarks URIs of the selected entries. It doesn't star the entries
-     * in the database or send notifications - that part performed by the bookmarks
+     * in the database or send notifications - that part is performed by the bookmarks
      * observer implemented by BriefStorageService.
      */
     starEntries: function BriefQuery_starEntries(aState) {
         var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1'].
                        getService(Ci.nsIPlacesTransactionsService);
-        var folder = Places.unfiledBookmarksFolderId;
         var transactions = []
 
         for each (let entry in this.getFullEntries()) {
@@ -1231,8 +1218,8 @@ BriefQuery.prototype = {
                 continue;
 
             if (aState) {
-                let trans = transSrv.createItem(uri, folder, Bookmarks.DEFAULT_INDEX,
-                                                entry.title);
+                let trans = transSrv.createItem(uri, Places.unfiledBookmarksFolderId,
+                                                Bookmarks.DEFAULT_INDEX, entry.title);
                 transactions.push(trans);
             }
             else {
@@ -1246,11 +1233,9 @@ BriefQuery.prototype = {
                 }
                 else {
                     // If there are no bookmarks for an URL that is starred in our
-                    // database, it means that the database is out of sync. We've
-                    // got to update the database directly instead of relying on
-                    // the bookmarks observer implemented by BriefStorageService.
+                    // database, it means that the database is out of sync and we
+                    // must update the database directly.
                     StorageService.starEntry(false, entry.id);
-                    StorageService.notifyOfEntriesStarred([entry.id], false);
                 }
             }
         }
@@ -1260,7 +1245,7 @@ BriefQuery.prototype = {
     },
 
     // nsIBriefQuery
-    verifyEntriesStarredStatus: function BriefQuery_verifyEntriesStarredStatus() {
+    verifyBookmarksAndTags: function BriefQuery_verifyBookmarksAndTags() {
         var statusOK = true;
 
         for each (let entry in this.getFullEntries()) {
@@ -1268,10 +1253,10 @@ BriefQuery.prototype = {
             if (!uri)
                 continue;
 
-            let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
-                                      filter(Utils.isNormalBookmark)
+            let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
+            let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
 
-            if (entry.starred != !!bookmarks.length) {
+            if (entry.starred != !!normalBookmarks.length) {
                 let query = new BriefQuery();
                 query.entries = [entry.id];
                 query.starEntries(true);
@@ -1279,14 +1264,9 @@ BriefQuery.prototype = {
             }
 
             let addedTags, removedTags;
-            [addedTags, removedTags] = StorageService.refreshTagsForEntry(entry.id, bookmarks);
+            [addedTags, removedTags] = StorageService.refreshTagsForEntry(entry.id, allBookmarks);
 
-            for each (let tag in addedTags)
-                StorageService.notifyOfEntriesTagged([entry.id], true, tag);
-            for each (let tag in removedTags)
-                StorageService.notifyOfEntriesTagged([entry.id], false, tag);
-
-            statusOK = !addedTags.length && !removedTags.length;
+            statusOK = statusOK && !addedTags.length && !removedTags.length;
         }
 
         return statusOK;
@@ -1437,7 +1417,7 @@ BriefQuery.prototype = {
         }
     },
 
-    classDescription: 'Query to database of the Brief extension',
+    classDescription: 'Database query of the Brief extension',
     classID: Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}'),
     contractID: '@ancestor/brief/query;1',
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefQuery])
@@ -1702,12 +1682,6 @@ var BookmarkObserver = {
     batching: false,
     homeFolderContentModified: false,
 
-    get syncDelayTimer BookmarkObserver_syncDelayTimer() {
-        if (!this.__syncDelayTimer)
-            this.__syncDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        return this.__syncDelayTimer;
-    },
-
     // nsINavBookmarkObserver
     onEndUpdateBatch: function BookmarkObserver_onEndUpdateBatch() {
         this.batching = false;
@@ -1722,144 +1696,104 @@ var BookmarkObserver = {
     },
 
     // nsINavBookmarkObserver
-    onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aFolder, aIndex) {
-        if (Utils.isFolder(aItemID) && Utils.isInHomeFolder(aFolder)) {
+    onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aFolder, aIndex, aItemType) {
+        if (aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aFolder)) {
             this.delayedLivemarksSync();
             return;
         }
 
-        // We only care about plain bookmarks and tags.
-        if (Utils.isLivemark(aFolder) || !Utils.isBookmark(aItemID))
+        // Only care about plain bookmarks and tags.
+        if (Utils.isLivemark(aFolder) || aItemType != Bookmarks.TYPE_BOOKMARK)
             return;
 
         // Find entries with the same URI as the added item and tag or star them.
-        Connection.beginTransaction();
-        try {
-            var url = Bookmarks.getBookmarkURI(aItemID).spec;
-            var isTag = Utils.isTagFolder(aFolder);
-            var changedEntries = [];
+        // Typically, there is going to be at most one such entry, so don't even
+        // bother with a transaction.
+        var url = Bookmarks.getBookmarkURI(aItemID).spec;
+        var isTag = Utils.isTagFolder(aFolder);
 
-            for each (let entry in Utils.getEntriesByURL(url)) {
-                if (isTag) {
-                    let tagName = Bookmarks.getItemTitle(aFolder);
-                    StorageService.tagEntry(true, entry.id, tagName, aItemID);
-                }
-                else {
-                    StorageService.starEntry(true, entry.id, aItemID);
-                }
-
-                changedEntries.push(entry);
+        for each (let entry in Utils.getEntriesByURL(url)) {
+            if (isTag) {
+                let tagName = Bookmarks.getItemTitle(aFolder);
+                StorageService.tagEntry(true, entry.id, tagName, aItemID);
             }
-        }
-        catch (ex) {
-            ReportError(ex, true);
-        }
-        finally {
-            Connection.commitTransaction();
-        }
-
-        if (changedEntries.length) {
-            let entryIDs = changedEntries.map(function(e) e.id);
-
-            if (isTag)
-                StorageService.notifyOfEntriesTagged(entryIDs, true, tagName);
-            else
-                StorageService.notifyOfEntriesStarred(entryIDs, true);
+            else {
+                StorageService.starEntry(true, entry.id, aItemID);
+            }
         }
     },
 
 
     // nsINavBookmarkObserver
-    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved() { },
-
+    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved(aItemID, aItemType) {},
 
     // nsINavBookmarkObserver
-    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex) {
+    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType) {
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageService.homeFolderID) {
             this.delayedLivemarksSync();
             return;
         }
 
-        // We only care about plain bookmarks and tags, but we can't check the type
-        // of the removed item, except for if it was a part of a Live Bookmark.
-        if (Utils.isLivemark(aFolder))
+        // Only care about plain bookmarks and tags.
+        if (Utils.isLivemark(aFolder) || aItemType != Bookmarks.TYPE_BOOKMARK)
             return;
 
         // Find entries with bookmarkID of the removed item and untag/unstar them.
-        Connection.beginTransaction();
-        try {
-            var changedEntries = [];
-            var isTag = Utils.isTagFolder(aFolder);
+        // Typically, there is going to be at most one such entry, so don't even
+        // bother with a transaction.
+        var isTag = Utils.isTagFolder(aFolder);
 
-            if (isTag) {
-                for each (let entry in Utils.getEntriesByTagID(aItemID)) {
-                    var tagName = Bookmarks.getItemTitle(aFolder);
-                    StorageService.tagEntry(false, entry.id, tagName);
-                    changedEntries.push(entry)
-                }
-            }
-            else {
-                let entries = Utils.getEntriesByBookmarkID(aItemID);
-
-                // Look for other bookmarks for this URI.
-                if (entries.length) {
-                    let uri = Utils.newURI(entries[0].url);
-                    var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
-                                              filter(Utils.isNormalBookmark);
-                }
-
-                for each (let entry in entries) {
-                    if (bookmarks.length) {
-                        // If there is another bookmark for this URI, don't unstar the
-                        // entry, but update its bookmarkID to point to that bookmark.
-                        StorageService.starEntry(true, entry.id, bookmarks[0]);
-                    }
-                    else {
-                        StorageService.starEntry(false, entry.id);
-                        changedEntries.push(entry);
-                    }
-                }
+        if (isTag) {
+            for each (let entry in Utils.getEntriesByTagID(aItemID)) {
+                let tagName = Bookmarks.getItemTitle(aFolder);
+                StorageService.tagEntry(false, entry.id, tagName);
             }
         }
-        catch (ex) {
-            ReportError(ex, true);
-        }
-        finally {
-            Connection.commitTransaction();
-        }
+        else {
+            let entries = Utils.getEntriesByBookmarkID(aItemID);
 
-        if (changedEntries.length) {
-            let entryIDs = changedEntries.map(function(e) e.id);
-            if (isTag)
-                StorageService.notifyOfEntriesTagged(entryIDs, false, tagName);
-            else
-                StorageService.notifyOfEntriesStarred(entryIDs, false);
+            // Look for other bookmarks for this URI.
+            if (entries.length) {
+                let uri = Utils.newURI(entries[0].url);
+                var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
+                                          filter(Utils.isNormalBookmark);
+            }
+
+            for each (let entry in entries) {
+                // If there is another bookmark for this URI, don't unstar the
+                // entry, but update its bookmarkID to point to that bookmark.
+                if (bookmarks.length)
+                    StorageService.starEntry(true, entry.id, bookmarks[0], true);
+                else
+                    StorageService.starEntry(false, entry.id);
+            }
         }
     },
 
     // nsINavBookmarkObserver
     onItemMoved: function BookmarkObserver_onItemMoved(aItemID, aOldParent, aOldIndex,
-                                                   aNewParent, aNewIndex) {
+                                                   aNewParent, aNewIndex, aItemType) {
         var wasInHome = Utils.isLivemarkStored(aItemID);
-        var isInHome = Utils.isFolder(aItemID) && Utils.isInHomeFolder(aNewParent);
+        var isInHome = aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aNewParent);
         if (wasInHome || isInHome)
             this.delayedLivemarksSync();
     },
 
     // nsINavBookmarkObserver
     onItemChanged: function BookmarkObserver_onItemChanged(aItemID, aProperty,
-                                                       aIsAnnotationProperty, aValue) {
+                                                           aIsAnnotationProperty, aNewValue,
+                                                           aLastModified, aItemType) {
         switch (aProperty) {
         case 'title':
             let feed = Utils.getFeedByBookmarkID(aItemID);
             if (feed) {
-                Stm.setFeedTitle.execute({ 'title': aValue, 'feedID': feed.feedID });
-                feed.title = aValue; // Update the cache.
+                Stm.setFeedTitle.execute({ 'title': aNewValue, 'feedID': feed.feedID });
+                feed.title = aNewValue; // Update the cache.
 
                 ObserverService.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
             }
             else if (Utils.isTagFolder(aItemID)) {
-                this.renameTag(aItemID, aValue);
+                this.renameTag(aItemID, aNewValue);
             }
             break;
 
@@ -1870,20 +1804,12 @@ var BookmarkObserver = {
 
         case 'uri':
             // Unstar any entries with the old URI.
-            let entries = Utils.getEntriesByBookmarkID(aItemID);
-            for each (let entry in entries)
+            for each (let entry in Utils.getEntriesByBookmarkID(aItemID))
                 StorageService.starEntry(false, entry.id);
 
-            if (entries.length)
-                StorageService.notifyOfEntriesStarred(entries.map(function(e) e.id), false);
-
             // Star any entries with the new URI.
-            entries = Utils.getEntriesByURL(aValue);
-            for each (let entry in entries)
+            for each (let entry in Utils.getEntriesByURL(aNewValue))
                 StorageService.starEntry(true, entry.id, aItemID);
-
-            if (entries.length)
-                StorageService.notifyOfEntriesStarred(entries.map(function(e) e.id), true);
 
             break;
         }
@@ -1891,6 +1817,12 @@ var BookmarkObserver = {
 
     // nsINavBookmarkObserver
     onItemVisited: function BookmarkObserver_aOnItemVisited(aItemID, aVisitID, aTime) { },
+
+    get syncDelayTimer BookmarkObserver_syncDelayTimer() {
+        if (!this.__syncDelayTimer)
+            this.__syncDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+        return this.__syncDelayTimer;
+    },
 
     delayedLivemarksSync: function BookmarkObserver_delayedLivemarksSync() {
         if (this.batching) {
@@ -1913,44 +1845,34 @@ var BookmarkObserver = {
      * @param aNewName     New name of the tag folder, i.e. new name of the tag.
      */
     renameTag: function BookmarkObserver_renameTag(aTagFolderID, aNewName) {
-        try {
-            // Get bookmarks in the renamed tag folder.
-            var options = Places.history.getNewQueryOptions();
-            var query = Places.history.getNewQuery();
-            query.setFolders([aTagFolderID], 1);
-            var result = Places.history.executeQuery(query, options);
-            result.root.containerOpen = true;
+        // Get bookmarks in the renamed tag folder.
+        var options = Places.history.getNewQueryOptions();
+        var query = Places.history.getNewQuery();
+        query.setFolders([aTagFolderID], 1);
+        var result = Places.history.executeQuery(query, options);
+        result.root.containerOpen = true;
 
-            var oldTagName = '';
+        var oldTagName = '';
 
-            for (let i = 0; i < result.root.childCount; i++) {
-                let tagID = result.root.getChild(i).itemId;
-                let entries = Utils.getEntriesByTagID(tagID).
-                                    map(function(e) e.id);
+        for (let i = 0; i < result.root.childCount; i++) {
+            let tagID = result.root.getChild(i).itemId;
+            let entries = Utils.getEntriesByTagID(tagID).
+                                map(function(e) e.id);
 
-                for each (let entry in entries) {
-                    if (!oldTagName) {
-                        // The bookmark observer doesn't provide the old name,
-                        // so we have to look it up in our database.
-                        let row = Stm.getNameForTagID.getSingleResult({ 'tagID': tagID });
-                        oldTagName = row.tagName;
-                    }
-
-                    StorageService.tagEntry(false, entry, oldTagName);
-                    StorageService.tagEntry(true, entry, aNewName, tagID);
+            for each (let entry in entries) {
+                if (!oldTagName) {
+                    // The bookmark observer doesn't provide the old name,
+                    // so we have to look it up in the database.
+                    let row = Stm.getNameForTagID.getSingleResult({ 'tagID': tagID });
+                    oldTagName = row.tagName;
                 }
 
-                if (entries.length) {
-                    StorageService.notifyOfEntriesTagged(entries, false, oldTagName);
-                    StorageService.notifyOfEntriesTagged(entries, true, aNewName);
-                }
+                StorageService.tagEntry(false, entry, oldTagName);
+                StorageService.tagEntry(true, entry, aNewName, tagID);
             }
+        }
 
-            result.root.containerOpen = false;
-        }
-        finally {
-            Stm.getNameForTagID.reset();
-        }
+        result.root.containerOpen = false;
     },
 
     observe: function BookmarkObserver_observe(aSubject, aTopic, aData) {
