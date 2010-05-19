@@ -73,6 +73,11 @@ function init() {
 
 
 function unload() {
+    var viewList = getElement('view-list');
+    var id = viewList.selectedItem && viewList.selectedItem.id;
+    var startView = (id == 'unread-folder') ? 'unread-folder' : 'all-items-folder';
+    viewList.setAttribute('startview', startView);
+
     var observerService = Cc['@mozilla.org/observer-service;1'].
                           getService(Ci.nsIObserverService);
     observerService.removeObserver(gFeedList, 'brief:feed-updated');
@@ -315,13 +320,16 @@ function loadHomeview() {
         getElement('feed-view-toolbar').hidden = true;
     }
     else {
+        let startView = getElement('view-list').getAttribute('startview');
+
         let query = new Query();
         query.deleted = ENTRY_STATE_NORMAL;
-        let name = getElement('all-items-folder').getAttribute('name');
+        query.unread = (startView == 'unread-folder');
+        let name = getElement(startView).getAttribute('name');
         gFeedView = new FeedView(name, query);
 
         gViewList.richlistbox.suppressOnSelect = true;
-        gViewList.selectedItem = getElement('all-items-folder');
+        gViewList.selectedItem = getElement(startView);
         gViewList.richlistbox.suppressOnSelect = false;
     }
 }

@@ -93,6 +93,8 @@
 
     <vbox id="sidebar" persist="width hidden">
         <richlistbox id="view-list"
+                     startview="all-items-folder"
+                     persist="startview"
                      suppressonselect="true"
                      context="view-list-popup"
                      onselect="gViewList.onSelect(event)"
