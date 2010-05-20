@@ -548,10 +548,7 @@ BriefStorageService.prototype = {
             return;
 
         // Notify observers.
-        var query = new BriefQuery();
-        query.entries = [aEntryID];
-        var list = query.getEntryList();
-
+        var list = new BriefQuery([aEntryID]).getEntryList();
         for each (let observer in this.observers)
             observer.onEntriesStarred(list, aState);
     },
@@ -587,58 +584,9 @@ BriefStorageService.prototype = {
         });
 
         // Notify observers.
-        var query = new BriefQuery();
-        query.entries = [aEntryID];
-        var list = query.getEntryList();
-
+        var list = new BriefQuery([aEntryID]).getEntryList();
         for each (let observer in this.observers)
             observer.onEntriesTagged(list, aState, aTagName);
-    },
-
-
-    /**
-     * Refreshes tags for an entry by comparing stored tags with the current tags in the
-     * Places database. This function should only be used when the caller doesn't know
-     * which tags may have been changed, otherwise tagEntry() should be used. This
-     * function does not notify observers of any changes it makes.
-     *
-     * @param aEntryID    Entry whose tags to refresh.
-     * @param aBoookmarks Array of itemIds of bookmark items for the entry's URI.
-     * @returns An array of added tags and an array of removed tags.
-     */
-    refreshTagsForEntry: function BriefStorage_refreshTagsForEntry(aEntryID, aBookmarks) {
-        var addedTags = [];
-        var removedTags = [];
-
-        var storedTags = Utils.getTagsForEntry(aEntryID);
-
-        // Get the list of current tags for this entry's URI.
-        var currentTagNames = [];
-        var currentTagIDs = [];
-        for each (let itemID in aBookmarks) {
-            let parent = Bookmarks.getFolderIdForItem(itemID);
-            if (Utils.isTagFolder(parent)) {
-                currentTagIDs.push(itemID);
-                currentTagNames.push(Bookmarks.getItemTitle(parent));
-            }
-        }
-
-        for each (let tag in storedTags) {
-            if (currentTagNames.indexOf(tag) === -1) {
-                this.tagEntry(false, aEntryID, tag);
-                removedTags.push(tag);
-            }
-        }
-
-        for (let i = 0; i < currentTagNames.length; i++) {
-            let tag = currentTagNames[i];
-            if (storedTags.indexOf(tag) === -1) {
-                this.tagEntry(true, aEntryID, tag, currentTagIDs[i])
-                addedTags.push(tag);
-            }
-        }
-
-        return [addedTags, removedTags];
     },
 
 
@@ -848,15 +796,12 @@ FeedProcessor.prototype = {
                 },
 
                 handleCompletion: function(aReason) {
-                    // Notify observers.
-                    let query = new BriefQuery();
-                    query.entries = self.insertedEntries;
-                    let list = query.getEntryList();
+                    var list = new BriefQuery(self.insertedEntries).getEntryList();
                     for each (let observer in StorageService.observers)
                         observer.onEntriesAdded(list);
 
                     // XXX This should be optimized and/or be asynchronous
-                    query.verifyEntriesStarredStatus();
+                    // query.verifyBookmarksAndTags();
                 }
             });
         }
@@ -867,10 +812,7 @@ FeedProcessor.prototype = {
             ExecuteStatementsAsync(statements, {
 
                 handleCompletion: function(aReason) {
-                    // Notify observers.
-                    let query = new BriefQuery();
-                    query.entries = self.updatedEntries;
-                    let list = query.getEntryList();
+                    var list = new BriefQuery(self.updatedEntries).getEntryList();
                     for each (let observer in StorageService.observers)
                         observer.onEntriesUpdated(list);
                 }
@@ -887,7 +829,9 @@ const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
 const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
 const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
 
-function BriefQuery() { }
+function BriefQuery(aEntries) {
+    this.entries = aEntries;
+}
 
 BriefQuery.prototype = {
 
@@ -1223,8 +1167,8 @@ BriefQuery.prototype = {
                 transactions.push(trans);
             }
             else {
-                let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
-                                          filter(Utils.isNormalBookmark);
+                let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {})
+                                         .filter(Utils.isNormalBookmark);
                 if (bookmarks.length) {
                     for (let i = bookmarks.length - 1; i >= 0; i--) {
                         let trans = transSrv.removeItem(bookmarks[i]);
@@ -1235,7 +1179,7 @@ BriefQuery.prototype = {
                     // If there are no bookmarks for an URL that is starred in our
                     // database, it means that the database is out of sync and we
                     // must update the database directly.
-                    StorageService.starEntry(false, entry.id);
+                    StorageService.starEntry(false, entry.id, bookmarks[0]);
                 }
             }
         }
@@ -1254,19 +1198,46 @@ BriefQuery.prototype = {
                 continue;
 
             let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
-            let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
 
-            if (entry.starred != !!normalBookmarks.length) {
-                let query = new BriefQuery();
-                query.entries = [entry.id];
-                query.starEntries(true);
+            // Verify bookmarks.
+            let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
+            if (entry.starred && !normalBookmarks.length) {
+                new BriefQuery([entry.id]).starEntries(true);
+                statusOK = false;
+            }
+            else if (!entry.starred && normalBookmarks.length) {
+                StorageService.starEntry(true, entry.id, normalBookmarks[0]);
                 statusOK = false;
             }
 
-            let addedTags, removedTags;
-            [addedTags, removedTags] = StorageService.refreshTagsForEntry(entry.id, allBookmarks);
+            // Verify tags.
+            var storedTags = Utils.getTagsForEntry(entry.id);
 
-            statusOK = statusOK && !addedTags.length && !removedTags.length;
+            // Get the list of current tags for this entry's URI.
+            var currentTagNames = [];
+            var currentTagIDs = [];
+            for each (let itemID in allBookmarks) {
+                let parent = Bookmarks.getFolderIdForItem(itemID);
+                if (Utils.isTagFolder(parent)) {
+                    currentTagIDs.push(itemID);
+                    currentTagNames.push(Bookmarks.getItemTitle(parent));
+                }
+            }
+
+            for each (let tag in storedTags) {
+                if (currentTagNames.indexOf(tag) === -1) {
+                    Places.tagging.tagURI(uri, [tag]);
+                    statusOK = false;
+                }
+            }
+
+            for (let i = 0; i < currentTagNames.length; i++) {
+                let tag = currentTagNames[i];
+                if (storedTags.indexOf(tag) === -1) {
+                    StorageService.tagEntry(true, entry.id, tag, currentTagIDs[i])
+                    statusOK = false;
+                }
+            }
         }
 
         return statusOK;
@@ -1714,6 +1685,7 @@ var BookmarkObserver = {
 
         for each (let entry in Utils.getEntriesByURL(url)) {
             if (isTag) {
+                // XXX Don't allow duplicate tags.
                 let tagName = Bookmarks.getItemTitle(aFolder);
                 StorageService.tagEntry(true, entry.id, tagName, aItemID);
             }
