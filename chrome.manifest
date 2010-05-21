@@ -2,6 +2,7 @@ content   brief   chrome/content/   contentaccessible=yes
 skin   brief   classic   chrome/skin/
 
 resource  brief-content  defaults/data/
+resource brief modules/
 
 overlay   chrome://browser/content/browser.xul   chrome://brief/content/brief-overlay.xul
 style   chrome://global/content/customizeToolbar.xul   chrome://brief/skin/overlay.css

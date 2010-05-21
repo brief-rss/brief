@@ -1,8 +1,9 @@
 const Ci = Components.interfaces;
 const Cc = Components.classes;
 
+Components.utils.import('resource://brief/Storage.jsm');
+
 var gFeed = null;
-var gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
 var gPrefs = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
                                                       getBranch('extensions.brief.');
 
@@ -11,7 +12,7 @@ function getElement(aId) document.getElementById(aId);
 
 function setupWindow() {
     if (!gFeed)
-        gFeed = gStorage.getFeed(window.arguments[0]);
+        gFeed = Storage.getFeed(window.arguments[0]);
 
     document.title = getElement('options-bundle').
                      getFormattedString('feedPropertiesDialogTitle', [gFeed.title]);
@@ -30,19 +31,19 @@ function setupWindow() {
     getElement('updated-entries-checkbox').checked = !gFeed.markModifiedEntriesUnread;
 
     var index = getFeedIndex(gFeed);
-    getElement('next-feed').disabled = (index == gStorage.getAllFeeds().length - 1);
+    getElement('next-feed').disabled = (index == Storage.getAllFeeds().length - 1);
     getElement('previous-feed').disabled = (index == 0);
 }
 
 function showFeed(aDeltaIndex) {
     saveChanges();
-    gFeed = gStorage.getAllFeeds()[getFeedIndex(gFeed) + aDeltaIndex];
+    gFeed = Storage.getAllFeeds()[getFeedIndex(gFeed) + aDeltaIndex];
     setupWindow();
 }
 
 function getFeedIndex(aFeed) {
     var index = -1;
-    var allFeeds = gStorage.getAllFeeds();
+    var allFeeds = Storage.getAllFeeds();
     for (let i = 0; index < allFeeds.length; i++) {
         if (allFeeds[i].feedID == aFeed.feedID) {
             index = i;
@@ -134,7 +135,7 @@ function saveChanges() {
 
     gFeed.markModifiedEntriesUnread = !getElement('updated-entries-checkbox').checked;
 
-    gStorage.setFeedOptions(gFeed);
+    Storage.setFeedOptions(gFeed);
 
     saveLivemarksData();
 

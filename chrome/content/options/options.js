@@ -1,6 +1,8 @@
 var Ci = Components.interfaces;
 var Cc = Components.classes;
 
+Components.utils.import('resource://brief/Storage.jsm');
+
 function init() {
     gMainPane.setUpPlacesTree();
 
@@ -136,10 +138,10 @@ var gFeedsPane = {
 
         var result = promptService.confirmCheck(window, title, text, checkboxLabel, checked);
         if (result) {
-            var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
+            var query = new Query();
             query.unstarred = checked.value;
             query.includeHiddenFeeds = true;
-            query.deleteEntries(Ci.nsIBriefQuery.ENTRY_STATE_DELETED);
+            query.deleteEntries(Storage.ENTRY_STATE_DELETED);
 
             prefBranch.setBoolPref('extensions.brief.database.keepStarredWhenClearing', checked.value)
         }
