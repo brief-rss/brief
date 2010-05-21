@@ -1,3 +1,5 @@
+var EXPORTED_SYMBOLS = ['Storage', 'Query'];
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -59,6 +61,8 @@ const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
 const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
 
+Components.utils.import('resource://brief/FeedContainer.jsm');
+Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 XPCOMUtils.defineLazyServiceGetter(this, 'ObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
@@ -75,6 +79,8 @@ XPCOMUtils.defineLazyGetter(this, 'Places', function() {
     return tempScope.PlacesUtils;
 });
 
+
+var Connection = null;
 
 function ExecuteSQL(aSQLString) {
     try {
@@ -221,23 +227,17 @@ Statement.prototype = {
 }
 
 
-var StorageService = null;
-var Connection = null;
+var Storage = {
 
-function BriefStorageService() {
-    this.observers = [];
+    feedsAndFoldersCache: null,
+    feedsCache:           null,
 
-    // The instantiation can't be done on app-startup, because the directory service
-    // doesn't work yet, so we perform it on profile-after-change.
-    ObserverService.addObserver(this, 'profile-after-change', false);
-}
+    ENTRY_STATE_NORMAL: 0,
+    ENTRY_STATE_TRASHED: 1,
+    ENTRY_STATE_DELETED: 2,
+    ENTRY_STATE_ANY: 3,
 
-BriefStorageService.prototype = {
-
-    feedsAndFoldersCache:  null,
-    feedsCache:            null,
-
-    instantiate: function BriefStorage_instantiate() {
+    init: function Storage_init() {
         var profileDir = Cc['@mozilla.org/file/directory_service;1'].
                          getService(Ci.nsIProperties).
                          get('ProfD', Ci.nsIFile);
@@ -292,7 +292,7 @@ BriefStorageService.prototype = {
         Bookmarks.addObserver(BookmarkObserver, false);
     },
 
-    setupDatabase: function BriefStorage_setupDatabase() {
+    setupDatabase: function Storage_setupDatabase() {
         ExecuteSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')                   ');
         ExecuteSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')               ');
         ExecuteSQL('CREATE TABLE IF NOT EXISTS entry_tags ('+ENTRY_TAGS_TABLE_SCHEMA+')         ');
@@ -312,8 +312,13 @@ BriefStorageService.prototype = {
     },
 
 
-    // nsIBriefStorage
-    getFeed: function BriefStorage_getFeed(aFeedID) {
+    /**
+     * Returns a feed or a folder with given ID.
+     *
+     * @param aFeedID
+     * @returns Feed object, without entries.
+     */
+    getFeed: function Storage_getFeed(aFeedID) {
         var foundFeed = null;
         var feeds = this.getAllFeeds(true);
         for (var i = 0; i < feeds.length; i++) {
@@ -325,22 +330,27 @@ BriefStorageService.prototype = {
         return foundFeed;
     },
 
-    // nsIBriefStorage
-    getAllFeeds: function BriefStorage_getAllFeeds(aIncludeFolders) {
+    /**
+     * Gets all feeds, without entries.
+     *
+     * @param aIncludeFolders [optional]
+     * @returns array of Feed's.
+     */
+    getAllFeeds: function Storage_getAllFeeds(aIncludeFolders) {
         if (!this.feedsCache)
             this.buildFeedsCache();
 
         return aIncludeFolders ? this.feedsAndFoldersCache : this.feedsCache;
     },
 
-    buildFeedsCache: function BriefStorage_buildFeedsCache() {
+    buildFeedsCache: function Storage_buildFeedsCache() {
         this.feedsCache = [];
         this.feedsAndFoldersCache = [];
 
         var results = Stm.getAllFeeds.getResults();
         for (let row = results.next(); row; row = results.next()) {
 
-            let feed = Cc['@ancestor/brief/feed;1'].createInstance(Ci.nsIBriefFeed);
+            let feed = new Feed();
             for (let column in row)
                 feed[column] = row[column];
 
@@ -351,8 +361,12 @@ BriefStorageService.prototype = {
         results.close();
     },
 
-    // nsIBriefStorage
-    getAllTags: function BriefStorage_getAllTags() {
+    /**
+     * Gets a list of distinct tags for URLs of entries stored in the database.
+     *
+     * @returns Array of tag names.
+     */
+    getAllTags: function Storage_getAllTags() {
         var tags = [];
 
         var results = Stm.getAllTags.getResults();
@@ -364,13 +378,28 @@ BriefStorageService.prototype = {
     },
 
 
-    // nsIBriefStorage
-    processFeed: function BriefStorage_processFeed(aFeed, aCallback) {
+    /**
+     * Evaluates provided entries, inserting any new items and updating existing
+     * items when newer versions are found. Also updates feed's properties.
+     *
+     * @param aFeed
+     *        Contains the feed and the entries to evaluate.
+     * @param aCallback
+     *        Callback after the database is updated.
+     */
+    processFeed: function Storage_processFeed(aFeed, aCallback) {
         new FeedProcessor(aFeed, aCallback);
     },
 
-    // nsIBriefStorage
-    setFeedOptions: function BriefStorage_setFeedOptions(aFeed) {
+    /**
+     * Saves feed settings: entryAgeLimit, maxEntries, updateInterval and
+     * markModifiedEntriesUnread.
+     *
+     * @param aFeed
+     *        Feed object whose properties to use to update the respective
+     *        columns in the database.
+     */
+    setFeedOptions: function Storage_setFeedOptions(aFeed) {
         Stm.setFeedOptions.execute({
             'entryAgeLimit': aFeed.entryAgeLimit,
             'maxEntries': aFeed.maxEntries,
@@ -379,7 +408,7 @@ BriefStorageService.prototype = {
             'feedID': aFeed.feedID
         });
 
-        // Update the cache if neccassary (it may not be if nsIBriefFeed instance that was
+        // Update the cache if neccassary (it may not be if Feed instance that was
         // passed to us was itself taken from the cache).
         var feed = this.getFeed(aFeed.feedID);
         if (feed != aFeed) {
@@ -391,8 +420,11 @@ BriefStorageService.prototype = {
     },
 
 
-    // nsIBriefStorage
-    compactDatabase: function BriefStorage_compactDatabase() {
+    /**
+     * Physically removes all deleted items and runs SQL VACUUM command to reclaim
+     * disc space and defragment the database.
+     */
+    compactDatabase: function Storage_compactDatabase() {
         this.purgeEntries(false);
         ExecuteSQL('VACUUM');
     },
@@ -400,7 +432,7 @@ BriefStorageService.prototype = {
 
     // Moves expired entries to Trash and permanently removes
     // the deleted items from database.
-    purgeEntries: function BriefStorage_purgeEntries(aDeleteExpired) {
+    purgeEntries: function Storage_purgeEntries(aDeleteExpired) {
         Connection.beginTransaction()
         try {
             if (aDeleteExpired) {
@@ -409,8 +441,8 @@ BriefStorageService.prototype = {
                     let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
 
                     Stm.expireEntriesByAgeGlobal.execute({
-                        'oldState': ENTRY_STATE_NORMAL,
-                        'newState': ENTRY_STATE_TRASHED,
+                        'oldState': Storage.ENTRY_STATE_NORMAL,
+                        'newState': Storage.ENTRY_STATE_TRASHED,
                         'edgeDate': Date.now() - expirationAge * 86400000
                     });
                 }
@@ -419,8 +451,8 @@ BriefStorageService.prototype = {
                 for each (let feed in this.getAllFeeds()) {
                     if (feed.entryAgeLimit > 0) {
                         Stm.expireEntriesByAgePerFeed.execute({
-                            'oldState': ENTRY_STATE_NORMAL,
-                            'newState': ENTRY_STATE_TRASHED,
+                            'oldState': Storage.ENTRY_STATE_NORMAL,
+                            'newState': Storage.ENTRY_STATE_TRASHED,
                             'edgeDate': Date.now() - feed.entryAgeLimit * 86400000,
                             'feedID': feed.feedID
                         });
@@ -434,13 +466,13 @@ BriefStorageService.prototype = {
                     for each (let feed in this.getAllFeeds()) {
                         let row = Stm.getDeletedEntriesCount.getSingleResult({
                             'feedID': feed.feedID,
-                            'deletedState': ENTRY_STATE_NORMAL
+                            'deletedState': Storage.ENTRY_STATE_NORMAL
                         })
 
                         if (row.entryCount - maxEntries > 0) {
                             Stm.expireEntriesByNumber.execute({
-                                'oldState': ENTRY_STATE_NORMAL,
-                                'newState': ENTRY_STATE_TRASHED,
+                                'oldState': Storage.ENTRY_STATE_NORMAL,
+                                'newState': Storage.ENTRY_STATE_TRASHED,
                                 'feedID': feed.feedID,
                                 'limit': row.entryCount - maxEntries
                             });
@@ -450,13 +482,13 @@ BriefStorageService.prototype = {
             }
 
             Stm.purgeDeletedEntriesText.execute({
-                'deletedState': ENTRY_STATE_DELETED,
+                'deletedState': Storage.ENTRY_STATE_DELETED,
                 'currentDate': Date.now(),
                 'retentionTime': DELETED_FEEDS_RETENTION_TIME
             });
 
             Stm.purgeDeletedEntries.execute({
-                'deletedState': ENTRY_STATE_DELETED,
+                'deletedState': Storage.ENTRY_STATE_DELETED,
                 'currentDate': Date.now(),
                 'retentionTime': DELETED_FEEDS_RETENTION_TIME
             });
@@ -479,15 +511,8 @@ BriefStorageService.prototype = {
     },
 
     // nsIObserver
-    observe: function BriefStorage_observe(aSubject, aTopic, aData) {
+    observe: function Storage_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
-            case 'profile-after-change':
-                if (aData === 'startup') {
-                    this.instantiate();
-                    ObserverService.removeObserver(this, 'profile-after-change');
-                }
-                break;
-
             case 'quit-application':
                 // Integer prefs are longs while Date is a long long.
                 var now = Math.round(Date.now() / 1000);
@@ -512,20 +537,59 @@ BriefStorageService.prototype = {
     },
 
 
-    // nsIBriefStorage
-    syncWithLivemarks: function BriefStorage_syncWithLivemarks() {
+    /**
+     * Synchronizes database with Live Bookmarks from home folder which ID is
+     * specified by extensions.brief.homeFolder.
+     * Feeds that were removed from the home folder remain in the database in the hidden
+     * state for a certain amount of time in case they are added back.
+     */
+    syncWithLivemarks: function Storage_syncWithLivemarks() {
         new LivemarksSync();
     },
 
     observers: [],
 
-    // nsIBriefStorage
-    addObserver: function BriefStorage_addObserver(aObserver) {
+    /**
+     * Registers an object to be notified of entry changes. Storage keeps a strong
+     * reference to this object, so all observers have to be removed using
+     * Storage.removeObserver().
+     *
+     * Observer must implement the following functions.
+     *
+     * Called when new entries are added to the database.
+     *
+     *     function onEntriesAdded(aEntryList)
+     *
+     * Called when properties of existing entries, such as title, content, authors
+     * and date, are changed. When entries are updated, they can also be marked as unread.
+     *
+     *     function onEntriesUpdated(aEntryList);
+     *
+     * Called when the read/unread state of entries changes.
+     *
+     *     function onEntriesMarkedRead(aEntryList, aNewState);
+     *
+     * Called when URLs of entries are bookmarked/unbookmarked.
+     *
+     *     function onEntriesStarred(aEntryList, aNewState);
+     *
+     * Called when a tag is added or removed from entries.
+     *
+     *     function onEntriesTagged(aEntryList, aNewState, aTagName);
+     *
+     * Called when the deleted state of entries changes.
+     *
+     *     function onEntriesDeleted(aEntryList, aNewState);
+     *
+     */
+    addObserver: function Storage_addObserver(aObserver) {
         this.observers.push(aObserver);
     },
 
-    // nsIBriefStorage
-    removeObserver: function BriefStorage_removeObserver(aObserver) {
+    /**
+     * Unregisters an observer object.
+     */
+    removeObserver: function Storage_removeObserver(aObserver) {
         var index = this.observers.indexOf(aObserver);
         if (index !== -1)
             this.observers.splice(index, 1);
@@ -538,7 +602,7 @@ BriefStorageService.prototype = {
      * @param aEntryID    Subject entry.
      * @param aBookmarkID ItemId of the corresponding bookmark in Places database.
      */
-    starEntry: function BriefStorage_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
+    starEntry: function Storage_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
         if (aState)
             Stm.starEntry.execute({ 'bookmarkID': aBookmarkID, 'entryID': aEntryID });
         else
@@ -548,7 +612,7 @@ BriefStorageService.prototype = {
             return;
 
         // Notify observers.
-        var list = new BriefQuery([aEntryID]).getEntryList();
+        var list = new Query([aEntryID]).getEntryList();
         for each (let observer in this.observers)
             observer.onEntriesStarred(list, aState);
     },
@@ -562,7 +626,7 @@ BriefStorageService.prototype = {
      * @param aTagID   ItemId of the tag's bookmark item in Places database. Only
      *                 required when adding a tag.
      */
-    tagEntry: function BriefStorage_tagEntry(aState, aEntryID, aTagName, aTagID) {
+    tagEntry: function Storage_tagEntry(aState, aEntryID, aTagName, aTagID) {
         if (aState) {
             Stm.tagEntry.execute({
                 'entryID': aEntryID,
@@ -584,28 +648,13 @@ BriefStorageService.prototype = {
         });
 
         // Notify observers.
-        var list = new BriefQuery([aEntryID]).getEntryList();
+        var list = new Query([aEntryID]).getEntryList();
         for each (let observer in this.observers)
             observer.onEntriesTagged(list, aState, aTagName);
     },
 
+    QueryInterface: XPCOMUtils.generateQI(Ci.nsIObserver)
 
-    classDescription: 'Database component for the Brief extension',
-    classID: Components.ID('{4C468DA8-7F30-11DB-A690-EBF455D89593}'),
-    contractID: '@ancestor/brief/storage;1',
-    _xpcom_categories: [ { category: 'app-startup', service: true } ],
-    _xpcom_factory: {
-        createInstance: function(aOuter, aIID) {
-            if (aOuter != null)
-                throw Components.results.NS_ERROR_NO_AGGREGATION;
-
-            if (!StorageService)
-                StorageService = new BriefStorageService();
-
-            return StorageService.QueryInterface(aIID);
-        }
-    },
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefStorage, Ci.nsIObserver])
 }
 
 
@@ -623,7 +672,7 @@ function FeedProcessor(aFeed, aCallback) {
     this.insertedEntries = [];
 
     var newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-    var prevDateModified = StorageService.getFeed(aFeed.feedID).dateModified;
+    var prevDateModified = Storage.getFeed(aFeed.feedID).dateModified;
 
     if (aFeed.entries.length && (!newDateModified || newDateModified > prevDateModified)) {
         aFeed.oldestEntryDate = Date.now();
@@ -637,7 +686,7 @@ function FeedProcessor(aFeed, aCallback) {
         }
     }
     else {
-        aCallback.onFeedProcessed(0);
+        aCallback(0);
     }
 
     var properties = {
@@ -654,7 +703,7 @@ function FeedProcessor(aFeed, aCallback) {
     Stm.updateFeed.executeAsync();
 
     // Keep cache up to date.
-    var cachedFeed = StorageService.getFeed(aFeed.feedID);
+    var cachedFeed = Storage.getFeed(aFeed.feedID);
     for (let p in properties)
         cachedFeed[p] = properties[p];
 }
@@ -738,7 +787,7 @@ FeedProcessor.prototype = {
 
     addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
-        var markUnread = StorageService.getFeed(this.feed.feedID).markModifiedEntriesUnread;
+        var markUnread = Storage.getFeed(this.feed.feedID).markModifiedEntriesUnread;
 
         Stm.updateEntry.paramSets.push({
             'date': aEntry.date,
@@ -796,8 +845,8 @@ FeedProcessor.prototype = {
                 },
 
                 handleCompletion: function(aReason) {
-                    var list = new BriefQuery(self.insertedEntries).getEntryList();
-                    for each (let observer in StorageService.observers)
+                    var list = new Query(self.insertedEntries).getEntryList();
+                    for each (let observer in Storage.observers)
                         observer.onEntriesAdded(list);
 
                     // XXX This should be optimized and/or be asynchronous
@@ -812,67 +861,119 @@ FeedProcessor.prototype = {
             ExecuteStatementsAsync(statements, {
 
                 handleCompletion: function(aReason) {
-                    var list = new BriefQuery(self.updatedEntries).getEntryList();
-                    for each (let observer in StorageService.observers)
+                    var list = new Query(self.updatedEntries).getEntryList();
+                    for each (let observer in Storage.observers)
                         observer.onEntriesUpdated(list);
                 }
             });
         }
 
-        this.callback.onFeedProcessed(this.entriesToInsertCount);
+        this.callback(this.entriesToInsertCount);
     }
 }
 
 
-const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
-const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
-const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
-const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
-
-function BriefQuery(aEntries) {
+/**
+ * A query to the Brief's database. Constraints are AND-ed.
+ */
+function Query(aEntries) {
     this.entries = aEntries;
 }
 
-BriefQuery.prototype = {
+Query.prototype = {
 
+    /**
+     * Array of IDs of entries to be selected.
+     */
     entries: null,
-    feeds:   null,
+
+    /**
+     * Array of IDs of feeds containing the entries to be selected.
+     */
+    feeds: null,
+
+    /**
+     * Array of IDs of folders containing the entries to be selected.
+     */
     folders: null,
-    tags:    null,
 
-    read:      false,
-    unread:    false,
-    starred:   false,
+    /**
+     * Array of tags which selected entries must have.
+     */
+    tags: null,
+
+    /**
+     * Entry status. Set any of these attributes to TRUE to limit query to entries with
+     * respetive status.
+     */
+    read: false,
+    unread: false,
+    starred: false,
     unstarred: false,
-    deleted:   ENTRY_STATE_ANY,
 
+    /**
+     * Deleted state of entries to be selected. See constants in Storage.
+     */
+    deleted: Storage.ENTRY_STATE_ANY,
+
+    /**
+     * String that must be contained by title, content, authors or tags of the
+     * selected entries.
+     */
     searchString: '',
 
+    /**
+     * Date range for the selected entries.
+     */
     startDate: 0,
     endDate:   0,
 
+    /**
+     * Maximum number of entries to be selected. Default value is 0 - unlimited.
+     */
     limit:  0,
+
+    /**
+     * Specifies how many result entries to skip at the beggining of the result set.
+     */
     offset: 0,
 
-    sortOrder: Ci.nsIBriefQuery.NO_SORT,
-    sortDirection: Ci.nsIBriefQuery.SORT_DESCENDING,
+    /**
+     * By which column to sort the results.
+     */
+    NO_SORT: 0,
+    SORT_BY_DATE: 1,
+    SORT_BY_TITLE: 2,
+    SORT_BY_FEED_ROW_INDEX: 3,
 
+    sortOrder: 0,
+
+    /**
+     * Direction in which to sort the results.
+     */
+    SORT_DESCENDING: 0,
+    SORT_ASCENDING: 1,
+
+    sortDirection: 0,
+
+    /**
+     * Include hidden feeds i.e. the ones whose Live Bookmarks are no longer
+     * to be found in Brief's home folder. This attribute is ignored if
+     * the list of feeds is explicitly specified by Query.feeds.
+     */
     includeHiddenFeeds: false,
 
-    // When |nsIBriefQuery.folders| is set, it's not enough to take feeds from these
-    // folders alone - we also have to consider their subfolders. Because feeds have
-    // no knowledge about the folders they are in besides their direct parent, we have
-    // to compute actual folders list when creating the query.
+    /**
+     * Actual list of folders selected by the query, including subfolders
+     * of folders specified by Query.folders.
+     */
     effectiveFolders: null,
 
-    // nsIBriefQuery
-    setEntries: function BriefQuery_setEntries(aEntries) {
-        this.entries = aEntries;
-    },
 
-
-    // nsIBriefQuery
-    hasMatches: function BriefQuery_hasMatches() {
+    /**
+     * Indicates if there are any entries that match this query.
+     */
+    hasMatches: function Query_hasMatches() {
         try {
             var sql = 'SELECT EXISTS (SELECT entries.id ' + this.getQueryString(true) + ') AS found';
             var select = CreateStatement(sql);
@@ -889,8 +990,12 @@ BriefQuery.prototype = {
         return exists;
     },
 
-    // nsIBriefQuery
-    getEntries: function BriefQuery_getEntries() {
+    /**
+     * Returns a list of IDs of selected entries.
+     *
+     * @returns Array if IDs of selected entries.
+     */
+    getEntries: function Query_getEntries() {
         try {
             var sql = 'SELECT entries.id ' + this.getQueryString(true);
             var select = CreateStatement(sql);
@@ -909,8 +1014,12 @@ BriefQuery.prototype = {
     },
 
 
-    // nsIBriefQuery
-    getFullEntries: function BriefQuery_getFullEntries() {
+    /**
+     * Returns the selected entries with all their properties.
+     *
+     * @returns Array of Entry's.
+     */
+    getFullEntries: function Query_getFullEntries() {
         var sql = 'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,   '+
                   '       entries.read, entries.starred, entries.updated,               '+
                   '       entries.bookmarkID, entries_text.title, entries_text.content, '+
@@ -921,8 +1030,7 @@ BriefQuery.prototype = {
         var entries = [];
         try {
             while (select.step()) {
-                var entry = Cc['@ancestor/brief/feedentry;1'].
-                            createInstance(Ci.nsIBriefFeedEntry);
+                var entry = new Entry();
 
                 entry.id = select.row.id;
                 entry.feedID = select.row.feedID;
@@ -953,8 +1061,17 @@ BriefQuery.prototype = {
     },
 
 
-    // nsIBriefQuery
-    getProperty: function BriefQuery_getProperty(aPropertyName, aDistinct) {
+    /**
+     * Returns value of a property for each of the selected entries.
+     *
+     * @param aPropertyName
+     *        Name of the property.
+     * @param aDistinct
+     *        Don't include multiple entries with the same value.
+     * @returns Array of objects containing the requested property
+     *          and ID of the corresponding entry.
+     */
+    getProperty: function Query_getProperty(aPropertyName, aDistinct) {
         var rows = [];
         var values = [];
 
@@ -998,11 +1115,13 @@ BriefQuery.prototype = {
     },
 
 
-    // nsIBriefQuery
-    getEntryCount: function BriefQuery_getEntryCount() {
+    /**
+     * Returns the number of selected entries.
+     */
+    getEntryCount: function Query_getEntryCount() {
         // Optimization: ignore sorting settings.
         var tempOrder = this.sortOrder;
-        this.sortOrder = Ci.nsIBriefQuery.NO_SORT;
+        this.sortOrder = this.NO_SORT;
         var select = CreateStatement('SELECT COUNT(1) AS count ' + this.getQueryString(true));
         this.sortOrder = tempOrder;
 
@@ -1022,10 +1141,9 @@ BriefQuery.prototype = {
 
 
     /**
-     * Used to get nsIBriefEntryList of changed entries, so that it can be passed to
-     * nsIBriefStorageObserver's.
+     * Used to get EntryList of changed entries, so that it can be passed to observers.
      */
-    getEntryList: function BriefQuery_getEntryList() {
+    getEntryList: function Query_getEntryList() {
         try {
             var entryIDs = [];
             var feedIDs = [];
@@ -1061,8 +1179,7 @@ BriefQuery.prototype = {
             this.includeHiddenFeeds = tempHidden;
         }
 
-        var list = Cc['@ancestor/brief/entrylist;1'].
-                   createInstance(Ci.nsIBriefEntryList);
+        var list = new EntryList();
         list.IDs = entryIDs;
         list.feedIDs = feedIDs;
         list.tags = tags;
@@ -1071,8 +1188,13 @@ BriefQuery.prototype = {
     },
 
 
-    // nsIBriefQuery
-    markEntriesRead: function BriefQuery_markEntriesRead(aState) {
+    /**
+     * Marks selected entries as read/unread.
+     *
+     * @param aState
+     *        New state of entries (TRUE for read, FALSE for unread).
+     */
+    markEntriesRead: function Query_markEntriesRead(aState) {
         // We try not to include entries which already have the desired state,
         // but we can't omit them if a specific range of the selected entries
         // is meant to be marked.
@@ -1103,22 +1225,32 @@ BriefQuery.prototype = {
         }
 
         if (list.length) {
-            for each (let observer in StorageService.observers)
+            for each (let observer in Storage.observers)
                 observer.onEntriesMarkedRead(list, aState);
         }
     },
 
+    /**
+     * Sets the deleted state of the selected entries or removes them from the database.
+     *
+     * @param aState
+     *        The new deleted state (as defined by constants in Storage.deleted)
+     *        or instruction to physically remove the entries from the
+     *        database (REMOVE_FROM_DATABASE constant below).
+     *
+     * @throws NS_ERROR_INVALID_ARG on invalid |aState| parameter.
+     */
+    REMOVE_FROM_DATABASE: 4,
 
-    // nsIBriefQuery
-    deleteEntries: function BriefQuery_deleteEntries(aState) {
+    deleteEntries: function Query_deleteEntries(aState) {
         switch (aState) {
-            case ENTRY_STATE_NORMAL:
-            case ENTRY_STATE_TRASHED:
-            case ENTRY_STATE_DELETED:
+            case Storage.ENTRY_STATE_NORMAL:
+            case Storage.ENTRY_STATE_TRASHED:
+            case Storage.ENTRY_STATE_DELETED:
                 var statement = CreateStatement('UPDATE entries SET deleted = ' +aState+
                                                  this.getQueryString());
                 break;
-            case Ci.nsIBriefQuery.REMOVE_FROM_DATABASE:
+            case this.REMOVE_FROM_DATABASE:
                 var statement = CreateStatement('DELETE FROM entries ' + this.getQueryString());
                 break;
             default:
@@ -1138,20 +1270,23 @@ BriefQuery.prototype = {
         }
 
         if (list.length) {
-            for each (let observer in StorageService.observers)
+            for each (let observer in Storage.observers)
                 observer.onEntriesDeleted(list, aState);
         }
     },
 
 
     /**
-     * nsIBriefQuery
+     * Bookmarks or unbookmarks URLs of the selected entries.
+     *
+     * @param state
+     *        New state of entries. TRUE to bookmark, FALSE to unbookmark.
      *
      * This function bookmarks URIs of the selected entries. It doesn't star the entries
-     * in the database or send notifications - that part is performed by the bookmarks
-     * observer implemented by BriefStorageService.
+     * in the database or send notifications - that part is performed by the bookmark
+     * observer.
      */
-    starEntries: function BriefQuery_starEntries(aState) {
+    starEntries: function Query_starEntries(aState) {
         var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1'].
                        getService(Ci.nsIPlacesTransactionsService);
         var transactions = []
@@ -1179,7 +1314,7 @@ BriefQuery.prototype = {
                     // If there are no bookmarks for an URL that is starred in our
                     // database, it means that the database is out of sync and we
                     // must update the database directly.
-                    StorageService.starEntry(false, entry.id, bookmarks[0]);
+                    Storage.starEntry(false, entry.id, bookmarks[0]);
                 }
             }
         }
@@ -1188,8 +1323,18 @@ BriefQuery.prototype = {
         transSrv.doTransaction(aggregatedTrans);
     },
 
-    // nsIBriefQuery
-    verifyBookmarksAndTags: function BriefQuery_verifyBookmarksAndTags() {
+    /**
+     * The starred status of entries is automatically kept in sync with user's bookmarks
+     * by the storage service. However, there's always a possibility that it goes out of
+     * sync, for example while Brief is disabled or uninstalled. This method verifies
+     * status of the selected entries.
+     * If an entry is starred, but no bookmarks are found for its URI, then a new bookmark
+     * is added. If an entry isn't starred, but there is a bookmark for its URI, this
+     * function stars the entry. Tags are verified in the same manner.
+     *
+     * @returns TRUE if the starred status was in sync, FALSE otherwise.
+     */
+    verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
         var statusOK = true;
 
         for each (let entry in this.getFullEntries()) {
@@ -1202,11 +1347,11 @@ BriefQuery.prototype = {
             // Verify bookmarks.
             let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
             if (entry.starred && !normalBookmarks.length) {
-                new BriefQuery([entry.id]).starEntries(true);
+                new Query([entry.id]).starEntries(true);
                 statusOK = false;
             }
             else if (!entry.starred && normalBookmarks.length) {
-                StorageService.starEntry(true, entry.id, normalBookmarks[0]);
+                Storage.starEntry(true, entry.id, normalBookmarks[0]);
                 statusOK = false;
             }
 
@@ -1234,7 +1379,7 @@ BriefQuery.prototype = {
             for (let i = 0; i < currentTagNames.length; i++) {
                 let tag = currentTagNames[i];
                 if (storedTags.indexOf(tag) === -1) {
-                    StorageService.tagEntry(true, entry.id, tag, currentTagIDs[i])
+                    Storage.tagEntry(true, entry.id, tag, currentTagIDs[i])
                     statusOK = false;
                 }
             }
@@ -1244,23 +1389,21 @@ BriefQuery.prototype = {
     },
 
     /**
-     * Constructs SQL query constraints based on attributes of this nsIBriefQuery object.
+     * Constructs SQL query constraints query's properties.
      *
      * @param aForSelect      Build a string optimized for a SELECT statement.
      * @param aGetFullEntries Forces including entries_text table (otherwise, it is
      *                        included only when it is used by the query constraints).
      * @returns String containing the part of an SQL statement after WHERE clause.
      */
-    getQueryString: function BriefQuery_getQueryString(aForSelect, aGetFullEntries) {
-        var nsIBriefQuery = Components.interfaces.nsIBriefQuery;
-
+    getQueryString: function Query_getQueryString(aForSelect, aGetFullEntries) {
         var text = aForSelect ? ' FROM entries '
                               : ' WHERE entries.id IN (SELECT entries.id FROM entries ';
 
         if (!this.feeds && !this.includeHiddenFeeds)
             text += ' INNER JOIN feeds ON entries.feedID = feeds.feedID ';
 
-        if (aGetFullEntries || this.searchString || this.sortOrder == nsIBriefQuery.SORT_BY_TITLE)
+        if (aGetFullEntries || this.searchString || this.sortOrder == this.SORT_BY_TITLE)
             text += ' INNER JOIN entries_text ON entries.id = entries_text.rowid ';
 
         if (this.tags)
@@ -1272,9 +1415,12 @@ BriefQuery.prototype = {
             if (!this.folders.length)
                 throw Components.results.NS_ERROR_INVALID_ARG;
 
-            // Fill the list of effective folders.
+            /**
+             * Compute the actual list of folders to be selected, including subfolders
+             * of folders specified by Query.folders.
+             */
             this.effectiveFolders = this.folders;
-            this.traverseFolderChildren(StorageService.homeFolderID);
+            this.traverseFolderChildren(Storage.homeFolderID);
 
             let con = '(feeds.parent = "';
             con += this.effectiveFolders.join('" OR feeds.parent = "');
@@ -1326,7 +1472,7 @@ BriefQuery.prototype = {
         if (this.unstarred)
             constraints.push('entries.starred = 0');
 
-        if (this.deleted != ENTRY_STATE_ANY)
+        if (this.deleted != Storage.ENTRY_STATE_ANY)
             constraints.push('entries.deleted = ' + this.deleted);
 
         if (this.startDate > 0)
@@ -1340,22 +1486,22 @@ BriefQuery.prototype = {
         if (constraints.length)
             text += ' WHERE ' + constraints.join(' AND ') + ' ';
 
-        if (this.sortOrder != nsIBriefQuery.NO_SORT) {
+        if (this.sortOrder != this.NO_SORT) {
             switch (this.sortOrder) {
-                case nsIBriefQuery.SORT_BY_FEED_ROW_INDEX:
+                case this.SORT_BY_FEED_ROW_INDEX:
                     var sortOrder = 'feeds.rowIndex ';
                     break;
-                case nsIBriefQuery.SORT_BY_DATE:
+                case this.SORT_BY_DATE:
                     sortOrder = 'entries.date ';
                     break;
-                case nsIBriefQuery.SORT_BY_TITLE:
+                case this.SORT_BY_TITLE:
                     sortOrder = 'entries_text.title ';
                     break;
                 default:
                     throw Components.results.NS_ERROR_ILLEGAL_VALUE;
             }
 
-            var sortDir = (this.sortDirection == nsIBriefQuery.SORT_ASCENDING) ? 'ASC' : 'DESC';
+            var sortDir = (this.sortDirection == this.SORT_ASCENDING) ? 'ASC' : 'DESC';
             text += 'ORDER BY ' + sortOrder + sortDir;
 
             // Sort by rowid, so that entries that are equal in respect of primary
@@ -1375,9 +1521,9 @@ BriefQuery.prototype = {
         return text;
     },
 
-    traverseFolderChildren: function BriefQuery_traverseFolderChildren(aFolder) {
+    traverseFolderChildren: function Query_traverseFolderChildren(aFolder) {
         var isEffectiveFolder = (this.effectiveFolders.indexOf(aFolder) != -1);
-        var items = StorageService.getAllFeeds(true);
+        var items = Storage.getAllFeeds(true);
 
         for (var i = 0; i < items.length; i++) {
             if (items[i].parent == aFolder && items[i].isFolder) {
@@ -1386,12 +1532,8 @@ BriefQuery.prototype = {
                 this.traverseFolderChildren(items[i].feedID);
             }
         }
-    },
+    }
 
-    classDescription: 'Database query of the Brief extension',
-    classID: Components.ID('{10992573-5d6d-477f-8b13-8b578ad1c95e}'),
-    contractID: '@ancestor/brief/query;1',
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefQuery])
 }
 
 
@@ -1532,7 +1674,7 @@ var Migration = {
             ExecuteSQL('INSERT INTO entries_copy SELECT '+cols+' FROM entries ');
             ExecuteSQL('DROP TABLE entries                                    ');
 
-            StorageService.setupDatabase();
+            Storage.setupDatabase();
 
             let fromCols = 'feedID, providedID, entryURL, date, read, updated,       '+
                            'starred, deleted, bookmarkID, id, secondaryID            ';
@@ -1589,7 +1731,7 @@ var Migration = {
                 }
 
                 if (alreadyBookmarked) {
-                    StorageService.starEntry(true, select.row.id, bookmarkID);
+                    Storage.starEntry(true, select.row.id, bookmarkID);
                 }
                 else {
                     let bookmarkID = Bookmarks.insertBookmark(folder, uri, Bookmarks.DEFAULT_INDEX,
@@ -1687,10 +1829,10 @@ var BookmarkObserver = {
             if (isTag) {
                 // XXX Don't allow duplicate tags.
                 let tagName = Bookmarks.getItemTitle(aFolder);
-                StorageService.tagEntry(true, entry.id, tagName, aItemID);
+                Storage.tagEntry(true, entry.id, tagName, aItemID);
             }
             else {
-                StorageService.starEntry(true, entry.id, aItemID);
+                Storage.starEntry(true, entry.id, aItemID);
             }
         }
     },
@@ -1701,7 +1843,7 @@ var BookmarkObserver = {
 
     // nsINavBookmarkObserver
     onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType) {
-        if (Utils.isLivemarkStored(aItemID) || aItemID == StorageService.homeFolderID) {
+        if (Utils.isLivemarkStored(aItemID) || aItemID == Storage.homeFolderID) {
             this.delayedLivemarksSync();
             return;
         }
@@ -1718,7 +1860,7 @@ var BookmarkObserver = {
         if (isTag) {
             for each (let entry in Utils.getEntriesByTagID(aItemID)) {
                 let tagName = Bookmarks.getItemTitle(aFolder);
-                StorageService.tagEntry(false, entry.id, tagName);
+                Storage.tagEntry(false, entry.id, tagName);
             }
         }
         else {
@@ -1735,9 +1877,9 @@ var BookmarkObserver = {
                 // If there is another bookmark for this URI, don't unstar the
                 // entry, but update its bookmarkID to point to that bookmark.
                 if (bookmarks.length)
-                    StorageService.starEntry(true, entry.id, bookmarks[0], true);
+                    Storage.starEntry(true, entry.id, bookmarks[0], true);
                 else
-                    StorageService.starEntry(false, entry.id);
+                    Storage.starEntry(false, entry.id);
             }
         }
     },
@@ -1777,11 +1919,11 @@ var BookmarkObserver = {
         case 'uri':
             // Unstar any entries with the old URI.
             for each (let entry in Utils.getEntriesByBookmarkID(aItemID))
-                StorageService.starEntry(false, entry.id);
+                Storage.starEntry(false, entry.id);
 
             // Star any entries with the new URI.
             for each (let entry in Utils.getEntriesByURL(aNewValue))
-                StorageService.starEntry(true, entry.id, aItemID);
+                Storage.starEntry(true, entry.id, aItemID);
 
             break;
         }
@@ -1839,8 +1981,8 @@ var BookmarkObserver = {
                     oldTagName = row.tagName;
                 }
 
-                StorageService.tagEntry(false, entry, oldTagName);
-                StorageService.tagEntry(true, entry, aNewName, tagID);
+                Storage.tagEntry(false, entry, oldTagName);
+                Storage.tagEntry(true, entry, aNewName, tagID);
             }
         }
 
@@ -1850,7 +1992,7 @@ var BookmarkObserver = {
     observe: function BookmarkObserver_observe(aSubject, aTopic, aData) {
         if (aTopic == 'timer-callback') {
             this.livemarksSyncPending = false;
-            StorageService.syncWithLivemarks();
+            Storage.syncWithLivemarks();
         }
     },
 
@@ -1907,7 +2049,7 @@ function LivemarksSync() {
     }
 
     if (this.feedListChanged) {
-        StorageService.feedsCache = StorageService.feedsAndFoldersCache = null;
+        Storage.feedsCache = Storage.feedsAndFoldersCache = null;
         ObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
     }
 
@@ -1915,11 +2057,9 @@ function LivemarksSync() {
     if (this.newLivemarks.length) {
         var feeds = [];
         for each (let livemark in this.newLivemarks)
-            feeds.push(StorageService.getFeed(livemark.feedID));
+            feeds.push(Storage.getFeed(livemark.feedID));
 
-        var updateService = Cc['@ancestor/brief/updateservice;1'].
-                            getService(Ci.nsIBriefUpdateService);
-        updateService.updateFeeds(feeds);
+        FeedUpdateService.updateFeeds(feeds);
     }
 }
 
@@ -1938,7 +2078,7 @@ LivemarksSync.prototype = {
             let hideAllFeeds = new Statement('UPDATE feeds SET hidden = :hidden');
             hideAllFeeds.execute({ 'hidden': Date.now() });
 
-            StorageService.feedsCache = StorageService.feedsAndFoldersCache = null;
+            Storage.feedsCache = Storage.feedsAndFoldersCache = null;
             ObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
             folderValid = false;
         }
@@ -2025,7 +2165,7 @@ LivemarksSync.prototype = {
         }
         else {
             // Invalidate feeds cache.
-            StorageService.feedsCache = StorageService.feedsAndFoldersCache = null;
+            Storage.feedsCache = Storage.feedsAndFoldersCache = null;
             ObserverService.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
         }
     },
@@ -2107,7 +2247,7 @@ var Stm = {
                   'WHERE entries.deleted = :deletedState                                 '+
                   'ORDER BY entry_tags.tagName                                           ';
         delete this.getAllTags;
-        return this.getAllTags = new Statement(sql, { 'deletedState': ENTRY_STATE_NORMAL });
+        return this.getAllTags = new Statement(sql, { 'deletedState': Storage.ENTRY_STATE_NORMAL });
     },
 
     get updateFeed() {
@@ -2349,7 +2489,7 @@ var Utils = {
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
         var foundFeed = null;
-        var feeds = StorageService.getAllFeeds(true);
+        var feeds = Storage.getAllFeeds(true);
         for (let i = 0; i < feeds.length; i++) {
             if (feeds[i].bookmarkID == aBookmarkID) {
                 foundFeed = feeds[i];
@@ -2445,7 +2585,7 @@ var Utils = {
 
     // Returns TRUE if an item is a subfolder of Brief's home folder.
     isInHomeFolder: function(aItemID) {
-        var homeID = StorageService.homeFolderID;
+        var homeID = Storage.homeFolderID;
         if (homeID === -1)
             return false;
 
@@ -2510,6 +2650,4 @@ function log(aMessage) {
   consoleService.logStringMessage('Brief:\n' + aMessage);
 }
 
-
-var components = [BriefStorageService, BriefQuery];
-function NSGetModule(compMgr, fileSpec) XPCOMUtils.generateModule(components)
+Storage.init();

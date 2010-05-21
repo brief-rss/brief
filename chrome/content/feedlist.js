@@ -38,17 +38,17 @@ var gViewList = {
 
         switch (this.selectedItem.id) {
             case 'all-items-folder':
-                query.deleted = ENTRY_STATE_NORMAL;
+                query.deleted = Storage.ENTRY_STATE_NORMAL;
                 break;
 
             case 'unread-folder':
-                query.deleted = ENTRY_STATE_NORMAL;
+                query.deleted = Storage.ENTRY_STATE_NORMAL;
                 query.unread = true;
                 var fixedUnread = true;
                 break;
 
             case 'starred-folder':
-                query.deleted = ENTRY_STATE_NORMAL;
+                query.deleted = Storage.ENTRY_STATE_NORMAL;
                 query.starred = true;
                 var fixedStarred = true;
 
@@ -57,7 +57,7 @@ var gViewList = {
                 break;
 
             case 'trash-folder':
-                query.deleted = ENTRY_STATE_TRASHED;
+                query.deleted = Storage.ENTRY_STATE_TRASHED;
                 break;
         }
 
@@ -83,7 +83,7 @@ var gViewList = {
         var item = getElement(aItemID);
 
         var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.unread = true;
         query.starred = (aItemID == 'starred-folder');
 
@@ -109,7 +109,7 @@ var gTagList = {
 
     get tags gTagList_tags_get() {
         if (!this.__tags)
-            this.__tags = gStorage.getAllTags();
+            this.__tags = Storage.getAllTags();
         return this.__tags;
     },
 
@@ -158,7 +158,7 @@ var gTagList = {
         gFeedList.deselect();
 
         var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.tags = [this.selectedItem.id];
 
         gFeedView = new FeedView(this.selectedItem.id, query, false, true);
@@ -207,7 +207,7 @@ var gTagList = {
 
             // Update the label.
             let query = new Query();
-            query.deleted = ENTRY_STATE_NORMAL;
+            query.deleted = Storage.ENTRY_STATE_NORMAL;
             query.tags = [tag];
             query.unread = true;
             this._setLabel(getElement(tag), tag, query.getEntryCount());
@@ -218,17 +218,18 @@ var gTagList = {
         while (this._listbox.hasChildNodes())
             this._listbox.removeChild(this._listbox.lastChild);
 
-        this.tags = gStorage.getAllTags();
+        this.tags = Storage.getAllTags();
 
         for (let i = 0; i < this.tags.length; i++) {
             let item = document.createElement('listitem');
             item.id = this.tags[i];
-            item.className = 'tag-list-item';
+            item.className = 'listitem-iconic tag-list-item';
+            item.setAttribute('image', 'chrome://brief/skin/icons/tag.png');
 
             this._listbox.appendChild(item);
 
             let query = new Query();
-            query.deleted = ENTRY_STATE_NORMAL;
+            query.deleted = Storage.ENTRY_STATE_NORMAL;
             query.tags = [this.tags[i]];
             query.unread = true;
             this._setLabel(item, this.tags[i], query.getEntryCount());
@@ -275,7 +276,7 @@ var gFeedList = {
         return item;
     },
 
-    // nsIBriefFeed object of currently selected feed, or null.
+    // Feed object of currently selected feed, or null.
     get selectedFeed gFeedList_selectedFeed() {
         if (!this.selectedItem)
             return null;
@@ -283,7 +284,7 @@ var gFeedList = {
         var feed = null;
         var feedID = this.selectedItem.id;
         if (feedID)
-            feed = gStorage.getFeed(feedID);
+            feed = Storage.getFeed(feedID);
         return feed;
     },
 
@@ -310,7 +311,7 @@ var gFeedList = {
         this._lastSelectedItem = selectedItem;
 
         var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
 
         if (selectedItem.hasAttribute('container'))
             query.folders = [this.selectedFeed.feedID];
@@ -381,7 +382,7 @@ var gFeedList = {
         var folders = (aFolders.splice) ? aFolders : [aFolders];
 
         for (let i = 0; i < folders.length; i++) {
-            let folder = gStorage.getFeed(folders[i]);
+            let folder = Storage.getFeed(folders[i]);
             let treeitem = getElement(folder.feedID);
             let treecell = treeitem.firstChild.firstChild;
 
@@ -391,7 +392,7 @@ var gFeedList = {
             }
             else {
                 let query = new Query();
-                query.deleted = ENTRY_STATE_NORMAL;
+                query.deleted = Storage.ENTRY_STATE_NORMAL;
                 query.folders = [folder.feedID];
                 query.unread = true;
                 let unreadCount = query.getEntryCount();
@@ -416,13 +417,13 @@ var gFeedList = {
         var feeds = (aFeeds.splice) ? aFeeds : [aFeeds];
 
         for (let i = 0; i < feeds.length; i++) {
-            let feed = gStorage.getFeed(feeds[i]);
+            let feed = Storage.getFeed(feeds[i]);
             let treeitem = getElement(feed.feedID);
             let treecell = treeitem.firstChild.firstChild;
 
             // Update the label.
             let query = new Query();
-            query.deleted = ENTRY_STATE_NORMAL;
+            query.deleted = Storage.ENTRY_STATE_NORMAL;
             query.feeds = [feed.feedID];
             query.unread = true;
             let unreadCount = query.getEntryCount();
@@ -454,7 +455,7 @@ var gFeedList = {
     },
 
     _refreshFavicon: function gFeedList__refreshFavicon(aFeedID) {
-        var feed = gStorage.getFeed(aFeedID);
+        var feed = Storage.getFeed(aFeedID);
         var treeitem = getElement(aFeedID);
         var treecell = treeitem.firstChild.firstChild;
 
@@ -484,7 +485,7 @@ var gFeedList = {
         while (topLevelChildren.hasChildNodes())
             topLevelChildren.removeChild(topLevelChildren.lastChild);
 
-        this.feeds = gStorage.getAllFeeds(true);
+        this.feeds = Storage.getAllFeeds(true);
 
         // This a helper array used by _buildFolderChildren. As the function recurses,
         // the array stores the <treechildren> elements of all folders in the parent
@@ -619,7 +620,7 @@ var gFeedList = {
             break;
 
         case 'brief:feed-title-changed':
-            var feed = gStorage.getFeed(aData);
+            var feed = Storage.getFeed(aData);
             if (feed.isFolder)
                 this.refreshFolderTreeitems(aData);
             else
@@ -656,7 +657,7 @@ var gFeedList = {
         case 'brief:feed-update-queued':
             getElement('update-buttons-deck').selectedIndex = 1;
 
-            if (gUpdateService.scheduledFeedsCount > 1) {
+            if (FeedUpdateService.scheduledFeedsCount > 1) {
                 getElement('update-progress-deck').selectedIndex = 1;
                 refreshProgressmeter();
             }
@@ -667,7 +668,7 @@ var gFeedList = {
             getElement('update-progress-deck').selectedIndex = 0;
             progressmeter.value = 0;
 
-            for each (feed in gStorage.getAllFeeds(false)) {
+            for each (feed in Storage.getAllFeeds(false)) {
                 let item = getElement(feed.feedID);
                 if (item.hasAttribute('loading')) {
                     item.removeAttribute('loading');
@@ -683,7 +684,6 @@ var gFeedList = {
     },
 
 
-    // nsIBriefStorageObserver
     onEntriesAdded: function gFeedList_onEntriesAdded(aEntryList) {
         async(function() {
             this.refreshFeedTreeitems(aEntryList.feedIDs);
@@ -697,7 +697,6 @@ var gFeedList = {
         }, 0, this)
     },
 
-    // nsIBriefStorageObserver
     onEntriesUpdated: function gFeedList_onEntriesUpdated(aEntryList) {
         async(function() {
             if (aEntryList.containsUnread()) {
@@ -709,7 +708,6 @@ var gFeedList = {
         }, 0, this)
     },
 
-    // nsIBriefStorageObserver
     onEntriesMarkedRead: function gFeedList_onEntriesMarkedRead(aEntryList, aNewState) {
         async(function() {
             this.refreshFeedTreeitems(aEntryList.feedIDs);
@@ -722,7 +720,6 @@ var gFeedList = {
         }, 0, this)
     },
 
-    // nsIBriefStorageObserver
     onEntriesStarred: function gFeedList_onEntriesStarred(aEntryList, aNewState) {
         async(function() {
             if (aEntryList.containsUnread())
@@ -731,14 +728,12 @@ var gFeedList = {
         }, 0, this)
     },
 
-    // nsIBriefStorageObserver
     onEntriesTagged: function gFeedList_onEntriesTagged(aEntryList, aNewState, aTag) {
         async(function() {
             gTagList.refreshTags(aTag, aNewState, !aNewState);
         }, 0, this)
     },
 
-    // nsIBriefStorageObserver
     onEntriesDeleted: function gFeedList_onEntriesDeleted(aEntryList, aNewState) {
         async(function() {
             if (aEntryList.containsUnread()) {
@@ -749,7 +744,7 @@ var gFeedList = {
                     gViewList.refreshItem('starred-folder');
             }
 
-            var entriesRestored = (aNewState == ENTRY_STATE_NORMAL);
+            var entriesRestored = (aNewState == Storage.ENTRY_STATE_NORMAL);
             gTagList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);
 
         }, 0, this)
@@ -787,8 +782,7 @@ var gFeedList = {
 
     QueryInterface: function gFeedList_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
-            aIID.equals(Ci.nsIObserver) ||
-            aIID.equals(Ci.nsIBriefStorageObserver)) {
+            aIID.equals(Ci.nsIObserver)) {
             return this;
         }
         throw Components.results.NS_ERROR_NO_INTERFACE;
@@ -828,15 +822,15 @@ var gViewListContextMenu = {
         var query = new Query();
 
         if (this.targetIsUnreadFolder) {
-            query.deleted = ENTRY_STATE_NORMAL;
+            query.deleted = Storage.ENTRY_STATE_NORMAL;
             query.unread = true;
         }
         else if (this.targetIsStarredFolder) {
-            query.deleted = ENTRY_STATE_NORMAL;
+            query.deleted = Storage.ENTRY_STATE_NORMAL;
             query.starred = true;
         }
         else if (this.targetIsTrashFolder) {
-            query.deleted = ENTRY_STATE_TRASHED;
+            query.deleted = Storage.ENTRY_STATE_TRASHED;
         }
 
         query.markEntriesRead(true);
@@ -844,22 +838,22 @@ var gViewListContextMenu = {
 
     restoreTrashed: function gViewListContextMenu_restoreTrashed() {
         var query = new Query();
-        query.deleted = ENTRY_STATE_TRASHED;
-        query.deleteEntries(ENTRY_STATE_NORMAL);
+        query.deleted = Storage.ENTRY_STATE_TRASHED;
+        query.deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
     emptyUnreadFolder: function gViewListContextMenu_emptyUnreadFolder() {
         var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.unstarred = true;
         query.unread = true;
-        query.deleteEntries(ENTRY_STATE_TRASHED);
+        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
     emptyTrash: function gFeedViewContextMenu_emptyTrash() {
         var query = new Query();
-        query.deleted = ENTRY_STATE_TRASHED;
-        query.deleteEntries(ENTRY_STATE_DELETED);
+        query.deleted = Storage.ENTRY_STATE_TRASHED;
+        query.deleteEntries(Storage.ENTRY_STATE_DELETED);
 
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
@@ -891,7 +885,7 @@ var gTagListContextMenu = {
 
     markTagRead: function gTagListContextMenu_markTagRead() {
         var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.tags = [this.targetItem.id];
         query.markEntriesRead(true);
     },
@@ -937,7 +931,7 @@ var gFeedListContextMenu = {
     targetItem: null,
 
     get targetID() this.targetItem.id,
-    get targetFeed() gStorage.getFeed(this.targetID),
+    get targetFeed() Storage.getFeed(this.targetID),
 
     get targetIsFeed()          this.targetItem.hasAttribute('url'),
     get targetIsFolder()        this.targetItem.hasAttribute('container'),
@@ -954,7 +948,7 @@ var gFeedListContextMenu = {
         var openWebsite = getElement('ctx-open-website');
         openWebsite.hidden = !this.targetIsFeed;
         if (this.targetIsFeed)
-            openWebsite.disabled = !gStorage.getFeed(this.targetItem.id).websiteURL;
+            openWebsite.disabled = !Storage.getFeed(this.targetItem.id).websiteURL;
 
         getElement('ctx-properties-separator').hidden = !this.targetIsFeed;
         getElement('ctx-feed-properties').hidden = !this.targetIsFeed;
@@ -972,21 +966,21 @@ var gFeedListContextMenu = {
     markFeedRead: function gFeedListContextMenu_markFeedRead() {
         var query = new Query();
         query.feeds = [this.targetID];
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.markEntriesRead(true);
     },
 
 
     markFolderRead: function gFeedListContextMenu_markFolderRead() {
         var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.folders = [this.targetID];
         query.markEntriesRead(true);
     },
 
 
     updateFeed: function gFeedListContextMenu_updateFeed() {
-        gUpdateService.updateFeeds([this.targetFeed]);
+        FeedUpdateService.updateFeeds([this.targetFeed]);
     },
 
 
@@ -996,10 +990,10 @@ var gFeedListContextMenu = {
 
         for (let i = 0; i < items.length; i++) {
             if (!items[i].hasAttribute('container'))
-                feeds.push(gStorage.getFeed(items[i].id));
+                feeds.push(Storage.getFeed(items[i].id));
         }
 
-        gUpdateService.updateFeeds(feeds);
+        FeedUpdateService.updateFeeds(feeds);
     },
 
 
@@ -1011,19 +1005,19 @@ var gFeedListContextMenu = {
 
     emptyFeed: function gFeedListContextMenu_emptyFeed() {
         var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.feeds = [this.targetID];
         query.unstarred = true;
-        query.deleteEntries(ENTRY_STATE_TRASHED);
+        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
 
     emptyFolder: function gFeedListContextMenu_emptyFolder() {
         var query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.unstarred = true;
         query.folders = [this.targetID];
-        query.deleteEntries(ENTRY_STATE_TRASHED);
+        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
 
@@ -1056,7 +1050,7 @@ var gFeedListContextMenu = {
             var items = this.targetItem.getElementsByTagName('treeitem');
             var feeds = [this.targetFeed];
             for (let i = 0; i < items.length; i++)
-                feeds.push(gStorage.getFeed(items[i].id));
+                feeds.push(Storage.getFeed(items[i].id));
 
             this._deleteBookmarks(feeds);
         }
@@ -1119,12 +1113,12 @@ function getFoldersForFeeds(aFeeds) {
    var feeds = (aFeeds.splice) ? aFeeds : [aFeeds];
 
    for (let i = 0; i < feeds.length; i++) {
-       let feed = gStorage.getFeed(feeds[i]);
+       let feed = Storage.getFeed(feeds[i]);
        let parentID = feed.parent;
        while (parentID != root) {
            if (folders.indexOf(parentID) == -1)
                folders.push(parentID);
-           parentID = gStorage.getFeed(parentID).parent;
+           parentID = Storage.getFeed(parentID).parent;
        }
    }
    return folders;

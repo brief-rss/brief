@@ -24,16 +24,27 @@ const gBrief = {
                             QueryInterface(Ci.nsIPrefBranch2);
     },
 
-    get storage gBrief_storage() {
-        delete this.storage;
-        return this.storage = Cc['@ancestor/brief/storage;1'].
-                              getService(Ci.nsIBriefStorage);
+    get Storage gBrief_Storage() {
+        var tempScope = {};
+        Components.utils.import('resource://brief/Storage.jsm', tempScope);
+
+        delete this.Storage;
+        return this.Storage = tempScope.Storage;
     },
 
-    get updateService gBrief_updateService() {
-        delete this.updateService;
-        return this.updateService = Cc['@ancestor/brief/updateservice;1'].
-                                    getService(Ci.nsIBriefUpdateService);
+    get Query gBrief_Query() {
+        let tempScope = {};
+        Components.utils.import('resource://brief/Storage.jsm', tempScope);
+        delete this.Query;
+        return this.Query = tempScope.Query
+    },
+
+    get FeedUpdateService gBrief_FeedUpdateService() {
+        var tempScope = {};
+        Components.utils.import('resource://brief/FeedUpdateService.jsm', tempScope);
+
+        delete this.FeedUpdateService;
+        return this.FeedUpdateService = tempScope.FeedUpdateService;
     },
 
 
@@ -74,8 +85,7 @@ const gBrief = {
 
 
     markFeedsAsRead: function gBrief_markFeedsAsRead() {
-        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-        query.markEntriesRead(true);
+        new this.Query().markEntriesRead(true);
     },
 
     showOptions: function cmd_showOptions() {
@@ -94,8 +104,8 @@ const gBrief = {
         var counter = document.getElementById('brief-status-counter');
         var panel = document.getElementById('brief-status');
 
-        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-        query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+        var query = new gBrief.Query();
+        query.deleted = gBrief.Storage.ENTRY_STATE_NORMAL;
         query.unread = true;
         var unreadEntriesCount = query.getEntryCount();
 
@@ -105,8 +115,8 @@ const gBrief = {
 
     refreshProgressmeter: function gBrief_refreshProgressmeter() {
         var progressmeter = document.getElementById('brief-progressmeter');
-        var progress = 100 * this.updateService.completedFeedsCount /
-                             this.updateService.scheduledFeedsCount;
+        var progress = 100 * this.FeedUpdateService.completedFeedsCount /
+                             this.FeedUpdateService.scheduledFeedsCount;
         progressmeter.value = progress;
 
         if (progress == 100)
@@ -137,11 +147,11 @@ const gBrief = {
         while (rows.lastChild)
             rows.removeChild(rows.lastChild);
 
-        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-        query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+        var query = new this.Query()
+        query.deleted = this.Storage.ENTRY_STATE_NORMAL;
         query.unread = true;
-        query.sortOrder = Ci.nsIBriefQuery.SORT_BY_FEED_ROW_INDEX;
-        query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
+        query.sortOrder = query.SORT_BY_FEED_ROW_INDEX;
+        query.sortDirection = query.SORT_ASCENDING;
         var unreadFeeds = query.getProperty('feedID', true).
                                 map(function(e) e.feedID);
 
@@ -155,15 +165,15 @@ const gBrief = {
             row.setAttribute('class', 'unread-feed-row');
             row = rows.appendChild(row);
 
-            var feedName = this.storage.getFeed(unreadFeeds[i]).title;
+            var feedName = this.Storage.getFeed(unreadFeeds[i]).title;
             label = document.createElement('label');
             label.setAttribute('class', 'unread-feed-name');
             label.setAttribute('crop', 'right');
             label.setAttribute('value', feedName);
             row.appendChild(label);
 
-            var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-            query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
+            var query = new this.Query;
+            query.deleted = this.Storage.ENTRY_STATE_NORMAL;
             query.feeds = [unreadFeeds[i]];
             query.unread = true;
             var unreadCount = query.getEntryCount();
@@ -283,14 +293,14 @@ const gBrief = {
             gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
             this.prefs.addObserver('', this, false);
-            this.storage.addObserver(this);
+            this.Storage.addObserver(this);
 
             window.addEventListener('unload', this, false);
             break;
 
         case 'unload':
             this.prefs.removeObserver('', this);
-            this.storage.removeObserver(this);
+            this.Storage.removeObserver(this);
 
             var observerService = Cc['@mozilla.org/observer-service;1'].
                                   getService(Ci.nsIObserverService);
@@ -323,8 +333,8 @@ const gBrief = {
         case 'brief:feed-update-queued':
             // Only show the progressmeter if Brief isn't opened in the currently
             // selected tab (no need to show two progressmeters on screen).
-            if (this.updateService.status == Ci.nsIBriefUpdateService.NORMAL_UPDATING
-                && this.updateService.scheduledFeedsCount > 1
+            if (this.FeedUpdateService.status == this.FeedUpdateService.NORMAL_UPDATING
+                && this.FeedUpdateService.scheduledFeedsCount > 1
                 && gBrowser.selectedTab != this.tab) {
 
                 document.getElementById('brief-progressmeter').hidden = false;
@@ -343,25 +353,22 @@ const gBrief = {
         }
     },
 
-    // nsIBriefStorageObserver
+
     onEntriesAdded: function gBrief_onEntriesAdded(aEntryList) {
         if (!this.statusIcon.hidden)
             setTimeout(this.updateStatuspanel, 0);
     },
 
-    // nsIBriefStorageObserver
     onEntriesUpdated: function gBrief_onEntriesUpdated(aEntryList) {
         if (!this.statusIcon.hidden)
             setTimeout(this.updateStatuspanel, 0);
     },
 
-    // nsIBriefStorageObserver
     onEntriesMarkedRead: function gBrief_onEntriesMarkedRead(aEntryList, aState) {
         if (!this.statusIcon.hidden)
             setTimeout(this.updateStatuspanel, 0);
     },
 
-    // nsIBriefStorageObserver
     onEntriesDeleted: function gBrief_onEntriesDeleted(aEntryList, aState) {
         if (!this.statusIcon.hidden && aEntryList.containsUnread())
             setTimeout(this.updateStatuspanel, 0);
@@ -420,8 +427,7 @@ const gBrief = {
 
     QueryInterface: function gBrief_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
-            aIID.equals(Ci.nsIDOMEventListener) ||
-            aIID.equals(Ci.nsIBriefStorageObserver)) {
+            aIID.equals(Ci.nsIDOMEventListener)) {
             return this;
         }
         throw Components.results.NS_ERROR_NO_INTERFACE;

@@ -1,16 +1,24 @@
+var EXPORTED_SYMBOLS = ['Feed', 'Entry', 'EntryList'];
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-
-// nsBriefFeed class definition
+/**
+ * Container for feed properties.
+ */
 function Feed() { }
 
 Feed.prototype = {
 
+    /**
+     * Unique string identifying an entry in Brief's database.
+     */
     feedID:  '',
-    feedURL: '',
 
+    /**
+     * Feed's properties.
+     */
+    feedURL: '',
     websiteURL: '',
     title:      '',
     subtitle:   '',
@@ -19,26 +27,65 @@ Feed.prototype = {
     imageTitle: '',
     dateModified: 0,
 
+    /**
+     * base64-encoded data: URI of the favicon of the site under websiteURL.
+     */
     favicon: '',
 
+    /**
+     * Date when the feed was last checked for updates.
+     */
     lastUpdated: 0,
 
+    /**
+     * ID of the Live Bookmark.
+     */
     bookmarkID: '',
+
+    /**
+     * Index of the feed's Live Bookmark relative to the Brief's home folder
+     * (not to the Live Bookmark's direct parent).
+     */
     rowIndex: 0,
     isFolder: false,
+
+    /**
+     * feedID of the parent folder.
+     */
     parent:   '',
 
+    /**
+     * The wrapped nsIFeed.
+     */
     wrappedFeed: null,
+
+    /**
+     * Entries from the wrapped nsIFeed, array of FeedEntry objects.
+     */
     entries: null,
 
+    /**
+     * Feed's preferences.
+     */
     entryAgeLimit:  0,
     maxEntries:     0,
     updateInterval: 0,
     markModifiedEntriesUnread: false,
 
+    /**
+     * Date of the oldest entry that was available
+     * when the feed was checked for updates.
+     */
     oldestEntryDate: 0,
 
-    wrapFeed: function BriefFeed_wrapFeed(aFeed) {
+    /**
+     * Wraps an instance of nsIFeed, mapping some of its selected properties for
+     * easier access.
+     *
+     * @param aFeed
+     *        nsIFeed to wrap.
+     */
+    wrapFeed: function Feed_wrapFeed(aFeed) {
         this.wrappedFeed = aFeed;
 
         if (aFeed.title)
@@ -57,33 +104,40 @@ Feed.prototype = {
         }
         if (aFeed.items) {
             this.entries = [];
+
             // Counting down, because the order of items is reversed after parsing.
             for (let i = aFeed.items.length - 1; i >= 0; i--) {
                 let entry = aFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
-                let wrappedEntry = Cc['@ancestor/brief/feedentry;1'].
-                                   createInstance(Ci.nsIBriefFeedEntry);
+                let wrappedEntry = new Entry();
                 wrappedEntry.wrapEntry(entry);
                 this.entries.push(wrappedEntry);
             }
         }
-    },
-
-    classDescription: 'Container for feed data',
-    classID: Components.ID('{33F4FF4C-7F11-11DB-83CE-09C655D89593}'),
-    contractID: '@ancestor/brief/feed;1',
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefFeed])
+    }
 
 }
 
 
-// nsBriefFeedEntry class definition
-function FeedEntry() { }
+/**
+ * Container for feed entry data.
+ */
+function Entry() { }
 
-FeedEntry.prototype = {
+Entry.prototype = {
 
-    feedID:   '',
-    id:       0,
+    /**
+     * Unique number identifying an entry in Brief's database.
+     */
+    id: 0,
 
+    /**
+     * ID of feed to which the entry belongs.
+     */
+    feedID: '',
+
+    /**
+     * Entry's data.
+     */
     entryURL: '',
     title:    '',
     summary:  '',
@@ -91,16 +145,36 @@ FeedEntry.prototype = {
     date:     0,
     authors:  '',
 
+    /**
+     * Status information.
+     */
     read:     false,
     starred:  false,
     updated:  false,
 
+    /**
+     * ID if the corresponing bookmark, or -1 if entry isn't bookmarked.
+     */
     bookmarkID: -1,
+
+    /**
+     * Array of tags associated with the entry's URI.
+     */
     tags: null,
 
+    /**
+     * Wrapped nsIFeedEntry.
+     */
     wrappedEntry: null,
 
-    wrapEntry: function BriefFeedEntry_wrapEntry(aEntry) {
+    /**
+     * Wraps an instance of nsIFeedEntry, mapping some of its properties
+     * for easier access.
+     *
+     * @param aFeed
+     *        nsIFeedEntry object to wrap.
+     */
+    wrapEntry: function FeedEntry_wrapEntry(aEntry) {
         this.wrappedEntry = aEntry;
 
         if (aEntry.title)
@@ -133,28 +207,37 @@ FeedEntry.prototype = {
         catch (e) {
             // XXX With some feeds accessing nsIFeedContainer.authors throws.
         }
-    },
-
-    classDescription: 'Container for a single feed entry',
-    classID: Components.ID('{2B99DB2E-7F11-11DB-ABEC-E0C555D89593}'),
-    contractID: '@ancestor/brief/feedentry;1',
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefFeedEntry])
+    }
 
 }
 
 
-// nsIBriefEntryList class definition
+/**
+ * A simple list of entries which provides utility functions for analyzing its contents.
+ */
 function EntryList() { }
 
 EntryList.prototype = {
 
+    /**
+     * Number of entries in the list.
+     */
     get length() this.IDs ? this.IDs.length : 0,
 
-    // nsIBriefEntryList
-    IDs:   null,
+    /**
+     * Array of entry IDs.
+     */
+    IDs: null,
 
+    /**
+     * Array of distinct feeds to which entries in the list belong.
+     */
     feeds: null,
-    tags:  null,
+
+    /**
+     * Array of distinct tags which entries in the list have.
+     */
+    tags: null,
 
 
     containsFeed: function EntryList_containsFeed(aFeedID) {
@@ -182,13 +265,12 @@ EntryList.prototype = {
         // Maximum depth of expression tree in sqlite is 1000, so there are only
         // so many entries you can OR in a statement. If that limit is exceeded,
         // we return true even though we don't know if there were any matches.
-        // nsIBriefEntryList.contains() is used primarly by views and it's better
+        // EntryList.contains() is used primarly by views and it's better
         // for them to be unnecessarily refreshed than not be refreshed when they should.
         if (this.length > 500)
             return true;
 
-        var query = Cc['@ancestor/brief/query;1'].createInstance(Ci.nsIBriefQuery);
-        query.entries = this.IDs;
+        query = new Query(this.IDs);
         switch (aWhat) {
             case 'unread':
                 query.unread = true;
@@ -197,18 +279,12 @@ EntryList.prototype = {
                 query.starred = true;
                 break;
             case 'trashed':
-                query.deleted = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
+                query.deleted = Storage.ENTRY_STATE_TRASHED;
                 break;
         }
 
         return query.hasMatches();
-    },
-
-
-    classDescription: 'A simple list of feed entries',
-    classID: Components.ID('{9a853d20-203d-11dd-bd0b-0800200c9a66}'),
-    contractID: '@ancestor/brief/entrylist;1',
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIBriefEntryList])
+    }
 
 }
 
@@ -246,12 +322,15 @@ var milTimezoneCodesMap = {
     S: '+6',  T: '+7',  U: '+8',  V: '+9', W: '+10', X: '+11', Y: '+12', Z: 'UT',
 }
 
+__defineGetter__('Query', function() {
+    var tempScope = {};
+    Components.utils.import('resource://brief/Storage.jsm', tempScope);
+    delete this.Query;
+    return this.Query = tempScope.Query;
+});
 
 function log(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].
                        getService(Ci.nsIConsoleService);
   consoleService.logStringMessage(aMessage);
 }
-
-var modules = [Feed, FeedEntry, EntryList];
-function NSGetModule(compMgr, fileSpec) XPCOMUtils.generateModule(modules)

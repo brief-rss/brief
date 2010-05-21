@@ -34,7 +34,7 @@ function FeedView(aTitle, aQuery, aFixedUnread, aFixedStarred) {
     this.fixedUnread = aFixedUnread || false;
     this.fixedStarred = aFixedStarred || false;
 
-    aQuery.sortOrder = Ci.nsIBriefQuery.SORT_BY_DATE;
+    aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
     this.query = aQuery;
 
     // Ordered array of IDs of entries that have been loaded.
@@ -93,9 +93,9 @@ FeedView.prototype = {
             this.__query.starred = gPrefs.filterStarred;
 
         if (this.__query.unread && gPrefs.sortUnreadViewOldestFirst)
-            this.__query.sortDirection = Ci.nsIBriefQuery.SORT_ASCENDING;
+            this.__query.sortDirection = Query.prototype.SORT_ASCENDING;
         else
-            this.__query.sortDirection = Ci.nsIBriefQuery.SORT_DESCENDING;
+            this.__query.sortDirection = Query.prototype.SORT_DESCENDING;
 
         return this.__query;
     },
@@ -421,7 +421,7 @@ FeedView.prototype = {
         }
 
         if (entriesToMark.length) {
-            var query = new QuerySH(entriesToMark);
+            var query = new Query(entriesToMark);
             query.markEntriesRead(true);
         }
     },
@@ -459,7 +459,7 @@ FeedView.prototype = {
 
         this.browser.addEventListener('load', this, false);
         getTopWindow().gBrowser.addEventListener('TabSelect', this, false);
-        gStorage.addObserver(this);
+        Storage.addObserver(this);
 
         // Load the template page if it isn't loaded yet. We also have to make sure to
         // load it at startup, when no view was attached yet, because the template page
@@ -489,7 +489,7 @@ FeedView.prototype = {
         for each (let event in this._events)
             this.document.removeEventListener(event, this, true);
 
-        gStorage.removeObserver(this);
+        Storage.removeObserver(this);
 
         this._stopSmoothScrolling();
         clearTimeout(this._markVisibleTimeout);
@@ -536,7 +536,7 @@ FeedView.prototype = {
                 break;
 
             case 'ShowBookmarkPanel':
-                let query = new QuerySH([id]);
+                let query = new Query([id]);
                 query.verifyBookmarksAndTags();
                 let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
 
@@ -645,7 +645,6 @@ FeedView.prototype = {
         }
     },
 
-    // nsIBriefStorageObserver
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
         if (getTopWindow().gBrowser.selectedTab != getTopWindow().gBrief.tab) {
             this._refreshPending = true;
@@ -656,7 +655,6 @@ FeedView.prototype = {
             this._onEntriesAdded(aEntryList.IDs);
     },
 
-    // nsIBriefStorageObserver
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
         if (getTopWindow().gBrowser.selectedTab != getTopWindow().gBrief.tab) {
             this._refreshPending = true;
@@ -669,7 +667,6 @@ FeedView.prototype = {
         }
     },
 
-    // nsIBriefStorageObserver
     onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntryList, aNewState) {
         if (!this.active)
             return;
@@ -686,7 +683,6 @@ FeedView.prototype = {
         this._sendEvent(entries, 'EntryMarkedRead', aNewState);
     },
 
-    // nsIBriefStorageObserver
     onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
         if (!this.active)
             return;
@@ -703,7 +699,6 @@ FeedView.prototype = {
         this._sendEvent(entries, 'EntryStarred', aNewState);
     },
 
-    // nsIBriefStorageObserver
     onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
         if (!this.active)
             return;
@@ -726,7 +721,6 @@ FeedView.prototype = {
         }
     },
 
-    // nsIBriefStorageObserver
     onEntriesDeleted: function FeedView_onEntriesDeleted(aEntryList, aNewState) {
         if (!this.active)
             return;
@@ -872,12 +866,12 @@ FeedView.prototype = {
         content.id = 'feed-content';
         container.appendChild(content);
 
-        var feed = gStorage.getFeed(this.query.feeds);
+        var feed = Storage.getFeed(this.query.feeds);
 
         this._buildHeader(feed);
 
         // Pass parameters to content.
-        if (this.query.deleted == ENTRY_STATE_TRASHED)
+        if (this.query.deleted == Storage.ENTRY_STATE_TRASHED)
             this.feedContent.setAttribute('trash', true);
         if (gPrefs.showHeadlinesOnly)
             this.feedContent.setAttribute('showHeadlinesOnly', true);
@@ -1012,7 +1006,7 @@ FeedView.prototype = {
             articleContainer.setAttribute('updated', true);
         }
 
-        var feedName = gStorage.getFeed(aEntry.feedID).title;
+        var feedName = Storage.getFeed(aEntry.feedID).title;
         articleContainer.setAttribute('feedName', feedName);
 
         if (gPrefs.showHeadlinesOnly)
@@ -1126,7 +1120,7 @@ FeedView.prototype = {
             mainMessage = gStringBundle.getString('noStarredEntries');
             secondaryMessage = gStringBundle.getString('noStarredEntriesAdvice');
         }
-        else if (this.query.deleted == ENTRY_STATE_TRASHED) {
+        else if (this.query.deleted == Storage.ENTRY_STATE_TRASHED) {
             mainMessage = gStringBundle.getString('trashIsEmpty');
         }
         else {
@@ -1186,8 +1180,7 @@ FeedView.prototype = {
 
     QueryInterface: function FeedView_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
-            aIID.equals(Ci.nsIDOMEventListener) ||
-            aIID.equals(Ci.nsIBriefStorageObserver)) {
+            aIID.equals(Ci.nsIDOMEventListener)) {
             return this;
         }
         throw Components.results.NS_ERROR_NO_INTERFACE;

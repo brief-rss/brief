@@ -6,15 +6,8 @@ const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-const gStorage = Cc['@ancestor/brief/storage;1'].getService(Ci.nsIBriefStorage);
-const gUpdateService = Cc['@ancestor/brief/updateservice;1'].getService(Ci.nsIBriefUpdateService);
-var QuerySH = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery', 'setEntries');
-var Query = Components.Constructor('@ancestor/brief/query;1', 'nsIBriefQuery');
-
-const ENTRY_STATE_NORMAL = Ci.nsIBriefQuery.ENTRY_STATE_NORMAL;
-const ENTRY_STATE_TRASHED = Ci.nsIBriefQuery.ENTRY_STATE_TRASHED;
-const ENTRY_STATE_DELETED = Ci.nsIBriefQuery.ENTRY_STATE_DELETED;
-const ENTRY_STATE_ANY = Ci.nsIBriefQuery.ENTRY_STATE_ANY;
+Components.utils.import('resource://brief/Storage.jsm');
+Components.utils.import('resource://brief/FeedUpdateService.jsm');
 
 var gPrefBranch = Cc['@mozilla.org/preferences-service;1'].
                     getService(Ci.nsIPrefService).
@@ -62,13 +55,13 @@ function init() {
     observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
     observerService.addObserver(gFeedList, 'brief:custom-style-changed', false);
 
-    gStorage.addObserver(gFeedList);
+    Storage.addObserver(gFeedList);
 
     gViewList.init();
     async(gFeedList.rebuild, 0, gFeedList);
     async(loadHomeview);
 
-    async(gStorage.syncWithLivemarks, 2000, gStorage);
+    async(Storage.syncWithLivemarks, 2000, Storage);
 }
 
 
@@ -90,7 +83,7 @@ function unload() {
     observerService.removeObserver(gFeedList, 'brief:custom-style-changed');
 
     gPrefs.unregister();
-    gStorage.removeObserver(gFeedList);
+    Storage.removeObserver(gFeedList);
     gFeedView.uninit();
 }
 
@@ -122,11 +115,11 @@ var gCommands = {
     },
 
     updateAllFeeds: function cmd_updateAllFeeds() {
-        gUpdateService.updateAllFeeds();
+        FeedUpdateService.updateAllFeeds();
     },
 
     stopUpdating: function cmd_stopUpdating() {
-        gUpdateService.stopUpdating();
+        FeedUpdateService.stopUpdating();
         getElement('update-buttons-deck').selectedIndex = 0;
     },
 
@@ -220,7 +213,7 @@ var gCommands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        var query = new QuerySH([aEntry]);
+        var query = new Query([aEntry]);
         query.markEntriesRead(aNewState);
 
         if (gPrefs.autoMarkRead && !aNewState)
@@ -229,7 +222,7 @@ var gCommands = {
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
         if (gFeedView.selectedEntry) {
-            if (gFeedView.query.deleted == ENTRY_STATE_TRASHED)
+            if (gFeedView.query.deleted == Storage.ENTRY_STATE_TRASHED)
                 this.restoreEntry(gFeedView.selectedEntry);
             else
                 this.deleteEntry(gFeedView.selectedEntry);
@@ -237,13 +230,13 @@ var gCommands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        var query = new QuerySH([aEntry]);
-        query.deleteEntries(ENTRY_STATE_TRASHED);
+        var query = new Query([aEntry]);
+        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        var query = new QuerySH([aEntry]);
-        query.deleteEntries(ENTRY_STATE_NORMAL);
+        var query = new Query([aEntry]);
+        query.deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
     switchSelectedEntryStarred: function cmd_switchSelectedEntryStarred() {
@@ -254,7 +247,7 @@ var gCommands = {
     },
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
-        var query = new QuerySH([aEntry]);
+        var query = new Query([aEntry]);
         query.starEntries(aNewState);
     },
 
@@ -281,7 +274,7 @@ var gCommands = {
         if (!aEntryElement.hasAttribute('read')) {
             aEntryElement.setAttribute('read', true);
             let entryID = parseInt(aEntryElement.id);
-            let query = new QuerySH([entryID]);
+            let query = new Query([entryID]);
             query.markEntriesRead(true);
         }
     },
@@ -323,7 +316,7 @@ function loadHomeview() {
         let startView = getElement('view-list').getAttribute('startview');
 
         let query = new Query();
-        query.deleted = ENTRY_STATE_NORMAL;
+        query.deleted = Storage.ENTRY_STATE_NORMAL;
         query.unread = (startView == 'unread-folder');
         let name = getElement(startView).getAttribute('name');
         gFeedView = new FeedView(name, query);
@@ -337,8 +330,8 @@ function loadHomeview() {
 
 function refreshProgressmeter() {
     var progressmeter = getElement('update-progress');
-    var progress = 100 * gUpdateService.completedFeedsCount /
-                         gUpdateService.scheduledFeedsCount;
+    var progress = 100 * FeedUpdateService.completedFeedsCount /
+                         FeedUpdateService.scheduledFeedsCount;
     progressmeter.value = progress;
 
     if (progress == 100) {
