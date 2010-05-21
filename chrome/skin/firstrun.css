@@ -10,8 +10,6 @@ html, body {
 
 body {
     display: -moz-box;
-    -moz-box-orient: vertical;
-    -moz-box-align: center;
     font-family: Verdana, Helvetica, Arial, sans-serif;
     font-size: 13px;
     background: -moz-linear-gradient(top, #c0e3f0, #eaf6fa 50%, #eaf6fa);
@@ -24,10 +22,15 @@ div {
 #page {
     -moz-box-orient: vertical;
     -moz-box-pack: center;
+    -moz-box-align: center;
     -moz-box-flex: 1;
     padding: 10px;
     padding-bottom: 80px;
     }
+
+#header {
+    -moz-box-align: start;
+}
 
 #intro {
     -moz-box-orient: vertical;
@@ -88,22 +91,18 @@ div {
     }
 
 #open-brief {
-    -moz-box-pack: center;
-    margin-top: 70px;
-    }
-
-#open-brief > a {
     display: -moz-box;
+    margin-top: 70px;
+    padding: 5px 20px 8px;
     font-size: 24px;
     font-weight: bold;
     color: #FFFFFF;
     text-shadow: -1px -1px 1px #7BAB29;
     border: 1px solid #488F03;
     -moz-border-radius: 10px;
-    padding: 5px 20px 8px;
     background: url(chrome://brief/skin/get-started-button.png) repeat-x center;
     }
 
-#open-brief > a:hover {
+#open-brief:hover {
     background-image: url(chrome://brief/skin/get-started-button-hover.png);
-}
+    }
