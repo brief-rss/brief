@@ -324,19 +324,8 @@ var opml = {
         }
 
         return str;
-    },
-
-    getField: function(e, field) {
-        try {
-            var source = RDF.GetResource(e.Value);
-            var property = RDF.GetResource('http://home.netscape.com/NC-rdf#'+field);
-            return BMDS.GetTarget(source, property, true).
-                        QueryInterface(kRDFLITIID).Value;
-        }
-        catch (e) {
-            return '';
-        }
     }
+
 }
 
 function log(aMessage) {
