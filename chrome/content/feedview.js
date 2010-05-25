@@ -88,11 +88,11 @@ FeedView.prototype = {
 
     get query FeedView_query_get() {
         if (!this.fixedUnread)
-            this.__query.unread = gPrefs.filterUnread;
+            this.__query.read = gPrefs.filterUnread ? false : undefined;
         if (!this.fixedStarred)
-            this.__query.starred = gPrefs.filterStarred;
+            this.__query.starred = gPrefs.filterStarred ? true : undefined;
 
-        if (this.__query.unread && gPrefs.sortUnreadViewOldestFirst)
+        if (this.__query.read === false && gPrefs.sortUnreadViewOldestFirst)
             this.__query.sortDirection = Query.prototype.SORT_ASCENDING;
         else
             this.__query.sortDirection = Query.prototype.SORT_DESCENDING;
@@ -396,7 +396,7 @@ FeedView.prototype = {
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
-        if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && !this.query.unread) {
+        if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
             this._markVisibleTimeout = async(this.markVisibleEntriesRead, 1000, this);
         }
@@ -420,10 +420,8 @@ FeedView.prototype = {
                 entriesToMark.push(id);
         }
 
-        if (entriesToMark.length) {
-            var query = new Query(entriesToMark);
-            query.markEntriesRead(true);
-        }
+        if (entriesToMark.length)
+            new Query(entriesToMark).markEntriesRead(true);
     },
 
     toggleHeadlinesView: function FeedView_toggleHeadlinesView() {
@@ -531,12 +529,12 @@ FeedView.prototype = {
                 break;
 
             case 'EntryUncollapsed':
-                if (gPrefs.autoMarkRead && !this.query.unread)
+                if (gPrefs.autoMarkRead && this.query.read !== false)
                     gCommands.markEntryRead(id, true);
                 break;
 
             case 'ShowBookmarkPanel':
-                let query = new Query([id]);
+                let query = new Query(id);
                 query.verifyBookmarksAndTags();
                 let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
 
@@ -671,7 +669,7 @@ FeedView.prototype = {
         if (!this.active)
             return;
 
-        if (this.query.unread) {
+        if (this.query.read === false) {
             let delta = this.query.getEntryCount() - this.entryCount;
             if (delta > 0)
                 this._onEntriesAdded(aEntryList.IDs);
@@ -687,7 +685,7 @@ FeedView.prototype = {
         if (!this.active)
             return;
 
-        if (this.query.starred) {
+        if (this.query.starred === true) {
             let delta = this.query.getEntryCount() - this.entryCount;
             if (delta > 0)
                 this._onEntriesAdded(aEntryList.IDs);
@@ -1113,10 +1111,10 @@ FeedView.prototype = {
         if (this.query.searchString) {
             mainMessage = gStringBundle.getString('noEntriesFound');
         }
-        else if (this.query.unread) {
+        else if (this.query.read === false) {
             mainMessage = gStringBundle.getString('noUnreadEntries');
         }
-        else if (this.query.starred) {
+        else if (this.query.starred === true) {
             mainMessage = gStringBundle.getString('noStarredEntries');
             secondaryMessage = gStringBundle.getString('noStarredEntriesAdvice');
         }

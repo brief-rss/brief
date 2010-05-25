@@ -104,9 +104,10 @@ const gBrief = {
         var counter = document.getElementById('brief-status-counter');
         var panel = document.getElementById('brief-status');
 
-        var query = new gBrief.Query();
-        query.deleted = gBrief.Storage.ENTRY_STATE_NORMAL;
-        query.unread = true;
+        var query = new gBrief.Query({
+            deleted: gBrief.Storage.ENTRY_STATE_NORMAL,
+            read: false
+        });
         var unreadEntriesCount = query.getEntryCount();
 
         counter.value = unreadEntriesCount;
@@ -147,13 +148,14 @@ const gBrief = {
         while (rows.lastChild)
             rows.removeChild(rows.lastChild);
 
-        var query = new this.Query()
-        query.deleted = this.Storage.ENTRY_STATE_NORMAL;
-        query.unread = true;
-        query.sortOrder = query.SORT_BY_FEED_ROW_INDEX;
-        query.sortDirection = query.SORT_ASCENDING;
-        var unreadFeeds = query.getProperty('feedID', true).
-                                map(function(e) e.feedID);
+        var query = new this.Query({
+            deleted: this.Storage.ENTRY_STATE_NORMAL,
+            read: false,
+            sortOrder: this.Query.SORT_BY_FEED_ROW_INDEX,
+            sortDirection: this.Query.SORT_ASCENDING
+        })
+        var unreadFeeds = query.getProperty('feedID', true)
+                               .map(function(e) e.feedID);
 
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
         var value = bundle.getString('noUnreadFeedsTooltip');
@@ -172,14 +174,15 @@ const gBrief = {
             label.setAttribute('value', feedName);
             row.appendChild(label);
 
-            var query = new this.Query;
-            query.deleted = this.Storage.ENTRY_STATE_NORMAL;
-            query.feeds = [unreadFeeds[i]];
-            query.unread = true;
-            var unreadCount = query.getEntryCount();
+            var query = new this.Query({
+                deleted: this.Storage.ENTRY_STATE_NORMAL,
+                feeds: [unreadFeeds[i]],
+                read: false
+            });
+
             label = document.createElement('label');
             label.setAttribute('class', 'unread-entries-count');
-            label.setAttribute('value', unreadCount);
+            label.setAttribute('value', query.getEntryCount());
             row.appendChild(label);
 
             value = unreadCount > 1 ? bundle.getString('manyUnreadEntries')
