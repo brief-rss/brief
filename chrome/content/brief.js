@@ -213,8 +213,7 @@ var gCommands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        var query = new Query([aEntry]);
-        query.markEntriesRead(aNewState);
+        new Query(aEntry).markEntriesRead(aNewState);
 
         if (gPrefs.autoMarkRead && !aNewState)
             gFeedView.entriesMarkedUnread.push(aEntry);
@@ -230,13 +229,11 @@ var gCommands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        var query = new Query([aEntry]);
-        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+        new Query(aEntry).deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        var query = new Query([aEntry]);
-        query.deleteEntries(Storage.ENTRY_STATE_NORMAL);
+        new Query(aEntry).deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
     switchSelectedEntryStarred: function cmd_switchSelectedEntryStarred() {
@@ -247,8 +244,7 @@ var gCommands = {
     },
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
-        var query = new Query([aEntry]);
-        query.starEntries(aNewState);
+        new Query(aEntry).bookmarkEntries(aNewState);
     },
 
     switchSelectedEntryCollapsed: function cmd_switchSelectedEntryCollapsed() {
@@ -274,8 +270,7 @@ var gCommands = {
         if (!aEntryElement.hasAttribute('read')) {
             aEntryElement.setAttribute('read', true);
             let entryID = parseInt(aEntryElement.id);
-            let query = new Query([entryID]);
-            query.markEntriesRead(true);
+            new Query(entryID).markEntriesRead(true);
         }
     },
 
@@ -314,11 +309,12 @@ function loadHomeview() {
     }
     else {
         let startView = getElement('view-list').getAttribute('startview');
-
-        let query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
-        query.unread = (startView == 'unread-folder');
         let name = getElement(startView).getAttribute('name');
+
+        let query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            read: startView == 'unread-folder' ? false : undefined
+        });
         gFeedView = new FeedView(name, query);
 
         gViewList.richlistbox.suppressOnSelect = true;
@@ -471,11 +467,11 @@ var gPrefs = {
 
         switch (aData) {
             case 'feedview.autoMarkRead':
-                gFeedView._markVisibleAsRead();
+                gFeedView._autoMarkRead();
                 break;
 
             case 'feedview.sortUnreadViewOldestFirst':
-                if (gFeedView.query.unread)
+                if (gFeedView.query.read === false)
                     gFeedView.refresh();
                 break;
 

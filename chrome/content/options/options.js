@@ -138,9 +138,10 @@ var gFeedsPane = {
 
         var result = promptService.confirmCheck(window, title, text, checkboxLabel, checked);
         if (result) {
-            var query = new Query();
-            query.unstarred = checked.value;
-            query.includeHiddenFeeds = true;
+            var query = new Query({
+                starred: checked.value ? false : undefined,
+                includeHiddenFeeds: true
+            });
             query.deleteEntries(Storage.ENTRY_STATE_DELETED);
 
             prefBranch.setBoolPref('extensions.brief.database.keepStarredWhenClearing', checked.value)

@@ -43,7 +43,7 @@ var gViewList = {
 
             case 'unread-folder':
                 query.deleted = Storage.ENTRY_STATE_NORMAL;
-                query.unread = true;
+                query.read = false;
                 var fixedUnread = true;
                 break;
 
@@ -82,10 +82,11 @@ var gViewList = {
     refreshItem: function gViewList_refreshItem(aItemID) {
         var item = getElement(aItemID);
 
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
-        query.unread = true;
-        query.starred = (aItemID == 'starred-folder');
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            read: false,
+            starred: (aItemID == 'starred-folder') ? true : undefined
+        });
 
         var unreadCount = query.getEntryCount();
         var name = item.getAttribute('name');
@@ -157,9 +158,10 @@ var gTagList = {
         gViewList.deselect();
         gFeedList.deselect();
 
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
-        query.tags = [this.selectedItem.id];
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            tags: [this.selectedItem.id]
+        });
 
         gFeedView = new FeedView(this.selectedItem.id, query, false, true);
     },
@@ -195,9 +197,7 @@ var gTagList = {
                 }
             }
             else if (aPossiblyRemoved) {
-                let query = new Query();
-                query.tags = [tag];
-                if (!query.hasMatches()) {
+                if (!new Query({ tags: [tag] }).hasMatches()) {
                     this._rebuild();
                     if (gFeedView.query.tags && gFeedView.query.tags[0] === tag)
                         gViewList.selectedItem = getElement('starred-folder');
@@ -206,10 +206,12 @@ var gTagList = {
             }
 
             // Update the label.
-            let query = new Query();
-            query.deleted = Storage.ENTRY_STATE_NORMAL;
-            query.tags = [tag];
-            query.unread = true;
+            let query = new Query({
+                deleted: Storage.ENTRY_STATE_NORMAL,
+                tags: [tag],
+                read: false
+            });
+
             this._setLabel(getElement(tag), tag, query.getEntryCount());
         }
     },
@@ -228,11 +230,13 @@ var gTagList = {
 
             this._listbox.appendChild(item);
 
-            let query = new Query();
-            query.deleted = Storage.ENTRY_STATE_NORMAL;
-            query.tags = [this.tags[i]];
-            query.unread = true;
-            this._setLabel(item, this.tags[i], query.getEntryCount());
+            let query = new Query({
+                deleted: Storage.ENTRY_STATE_NORMAL,
+                tags: [this.tags[i]],
+                read: false
+            });
+
+            this._updateLabel(item, this.tags[i], query.getEntryCount());
         }
 
         this.ready = true;
@@ -310,8 +314,7 @@ var gFeedList = {
         // the new selected item is the same.
         this._lastSelectedItem = selectedItem;
 
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
+        var query = new Query({ deleted: Storage.ENTRY_STATE_NORMAL });
 
         if (selectedItem.hasAttribute('container'))
             query.folders = [this.selectedFeed.feedID];
@@ -391,13 +394,13 @@ var gFeedList = {
                 treecell.setAttribute('label', folder.title);
             }
             else {
-                let query = new Query();
-                query.deleted = Storage.ENTRY_STATE_NORMAL;
-                query.folders = [folder.feedID];
-                query.unread = true;
-                let unreadCount = query.getEntryCount();
+                let query = new Query({
+                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    folders: [folder.feedID],
+                    read: false
+                });
 
-                this._setLabel(treecell, folder.title, unreadCount);
+                this._setLabel(treecell, folder.title, query.getEntryCount());
             }
         }
     },
@@ -422,12 +425,13 @@ var gFeedList = {
             let treecell = treeitem.firstChild.firstChild;
 
             // Update the label.
-            let query = new Query();
-            query.deleted = Storage.ENTRY_STATE_NORMAL;
-            query.feeds = [feed.feedID];
-            query.unread = true;
-            let unreadCount = query.getEntryCount();
-            this._setLabel(treecell, feed.title, unreadCount);
+            let query = new Query({
+                deleted: Storage.ENTRY_STATE_NORMAL,
+                feeds: [feed.feedID],
+                read: false
+            });
+
+            this._setLabel(treecell, feed.title, query.getEntryCount());
 
             this._refreshFavicon(feed.feedID);
         }
@@ -823,7 +827,7 @@ var gViewListContextMenu = {
 
         if (this.targetIsUnreadFolder) {
             query.deleted = Storage.ENTRY_STATE_NORMAL;
-            query.unread = true;
+            query.read = false;
         }
         else if (this.targetIsStarredFolder) {
             query.deleted = Storage.ENTRY_STATE_NORMAL;
@@ -837,22 +841,25 @@ var gViewListContextMenu = {
     },
 
     restoreTrashed: function gViewListContextMenu_restoreTrashed() {
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_TRASHED;
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_TRASHED
+        });
         query.deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
     emptyUnreadFolder: function gViewListContextMenu_emptyUnreadFolder() {
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
-        query.unstarred = true;
-        query.unread = true;
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            starred: false,
+            read: false
+        });
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
     emptyTrash: function gFeedViewContextMenu_emptyTrash() {
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_TRASHED;
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_TRASHED
+        });
         query.deleteEntries(Storage.ENTRY_STATE_DELETED);
 
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
@@ -884,9 +891,10 @@ var gTagListContextMenu = {
     targetItem: null,
 
     markTagRead: function gTagListContextMenu_markTagRead() {
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
-        query.tags = [this.targetItem.id];
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            tags: [this.targetItem.id]
+        });
         query.markEntriesRead(true);
     },
 
@@ -906,10 +914,8 @@ var gTagListContextMenu = {
         var weHaveAGo = promptService.confirm(window, dialogTitle, dialogText);
 
         if (weHaveAGo) {
-            var query = new Query();
-            query.tags = [tag];
-            var urls = query.getProperty('entryURL', true).
-                             map(function(e) e.entryURL);
+            var urls = new Query({ tags: [tag] }).getProperty('entryURL', true)
+                                                 .map(function(e) e.entryURL);
 
             for (let i = 0; i < urls.length; i++) {
                 try {
@@ -964,17 +970,19 @@ var gFeedListContextMenu = {
 
 
     markFeedRead: function gFeedListContextMenu_markFeedRead() {
-        var query = new Query();
-        query.feeds = [this.targetID];
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
+        var query = new Query({
+            feeds: [this.targetID],
+            deleted: Storage.ENTRY_STATE_NORMAL
+        });
         query.markEntriesRead(true);
     },
 
 
     markFolderRead: function gFeedListContextMenu_markFolderRead() {
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
-        query.folders = [this.targetID];
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            folders: [this.targetID]
+        });
         query.markEntriesRead(true);
     },
 
@@ -1004,19 +1012,21 @@ var gFeedListContextMenu = {
 
 
     emptyFeed: function gFeedListContextMenu_emptyFeed() {
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
-        query.feeds = [this.targetID];
-        query.unstarred = true;
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            starred: false,
+            feeds: [this.targetID]
+        });
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
 
     emptyFolder: function gFeedListContextMenu_emptyFolder() {
-        var query = new Query();
-        query.deleted = Storage.ENTRY_STATE_NORMAL;
-        query.unstarred = true;
-        query.folders = [this.targetID];
+        var query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            starred: false,
+            folders: [this.targetID]
+        });
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 

@@ -89,7 +89,6 @@ var Storage = {
     ENTRY_STATE_NORMAL: 0,
     ENTRY_STATE_TRASHED: 1,
     ENTRY_STATE_DELETED: 2,
-    ENTRY_STATE_ANY: 3,
 
     /**
      * Returns a feed or a folder with given ID.
@@ -117,7 +116,7 @@ var Storage = {
      * @returns Array of tag names.
      */
     getAllTags: function() {
-        return Database.getAllFeeds();
+        return Database.getAllTags();
     },
 
     /**
@@ -219,7 +218,7 @@ var Database = {
     ENTRY_STATE_NORMAL: 0,
     ENTRY_STATE_TRASHED: 1,
     ENTRY_STATE_DELETED: 2,
-    ENTRY_STATE_ANY: 3,
+
 
     init: function Database_init() {
         var profileDir = Cc['@mozilla.org/file/directory_service;1'].
@@ -524,7 +523,7 @@ var Database = {
         if (aDontNotify)
             return;
 
-        var list = new Query([aEntryID]).getEntryList();
+        var list = new Query(aEntryID).getEntryList();
         for each (let observer in this.observers)
             observer.onEntriesStarred(list, aState);
     },
@@ -563,7 +562,7 @@ var Database = {
             'entryID': aEntryID
         });
 
-        var list = new Query([aEntryID]).getEntryList();
+        var list = new Query(aEntryID).getEntryList();
         for each (let observer in this.observers)
             observer.onEntriesTagged(list, aState, aTagName);
     },
@@ -790,9 +789,22 @@ FeedProcessor.prototype = {
 
 /**
  * A query to the Brief's database. Constraints are AND-ed.
+ *
+ * @param aConstraints
+ *        Entry ID, array of entry IDs, or object containing name-value pairs
+ *        of query constraints.
  */
-function Query(aEntries) {
-    this.entries = aEntries;
+function Query(aConstraints) {
+    if (typeof aConstraints == 'number') {
+        this.entries = [aConstraints];
+    }
+    else if (aConstraints instanceof Array) {
+        this.entries = aConstraints;
+    }
+    else {
+        for (let constraint in aConstraints)
+            this[constraint] = aConstraints[constraint];
+    }
 }
 
 Query.prototype = {
@@ -800,53 +812,54 @@ Query.prototype = {
     /**
      * Array of IDs of entries to be selected.
      */
-    entries: null,
+    entries: undefined,
 
     /**
      * Array of IDs of feeds containing the entries to be selected.
      */
-    feeds: null,
+    feeds: undefined,
 
     /**
      * Array of IDs of folders containing the entries to be selected.
      */
-    folders: null,
+    folders: undefined,
 
     /**
      * Array of tags which selected entries must have.
      */
-    tags: null,
+    tags: undefined,
 
     /**
-     * Entry status. Set any of these attributes to TRUE to limit query to entries with
-     * respetive status.
+     * Read state of entries to be selected.
      */
-    read: false,
-    unread: false,
-    starred: false,
-    unstarred: false,
+    read: undefined,
+
+    /**
+     * Starred state of entries to be selected.
+     */
+    starred: undefined,
 
     /**
      * Deleted state of entries to be selected. See constants in Database.
      */
-    deleted: Database.ENTRY_STATE_ANY,
+    deleted: undefined,
 
     /**
      * String that must be contained by title, content, authors or tags of the
      * selected entries.
      */
-    searchString: '',
+    searchString: undefined,
 
     /**
      * Date range for the selected entries.
      */
-    startDate: 0,
-    endDate:   0,
+    startDate: undefined,
+    endDate: undefined,
 
     /**
-     * Maximum number of entries to be selected. Default value is 0 - unlimited.
+     * Maximum number of entries to be selected.
      */
-    limit:  0,
+    limit: undefined,
 
     /**
      * Specifies how many result entries to skip at the beggining of the result set.
@@ -856,12 +869,11 @@ Query.prototype = {
     /**
      * By which column to sort the results.
      */
-    NO_SORT: 0,
     SORT_BY_DATE: 1,
     SORT_BY_TITLE: 2,
     SORT_BY_FEED_ROW_INDEX: 3,
 
-    sortOrder: 0,
+    sortOrder: undefined,
 
     /**
      * Direction in which to sort the results.
@@ -1036,7 +1048,7 @@ Query.prototype = {
     getEntryCount: function Query_getEntryCount() {
         // Optimization: ignore sorting settings.
         var tempOrder = this.sortOrder;
-        this.sortOrder = this.NO_SORT;
+        this.sortOrder = undefined;
         var select = CreateStatement('SELECT COUNT(1) AS count ' + this._getQueryString(true));
         this.sortOrder = tempOrder;
 
@@ -1114,11 +1126,8 @@ Query.prototype = {
         // but we can't omit them if a specific range of the selected entries
         // is meant to be marked.
         var tempRead = this.read;
-        var tempUnread = this.unread;
-        if (!this.limit && !this.offset) {
+        if (!this.limit && !this.offset)
             this.read = !aState;
-            this.unread = aState;
-        }
 
         var update = CreateStatement('UPDATE entries SET read = :read, updated = 0 ' +
                                      this._getQueryString())
@@ -1133,9 +1142,7 @@ Query.prototype = {
             if (Connection.lastError != 1) ReportError(ex, true);
         }
         finally {
-            this.unread = tempUnread;
             this.read = tempRead;
-
             Connection.commitTransaction();
         }
 
@@ -1262,7 +1269,7 @@ Query.prototype = {
             // Verify bookmarks.
             let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
             if (entry.starred && !normalBookmarks.length) {
-                new Query([entry.id]).bookmarkEntries(true);
+                new Query(entry.id).bookmarkEntries(true);
                 statusOK = false;
             }
             else if (!entry.starred && normalBookmarks.length) {
@@ -1378,21 +1385,22 @@ Query.prototype = {
             constraints.push(con);
         }
 
-        if (this.read)
+        if (this.read === true)
             constraints.push('entries.read = 1');
-        if (this.unread)
+        else if (this.read === false)
             constraints.push('entries.read = 0');
-        if (this.starred)
+
+        if (this.starred === true)
             constraints.push('entries.starred = 1');
-        if (this.unstarred)
+        else if (this.starred === false)
             constraints.push('entries.starred = 0');
 
-        if (this.deleted != Database.ENTRY_STATE_ANY)
+        if (this.deleted !== undefined)
             constraints.push('entries.deleted = ' + this.deleted);
 
-        if (this.startDate > 0)
+        if (this.startDate !== undefined)
             constraints.push('entries.date >= ' + this.startDate);
-        if (this.endDate > 0)
+        if (this.endDate !== undefined)
             constraints.push('entries.date <= ' + this.endDate);
 
         if (!this.includeHiddenFeeds && !this.feeds)
@@ -1401,7 +1409,7 @@ Query.prototype = {
         if (constraints.length)
             text += ' WHERE ' + constraints.join(' AND ') + ' ';
 
-        if (this.sortOrder != this.NO_SORT) {
+        if (this.sortOrder !== undefined) {
             switch (this.sortOrder) {
                 case this.SORT_BY_FEED_ROW_INDEX:
                     var sortOrder = 'feeds.rowIndex ';
@@ -1425,7 +1433,7 @@ Query.prototype = {
             text += ', entries.rowid ' + sortDir;
         }
 
-        if (this.limit)
+        if (this.limit !== undefined)
             text += ' LIMIT ' + this.limit;
         if (this.offset > 1)
             text += ' OFFSET ' + this.offset;
