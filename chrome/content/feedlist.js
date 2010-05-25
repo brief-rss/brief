@@ -104,6 +104,7 @@ var gViewList = {
 
 }
 
+
 var gTagList = {
 
     ready: false,
@@ -205,14 +206,7 @@ var gTagList = {
                 }
             }
 
-            // Update the label.
-            let query = new Query({
-                deleted: Storage.ENTRY_STATE_NORMAL,
-                tags: [tag],
-                read: false
-            });
-
-            this._setLabel(getElement(tag), tag, query.getEntryCount());
+            this._updateLabel(tag);
         }
     },
 
@@ -227,34 +221,37 @@ var gTagList = {
             item.id = this.tags[i];
             item.className = 'listitem-iconic tag-list-item';
             item.setAttribute('image', 'chrome://brief/skin/icons/tag.png');
-
             this._listbox.appendChild(item);
 
-            let query = new Query({
-                deleted: Storage.ENTRY_STATE_NORMAL,
-                tags: [this.tags[i]],
-                read: false
-            });
-
-            this._updateLabel(item, this.tags[i], query.getEntryCount());
+            this._updateLabel(this.tags[i]);
         }
 
         this.ready = true;
     },
 
-    _setLabel: function gTagList__setLabel(aItem, aName, aUnreadCount) {
-        var name = aName;
-        if (aUnreadCount > 0) {
-            name += ' (' + aUnreadCount +')';
-            aItem.setAttribute('unread', true);
+    _updateLabel: function gTagList__updateLabel(aTagName) {
+        let query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            tags: [aTagName],
+            read: false
+        });
+        var unreadCount = query.getEntryCount();
+
+        var listitem = getElement(aTagName);
+        var name = aTagName;
+        if (unreadCount > 0) {
+            name += ' (' + unreadCount +')';
+            listitem.setAttribute('unread', true);
         }
         else {
-            aItem.removeAttribute('unread');
+            listitem.removeAttribute('unread');
         }
-        aItem.setAttribute('label', name);
+
+        listitem.setAttribute('label', name);
     }
 
 }
+
 
 var gFeedList = {
 
@@ -334,7 +331,7 @@ var gFeedList = {
             if (item.hasAttribute('container')) {
                 // This must be done asynchronously, because this listener was called
                 // during capture and the folder hasn't actually been opened or closed yet.
-                async(function() gFeedList.refreshFolderTreeitems(item.id));
+                async(function() gFeedList.refreshFolderTreeitems([item.id]));
 
                 // Folder states must be persisted immediatelly instead of when
                 // Brief is closed, because otherwise if the feedlist is rebuilt,
@@ -354,7 +351,7 @@ var gFeedList = {
         var isContainer = this.selectedItem.hasAttribute('container');
         if (isContainer && aEvent.keyCode == aEvent.DOM_VK_RETURN) {
             if (this.selectedItem.id != 'starred-folder')
-                this.refreshFolderTreeitems(this.selectedItem.id);
+                this.refreshFolderTreeitems([this.selectedItem.id]);
 
             async(this._persistFolderState, 0, this);
         }
@@ -375,32 +372,24 @@ var gFeedList = {
     /**
      * Refresh the folder's label.
      *
-     * @param  aFolders  A single feedID or an array of feedIDs of a folders.
+     * @param aFolders
+     *        An array of feed IDs.
      */
     refreshFolderTreeitems: function gFeedList_refreshFolderTreeitems(aFolders) {
         if (!this.treeReady)
             return;
 
-        // See refreshFeedTreeitems
-        var folders = (aFolders.splice) ? aFolders : [aFolders];
-
-        for (let i = 0; i < folders.length; i++) {
-            let folder = Storage.getFeed(folders[i]);
+        for (let i = 0; i < aFolders.length; i++) {
+            let folder = Storage.getFeed(aFolders[i]);
             let treeitem = getElement(folder.feedID);
-            let treecell = treeitem.firstChild.firstChild;
 
             if (treeitem.getAttribute('open') == 'true') {
+                let treecell = getElement(folder.feedID).firstChild.firstChild;
                 this.removeProperty(treecell, 'unread');
                 treecell.setAttribute('label', folder.title);
             }
             else {
-                let query = new Query({
-                    deleted: Storage.ENTRY_STATE_NORMAL,
-                    folders: [folder.feedID],
-                    read: false
-                });
-
-                this._setLabel(treecell, folder.title, query.getEntryCount());
+                this._updateLabel(folder);
             }
         }
     },
@@ -409,53 +398,59 @@ var gFeedList = {
      * Refresh the feed treeitem's label and favicon. Also refreshes folders
      * in the feed's parent chain.
      *
-     * @param  aFolders  A single feedID or an array of feedIDs of a feeds.
+     * @param aFeeds
+     *        An array of feed IDs.
      */
     refreshFeedTreeitems: function gFeedList_refreshFeedTreeitems(aFeeds) {
         if (!this.treeReady)
             return;
 
-        // Hack: arrays that travelled through XPConnect aren't instanceof Array,
-        // so we use the splice method to check if aFeeds is an array.
-        var feeds = (aFeeds.splice) ? aFeeds : [aFeeds];
-
-        for (let i = 0; i < feeds.length; i++) {
-            let feed = Storage.getFeed(feeds[i]);
-            let treeitem = getElement(feed.feedID);
-            let treecell = treeitem.firstChild.firstChild;
-
-            // Update the label.
-            let query = new Query({
-                deleted: Storage.ENTRY_STATE_NORMAL,
-                feeds: [feed.feedID],
-                read: false
-            });
-
-            this._setLabel(treecell, feed.title, query.getEntryCount());
-
+        for (let i = 0; i < aFeeds.length; i++) {
+            let feed = Storage.getFeed(aFeeds[i]);
+            this._updateLabel(feed);
             this._refreshFavicon(feed.feedID);
-        }
 
-        // |this.items| is null before the tree finishes building. We don't need to
-        // refresh the parent folders then, anyway, because _buildFolderChildren does
-        // it itself.
-        if (this.items) {
-            let folders = getFoldersForFeeds(aFeeds);
-            this.refreshFolderTreeitems(folders);
+            // gFeedList.items is null before the tree finishes building. We don't need to
+            // refresh the parent folders then, anyway, because _buildFolderChildren does
+            // it itself.
+            if (this.items) {
+                // Build an array of IDs of folders in the the parent chains of
+                // the given feeds.
+                let folders = [];
+                let parentID = feed.parent;
+
+                while (parentID != gPrefs.homeFolder) {
+                    if (folders.indexOf(parentID) == -1)
+                        folders.push(parentID);
+                    parentID = Storage.getFeed(parentID).parent;
+                }
+
+                this.refreshFolderTreeitems(folders);
+            }
         }
     },
 
-    _setLabel: function gFeedList__setLabel(aTreecell, aName, aUnreadCount) {
+    _updateLabel: function gFeedList__updateLabel(aFeed) {
+        let query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            folders: aFeed.isFolder ? [aFeed.feedID] : undefined,
+            feeds: aFeed.isFolder ? undefined : [aFeed.feedID],
+            read: false
+        });
+        var unreadCount = query.getEntryCount();
+
+        var treecell = getElement(aFeed.feedID).firstChild.firstChild;
         var label;
-        if (aUnreadCount > 0) {
-            label = aName + ' (' + aUnreadCount +')';
-            this.setProperty(aTreecell, 'unread');
+        if (unreadCount > 0) {
+            label = aFeed.title + ' (' + unreadCount +')';
+            this.setProperty(treecell, 'unread');
         }
         else {
-            label = aName;
-            this.removeProperty(aTreecell, 'unread');
+            label = aFeed.title;
+            this.removeProperty(treecell, 'unread');
         }
-        aTreecell.setAttribute('label', label);
+
+        treecell.setAttribute('label', label);
     },
 
     _refreshFavicon: function gFeedList__refreshFavicon(aFeedID) {
@@ -571,7 +566,7 @@ var gFeedList = {
 
                 parent.appendChild(fragment);
 
-                this.refreshFolderTreeitems(feed.feedID);
+                this.refreshFolderTreeitems([feed.feedID]);
 
                 this._folderParentChain.push(treeitem.lastChild);
 
@@ -588,7 +583,7 @@ var gFeedList = {
 
                 parent.appendChild(fragment);
 
-                this.refreshFeedTreeitems(feed.feedID);
+                this.refreshFeedTreeitems([feed.feedID]);
             }
         }
         this._folderParentChain.pop();
@@ -626,9 +621,9 @@ var gFeedList = {
         case 'brief:feed-title-changed':
             var feed = Storage.getFeed(aData);
             if (feed.isFolder)
-                this.refreshFolderTreeitems(aData);
+                this.refreshFolderTreeitems([aData]);
             else
-                this.refreshFeedTreeitems(aData);
+                this.refreshFeedTreeitems([aData]);
             break;
 
         case 'brief:feed-updated':
@@ -1106,30 +1101,4 @@ var gFeedListContextMenu = {
                    'chrome,titlebar,toolbar,centerscreen,modal', this.targetID);
     }
 
-}
-
-
-/**
-* Returns an array of IDs of folders in the the parent chains of the given feeds.
-*
-* @param aFeeds A single feedID or an array of feedIDs of a feeds.
-* @returns Array of IDs of folders.
-*/
-function getFoldersForFeeds(aFeeds) {
-   var folders = [];
-   var root = gPrefs.homeFolder;
-
-    // See refreshFeedTreeitems
-   var feeds = (aFeeds.splice) ? aFeeds : [aFeeds];
-
-   for (let i = 0; i < feeds.length; i++) {
-       let feed = Storage.getFeed(feeds[i]);
-       let parentID = feed.parent;
-       while (parentID != root) {
-           if (folders.indexOf(parentID) == -1)
-               folders.push(parentID);
-           parentID = Storage.getFeed(parentID).parent;
-       }
-   }
-   return folders;
 }
