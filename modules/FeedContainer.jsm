@@ -4,9 +4,42 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 /**
- * Container for feed properties.
+ * Container for feed properties. You can pass an instance of nsIFeed to wrap
+ * and map some of its selected properties for easier access.
+ *
+ * @param aFeed [optional]
+ *        nsIFeed to wrap.
  */
-function Feed() { }
+function Feed(aFeed) {
+    if (!aFeed)
+        return;
+
+    this.wrappedFeed = aFeed;
+
+    if (aFeed.title)
+        this.title = aFeed.title.text;
+    if (aFeed.link)
+        this.websiteURL = aFeed.link.spec;
+    if (aFeed.subtitle)
+        this.subtitle = aFeed.subtitle.text;
+    if (aFeed.image) {
+        try {
+            this.imageURL = aFeed.image.getPropertyAsAString('url');
+            this.imageLink = aFeed.image.getPropertyAsAString('link');
+            this.imageTitle = aFeed.image.getPropertyAsAString('title');
+        }
+        catch (e) {}
+    }
+    if (aFeed.items) {
+        this.entries = [];
+
+        // Counting down, because the order of items is reversed after parsing.
+        for (let i = aFeed.items.length - 1; i >= 0; i--) {
+            let entry = aFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
+            this.entries.push(new Entry(entry));
+        }
+    }
+}
 
 Feed.prototype = {
 
@@ -60,7 +93,7 @@ Feed.prototype = {
     wrappedFeed: null,
 
     /**
-     * Entries from the wrapped nsIFeed, array of FeedEntry objects.
+     * Entries from the wrapped nsIFeed, array of Entry objects.
      */
     entries: null,
 
@@ -76,52 +109,55 @@ Feed.prototype = {
      * Date of the oldest entry that was available
      * when the feed was checked for updates.
      */
-    oldestEntryDate: 0,
-
-    /**
-     * Wraps an instance of nsIFeed, mapping some of its selected properties for
-     * easier access.
-     *
-     * @param aFeed
-     *        nsIFeed to wrap.
-     */
-    wrapFeed: function Feed_wrapFeed(aFeed) {
-        this.wrappedFeed = aFeed;
-
-        if (aFeed.title)
-            this.title = aFeed.title.text;
-        if (aFeed.link)
-            this.websiteURL = aFeed.link.spec;
-        if (aFeed.subtitle)
-            this.subtitle = aFeed.subtitle.text;
-        if (aFeed.image) {
-            try {
-                this.imageURL = aFeed.image.getPropertyAsAString('url');
-                this.imageLink = aFeed.image.getPropertyAsAString('link');
-                this.imageTitle = aFeed.image.getPropertyAsAString('title');
-            }
-            catch (e) {}
-        }
-        if (aFeed.items) {
-            this.entries = [];
-
-            // Counting down, because the order of items is reversed after parsing.
-            for (let i = aFeed.items.length - 1; i >= 0; i--) {
-                let entry = aFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
-                let wrappedEntry = new Entry();
-                wrappedEntry.wrapEntry(entry);
-                this.entries.push(wrappedEntry);
-            }
-        }
-    }
+    oldestEntryDate: 0
 
 }
 
 
 /**
  * Container for feed entry data.
+ *
+ * @param aEntry [optional]
+ *        nsIFeedEntry object to wrap.
  */
-function Entry() { }
+
+function Entry(aEntry) {
+    if (!aEntry)
+        return;
+
+    this.wrappedEntry = aEntry;
+
+    if (aEntry.title)
+        this.title = aEntry.title.text;
+
+    if (aEntry.link)
+        this.entryURL = aEntry.link.spec;
+
+    if (aEntry.summary)
+        this.summary = aEntry.summary.text;
+
+    if (aEntry.content)
+        this.content = aEntry.content.text;
+
+    if (aEntry.updated)
+        this.date = new RFC822Date(aEntry.updated).getTime();
+    else if (aEntry.published)
+        this.date = new RFC822Date(aEntry.published).getTime();
+
+    try {
+        if (aEntry.authors) {
+            let authors = [];
+            for (let i = 0; i < aEntry.authors.length; i++) {
+                let author = aEntry.authors.queryElementAt(i, Ci.nsIFeedPerson).name;
+                authors.push(author);
+            }
+            this.authors = authors.join(', ');
+        }
+    }
+    catch (e) {
+        // XXX With some feeds accessing nsIFeedContainer.authors throws.
+    }
+}
 
 Entry.prototype = {
 
@@ -165,49 +201,7 @@ Entry.prototype = {
     /**
      * Wrapped nsIFeedEntry.
      */
-    wrappedEntry: null,
-
-    /**
-     * Wraps an instance of nsIFeedEntry, mapping some of its properties
-     * for easier access.
-     *
-     * @param aFeed
-     *        nsIFeedEntry object to wrap.
-     */
-    wrapEntry: function FeedEntry_wrapEntry(aEntry) {
-        this.wrappedEntry = aEntry;
-
-        if (aEntry.title)
-            this.title = aEntry.title.text;
-
-        if (aEntry.link)
-            this.entryURL = aEntry.link.spec;
-
-        if (aEntry.summary)
-            this.summary = aEntry.summary.text;
-
-        if (aEntry.content)
-            this.content = aEntry.content.text;
-
-        if (aEntry.updated)
-            this.date = new RFC822Date(aEntry.updated).getTime();
-        else if (aEntry.published)
-            this.date = new RFC822Date(aEntry.published).getTime();
-
-        try {
-            if (aEntry.authors) {
-                var authors = [], author;
-                for (var i = 0; i < aEntry.authors.length; i++) {
-                    author = aEntry.authors.queryElementAt(i, Ci.nsIFeedPerson).name;
-                    authors.push(author);
-                }
-                this.authors = authors.join(', ');
-            }
-        }
-        catch (e) {
-            // XXX With some feeds accessing nsIFeedContainer.authors throws.
-        }
-    }
+    wrappedEntry: null
 
 }
 

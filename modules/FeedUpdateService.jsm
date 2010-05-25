@@ -15,9 +15,9 @@ const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
 Components.utils.import('resource://brief/FeedContainer.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
-XPCOMUtils.defineLazyServiceGetter(this, 'gObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
-XPCOMUtils.defineLazyServiceGetter(this, 'gIOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
-XPCOMUtils.defineLazyGetter(this, 'gPrefs', function()
+XPCOMUtils.defineLazyServiceGetter(this, 'ObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
+XPCOMUtils.defineLazyServiceGetter(this, 'IOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
+XPCOMUtils.defineLazyGetter(this, 'Prefs', function()
     Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
                                              getBranch('extensions.brief.').
                                              QueryInterface(Ci.nsIPrefBranch2)
@@ -30,10 +30,7 @@ XPCOMUtils.defineLazyGetter(this, 'Storage', function() {
 });
 
 
-/**
- * This object is responsible for downloading and parsing feeds, after which it hands
- * them to Storage to process and update the database.
- */
+// Exported object exposing public properties.
 var FeedUpdateService = {
 
     /**
@@ -45,10 +42,66 @@ var FeedUpdateService = {
 
     status: 0,
 
-    init: function FeedUpdateService_init() {
-        gObserverService.addObserver(this, 'brief:feed-updated', false);
-        gObserverService.addObserver(this, 'quit-application', false);
-        gPrefs.addObserver('', this, false);
+    /**
+     * Total number of feeds scheduled for current update batch (both completed
+     * and pending ones).
+     */
+    get scheduledFeedsCount() {
+        return Service.scheduledFeeds.length;
+    },
+
+    /**
+     * Number of completed feed in the current update batch.
+     */
+    get completedFeedsCount() {
+        return Service.completedFeeds.length;
+    },
+
+    /**
+     * Downloads and checks for updates all the feeds in the database.
+     *
+     * @param aInBackground [optional]
+     *        Use longer delay between requesting subsequent
+     *        feeds in order to reduce the CPU load.
+     */
+    updateAllFeeds: function(aInBackground) {
+        return Service.updateAllFeeds(aInBackground);
+    },
+
+    /**
+     * Downloads feeds and check them for updates.
+     *
+     * @param aFeeds
+     *        Array of Feed objects representing feeds to be downloaded.
+     * @param aInBackground [optional]
+     *        Use longer delay between requesting subsequent feeds in order to
+     *        reduce the CPU load.
+     */
+    updateFeeds: function(aFeeds, aInBackground) {
+        return Service.updateFeeds(aFeeds, aInBackground);
+    },
+
+    /**
+     * Cancel the remaining update batch.
+     */
+    stopUpdating: function() {
+        return Service.stopUpdating();
+    }
+}
+
+
+var Service = {
+
+    NOT_UPDATING: 0,
+    BACKGROUND_UPDATING: 1,
+    NORMAL_UPDATING: 2,
+
+    status: 0,
+
+    init: function Service_init() {
+        ObserverService.addObserver(this, 'brief:feed-updated', false);
+        ObserverService.addObserver(this, 'quit-application', false);
+        Prefs.addObserver('', this, false);
 
         XPCOMUtils.defineLazyGetter(this, 'updateTimer', function()
             Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer));
@@ -58,23 +111,8 @@ var FeedUpdateService = {
              Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer));
 
         // Delay the initial autoupdate check in order not to slow down the startup.
-        let startupDelay = gPrefs.getIntPref('update.startupDelay');
+        let startupDelay = Prefs.getIntPref('update.startupDelay');
         this.startupDelayTimer.initWithCallback(this, startupDelay, TIMER_TYPE_ONE_SHOT);
-    },
-
-    /**
-     * Total number of feeds scheduled for current update batch (both completed
-     * and pending ones).
-     */
-    get scheduledFeedsCount FeedUpdateService_scheduledFeedsCount() {
-        return this.scheduledFeeds.length;
-    },
-
-    /**
-     * Number of completed feed in the current update batch.
-     */
-    get completedFeedsCount FeedUpdateService_completedFeedsCount() {
-        return this.completedFeeds.length;
     },
 
     scheduledFeeds: [],  // current batch of feeds to be updated (array of Feed's)
@@ -84,30 +122,16 @@ var FeedUpdateService = {
     feedsWithNewEntriesCount: 0,  // number of feeds updated in the current batch that have new entries
     newEntriesCount:          0,  // total number of new entries in the current batch
 
-    /**
-     * Downloads and checks for updates all the feeds in the database.
-     *
-     * @param aInBackground [optional]
-     *        Use longer delay between requesting subsequent
-     *        feeds in order to reduce the CPU load.
-     */
-    updateAllFeeds: function FeedUpdateService_updateAllFeeds(aInBackground) {
+    // See FeedUpdateService.
+    updateAllFeeds: function Service_updateAllFeeds(aInBackground) {
         this.updateFeeds(Storage.getAllFeeds(), aInBackground);
 
         var roundedNow = Math.round(Date.now() / 1000);
-        gPrefs.setIntPref('update.lastUpdateTime', roundedNow);
+        Prefs.setIntPref('update.lastUpdateTime', roundedNow);
     },
 
-    /**
-     * Downloads feeds and check them for updates.
-     *
-     * @param aFeeds
-     *        Array of nsIBriefFeed's to be downloaded.
-     * @param aInBackground [optional]
-     *        Use longer delay between requesting subsequent feeds in order to
-     *        reduce the CPU load.
-     */
-    updateFeeds: function FeedUpdateService_updateFeeds(aFeeds, aInBackground) {
+    // See FeedUpdateService.
+    updateFeeds: function Service_updateFeeds(aFeeds, aInBackground) {
         // Add feeds to the queue, but don't let the same feed be added twice.
         var newFeedsQueued = false;
         for each (feed in aFeeds) {
@@ -121,8 +145,8 @@ var FeedUpdateService = {
         // Start an update if it isn't in progress yet. Subsequent feeds are requested
         // on an interval, so that we don't choke when processing all of them a once.
         if (this.status == this.NOT_UPDATING) {
-            var delay = aInBackground ? gPrefs.getIntPref('update.backgroundFetchDelay')
-                                      : gPrefs.getIntPref('update.defaultFetchDelay');
+            var delay = aInBackground ? Prefs.getIntPref('update.backgroundFetchDelay')
+                                      : Prefs.getIntPref('update.defaultFetchDelay');
 
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
             this.status = aInBackground ? this.BACKGROUND_UPDATING : this.NORMAL_UPDATING;
@@ -133,7 +157,7 @@ var FeedUpdateService = {
             // Stop the background update and continue with a foreground one.
             this.fetchDelayTimer.cancel();
 
-            var delay = gPrefs.getIntPref('update.defaultFetchDelay');
+            var delay = Prefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
             this.status = this.NORMAL_UPDATING;
 
@@ -141,19 +165,17 @@ var FeedUpdateService = {
         }
 
         if (newFeedsQueued)
-            gObserverService.notifyObservers(null, 'brief:feed-update-queued', '');
+            ObserverService.notifyObservers(null, 'brief:feed-update-queued', '');
     },
 
-    /**
-     * Cancel the remaining update batch.
-     */
-    stopUpdating: function FeedUpdateService_stopUpdating() {
-        gObserverService.notifyObservers(null, 'brief:feed-update-canceled', '');
+    // See FeedUpdateService.
+    stopUpdating: function Service_stopUpdating() {
+        ObserverService.notifyObservers(null, 'brief:feed-update-canceled', '');
         this.finishUpdate();
     },
 
 
-    notify: function FeedUpdateService_notify(aTimer) {
+    notify: function Service_notify(aTimer) {
         switch (aTimer) {
 
         case this.startupDelayTimer:
@@ -164,10 +186,10 @@ var FeedUpdateService = {
             if (this.status != this.NOT_UPDATING)
                 return;
 
-            var globalUpdatingEnabled = gPrefs.getBoolPref('update.enableAutoUpdate');
+            var globalUpdatingEnabled = Prefs.getBoolPref('update.enableAutoUpdate');
             // Preferencos are in seconds, because they can only store 32 bit integers.
-            var globalInterval = gPrefs.getIntPref('update.interval') * 1000;
-            var lastGlobalUpdateTime = gPrefs.getIntPref('update.lastUpdateTime') * 1000;
+            var globalInterval = Prefs.getIntPref('update.interval') * 1000;
+            var lastGlobalUpdateTime = Prefs.getIntPref('update.lastUpdateTime') * 1000;
             var now = Date.now();
 
             var itsGlobalUpdateTime = globalUpdatingEnabled &&
@@ -183,7 +205,7 @@ var FeedUpdateService = {
                 this.updateFeeds(feedsToUpdate, feedsToUpdate.length, true);
 
             if (itsGlobalUpdateTime)
-                gPrefs.setIntPref('update.lastUpdateTime', Math.round(now / 1000));
+                Prefs.setIntPref('update.lastUpdateTime', Math.round(now / 1000));
 
             break;
 
@@ -194,7 +216,7 @@ var FeedUpdateService = {
     },
 
 
-    fetchNextFeed: function FeedUpdateService_fetchNextFeed() {
+    fetchNextFeed: function Service_fetchNextFeed() {
         // All feeds in the update queue may have already been requested,
         // because we don't cancel the timer until after all feeds are completed.
         var feed = this.updateQueue.shift();
@@ -203,26 +225,26 @@ var FeedUpdateService = {
     },
 
 
-    onFeedUpdated: function FeedUpdateService_onFeedUpdated(aFeed, aError, aNewEntriesCount) {
+    onFeedUpdated: function Service_onFeedUpdated(aFeed, aError, aNewEntriesCount) {
         this.completedFeeds.push(aFeed);
         this.newEntriesCount += aNewEntriesCount;
         if (aNewEntriesCount > 0)
             this.feedsWithNewEntriesCount++;
 
-        gObserverService.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
+        ObserverService.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
         if (aError)
-            gObserverService.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
+            ObserverService.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
 
         if (this.completedFeeds.length == this.scheduledFeeds.length)
             this.finishUpdate();
     },
 
 
-    finishUpdate: function FeedUpdateService_finishUpdate() {
+    finishUpdate: function Service_finishUpdate() {
         this.status = this.NOT_UPDATING;
         this.fetchDelayTimer.cancel();
 
-        var showNotification = gPrefs.getBoolPref('update.showNotification');
+        var showNotification = Prefs.getBoolPref('update.showNotification');
         if (this.feedsWithNewEntriesCount > 0 && showNotification) {
 
             var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
@@ -254,7 +276,7 @@ var FeedUpdateService = {
 
 
     // nsIObserver
-    observe: function FeedUpdateService_observe(aSubject, aTopic, aData) {
+    observe: function Service_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
 
         // Notification from nsIAlertsService that user has clicked the link in
@@ -275,9 +297,9 @@ var FeedUpdateService = {
             break;
 
         case 'quit-application':
-            gObserverService.removeObserver(this, 'brief:feed-updated');
-            gObserverService.removeObserver(this, 'quit-application');
-            gPrefs.removeObserver('', this);
+            ObserverService.removeObserver(this, 'brief:feed-updated');
+            ObserverService.removeObserver(this, 'quit-application');
+            Prefs.removeObserver('', this);
             break;
 
         }
@@ -291,15 +313,16 @@ var FeedUpdateService = {
 /**
  * This object downloads the feed, parses it and updates the database.
  *
- * @param aFeed nsIFeed object representing the feed to be downloaded.
+ * @param aFeed
+ *        Feed object representing the feed to be downloaded.
  */
 function FeedFetcher(aFeed) {
     this.feed = aFeed;
     this.parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
     this.parser.listener = this;
 
-    gObserverService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
-    gObserverService.addObserver(this, 'brief:feed-update-canceled', false);
+    ObserverService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
+    ObserverService.addObserver(this, 'brief:feed-update-canceled', false);
 
     this.requestFeed();
 }
@@ -336,7 +359,7 @@ FeedFetcher.prototype = {
         function onRequestLoad() {
             self.timeoutTimer.cancel();
             try {
-                let uri = gIOService.newURI(self.feed.feedURL, null, null);
+                let uri = IOService.newURI(self.feed.feedURL, null, null);
                 self.parser.parseFromString(self.request.responseText, uri);
             }
             catch (ex) {
@@ -346,7 +369,7 @@ FeedFetcher.prototype = {
 
         this.request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1'].
                        createInstance(Ci.nsIXMLHttpRequest);
-        if (gPrefs.getBoolPref('update.suppressSecurityDialogs'))
+        if (Prefs.getBoolPref('update.suppressSecurityDialogs'))
             this.request.mozBackgroundRequest = true;
         this.request.open('GET', this.feed.feedURL, true);
         this.request.overrideMimeType('application/xml');
@@ -373,8 +396,7 @@ FeedFetcher.prototype = {
         this.bozo = aResult.bozo;
 
         var feed = aResult.doc.QueryInterface(Ci.nsIFeed);
-        this.downloadedFeed = new Feed();
-        this.downloadedFeed.wrapFeed(feed);
+        this.downloadedFeed = new Feed(feed);
 
         // The URI that we passed and aResult.uri (which is actual URI from which the data
         // was fetched) may differ because of redirects. We want to use the former one
@@ -410,7 +432,7 @@ FeedFetcher.prototype = {
 
 
     finish: function FeedFetcher_finish(aError, aNewEntriesCount) {
-        FeedUpdateService.onFeedUpdated(this.feed, aError, aNewEntriesCount || 0);
+        Service.onFeedUpdated(this.feed, aError, aNewEntriesCount || 0);
         this.cleanup();
     },
 
@@ -429,7 +451,7 @@ FeedFetcher.prototype = {
     },
 
     cleanup: function FeedFetcher_cleanup() {
-        gObserverService.removeObserver(this, 'brief:feed-update-canceled');
+        ObserverService.removeObserver(this, 'brief:feed-update-canceled');
         this.request = null;
         this.timeoutTimer.cancel();
         this.timeoutTimer = null;
@@ -442,15 +464,17 @@ FeedFetcher.prototype = {
 /**
  * Downloads a favicon of a webpage and base64-encodes it.
  *
- * @param aWebsiteURL  URL of webpage which favicon to download (not URI of the
- *                     favicon itself).
- * @param aCallback    Callback to use when finished.
+ * @param aWebsiteURL
+ *        URL of webpage which favicon to download (not URI of the
+ *        favicon itself).
+ * @param aCallback
+ *        Callback to use when finished.
  */
 function FaviconFetcher(aWebsiteURL, aCallback) {
-    var websiteURI = gIOService.newURI(aWebsiteURL, null, null)
-    var faviconURI = gIOService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
+    var websiteURI = IOService.newURI(aWebsiteURL, null, null)
+    var faviconURI = IOService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
-    var chan = gIOService.newChannelFromURI(faviconURI);
+    var chan = IOService.newChannelFromURI(faviconURI);
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
@@ -534,4 +558,5 @@ function log(aMessage) {
   consoleService.logStringMessage(aMessage);
 }
 
-FeedUpdateService.init();
+
+Service.init();
