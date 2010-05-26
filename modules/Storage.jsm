@@ -523,9 +523,10 @@ var Database = {
         if (aDontNotify)
             return;
 
-        var list = new Query(aEntryID).getEntryList();
-        for each (let observer in this.observers)
-            observer.onEntriesStarred(list, aState);
+        new Query(aEntryID).getEntryList(function(aList) {
+            for each (let observer in Database.observers)
+                observer.onEntriesStarred(aList, aState);
+        });
     },
 
     /**
@@ -562,9 +563,10 @@ var Database = {
             'entryID': aEntryID
         });
 
-        var list = new Query(aEntryID).getEntryList();
-        for each (let observer in this.observers)
-            observer.onEntriesTagged(list, aState, aTagName);
+        new Query(aEntryID).getEntryList(function(aList) {
+            for each (let observer in Database.observers)
+                observer.onEntriesTagged(aList, aState, aTagName);
+        });
     },
 
     QueryInterface: XPCOMUtils.generateQI(Ci.nsIObserver)
@@ -673,11 +675,11 @@ FeedProcessor.prototype = {
         var self = this;
 
         select.executeAsync({
-            handleResult: function(aResultSet) {
-                var row = aResultSet.getNextRow();
-                storedID = row.getResultByIndex('id');
-                storedDate = row.getResultByName('date');
-                isEntryRead = row.getResultByName('read');
+            handleResult: function(aResults) {
+                var row = aResults.next()
+                storedID = row.id;
+                storedDate = row.date;
+                isEntryRead = row.read;
             },
 
             handleCompletion: function(aReason) {
@@ -750,18 +752,17 @@ FeedProcessor.prototype = {
 
             ExecuteStatementsAsync(statements, {
 
-                handleResult: function(aResultSet) {
+                handleResult: function(aResults) {
                     var row;
-                    while (row = aResultSet.getNextRow()) {
-                        let entryID = row.getResultByIndex(0);
-                        self.insertedEntries.push(entryID);
-                    }
+                    while (row = aResults.getNextRow())
+                        self.insertedEntries.push(row.getResultByName('id'));
                 },
 
                 handleCompletion: function(aReason) {
-                    var list = new Query(self.insertedEntries).getEntryList();
-                    for each (let observer in Database.observers)
-                        observer.onEntriesAdded(list);
+                    new Query(self.insertedEntries).getEntryList(function(aList) {
+                        for each (let observer in Database.observers)
+                            observer.onEntriesAdded(aList);
+                    });
 
                     // XXX This should be optimized and/or be asynchronous
                     // query.verifyBookmarksAndTags();
@@ -772,13 +773,11 @@ FeedProcessor.prototype = {
         if (this.entriesToUpdateCount) {
             let statements = [Stm.updateEntry, Stm.updateEntryText];
 
-            ExecuteStatementsAsync(statements, {
-
-                handleCompletion: function(aReason) {
-                    var list = new Query(self.updatedEntries).getEntryList();
+            ExecuteStatementsAsync(statements, function() {
+                new Query(self.updatedEntries).getEntryList(function(aList) {
                     for each (let observer in Database.observers)
-                        observer.onEntriesUpdated(list);
-                }
+                        observer.onEntriesUpdated(aList);
+                });
             });
         }
 
@@ -891,60 +890,35 @@ Query.prototype = {
     includeHiddenFeeds: false,
 
     /**
-     * Actual list of folders selected by the query, including subfolders
-     * of folders specified by Query.folders.
-     */
-    _effectiveFolders: null,
-
-
-    /**
      * Indicates if there are any entries that match this query.
      */
     hasMatches: function Query_hasMatches() {
-        try {
-            var sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
-            var select = CreateStatement(sql);
-            select.step();
-            var exists = select.row.found;
-        }
-        catch (ex) {
-            if (Connection.lastError != 1) ReportError(ex, true);
-        }
-        finally {
-            select.reset();
-        }
-
-        return exists;
+        var sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
+        return new Statement(sql).getSingleResult(null, this._onDatabaseError).found;
     },
 
     /**
-     * Returns a list of IDs of selected entries.
+     * Get a simple list of entries.
      *
-     * @returns Array if IDs of selected entries.
+     * @returns Array if IDs.
      */
     getEntries: function Query_getEntries() {
-        try {
-            var sql = 'SELECT entries.id ' + this._getQueryString(true);
-            var select = CreateStatement(sql);
-            var entries = [];
-            while (select.step())
-                entries.push(select.row.id);
-        }
-        catch (ex) {
-            if (Connection.lastError != 1) ReportError(ex, true);
-        }
-        finally {
-            select.reset();
-        }
+        var entries = [];
+
+        var sql = 'SELECT entries.id ' + this._getQueryString(true);
+        var results = new Statement(sql).getResults(null, this._onDatabaseError);
+        for (let row = results.next(); row; row = results.next())
+            entries.push(row.id);
+        results.close();
 
         return entries;
     },
 
 
     /**
-     * Returns the selected entries with all their properties.
+     * Get entries with all their properties.
      *
-     * @returns Array of Entry's.
+     * @returns Array of Entry objects.
      */
     getFullEntries: function Query_getFullEntries() {
         var sql = 'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,   '+
@@ -952,50 +926,31 @@ Query.prototype = {
                   '       entries.bookmarkID, entries_text.title, entries_text.content, '+
                   '       entries_text.authors, entries_text.tags                       ';
         sql += this._getQueryString(true, true);
-        var select = CreateStatement(sql);
+        var results = new Statement(sql).getResults(null, this._onDatabaseError);
 
         var entries = [];
-        try {
-            while (select.step()) {
-                var entry = new Entry();
+        for (let row = results.next(); row; row = results.next()) {
+            let entry = new Entry();
 
-                entry.id = select.row.id;
-                entry.feedID = select.row.feedID;
-                entry.entryURL = select.row.entryURL;
-                entry.date = select.row.date;
-                entry.authors = select.row.authors;
-                entry.read = select.row.read;
-                entry.starred = select.row.starred;
-                entry.updated = select.row.updated;
-                entry.bookmarkID = select.row.bookmarkID;
-                entry.title = select.row.title;
-                entry.content = select.row.content;
-                entry.tags = select.row.tags;
+            for (let column in row)
+                entry[column] = row[column]
 
-                entries.push(entry);
-            }
+            entries.push(entry);
         }
-        catch (ex) {
-            // Ignore "SQL logic error or missing database" error which full-text search
-            // throws when the query doesn't contain at least one non-excluded term.
-            if (Connection.lastError != 1) ReportError(ex, true);
-        }
-        finally {
-            select.reset();
-        }
+        results.close();
 
         return entries;
     },
 
 
     /**
-     * Returns value of a property for each of the selected entries.
+     * Get values of a single property of each of the entries.
      *
      * @param aPropertyName
      *        Name of the property.
      * @param aDistinct
      *        Don't include multiple entries with the same value.
-     * @returns Array of objects containing the requested property
+     * @returns Array of objects containing name-value pairs of the requested property
      *          and ID of the corresponding entry.
      */
     getProperty: function Query_getProperty(aPropertyName, aDistinct) {
@@ -1014,146 +969,119 @@ Query.prototype = {
                 table = 'entries.';
         }
 
-        try {
-            var select = CreateStatement('SELECT entries.id, ' + table + aPropertyName +
-                                         this._getQueryString(true, getEntriesText));
+        var sql = 'SELECT entries.id, ' + table + aPropertyName +
+                   this._getQueryString(true, getEntriesText);
 
-            while (select.step()) {
-                let propertyValue = select.row[aPropertyName];
-                if (aDistinct && values.indexOf(propertyValue) != -1)
-                    continue;
+        var results = new Statement(sql).getResults(null, this._onDatabaseError);
+        for (let row = results.next(); row; row = results.next()) {
+            let value = row[aPropertyName];
+            if (aDistinct && values.indexOf(value) != -1)
+                continue;
 
-                values.push(propertyValue);
+            values.push(value);
 
-                let row = { };
-                row[aPropertyName] = propertyValue;
-                row.ID = select.row.id;
-                rows.push(row);
-            }
+            let obj = {};
+            obj[aPropertyName] = value;
+            obj.ID = row.id;
+            rows.push(obj);
         }
-        catch (ex) {
-            if (Connection.lastError != 1) ReportError(ex, true);
-        }
-        finally {
-            select.reset();
-        }
+        results.close();
 
         return rows;
     },
 
 
     /**
-     * Returns the number of selected entries.
+     * Get the number of selected entries.
      */
     getEntryCount: function Query_getEntryCount() {
-        // Optimization: ignore sorting settings.
+        // Optimization: don't sort.
         var tempOrder = this.sortOrder;
         this.sortOrder = undefined;
-        var select = CreateStatement('SELECT COUNT(1) AS count ' + this._getQueryString(true));
+        var sql = 'SELECT COUNT(1) AS count ' + this._getQueryString(true);
         this.sortOrder = tempOrder;
 
-        try {
-            select.step();
-            var count = select.row.count;
-        }
-        catch (ex) {
-            if (Connection.lastError != 1) ReportError(ex, true);
-        }
-        finally {
-            select.reset();
-        }
-
-        return count;
+        return new Statement(sql).getSingleResult(null, this._onDatabaseError).count;
     },
 
 
     /**
-     * Used to get EntryList of changed entries, so that it can be passed to observers.
+     * Get an EntryList of entries.
      */
-    getEntryList: function Query_getEntryList() {
-        try {
-            var entryIDs = [];
-            var feedIDs = [];
-            var tags = [];
+    getEntryList: function Query_getEntryList(aCallback) {
+        var entryIDs = [];
+        var feedIDs = [];
+        var tags = [];
 
-            var tempHidden = this.includeHiddenFeeds;
-            this.includeHiddenFeeds = false;
+        var tempHidden = this.includeHiddenFeeds;
+        this.includeHiddenFeeds = false;
+        var sql = 'SELECT entries.id, entries.feedID, entries_text.tags '
+                   + this._getQueryString(true, true);
+        this.includeHiddenFeeds = tempHidden;
 
-            var sql = 'SELECT entries.id, entries.feedID, entries_text.tags ';
-            var select = CreateStatement(sql + this._getQueryString(true, true));
-            while (select.step()) {
-                entryIDs.push(select.row.id);
+        new Statement(sql).executeAsync({
+            handleResult: function(aResults) {
+                var row;
+                while (row = aResults.next()) {
+                    entryIDs.push(row.id);
 
-                let feedID = select.row.feedID;
-                if (feedIDs.indexOf(feedID) == -1)
-                    feedIDs.push(feedID);
+                    if (feedIDs.indexOf(row.feedID) == -1)
+                        feedIDs.push(row.feedID);
 
-                let tagSet = select.row.tags;
-                if (tagSet) {
-                    tagSet = tagSet.split(', ');
-                    for (let i = 0; i < tagSet.length; i++) {
-                        if (tags.indexOf(tagSet[i]) == -1)
-                            tags.push(tagSet[i]);
+                    if (row.tags) {
+                        tagArray = row.tags.split(', ');
+                        for (let i = 0; i < tagArray.length; i++) {
+                            if (tags.indexOf(tagArray[i]) === -1)
+                                tags.push(tagArray[i]);
+                        }
                     }
                 }
+            },
+
+            handleCompletion: function(aReason) {
+                var list = new EntryList();
+                list.IDs = entryIDs;
+                list.feedIDs = feedIDs;
+                list.tags = tags;
+
+                aCallback(list);
             }
-        }
-        catch (ex) {
-            if (Connection.lastError != 1) ReportError(ex, true);
-        }
-        finally {
-            select.reset();
-            this.includeHiddenFeeds = tempHidden;
-        }
-
-        var list = new EntryList();
-        list.IDs = entryIDs;
-        list.feedIDs = feedIDs;
-        list.tags = tags;
-
-        return list;
+        });
     },
 
 
     /**
-     * Marks selected entries as read/unread.
+     * Mark entries as read/unread.
      *
      * @param aState
      *        New state of entries (TRUE for read, FALSE for unread).
      */
     markEntriesRead: function Query_markEntriesRead(aState) {
-        // We try not to include entries which already have the desired state,
+        // Try not to include entries which already have the desired state,
         // but we can't omit them if a specific range of the selected entries
         // is meant to be marked.
         var tempRead = this.read;
         if (!this.limit && !this.offset)
             this.read = !aState;
 
-        var update = CreateStatement('UPDATE entries SET read = :read, updated = 0 ' +
-                                     this._getQueryString())
+        var sql = 'UPDATE entries SET read = :read, updated = 0 ' + this._getQueryString();
+        var update = new Statement(sql);
         update.params.read = aState ? 1 : 0;
 
-        Connection.beginTransaction();
-        try {
-            var list = this.getEntryList();
-            update.execute();
-        }
-        catch (ex) {
-            if (Connection.lastError != 1) ReportError(ex, true);
-        }
-        finally {
+        this.getEntryList(function(aList) {
             this.read = tempRead;
-            Connection.commitTransaction();
-        }
 
-        if (list.length) {
-            for each (let observer in Database.observers)
-                observer.onEntriesMarkedRead(list, aState);
-        }
+            update.executeAsync(function() {
+                if (aList.length) {
+                    for each (let observer in Database.observers)
+                        observer.onEntriesMarkedRead(aList, aState);
+                }
+            });
+        });
     },
 
     /**
-     * Sets the deleted state of the selected entries or removes them from the database.
+     * Set the deleted state of the selected entries or remove them from the database.
      *
      * @param aState
      *        The new deleted state (as defined by constants in Database.deleted)
@@ -1169,37 +1097,28 @@ Query.prototype = {
             case Database.ENTRY_STATE_NORMAL:
             case Database.ENTRY_STATE_TRASHED:
             case Database.ENTRY_STATE_DELETED:
-                var statement = CreateStatement('UPDATE entries SET deleted = ' +aState+
-                                                 this._getQueryString());
+                var sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
                 break;
             case this.REMOVE_FROM_DATABASE:
-                var statement = CreateStatement('DELETE FROM entries ' + this._getQueryString());
+                var sql = 'DELETE FROM entries ' + this._getQueryString();
                 break;
             default:
                 throw Components.results.NS_ERROR_INVALID_ARG;
         }
 
-        Connection.beginTransaction();
-        try {
-            var list = this.getEntryList();
-            statement.execute();
-        }
-        catch (ex) {
-            if (Connection.lastError != 1) ReportError(ex, true);
-        }
-        finally {
-            Connection.commitTransaction();
-        }
-
-        if (list.length) {
-            for each (let observer in Database.observers)
-                observer.onEntriesDeleted(list, aState);
-        }
+        this.getEntryList(function(aList) {
+            new Statement(sql).executeAsync(function() {
+                if (aList.length) {
+                    for each (let observer in Database.observers)
+                        observer.onEntriesDeleted(aList, aState);
+                }
+            });
+        });
     },
 
 
     /**
-     * Bookmarks or unbookmarks URLs of the selected entries.
+     * Bookmark/unbookmark URLs of the selected entries.
      *
      * @param state
      *        New state of entries. TRUE to bookmark, FALSE to unbookmark.
@@ -1246,13 +1165,14 @@ Query.prototype = {
     },
 
     /**
-     * The starred status of entries is automatically kept in sync with user's bookmarks
-     * by the storage service. However, there's always a possibility that it goes out of
-     * sync, for example while Brief is disabled or uninstalled. This method verifies
-     * status of the selected entries.
-     * If an entry is starred, but no bookmarks are found for its URI, then a new bookmark
-     * is added. If an entry isn't starred, but there is a bookmark for its URI, this
-     * function stars the entry. Tags are verified in the same manner.
+     * Verifies entries' starred statuses and their tags.
+     *
+     * Normally, the starred status is automatically kept in sync with user's bookmarks,
+     * but there's always a possibility that it goes out of sync, for example while
+     * Brief is disabled or uninstalled. If an entry is starred but no bookmarks are
+     * found for its URI, then a new bookmark is added. If an entry isn't starred,
+     * but there is a bookmark for its URI, this function stars the entry.
+     * Tags are verified in the same manner.
      *
      * @returns TRUE if the starred status was in sync, FALSE otherwise.
      */
@@ -1308,6 +1228,21 @@ Query.prototype = {
         }
 
         return statusOK;
+    },
+
+
+    /**
+     * Actual list of folders selected by the query, including subfolders
+     * of folders specified by Query.folders.
+     */
+    _effectiveFolders: null,
+
+
+    _onDatabaseError: function BriefQuery__onDatabaseError() {
+        // Ignore "SQL logic error or missing database" error which full-text search
+        // throws when the query doesn't contain at least one non-excluded term.
+        if (Connection.lastError != 1)
+            ReportError(ex, true);
     },
 
     /**
@@ -1435,7 +1370,7 @@ Query.prototype = {
 
         if (this.limit !== undefined)
             text += ' LIMIT ' + this.limit;
-        if (this.offset > 1)
+        if (this.offset > 0)
             text += ' OFFSET ' + this.offset;
 
         if (!aForSelect)
@@ -1470,40 +1405,15 @@ function ExecuteSQL(aSQLString) {
     }
 }
 
-function CreateStatement(aSQLString) {
+function Statement(aSQLString, aDefaultParams) {
     try {
-        var statement = Connection.createStatement(aSQLString);
+        this._wrappedStatement = Connection.createStatement(aSQLString);
     }
     catch (ex) {
         log('SQL statement:\n' + aSQLString);
         ReportError(ex, true);
     }
-    return statement;
-}
 
-function ExecuteStatementsAsync(aStatements, aCallback) {
-    var nativeStatements = [];
-
-    for (let i = 0; i < aStatements.length; i++) {
-        aStatements[i]._bindParams();
-        nativeStatements.push(aStatements[i]._wrappedStatement);
-    }
-
-    var callback = aCallback || {};
-    if (!callback.handleError) {
-        callback.handleError = function(aError) {
-            ReportError(aError.message);
-        }
-    }
-    if (!callback.handleCompletion) {
-        callback.handleCompletion = function() {}
-    }
-
-    Connection.executeAsync(nativeStatements, nativeStatements.length, callback);
-}
-
-function Statement(aSQLString, aDefaultParams) {
-    this._wrappedStatement = CreateStatement(aSQLString);
     this._defaultParams = aDefaultParams;
     this.paramSets = [];
     this.params = {};
@@ -1520,18 +1430,8 @@ Statement.prototype = {
     },
 
     executeAsync: function Statement_executeAsync(aCallback) {
-        var callback = aCallback || {};
-
-        if (!callback.handleError) {
-            callback.handleError = function(aError) {
-                ReportError(aError.message);
-            }
-        }
-        if (!callback.handleCompletion) {
-            callback.handleCompletion = function() {}
-        }
-
         this._bindParams();
+        var callback = new StatementCallback(this._wrappedStatement, aCallback);
         this._wrappedStatement.executeAsync(callback);
     },
 
@@ -1561,7 +1461,7 @@ Statement.prototype = {
         this.params = {};
     },
 
-    getResults: function Statement_getResults(aParams) {
+    getResults: function Statement_getResults(aParams, aOnError) {
         if (aParams)
             this.params = aParams;
 
@@ -1583,13 +1483,19 @@ Statement.prototype = {
                 yield row;
             }
         }
+        catch (ex) {
+            if (aOnError)
+                aOnError();
+            else
+                throw(ex);
+        }
         finally {
             this._wrappedStatement.reset();
         }
     },
 
-    getSingleResult: function Statement_getSingleResult(aParams) {
-        var results = this.getResults(aParams);
+    getSingleResult: function Statement_getSingleResult(aParams, aOnError) {
+        var results = this.getResults(aParams, aOnError);
         var row = results.next();
         results.close();
 
@@ -1602,6 +1508,81 @@ Statement.prototype = {
         this._wrappedStatement.reset();
     }
 
+}
+
+function StatementCallback(aStatement, aCallback) {
+    this._statement = aStatement;
+
+    if (typeof aCallback == 'function') {
+        this._callback =  {
+            handleCompletion: aCallback
+        }
+    }
+    else {
+        this._callback = aCallback || {};
+    }
+}
+
+StatementCallback.prototype = {
+
+    handleResult: function(aResultSet) {
+        if (!this._callback.handleResult)
+            return;
+
+        if (this._statement) {
+            let gen = this._getResultsGenerator(aResultSet);
+            this._callback.handleResult(gen);
+            gen.close();
+        }
+        else {
+            // When using ExecuteStatementsAsync the callback doesn't know
+            // which statement is being handled so we can't use a generator.
+            this._callback.handleResult(aResultSet);
+        }
+    },
+
+    handleCompletion: function(aReason) {
+        if (this._callback.handleCompletion)
+            this._callback.handleCompletion(aReason);
+    },
+
+    handleError: function(aError) {
+        if (this._callback.handleError)
+            this._callback.handleError(aError);
+        else
+            ReportError(aError.message);
+    },
+
+    _getResultsGenerator: function Statement__getResultsGenerator(aResultSet) {
+        var columnCount = this._statement.columnCount;
+
+        while (true) {
+            let obj = null;
+
+            let row = aResultSet.getNextRow();
+            if (row) {
+                obj = {};
+                for (let i = 0; i < columnCount; i++) {
+                    let column = this._statement.getColumnName(i);
+                    obj[column] = row.getResultByName(column);
+                }
+            }
+
+            yield obj;
+        }
+    }
+}
+
+function ExecuteStatementsAsync(aStatements, aCallback) {
+    var nativeStatements = [];
+
+    for (let i = 0; i < aStatements.length; i++) {
+        aStatements[i]._bindParams();
+        nativeStatements.push(aStatements[i]._wrappedStatement);
+    }
+
+    Connection.executeAsync(nativeStatements, nativeStatements.length,
+                            new StatementCallback(null, aCallback));
 }
 
 
@@ -2451,47 +2432,42 @@ var Migration = {
     },
 
     bookmarkStarredEntries: function Migration_bookmarkStarredEntries() {
-        var folder = Bookmarks.unfiledBookmarksFolder;
-
         var sql = 'SELECT entries.entryURL, entries.id, entries_text.title                 '+
                   'FROM entries INNER JOIN entries_text ON entries.id = entries_text.rowid '+
                   'WHERE starred = 1                                                       ';
-        var select = CreateStatement(sql);
+        var starredEntries = new Statement(sql).getResults();
 
         sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
-        var update = CreateStatement(sql);
+        var update = new Statement(sql);
 
         Connection.beginTransaction();
         try {
-            while (select.step()) {
-                let uri = Utils.newURI(select.row.entryURL);
+            var entry;
+            while (entry = starredEntries.next()){
+                let uri = Utils.newURI(entry.entryURL);
                 if (!uri)
                     continue;
 
-                let title = select.row.title;
                 let alreadyBookmarked = false;
-
-                // Look for existing bookmarks for entry's URI.
-                if (Bookmarks.isBookmarked(uri)) {
-                    let bookmarkIDs = Bookmarks.getBookmarkIdsForURI(uri, {});
-                    for each (let bookmarkID in bookmarkIDs) {
-                        let parent = Bookmarks.getFolderIdForItem(bookmarkID);
-                        if (!Utils.isLivemark(parent)) {
-                            alreadyBookmarked = true;
-                            break;
-                        }
+                let bookmarkIDs = Bookmarks.getBookmarkIdsForURI(uri, {});
+                for each (var bookmarkID in bookmarkIDs) {
+                    if (Utils.isNormalBookmark(bookmarkID)) {
+                        alreadyBookmarked = true;
+                        break;
                     }
                 }
 
                 if (alreadyBookmarked) {
-                    Database.starEntry(true, select.row.id, bookmarkID);
+                    Database.starEntry(true, entry.id, bookmarkID);
                 }
                 else {
-                    let bookmarkID = Bookmarks.insertBookmark(folder, uri, Bookmarks.DEFAULT_INDEX,
-                                                              title);
-                    update.params.entryID = select.row.id;
-                    update.params.bookmarkID = bookmarkID;
-                    update.execute();
+                    let bookmarkID = Bookmarks.insertBookmark(Bookmarks.unfiledBookmarksFolder,
+                                                              uri, Bookmarks.DEFAULT_INDEX,
+                                                              entry.title);
+                    update.execute({
+                        entryID: entry.id,
+                        bookmarkID: bookmarkID
+                    });
                 }
             }
         }
@@ -2499,7 +2475,7 @@ var Migration = {
             ReportError(ex);
         }
         finally {
-            select.reset();
+            starredEntries.close();
             Connection.commitTransaction();
         }
     },
