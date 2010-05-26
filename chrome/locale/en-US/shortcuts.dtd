@@ -3,6 +3,7 @@
 
 <!ENTITY navigation.header "Navigation">
 <!ENTITY space.key "Space">
+<!ENTITY shiftSpace.key "Shift + Space">
 <!ENTITY nextItem "Go to the next item">
 <!ENTITY previousItem "Go to the previous item">
 <!ENTITY skipDown "Skip down by 10 items">
