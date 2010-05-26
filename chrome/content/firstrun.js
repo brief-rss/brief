@@ -1,7 +1,7 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-document.addEventListener('load', onload, false);
+document.addEventListener('DOMContentLoaded', onload, false);
 document.addEventListener('unload', onunload, false);
 
 var prefBranch = Cc['@mozilla.org/preferences-service;1'].
