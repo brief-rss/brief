@@ -376,21 +376,29 @@ function onKeyPress(aEvent) {
         aEvent.stopPropagation();
 
     // Brief takes over these shortcut keys, so we stop the default action.
-    if (gPrefBranch.getBoolPref('assumeStandardKeys')) {
+    if (!gPrefBranch.getBoolPref('assumeStandardKeys'))
+        return;
 
-        if (aEvent.keyCode == aEvent.DOM_VK_TAB && !aEvent.ctrlKey) {
-            gPrefBranch.setBoolPref('feedview.entrySelectionEnabled',
-                                    !gPrefs.entrySelectionEnabled);
-            aEvent.preventDefault();
+    if (aEvent.keyCode == aEvent.DOM_VK_TAB && !aEvent.ctrlKey) {
+        gPrefBranch.setBoolPref('feedview.entrySelectionEnabled',
+                                !gPrefs.entrySelectionEnabled);
+        aEvent.preventDefault();
+    }
+    else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
+        if (aEvent.shiftKey) {
+            if (gPrefs.entrySelectionEnabled)
+                gFeedView.scrollToPrevEntry();
+            else
+                gFeedView.scrollToPrevEntry(true);
         }
-        else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
+        else {
             if (gPrefs.entrySelectionEnabled)
                 gFeedView.selectNextEntry();
             else
                 gFeedView.scrollToNextEntry(true);
-
-            aEvent.preventDefault();
         }
+
+        aEvent.preventDefault();
     }
 }
 
