@@ -663,9 +663,9 @@ var gFeedList = {
             break;
 
         case 'brief:feed-update-canceled':
-            var progressmeter = getElement('update-progress');
             getElement('update-progress-deck').selectedIndex = 0;
-            progressmeter.value = 0;
+            getElement('update-buttons-deck').selectedIndex = 0;
+            getElement('update-progress').value = 0;
 
             for each (feed in Storage.getAllFeeds(false)) {
                 let item = getElement(feed.feedID);
