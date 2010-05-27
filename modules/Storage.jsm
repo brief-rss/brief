@@ -53,7 +53,6 @@ const ENTRIES_TEXT_TABLE_SCHEMA =
     'tags    TEXT  ';
 
 const ENTRY_TAGS_TABLE_SCHEMA =
-    'tagID    INTEGER, ' +
     'tagName  TEXT,    ' +
     'entryID  INTEGER  ';
 
@@ -538,23 +537,19 @@ var Database = {
      *        Subject entry.
      * @param aTagName
      *        Name of the tag.
-     * @param aTagID
-     *        ItemId of the tag's bookmark item in Places database. Only
-     *        required when adding a tag.
      */
-    tagEntry: function Database_tagEntry(aState, aEntryID, aTagName, aTagID) {
+    tagEntry: function Database_tagEntry(aState, aEntryID, aTagName) {
+        var params = { 'entryID': aEntryID, 'tagName': aTagName };
+
         if (aState) {
-            Stm.tagEntry.execute({
-                'entryID': aEntryID,
-                'tagName': aTagName,
-                'tagID': aTagID
-            });
+            let alreadyTagged = Stm.checkTag.getSingleResult(params).alreadyExists;
+            if (alreadyTagged)
+                return;
+
+            Stm.tagEntry.execute(params);
         }
         else {
-            Stm.untagEntry.execute({
-                'entryID': aEntryID,
-                'tagName': aTagName
-            });
+            Stm.untagEntry.execute(params);
         }
 
         // Update the serialized list of tags stored in entries_text table.
@@ -1200,28 +1195,20 @@ Query.prototype = {
             // Verify tags.
             var storedTags = Utils.getTagsForEntry(entry.id);
 
-            // Get the list of current tags for this entry's URI.
-            var currentTagNames = [];
-            var currentTagIDs = [];
-            for each (let itemID in allBookmarks) {
-                let parent = Bookmarks.getFolderIdForItem(itemID);
-                if (Utils.isTagFolder(parent)) {
-                    currentTagIDs.push(itemID);
-                    currentTagNames.push(Bookmarks.getItemTitle(parent));
-                }
-            }
+            var currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
+                                          .filter(Utils.isTagFolder)
+                                          .map(function(id) Bookmarks.getItemTitle(id));
 
             for each (let tag in storedTags) {
-                if (currentTagNames.indexOf(tag) === -1) {
+                if (currentTags.indexOf(tag) === -1) {
                     Places.tagging.tagURI(uri, [tag]);
                     statusOK = false;
                 }
             }
 
-            for (let i = 0; i < currentTagNames.length; i++) {
-                let tag = currentTagNames[i];
+            for each (let tag in currentTags) {
                 if (storedTags.indexOf(tag) === -1) {
-                    Database.tagEntry(true, entry.id, tag, currentTagIDs[i])
+                    Database.tagEntry(true, entry.id, tag);
                     statusOK = false;
                 }
             }
@@ -1649,35 +1636,38 @@ var BookmarkObserver = {
         if (Utils.isLivemark(aFolder) || aItemType != Bookmarks.TYPE_BOOKMARK)
             return;
 
-        // Find entries with bookmarkID of the removed item and untag/unstar them.
-        // Typically, there is going to be at most one such entry, so don't even
-        // bother with a transaction.
         var isTag = Utils.isTagFolder(aFolder);
 
-        if (isTag) {
-            for each (let entry in Utils.getEntriesByTagID(aItemID)) {
+        Connection.beginTransaction();
+        try {
+            if (isTag) {
                 let tagName = Bookmarks.getItemTitle(aFolder);
-                Database.tagEntry(false, entry.id, tagName);
+                for each (let entry in Utils.getEntriesByTagName(tagName))
+                    Database.tagEntry(false, entry.id, tagName);
+            }
+            else {
+                // Find entries with bookmarkID of the removed item and unstar them.
+                let entries = Utils.getEntriesByBookmarkID(aItemID);
+
+                // Look for other bookmarks for this URI.
+                if (entries.length) {
+                    let uri = Utils.newURI(entries[0].url);
+                    var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
+                                              filter(Utils.isNormalBookmark);
+                }
+
+                for each (let entry in entries) {
+                    // If there is another bookmark for this URI, don't unstar the
+                    // entry, but update its bookmarkID to point to that bookmark.
+                    if (bookmarks.length)
+                        Database.starEntry(true, entry.id, bookmarks[0], true);
+                    else
+                        Database.starEntry(false, entry.id);
+                }
             }
         }
-        else {
-            let entries = Utils.getEntriesByBookmarkID(aItemID);
-
-            // Look for other bookmarks for this URI.
-            if (entries.length) {
-                let uri = Utils.newURI(entries[0].url);
-                var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
-                                          filter(Utils.isNormalBookmark);
-            }
-
-            for each (let entry in entries) {
-                // If there is another bookmark for this URI, don't unstar the
-                // entry, but update its bookmarkID to point to that bookmark.
-                if (bookmarks.length)
-                    Database.starEntry(true, entry.id, bookmarks[0], true);
-                else
-                    Database.starEntry(false, entry.id);
-            }
+        finally {
+            Connection.commitTransaction();
         }
     },
 
@@ -1752,8 +1742,10 @@ var BookmarkObserver = {
      * Syncs tags when a tag folder is renamed by removing tags with the old name
      * and re-tagging the entries using the new one.
      *
-     * @param aTagFolderID itemId of the tag folder that was renamed.
-     * @param aNewName     New name of the tag folder, i.e. new name of the tag.
+     * @param aTagFolderID
+     *        itemId of the tag folder that was renamed.
+     * @param aNewName
+     *        New name of the tag folder, i.e. new name of the tag.
      */
     renameTag: function BookmarkObserver_renameTag(aTagFolderID, aNewName) {
         // Get bookmarks in the renamed tag folder.
@@ -1763,23 +1755,25 @@ var BookmarkObserver = {
         var result = Places.history.executeQuery(query, options);
         result.root.containerOpen = true;
 
-        var oldTagName = '';
-
         for (let i = 0; i < result.root.childCount; i++) {
             let tagID = result.root.getChild(i).itemId;
-            let entries = Utils.getEntriesByTagID(tagID).
-                                map(function(e) e.id);
+            let uri = Bookmarks.getBookmarkURI(tagID);
+            let entries = Utils.getEntriesByURL(uri.spec)
+                               .map(function(e) e.id);
 
-            for each (let entry in entries) {
-                if (!oldTagName) {
-                    // The bookmark observer doesn't provide the old name,
-                    // so we have to look it up in the database.
-                    let row = Stm.getNameForTagID.getSingleResult({ 'tagID': tagID });
-                    oldTagName = row.tagName;
+            for each (let entryID in entries) {
+                Database.tagEntry(true, entryID, aNewName);
+
+                let storedTags = Utils.getTagsForEntry(entryID);
+                let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
+                                           .map(function(id) Bookmarks.getFolderIdForItem(id))
+                                           .filter(Utils.isTagFolder)
+                                           .map(function(id) Bookmarks.getItemTitle(id));
+
+                for each (let tag in storedTags) {
+                    if (currentTags.indexOf(tag) === -1)
+                        Database.tagEntry(false, entryID, tag);
                 }
-
-                Database.tagEntry(false, entry, oldTagName);
-                Database.tagEntry(true, entry, aNewName, tagID);
             }
         }
 
@@ -2215,12 +2209,12 @@ var Stm = {
         return this.selectEntriesByBookmarkID = new Statement(sql);
     },
 
-    get selectEntriesByTagID() {
+    get selectEntriesByTagName() {
         var sql = 'SELECT id, entryURL FROM entries WHERE id IN (          '+
-                  '    SELECT entryID FROM entry_tags WHERE tagID = :tagID '+
+                  '    SELECT entryID FROM entry_tags WHERE tagName = :tagName '+
                   ')                                                       ';
-        delete this.selectEntriesByTagID;
-        return this.selectEntriesByTagID = new Statement(sql);
+        delete this.selectEntriesByTagName;
+        return this.selectEntriesByTagName = new Statement(sql);
     },
 
     get starEntry() {
@@ -2235,11 +2229,20 @@ var Stm = {
         return this.unstarEntry = new Statement(sql);
     },
 
+    get checkTag() {
+        var sql = 'SELECT EXISTS (                  '+
+                  '    SELECT tagName               '+
+                  '    FROM entry_tags              '+
+                  '    WHERE tagName = :tagName AND '+
+                  '          entryID = :entryID     '+
+                  ') AS alreadyExists               ';
+        delete this.checkTag;
+        return this.checkTag = new Statement(sql);
+    },
+
     get tagEntry() {
-        // |OR IGNORE| is necessary, because some beta users mistakingly ended
-        // up with tagID column marked as UNIQUE.
-        var sql = 'INSERT OR IGNORE INTO entry_tags (entryID, tagName, tagID) '+
-                  'VALUES (:entryID, :tagName, :tagID)            ';
+        var sql = 'INSERT INTO entry_tags (entryID, tagName) '+
+                  'VALUES (:entryID, :tagName)               ';
         delete this.tagEntry;
         return this.tagEntry = new Statement(sql);
     },
@@ -2254,12 +2257,6 @@ var Stm = {
         var sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
         delete this.getTagsForEntry;
         return this.getTagsForEntry = new Statement(sql);
-    },
-
-    get getNameForTagID() {
-        var sql = 'SELECT tagName FROM entry_tags WHERE tagID = :tagID LIMIT 1';
-        delete this.getNameForTagID;
-        return this.getNameForTagID = new Statement(sql);
     },
 
     get setSerializedTagList() {
@@ -2577,10 +2574,10 @@ var Utils = {
         return entries;
     },
 
-    getEntriesByTagID: function getEntriesByTagID(aTagID) {
+    getEntriesByTagName: function getEntriesByTagName(aTagName) {
         var entries = [];
 
-        var results = Stm.selectEntriesByTagID.getResults({ 'tagID': aTagID });
+        var results = Stm.selectEntriesByTagName.getResults({ 'tagName': aTagName });
         for (let row = results.next(); row; row = results.next()) {
             entries.push({
                 id: row.id,
