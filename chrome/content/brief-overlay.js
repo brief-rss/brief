@@ -1,22 +1,25 @@
 const gBrief = {
 
+    FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
+    LAST_MAJOR_VERSION: '1.5',
+    RELEASE_NOTES_URL: 'http://brief.mozdev.org/versions/1.5.html',
+
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
-    FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
     tab: null,  // Tab in which Brief is loaded
 
-    get statusIcon gBrief_statusIcon() {
+    get statusIcon() {
         delete this.statusIcon;
         return this.statusIcon = document.getElementById('brief-status');
     },
 
-    get toolbarbutton gBrief_toolbarbutton() {
+    get toolbarbutton() {
         delete this.toolbarbutton;
         return this.toolbarbutton = document.getElementById('brief-button');
     },
 
-    get prefs gBrief_prefs() {
+    get prefs() {
         delete this.prefs;
         return this.prefs = Cc['@mozilla.org/preferences-service;1'].
                             getService(Ci.nsIPrefService).
@@ -24,7 +27,7 @@ const gBrief = {
                             QueryInterface(Ci.nsIPrefBranch2);
     },
 
-    get Storage gBrief_Storage() {
+    get Storage() {
         var tempScope = {};
         Components.utils.import('resource://brief/Storage.jsm', tempScope);
 
@@ -32,14 +35,15 @@ const gBrief = {
         return this.Storage = tempScope.Storage;
     },
 
-    get Query gBrief_Query() {
+    get Query() {
         let tempScope = {};
         Components.utils.import('resource://brief/Storage.jsm', tempScope);
+
         delete this.Query;
         return this.Query = tempScope.Query
     },
 
-    get FeedUpdateService gBrief_FeedUpdateService() {
+    get FeedUpdateService() {
         var tempScope = {};
         Components.utils.import('resource://brief/FeedUpdateService.jsm', tempScope);
 
@@ -135,7 +139,7 @@ const gBrief = {
         var lastUpdateTime = gBrief.prefs.getIntPref('update.lastUpdateTime');
         var elapsedTime = now - lastUpdateTime;
         var hours = Math.floor(elapsedTime / 3600);
-        var minutes = Math.floor((elapsedTime - hours*3600) / 60);
+        var minutes = Math.floor((elapsedTime - hours * 3600) / 60);
 
         var label = document.getElementById('brief-tooltip-last-updated');
         if (hours > 1)
@@ -160,29 +164,30 @@ const gBrief = {
         var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
         var value = bundle.getString('noUnreadFeedsTooltip');
         noUnreadLabel.setAttribute('value', value);
-        noUnreadLabel.hidden = unreadFeeds;
+        noUnreadLabel.hidden = unreadFeeds.length;
 
-        for (var i = 0; unreadFeeds && i < unreadFeeds.length; i++) {
-            var row = document.createElement('row');
+        for (let i = 0; unreadFeeds && i < unreadFeeds.length; i++) {
+            let row = document.createElement('row');
             row.setAttribute('class', 'unread-feed-row');
             row = rows.appendChild(row);
 
-            var feedName = this.Storage.getFeed(unreadFeeds[i]).title;
+            let feedName = this.Storage.getFeed(unreadFeeds[i]).title;
             label = document.createElement('label');
             label.setAttribute('class', 'unread-feed-name');
             label.setAttribute('crop', 'right');
             label.setAttribute('value', feedName);
             row.appendChild(label);
 
-            var query = new this.Query({
+            let query = new this.Query({
                 deleted: this.Storage.ENTRY_STATE_NORMAL,
                 feeds: [unreadFeeds[i]],
                 read: false
             });
+            let unreadCount = query.getEntryCount();
 
             label = document.createElement('label');
             label.setAttribute('class', 'unread-entries-count');
-            label.setAttribute('value', query.getEntryCount());
+            label.setAttribute('value', unreadCount);
             row.appendChild(label);
 
             value = unreadCount > 1 ? bundle.getString('manyUnreadEntries')
@@ -269,6 +274,21 @@ const gBrief = {
                 // changing content of the toolbar may interfere with that.
                 setTimeout(this.onFirstRun, 0);
             }
+            else {
+                let prevVersion = this.prefs.getCharPref('lastMajorVersion');
+                let verComparator = Cc['@mozilla.org/xpcom/version-comparator;1']
+                                    .getService(Ci.nsIVersionComparator);
+
+                // If Brief has been updated, load the new version info page.
+                if (verComparator.compare(prevVersion, this.LAST_MAJOR_VERSION) < 0) {
+                    gBrowser.loadOneTab(this.RELEASE_NOTES_URL, {
+                        relatedToCurrent: false,
+                        inBackground: false
+                    });
+
+                    this.prefs.setCharPref('lastMajorVersion', this.LAST_MAJOR_VERSION);
+                }
+            }
 
             var showStatusIcon = this.prefs.getBoolPref('showStatusbarIcon');
             if (showStatusIcon) {
@@ -282,7 +302,6 @@ const gBrief = {
                                   getService(Ci.nsIObserverService);
             observerService.addObserver(this, 'brief:feed-updated', false);
             observerService.addObserver(this, 'brief:invalidate-feedlist', false);
-            observerService.addObserver(this, 'brief:entry-status-changed', false);
             observerService.addObserver(this, 'brief:feed-update-queued', false);
             observerService.addObserver(this, 'brief:feed-update-canceled', false);
 
@@ -346,8 +365,7 @@ const gBrief = {
             break;
 
         case 'brief:feed-update-canceled':
-            var progressmeter = document.getElementById('brief-progressmeter');
-            progressmeter.hidden = true;
+            document.getElementById('brief-progressmeter').hidden = true;
             break;
 
         case 'brief:feed-updated':
