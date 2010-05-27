@@ -1,29 +1,21 @@
 const TEMPLATE_URL = 'resource://brief-content/feedview-template.html';
-const GUIDE_PAGE_URL = 'http://brief.mozdev.org/guide/guide.html';
-const LAST_MAJOR_VERSION = '1.2';
-const RELEASE_NOTES_URL = 'http://brief.mozdev.org/versions/1.2.html';
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 
-var gPrefBranch = Cc['@mozilla.org/preferences-service;1'].
-                    getService(Ci.nsIPrefService).
-                    getBranch('extensions.brief.').
-                    QueryInterface(Ci.nsIPrefBranch2);
+var gPrefBranch = Cc['@mozilla.org/preferences-service;1']
+                  .getService(Ci.nsIPrefService)
+                  .getBranch('extensions.brief.')
+                  .QueryInterface(Ci.nsIPrefBranch2);
 
-__defineGetter__('gTemplateURI', function() {
-    delete this.gTemplateURI;
-    return this.gTemplateURI = Cc['@mozilla.org/network/io-service;1'].
-                               getService(Ci.nsIIOService).
-                               newURI(TEMPLATE_URL, null, null);
-});
-__defineGetter__('gStringBundle', function() {
-    delete this.gStringBundle;
-    return this.gStringBundle = getElement('main-bundle');
-});
+var gTemplateURI = Cc['@mozilla.org/network/io-service;1']
+                   .getService(Ci.nsIIOService)
+                   .newURI(TEMPLATE_URL, null, null);
+
+var gStringBundle;
 
 
 function init() {
@@ -33,6 +25,8 @@ function init() {
     getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
     getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
     getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
+
+    gStringBundle = getElement('main-bundle');
 
     document.addEventListener('keypress', onKeyPress, true);
 
@@ -58,9 +52,22 @@ function init() {
     Storage.addObserver(gFeedList);
 
     gViewList.init();
-    async(gFeedList.rebuild, 0, gFeedList);
-    async(loadHomeview);
 
+    // Load feed view.
+    let startView = getElement('view-list').getAttribute('startview');
+    let name = getElement(startView).getAttribute('name');
+
+    let query = new Query({
+        deleted: Storage.ENTRY_STATE_NORMAL,
+        read: startView == 'unread-folder' ? false : undefined
+    });
+    gFeedView = new FeedView(name, query);
+
+    gViewList.richlistbox.suppressOnSelect = true;
+    gViewList.selectedItem = getElement(startView);
+    gViewList.richlistbox.suppressOnSelect = false;
+
+    async(gFeedList.rebuild, 0, gFeedList);
     async(Storage.syncWithLivemarks, 2000, Storage);
 }
 
@@ -120,7 +127,6 @@ var gCommands = {
 
     stopUpdating: function cmd_stopUpdating() {
         FeedUpdateService.stopUpdating();
-        getElement('update-buttons-deck').selectedIndex = 0;
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
@@ -142,7 +148,7 @@ var gCommands = {
         gFeedView.markVisibleEntriesRead();
     },
 
-    switchHeadlinesView: function cmd_switchHeadlinesView() {
+    toggleHeadlinesView: function cmd_toggleHeadlinesView() {
         var newState = !gPrefs.showHeadlinesOnly;
         gPrefBranch.setBoolPref('feedview.showHeadlinesOnly', newState);
         getElement('headlines-checkbox').checked = newState;
@@ -205,7 +211,7 @@ var gCommands = {
         gPrefBranch.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
     },
 
-    switchSelectedEntryRead: function cmd_switchSelectedEntryRead() {
+    toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
         if (gFeedView.selectedEntry) {
             var newState = !gFeedView.selectedElement.hasAttribute('read');
             this.markEntryRead(gFeedView.selectedEntry, newState);
@@ -236,7 +242,7 @@ var gCommands = {
         new Query(aEntry).deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
-    switchSelectedEntryStarred: function cmd_switchSelectedEntryStarred() {
+    toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
         if (gFeedView.selectedEntry) {
             var newState = !gFeedView.selectedElement.hasAttribute('starred');
             this.starEntry(gFeedView.selectedEntry, newState);
@@ -247,7 +253,7 @@ var gCommands = {
         new Query(aEntry).bookmarkEntries(aNewState);
     },
 
-    switchSelectedEntryCollapsed: function cmd_switchSelectedEntryCollapsed() {
+    toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
         if (gFeedView.selectedEntry && gPrefs.showHeadlinesOnly) {
             var selectedElement = gFeedView.selectedElement;
             var newState = !selectedElement.hasAttribute('collapsed');
@@ -268,7 +274,6 @@ var gCommands = {
         gCommands.openLink(url, aNewTab);
 
         if (!aEntryElement.hasAttribute('read')) {
-            aEntryElement.setAttribute('read', true);
             let entryID = parseInt(aEntryElement.id);
             new Query(entryID).markEntriesRead(true);
         }
@@ -291,35 +296,6 @@ var gCommands = {
         var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
         window.openDialog(url, 'Brief shortcuts', features);
-    }
-}
-
-
-function loadHomeview() {
-    var prevVersion = gPrefBranch.getCharPref('lastMajorVersion');
-    var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1'].
-                        getService(Ci.nsIVersionComparator);
-
-    // If Brief has been updated, load the new version info page.
-    if (verComparator.compare(prevVersion, LAST_MAJOR_VERSION) < 0) {
-        let browser = getElement('feed-view');
-        browser.loadURI(RELEASE_NOTES_URL);
-        gPrefBranch.setCharPref('lastMajorVersion', LAST_MAJOR_VERSION);
-        getElement('feed-view-toolbar').hidden = true;
-    }
-    else {
-        let startView = getElement('view-list').getAttribute('startview');
-        let name = getElement(startView).getAttribute('name');
-
-        let query = new Query({
-            deleted: Storage.ENTRY_STATE_NORMAL,
-            read: startView == 'unread-folder' ? false : undefined
-        });
-        gFeedView = new FeedView(name, query);
-
-        gViewList.richlistbox.suppressOnSelect = true;
-        gViewList.selectedItem = getElement(startView);
-        gViewList.richlistbox.suppressOnSelect = false;
     }
 }
 
