@@ -21,23 +21,23 @@
         <key id="Brief_skipUp" key="i"
              oncommand="gBrief.doCommand('skipUp')"/>
 
-        <key id="Brief_switchSelectedEntryRead" key="m"
-             oncommand="gBrief.doCommand('switchSelectedEntryRead')"/>
+        <key id="Brief_toggleSelectedEntryRead" key="m"
+             oncommand="gBrief.doCommand('toggleSelectedEntryRead')"/>
         <key id="Brief_markCurrentViewRead" key="n"
              oncommand="gBrief.doCommand('markVisibleEntriesRead')"/>
         <key id="Brief_markCurrentViewRead" key="n" modifiers="alt"
              oncommand="gBrief.doCommand('markViewRead')"/>
         <key id="Brief_deleteOrRestoreSelectedEntry" key="t"
              oncommand="gBrief.doCommand('deleteOrRestoreSelectedEntry')"/>
-        <key id="Brief_switchSelectedEntryStarred" key="b"
-             oncommand="gBrief.doCommand('switchSelectedEntryStarred')"/>
-        <key id="Brief_switchSelectedEntryCollapsed" key="h"
-             oncommand="gBrief.doCommand('switchSelectedEntryCollapsed')"/>
+        <key id="Brief_toggleSelectedEntryStarred" key="b"
+             oncommand="gBrief.doCommand('toggleSelectedEntryStarred')"/>
+        <key id="Brief_toggleSelectedEntryCollapsed" key="h"
+             oncommand="gBrief.doCommand('toggleSelectedEntryCollapsed')"/>
         <key id="Brief_openSelectedEntry" keycode="VK_RETURN"
              oncommand="gBrief.doCommand('openSelectedEntryLink')"/>
 
-        <key id="Brief_switchHeadlinesView" key="f"
-             oncommand="gBrief.doCommand('switchHeadlinesView')"/>
+        <key id="Brief_toggleHeadlinesView" key="f"
+             oncommand="gBrief.doCommand('toggleHeadlinesView')"/>
         <key id="Brief_showAllEntries" key="a"
              oncommand="gBrief.doCommand('showAllEntries')"/>
         <key id="Brief_showStarredEntries" key="s"

@@ -199,7 +199,7 @@
                     type="checkbox"
                     autoCheck="false"
                     tooltiptext="&headlinesCheckbox.tooltip;"
-                    oncommand="gCommands.switchHeadlinesView()"/>
+                    oncommand="gCommands.toggleHeadlinesView()"/>
             <button id="filter-unread-checkbox"
                     class="brief-button view-button"
                     tooltiptext="&filterUnread.tooltip;"
