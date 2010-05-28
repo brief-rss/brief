@@ -512,6 +512,8 @@ var Database = {
      *        Subject entry.
      * @param aBookmarkID
      *        ItemId of the corresponding bookmark in Places database.
+     * @param aDontNotify
+     *        Don't notify observers.
      */
     starEntry: function Database_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
         if (aState)
@@ -539,29 +541,35 @@ var Database = {
      *        Name of the tag.
      */
     tagEntry: function Database_tagEntry(aState, aEntryID, aTagName) {
-        var params = { 'entryID': aEntryID, 'tagName': aTagName };
+        Connection.beginTransaction();
+        try {
+            var params = { 'entryID': aEntryID, 'tagName': aTagName };
 
-        if (aState) {
-            let alreadyTagged = Stm.checkTag.getSingleResult(params).alreadyExists;
-            if (alreadyTagged)
-                return;
+            if (aState) {
+                let alreadyTagged = Stm.checkTag.getSingleResult(params).alreadyExists;
+                if (alreadyTagged)
+                    return;
 
-            Stm.tagEntry.execute(params);
+                Stm.tagEntry.execute(params);
+            }
+            else {
+                Stm.untagEntry.execute(params);
+            }
+
+            // Update the serialized list of tags stored in entries_text table.
+            Stm.setSerializedTagList.execute({
+                'tags': Utils.getTagsForEntry(aEntryID).join(', '),
+                'entryID': aEntryID
+            });
+
+            new Query(aEntryID).getEntryList(function(aList) {
+                for each (let observer in Database.observers)
+                    observer.onEntriesTagged(aList, aState, aTagName);
+            });
         }
-        else {
-            Stm.untagEntry.execute(params);
+        finally {
+            Connection.commitTransaction();
         }
-
-        // Update the serialized list of tags stored in entries_text table.
-        Stm.setSerializedTagList.execute({
-            'tags': Utils.getTagsForEntry(aEntryID).join(', '),
-            'entryID': aEntryID
-        });
-
-        new Query(aEntryID).getEntryList(function(aList) {
-            for each (let observer in Database.observers)
-                observer.onEntriesTagged(aList, aState, aTagName);
-        });
     },
 
     QueryInterface: XPCOMUtils.generateQI(Ci.nsIObserver)
@@ -1604,21 +1612,20 @@ var BookmarkObserver = {
             return;
 
         // Find entries with the same URI as the added item and tag or star them.
-        // Typically, there is going to be at most one such entry, so don't even
-        // bother with a transaction.
         var url = Bookmarks.getBookmarkURI(aItemID).spec;
         var isTag = Utils.isTagFolder(aFolder);
 
-        for each (let entry in Utils.getEntriesByURL(url)) {
-            if (isTag) {
-                // XXX Don't allow duplicate tags.
-                let tagName = Bookmarks.getItemTitle(aFolder);
-                Database.tagEntry(true, entry.id, tagName, aItemID);
-            }
-            else {
-                Database.starEntry(true, entry.id, aItemID);
-            }
-        }
+        Utils.getEntriesByURL(url, function(aEntries) {
+            aEntries.forEach(function(entry) {
+                if (isTag) {
+                    let tagName = Bookmarks.getItemTitle(aFolder);
+                    Database.tagEntry(true, entry, tagName, aItemID);
+                }
+                else {
+                    Database.starEntry(true, entry, aItemID);
+                }
+            })
+        })
     },
 
 
@@ -1638,36 +1645,34 @@ var BookmarkObserver = {
 
         var isTag = Utils.isTagFolder(aFolder);
 
-        Connection.beginTransaction();
-        try {
-            if (isTag) {
-                let tagName = Bookmarks.getItemTitle(aFolder);
-                for each (let entry in Utils.getEntriesByTagName(tagName))
-                    Database.tagEntry(false, entry.id, tagName);
-            }
-            else {
-                // Find entries with bookmarkID of the removed item and unstar them.
-                let entries = Utils.getEntriesByBookmarkID(aItemID);
+        if (isTag) {
+            let tagName = Bookmarks.getItemTitle(aFolder);
 
-                // Look for other bookmarks for this URI.
-                if (entries.length) {
-                    let uri = Utils.newURI(entries[0].url);
+            Utils.getEntriesByTagName(tagName, function(aEntries) {
+                aEntries.forEach(function(entry) {
+                    Database.tagEntry(false, entry, tagName);
+                })
+            })
+        }
+        else {
+            Utils.getEntriesByBookmarkID(aItemID, function(aEntries) {
+
+                // Look for other bookmarks for this URI. If there is another
+                // bookmark for this URI, don't unstar the entry, but update
+                // its bookmarkID to point to that bookmark.
+                if (aEntries.length) {
+                    let uri = Utils.newURI(aEntries[0].url);
                     var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
                                               filter(Utils.isNormalBookmark);
                 }
 
-                for each (let entry in entries) {
-                    // If there is another bookmark for this URI, don't unstar the
-                    // entry, but update its bookmarkID to point to that bookmark.
+                aEntries.forEach(function(entry) {
                     if (bookmarks.length)
                         Database.starEntry(true, entry.id, bookmarks[0], true);
                     else
                         Database.starEntry(false, entry.id);
-                }
-            }
-        }
-        finally {
-            Connection.commitTransaction();
+                })
+            })
         }
     },
 
@@ -1705,12 +1710,18 @@ var BookmarkObserver = {
 
         case 'uri':
             // Unstar any entries with the old URI.
-            for each (let entry in Utils.getEntriesByBookmarkID(aItemID))
-                Database.starEntry(false, entry.id);
+            Utils.getEntriesByBookmarkID(aItemID, function(aEntries) {
+                aEntries.forEach(function(entry) {
+                    Database.starEntry(false, entry.id);
+                })
+            })
 
             // Star any entries with the new URI.
-            for each (let entry in Utils.getEntriesByURL(aNewValue))
-                Database.starEntry(true, entry.id, aItemID);
+            Utils.getEntriesByURL(aNewValue, function(aEntries) {
+                aEntries.forEach(function(entry) {
+                    Database.starEntry(true, entry, aItemID);
+                })
+            })
 
             break;
         }
@@ -1758,23 +1769,24 @@ var BookmarkObserver = {
         for (let i = 0; i < result.root.childCount; i++) {
             let tagID = result.root.getChild(i).itemId;
             let uri = Bookmarks.getBookmarkURI(tagID);
-            let entries = Utils.getEntriesByURL(uri.spec)
-                               .map(function(e) e.id);
 
-            for each (let entryID in entries) {
-                Database.tagEntry(true, entryID, aNewName);
+            Utils.getEntriesByURL(uri.spec, function(aEntries) {
+                aEntries.forEach(function(entryID) {
 
-                let storedTags = Utils.getTagsForEntry(entryID);
-                let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
-                                           .map(function(id) Bookmarks.getFolderIdForItem(id))
-                                           .filter(Utils.isTagFolder)
-                                           .map(function(id) Bookmarks.getItemTitle(id));
+                    Database.tagEntry(true, entryID, aNewName);
 
-                for each (let tag in storedTags) {
-                    if (currentTags.indexOf(tag) === -1)
-                        Database.tagEntry(false, entryID, tag);
-                }
-            }
+                    let storedTags = Utils.getTagsForEntry(entryID);
+                    let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
+                                               .map(function(id) Bookmarks.getFolderIdForItem(id))
+                                               .filter(Utils.isTagFolder)
+                                               .map(function(id) Bookmarks.getItemTitle(id));
+
+                    for each (let tag in storedTags) {
+                        if (currentTags.indexOf(tag) === -1)
+                            Database.tagEntry(false, entryID, tag);
+                    }
+                })
+            })
         }
 
         result.root.containerOpen = false;
@@ -2198,13 +2210,13 @@ var Stm = {
     },
 
     get selectEntriesByURL() {
-        var sql = 'SELECT id, starred FROM entries WHERE entryURL = :url';
+        var sql = 'SELECT id FROM entries WHERE entryURL = :url';
         delete this.selectEntriesByURL;
         return this.selectEntriesByURL = new Statement(sql);
     },
 
     get selectEntriesByBookmarkID() {
-        var sql = 'SELECT id, starred, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
+        var sql = 'SELECT id, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
         delete this.selectEntriesByBookmarkID;
         return this.selectEntriesByBookmarkID = new Statement(sql);
     },
@@ -2235,7 +2247,7 @@ var Stm = {
                   '    FROM entry_tags              '+
                   '    WHERE tagName = :tagName AND '+
                   '          entryID = :entryID     '+
-                  ') AS alreadyExists               ';
+                  ') AS alreadyTagged               ';
         delete this.checkTag;
         return this.checkTag = new Statement(sql);
     },
@@ -2543,50 +2555,59 @@ var Utils = {
         return !!Utils.getFeedByBookmarkID(aItemID);
     },
 
-    getEntriesByURL: function getEntriesByURL(aURL) {
+    getEntriesByURL: function getEntriesByURL(aURL, aCallback) {
         var entries = [];
 
-        var results = Stm.selectEntriesByURL.getResults({ 'url': aURL });
-        for (let row = results.next(); row; row = results.next()) {
-            entries.push({
-                id: row.id,
-                starred: row.starred
-            });
-        }
-        results.close();
+        Stm.selectEntriesByURL.params.url = aURL;
+        Stm.selectEntriesByURL.executeAsync({
+            handleResult: function(aResults) {
+                var row;
+                while (row = aResults.next())
+                    entries.push(row.id);
+            },
 
-        return entries;
+            handleCompletion: function(aReason) {
+                aCallback(entries);
+            }
+        })
     },
 
-    getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID) {
+    getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID, aCallback) {
         var entries = [];
 
-        var results = Stm.selectEntriesByBookmarkID.getResults({ 'bookmarkID': aBookmarkID });
-        for (let row = results.next(); row; row = results.next()) {
-            entries.push({
-                id: row.id,
-                url: row.entryURL,
-                starred: row.starred
-            });
-        }
-        results.close();
+        Stm.selectEntriesByBookmarkID.params.bookmarkID = aBookmarkID;
+        Stm.selectEntriesByBookmarkID.executeAsync({
+            handleResult: function(aResults) {
+                var row;
+                while (row = aResults.next()) {
+                    entries.push({
+                        id: row.id,
+                        url: row.entryURL
+                    });
+                }
+            },
 
-        return entries;
+            handleCompletion: function(aReason) {
+                aCallback(entries);
+            }
+        })
     },
 
-    getEntriesByTagName: function getEntriesByTagName(aTagName) {
+    getEntriesByTagName: function getEntriesByTagName(aTagName, aCallback) {
         var entries = [];
 
-        var results = Stm.selectEntriesByTagName.getResults({ 'tagName': aTagName });
-        for (let row = results.next(); row; row = results.next()) {
-            entries.push({
-                id: row.id,
-                url: row.entryURL
-            });
-        }
-        results.close();
+        Stm.selectEntriesByTagName.params.tagName = aTagName;
+        Stm.selectEntriesByTagName.executeAsync({
+            handleResult: function(aResults) {
+                var row;
+                while (row = aResults.next())
+                    entries.push(row.id)
+            },
 
-        return entries;
+            handleCompletion: function(aReason) {
+                aCallback(entries);
+            }
+        })
     },
 
     newURI: function(aSpec) {
