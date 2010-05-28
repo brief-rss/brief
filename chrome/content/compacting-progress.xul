@@ -12,10 +12,10 @@
 
     <script type="application/x-javascript">
         function compact() {
+            Components.utils.import('resource://brief/Storage.jsm');
+
             setTimeout(function() {
-                Components.classes['@ancestor/brief/storage;1'].
-                           getService(Components.interfaces.nsIBriefStorage).
-                           compactDatabase();
+                Storage.compactDatabase();
                 window.close();
             }, 100)
         }
