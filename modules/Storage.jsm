@@ -313,9 +313,9 @@ var Database = {
             this.feedsCache = [];
             this.feedsAndFoldersCache = [];
 
-            var results = Stm.getAllFeeds.getResults();
-            for (let row = results.next(); row; row = results.next()) {
+            var results = Stm.getAllFeeds.getResults(), row;
 
+            while (row = results.next()) {
                 let feed = new Feed();
                 for (let column in row)
                     feed[column] = row[column];
@@ -324,7 +324,6 @@ var Database = {
                 if (!feed.isFolder)
                     this.feedsCache.push(feed);
             }
-            results.close();
         }
 
         return aIncludeFolders ? this.feedsAndFoldersCache : this.feedsCache;
@@ -332,14 +331,7 @@ var Database = {
 
     // See Storage.
     getAllTags: function Database_getAllTags() {
-        var tags = [];
-
-        var results = Stm.getAllTags.getResults();
-        for (row = results.next(); row; row = results.next())
-            tags.push(row.tagName);
-        results.close();
-
-        return tags;
+        return Stm.getAllTags.getAllResults().map(function(row) row.tagName);
     },
 
 
@@ -906,13 +898,20 @@ Query.prototype = {
      * @returns Array if IDs.
      */
     getEntries: function Query_getEntries() {
-        var entries = [];
-
         var sql = 'SELECT entries.id ' + this._getQueryString(true);
-        var results = new Statement(sql).getResults(null, this._onDatabaseError);
-        for (let row = results.next(); row; row = results.next())
-            entries.push(row.id);
-        results.close();
+
+        try {
+            var entries = [];
+            var statement = Connection.createStatement(sql);
+            while (statement.step())
+                entries.push(statement.row.id);
+        }
+        catch(ex) {
+            this._onDatabaseError(ex);
+        }
+        finally {
+            statement.reset();
+        }
 
         return entries;
     },
@@ -929,10 +928,11 @@ Query.prototype = {
                   '       entries.bookmarkID, entries_text.title, entries_text.content, '+
                   '       entries_text.authors, entries_text.tags                       ';
         sql += this._getQueryString(true, true);
+
         var results = new Statement(sql).getResults(null, this._onDatabaseError);
 
-        var entries = [];
-        for (let row = results.next(); row; row = results.next()) {
+        var entries = [], row;
+        while (row = results.next()) {
             let entry = new Entry();
 
             for (let column in row)
@@ -940,7 +940,6 @@ Query.prototype = {
 
             entries.push(entry);
         }
-        results.close();
 
         return entries;
     },
@@ -957,9 +956,6 @@ Query.prototype = {
      *          and ID of the corresponding entry.
      */
     getProperty: function Query_getProperty(aPropertyName, aDistinct) {
-        var rows = [];
-        var values = [];
-
         switch (aPropertyName) {
             case 'content':
             case 'title':
@@ -975,8 +971,11 @@ Query.prototype = {
         var sql = 'SELECT entries.id, ' + table + aPropertyName +
                    this._getQueryString(true, getEntriesText);
 
+        var objects = [], values = [], row;
+
         var results = new Statement(sql).getResults(null, this._onDatabaseError);
-        for (let row = results.next(); row; row = results.next()) {
+
+        while (row = results.next()) {
             let value = row[aPropertyName];
             if (aDistinct && values.indexOf(value) != -1)
                 continue;
@@ -986,11 +985,10 @@ Query.prototype = {
             let obj = {};
             obj[aPropertyName] = value;
             obj.ID = row.id;
-            rows.push(obj);
+            objects.push(obj);
         }
-        results.close();
 
-        return rows;
+        return objects;
     },
 
 
@@ -1462,17 +1460,18 @@ Statement.prototype = {
 
         this._bindParams();
 
+        var columns = [];
         var columnCount = this._wrappedStatement.columnCount;
+        for (let i = 0; i < columnCount; i++)
+            columns.push(this._wrappedStatement.getColumnName(i));
 
         try {
             while (true) {
                 let row = null;
                 if (this._wrappedStatement.step()) {
                     row = {};
-                    for (let i = 0; i < columnCount; i++) {
-                        let column = this._wrappedStatement.getColumnName(i);
-                        row[column] = this._wrappedStatement.row[column];
-                    }
+                    for (let i = 0; i < columnCount; i++)
+                        row[columns[i]] = this._wrappedStatement.row[columns[i]];
                 }
 
                 yield row;
@@ -1495,6 +1494,15 @@ Statement.prototype = {
         results.close();
 
         return row;
+    },
+
+    getAllResults: function Statement_getAllResults(aParams, aOnError) {
+        var results = this.getResults(aParams, aOnError);
+        var row, rows = [];
+        while (row = results.next())
+            rows.push(row);
+
+        return rows;
     },
 
     reset: function Statement_reset() {
@@ -1918,12 +1926,7 @@ LivemarksSync.prototype = {
     // Gets all feeds stored in the database.
     getStoredFeeds: function BookmarksSync_getStoredFeeds() {
         var sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
-
-        this.storedFeeds = [];
-        var results = new Statement(sql).getResults();
-        for (let row = results.next(); row; row = results.next())
-            this.storedFeeds.push(row);
-        results.close();
+        this.storedFeeds = new Statement(sql).getAllResults();
     },
 
 
@@ -2529,14 +2532,8 @@ var Migration = {
 var Utils = {
 
     getTagsForEntry: function getTagsForEntry(aEntryID) {
-        var tags = [];
-
-        var results = Stm.getTagsForEntry.getResults({ 'entryID': aEntryID });
-        for (let row = results.next(); row; row = results.next())
-            tags.push(row.tagName);
-        results.close();
-
-        return tags;
+        return Stm.getTagsForEntry.getAllResults({ 'entryID': aEntryID })
+                                  .map(function(r) r.tagName);
     },
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
