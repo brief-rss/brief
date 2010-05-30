@@ -149,23 +149,24 @@ FeedView.prototype = {
      * or update its state.
      * This is the only way we can communicate with the untrusted document.
      *
-     * @param aTargetEntries Array of IDs of target entries.
+     * @param aTargetEntries ID, or an array of IDs, of target entries.
      * @param aEventType     Type of the event.
      * @param aState         Additional parameter, the new state of the entry.
      */
     _sendEvent: function FeedView__sendEvent(aTargetEntries, aEventType, aState) {
-        var targetEntries = aTargetEntries.splice ? aTargetEntries : [aTargetEntries];
+        var targetEntries = aTargetEntries instanceof Array ? aTargetEntries
+                                                            : [aTargetEntries];
 
-        for (let i = 0; i < targetEntries.length; i++) {
-            let evt = document.createEvent('Events');
+        targetEntries.forEach(function(targetEntry) {
+            let evt = this.document.createEvent('Events');
             evt.initEvent('ViewEvent', false, false);
 
-            let element = this.document.getElementById(targetEntries[i]);
+            let element = this.document.getElementById(targetEntry);
             element.setAttribute('eventType', aEventType);
             element.setAttribute('eventState', aState);
 
             element.dispatchEvent(evt);
-        }
+        }, this)
     },
 
     collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
@@ -425,8 +426,9 @@ FeedView.prototype = {
     },
 
     toggleHeadlinesView: function FeedView_toggleHeadlinesView() {
-        for (let i = 0; i < this._loadedEntries.length; i++)
-            this.collapseEntry(this._loadedEntries[i], gPrefs.showHeadlinesOnly, false);
+        this._loadedEntries.forEach(function(entry) {
+            this.collapseEntry(entry, gPrefs.showHeadlinesOnly, false);
+        }, this)
 
         if (gPrefs.showHeadlinesOnly) {
             this.feedContent.setAttribute('showHeadlinesOnly', true);
@@ -701,14 +703,11 @@ FeedView.prototype = {
         if (!this.active)
             return;
 
-        var entries = intersect(this._loadedEntries, aEntryList.IDs);
-        for (let i = 0; i < entries.length; i++) {
-            let elem = this.document.getElementById(entries[i]);
-            if (elem) {
-                elem.setAttribute('changedTag', aTag);
-                this._sendEvent(entries[i], 'EntryTagged', aNewState);
-            }
-        }
+        intersect(this._loadedEntries, aEntryList.IDs).forEach(function(entry) {
+            this.document.getElementById(entry)
+                         .setAttribute('changedTag', aTag);
+            this._sendEvent(entry, 'EntryTagged', aNewState);
+        }, this)
 
         if (this.query.tags && this.query.tags[0] === aTag) {
             let delta = this.query.getEntryCount() - this.entryCount;
@@ -760,10 +759,10 @@ FeedView.prototype = {
             return;
 
         var fullEntries = this._getFastQuery(entriesToInsert).getFullEntries();
-        for (let i = 0; i < fullEntries.length; i++) {
-            let index = this._loadedEntries.indexOf(fullEntries[i].id);
-            this._insertEntry(fullEntries[i], index);
-        }
+        fullEntries.forEach(function(entry) {
+            let index = this._loadedEntries.indexOf(entry.id);
+            this._insertEntry(entry, index);
+        }, this)
 
         this._setEmptyViewMessage();
         this._asyncRefreshEntryList();
@@ -1000,7 +999,7 @@ FeedView.prototype = {
         articleContainer.setAttribute('dateString', dateString);
         if (aEntry.updated) {
             dateString += ' <span class="article-updated">' + this._strings.entryUpdated + '</span>'
-            articleContainer.setAttribute('_strings.entryUpdateding', dateString);
+            articleContainer.setAttribute('updatedString', dateString);
             articleContainer.setAttribute('updated', true);
         }
 
@@ -1019,11 +1018,12 @@ FeedView.prototype = {
             let tags = this._getAnonElement(header, 'article-tags');
             let authors = this._getAnonElement(header, 'article-authors');
             let terms = this.query.searchString.match(/[A-Za-z0-9]+/g);
-            for each (let term in terms) {
+
+            terms.forEach(function(term) {
                 this._highlightText(term, articleContainer);
                 this._highlightText(term, authors);
                 this._highlightText(term, tags);
-            }
+            }, this)
         }
 
         return articleContainer;

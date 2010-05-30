@@ -667,13 +667,13 @@ var gFeedList = {
             getElement('update-buttons-deck').selectedIndex = 0;
             getElement('update-progress').value = 0;
 
-            for each (feed in Storage.getAllFeeds(false)) {
+            Storage.getAllFeeds().forEach(function(feed) {
                 let item = getElement(feed.feedID);
                 if (item.hasAttribute('loading')) {
                     item.removeAttribute('loading');
                     this._refreshFavicon(feed.feedID);
                 }
-            }
+            }, this)
             break;
 
         case 'brief:custom-style-changed':
