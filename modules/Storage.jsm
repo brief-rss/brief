@@ -395,7 +395,7 @@ var Database = {
                 }
 
                 // Delete old entries based on per-feed limit.
-                for each (let feed in this.getAllFeeds()) {
+                this.getAllFeeds().forEach(function(feed) {
                     if (feed.entryAgeLimit > 0) {
                         Stm.expireEntriesByAgePerFeed.execute({
                             'oldState': Database.ENTRY_STATE_NORMAL,
@@ -404,13 +404,13 @@ var Database = {
                             'feedID': feed.feedID
                         });
                     }
-                }
+                })
 
                 // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
                 if (Prefs.getBoolPref('database.limitStoredEntries')) {
                     let maxEntries = Prefs.getIntPref('database.maxStoredEntries');
 
-                    for each (let feed in this.getAllFeeds()) {
+                    this.getAllFeeds().forEach(function(feed) {
                         let row = Stm.getDeletedEntriesCount.getSingleResult({
                             'feedID': feed.feedID,
                             'deletedState': Database.ENTRY_STATE_NORMAL
@@ -424,7 +424,7 @@ var Database = {
                                 'limit': row.entryCount - maxEntries
                             });
                         }
-                    }
+                    })
                 }
             }
 
@@ -1135,10 +1135,10 @@ Query.prototype = {
                        getService(Ci.nsIPlacesTransactionsService);
         var transactions = []
 
-        for each (let entry in this.getFullEntries()) {
+        this.getFullEntries().forEach(function(entry) {
             let uri = Utils.newURI(entry.entryURL);
             if (!uri)
-                continue;
+                return;
 
             if (aState) {
                 let trans = transSrv.createItem(uri, Places.unfiledBookmarksFolderId,
@@ -1161,7 +1161,7 @@ Query.prototype = {
                     Database.starEntry(false, entry.id, bookmarks[0]);
                 }
             }
-        }
+        })
 
         var aggregatedTrans = transSrv.aggregateTransactions('', transactions);
         transSrv.doTransaction(aggregatedTrans);
@@ -1182,10 +1182,10 @@ Query.prototype = {
     verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
         var statusOK = true;
 
-        for each (let entry in this.getFullEntries()) {
+        this.getFullEntries().forEach(function(entry) {
             let uri = Utils.newURI(entry.entryURL);
             if (!uri)
-                continue;
+                return;
 
             let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
 
@@ -1207,20 +1207,20 @@ Query.prototype = {
                                           .filter(Utils.isTagFolder)
                                           .map(function(id) Bookmarks.getItemTitle(id));
 
-            for each (let tag in storedTags) {
+            storedTags.forEach(function(tag) {
                 if (currentTags.indexOf(tag) === -1) {
                     Places.tagging.tagURI(uri, [tag]);
                     statusOK = false;
                 }
-            }
+            })
 
-            for each (let tag in currentTags) {
+            currentTags.forEach(function(tag) {
                 if (storedTags.indexOf(tag) === -1) {
                     Database.tagEntry(true, entry.id, tag);
                     statusOK = false;
                 }
-            }
-        }
+            })
+        })
 
         return statusOK;
     },
@@ -1781,10 +1781,10 @@ var BookmarkObserver = {
                                                .filter(Utils.isTagFolder)
                                                .map(function(id) Bookmarks.getItemTitle(id));
 
-                    for each (let tag in storedTags) {
+                    storedTags.forEach(function(tag) {
                         if (currentTags.indexOf(tag) === -1)
                             Database.tagEntry(false, entryID, tag);
-                    }
+                    })
                 })
             })
         }
@@ -1822,7 +1822,7 @@ function LivemarksSync() {
         // Get the list of feeds stored in the database.
         this.getStoredFeeds();
 
-        for each (let livemark in this.foundLivemarks) {
+        this.foundLivemarks.forEach(function(livemark) {
             let feed = null;
             for (let i = 0; i < this.storedFeeds.length; i++) {
                 if (this.storedFeeds[i].feedID == livemark.feedID) {
@@ -1840,12 +1840,12 @@ function LivemarksSync() {
                 if (!livemark.isFolder)
                     this.newLivemarks.push(livemark);
             }
-        }
+        }, this)
 
-        for each (let feed in this.storedFeeds) {
+        this.storedFeeds.forEach(function(feed) {
             if (!feed.bookmarked && feed.hidden == 0)
                 this.hideFeed(feed);
-        }
+        }, this)
     }
     finally {
         Connection.commitTransaction();

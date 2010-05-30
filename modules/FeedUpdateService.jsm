@@ -98,6 +98,22 @@ var Service = {
 
     status: 0,
 
+    // Current batch of feeds to be updated (array of Feed's)
+    scheduledFeeds: [],
+
+    // Remaining feeds to be fetched in the current batch
+    updateQueue:    [],
+
+    // Feeds that have already been fetched and parsed
+    completedFeeds: [],
+
+    // Number of feeds updated in the current batch that have new entries
+    feedsWithNewEntriesCount: 0,
+
+    // Total number of new entries in the current batch
+    newEntriesCount:          0,
+
+
     init: function Service_init() {
         ObserverService.addObserver(this, 'brief:feed-updated', false);
         ObserverService.addObserver(this, 'quit-application', false);
@@ -115,35 +131,22 @@ var Service = {
         this.startupDelayTimer.initWithCallback(this, startupDelay, TIMER_TYPE_ONE_SHOT);
     },
 
-    scheduledFeeds: [],  // current batch of feeds to be updated (array of Feed's)
-    updateQueue:    [],  // remaining feeds to be fetched in the current batch
-    completedFeeds: [],  // feeds that have already been fetched and parsed
-
-    feedsWithNewEntriesCount: 0,  // number of feeds updated in the current batch that have new entries
-    newEntriesCount:          0,  // total number of new entries in the current batch
-
     // See FeedUpdateService.
     updateAllFeeds: function Service_updateAllFeeds(aInBackground) {
         this.updateFeeds(Storage.getAllFeeds(), aInBackground);
 
-        var roundedNow = Math.round(Date.now() / 1000);
-        Prefs.setIntPref('update.lastUpdateTime', roundedNow);
+        Prefs.setIntPref('update.lastUpdateTime', Math.round(Date.now() / 1000));
     },
 
     // See FeedUpdateService.
     updateFeeds: function Service_updateFeeds(aFeeds, aInBackground) {
-        // Add feeds to the queue, but don't let the same feed be added twice.
-        var newFeedsQueued = false;
-        for each (feed in aFeeds) {
-            if (this.updateQueue.indexOf(feed) == -1) {
-                this.scheduledFeeds.push(feed);
-                this.updateQueue.push(feed);
-                newFeedsQueued = true;
-            }
-        }
+        // Don't add the same feed be added twice.
+        var newFeeds = aFeeds.filter(function(f) this.updateQueue.indexOf(f) == -1, this);
 
-        // Start an update if it isn't in progress yet. Subsequent feeds are requested
-        // on an interval, so that we don't choke when processing all of them a once.
+        this.scheduledFeeds = this.scheduledFeeds.concat(newFeeds);
+        this.updateQueue = this.updateQueue.concat(newFeeds);
+
+        // Start an update if it isn't in progress yet.
         if (this.status == this.NOT_UPDATING) {
             var delay = aInBackground ? Prefs.getIntPref('update.backgroundFetchDelay')
                                       : Prefs.getIntPref('update.defaultFetchDelay');
@@ -164,7 +167,7 @@ var Service = {
             this.fetchNextFeed();
         }
 
-        if (newFeedsQueued)
+        if (newFeeds.length)
             ObserverService.notifyObservers(null, 'brief:feed-update-queued', '');
     },
 
@@ -318,8 +321,11 @@ var Service = {
  */
 function FeedFetcher(aFeed) {
     this.feed = aFeed;
+
     this.parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
     this.parser.listener = this;
+
+    this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
     ObserverService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
     ObserverService.addObserver(this, 'brief:feed-update-canceled', false);
@@ -332,7 +338,8 @@ FeedFetcher.prototype = {
     feed:           null, // The passed feed, as currently stored in the database.
     downloadedFeed: null, // The downloaded feed.
 
-    request:      null,
+    request: null,
+    parser: null,
     timeoutTimer: null,
 
     // The feed processor sets the bozo bit when a feed triggers a fatal error during XML
@@ -340,13 +347,26 @@ FeedFetcher.prototype = {
     // error occurred.
     bozo: false,
 
+
     requestFeed: function FeedFetcher_requestFeed() {
+        this.request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1']
+                       .createInstance(Ci.nsIXMLHttpRequest);
+
+        this.request.mozBackgroundRequest = Prefs.getBoolPref('update.suppressSecurityDialogs');
+        this.request.open('GET', this.feed.feedURL, true);
+        this.request.overrideMimeType('application/xml');
+        this.request.onload = onRequestLoad;
+        this.request.onerror = onRequestError;
+        this.request.send(null);
+
+        this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
+
         var self = this;
 
-        // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
-        const I_LOVE_NECKO_TOO = 2152398850;
-
         function onRequestError() {
+            // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
+            const I_LOVE_NECKO_TOO = 2152398850;
+
             if (self.request.channel.status == I_LOVE_NECKO_TOO) {
                 self.request.abort();
                 self.requestFeed();
@@ -366,21 +386,7 @@ FeedFetcher.prototype = {
                 self.finish(true);
             }
         }
-
-        this.request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1'].
-                       createInstance(Ci.nsIXMLHttpRequest);
-        if (Prefs.getBoolPref('update.suppressSecurityDialogs'))
-            this.request.mozBackgroundRequest = true;
-        this.request.open('GET', this.feed.feedURL, true);
-        this.request.overrideMimeType('application/xml');
-        this.request.onload = onRequestLoad;
-        this.request.onerror = onRequestError;
-        this.request.send(null);
-
-        this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
     },
-
 
     // nsIFeedResultListener
     handleResult: function FeedFetcher_handleResult(aResult) {
@@ -429,7 +435,6 @@ FeedFetcher.prototype = {
             self.finish(self.bozo, aNewEntriesCount);
         });
     },
-
 
     finish: function FeedFetcher_finish(aError, aNewEntriesCount) {
         Service.onFeedUpdated(this.feed, aError, aNewEntriesCount || 0);
