@@ -22,12 +22,16 @@ var gFeedView = null;
  * be untrusted and we respect XPCNativeWrappers when interacting with it. Individual
  * entries are inserted dynamically and have their own XBL bindings.
  *
- * @param aTitle  Title of the view which will be shown in the header.
- * @param aQuery  Query which selects contained entries.
- * @param aFixedUnread  Indicates that the "unread" query parameter is fixed and the view
- *                      isn't affected by feedview.filterUnread pref.
- * @param aFixedStarred  Indicates that the "starred" query parameter is fixed and the
- *                       isn't view affected by feedview.filterStarred pref.
+ * @param aTitle
+ *        Title of the view which will be shown in the header.
+ * @param aQuery
+ *        Query which selects contained entries.
+ * @param aFixedUnread
+ *        Indicates that the "unread" query parameter is fixed and the view
+ *        isn't affected by feedview.filterUnread pref.
+ * @param aFixedStarred
+ *        Indicates that the "starred" query parameter is fixed and the
+ *        isn't view affected by feedview.filterStarred pref.
  */
 function FeedView(aTitle, aQuery, aFixedUnread, aFixedStarred) {
     this.title = aTitle;
@@ -112,37 +116,6 @@ FeedView.prototype = {
             copy[property] = query[property];
         return copy;
     },
-
-    // It is faster to query entries by their IDs, when possible.
-    _getFastQuery: function FeedView_getFastQuery(aEntries) {
-        if (!this.__fastQuery)
-            this.__fastQuery = new Query();
-
-        this.__fastQuery.sortOrder = this.query.sortOrder;
-        this.__fastQuery.sortDirection = this.query.sortDirection;
-        this.__fastQuery.entries = aEntries;
-
-        return this.__fastQuery;
-    },
-
-
-    /**
-     * Ordered array of IDs of entries contained by the view.
-     */
-    get _entries FeedView__entries_get() {
-        if (!this.__entries)
-            this.__entries = this.query.getEntries();
-        return this.__entries
-    },
-
-    set _entries FeedView__entries_set(aEntries) {
-        this.__entries = aEntries;
-    },
-
-    get entryCount Feedview_entryCount() {
-        return this._entries.length;
-    },
-
 
     /**
      * Sends an event to an entry element, for example a message to perform an action
@@ -651,7 +624,7 @@ FeedView.prototype = {
             return;
         }
 
-        if (this.active && this.entryCount < this.query.getEntryCount())
+        if (this.active)
             this._onEntriesAdded(aEntryList.IDs);
     },
 
@@ -672,11 +645,10 @@ FeedView.prototype = {
             return;
 
         if (this.query.read === false) {
-            let delta = this.query.getEntryCount() - this.entryCount;
-            if (delta > 0)
-                this._onEntriesAdded(aEntryList.IDs);
-            else if (delta < 0)
+            if (aNewState)
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
+            else
+                this._onEntriesAdded(aEntryList.IDs);
         }
 
         var entries = intersect(this._loadedEntries, aEntryList.IDs);
@@ -688,10 +660,9 @@ FeedView.prototype = {
             return;
 
         if (this.query.starred === true) {
-            let delta = this.query.getEntryCount() - this.entryCount;
-            if (delta > 0)
+            if (aNewState)
                 this._onEntriesAdded(aEntryList.IDs);
-            else if (delta < 0)
+            else
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
         }
 
@@ -710,10 +681,9 @@ FeedView.prototype = {
         }, this)
 
         if (this.query.tags && this.query.tags[0] === aTag) {
-            let delta = this.query.getEntryCount() - this.entryCount;
-            if (delta > 0)
+            if (aNewState)
                 this._onEntriesAdded(aEntryList.IDs);
-            else if (delta < 0)
+            else
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
         }
     },
@@ -722,65 +692,71 @@ FeedView.prototype = {
         if (!this.active)
             return;
 
-        var delta = this.query.getEntryCount() - this.entryCount;
-        if (delta > 0)
+        if (aNewState === this.query.deleted)
             this._onEntriesAdded(aEntryList.IDs);
-        else if (delta < 0)
+        else
             this._onEntriesRemoved(aEntryList.IDs, true, true);
     },
 
 
     /**
      * Checks if given entries belong to the view and inserts them.
-     * @param aNewEntries Array of entries to be checked.
+     *
+     * If the previously loaded entries fill the window, the added entries need to
+     * be inserted only if they have a more recent date than the last loaded
+     * entry. We can use the date of the last loaded entry as an anchor and
+     * determine the new list of entries by selecting entries with a newer date
+     * than that.
+     * However, this doesn't work if the previously loaded entries don't fill
+     * the window, in which case we must do a full refresh.
+     *
+     * @param aAddedEntries
+     *        Array of IDs of entries.
      */
-    _onEntriesAdded: function FeedView__onEntriesAdded(aNewEntries) {
-        // We need to compare aNewEntries with the current list of entries that should
-        // be loaded. However, if the previously loaded entries didn't fill the
-        // window, there is no way to learn this current list, other than
-        // incrementally loading more entries until they fill the window. It's not
-        // worth the hassle here, let's just perform a full refresh.
+    _onEntriesAdded: function FeedView__onEntriesAdded(aAddedEntries) {
         var win = this.window;
         if (win.scrollMaxY - win.pageYOffset < win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS) {
             this.refresh()
             return;
         }
 
-        // Get the current list of entries that should be loaded,
-        // using the date of the last loaded entry as an anchor.
         var query = this.getQueryCopy();
         query.startDate = parseInt(this.feedContent.lastChild.getAttribute('date'));
         this._loadedEntries = query.getEntries();
 
-        function fun(entry) this._loadedEntries.indexOf(entry) != -1;
-        var entriesToInsert = aNewEntries.filter(fun, this);
+        function filterNew(entryID) this._loadedEntries.indexOf(entryID) != -1;
+        var newEntries = aAddedEntries.filter(filterNew, this);
 
-        if (!entriesToInsert.length)
-            return;
+        if (newEntries.length) {
+            let query = new Query({
+                sortOrder: this.query.sortOrder,
+                sortDirection: this.query.sortDirection,
+                entries: newEntries
+            })
 
-        var fullEntries = this._getFastQuery(entriesToInsert).getFullEntries();
-        fullEntries.forEach(function(entry) {
-            let index = this._loadedEntries.indexOf(entry.id);
-            this._insertEntry(entry, index);
-        }, this)
+            query.getFullEntries().forEach(function(entry) {
+                let index = this._loadedEntries.indexOf(entry.id);
+                this._insertEntry(entry, index);
+            }, this)
 
-        this._setEmptyViewMessage();
-        this._asyncRefreshEntryList();
+            this._setEmptyViewMessage();
+        }
     },
 
     /**
      * Checks if given entries are in the view and removes them.
      *
-     * @param aRemovedEntries Array of entries to be checked.
-     * @param aAnimate Use animation when a single entry is being removed.
-     * @param aLoadNewEntries Load new entries to fill the screen.
+     * @param aRemovedEntries
+     *        Array of IDs of entries.
+     * @param aAnimate
+     *        Use animation when a single entry is being removed.
+     * @param aLoadNewEntries
+     *        Load new entries to fill the screen.
      */
     _onEntriesRemoved: function FeedView__onEntriesRemoved(aRemovedEntries, aAnimate,
                                                            aLoadNewEntries) {
-        this._entries = this._entries.filter(function(e) aRemovedEntries.indexOf(e) == -1);
-
-        var indices = aRemovedEntries.map(function(e) this._loadedEntries.indexOf(e), this).
-                                      filter(function(i) i != -1);
+        var indices = aRemovedEntries.map(function(e) this._loadedEntries.indexOf(e), this)
+                                     .filter(function(i) i != -1);
         if (!indices.length)
             return;
 
@@ -903,7 +879,6 @@ FeedView.prototype = {
         // triggered before the initial refresh.
         this.window.addEventListener('resize', this, false);
 
-        this._asyncRefreshEntryList();
         this._setEmptyViewMessage();
         this._autoMarkRead();
 
@@ -923,32 +898,25 @@ FeedView.prototype = {
     },
 
     /**
-     * Asynchronously refreshes the list of entries contained by the view.
-     */
-    _asyncRefreshEntryList: function FeedView__asyncRefreshEntryList() {
-        this._entries = null;
-        async(function() {
-            if (!this.__entries)
-                this._entries = this.query.getEntries();
-        }, 250, this);
-    },
-
-    /**
      * Incrementally loads the next part of entries.
      *
-     * @param aCount If provided, specifies the number of entries to be loaded.
-     *               Otherwise, entries are loaded until they fill WINDOW_HEIGHTS_LOAD
-     *               of window heights.
+     * @param aCount [optional]
+     *        Specifies the number of entries to be loaded. If not provided,
+     *        entries are loaded until they fill WINDOW_HEIGHTS_LOAD of window heights.
      */
     _loadEntries: function FeedView__loadEntries(aCount) {
-        if (this._loadedEntries.length == this._entries.length)
-            return;
+        var lastEntryElement = this.feedContent.lastChild;
 
         if (aCount) {
-            let startIndex = this._loadedEntries.length;
-            let endIndex = Math.min(startIndex + aCount, this._entries.length);
-            let entries = this._entries.slice(startIndex, endIndex);
-            this._getFastQuery(entries).getFullEntries().forEach(this._appendEntry, this);
+            let query = this.getQueryCopy();
+            query.limit = aCount;
+
+            if (lastEntryElement)
+                query.endDate = parseInt(lastEntryElement.getAttribute('date'));
+
+            query.getFullEntries()
+                 .filter(function(entry) this._loadedEntries.indexOf(entry.id) == -1, this)
+                 .forEach(this._appendEntry, this);
             return;
         }
 
@@ -956,17 +924,25 @@ FeedView.prototype = {
         var middleEntry = this._getMiddleEntryElement();
 
         if (win.scrollMaxY - win.pageYOffset > win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS
-            && middleEntry != this.feedContent.lastChild) {
+                && middleEntry != this.feedContent.lastChild) {
             return;
         }
 
-        while ((win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD
-                || middleEntry == this.feedContent.lastChild)
-               && this._loadedEntries.length < this._entries.length) {
-            let startIndex = this._loadedEntries.length;
-            let endIndex = Math.min(startIndex + LOAD_STEP_SIZE, this._entries.length);
-            let entries = this._entries.slice(startIndex, endIndex);
-            this._getFastQuery(entries).getFullEntries().forEach(this._appendEntry, this);
+        while (win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD
+               || middleEntry == this.feedContent.lastChild) {
+            let query = this.getQueryCopy();
+            query.limit = LOAD_STEP_SIZE;
+
+            if (lastEntryElement)
+                query.endDate = parseInt(lastEntryElement.getAttribute('date'));
+
+            let entries = query.getFullEntries()
+                               .filter(function(e) this._loadedEntries.indexOf(e.id) == -1, this);
+
+            if (entries.length)
+                entries.forEach(this._appendEntry, this);
+            else
+                break;
         }
     },
 
