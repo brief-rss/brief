@@ -9,52 +9,57 @@ const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
 const DATABASE_VERSION = 10;
 
-const FEEDS_TABLE_SCHEMA =
-    'feedID          TEXT UNIQUE,         ' +
-    'feedURL         TEXT,                ' +
-    'websiteURL      TEXT,                ' +
-    'title           TEXT,                ' +
-    'subtitle        TEXT,                ' +
-    'imageURL        TEXT,                ' +
-    'imageLink       TEXT,                ' +
-    'imageTitle      TEXT,                ' +
-    'favicon         TEXT,                ' +
-    'bookmarkID      TEXT,                ' +
-    'rowIndex        INTEGER,             ' +
-    'parent          TEXT,                ' +
-    'isFolder        INTEGER,             ' +
-    'hidden          INTEGER DEFAULT 0,   ' +
-    'lastUpdated     INTEGER DEFAULT 0,   ' +
-    'oldestEntryDate INTEGER,             ' +
-    'entryAgeLimit   INTEGER DEFAULT 0,   ' +
-    'maxEntries      INTEGER DEFAULT 0,   ' +
-    'updateInterval  INTEGER DEFAULT 0,   ' +
-    'dateModified    INTEGER DEFAULT 0,   ' +
-    'markModifiedEntriesUnread INTEGER DEFAULT 1 ';
+const FEEDS_TABLE_SCHEMA = [
+    'feedID          TEXT UNIQUE',
+    'feedURL         TEXT',
+    'websiteURL      TEXT',
+    'title           TEXT',
+    'subtitle        TEXT',
+    'imageURL        TEXT',
+    'imageLink       TEXT',
+    'imageTitle      TEXT',
+    'favicon         TEXT',
+    'bookmarkID      TEXT',
+    'parent          TEXT',
+    'rowIndex        INTEGER',
+    'isFolder        INTEGER',
+    'hidden          INTEGER DEFAULT 0',
+    'lastUpdated     INTEGER DEFAULT 0',
+    'oldestEntryDate INTEGER',
+    'entryAgeLimit   INTEGER DEFAULT 0',
+    'maxEntries      INTEGER DEFAULT 0',
+    'updateInterval  INTEGER DEFAULT 0',
+    'dateModified    INTEGER DEFAULT 0',
+    'markModifiedEntriesUnread INTEGER DEFAULT 1'
+]
 
-const ENTRIES_TABLE_SCHEMA =
-    'id            INTEGER PRIMARY KEY AUTOINCREMENT,' +
-    'feedID        TEXT,               ' +
-    'primaryHash   TEXT,               ' +
-    'secondaryHash TEXT,               ' +
-    'providedID    TEXT,               ' +
-    'entryURL      TEXT,               ' +
-    'date          INTEGER,            ' +
-    'read          INTEGER DEFAULT 0,  ' +
-    'updated       INTEGER DEFAULT 0,  ' +
-    'starred       INTEGER DEFAULT 0,  ' +
-    'deleted       INTEGER DEFAULT 0,  ' +
-    'bookmarkID    INTEGER DEFAULT -1  ';
+const ENTRIES_TABLE_SCHEMA = [
+    'id            INTEGER PRIMARY KEY AUTOINCREMENT',
+    'feedID        TEXT               ',
+    'primaryHash   TEXT               ',
+    'secondaryHash TEXT               ',
+    'providedID    TEXT               ',
+    'entryURL      TEXT               ',
+    'date          INTEGER            ',
+    'read          INTEGER DEFAULT 0  ',
+    'updated       INTEGER DEFAULT 0  ',
+    'starred       INTEGER DEFAULT 0  ',
+    'deleted       INTEGER DEFAULT 0  ',
+    'bookmarkID    INTEGER DEFAULT -1 '
+]
 
-const ENTRIES_TEXT_TABLE_SCHEMA =
-    'title   TEXT, ' +
-    'content TEXT, ' +
-    'authors TEXT, ' +
-    'tags    TEXT  ';
+const ENTRIES_TEXT_TABLE_SCHEMA = [
+    'title   TEXT ',
+    'content TEXT ',
+    'authors TEXT ',
+    'tags    TEXT '
+]
 
-const ENTRY_TAGS_TABLE_SCHEMA =
-    'tagName  TEXT,    ' +
-    'entryID  INTEGER  ';
+const ENTRY_TAGS_TABLE_SCHEMA = [
+    'tagName  TEXT    ',
+    'entryID  INTEGER '
+]
+
 
 const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
 const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
@@ -273,10 +278,10 @@ var Database = {
     },
 
     setupDatabase: function Database_setupDatabase() {
-        ExecuteSQL('CREATE TABLE IF NOT EXISTS feeds ('+FEEDS_TABLE_SCHEMA+')                   ');
-        ExecuteSQL('CREATE TABLE IF NOT EXISTS entries ('+ENTRIES_TABLE_SCHEMA+')               ');
-        ExecuteSQL('CREATE TABLE IF NOT EXISTS entry_tags ('+ENTRY_TAGS_TABLE_SCHEMA+')         ');
-        ExecuteSQL('CREATE VIRTUAL TABLE entries_text USING fts3 ('+ENTRIES_TEXT_TABLE_SCHEMA+')');
+        ExecuteSQL('CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA.join(',') + ')                   ');
+        ExecuteSQL('CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA.join(',') + ')               ');
+        ExecuteSQL('CREATE TABLE IF NOT EXISTS entry_tags (' + ENTRY_TAGS_TABLE_SCHEMA.join(',') + ')         ');
+        ExecuteSQL('CREATE VIRTUAL TABLE entries_text USING fts3 (' + ENTRIES_TEXT_TABLE_SCHEMA.join(',') + ')');
 
         ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)                ');
         ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
@@ -577,24 +582,21 @@ function FeedProcessor(aFeed, aCallback) {
     this.feed = aFeed;
     this.callback = aCallback;
 
-    this.remainingEntriesCount = aFeed.entries.length;
-
-    this.updatedEntries = [];
-    this.insertedEntries = [];
+    var storedFeed = Database.getFeed(aFeed.feedID);
+    this.oldestEntryDate = storedFeed.oldestEntryDate;
 
     var newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-    var prevDateModified = Database.getFeed(aFeed.feedID).dateModified;
+    var prevDateModified = storedFeed.dateModified;
 
     if (aFeed.entries.length && (!newDateModified || newDateModified > prevDateModified)) {
-        aFeed.oldestEntryDate = Date.now();
+        this.remainingEntriesCount = aFeed.entries.length;
 
-        for (let i = 0; i < aFeed.entries.length; i++) {
-            let entry = aFeed.entries[i];
-            this.processEntry(entry);
+        this.updatedEntries = [];
+        this.insertedEntries = [];
 
-            if (entry.date && entry.date < aFeed.oldestEntryDate)
-                aFeed.oldestEntryDate = entry.date;
-        }
+        this.oldestEntryDate = Date.now();
+
+        aFeed.entries.forEach(this.processEntry, this);
     }
     else {
         aCallback(0);
@@ -606,7 +608,7 @@ function FeedProcessor(aFeed, aCallback) {
         'favicon': aFeed.favicon,
         'lastUpdated': Date.now(),
         'dateModified': newDateModified,
-        'oldestEntryDate': aFeed.oldestEntryDate,
+        'oldestEntryDate': this.oldestEntryDate,
         'feedID': aFeed.feedID
     }
 
@@ -625,6 +627,9 @@ FeedProcessor.prototype = {
     entriesToInsertCount: 0,
 
     processEntry: function FeedProcessor_processEntry(aEntry) {
+        if (aEntry.date && aEntry.date < this.oldestEntryDate)
+            this.oldestEntryDate = aEntry.date;
+
         // This function checks whether a downloaded entry is already in the database or
         // it is a new one. To do this we need a way to uniquely identify entries. Many
         // feeds don't provide unique identifiers for their entries, so we have to use
@@ -2397,7 +2402,7 @@ var Migration = {
             ExecuteSQL('CREATE TABLE feeds_copy ('+OLD_COLS+')                               ');
             ExecuteSQL('INSERT INTO feeds_copy SELECT '+OLD_COLS+' FROM feeds                ');
             ExecuteSQL('DROP TABLE feeds                                                     ');
-            ExecuteSQL('CREATE TABLE feeds ('+FEEDS_TABLE_SCHEMA+')                          ');
+            ExecuteSQL('CREATE TABLE feeds (' + FEEDS_TABLE_SCHEMA.join(',') + ')            ');
             ExecuteSQL('INSERT INTO feeds ('+NEW_COLS+') SELECT '+OLD_COLS+' FROM feeds_copy ');
             ExecuteSQL('DROP TABLE feeds_copy                                                ');
         }
