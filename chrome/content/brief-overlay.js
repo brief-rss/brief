@@ -1,4 +1,4 @@
-const gBrief = {
+const Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
     LAST_MAJOR_VERSION: '1.5',
@@ -27,20 +27,20 @@ const gBrief = {
                             QueryInterface(Ci.nsIPrefBranch2);
     },
 
-    get Storage() {
+    get storage() {
         var tempScope = {};
         Components.utils.import('resource://brief/Storage.jsm', tempScope);
 
-        delete this.Storage;
-        return this.Storage = tempScope.Storage;
+        delete this.storage;
+        return this.storage = tempScope.Storage;
     },
 
-    get Query() {
+    get query() {
         let tempScope = {};
         Components.utils.import('resource://brief/Storage.jsm', tempScope);
 
-        delete this.Query;
-        return this.Query = tempScope.Query
+        delete this.query;
+        return this.query = tempScope.Query
     },
 
     get FeedUpdateService() {
@@ -52,7 +52,7 @@ const gBrief = {
     },
 
 
-    open: function gBrief_open(aNewTab) {
+    open: function Brief_open(aNewTab) {
         if (this.toolbarbutton)
             this.toolbarbutton.checked = true;
 
@@ -65,14 +65,14 @@ const gBrief = {
             gBrowser.loadURI(this.BRIEF_URL, null, null);
     },
 
-    toggle: function gBrief_toggle() {
+    toggle: function Brief_toggle() {
         if (this.tab == gBrowser.selectedTab)
             gBrowser.removeTab(this.tab);
         else
-            gBrief.open(this.shouldOpenInNewTab());
+            Brief.open(this.shouldOpenInNewTab());
     },
 
-    shouldOpenInNewTab: function gBrief_shouldOpenInNewTab() {
+    shouldOpenInNewTab: function Brief_shouldOpenInNewTab() {
         var openInNewTab = this.prefs.getBoolPref('openInNewTab');
         var isLoading = gBrowser.webProgress.isLoadingDocument;
         var isBlank = (gBrowser.currentURI.spec == 'about:blank');
@@ -80,16 +80,16 @@ const gBrief = {
     },
 
 
-    doCommand: function gBrief_doCommand(aCommand) {
+    doCommand: function Brief_doCommand(aCommand) {
         if (gBrowser.currentURI.spec == this.BRIEF_URL) {
             let win = gBrowser.contentDocument.defaultView.wrappedJSObject;
-            win.gCommands[aCommand]();
+            win.Commands[aCommand]();
         }
     },
 
 
-    markFeedsAsRead: function gBrief_markFeedsAsRead() {
-        new this.Query().markEntriesRead(true);
+    markFeedsAsRead: function Brief_markFeedsAsRead() {
+        new this.query().markEntriesRead(true);
     },
 
     showOptions: function cmd_showOptions() {
@@ -104,12 +104,12 @@ const gBrief = {
     },
 
 
-    updateStatuspanel: function gBrief_updateStatuspanel() {
+    updateStatuspanel: function Brief_updateStatuspanel() {
         var counter = document.getElementById('brief-status-counter');
         var panel = document.getElementById('brief-status');
 
-        var query = new gBrief.Query({
-            deleted: gBrief.Storage.ENTRY_STATE_NORMAL,
+        var query = new Brief.query({
+            deleted: Brief.storage.ENTRY_STATE_NORMAL,
             read: false
         });
         var unreadEntriesCount = query.getEntryCount();
@@ -118,7 +118,7 @@ const gBrief = {
         panel.setAttribute('unread', unreadEntriesCount > 0);
     },
 
-    refreshProgressmeter: function gBrief_refreshProgressmeter() {
+    refreshProgressmeter: function Brief_refreshProgressmeter() {
         var progressmeter = document.getElementById('brief-progressmeter');
         var progress = 100 * this.FeedUpdateService.completedFeedsCount /
                              this.FeedUpdateService.scheduledFeedsCount;
@@ -129,14 +129,14 @@ const gBrief = {
     },
 
 
-    constructTooltip: function gBrief_constructTooltip(aEvent) {
+    constructTooltip: function Brief_constructTooltip(aEvent) {
         var bundle = document.getElementById('brief-bundle');
         var rows = document.getElementById('brief-tooltip-rows');
         var tooltip = aEvent.target;
 
         // Integer prefs are longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
-        var lastUpdateTime = gBrief.prefs.getIntPref('update.lastUpdateTime');
+        var lastUpdateTime = Brief.prefs.getIntPref('update.lastUpdateTime');
         var elapsedTime = now - lastUpdateTime;
         var hours = Math.floor(elapsedTime / 3600);
         var minutes = Math.floor((elapsedTime - hours * 3600) / 60);
@@ -152,11 +152,11 @@ const gBrief = {
         while (rows.lastChild)
             rows.removeChild(rows.lastChild);
 
-        var query = new this.Query({
-            deleted: this.Storage.ENTRY_STATE_NORMAL,
+        var query = new this.query({
+            deleted: this.storage.ENTRY_STATE_NORMAL,
             read: false,
-            sortOrder: this.Query.SORT_BY_FEED_ROW_INDEX,
-            sortDirection: this.Query.SORT_ASCENDING
+            sortOrder: this.query.SORT_BY_FEED_ROW_INDEX,
+            sortDirection: this.query.SORT_ASCENDING
         })
         var unreadFeeds = query.getProperty('feedID', true)
                                .map(function(e) e.feedID);
@@ -171,18 +171,18 @@ const gBrief = {
             row.setAttribute('class', 'unread-feed-row');
             row = rows.appendChild(row);
 
-            let feedName = this.Storage.getFeed(unreadFeeds[i]).title;
+            let feedName = this.storage.getFeed(unreadFeeds[i]).title;
             label = document.createElement('label');
             label.setAttribute('class', 'unread-feed-name');
             label.setAttribute('crop', 'right');
             label.setAttribute('value', feedName);
             row.appendChild(label);
 
-            let query = new this.Query({
-                deleted: this.Storage.ENTRY_STATE_NORMAL,
+            let query = new this.query({
+                deleted: this.storage.ENTRY_STATE_NORMAL,
                 feeds: [unreadFeeds[i]],
                 read: false
-            });
+            })
             let unreadCount = query.getEntryCount();
 
             label = document.createElement('label');
@@ -200,7 +200,7 @@ const gBrief = {
     },
 
 
-    onBriefButtonClick: function gBrief_onBriefButtonClick(aEvent) {
+    onBriefButtonClick: function Brief_onBriefButtonClick(aEvent) {
         if (aEvent.button != 0 && aEvent.button != 1)
             return;
 
@@ -216,53 +216,53 @@ const gBrief = {
                 gBrowser.addTab('about:blank', null, null, null, null, false);
             gBrowser.removeCurrentTab();
         }
-        else if (aEvent.button == 1 || gBrief.shouldOpenInNewTab()) {
-            gBrief.open(true);
+        else if (aEvent.button == 1 || Brief.shouldOpenInNewTab()) {
+            Brief.open(true);
         }
         else {
-            gBrief.open(false);
+            Brief.open(false);
         }
     },
 
-    onTabLoad: function gBrief_onTabLoad(aEvent) {
+    onTabLoad: function Brief_onTabLoad(aEvent) {
         var targetDoc = aEvent.target;
 
-        if (targetDoc && targetDoc.documentURI == gBrief.BRIEF_URL) {
+        if (targetDoc && targetDoc.documentURI == Brief.BRIEF_URL) {
 
-            if (!gBrief.tab) {
+            if (!Brief.tab) {
                 var targetBrowser = gBrowser.getBrowserForDocument(targetDoc);
                 var tabs = gBrowser.mTabs;
                 for (var i = 0; i < tabs.length; i++) {
                     if (tabs[i].linkedBrowser == targetBrowser) {
-                        gBrief.tab = tabs[i];
+                        Brief.tab = tabs[i];
                         break;
                     }
                 }
             }
 
-            gBrowser.setIcon(gBrief.tab, gBrief.BRIEF_FAVICON_URL);
-            if (gBrief.toolbarbutton)
-                gBrief.toolbarbutton.checked = (gBrowser.selectedTab == gBrief.tab);
+            gBrowser.setIcon(Brief.tab, Brief.BRIEF_FAVICON_URL);
+            if (Brief.toolbarbutton)
+                Brief.toolbarbutton.checked = (gBrowser.selectedTab == Brief.tab);
         }
 
-        else if (gBrief.tab && gBrief.tab.linkedBrowser.currentURI.spec != gBrief.BRIEF_URL) {
-            gBrief.tab = null;
-            if (gBrief.toolbarbutton)
-                gBrief.toolbarbutton.checked = (gBrowser.selectedTab == gBrief.tab);
+        else if (Brief.tab && Brief.tab.linkedBrowser.currentURI.spec != Brief.BRIEF_URL) {
+            Brief.tab = null;
+            if (Brief.toolbarbutton)
+                Brief.toolbarbutton.checked = (gBrowser.selectedTab == Brief.tab);
         }
     },
 
-    onTabClose: function gBrief_onTabClose(aEvent) {
-        if (aEvent.originalTarget == gBrief.tab)
-            gBrief.tab = null;
+    onTabClose: function Brief_onTabClose(aEvent) {
+        if (aEvent.originalTarget == Brief.tab)
+            Brief.tab = null;
     },
 
-    onTabSelect: function gBrief_onTabSelect(aEvent) {
-        if (gBrief.toolbarbutton)
-            gBrief.toolbarbutton.checked = (aEvent.originalTarget == gBrief.tab);
+    onTabSelect: function Brief_onTabSelect(aEvent) {
+        if (Brief.toolbarbutton)
+            Brief.toolbarbutton.checked = (aEvent.originalTarget == Brief.tab);
     },
 
-    handleEvent: function gBrief_handleEvent(aEvent) {
+    handleEvent: function Brief_handleEvent(aEvent) {
         switch (aEvent.type) {
         case 'load':
             window.removeEventListener('load', this, false);
@@ -315,14 +315,14 @@ const gBrief = {
             gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
             this.prefs.addObserver('', this, false);
-            this.Storage.addObserver(this);
+            this.storage.addObserver(this);
 
             window.addEventListener('unload', this, false);
             break;
 
         case 'unload':
             this.prefs.removeObserver('', this);
-            this.Storage.removeObserver(this);
+            this.storage.removeObserver(this);
 
             var observerService = Cc['@mozilla.org/observer-service;1'].
                                   getService(Ci.nsIObserverService);
@@ -335,7 +335,7 @@ const gBrief = {
     },
 
 
-    observe: function gBrief_observe(aSubject, aTopic, aData) {
+    observe: function Brief_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
         case 'brief:invalidate-feedlist':
             if (!this.statusIcon.hidden)
@@ -375,22 +375,22 @@ const gBrief = {
     },
 
 
-    onEntriesAdded: function gBrief_onEntriesAdded(aEntryList) {
+    onEntriesAdded: function Brief_onEntriesAdded(aEntryList) {
         if (!this.statusIcon.hidden)
             setTimeout(this.updateStatuspanel, 0);
     },
 
-    onEntriesUpdated: function gBrief_onEntriesUpdated(aEntryList) {
+    onEntriesUpdated: function Brief_onEntriesUpdated(aEntryList) {
         if (!this.statusIcon.hidden)
             setTimeout(this.updateStatuspanel, 0);
     },
 
-    onEntriesMarkedRead: function gBrief_onEntriesMarkedRead(aEntryList, aState) {
+    onEntriesMarkedRead: function Brief_onEntriesMarkedRead(aEntryList, aState) {
         if (!this.statusIcon.hidden)
             setTimeout(this.updateStatuspanel, 0);
     },
 
-    onEntriesDeleted: function gBrief_onEntriesDeleted(aEntryList, aState) {
+    onEntriesDeleted: function Brief_onEntriesDeleted(aEntryList, aState) {
         if (!this.statusIcon.hidden && aEntryList.containsUnread())
             setTimeout(this.updateStatuspanel, 0);
     },
@@ -399,7 +399,7 @@ const gBrief = {
     onEntriesStarred: function() { },
 
 
-    onFirstRun: function gBrief_onFirstRun() {
+    onFirstRun: function Brief_onFirstRun() {
         // Add the toolbar button to the Navigation Bar.
         var navbar = document.getElementById('nav-bar');
         var currentSet = navbar.currentSet;
@@ -420,18 +420,18 @@ const gBrief = {
                         getService(Ci.nsINavBookmarksService);
         var folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
                                               bookmarks.DEFAULT_INDEX);
-        gBrief.prefs.setIntPref('homeFolder', folderID);
+        Brief.prefs.setIntPref('homeFolder', folderID);
 
         // Load the first run page.
-        gBrowser.loadOneTab(gBrief.FIRST_RUN_PAGE_URL, {
+        gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, {
             relatedToCurrent: false,
             inBackground: false
         });
-        gBrief.prefs.setBoolPref('firstRun', false);
+        Brief.prefs.setBoolPref('firstRun', false);
     },
 
     // Registers %profile%/chrome directory under a resource URI.
-    registerCustomStyle: function gBrief_registerCustomStyle() {
+    registerCustomStyle: function Brief_registerCustomStyle() {
         var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
         var resourceProtocolHandler = ioService.getProtocolHandler('resource').
                                                 QueryInterface(Ci.nsIResProtocolHandler);
@@ -446,7 +446,7 @@ const gBrief = {
     },
 
 
-    QueryInterface: function gBrief_QueryInterface(aIID) {
+    QueryInterface: function Brief_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
             aIID.equals(Ci.nsIDOMEventListener)) {
             return this;
@@ -456,5 +456,5 @@ const gBrief = {
 
 }
 
-window.addEventListener('load', gBrief, false);
-gBrief.registerCustomStyle();
+window.addEventListener('load', Brief, false);
+Brief.registerCustomStyle();

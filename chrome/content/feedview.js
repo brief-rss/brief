@@ -13,7 +13,7 @@ const LOAD_STEP_SIZE = 5;
 
 
 // The currently active instance of FeedView.
-var gFeedView = null;
+var gCurrentView = null;
 
 /**
  * This object represents the main feed display. It stores and manages display parameters.
@@ -79,7 +79,7 @@ FeedView.prototype = {
     },
 
     get active FeedView_active() {
-        return (this.browser.currentURI.equals(gTemplateURI) && gFeedView == this);
+        return (this.browser.currentURI.equals(gTemplateURI) && gCurrentView == this);
     },
 
     /**
@@ -92,11 +92,11 @@ FeedView.prototype = {
 
     get query FeedView_query_get() {
         if (!this.fixedUnread)
-            this.__query.read = gPrefs.filterUnread ? false : undefined;
+            this.__query.read = PrefCache.filterUnread ? false : undefined;
         if (!this.fixedStarred)
-            this.__query.starred = gPrefs.filterStarred ? true : undefined;
+            this.__query.starred = PrefCache.filterStarred ? true : undefined;
 
-        if (this.__query.read === false && gPrefs.sortUnreadViewOldestFirst)
+        if (this.__query.read === false && PrefCache.sortUnreadViewOldestFirst)
             this.__query.sortDirection = Query.prototype.SORT_ASCENDING;
         else
             this.__query.sortDirection = Query.prototype.SORT_DESCENDING;
@@ -118,13 +118,16 @@ FeedView.prototype = {
     },
 
     /**
-     * Sends an event to an entry element, for example a message to perform an action
-     * or update its state.
-     * This is the only way we can communicate with the untrusted document.
+     * Sends an event to an entry element, for example a message to perform
+     * an action or update its state. This is the only way we communicate
+     * with the untrusted document.
      *
-     * @param aTargetEntries ID, or an array of IDs, of target entries.
-     * @param aEventType     Type of the event.
-     * @param aState         Additional parameter, the new state of the entry.
+     * @param aTargetEntries
+     *        ID, or an array of IDs, of target entries.
+     * @param aEventType
+     *        Type of the event.
+     * @param aState
+     *        Additional parameter, the new state of the entry.
      */
     _sendEvent: function FeedView__sendEvent(aTargetEntries, aEventType, aState) {
         var targetEntries = aTargetEntries instanceof Array ? aTargetEntries
@@ -167,13 +170,13 @@ FeedView.prototype = {
         if (this._scrolling)
             return;
 
-        if (gPrefs.entrySelectionEnabled) {
+        if (PrefCache.entrySelectionEnabled) {
             var entryElement = this.selectedElement.nextSibling;
             if (entryElement)
                 this.selectEntry(parseInt(entryElement.id), true, true);
         }
         else {
-            gPrefBranch.setBoolPref('feedview.entrySelectionEnabled', true);
+            Prefs.setBoolPref('feedview.entrySelectionEnabled', true);
         }
     },
 
@@ -181,24 +184,27 @@ FeedView.prototype = {
         if (this._scrolling)
             return;
 
-        if (gPrefs.entrySelectionEnabled) {
+        if (PrefCache.entrySelectionEnabled) {
             var entryElement = this.selectedElement.previousSibling;
             if (entryElement)
                 this.selectEntry(parseInt(entryElement.id), true, true);
         }
         else {
-            gPrefBranch.setBoolPref('feedview.entrySelectionEnabled', true);
+            Prefs.setBoolPref('feedview.entrySelectionEnabled', true);
         }
     },
 
     /**
      * Selects the given entry and optionally scrolls it into view.
      *
-     * @param aEntry           ID or DOM element of entry to select. Pass null to
-     *                         deselect current entry.
-     * @param aScroll          Set to TRUE to scroll the entry into view.
-     * @param aScrollSmoothly  Set to TRUE to scroll smoothly, FALSE to jump directly
-     *                         to the target position.
+     * @param aEntry
+     *        ID or DOM element of entry to select.
+     *        Pass null to deselect current entry.
+     * @param aScroll
+     *        Set to TRUE to scroll the entry into view.
+     * @param aScrollSmoothly
+     *        Set to TRUE to scroll smoothly, FALSE to jump
+     *        directly to the target position.
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollSmoothly) {
         if (!this.active)
@@ -223,8 +229,9 @@ FeedView.prototype = {
     /**
      * Scrolls to the entry before the entry closest to the middle of the screen.
      *
-     * @param aSmooth Set to TRUE to scroll smoothly, FALSE to jump directly to the
-     *                target position.
+     * @param aSmooth
+     *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
+     *        target position.
      */
     scrollToPrevEntry: function FeedView_scrollToPrevEntry(aSmooth) {
         var middleElement = this._getMiddleEntryElement();
@@ -246,6 +253,9 @@ FeedView.prototype = {
             this.scrollToEntry(parseInt(nextElement.id), aSmooth);
     },
 
+    /**
+     * Scroll down by 10 entries, loading more entries if necessary.
+     */
     skipDown: function FeedView_skipDown() {
         var middleEntry = parseInt(this._getMiddleEntryElement().id);
         var index = this._loadedEntries.indexOf(middleEntry);
@@ -255,18 +265,19 @@ FeedView.prototype = {
         var targetEntry = this._loadedEntries[index + 10] ||
                           this._loadedEntries[this._loadedEntries.length - 1];
 
-        if (gPrefs.entrySelectionEnabled)
+        if (PrefCache.entrySelectionEnabled)
             this.selectEntry(targetEntry, true, true);
         else
             this.scrollToEntry(targetEntry, true);
     },
 
+    // See scrollDown.
     skipUp: function FeedView_skipUp() {
         var middleEntry = parseInt(this._getMiddleEntryElement().id);
         var index = this._loadedEntries.indexOf(middleEntry);
         var targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
 
-        if (gPrefs.entrySelectionEnabled)
+        if (PrefCache.entrySelectionEnabled)
             this.selectEntry(targetEntry, true, true);
         else
             this.scrollToEntry(targetEntry, true);
@@ -278,9 +289,11 @@ FeedView.prototype = {
      * the scroll position is aligned with the top of the entry, otherwise the entry
      * is positioned in the middle of the screen.
      *
-     * @param aEntry  ID of entry to scroll to.
-     * @param aSmooth Set to TRUE to scroll smoothly, FALSE to jump directly to the
-     *                target position.
+     * @param aEntry
+     *        ID of entry to scroll to.
+     * @param aSmooth
+     *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
+     *        target position.
      */
     scrollToEntry: function FeedView_scrollToEntry(aEntry, aSmooth) {
         var win = this.window;
@@ -370,7 +383,7 @@ FeedView.prototype = {
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
-        if (gPrefs.autoMarkRead && !gPrefs.showHeadlinesOnly && this.query.read !== false) {
+        if (PrefCache.autoMarkRead && !PrefCache.showHeadlinesOnly && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
             this._markVisibleTimeout = async(this.markVisibleEntriesRead, 1000, this);
         }
@@ -400,10 +413,10 @@ FeedView.prototype = {
 
     toggleHeadlinesView: function FeedView_toggleHeadlinesView() {
         this._loadedEntries.forEach(function(entry) {
-            this.collapseEntry(entry, gPrefs.showHeadlinesOnly, false);
+            this.collapseEntry(entry, PrefCache.showHeadlinesOnly, false);
         }, this)
 
-        if (gPrefs.showHeadlinesOnly) {
+        if (PrefCache.showHeadlinesOnly) {
             this.feedContent.setAttribute('showHeadlinesOnly', true);
             this._loadEntries();
         }
@@ -418,8 +431,8 @@ FeedView.prototype = {
      * Initializes the view.
      */
     _init: function FeedView__init() {
-        if (gFeedView)
-            gFeedView.uninit();
+        if (gCurrentView)
+            gCurrentView.uninit();
         else
             var noExistingView = true;
 
@@ -491,21 +504,21 @@ FeedView.prototype = {
 
             // Forward commands from the view to the controller.
             case 'SwitchEntryRead':
-                gCommands.markEntryRead(id, !target.hasAttribute('read'));
+                Commands.markEntryRead(id, !target.hasAttribute('read'));
                 break;
             case 'DeleteEntry':
-                gCommands.deleteEntry(id);
+                Commands.deleteEntry(id);
                 break;
             case 'RestoreEntry':
-                gCommands.restoreEntry(id);
+                Commands.restoreEntry(id);
                 break;
             case 'StarEntry':
-                gCommands.starEntry(id, true);
+                Commands.starEntry(id, true);
                 break;
 
             case 'EntryUncollapsed':
-                if (gPrefs.autoMarkRead && this.query.read !== false)
-                    gCommands.markEntryRead(id, true);
+                if (PrefCache.autoMarkRead && this.query.read !== false)
+                    Commands.markEntryRead(id, true);
                 break;
 
             case 'ShowBookmarkPanel':
@@ -528,7 +541,7 @@ FeedView.prototype = {
 
                     // Pass some data which bindings need but don't have access to.
                     var data = {};
-                    data.doubleClickMarks = gPrefs.doubleClickMarks;
+                    data.doubleClickMarks = PrefCache.doubleClickMarks;
                     data.markReadString = this._strings.markAsRead;
                     data.markUnreadString = this._strings.markAsUnread;
                     this.window.wrappedJSObject.gData = data;
@@ -544,7 +557,7 @@ FeedView.prototype = {
                     break;
                 }
 
-                if (gPrefs.entrySelectionEnabled && !this._scrolling) {
+                if (PrefCache.entrySelectionEnabled && !this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
 
                     function selectCentralEntry() {
@@ -570,7 +583,7 @@ FeedView.prototype = {
                 break;
 
             case 'TabSelect':
-                if (aEvent.originalTarget == getTopWindow().gBrief.tab && this._refreshPending) {
+                if (aEvent.originalTarget == getTopWindow().Brief.tab && this._refreshPending) {
                     this.refresh();
                     this._refreshPending = false;
                 }
@@ -598,7 +611,7 @@ FeedView.prototype = {
             elem = elem.parentNode;
         }
 
-        if (gPrefs.entrySelectionEnabled && entryElement)
+        if (PrefCache.entrySelectionEnabled && entryElement)
             this.selectEntry(parseInt(entryElement.id));
 
         if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
@@ -608,18 +621,18 @@ FeedView.prototype = {
             if (aEvent.button == 1)
                 aEvent.stopPropagation();
 
-            var openInTabs = gPrefBranch.getBoolPref('feedview.openEntriesInTabs');
+            var openInTabs = Prefs.getBoolPref('feedview.openEntriesInTabs');
             var newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
 
             if (anchor.className == 'article-title-link')
-                gCommands.openEntryLink(entryElement, newTab);
+                Commands.openEntryLink(entryElement, newTab);
             else if (anchor.hasAttribute('href'))
-                gCommands.openLink(anchor.getAttribute('href'), newTab);
+                Commands.openLink(anchor.getAttribute('href'), newTab);
         }
     },
 
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
-        if (getTopWindow().gBrowser.selectedTab != getTopWindow().gBrief.tab) {
+        if (getTopWindow().gBrowser.selectedTab != getTopWindow().Brief.tab) {
             this._refreshPending = true;
             return;
         }
@@ -629,7 +642,7 @@ FeedView.prototype = {
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
-        if (getTopWindow().gBrowser.selectedTab != getTopWindow().gBrief.tab) {
+        if (getTopWindow().gBrowser.selectedTab != getTopWindow().Brief.tab) {
             this._refreshPending = true;
             return;
         }
@@ -846,7 +859,7 @@ FeedView.prototype = {
         // Pass parameters to content.
         if (this.query.deleted == Storage.ENTRY_STATE_TRASHED)
             this.feedContent.setAttribute('trash', true);
-        if (gPrefs.showHeadlinesOnly)
+        if (PrefCache.showHeadlinesOnly)
             this.feedContent.setAttribute('showHeadlinesOnly', true);
         if (!feed)
             this.feedContent.setAttribute('showFeedNames', true);
@@ -856,7 +869,7 @@ FeedView.prototype = {
         // Append the predefined initial number of entries and if necessary, keep
         // appending more until they fill WINDOW_HEIGHTS_LOAD + 1 of window heights.
         var query = this.getQueryCopy();
-        query.limit = gPrefs.minInitialEntries;
+        query.limit = PrefCache.minInitialEntries;
         var win = this.window;
 
         // Temporarily remove the listener because reading window.innerHeight
@@ -883,7 +896,7 @@ FeedView.prototype = {
         this._autoMarkRead();
 
         // Initialize selection.
-        if (gPrefs.entrySelectionEnabled) {
+        if (PrefCache.entrySelectionEnabled) {
             let entry = (this._loadedEntries.indexOf(this.selectedEntry) != -1)
                         ? this.selectedEntry
                         : this._loadedEntries[0];
@@ -982,7 +995,7 @@ FeedView.prototype = {
         var feedName = Storage.getFeed(aEntry.feedID).title;
         articleContainer.setAttribute('feedName', feedName);
 
-        if (gPrefs.showHeadlinesOnly)
+        if (PrefCache.showHeadlinesOnly)
             articleContainer.setAttribute('collapsed', true);
 
         var nextEntry = this.feedContent.childNodes[aPosition];
