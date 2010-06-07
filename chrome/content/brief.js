@@ -6,24 +6,18 @@ const Ci = Components.interfaces;
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 
-var gPrefBranch = Cc['@mozilla.org/preferences-service;1']
-                  .getService(Ci.nsIPrefService)
-                  .getBranch('extensions.brief.')
-                  .QueryInterface(Ci.nsIPrefBranch2);
-
 var gTemplateURI = Cc['@mozilla.org/network/io-service;1']
                    .getService(Ci.nsIIOService)
                    .newURI(TEMPLATE_URL, null, null);
-
 var gStringBundle;
 
 
 function init() {
-    gPrefs.register();
+    PrefObserver.register();
 
-    getElement('headlines-checkbox').checked = gPrefs.showHeadlinesOnly;
-    getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
-    getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
+    getElement('headlines-checkbox').checked = PrefCache.showHeadlinesOnly;
+    getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
+    getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
     getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
     gStringBundle = getElement('main-bundle');
@@ -35,23 +29,23 @@ function init() {
     // no longer find the target of the click event, because event.clientY points to
     // where it used to be before scrolling occurred. Therefore, we have to catch the
     // click event before the folder is actually collapsed.
-    gFeedList.tree.addEventListener('click', gFeedList.onClick, true);
+    FeedList.tree.addEventListener('click', FeedList.onClick, true);
 
-    var observerService = Cc['@mozilla.org/observer-service;1'].
-                          getService(Ci.nsIObserverService);
+    var observerService = Cc['@mozilla.org/observer-service;1']
+                          .getService(Ci.nsIObserverService);
 
-    observerService.addObserver(gFeedList, 'brief:feed-update-queued', false);
-    observerService.addObserver(gFeedList, 'brief:feed-update-canceled', false);
-    observerService.addObserver(gFeedList, 'brief:feed-updated', false);
-    observerService.addObserver(gFeedList, 'brief:feed-loading', false);
-    observerService.addObserver(gFeedList, 'brief:feed-error', false);
-    observerService.addObserver(gFeedList, 'brief:invalidate-feedlist', false);
-    observerService.addObserver(gFeedList, 'brief:feed-title-changed', false);
-    observerService.addObserver(gFeedList, 'brief:custom-style-changed', false);
+    observerService.addObserver(FeedList, 'brief:feed-update-queued', false);
+    observerService.addObserver(FeedList, 'brief:feed-update-canceled', false);
+    observerService.addObserver(FeedList, 'brief:feed-updated', false);
+    observerService.addObserver(FeedList, 'brief:feed-loading', false);
+    observerService.addObserver(FeedList, 'brief:feed-error', false);
+    observerService.addObserver(FeedList, 'brief:invalidate-feedlist', false);
+    observerService.addObserver(FeedList, 'brief:feed-title-changed', false);
+    observerService.addObserver(FeedList, 'brief:custom-style-changed', false);
 
-    Storage.addObserver(gFeedList);
+    Storage.addObserver(FeedList);
 
-    gViewList.init();
+    ViewList.init();
 
     // Load feed view.
     let startView = getElement('view-list').getAttribute('startview');
@@ -60,14 +54,15 @@ function init() {
     let query = new Query({
         deleted: Storage.ENTRY_STATE_NORMAL,
         read: startView == 'unread-folder' ? false : undefined
-    });
-    gFeedView = new FeedView(name, query);
+    })
 
-    gViewList.richlistbox.suppressOnSelect = true;
-    gViewList.selectedItem = getElement(startView);
-    gViewList.richlistbox.suppressOnSelect = false;
+    gCurrentView = new FeedView(name, query);
 
-    async(gFeedList.rebuild, 0, gFeedList);
+    ViewList.richlistbox.suppressOnSelect = true;
+    ViewList.selectedItem = getElement(startView);
+    ViewList.richlistbox.suppressOnSelect = false;
+
+    async(FeedList.rebuild, 0, FeedList);
     async(Storage.syncWithLivemarks, 2000, Storage);
 }
 
@@ -78,24 +73,24 @@ function unload() {
     var startView = (id == 'unread-folder') ? 'unread-folder' : 'all-items-folder';
     viewList.setAttribute('startview', startView);
 
-    var observerService = Cc['@mozilla.org/observer-service;1'].
-                          getService(Ci.nsIObserverService);
-    observerService.removeObserver(gFeedList, 'brief:feed-updated');
-    observerService.removeObserver(gFeedList, 'brief:feed-loading');
-    observerService.removeObserver(gFeedList, 'brief:feed-error');
-    observerService.removeObserver(gFeedList, 'brief:feed-update-queued');
-    observerService.removeObserver(gFeedList, 'brief:feed-update-canceled');
-    observerService.removeObserver(gFeedList, 'brief:invalidate-feedlist');
-    observerService.removeObserver(gFeedList, 'brief:feed-title-changed');
-    observerService.removeObserver(gFeedList, 'brief:custom-style-changed');
+    var observerService = Cc['@mozilla.org/observer-service;1']
+                          .getService(Ci.nsIObserverService);
+    observerService.removeObserver(FeedList, 'brief:feed-updated');
+    observerService.removeObserver(FeedList, 'brief:feed-loading');
+    observerService.removeObserver(FeedList, 'brief:feed-error');
+    observerService.removeObserver(FeedList, 'brief:feed-update-queued');
+    observerService.removeObserver(FeedList, 'brief:feed-update-canceled');
+    observerService.removeObserver(FeedList, 'brief:invalidate-feedlist');
+    observerService.removeObserver(FeedList, 'brief:feed-title-changed');
+    observerService.removeObserver(FeedList, 'brief:custom-style-changed');
 
-    gPrefs.unregister();
-    Storage.removeObserver(gFeedList);
-    gFeedView.uninit();
+    PrefObserver.unregister();
+    Storage.removeObserver(FeedList);
+    gCurrentView.uninit();
 }
 
 
-var gCommands = {
+var Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
         getElement('sidebar').hidden = true;
@@ -110,15 +105,15 @@ var gCommands = {
         getElement('sidebar').hidden = false;
         getElement('sidebar-splitter').hidden = false;
 
-        if (gViewList.selectedItem == getElement('starred-folder') || gTagList.selectedItem) {
+        if (ViewList.selectedItem == getElement('starred-folder') || TagList.selectedItem) {
             getElement('tag-list').hidden = false;
             getElement('tag-list-splitter').hidden = false;
         }
 
         getElement('reveal-sidebar-button').hidden = true;
 
-        if (!gFeedList.treeReady)
-            gFeedList.rebuild();
+        if (!FeedList.treeReady)
+            FeedList.rebuild();
     },
 
     updateAllFeeds: function cmd_updateAllFeeds() {
@@ -130,8 +125,8 @@ var gCommands = {
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
-        var prefBranch = Cc['@mozilla.org/preferences-service;1'].
-                         getService(Ci.nsIPrefBranch);
+        var prefBranch = Cc['@mozilla.org/preferences-service;1']
+                         .getService(Ci.nsIPrefBranch);
         var instantApply = prefBranch.getBoolPref('browser.preferences.instantApply');
         var features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
@@ -141,65 +136,65 @@ var gCommands = {
     },
 
     markViewRead: function cmd_markViewRead() {
-        gFeedView.query.markEntriesRead(true);
+        gCurrentView.query.markEntriesRead(true);
     },
 
     markVisibleEntriesRead: function cmd_markVisibleEntriesRead() {
-        gFeedView.markVisibleEntriesRead();
+        gCurrentView.markVisibleEntriesRead();
     },
 
     toggleHeadlinesView: function cmd_toggleHeadlinesView() {
-        var newState = !gPrefs.showHeadlinesOnly;
-        gPrefBranch.setBoolPref('feedview.showHeadlinesOnly', newState);
+        var newState = !PrefCache.showHeadlinesOnly;
+        Prefs.setBoolPref('feedview.showHeadlinesOnly', newState);
         getElement('headlines-checkbox').checked = newState;
     },
 
     showAllEntries: function cmd_showAllEntries() {
-        gPrefBranch.setBoolPref('feedview.filterUnread', false);
+        Prefs.setBoolPref('feedview.filterUnread', false);
         getElement('filter-unread-checkbox').checked = false;
 
-        gPrefBranch.setBoolPref('feedview.filterStarred', false);
+        Prefs.setBoolPref('feedview.filterStarred', false);
         getElement('filter-starred-checkbox').checked = false;
 
-        gFeedView.refresh();
+        gCurrentView.refresh();
     },
 
     showUnreadEntries: function cmd_showUnreadEntries() {
-        if (!gPrefs.filterUnread)
-            gCommands.toggleUnreadEntriesFilter();
+        if (!PrefCache.filterUnread)
+            Commands.toggleUnreadEntriesFilter();
     },
 
     toggleUnreadEntriesFilter: function cmd_toggleUnreadEntriesFilter() {
-        gPrefBranch.setBoolPref('feedview.filterUnread', !gPrefs.filterUnread);
-        getElement('filter-unread-checkbox').checked = gPrefs.filterUnread;
-        gFeedView.refresh();
+        Prefs.setBoolPref('feedview.filterUnread', !PrefCache.filterUnread);
+        getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
+        gCurrentView.refresh();
     },
 
     showStarredEntries: function cmd_showStarredEntries() {
-        if (!gPrefs.filterStarred)
-            gCommands.toggleStarredEntriesFilter();
+        if (!PrefCache.filterStarred)
+            Commands.toggleStarredEntriesFilter();
     },
 
     toggleStarredEntriesFilter: function cmd_toggleStarredEntriesFilter() {
-        gPrefBranch.setBoolPref('feedview.filterStarred', !gPrefs.filterStarred);
-        getElement('filter-starred-checkbox').checked = gPrefs.filterStarred;
-        gFeedView.refresh();
+        Prefs.setBoolPref('feedview.filterStarred', !PrefCache.filterStarred);
+        getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
+        gCurrentView.refresh();
     },
 
     selectNextEntry: function cmd_selectNextEntry() {
-        gFeedView.selectNextEntry();
+        gCurrentView.selectNextEntry();
     },
 
     selectPrevEntry: function cmd_selectPrevEntry() {
-        gFeedView.selectPrevEntry();
+        gCurrentView.selectPrevEntry();
     },
 
     skipDown: function cmd_skipDown() {
-        gFeedView.skipDown();
+        gCurrentView.skipDown();
     },
 
     skipUp: function cmd_skipUp() {
-        gFeedView.skipUp();
+        gCurrentView.skipUp();
     },
 
     focusSearchbar: function cmd_focusSearchbar() {
@@ -207,30 +202,30 @@ var gCommands = {
     },
 
     toggleEntrySelection: function toggleEntrySelection() {
-        var oldValue = gPrefs.entrySelectionEnabled;
-        gPrefBranch.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
+        var oldValue = PrefCache.entrySelectionEnabled;
+        Prefs.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
     },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
-        if (gFeedView.selectedEntry) {
-            var newState = !gFeedView.selectedElement.hasAttribute('read');
-            this.markEntryRead(gFeedView.selectedEntry, newState);
+        if (gCurrentView.selectedEntry) {
+            var newState = !gCurrentView.selectedElement.hasAttribute('read');
+            Commands.markEntryRead(gCurrentView.selectedEntry, newState);
         }
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
         new Query(aEntry).markEntriesRead(aNewState);
 
-        if (gPrefs.autoMarkRead && !aNewState)
-            gFeedView.entriesMarkedUnread.push(aEntry);
+        if (PrefCache.autoMarkRead && !aNewState)
+            gCurrentView.entriesMarkedUnread.push(aEntry);
     },
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
-        if (gFeedView.selectedEntry) {
-            if (gFeedView.query.deleted == Storage.ENTRY_STATE_TRASHED)
-                this.restoreEntry(gFeedView.selectedEntry);
+        if (gCurrentView.selectedEntry) {
+            if (gCurrentView.query.deleted == Storage.ENTRY_STATE_TRASHED)
+                Commands.restoreEntry(gCurrentView.selectedEntry);
             else
-                this.deleteEntry(gFeedView.selectedEntry);
+                Commands.deleteEntry(gCurrentView.selectedEntry);
         }
     },
 
@@ -243,9 +238,9 @@ var gCommands = {
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
-        if (gFeedView.selectedEntry) {
-            var newState = !gFeedView.selectedElement.hasAttribute('starred');
-            this.starEntry(gFeedView.selectedEntry, newState);
+        if (gCurrentView.selectedEntry) {
+            var newState = !gCurrentView.selectedElement.hasAttribute('starred');
+            Commands.starEntry(gCurrentView.selectedEntry, newState);
         }
     },
 
@@ -254,24 +249,24 @@ var gCommands = {
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
-        if (gFeedView.selectedEntry && gPrefs.showHeadlinesOnly) {
-            var selectedElement = gFeedView.selectedElement;
+        if (gCurrentView.selectedEntry && PrefCache.showHeadlinesOnly) {
+            var selectedElement = gCurrentView.selectedElement;
             var newState = !selectedElement.hasAttribute('collapsed');
-            gFeedView.collapseEntry(gFeedView.selectedEntry, newState, true);
+            gCurrentView.collapseEntry(gCurrentView.selectedEntry, newState, true);
         }
     },
 
 
     openSelectedEntryLink: function cmd_openSelectedEntryLink() {
-        if (gFeedView.selectedEntry) {
-            let newTab = gPrefBranch.getBoolPref('feedview.openEntriesInTabs');
-            gCommands.openEntryLink(gFeedView.selectedElement, newTab);
+        if (gCurrentView.selectedEntry) {
+            let newTab = Prefs.getBoolPref('feedview.openEntriesInTabs');
+            Commands.openEntryLink(gCurrentView.selectedElement, newTab);
         }
     },
 
     openEntryLink: function cmd_openEntryLink(aEntryElement, aNewTab) {
         var url = aEntryElement.getAttribute('entryURL');
-        gCommands.openLink(url, aNewTab);
+        Commands.openLink(url, aNewTab);
 
         if (!aEntryElement.hasAttribute('read')) {
             let entryID = parseInt(aEntryElement.id);
@@ -280,14 +275,14 @@ var gCommands = {
     },
 
     openLink: function cmd_openLink(aURL, aNewTab) {
-        var docURI = Cc['@mozilla.org/network/io-service;1'].
-                     getService(Ci.nsIIOService).
-                     newURI(document.documentURI, null, null);
+        var docURI = Cc['@mozilla.org/network/io-service;1']
+                     .getService(Ci.nsIIOService)
+                     .newURI(document.documentURI, null, null);
 
         if (aNewTab)
             getTopWindow().gBrowser.loadOneTab(aURL, docURI);
         else
-            gFeedView.browser.loadURI(aURL);
+            gCurrentView.browser.loadURI(aURL);
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
@@ -316,23 +311,23 @@ function refreshProgressmeter() {
 function onSearchbarCommand() {
     var searchbar = getElement('searchbar');
     if (searchbar.value) {
-        gFeedView.titleOverride = gStringBundle.getFormattedString('searchResults',
-                                                                   [searchbar.value]);
+        gCurrentView.titleOverride = gStringBundle.getFormattedString('searchResults',
+                                                                      [searchbar.value]);
     }
     else {
-        gFeedView.titleOverride = '';
+        gCurrentView.titleOverride = '';
     }
 
-    gFeedView.query.searchString = searchbar.value;
-    gFeedView.refresh();
+    gCurrentView.query.searchString = searchbar.value;
+    gCurrentView.refresh();
 }
 
 function onSearchbarBlur() {
     var searchbar = getElement('searchbar');
-    if (!searchbar.value && gFeedView.query.searchString) {
-        gFeedView.titleOverride = '';
-        gFeedView.query.searchString = searchbar.value;
-        gFeedView.refresh();
+    if (!searchbar.value && gCurrentView.query.searchString) {
+        gCurrentView.titleOverride = '';
+        gCurrentView.query.searchString = searchbar.value;
+        gCurrentView.refresh();
     }
 }
 
@@ -351,27 +346,25 @@ function onKeyPress(aEvent) {
     if (aEvent.charCode)
         aEvent.stopPropagation();
 
-    // Brief takes over these shortcut keys, so we stop the default action.
-    if (!gPrefBranch.getBoolPref('assumeStandardKeys'))
+    if (!Prefs.getBoolPref('assumeStandardKeys'))
         return;
 
     if (aEvent.keyCode == aEvent.DOM_VK_TAB && !aEvent.ctrlKey) {
-        gPrefBranch.setBoolPref('feedview.entrySelectionEnabled',
-                                !gPrefs.entrySelectionEnabled);
+        Prefs.setBoolPref('feedview.entrySelectionEnabled', !PrefCache.entrySelectionEnabled);
         aEvent.preventDefault();
     }
     else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
         if (aEvent.shiftKey) {
-            if (gPrefs.entrySelectionEnabled)
-                gFeedView.scrollToPrevEntry();
+            if (PrefCache.entrySelectionEnabled)
+                gCurrentView.scrollToPrevEntry();
             else
-                gFeedView.scrollToPrevEntry(true);
+                gCurrentView.scrollToPrevEntry(true);
         }
         else {
-            if (gPrefs.entrySelectionEnabled)
-                gFeedView.selectNextEntry();
+            if (PrefCache.entrySelectionEnabled)
+                gCurrentView.selectNextEntry();
             else
-                gFeedView.scrollToNextEntry(true);
+                gCurrentView.scrollToNextEntry(true);
         }
 
         aEvent.preventDefault();
@@ -380,37 +373,44 @@ function onKeyPress(aEvent) {
 
 function onMarkViewReadClick(aEvent) {
     if (aEvent.ctrlKey)
-        gCommands.markVisibleEntriesRead();
+        Commands.markVisibleEntriesRead();
     else
-        gCommands.markViewRead();
+        Commands.markViewRead();
 }
 
 function getTopWindow() {
-    return window.QueryInterface(Ci.nsIInterfaceRequestor).
-           getInterface(Ci.nsIWebNavigation).
-           QueryInterface(Ci.nsIDocShellTreeItem).
-           rootTreeItem.
-           QueryInterface(Ci.nsIInterfaceRequestor).
-           getInterface(Ci.nsIDOMWindow);
+    return window.QueryInterface(Ci.nsIInterfaceRequestor)
+                 .getInterface(Ci.nsIWebNavigation)
+                 .QueryInterface(Ci.nsIDocShellTreeItem)
+                 .rootTreeItem
+                 .QueryInterface(Ci.nsIInterfaceRequestor)
+                 .getInterface(Ci.nsIDOMWindow);
 }
 
 
-// Preferences cache and observer.
-var gPrefs = {
+var Prefs = Cc['@mozilla.org/preferences-service;1']
+            .getService(Ci.nsIPrefService)
+            .getBranch('extensions.brief.')
+            .QueryInterface(Ci.nsIPrefBranch2);
 
-    register: function gPrefs_register() {
+var PrefCache = {};
+
+// Preferences cache and observer.
+var PrefObserver = {
+
+    register: function PrefObserver_register() {
         for (key in this._cachedPrefs)
             this._updateCachedPref(key);
 
-        gPrefBranch.addObserver('', this, false);
+        Prefs.addObserver('', this, false);
     },
 
-    unregister: function gPrefs_unregister() {
-        gPrefBranch.removeObserver('', this);
+    unregister: function PrefObserver_unregister() {
+        Prefs.removeObserver('', this);
     },
 
     // Hash table of prefs which are cached and available as properties
-    // of gPrefs. These properties are named after the respective keys.
+    // of PrefCache.
     _cachedPrefs: {
         doubleClickMarks:          'feedview.doubleClickMarks',
         showHeadlinesOnly:         'feedview.showHeadlinesOnly',
@@ -424,23 +424,23 @@ var gPrefs = {
         homeFolder:                'homeFolder'
     },
 
-    _updateCachedPref: function gPrefs__updateCachedPref(aKey) {
+    _updateCachedPref: function PrefObserver__updateCachedPref(aKey) {
         var prefName = this._cachedPrefs[aKey];
 
-        switch (gPrefBranch.getPrefType(prefName)) {
+        switch (Prefs.getPrefType(prefName)) {
             case Ci.nsIPrefBranch.PREF_STRING:
-                this[aKey] = gPrefBranch.getCharPref(prefName);
+                PrefCache[aKey] = Prefs.getCharPref(prefName);
                 break;
             case Ci.nsIPrefBranch.PREF_INT:
-                this[aKey] = gPrefBranch.getIntPref(prefName);
+                PrefCache[aKey] = Prefs.getIntPref(prefName);
                 break;
             case Ci.nsIPrefBranch.PREF_BOOL:
-                this[aKey] = gPrefBranch.getBoolPref(prefName);
+                PrefCache[aKey] = Prefs.getBoolPref(prefName);
                 break;
         }
     },
 
-    observe: function gPrefs_observe(aSubject, aTopic, aData) {
+    observe: function PrefObserver_observe(aSubject, aTopic, aData) {
         if (aTopic != 'nsPref:changed')
             return;
 
@@ -451,23 +451,23 @@ var gPrefs = {
 
         switch (aData) {
             case 'feedview.autoMarkRead':
-                gFeedView._autoMarkRead();
+                gCurrentView._autoMarkRead();
                 break;
 
             case 'feedview.sortUnreadViewOldestFirst':
-                if (gFeedView.query.read === false)
-                    gFeedView.refresh();
+                if (gCurrentView.query.read === false)
+                    gCurrentView.refresh();
                 break;
 
             case 'feedview.entrySelectionEnabled':
-                if (gPrefs.entrySelectionEnabled)
-                    gFeedView.selectEntry(gFeedView._getMiddleEntryElement());
+                if (PrefObserver.entrySelectionEnabled)
+                    gCurrentView.selectEntry(gCurrentView._getMiddleEntryElement());
                 else
-                    gFeedView.selectEntry(null);
+                    gCurrentView.selectEntry(null);
                 break;
 
             case 'feedview.showHeadlinesOnly':
-                gFeedView.toggleHeadlinesView();
+                gCurrentView.toggleHeadlinesView();
                 break;
         }
     }

@@ -10,64 +10,64 @@
 
     <keyset id="mainKeyset">
         <key id="Brief_open" key="a" modifiers="control shift"
-             oncommand="gBrief.toggle()"/>
+             oncommand="Brief.toggle()"/>
 
         <key id="Brief_selectNextEntry" key="j"
-             oncommand="gBrief.doCommand('selectNextEntry')"/>
+             oncommand="Brief.doCommand('selectNextEntry')"/>
         <key id="Brief_selectPreviousEntry" key="k"
-             oncommand="gBrief.doCommand('selectPrevEntry')"/>
+             oncommand="Brief.doCommand('selectPrevEntry')"/>
         <key id="Brief_skipDown" key="u"
-             oncommand="gBrief.doCommand('skipDown')"/>
+             oncommand="Brief.doCommand('skipDown')"/>
         <key id="Brief_skipUp" key="i"
-             oncommand="gBrief.doCommand('skipUp')"/>
+             oncommand="Brief.doCommand('skipUp')"/>
 
         <key id="Brief_toggleSelectedEntryRead" key="m"
-             oncommand="gBrief.doCommand('toggleSelectedEntryRead')"/>
+             oncommand="Brief.doCommand('toggleSelectedEntryRead')"/>
         <key id="Brief_markCurrentViewRead" key="n"
-             oncommand="gBrief.doCommand('markVisibleEntriesRead')"/>
+             oncommand="Brief.doCommand('markVisibleEntriesRead')"/>
         <key id="Brief_markCurrentViewRead" key="n" modifiers="alt"
-             oncommand="gBrief.doCommand('markViewRead')"/>
+             oncommand="Brief.doCommand('markViewRead')"/>
         <key id="Brief_deleteOrRestoreSelectedEntry" key="t"
-             oncommand="gBrief.doCommand('deleteOrRestoreSelectedEntry')"/>
+             oncommand="Brief.doCommand('deleteOrRestoreSelectedEntry')"/>
         <key id="Brief_toggleSelectedEntryStarred" key="b"
-             oncommand="gBrief.doCommand('toggleSelectedEntryStarred')"/>
+             oncommand="Brief.doCommand('toggleSelectedEntryStarred')"/>
         <key id="Brief_toggleSelectedEntryCollapsed" key="h"
-             oncommand="gBrief.doCommand('toggleSelectedEntryCollapsed')"/>
+             oncommand="Brief.doCommand('toggleSelectedEntryCollapsed')"/>
         <key id="Brief_openSelectedEntry" keycode="VK_RETURN"
-             oncommand="gBrief.doCommand('openSelectedEntryLink')"/>
+             oncommand="Brief.doCommand('openSelectedEntryLink')"/>
 
         <key id="Brief_toggleHeadlinesView" key="f"
-             oncommand="gBrief.doCommand('toggleHeadlinesView')"/>
+             oncommand="Brief.doCommand('toggleHeadlinesView')"/>
         <key id="Brief_showAllEntries" key="a"
-             oncommand="gBrief.doCommand('showAllEntries')"/>
+             oncommand="Brief.doCommand('showAllEntries')"/>
         <key id="Brief_showStarredEntries" key="s"
-             oncommand="gBrief.doCommand('showStarredEntries')"/>
+             oncommand="Brief.doCommand('showStarredEntries')"/>
         <key id="Brief_showUnreadEntries" key="d"
-             oncommand="gBrief.doCommand('showUnreadEntries')"/>
+             oncommand="Brief.doCommand('showUnreadEntries')"/>
         <key id="Brief_focusSearchbar" key="/"
-             oncommand="gBrief.doCommand('focusSearchbar')"/>
+             oncommand="Brief.doCommand('focusSearchbar')"/>
 
         <key id="Brief_displayShortcuts" key="?" modifiers="shift"
-             oncommand="gBrief.doCommand('displayShortcuts')"/>
+             oncommand="Brief.doCommand('displayShortcuts')"/>
     </keyset>
 
     <popupset id="mainPopupSet">
         <popup id="brief-status-context">
             <menuitem id="brief-ctx-update-feeds"
                       label="&ctxUpdateFeeds.label;"
-                      oncommand="gBrief.updateService.updateAllFeeds();"/>
+                      oncommand="Brief.updateService.updateAllFeeds();"/>
             <menuitem id="brief-ctx-mark-read"
                      label="&ctxMarkFeedsAsRead.label;"
-                     oncommand="gBrief.markFeedsAsRead();"/>
+                     oncommand="Brief.markFeedsAsRead();"/>
             <menuseparator/>
             <menuitem id="brief-ctx-show-options"
                       label="&ctxShowOptions.label;"
-                      oncommand="gBrief.showOptions();"/>
+                      oncommand="Brief.showOptions();"/>
         </popup>
 
         <tooltip id="brief-tooltip"
                  orient="vertical"
-                 onpopupshowing="gBrief.constructTooltip(event);">
+                 onpopupshowing="Brief.constructTooltip(event);">
             <label id="brief-tooltip-last-updated"/>
             <label id="brief-tooltip-no-unread"/>
             <grid>
@@ -92,7 +92,7 @@
                        tooltip="brief-tooltip"
                        type="checkbox"
                        autoCheck="false"
-                       onclick="gBrief.onBriefButtonClick(event);"/>
+                       onclick="Brief.onBriefButtonClick(event);"/>
     </toolbarpalette>
 
     <statusbar id="status-bar">
@@ -100,7 +100,7 @@
                         tooltip="brief-tooltip"
                         context="brief-status-context"
                         hidden="true"
-                        onclick="gBrief.onBriefButtonClick(event);"
+                        onclick="Brief.onBriefButtonClick(event);"
                         insertafter="statusbar-resizerpanel">
 
             <image id="brief-status-image"/>

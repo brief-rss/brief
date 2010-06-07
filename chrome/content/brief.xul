@@ -23,71 +23,71 @@
 
     <popupset id="main-popupset">
         <menupopup id="view-list-popup"
-                   onpopupshowing="gViewListContextMenu.init(gViewList.selectedItem)">
+                   onpopupshowing="ViewListContextMenu.init(ViewList.selectedItem)">
             <menuitem id="ctx-mark-special-folder-read"
                       label="&ctxMarkFolderRead.label;"
-                      oncommand="gViewListContextMenu.markFolderRead()"/>
+                      oncommand="ViewListContextMenu.markFolderRead()"/>
             <menuitem id="ctx-mark-tag-read"
                       label="&ctxMarkTagRead.label;"
-                      oncommand="gViewListContextMenu.markTagRead()"/>
+                      oncommand="ViewListContextMenu.markTagRead()"/>
             <menuitem id="ctx-restore-trashed"
                       label="&ctxRestoreTrashed.label;"
-                      oncommand="gViewListContextMenu.restoreTrashed()"/>
+                      oncommand="ViewListContextMenu.restoreTrashed()"/>
             <menuseparator id="ctx-view-list-separator"/>
             <menuitem id="ctx-empty-unread-folder"
                       label="&ctxEmptyFolder.label;"
-                      oncommand="gViewListContextMenu.emptyUnreadFolder()"/>
+                      oncommand="ViewListContextMenu.emptyUnreadFolder()"/>
             <menuitem id="ctx-delete-tag"
                       label="&ctxDeleteTag.label;"
-                      oncommand="gViewListContextMenu.deleteTag()"/>
+                      oncommand="ViewListContextMenu.deleteTag()"/>
             <menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
-                      oncommand="gViewListContextMenu.emptyTrash()"/>
+                      oncommand="ViewListContextMenu.emptyTrash()"/>
         </menupopup>
         <menupopup id="tag-list-popup"
-                   onpopupshowing="gTagListContextMenu.targetItem = gTagList.selectedItem">
+                   onpopupshowing="TagListContextMenu.targetItem = TagList.selectedItem">
             <menuitem id="ctx-mark-tag-read"
                       label="&ctxMarkTagRead.label;"
-                      oncommand="gTagListContextMenu.markTagRead()"/>
+                      oncommand="TagListContextMenu.markTagRead()"/>
             <menuseparator id="ctx-tag-list-separator"/>
             <menuitem id="ctx-delete-tag"
                       label="&ctxDeleteTag.label;"
-                      oncommand="gTagListContextMenu.deleteTag()"/>
+                      oncommand="TagListContextMenu.deleteTag()"/>
         </menupopup>
         <menupopup id="feed-list-popup"
-                   onpopupshowing="gFeedList.onContextMenuShowing(event)">
+                   onpopupshowing="FeedList.onContextMenuShowing(event)">
             <menuitem id="ctx-mark-feed-read"
                       label="&ctxMarkFeedRead.label;"
-                      oncommand="gFeedListContextMenu.markFeedRead()"/>
+                      oncommand="FeedListContextMenu.markFeedRead()"/>
             <menuitem id="ctx-mark-folder-read"
                       label="&ctxMarkFolderRead.label;"
-                      oncommand="gFeedListContextMenu.markFolderRead()"/>
+                      oncommand="FeedListContextMenu.markFolderRead()"/>
             <menuitem id="ctx-update-feed"
                       label="&ctxUpdateFeed.label;"
-                      oncommand="gFeedListContextMenu.updateFeed()"/>
+                      oncommand="FeedListContextMenu.updateFeed()"/>
             <menuitem id="ctx-update-folder"
                       label="&ctxUpdateFolder.label;"
-                      oncommand="gFeedListContextMenu.updateFolder()"/>
+                      oncommand="FeedListContextMenu.updateFolder()"/>
             <menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
-                      oncommand="gFeedListContextMenu.openWebsite()"/>
+                      oncommand="FeedListContextMenu.openWebsite()"/>
             <menuseparator id="ctx-dangerous-cmds-separator"/>
             <menuitem id="ctx-delete-feed"
                       label="&ctxDeleteFeed.label;"
-                      oncommand="gFeedListContextMenu.deleteFeed()"/>
+                      oncommand="FeedListContextMenu.deleteFeed()"/>
             <menuitem id="ctx-delete-folder"
                       label="&ctxDeleteFolder.label;"
-                      oncommand="gFeedListContextMenu.deleteFolder()"/>
+                      oncommand="FeedListContextMenu.deleteFolder()"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
-                      oncommand="gFeedListContextMenu.emptyFeed()"/>
+                      oncommand="FeedListContextMenu.emptyFeed()"/>
             <menuitem id="ctx-empty-folder"
                       label="&ctxEmptyFolder.label;"
-                      oncommand="gFeedListContextMenu.emptyFolder()"/>
+                      oncommand="FeedListContextMenu.emptyFolder()"/>
             <menuseparator id="ctx-properties-separator"/>
             <menuitem id="ctx-feed-properties"
                       label="&ctxFeedProperties.label;"
-                      oncommand="gFeedListContextMenu.showFeedProperties()"/>
+                      oncommand="FeedListContextMenu.showFeedProperties()"/>
         </menupopup>
     </popupset>
 
@@ -97,8 +97,8 @@
                      persist="startview"
                      suppressonselect="true"
                      context="view-list-popup"
-                     onselect="gViewList.onSelect(event)"
-                     onclick="gViewList.onClick(event)">
+                     onselect="ViewList.onSelect(event)"
+                     onclick="ViewList.onClick(event)">
             <richlistitem id="all-items-folder"
                           class="view-list-item"
                           name="&allItemsFolder.label;">
@@ -138,16 +138,16 @@
                     <button id="update-button"
                             class="brief-button sidebar-button"
                             tooltiptext="&updateButton.tooltip;"
-                            oncommand="gCommands.updateAllFeeds()"/>
+                            oncommand="Commands.updateAllFeeds()"/>
                     <button id="stop-updating-button"
                             class="brief-button sidebar-button"
                             tooltiptext="&stopUpdatingButton.tooltip;"
-                            oncommand="gCommands.stopUpdating()"/>
+                            oncommand="Commands.stopUpdating()"/>
                 </deck>
                 <button id="options-button"
                         class="brief-button sidebar-button"
                         tooltiptext="&showOptions.tooltip;"
-                        oncommand="gCommands.openOptions()"/>
+                        oncommand="Commands.openOptions()"/>
             </hbox>
         </hbox>
 
@@ -156,8 +156,8 @@
               seltype="single"
               contextmenu="feed-list-popup"
               persist="closedFolders"
-              onselect="gFeedList.onSelect(event)"
-              onkeyup="gFeedList.onKeyUp(event)">
+              onselect="FeedList.onSelect(event)"
+              onkeyup="FeedList.onKeyUp(event)">
 
             <treecols>
                 <treecol id="name" flex="1"
@@ -173,14 +173,14 @@
               resizeafter="farthest"
               tooltiptext="&sidebarSplitter.tooltip;"
               persist="hidden"
-              ondblclick="gCommands.hideSidebar()"/>
+              ondblclick="Commands.hideSidebar()"/>
 
     <listbox id="tag-list"
              hidden="true"
              persist="width"
              context="tag-list-popup"
-             onselect="gTagList.onSelect(event)"
-             onclick="gTagList.onClick(event)"/>
+             onselect="TagList.onSelect(event)"
+             onclick="TagList.onClick(event)"/>
 
     <splitter id="tag-list-splitter"
               hidden="true"/>
@@ -199,17 +199,17 @@
                     type="checkbox"
                     autoCheck="false"
                     tooltiptext="&headlinesCheckbox.tooltip;"
-                    oncommand="gCommands.toggleHeadlinesView()"/>
+                    oncommand="Commands.toggleHeadlinesView()"/>
             <button id="filter-unread-checkbox"
                     class="brief-button view-button"
                     tooltiptext="&filterUnread.tooltip;"
                     type="checkbox"
-                    oncommand="gCommands.toggleUnreadEntriesFilter()"/>
+                    oncommand="Commands.toggleUnreadEntriesFilter()"/>
             <button id="filter-starred-checkbox"
                     class="brief-button view-button"
                     tooltiptext="&filterStarred.tooltip;"
                     type="checkbox"
-                    oncommand="gCommands.toggleStarredEntriesFilter()"/>
+                    oncommand="Commands.toggleStarredEntriesFilter()"/>
             <textbox id="searchbar"
                      spellcheck="false"
                      type="search"
@@ -224,7 +224,7 @@
                     class="brief-button"
                     hidden="true"
                     tooltiptext="&revealSidebar.tooltip;"
-                    oncommand="gCommands.revealSidebar()"/>
+                    oncommand="Commands.revealSidebar()"/>
             <browser id="feed-view" flex="1"
                      disablehistory="true"
                      type="content"
