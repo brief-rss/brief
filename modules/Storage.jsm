@@ -101,7 +101,7 @@ var Storage = {
      * @returns Feed object, without entries.
      */
     getFeed: function(aFeedID) {
-        return Database.getFeed(aFeedID);
+        return StorageInternal.getFeed(aFeedID);
     },
 
     /**
@@ -111,7 +111,7 @@ var Storage = {
      * @returns array of Feed's.
      */
     getAllFeeds: function(aIncludeFolders) {
-        return Database.getAllFeeds(aIncludeFolders);
+        return StorageInternal.getAllFeeds(aIncludeFolders);
     },
 
     /**
@@ -120,7 +120,7 @@ var Storage = {
      * @returns Array of tag names.
      */
     getAllTags: function() {
-        return Database.getAllTags();
+        return StorageInternal.getAllTags();
     },
 
     /**
@@ -133,7 +133,7 @@ var Storage = {
      *        Callback after the database is updated.
      */
     processFeed: function(aFeed, aCallback) {
-        return Database.processFeed(aFeed, aCallback);
+        return StorageInternal.processFeed(aFeed, aCallback);
     },
 
     /**
@@ -145,7 +145,7 @@ var Storage = {
      *        columns in the database.
      */
     setFeedOptions: function(aFeed) {
-        return Database.setFeedOptions(aFeed);
+        return StorageInternal.setFeedOptions(aFeed);
     },
 
 
@@ -154,7 +154,7 @@ var Storage = {
      * disc space and defragment the database.
      */
     compactDatabase: function() {
-        return Database.compactDatabase();
+        return StorageInternal.compactDatabase();
     },
 
     /**
@@ -164,7 +164,7 @@ var Storage = {
      * state for a certain amount of time in case they are added back.
      */
     syncWithLivemarks: function() {
-        return Database.syncWithLivemarks();
+        return StorageInternal.syncWithLivemarks();
     },
 
     /**
@@ -201,30 +201,26 @@ var Storage = {
      *
      */
     addObserver: function(aObserver) {
-        return Database.addObserver(aObserver);
+        return StorageInternal.addObserver(aObserver);
     },
 
     /**
      * Unregisters an observer object.
      */
     removeObserver: function(aObserver) {
-        return Database.removeObserver(aObserver);
+        return StorageInternal.removeObserver(aObserver);
     }
 
 }
 
 
-var Database = {
+var StorageInternal = {
 
     feedsAndFoldersCache: null,
     feedsCache:           null,
 
-    ENTRY_STATE_NORMAL: 0,
-    ENTRY_STATE_TRASHED: 1,
-    ENTRY_STATE_DELETED: 2,
 
-
-    init: function Database_init() {
+    init: function StorageInternal_init() {
         var profileDir = Cc['@mozilla.org/file/directory_service;1'].
                          getService(Ci.nsIProperties).
                          get('ProfD', Ci.nsIFile);
@@ -300,7 +296,7 @@ var Database = {
 
 
     // See Storage.
-    getFeed: function Database_getFeed(aFeedID) {
+    getFeed: function StorageInternal_getFeed(aFeedID) {
         var foundFeed = null;
         var feeds = this.getAllFeeds(true);
         for (var i = 0; i < feeds.length; i++) {
@@ -313,7 +309,7 @@ var Database = {
     },
 
     // See Storage.
-    getAllFeeds: function Database_getAllFeeds(aIncludeFolders) {
+    getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders) {
         if (!this.feedsCache) {
             this.feedsCache = [];
             this.feedsAndFoldersCache = [];
@@ -335,18 +331,18 @@ var Database = {
     },
 
     // See Storage.
-    getAllTags: function Database_getAllTags() {
+    getAllTags: function StorageInternal_getAllTags() {
         return Stm.getAllTags.getAllResults().map(function(row) row.tagName);
     },
 
 
     // See Storage.
-    processFeed: function Database_processFeed(aFeed, aCallback) {
+    processFeed: function StorageInternal_processFeed(aFeed, aCallback) {
         new FeedProcessor(aFeed, aCallback);
     },
 
     // See Storage.
-    setFeedOptions: function Database_setFeedOptions(aFeed) {
+    setFeedOptions: function StorageInternal_setFeedOptions(aFeed) {
         Stm.setFeedOptions.execute({
             'entryAgeLimit': aFeed.entryAgeLimit,
             'maxEntries': aFeed.maxEntries,
@@ -368,7 +364,7 @@ var Database = {
 
 
     // See Storage.
-    compactDatabase: function Database_compactDatabase() {
+    compactDatabase: function StorageInternal_compactDatabase() {
         this.purgeEntries(false);
         ExecuteSQL('VACUUM');
     },
@@ -376,7 +372,7 @@ var Database = {
 
     // Moves expired entries to Trash and permanently removes
     // the deleted items from database.
-    purgeEntries: function Database_purgeEntries(aDeleteExpired) {
+    purgeEntries: function StorageInternal_purgeEntries(aDeleteExpired) {
         Connection.beginTransaction()
         try {
             if (aDeleteExpired) {
@@ -385,8 +381,8 @@ var Database = {
                     let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
 
                     Stm.expireEntriesByAgeGlobal.execute({
-                        'oldState': Database.ENTRY_STATE_NORMAL,
-                        'newState': Database.ENTRY_STATE_TRASHED,
+                        'oldState': Storage.ENTRY_STATE_NORMAL,
+                        'newState': Storage.ENTRY_STATE_TRASHED,
                         'edgeDate': Date.now() - expirationAge * 86400000
                     });
                 }
@@ -395,8 +391,8 @@ var Database = {
                 this.getAllFeeds().forEach(function(feed) {
                     if (feed.entryAgeLimit > 0) {
                         Stm.expireEntriesByAgePerFeed.execute({
-                            'oldState': Database.ENTRY_STATE_NORMAL,
-                            'newState': Database.ENTRY_STATE_TRASHED,
+                            'oldState': Storage.ENTRY_STATE_NORMAL,
+                            'newState': Storage.ENTRY_STATE_TRASHED,
                             'edgeDate': Date.now() - feed.entryAgeLimit * 86400000,
                             'feedID': feed.feedID
                         });
@@ -410,13 +406,13 @@ var Database = {
                     this.getAllFeeds().forEach(function(feed) {
                         let row = Stm.getDeletedEntriesCount.getSingleResult({
                             'feedID': feed.feedID,
-                            'deletedState': Database.ENTRY_STATE_NORMAL
+                            'deletedState': Storage.ENTRY_STATE_NORMAL
                         })
 
                         if (row.entryCount - maxEntries > 0) {
                             Stm.expireEntriesByNumber.execute({
-                                'oldState': Database.ENTRY_STATE_NORMAL,
-                                'newState': Database.ENTRY_STATE_TRASHED,
+                                'oldState': Storage.ENTRY_STATE_NORMAL,
+                                'newState': Storage.ENTRY_STATE_TRASHED,
                                 'feedID': feed.feedID,
                                 'limit': row.entryCount - maxEntries
                             });
@@ -426,13 +422,13 @@ var Database = {
             }
 
             Stm.purgeDeletedEntriesText.execute({
-                'deletedState': Database.ENTRY_STATE_DELETED,
+                'deletedState': Storage.ENTRY_STATE_DELETED,
                 'currentDate': Date.now(),
                 'retentionTime': DELETED_FEEDS_RETENTION_TIME
             });
 
             Stm.purgeDeletedEntries.execute({
-                'deletedState': Database.ENTRY_STATE_DELETED,
+                'deletedState': Storage.ENTRY_STATE_DELETED,
                 'currentDate': Date.now(),
                 'retentionTime': DELETED_FEEDS_RETENTION_TIME
             });
@@ -455,7 +451,7 @@ var Database = {
     },
 
     // nsIObserver
-    observe: function Database_observe(aSubject, aTopic, aData) {
+    observe: function StorageInternal_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'quit-application':
                 // Integer prefs are longs while Date is a long long.
@@ -482,19 +478,19 @@ var Database = {
 
 
     // See Storage.
-    syncWithLivemarks: function Database_syncWithLivemarks() {
+    syncWithLivemarks: function StorageInternal_syncWithLivemarks() {
         new LivemarksSync();
     },
 
     observers: [],
 
     // See Storage.
-    addObserver: function Database_addObserver(aObserver) {
+    addObserver: function StorageInternal_addObserver(aObserver) {
         this.observers.push(aObserver);
     },
 
     // See Storage.
-    removeObserver: function Database_removeObserver(aObserver) {
+    removeObserver: function StorageInternal_removeObserver(aObserver) {
         var index = this.observers.indexOf(aObserver);
         if (index !== -1)
             this.observers.splice(index, 1);
@@ -512,7 +508,7 @@ var Database = {
      * @param aDontNotify
      *        Don't notify observers.
      */
-    starEntry: function Database_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
+    starEntry: function StorageInternal_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
         if (aState)
             Stm.starEntry.execute({ 'bookmarkID': aBookmarkID, 'entryID': aEntryID });
         else
@@ -522,7 +518,7 @@ var Database = {
             return;
 
         new Query(aEntryID).getEntryList(function(aList) {
-            for each (let observer in Database.observers)
+            for each (let observer in StorageInternal.observers)
                 observer.onEntriesStarred(aList, aState);
         });
     },
@@ -537,7 +533,7 @@ var Database = {
      * @param aTagName
      *        Name of the tag.
      */
-    tagEntry: function Database_tagEntry(aState, aEntryID, aTagName) {
+    tagEntry: function StorageInternal_tagEntry(aState, aEntryID, aTagName) {
         Connection.beginTransaction();
         try {
             var params = { 'entryID': aEntryID, 'tagName': aTagName };
@@ -560,7 +556,7 @@ var Database = {
             });
 
             new Query(aEntryID).getEntryList(function(aList) {
-                for each (let observer in Database.observers)
+                for each (let observer in StorageInternal.observers)
                     observer.onEntriesTagged(aList, aState, aTagName);
             });
         }
@@ -575,14 +571,14 @@ var Database = {
 
 
 /**
- * Evaluates the provided entries, inserting any new items and updating existing
+ * Evaluates provided entries, inserting any new items and updating existing
  * items when newer versions are found. Also updates feed's properties.
  */
 function FeedProcessor(aFeed, aCallback) {
     this.feed = aFeed;
     this.callback = aCallback;
 
-    var storedFeed = Database.getFeed(aFeed.feedID);
+    var storedFeed = StorageInternal.getFeed(aFeed.feedID);
     this.oldestEntryDate = storedFeed.oldestEntryDate;
 
     var newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
@@ -616,7 +612,7 @@ function FeedProcessor(aFeed, aCallback) {
     Stm.updateFeed.executeAsync();
 
     // Keep cache up to date.
-    var cachedFeed = Database.getFeed(aFeed.feedID);
+    var cachedFeed = StorageInternal.getFeed(aFeed.feedID);
     for (let p in properties)
         cachedFeed[p] = properties[p];
 }
@@ -703,7 +699,7 @@ FeedProcessor.prototype = {
 
     addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
-        var markUnread = Database.getFeed(this.feed.feedID).markModifiedEntriesUnread;
+        var markUnread = StorageInternal.getFeed(this.feed.feedID).markModifiedEntriesUnread;
 
         Stm.updateEntry.paramSets.push({
             'date': aEntry.date,
@@ -760,7 +756,7 @@ FeedProcessor.prototype = {
 
                 handleCompletion: function(aReason) {
                     new Query(self.insertedEntries).getEntryList(function(aList) {
-                        for each (let observer in Database.observers)
+                        for each (let observer in StorageInternal.observers)
                             observer.onEntriesAdded(aList);
                     });
 
@@ -775,7 +771,7 @@ FeedProcessor.prototype = {
 
             ExecuteStatementsAsync(statements, function() {
                 new Query(self.updatedEntries).getEntryList(function(aList) {
-                    for each (let observer in Database.observers)
+                    for each (let observer in StorageInternal.observers)
                         observer.onEntriesUpdated(aList);
                 });
             });
@@ -842,7 +838,7 @@ Query.prototype = {
     starred: undefined,
 
     /**
-     * Deleted state of entries to be selected. See constants in Database.
+     * Deleted state of entries to be selected. See constants in StorageInternal.
      */
     deleted: undefined,
 
@@ -1082,7 +1078,7 @@ Query.prototype = {
 
             update.executeAsync(function() {
                 if (aList.length) {
-                    for each (let observer in Database.observers)
+                    for each (let observer in StorageInternal.observers)
                         observer.onEntriesMarkedRead(aList, aState);
                 }
             });
@@ -1093,7 +1089,7 @@ Query.prototype = {
      * Set the deleted state of the selected entries or remove them from the database.
      *
      * @param aState
-     *        The new deleted state (as defined by constants in Database.deleted)
+     *        The new deleted state (as defined by constants in Storage)
      *        or instruction to physically remove the entries from the
      *        database (REMOVE_FROM_DATABASE constant below).
      *
@@ -1103,9 +1099,9 @@ Query.prototype = {
 
     deleteEntries: function Query_deleteEntries(aState) {
         switch (aState) {
-            case Database.ENTRY_STATE_NORMAL:
-            case Database.ENTRY_STATE_TRASHED:
-            case Database.ENTRY_STATE_DELETED:
+            case Storage.ENTRY_STATE_NORMAL:
+            case Storage.ENTRY_STATE_TRASHED:
+            case Storage.ENTRY_STATE_DELETED:
                 var sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
                 break;
             case this.REMOVE_FROM_DATABASE:
@@ -1118,7 +1114,7 @@ Query.prototype = {
         this.getEntryList(function(aList) {
             new Statement(sql).executeAsync(function() {
                 if (aList.length) {
-                    for each (let observer in Database.observers)
+                    for each (let observer in StorageInternal.observers)
                         observer.onEntriesDeleted(aList, aState);
                 }
             });
@@ -1164,7 +1160,7 @@ Query.prototype = {
                     // If there are no bookmarks for an URL that is starred in our
                     // database, it means that the database is out of sync and we
                     // must update the database directly.
-                    Database.starEntry(false, entry.id, bookmarks[0]);
+                    StorageInternal.starEntry(false, entry.id, bookmarks[0]);
                 }
             }
         })
@@ -1202,7 +1198,7 @@ Query.prototype = {
                 statusOK = false;
             }
             else if (!entry.starred && normalBookmarks.length) {
-                Database.starEntry(true, entry.id, normalBookmarks[0]);
+                StorageInternal.starEntry(true, entry.id, normalBookmarks[0]);
                 statusOK = false;
             }
 
@@ -1222,7 +1218,7 @@ Query.prototype = {
 
             currentTags.forEach(function(tag) {
                 if (storedTags.indexOf(tag) === -1) {
-                    Database.tagEntry(true, entry.id, tag);
+                    StorageInternal.tagEntry(true, entry.id, tag);
                     statusOK = false;
                 }
             })
@@ -1278,7 +1274,7 @@ Query.prototype = {
              * of folders specified by Query.folders.
              */
             this._effectiveFolders = this.folders;
-            this._traverseFolderChildren(Database.homeFolderID);
+            this._traverseFolderChildren(StorageInternal.homeFolderID);
 
             let con = '(feeds.parent = "';
             con += this._effectiveFolders.join('" OR feeds.parent = "');
@@ -1382,7 +1378,7 @@ Query.prototype = {
 
     _traverseFolderChildren: function Query__traverseFolderChildren(aFolder) {
         var isEffectiveFolder = (this._effectiveFolders.indexOf(aFolder) != -1);
-        var items = Database.getAllFeeds(true);
+        var items = StorageInternal.getAllFeeds(true);
 
         for (let i = 0; i < items.length; i++) {
             if (items[i].parent == aFolder && items[i].isFolder) {
@@ -1635,10 +1631,10 @@ var BookmarkObserver = {
             aEntries.forEach(function(entry) {
                 if (isTag) {
                     let tagName = Bookmarks.getItemTitle(aFolder);
-                    Database.tagEntry(true, entry, tagName, aItemID);
+                    StorageInternal.tagEntry(true, entry, tagName, aItemID);
                 }
                 else {
-                    Database.starEntry(true, entry, aItemID);
+                    StorageInternal.starEntry(true, entry, aItemID);
                 }
             })
         })
@@ -1650,7 +1646,7 @@ var BookmarkObserver = {
 
     // nsINavBookmarkObserver
     onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType) {
-        if (Utils.isLivemarkStored(aItemID) || aItemID == Database.homeFolderID) {
+        if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
         }
@@ -1666,7 +1662,7 @@ var BookmarkObserver = {
 
             Utils.getEntriesByTagName(tagName, function(aEntries) {
                 aEntries.forEach(function(entry) {
-                    Database.tagEntry(false, entry, tagName);
+                    StorageInternal.tagEntry(false, entry, tagName);
                 })
             })
         }
@@ -1684,9 +1680,9 @@ var BookmarkObserver = {
 
                 aEntries.forEach(function(entry) {
                     if (bookmarks.length)
-                        Database.starEntry(true, entry.id, bookmarks[0], true);
+                        StorageInternal.starEntry(true, entry.id, bookmarks[0], true);
                     else
-                        Database.starEntry(false, entry.id);
+                        StorageInternal.starEntry(false, entry.id);
                 })
             })
         }
@@ -1728,14 +1724,14 @@ var BookmarkObserver = {
             // Unstar any entries with the old URI.
             Utils.getEntriesByBookmarkID(aItemID, function(aEntries) {
                 aEntries.forEach(function(entry) {
-                    Database.starEntry(false, entry.id);
+                    StorageInternal.starEntry(false, entry.id);
                 })
             })
 
             // Star any entries with the new URI.
             Utils.getEntriesByURL(aNewValue, function(aEntries) {
                 aEntries.forEach(function(entry) {
-                    Database.starEntry(true, entry, aItemID);
+                    StorageInternal.starEntry(true, entry, aItemID);
                 })
             })
 
@@ -1789,7 +1785,7 @@ var BookmarkObserver = {
             Utils.getEntriesByURL(uri.spec, function(aEntries) {
                 aEntries.forEach(function(entryID) {
 
-                    Database.tagEntry(true, entryID, aNewName);
+                    StorageInternal.tagEntry(true, entryID, aNewName);
 
                     let storedTags = Utils.getTagsForEntry(entryID);
                     let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
@@ -1799,7 +1795,7 @@ var BookmarkObserver = {
 
                     storedTags.forEach(function(tag) {
                         if (currentTags.indexOf(tag) === -1)
-                            Database.tagEntry(false, entryID, tag);
+                            StorageInternal.tagEntry(false, entryID, tag);
                     })
                 })
             })
@@ -1811,7 +1807,7 @@ var BookmarkObserver = {
     observe: function BookmarkObserver_observe(aSubject, aTopic, aData) {
         if (aTopic == 'timer-callback') {
             this.livemarksSyncPending = false;
-            Database.syncWithLivemarks();
+            StorageInternal.syncWithLivemarks();
         }
     },
 
@@ -1868,7 +1864,7 @@ function LivemarksSync() {
     }
 
     if (this.feedListChanged) {
-        Database.feedsCache = Database.feedsAndFoldersCache = null;
+        StorageInternal.feedsCache = StorageInternal.feedsAndFoldersCache = null;
         ObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
     }
 
@@ -1876,7 +1872,7 @@ function LivemarksSync() {
     if (this.newLivemarks.length) {
         var feeds = [];
         for each (let livemark in this.newLivemarks)
-            feeds.push(Database.getFeed(livemark.feedID));
+            feeds.push(StorageInternal.getFeed(livemark.feedID));
 
         FeedUpdateService.updateFeeds(feeds);
     }
@@ -1897,7 +1893,7 @@ LivemarksSync.prototype = {
             let hideAllFeeds = new Statement('UPDATE feeds SET hidden = :hidden');
             hideAllFeeds.execute({ 'hidden': Date.now() });
 
-            Database.feedsCache = Database.feedsAndFoldersCache = null;
+            StorageInternal.feedsCache = StorageInternal.feedsAndFoldersCache = null;
             ObserverService.notifyObservers(null, 'brief:invalidate-feedlist', '');
             folderValid = false;
         }
@@ -1979,7 +1975,7 @@ LivemarksSync.prototype = {
         }
         else {
             // Invalidate feeds cache.
-            Database.feedsCache = Database.feedsAndFoldersCache = null;
+            StorageInternal.feedsCache = StorageInternal.feedsAndFoldersCache = null;
             ObserverService.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
         }
     },
@@ -2061,7 +2057,7 @@ var Stm = {
                   'WHERE entries.deleted = :deletedState                                 '+
                   'ORDER BY entry_tags.tagName                                           ';
         delete this.getAllTags;
-        return this.getAllTags = new Statement(sql, { 'deletedState': Database.ENTRY_STATE_NORMAL });
+        return this.getAllTags = new Statement(sql, { 'deletedState': Storage.ENTRY_STATE_NORMAL });
     },
 
     get updateFeed() {
@@ -2428,7 +2424,7 @@ var Migration = {
             ExecuteSQL('INSERT INTO entries_copy SELECT '+cols+' FROM entries ');
             ExecuteSQL('DROP TABLE entries                                    ');
 
-            Database.setupDatabase();
+            StorageInternal.setupDatabase();
 
             let fromCols = 'feedID, providedID, entryURL, date, read, updated,       '+
                            'starred, deleted, bookmarkID, id, secondaryID            ';
@@ -2478,7 +2474,7 @@ var Migration = {
                 }
 
                 if (alreadyBookmarked) {
-                    Database.starEntry(true, entry.id, bookmarkID);
+                    StorageInternal.starEntry(true, entry.id, bookmarkID);
                 }
                 else {
                     let bookmarkID = Bookmarks.insertBookmark(Bookmarks.unfiledBookmarksFolder,
@@ -2546,7 +2542,7 @@ var Utils = {
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
         var foundFeed = null;
-        var feeds = Database.getAllFeeds(true);
+        var feeds = StorageInternal.getAllFeeds(true);
         for (let i = 0; i < feeds.length; i++) {
             if (feeds[i].bookmarkID == aBookmarkID) {
                 foundFeed = feeds[i];
@@ -2651,7 +2647,7 @@ var Utils = {
 
     // Returns TRUE if an item is a subfolder of Brief's home folder.
     isInHomeFolder: function(aItemID) {
-        var homeID = Database.homeFolderID;
+        var homeID = StorageInternal.homeFolderID;
         if (homeID === -1)
             return false;
 
@@ -2716,4 +2712,4 @@ function log(aMessage) {
   consoleService.logStringMessage('Brief:\n' + aMessage);
 }
 
-Database.init();
+StorageInternal.init();
