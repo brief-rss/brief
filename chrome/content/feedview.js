@@ -946,15 +946,14 @@ FeedView.prototype = {
 
         var dateQuery = this.getQueryCopy();
         dateQuery.endDate = endDate;
-        dateQuery.offset = aCount - 1;
-        dateQuery.limit = 1;
+        dateQuery.limit = aCount;
 
         var entryDates = dateQuery.getProperty('date');
         if (!entryDates.length)
             return 0;
 
         var query = this.getQueryCopy();
-        query.startDate = entryDates[0].date;
+        query.startDate = entryDates[entryDates.length - 1].date;
         query.endDate = endDate;
 
         var entries = query.getFullEntries();
