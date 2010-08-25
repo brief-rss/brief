@@ -1,5 +1,10 @@
-<!ENTITY confirmHomeFolder.label "Choose folder">
 <!ENTITY searchBox.label "Search">
+<!ENTITY allItemsFolder.label "All items">
+<!ENTITY unreadFolder.label "Unread">
+<!ENTITY starredFolder.label "Bookmarks">
+<!ENTITY trashFolder.label "Trash">
+
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "View headlines (F)">
 <!ENTITY filterUnread.tooltip "View only unread items (D)">
 <!ENTITY filterStarred.tooltip "View only bookmarks (S)">
@@ -9,10 +14,8 @@
 <!ENTITY sidebarSplitter.tooltip "Double-click to hide the sidebar">
 <!ENTITY revealSidebar.tooltip "Reveal the sidebar">
 <!ENTITY markViewRead.tooltip "Mark all items as read (Alt + N)">
-<!ENTITY allItemsFolder.label "All items">
-<!ENTITY unreadFolder.label "Unread">
-<!ENTITY starredFolder.label "Bookmarks">
-<!ENTITY trashFolder.label "Trash">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Mark Feed As Read">
 <!ENTITY ctxMarkFeedUnread.label "Mark Feed As Unread">
 <!ENTITY ctxMarkFolderRead.label "Mark Folder As Read">
@@ -31,7 +34,6 @@
 <!ENTITY ctxUpdateFeeds.label "Update Feeds Now">
 <!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
 <!ENTITY ctxShowOptions.label "Options">
+
 <!ENTITY compactingWindow.title "Compacting feeds">
 <!ENTITY compactingInProgress.label "Brief is compacting stored feeds. This may take a few minutes...">
-<!ENTITY migrationProgress.title "Migrating feeds">
-<!ENTITY migrationProgress.description "Brief is migrating stored feeds...">
