@@ -418,7 +418,6 @@ var PrefObserver = {
         autoMarkRead:              'feedview.autoMarkRead',
         filterUnread:              'feedview.filterUnread',
         filterStarred:             'feedview.filterStarred',
-        minInitialEntries:         'feedview.minInitialEntries',
         sortUnreadViewOldestFirst: 'feedview.sortUnreadViewOldestFirst',
         showFavicons:              'showFavicons',
         homeFolder:                'homeFolder'
@@ -460,7 +459,7 @@ var PrefObserver = {
                 break;
 
             case 'feedview.entrySelectionEnabled':
-                if (PrefObserver.entrySelectionEnabled)
+                if (PrefCache.entrySelectionEnabled)
                     gCurrentView.selectEntry(gCurrentView._getMiddleEntryElement());
                 else
                     gCurrentView.selectEntry(null);
