@@ -794,10 +794,13 @@ FeedProcessor.prototype = {
  *        of query constraints.
  */
 function Query(aConstraints) {
+    if (!aConstraints)
+        return;
+
     if (typeof aConstraints == 'number') {
         this.entries = [aConstraints];
     }
-    else if (aConstraints instanceof Array) {
+    else if (aConstraints.splice) {
         this.entries = aConstraints;
     }
     else {
