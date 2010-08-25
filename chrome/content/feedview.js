@@ -8,8 +8,11 @@ const WINDOW_HEIGHTS_LOAD = 2;
 // Number of window heights worth of entries to load when creating a view.
 const INITIAL_WINDOW_HEIGHTS_LOAD = 2;
 
-// Number of entries queried in each incremental step until they fill the defined height.
+// Number of entries queried in each step until they fill the defined height.
 const LOAD_STEP_SIZE = 5;
+
+// Same as above, but applies to headlines view.
+const HEADLINES_LOAD_STEP_SIZE = 10;
 
 
 // The currently active instance of FeedView.
@@ -418,7 +421,7 @@ FeedView.prototype = {
 
         if (PrefCache.showHeadlinesOnly) {
             this.feedContent.setAttribute('showHeadlinesOnly', true);
-            this._loadEntries();
+            this._fillWindow(WINDOW_HEIGHTS_LOAD);
         }
         else {
             this.feedContent.removeAttribute('showHeadlinesOnly');
@@ -567,11 +570,11 @@ FeedView.prototype = {
                     this._scrollSelectionTimeout = async(selectCentralEntry, 100, this);
                 }
 
-                this._loadEntries();
+                this._fillWindow(WINDOW_HEIGHTS_LOAD);
                 break;
 
             case 'resize':
-                this._loadEntries();
+                this._fillWindow(WINDOW_HEIGHTS_LOAD);
                 break;
 
             case 'click':
@@ -737,6 +740,7 @@ FeedView.prototype = {
         query.startDate = parseInt(this.feedContent.lastChild.getAttribute('date'));
         this._loadedEntries = query.getEntries();
 
+        // XXX should it be ===?
         function filterNew(entryID) this._loadedEntries.indexOf(entryID) != -1;
         var newEntries = aAddedEntries.filter(filterNew, this);
 
@@ -785,7 +789,7 @@ FeedView.prototype = {
             self.document.removeEventListener('EntryRemoved', arguments.callee, true);
 
             if (aLoadNewEntries)
-                self._loadEntries();
+                self._fillWindow(WINDOW_HEIGHTS_LOAD);
 
             self._setEmptyViewMessage();
 
@@ -866,26 +870,11 @@ FeedView.prototype = {
 
         this._loadedEntries = [];
 
-        // Append the predefined initial number of entries and if necessary, keep
-        // appending more until they fill WINDOW_HEIGHTS_LOAD + 1 of window heights.
-        var query = this.getQueryCopy();
-        query.limit = PrefCache.minInitialEntries;
-        var win = this.window;
-
         // Temporarily remove the listener because reading window.innerHeight
         // can trigger a resize event (!?).
         this.window.removeEventListener('resize', this, false);
 
-        while (win.scrollMaxY - win.pageYOffset < win.innerHeight * INITIAL_WINDOW_HEIGHTS_LOAD) {
-            let entries = query.getFullEntries();
-            if (!entries.length)
-                break;
-
-            entries.forEach(this._appendEntry, this);
-
-            query.offset += query.limit;
-            query.limit = LOAD_STEP_SIZE;
-        }
+        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD);
 
         // Resize events can be dispatched asynchronously, so this listener can't be
         // added in FeedView.attach() like the others, because then it could be
@@ -910,29 +899,16 @@ FeedView.prototype = {
         this._ignoreNextScrollEvent = true;
     },
 
+
     /**
-     * Incrementally loads the next part of entries.
+     * Loads more entries if the loaded entries don't fill the specified minimal
+     * number of window heights ahead of the current scroll position.
      *
-     * @param aCount [optional]
-     *        Specifies the number of entries to be loaded. If not provided,
-     *        entries are loaded until they fill WINDOW_HEIGHTS_LOAD of window heights.
+     * @param aWindowHeights
+     *        The number of window heights to fill ahead of the current scroll
+     *        position.
      */
-    _loadEntries: function FeedView__loadEntries(aCount) {
-        var lastEntryElement = this.feedContent.lastChild;
-
-        if (aCount) {
-            let query = this.getQueryCopy();
-            query.limit = aCount;
-
-            if (lastEntryElement)
-                query.endDate = parseInt(lastEntryElement.getAttribute('date'));
-
-            query.getFullEntries()
-                 .filter(function(entry) this._loadedEntries.indexOf(entry.id) == -1, this)
-                 .forEach(this._appendEntry, this);
-            return;
-        }
-
+    _fillWindow: function FeedView__fillWindow(aWindowHeights) {
         var win = this.document.defaultView;
         var middleEntry = this._getMiddleEntryElement();
 
@@ -941,22 +917,50 @@ FeedView.prototype = {
             return;
         }
 
-        while (win.scrollMaxY - win.pageYOffset < win.innerHeight * WINDOW_HEIGHTS_LOAD
-               || middleEntry == this.feedContent.lastChild) {
-            let query = this.getQueryCopy();
-            query.limit = LOAD_STEP_SIZE;
+        var stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
+                                                   : LOAD_STEP_SIZE;
 
-            if (lastEntryElement)
-                query.endDate = parseInt(lastEntryElement.getAttribute('date'));
+        var loadedEntriesCount = this._loadEntries(stepSize);
 
-            let entries = query.getFullEntries()
-                               .filter(function(e) this._loadedEntries.indexOf(e.id) == -1, this);
+        while ((win.scrollMaxY - win.pageYOffset < win.innerHeight * aWindowHeights
+               || middleEntry == this.feedContent.lastChild) && loadedEntriesCount) {
 
-            if (entries.length)
-                entries.forEach(this._appendEntry, this);
-            else
-                break;
+            loadedEntriesCount = this._loadEntries(stepSize);
         }
+    },
+
+    /**
+     * Queries and appends a requested number of entries. The actual number of loaded
+     * entries may be different. If there are many entries with the same date, we must
+     * make sure to load all of them in a single batch, in order to avoid loading them
+     * again later.
+     *
+     * @param aCount
+     *        Requested number of entries.
+     * @return The actual number of entries that were loaded.
+     */
+    _loadEntries: function FeedView__loadEntries(aCount) {
+        var lastEntryElem = this.feedContent.lastChild;
+        var endDate = lastEntryElem ? parseInt(lastEntryElem.getAttribute('date')) - 1
+                                    : undefined;
+
+        var dateQuery = this.getQueryCopy();
+        dateQuery.endDate = endDate;
+        dateQuery.offset = aCount - 1;
+        dateQuery.limit = 1;
+
+        var entryDates = dateQuery.getProperty('date');
+        if (!entryDates.length)
+            return 0;
+
+        var query = this.getQueryCopy();
+        query.startDate = entryDates[0].date;
+        query.endDate = endDate;
+
+        var entries = query.getFullEntries();
+        entries.forEach(this._appendEntry, this);
+
+        return entries.length;
     },
 
     _appendEntry: function FeedView__appendEntry(aEntry) {
