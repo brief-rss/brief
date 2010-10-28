@@ -1824,21 +1824,31 @@ function LivemarksSync() {
     if (!this.checkHomeFolder())
         return;
 
-    this.newLivemarks = [];
+    // Get a list of Live Bookmarks in the user's home folder.
+    var homeFolder = Prefs.getIntPref('homeFolder');
+    var foundLivemarks = [];
+
+    var options = Places.history.getNewQueryOptions();
+    var query = Places.history.getNewQuery();
+    query.setFolders([homeFolder], 1);
+    options.excludeItems = true;
+
+    var result = Places.history.executeQuery(query, options);
+    this.traversePlacesQueryResults(result.root, foundLivemarks);
 
     Connection.beginTransaction();
     try {
-        // Get the list of livemarks and folders in the home folder.
-        this.getLivemarks();
+        // Get a list all feeds stored in the database.
+        var sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
+        var storedFeeds = new Statement(sql).getAllResults();
 
-        // Get the list of feeds stored in the database.
-        this.getStoredFeeds();
+        var newFeeds = [];
 
-        this.foundLivemarks.forEach(function(livemark) {
+        foundLivemarks.forEach(function(livemark) {
             let feed = null;
-            for (let i = 0; i < this.storedFeeds.length; i++) {
-                if (this.storedFeeds[i].feedID == livemark.feedID) {
-                    feed = this.storedFeeds[i];
+            for (let i = 0; i < storedFeeds.length; i++) {
+                if (storedFeeds[i].feedID == livemark.feedID) {
+                    feed = storedFeeds[i];
                     break;
                 }
             }
@@ -1850,11 +1860,11 @@ function LivemarksSync() {
             else {
                 this.insertFeed(livemark);
                 if (!livemark.isFolder)
-                    this.newLivemarks.push(livemark);
+                    newFeeds.push(StorageInternal.getFeed(livemark.feedID));
             }
         }, this)
 
-        this.storedFeeds.forEach(function(feed) {
+        storedFeeds.forEach(function(feed) {
             if (!feed.bookmarked && feed.hidden == 0)
                 this.hideFeed(feed);
         }, this)
@@ -1869,20 +1879,12 @@ function LivemarksSync() {
     }
 
     // Update the newly added feeds.
-    if (this.newLivemarks.length) {
-        var feeds = [];
-        for each (let livemark in this.newLivemarks)
-            feeds.push(StorageInternal.getFeed(livemark.feedID));
-
+    if (newFeeds.length)
         FeedUpdateService.updateFeeds(feeds);
-    }
 }
 
 LivemarksSync.prototype = {
 
-    storedFeeds: null,
-    newLivemarks: null,
-    foundLivemarks: null,
     feedListChanged: false,
 
     checkHomeFolder: function BookmarksSync_checkHomeFolder() {
@@ -1909,28 +1911,6 @@ LivemarksSync.prototype = {
         }
 
         return folderValid;
-    },
-
-
-    // Get the list of Live Bookmarks in the user's home folder.
-    getLivemarks: function BookmarksSync_getLivemarks() {
-        var homeFolder = Prefs.getIntPref('homeFolder');
-        this.foundLivemarks = [];
-
-        var options = Places.history.getNewQueryOptions();
-        var query = Places.history.getNewQuery();
-        query.setFolders([homeFolder], 1);
-        options.excludeItems = true;
-
-        var result = Places.history.executeQuery(query, options);
-        this.traversePlacesQueryResults(result.root);
-    },
-
-
-    // Gets all feeds stored in the database.
-    getStoredFeeds: function BookmarksSync_getStoredFeeds() {
-        var sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
-        this.storedFeeds = new Statement(sql).getAllResults();
     },
 
 
@@ -1995,38 +1975,38 @@ LivemarksSync.prototype = {
     },
 
 
-    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer) {
+    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer, aLivemarks) {
         aContainer.containerOpen = true;
 
-        for (var i = 0; i < aContainer.childCount; i++) {
-            var node = aContainer.getChild(i);
+        for (let i = 0; i < aContainer.childCount; i++) {
+            let node = aContainer.getChild(i);
 
             if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
                 continue;
 
-            var item = {};
+            let item = {};
             item.title = Bookmarks.getItemTitle(node.itemId);
             item.bookmarkID = node.itemId;
-            item.rowIndex = this.foundLivemarks.length;
+            item.rowIndex = aLivemarks.length;
             item.parent = aContainer.itemId.toFixed().toString();
 
             if (Utils.isLivemark(node.itemId)) {
-                var feedURL = Places.livemarks.getFeedURI(node.itemId).spec;
+                let feedURL = Places.livemarks.getFeedURI(node.itemId).spec;
                 item.feedURL = feedURL;
                 item.feedID = Utils.hashString(feedURL);
                 item.isFolder = false;
 
-                this.foundLivemarks.push(item);
+                aLivemarks.push(item);
             }
             else {
                 item.feedURL = '';
                 item.feedID = node.itemId.toFixed().toString();
                 item.isFolder = true;
 
-                this.foundLivemarks.push(item);
+                aLivemarks.push(item);
 
                 if (node instanceof Ci.nsINavHistoryContainerResultNode)
-                    this.traversePlacesQueryResults(node);
+                    this.traversePlacesQueryResults(node, aLivemarks);
             }
         }
 
