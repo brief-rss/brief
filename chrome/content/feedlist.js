@@ -3,16 +3,16 @@ const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
 var ViewList = {
 
-    get richlistbox ViewList_richlistbox() {
+    get richlistbox() {
         delete this.richlistbox;
         return this.richlistbox = getElement('view-list');
     },
 
-    get selectedItem ViewList_selectedItem_get() {
+    get selectedItem() {
         return this.richlistbox.selectedItem;
     },
 
-    set selectedItem ViewList_selectedItem_set(aItem) {
+    set selectedItem(aItem) {
         this.richlistbox.selectedItem = aItem;
         return aItem;
     },
@@ -109,22 +109,22 @@ var TagList = {
 
     ready: false,
 
-    get tags TagList_tags_get() {
+    get tags() {
         if (!this.__tags)
             this.__tags = Storage.getAllTags();
         return this.__tags;
     },
 
-    set tags TagList_tags_set(aTags) {
+    set tags(aTags) {
         this.__tags = aTags;
         return aTags;
     },
 
-    get selectedItem TagList_selectedItem() {
+    get selectedItem() {
         return this._listbox.selectedItem;
     },
 
-    get _listbox TagList__listBox() {
+    get _listbox() {
         delete this._listbox;
         return this._listbox = getElement('tag-list');
     },
@@ -256,7 +256,7 @@ var TagList = {
 
 var FeedList = {
 
-    get tree FeedList_tree() {
+    get tree() {
         delete this.tree;
         return this.tree = getElement('feed-list');
     },
@@ -270,7 +270,7 @@ var FeedList = {
 
     treeReady: false,
 
-    get selectedItem FeedList_selectedItem() {
+    get selectedItem() {
         var item = null;
         var currentIndex = this.tree.currentIndex;
         if (currentIndex != -1 && currentIndex < this.tree.view.rowCount)
@@ -279,7 +279,7 @@ var FeedList = {
     },
 
     // Feed object of currently selected feed, or null.
-    get selectedFeed FeedList_selectedFeed() {
+    get selectedFeed() {
         if (!this.selectedItem)
             return null;
 
@@ -503,7 +503,7 @@ var FeedList = {
     },
 
     // Cached document fragments, "bricks" used to build the tree.
-    get _containerRow FeedList__containerRow() {
+    get _containerRow() {
         delete this._containerRow;
 
         this._containerRow = document.createDocumentFragment();
@@ -524,7 +524,7 @@ var FeedList = {
         return this._containerRow;
     },
 
-    get _flatRow FeedList__flatRow() {
+    get _flatRow() {
         delete this._flatRow;
 
         this._flatRow = document.createDocumentFragment();
