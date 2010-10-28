@@ -1742,7 +1742,7 @@ var BookmarkObserver = {
     // nsINavBookmarkObserver
     onItemVisited: function BookmarkObserver_aOnItemVisited(aItemID, aVisitID, aTime) { },
 
-    get syncDelayTimer BookmarkObserver_syncDelayTimer() {
+    get syncDelayTimer() {
         if (!this.__syncDelayTimer)
             this.__syncDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
         return this.__syncDelayTimer;

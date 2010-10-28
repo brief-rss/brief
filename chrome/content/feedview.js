@@ -65,35 +65,35 @@ FeedView.prototype = {
 
     _refreshPending: false,
 
-    get browser FeedView_browser() {
+    get browser() {
         return getElement('feed-view');
     },
 
-    get document FeedView_document() {
+    get document() {
         return this.browser.contentDocument;
     },
 
-    get window FeedView_window() {
+    get window() {
         return this.document.defaultView;
     },
 
-    get feedContent FeedView_feedContent() {
+    get feedContent() {
         return this.document.getElementById('feed-content');
     },
 
-    get active FeedView_active() {
+    get active() {
         return (this.browser.currentURI.equals(gTemplateURI) && gCurrentView == this);
     },
 
     /**
      * Query which selects all entries contained by the view.
      */
-    set query FeedView_query_set(aQuery) {
+    set query(aQuery) {
         this.__query = aQuery;
         return aQuery;
     },
 
-    get query FeedView_query_get() {
+    get query() {
         if (!this.fixedUnread)
             this.__query.read = PrefCache.filterUnread ? false : undefined;
         if (!this.fixedStarred)
@@ -164,7 +164,7 @@ FeedView.prototype = {
         return this.document.getAnonymousElementByAttribute(aRoot, 'class', aAttrVal);
     },
 
-    get selectedElement FeedView_selectedElement() {
+    get selectedElement() {
         return this.selectedEntry ? this.document.getElementById(this.selectedEntry)
                                   : null;
     },
@@ -740,7 +740,6 @@ FeedView.prototype = {
         query.startDate = parseInt(this.feedContent.lastChild.getAttribute('date'));
         this._loadedEntries = query.getEntries();
 
-        // XXX should it be ===?
         function filterNew(entryID) this._loadedEntries.indexOf(entryID) != -1;
         var newEntries = aAddedEntries.filter(filterNew, this);
 
@@ -1123,7 +1122,7 @@ FeedView.prototype = {
         messageBox.style.display = 'block';
     },
 
-    get _strings FeedView__strings() {
+    get _strings() {
         delete this.__proto__._strings;
         return this.__proto__._strings = {
             today: gStringBundle.getString('today'),
