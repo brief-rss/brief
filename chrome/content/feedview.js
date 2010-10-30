@@ -120,48 +120,16 @@ FeedView.prototype = {
         return copy;
     },
 
-    /**
-     * Sends an event to an entry element, for example a message to perform
-     * an action or update its state. This is the only way we communicate
-     * with the untrusted document.
-     *
-     * @param aTargetEntries
-     *        ID, or an array of IDs, of target entries.
-     * @param aEventType
-     *        Type of the event.
-     * @param aState
-     *        Additional parameter, the new state of the entry.
-     */
-    _sendEvent: function FeedView__sendEvent(aTargetEntries, aEventType, aState) {
-        var targetEntries = aTargetEntries instanceof Array ? aTargetEntries
-                                                            : [aTargetEntries];
-
-        targetEntries.forEach(function(targetEntry) {
-            let evt = this.document.createEvent('Events');
-            evt.initEvent('ViewEvent', false, false);
-
-            let element = this.document.getElementById(targetEntry);
-            element.setAttribute('eventType', aEventType);
-            element.setAttribute('eventState', aState);
-
-            element.dispatchEvent(evt);
-        }, this)
-    },
-
     collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
-        var eventType = aAnimate ? 'DoCollapseEntryAnimated' : 'DoCollapseEntry';
-        this._sendEvent(aEntry, eventType, aNewState);
+        var entryElement = this.document.getElementById(aEntry);
+        if (aNewState)
+            var eventType = aAnimate ? 'CollapseEntryAnimated' : 'CollapseEntry';
+        else
+            eventType = aAnimate ? 'UnCollapseEntryAnimated' : 'UnCollapseEntry';
 
-        if (aEntry == this.selectedEntry) {
-            async(function() {
-                alignWithTop = (this.selectedElement.offsetHeight > this.window.innerHeight);
-                this.selectedElement.scrollIntoView(alignWithTop);
-            }, 310, this);
-        }
-    },
-
-    _getAnonElement: function FeedView__getAnonElement(aRoot, aAttrVal) {
-        return this.document.getAnonymousElementByAttribute(aRoot, 'class', aAttrVal);
+        var evt = this.document.createEvent('Events');
+        evt.initEvent(eventType, false, false);
+        entryElement.dispatchEvent(evt);
     },
 
     get selectedElement() {
@@ -489,9 +457,7 @@ FeedView.prototype = {
      * Events which the view listens to in the template page. Entry binding
      * communicates with chrome by sending custom events.
      */
-    _events: ['SwitchEntryRead', 'StarEntry', 'ShowBookmarkPopup', 'DeleteEntry',
-              'RestoreEntry', 'EntryUncollapsed', 'ShowBookmarkPanel', 'click',
-              'mousedown', 'scroll', 'keypress'],
+    _events: ['EntryUncollapsed', 'click', 'scroll', 'keypress'],
 
     handleEvent: function FeedView_handleEvent(aEvent) {
         var target = aEvent.target;
@@ -505,32 +471,14 @@ FeedView.prototype = {
 
         switch (aEvent.type) {
 
-            // Forward commands from the view to the controller.
-            case 'SwitchEntryRead':
-                Commands.markEntryRead(id, !target.hasAttribute('read'));
-                break;
-            case 'DeleteEntry':
-                Commands.deleteEntry(id);
-                break;
-            case 'RestoreEntry':
-                Commands.restoreEntry(id);
-                break;
-            case 'StarEntry':
-                Commands.starEntry(id, true);
-                break;
-
             case 'EntryUncollapsed':
                 if (PrefCache.autoMarkRead && this.query.read !== false)
                     Commands.markEntryRead(id, true);
-                break;
 
-            case 'ShowBookmarkPanel':
-                let query = new Query(id);
-                query.verifyBookmarksAndTags();
-                let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
-
-                let starElem = this._getAnonElement(target.firstChild, 'article-star');
-                getTopWindow().StarUI.showEditBookmarkPopup(itemID, starElem, 'after_start');
+                if (id == this.selectedEntry) {
+                    alignWithTop = (this.selectedElement.offsetHeight > this.window.innerHeight);
+                    this.selectedElement.scrollIntoView(alignWithTop);
+                }
                 break;
 
             // Set up the template page when it's loaded.
@@ -542,12 +490,10 @@ FeedView.prototype = {
                     for each (let event in this._events)
                         this.document.addEventListener(event, this, true);
 
-                    // Pass some data which bindings need but don't have access to.
-                    var data = {};
-                    data.doubleClickMarks = PrefCache.doubleClickMarks;
-                    data.markReadString = this._strings.markAsRead;
-                    data.markUnreadString = this._strings.markAsUnread;
-                    this.window.wrappedJSObject.gData = data;
+                    // Some feeds include scripts that use document.write() which screw
+                    // us up, because we insert them dynamically after the page is loaded.
+                    document.write = document.writeln = function() { };
+
                     this.refresh();
                 }
                 break;
@@ -611,12 +557,11 @@ FeedView.prototype = {
                 var entryElement = elem;
                 break;
             }
+
             elem = elem.parentNode;
         }
 
-        if (PrefCache.entrySelectionEnabled && entryElement)
-            this.selectEntry(parseInt(entryElement.id));
-
+        // Divert links to new tabs according to user preferences.
         if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
             // preventDefault doesn't stop the default action for middle-clicks,
             // so we've got stop propagation as well.
@@ -631,6 +576,57 @@ FeedView.prototype = {
                 Commands.openEntryLink(entryElement, newTab);
             else if (anchor.hasAttribute('href'))
                 Commands.openLink(anchor.getAttribute('href'), newTab);
+        }
+
+        if (!entryElement)
+            return;
+
+        if (PrefCache.entrySelectionEnabled)
+            this.selectEntry(parseInt(entryElement.id));
+
+        var entryID = parseInt(entryElement.id);
+        var command = aEvent.target.getAttribute('command');
+
+        if (aEvent.detail == 2 && PrefCache.doubleClickMarks && !command)
+            Commands.markEntryRead(entryID, !entryElement.hasAttribute('read'));
+
+        if (command) {
+            switch (command) {
+                case 'switchRead':
+                    Commands.markEntryRead(entryID, !entryElement.hasAttribute('read'));
+                    break;
+
+                case 'star':
+                    if (entryElement.hasAttribute('starred')) {
+                        let query = new Query(entryID);
+                        query.verifyBookmarksAndTags();
+                        let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
+
+                        let starElem = entryElement.getElementsByClassName('article-star')[0];
+                        getTopWindow().StarUI.showEditBookmarkPopup(itemID, starElem, 'after_start');
+                    }
+                    else {
+                        Commands.starEntry(entryID, true);
+                    }
+                    break;
+
+                case 'delete':
+                    Commands.deleteEntry(entryID);
+                    break;
+
+                case 'restore':
+                    Commands.restoreEntry(entryID);
+                    break;
+            }
+        }
+        else if (this.collapsed) {
+            this.collapseEntry(entryID, false, true);
+        }
+        else {
+            var className = aEvent.target.className;
+
+            if (PrefCache.showHeadlinesOnly && (cls == 'expand-button' || cls == 'article-header'))
+                this.collapseEntry(entryID, true, true);
         }
     },
 
@@ -667,8 +663,26 @@ FeedView.prototype = {
                 this._onEntriesAdded(aEntryList.IDs);
         }
 
-        var entries = intersect(this._loadedEntries, aEntryList.IDs);
-        this._sendEvent(entries, 'EntryMarkedRead', aNewState);
+        intersect(this._loadedEntries, aEntryList.IDs).forEach(function(entry) {
+            let entryElement = this.document.getElementById(entry);
+            let markReadButton = entryElement.getElementsByClassName('mark-read-centre')[0];
+
+            if (aNewState) {
+                entryElement.setAttribute('read', 'true');
+                markReadButton.textContent = this._strings.markAsUnread;
+
+                // XXX
+                if (entryElement.hasAttribute('updated')) {
+                    entryElement.removeAttribute('updated');
+                    let dateElement = entryElement.getElementsByClassName('article-date')[0];
+                    dateElement.innerHTML = entryElement.getAttribute('dateString');
+                }
+            }
+            else {
+                entryElement.removeAttribute('read');
+                markReadButton.textContent = this._strings.markAsRead;
+            }
+        }, this)
     },
 
     onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
@@ -682,8 +696,13 @@ FeedView.prototype = {
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
         }
 
-        var entries = intersect(this._loadedEntries, aEntryList.IDs);
-        this._sendEvent(entries, 'EntryStarred', aNewState);
+        intersect(this._loadedEntries, aEntryList.IDs).forEach(function(entry) {
+            let entryElement = this.document.getElementById(entry);
+            if (aNewState)
+                entryElement.setAttribute('starred', 'true');
+            else
+                entryElement.removeAttribute('starred');
+        }, this)
     },
 
     onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
@@ -691,9 +710,25 @@ FeedView.prototype = {
             return;
 
         intersect(this._loadedEntries, aEntryList.IDs).forEach(function(entry) {
-            this.document.getElementById(entry)
-                         .setAttribute('changedTag', aTag);
-            this._sendEvent(entry, 'EntryTagged', aNewState);
+            let entryElement = this.document.getElementById(entry);
+
+            let tags = entryElement.getAttribute('tags');
+            tags = tags ? tags.split(', ') : [];
+
+            if (aNewState) {
+                tags.push(aTag);
+                tags.sort();
+            }
+            else {
+                let index = tags.indexOf(aTag);
+                tags.splice(index, 1);
+            }
+
+            tags = tags.join(', ');
+
+            entryElement.setAttribute('tags', tags);
+            var tagsElement = entryElement.getElementsByClassName('article-tags')[0];
+            tagsElement.textContent = tags;
         }, this)
 
         if (this.query.tags && this.query.tags[0] === aTag) {
@@ -810,7 +845,10 @@ FeedView.prototype = {
             // Gracefully fade the entry using jQuery. For callback, the binding
             // will send EntryRemoved event when it's finished.
             this.document.addEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
-            this._sendEvent(entryID, 'DoRemoveEntry');
+
+            var evt = this.document.createEvent('Events');
+            evt.initEvent('RemoveEntry', false, false);
+            this.document.getElementById(entryID).dispatchEvent(evt);
 
             this._loadedEntries.splice(indices[0], 1);
         }
@@ -967,57 +1005,68 @@ FeedView.prototype = {
     },
 
     _insertEntry: function FeedView__appendEntry(aEntry, aPosition) {
-        var articleContainer = this.document.createElement('div');
-        articleContainer.className = 'article-container';
-
-        // Safely pass the data so that binding constructor can use it.
-        articleContainer.setAttribute('id', aEntry.id);
-        articleContainer.setAttribute('entryURL', aEntry.entryURL);
-        articleContainer.setAttribute('entryTitle', aEntry.title);
-        articleContainer.setAttribute('content', aEntry.content);
-        articleContainer.setAttribute('tags', aEntry.tags);
-
-        if (aEntry.authors)
-            articleContainer.setAttribute('authors', this._strings.authorPrefix + aEntry.authors);
-        if (aEntry.read)
-            articleContainer.setAttribute('read', true);
-        if (aEntry.starred)
-            articleContainer.setAttribute('starred', true);
-
-        articleContainer.setAttribute('date', aEntry.date);
-
-        var dateString = this._constructEntryDate(aEntry);
-        articleContainer.setAttribute('dateString', dateString);
-        if (aEntry.updated) {
-            dateString += ' <span class="article-updated">' + this._strings.entryUpdated + '</span>'
-            articleContainer.setAttribute('updatedString', dateString);
-            articleContainer.setAttribute('updated', true);
-        }
-
-        var feedName = Storage.getFeed(aEntry.feedID).title;
-        articleContainer.setAttribute('feedName', feedName);
-
-        if (PrefCache.showHeadlinesOnly)
-            articleContainer.setAttribute('collapsed', true);
+        var template = this.document.getElementById('article-template');
+        var entryContainer = template.cloneNode(true);
 
         var nextEntry = this.feedContent.childNodes[aPosition];
-        this.feedContent.insertBefore(articleContainer, nextEntry);
+        this.feedContent.insertBefore(entryContainer, nextEntry);
 
-        // Highlight search terms.
-        if (this.query.searchString) {
-            let header = articleContainer.firstChild;
-            let tags = this._getAnonElement(header, 'article-tags');
-            let authors = this._getAnonElement(header, 'article-authors');
-            let terms = this.query.searchString.match(/[A-Za-z0-9]+/g);
+        entryContainer.setAttribute('id', aEntry.id);
 
-            terms.forEach(function(term) {
-                this._highlightText(term, articleContainer);
-                this._highlightText(term, authors);
-                this._highlightText(term, tags);
-            }, this)
+        var titleElem = entryContainer.getElementsByClassName('article-title-link')[0];
+        titleElem.setAttribute('href', aEntry.entryURL);
+        // Use innerHTML instead of textContent, so that the entities are resolved.
+        titleElem.innerHTML = aEntry.title || aEntry.entryURL;
+
+        var tagsElem = entryContainer.getElementsByClassName('article-tags')[0];
+        tagsElem.textContent = aEntry.tags;
+
+        var markReadElem = entryContainer.getElementsByClassName('mark-read-centre')[0];
+        markReadElem.textContent = aEntry.read ? this._strings.markAsUnread
+                                               : this._strings.markAsRead;
+
+        var contentElem = entryContainer.getElementsByClassName('article-content')[0];
+        contentElem.innerHTML = aEntry.content;
+
+        var feed = Storage.getFeed(aEntry.feedID);
+        if (feed) {
+            var feedNameElem = entryContainer.getElementsByClassName('feed-name')[0];
+            feedNameElem.innerHTML = feed.title;
         }
 
-        return articleContainer;
+        var authorsElem = entryContainer.getElementsByClassName('article-authors')[0];
+        if (aEntry.authors) {
+            authorsElem.innerHTML = this._strings.authorPrefix + aEntry.authors;
+        }
+
+        if (aEntry.starred)
+            entryContainer.setAttribute('starred', true);
+
+        entryContainer.setAttribute('date', aEntry.date);
+
+        var dateString = this._constructEntryDate(aEntry);
+        if (aEntry.updated) {
+            var updatedString = dateString + ' <span class="article-updated">'
+                                + this._strings.entryUpdated + '</span>'
+            entryContainer.setAttribute('updated', true);
+        }
+
+        var dateElem = entryContainer.getElementsByClassName('article-date')[0];
+        dateElem.innerHTML = updatedString || dateString;
+
+        if (PrefCache.showHeadlinesOnly)
+            this.collapseEntry(aEntry.id, true, false);
+
+        // Highlight search terms. For some reason doing it synchronously does not work.
+        if (this.query.searchString) {
+            async(function() {
+                this.query.searchString.match(/[A-Za-z0-9]+/g).forEach(function(term) {
+                    this._highlightText(term, entryContainer);
+                }, this)
+            }, 0, this)
+        }
+
+        return entryContainer;
     },
 
 
@@ -1054,7 +1103,7 @@ FeedView.prototype = {
         }
 
         string = string.replace(/:\d\d /, ' ');
-        // XXX We do it because %e conversion specification doesn't work
+        // We do it because %e conversion specification doesn't work
         string = string.replace(/^0/, '');
 
         return string;

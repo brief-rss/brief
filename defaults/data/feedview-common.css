@@ -1,9 +1,5 @@
-.article-container {
-  -moz-binding: url('chrome://brief/content/bindings.xml#article');
-}
-
-.article-header {
-    -moz-binding: url('chrome://brief/content/bindings.xml#article-header');
+#article-template {
+    display: none;
 }
 
 #feed-content[trash] .delete-entry {
