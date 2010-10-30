@@ -356,7 +356,7 @@ function onKeyPress(aEvent) {
     else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
         if (aEvent.shiftKey) {
             if (PrefCache.entrySelectionEnabled)
-                gCurrentView.scrollToPrevEntry();
+                gCurrentView.selectPrevEntry();
             else
                 gCurrentView.scrollToPrevEntry(true);
         }
