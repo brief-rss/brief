@@ -7,7 +7,101 @@
         <link rel="stylesheet" href="feedview-common.css" type="text/css" media="screen">
         <link rel="stylesheet" href="feedview.css" type="text/css" media="screen">
         <link rel="stylesheet" href="resource://profile-chrome-dir/brief-custom-style.css" type="text/css" media="screen">
-        <script type="text/javascript" src="jquery.js"></script>
+        <script type="application/javascript" src="jquery.js"></script>
+        <script type="application/javascript;version=1.7">
+            document.addEventListener('CollapseEntry', function(aEvent) {
+                collapseEntry(aEvent.target, true, false);
+            }, true);
+
+            document.addEventListener('CollapseEntryAnimated', function(aEvent) {
+                collapseEntry(aEvent.target, true, true);
+            }, true);
+
+            document.addEventListener('UnCollapseEntry', function(aEvent) {
+                collapseEntry(aEvent.target, false, false);
+            }, true);
+
+            document.addEventListener('UnCollapseEntryAnimated', function(aEvent) {
+                collapseEntry(aEvent.target, false, true);
+            }, true);
+
+            document.addEventListener('RemoveEntry', removeEntry, true);
+
+            function collapseEntry(aEntryElement, aNewState, aAnimate) {
+                if (aNewState == aEntryElement.hasAttribute('collapsed'))
+                    return;
+
+                var feedContent = document.getElementById('feed-content');
+                var entryContent = aEntryElement.getElementsByClassName('article-content')[0];
+                var tagsElem = aEntryElement.getElementsByClassName('article-tags')[0];
+                var date = aEntryElement.getElementsByClassName('article-date')[0];
+                var feedName = aEntryElement.getElementsByClassName('feed-name')[0];
+
+                if (aNewState) {
+                    function finish() {
+                        if (aEntryElement.parentNode != feedContent)
+                            return;
+
+                        aEntryElement.setAttribute('collapsed', true);
+
+                        var collapsedSubheader = aEntryElement.getElementsByClassName('collapsed-article-subheader')[0];
+                        collapsedSubheader.insertBefore(date, null);
+                        collapsedSubheader.insertBefore(feedName, null);
+                    }
+
+                    if (aAnimate) {
+                        $(entryContent).animate({height: 'hide', opacity: 'hide'},
+                                                200, 'linear', finish);
+                    }
+                    else {
+                        $(entryContent).hide();
+                        finish();
+                    }
+                }
+
+                else {
+                    aEntryElement.removeAttribute('collapsed');
+
+                    var subheader = aEntryElement.getElementsByClassName('article-subheader')[0];
+                    subheader.insertBefore(date, aEntryElement.getElementsByClassName('article-authors')[0]);
+                    subheader.insertBefore(feedName, tagsElem);
+
+                    function finish() {
+                        if (aEntryElement.parentNode == feedContent) {
+                            let evt = document.createEvent('Events');
+                            evt.initEvent('EntryUncollapsed', false, false);
+                            aEntryElement.dispatchEvent(evt);
+                        }
+                    }
+
+                    if (aAnimate) {
+                        $(entryContent).animate({height: 'show', opacity: 'show'},
+                                                200, 'linear', finish);
+                    }
+                    else {
+                        $(entryContent).show();
+                        finish();
+                    }
+                }
+            }
+
+            function removeEntry(aEvent) {
+                $(aEvent.target).fadeOut(200, function() {
+                    var feedContent = document.getElementById('feed-content');
+
+                    // The entry may have been removed if the view
+                    // was refreshed in the meantime.
+                    if (self.parentNode == feedContent) {
+                        feedContent.removeChild(aEvent.target);
+
+                        let evt = document.createEvent('Events');
+                        evt.initEvent('EntryRemoved', false, false);
+                        document.dispatchEvent(evt);
+                    }
+                });
+            }
+
+        </script>
     </head>
 
     <body>
@@ -18,7 +112,36 @@
             </div>
 
             <div id="feed-content"></div>
+        </div>
 
+        <div id="article-template" class="article-container">
+            <div class="article-header">
+                <div class="expand-button"></div>
+                <div class="article-star" command="star"></div>
+
+                <div class="article-controls">
+                    <div class="mark-read" command="switchRead">
+                        <div class="mark-read-left" command="switchRead"/></div>
+                        <div class="mark-read-centre" command="switchRead"/></div>
+                        <div class="mark-read-right" command="switchRead"/></div>
+                    </div>
+                    <div class="delete-entry" command="delete"/></div>
+                    <div class="restore-entry" command="restore"/></div>
+                </div>
+
+                <div class="collapsed-article-subheader"/></div>
+
+                <div class="article-title-link" command="open"/></div>
+
+                <div class="article-subheader">
+                    <div class="article-date"/></div>
+                    <div class="article-authors"/></div>
+                    <div class="feed-name"/></div>
+                    <div class="article-tags"/></div>
+                </div>
+            </div>
+
+            <div class="article-content"/></div>
         </div>
 
     </body>
