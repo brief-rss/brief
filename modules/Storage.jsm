@@ -79,7 +79,13 @@ XPCOMUtils.defineLazyGetter(this, 'Prefs', function()
 );
 XPCOMUtils.defineLazyGetter(this, 'Places', function() {
     var tempScope = {};
-    Components.utils.import('resource://gre/modules/utils.js', tempScope);
+    try {
+        Components.utils.import('resource://gre/modules/PlacesUtils.jsm', tempScope);
+    }
+    catch (ex) {
+        // Compatibility with Firefox 3.6.
+        Components.utils.import('resource://gre/modules/utils.js', tempScope);
+    }
     return tempScope.PlacesUtils;
 });
 
