@@ -310,8 +310,8 @@ const Brief = {
             // limitation.
             // These listeners are responsible for observing in which tab Brief is loaded
             // as well as for maintaining correct checked state of the toolbarbutton.
-            gBrowser.addEventListener('TabClose', this.onTabClose, false);
-            gBrowser.addEventListener('TabSelect', this.onTabSelect, false);
+            gBrowser.tabContainer.addEventListener('TabClose', this.onTabClose, false);
+            gBrowser.tabContainer.addEventListener('TabSelect', this.onTabSelect, false);
             gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
             this.prefs.addObserver('', this, false);
@@ -404,7 +404,7 @@ const Brief = {
         var navbar = document.getElementById('nav-bar');
         var currentSet = navbar.currentSet;
         if (!currentSet.match('brief-button')) {
-            let newset = currentSet.replace('urlbar-container,', 'brief-button,urlbar-container,');
+            let newset = currentSet.concat(',brief-button');
             navbar.currentSet = newset;
             navbar.setAttribute('currentset', newset);
             document.persist('nav-bar', 'currentset');
