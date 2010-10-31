@@ -1082,15 +1082,21 @@ var FeedListContextMenu = {
 
 
     _deleteBookmarks: function FeedListContextMenu__deleteBookmarks(aFeeds) {
-        var transactionsService = Cc['@mozilla.org/browser/placesTransactionsService;1'].
-                                  getService(Ci.nsIPlacesTransactionsService);
+        if ('@mozilla.org/browser/placesTransactionsService;1' in Cc) {
+            var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1']
+                             .getService(Ci.nsIPlacesTransactionsService);
+        }
+        else {
+            Components.utils.import('resource://gre/modules/PlacesUIUtils.jsm');
+            transSrv = PlacesUIUtils.ptm;
+        }
 
         var transactions = [];
-        for (var i = aFeeds.length - 1; i >= 0; i--)
-            transactions.push(transactionsService.removeItem(aFeeds[i].bookmarkID));
+        for (let i = aFeeds.length - 1; i >= 0; i--)
+            transactions.push(transSrv.removeItem(aFeeds[i].bookmarkID));
 
-        var txn = transactionsService.aggregateTransactions('Remove items', transactions);
-        transactionsService.doTransaction(txn);
+        var txn = transSrv.aggregateTransactions('Remove items', transactions);
+        transSrv.doTransaction(txn);
     },
 
 
