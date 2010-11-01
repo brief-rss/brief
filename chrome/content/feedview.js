@@ -1013,6 +1013,9 @@ FeedView.prototype = {
 
         entryContainer.setAttribute('id', aEntry.id);
 
+        if (aEntry.read)
+            entryContainer.setAttribute('read', true);
+
         var titleElem = entryContainer.getElementsByClassName('article-title-link')[0];
         titleElem.setAttribute('href', aEntry.entryURL);
         // Use innerHTML instead of textContent, so that the entities are resolved.
