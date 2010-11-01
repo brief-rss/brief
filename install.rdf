@@ -5,10 +5,9 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>1.5b4</version>
+    <version>1.5b5</version>
     <type>2</type>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
-    <iconURL>chrome://brief/skin/icon.png</iconURL>
     <aboutURL>chrome://brief/content/about/about.xul</aboutURL>
 
     <!-- Target Application this extension can install into,
