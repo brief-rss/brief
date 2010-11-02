@@ -430,22 +430,6 @@ const Brief = {
         Brief.prefs.setBoolPref('firstRun', false);
     },
 
-    // Registers %profile%/chrome directory under a resource URI.
-    registerCustomStyle: function Brief_registerCustomStyle() {
-        var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-        var resourceProtocolHandler = ioService.getProtocolHandler('resource').
-                                                QueryInterface(Ci.nsIResProtocolHandler);
-        if (!resourceProtocolHandler.hasSubstitution('profile-chrome-dir')) {
-            let chromeDir = Cc['@mozilla.org/file/directory_service;1'].
-                            getService(Ci.nsIProperties).
-                            get('ProfD', Ci.nsIFile);
-            chromeDir.append('chrome');
-            let chromeDirURI = ioService.newFileURI(chromeDir);
-            resourceProtocolHandler.setSubstitution('profile-chrome-dir', chromeDirURI);
-        }
-    },
-
-
     QueryInterface: function Brief_QueryInterface(aIID) {
         if (aIID.equals(Ci.nsISupports) ||
             aIID.equals(Ci.nsIDOMEventListener)) {
@@ -457,4 +441,3 @@ const Brief = {
 }
 
 window.addEventListener('load', Brief, false);
-Brief.registerCustomStyle();

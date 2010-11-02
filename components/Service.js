@@ -7,6 +7,7 @@ function BriefService() {
     // Firefox 4 component registration.
     if (XPCOMUtils.generateNSGetFactory) {
         Components.utils.import('resource://brief/Storage.jsm');
+        this.registerCustomStyle();
     }
     // Old component registration.
     else {
@@ -18,6 +19,21 @@ function BriefService() {
 
 BriefService.prototype = {
 
+    // Registers %profile%/chrome directory under a resource URI.
+    registerCustomStyle: function Brief_registerCustomStyle() {
+        var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
+        var resourceProtocolHandler = ioService.getProtocolHandler('resource').
+                                                QueryInterface(Ci.nsIResProtocolHandler);
+        if (!resourceProtocolHandler.hasSubstitution('profile-chrome-dir')) {
+            let chromeDir = Cc['@mozilla.org/file/directory_service;1'].
+                            getService(Ci.nsIProperties).
+                            get('ProfD', Ci.nsIFile);
+            chromeDir.append('chrome');
+            let chromeDirURI = ioService.newFileURI(chromeDir);
+            resourceProtocolHandler.setSubstitution('profile-chrome-dir', chromeDirURI);
+        }
+    },
+
     // nsIObserver
     observe: function BriefService_observe(aSubject, aTopic, aData) {
         if (aData == 'startup') {
@@ -26,6 +42,7 @@ BriefService.prototype = {
             observerService.removeObserver(this, 'profile-after-change');
 
             Components.utils.import('resource://brief/Storage.jsm');
+            this.registerCustomStyle();
         }
     },
 
