@@ -91,7 +91,7 @@
 
                     // The entry may have been removed if the view
                     // was refreshed in the meantime.
-                    if (self.parentNode == feedContent) {
+                    if (aEvent.target.parentNode == feedContent) {
                         feedContent.removeChild(aEvent.target);
 
                         let evt = document.createEvent('Events');
