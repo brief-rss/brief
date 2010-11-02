@@ -216,11 +216,8 @@ const Brief = {
                 gBrowser.addTab('about:blank', null, null, null, null, false);
             gBrowser.removeCurrentTab();
         }
-        else if (aEvent.button == 1 || Brief.shouldOpenInNewTab()) {
-            Brief.open(true);
-        }
         else {
-            Brief.open(false);
+            Brief.open(aEvent.button == 1 || Brief.shouldOpenInNewTab());
         }
     },
 
@@ -230,11 +227,10 @@ const Brief = {
         if (targetDoc && targetDoc.documentURI == Brief.BRIEF_URL) {
 
             if (!Brief.tab) {
-                var targetBrowser = gBrowser.getBrowserForDocument(targetDoc);
-                var tabs = gBrowser.mTabs;
-                for (var i = 0; i < tabs.length; i++) {
-                    if (tabs[i].linkedBrowser == targetBrowser) {
-                        Brief.tab = tabs[i];
+                let targetBrowser = gBrowser.getBrowserForDocument(targetDoc);
+                for (let i = 0; i < gBrowser.mTabs.length; i++) {
+                    if (gBrowser.mTabs[i].linkedBrowser == targetBrowser) {
+                        Brief.tab = gBrowser.mTabs[i];
                         break;
                     }
                 }
@@ -244,7 +240,6 @@ const Brief = {
             if (Brief.toolbarbutton)
                 Brief.toolbarbutton.checked = (gBrowser.selectedTab == Brief.tab);
         }
-
         else if (Brief.tab && Brief.tab.linkedBrowser.currentURI.spec != Brief.BRIEF_URL) {
             Brief.tab = null;
             if (Brief.toolbarbutton)
@@ -298,8 +293,8 @@ const Brief = {
 
             // Observe changes to the feed database in order to keep
             // the statusbar icon up-to-date.
-            var observerService = Cc['@mozilla.org/observer-service;1'].
-                                  getService(Ci.nsIObserverService);
+            var observerService = Cc['@mozilla.org/observer-service;1']
+                                  .getService(Ci.nsIObserverService);
             observerService.addObserver(this, 'brief:feed-updated', false);
             observerService.addObserver(this, 'brief:invalidate-feedlist', false);
             observerService.addObserver(this, 'brief:feed-update-queued', false);
@@ -324,8 +319,8 @@ const Brief = {
             this.prefs.removeObserver('', this);
             this.storage.removeObserver(this);
 
-            var observerService = Cc['@mozilla.org/observer-service;1'].
-                                  getService(Ci.nsIObserverService);
+            var observerService = Cc['@mozilla.org/observer-service;1']
+                                  .getService(Ci.nsIObserverService);
             observerService.removeObserver(this, 'brief:feed-updated');
             observerService.removeObserver(this, 'brief:invalidate-feedlist');
             observerService.removeObserver(this, 'brief:feed-update-queued');
@@ -344,9 +339,8 @@ const Brief = {
 
         case 'nsPref:changed':
             if (aData == 'showStatusbarIcon') {
-                var newValue = this.prefs.getBoolPref('showStatusbarIcon');
-                var statusIcon = document.getElementById('brief-status');
-                statusIcon.hidden = !newValue;
+                let newValue = this.prefs.getBoolPref('showStatusbarIcon');
+                document.getElementById('brief-status').hidden = !newValue;
                 if (newValue)
                     this.updateStatuspanel();
             }
@@ -412,12 +406,11 @@ const Brief = {
         }
 
         // Create the default feeds folder.
-        var name = Cc['@mozilla.org/intl/stringbundle;1'].
-                     getService(Ci.nsIStringBundleService).
-                     createBundle('chrome://brief/locale/brief.properties').
-                     GetStringFromName('defaultFeedsFolderName');
-        var bookmarks = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
-                        getService(Ci.nsINavBookmarksService);
+        var name = Cc['@mozilla.org/intl/stringbundle;1']
+                   .getService(Ci.nsIStringBundleService)
+                   .createBundle('chrome://brief/locale/brief.properties')
+                   .GetStringFromName('defaultFeedsFolderName');
+        var bookmarks = PlacesUtils.bookmarks;
         var folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
                                               bookmarks.DEFAULT_INDEX);
         Brief.prefs.setIntPref('homeFolder', folderID);
@@ -427,14 +420,13 @@ const Brief = {
             relatedToCurrent: false,
             inBackground: false
         });
+
         Brief.prefs.setBoolPref('firstRun', false);
     },
 
     QueryInterface: function Brief_QueryInterface(aIID) {
-        if (aIID.equals(Ci.nsISupports) ||
-            aIID.equals(Ci.nsIDOMEventListener)) {
+        if (aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIDOMEventListener))
             return this;
-        }
         throw Components.results.NS_ERROR_NO_INTERFACE;
     }
 
