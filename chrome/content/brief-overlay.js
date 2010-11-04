@@ -57,12 +57,20 @@ const Brief = {
             this.toolbarbutton.checked = true;
 
         // If Brief is already open then select the existing tab.
-        if (this.tab)
+        if (this.tab) {
             gBrowser.selectedTab = this.tab;
-        else if (aNewTab)
-            gBrowser.loadOneTab(this.BRIEF_URL, null, null, null, false, false);
-        else
+        }
+        else if (aNewTab) {
+            let tab = gBrowser.loadOneTab(this.BRIEF_URL);
+            // Firefox 3.6 compatibility.
+            if (gBrowser.pinTab)
+                gBrowser.pinTab(tab);
+        }
+        else {
             gBrowser.loadURI(this.BRIEF_URL, null, null);
+            if (gBrowser.pinTab)
+                gBrowser.pinTab(gBrowser.selectedTab);
+        }
     },
 
     toggle: function Brief_toggle() {
