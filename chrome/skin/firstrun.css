@@ -92,10 +92,12 @@ div {
 
 #open-brief {
     display: -moz-box;
+    cursor: pointer;
     margin-top: 70px;
     padding: 5px 20px 8px;
     font-size: 24px;
     font-weight: bold;
+    text-decoration: none;
     color: #FFFFFF;
     text-shadow: -1px -1px 1px #7BAB29;
     border: 1px solid #488F03;
