@@ -54,3 +54,13 @@ function openOptions() {
     window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
                       features, 'feeds-pane');
 }
+
+function openBrief() {
+    var topWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
+                           .getInterface(Ci.nsIWebNavigation)
+                           .QueryInterface(Ci.nsIDocShellTreeItem)
+                           .rootTreeItem
+                           .QueryInterface(Ci.nsIInterfaceRequestor)
+                           .getInterface(Ci.nsIDOMWindow);
+    topWindow.Brief.open(false);
+}
