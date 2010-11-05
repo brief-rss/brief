@@ -82,7 +82,7 @@ XPCOMUtils.defineLazyGetter(this, 'Places', function() {
         Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
     }
     catch (ex) {
-        // Compatibility with Firefox 3.6.
+        // Firefox 3.6 compatibility.
         Components.utils.import('resource://gre/modules/utils.js');
     }
     return PlacesUtils;
@@ -1138,6 +1138,7 @@ Query.prototype = {
      * observer.
      */
     bookmarkEntries: function Query_bookmarkEntries(aState) {
+        // Firefox 3.6 compatibility.
         if ('@mozilla.org/browser/placesTransactionsService;1' in Cc) {
             var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1']
                              .getService(Ci.nsIPlacesTransactionsService);
@@ -1836,17 +1837,17 @@ function LivemarksSync() {
     if (!this.checkHomeFolder())
         return;
 
-    // Get a list of Live Bookmarks in the user's home folder.
     var homeFolder = Prefs.getIntPref('homeFolder');
-    var foundLivemarks = [];
+    var livemarks = [];
+    var newLivemarks = [];
 
+    // Get a list of folders and Live Bookmarks in the user's home folder.
     var options = Places.history.getNewQueryOptions();
     var query = Places.history.getNewQuery();
     query.setFolders([homeFolder], 1);
     options.excludeItems = true;
-
     var result = Places.history.executeQuery(query, options);
-    this.traversePlacesQueryResults(result.root, foundLivemarks);
+    this.traversePlacesQueryResults(result.root, livemarks);
 
     Connection.beginTransaction();
     try {
@@ -1854,9 +1855,7 @@ function LivemarksSync() {
         var sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
         var storedFeeds = new Statement(sql).getAllResults();
 
-        var newFeeds = [];
-
-        foundLivemarks.forEach(function(livemark) {
+        livemarks.forEach(function(livemark) {
             let feed = null;
             for (let i = 0; i < storedFeeds.length; i++) {
                 if (storedFeeds[i].feedID == livemark.feedID) {
@@ -1871,8 +1870,7 @@ function LivemarksSync() {
             }
             else {
                 this.insertFeed(livemark);
-                if (!livemark.isFolder)
-                    newFeeds.push(StorageInternal.getFeed(livemark.feedID));
+                newLivemarks.push(livemark);
             }
         }, this)
 
@@ -1891,8 +1889,11 @@ function LivemarksSync() {
     }
 
     // Update the newly added feeds.
-    if (newFeeds.length)
+    if (newLivemarks.length) {
+        let feeds = newLivemarks.filter(function(l) !l.isFolder)
+                                .map(function(l) StorageInternal.getFeed(l.feedID));
         FeedUpdateService.updateFeeds(feeds);
+    }
 }
 
 LivemarksSync.prototype = {
