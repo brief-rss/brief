@@ -902,8 +902,6 @@ FeedView.prototype = {
             this.feedContent.setAttribute('trash', true);
         if (PrefCache.showHeadlinesOnly)
             this.feedContent.setAttribute('showHeadlinesOnly', true);
-        if (!feed)
-            this.feedContent.setAttribute('showFeedNames', true);
 
         this._loadedEntries = [];
 
@@ -1035,10 +1033,10 @@ FeedView.prototype = {
         var contentElem = entryContainer.getElementsByClassName('article-content')[0];
         contentElem.innerHTML = aEntry.content;
 
-        var feed = Storage.getFeed(aEntry.feedID);
-        if (feed) {
-            var feedNameElem = entryContainer.getElementsByClassName('feed-name')[0];
-            feedNameElem.innerHTML = feed.title;
+        // When view contains entries from many feeds, show feed name on each entry.
+        if (!Storage.getFeed(this.query.feeds)) {
+            let feedNameElem = entryContainer.getElementsByClassName('feed-name')[0];
+            feedNameElem.innerHTML = Storage.getFeed(aEntry.feedID).title;
         }
 
         var authorsElem = entryContainer.getElementsByClassName('article-authors')[0];
