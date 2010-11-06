@@ -7,7 +7,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 10;
+const DATABASE_VERSION = 11;
 
 const FEEDS_TABLE_SCHEMA = [
     'feedID          TEXT UNIQUE',
@@ -30,6 +30,7 @@ const FEEDS_TABLE_SCHEMA = [
     'maxEntries      INTEGER DEFAULT 0',
     'updateInterval  INTEGER DEFAULT 0',
     'dateModified    INTEGER DEFAULT 0',
+    'lastFaviconRefresh INTEGER DEFAULT 0',
     'markModifiedEntriesUnread INTEGER DEFAULT 1'
 ]
 
@@ -608,6 +609,7 @@ function FeedProcessor(aFeed, aCallback) {
         'subtitle': aFeed.subtitle,
         'favicon': aFeed.favicon,
         'lastUpdated': Date.now(),
+        'lastFaviconRefresh': aFeed.lastFaviconRefresh,
         'dateModified': newDateModified,
         'oldestEntryDate': this.oldestEntryDate,
         'feedID': aFeed.feedID
@@ -2033,13 +2035,13 @@ LivemarksSync.prototype = {
 var Stm = {
 
     get getAllFeeds() {
-        var sql = 'SELECT feedID, feedURL, websiteURL, title, subtitle, dateModified, ' +
-                  '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,    ' +
-                  '       isFolder, bookmarkID, entryAgeLimit, maxEntries,            ' +
-                  '       updateInterval, markModifiedEntriesUnread                   ' +
-                  'FROM feeds                                                         ' +
-                  'WHERE hidden = 0                                                   ' +
-                  'ORDER BY rowIndex ASC                                              ';
+        var sql = 'SELECT feedID, feedURL, websiteURL, title, subtitle, dateModified,   ' +
+                  '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,      ' +
+                  '       isFolder, bookmarkID, entryAgeLimit, maxEntries,              ' +
+                  '       updateInterval, markModifiedEntriesUnread, lastFaviconRefresh ' +
+                  'FROM feeds                                                           ' +
+                  'WHERE hidden = 0                                                     ' +
+                  'ORDER BY rowIndex ASC                                                ';
         delete this.getAllFeeds;
         return this.getAllFeeds = new Statement(sql);
     },
@@ -2054,13 +2056,18 @@ var Stm = {
     },
 
     get updateFeed() {
-        var sql = 'UPDATE feeds                                                  ' +
-                  'SET websiteURL = :websiteURL, subtitle = :subtitle,           ' +
-                  '    imageURL = :imageURL, imageLink = :imageLink,             ' +
-                  '    imageTitle = :imageTitle, favicon = :favicon,             ' +
-                  '    lastUpdated = :lastUpdated, dateModified = :dateModified, ' +
-                  '    oldestEntryDate = :oldestEntryDate                        ' +
-                  'WHERE feedID = :feedID                                        ';
+        var sql = 'UPDATE feeds                                  ' +
+                  'SET websiteURL = :websiteURL,                 ' +
+                  '    subtitle = :subtitle,                     ' +
+                  '    imageURL = :imageURL,                     ' +
+                  '    imageLink = :imageLink,                   ' +
+                  '    imageTitle = :imageTitle,                 ' +
+                  '    favicon = :favicon,                       ' +
+                  '    lastUpdated = :lastUpdated,               ' +
+                  '    dateModified = :dateModified,             ' +
+                  '    oldestEntryDate = :oldestEntryDate,       ' +
+                  '    lastFaviconRefresh = :lastFaviconRefresh  ' +
+                  'WHERE feedID = :feedID                        ';
         delete this.updateFeed;
         return this.updateFeed = new Statement(sql);
     },
@@ -2357,7 +2364,7 @@ var Migration = {
             ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
             // Fall through...
 
-        // To 1.5
+        // To 1.5b2
         case 9:
             // Remove dead rows from entries_text.
             ExecuteSQL('DELETE FROM entries_text                       '+
@@ -2371,6 +2378,12 @@ var Migration = {
                        '         WHERE entries_text.rowid = entries.id '+
                        '     )                                         '+
                        ')                                              ');
+            // Fall through...
+
+        // To 1.5
+        case 10:
+            ExecuteSQL('ALTER TABLE feeds ADD COLUMN lastFaviconRefresh INTEGER DEFAULT 0');
+
         }
 
         Connection.schemaVersion = DATABASE_VERSION;
