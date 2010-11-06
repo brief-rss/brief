@@ -5,6 +5,7 @@ const Ci = Components.interfaces;
 
 const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
 const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
+const FAVICON_REFRESH_INTERVAL = 14*24*60*60*1000; // 2 weeks
 
 const FEED_ICON_URL = 'chrome://brief/skin/icon.png';
 
@@ -405,10 +406,14 @@ FeedFetcher.prototype = {
         this.downloadedFeed.feedURL = this.feed.feedURL;
         this.downloadedFeed.feedID = this.feed.feedID;
         this.downloadedFeed.favicon = this.feed.favicon;
+        this.downloadedFeed.lastFaviconRefresh = this.feed.lastFaviconRefresh;
 
         var self = this;
 
-        if (!this.downloadedFeed.favicon) {
+        if (Date.now() - this.downloadedFeed.lastFaviconRefresh > FAVICON_REFRESH_INTERVAL
+                || !this.downloadedFeed.favicon) {
+            this.downloadedFeed.lastFaviconRefresh = Date.now();
+
             // We use websiteURL instead of feedURL for resolving the favicon URL,
             // because many websites use services like Feedburner for generating their
             // feeds and we'd get the Feedburner's favicon instead.

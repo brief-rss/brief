@@ -71,6 +71,11 @@ Feed.prototype = {
     lastUpdated: 0,
 
     /**
+     * Date when the feed's favicon was last refreshed.
+     */
+    lastFaviconRefresh: 0,
+
+    /**
      * ID of the Live Bookmark.
      */
     bookmarkID: '',
