@@ -540,11 +540,6 @@ FeedView.prototype = {
         }
     },
 
-    /**
-     * This event handler is responsible for selecting entries when clicked,
-     * forcing opening links in new tabs depending on openEntriesInTabs pref,
-     * and marking entries as read when opened.
-     */
     _onClick: function FeedView__onClick(aEvent) {
         // This loops walks the parent chain of the even target to check if the
         // article-container and/or an anchor were clicked.
@@ -619,14 +614,15 @@ FeedView.prototype = {
                     break;
             }
         }
-        else if (this.collapsed) {
+        else if (entryElement.hasAttribute('collapsed')) {
             this.collapseEntry(entryID, false, true);
         }
         else {
-            var className = aEvent.target.className;
-
-            if (PrefCache.showHeadlinesOnly && (cls == 'expand-button' || cls == 'article-header'))
+            let className = aEvent.target.className;
+            if ((className == 'expand-button' || className == 'article-header')
+                    && PrefCache.showHeadlinesOnly) {
                 this.collapseEntry(entryID, true, true);
+            }
         }
     },
 
