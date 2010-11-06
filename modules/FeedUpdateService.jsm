@@ -18,15 +18,14 @@ Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 XPCOMUtils.defineLazyServiceGetter(this, 'ObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
 XPCOMUtils.defineLazyServiceGetter(this, 'IOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
 XPCOMUtils.defineLazyGetter(this, 'Prefs', function()
-    Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
-                                             getBranch('extensions.brief.').
-                                             QueryInterface(Ci.nsIPrefBranch2)
+    Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService)
+                                            .getBranch('extensions.brief.')
+                                            .QueryInterface(Ci.nsIPrefBranch2)
 );
 XPCOMUtils.defineLazyGetter(this, 'Storage', function() {
     var tempScope = {};
     Components.utils.import('resource://brief/Storage.jsm', tempScope);
-    delete this.Storage;
-    return this.Storage = tempScope.Storage;
+    return tempScope.Storage;
 });
 
 
@@ -47,14 +46,14 @@ var FeedUpdateService = {
      * and pending ones).
      */
     get scheduledFeedsCount() {
-        return Service.scheduledFeeds.length;
+        return FeedUpdateServiceInternal.scheduledFeeds.length;
     },
 
     /**
      * Number of completed feed in the current update batch.
      */
     get completedFeedsCount() {
-        return Service.completedFeeds.length;
+        return FeedUpdateServiceInternal.completedFeeds.length;
     },
 
     /**
@@ -65,7 +64,7 @@ var FeedUpdateService = {
      *        feeds in order to reduce the CPU load.
      */
     updateAllFeeds: function(aInBackground) {
-        return Service.updateAllFeeds(aInBackground);
+        return FeedUpdateServiceInternal.updateAllFeeds(aInBackground);
     },
 
     /**
@@ -78,19 +77,19 @@ var FeedUpdateService = {
      *        reduce the CPU load.
      */
     updateFeeds: function(aFeeds, aInBackground) {
-        return Service.updateFeeds(aFeeds, aInBackground);
+        return FeedUpdateServiceInternal.updateFeeds(aFeeds, aInBackground);
     },
 
     /**
      * Cancel the remaining update batch.
      */
     stopUpdating: function() {
-        return Service.stopUpdating();
+        return FeedUpdateServiceInternal.stopUpdating();
     }
 }
 
 
-var Service = {
+var FeedUpdateServiceInternal = {
 
     NOT_UPDATING: 0,
     BACKGROUND_UPDATING: 1,
@@ -114,7 +113,7 @@ var Service = {
     newEntriesCount:          0,
 
 
-    init: function Service_init() {
+    init: function FeedUpdateServiceInternal_init() {
         ObserverService.addObserver(this, 'brief:feed-updated', false);
         ObserverService.addObserver(this, 'quit-application', false);
         Prefs.addObserver('', this, false);
@@ -132,14 +131,14 @@ var Service = {
     },
 
     // See FeedUpdateService.
-    updateAllFeeds: function Service_updateAllFeeds(aInBackground) {
+    updateAllFeeds: function FeedUpdateServiceInternal_updateAllFeeds(aInBackground) {
         this.updateFeeds(Storage.getAllFeeds(), aInBackground);
 
         Prefs.setIntPref('update.lastUpdateTime', Math.round(Date.now() / 1000));
     },
 
     // See FeedUpdateService.
-    updateFeeds: function Service_updateFeeds(aFeeds, aInBackground) {
+    updateFeeds: function FeedUpdateServiceInternal_updateFeeds(aFeeds, aInBackground) {
         // Don't add the same feed be added twice.
         var newFeeds = aFeeds.filter(function(f) this.updateQueue.indexOf(f) == -1, this);
 
@@ -172,13 +171,13 @@ var Service = {
     },
 
     // See FeedUpdateService.
-    stopUpdating: function Service_stopUpdating() {
+    stopUpdating: function FeedUpdateServiceInternal_stopUpdating() {
         ObserverService.notifyObservers(null, 'brief:feed-update-canceled', '');
         this.finishUpdate();
     },
 
-
-    notify: function Service_notify(aTimer) {
+    // nsITimerCallback
+    notify: function FeedUpdateServiceInternal_notify(aTimer) {
         switch (aTimer) {
 
         case this.startupDelayTimer:
@@ -219,7 +218,7 @@ var Service = {
     },
 
 
-    fetchNextFeed: function Service_fetchNextFeed() {
+    fetchNextFeed: function FeedUpdateServiceInternal_fetchNextFeed() {
         // All feeds in the update queue may have already been requested,
         // because we don't cancel the timer until after all feeds are completed.
         var feed = this.updateQueue.shift();
@@ -228,7 +227,7 @@ var Service = {
     },
 
 
-    onFeedUpdated: function Service_onFeedUpdated(aFeed, aError, aNewEntriesCount) {
+    onFeedUpdated: function FeedUpdateServiceInternal_onFeedUpdated(aFeed, aError, aNewEntriesCount) {
         this.completedFeeds.push(aFeed);
         this.newEntriesCount += aNewEntriesCount;
         if (aNewEntriesCount > 0)
@@ -243,30 +242,26 @@ var Service = {
     },
 
 
-    finishUpdate: function Service_finishUpdate() {
+    finishUpdate: function FeedUpdateServiceInternal_finishUpdate() {
         this.status = this.NOT_UPDATING;
         this.fetchDelayTimer.cancel();
 
         var showNotification = Prefs.getBoolPref('update.showNotification');
         if (this.feedsWithNewEntriesCount > 0 && showNotification) {
-
-            var bundle = Cc['@mozilla.org/intl/stringbundle;1'].
-                         getService(Ci.nsIStringBundleService).
-                         createBundle('chrome://brief/locale/brief.properties');
-            var title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
-            var params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
-            var text = bundle.formatStringFromName('updateAlertText', params, 2);
+            let bundle = Cc['@mozilla.org/intl/stringbundle;1']
+                         .getService(Ci.nsIStringBundleService)
+                         .createBundle('chrome://brief/locale/brief.properties');
+            let title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
+            let params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
+            let text = bundle.formatStringFromName('updateAlertText', params, 2);
 
             try {
-                var alertsService = Cc['@mozilla.org/alerts-service;1'].
-                                    getService(Ci.nsIAlertsService);
-                alertsService.showAlertNotification(FEED_ICON_URL, title, text,
-                                                    true, null, this);
+                let alertsService = Cc['@mozilla.org/alerts-service;1']
+                                    .getService(Ci.nsIAlertsService);
+                alertsService.showAlertNotification(FEED_ICON_URL, title, text, true, null, this);
             }
             catch (ex) {
-                // XXX There are some reports of nsIAlertsService failing on OS X with
-                // Growl installed. Let's catch the exception until a real solution
-                // is found.
+                // Apparently nsIAlertsService may fail on OS X with Growl installed.
                 Components.utils.reportError(ex);
             }
         }
@@ -279,15 +274,15 @@ var Service = {
 
 
     // nsIObserver
-    observe: function Service_observe(aSubject, aTopic, aData) {
+    observe: function FeedUpdateServiceInternal_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
 
         // Notification from nsIAlertsService that user has clicked the link in
         // the alert.
         case 'alertclickcallback':
-            var window = Cc['@mozilla.org/appshell/window-mediator;1'].
-                         getService(Ci.nsIWindowMediator).
-                         getMostRecentWindow('navigator:browser');
+            var window = Cc['@mozilla.org/appshell/window-mediator;1']
+                         .getService(Ci.nsIWindowMediator)
+                         .getMostRecentWindow('navigator:browser');
             if (window) {
                 window.gBrief.open(true);
                 window.focus();
@@ -437,22 +432,22 @@ FeedFetcher.prototype = {
     },
 
     finish: function FeedFetcher_finish(aError, aNewEntriesCount) {
-        Service.onFeedUpdated(this.feed, aError, aNewEntriesCount || 0);
+        FeedUpdateServiceInternal.onFeedUpdated(this.feed, aError, aNewEntriesCount || 0);
         this.cleanup();
     },
 
     observe: function FeedFetcher_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
-        case 'timer-callback':
-            this.request.abort();
-            this.finish(true);
-            break;
+            case 'timer-callback':
+                this.request.abort();
+                this.finish(true);
+                break;
 
-        case 'brief:feed-update-canceled':
-            this.request.abort();
-            this.cleanup();
-            break;
-        }
+            case 'brief:feed-update-canceled':
+                this.request.abort();
+                this.cleanup();
+                break;
+            }
     },
 
     cleanup: function FeedFetcher_cleanup() {
@@ -499,8 +494,8 @@ FaviconFetcher.prototype = {
 
     // nsIRequestObserver
     onStartRequest: function FaviconFetcher_lonStartRequest(aRequest, aContext) {
-        this._stream = Cc['@mozilla.org/binaryinputstream;1'].
-                         createInstance(Ci.nsIBinaryInputStream);
+        this._stream = Cc['@mozilla.org/binaryinputstream;1']
+                       .createInstance(Ci.nsIBinaryInputStream);
     },
 
     onStopRequest: function FaviconFetcher_onStopRequest(aRequest, aContext, aStatusCode) {
@@ -558,10 +553,10 @@ FaviconFetcher.prototype = {
 
 
 function log(aMessage) {
-  var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                       getService(Ci.nsIConsoleService);
+  var consoleService = Cc['@mozilla.org/consoleservice;1']
+                       .getService(Ci.nsIConsoleService);
   consoleService.logStringMessage(aMessage);
 }
 
 
-Service.init();
+FeedUpdateServiceInternal.init();
