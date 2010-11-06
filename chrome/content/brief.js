@@ -1,14 +1,11 @@
-const TEMPLATE_URL = 'resource://brief-content/feedview-template.html';
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
+Components.utils.import('resource://gre/modules/NetUtil.jsm');
 
-var gTemplateURI = Cc['@mozilla.org/network/io-service;1']
-                   .getService(Ci.nsIIOService)
-                   .newURI(TEMPLATE_URL, null, null);
+var gTemplateURI = NetUtil.newURI('resource://brief-content/feedview-template.html');
 var gStringBundle;
 
 
@@ -275,9 +272,7 @@ var Commands = {
     },
 
     openLink: function cmd_openLink(aURL, aNewTab) {
-        var docURI = Cc['@mozilla.org/network/io-service;1']
-                     .getService(Ci.nsIIOService)
-                     .newURI(document.documentURI, null, null);
+        var docURI = NetUtil.newURI(document.documentURI);
 
         if (aNewTab)
             getTopWindow().gBrowser.loadOneTab(aURL, docURI);

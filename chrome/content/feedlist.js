@@ -892,8 +892,6 @@ var TagListContextMenu = {
     },
 
     deleteTag: function TagListContextMenu_deleteTag() {
-        var ioService = Cc['@mozilla.org/network/io-service;1'].
-                            getService(Ci.nsIIOService);
         var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
                             getService(Ci.nsIPromptService);
         var taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
@@ -912,7 +910,7 @@ var TagListContextMenu = {
 
             for (let i = 0; i < urls.length; i++) {
                 try {
-                    var uri = ioService.newURI(urls[i], null, null);
+                    var uri = NetUtil.newURI(urls[i], null, null);
                 }
                 catch (ex) {
                     continue;
@@ -1082,6 +1080,7 @@ var FeedListContextMenu = {
 
 
     _deleteBookmarks: function FeedListContextMenu__deleteBookmarks(aFeeds) {
+        // Firefox 3.6 compatibility.
         if ('@mozilla.org/browser/placesTransactionsService;1' in Cc) {
             var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1']
                              .getService(Ci.nsIPlacesTransactionsService);
