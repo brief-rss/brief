@@ -1175,11 +1175,11 @@ FeedView.prototype = {
     get _strings() {
         delete this.__proto__._strings;
         return this.__proto__._strings = {
-            today: gStringBundle.getString('today'),
-            yesterday: gStringBundle.getString('yesterday'),
+            today:        gStringBundle.getString('today'),
+            yesterday:    gStringBundle.getString('yesterday'),
             authorPrefix: gStringBundle.getString('authorIntroductionPrefix') + ' ',
             entryUpdated: gStringBundle.getString('entryWasUpdated'),
-            markAsRead: gStringBundle.getString('markEntryAsRead'),
+            markAsRead:   gStringBundle.getString('markEntryAsRead'),
             markAsUnread: gStringBundle.getString('markEntryAsUnread'),
         }
     },
@@ -1228,18 +1228,17 @@ FeedView.prototype = {
 }
 
 
-__defineGetter__("gSecurityManager", function() {
+__defineGetter__('gSecurityManager', function() {
     delete this.gSecurityManager;
-    return this.gSecurityManager = Cc['@mozilla.org/scriptsecuritymanager;1'].
-                                   getService(Ci.nsIScriptSecurityManager);
+    return this.gSecurityManager = Cc['@mozilla.org/scriptsecuritymanager;1']
+                                   .getService(Ci.nsIScriptSecurityManager);
 });
 
-__defineGetter__("gBriefPrincipal", function() {
-    var ioService = Cc['@mozilla.org/network/io-service;1'].getService(Ci.nsIIOService);
-    var uri = ioService.newURI(document.documentURI, null, null)
-    var resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1'].
-                      getService(Ci.nsIChromeRegistry).
-                      convertChromeURL(uri);
+__defineGetter__('gBriefPrincipal', function() {
+    var uri = NetUtil.newURI(document.documentURI);
+    var resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1']
+                      .getService(Ci.nsIChromeRegistry)
+                      .convertChromeURL(uri);
 
     delete this.gBriefPrincipal;
     return this.gBriefPrincipal = gSecurityManager.getCodebasePrincipal(resolvedURI);
