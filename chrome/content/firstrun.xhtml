@@ -6,7 +6,7 @@
     <title>&pageTitle;</title>
     <link rel="stylesheet" href="chrome://brief/skin/firstrun.css"/>
     <link rel="icon" href="chrome://brief/skin/feed-icon-16x16.png" type="image/png"/>
-    <script type="text/javascript" src="chrome://brief/content/firstrun.js"/>
+    <script type="text/javascript;version=1.8" src="chrome://brief/content/firstrun.js"/>
 </head>
 
 <body>
@@ -24,13 +24,22 @@
 
     <div id="guide">
 
-        <div class="step">
+        <div class="step firefox-old">
             <div class="screenshot-container">
                 <img class="screenshot"
                      src="http://brief.mozdev.org/images/subscribe-step-1.png"
                      alt="Subscribing to feeds - step 1"/>
             </div>
             <p class="step-description">&subscribingStep1.description;</p>
+        </div>
+
+        <div class="step firefox-new">
+            <div class="screenshot-container">
+                <img class="screenshot"
+                     src="http://brief.mozdev.org/images/subscribe-step-1-firefox4.png"
+                     alt="Subscribing to feeds - step 1"/>
+            </div>
+            <p class="step-description">&subscribingStep1firefox4.description;</p>
         </div>
 
         <div class="step">
