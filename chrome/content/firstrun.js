@@ -18,7 +18,19 @@ prefBranch.addObserver('', prefObserver, false);
 
 
 function onload() {
+    // Show steps approperiate for the running Firefox version.
+    var versionComparator = Cc['@mozilla.org/xpcom/version-comparator;1']
+                            .getService(Ci.nsIVersionComparator);
+    var className = versionComparator.compare(Application.version, '4.0b6') >= 0
+                    ? 'firefox-old'
+                    : 'firefox-new';
+    var elements = document.getElementsByClassName(className);
+    for (let i = 0; i < elements.length; i++)
+        elements[i].style.display = 'none';
+
     buildHeader();
+
+    document.removeEventListener('DOMContentLoaded', onload, false);
 }
 
 function onunload() {
