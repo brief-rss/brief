@@ -115,7 +115,7 @@
                           preference="extensions.brief.database.limitStoredEntries"
                           oncommand="gFeedsPane.updateStoredEntriesDisabledState();"/>
                 <textbox id="stored-entries-textbox"
-                         size="1"
+                         size="2"
                          type="number"
                          min="1"
                          preference="extensions.brief.database.maxStoredEntries"/>
@@ -140,7 +140,7 @@
                         type="int"/>
         </preferences>
 
-        <label value="&folderTree.label;"/>
+        <label id="places-tree-label" value="&folderTree.label;"/>
         <separator class="thin"/>
 
         <tree id="places-tree"
@@ -187,7 +187,6 @@
         </preferences>
 
         <groupbox align="stretch">
-            <separator class="thin"/>
             <checkbox id="unread-oldest-first-checkbox"
                       label="&sortUnreadViewOldestFirst.label;"
                       accesskey="&sortUnreadViewOldestFirst.accesskey;"
@@ -199,19 +198,10 @@
                       label="&showStatusbarIcon.label;"
                       accesskey="&showStatusbarIcon.accesskey;"
                       preference="extensions.brief.showStatusbarIcon"/>
-        </groupbox>
-
-        <groupbox align="center" orient="horizontal">
-            <caption label="&shortcutsGroup.caption;"/>
             <checkbox id="enable-item-selection-checkbox"
                       label="&enableItemHightlight.label;"
                       accesskey="&enableItemHightlight.accesskey;"
                       preference="extensions.brief.feedview.entrySelectionEnabled"/>
-            <spacer flex="1"/>
-            <button id="show-shortcuts"
-                    label="&keyboardShortcuts.label;"
-                    accesskey="&keyboardShortcuts.accesskey;"
-                    oncommand="gDisplayPane.showShortcuts()"/>
         </groupbox>
 
         <groupbox align="center" orient="horizontal">
@@ -224,6 +214,13 @@
                     oncommand="gDisplayPane.editCustomStyle();"/>
         </groupbox>
 
+    </prefpane>
+
+    <prefpane id="shortcuts-pane" label="&shortcutsPane.label;">
+        <browser id="shortcuts-browser"
+                 flex="1"
+                 disablehistory="true"
+                 src="chrome://brief/content/keyboard-shortcuts.xhtml"/>
     </prefpane>
 
 </prefwindow>
