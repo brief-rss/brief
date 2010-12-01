@@ -63,3 +63,4 @@
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Next &gt;">
 <!ENTITY nextFeed.accesskey "N">
+<!ENTITY shortcutsPane.label "Shorcuts">

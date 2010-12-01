@@ -14,12 +14,20 @@ radio[pane=feeds-pane] {
   -moz-image-region: rect(64px, 32px, 96px, 0px);
   }
 
+radio[pane=shortcuts-pane] {
+    -moz-image-region: rect(96px, 32px, 128px, 0px);
+}
+
 textbox[type="number"] > spinbuttons {
   margin-left: 4px;
 }
 
+#places-tree-label {
+    font-size: 110%;
+}
+
 #places-tree {
-  height: 18em;
+  height: 25em;
 }
 
 #import-export-box {
@@ -38,4 +46,15 @@ textbox[type="number"] > spinbuttons {
 #learn-more-link {
   margin: 5px 0;
   color: #0049de;
+}
+
+#shortcuts-pane {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+#shortcuts-browser {
+    height: 450px;
+    width: 500px;
 }

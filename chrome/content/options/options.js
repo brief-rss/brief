@@ -156,14 +156,6 @@ var gDisplayPane = {
     editCustomStyle: function() {
         window.openDialog('chrome://brief/content/options/style-editor.xul',
                           'Style editor', 'chrome,centerscreen,titlebar,resizable');
-    },
-
-    showShortcuts: function() {
-        var height = Math.min(window.screen.availHeight, 630);
-        var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
-        var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
-
-        window.openDialog(url, 'Brief shortcuts', features);
     }
 
 }

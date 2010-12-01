@@ -7,7 +7,11 @@
         <link id="mac-override" rel="stylesheet" type="text/css" media="screen"/>
         <style type="text/css">
             body {
-              margin: 0;
+                margin: 0;
+            }
+
+            body[embedded="true"] {
+                color: -moz-DialogText;
             }
 
             #shortcuts-table {
@@ -17,9 +21,13 @@
                 margin: 0 auto;
             }
 
-            #shortcuts-table td {
+            td {
                 padding: 4px 10px;
                 border-bottom: 1px solid lightgray;
+            }
+
+            body[embedded="true"] #shortcuts-table td {
+                border-bottom-color: ThreeDFace;
             }
 
             .shortcut-key {
@@ -28,26 +36,34 @@
                 text-align: center;
             }
 
+            body[embedded="true"] .shortcut-key {
+                border-right-color: ThreeDFace;
+            }
+
             .shortcuts-plain {
                 font-weight: normal;
             }
 
-            #shortcuts-table .shortucts-header {
+            .shortucts-header {
                 font-size: 14px;
                 text-align: center;
                 padding-top: 20px;
             }
 
             .onlyMac {
-              display: none;
+                display: none;
             }
         </style>
         <script type="text/javascript">
-            function applyMacOverride() {
+            function onload(aEvent) {
+                // Apply platform override override
                 if (window.navigator.platform.match('Mac')) {
-                    var link = document.getElementById('mac-override');
+                    let link = document.getElementById('mac-override');
                     link.setAttribute('href', 'mac.css');
                 }
+
+                if (window.top != window)
+                    document.body.setAttribute('embedded', true);
             }
 
             function onKeypress(aEvent) {
@@ -55,12 +71,12 @@
                     window.close();
             }
 
-            window.addEventListener('load', applyMacOverride, false);
+            window.addEventListener('load', onload, false);
             document.addEventListener('keypress', onKeypress, false);
         </script>
     </head>
 
-    <body >
+    <body>
         <table id="shortcuts-table">
             <tr>
                 <td colspan="2" class="shortucts-header" style="padding-top: 10px;">&navigation.header;</td>
