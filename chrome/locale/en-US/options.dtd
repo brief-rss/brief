@@ -37,14 +37,15 @@
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
-<!ENTITY autoMarkRead.label "Mark items as read after I see them">
+<!ENTITY autoMarkRead.label "Automatically mark items as read after I see them">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY shortcutsGroup.caption "Shortcuts">
-<!ENTITY enableItemHightlight.label "Always highlight the current item">
-<!ENTITY enableItemHightlight.accesskey "A">
+<!ENTITY enableItemHightlight.label "Highlight the active item to let me manage it using shortcuts">
+<!ENTITY enableItemHightlight.accesskey "g">
 <!ENTITY keyboardShortcuts.label "Keyboard shortcuts">
 <!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Appearance">
+<!ENTITY shortcutsPane.label "Shorcuts">
 <!ENTITY editStyleDescription.label "Customize the appearance of feeds">
 <!ENTITY editStyleButton.label "Customize">
 <!ENTITY editStyleButton.accesskey "C">
@@ -65,4 +66,3 @@
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Next &gt;">
 <!ENTITY nextFeed.accesskey "N">
-<!ENTITY shortcutsPane.label "Shorcuts">
