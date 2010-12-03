@@ -7,17 +7,21 @@ const Brief = {
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
 
+    get firefox4() {
+        var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1']
+                            .getService(Ci.nsIVersionComparator);
+        delete this.firefox4;
+        return this.firefox4 = verComparator.compare(Application.version, '4.0b7') >= 0;
+    },
+
     tab: null,  // Tab in which Brief is loaded
 
-    get statusIcon() {
-        delete this.statusIcon;
-        return this.statusIcon = document.getElementById('brief-status');
-    },
+    // Firefox 3.6 compatibility.
+    get statusPanel() document.getElementById('brief-status'),
 
-    get toolbarbutton() {
-        delete this.toolbarbutton;
-        return this.toolbarbutton = document.getElementById('brief-button');
-    },
+    get statusCounter() document.getElementById('brief-status-counter'),
+
+    get toolbarbutton() document.getElementById('brief-button'),
 
     get prefs() {
         delete this.prefs;
@@ -112,9 +116,12 @@ const Brief = {
     },
 
 
-    updateStatuspanel: function Brief_updateStatuspanel() {
+    updateStatus: function Brief_updateStatus() {
+        // Firefox 3.6 compatibility.
+        if (Brief.firefox4 && !Brief.statusCounter)
+            return;
+
         var counter = document.getElementById('brief-status-counter');
-        var panel = document.getElementById('brief-status');
 
         var query = new Brief.query({
             deleted: Brief.storage.ENTRY_STATE_NORMAL,
@@ -123,17 +130,15 @@ const Brief = {
         var unreadEntriesCount = query.getEntryCount();
 
         counter.value = unreadEntriesCount;
-        panel.setAttribute('unread', unreadEntriesCount > 0);
-    },
 
-    refreshProgressmeter: function Brief_refreshProgressmeter() {
-        var progressmeter = document.getElementById('brief-progressmeter');
-        var progress = 100 * this.FeedUpdateService.completedFeedsCount /
-                             this.FeedUpdateService.scheduledFeedsCount;
-        progressmeter.value = progress;
+        if (!Brief.firefox4) {
+            let panel = document.getElementById('brief-status');
+            panel.setAttribute('unread', unreadEntriesCount > 0);
+        }
+        else {
+            counter.hidden = unreadEntriesCount == 0;
+        }
 
-        if (progress == 100)
-            setTimeout(function() { progressmeter.hidden = true }, 500);
     },
 
 
@@ -219,7 +224,7 @@ const Brief = {
 
             // Closing the last tab closes the application when tab bar is visible,
             // and is impossible when it is hidden. In either case, if Brief is the
-            // last tab we have to add another one before closing it.
+            // last tab we have to add another one before closing Brief.
             if (gBrowser.tabContainer.childNodes.length == 1)
                 gBrowser.addTab('about:blank', null, null, null, null, false);
             gBrowser.removeCurrentTab();
@@ -293,20 +298,25 @@ const Brief = {
                 }
             }
 
-            var showStatusIcon = this.prefs.getBoolPref('showStatusbarIcon');
-            if (showStatusIcon) {
-                this.statusIcon.hidden = false;
-                this.updateStatuspanel();
+            // Firefox 3.6 compatibility.
+            if (!this.firefox4 && this.prefs.getBoolPref('showStatusbarIcon')) {
+                this.statusPanel.hidden = false;
             }
 
+            // Because Brief's toolbarbutton doesn't use toolbarbutton's binding content,
+            // we must manually set the label in "icons and text" toolbar mode.
+            if (this.firefox4) {
+                let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
+                label.value = this.toolbarbutton.label;
+            }
+
+            this.updateStatus();
+
             // Observe changes to the feed database in order to keep
-            // the statusbar icon up-to-date.
+            // the status panel up-to-date.
             var observerService = Cc['@mozilla.org/observer-service;1']
                                   .getService(Ci.nsIObserverService);
-            observerService.addObserver(this, 'brief:feed-updated', false);
             observerService.addObserver(this, 'brief:invalidate-feedlist', false);
-            observerService.addObserver(this, 'brief:feed-update-queued', false);
-            observerService.addObserver(this, 'brief:feed-update-canceled', false);
 
             // Stores the tab in which Brief is loaded so we can ensure only
             // instance can be open at a time. This is an UI choice, not a technical
@@ -329,10 +339,7 @@ const Brief = {
 
             var observerService = Cc['@mozilla.org/observer-service;1']
                                   .getService(Ci.nsIObserverService);
-            observerService.removeObserver(this, 'brief:feed-updated');
             observerService.removeObserver(this, 'brief:invalidate-feedlist');
-            observerService.removeObserver(this, 'brief:feed-update-queued');
-            observerService.removeObserver(this, 'brief:feed-update-canceled');
             break;
         }
     },
@@ -341,60 +348,46 @@ const Brief = {
     observe: function Brief_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
         case 'brief:invalidate-feedlist':
-            if (!this.statusIcon.hidden)
-                this.updateStatuspanel();
+            this.updateStatus();
             break;
 
         case 'nsPref:changed':
-            if (aData == 'showStatusbarIcon') {
-                let newValue = this.prefs.getBoolPref('showStatusbarIcon');
-                document.getElementById('brief-status').hidden = !newValue;
-                if (newValue)
-                    this.updateStatuspanel();
+            switch (aData) {
+                // Firefox 3.6 compatibility.
+                case 'showStatusbarIcon':
+                    let newValue = this.prefs.getBoolPref('showStatusbarIcon');
+                    this.statusPanel.hidden = !newValue;
+                    if (newValue)
+                        this.updateStatus();
+                    break;
+
+                case 'showUnreadCounter':
+                    newValue = this.prefs.getBoolPref('showUnreadCounter');
+                    this.statusCounter.hidden = !newValue;
+                    if (newValue)
+                        this.updateStatus();
+                    break;
             }
-            break;
-
-        case 'brief:feed-update-queued':
-            // Only show the progressmeter if Brief isn't opened in the currently
-            // selected tab (no need to show two progressmeters on screen).
-            if (this.FeedUpdateService.status == this.FeedUpdateService.NORMAL_UPDATING
-                && this.FeedUpdateService.scheduledFeedsCount > 1
-                && gBrowser.selectedTab != this.tab) {
-
-                document.getElementById('brief-progressmeter').hidden = false;
-                this.refreshProgressmeter();
-            }
-            break;
-
-        case 'brief:feed-update-canceled':
-            document.getElementById('brief-progressmeter').hidden = true;
-            break;
-
-        case 'brief:feed-updated':
-            this.refreshProgressmeter();
             break;
         }
     },
 
 
     onEntriesAdded: function Brief_onEntriesAdded(aEntryList) {
-        if (!this.statusIcon.hidden)
-            setTimeout(this.updateStatuspanel, 0);
+        setTimeout(this.updateStatus, 0);
     },
 
     onEntriesUpdated: function Brief_onEntriesUpdated(aEntryList) {
-        if (!this.statusIcon.hidden)
-            setTimeout(this.updateStatuspanel, 0);
+        setTimeout(this.updateStatus, 0);
     },
 
     onEntriesMarkedRead: function Brief_onEntriesMarkedRead(aEntryList, aState) {
-        if (!this.statusIcon.hidden)
-            setTimeout(this.updateStatuspanel, 0);
+        setTimeout(this.updateStatus, 0);
     },
 
     onEntriesDeleted: function Brief_onEntriesDeleted(aEntryList, aState) {
-        if (!this.statusIcon.hidden && aEntryList.containsUnread())
-            setTimeout(this.updateStatuspanel, 0);
+        if (aEntryList.containsUnread())
+            setTimeout(this.updateStatus, 0);
     },
 
     onEntriesTagged: function() { },

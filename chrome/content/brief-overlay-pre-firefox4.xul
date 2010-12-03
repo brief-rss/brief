@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://brief/skin/overlay-pre-firefox4.css" type="text/css"?>
+
+<overlay id="brief-overlay-statusbar"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <toolbarpalette id="BrowserToolbarPalette">
+        <toolbarbutton id="brief-button"
+                       class="toolbarbutton-1 chromeclass-toolbar-additional"
+                       label="Brief"
+                       tooltip="brief-tooltip"
+                       type="checkbox"
+                       autoCheck="false"
+                       onclick="Brief.onBriefButtonClick(event);"/>
+    </toolbarpalette>
+
+    <statusbar id="status-bar">
+        <statusbarpanel id="brief-status"
+                        tooltip="brief-tooltip"
+                        context="brief-status-context"
+                        hidden="true"
+                        onclick="Brief.onBriefButtonClick(event);"
+                        insertafter="statusbar-resizerpanel">
+            <image id="brief-status-image"/>
+            <label id="brief-status-counter"/>
+        </statusbarpanel>
+    </statusbar>
+
+</overlay>

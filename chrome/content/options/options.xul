@@ -181,6 +181,9 @@
             <preference id="extensions.brief.showStatusbarIcon"
                         name="extensions.brief.showStatusbarIcon"
                         type="bool"/>
+            <preference id="extensions.brief.showUnreadCounter"
+                        name="extensions.brief.showUnreadCounter"
+                        type="bool"/>
             <preference id="extensions.brief.feedview.entrySelectionEnabled"
                         name="extensions.brief.feedview.entrySelectionEnabled"
                         type="bool"/>
@@ -198,6 +201,10 @@
                       label="&showStatusbarIcon.label;"
                       accesskey="&showStatusbarIcon.accesskey;"
                       preference="extensions.brief.showStatusbarIcon"/>
+            <checkbox id="show-unread-counter"
+                      label="&showUnreadCounter.label;"
+                      accesskey="&showUnreadCounter.accesskey;"
+                      preference="extensions.brief.showUnreadCounter"/>
             <checkbox id="enable-item-selection-checkbox"
                       label="&enableItemHightlight.label;"
                       accesskey="&enableItemHightlight.accesskey;"
