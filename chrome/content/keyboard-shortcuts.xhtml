@@ -23,21 +23,19 @@
 
             td {
                 padding: 4px 10px;
+            }
+
+            body:not([embedded="true"]) td {
                 border-bottom: 1px solid lightgray;
             }
 
-            body[embedded="true"] #shortcuts-table td {
-                border-bottom-color: ThreeDFace;
-            }
-
             .shortcut-key {
-                border-right: 1px solid lightgray;
                 font-weight: bold;
                 text-align: center;
             }
 
-            body[embedded="true"] .shortcut-key {
-                border-right-color: ThreeDFace;
+            body:not([embedded="true"]) .shortcut-key {
+                border-right: 1px solid lightgray;
             }
 
             .shortcuts-plain {
@@ -54,7 +52,7 @@
                 display: none;
             }
         </style>
-        <script type="text/javascript">
+        <script type="text/javascript;version=1.8">
             function onload(aEvent) {
                 // Apply platform override override
                 if (window.navigator.platform.match('Mac')) {
