@@ -33,6 +33,7 @@
 <!ENTITY ctxFeedProperties.label "Properties">
 <!ENTITY ctxUpdateFeeds.label "Update Feeds Now">
 <!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
+<!ENTITY showUnreadCounter.label "Show number of unread items">
 <!ENTITY ctxShowOptions.label "Options">
 
 <!ENTITY compactingWindow.title "Compacting feeds">

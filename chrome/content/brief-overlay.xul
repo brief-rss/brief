@@ -57,8 +57,14 @@
                       label="&ctxUpdateFeeds.label;"
                       oncommand="Brief.updateService.updateAllFeeds();"/>
             <menuitem id="brief-ctx-mark-read"
-                     label="&ctxMarkFeedsAsRead.label;"
-                     oncommand="Brief.markFeedsAsRead();"/>
+                      label="&ctxMarkFeedsAsRead.label;"
+                      oncommand="Brief.markFeedsAsRead();"/>
+            <menuseparator id="brief-show-unread-counter-separator"/>
+            <menuitem id="brief-show-unread-counter"
+                      label="&showUnreadCounter.label;"
+                      type="checkbox"
+                      autocheck="false"
+                      oncommand="Brief.toggleUnreadCounter()"/>
             <menuseparator/>
             <menuitem id="brief-ctx-show-options"
                       label="&ctxShowOptions.label;"
