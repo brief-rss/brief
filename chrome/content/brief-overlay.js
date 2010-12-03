@@ -65,7 +65,11 @@ const Brief = {
             gBrowser.selectedTab = this.tab;
         }
         else if (aNewTab) {
-            let tab = gBrowser.loadOneTab(this.BRIEF_URL);
+            let tab = gBrowser.loadOneTab(this.BRIEF_URL, {
+                relatedToCurrent: false,
+                inBackground: false
+            });
+
             // Firefox 3.6 compatibility.
             if (gBrowser.pinTab)
                 gBrowser.pinTab(tab);
