@@ -53,6 +53,21 @@
             <preference id="extensions.brief.update.showNotification"
                         name="extensions.brief.update.showNotification"
                         type="bool"/>
+            <preference id="extensions.brief.feedview.sortUnreadViewOldestFirst"
+                        name="extensions.brief.feedview.sortUnreadViewOldestFirst"
+                        type="bool"/>
+            <preference id="extensions.brief.feedview.autoMarkRead"
+                        name="extensions.brief.feedview.autoMarkRead"
+                        type="bool"/>
+            <preference id="extensions.brief.showStatusbarIcon"
+                        name="extensions.brief.showStatusbarIcon"
+                        type="bool"/>
+            <preference id="extensions.brief.showUnreadCounter"
+                        name="extensions.brief.showUnreadCounter"
+                        type="bool"/>
+            <preference id="extensions.brief.feedview.entrySelectionEnabled"
+                        name="extensions.brief.feedview.entrySelectionEnabled"
+                        type="bool"/>
         </preferences>
 
         <groupbox>
@@ -80,15 +95,33 @@
                       preference="extensions.brief.update.showNotification"/>
         </groupbox>
 
-        <groupbox>
-            <caption label="&behaviorGroup.caption;"/>
+        <groupbox align="stretch">
             <checkbox id="open-in-new-tab"
                       label="&openInNewTab.label;"
                       accesskey="&openInNewTab.accesskey;"
                       preference="extensions.brief.openInNewTab"/>
+            <checkbox id="show-statusbar-icon"
+                      label="&showStatusbarIcon.label;"
+                      accesskey="&showStatusbarIcon.accesskey;"
+                      preference="extensions.brief.showStatusbarIcon"/>
+            <checkbox id="show-unread-counter"
+                      label="&showUnreadCounter.label;"
+                      accesskey="&showUnreadCounter.accesskey;"
+                      preference="extensions.brief.showUnreadCounter"/>
             <checkbox label="&openEntriesInTabs.label;"
                       accesskey="&openEntriesInTabs.accesskey;"
                       preference="extensions.brief.feedview.openEntriesInTabs"/>
+            <checkbox label="&autoMarkRead.label;"
+                      accesskey="&autoMarkRead.accesskey;"
+                      preference="extensions.brief.feedview.autoMarkRead"/>
+            <checkbox id="unread-oldest-first-checkbox"
+                      label="&sortUnreadViewOldestFirst.label;"
+                      accesskey="&sortUnreadViewOldestFirst.accesskey;"
+                      preference="extensions.brief.feedview.sortUnreadViewOldestFirst"/>
+            <checkbox id="enable-item-selection-checkbox"
+                      label="&enableItemHightlight.label;"
+                      accesskey="&enableItemHightlight.accesskey;"
+                      preference="extensions.brief.feedview.entrySelectionEnabled"/>
         </groupbox>
 
         <groupbox>
@@ -130,6 +163,16 @@
             </hbox>
         </groupbox>
 
+        <groupbox align="center" orient="horizontal">
+            <caption label="&customizeGroup.caption;"/>
+            <label value="&editStyleDescription.label;"/>
+            <spacer flex="1"/>
+            <button id="edit-custom-style"
+                    label="&editStyleButton.label;"
+                    accesskey="&editStyleButton.accesskey;"
+                    oncommand="gDisplayPane.editCustomStyle();"/>
+        </groupbox>
+
     </prefpane>
 
     <prefpane id="feeds-pane" label="&feedsPane.label;">
@@ -166,60 +209,6 @@
                     accesskey="&exportOPML.accesskey;"
                     oncommand="opml.exportOPML()"/>
         </hbox>
-
-    </prefpane>
-
-    <prefpane id="display-pane" label="&displayPane.label;">
-
-        <preferences>
-            <preference id="extensions.brief.feedview.sortUnreadViewOldestFirst"
-                        name="extensions.brief.feedview.sortUnreadViewOldestFirst"
-                        type="bool"/>
-            <preference id="extensions.brief.feedview.autoMarkRead"
-                        name="extensions.brief.feedview.autoMarkRead"
-                        type="bool"/>
-            <preference id="extensions.brief.showStatusbarIcon"
-                        name="extensions.brief.showStatusbarIcon"
-                        type="bool"/>
-            <preference id="extensions.brief.showUnreadCounter"
-                        name="extensions.brief.showUnreadCounter"
-                        type="bool"/>
-            <preference id="extensions.brief.feedview.entrySelectionEnabled"
-                        name="extensions.brief.feedview.entrySelectionEnabled"
-                        type="bool"/>
-        </preferences>
-
-        <groupbox align="stretch">
-            <checkbox id="unread-oldest-first-checkbox"
-                      label="&sortUnreadViewOldestFirst.label;"
-                      accesskey="&sortUnreadViewOldestFirst.accesskey;"
-                      preference="extensions.brief.feedview.sortUnreadViewOldestFirst"/>
-            <checkbox label="&autoMarkRead.label;"
-                      accesskey="&autoMarkRead.accesskey;"
-                      preference="extensions.brief.feedview.autoMarkRead"/>
-            <checkbox id="show-statusbar-icon"
-                      label="&showStatusbarIcon.label;"
-                      accesskey="&showStatusbarIcon.accesskey;"
-                      preference="extensions.brief.showStatusbarIcon"/>
-            <checkbox id="show-unread-counter"
-                      label="&showUnreadCounter.label;"
-                      accesskey="&showUnreadCounter.accesskey;"
-                      preference="extensions.brief.showUnreadCounter"/>
-            <checkbox id="enable-item-selection-checkbox"
-                      label="&enableItemHightlight.label;"
-                      accesskey="&enableItemHightlight.accesskey;"
-                      preference="extensions.brief.feedview.entrySelectionEnabled"/>
-        </groupbox>
-
-        <groupbox align="center" orient="horizontal">
-            <caption label="&customizeGroup.caption;"/>
-            <label value="&editStyleDescription.label;"/>
-            <spacer flex="1"/>
-            <button id="edit-custom-style"
-                    label="&editStyleButton.label;"
-                    accesskey="&editStyleButton.accesskey;"
-                    oncommand="gDisplayPane.editCustomStyle();"/>
-        </groupbox>
 
     </prefpane>
 
