@@ -112,6 +112,12 @@ const Brief = {
         new this.query().markEntriesRead(true);
     },
 
+    toggleUnreadCounter: function Brief_toggleUnreadCounter() {
+        var menuitem = document.getElementById('brief-show-unread-counter');
+        var checked = menuitem.getAttribute('checked') == 'true';
+        Brief.prefs.setBoolPref('showUnreadCounter', !checked);
+    },
+
     showOptions: function cmd_showOptions() {
         var prefBranch = Cc['@mozilla.org/preferences-service;1'].
                          getService(Ci.nsIPrefBranch);
@@ -125,11 +131,8 @@ const Brief = {
 
 
     updateStatus: function Brief_updateStatus() {
-        // Firefox 3.6 compatibility.
-        if (Brief.firefox4 && !Brief.statusCounter)
+        if (!Brief.toolbarbutton || Brief.firefox4 && !Brief.prefs.getBoolPref('showUnreadCounter'))
             return;
-
-        var counter = document.getElementById('brief-status-counter');
 
         var query = new Brief.query({
             deleted: Brief.storage.ENTRY_STATE_NORMAL,
@@ -137,14 +140,15 @@ const Brief = {
         });
         var unreadEntriesCount = query.getEntryCount();
 
-        counter.value = unreadEntriesCount;
+        Brief.statusCounter.value = unreadEntriesCount;
 
+        // Firefox 3.6 compatibility.
         if (!Brief.firefox4) {
             let panel = document.getElementById('brief-status');
             panel.setAttribute('unread', unreadEntriesCount > 0);
         }
         else {
-            counter.hidden = unreadEntriesCount == 0;
+            Brief.statusCounter.hidden = unreadEntriesCount == 0;
         }
 
     },
@@ -307,15 +311,26 @@ const Brief = {
             }
 
             // Firefox 3.6 compatibility.
-            if (!this.firefox4 && this.prefs.getBoolPref('showStatusbarIcon')) {
-                this.statusPanel.hidden = false;
-            }
-
-            // Because Brief's toolbarbutton doesn't use toolbarbutton's binding content,
-            // we must manually set the label in "icons and text" toolbar mode.
             if (this.firefox4) {
-                let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
-                label.value = this.toolbarbutton.label;
+                if (this.toolbarbutton) {
+                    let showCounter = this.prefs.getBoolPref('showUnreadCounter');
+                    this.statusCounter.hidden = !showCounter;
+
+                    let menuitem = document.getElementById('brief-show-unread-counter');
+                    menuitem.setAttribute('checked', showCounter);
+
+                    // Because Brief's toolbarbutton doesn't use toolbarbutton's binding content,
+                    // we must manually set the label in "icons and text" toolbar mode.
+                    let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
+                    label.value = this.toolbarbutton.label;
+                }
+            }
+            else {
+                document.getElementById('brief-show-unread-counter-separator').hidden = true;
+                document.getElementById('brief-show-unread-counter').hidden = true;
+
+                if (this.prefs.getBoolPref('showStatusbarIcon'))
+                    this.statusPanel.hidden = false;
             }
 
             this.updateStatus();
@@ -365,6 +380,10 @@ const Brief = {
                 case 'showStatusbarIcon':
                     let newValue = this.prefs.getBoolPref('showStatusbarIcon');
                     this.statusPanel.hidden = !newValue;
+
+                    let menuitem = document.getElementById('brief-show-unread-counter');
+                    menuitem.setAttribute('checked', newValue);
+
                     if (newValue)
                         this.updateStatus();
                     break;
@@ -372,6 +391,10 @@ const Brief = {
                 case 'showUnreadCounter':
                     newValue = this.prefs.getBoolPref('showUnreadCounter');
                     this.statusCounter.hidden = !newValue;
+
+                    menuitem = document.getElementById('brief-show-unread-counter');
+                    menuitem.setAttribute('checked', newValue);
+
                     if (newValue)
                         this.updateStatus();
                     break;
