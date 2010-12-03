@@ -89,6 +89,10 @@ const Brief = {
     },
 
     shouldOpenInNewTab: function Brief_shouldOpenInNewTab() {
+        // Firefox 3.6 compatibility.
+        if (Brief.firefox4)
+            return true;
+
         var openInNewTab = this.prefs.getBoolPref('openInNewTab');
         var isLoading = gBrowser.webProgress.isLoadingDocument;
         var isBlank = (gBrowser.currentURI.spec == 'about:blank');

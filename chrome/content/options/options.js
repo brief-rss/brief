@@ -15,10 +15,13 @@ function init() {
     // Firefox 3.6 compatibility.
     var versionComparator = Cc['@mozilla.org/xpcom/version-comparator;1']
                             .getService(Ci.nsIVersionComparator);
-    if (versionComparator.compare(Application.version, '4.0b7') >= 0)
+    if (versionComparator.compare(Application.version, '4.0b7') >= 0) {
         document.getElementById('show-statusbar-icon').hidden = true;
-    else
+        document.getElementById('open-in-new-tab').hidden = true;
+    }
+    else {
         document.getElementById('show-unread-counter').hidden = true;
+    }
 
     opml.init();
 }
