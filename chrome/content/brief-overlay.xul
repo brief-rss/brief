@@ -85,31 +85,4 @@
         <stringbundle id="brief-bundle" src="chrome://brief/locale/brief.properties"/>
     </stringbundleset>
 
-    <toolbarpalette id="BrowserToolbarPalette">
-        <toolbarbutton id="brief-button"
-                       class="toolbarbutton-1 chromeclass-toolbar-additional"
-                       label="Brief"
-                       tooltip="brief-tooltip"
-                       type="checkbox"
-                       autoCheck="false"
-                       onclick="Brief.onBriefButtonClick(event);"/>
-    </toolbarpalette>
-
-    <statusbar id="status-bar">
-        <statusbarpanel id="brief-status"
-                        tooltip="brief-tooltip"
-                        context="brief-status-context"
-                        hidden="true"
-                        onclick="Brief.onBriefButtonClick(event);"
-                        insertafter="statusbar-resizerpanel">
-
-            <image id="brief-status-image"/>
-            <label id="brief-status-counter"/>
-            <progressmeter id="brief-progressmeter"
-                           mode="determined"
-                           hidden="true"/>
-
-        </statusbarpanel>
-    </statusbar>
-
 </overlay>

@@ -33,6 +33,8 @@
 <!ENTITY displayPane.label "Display">
 <!ENTITY showStatusbarIcon.label "Show statusbar icon">
 <!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY showUnreadCounter.label "Show the number of unread items next to Brief's icon">
+<!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Mark items as read after I see them">
