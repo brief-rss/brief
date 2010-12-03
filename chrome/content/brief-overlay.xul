@@ -52,7 +52,7 @@
     </keyset>
 
     <popupset id="mainPopupSet">
-        <popup id="brief-status-context">
+        <menupopup id="brief-status-context">
             <menuitem id="brief-ctx-update-feeds"
                       label="&ctxUpdateFeeds.label;"
                       oncommand="Brief.updateService.updateAllFeeds();"/>
@@ -63,7 +63,7 @@
             <menuitem id="brief-ctx-show-options"
                       label="&ctxShowOptions.label;"
                       oncommand="Brief.showOptions();"/>
-        </popup>
+        </menupopup>
 
         <tooltip id="brief-tooltip"
                  orient="vertical"
