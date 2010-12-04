@@ -57,7 +57,7 @@ const Brief = {
 
 
     open: function Brief_open(aNewTab) {
-        if (this.toolbarbutton)
+        if (!Brief.firefox4 && this.toolbarbutton)
             this.toolbarbutton.checked = true;
 
         // If Brief is already open then select the existing tab.
@@ -89,7 +89,6 @@ const Brief = {
     },
 
     shouldOpenInNewTab: function Brief_shouldOpenInNewTab() {
-        // Firefox 3.6 compatibility.
         if (Brief.firefox4)
             return true;
 
@@ -142,7 +141,6 @@ const Brief = {
 
         Brief.statusCounter.value = unreadEntriesCount;
 
-        // Firefox 3.6 compatibility.
         if (!Brief.firefox4) {
             let panel = document.getElementById('brief-status');
             panel.setAttribute('unread', unreadEntriesCount > 0);
@@ -262,12 +260,12 @@ const Brief = {
             }
 
             gBrowser.setIcon(Brief.tab, Brief.BRIEF_FAVICON_URL);
-            if (Brief.toolbarbutton)
+            if (!Brief.firefox4 && Brief.toolbarbutton)
                 Brief.toolbarbutton.checked = (gBrowser.selectedTab == Brief.tab);
         }
         else if (Brief.tab && Brief.tab.linkedBrowser.currentURI.spec != Brief.BRIEF_URL) {
             Brief.tab = null;
-            if (Brief.toolbarbutton)
+            if (!Brief.firefox4 && Brief.toolbarbutton)
                 Brief.toolbarbutton.checked = (gBrowser.selectedTab == Brief.tab);
         }
     },
@@ -278,7 +276,7 @@ const Brief = {
     },
 
     onTabSelect: function Brief_onTabSelect(aEvent) {
-        if (Brief.toolbarbutton)
+        if (!Brief.firefox4 && Brief.toolbarbutton)
             Brief.toolbarbutton.checked = (aEvent.originalTarget == Brief.tab);
     },
 
@@ -310,7 +308,6 @@ const Brief = {
                 }
             }
 
-            // Firefox 3.6 compatibility.
             if (this.firefox4) {
                 if (this.toolbarbutton) {
                     let showCounter = this.prefs.getBoolPref('showUnreadCounter');
