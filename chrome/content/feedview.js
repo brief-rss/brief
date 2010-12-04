@@ -51,13 +51,42 @@ function FeedView(aTitle, aQuery, aFixedUnread, aFixedStarred) {
     // marked as read again when autoMarkRead is on.
     this.entriesMarkedUnread = [];
 
-    this._init();
+    if (gCurrentView)
+        gCurrentView.uninit();
+    else
+        var noExistingView = true;
+
+    if (!this.query.searchString)
+        getElement('searchbar').value = '';
+
+    // Disable filters for views with fixed parameters.
+    getElement('filter-unread-checkbox').disabled = this.fixedUnread;
+    getElement('filter-starred-checkbox').disabled = this.fixedStarred;
+
+    this.browser.addEventListener('load', this, false);
+    getTopWindow().gBrowser.addEventListener('TabSelect', this, false);
+    Storage.addObserver(this);
+
+    // Load the template page if it hasn't been loaded yet. We also have to make sure to
+    // load it at startup, when no view was attached yet, because the template page
+    // may have been restored by SessionStore - before any FeedView was attached.
+    if (!this.browser.currentURI.equals(gTemplateURI) || noExistingView) {
+        this.browser.loadURI(gTemplateURI.spec);
+    }
+    else {
+        for each (let event in this._events)
+            this.document.addEventListener(event, this, true);
+
+        // Refresh asynchronously, because it might take a while
+        // and UI may be waiting to be redrawn.
+        async(this.refresh, 0, this);
+    }
 }
 
 
 FeedView.prototype = {
 
-    // Temporarliy override the title without losing the old one.
+    // Temporarily override the title without losing the old one.
     titleOverride: '',
 
     // ID of the selected entry.
@@ -65,28 +94,18 @@ FeedView.prototype = {
 
     _refreshPending: false,
 
-    get browser() {
-        return getElement('feed-view');
-    },
+    get browser() getElement('feed-view'),
 
-    get document() {
-        return this.browser.contentDocument;
-    },
+    get document() this.browser.contentDocument,
 
-    get window() {
-        return this.document.defaultView;
-    },
+    get window() this.document.defaultView,
 
-    get feedContent() {
-        return this.document.getElementById('feed-content');
-    },
+    get feedContent() this.document.getElementById('feed-content'),
 
-    get active() {
-        return (this.browser.currentURI.equals(gTemplateURI) && gCurrentView == this);
-    },
+    get active() this.browser.currentURI.equals(gTemplateURI) && gCurrentView == this,
 
     /**
-     * Query which selects all entries contained by the view.
+     * Query selecting all entries contained by the view.
      */
     set query(aQuery) {
         this.__query = aQuery;
@@ -121,7 +140,6 @@ FeedView.prototype = {
     },
 
     collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
-        var entryElement = this.document.getElementById(aEntry);
         if (aNewState)
             var eventType = aAnimate ? 'CollapseEntryAnimated' : 'CollapseEntry';
         else
@@ -129,7 +147,7 @@ FeedView.prototype = {
 
         var evt = this.document.createEvent('Events');
         evt.initEvent(eventType, false, false);
-        entryElement.dispatchEvent(evt);
+        this.document.getElementById(aEntry).dispatchEvent(evt);
     },
 
     get selectedElement() {
@@ -399,43 +417,6 @@ FeedView.prototype = {
 
 
     /**
-     * Initializes the view.
-     */
-    _init: function FeedView__init() {
-        if (gCurrentView)
-            gCurrentView.uninit();
-        else
-            var noExistingView = true;
-
-        if (!this.query.searchString)
-            getElement('searchbar').value = '';
-
-        // Disable filters for views with fixed parameters.
-        getElement('filter-unread-checkbox').disabled = this.fixedUnread;
-        getElement('filter-starred-checkbox').disabled = this.fixedStarred;
-
-        this.browser.addEventListener('load', this, false);
-        getTopWindow().gBrowser.addEventListener('TabSelect', this, false);
-        Storage.addObserver(this);
-
-        // Load the template page if it isn't loaded yet. We also have to make sure to
-        // load it at startup, when no view was attached yet, because the template page
-        // may have been restored by SessionStore - before the custom CSS file was
-        // registered as a resource and before any FeedView was attached.
-        if (!this.browser.currentURI.equals(gTemplateURI) || noExistingView) {
-            this.browser.loadURI(gTemplateURI.spec);
-        }
-        else {
-            for each (let event in this._events)
-                this.document.addEventListener(event, this, true);
-
-            // Refresh asynchronously, because UI maybe waiting to be redrawn
-            // (e.g. after selecting a treeitem).
-            async(this.refresh, 0, this);
-        }
-    },
-
-    /**
      * Deactivates the view.
      */
     uninit: function FeedView_uninit() {
@@ -454,8 +435,7 @@ FeedView.prototype = {
 
 
     /**
-     * Events which the view listens to in the template page. Entry binding
-     * communicates with chrome by sending custom events.
+     * Events which the view listens to in the template page.
      */
     _events: ['EntryUncollapsed', 'click', 'scroll', 'keypress'],
 
@@ -541,7 +521,7 @@ FeedView.prototype = {
     },
 
     _onClick: function FeedView__onClick(aEvent) {
-        // This loops walks the parent chain of the even target to check if the
+        // This loop walks the parent chain of the even target to check if the
         // article-container and/or an anchor were clicked.
         var elem = aEvent.target;
         while (elem != this.document.documentElement) {
@@ -558,9 +538,10 @@ FeedView.prototype = {
 
         // Divert links to new tabs according to user preferences.
         if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
+            aEvent.preventDefault();
+
             // preventDefault doesn't stop the default action for middle-clicks,
             // so we've got stop propagation as well.
-            aEvent.preventDefault();
             if (aEvent.button == 1)
                 aEvent.stopPropagation();
 
