@@ -130,7 +130,10 @@ const Brief = {
 
 
     updateStatus: function Brief_updateStatus() {
-        if (!Brief.toolbarbutton || Brief.firefox4 && !Brief.prefs.getBoolPref('showUnreadCounter'))
+        if (Brief.firefox4 && (!Brief.toolbarbutton || !Brief.prefs.getBoolPref('showUnreadCounter')))
+            return;
+
+        if (!Brief.firefox4 && !Brief.prefs.getBoolPref('showStatusbarIcon'))
             return;
 
         var query = new Brief.query({
