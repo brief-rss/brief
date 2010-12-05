@@ -600,7 +600,7 @@ FeedView.prototype = {
         }
         else {
             let className = aEvent.target.className;
-            if ((className == 'expand-button' || className == 'article-header')
+            if ((className == 'article-header' || className == 'article-title-link-box')
                     && PrefCache.showHeadlinesOnly) {
                 this.collapseEntry(entryID, true, true);
             }
@@ -1018,7 +1018,7 @@ FeedView.prototype = {
 
         var authorsElem = entryContainer.getElementsByClassName('article-authors')[0];
         if (aEntry.authors) {
-            authorsElem.innerHTML = this._strings.authorPrefix + aEntry.authors;
+            authorsElem.innerHTML = aEntry.authors;
         }
 
         if (aEntry.starred)
@@ -1158,7 +1158,6 @@ FeedView.prototype = {
         return this.__proto__._strings = {
             today:        gStringBundle.getString('today'),
             yesterday:    gStringBundle.getString('yesterday'),
-            authorPrefix: gStringBundle.getString('authorIntroductionPrefix') + ' ',
             entryUpdated: gStringBundle.getString('entryWasUpdated'),
             markAsRead:   gStringBundle.getString('markEntryAsRead'),
             markAsUnread: gStringBundle.getString('markEntryAsUnread'),
