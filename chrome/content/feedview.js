@@ -952,12 +952,24 @@ FeedView.prototype = {
      * @return The actual number of entries that were loaded.
      */
     _loadEntries: function FeedView__loadEntries(aCount) {
-        var lastEntryElem = this.feedContent.lastChild;
-        var endDate = lastEntryElem ? parseInt(lastEntryElem.getAttribute('date')) - 1
-                                    : undefined;
-
         var dateQuery = this.getQueryCopy();
-        dateQuery.endDate = endDate;
+
+        var edgeDate = undefined;
+
+        var lastEntryElement = this.feedContent.lastChild;
+        if (lastEntryElement) {
+            let lastEntryDate = parseInt(lastEntryElement.getAttribute('date'));
+            if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
+                edgeDate = lastEntryDate - 1;
+            else
+                edgeDate = lastEntryDate + 1;
+        }
+
+        if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
+            dateQuery.endDate = edgeDate;
+        else
+            dateQuery.startDate = edgeDate;
+
         dateQuery.limit = aCount;
 
         var entryDates = dateQuery.getProperty('date');
@@ -965,8 +977,14 @@ FeedView.prototype = {
             return 0;
 
         var query = this.getQueryCopy();
-        query.startDate = entryDates[entryDates.length - 1].date;
-        query.endDate = endDate;
+        if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
+            query.startDate = entryDates[entryDates.length - 1].date;
+            query.endDate = edgeDate;
+        }
+        else {
+            query.startDate = edgeDate;
+            query.endDate = entryDates[entryDates.length - 1].date;
+        }
 
         var entries = query.getFullEntries();
         entries.forEach(this._appendEntry, this);
