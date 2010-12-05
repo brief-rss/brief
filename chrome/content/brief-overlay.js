@@ -82,7 +82,7 @@ const Brief = {
     },
 
     toggle: function Brief_toggle() {
-        if (this.tab == gBrowser.selectedTab)
+        if (!Brief.firefox4 && this.tab == gBrowser.selectedTab)
             gBrowser.removeTab(this.tab);
         else
             Brief.open(this.shouldOpenInNewTab());
@@ -229,8 +229,8 @@ const Brief = {
 
         // Clicking the toolbar button when Brief is open in current tab
         // "unpresses" it and closes Brief.
-        if (aEvent.target.id == 'brief-button' && gBrowser.selectedTab == this.tab
-            && aEvent.button == 0) {
+        if (!Brief.firefox4 && aEvent.target.id == 'brief-button' && aEvent.button == 0
+                && gBrowser.selectedTab == this.tab) {
 
             // Closing the last tab closes the application when tab bar is visible,
             // and is impossible when it is hidden. In either case, if Brief is the
