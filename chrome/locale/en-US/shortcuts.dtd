@@ -29,8 +29,8 @@
 <!ENTITY headlinesView "Toggle headlines view">
 
 <!ENTITY general.header "General">
-<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
-<!ENTITY cmdShiftA.key "Cmd + Shift + A">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
 <!ENTITY openBrief "Open Brief">
 <!ENTITY focusSearchbar "Focus the search box">
 <!ENTITY displayShortcuts "Display the list of keyboard shortcuts">
