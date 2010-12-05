@@ -11,7 +11,7 @@
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY behaviorGroup.caption "Behavior">
 <!ENTITY openInNewTab.label "Open Brief in a new tab">
-<!ENTITY openInNewTab.accesskey "O">
+<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY openEntriesInTabs.label "Open items in new tabs">
 <!ENTITY openEntriesInTabs.accesskey "e">
 <!ENTITY storingGroup.caption "Storing">
@@ -32,7 +32,7 @@
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Display">
 <!ENTITY showStatusbarIcon.label "Show statusbar icon">
-<!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY showStatusbarIcon.accesskey "t">
 <!ENTITY showUnreadCounter.label "Show the number of unread items next to Brief's icon">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">
@@ -41,14 +41,14 @@
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY shortcutsGroup.caption "Shortcuts">
 <!ENTITY enableItemHightlight.label "Highlight the active item to let me manage it using shortcuts">
-<!ENTITY enableItemHightlight.accesskey "g">
+<!ENTITY enableItemHightlight.accesskey "H">
 <!ENTITY keyboardShortcuts.label "Keyboard shortcuts">
 <!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Appearance">
 <!ENTITY shortcutsPane.label "Shorcuts">
 <!ENTITY editStyleDescription.label "Customize the appearance of feeds">
 <!ENTITY editStyleButton.label "Customize">
-<!ENTITY editStyleButton.accesskey "C">
+<!ENTITY editStyleButton.accesskey "u">
 <!ENTITY styleEditor.title "Edit custom style">
 <!ENTITY seeCustomizationTips.label "Learn about customizing appearance with CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
