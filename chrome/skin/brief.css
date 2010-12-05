@@ -217,6 +217,7 @@ page {
 
 
 #feed-list > treechildren::-moz-tree-cell-text {
+    font-family: Arial, sans-serif !important;
     font-size: 12px !important;
     color: #000000 !important;
 }
