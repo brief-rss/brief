@@ -285,7 +285,7 @@ var FeedUpdateServiceInternal = {
                          .getService(Ci.nsIWindowMediator)
                          .getMostRecentWindow('navigator:browser');
             if (window) {
-                window.gBrief.open(true);
+                window.Brief.open(true);
                 window.focus();
             }
             break;
