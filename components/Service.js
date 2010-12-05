@@ -9,7 +9,7 @@ function BriefService() {
         Components.utils.import('resource://brief/Storage.jsm');
         this.registerCustomStyle();
     }
-    // Old component registration.
+    // Firefox 3.6 compatibility.
     else {
         let observerService = Cc['@mozilla.org/observer-service;1']
                               .getService(Ci.nsIObserverService);
@@ -57,6 +57,7 @@ BriefService.prototype = {
 /**
  * XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
  * XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+ * Firefox 3.6 compatibility.
  */
 if (XPCOMUtils.generateNSGetFactory)
     var NSGetFactory = XPCOMUtils.generateNSGetFactory([BriefService]);

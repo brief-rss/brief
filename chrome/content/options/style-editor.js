@@ -19,6 +19,7 @@ function init() {
     gCustomStyleFile = chromeDir.clone();
     gCustomStyleFile.append('brief-custom-style.css');
 
+    // Firefox 3.6 compatibility.
     if ('@mozilla.org/extensions/manager;1' in Cc) {
         // If the custom CSS file doesn't exist, create it by copying the example file.
         if (!gCustomStyleFile.exists()) {
