@@ -1,9 +1,9 @@
 body {
-    background: #fafcff;
-    font-family: Verdana, Helvetica, Arial, sans-serif;
-    font-size: 10px;
     margin: 0;
     padding: 0;
+    background: #fafcff;
+    font-family: "Lucida Grande", Verdana, sans-serif;
+    font-size: 10px;
 }
 
 #feed-content {
@@ -37,17 +37,15 @@ body {
    attributes. The first two are self-explanatory while "collapsed"
    means that the article's content is folded (headlines view) */
 .article-container {
+    max-width: 70em;
+    min-width: -moz-min-content;
+    margin: 0 auto;
+    position: relative;
     background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x #ffffff;
     border-right: 5px #e6e9ed solid;
     -moz-border-right-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
     border-left: 5px #e6e9ed solid;
     -moz-border-left-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
-    overflow: visible;   /* This is for the the expand/collapse dropmarker which is
-                            taken outside the box using negative margins */
-    position: relative;
-    margin: 0 auto;
-    min-width: -moz-min-content;
-    max-width: 70em;
 }
 
 .article-container:last-child {
@@ -59,14 +57,22 @@ body {
 /* ----------------------  Article header  ---------------------- */
 
 .article-header {
-    border-top: 1px #abbfc9 solid;
-    padding: 5px 5px 0 24px;
+    display: -moz-box;
+    width: -moz-available;
     margin-bottom: 5px;
+    padding: 5px 5px 0 24px;
+    border-top: 1px #abbfc9 solid;
+}
+
+.article-title-link-box {
+    display: block;
+    -moz-box-flex: 1;
 }
 
 .article-title-link {
-    color: #00394f;
-    font-size: 14px;
+    color: #05447e;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
     font-weight: bold;
     text-decoration: none;
 }
@@ -76,55 +82,56 @@ body {
 /* ----------------------  Article controls  ---------------------- */
 
 .article-controls {
-    float: right;
     margin: -2px 0 0 5px;
 }
 
 .article-star {
-    float: left;
-    margin: -6px 2px 0 -24px;
     width: 24px;
     height: 24px;
+    margin: -6px 2px 0 -24px;
 }
-
-.expand-button {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: -30px;
-    height: 6em;
-    width: 42px;
-    -moz-user-select: none; /* Prevent selecting the title when clicking the button */
-}
-
 
 
 /* ----------------------  Article subheader  ---------------------- */
 
 .article-subheader, .collapsed-article-subheader {
-    font-family: "Lucida Grande", Verdana, sans-serif;
     font-size: 12px;
     line-height: 17px; /* Make the height the same for both Lucida and Verdana */
 }
 
 .article-subheader {
-    color: #477900;
-    clear: both;
-    padding: 10px 10px 0 15px;
+    display: -moz-box;
+    width: -moz-available;
+    color: #2a7d00;
+    margin: 5px 10px 5px 40px;
 }
 
-.article-authors, .article-date {
-    text-align: right;
-    float: right;
+.article-subheader-right {
+    display: -moz-box;
+    -moz-box-flex: 1;
+    -moz-box-pack: end;
 }
 
-.article-authors {
-    clear: right;
+.article-subheader-left {
+    display: -moz-box;
+    -moz-box-flex: 1;
+    -moz-box-orient: vertical;
+}
+
+.article-date {
+    margin-left: 4px;
+}
+
+.article-authors:not(:empty):after {
+    content: " •";
+}
+
+.feed-name {
+    margin-bottom: 2px;
 }
 
 .article-tags {
     padding-left: 20px;
-    margin-top: 2px;
     background: url(chrome://brief/skin/icons/tag.png) 1px no-repeat;
 }
 
@@ -136,14 +143,13 @@ body {
 /* ----------------------  Article content area   ---------------------- */
 
 .article-content {
-    font-family: "Lucida Grande", Verdana, sans-serif;
-    font-size: 12px;
-    line-height: 1.4;
-    color: #272727;
+    width: -moz-fit-content;
     padding: 10px 25px 25px;
     border-bottom: 1px solid #ffffff; /* Placeholder for selection border */
     overflow: auto;
-    clear: both;
+    color: #404040;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 .article-content:empty {
@@ -151,11 +157,11 @@ body {
 }
 
 .article-content a {
-    color: #0a1f72;
+    color: #003b73;
 }
 
 .article-content a:visited {
-    color: #444b66;
+    color: #4b667e;
 }
 
 
@@ -167,7 +173,7 @@ body {
 }
 
 .article-container[read] .article-title-link {
-    font-weight: normal;
+    color: #404040;
 }
 
 
@@ -176,29 +182,29 @@ body {
 
 .article-container[collapsed] {
     background-image: none;
-    background-color: #ebf7ff;
+    background-color: #f0f9ff;
     min-height: 50px;
 }
 
 .article-container[collapsed][read] {
-    background-color: #f5faff;
+    background-color: transparent;
+}
+
+.article-container[collapsed]:hover {
+    background-color: #e5f5ff;
 }
 
 .article-container[collapsed] .article-title-link {
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .article-container[collapsed] .article-controls {
-    background-color: #ebf7ff;
+    background-color: #e5f5ff;
     position: absolute;
     top: 4px;
     right: 5px;
     margin: 0;
     padding-left: 10px;
-}
-
-.article-container[collapsed][read] .article-controls {
-    background-color: #f5faff;
 }
 
 .article-container[collapsed] .collapsed-article-subheader {

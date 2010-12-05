@@ -62,9 +62,10 @@
                 else {
                     aEntryElement.removeAttribute('collapsed');
 
-                    var subheader = aEntryElement.getElementsByClassName('article-subheader')[0];
-                    subheader.insertBefore(date, aEntryElement.getElementsByClassName('article-authors')[0]);
-                    subheader.insertBefore(feedName, tagsElem);
+                    var subheaderLeft = aEntryElement.getElementsByClassName('article-subheader-left')[0];
+                    var subheaderRight = aEntryElement.getElementsByClassName('article-subheader-right')[0];
+                    subheaderLeft.insertBefore(feedName, tagsElem);
+                    subheaderRight.insertBefore(date, null);
 
                     function finish() {
                         if (aEntryElement.parentNode == feedContent) {
@@ -116,8 +117,10 @@
 
         <div id="article-template" class="article-container">
             <div class="article-header">
-                <div class="expand-button"></div>
                 <div class="article-star" command="star"></div>
+                <div class="article-title-link-box">
+                    <a class="article-title-link" command="open"></a>
+                </div>
 
                 <div class="article-controls">
                     <div class="mark-read" command="switchRead">
@@ -130,14 +133,16 @@
                 </div>
 
                 <div class="collapsed-article-subheader"/></div>
+            </div>
 
-                <a class="article-title-link" command="open"></a>
-
-                <div class="article-subheader">
-                    <div class="article-date"/></div>
-                    <div class="article-authors"/></div>
+            <div class="article-subheader">
+                <div class="article-subheader-left">
                     <div class="feed-name"/></div>
                     <div class="article-tags"/></div>
+                </div>
+                <div class="article-subheader-right">
+                    <div class="article-authors"/></div>
+                    <div class="article-date"/></div>
                 </div>
             </div>
 
