@@ -47,15 +47,6 @@ const Brief = {
         return this.query = tempScope.Query
     },
 
-    get FeedUpdateService() {
-        var tempScope = {};
-        Components.utils.import('resource://brief/FeedUpdateService.jsm', tempScope);
-
-        delete this.FeedUpdateService;
-        return this.FeedUpdateService = tempScope.FeedUpdateService;
-    },
-
-
     open: function Brief_open(aNewTab) {
         if (!Brief.firefox4 && this.toolbarbutton)
             this.toolbarbutton.checked = true;
@@ -106,6 +97,12 @@ const Brief = {
         }
     },
 
+
+    updateAllFeeds: function Brief_updateAllFeeds() {
+        var tempScope = {};
+        Components.utils.import('resource://brief/FeedUpdateService.jsm', tempScope);
+        tempScope.FeedUpdateService.updateAllFeeds();
+    },
 
     markFeedsAsRead: function Brief_markFeedsAsRead() {
         new this.query().markEntriesRead(true);
