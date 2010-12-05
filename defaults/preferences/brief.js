@@ -1,5 +1,6 @@
 pref("extensions.brief.homeFolder", -1);
 pref("extensions.brief.showStatusbarIcon", true);
+pref("extensions.brief.showUnreadCounter", true);
 pref("extensions.brief.openInNewTab", false);
 pref("extensions.brief.firstRun", true);
 pref("extensions.brief.lastMajorVersion", "0");
