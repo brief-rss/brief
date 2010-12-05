@@ -9,7 +9,7 @@
     <script type="application/x-javascript" src="brief-overlay.js"/>
 
     <keyset id="mainKeyset">
-        <key id="Brief_open" key="a" modifiers="control shift"
+        <key id="Brief_open" key="d" modifiers="accel alt"
              oncommand="Brief.toggle()"/>
 
         <key id="Brief_selectNextEntry" key="j"
@@ -23,7 +23,7 @@
 
         <key id="Brief_toggleSelectedEntryRead" key="m"
              oncommand="Brief.doCommand('toggleSelectedEntryRead')"/>
-        <key id="Brief_markCurrentViewRead" key="n"
+        <key id="Brief_markVisibleEntriesRead" key="n"
              oncommand="Brief.doCommand('markVisibleEntriesRead')"/>
         <key id="Brief_markCurrentViewRead" key="n" modifiers="alt"
              oncommand="Brief.doCommand('markViewRead')"/>
