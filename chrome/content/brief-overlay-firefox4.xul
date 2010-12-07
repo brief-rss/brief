@@ -18,7 +18,8 @@
                 <image class="toolbarbutton-icon"/>
                 <label class="toolbarbutton-text" crop="right" flex="1"/>
             </vbox>
-            <label id="brief-status-counter"/>
+            <label id="brief-status-counter"
+                   hidden="true"/>
         </toolbarbutton>
     </toolbarpalette>
 
