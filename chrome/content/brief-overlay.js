@@ -332,6 +332,9 @@ const Brief = {
 
             this.updateStatus();
 
+            if (XULBrowserWindow.inContentWhitelist)
+                XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
+
             // Observe changes to the feed database in order to keep
             // the status panel up-to-date.
             var observerService = Cc['@mozilla.org/observer-service;1']
