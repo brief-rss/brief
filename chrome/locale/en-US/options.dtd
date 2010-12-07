@@ -39,11 +39,8 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Automatically mark items as read after I see them">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY shortcutsGroup.caption "Shortcuts">
 <!ENTITY enableItemHightlight.label "Highlight the active item to let me manage it using shortcuts">
 <!ENTITY enableItemHightlight.accesskey "H">
-<!ENTITY keyboardShortcuts.label "Keyboard shortcuts">
-<!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Appearance">
 <!ENTITY shortcutsPane.label "Shorcuts">
 <!ENTITY editStyleDescription.label "Customize the appearance of feeds">
