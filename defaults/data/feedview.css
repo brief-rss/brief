@@ -143,13 +143,13 @@ body {
 /* ----------------------  Article content area   ---------------------- */
 
 .article-content {
-    width: -moz-fit-content;
     padding: 10px 25px 25px;
     border-bottom: 1px solid #ffffff; /* Placeholder for selection border */
     overflow: auto;
     color: #404040;
     font-size: 13px;
     line-height: 1.4;
+    text-align: justify;
 }
 
 .article-content:empty {
