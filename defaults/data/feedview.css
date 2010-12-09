@@ -40,8 +40,6 @@ body {
     max-width: 70em;
     min-width: -moz-min-content;
     margin: 0 auto;
-    position: relative;
-    background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x #ffffff;
     border-right: 5px #e6e9ed solid;
     -moz-border-right-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
     border-left: 5px #e6e9ed solid;
@@ -53,6 +51,10 @@ body {
     -moz-border-bottom-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
 }
 
+.article-inner-container {
+    border-top: 1px #abbfc9 solid;
+    background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x #ffffff;
+}
 
 /* ----------------------  Article header  ---------------------- */
 
@@ -61,7 +63,6 @@ body {
     width: -moz-available;
     margin-bottom: 5px;
     padding: 5px 5px 0 24px;
-    border-top: 1px #abbfc9 solid;
 }
 
 .article-title-link-box {
@@ -133,7 +134,6 @@ body {
 
 .article-content {
     padding: 10px 25px 25px;
-    border-bottom: 1px solid #ffffff; /* Placeholder for selection border */
     overflow: auto;
     color: #404040;
     font-size: 13px;
@@ -184,7 +184,7 @@ pre, code {
 
 /*  ----------------------  Read article  ---------------------- */
 
-.article-container[read] {
+.article-container[read] > .article-inner-container {
     background-image: url('chrome://brief/skin/read-entry-bkg.png');
 }
 
@@ -196,40 +196,32 @@ pre, code {
 /* ---------------------  Selected article  ------------------- */
 
 .article-container[selected] {
-    -moz-border-left-colors: #fafcff #f7f9fc #d2e8ff #98cbff #1474d6;
-    -moz-border-right-colors: #fafcff #f7f9fc #d2e8ff #98cbff #1474d6;
-}
-
-.article-container[selected] > .article-header {
-    border-top-color: #1474d6;
-}
-
-.article-container[selected]:not(:last-child) > .article-content {
-    border-bottom-color: #1474d6;
-}
-
-.article-container[selected][collapsed] + .article-container > .article-header {
-    border-top-color: #1474d6;
-}
-
-.article-container[selected]:last-child {
-    -moz-border-bottom-colors: #fafcff #f7f9fc #d2e8ff #98cbff #1474d6;
+    position: relative;
+    z-index: 1;
+    top: 6px;
+    margin-top: -12px;
+    border-width: 6px;
+    -moz-border-image: url(chrome://brief/skin/border.png) 6 stretch;
 }
 
 
 /* ----------------------  Headlines view   ---------------------- */
 
 .article-container[collapsed] {
-    background-image: none;
-    background-color: #f0f9ff;
+    position: relative;
     min-height: 50px;
 }
 
-.article-container[collapsed][read] {
+.article-container[collapsed] > .article-inner-container {
+    background-image: none;
+    background-color: #f0f9ff;
+}
+
+.article-container[collapsed][read] > .article-inner-container {
     background-color: transparent;
 }
 
-.article-container[collapsed]:hover {
+.article-container[collapsed]:hover > .article-inner-container {
     background-color: #e5f5ff;
 }
 
