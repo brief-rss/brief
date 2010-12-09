@@ -13,6 +13,12 @@
 
 /* ----------------------  Article controls ------------------- */
 
+.article-star {
+    width: 24px;
+    height: 24px;
+    margin: -6px 2px 0 -24px;
+}
+
 .article-controls > * {
   display: inline-block;
 }
@@ -112,53 +118,4 @@
 
 .article-container[starred] .article-star:active:hover {
     background-position: -96px 5px;
-}
-
-
-/* ----------------------  Article content area   ---------------------- */
-
-/* Reset the top margin, so that the gap between
-   header and content is always the same */
-.article-content > *:first-child {
-    margin-top: 0 !important;
-}
-
-.article-content img {
-    margin: 0.75em;
-}
-
-blockquote {
-    font-style: italic;
-}
-
-pre, code {
-    font-family: "Courier New", monospace;
-    font-size: 1em;
-    white-space: pre-wrap;
-    width: -moz-available;
-}
-
-.search-highlight {
-    color: black;
-    background-color: #adff89;
-    border: 1px solid #45e500;
-    padding: 0 3px;
-    -moz-border-radius: 3px;
-}
-
-/* ----------------------  Adjustments for headlines view   ---------------------- */
-
-.article-container[collapsed] .article-controls,
-.article-container[collapsed] .article-subheader {
-    display: none;
-}
-
-.article-container:not([collapsed]) .collapsed-article-subheader {
-    display: none;
-}
-
-
-/* Shows controls on hover */
-.article-container[collapsed]:hover .article-controls {
-    display: block;
 }
