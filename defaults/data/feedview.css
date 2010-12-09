@@ -53,7 +53,7 @@ body {
 
 .article-inner-container {
     border-top: 1px #abbfc9 solid;
-    background: url('chrome://brief/skin/unread-entry-bkg.png') repeat-x #ffffff;
+    background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
 }
 
 /* ----------------------  Article header  ---------------------- */
@@ -185,7 +185,7 @@ pre, code {
 /*  ----------------------  Read article  ---------------------- */
 
 .article-container[read] > .article-inner-container {
-    background-image: url('chrome://brief/skin/read-entry-bkg.png');
+    background-image: -moz-linear-gradient(top, rgba(235, 238, 243, 1), rgba(235, 238, 243, 0.5) 24px, rgba(235, 238, 243, 0) 40px);
 }
 
 .article-container[read] .article-title-link {
