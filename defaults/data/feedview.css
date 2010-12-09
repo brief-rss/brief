@@ -201,7 +201,7 @@ pre, code {
     top: 6px;
     margin-top: -12px;
     border-width: 6px;
-    -moz-border-image: url(chrome://brief/skin/border.png) 6 stretch;
+    -moz-border-image: url(chrome://brief/skin/selected-entry-border.png) 6 stretch;
 }
 
 
