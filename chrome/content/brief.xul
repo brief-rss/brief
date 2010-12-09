@@ -91,7 +91,7 @@
         </menupopup>
     </popupset>
 
-    <vbox id="sidebar" persist="width hidden">
+    <vbox id="sidebar" width="250" persist="width hidden">
         <richlistbox id="view-list"
                      startview="all-items-folder"
                      persist="startview"
