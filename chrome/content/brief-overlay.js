@@ -285,12 +285,8 @@ const Brief = {
         case 'load':
             window.removeEventListener('load', this, false);
 
-            var firstRun = this.prefs.getBoolPref('firstRun');
-            if (firstRun) {
-                // The timeout is necessary to avoid adding the button while
-                // initialization of various other stuff is still in progress because
-                // changing content of the toolbar may interfere with that.
-                setTimeout(this.onFirstRun, 0);
+            if (this.prefs.getBoolPref('firstRun')) {
+                this.onFirstRun();
             }
             else {
                 let prevVersion = this.prefs.getCharPref('lastMajorVersion');
@@ -426,15 +422,12 @@ const Brief = {
 
 
     onFirstRun: function Brief_onFirstRun() {
-        // Add the toolbar button to the Navigation Bar.
+        // Add the toolbar button at the end of the Navigation Bar.
         var navbar = document.getElementById('nav-bar');
-        var currentSet = navbar.currentSet;
-        if (!currentSet.match('brief-button')) {
-            let newset = currentSet.concat(',brief-button');
-            navbar.currentSet = newset;
-            navbar.setAttribute('currentset', newset);
+        if (!navbar.currentSet.match('brief-button')) {
+            navbar.insertItem('brief-button', null, null, false);
+            navbar.setAttribute('currentset', navbar.currentSet);
             document.persist('nav-bar', 'currentset');
-            BrowserToolboxCustomizeDone(true);
         }
 
         // Create the default feeds folder.
