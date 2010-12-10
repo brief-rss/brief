@@ -4,11 +4,10 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
         <title>Brief - feed view</title>
-        <link rel="stylesheet" href="feedview-common.css" type="text/css" media="screen">
         <link rel="stylesheet" href="feedview.css" type="text/css" media="screen">
         <link rel="stylesheet" href="resource://profile-chrome-dir/brief-custom-style.css" type="text/css" media="screen">
         <script type="application/javascript" src="jquery.js"></script>
-        <script type="application/javascript;version=1.7">
+        <script type="application/javascript;version=1.8">
             document.addEventListener('CollapseEntry', function(aEvent) {
                 collapseEntry(aEvent.target, true, false);
             }, true);
@@ -124,11 +123,7 @@
                     </div>
 
                     <div class="article-controls">
-                        <div class="mark-read" command="switchRead">
-                            <div class="mark-read-left" command="switchRead"/></div>
-                            <div class="mark-read-centre" command="switchRead"/></div>
-                            <div class="mark-read-right" command="switchRead"/></div>
-                        </div>
+                        <div class="mark-read" command="switchRead"></div>
                         <div class="delete-entry" command="delete"/></div>
                         <div class="restore-entry" command="restore"/></div>
                     </div>
