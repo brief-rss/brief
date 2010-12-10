@@ -642,7 +642,7 @@ FeedView.prototype = {
 
         intersect(this._loadedEntries, aEntryList.IDs).forEach(function(entry) {
             let entryElement = this.document.getElementById(entry);
-            let markReadButton = entryElement.getElementsByClassName('mark-read-centre')[0];
+            let markReadButton = entryElement.getElementsByClassName('mark-read')[0];
 
             if (aNewState) {
                 entryElement.setAttribute('read', 'true');
