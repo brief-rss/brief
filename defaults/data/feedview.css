@@ -33,6 +33,10 @@ body {
 
 /* ---------------------------  Article  ------------------------ */
 
+#article-template {
+    display: none;
+}
+
 /* Article container can have "starred", "read", and "collapsed"
    attributes. The first two are self-explanatory while "collapsed"
    means that the article's content is folded (headlines view) */
@@ -56,10 +60,35 @@ body {
     background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
 }
 
+
+/*  ----------------------  Read article  ---------------------- */
+
+.article-container[read] > .article-inner-container {
+    background-image: -moz-linear-gradient(top, rgba(235, 238, 243, 1), rgba(235, 238, 243, 0.5) 24px, rgba(235, 238, 243, 0) 40px);
+}
+
+.article-container[read] .article-title-link {
+    color: #404040;
+}
+
+
+/* ---------------------  Selected article  ------------------- */
+
+.article-container[selected] {
+    position: relative;
+    z-index: 1;
+    top: 6px;
+    margin-top: -12px;
+    border-width: 6px;
+    -moz-border-image: url(chrome://brief/skin/selected-entry-border.png) 6 stretch;
+}
+
+
 /* ----------------------  Article header  ---------------------- */
 
 .article-header {
     display: -moz-box;
+    -moz-box-align: start;
     width: -moz-available;
     margin-bottom: 5px;
     padding: 5px 5px 0 24px;
@@ -78,6 +107,7 @@ body {
 }
 
 .article-controls {
+    display: -moz-box;
     margin: -2px 0 0 5px;
 }
 
@@ -182,29 +212,6 @@ pre, code {
 }
 
 
-/*  ----------------------  Read article  ---------------------- */
-
-.article-container[read] > .article-inner-container {
-    background-image: -moz-linear-gradient(top, rgba(235, 238, 243, 1), rgba(235, 238, 243, 0.5) 24px, rgba(235, 238, 243, 0) 40px);
-}
-
-.article-container[read] .article-title-link {
-    color: #404040;
-}
-
-
-/* ---------------------  Selected article  ------------------- */
-
-.article-container[selected] {
-    position: relative;
-    z-index: 1;
-    top: 6px;
-    margin-top: -12px;
-    border-width: 6px;
-    -moz-border-image: url(chrome://brief/skin/selected-entry-border.png) 6 stretch;
-}
-
-
 /* ----------------------  Headlines view   ---------------------- */
 
 .article-container[collapsed] {
@@ -222,7 +229,7 @@ pre, code {
 }
 
 .article-container[collapsed]:hover > .article-inner-container {
-    background-color: #e5f5ff;
+    background-color: #d3eeff;
 }
 
 .article-container[collapsed] .article-title-link {
@@ -230,12 +237,13 @@ pre, code {
 }
 
 .article-container[collapsed] .article-controls {
-    background-color: #e5f5ff;
     position: absolute;
     top: 4px;
     right: 5px;
+    height: 30px; /* Hack */
     margin: 0;
     padding-left: 10px;
+    background-color: #d3eeff;
 }
 
 .article-container[collapsed] .collapsed-article-subheader {
@@ -264,4 +272,106 @@ pre, code {
 
 .article-container:not([collapsed]) .collapsed-article-subheader {
     display: none;
+}
+
+/* Hack */
+.article-container[collapsed] .delete-entry,
+.article-container[collapsed] .restore-entry {
+    position: relative;
+    top: -12px;
+}
+
+
+/* ----------------------  Article controls ------------------- */
+
+.article-controls {
+    display: -moz-box;
+}
+
+.article-controls > * {
+    display: -moz-box;
+}
+
+.mark-read {
+    -moz-box-align: center;
+    -moz-box-pack: center;
+    height: 25px;
+    min-width: 84px;
+    margin-right: 3px;
+    border-width: 0 7px;
+    -moz-border-image: url(chrome://brief/skin/mark-read-button-normal.png) 0 6 stretch;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #326585;
+    cursor: default;
+    -moz-user-select: none;
+}
+
+.mark-read:hover {
+    -moz-border-image: url(chrome://brief/skin/mark-read-button-hover.png) 0 6 stretch;
+}
+
+.mark-read:active {
+    -moz-border-image: url(chrome://brief/skin/mark-read-button-active.png) 0 6 stretch;
+}
+
+
+#feed-content[trash] .delete-entry {
+    display: none;
+}
+
+#feed-content:not([trash]) .restore-entry {
+    display: none;
+}
+
+.delete-entry, .restore-entry {
+    width: 29px;
+    height: 25px;
+}
+
+.delete-entry {
+    background-image: url(chrome://brief/skin/delete-button.png);
+}
+
+.restore-entry {
+    background-image: url(chrome://brief/skin/restore-button.png);
+}
+
+.delete-entry:hover,
+.restore-entry:hover {
+    background-position: 0 -25px;
+}
+
+.delete-entry:active,
+.restore-entry:active {
+    background-position: 0 -50px;
+}
+
+
+.article-star {
+    width: 24px;
+    height: 24px;
+    margin: -6px 2px 0 -24px;
+    background: url(chrome://brief/skin/icons/entry-star.png) no-repeat;
+    background-position: 0 5px;
+}
+
+.article-container:not([starred]) .article-star:hover {
+    background-position: -24px 5px;
+}
+
+.article-container:not([starred]) .article-star:active:hover {
+    background-position: -48px 5px;
+}
+
+.article-container[starred] .article-star {
+    background-position: -48px 5px;
+}
+
+.article-container[starred] .article-star:hover {
+    background-position: -72px 5px;
+}
+
+.article-container[starred] .article-star:active:hover {
+    background-position: -96px 5px;
 }
