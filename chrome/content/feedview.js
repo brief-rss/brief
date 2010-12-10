@@ -1021,7 +1021,7 @@ FeedView.prototype = {
         var tagsElem = entryContainer.getElementsByClassName('article-tags')[0];
         tagsElem.textContent = aEntry.tags;
 
-        var markReadElem = entryContainer.getElementsByClassName('mark-read-centre')[0];
+        var markReadElem = entryContainer.getElementsByClassName('mark-read')[0];
         markReadElem.textContent = aEntry.read ? this._strings.markAsUnread
                                                : this._strings.markAsRead;
 
