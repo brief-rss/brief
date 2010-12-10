@@ -243,7 +243,6 @@ pre, code {
     height: 30px; /* Hack */
     margin: 0;
     padding-left: 10px;
-    background-color: #d3eeff;
 }
 
 .article-container[collapsed] .collapsed-article-subheader {
@@ -265,7 +264,6 @@ pre, code {
     overflow: hidden;
 }
 
-.article-container[collapsed]:not(:hover) .article-controls,
 .article-container[collapsed] .article-subheader {
     display: none;
 }
