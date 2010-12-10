@@ -4,7 +4,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <title>&shortcutsPage.title;</title>
-        <link id="mac-override" rel="stylesheet" type="text/css" media="screen"/>
         <style type="text/css">
             body {
                 margin: 0;
@@ -47,18 +46,16 @@
                 text-align: center;
                 padding-top: 20px;
             }
-
-            .onlyMac {
-                display: none;
-            }
         </style>
         <script type="text/javascript;version=1.8">
+            <![CDATA[
             function onload(aEvent) {
-                // Apply platform override override
-                if (window.navigator.platform.match('Mac')) {
-                    let link = document.getElementById('mac-override');
-                    link.setAttribute('href', 'mac.css');
-                }
+                var elems = window.navigator.platform.match('Mac')
+                            ? document.getElementsByClassName('noMac')
+                            : document.getElementsByClassName('onlyMac');
+
+                for (let i = 0; i < elems.length; i++)
+                    elems[i].style.display = 'none';
 
                 if (window.top != window)
                     document.body.setAttribute('embedded', true);
@@ -71,6 +68,7 @@
 
             window.addEventListener('load', onload, false);
             document.addEventListener('keypress', onKeypress, false);
+            ]]>
         </script>
     </head>
 
