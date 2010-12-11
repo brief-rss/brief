@@ -1,25 +1,21 @@
 .article-container[collapsed] > .article-inner-container {
-    -moz-transition: background-color 0.5s;
+    -moz-transition: background-color 0.3s;
 }
 
 .article-container[collapsed][read] > .article-inner-container {
-    -moz-transition: background-color 0.5s;
+    -moz-transition: background-color 0.3s;
 }
 
 .article-container[collapsed]:hover > .article-inner-container {
-    -moz-transition: background-color 0.5s;
+    -moz-transition: background-color 0.3s;
 }
 
 .article-container[collapsed] .article-controls {
-    opacity: 0;
     -moz-transition-property: opacity background-color;
-    -moz-transition-duration: 0.4s;
+    -moz-transition-duration: 0.1s 0.3s;
 }
 
 .article-container[collapsed]:hover .article-controls {
-    opacity: 1;
-    background-color: #d3eeff;
     -moz-transition-property: opacity background-color;
-    -moz-transition-duration: 0.2s;
-    -moz-transition-delay: 0.1s;
+    -moz-transition-duration: 0.1s 0.3s;
 }
