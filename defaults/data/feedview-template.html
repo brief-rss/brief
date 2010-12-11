@@ -33,7 +33,6 @@
 
                 var feedContent = document.getElementById('feed-content');
                 var entryContent = aEntryElement.getElementsByClassName('article-content')[0];
-                var tagsElem = aEntryElement.getElementsByClassName('article-tags')[0];
                 var date = aEntryElement.getElementsByClassName('article-date')[0];
                 var feedName = aEntryElement.getElementsByClassName('feed-name')[0];
 
@@ -54,7 +53,7 @@
                                                 200, 'linear', finish);
                     }
                     else {
-                        $(entryContent).hide();
+                        entryContent.style.display = 'none';
                         finish();
                     }
                 }
@@ -64,6 +63,8 @@
 
                     var subheaderLeft = aEntryElement.getElementsByClassName('article-subheader-left')[0];
                     var subheaderRight = aEntryElement.getElementsByClassName('article-subheader-right')[0];
+                    var tagsElem = aEntryElement.getElementsByClassName('article-tags')[0];
+
                     subheaderLeft.insertBefore(feedName, tagsElem);
                     subheaderRight.insertBefore(date, null);
 
@@ -80,7 +81,7 @@
                                                 200, 'linear', finish);
                     }
                     else {
-                        $(entryContent).show();
+                        entryContent.style.display = 'block';
                         finish();
                     }
                 }
