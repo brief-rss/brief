@@ -998,8 +998,8 @@ FeedView.prototype = {
     },
 
     _insertEntry: function FeedView__appendEntry(aEntry, aPosition) {
-        var template = this.document.getElementById('article-template');
-        var entryContainer = template.cloneNode(true);
+        var entryContainer = this.document.getElementById('article-template')
+                                          .cloneNode(true);
 
         var nextEntry = this.feedContent.childNodes[aPosition];
         this.feedContent.insertBefore(entryContainer, nextEntry);
@@ -1024,9 +1024,6 @@ FeedView.prototype = {
         var markReadElem = entryContainer.getElementsByClassName('mark-read')[0];
         markReadElem.textContent = aEntry.read ? this._strings.markAsUnread
                                                : this._strings.markAsRead;
-
-        var contentElem = entryContainer.getElementsByClassName('article-content')[0];
-        contentElem.innerHTML = aEntry.content;
 
         // When view contains entries from many feeds, show feed name on each entry.
         if (!Storage.getFeed(this.query.feeds)) {
@@ -1054,8 +1051,22 @@ FeedView.prototype = {
         var dateElem = entryContainer.getElementsByClassName('article-date')[0];
         dateElem.innerHTML = updatedString || dateString;
 
-        if (PrefCache.showHeadlinesOnly)
+        var contentElem = entryContainer.getElementsByClassName('article-content')[0];
+        if (PrefCache.showHeadlinesOnly) {
             this.collapseEntry(aEntry.id, true, false);
+
+            // In headlines view, delay inserting the content to better perceived perf.
+            // Temporarily set display:block so that layout is done immediatelly
+            // on insertion, not delayed until the entry is uncollapsed.
+            async(function() {
+                contentElem.style.display = 'block';
+                contentElem.innerHTML = aEntry.content;
+                contentElem.style.display = 'none';
+            })
+        }
+        else {
+            contentElem.innerHTML = aEntry.content;
+        }
 
         // Highlight search terms. For some reason doing it synchronously does not work.
         if (this.query.searchString) {
