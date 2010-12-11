@@ -1,13 +1,5 @@
-/* Below are a few example customizations. */
-
-/* Don't show authors of items */ /*
-.article-authors {
-    display: none;
-}
-*/
-
-/* Increase the font size */ /*
-.article-content {
-    font-size: 13px !important;
+/* Example: increase the title size */ /*
+.article-title-link {
+    font-size: 16px;
 }
 */
