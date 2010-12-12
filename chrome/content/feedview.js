@@ -211,7 +211,7 @@ FeedView.prototype = {
             this.selectedElement.setAttribute('selected', true);
 
             if (aScroll)
-                this.scrollToEntry(entry, aScrollSmoothly);
+                this.scrollToEntry(entry, true, aScrollSmoothly);
         }
     },
 
@@ -228,7 +228,7 @@ FeedView.prototype = {
             var previousElement = middleElement.previousSibling;
 
         if (previousElement)
-            this.scrollToEntry(parseInt(previousElement.id), aSmooth);
+            this.scrollToEntry(parseInt(previousElement.id), true, aSmooth);
     },
 
 
@@ -239,7 +239,7 @@ FeedView.prototype = {
             var nextElement = middleElement.nextSibling;
 
         if (nextElement)
-            this.scrollToEntry(parseInt(nextElement.id), aSmooth);
+            this.scrollToEntry(parseInt(nextElement.id), true, aSmooth);
     },
 
     /**
@@ -257,7 +257,7 @@ FeedView.prototype = {
         if (PrefCache.entrySelectionEnabled)
             this.selectEntry(targetEntry, true, true);
         else
-            this.scrollToEntry(targetEntry, true);
+            this.scrollToEntry(targetEntry, true, true);
     },
 
     // See scrollDown.
@@ -269,31 +269,37 @@ FeedView.prototype = {
         if (PrefCache.entrySelectionEnabled)
             this.selectEntry(targetEntry, true, true);
         else
-            this.scrollToEntry(targetEntry, true);
+            this.scrollToEntry(targetEntry, true, true);
     },
 
 
     /**
      * Scroll entry into view. If the entry is taller than the height of the screen,
      * the scroll position is aligned with the top of the entry, otherwise the entry
-     * is positioned in the middle of the screen.
+     * is positioned depending on aCentre parameter.
      *
      * @param aEntry
      *        ID of entry to scroll to.
+     * @param aCentre
+     *        TRUE to position the entry in the middle of the screen, FALSE to only
+     *        scroll it into view.
      * @param aSmooth
      *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
      *        target position.
      */
-    scrollToEntry: function FeedView_scrollToEntry(aEntry, aSmooth) {
+    scrollToEntry: function FeedView_scrollToEntry(aEntry, aCentre, aSmooth) {
         var win = this.window;
         var entryElement = this.document.getElementById(aEntry);
 
         if (entryElement.offsetHeight >= win.innerHeight) {
             var targetPosition = entryElement.offsetTop;
         }
-        else {
-            var difference = win.innerHeight - entryElement.offsetHeight;
+        else if (aCentre) {
+            let difference = win.innerHeight - entryElement.offsetHeight;
             targetPosition = entryElement.offsetTop - Math.floor(difference / 2);
+        }
+        else {
+            targetPosition = (entryElement.offsetTop + entryElement.offsetHeight) - win.innerHeight;
         }
 
         targetPosition = Math.max(targetPosition, 0);
@@ -456,8 +462,10 @@ FeedView.prototype = {
                     Commands.markEntryRead(id, true);
 
                 if (id == this.selectedEntry) {
-                    alignWithTop = (this.selectedElement.offsetHeight > this.window.innerHeight);
-                    this.selectedElement.scrollIntoView(alignWithTop);
+                    let entryBottom = this.selectedElement.offsetTop + this.selectedElement.offsetHeight;
+                    let windowBottom = this.window.pageYOffset + this.window.innerHeight;
+                    if (entryBottom > windowBottom)
+                        this.scrollToEntry(id, false, true);
                 }
                 break;
 
