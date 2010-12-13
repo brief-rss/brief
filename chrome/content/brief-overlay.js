@@ -328,7 +328,7 @@ const Brief = {
 
             this.updateStatus();
 
-            if (XULBrowserWindow.inContentWhitelist)
+            if (this.prefs.getBoolPref('hideChrome'))
                 XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
 
             // Observe changes to the feed database in order to keep
