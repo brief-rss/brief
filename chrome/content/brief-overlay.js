@@ -14,8 +14,6 @@ const Brief = {
         return this.firefox4 = verComparator.compare(Application.version, '4.0b7') >= 0;
     },
 
-    tab: null,  // Tab in which Brief is loaded
-
     // Firefox 3.6 compatibility.
     get statusPanel() document.getElementById('brief-status'),
 
@@ -47,15 +45,23 @@ const Brief = {
         return this.query = tempScope.Query
     },
 
-    open: function Brief_open(aNewTab) {
-        if (!Brief.firefox4 && this.toolbarbutton)
-            this.toolbarbutton.checked = true;
+    open: function Brief_open(aForceNewTab) {
+        if (Brief.firefox4) {
+            var newTab = true;
+        }
+        else {
+            let pref = this.prefs.getBoolPref('openInNewTab');
+            let loading = gBrowser.webProgress.isLoadingDocument;
+            let blank = (gBrowser.currentURI.spec == 'about:blank');
+            newTab = aForceNewTab || pref && (!blank || loading);
+        }
 
         // If Brief is already open then select the existing tab.
-        if (this.tab) {
-            gBrowser.selectedTab = this.tab;
+        var briefTab = this.getBriefTab();
+        if (briefTab) {
+            gBrowser.selectedTab = briefTab;
         }
-        else if (aNewTab) {
+        else if (newTab) {
             let tab = gBrowser.loadOneTab(this.BRIEF_URL, {
                 relatedToCurrent: false,
                 inBackground: false
@@ -72,21 +78,15 @@ const Brief = {
         }
     },
 
-    toggle: function Brief_toggle() {
-        if (!Brief.firefox4 && this.tab == gBrowser.selectedTab)
-            gBrowser.removeTab(this.tab);
-        else
-            Brief.open(this.shouldOpenInNewTab());
-    },
+    getBriefTab: function Brief_getBriefTab() {
+        // Firefox 3.6 compatibility. Use gBrowser.tabs
+        var tabs = gBrowser.mTabs;
+        for (let i = 0; i < tabs.length; i++) {
+            if (gBrowser.getBrowserForTab(tabs[i]).currentURI.spec == this.BRIEF_URL)
+                return tabs[i];
+        }
 
-    shouldOpenInNewTab: function Brief_shouldOpenInNewTab() {
-        if (Brief.firefox4)
-            return true;
-
-        var openInNewTab = this.prefs.getBoolPref('openInNewTab');
-        var isLoading = gBrowser.webProgress.isLoadingDocument;
-        var isBlank = (gBrowser.currentURI.spec == 'about:blank');
-        return openInNewTab && (!isBlank || isLoading);
+        return null;
     },
 
 
@@ -222,62 +222,9 @@ const Brief = {
         }
     },
 
-
-    onBriefButtonClick: function Brief_onBriefButtonClick(aEvent) {
-        if (aEvent.button != 0 && aEvent.button != 1)
-            return;
-
-        // Clicking the toolbar button when Brief is open in current tab
-        // "unpresses" it and closes Brief.
-        if (!Brief.firefox4 && aEvent.target.id == 'brief-button' && aEvent.button == 0
-                && gBrowser.selectedTab == this.tab) {
-
-            // Closing the last tab closes the application when tab bar is visible,
-            // and is impossible when it is hidden. In either case, if Brief is the
-            // last tab we have to add another one before closing Brief.
-            if (gBrowser.tabContainer.childNodes.length == 1)
-                gBrowser.addTab('about:blank', null, null, null, null, false);
-            gBrowser.removeCurrentTab();
-        }
-        else {
-            Brief.open(aEvent.button == 1 || Brief.shouldOpenInNewTab());
-        }
-    },
-
     onTabLoad: function Brief_onTabLoad(aEvent) {
-        var targetDoc = aEvent.target;
-
-        if (targetDoc && targetDoc.documentURI == Brief.BRIEF_URL) {
-
-            if (!Brief.tab) {
-                let targetBrowser = gBrowser.getBrowserForDocument(targetDoc);
-                for (let i = 0; i < gBrowser.mTabs.length; i++) {
-                    if (gBrowser.mTabs[i].linkedBrowser == targetBrowser) {
-                        Brief.tab = gBrowser.mTabs[i];
-                        break;
-                    }
-                }
-            }
-
-            gBrowser.setIcon(Brief.tab, Brief.BRIEF_FAVICON_URL);
-            if (!Brief.firefox4 && Brief.toolbarbutton)
-                Brief.toolbarbutton.checked = (gBrowser.selectedTab == Brief.tab);
-        }
-        else if (Brief.tab && Brief.tab.linkedBrowser.currentURI.spec != Brief.BRIEF_URL) {
-            Brief.tab = null;
-            if (!Brief.firefox4 && Brief.toolbarbutton)
-                Brief.toolbarbutton.checked = (gBrowser.selectedTab == Brief.tab);
-        }
-    },
-
-    onTabClose: function Brief_onTabClose(aEvent) {
-        if (aEvent.originalTarget == Brief.tab)
-            Brief.tab = null;
-    },
-
-    onTabSelect: function Brief_onTabSelect(aEvent) {
-        if (!Brief.firefox4 && Brief.toolbarbutton)
-            Brief.toolbarbutton.checked = (aEvent.originalTarget == Brief.tab);
+        if (aEvent.target && aEvent.target.documentURI == Brief.BRIEF_URL)
+            gBrowser.setIcon(Brief.getBriefTab(), Brief.BRIEF_FAVICON_URL);
     },
 
     handleEvent: function Brief_handleEvent(aEvent) {
@@ -337,13 +284,6 @@ const Brief = {
                                   .getService(Ci.nsIObserverService);
             observerService.addObserver(this, 'brief:invalidate-feedlist', false);
 
-            // Stores the tab in which Brief is loaded so we can ensure only
-            // instance can be open at a time. This is an UI choice, not a technical
-            // limitation.
-            // These listeners are responsible for observing in which tab Brief is loaded
-            // as well as for maintaining correct checked state of the toolbarbutton.
-            gBrowser.tabContainer.addEventListener('TabClose', this.onTabClose, false);
-            gBrowser.tabContainer.addEventListener('TabSelect', this.onTabSelect, false);
             gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
             this.prefs.addObserver('', this, false);

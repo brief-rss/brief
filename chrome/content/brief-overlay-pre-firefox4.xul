@@ -12,7 +12,7 @@
                        tooltip="brief-tooltip"
                        type="checkbox"
                        autoCheck="false"
-                       onclick="Brief.onBriefButtonClick(event);"/>
+                       onclick="if (event.button == 0 || event.button == 1) Brief.open(event.button == 1)"/>
     </toolbarpalette>
 
     <statusbar id="status-bar">
