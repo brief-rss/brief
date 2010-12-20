@@ -45,37 +45,17 @@ const Brief = {
         return this.query = tempScope.Query
     },
 
-    open: function Brief_open(aForceNewTab) {
-        if (Brief.firefox4) {
-            var newTab = true;
-        }
-        else {
-            let pref = this.prefs.getBoolPref('openInNewTab');
-            let loading = gBrowser.webProgress.isLoadingDocument;
-            let blank = (gBrowser.currentURI.spec == 'about:blank');
-            newTab = aForceNewTab || pref && (!blank || loading);
-        }
-
-        // If Brief is already open then select the existing tab.
+    open: function Brief_open() {
+        var loading = gBrowser.webProgress.isLoadingDocument;
+        var blank = (gBrowser.currentURI.spec == 'about:blank');
         var briefTab = this.getBriefTab();
-        if (briefTab) {
-            gBrowser.selectedTab = briefTab;
-        }
-        else if (newTab) {
-            let tab = gBrowser.loadOneTab(this.BRIEF_URL, {
-                relatedToCurrent: false,
-                inBackground: false
-            });
 
-            // Firefox 3.6 compatibility.
-            if (gBrowser.pinTab)
-                gBrowser.pinTab(tab);
-        }
-        else {
+        if (briefTab)
+            gBrowser.selectedTab = briefTab;
+        else if (blank && !loading)
             gBrowser.loadURI(this.BRIEF_URL, null, null);
-            if (gBrowser.pinTab)
-                gBrowser.pinTab(gBrowser.selectedTab);
-        }
+        else
+            gBrowser.loadOneTab(this.BRIEF_URL, { inBackground: false });
     },
 
     getBriefTab: function Brief_getBriefTab() {

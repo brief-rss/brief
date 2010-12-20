@@ -17,7 +17,6 @@ function init() {
                             .getService(Ci.nsIVersionComparator);
     if (versionComparator.compare(Application.version, '4.0b7') >= 0) {
         document.getElementById('show-statusbar-icon').hidden = true;
-        document.getElementById('open-in-new-tab').hidden = true;
     }
     else {
         document.getElementById('show-unread-counter').hidden = true;
