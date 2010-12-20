@@ -32,9 +32,6 @@
             <preference id="extensions.brief.update.enableAutoUpdate"
                         name="extensions.brief.update.enableAutoUpdate"
                         type="bool"/>
-            <preference id="extensions.brief.openInNewTab"
-                        name="extensions.brief.openInNewTab"
-                        type="bool"/>
             <preference id="extensions.brief.feedview.openEntriesInTabs"
                         name="extensions.brief.feedview.openEntriesInTabs"
                         type="bool"/>
@@ -96,10 +93,6 @@
         </groupbox>
 
         <groupbox align="stretch">
-            <checkbox id="open-in-new-tab"
-                      label="&openInNewTab.label;"
-                      accesskey="&openInNewTab.accesskey;"
-                      preference="extensions.brief.openInNewTab"/>
             <checkbox id="show-statusbar-icon"
                       label="&showStatusbarIcon.label;"
                       accesskey="&showStatusbarIcon.accesskey;"

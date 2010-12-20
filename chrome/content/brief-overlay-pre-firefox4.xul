@@ -10,9 +10,7 @@
                        class="toolbarbutton-1 chromeclass-toolbar-additional"
                        label="Brief"
                        tooltip="brief-tooltip"
-                       type="checkbox"
-                       autoCheck="false"
-                       onclick="if (event.button == 0 || event.button == 1) Brief.open(event.button == 1)"/>
+                       onclick="if (event.button == 0 || event.button == 1) Brief.open()"/>
     </toolbarpalette>
 
     <statusbar id="status-bar">
