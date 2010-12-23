@@ -616,7 +616,7 @@ FeedView.prototype = {
     },
 
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
-        if (getTopWindow().gBrowser.selectedTab != getTopWindow().Brief.tab) {
+        if (getTopWindow().gBrowser.currentURI.spec != document.documentURI) {
             this._refreshPending = true;
             return;
         }
@@ -626,7 +626,7 @@ FeedView.prototype = {
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
-        if (getTopWindow().gBrowser.selectedTab != getTopWindow().Brief.tab) {
+        if (getTopWindow().gBrowser.currentURI.spec != document.documentURI) {
             this._refreshPending = true;
             return;
         }
