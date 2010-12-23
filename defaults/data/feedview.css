@@ -273,7 +273,7 @@ pre, code {
 
 /* Crop feed names longer than 170px */
 .article-container[collapsed] .feed-name {
-    max-width: 170px;
+    width: 170px;
     height: 1.3em; /* Height of a single line */
     overflow: hidden;
 }
