@@ -39,11 +39,19 @@ body {
 
 /* Article container can have "starred", "read", and "collapsed"
    attributes. The first two are self-explanatory while "collapsed"
-   means that the article's content is folded (headlines view) */
+   means that the article's content is folded (headlines view)
+
+   Relative position is needed only for selected articles in order
+   for the border to be drawn above other articles.
+   However, changing between static and relative positioning seems
+   to blow away the plugins which slows down scrolling. */
 .article-container {
+    position: relative;
     max-width: 70em;
     min-width: -moz-min-content;
     margin: 0 auto;
+    background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
+    background-clip: padding-box;
     border-right: 6px #e6e9ed solid;
     -moz-border-right-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
     border-left: 6px #e6e9ed solid;
@@ -55,15 +63,10 @@ body {
     -moz-border-bottom-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
 }
 
-.article-inner-container {
-    border-top: 1px #abbfc9 solid;
-    background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
-}
-
 
 /*  ----------------------  Read article  ---------------------- */
 
-.article-container[read] > .article-inner-container {
+.article-container[read] {
     background-image: -moz-linear-gradient(top, rgba(235, 238, 243, 1), rgba(235, 238, 243, 0.5) 24px, rgba(235, 238, 243, 0) 40px);
 }
 
@@ -75,7 +78,6 @@ body {
 /* ---------------------  Selected article  ------------------- */
 
 .article-container[selected] {
-    position: relative;
     z-index: 1;
     top: 6px;
     margin-top: -12px;
@@ -92,6 +94,7 @@ body {
     width: -moz-available;
     margin-bottom: 5px;
     padding: 5px 5px 0 24px;
+    border-top: 1px #abbfc9 solid;
 }
 
 .article-title-link-box {
@@ -219,16 +222,16 @@ pre, code {
     min-height: 50px;
 }
 
-.article-container[collapsed] > .article-inner-container {
+.article-container[collapsed] {
     background-image: none;
-    background-color: #f0f9ff;
+    background-color: #edf8ff;
 }
 
-.article-container[collapsed][read] > .article-inner-container {
-    background-color: transparent;
+.article-container[collapsed][read] {
+    background-color: #fcfeff;
 }
 
-.article-container[collapsed]:hover > .article-inner-container {
+.article-container[collapsed]:hover {
     background-color: #d3eeff;
 }
 
@@ -238,6 +241,7 @@ pre, code {
 
 .article-container[collapsed] .article-controls {
     position: absolute;
+    z-index: 1;
     top: 4px;
     right: 5px;
     height: 30px; /* Hack */
@@ -248,7 +252,6 @@ pre, code {
 
 .article-container[collapsed]:hover .article-controls {
     opacity: 1;
-    background-color: #d3eeff;
 }
 
 .article-container[collapsed] .collapsed-article-subheader {
@@ -257,10 +260,15 @@ pre, code {
     color: #5c7933;
     padding: 0 8px;
     text-align: right;
+    cursor: default;
 }
 
 .article-container[collapsed] .article-date {
-     margin-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+.article-container[collapsed]:hover .article-date {
+    opacity: 0;
 }
 
 /* Crop feed names longer than 170px */

@@ -1,21 +1,11 @@
-.article-container[collapsed] > .article-inner-container {
+.article-container[collapsed],
+.article-container[collapsed]:hover {
     -moz-transition: background-color 0.3s;
 }
 
-.article-container[collapsed][read] > .article-inner-container {
-    -moz-transition: background-color 0.3s;
-}
-
-.article-container[collapsed]:hover > .article-inner-container {
-    -moz-transition: background-color 0.3s;
-}
-
-.article-container[collapsed] .article-controls {
-    -moz-transition-property: opacity background-color;
-    -moz-transition-duration: 0.1s 0.3s;
-}
-
-.article-container[collapsed]:hover .article-controls {
-    -moz-transition-property: opacity background-color;
-    -moz-transition-duration: 0.1s 0.3s;
+.article-container[collapsed] .article-controls,
+.article-container[collapsed] .article-date,
+.article-container[collapsed]:hover .article-controls,
+.article-container[collapsed]:hover .article-date {
+    -moz-transition: opacity 0.2s;
 }
