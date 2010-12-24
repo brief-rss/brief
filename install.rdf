@@ -8,7 +8,6 @@
     <version>1.5b3</version>
     <type>2</type>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
-    <aboutURL>chrome://brief/content/about/about.xul</aboutURL>
 
     <!-- Target Application this extension can install into,
          with minimum and maximum supported versions. -->
@@ -29,6 +28,9 @@
     <contributor>Leszek "teo" Życzkowski</contributor>
     <contributor>Christopher Finke</contributor>
     <contributor>Ngamer01</contributor>
+    <contributor>Some of the icons courtesy of the talented Arvid Axelsson.</contributor>
+    <contributor>Some of the icons were made as part of the Tango Desktop Project.</contributor>
+    <contributor>Thanks to all the great people on #extdev at irc.mozilla.org: Christian Biesinger, Mark Finkle, Mook, Nickolay Ponomarev, Doron Rosenberg, Dave Townsend and Mike Shaver.</contributor>
 
     <translator>The Zero (cs-CZ)</translator>
     <translator>AlleyKat (da-DK)</translator>
