@@ -44,13 +44,11 @@ var ViewList = {
             case 'unread-folder':
                 query.deleted = Storage.ENTRY_STATE_NORMAL;
                 query.read = false;
-                var fixedUnread = true;
                 break;
 
             case 'starred-folder':
                 query.deleted = Storage.ENTRY_STATE_NORMAL;
                 query.starred = true;
-                var fixedStarred = true;
 
                 if (TagList.tags.length)
                     TagList.show();
@@ -61,7 +59,7 @@ var ViewList = {
                 break;
         }
 
-        gCurrentView = new FeedView(title, query, fixedUnread, fixedStarred);
+        gCurrentView = new FeedView(title, query);
     },
 
     // If there is a webpage open in the browser then clicking on
@@ -164,7 +162,7 @@ var TagList = {
             tags: [this.selectedItem.id]
         })
 
-        gCurrentView = new FeedView(this.selectedItem.id, query, false, true);
+        gCurrentView = new FeedView(this.selectedItem.id, query);
     },
 
     // If there is a webpage open in the browser then clicking on

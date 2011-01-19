@@ -53,7 +53,7 @@ function init() {
         read: startView == 'unread-folder' ? false : undefined
     })
 
-    gCurrentView = new FeedView(name, query, true, false);
+    gCurrentView = new FeedView(name, query);
 
     ViewList.richlistbox.suppressOnSelect = true;
     ViewList.selectedItem = getElement(startView);
