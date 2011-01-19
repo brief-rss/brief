@@ -29,17 +29,17 @@ var gCurrentView = null;
  *        Title of the view which will be shown in the header.
  * @param aQuery
  *        Query which selects contained entries.
- * @param aFixedUnread
- *        Indicates that the "unread" query parameter is fixed and the view
- *        isn't affected by feedview.filterUnread pref.
- * @param aFixedStarred
- *        Indicates that the "starred" query parameter is fixed and the
- *        isn't view affected by feedview.filterStarred pref.
  */
-function FeedView(aTitle, aQuery, aFixedUnread, aFixedStarred) {
+function FeedView(aTitle, aQuery) {
     this.title = aTitle;
-    this.fixedUnread = aFixedUnread || false;
-    this.fixedStarred = aFixedStarred || false;
+
+    // If any of read, starred, or tags parameters is specified in the query,
+    // then it is fixed for the view and the user can't toggle the filter.
+    this.fixedUnread = aQuery.read !== undefined;
+    this.fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
+
+    getElement('filter-unread-checkbox').disabled = this.fixedUnread;
+    getElement('filter-starred-checkbox').disabled = this.fixedStarred;
 
     aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
     this.query = aQuery;
@@ -58,10 +58,6 @@ function FeedView(aTitle, aQuery, aFixedUnread, aFixedStarred) {
 
     if (!this.query.searchString)
         getElement('searchbar').value = '';
-
-    // Disable filters for views with fixed parameters.
-    getElement('filter-unread-checkbox').disabled = this.fixedUnread;
-    getElement('filter-starred-checkbox').disabled = this.fixedStarred;
 
     this.browser.addEventListener('load', this, false);
     getTopWindow().gBrowser.addEventListener('TabSelect', this, false);
