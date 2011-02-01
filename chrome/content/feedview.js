@@ -144,6 +144,9 @@ FeedView.prototype = {
         var evt = this.document.createEvent('Events');
         evt.initEvent(eventType, false, false);
         this.document.getElementById(aEntry).dispatchEvent(evt);
+
+        if (!aNewState && this.query.searchString)
+            this._highlightSearchTerms(aEntry);
     },
 
     get selectedElement() {
@@ -1059,10 +1062,11 @@ FeedView.prototype = {
         if (PrefCache.showHeadlinesOnly) {
             this.collapseEntry(aEntry.id, true, false);
 
-            // In headlines view, delay inserting the content to better perceived perf.
-            // Temporarily set display:block so that layout is done immediatelly
-            // on insertion, not delayed until the entry is uncollapsed.
+            // In headlines view, insert the entry content asynchornously for better
+            // perceived performance.
             async(function() {
+                // Temporarily set display:block so that layout is done immediatelly
+                // on insertion, not delayed until the entry is unfolded.
                 contentElem.style.display = 'block';
                 contentElem.innerHTML = aEntry.content;
                 contentElem.style.display = 'none';
@@ -1070,15 +1074,9 @@ FeedView.prototype = {
         }
         else {
             contentElem.innerHTML = aEntry.content;
-        }
 
-        // Highlight search terms. For some reason doing it synchronously does not work.
-        if (this.query.searchString) {
-            async(function() {
-                this.query.searchString.match(/[A-Za-z0-9]+/g).forEach(function(term) {
-                    this._highlightText(term, entryContainer);
-                }, this)
-            }, 0, this)
+            if (this.query.searchString)
+                async(function() this._highlightSearchTerms(aEntry.id), 0, this);
         }
 
         return entryContainer;
@@ -1198,36 +1196,45 @@ FeedView.prototype = {
     },
 
 
-    _highlightText: function FeedView__highlightText(aWord, aContainer) {
-        var searchRange = this.document.createRange();
-        searchRange.setStart(aContainer, 0);
-        searchRange.setEnd(aContainer, aContainer.childNodes.length);
+    _highlightSearchTerms: function FeedView__highlightSearchTerms(aEntry) {
+        let entryElement = this.document.getElementById(aEntry);
 
-        var startPoint = this.document.createRange();
-        startPoint.setStart(aContainer, 0);
-        startPoint.setEnd(aContainer, 0);
+        if (entryElement.hasAttribute('searchTermsHighlighted'))
+            return;
 
-        var endPoint = this.document.createRange();
-        endPoint.setStart(aContainer, aContainer.childNodes.length);
-        endPoint.setEnd(aContainer, aContainer.childNodes.length);
-
-        var baseNode = this.document.createElement('span');
-        baseNode.className = 'search-highlight';
-
-        var finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
+        let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
         finder.caseSensitive = false;
 
-        var retRange;
-        while (retRange = finder.Find(aWord, searchRange, startPoint, endPoint)) {
-            let surroundingNode = baseNode.cloneNode(false);
-            surroundingNode.appendChild(retRange.extractContents());
+        this.query.searchString.match(/[A-Za-z0-9]+/g).forEach(function(term) {
+            let searchRange = this.document.createRange();
+            searchRange.setStart(entryElement, 0);
+            searchRange.setEnd(entryElement, entryElement.childNodes.length);
 
-            let before = retRange.startContainer.splitText(retRange.startOffset);
-            before.parentNode.insertBefore(surroundingNode, before);
+            let startPoint = this.document.createRange();
+            startPoint.setStart(entryElement, 0);
+            startPoint.setEnd(entryElement, 0);
 
-            startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
-            startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
-        }
+            let endPoint = this.document.createRange();
+            endPoint.setStart(entryElement, entryElement.childNodes.length);
+            endPoint.setEnd(entryElement, entryElement.childNodes.length);
+
+            let baseNode = this.document.createElement('span');
+            baseNode.className = 'search-highlight';
+
+            let retRange;
+            while (retRange = finder.Find(term, searchRange, startPoint, endPoint)) {
+                let surroundingNode = baseNode.cloneNode(false);
+                surroundingNode.appendChild(retRange.extractContents());
+
+                let before = retRange.startContainer.splitText(retRange.startOffset);
+                before.parentNode.insertBefore(surroundingNode, before);
+
+                startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
+                startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
+            }
+        }, this)
+
+        entryElement.setAttribute('searchTermsHighlighted', true);
     },
 
     QueryInterface: function FeedView_QueryInterface(aIID) {
