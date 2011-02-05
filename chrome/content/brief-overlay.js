@@ -45,14 +45,14 @@ const Brief = {
         return this.query = tempScope.Query
     },
 
-    open: function Brief_open() {
+    open: function Brief_open(aInCurrentTab) {
         var loading = gBrowser.webProgress.isLoadingDocument;
         var blank = (gBrowser.currentURI.spec == 'about:blank');
         var briefTab = this.getBriefTab();
 
         if (briefTab)
             gBrowser.selectedTab = briefTab;
-        else if (blank && !loading)
+        else if (blank && !loading || aInCurrentTab)
             gBrowser.loadURI(this.BRIEF_URL, null, null);
         else
             gBrowser.loadOneTab(this.BRIEF_URL, { inBackground: false });
