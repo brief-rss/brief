@@ -223,7 +223,7 @@ const Brief = {
                 // If Brief has been updated, load the new version info page.
                 if (verComparator.compare(prevVersion, this.LAST_MAJOR_VERSION) < 0) {
                     setTimeout(function() {
-                        gBrowser.loadOneTab(this.RELEASE_NOTES_URL, {
+                        gBrowser.loadOneTab(Brief.RELEASE_NOTES_URL, {
                             relatedToCurrent: false,
                             inBackground: false
                         });
