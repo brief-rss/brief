@@ -1076,7 +1076,8 @@ FeedView.prototype = {
                 contentElem.style.display = 'none';
 
                 // Highlight search terms in the entry title.
-                async(function() this._highlightSearchTerms(aEntry.id), 0, this);
+                if (this.query.searchString)
+                    async(function() this._highlightSearchTerms(aEntry.id), 0, this);
             }, 0, this)
         }
         else {
