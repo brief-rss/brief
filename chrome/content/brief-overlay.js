@@ -222,10 +222,12 @@ const Brief = {
 
                 // If Brief has been updated, load the new version info page.
                 if (verComparator.compare(prevVersion, this.LAST_MAJOR_VERSION) < 0) {
-                    gBrowser.loadOneTab(this.RELEASE_NOTES_URL, {
-                        relatedToCurrent: false,
-                        inBackground: false
-                    });
+                    setTimeout(function() {
+                        gBrowser.loadOneTab(this.RELEASE_NOTES_URL, {
+                            relatedToCurrent: false,
+                            inBackground: false
+                        });
+                    }, 0);
 
                     this.prefs.setCharPref('lastMajorVersion', this.LAST_MAJOR_VERSION);
                 }
