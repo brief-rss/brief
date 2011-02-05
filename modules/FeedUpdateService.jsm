@@ -144,7 +144,7 @@ var FeedUpdateServiceInternal = {
         this.scheduledFeeds = this.scheduledFeeds.concat(newFeeds);
         this.updateQueue = this.updateQueue.concat(newFeeds);
 
-        if (Storage.getAllFeeds().every(function(f) this.scheduledFeeds.indexOf(f) != -1, this));
+        if (Storage.getAllFeeds().every(function(f) this.scheduledFeeds.indexOf(f) != -1, this))
             Prefs.setIntPref('update.lastUpdateTime', Math.round(Date.now() / 1000));
 
         // Start an update if it isn't in progress yet.
