@@ -141,12 +141,16 @@ FeedView.prototype = {
         else
             eventType = aAnimate ? 'UnCollapseEntryAnimated' : 'UnCollapseEntry';
 
+        var entryElement = this.document.getElementById(aEntry);
+
         var evt = this.document.createEvent('Events');
         evt.initEvent(eventType, false, false);
-        this.document.getElementById(aEntry).dispatchEvent(evt);
+        entryElement.dispatchEvent(evt);
 
-        if (!aNewState && this.query.searchString)
+        if (!aNewState && this.query.searchString) {
             this._highlightSearchTerms(aEntry);
+            entryElement.setAttribute('searchTermsHighlighted', true);
+        }
     },
 
     get selectedElement() {
@@ -1070,13 +1074,18 @@ FeedView.prototype = {
                 contentElem.style.display = 'block';
                 contentElem.innerHTML = aEntry.content;
                 contentElem.style.display = 'none';
-            })
+
+                // Highlight search terms in the entry title.
+                async(function() this._highlightSearchTerms(aEntry.id), 0, this);
+            }, 0, this)
         }
         else {
             contentElem.innerHTML = aEntry.content;
 
-            if (this.query.searchString)
+            if (this.query.searchString) {
                 async(function() this._highlightSearchTerms(aEntry.id), 0, this);
+                entryContainer.setAttribute('searchTermsHighlighted', true);
+            }
         }
 
         return entryContainer;
@@ -1233,8 +1242,6 @@ FeedView.prototype = {
                 startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
             }
         }, this)
-
-        entryElement.setAttribute('searchTermsHighlighted', true);
     },
 
     QueryInterface: function FeedView_QueryInterface(aIID) {
