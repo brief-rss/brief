@@ -13,17 +13,17 @@
 <!ENTITY openInNewTab.label "Zobrazit Brief v novém panelu">
 <!ENTITY openInNewTab.accesskey "b">
 <!ENTITY openEntriesInTabs.label "Zobrazit položky v novém panelu">
-<!ENTITY openEntriesInTabs.accesskey "p">
+<!ENTITY openEntriesInTabs.accesskey "b">
 <!ENTITY storingGroup.caption "Ukládání">
 <!ENTITY expirationBefore.label "Odstranit stažené položky po">
 <!ENTITY expirationAfter.label "dnech">
-<!ENTITY expirationCheckbox.accesskey "O">
+<!ENTITY expirationCheckbox.accesskey "d">
 <!ENTITY starredItemsKept.tooltip "Položky uložené do záložen budou zachovány">
 <!ENTITY storedEntriesBefore.label "Ukládat ne více než">
 <!ENTITY storedEntriesAfter.label "posledních položek každého kanálu">
-<!ENTITY storedEntriesCheckbox.accesskey "k">
+<!ENTITY storedEntriesCheckbox.accesskey "U">
 <!ENTITY clearAllEntriesButton.label "Smazat všechny položky...">
-<!ENTITY clearAllEntriesButton.accesskey "v">
+<!ENTITY clearAllEntriesButton.accesskey "S">
 <!ENTITY feedsPane.label "Kanály">
 <!ENTITY folderTree.label "Složka obsahující mé Aktuální záložky:">
 <!ENTITY importOPML.label "Importovat...">
@@ -31,21 +31,18 @@
 <!ENTITY exportOPML.label "Exportovat...">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Zobrazení">
-<!ENTITY entriesPerPageBefore.label "Zobrazit">
-<!ENTITY entriesPerPageAfter.label "položek na každé stránce">
-<!ENTITY entriesPerPage.accesskey "Z">
 <!ENTITY showStatusbarIcon.label "Zobrazit ikonku ve stavovém řádku">
 <!ENTITY showStatusbarIcon.accesskey "s">
+<!ENTITY showUnreadCounter.label "Zobrazit počet nepřečtených položek vedle ikonky Briefu">
+<!ENTITY showUnreadCounter.accesskey "i">
 <!ENTITY sortUnreadViewOldestFirst.label "Seřadit od nejstarší při zobrazení nepřečtených položek">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "n">
-<!ENTITY autoMarkRead.label "Označit položky za přečtené poté co je uvidím">
+<!ENTITY autoMarkRead.label "Označit položky za přečtené poté, co je uvidím">
 <!ENTITY autoMarkRead.accesskey "O">
-<!ENTITY shortcutsGroup.caption "Zkratky">
 <!ENTITY enableItemHightlight.label "Vždy zvýraznit aktuální položku">
 <!ENTITY enableItemHightlight.accesskey "V">
-<!ENTITY keyboardShortcuts.label "Klávesové zkratky">
-<!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Vzhled">
+<!ENTITY shortcutsPane.label "Zkratky">
 <!ENTITY editStyleDescription.label "Přizpůsobit vzhled kanálů">
 <!ENTITY editStyleButton.label "Přizpůsobit">
 <!ENTITY editStyleButton.accesskey "P">
