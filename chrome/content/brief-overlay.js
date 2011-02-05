@@ -361,10 +361,12 @@ const Brief = {
         Brief.prefs.setIntPref('homeFolder', folderID);
 
         // Load the first run page.
-        gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, {
-            relatedToCurrent: false,
-            inBackground: false
-        });
+        setTimeout(function() {
+            gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, {
+                relatedToCurrent: false,
+                inBackground: false
+            });
+        }, 0)
 
         Brief.prefs.setBoolPref('firstRun', false);
     },
