@@ -31,21 +31,18 @@
 <!ENTITY exportOPML.label "Exporter…">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Affichage">
-<!ENTITY entriesPerPageBefore.label "Afficher">
-<!ENTITY entriesPerPageAfter.label "articles par page">
-<!ENTITY entriesPerPage.accesskey "r">
 <!ENTITY showStatusbarIcon.label "Afficher l&apos;icône dans la barre d&apos;état">
 <!ENTITY showStatusbarIcon.accesskey "f">
+<!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus à côté de l'icône de Brief.">
+<!ENTITY showUnreadCounter.accesskey "l">
 <!ENTITY sortUnreadViewOldestFirst.label "Afficher les plus anciens en premier dans l&apos;affichage des articles non lus">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "A">
 <!ENTITY autoMarkRead.label "Marquer les articles vus comme lus">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY shortcutsGroup.caption "Raccourcis">
 <!ENTITY enableItemHightlight.label "Toujours surligner l&apos;article courant">
 <!ENTITY enableItemHightlight.accesskey "T">
-<!ENTITY keyboardShortcuts.label "Raccourcis clavier">
-<!ENTITY keyboardShortcuts.accesskey "R">
 <!ENTITY customizeGroup.caption "Apparence">
+<!ENTITY shortcutsPane.label "Raccourcis">
 <!ENTITY editStyleDescription.label "Personnaliser l&apos;apparence des flux">
 <!ENTITY editStyleButton.label "Personnaliser">
 <!ENTITY editStyleButton.accesskey "P">

@@ -1,21 +1,17 @@
-<!ENTITY confirmHomeFolder.label "OK">
-<!ENTITY searchCurrentView.label "Prohledat aktuální pohled">
-<!ENTITY searchAllFeeds.label "Prohledat všechny kanály">
-<!ENTITY headlinesCheckbox.tooltip "Použít zobrazení záhlaví">
-<!ENTITY showAll.label "Zobrazit vše">
-<!ENTITY showUnread.label "Zobrazit nepřečtené">
-<!ENTITY showStarred.label "Zobrazit záložky">
-<!ENTITY updateButton.tooltip "Zkontrolovat všechny kanály pro novinky">
-<!ENTITY stopUpdatingButton.tooltip "Zastavit kontrolu kanálů pro novinky">
-<!ENTITY searchScopeButton.tooltip "Změnit rozsah vyhledávání">
-<!ENTITY showOptions.tooltip "Otevřít možnosti rozšíření Brief">
-<!ENTITY markViewRead.tooltip "Zobrazit všechny položky jako nepřečtené (držte Ctrl pro označení pouze aktuální stránky)">
-<!ENTITY viewConstraintList.tooltip "Vyberte, které typy položek zobrazit">
-<!ENTITY previousPage.tooltip "Zobrazit novější položky">
-<!ENTITY nextPage.tooltip "Zobrazit starší položky">
+<!ENTITY searchBox.label "Hledat">
+<!ENTITY allItemsFolder.label "Všechny položky">
 <!ENTITY unreadFolder.label "Nepřečtené">
 <!ENTITY starredFolder.label "Záložky">
 <!ENTITY trashFolder.label "Koš">
+<!ENTITY headlinesCheckbox.tooltip "Použít zobrazení záhlaví">
+<!ENTITY filterUnread.tooltip "Zobrazit pouze nepřečtené položky (D)">
+<!ENTITY filterStarred.tooltip "Zobrazit pouze záložky (S)">
+<!ENTITY updateButton.tooltip "Zkontrolovat všechny kanály pro novinky">
+<!ENTITY stopUpdatingButton.tooltip "Zastavit kontrolu kanálů pro novinky">
+<!ENTITY showOptions.tooltip "Otevřít možnosti rozšíření Brief">
+<!ENTITY sidebarSplitter.tooltip "Dvojím klepnutím skryjete postranní lištu">
+<!ENTITY revealSidebar.tooltip "Znovu zobrazit postranní lištu">
+<!ENTITY markViewRead.tooltip "Označit všechny položky jako přečtené (Alt + N)">
 <!ENTITY ctxMarkFeedRead.label "Označit kanál jako přečtený">
 <!ENTITY ctxMarkFeedUnread.label "Označit kanál jako nepřečtený">
 <!ENTITY ctxMarkFolderRead.label "Označit složku jako přečtenou">
@@ -33,7 +29,7 @@
 <!ENTITY ctxFeedProperties.label "Vlastnosti">
 <!ENTITY ctxUpdateFeeds.label "Aktualizovat kanály teď">
 <!ENTITY ctxMarkFeedsAsRead.label "Označit všechny kanály jako přečtené">
+<!ENTITY showUnreadCounter.label "Zobrazit počet nepřečtených položek">
+<!ENTITY ctxShowOptions.label "Možnosti">
 <!ENTITY compactingWindow.title "Zhušťování kanálů">
 <!ENTITY compactingInProgress.label "Brief zhušťuje uložené kanály. To může trvat několik minut...">
-<!ENTITY migrationProgress.title "Převádění kanálů">
-<!ENTITY migrationProgress.description "Brief převádí uložené kanály...">
