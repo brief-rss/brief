@@ -1,0 +1,35 @@
+<!ENTITY searchBox.label "Suchen">
+<!ENTITY allItemsFolder.label "Alle Einträge">
+<!ENTITY unreadFolder.label "Ungelesen">
+<!ENTITY starredFolder.label "Lesezeichen">
+<!ENTITY trashFolder.label "Papierkorb">
+<!ENTITY headlinesCheckbox.tooltip "Überschriftenmodus verwenden(F)">
+<!ENTITY filterUnread.tooltip "Nur ungelesene Einträge anzeigen (D)">
+<!ENTITY filterStarred.tooltip "Nur Lesezeichen anzeigen (S)">
+<!ENTITY updateButton.tooltip "Alle Feeds auf Aktualisierungen prüfen">
+<!ENTITY stopUpdatingButton.tooltip "Überprüfung abbrechen">
+<!ENTITY showOptions.tooltip "Einstellungen öffnen">
+<!ENTITY sidebarSplitter.tooltip "Doppelklick zum Ausblenden der Sidebar">
+<!ENTITY revealSidebar.tooltip "Sidebar einblenden">
+<!ENTITY markViewRead.tooltip "Alle Einträge als gelesen markieren (Alt + N)">
+<!ENTITY ctxMarkFeedRead.label "Feed als gelesen markieren">
+<!ENTITY ctxMarkFeedUnread.label "Feed als ungelesen markieren">
+<!ENTITY ctxMarkFolderRead.label "Ordner als gelesen markieren">
+<!ENTITY ctxMarkTagRead.label "Mit Schlagwörtern versehene Einträge als gelesen markieren">
+<!ENTITY ctxUpdateFeed.label "Feed aktualisieren">
+<!ENTITY ctxUpdateFolder.label "Ordner aktualisieren">
+<!ENTITY ctxOpenWebsite.label "Homepage öffnen">
+<!ENTITY ctxDeleteFeed.label "Feed löschen">
+<!ENTITY ctxDeleteFolder.label "Ordner löschen">
+<!ENTITY ctxDeleteTag.label "Schlagwort löschen">
+<!ENTITY ctxEmptyFeed.label "Feed-Einträge löschen">
+<!ENTITY ctxEmptyFolder.label "Einträge des Feed-Ordners löschen">
+<!ENTITY ctxRestoreTrashed.label "Einträge aus dem Papierkorb wiederherstellen">
+<!ENTITY ctxEmptyTrash.label "Papierkorb leeren">
+<!ENTITY ctxFeedProperties.label "Eigenschaften">
+<!ENTITY ctxUpdateFeeds.label "Feeds jetzt aktualisieren">
+<!ENTITY ctxMarkFeedsAsRead.label "Alle Feeds als gelesen markieren">
+<!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Einträge anzeigen">
+<!ENTITY ctxShowOptions.label "Optionen">
+<!ENTITY compactingWindow.title "Feeds komprimieren">
+<!ENTITY compactingInProgress.label "Gespeicherte Feeds werden komprimiert. Dies kann einige Minuten in Anspruch nehmen...">
