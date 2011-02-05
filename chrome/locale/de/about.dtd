@@ -1,0 +1,8 @@
+<!ENTITY createdBy.headline "Erstellt von">
+<!ENTITY homepage.label "Die Homepage besuchen">
+<!ENTITY contributors.headline "Mitwirkende">
+<!ENTITY credits.headline "Danksagung an">
+<!ENTITY translators.headline "Übersetzer">
+<!ENTITY extdevThanks.paragraph "Dank an die großartigen Leute von #extdev bei irc.mozilla.org:">
+<!ENTITY iconsThanks.paragraph "Einige der Symbole mit freundlicher Genehmigung von Arvid Axelsson.">
+<!ENTITY toolbarIconsCredits.paragraph "Einige der Werkzeugleistensymbole wurden im Rahmen des Tango Desktop Project erstellt">
