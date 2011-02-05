@@ -1,36 +1,19 @@
 <!ENTITY shortcutsPage.title "Brief - tastaturgenveje">
-<!ENTITY navigation.header "Navigation">
 <!ENTITY or "eller">
-<!ENTITY ctrlShiftA.key "Ctrl + Skift + A">
-<!ENTITY openBrief "Åbn Brief">
+<!ENTITY navigation.header "Navigation">
 <!ENTITY space.key "Mellemrum">
-<!ENTITY showNextItem "Vis næste emne">
-<!ENTITY backspace.key "Backspace">
-<!ENTITY showPreviousItem "Vis foregående emne">
-<!ENTITY altK.key "Alt - K">
-<!ENTITY nextPage "Vis næste side">
-<!ENTITY altJ.key "Alt + J">
-<!ENTITY previousPage "Vis foregående side">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Åbn nuværende emne">
-<!ENTITY ctrlEnter.key "Ctrl + Enter">
-<!ENTITY cmdEnter.key "Cmd + Enter">
-<!ENTITY openEntryTab "Åbn nuværende emne i nyt faneblad">
-<!ENTITY foldEntry "Sammen- eller udfold nuværende emne (i overskrift-visning)">
 <!ENTITY entries.header "Emner">
-<!ENTITY markRead "Markér nuværende emne som læst eller ulæst">
-<!ENTITY starEntry "Bogmærk eller af-bogmærk nuværende emne">
-<!ENTITY moveToTrash "Flyt nuværende emne til skraldespand">
-<!ENTITY restoreEntry "Genetablér nuværende emne fra skraldespand">
-<!ENTITY ctrlM.key "Ctrl + M">
-<!ENTITY cmdM.key "Cmd + M">
-<!ENTITY markAllAsRead "Marker alle viste emner som læste">
 <!ENTITY tab.key "Tab">
 <!ENTITY enableEntryHightlight "Aktivér fremhævning af nuværende emne">
+<!ENTITY moveToTrash "Flyt nuværende emne til skraldespand">
 <!ENTITY view.header "Vis">
 <!ENTITY showAll "Vis alle emner">
 <!ENTITY showStarred "Vis bogmærkede emner">
 <!ENTITY showUnread "Vis ulæste emner">
 <!ENTITY headlinesView "Slå overskrift-visning til/fra">
+
+<!ENTITY openBrief "Åbn Brief">
 <!ENTITY focusSearchbar "Fokusér søgelinje">
 <!ENTITY displayShortcuts "Vis liste over genvejstaster">

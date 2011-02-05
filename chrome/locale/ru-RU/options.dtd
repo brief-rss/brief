@@ -31,21 +31,18 @@
 <!ENTITY exportOPML.label "Экспорт…">
 <!ENTITY exportOPML.accesskey "Э">
 <!ENTITY displayPane.label "Отображение">
-<!ENTITY entriesPerPageBefore.label "Показывать">
-<!ENTITY entriesPerPageAfter.label "записей на странице">
-<!ENTITY entriesPerPage.accesskey "П">
 <!ENTITY showStatusbarIcon.label "Показывать значок в строке состояния">
 <!ENTITY showStatusbarIcon.accesskey "з">
+<!ENTITY showUnreadCounter.label "Показывать число непрочитанных новостей возле значка">
+<!ENTITY showUnreadCounter.accesskey "ы">
 <!ENTITY sortUnreadViewOldestFirst.label "В списке непрочитанных новостей показывать старые записи в начале">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "о">
 <!ENTITY autoMarkRead.label "Отмечать записи прочитанными после просмотра">
 <!ENTITY autoMarkRead.accesskey "п">
-<!ENTITY shortcutsGroup.caption "Клавиатурные сокращения">
 <!ENTITY enableItemHightlight.label "Всегда подсвечивать текущую запись">
 <!ENTITY enableItemHightlight.accesskey "В">
-<!ENTITY keyboardShortcuts.label "Клавиатурные сокращения">
-<!ENTITY keyboardShortcuts.accesskey "К">
 <!ENTITY customizeGroup.caption "Внешний вид">
+<!ENTITY shortcutsPane.label "Быстрый вызов">
 <!ENTITY editStyleDescription.label "Настройка внешнего вида лент">
 <!ENTITY editStyleButton.label "Настроить">
 <!ENTITY editStyleButton.accesskey "Н">

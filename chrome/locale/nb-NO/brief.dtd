@@ -1,21 +1,17 @@
-<!ENTITY confirmHomeFolder.label "OK">
-<!ENTITY searchCurrentView.label "Søk i nyhetskilden">
-<!ENTITY searchAllFeeds.label "Søk i alle nyhetskilder">
-<!ENTITY headlinesCheckbox.tooltip "Bruk overskriftsvisning">
-<!ENTITY showAll.label "Vis alle">
-<!ENTITY showUnread.label "Vis ulest">
-<!ENTITY showStarred.label "Vis bokmerker">
-<!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
-<!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskilder">
-<!ENTITY searchScopeButton.tooltip "Endre søk">
-<!ENTITY showOptions.tooltip "Innstillinger for Brief">
-<!ENTITY markViewRead.tooltip "Merk alle elementer som lest (hold Ctrl for å kun merke gjeldende side)">
-<!ENTITY viewConstraintList.tooltip "Velg hvilke elementer som skal vises">
-<!ENTITY previousPage.tooltip "Vis nyere elementer">
-<!ENTITY nextPage.tooltip "Vis eldre elementer">
+<!ENTITY searchBox.label "Søk">
+<!ENTITY allItemsFolder.label "Alle">
 <!ENTITY unreadFolder.label "Ulest">
 <!ENTITY starredFolder.label "Bokmerker">
 <!ENTITY trashFolder.label "Papirkurv">
+<!ENTITY headlinesCheckbox.tooltip "Bruk overskriftsvisning">
+<!ENTITY filterUnread.tooltip "Vis kun uleste elementer (D)">
+<!ENTITY filterStarred.tooltip "Vis kun bokmerker elementer (S)">
+<!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
+<!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskilder">
+<!ENTITY showOptions.tooltip "Innstillinger for Brief">
+<!ENTITY sidebarSplitter.tooltip "Dobbeltklikk for å skjule sidestolpen">
+<!ENTITY revealSidebar.tooltip "Vis sidestolpen">
+<!ENTITY markViewRead.tooltip "Merk alle elementer som lest (hold Ctrl for å kun merke gjeldende side)">
 <!ENTITY ctxMarkFeedRead.label "Merk nyhetskilden som lest">
 <!ENTITY ctxMarkFeedUnread.label "Merk nyhetskilden som ulest">
 <!ENTITY ctxMarkFolderRead.label "Merk mappe som lest">
@@ -33,7 +29,7 @@
 <!ENTITY ctxFeedProperties.label "Egenskaper">
 <!ENTITY ctxUpdateFeeds.label "Oppdater nyhetskilder nå">
 <!ENTITY ctxMarkFeedsAsRead.label "Merk alle nyhetskilder som lest">
+<!ENTITY showUnreadCounter.label "Vis antall uleste elementer">
+<!ENTITY ctxShowOptions.label "Innstillinger">
 <!ENTITY compactingWindow.title "Komprimerer nyhetskilder">
 <!ENTITY compactingInProgress.label "Brief komprimerer lagrede nyhetskilder. Dette kan ta noen minutter ...">
-<!ENTITY migrationProgress.title "Migrering av nyhetskilder">
-<!ENTITY migrationProgress.description "Brief migrerer lagrede nyhetskilder ...">

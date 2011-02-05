@@ -1,22 +1,11 @@
-
-
-<!ENTITY searchCurrentView.label "Rechercher dans les articles courants">
-<!ENTITY searchAllFeeds.label "Rechercher dans tous les flux">
-<!ENTITY updateButton.tooltip "Mettre à jour tous les flux">
-<!ENTITY stopUpdatingButton.tooltip "Arrêter la recherche de mises à jour">
-<!ENTITY searchScopeButton.tooltip "Modifier la portée de recherche">
-<!ENTITY showOptions.tooltip "Ouvrir les options de Brief">
-
-<!ENTITY viewConstraintList.tooltip "Choisir quel type d&apos;articles afficher">
-<!ENTITY previousPage.tooltip "Afficher les articles plus récents">
-<!ENTITY nextPage.tooltip "Afficher les articles plus anciens">
 <!ENTITY unreadFolder.label "Non lus">
 <!ENTITY starredFolder.label "Marqués">
 <!ENTITY trashFolder.label "Corbeille">
+<!ENTITY updateButton.tooltip "Mettre à jour tous les flux">
+<!ENTITY stopUpdatingButton.tooltip "Arrêter la recherche de mises à jour">
+<!ENTITY showOptions.tooltip "Ouvrir les options de Brief">
 <!ENTITY ctxMarkFeedRead.label "Marquer le flux comme lu">
-
 <!ENTITY ctxMarkFolderRead.label "Marquer le dossier comme lu">
-
 <!ENTITY ctxUpdateFeed.label "Mettre le flux à jour">
 <!ENTITY ctxUpdateFolder.label "Mettre le dossier à jour">
 <!ENTITY ctxOpenWebsite.label "Afficher le site Web">

@@ -31,21 +31,18 @@
 <!ENTITY exportOPML.label "Eksporter ...">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Visning">
-<!ENTITY entriesPerPageBefore.label "Vis">
-<!ENTITY entriesPerPageAfter.label "elementer pr side">
-<!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY showStatusbarIcon.label "Vis ikon i statuslinja">
 <!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY showUnreadCounter.label "Vis antall uleste elementer ved siden av ikonet til Brief">
+<!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Sorter eldste elementer først i ulest visning">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Merk elementer som lest etter at jeg har sett dem">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY shortcutsGroup.caption "Snarveier">
 <!ENTITY enableItemHightlight.label "Uthev alltid valgte element">
 <!ENTITY enableItemHightlight.accesskey "A">
-<!ENTITY keyboardShortcuts.label "Tastatursnarveier">
-<!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Utseende">
+<!ENTITY shortcutsPane.label "Snarveier">
 <!ENTITY editStyleDescription.label "Tilpass utseende til nyhetskilder">
 <!ENTITY editStyleButton.label "Tilpass">
 <!ENTITY editStyleButton.accesskey "C">

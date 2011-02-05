@@ -31,20 +31,14 @@
 <!ENTITY exportOPML.label "Dışa aktar...">
 <!ENTITY exportOPML.accesskey "D">
 <!ENTITY displayPane.label "Görünüm">
-<!ENTITY entriesPerPageBefore.label "Her sayfada">
-<!ENTITY entriesPerPageAfter.label "öğe göster">
-<!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY showStatusbarIcon.label "Durum çubuğunda simge göster">
 <!ENTITY showStatusbarIcon.accesskey "R">
 <!ENTITY sortUnreadViewOldestFirst.label "Okunmadı görünümünde önce en eski öğeleri göster">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Öğeleri gördükten sonra okundu olarak işaretle">
 <!ENTITY autoMarkRead.accesskey "S">
-<!ENTITY shortcutsGroup.caption "Kısayollar">
 <!ENTITY enableItemHightlight.label "Seçili öğeyi her zaman vurgula">
 <!ENTITY enableItemHightlight.accesskey "A">
-<!ENTITY keyboardShortcuts.label "Klavye kısayolları">
-<!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Dış Görünüm">
 <!ENTITY editStyleDescription.label "Beslemelerin görünümünü özelleştir">
 <!ENTITY editStyleButton.label "Özelleştir">
