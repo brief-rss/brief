@@ -5,25 +5,21 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>1.5b3</version>
+    <version>1.5</version>
     <type>2</type>
-    <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
-
-    <!-- Target Application this extension can install into,
-         with minimum and maximum supported versions. -->
-    <targetApplication>
-      <rdf:Description>
-        <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-        <minVersion>3.6</minVersion>
-        <maxVersion>4.0b8</maxVersion>
-      </rdf:Description>
-    </targetApplication>
-
-    <!-- Front End MetaData -->
     <name>Brief</name>
     <description>A feed reading extension.</description>
     <creator>Adam Kowalczyk</creator>
     <homepageURL>http://brief.mozdev.org/</homepageURL>
+    <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
+
+    <targetApplication>
+      <rdf:Description>
+        <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
+        <minVersion>3.6</minVersion>
+        <maxVersion>4.0.*</maxVersion>
+      </rdf:Description>
+    </targetApplication>
 
     <contributor>Leszek "teo" Życzkowski</contributor>
     <contributor>Christopher Finke</contributor>
@@ -32,26 +28,28 @@
     <contributor>Some of the icons were made as part of the Tango Desktop Project.</contributor>
     <contributor>Thanks to all the great people on #extdev at irc.mozilla.org: Christian Biesinger, Mark Finkle, Mook, Nickolay Ponomarev, Doron Rosenberg, Dave Townsend and Mike Shaver.</contributor>
 
-    <translator>The Zero (cs-CZ)</translator>
-    <translator>AlleyKat (da-DK)</translator>
-    <translator>Fenian (de-DE)</translator>
-    <translator>Fux (de-DE)</translator>
-    <translator>Sonickydon (el-GR)</translator>
-    <translator>**Juanito** (es-AR)</translator>
-    <translator>villepyry (fi-FI)</translator>
-    <translator>nico@nc (fr-FR)</translator>
+    <translator>The Zero (cs)</translator>
+    <translator>AlleyKat (da)</translator>
+    <translator>Joergen (da)</translator>
+    <translator>Fenian (de)</translator>
+    <translator>Fux (de)</translator>
+    <translator>Team erweiterungen.de (de)</translator>
+    <translator>Sonickydon (el)</translator>
+    <translator>nico@nc (fr)</translator>
+    <translator>Goofy (fr)</translator>
+    <translator>lois (gl)</translator>
     <translator>kami (hu-HU)</translator>
     <translator>Cashman (hu-HU)</translator>
-    <translator>MatrixIsAllOver it-IT)</translator>
-    <translator>drry (ja-JP)</translator>
+    <translator>Luana (it)</translator>
+    <translator>drry (ja)</translator>
     <translator>gandhi2 (nb-NO)</translator>
-    <translator>markh (nl-NL)</translator>
+    <translator>markh (nl)</translator>
+    <translator>cachopo (pt-BR)</translator>
     <translator>Merlyel (ru-RU)</translator>
     <translator>Modex (ru-RU)</translator>
     <translator>Jacen (sk-SK)</translator>
-    <translator>manilyildiz (tr-TR)</translator>
+    <translator>Lakrits</translator>
     <translator>xmoke (zh-CN)</translator>
-    <translator>winiah (zh-TW)</translator>
 
   </rdf:Description>
 </rdf:RDF>
