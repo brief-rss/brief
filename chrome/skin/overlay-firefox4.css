@@ -1,7 +1,6 @@
 #brief-button {
     -moz-box-align: center;
     -moz-box-orient: horizontal;
-    list-style-image: url(chrome://brief/skin/feed-icon-16x16.png);
 }
 
 #brief-button .toolbarbutton-icon {
