@@ -1,3 +1,11 @@
+#brief-button {
+    list-style-image: url(chrome://brief/skin/toolbarbutton.png);
+}
+
+toolbar[iconsize=small] #brief-button {
+    list-style-image: url(chrome://brief/skin/feed-icon-16x16.png);
+}
+
 #brief-tooltip-last-updated {
   margin-bottom: 0.75em;
 }
