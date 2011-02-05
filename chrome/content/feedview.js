@@ -1083,8 +1083,10 @@ FeedView.prototype = {
             contentElem.innerHTML = aEntry.content;
 
             if (this.query.searchString) {
-                async(function() this._highlightSearchTerms(aEntry.id), 0, this);
-                entryContainer.setAttribute('searchTermsHighlighted', true);
+                async(function() {
+                    this._highlightSearchTerms(aEntry.id);
+                    entryContainer.setAttribute('searchTermsHighlighted', true);
+                } , 0, this);
             }
         }
 
