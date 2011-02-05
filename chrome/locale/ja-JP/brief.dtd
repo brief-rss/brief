@@ -1,21 +1,17 @@
-<!ENTITY confirmHomeFolder.label "承認">
-<!ENTITY searchCurrentView.label "現在の表示から検索">
-<!ENTITY searchAllFeeds.label "すべてのフィードを検索">
-<!ENTITY headlinesCheckbox.tooltip "ヘッドライン表示を利用します">
-<!ENTITY showAll.label "すべて見る">
-<!ENTITY showUnread.label "未読を見る">
-<!ENTITY showStarred.label "ブックマークを見る">
-<!ENTITY updateButton.tooltip "全フィードの更新を確認します">
-<!ENTITY stopUpdatingButton.tooltip "フィード更新の確認を停止します">
-<!ENTITY searchScopeButton.tooltip "検索範囲を変更します">
-<!ENTITY showOptions.tooltip "Brief のオプションを開きます">
-<!ENTITY markViewRead.tooltip "すべての項目を既読にします (現在のページのみを既読にするためには Ctrl を押したままにします)">
-<!ENTITY viewConstraintList.tooltip "表示する項目の種類を選びます">
-<!ENTITY previousPage.tooltip "より新たな項目を表示します">
-<!ENTITY nextPage.tooltip "より古い項目を表示します">
+<!ENTITY searchBox.label "検索">
+<!ENTITY allItemsFolder.label "すべての項目">
 <!ENTITY unreadFolder.label "未読">
 <!ENTITY starredFolder.label "ブックマーク">
 <!ENTITY trashFolder.label "ごみ箱">
+<!ENTITY headlinesCheckbox.tooltip "ヘッドラインを表示します (F)">
+<!ENTITY filterUnread.tooltip "未読の項目のみを表示します (D)">
+<!ENTITY filterStarred.tooltip "ブックマークのみを表示します (S)">
+<!ENTITY updateButton.tooltip "すべてのフィードの更新を確認します">
+<!ENTITY stopUpdatingButton.tooltip "フィード更新の確認を停止します">
+<!ENTITY showOptions.tooltip "Brief のオプションを開きます">
+<!ENTITY sidebarSplitter.tooltip "ダブルクリックするとサイドバーを非表示にします">
+<!ENTITY revealSidebar.tooltip "サイドバーを表示させます">
+<!ENTITY markViewRead.tooltip "すべての項目を既読にします (Alt + N)">
 <!ENTITY ctxMarkFeedRead.label "フィードを既読にする">
 <!ENTITY ctxMarkFeedUnread.label "フィードを未読にする">
 <!ENTITY ctxMarkFolderRead.label "フォルダを既読にする">
@@ -33,7 +29,7 @@
 <!ENTITY ctxFeedProperties.label "プロパティ">
 <!ENTITY ctxUpdateFeeds.label "今すぐフィードを更新する">
 <!ENTITY ctxMarkFeedsAsRead.label "すべてのフィードを既読にする">
+<!ENTITY showUnreadCounter.label "未読数を表示する">
+<!ENTITY ctxShowOptions.label "オプション">
 <!ENTITY compactingWindow.title "フィード圧縮中">
-<!ENTITY compactingInProgress.label "Brief は保管済みフィードを圧縮しています。しばらく時間がかかるでしょう...">
-<!ENTITY migrationProgress.title "フィードの移行">
-<!ENTITY migrationProgress.description "Brief は保管済みフィードを移行しています...">
+<!ENTITY compactingInProgress.label "Brief は保管済みのフィードを圧縮しています。これにはしばらく時間がかかることがあります...">

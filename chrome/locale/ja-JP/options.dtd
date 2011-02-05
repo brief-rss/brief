@@ -22,7 +22,7 @@
 <!ENTITY storedEntriesBefore.label "フィードごとに最新">
 <!ENTITY storedEntriesAfter.label "項目以上は保管しない">
 <!ENTITY storedEntriesCheckbox.accesskey "n">
-<!ENTITY clearAllEntriesButton.label "すべての項目を一掃する...">
+<!ENTITY clearAllEntriesButton.label "すべての項目を消去する...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY feedsPane.label "フィード">
 <!ENTITY folderTree.label "ライブブックマークを含むフォルダ:">
@@ -31,21 +31,18 @@
 <!ENTITY exportOPML.label "書き出す...">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "表示">
-<!ENTITY entriesPerPageBefore.label "ページあたり">
-<!ENTITY entriesPerPageAfter.label "項目ずつ表示する">
-<!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY showStatusbarIcon.label "ステータスバーアイコンを表示する">
 <!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY showUnreadCounter.label "未読数を Brief のアイコンに表示する">
+<!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "未読表示で古い項目から先に並び替える">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "項目を見たら既読にする">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY shortcutsGroup.caption "ショートカット">
 <!ENTITY enableItemHightlight.label "常に現在の項目を強調表示する">
 <!ENTITY enableItemHightlight.accesskey "A">
-<!ENTITY keyboardShortcuts.label "キーボードショートカット">
-<!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "外観">
+<!ENTITY shortcutsPane.label "ショートカット">
 <!ENTITY editStyleDescription.label "フィードの外観をカスタマイズする">
 <!ENTITY editStyleButton.label "カスタマイズ">
 <!ENTITY editStyleButton.accesskey "C">

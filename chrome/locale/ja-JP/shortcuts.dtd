@@ -1,36 +1,32 @@
 <!ENTITY shortcutsPage.title "Brief - キーボードショートカット">
-<!ENTITY navigation.header "ナビゲーション">
 <!ENTITY or "または">
-<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
-<!ENTITY openBrief "Brief を開く">
+<!ENTITY navigation.header "ナビゲーション">
 <!ENTITY space.key "Space">
-<!ENTITY showNextItem "次の項目を表示する">
-<!ENTITY backspace.key "BackSpace">
-<!ENTITY showPreviousItem "前の項目を表示する">
-<!ENTITY altK.key "Alt + K">
-<!ENTITY nextPage "次のページを表示する">
-<!ENTITY altJ.key "Alt + J">
-<!ENTITY previousPage "前のページを表示する">
+<!ENTITY shiftSpace.key "Shift + スペース">
+<!ENTITY nextItem "次の項目へ移動">
+<!ENTITY previousItem "以前の項目へ移動">
+<!ENTITY skipDown "10項目下へ飛ばす">
+<!ENTITY skipUp "10項目上へ飛ばす">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "現在の項目を開く">
-<!ENTITY ctrlEnter.key "Ctrl + Enter">
-<!ENTITY cmdEnter.key "Cmd + Enter">
-<!ENTITY openEntryTab "現在の項目を新しいタブで開く">
-<!ENTITY foldEntry "現在の項目の展開または折り畳み (見出し表示時)">
+<!ENTITY showItem "現在の項目の表示・非表示 (ヘッドライン表示にて)">
 <!ENTITY entries.header "項目">
-<!ENTITY markRead "現在の項目を既読または未読にする">
-<!ENTITY starEntry "現在の項目をブックマークするまたはしない">
-<!ENTITY moveToTrash "現在の項目をごみ箱へ移動する">
-<!ENTITY restoreEntry "現在の項目をごみ箱から元に戻す">
-<!ENTITY ctrlM.key "Ctrl + M">
-<!ENTITY cmdM.key "Cmd + M">
-<!ENTITY markAllAsRead "すべての表示済み項目を既読にする">
 <!ENTITY tab.key "Tab">
 <!ENTITY enableEntryHightlight "現在の項目の強調表示を有効にする">
+<!ENTITY markCurrentItemRead "現在の項目を既読・未読にする">
+<!ENTITY markVisibleRead "画面上のすべての項目を既読にする">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "すべての項目を既読にする">
+<!ENTITY starItem "現在の項目をブックマーク">
+<!ENTITY moveToTrash "現在の項目をごみ箱へ移動する">
 <!ENTITY view.header "表示">
 <!ENTITY showAll "すべての項目を表示する">
 <!ENTITY showStarred "ブックマーク済み項目を表示する">
 <!ENTITY showUnread "未読項目を表示する">
 <!ENTITY headlinesView "見出し表示を切り替える">
+<!ENTITY general.header "全般">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Brief を開く">
 <!ENTITY focusSearchbar "検索バーにフォーカスを移す">
 <!ENTITY displayShortcuts "ショートカットキーの一覧を表示する">
