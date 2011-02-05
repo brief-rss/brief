@@ -1,21 +1,17 @@
-<!ENTITY confirmHomeFolder.label "OK">
-<!ENTITY searchCurrentView.label "Keresés az aktuális nézetben">
-<!ENTITY searchAllFeeds.label "Keresés az összes hírforrásban">
-<!ENTITY headlinesCheckbox.tooltip "Fejléc nézet használata">
-<!ENTITY showAll.label "Mindent megjelenít">
-<!ENTITY showUnread.label "Olvasatlan megjelenítése">
-<!ENTITY showStarred.label "Könyvjelzők megtekintése">
-<!ENTITY updateButton.tooltip "Hírforrások frissítése">
-<!ENTITY stopUpdatingButton.tooltip "Hírforrás felfüggesztése">
-<!ENTITY searchScopeButton.tooltip "Keresési hatókör megváltoztatása">
-<!ENTITY showOptions.tooltip "Brief – Beállítások">
-<!ENTITY markViewRead.tooltip "Mindegyik elem megjelölése olvasottként (CTRL csak a jelenlegit)">
-<!ENTITY viewConstraintList.tooltip "Válassza ki milyen típusú bejegyzése jelenjen meg">
-<!ENTITY previousPage.tooltip "Újabb bejegyzések megjelenítése">
-<!ENTITY nextPage.tooltip "Régebbi bejegyzések megjelenítése">
+<!ENTITY searchBox.label "Keresés">
+<!ENTITY allItemsFolder.label "Összes elem">
 <!ENTITY unreadFolder.label "Olvasatlan">
 <!ENTITY starredFolder.label "Könyvjelzők">
 <!ENTITY trashFolder.label "Törölt bejegyzések">
+<!ENTITY headlinesCheckbox.tooltip "Fejléc nézet használata">
+<!ENTITY filterUnread.tooltip "Csak olvasatlan elemek">
+<!ENTITY filterStarred.tooltip "Csak a Könyvjelzők">
+<!ENTITY updateButton.tooltip "Hírforrások frissítése">
+<!ENTITY stopUpdatingButton.tooltip "Hírforrás felfüggesztése">
+<!ENTITY showOptions.tooltip "Brief – Beállítások">
+<!ENTITY sidebarSplitter.tooltip "Duplakattintás az oldalsáv elrejtéséhez">
+<!ENTITY revealSidebar.tooltip "Oldalsáv megjelenítése">
+<!ENTITY markViewRead.tooltip "Mindegyik elem megjelölése olvasottként (CTRL csak a jelenlegit)">
 <!ENTITY ctxMarkFeedRead.label "Hírforrást olvasottnak jelöl">
 <!ENTITY ctxMarkFeedUnread.label "Megjelölés olvasatlanként">
 <!ENTITY ctxMarkFolderRead.label "Mappát olvasottnak jelöl">
@@ -33,7 +29,7 @@
 <!ENTITY ctxFeedProperties.label "Tulajdonságok">
 <!ENTITY ctxUpdateFeeds.label "Hírforrások frissítése azonnal">
 <!ENTITY ctxMarkFeedsAsRead.label "Hírforrások jelölése olvasottként">
+<!ENTITY showUnreadCounter.label "Olvasatlan elemek számának megjelenítése">
+<!ENTITY ctxShowOptions.label "Beállítások">
 <!ENTITY compactingWindow.title "Hírforrások tömörítése">
 <!ENTITY compactingInProgress.label "A Brief tömöríti a mentett hírforrásokat. Kérem várjon...">
-<!ENTITY migrationProgress.title "Hírforrások migrációja">
-<!ENTITY migrationProgress.description "A Brief a mentett hírforrások migrációját végzi...">

@@ -1,21 +1,11 @@
-<!ENTITY confirmHomeFolder.label "Tamam">
-<!ENTITY searchCurrentView.label "Seçili görünümü ara">
-<!ENTITY searchAllFeeds.label "Tüm beslemeleri ara">
-<!ENTITY headlinesCheckbox.tooltip "Başlık görünümünü kullan">
-<!ENTITY showAll.label "Tümü">
-<!ENTITY showUnread.label "Okunmayanlar">
-<!ENTITY showStarred.label "İşaretliler">
-<!ENTITY updateButton.tooltip "Tüm beslemeleri güncellemeler için kontrol et">
-<!ENTITY stopUpdatingButton.tooltip "Beslemelerin güncellenmesini durdur">
-<!ENTITY searchScopeButton.tooltip "Arama alanını değiştir">
-<!ENTITY showOptions.tooltip "Brief seçeneklerini aç">
-<!ENTITY markViewRead.tooltip "Tüm öğeleri okundu olarak işaretle (Sadece geçerli sayfayı işaretlemek için CTRL&apos;ye basılı tutun)">
-<!ENTITY viewConstraintList.tooltip "Ne tür öğelerin gösterileceğini seçin">
-<!ENTITY previousPage.tooltip "Daha yeni öğeleri göster">
-<!ENTITY nextPage.tooltip "Daha eski öğeleri göster">
 <!ENTITY unreadFolder.label "Okunmamış">
 <!ENTITY starredFolder.label "İşaretlenmiş">
 <!ENTITY trashFolder.label "Çöp Kutusu">
+<!ENTITY headlinesCheckbox.tooltip "Başlık görünümünü kullan">
+<!ENTITY updateButton.tooltip "Tüm beslemeleri güncellemeler için kontrol et">
+<!ENTITY stopUpdatingButton.tooltip "Beslemelerin güncellenmesini durdur">
+<!ENTITY showOptions.tooltip "Brief seçeneklerini aç">
+<!ENTITY markViewRead.tooltip "Tüm öğeleri okundu olarak işaretle (Sadece geçerli sayfayı işaretlemek için CTRL&apos;ye basılı tutun)">
 <!ENTITY ctxMarkFeedRead.label "Beslemeyi Okundu Olarak İşaretle">
 <!ENTITY ctxMarkFeedUnread.label "Beslemeyi Okunmadı Olarak İşaretle">
 <!ENTITY ctxMarkFolderRead.label "Klasörü Okundu Olarak İşaretle">
@@ -35,5 +25,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Tüm Beslemeleri Okundu Olarak İşaretle">
 <!ENTITY compactingWindow.title "Beslemeler sıkıştırılıyor">
 <!ENTITY compactingInProgress.label "Brief, depolanmış beslemeleri sıkıştırıyor. Bu birkaç dakika sürebilir...">
-<!ENTITY migrationProgress.title "Beslemeler taşınıyor">
-<!ENTITY migrationProgress.description "Brief depolanmış beslemeleri taşıyor...">

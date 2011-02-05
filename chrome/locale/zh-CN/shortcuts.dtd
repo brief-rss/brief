@@ -1,36 +1,32 @@
 <!ENTITY shortcutsPage.title "Brief 快捷键">
-<!ENTITY navigation.header "导航">
 <!ENTITY or "或">
-<!ENTITY ctrlShiftA.key "Ctrl + Shift + A">
-<!ENTITY openBrief "打开 Brief">
+<!ENTITY navigation.header "导航">
 <!ENTITY space.key "Space">
-<!ENTITY showNextItem "显示下个项目">
-<!ENTITY backspace.key "Backspace">
-<!ENTITY showPreviousItem "显示上个项目">
-<!ENTITY altK.key "Alt + K">
-<!ENTITY nextPage "显示下个页面">
-<!ENTITY altJ.key "Alt + J">
-<!ENTITY previousPage "显示上个页面">
+<!ENTITY shiftSpace.key "Shift + 空格">
+<!ENTITY nextItem "跳到下个项目">
+<!ENTITY previousItem "跳到上个项目">
+<!ENTITY skipDown "跳过10个项目">
+<!ENTITY skipUp "跳返10个项目">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "打开当前阅读的项目">
-<!ENTITY ctrlEnter.key "Ctrl + Enter">
-<!ENTITY cmdEnter.key "Cmd + Enter">
-<!ENTITY openEntryTab "在新标签页打开当前阅读的项目">
-<!ENTITY foldEntry "展开或折叠当前阅读的项目（只显示标题时）">
+<!ENTITY showItem "显示或隐藏当前项目（在头条阅读模式）">
 <!ENTITY entries.header "项目">
-<!ENTITY markRead "标记当前阅读的项目为已读或未读">
-<!ENTITY starEntry "将当前阅读的项目加入或移出书签">
-<!ENTITY moveToTrash "将当前阅读的项目移到垃圾箱">
-<!ENTITY restoreEntry "还原当前阅读的项目">
-<!ENTITY ctrlM.key "Ctrl + M">
-<!ENTITY cmdM.key "Cmd + M">
-<!ENTITY markAllAsRead "标记所有已查看的项目为已读">
 <!ENTITY tab.key "Tab">
 <!ENTITY enableEntryHightlight "高亮当前阅读的项目">
+<!ENTITY markCurrentItemRead "标记当前项目为已读或未读">
+<!ENTITY markVisibleRead "标记所有项目为已读或未读">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "标记所有项目为已读">
+<!ENTITY starItem "将当前项目加入书签">
+<!ENTITY moveToTrash "将当前阅读的项目移到垃圾箱">
 <!ENTITY view.header "查看">
 <!ENTITY showAll "显示所有项目">
 <!ENTITY showStarred "显示加入书签的项目">
 <!ENTITY showUnread "显示未读项目">
 <!ENTITY headlinesView "切换只显示标题">
+<!ENTITY general.header "常规">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "打开 Brief">
 <!ENTITY focusSearchbar "切换焦点到搜索栏">
 <!ENTITY displayShortcuts "显示快捷键列表">

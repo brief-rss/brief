@@ -31,21 +31,18 @@
 <!ENTITY exportOPML.label "Exportovať...">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Zobraziť">
-<!ENTITY entriesPerPageBefore.label "Zobraziť">
-<!ENTITY entriesPerPageAfter.label "položiek na stránku">
-<!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY showStatusbarIcon.label "Zobraziť ikonu v stavom riadku">
 <!ENTITY showStatusbarIcon.accesskey "i">
+<!ENTITY showUnreadCounter.label "Zobraziť počet neprečítaných položiek vedľa ikony Brief">
+<!ENTITY showUnreadCounter.accesskey "b">
 <!ENTITY sortUnreadViewOldestFirst.label "V náhľade neprečítaných zobraziť najprv najstaršie články">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "n">
 <!ENTITY autoMarkRead.label "Pred zobrazením označiť články ako prečítané">
 <!ENTITY autoMarkRead.accesskey "z">
-<!ENTITY shortcutsGroup.caption "Skratky">
 <!ENTITY enableItemHightlight.label "Vždy zvýrazniť aktuálny článok">
 <!ENTITY enableItemHightlight.accesskey "V">
-<!ENTITY keyboardShortcuts.label "Klávesové skratky">
-<!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Vzhľad">
+<!ENTITY shortcutsPane.label "Klávesové skratky">
 <!ENTITY editStyleDescription.label "Prispôsobiť vzhľad kanálov">
 <!ENTITY editStyleButton.label "Prispôsobiť">
 <!ENTITY editStyleButton.accesskey "P">

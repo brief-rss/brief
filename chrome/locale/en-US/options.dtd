@@ -39,7 +39,7 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Automatically mark items as read after I see them">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Highlight the active item to let me manage it using shortcuts">
+<!ENTITY enableItemHightlight.label "Highlight the active item">
 <!ENTITY enableItemHightlight.accesskey "H">
 <!ENTITY customizeGroup.caption "Appearance">
 <!ENTITY shortcutsPane.label "Shorcuts">

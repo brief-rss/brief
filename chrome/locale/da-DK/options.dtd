@@ -31,20 +31,17 @@
 <!ENTITY exportOPML.label "Eksportér...">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Vis">
-<!ENTITY entriesPerPageBefore.label "Vis">
-<!ENTITY entriesPerPageAfter.label "indlæg pr. side">
-<!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY showStatusbarIcon.label "Vis statuslinje-ikon">
 <!ENTITY showStatusbarIcon.accesskey "u">
 <!ENTITY sortUnreadViewOldestFirst.label "Sortér ældste emner først i ulæste-visning">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
-<!ENTITY autoMarkRead.label "Markér emner som læste efter jeg har set dem">
-<!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY shortcutsGroup.caption "Genveje">
-<!ENTITY enableItemHightlight.label "Fremhæv altid nuværende emne">
-<!ENTITY enableItemHightlight.accesskey "F">
-<!ENTITY keyboardShortcuts.label "Tastaturgenveje">
-<!ENTITY keyboardShortcuts.accesskey "g">
+
+
+
+
+
+
+
 <!ENTITY customizeGroup.caption "Udseende">
 <!ENTITY editStyleDescription.label "Tilret udseendet for feeds">
 <!ENTITY editStyleButton.label "Tilret">

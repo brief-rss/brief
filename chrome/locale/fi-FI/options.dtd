@@ -31,20 +31,14 @@
 <!ENTITY exportOPML.label "Vie...">
 <!ENTITY exportOPML.accesskey "V">
 <!ENTITY displayPane.label "Näyttö">
-<!ENTITY entriesPerPageBefore.label "Yhdellä sivulla on">
-<!ENTITY entriesPerPageAfter.label "merkintää">
-<!ENTITY entriesPerPage.accesskey "Y">
 <!ENTITY showStatusbarIcon.label "Näytä kuvake tilarivillä">
 <!ENTITY showStatusbarIcon.accesskey "N">
 <!ENTITY sortUnreadViewOldestFirst.label "Näytä vanhin merkintä ensin lukematta olevien listassa">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "v">
 <!ENTITY autoMarkRead.label "Merkitse merkinnät luetuksi avaamisen jälkeen">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY shortcutsGroup.caption "Näppäinkomennot">
 <!ENTITY enableItemHightlight.label "Korosta aina valittu merkintä">
 <!ENTITY enableItemHightlight.accesskey "K">
-<!ENTITY keyboardShortcuts.label "Näppäinkomennot">
-<!ENTITY keyboardShortcuts.accesskey "N">
 <!ENTITY customizeGroup.caption "Ulkoasu">
 <!ENTITY editStyleDescription.label "Muokkaa syötteiden ulkoasua">
 <!ENTITY editStyleButton.label "Muokkaa">

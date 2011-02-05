@@ -31,21 +31,18 @@
 <!ENTITY exportOPML.label "Exportálás...">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Megjelenítés">
-<!ENTITY entriesPerPageBefore.label "Oldalanként">
-<!ENTITY entriesPerPageAfter.label "bejegyzés megjelenítése">
-<!ENTITY entriesPerPage.accesskey "O">
 <!ENTITY showStatusbarIcon.label "Állapotsor ikon megjelenítése">
 <!ENTITY showStatusbarIcon.accesskey "s">
+<!ENTITY showUnreadCounter.label "Olvasatlan elemek számának megjelenítése a Brief ikonja után">
+<!ENTITY showUnreadCounter.accesskey "u">
 <!ENTITY sortUnreadViewOldestFirst.label "Az olvasatlan nézetben a régebbi elemek megjelenítése először">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Elem megtekintése után annak megjelölése olvasottként">
 <!ENTITY autoMarkRead.accesskey "m">
-<!ENTITY shortcutsGroup.caption "Gyors elérés">
 <!ENTITY enableItemHightlight.label "Elem kiemelése mindig">
 <!ENTITY enableItemHightlight.accesskey "k">
-<!ENTITY keyboardShortcuts.label "Gyorsbillentyűk">
-<!ENTITY keyboardShortcuts.accesskey "y">
 <!ENTITY customizeGroup.caption "Megjelenés">
+<!ENTITY shortcutsPane.label "Gyorsbillentyűk">
 <!ENTITY editStyleDescription.label "Hírforrások megjelenésének testreszabása">
 <!ENTITY editStyleButton.label "Testreszabás">
 <!ENTITY editStyleButton.accesskey "T">

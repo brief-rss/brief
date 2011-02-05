@@ -31,20 +31,14 @@
 <!ENTITY exportOPML.label "Exportar...">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Presentación">
-<!ENTITY entriesPerPageBefore.label "Mostrar">
-<!ENTITY entriesPerPageAfter.label "elementos por página">
-<!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY showStatusbarIcon.label "Mostrar icono en la barra de estado">
 <!ENTITY showStatusbarIcon.accesskey "h">
 <!ENTITY sortUnreadViewOldestFirst.label "Ordenar elementos antiguos primero en la vista no leídos">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Marcar elementos como leídos después de que los veo">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY shortcutsGroup.caption "Atajos">
 <!ENTITY enableItemHightlight.label "Siempre destacar el elemento actual">
 <!ENTITY enableItemHightlight.accesskey "A">
-<!ENTITY keyboardShortcuts.label "Atajos de teclado">
-<!ENTITY keyboardShortcuts.accesskey "K">
 <!ENTITY customizeGroup.caption "Apariencia">
 <!ENTITY editStyleDescription.label "Personalizar la apariencia de los Feeds">
 <!ENTITY editStyleButton.label "Personalizar">
