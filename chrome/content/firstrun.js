@@ -74,5 +74,5 @@ function openBrief() {
                            .rootTreeItem
                            .QueryInterface(Ci.nsIInterfaceRequestor)
                            .getInterface(Ci.nsIDOMWindow);
-    topWindow.Brief.open(false);
+    topWindow.Brief.open(true);
 }
