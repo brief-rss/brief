@@ -7,7 +7,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 11;
+const DATABASE_VERSION = 12;
 
 const FEEDS_TABLE_SCHEMA = [
     'feedID          TEXT UNIQUE',
@@ -2380,9 +2380,14 @@ var Migration = {
                        ')                                              ');
             // Fall through...
 
-        // To 1.5
+        // To 1.5b3
         case 10:
             ExecuteSQL('ALTER TABLE feeds ADD COLUMN lastFaviconRefresh INTEGER DEFAULT 0');
+            // Fall through...
+
+        // To 1.5
+        case 11:
+            ExecuteSQL('ANALYZE');
 
         }
 
