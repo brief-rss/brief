@@ -31,21 +31,18 @@
 <!ENTITY exportOPML.label "Exportieren...">
 <!ENTITY exportOPML.accesskey "x">
 <!ENTITY displayPane.label "Anzeige">
-<!ENTITY entriesPerPageBefore.label "Pro Seite">
-<!ENTITY entriesPerPageAfter.label "Einträge anzeigen">
-<!ENTITY entriesPerPage.accesskey "S">
 <!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
 <!ENTITY showStatusbarIcon.accesskey "S">
+<!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Einträge neben dem Brief-Symbol anzeigen">
+<!ENTITY showUnreadCounter.accesskey "A">
 <!ENTITY sortUnreadViewOldestFirst.label "Bei Anzeige ungelesener Einträge älteste zuerst anzeigen">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "u">
 <!ENTITY autoMarkRead.label "Einträge nach Anzeige in der Liste als gelesen markieren">
 <!ENTITY autoMarkRead.accesskey "A">
-<!ENTITY shortcutsGroup.caption "Tastaturkürzel">
 <!ENTITY enableItemHightlight.label "Den aktuellen Eintrag immer hervorheben">
 <!ENTITY enableItemHightlight.accesskey "a">
-<!ENTITY keyboardShortcuts.label "Tastaturkürzel">
-<!ENTITY keyboardShortcuts.accesskey "T">
 <!ENTITY customizeGroup.caption "Anzeige">
+<!ENTITY shortcutsPane.label "Tastaturkürzel">
 <!ENTITY editStyleDescription.label "Darstellung der Feeds anpassen">
 <!ENTITY editStyleButton.label "Anpassen...">
 <!ENTITY editStyleButton.accesskey "A">
