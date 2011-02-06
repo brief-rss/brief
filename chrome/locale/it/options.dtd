@@ -6,6 +6,7 @@
 <!ENTITY updateIntervalMinutes.label "minuto/i">
 <!ENTITY updateIntervalHours.label "ora/e">
 <!ENTITY updateIntervalDays.label "giorno/i">
+<!ENTITY checkForUpdatesAfter.label "">
 <!ENTITY showNotification.label "Mostra la finestra di notifica quando ci sono aggiornamenti">
 <!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "Comportamento">
@@ -15,9 +16,11 @@
 <!ENTITY openEntriesInTabs.accesskey "s">
 <!ENTITY storingGroup.caption "Memorizzazione">
 <!ENTITY expirationBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
+<!ENTITY expirationAfter.label "">
 <!ENTITY expirationCheckbox.accesskey "G">
 <!ENTITY starredItemsKept.tooltip "Gli elementi associati ai segnalibri verranno mantenuti">
 <!ENTITY storedEntriesBefore.label "Numero massimo di elementi per feed da memorizzare:">
+<!ENTITY storedEntriesAfter.label "">
 <!ENTITY storedEntriesCheckbox.accesskey "u">
 <!ENTITY clearAllEntriesButton.label "Elimina tutti gli elementi…">
 <!ENTITY clearAllEntriesButton.accesskey "t">
@@ -53,6 +56,7 @@
 <!ENTITY checkUpdatesPerFeed.accesskey "C">
 <!ENTITY expireEntriesPerFeedBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
 <!ENTITY expireEntriesPerFeed.accesskey "G">
+<!ENTITY expireEntriesPerFeedAfter.label "">
 <!ENTITY updatedEntries.label "Non segnare elementi modificati come non letti">
 <!ENTITY updatedEntries.accesskey "N">
 <!ENTITY previousFeed.label "&lt; Precedente">
