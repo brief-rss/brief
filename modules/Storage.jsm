@@ -297,6 +297,8 @@ var StorageInternal = {
 
         ExecuteSQL('CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagName)');
 
+        ExecuteSQL('ANALYZE');
+
         Connection.schemaVersion = DATABASE_VERSION;
     },
 
