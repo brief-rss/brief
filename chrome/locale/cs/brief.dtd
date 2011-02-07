@@ -3,7 +3,7 @@
 <!ENTITY unreadFolder.label "Nepřečtené">
 <!ENTITY starredFolder.label "Záložky">
 <!ENTITY trashFolder.label "Koš">
-<!ENTITY headlinesCheckbox.tooltip "Použít zobrazení záhlaví">
+<!ENTITY headlinesCheckbox.tooltip "Použít zobrazení záhlaví (F)">
 <!ENTITY filterUnread.tooltip "Zobrazit pouze nepřečtené položky (D)">
 <!ENTITY filterStarred.tooltip "Zobrazit pouze záložky (S)">
 <!ENTITY updateButton.tooltip "Zkontrolovat všechny kanály pro novinky">

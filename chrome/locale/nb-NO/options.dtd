@@ -2,7 +2,7 @@
 <!ENTITY mainPane.label "Generelt">
 <!ENTITY updateGroup.caption "Oppdatering">
 <!ENTITY checkForUpdatesBefore.label "Finn oppdateringer for nyhetskilder hver(t)">
-<!ENTITY checkForUpdates.accesskey "C">
+<!ENTITY checkForUpdates.accesskey "">
 <!ENTITY updateIntervalMinutes.label "minutt">
 <!ENTITY updateIntervalHours.label "time">
 <!ENTITY updateIntervalDays.label "dag">
@@ -32,7 +32,7 @@
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Visning">
 <!ENTITY showStatusbarIcon.label "Vis ikon i statuslinja">
-<!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY showStatusbarIcon.accesskey "">
 <!ENTITY showUnreadCounter.label "Vis antall uleste elementer ved siden av ikonet til Brief">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Sorter eldste elementer først i ulest visning">
@@ -45,7 +45,7 @@
 <!ENTITY shortcutsPane.label "Snarveier">
 <!ENTITY editStyleDescription.label "Tilpass utseende til nyhetskilder">
 <!ENTITY editStyleButton.label "Tilpass">
-<!ENTITY editStyleButton.accesskey "C">
+<!ENTITY editStyleButton.accesskey "T">
 <!ENTITY styleEditor.title "Rediger selvvalgt stil">
 <!ENTITY seeCustomizationTips.label "Les om tilpassing av utseende med CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">

@@ -32,7 +32,7 @@
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Exibir">
 <!ENTITY showStatusbarIcon.label "Mostrar ícone na barra de status">
-<!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY showStatusbarIcon.accesskey "">
 <!ENTITY showUnreadCounter.label "Mostrar o número de itens não lidos ao lado do ícone do Brief">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Classificar itens mais antigos primeiro na exibição de itens não lidos">
@@ -45,7 +45,7 @@
 <!ENTITY shortcutsPane.label "Atalhos">
 <!ENTITY editStyleDescription.label "Personalizar a aparência dos feeds">
 <!ENTITY editStyleButton.label "Personalizar">
-<!ENTITY editStyleButton.accesskey "C">
+<!ENTITY editStyleButton.accesskey "">
 <!ENTITY styleEditor.title "Editar estilo personalizado">
 <!ENTITY seeCustomizationTips.label "Saiba mais sobre como personalizar a aparência com CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">

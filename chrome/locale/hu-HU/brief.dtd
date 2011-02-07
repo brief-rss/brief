@@ -3,9 +3,9 @@
 <!ENTITY unreadFolder.label "Olvasatlan">
 <!ENTITY starredFolder.label "Könyvjelzők">
 <!ENTITY trashFolder.label "Törölt bejegyzések">
-<!ENTITY headlinesCheckbox.tooltip "Fejléc nézet használata">
-<!ENTITY filterUnread.tooltip "Csak olvasatlan elemek">
-<!ENTITY filterStarred.tooltip "Csak a Könyvjelzők">
+<!ENTITY headlinesCheckbox.tooltip "Fejléc nézet használata (F)">
+<!ENTITY filterUnread.tooltip "Csak olvasatlan elemek (D)">
+<!ENTITY filterStarred.tooltip "Csak a Könyvjelzők (S)">
 <!ENTITY updateButton.tooltip "Hírforrások frissítése">
 <!ENTITY stopUpdatingButton.tooltip "Hírforrás felfüggesztése">
 <!ENTITY showOptions.tooltip "Brief – Beállítások">
