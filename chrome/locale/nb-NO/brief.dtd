@@ -3,7 +3,7 @@
 <!ENTITY unreadFolder.label "Ulest">
 <!ENTITY starredFolder.label "Bokmerker">
 <!ENTITY trashFolder.label "Papirkurv">
-<!ENTITY headlinesCheckbox.tooltip "Bruk overskriftsvisning">
+<!ENTITY headlinesCheckbox.tooltip "Bruk overskriftsvisning (F)">
 <!ENTITY filterUnread.tooltip "Vis kun uleste elementer (D)">
 <!ENTITY filterStarred.tooltip "Vis kun bokmerker elementer (S)">
 <!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">

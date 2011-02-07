@@ -3,7 +3,7 @@
 <!ENTITY unreadFolder.label "Ungelesen">
 <!ENTITY starredFolder.label "Lesezeichen">
 <!ENTITY trashFolder.label "Papierkorb">
-<!ENTITY headlinesCheckbox.tooltip "Überschriftenmodus verwenden(F)">
+<!ENTITY headlinesCheckbox.tooltip "Überschriftenmodus verwenden (F)">
 <!ENTITY filterUnread.tooltip "Nur ungelesene Einträge anzeigen (D)">
 <!ENTITY filterStarred.tooltip "Nur Lesezeichen anzeigen (S)">
 <!ENTITY updateButton.tooltip "Alle Feeds auf Aktualisierungen prüfen">
