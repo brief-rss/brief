@@ -5,7 +5,7 @@
 
 html, body {
 	height: 100%;
-	width: 100%
+	width: 100%;
     }
 
 body {
@@ -82,8 +82,8 @@ div {
 .screenshot-container {
     -moz-box-align: center;
     -moz-box-pack: center;
-    height: 120px;
-    margin-bottom: 10px;
+    height: 160px;
+    margin-bottom: 15px;
     }
 
 .screenshot {
