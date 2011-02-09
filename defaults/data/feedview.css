@@ -225,7 +225,7 @@ pre, code {
 
 .article-container[collapsed] {
     background-image: none;
-    background-color: #edf8ff;
+    background-color: #F0F9FF;
 }
 
 .article-container[collapsed][read] {
