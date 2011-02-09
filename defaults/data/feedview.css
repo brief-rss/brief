@@ -240,6 +240,10 @@ pre, code {
     font-size: 13px;
 }
 
+.article-container[collapsed][read] .article-title-link {
+    font-weight: normal;
+}
+
 .article-container[collapsed] .article-controls {
     position: absolute;
     z-index: 1;
