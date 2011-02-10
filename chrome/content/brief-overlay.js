@@ -1,8 +1,8 @@
 const Brief = {
 
+    VERSION: '1.5.1',
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
-    LAST_MAJOR_VERSION: '1.5',
-    RELEASE_NOTES_URL: 'http://brief.mozdev.org/versions/1.5.html',
+    RELEASE_NOTES_URL: 'http://brief.mozdev.org/versions/1.5.1.html',
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
@@ -216,12 +216,12 @@ const Brief = {
                 this.onFirstRun();
             }
             else {
-                let prevVersion = this.prefs.getCharPref('lastMajorVersion');
+                let prevVersion = this.prefs.getCharPref('lastVersion');
                 let verComparator = Cc['@mozilla.org/xpcom/version-comparator;1']
                                     .getService(Ci.nsIVersionComparator);
 
                 // If Brief has been updated, load the new version info page.
-                if (verComparator.compare(prevVersion, this.LAST_MAJOR_VERSION) < 0) {
+                if (verComparator.compare(prevVersion, this.VERSION) < 0) {
                     setTimeout(function() {
                         gBrowser.loadOneTab(Brief.RELEASE_NOTES_URL, {
                             relatedToCurrent: false,
@@ -229,7 +229,7 @@ const Brief = {
                         });
                     }, 0);
 
-                    this.prefs.setCharPref('lastMajorVersion', this.LAST_MAJOR_VERSION);
+                    this.prefs.setCharPref('lastVersion', this.VERSION);
                 }
             }
 
