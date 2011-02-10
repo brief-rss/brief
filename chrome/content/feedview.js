@@ -60,7 +60,7 @@ function FeedView(aTitle, aQuery) {
         getElement('searchbar').value = '';
 
     this.browser.addEventListener('load', this, false);
-    getTopWindow().gBrowser.addEventListener('TabSelect', this, false);
+    getTopWindow().gBrowser.tabContainer.addEventListener('TabSelect', this, true);
     Storage.addObserver(this);
 
     // Load the template page if it hasn't been loaded yet. We also have to make sure to
@@ -429,7 +429,7 @@ FeedView.prototype = {
      * Deactivates the view.
      */
     uninit: function FeedView_uninit() {
-        getTopWindow().gBrowser.removeEventListener('TabSelect', this, false);
+        getTopWindow().gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
         this.document.removeEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
         this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
@@ -523,7 +523,7 @@ FeedView.prototype = {
                 break;
 
             case 'TabSelect':
-                if (aEvent.originalTarget == getTopWindow().Brief.tab && this._refreshPending) {
+                if (this._refreshPending && aEvent.originalTarget == getTopWindow().Brief.getBriefTab()) {
                     this.refresh();
                     this._refreshPending = false;
                 }
