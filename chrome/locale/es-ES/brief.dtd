@@ -1,20 +1,37 @@
-<!ENTITY unreadFolder.label "Non lus">
-<!ENTITY starredFolder.label "Marqués">
-<!ENTITY trashFolder.label "Corbeille">
-<!ENTITY updateButton.tooltip "Mettre à jour tous les flux">
-<!ENTITY stopUpdatingButton.tooltip "Arrêter la recherche de mises à jour">
-<!ENTITY showOptions.tooltip "Ouvrir les options de Brief">
-<!ENTITY ctxMarkFeedRead.label "Marquer le flux comme lu">
-<!ENTITY ctxMarkFolderRead.label "Marquer le dossier comme lu">
-<!ENTITY ctxUpdateFeed.label "Mettre le flux à jour">
-<!ENTITY ctxUpdateFolder.label "Mettre le dossier à jour">
-<!ENTITY ctxOpenWebsite.label "Afficher le site Web">
-<!ENTITY ctxDeleteFeed.label "Supprimer le flux">
-<!ENTITY ctxDeleteFolder.label "Supprimer le dossier">
-<!ENTITY ctxEmptyFeed.label "Vider le flux dans la corbeille">
-<!ENTITY ctxEmptyFolder.label "Vider le dossier dans la corbeille">
-<!ENTITY ctxRestoreTrashed.label "Restaurer le contenu de la corbeille">
-<!ENTITY ctxEmptyTrash.label "Vider la corbeille">
-<!ENTITY ctxFeedProperties.label "Propriétés">
-<!ENTITY ctxUpdateFeeds.label "Mettre à jour les flux">
-<!ENTITY ctxMarkFeedsAsRead.label "Marquer tous les flux comme lus">
+<!ENTITY searchBox.label "Buscar">
+<!ENTITY allItemsFolder.label "Todos los elementos">
+<!ENTITY unreadFolder.label "No leídos">
+<!ENTITY starredFolder.label "Marcadores">
+<!ENTITY trashFolder.label "Papelera">
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Ver sólo los titulares (F)">
+<!ENTITY filterUnread.tooltip "Ver sólo los elementos no leídos (D)">
+<!ENTITY filterStarred.tooltip "Ver sólo los elementos en marcadores (S)">
+<!ENTITY updateButton.tooltip "Obtener las últimas actualizaciones de todos los canales">
+<!ENTITY stopUpdatingButton.tooltip "Detener la búsqueda de las últimas actualizaciones de todos los canales">
+<!ENTITY showOptions.tooltip "Abrir el panel de preferencias de Brief">
+<!ENTITY sidebarSplitter.tooltip "Doble-clic para ocultar el panel lateral">
+<!ENTITY revealSidebar.tooltip "Mostrar el panel lateral">
+<!ENTITY markViewRead.tooltip "Marcar todos los elementos como leídos (Alt+N)">
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Marcar el canal como leído">
+<!ENTITY ctxMarkFeedUnread.label "Marcar el canal como no leído">
+<!ENTITY ctxMarkFolderRead.label "Marcar la carpeta como leída">
+<!ENTITY ctxMarkTagRead.label "Marcar elementos etiquetados como leídos">
+<!ENTITY ctxUpdateFeed.label "Actualizar el canal">
+<!ENTITY ctxUpdateFolder.label "Actualizar la carpeta">
+<!ENTITY ctxOpenWebsite.label "Abrir el sitio web">
+<!ENTITY ctxDeleteFeed.label "Eliminar el canal">
+<!ENTITY ctxDeleteFolder.label "Eliminar la carpeta">
+<!ENTITY ctxDeleteTag.label "Eliminar la etiqueta">
+<!ENTITY ctxEmptyFeed.label "Vaciar el canal">
+<!ENTITY ctxEmptyFolder.label "Vaciar la carpeta">
+<!ENTITY ctxRestoreTrashed.label "Restaurar todos los elementos">
+<!ENTITY ctxEmptyTrash.label "Vaciar la papelera">
+<!ENTITY ctxFeedProperties.label "Propiedades">
+<!ENTITY ctxUpdateFeeds.label "Actualizar los canales ahora">
+<!ENTITY ctxMarkFeedsAsRead.label "Marcar todos los canales como leídos">
+<!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos">
+<!ENTITY ctxShowOptions.label "Preferencias">
+<!ENTITY compactingWindow.title "Compactando los canales web">
+<!ENTITY compactingInProgress.label "Brief está compactando los canales web almacenados. Esto puede tomar algunos minutos...">
