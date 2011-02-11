@@ -20,6 +20,7 @@ locale  brief   cs     chrome/locale/cs/
 locale  brief   da     chrome/locale/da/
 locale  brief   de     chrome/locale/de/
 locale  brief   el     chrome/locale/el/
+locale  brief   es-ES  chrome/locale/es-ES/
 locale  brief   fr     chrome/locale/fr/
 locale  brief   gl     chrome/locale/gl/
 locale  brief   hu-HU  chrome/locale/hu-HU/
