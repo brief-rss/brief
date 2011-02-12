@@ -328,7 +328,7 @@ function FeedFetcher(aFeed) {
     this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
     ObserverService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
-    ObserverService.addObserver(this, 'brief:feed-update-canceled', false);
+    ObserverService.addObserver(this, 'brief:feed-update-finished', false);
 
     this.requestFeed();
 }
@@ -452,15 +452,17 @@ FeedFetcher.prototype = {
                 this.finish(true);
                 break;
 
-            case 'brief:feed-update-canceled':
-                this.request.abort();
-                this.cleanup();
+            case 'brief:feed-update-finished':
+                if (aData == 'canceled') {
+                    this.request.abort();
+                    this.cleanup();
+                }
                 break;
             }
     },
 
     cleanup: function FeedFetcher_cleanup() {
-        ObserverService.removeObserver(this, 'brief:feed-update-canceled');
+        ObserverService.removeObserver(this, 'brief:feed-update-finished');
         this.request = null;
         this.timeoutTimer.cancel();
         this.timeoutTimer = null;
