@@ -654,26 +654,21 @@ var FeedList = {
             break;
 
         case 'brief:feed-update-queued':
-            getElement('update-buttons-deck').selectedIndex = 1;
-
-            if (FeedUpdateService.scheduledFeedsCount > 1) {
-                getElement('update-progress-deck').selectedIndex = 1;
-                refreshProgressmeter();
-            }
+            refreshProgressmeter();
             break;
 
-        case 'brief:feed-update-canceled':
-            getElement('update-progress-deck').selectedIndex = 0;
-            getElement('update-buttons-deck').selectedIndex = 0;
-            getElement('update-progress').value = 0;
+        case 'brief:feed-update-finished':
+            refreshProgressmeter(aData);
 
-            Storage.getAllFeeds().forEach(function(feed) {
-                let item = getElement(feed.feedID);
-                if (item.hasAttribute('loading')) {
-                    item.removeAttribute('loading');
-                    this._refreshFavicon(feed.feedID);
-                }
-            }, this)
+            if (aData == 'canceled') {
+                Storage.getAllFeeds().forEach(function(feed) {
+                    let item = getElement(feed.feedID);
+                    if (item.hasAttribute('loading')) {
+                        item.removeAttribute('loading');
+                        this._refreshFavicon(feed.feedID);
+                    }
+                }, this)
+            }
             break;
 
         case 'brief:custom-style-changed':

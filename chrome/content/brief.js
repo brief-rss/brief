@@ -17,6 +17,8 @@ function init() {
     getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
     getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
+    refreshProgressmeter();
+
     gStringBundle = getElement('main-bundle');
 
     document.addEventListener('keypress', onKeyPress, true);
@@ -32,7 +34,7 @@ function init() {
                           .getService(Ci.nsIObserverService);
 
     observerService.addObserver(FeedList, 'brief:feed-update-queued', false);
-    observerService.addObserver(FeedList, 'brief:feed-update-canceled', false);
+    observerService.addObserver(FeedList, 'brief:feed-update-finished', false);
     observerService.addObserver(FeedList, 'brief:feed-updated', false);
     observerService.addObserver(FeedList, 'brief:feed-loading', false);
     observerService.addObserver(FeedList, 'brief:feed-error', false);
@@ -76,7 +78,7 @@ function unload() {
     observerService.removeObserver(FeedList, 'brief:feed-loading');
     observerService.removeObserver(FeedList, 'brief:feed-error');
     observerService.removeObserver(FeedList, 'brief:feed-update-queued');
-    observerService.removeObserver(FeedList, 'brief:feed-update-canceled');
+    observerService.removeObserver(FeedList, 'brief:feed-update-finished');
     observerService.removeObserver(FeedList, 'brief:invalidate-feedlist');
     observerService.removeObserver(FeedList, 'brief:feed-title-changed');
     observerService.removeObserver(FeedList, 'brief:custom-style-changed');
@@ -290,15 +292,27 @@ var Commands = {
 }
 
 
-function refreshProgressmeter() {
-    var progressmeter = getElement('update-progress');
-    var progress = 100 * FeedUpdateService.completedFeedsCount /
-                         FeedUpdateService.scheduledFeedsCount;
-    progressmeter.value = progress;
+function refreshProgressmeter(aReason) {
+    if (FeedUpdateService.status != FeedUpdateService.NOT_UPDATING) {
+        getElement('update-buttons-deck').selectedIndex = 1;
 
-    if (progress == 100) {
-        async(function() { getElement('update-progress-deck').selectedIndex = 0 }, 500);
+        if (FeedUpdateService.scheduledFeedsCount > 1)
+            getElement('update-progress-deck').selectedIndex = 1;
+
+        getElement('update-progress').value = 100 * FeedUpdateService.completedFeedsCount /
+                                                    FeedUpdateService.scheduledFeedsCount;
+    }
+    else {
         getElement('update-buttons-deck').selectedIndex = 0;
+
+        if (aReason == 'canceled') {
+            getElement('update-progress-deck').selectedIndex = 0;
+        }
+        else {
+            async(function() {
+                getElement('update-progress-deck').selectedIndex = 0;
+            }, 1000);
+        }
     }
 }
 
