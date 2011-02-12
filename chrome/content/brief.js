@@ -281,7 +281,7 @@ var Commands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        var height = Math.min(window.screen.availHeight, 630);
+        var height = Math.min(window.screen.availHeight, 610);
         var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
         var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
@@ -328,9 +328,8 @@ function onSearchbarBlur() {
 
 
 /**
- * Space and Tab can't be captured using <key/> XUL elements, so we handle
- * them manually using a listener. Additionally, unlike other keys, they have to
- * be default-prevented.
+ * Space can't be captured using the <key/> XUL element so we handle
+ * it manually using a listener. Also, unlike other keys it must be default-prevented.
  */
 function onKeyPress(aEvent) {
     // Don't do anything if the user is typing in an input field.
@@ -341,14 +340,7 @@ function onKeyPress(aEvent) {
     if (aEvent.charCode)
         aEvent.stopPropagation();
 
-    if (!Prefs.getBoolPref('assumeStandardKeys'))
-        return;
-
-    if (aEvent.keyCode == aEvent.DOM_VK_TAB && !aEvent.ctrlKey) {
-        Prefs.setBoolPref('feedview.entrySelectionEnabled', !PrefCache.entrySelectionEnabled);
-        aEvent.preventDefault();
-    }
-    else if (aEvent.charCode == aEvent.DOM_VK_SPACE) {
+    if (Prefs.getBoolPref('assumeStandardKeys') && aEvent.charCode == aEvent.DOM_VK_SPACE) {
         if (aEvent.shiftKey) {
             if (PrefCache.entrySelectionEnabled)
                 gCurrentView.selectPrevEntry();
