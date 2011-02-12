@@ -105,6 +105,13 @@ const Brief = {
                           features);
     },
 
+    refreshUI: function Brief_refreshUI() {
+        setTimeout(this.updateStatus, 0);
+
+        let tooltip = document.getElementById('brief-tooltip');
+        if (tooltip.state == 'open' || tooltip.state == 'showing')
+            setTimeout(function() Brief.constructTooltip(), 0);
+    },
 
     updateStatus: function Brief_updateStatus() {
         if (Brief.firefox4 && (!Brief.toolbarbutton || !Brief.prefs.getBoolPref('showUnreadCounter')))
@@ -128,14 +135,13 @@ const Brief = {
         else {
             Brief.statusCounter.hidden = unreadEntriesCount == 0;
         }
-
     },
 
 
-    constructTooltip: function Brief_constructTooltip(aEvent) {
+    constructTooltip: function Brief_constructTooltip() {
         var bundle = document.getElementById('brief-bundle');
         var rows = document.getElementById('brief-tooltip-rows');
-        var tooltip = aEvent.target;
+        var tooltip = document.getElementById('brief-tooltip');
 
         // Integer prefs are longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
@@ -289,7 +295,7 @@ const Brief = {
     observe: function Brief_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
         case 'brief:invalidate-feedlist':
-            this.updateStatus();
+            this.refreshUI();
             break;
 
         case 'nsPref:changed':
@@ -323,25 +329,24 @@ const Brief = {
 
 
     onEntriesAdded: function Brief_onEntriesAdded(aEntryList) {
-        setTimeout(this.updateStatus, 0);
+        this.refreshUI();
     },
 
     onEntriesUpdated: function Brief_onEntriesUpdated(aEntryList) {
-        setTimeout(this.updateStatus, 0);
+        this.refreshUI();
     },
 
     onEntriesMarkedRead: function Brief_onEntriesMarkedRead(aEntryList, aState) {
-        setTimeout(this.updateStatus, 0);
+        this.refreshUI();
     },
 
     onEntriesDeleted: function Brief_onEntriesDeleted(aEntryList, aState) {
         if (aEntryList.containsUnread())
-            setTimeout(this.updateStatus, 0);
+            this.refreshUI();
     },
 
     onEntriesTagged: function() { },
     onEntriesStarred: function() { },
-
 
     onFirstRun: function Brief_onFirstRun() {
         // Add the toolbar button at the end of the Navigation Bar.

@@ -73,7 +73,7 @@
 
         <tooltip id="brief-tooltip"
                  orient="vertical"
-                 onpopupshowing="Brief.constructTooltip(event);">
+                 onpopupshowing="Brief.constructTooltip()">
             <label id="brief-tooltip-last-updated"/>
             <label id="brief-tooltip-no-unread"/>
             <grid>
