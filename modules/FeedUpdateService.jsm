@@ -40,7 +40,9 @@ var FeedUpdateService = {
     BACKGROUND_UPDATING: 1,
     NORMAL_UPDATING: 2,
 
-    status: 0,
+    get status() {
+        return FeedUpdateServiceInternal.status;
+    },
 
     /**
      * Total number of feeds scheduled for current update batch (both completed
@@ -174,8 +176,7 @@ var FeedUpdateServiceInternal = {
 
     // See FeedUpdateService.
     stopUpdating: function FeedUpdateServiceInternal_stopUpdating() {
-        ObserverService.notifyObservers(null, 'brief:feed-update-canceled', '');
-        this.finishUpdate();
+        this.finishUpdate('canceled');
     },
 
     // nsITimerCallback
@@ -240,11 +241,11 @@ var FeedUpdateServiceInternal = {
             ObserverService.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
 
         if (this.completedFeeds.length == this.scheduledFeeds.length)
-            this.finishUpdate();
+            this.finishUpdate('completed');
     },
 
 
-    finishUpdate: function FeedUpdateServiceInternal_finishUpdate() {
+    finishUpdate: function FeedUpdateServiceInternal_finishUpdate(aReason) {
         this.status = this.NOT_UPDATING;
         this.fetchDelayTimer.cancel();
 
@@ -272,6 +273,8 @@ var FeedUpdateServiceInternal = {
         this.completedFeeds = [];
         this.scheduledFeeds = [];
         this.updateQueue = [];
+
+        ObserverService.notifyObservers(null, 'brief:feed-update-finished', aReason);
     },
 
 
