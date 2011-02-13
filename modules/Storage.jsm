@@ -598,6 +598,11 @@ function FeedProcessor(aFeed, aCallback) {
         this.updatedEntries = [];
         this.insertedEntries = [];
 
+        this.updateEntry = new Statement(Stm.updateEntry);
+        this.insertEntry = new Statement(Stm.insertEntry);
+        this.updateEntryText = new Statement(Stm.updateEntryText);
+        this.insertEntryText = new Statement(Stm.insertEntryText);
+
         this.oldestEntryDate = Date.now();
 
         aFeed.entries.forEach(this.processEntry, this);
@@ -710,13 +715,13 @@ FeedProcessor.prototype = {
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
         var markUnread = StorageInternal.getFeed(this.feed.feedID).markModifiedEntriesUnread;
 
-        Stm.updateEntry.paramSets.push({
+        this.updateEntry.paramSets.push({
             'date': aEntry.date,
             'read': markUnread || !aIsRead ? 0 : 1,
             'id': aStoredEntryID
         });
 
-        Stm.updateEntryText.paramSets.push({
+        this.updateEntryText.paramSets.push({
             'title': title,
             'content': aEntry.content || aEntry.summary,
             'authors': aEntry.authors,
@@ -730,7 +735,7 @@ FeedProcessor.prototype = {
     addInsertParams: function FeedProcessor_addInsertParams(aEntry, aPrimaryHash, aSecondaryHash) {
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
-        Stm.insertEntry.paramSets.push({
+        this.insertEntry.paramSets.push({
             'feedID': this.feed.feedID,
             'primaryHash': aPrimaryHash,
             'secondaryHash': aSecondaryHash,
@@ -739,7 +744,7 @@ FeedProcessor.prototype = {
             'date': aEntry.date || Date.now()
         });
 
-        Stm.insertEntryText.paramSets.push({
+        this.insertEntryText.paramSets.push({
             'title': title,
             'content': aEntry.content || aEntry.summary,
             'authors': aEntry.authors
@@ -753,7 +758,7 @@ FeedProcessor.prototype = {
 
         if (this.entriesToInsertCount) {
             Stm.getLastRowids.params.count = this.entriesToInsertCount;
-            let statements = [Stm.insertEntry, Stm.insertEntryText, Stm.getLastRowids];
+            let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
 
             ExecuteStatementsAsync(statements, {
 
@@ -776,7 +781,7 @@ FeedProcessor.prototype = {
         }
 
         if (this.entriesToUpdateCount) {
-            let statements = [Stm.updateEntry, Stm.updateEntryText];
+            let statements = [this.updateEntry, this.updateEntryText];
 
             ExecuteStatementsAsync(statements, function() {
                 new Query(self.updatedEntries).getEntryList(function(aList) {
@@ -1419,13 +1424,18 @@ function ExecuteSQL(aSQLString) {
     }
 }
 
-function Statement(aSQLString, aDefaultParams) {
-    try {
-        this._wrappedStatement = Connection.createStatement(aSQLString);
+function Statement(aStatement, aDefaultParams) {
+    if (aStatement instanceof Statement) {
+        this._wrappedStatement = aStatement._wrappedStatement.clone();
     }
-    catch (ex) {
-        log('SQL statement:\n' + aSQLString);
-        ReportError(ex, true);
+    else {
+        try {
+            this._wrappedStatement = Connection.createStatement(aStatement);
+        }
+        catch (ex) {
+            log('SQL statement:\n' + aStatement);
+            ReportError(ex, true);
+        }
     }
 
     this._defaultParams = aDefaultParams;
@@ -1838,6 +1848,7 @@ var BookmarkObserver = {
  * the livemarks available in the Brief's home folder.
  */
 function LivemarksSync() {
+    return;
     if (!this.checkHomeFolder())
         return;
 
