@@ -1427,6 +1427,8 @@ function ExecuteSQL(aSQLString) {
 function Statement(aStatement, aDefaultParams) {
     if (aStatement instanceof Statement) {
         this._wrappedStatement = aStatement._wrappedStatement.clone();
+        this._defaultParams = aStatement._defaultParams;
+        this._isWritingStatement = aStatement._isWritingStatement;
     }
     else {
         try {
@@ -1436,9 +1438,11 @@ function Statement(aStatement, aDefaultParams) {
             log('SQL statement:\n' + aStatement);
             ReportError(ex, true);
         }
+
+        this._isWritingStatement = !/^\s*SELECT/.test(aStatement);
+        this._defaultParams = aDefaultParams || null;
     }
 
-    this._defaultParams = aDefaultParams;
     this.paramSets = [];
     this.params = {};
 }
@@ -1455,8 +1459,11 @@ Statement.prototype = {
 
     executeAsync: function Statement_executeAsync(aCallback) {
         this._bindParams();
-        var callback = new StatementCallback(this._wrappedStatement, aCallback);
-        this._wrappedStatement.executeAsync(callback);
+        let callback = new StatementCallback(this, aCallback);
+        if (this._isWritingStatement)
+            WritingStatementsQueue.add(this, callback);
+        else
+            this._wrappedStatement.executeAsync(callback);
     },
 
     _bindParams: function Statement__bindParams() {
@@ -1588,7 +1595,8 @@ StatementCallback.prototype = {
     },
 
     _getResultsGenerator: function Statement__getResultsGenerator(aResultSet) {
-        var columnCount = this._statement.columnCount;
+        let nativeStatement = this._statement._wrappedStatement;
+        var columnCount = nativeStatement.columnCount;
 
         while (true) {
             let obj = null;
@@ -1597,7 +1605,7 @@ StatementCallback.prototype = {
             if (row) {
                 obj = {};
                 for (let i = 0; i < columnCount; i++) {
-                    let column = this._statement.getColumnName(i);
+                    let column = nativeStatement.getColumnName(i);
                     obj[column] = row.getResultByName(column);
                 }
             }
@@ -1608,15 +1616,79 @@ StatementCallback.prototype = {
 }
 
 function ExecuteStatementsAsync(aStatements, aCallback) {
-    var nativeStatements = [];
+    aStatements.forEach(function(statement) {
+        statement._bindParams();
+    })
+    WritingStatementsQueue.add(aStatements, aCallback);
+}
 
-    for (let i = 0; i < aStatements.length; i++) {
-        aStatements[i]._bindParams();
-        nativeStatements.push(aStatements[i]._wrappedStatement);
+/**
+ * Observers notified by writing statements often need to query the database to update
+ * views and such, and they rely on the database not to be modified again until they
+ * complete. If another writing statement was executed in the background thread before
+ * the oberver completed, it would create a race condition.
+ *
+ * Therefore, we maintain a queue of writing statements to prevent any such statement
+ * from being executed until the callback of the previous one has completed.
+ */
+var WritingStatementsQueue = {
+
+    _queue: [],
+    _executing: false,
+
+    add: function WritingStatementsQueue_add(aStatements, aCallback) {
+        this._queue.push({
+            statements: aStatements instanceof Array ? aStatements : [aStatements],
+            callback: aCallback
+        });
+
+        if (!this._executing)
+            this._executeNext();
+    },
+
+    _onStatementCompleted: function WritingStatementsQueue__onStatementCompleted() {
+        this._queue.shift();
+        this._executing = false;
+        if (this._queue.length)
+            this._executeNext();
+    },
+
+    _executeNext: function WritingStatementsQueue__executeNext() {
+        let statements = this._queue[0].statements;
+        let callback = this._queue[0].callback;
+
+        function handleCompletionWrapper(aReason) {
+            try {
+                if (handleCompletion)
+                    handleCompletion.call(callback, aReason);
+            }
+            finally {
+                WritingStatementsQueue._onStatementCompleted();
+            }
+        }
+
+        if (!callback || typeof callback == 'function') {
+            handleCompletion = callback;
+            callback = handleCompletionWrapper;
+        }
+        else {
+            handleCompletion = callback.handleCompletion;
+            callback.handleCompletion = handleCompletionWrapper;
+        }
+
+        let nativeStatements = statements.map(function(s) s._wrappedStatement)
+
+        if (nativeStatements.length > 1) {
+            Connection.executeAsync(nativeStatements, nativeStatements.length,
+                                    new StatementCallback(null, callback));
+        }
+        else {
+            nativeStatements[0].executeAsync(callback);
+        }
+
+        this._executing = true;
     }
 
-    Connection.executeAsync(nativeStatements, nativeStatements.length,
-                            new StatementCallback(null, aCallback));
 }
 
 
