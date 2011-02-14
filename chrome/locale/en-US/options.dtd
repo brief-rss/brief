@@ -42,7 +42,7 @@
 <!ENTITY enableItemHightlight.label "Highlight the active item">
 <!ENTITY enableItemHightlight.accesskey "H">
 <!ENTITY customizeGroup.caption "Appearance">
-<!ENTITY shortcutsPane.label "Shorcuts">
+<!ENTITY shortcutsPane.label "Shortcuts">
 <!ENTITY editStyleDescription.label "Customize the appearance of feeds">
 <!ENTITY editStyleButton.label "Customize">
 <!ENTITY editStyleButton.accesskey "u">
