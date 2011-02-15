@@ -735,20 +735,33 @@ FeedProcessor.prototype = {
     addInsertParams: function FeedProcessor_addInsertParams(aEntry, aPrimaryHash, aSecondaryHash) {
         var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
-        this.insertEntry.paramSets.push({
-            'feedID': this.feed.feedID,
-            'primaryHash': aPrimaryHash,
-            'secondaryHash': aSecondaryHash,
-            'providedID': aEntry.wrappedEntry.id,
-            'entryURL': aEntry.entryURL,
-            'date': aEntry.date || Date.now()
-        });
+        try {
+            this.insertEntry.paramSets.push({
+                'feedID': this.feed.feedID,
+                'primaryHash': aPrimaryHash,
+                'secondaryHash': aSecondaryHash,
+                'providedID': aEntry.wrappedEntry.id,
+                'entryURL': aEntry.entryURL,
+                'date': aEntry.date || Date.now()
+            });
+        }
+        catch (ex) {
+            ReportError('Error updating feeds. Failed to bind parameters to insertEntry.');
+            throw ex;
+        }
 
-        this.insertEntryText.paramSets.push({
-            'title': title,
-            'content': aEntry.content || aEntry.summary,
-            'authors': aEntry.authors
-        });
+        try {
+            this.insertEntryText.paramSets.push({
+                'title': title,
+                'content': aEntry.content || aEntry.summary,
+                'authors': aEntry.authors
+            });
+        }
+        catch (ex) {
+            this.insertEntry.paramSets.pop();
+            ReportError('Error updating feeds. Failed to bind parameters to insertEntryText.');
+            throw ex;
+        }
 
         this.entriesToInsertCount++;
     },
