@@ -770,8 +770,9 @@ FeedProcessor.prototype = {
         var self = this;
 
         if (this.entriesToInsertCount) {
-            Stm.getLastRowids.params.count = this.entriesToInsertCount;
-            let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
+            let getLastRowids = new Statement(Stm.getLastRowids);
+            getLastRowids.params.count = this.entriesToInsertCount;
+            let statements = [this.insertEntry, this.insertEntryText, getLastRowids];
 
             ExecuteStatementsAsync(statements, {
 
