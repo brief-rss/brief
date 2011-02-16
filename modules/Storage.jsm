@@ -256,7 +256,7 @@ var StorageInternal = {
         else if (databaseIsNew) {
             this.setupDatabase();
         }
-        else if (Connection.schemaVersion < DATABASE_VERSION) {
+        else if (schemaVersion < DATABASE_VERSION) {
             // Remove the old backup file.
             if (backupFile.exists())
                 backupFile.remove(false);
@@ -268,7 +268,17 @@ var StorageInternal = {
             if (!newBackupFile.exists())
                 storageService.backupDatabaseFile(databaseFile, filename);
 
-            Migration.upgradeDatabase();
+            // No support for migration from versions older than 1.2,
+            // create a new database.
+            if (schemaVersion < 9) {
+                Connection.close();
+                databaseFile.remove(false);
+                Connection = storageService.openUnsharedDatabase(databaseFile);
+                this.setupDatabase();
+            }
+            else {
+                this.upgradeDatabase();
+            }
         }
 
         this.homeFolderID = Prefs.getIntPref('homeFolder');
@@ -298,6 +308,35 @@ var StorageInternal = {
         ExecuteSQL('CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagName)');
 
         ExecuteSQL('ANALYZE');
+
+        Connection.schemaVersion = DATABASE_VERSION;
+    },
+
+    upgradeDatabase: function StorageInternal_upgradeDatabase() {
+        switch (Connection.schemaVersion) {
+            // To 1.5b2
+            case 9:
+                // Remove dead rows from entries_text.
+                ExecuteSQL('DELETE FROM entries_text                       '+
+                           'WHERE rowid IN (                               '+
+                           '     SELECT entries_text.rowid                 '+
+                           '     FROM entries_text LEFT JOIN entries       '+
+                           '          ON entries_text.rowid = entries.id   '+
+                           '     WHERE NOT EXISTS (                        '+
+                           '         SELECT id                             '+
+                           '         FROM entries                          '+
+                           '         WHERE entries_text.rowid = entries.id '+
+                           '     )                                         '+
+                           ')                                              ');
+
+            // To 1.5b3
+            case 10:
+                ExecuteSQL('ALTER TABLE feeds ADD COLUMN lastFaviconRefresh INTEGER DEFAULT 0');
+
+            // To 1.5
+            case 11:
+                ExecuteSQL('ANALYZE');
+        }
 
         Connection.schemaVersion = DATABASE_VERSION;
     },
@@ -1934,7 +1973,6 @@ var BookmarkObserver = {
  * the livemarks available in the Brief's home folder.
  */
 function LivemarksSync() {
-    return;
     if (!this.checkHomeFolder())
         return;
 
@@ -2381,263 +2419,6 @@ var Stm = {
         var sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
         delete this.setSerializedTagList;
         return this.setSerializedTagList = new Statement(sql);
-    }
-
-}
-
-
-var Migration = {
-
-    upgradeDatabase: function Migration_upgradeDatabase() {
-        switch (Connection.schemaVersion) {
-
-        // Schema version checking has only been introduced in 0.8 beta 1. When migrating
-        // from earlier releases we don't know the exact previous version, so we attempt
-        // to apply all the changes since the beginning of time.
-        case 0:
-            try {
-                // Columns added in 0.6.
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN oldestAvailableEntryDate INTEGER');
-                ExecuteSQL('ALTER TABLE entries ADD COLUMN providedID TEXT');
-            }
-            catch (ex) { }
-
-            try {
-                // Columns and indices added in 0.7.
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN lastUpdated INTEGER');
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN updateInterval INTEGER DEFAULT 0');
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN entryAgeLimit INTEGER DEFAULT 0');
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN maxEntries INTEGER DEFAULT 0');
-                ExecuteSQL('ALTER TABLE entries ADD COLUMN authors TEXT');
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN rowIndex INTEGER');
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN parent TEXT');
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN isFolder INTEGER');
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN RDF_URI TEXT');
-            }
-            catch (ex) { }
-            // Fall through...
-
-        // To 0.8.
-        case 1:
-            ExecuteSQL('ALTER TABLE entries ADD COLUMN secondaryID TEXT');
-            ExecuteSQL('UPDATE entries SET content = summary, summary = "" WHERE content = ""');
-            // Fall through...
-
-        // To 1.0 beta 1
-        case 2:
-            try {
-                ExecuteSQL('ALTER TABLE entries ADD COLUMN updated INTEGER DEFAULT 0');
-            }
-            catch (ex) { }
-            // Fall through...
-
-        // To 1.0
-        case 3:
-            ExecuteSQL('DROP INDEX IF EXISTS entries_id_index');
-            ExecuteSQL('DROP INDEX IF EXISTS feeds_feedID_index');
-            // Fall through...
-
-        // To 1.2a1
-        case 4:
-            this.recomputeIDs();
-            this.recreateFeedsTable();
-            ExecuteSQL('ALTER TABLE entries ADD COLUMN bookmarkID INTEGER DEFAULT -1');
-            // Fall through...
-
-        // To 1.2b2
-        case 5:
-        case 6:
-            if (Connection.schemaVersion > 4)
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN markModifiedEntriesUnread INTEGER DEFAULT 1');
-            // Fall through...
-
-        // To 1.2b3
-        case 7:
-            this.migrateEntries();
-            this.bookmarkStarredEntries();
-            // Fall through...
-
-        // To 1.2
-        case 8:
-            ExecuteSQL('DROP INDEX IF EXISTS entries_feedID_index');
-            ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
-            // Fall through...
-
-        // To 1.5b2
-        case 9:
-            // Remove dead rows from entries_text.
-            ExecuteSQL('DELETE FROM entries_text                       '+
-                       'WHERE rowid IN (                               '+
-                       '     SELECT entries_text.rowid                 '+
-                       '     FROM entries_text LEFT JOIN entries       '+
-                       '          ON entries_text.rowid = entries.id   '+
-                       '     WHERE NOT EXISTS (                        '+
-                       '         SELECT id                             '+
-                       '         FROM entries                          '+
-                       '         WHERE entries_text.rowid = entries.id '+
-                       '     )                                         '+
-                       ')                                              ');
-            // Fall through...
-
-        // To 1.5b3
-        case 10:
-            ExecuteSQL('ALTER TABLE feeds ADD COLUMN lastFaviconRefresh INTEGER DEFAULT 0');
-            // Fall through...
-
-        // To 1.5
-        case 11:
-            ExecuteSQL('ANALYZE');
-
-        }
-
-        Connection.schemaVersion = DATABASE_VERSION;
-    },
-
-
-    recreateFeedsTable: function Migration_recreateFeedsTable() {
-        // Columns in this list must be in the same order as the respective columns
-        // in the new schema.
-        const OLD_COLS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,    '+
-                         'imageLink, imageTitle, favicon, RDF_URI, rowIndex, parent, '+
-                         'isFolder, hidden, lastUpdated, oldestAvailableEntryDate,   '+
-                         'entryAgeLimit, maxEntries, updateInterval                  ';
-        const NEW_COLS = 'feedID, feedURL, websiteURL, title, subtitle, imageURL,       '+
-                         'imageLink, imageTitle, favicon, bookmarkID, rowIndex, parent, '+
-                         'isFolder, hidden, lastUpdated, oldestEntryDate,               '+
-                         'entryAgeLimit, maxEntries, updateInterval                     ';
-
-        Connection.beginTransaction();
-        try {
-            ExecuteSQL('CREATE TABLE feeds_copy ('+OLD_COLS+')                               ');
-            ExecuteSQL('INSERT INTO feeds_copy SELECT '+OLD_COLS+' FROM feeds                ');
-            ExecuteSQL('DROP TABLE feeds                                                     ');
-            ExecuteSQL('CREATE TABLE feeds (' + FEEDS_TABLE_SCHEMA.join(',') + ')            ');
-            ExecuteSQL('INSERT INTO feeds ('+NEW_COLS+') SELECT '+OLD_COLS+' FROM feeds_copy ');
-            ExecuteSQL('DROP TABLE feeds_copy                                                ');
-        }
-        catch (ex) {
-            ReportError(ex, true);
-        }
-        finally {
-            Connection.commitTransaction();
-        }
-    },
-
-
-    migrateEntries: function Migration_migrateEntries() {
-        Connection.beginTransaction();
-        try {
-            let cols = 'id, feedID, secondaryID, providedID, entryURL, date, authors, '+
-                       'read, updated, starred, deleted, bookmarkID, title, content   ';
-
-            ExecuteSQL('CREATE TABLE entries_copy ('+cols+')                  ');
-            ExecuteSQL('INSERT INTO entries_copy SELECT '+cols+' FROM entries ');
-            ExecuteSQL('DROP TABLE entries                                    ');
-
-            StorageInternal.setupDatabase();
-
-            let fromCols = 'feedID, providedID, entryURL, date, read, updated,       '+
-                           'starred, deleted, bookmarkID, id, secondaryID            ';
-            let toCols =   'feedID, providedID, entryURL, date, read, updated,       '+
-                           'starred, deleted, bookmarkID, primaryHash, secondaryHash ';
-
-            ExecuteSQL('INSERT INTO entries ('+toCols+')                                '+
-                       'SELECT '+fromCols+' FROM entries_copy ORDER BY rowid            ');
-            ExecuteSQL('INSERT INTO entries_text (title, content, authors)              '+
-                       'SELECT title, content, authors FROM entries_copy ORDER BY rowid ');
-            ExecuteSQL('DROP TABLE entries_copy                                         ');
-        }
-        catch (ex) {
-            ReportError(ex, true);
-        }
-        finally {
-            Connection.commitTransaction();
-        }
-
-        ExecuteSQL('VACUUM');
-    },
-
-    bookmarkStarredEntries: function Migration_bookmarkStarredEntries() {
-        var sql = 'SELECT entries.entryURL, entries.id, entries_text.title                 '+
-                  'FROM entries INNER JOIN entries_text ON entries.id = entries_text.rowid '+
-                  'WHERE starred = 1                                                       ';
-        var starredEntries = new Statement(sql).getResults();
-
-        sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
-        var update = new Statement(sql);
-
-        Connection.beginTransaction();
-        try {
-            var entry;
-            while (entry = starredEntries.next()){
-                let uri = Utils.newURI(entry.entryURL);
-                if (!uri)
-                    continue;
-
-                let alreadyBookmarked = false;
-                let bookmarkIDs = Bookmarks.getBookmarkIdsForURI(uri, {});
-                for each (var bookmarkID in bookmarkIDs) {
-                    if (Utils.isNormalBookmark(bookmarkID)) {
-                        alreadyBookmarked = true;
-                        break;
-                    }
-                }
-
-                if (alreadyBookmarked) {
-                    StorageInternal.starEntry(true, entry.id, bookmarkID);
-                }
-                else {
-                    let bookmarkID = Bookmarks.insertBookmark(Bookmarks.unfiledBookmarksFolder,
-                                                              uri, Bookmarks.DEFAULT_INDEX,
-                                                              entry.title);
-                    update.execute({
-                        entryID: entry.id,
-                        bookmarkID: bookmarkID
-                    });
-                }
-            }
-        }
-        catch (ex) {
-            ReportError(ex);
-        }
-        finally {
-            starredEntries.close();
-            Connection.commitTransaction();
-        }
-    },
-
-    recomputeIDs: function Migration_recomputeIDs() {
-        var hashStringFunc = {
-            QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
-            onFunctionCall: function(aArgs) Utils.hashString(aArgs.getUTF8String(0))
-        }
-        var generateEntryHashFunc = {
-            QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageFunction]),
-            onFunctionCall: function(aArgs) Utils.hashString(aArgs.getUTF8String(0) +
-                                                             aArgs.getUTF8String(1))
-        }
-
-        Connection.createFunction('hashString', 1, hashStringFunc);
-        Connection.createFunction('generateEntryHash', 2, generateEntryHashFunc);
-
-        Connection.beginTransaction();
-        try {
-            ExecuteSQL('UPDATE OR IGNORE entries                                          ' +
-                       'SET id = generateEntryHash(feedID, providedID)                    ' +
-                       'WHERE rowid IN (                                                  ' +
-                       '   SELECT entries.rowid                                           ' +
-                       '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                       '   WHERE entries.date >= feeds.oldestAvailableEntryDate AND       ' +
-                       '         entries.providedID != ""                                 ' +
-                       ')                                                                 ');
-            ExecuteSQL('UPDATE OR IGNORE feeds SET feedID = hashString(feedURL) WHERE isFolder = 0');
-        }
-        catch (ex) {
-            ReportError(ex, true);
-        }
-        finally {
-            Connection.commitTransaction();
-        }
     }
 
 }
