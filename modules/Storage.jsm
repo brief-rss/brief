@@ -36,16 +36,16 @@ const FEEDS_TABLE_SCHEMA = [
 
 const ENTRIES_TABLE_SCHEMA = [
     'id            INTEGER PRIMARY KEY AUTOINCREMENT',
-    'feedID        TEXT               ',
-    'primaryHash   TEXT               ',
-    'secondaryHash TEXT               ',
-    'providedID    TEXT               ',
-    'entryURL      TEXT               ',
-    'date          INTEGER            ',
-    'read          INTEGER DEFAULT 0  ',
-    'updated       INTEGER DEFAULT 0  ',
-    'starred       INTEGER DEFAULT 0  ',
-    'deleted       INTEGER DEFAULT 0  ',
+    'feedID        TEXT',
+    'primaryHash   TEXT',
+    'secondaryHash TEXT',
+    'providedID    TEXT',
+    'entryURL      TEXT',
+    'date          INTEGER',
+    'read          INTEGER DEFAULT 0',
+    'updated       INTEGER DEFAULT 0',
+    'starred       INTEGER DEFAULT 0',
+    'deleted       INTEGER DEFAULT 0',
     'bookmarkID    INTEGER DEFAULT -1 '
 ]
 
@@ -743,9 +743,8 @@ FeedProcessor.prototype = {
                     }
                 }
 
-                self.remainingEntriesCount--;
-                if (!self.remainingEntriesCount)
-                    self.exacuteAndNotify();
+                if (!--self.remainingEntriesCount)
+                    self.executeAndNotify();
             }
         });
     },
@@ -805,7 +804,7 @@ FeedProcessor.prototype = {
         this.entriesToInsertCount++;
     },
 
-    exacuteAndNotify: function FeedProcessor_exacuteAndNotify() {
+    executeAndNotify: function FeedProcessor_executeAndNotify() {
         var self = this;
 
         if (this.entriesToInsertCount) {
@@ -822,6 +821,9 @@ FeedProcessor.prototype = {
                 },
 
                 handleCompletion: function(aReason) {
+                    if (aReason == REASON_ERROR)
+                        return;
+
                     new Query(self.insertedEntries).getEntryList(function(aList) {
                         for each (let observer in StorageInternal.observers)
                             observer.onEntriesAdded(aList);
