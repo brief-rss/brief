@@ -66,6 +66,7 @@ const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
 const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
 
+Components.utils.import('resource://brief/StorageUtils.jsm');
 Components.utils.import('resource://brief/FeedContainer.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
@@ -91,6 +92,12 @@ XPCOMUtils.defineLazyGetter(this, 'Places', function() {
 
 
 var Connection = null;
+
+function Statement(aStatement, aDefaultParams) {
+    StorageStatement.call(this, Connection, aStatement, aDefaultParams);
+}
+
+Statement.prototype = StorageStatement.prototype;
 
 
 // Exported object exposing public properties.
@@ -236,7 +243,7 @@ var StorageInternal = {
 
         var storageService = Cc['@mozilla.org/storage/service;1'].
                              getService(Ci.mozIStorageService);
-        Connection = storageService.openUnsharedDatabase(databaseFile);
+        Connection = new StorageConnection(databaseFile);
         var schemaVersion = Connection.schemaVersion;
 
         // Remove the backup file after certain amount of time.
@@ -250,7 +257,7 @@ var StorageInternal = {
             storageService.backupDatabaseFile(databaseFile, 'brief-backup.sqlite');
             Connection.close();
             databaseFile.remove(false);
-            Connection = storageService.openUnsharedDatabase(databaseFile);
+            Connection = new StorageConnection(databaseFile);
             this.setupDatabase();
         }
         else if (databaseIsNew) {
@@ -273,7 +280,7 @@ var StorageInternal = {
             if (schemaVersion < 9) {
                 Connection.close();
                 databaseFile.remove(false);
-                Connection = storageService.openUnsharedDatabase(databaseFile);
+                Connection = new StorageConnection(databaseFile);
                 this.setupDatabase();
             }
             else {
@@ -290,24 +297,26 @@ var StorageInternal = {
     },
 
     setupDatabase: function Database_setupDatabase() {
-        ExecuteSQL('CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA.join(',') + ')                   ');
-        ExecuteSQL('CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA.join(',') + ')               ');
-        ExecuteSQL('CREATE TABLE IF NOT EXISTS entry_tags (' + ENTRY_TAGS_TABLE_SCHEMA.join(',') + ')         ');
-        ExecuteSQL('CREATE VIRTUAL TABLE entries_text USING fts3 (' + ENTRIES_TEXT_TABLE_SCHEMA.join(',') + ')');
+        Connection.executeSQL([
+            'CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA.join(',') + ') ',
+            'CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA.join(',') + ') ',
+            'CREATE TABLE IF NOT EXISTS entry_tags (' + ENTRY_TAGS_TABLE_SCHEMA.join(',') + ') ',
+            'CREATE VIRTUAL TABLE entries_text USING fts3 (' + ENTRIES_TEXT_TABLE_SCHEMA.join(',') + ')',
 
-        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)                ');
-        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ');
+            'CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)                ',
+            'CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ',
 
-        // Speed up lookup when checking for updates.
-        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_primaryHash_index ON entries (primaryHash) ');
+            // Speed up lookup when checking for updates.
+            'CREATE INDEX IF NOT EXISTS entries_primaryHash_index ON entries (primaryHash) ',
 
-        // Speed up SELECTs in the bookmarks observer.
-        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_bookmarkID_index ON entries (bookmarkID) ');
-        ExecuteSQL('CREATE INDEX IF NOT EXISTS entries_entryURL_index ON entries (entryURL)     ');
+            // Speed up SELECTs in the bookmarks observer.
+            'CREATE INDEX IF NOT EXISTS entries_bookmarkID_index ON entries (bookmarkID) ',
+            'CREATE INDEX IF NOT EXISTS entries_entryURL_index ON entries (entryURL)     ',
 
-        ExecuteSQL('CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagName)');
+            'CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagName)',
 
-        ExecuteSQL('ANALYZE');
+            'ANALYZE'
+        ])
 
         Connection.schemaVersion = DATABASE_VERSION;
     },
@@ -317,25 +326,25 @@ var StorageInternal = {
             // To 1.5b2
             case 9:
                 // Remove dead rows from entries_text.
-                ExecuteSQL('DELETE FROM entries_text                       '+
-                           'WHERE rowid IN (                               '+
-                           '     SELECT entries_text.rowid                 '+
-                           '     FROM entries_text LEFT JOIN entries       '+
-                           '          ON entries_text.rowid = entries.id   '+
-                           '     WHERE NOT EXISTS (                        '+
-                           '         SELECT id                             '+
-                           '         FROM entries                          '+
-                           '         WHERE entries_text.rowid = entries.id '+
-                           '     )                                         '+
-                           ')                                              ');
+                Connection.executeSQL('DELETE FROM entries_text                       '+
+                                      'WHERE rowid IN (                               '+
+                                      '     SELECT entries_text.rowid                 '+
+                                      '     FROM entries_text LEFT JOIN entries       '+
+                                      '          ON entries_text.rowid = entries.id   '+
+                                      '     WHERE NOT EXISTS (                        '+
+                                      '         SELECT id                             '+
+                                      '         FROM entries                          '+
+                                      '         WHERE entries_text.rowid = entries.id '+
+                                      '     )                                         '+
+                                     ')                                              ');
 
             // To 1.5b3
             case 10:
-                ExecuteSQL('ALTER TABLE feeds ADD COLUMN lastFaviconRefresh INTEGER DEFAULT 0');
+                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN lastFaviconRefresh INTEGER DEFAULT 0');
 
             // To 1.5
             case 11:
-                ExecuteSQL('ANALYZE');
+                Connection.executeSQL('ANALYZE');
         }
 
         Connection.schemaVersion = DATABASE_VERSION;
@@ -413,15 +422,14 @@ var StorageInternal = {
     // See Storage.
     compactDatabase: function StorageInternal_compactDatabase() {
         this.purgeEntries(false);
-        ExecuteSQL('VACUUM');
+        Connection.executeSQL('VACUUM');
     },
 
 
     // Moves expired entries to Trash and permanently removes
     // the deleted items from database.
     purgeEntries: function StorageInternal_purgeEntries(aDeleteExpired) {
-        Connection.beginTransaction()
-        try {
+        Connection.runTransaction(function() {
             if (aDeleteExpired) {
                 // Delete old entries in feeds that don't have per-feed setting enabled.
                 if (Prefs.getBoolPref('database.expireEntries')) {
@@ -484,13 +492,7 @@ var StorageInternal = {
                 'currentDate': Date.now(),
                 'retentionTime': DELETED_FEEDS_RETENTION_TIME
             });
-        }
-        catch (ex) {
-            ReportError(ex);
-        }
-        finally {
-            Connection.commitTransaction();
-        }
+        }, this)
 
         // Prefs can only store longs while Date is a long long.
         var now = Math.round(Date.now() / 1000);
@@ -581,8 +583,7 @@ var StorageInternal = {
      *        Name of the tag.
      */
     tagEntry: function StorageInternal_tagEntry(aState, aEntryID, aTagName) {
-        Connection.beginTransaction();
-        try {
+        Connection.runTransaction(function() {
             var params = { 'entryID': aEntryID, 'tagName': aTagName };
 
             if (aState) {
@@ -606,10 +607,7 @@ var StorageInternal = {
                 for each (let observer in StorageInternal.observers)
                     observer.onEntriesTagged(aList, aState, aTagName);
             });
-        }
-        finally {
-            Connection.commitTransaction();
-        }
+        })
     },
 
     QueryInterface: XPCOMUtils.generateQI(Ci.nsIObserver)
@@ -784,7 +782,7 @@ FeedProcessor.prototype = {
             });
         }
         catch (ex) {
-            ReportError('Error updating feeds. Failed to bind parameters to insertEntry.');
+            Connection.reportDatabaseError('Error updating feeds. Failed to bind parameters to insertEntry.');
             throw ex;
         }
 
@@ -797,7 +795,7 @@ FeedProcessor.prototype = {
         }
         catch (ex) {
             this.insertEntry.paramSets.pop();
-            ReportError('Error updating feeds. Failed to bind parameters to insertEntryText.');
+            Connection.reportDatabaseError('Error updating feeds. Failed to bind parameters to insertEntryText.');
             throw ex;
         }
 
@@ -812,12 +810,12 @@ FeedProcessor.prototype = {
             getLastRowids.params.count = this.entriesToInsertCount;
             let statements = [this.insertEntry, this.insertEntryText, getLastRowids];
 
-            ExecuteStatementsAsync(statements, {
+            Connection.executeAsync(statements, {
 
                 handleResult: function(aResults) {
-                    var row;
-                    while (row = aResults.getNextRow())
-                        self.insertedEntries.push(row.getResultByName('id'));
+                    let row;
+                    while (row = aResults.next())
+                        self.insertedEntries.push(row.id);
                 },
 
                 handleCompletion: function(aReason) {
@@ -838,7 +836,7 @@ FeedProcessor.prototype = {
         if (this.entriesToUpdateCount) {
             let statements = [this.updateEntry, this.updateEntryText];
 
-            ExecuteStatementsAsync(statements, function() {
+            Connection.executeAsync(statements, function() {
                 new Query(self.updatedEntries).getEntryList(function(aList) {
                     for each (let observer in StorageInternal.observers)
                         observer.onEntriesUpdated(aList);
@@ -975,7 +973,7 @@ Query.prototype = {
 
         try {
             var entries = [];
-            var statement = Connection.createStatement(sql);
+            var statement = Connection._nativeConnection.createStatement(sql);
             while (statement.step())
                 entries.push(statement.row.id);
         }
@@ -1316,7 +1314,7 @@ Query.prototype = {
         // Ignore "SQL logic error or missing database" error which full-text search
         // throws when the query doesn't contain at least one non-excluded term.
         if (Connection.lastError != 1)
-            ReportError(ex, true);
+            Connection.reportDatabaseError(ex, true);
     },
 
     /**
@@ -1464,284 +1462,6 @@ Query.prototype = {
                 this._traverseFolderChildren(items[i].feedID);
             }
         }
-    }
-
-}
-
-
-function ExecuteSQL(aSQLString) {
-    try {
-        Connection.executeSimpleSQL(aSQLString);
-    }
-    catch (ex) {
-        log('SQL statement: ' + aSQLString);
-        ReportError(ex, true);
-    }
-}
-
-function Statement(aStatement, aDefaultParams) {
-    if (aStatement instanceof Statement) {
-        this._wrappedStatement = aStatement._wrappedStatement.clone();
-        this._defaultParams = aStatement._defaultParams;
-        this._isWritingStatement = aStatement._isWritingStatement;
-    }
-    else {
-        try {
-            this._wrappedStatement = Connection.createStatement(aStatement);
-        }
-        catch (ex) {
-            log('SQL statement:\n' + aStatement);
-            ReportError(ex, true);
-        }
-
-        this._isWritingStatement = !/^\s*SELECT/.test(aStatement);
-        this._defaultParams = aDefaultParams || null;
-    }
-
-    this.paramSets = [];
-    this.params = {};
-}
-
-Statement.prototype = {
-
-    execute: function Statement_execute(aParams) {
-        if (aParams)
-            this.params = aParams;
-
-        this._bindParams();
-        this._wrappedStatement.execute();
-    },
-
-    executeAsync: function Statement_executeAsync(aCallback) {
-        this._bindParams();
-        let callback = new StatementCallback(this, aCallback);
-        if (this._isWritingStatement)
-            WritingStatementsQueue.add(this, callback);
-        else
-            this._wrappedStatement.executeAsync(callback);
-    },
-
-    _bindParams: function Statement__bindParams() {
-        for (let column in this._defaultParams)
-            this._wrappedStatement.params[column] = this._defaultParams[column];
-
-        if (!this.paramSets.length) {
-            for (let column in this.params)
-                this._wrappedStatement.params[column] = this.params[column];
-        }
-        else {
-            let bindingParamsArray = this._wrappedStatement.newBindingParamsArray();
-
-            for (let i = 0; i < this.paramSets.length; i++) {
-                let set = this.paramSets[i];
-                let bp = bindingParamsArray.newBindingParams();
-                for (let column in set)
-                    bp.bindByName(column, set[column])
-                bindingParamsArray.addParams(bp);
-            }
-
-            this._wrappedStatement.bindParameters(bindingParamsArray);
-        }
-
-        this.paramSets = [];
-        this.params = {};
-    },
-
-    getResults: function Statement_getResults(aParams, aOnError) {
-        if (aParams)
-            this.params = aParams;
-
-        this._bindParams();
-
-        var columns = [];
-        var columnCount = this._wrappedStatement.columnCount;
-        for (let i = 0; i < columnCount; i++)
-            columns.push(this._wrappedStatement.getColumnName(i));
-
-        try {
-            while (true) {
-                let row = null;
-                if (this._wrappedStatement.step()) {
-                    row = {};
-                    for (let i = 0; i < columnCount; i++)
-                        row[columns[i]] = this._wrappedStatement.row[columns[i]];
-                }
-
-                yield row;
-            }
-        }
-        catch (ex) {
-            if (aOnError)
-                aOnError();
-            else
-                throw(ex);
-        }
-        finally {
-            this._wrappedStatement.reset();
-        }
-    },
-
-    getSingleResult: function Statement_getSingleResult(aParams, aOnError) {
-        var results = this.getResults(aParams, aOnError);
-        var row = results.next();
-        results.close();
-
-        return row;
-    },
-
-    getAllResults: function Statement_getAllResults(aParams, aOnError) {
-        var results = this.getResults(aParams, aOnError);
-        var row, rows = [];
-        while (row = results.next())
-            rows.push(row);
-
-        return rows;
-    },
-
-    reset: function Statement_reset() {
-        this.paramSets = [];
-        this.params = {};
-        this._wrappedStatement.reset();
-    }
-
-}
-
-function StatementCallback(aStatement, aCallback) {
-    this._statement = aStatement;
-
-    if (typeof aCallback == 'function') {
-        this._callback =  {
-            handleCompletion: aCallback
-        }
-    }
-    else {
-        this._callback = aCallback || {};
-    }
-}
-
-StatementCallback.prototype = {
-
-    handleResult: function(aResultSet) {
-        if (!this._callback.handleResult)
-            return;
-
-        if (this._statement) {
-            let gen = this._getResultsGenerator(aResultSet);
-            this._callback.handleResult(gen);
-            gen.close();
-        }
-        else {
-            // When using ExecuteStatementsAsync the callback doesn't know
-            // which statement is being handled so we can't use a generator.
-            this._callback.handleResult(aResultSet);
-        }
-    },
-
-    handleCompletion: function(aReason) {
-        if (this._callback.handleCompletion)
-            this._callback.handleCompletion(aReason);
-    },
-
-    handleError: function(aError) {
-        if (this._callback.handleError)
-            this._callback.handleError(aError);
-        else
-            ReportError(aError.message);
-    },
-
-    _getResultsGenerator: function Statement__getResultsGenerator(aResultSet) {
-        let nativeStatement = this._statement._wrappedStatement;
-        var columnCount = nativeStatement.columnCount;
-
-        while (true) {
-            let obj = null;
-
-            let row = aResultSet.getNextRow();
-            if (row) {
-                obj = {};
-                for (let i = 0; i < columnCount; i++) {
-                    let column = nativeStatement.getColumnName(i);
-                    obj[column] = row.getResultByName(column);
-                }
-            }
-
-            yield obj;
-        }
-    }
-}
-
-function ExecuteStatementsAsync(aStatements, aCallback) {
-    aStatements.forEach(function(statement) {
-        statement._bindParams();
-    })
-    WritingStatementsQueue.add(aStatements, aCallback);
-}
-
-/**
- * Observers notified by writing statements often need to query the database to update
- * views and such, and they rely on the database not to be modified again until they
- * complete. If another writing statement was executed in the background thread before
- * the oberver completed, it would create a race condition.
- *
- * Therefore, we maintain a queue of writing statements to prevent any such statement
- * from being executed until the callback of the previous one has completed.
- */
-var WritingStatementsQueue = {
-
-    _queue: [],
-    _executing: false,
-
-    add: function WritingStatementsQueue_add(aStatements, aCallback) {
-        this._queue.push({
-            statements: aStatements instanceof Array ? aStatements : [aStatements],
-            callback: aCallback
-        });
-
-        if (!this._executing)
-            this._executeNext();
-    },
-
-    _onStatementCompleted: function WritingStatementsQueue__onStatementCompleted() {
-        this._queue.shift();
-        this._executing = false;
-        if (this._queue.length)
-            this._executeNext();
-    },
-
-    _executeNext: function WritingStatementsQueue__executeNext() {
-        let statements = this._queue[0].statements;
-        let callback = this._queue[0].callback;
-
-        function handleCompletionWrapper(aReason) {
-            try {
-                if (handleCompletion)
-                    handleCompletion.call(callback, aReason);
-            }
-            finally {
-                WritingStatementsQueue._onStatementCompleted();
-            }
-        }
-
-        if (!callback || typeof callback == 'function') {
-            handleCompletion = callback;
-            callback = handleCompletionWrapper;
-        }
-        else {
-            handleCompletion = callback.handleCompletion;
-            callback.handleCompletion = handleCompletionWrapper;
-        }
-
-        let nativeStatements = statements.map(function(s) s._wrappedStatement)
-
-        if (nativeStatements.length > 1) {
-            Connection.executeAsync(nativeStatements, nativeStatements.length,
-                                    new StatementCallback(null, callback));
-        }
-        else {
-            nativeStatements[0].executeAsync(callback);
-        }
-
-        this._executing = true;
     }
 
 }
@@ -1990,8 +1710,7 @@ function LivemarksSync() {
     var result = Places.history.executeQuery(query, options);
     this.traversePlacesQueryResults(result.root, livemarks);
 
-    Connection.beginTransaction();
-    try {
+    Connection.runTransaction(function() {
         // Get a list all feeds stored in the database.
         var sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
         var storedFeeds = new Statement(sql).getAllResults();
@@ -2019,10 +1738,7 @@ function LivemarksSync() {
             if (!feed.bookmarked && feed.hidden == 0)
                 this.hideFeed(feed);
         }, this)
-    }
-    finally {
-        Connection.commitTransaction();
-    }
+    }, this)
 
     if (this.feedListChanged) {
         StorageInternal.feedsCache = StorageInternal.feedsAndFoldersCache = null;
@@ -2587,22 +2303,11 @@ var Utils = {
 }
 
 
-function ReportError(aException, aRethrow) {
-    var message = typeof aException == 'string' ? aException : aException.message;
-    message += '\nStack: ' + aException.stack;
-    message += '\nDatabase error: ' + Connection.lastErrorString;
-    var error = new Error(message, aException.fileName, aException.lineNumber);
-    if (aRethrow)
-        throw(error);
-    else
-        Components.utils.reportError(error);
-}
-
-
 function log(aMessage) {
-  var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                       getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage('Brief:\n' + aMessage);
+    var consoleService = Cc['@mozilla.org/consoleservice;1']
+                         .getService(Ci.nsIConsoleService);
+    consoleService.logStringMessage(aMessage);
 }
+
 
 StorageInternal.init();
