@@ -80,13 +80,7 @@ XPCOMUtils.defineLazyGetter(this, 'Prefs', function()
                                              QueryInterface(Ci.nsIPrefBranch2)
 );
 XPCOMUtils.defineLazyGetter(this, 'Places', function() {
-    try {
-        Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
-    }
-    catch (ex) {
-        // Firefox 3.6 compatibility.
-        Components.utils.import('resource://gre/modules/utils.js');
-    }
+    Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
     return PlacesUtils;
 });
 
@@ -1232,15 +1226,8 @@ Query.prototype = {
      * observer.
      */
     bookmarkEntries: function Query_bookmarkEntries(aState) {
-        // Firefox 3.6 compatibility.
-        if ('@mozilla.org/browser/placesTransactionsService;1' in Cc) {
-            var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1']
-                             .getService(Ci.nsIPlacesTransactionsService);
-        }
-        else {
-            Components.utils.import('resource://gre/modules/PlacesUIUtils.jsm');
-            transSrv = PlacesUIUtils.ptm;
-        }
+        Components.utils.import('resource://gre/modules/PlacesUIUtils.jsm');
+        let transSrv = PlacesUIUtils.ptm;
 
         var transactions = [];
 
