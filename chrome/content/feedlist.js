@@ -176,7 +176,7 @@ var TagList = {
     /**
      * Refreshes tag listitems.
      *
-     * @param aTags            A tag string or an array of tag strings.
+     * @param aTags            An array of tag strings.
      * @param aPossiblyAdded   Indicates that the tag may not be in the list of tags yet.
      * @param aPossiblyRemoved Indicates that there may be no remaining entries with
      *                         the tag.
@@ -185,9 +185,7 @@ var TagList = {
         if (!this.ready)
             return;
 
-        var tags = (aTags.splice) ? aTags : [aTags];
-
-        tags.forEach(function(tag) {
+        aTags.forEach(function(tag) {
             if (aPossiblyAdded) {
                 if (this.tags.indexOf(tag) == -1)
                     this._rebuild();
@@ -712,7 +710,7 @@ var FeedList = {
     },
 
     onEntriesTagged: function FeedList_onEntriesTagged(aEntryList, aNewState, aTag) {
-        TagList.refreshTags(aTag, aNewState, !aNewState);
+        TagList.refreshTags([aTag], aNewState, !aNewState);
     },
 
     onEntriesDeleted: function FeedList_onEntriesDeleted(aEntryList, aNewState) {
