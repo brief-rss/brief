@@ -1043,8 +1043,7 @@ Query.prototype = {
      * @param aDistinct
      *        Don't include multiple entries with the same value.
      * @param aCallback
-     *        Receives an array of objects containing name-value pairs of the requested
-     *        property and ID of the corresponding entry.
+     *        Receives an array of values of the requested property.
      */
     getProperty: function Query_getProperty(aPropertyName, aDistinct, aCallback) {
         switch (aPropertyName) {
@@ -1062,7 +1061,7 @@ Query.prototype = {
         let sql = 'SELECT entries.id, ' + table + aPropertyName +
                    this._getQueryString(true, getEntriesText);
 
-        let objects = [], values = [];
+        let values = [];
 
         new Statement(sql).executeAsync({
 
@@ -1074,17 +1073,11 @@ Query.prototype = {
                         continue;
 
                     values.push(value);
-
-                    // XXX skip the temp variable
-                    let obj = {};
-                    obj[aPropertyName] = value;
-                    obj.ID = row.id;
-                    objects.push(obj);
                 }
             },
 
             handleCompletion: function(aReason) {
-                aCallback(objects);
+                aCallback(values);
             },
 
             handleError: this._onDatabaseError

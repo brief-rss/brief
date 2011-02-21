@@ -170,8 +170,6 @@ const Brief = {
         })
 
         query.getProperty('feedID', true, function(unreadFeeds) {
-            unreadFeeds = unreadFeeds.map(function(e) e.feedID);
-
             var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
             var value = bundle.getString('noUnreadFeedsTooltip');
             noUnreadLabel.setAttribute('value', value);

@@ -594,10 +594,9 @@ FeedView.prototype = {
 
                         query.verifyBookmarksAndTags();
 
-                        query.getProperty('bookmarkID', false, function(aResults) {
-                            let itemID = aResults[0].bookmarkID;
+                        query.getProperty('bookmarkID', false, function(ids) {
                             let starElem = entryElement.getElementsByClassName('article-star')[0];
-                            getTopWindow().StarUI.showEditBookmarkPopup(itemID, starElem,
+                            getTopWindow().StarUI.showEditBookmarkPopup(ids[0], starElem,
                                                                         'after_start');
                         })
                     }
@@ -1015,18 +1014,18 @@ FeedView.prototype = {
                 this._loadingEntries = false;
                 if (aCallback)
                     aCallback(0);
-                
+
                 return;
             }
 
             var query = this.getQueryCopy();
             if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
-                query.startDate = dates[dates.length - 1].date;
+                query.startDate = dates[dates.length - 1];
                 query.endDate = edgeDate;
             }
             else {
                 query.startDate = edgeDate;
-                query.endDate = dates[dates.length - 1].date;
+                query.endDate = dates[dates.length - 1];
             }
 
             query.getFullEntries(function(entries) {

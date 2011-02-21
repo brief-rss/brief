@@ -886,10 +886,10 @@ var TagListContextMenu = {
             tags: [tag]
         })
 
-        query.getProperty('entryURL', true, function(results) {
-            results.forEach(function(res) {
+        query.getProperty('entryURL', true, function(urls) {
+            urls.forEach(function(url) {
                 try {
-                    var uri = NetUtil.newURI(res.entryURL, null, null);
+                    var uri = NetUtil.newURI(url, null, null);
                 }
                 catch (ex) {
                     return;
