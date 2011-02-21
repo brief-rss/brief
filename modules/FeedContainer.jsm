@@ -212,7 +212,7 @@ Entry.prototype = {
 
 
 /**
- * A simple list of entries which provides utility functions for analyzing its contents.
+ * A simple list of entries.
  */
 function EntryList() { }
 
@@ -236,54 +236,7 @@ EntryList.prototype = {
     /**
      * Array of distinct tags which entries in the list have.
      */
-    tags: null,
-
-
-    containsFeed: function EntryList_containsFeed(aFeedID) {
-        return this.feeds.indexOf(aFeedID) != -1;
-    },
-
-    containsTagged: function EntryList_containsTagged(aTagName) {
-        return this.tags.indexOf(aTagName) != -1;
-    },
-
-    containsUnread: function EntryList_containsUnread() {
-        return this.contains('unread');
-    },
-
-    containsStarred: function EntryList_containsStarred() {
-        return this.contains('starred');
-    },
-
-    containsTrashed: function EntryList_containsTrashed() {
-        return this.contains('trashed');
-    },
-
-
-    contains: function EntryList_contains(aWhat) {
-        // Maximum depth of expression tree in sqlite is 1000, so there are only
-        // so many entries you can OR in a statement. If that limit is exceeded,
-        // we return true even though we don't know if there were any matches.
-        // EntryList.contains() is used primarly by views and it's better
-        // for them to be unnecessarily refreshed than not be refreshed when they should.
-        if (this.length > 500)
-            return true;
-
-        query = new Query(this.IDs);
-        switch (aWhat) {
-            case 'unread':
-                query.unread = true;
-                break;
-            case 'starred':
-                query.starred = true;
-                break;
-            case 'trashed':
-                query.deleted = Storage.ENTRY_STATE_TRASHED;
-                break;
-        }
-
-        return query.hasMatches();
-    }
+    tags: null
 
 }
 
@@ -320,13 +273,6 @@ var milTimezoneCodesMap = {
     K: '-10', L: '-11', M: '-12', N: '+1', O: '+2',  P: '+3',  Q: '+4',  R: '+5',
     S: '+6',  T: '+7',  U: '+8',  V: '+9', W: '+10', X: '+11', Y: '+12', Z: 'UT',
 }
-
-__defineGetter__('Query', function() {
-    var tempScope = {};
-    Components.utils.import('resource://brief/Storage.jsm', tempScope);
-    delete this.Query;
-    return this.Query = tempScope.Query;
-});
 
 function log(aMessage) {
   var consoleService = Cc['@mozilla.org/consoleservice;1'].

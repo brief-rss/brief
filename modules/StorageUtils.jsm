@@ -54,8 +54,8 @@ StorageConnection.prototype = {
                 this._nativeConnection.executeSimpleSQL(stm);
             }
             catch (ex) {
-                Components.utils.reportError('SQL statement:\n' + stm);
-                this.reportDatabaseError(ex, true);
+                this.reportDatabaseError('SQL statement:\n' + stm);
+                throw ex;
             }
         }, this)
     },
@@ -95,15 +95,10 @@ StorageConnection.prototype = {
         return this._nativeConnection.createFunction(aFunctionName, aNumArguments, aFunction);
     },
 
-    reportDatabaseError: function(aException, aRethrow) {
-        let message = typeof aException == 'string' ? aException : aException.message;
-        message += '\nStack: ' + aException.stack;
-        message += '\nDatabase error: ' + this._nativeConnection.lastErrorString;
-        let error = new Error(message, aException.fileName, aException.lineNumber);
-        if (aRethrow)
-            throw error;
-        else
-            Components.utils.reportError(error);
+    reportDatabaseError: function(aMessage, aError) {
+        let message = aMessage ? aMessage + '\n' : '';
+        message += aError ? aError.message : this._nativeConnection.lastErrorString;
+        Components.utils.reportError(message);
     }
 
 }
@@ -125,8 +120,8 @@ function StorageStatement(aConnection, aStatement, aDefaultParams) {
             this._nativeStatement = aConnection._nativeConnection.createStatement(aStatement);
         }
         catch (ex) {
-            log('SQL statement:\n' + aStatement);
-            this._connection.reportDatabaseError(ex, true);
+            this._connection.reportDatabaseError('Statement:\n' + aStatement);
+            throw ex;
         }
 
         this._defaultParams = aDefaultParams || null;
@@ -303,7 +298,7 @@ StatementCallback.prototype = {
         if (this._callback.handleError)
             this._callback.handleError(aError);
         else
-            this._connection.reportDatabaseError(aError.message);
+            this._connection.reportDatabaseError(aError);
     },
 
     _getResultsGenerator: function(aResultSet) {

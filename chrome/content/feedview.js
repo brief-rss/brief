@@ -12,7 +12,7 @@ const INITIAL_WINDOW_HEIGHTS_LOAD = 2;
 const LOAD_STEP_SIZE = 5;
 
 // Same as above, but applies to headlines view.
-const HEADLINES_LOAD_STEP_SIZE = 10;
+const HEADLINES_LOAD_STEP_SIZE = 20;
 
 
 // The currently active instance of FeedView.
@@ -251,16 +251,21 @@ FeedView.prototype = {
     skipDown: function FeedView_skipDown() {
         var middleEntry = parseInt(this._getMiddleEntryElement().id);
         var index = this._loadedEntries.indexOf(middleEntry);
+
+        let doSkipDown = function(aCount) {
+            var targetEntry = this._loadedEntries[index + 10] ||
+                              this._loadedEntries[this._loadedEntries.length - 1];
+
+            if (PrefCache.entrySelectionEnabled)
+                this.selectEntry(targetEntry, true, true);
+            else
+                this.scrollToEntry(targetEntry, true, true);
+        }.bind(this);
+
         if (index + 10 > this._loadedEntries.length - 1)
-            this._loadEntries(10);
-
-        var targetEntry = this._loadedEntries[index + 10] ||
-                          this._loadedEntries[this._loadedEntries.length - 1];
-
-        if (PrefCache.entrySelectionEnabled)
-            this.selectEntry(targetEntry, true, true);
+            this._loadEntries(10, doSkipDown);
         else
-            this.scrollToEntry(targetEntry, true, true);
+            doSkipDown();
     },
 
     // See scrollDown.
@@ -459,7 +464,6 @@ FeedView.prototype = {
             return;
 
         switch (aEvent.type) {
-
             case 'EntryUncollapsed':
                 if (PrefCache.autoMarkRead && this.query.read !== false)
                     Commands.markEntryRead(id, true);
@@ -477,7 +481,6 @@ FeedView.prototype = {
                 getElement('feed-view-header').hidden = !this.active;
 
                 if (this.active) {
-                    this.window.addEventListener('resize', this, false);
                     for each (let event in this._events)
                         this.document.addEventListener(event, this, true);
 
@@ -496,6 +499,8 @@ FeedView.prototype = {
                     this._ignoreNextScrollEvent = false;
                     break;
                 }
+
+                log('scroll')
 
                 if (PrefCache.entrySelectionEnabled && !this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
@@ -586,11 +591,15 @@ FeedView.prototype = {
                 case 'star':
                     if (entryElement.hasAttribute('starred')) {
                         let query = new Query(entryID);
-                        query.verifyBookmarksAndTags();
-                        let itemID = query.getProperty('bookmarkID')[0].bookmarkID;
 
-                        let starElem = entryElement.getElementsByClassName('article-star')[0];
-                        getTopWindow().StarUI.showEditBookmarkPopup(itemID, starElem, 'after_start');
+                        query.verifyBookmarksAndTags();
+
+                        query.getProperty('bookmarkID', false, function(aResults) {
+                            let itemID = aResults[0].bookmarkID;
+                            let starElem = entryElement.getElementsByClassName('article-star')[0];
+                            getTopWindow().StarUI.showEditBookmarkPopup(itemID, starElem,
+                                                                        'after_start');
+                        })
                     }
                     else {
                         Commands.starEntry(entryID, true);
@@ -753,33 +762,41 @@ FeedView.prototype = {
      *        Array of IDs of entries.
      */
     _onEntriesAdded: function FeedView__onEntriesAdded(aAddedEntries) {
-        var win = this.window;
+        let win = this.window;
         if (win.scrollMaxY - win.pageYOffset < win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS) {
             this.refresh()
             return;
         }
 
-        var query = this.getQueryCopy();
+        let query = this.getQueryCopy();
         query.startDate = parseInt(this.feedContent.lastChild.getAttribute('date'));
-        this._loadedEntries = query.getEntries();
 
-        function filterNew(entryID) this._loadedEntries.indexOf(entryID) != -1;
-        var newEntries = aAddedEntries.filter(filterNew, this);
+        let view = this;
 
-        if (newEntries.length) {
+        query.getEntries(function(entries) {
+            view._loadedEntries = entries;
+
+            function filterNew(entryID) view._loadedEntries.indexOf(entryID) != -1;
+            let newEntries = aAddedEntries.filter(filterNew);
+
+            if (!newEntries.length)
+                return;
+
             let query = new Query({
-                sortOrder: this.query.sortOrder,
-                sortDirection: this.query.sortDirection,
+                sortOrder: view.query.sortOrder,
+                sortDirection: view.query.sortDirection,
                 entries: newEntries
             })
 
-            query.getFullEntries().forEach(function(entry) {
-                let index = this._loadedEntries.indexOf(entry.id);
-                this._insertEntry(entry, index);
-            }, this)
+            query.getFullEntries(function(fullEntries) {
+                fullEntries.forEach(function(entry) {
+                    let index = view._loadedEntries.indexOf(entry.id);
+                    view._insertEntry(entry, index);
+                })
 
-            this._setEmptyViewMessage();
-        }
+                view._setEmptyViewMessage();
+            })
+        })
     },
 
     /**
@@ -806,19 +823,23 @@ FeedView.prototype = {
         // Remember index of selected entry if it is removed.
         var selectedEntryIndex = -1;
 
-        let self = this;
+        let view = this;
         this._onEntriesRemovedFinish = function() {
-            self.document.removeEventListener('EntryRemoved', arguments.callee, true);
+            view.document.removeEventListener('EntryRemoved', arguments.callee, true);
 
             if (aLoadNewEntries)
-                self._fillWindow(WINDOW_HEIGHTS_LOAD);
+                view._fillWindow(WINDOW_HEIGHTS_LOAD, IHateNestedAsyncCallbacks);
+            else
+                IHateNestedAsyncCallbacks();
 
-            self._setEmptyViewMessage();
+            function IHateNestedAsyncCallbacks() {
+                view._setEmptyViewMessage();
 
-            if (self._loadedEntries.length && selectedEntryIndex != -1) {
-                let newSelection = self._loadedEntries[selectedEntryIndex] ||
-                                   self._loadedEntries[self._loadedEntries.length - 1];
-                self.selectEntry(newSelection);
+                if (view._loadedEntries.length && selectedEntryIndex != -1) {
+                    let newSelection = view._loadedEntries[selectedEntryIndex] ||
+                                       view._loadedEntries[view._loadedEntries.length - 1];
+                    view.selectEntry(newSelection);
+                }
             }
         }
 
@@ -869,21 +890,30 @@ FeedView.prototype = {
         if (!this.active)
             return;
 
+        // Clean up.
         this._stopSmoothScrolling();
         this.document.removeEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
         clearTimeout(this._markVisibleTimeout);
         getTopWindow().StarUI.panel.hidePopup();
 
+        // Manually reset the scroll position, otherwise weird stuff happens.
+        if (this.window.pageYOffset != 0) {
+            this.window.scroll(this.window.pageXOffset, 0);
+            this._ignoreNextScrollEvent = true;
+        }
+
         // Clear the old entries.
+        this._loadedEntries = [];
         var container = this.document.getElementById('container');
         container.removeChild(this.feedContent);
         var content = this.document.createElement('div');
         content.id = 'feed-content';
         container.appendChild(content);
 
-        var feed = Storage.getFeed(this.query.feeds);
+        // Prevent the message from briefly showing up before entries are loaded.
+        this.document.getElementById('message-box').style.display = 'none';
 
-        this._buildHeader(feed);
+        this._buildHeader();
 
         // Pass parameters to content.
         if (this.query.deleted == Storage.ENTRY_STATE_TRASHED)
@@ -891,35 +921,26 @@ FeedView.prototype = {
         if (PrefCache.showHeadlinesOnly)
             this.feedContent.setAttribute('showHeadlinesOnly', true);
 
-        this._loadedEntries = [];
-
         // Temporarily remove the listener because reading window.innerHeight
         // can trigger a resize event (!?).
         this.window.removeEventListener('resize', this, false);
 
-        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD);
+        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD, function() {
+            // Resize events can be dispatched asynchronously, so this listener shouldn't
+            // be earlier along with others, because then it could be triggered before
+            // the initial refresh.
+            this.window.addEventListener('resize', this, false);
 
-        // Resize events can be dispatched asynchronously, so this listener can't be
-        // added in FeedView.attach() like the others, because then it could be
-        // triggered before the initial refresh.
-        this.window.addEventListener('resize', this, false);
+            this._setEmptyViewMessage();
+            this._autoMarkRead();
 
-        this._setEmptyViewMessage();
-        this._autoMarkRead();
-
-        // Initialize selection.
-        if (PrefCache.entrySelectionEnabled) {
-            let entry = (this._loadedEntries.indexOf(this.selectedEntry) != -1)
-                        ? this.selectedEntry
-                        : this._loadedEntries[0];
-            this.selectEntry(entry, true);
-        }
-        else {
-            this.window.scroll(this.window.pageXOffset, 0);
-        }
-
-        // Changing content may cause a scroll event which should be ignored.
-        this._ignoreNextScrollEvent = true;
+            if (PrefCache.entrySelectionEnabled) {
+                let entry = (this._loadedEntries.indexOf(this.selectedEntry) != -1)
+                            ? this.selectedEntry
+                            : this._loadedEntries[0];
+                this.selectEntry(entry, true);
+            }
+        }.bind(this))
     },
 
 
@@ -931,7 +952,10 @@ FeedView.prototype = {
      *        The number of window heights to fill ahead of the current scroll
      *        position.
      */
-    _fillWindow: function FeedView__fillWindow(aWindowHeights) {
+    _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
+        if (this._loadingEntries)
+            return;
+
         var win = this.document.defaultView;
         var middleEntry = this._getMiddleEntryElement();
 
@@ -943,13 +967,15 @@ FeedView.prototype = {
         var stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
                                                    : LOAD_STEP_SIZE;
 
-        var loadedEntriesCount = this._loadEntries(stepSize);
-
-        while ((win.scrollMaxY - win.pageYOffset < win.innerHeight * aWindowHeights
-               || middleEntry == this.feedContent.lastChild) && loadedEntriesCount) {
-
-            loadedEntriesCount = this._loadEntries(stepSize);
-        }
+        this._loadEntries(stepSize, function(loadedEntriesCount) {
+            if ((win.scrollMaxY - win.pageYOffset < win.innerHeight * aWindowHeights
+                    || middleEntry == this.feedContent.lastChild) && loadedEntriesCount) {
+                this._loadEntries(stepSize, arguments.callee.bind(this));
+            }
+            else if (aCallback) {
+                aCallback();
+            }
+        }.bind(this))
     },
 
     /**
@@ -962,9 +988,8 @@ FeedView.prototype = {
      *        Requested number of entries.
      * @return The actual number of entries that were loaded.
      */
-    _loadEntries: function FeedView__loadEntries(aCount) {
+    _loadEntries: function FeedView__loadEntries(aCount, aCallback) {
         var dateQuery = this.getQueryCopy();
-
         var edgeDate = undefined;
 
         var lastEntryElement = this.feedContent.lastChild;
@@ -983,24 +1008,36 @@ FeedView.prototype = {
 
         dateQuery.limit = aCount;
 
-        var entryDates = dateQuery.getProperty('date');
-        if (!entryDates.length)
-            return 0;
+        this._loadingEntries = true;
 
-        var query = this.getQueryCopy();
-        if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
-            query.startDate = entryDates[entryDates.length - 1].date;
-            query.endDate = edgeDate;
-        }
-        else {
-            query.startDate = edgeDate;
-            query.endDate = entryDates[entryDates.length - 1].date;
-        }
+        dateQuery.getProperty('date', false, function(dates) {
+            if (!dates.length) {
+                this._loadingEntries = false;
+                if (aCallback)
+                    aCallback(0);
+                
+                return;
+            }
 
-        var entries = query.getFullEntries();
-        entries.forEach(this._appendEntry, this);
+            var query = this.getQueryCopy();
+            if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
+                query.startDate = dates[dates.length - 1].date;
+                query.endDate = edgeDate;
+            }
+            else {
+                query.startDate = edgeDate;
+                query.endDate = dates[dates.length - 1].date;
+            }
 
-        return entries.length;
+            query.getFullEntries(function(entries) {
+                entries.forEach(this._appendEntry, this);
+
+                this._loadingEntries = false;
+
+                if (aCallback)
+                    aCallback(entries.length);
+            }.bind(this))
+        }.bind(this))
     },
 
     _appendEntry: function FeedView__appendEntry(aEntry) {
@@ -1134,17 +1171,15 @@ FeedView.prototype = {
         return string;
     },
 
-    _buildHeader: function FeedView__buildHeader(aFeed) {
-        var feedTitle = getElement('feed-title');
-
-        // Reset the header.
+    _buildHeader: function FeedView__buildHeader() {
+        let feedTitle = getElement('feed-title');
         feedTitle.removeAttribute('href');
         feedTitle.className = '';
-
         feedTitle.textContent = this.titleOverride || this.title;
 
-        if (aFeed) {
-            let url = aFeed.websiteURL || aFeed.feedURL;
+        let feed = Storage.getFeed(this.query.feeds);
+        if (feed) {
+            let url = feed.websiteURL || feed.feedURL;
             let flags = Ci.nsIScriptSecurityManager.DISALLOW_INHERIT_PRINCIPAL;
             let securityCheckOK = true;
             try {
@@ -1160,7 +1195,7 @@ FeedView.prototype = {
                 feedTitle.className = 'feed-link';
             }
 
-            feedTitle.setAttribute('tooltiptext', aFeed.subtitle);
+            feedTitle.setAttribute('tooltiptext', feed.subtitle);
         }
     },
 

@@ -957,62 +957,81 @@ Query.prototype = {
 
     /**
      * Indicates if there are any entries that match this query.
+     *
+     * @param aCallback
      */
-    hasMatches: function Query_hasMatches() {
-        var sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
-        return new Statement(sql).getSingleResult(null, this._onDatabaseError).found;
+    hasMatches: function Query_hasMatches(aCallback) {
+        let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
+        new Statement(sql).executeAsync({
+            handleResult: function(aResults) {
+                aCallback(aResults.next().found);
+            },
+
+            handleError: this._onDatabaseError
+        })
     },
 
     /**
      * Get a simple list of entries.
      *
-     * @returns Array if IDs.
+     * @param aCallback
+     *        Receives an array if IDs.
      */
-    getEntries: function Query_getEntries() {
-        var sql = 'SELECT entries.id ' + this._getQueryString(true);
+    getEntries: function Query_getEntries(aCallback) {
+        let entries = [];
+        let sql = 'SELECT entries.id ' + this._getQueryString(true);
 
-        try {
-            var entries = [];
-            var statement = Connection._nativeConnection.createStatement(sql);
-            while (statement.step())
-                entries.push(statement.row.id);
-        }
-        catch(ex) {
-            this._onDatabaseError(ex);
-        }
-        finally {
-            statement.reset();
-        }
+        new Statement(sql).executeAsync({
+            handleResult: function(aResults) {
+                // XXX Check performance.
+                let row;
+                while (row = aResults.next())
+                    entries.push(row.id);
+            },
 
-        return entries;
+            handleCompletion: function(aReason) {
+                aCallback(entries);
+            },
+
+            handleError: this._onDatabaseError
+        })
     },
 
 
     /**
      * Get entries with all their properties.
      *
-     * @returns Array of Entry objects.
+     * @param aCallback
+     *        Receives an array of Entry objects.
      */
-    getFullEntries: function Query_getFullEntries() {
-        var sql = 'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,   '+
+    getFullEntries: function Query_getFullEntries(aCallback) {
+        let sql = 'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,   '+
                   '       entries.read, entries.starred, entries.updated,               '+
                   '       entries.bookmarkID, entries_text.title, entries_text.content, '+
                   '       entries_text.authors, entries_text.tags                       ';
         sql += this._getQueryString(true, true);
 
-        var results = new Statement(sql).getResults(null, this._onDatabaseError);
+        let entries = [];
 
-        var entries = [], row;
-        while (row = results.next()) {
-            let entry = new Entry();
+        new Statement(sql).executeAsync({
+            handleResult: function(aResults) {
+                let row;
+                while (row = aResults.next()) {
+                    let entry = new Entry();
 
-            for (let column in row)
-                entry[column] = row[column]
+                    for (let column in row)
+                        entry[column] = row[column]
 
-            entries.push(entry);
-        }
+                    entries.push(entry);
+                }
+            },
 
-        return entries;
+            handleCompletion: function(aReason) {
+                aCallback(entries);
+            },
+
+            handleError: this._onDatabaseError
+        })
     },
 
 
@@ -1023,10 +1042,11 @@ Query.prototype = {
      *        Name of the property.
      * @param aDistinct
      *        Don't include multiple entries with the same value.
-     * @returns Array of objects containing name-value pairs of the requested property
-     *          and ID of the corresponding entry.
+     * @param aCallback
+     *        Receives an array of objects containing name-value pairs of the requested
+     *        property and ID of the corresponding entry.
      */
-    getProperty: function Query_getProperty(aPropertyName, aDistinct) {
+    getProperty: function Query_getProperty(aPropertyName, aDistinct, aCallback) {
         switch (aPropertyName) {
             case 'content':
             case 'title':
@@ -1039,41 +1059,60 @@ Query.prototype = {
                 table = 'entries.';
         }
 
-        var sql = 'SELECT entries.id, ' + table + aPropertyName +
+        let sql = 'SELECT entries.id, ' + table + aPropertyName +
                    this._getQueryString(true, getEntriesText);
 
-        var objects = [], values = [], row;
+        let objects = [], values = [];
 
-        var results = new Statement(sql).getResults(null, this._onDatabaseError);
+        new Statement(sql).executeAsync({
 
-        while (row = results.next()) {
-            let value = row[aPropertyName];
-            if (aDistinct && values.indexOf(value) != -1)
-                continue;
+            handleResult: function(aResult) {
+                let row;
+                while (row = aResult.next()) {
+                    let value = row[aPropertyName];
+                    if (aDistinct && values.indexOf(value) != -1)
+                        continue;
 
-            values.push(value);
+                    values.push(value);
 
-            let obj = {};
-            obj[aPropertyName] = value;
-            obj.ID = row.id;
-            objects.push(obj);
-        }
+                    // XXX skip the temp variable
+                    let obj = {};
+                    obj[aPropertyName] = value;
+                    obj.ID = row.id;
+                    objects.push(obj);
+                }
+            },
 
-        return objects;
+            handleCompletion: function(aReason) {
+                aCallback(objects);
+            },
+
+            handleError: this._onDatabaseError
+        })
     },
 
 
     /**
      * Get the number of selected entries.
+     *
+     * @param aCallback
      */
-    getEntryCount: function Query_getEntryCount() {
+    getEntryCount: function Query_getEntryCount(aCallback) {
         // Optimization: don't sort.
-        var tempOrder = this.sortOrder;
+        let tempOrder = this.sortOrder;
         this.sortOrder = undefined;
-        var sql = 'SELECT COUNT(1) AS count ' + this._getQueryString(true);
-        this.sortOrder = tempOrder;
 
-        return new Statement(sql).getSingleResult(null, this._onDatabaseError).count;
+        let sql = 'SELECT COUNT(1) AS count ' + this._getQueryString(true);
+
+        new Statement(sql).executeAsync({
+            handleResult: function(aResults) {
+                aCallback(aResults.next().count);
+            },
+
+            handleError: this._onDatabaseError
+        })
+
+        this.sortOrder = tempOrder;
     },
 
 
@@ -1212,94 +1251,84 @@ Query.prototype = {
 
         var transactions = [];
 
-        this.getFullEntries().forEach(function(entry) {
-            let uri = Utils.newURI(entry.entryURL);
-            if (!uri)
-                return;
+        this.getFullEntries(function(entries) {
+            entries.forEach(function(entry) {
+                let uri = Utils.newURI(entry.entryURL);
+                if (!uri)
+                    return;
 
-            if (aState) {
-                let trans = transSrv.createItem(uri, Places.unfiledBookmarksFolderId,
-                                                Bookmarks.DEFAULT_INDEX, entry.title);
-                transactions.push(trans);
-            }
-            else {
-                let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {})
-                                         .filter(Utils.isNormalBookmark);
-                if (bookmarks.length) {
-                    for (let i = bookmarks.length - 1; i >= 0; i--) {
-                        let trans = transSrv.removeItem(bookmarks[i]);
-                        transactions.push(trans);
-                    }
+                if (aState) {
+                    let trans = transSrv.createItem(uri, Places.unfiledBookmarksFolderId,
+                                                    Bookmarks.DEFAULT_INDEX, entry.title);
+                    transactions.push(trans);
                 }
                 else {
-                    // If there are no bookmarks for an URL that is starred in our
-                    // database, it means that the database is out of sync and we
-                    // must update the database directly.
-                    StorageInternal.starEntry(false, entry.id, bookmarks[0]);
+                    let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {})
+                                             .filter(Utils.isNormalBookmark);
+                    if (bookmarks.length) {
+                        for (let i = bookmarks.length - 1; i >= 0; i--) {
+                            let trans = transSrv.removeItem(bookmarks[i]);
+                            transactions.push(trans);
+                        }
+                    }
+                    else {
+                        // If there are no bookmarks for an URL that is starred in our
+                        // database, it means that the database is out of sync and we
+                        // must update the database directly.
+                        StorageInternal.starEntry(false, entry.id, bookmarks[0]);
+                    }
                 }
-            }
-        })
+            })
 
-        var aggregatedTrans = transSrv.aggregateTransactions('', transactions);
-        transSrv.doTransaction(aggregatedTrans);
+            let aggregatedTrans = transSrv.aggregateTransactions('', transactions);
+            transSrv.doTransaction(aggregatedTrans);
+        })
     },
 
     /**
      * Verifies entries' starred statuses and their tags.
      *
      * Normally, the starred status is automatically kept in sync with user's bookmarks,
-     * but there's always a possibility that it goes out of sync, for example while
+     * but there's always a possibility that it goes out of sync, for example if
      * Brief is disabled or uninstalled. If an entry is starred but no bookmarks are
      * found for its URI, then a new bookmark is added. If an entry isn't starred,
      * but there is a bookmark for its URI, this function stars the entry.
      * Tags are verified in the same manner.
-     *
-     * @returns TRUE if the starred status was in sync, FALSE otherwise.
      */
     verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
-        var statusOK = true;
+        this.getFullEntries(function(entries) {
+            entries.forEach(function(entry) {
+                let uri = Utils.newURI(entry.entryURL);
+                if (!uri)
+                    return;
 
-        this.getFullEntries().forEach(function(entry) {
-            let uri = Utils.newURI(entry.entryURL);
-            if (!uri)
-                return;
+                let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
 
-            let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
+                // Verify bookmarks.
+                let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
+                if (entry.starred && !normalBookmarks.length)
+                    new Query(entry.id).bookmarkEntries(true);
 
-            // Verify bookmarks.
-            let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
-            if (entry.starred && !normalBookmarks.length) {
-                new Query(entry.id).bookmarkEntries(true);
-                statusOK = false;
-            }
-            else if (!entry.starred && normalBookmarks.length) {
-                StorageInternal.starEntry(true, entry.id, normalBookmarks[0]);
-                statusOK = false;
-            }
+                else if (!entry.starred && normalBookmarks.length)
+                    StorageInternal.starEntry(true, entry.id, normalBookmarks[0]);
 
-            // Verify tags.
-            var storedTags = Utils.getTagsForEntry(entry.id);
+                // Verify tags.
+                var storedTags = Utils.getTagsForEntry(entry.id);
+                var currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
+                                              .filter(Utils.isTagFolder)
+                                              .map(function(id) Bookmarks.getItemTitle(id));
 
-            var currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
-                                          .filter(Utils.isTagFolder)
-                                          .map(function(id) Bookmarks.getItemTitle(id));
+                storedTags.forEach(function(tag) {
+                    if (currentTags.indexOf(tag) === -1)
+                        Places.tagging.tagURI(uri, [tag]);
+                })
 
-            storedTags.forEach(function(tag) {
-                if (currentTags.indexOf(tag) === -1) {
-                    Places.tagging.tagURI(uri, [tag]);
-                    statusOK = false;
-                }
-            })
-
-            currentTags.forEach(function(tag) {
-                if (storedTags.indexOf(tag) === -1) {
-                    StorageInternal.tagEntry(true, entry.id, tag);
-                    statusOK = false;
-                }
+                currentTags.forEach(function(tag) {
+                    if (storedTags.indexOf(tag) === -1)
+                        StorageInternal.tagEntry(true, entry.id, tag);
+                })
             })
         })
-
-        return statusOK;
     },
 
 
@@ -1310,11 +1339,13 @@ Query.prototype = {
     _effectiveFolders: null,
 
 
-    _onDatabaseError: function BriefQuery__onDatabaseError() {
+    _onDatabaseError: function BriefQuery__onDatabaseError(aError) {
         // Ignore "SQL logic error or missing database" error which full-text search
         // throws when the query doesn't contain at least one non-excluded term.
-        if (Connection.lastError != 1)
-            Connection.reportDatabaseError(ex, true);
+        if (aError.result != 1) {
+            Connection.reportDatabaseError('', aError);
+            throw 'Database error';
+        }
     },
 
     /**
