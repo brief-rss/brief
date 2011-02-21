@@ -106,11 +106,11 @@ const Brief = {
     },
 
     refreshUI: function Brief_refreshUI() {
-        setTimeout(this.updateStatus, 0);
+        this.updateStatus();
 
         let tooltip = document.getElementById('brief-tooltip');
         if (tooltip.state == 'open' || tooltip.state == 'showing')
-            setTimeout(function() Brief.constructTooltip(), 0);
+            this.constructTooltip();
     },
 
     updateStatus: function Brief_updateStatus() {
@@ -123,18 +123,19 @@ const Brief = {
         var query = new Brief.query({
             deleted: Brief.storage.ENTRY_STATE_NORMAL,
             read: false
-        });
-        var unreadEntriesCount = query.getEntryCount();
+        })
 
-        Brief.statusCounter.value = unreadEntriesCount;
+        query.getEntryCount(function(unreadEntriesCount) {
+            Brief.statusCounter.value = unreadEntriesCount;
 
-        if (!Brief.firefox4) {
-            let panel = document.getElementById('brief-status');
-            panel.setAttribute('unread', unreadEntriesCount > 0);
-        }
-        else {
-            Brief.statusCounter.hidden = unreadEntriesCount == 0;
-        }
+            if (!Brief.firefox4) {
+                let panel = document.getElementById('brief-status');
+                panel.setAttribute('unread', unreadEntriesCount > 0);
+            }
+            else {
+                Brief.statusCounter.hidden = unreadEntriesCount == 0;
+            }
+        })
     },
 
 
@@ -167,45 +168,48 @@ const Brief = {
             sortOrder: this.query.SORT_BY_FEED_ROW_INDEX,
             sortDirection: this.query.SORT_ASCENDING
         })
-        var unreadFeeds = query.getProperty('feedID', true)
-                               .map(function(e) e.feedID);
 
-        var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
-        var value = bundle.getString('noUnreadFeedsTooltip');
-        noUnreadLabel.setAttribute('value', value);
-        noUnreadLabel.hidden = unreadFeeds.length;
+        query.getProperty('feedID', true, function(unreadFeeds) {
+            unreadFeeds = unreadFeeds.map(function(e) e.feedID);
 
-        for (let i = 0; unreadFeeds && i < unreadFeeds.length; i++) {
-            let row = document.createElement('row');
-            row.setAttribute('class', 'unread-feed-row');
-            row = rows.appendChild(row);
+            var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
+            var value = bundle.getString('noUnreadFeedsTooltip');
+            noUnreadLabel.setAttribute('value', value);
+            noUnreadLabel.hidden = unreadFeeds.length;
 
-            let feedName = this.storage.getFeed(unreadFeeds[i]).title;
-            label = document.createElement('label');
-            label.setAttribute('class', 'unread-feed-name');
-            label.setAttribute('crop', 'right');
-            label.setAttribute('value', feedName);
-            row.appendChild(label);
+            unreadFeeds.forEach(function(feed) {
+                let row = document.createElement('row');
+                row.setAttribute('class', 'unread-feed-row');
+                row = rows.appendChild(row);
 
-            let query = new this.query({
-                deleted: this.storage.ENTRY_STATE_NORMAL,
-                feeds: [unreadFeeds[i]],
-                read: false
-            })
-            let unreadCount = query.getEntryCount();
+                let feedName = this.storage.getFeed(feed).title;
+                let label = document.createElement('label');
+                label.setAttribute('class', 'unread-feed-name');
+                label.setAttribute('crop', 'right');
+                label.setAttribute('value', feedName);
+                row.appendChild(label);
 
-            label = document.createElement('label');
-            label.setAttribute('class', 'unread-entries-count');
-            label.setAttribute('value', unreadCount);
-            row.appendChild(label);
+                let query = new this.query({
+                    deleted: this.storage.ENTRY_STATE_NORMAL,
+                    feeds: [feed],
+                    read: false
+                })
 
-            value = unreadCount > 1 ? bundle.getString('manyUnreadEntries')
-                                    : bundle.getString('singleUnreadEntry');
-            label = document.createElement('label');
-            label.setAttribute('class', 'unread-entries-desc');
-            label.setAttribute('value', value);
-            row.appendChild(label);
-        }
+                query.getEntryCount(function(unreadCount) {
+                    let label = document.createElement('label');
+                    label.setAttribute('class', 'unread-entries-count');
+                    label.setAttribute('value', unreadCount);
+                    row.appendChild(label);
+
+                    let value = unreadCount > 1 ? bundle.getString('manyUnreadEntries')
+                                                : bundle.getString('singleUnreadEntry');
+                    label = document.createElement('label');
+                    label.setAttribute('class', 'unread-entries-desc');
+                    label.setAttribute('value', value);
+                    row.appendChild(label);
+                }.bind(this))
+            }.bind(this))
+        }.bind(this))
     },
 
     onTabLoad: function Brief_onTabLoad(aEvent) {
@@ -341,8 +345,7 @@ const Brief = {
     },
 
     onEntriesDeleted: function Brief_onEntriesDeleted(aEntryList, aState) {
-        if (aEntryList.containsUnread())
-            this.refreshUI();
+        this.refreshUI();
     },
 
     onEntriesTagged: function() { },
