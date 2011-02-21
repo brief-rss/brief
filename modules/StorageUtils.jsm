@@ -46,8 +46,7 @@ StorageConnection.prototype = {
     },
 
     executeSQL: function(aSQLStatements) {
-        // Firefox 3.6 compatiblity. Use Array.isArray().
-        let statements = aSQLStatements.splice ? aSQLStatements : [aSQLStatements];
+        let statements = Array.isArray(aSQLStatements) ? aSQLStatements : [aSQLStatements];
 
         statements.forEach(function(stm) {
             try {
@@ -261,8 +260,7 @@ StorageStatement.prototype = {
 
 
 function StatementCallback(aStatements, aCallback) {
-    // Firefox 3.6 compatiblity. Use Array.isArray().
-    let statements = aStatements.splice ? aStatements : [aStatements];
+    let statements = Array.isArray(aStatements) ? aStatements : [aStatements];
 
     let selects = statements.filter(function(s) !s._isWritingStatement);
     if (selects.length == 1)
@@ -345,8 +343,7 @@ WritingStatementsQueue.prototype = {
 
     add: function add(aStatements, aCallback) {
         this._queue.push({
-            // Firefox 3.6 compatiblity. Use Array.isArray().
-            statements: aStatements.splice ? aStatements : [aStatements],
+            statements: Array.isArray(aStatements) ? aStatements : [aStatements],
             callback: aCallback
         });
 
@@ -365,19 +362,16 @@ WritingStatementsQueue.prototype = {
         let statements = this._queue[0].statements;
         let callback = this._queue[0].callback;
         let handleCompletion = callback.handleCompletion;
-        callback.handleCompletion = handleCompletionWrapper;
 
-        let self = this; // Firefox 3.6 compatiblity. Use Function.prototype.bind().
-
-        function handleCompletionWrapper(aReason) {
+        callback.handleCompletion = function(aReason) {
             try {
                 if (handleCompletion)
                     handleCompletion.call(callback, aReason);
             }
             finally {
-                self._onStatementCompleted();
+                this._onStatementCompleted();
             }
-        }
+        }.bind(this);
 
         let nativeStatements = statements.map(function(s) s._nativeStatement);
 

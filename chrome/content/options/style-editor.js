@@ -19,36 +19,18 @@ function init() {
     gCustomStyleFile = chromeDir.clone();
     gCustomStyleFile.append('brief-custom-style.css');
 
-    // Firefox 3.6 compatibility.
-    if ('@mozilla.org/extensions/manager;1' in Cc) {
-        // If the custom CSS file doesn't exist, create it by copying the example file.
-        if (!gCustomStyleFile.exists()) {
-            let exampleCustomStyle = Cc['@mozilla.org/extensions/manager;1']
-                                     .getService(Ci.nsIExtensionManager)
-                                     .getInstallLocation('brief@mozdev.org')
-                                     .getItemLocation('brief@mozdev.org');
-            exampleCustomStyle.append('defaults');
-            exampleCustomStyle.append('data');
-            exampleCustomStyle.append('example-custom-style.css');
-            exampleCustomStyle.copyTo(chromeDir, 'brief-custom-style.css');
-        }
+    if (!gCustomStyleFile.exists()) {
+        gCustomStyleFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, 777);
 
-        populateTextbox();
+        AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
+            let uri = addon.getResourceURI('/defaults/data/example-custom-style.css');
+            let cssText = fetchCSSText(uri);
+            writeCustomCSSFile(cssText);
+            gTextbox.value = cssText;
+        })
     }
     else {
-        if (!gCustomStyleFile.exists()) {
-            gCustomStyleFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, 777);
-
-            AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
-                let uri = addon.getResourceURI('/defaults/data/example-custom-style.css');
-                let cssText = fetchCSSText(uri);
-                writeCustomCSSFile(cssText);
-                gTextbox.value = cssText;
-            })
-        }
-        else {
-            populateTextbox();
-        }
+        populateTextbox();
     }
 }
 

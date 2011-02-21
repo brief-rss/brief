@@ -1057,15 +1057,8 @@ var FeedListContextMenu = {
 
 
     _deleteBookmarks: function FeedListContextMenu__deleteBookmarks(aFeeds) {
-        // Firefox 3.6 compatibility.
-        if ('@mozilla.org/browser/placesTransactionsService;1' in Cc) {
-            var transSrv = Cc['@mozilla.org/browser/placesTransactionsService;1']
-                             .getService(Ci.nsIPlacesTransactionsService);
-        }
-        else {
-            Components.utils.import('resource://gre/modules/PlacesUIUtils.jsm');
-            transSrv = PlacesUIUtils.ptm;
-        }
+        Components.utils.import('resource://gre/modules/PlacesUIUtils.jsm');
+        let transSrv = PlacesUIUtils.ptm;
 
         var transactions = [];
         for (let i = aFeeds.length - 1; i >= 0; i--)

@@ -7,16 +7,6 @@ const Brief = {
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
 
-    get firefox4() {
-        var verComparator = Cc['@mozilla.org/xpcom/version-comparator;1']
-                            .getService(Ci.nsIVersionComparator);
-        delete this.firefox4;
-        return this.firefox4 = verComparator.compare(Application.version, '4.0b7') >= 0;
-    },
-
-    // Firefox 3.6 compatibility.
-    get statusPanel() document.getElementById('brief-status'),
-
     get statusCounter() document.getElementById('brief-status-counter'),
 
     get toolbarbutton() document.getElementById('brief-button'),
@@ -59,8 +49,7 @@ const Brief = {
     },
 
     getBriefTab: function Brief_getBriefTab() {
-        // Firefox 3.6 compatibility. Use gBrowser.tabs
-        var tabs = gBrowser.mTabs;
+        let tabs = gBrowser.tabs;
         for (let i = 0; i < tabs.length; i++) {
             if (gBrowser.getBrowserForTab(tabs[i]).currentURI.spec == this.BRIEF_URL)
                 return tabs[i];
@@ -114,10 +103,7 @@ const Brief = {
     },
 
     updateStatus: function Brief_updateStatus() {
-        if (Brief.firefox4 && (!Brief.toolbarbutton || !Brief.prefs.getBoolPref('showUnreadCounter')))
-            return;
-
-        if (!Brief.firefox4 && !Brief.prefs.getBoolPref('showStatusbarIcon'))
+        if (!Brief.toolbarbutton || !Brief.prefs.getBoolPref('showUnreadCounter'))
             return;
 
         var query = new Brief.query({
@@ -127,14 +113,7 @@ const Brief = {
 
         query.getEntryCount(function(unreadEntriesCount) {
             Brief.statusCounter.value = unreadEntriesCount;
-
-            if (!Brief.firefox4) {
-                let panel = document.getElementById('brief-status');
-                panel.setAttribute('unread', unreadEntriesCount > 0);
-            }
-            else {
-                Brief.statusCounter.hidden = unreadEntriesCount == 0;
-            }
+            Brief.statusCounter.hidden = (unreadEntriesCount == 0);
         })
     },
 
@@ -241,26 +220,17 @@ const Brief = {
                 }
             }
 
-            if (this.firefox4) {
-                if (this.toolbarbutton) {
-                    let showCounter = this.prefs.getBoolPref('showUnreadCounter');
-                    this.statusCounter.hidden = !showCounter;
+            if (this.toolbarbutton) {
+                let showCounter = this.prefs.getBoolPref('showUnreadCounter');
+                this.statusCounter.hidden = !showCounter;
 
-                    let menuitem = document.getElementById('brief-show-unread-counter');
-                    menuitem.setAttribute('checked', showCounter);
+                let menuitem = document.getElementById('brief-show-unread-counter');
+                menuitem.setAttribute('checked', showCounter);
 
-                    // Because Brief's toolbarbutton doesn't use toolbarbutton's binding content,
-                    // we must manually set the label in "icons and text" toolbar mode.
-                    let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
-                    label.value = this.toolbarbutton.label;
-                }
-            }
-            else {
-                document.getElementById('brief-show-unread-counter-separator').hidden = true;
-                document.getElementById('brief-show-unread-counter').hidden = true;
-
-                if (this.prefs.getBoolPref('showStatusbarIcon'))
-                    this.statusPanel.hidden = false;
+                // Because Brief's toolbarbutton doesn't use toolbarbutton's binding content,
+                // we must manually set the label in "icons and text" toolbar mode.
+                let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
+                label.value = this.toolbarbutton.label;
             }
 
             this.updateStatus();
@@ -301,29 +271,15 @@ const Brief = {
             break;
 
         case 'nsPref:changed':
-            switch (aData) {
-                // Firefox 3.6 compatibility.
-                case 'showStatusbarIcon':
-                    let newValue = this.prefs.getBoolPref('showStatusbarIcon');
-                    this.statusPanel.hidden = !newValue;
+            if (aData == 'showUnreadCounter') {
+                let newValue = this.prefs.getBoolPref('showUnreadCounter');
+                this.statusCounter.hidden = !newValue;
 
-                    let menuitem = document.getElementById('brief-show-unread-counter');
-                    menuitem.setAttribute('checked', newValue);
+                let menuitem = document.getElementById('brief-show-unread-counter');
+                menuitem.setAttribute('checked', newValue);
 
-                    if (newValue)
-                        this.updateStatus();
-                    break;
-
-                case 'showUnreadCounter':
-                    newValue = this.prefs.getBoolPref('showUnreadCounter');
-                    this.statusCounter.hidden = !newValue;
-
-                    menuitem = document.getElementById('brief-show-unread-counter');
-                    menuitem.setAttribute('checked', newValue);
-
-                    if (newValue)
-                        this.updateStatus();
-                    break;
+                if (newValue)
+                    this.updateStatus();
             }
             break;
         }

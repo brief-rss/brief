@@ -56,9 +56,6 @@
             <preference id="extensions.brief.feedview.autoMarkRead"
                         name="extensions.brief.feedview.autoMarkRead"
                         type="bool"/>
-            <preference id="extensions.brief.showStatusbarIcon"
-                        name="extensions.brief.showStatusbarIcon"
-                        type="bool"/>
             <preference id="extensions.brief.showUnreadCounter"
                         name="extensions.brief.showUnreadCounter"
                         type="bool"/>
@@ -93,10 +90,6 @@
         </groupbox>
 
         <groupbox align="stretch">
-            <checkbox id="show-statusbar-icon"
-                      label="&showStatusbarIcon.label;"
-                      accesskey="&showStatusbarIcon.accesskey;"
-                      preference="extensions.brief.showStatusbarIcon"/>
             <checkbox id="show-unread-counter"
                       label="&showUnreadCounter.label;"
                       accesskey="&showUnreadCounter.accesskey;"
