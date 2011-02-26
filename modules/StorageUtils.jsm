@@ -1,7 +1,8 @@
-let EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement'];
+const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement'];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+Components.utils.import('resource://brief/common.jsm');
+IMPORT_COMMON(this);
+
 
 function StorageConnection(aDatabaseFile) {
     this._nativeConnection = Cc['@mozilla.org/storage/service;1']
@@ -37,7 +38,8 @@ StorageConnection.prototype = {
                 throw ex;
         }
         finally {
-            this._transactionStatements.forEach(function(stmt) stmt.reset());
+            for (let statement in this._transactionStatements)
+                statement.reset();
             this._transactionStatements = [];
 
             // XXX this prevents custom error handler from rolling back the transaction.
@@ -48,7 +50,7 @@ StorageConnection.prototype = {
     executeSQL: function(aSQLStatements) {
         let statements = Array.isArray(aSQLStatements) ? aSQLStatements : [aSQLStatements];
 
-        statements.forEach(function(stm) {
+        for (let stm in statements) {
             try {
                 this._nativeConnection.executeSimpleSQL(stm);
             }
@@ -56,7 +58,7 @@ StorageConnection.prototype = {
                 this.reportDatabaseError('SQL statement:\n' + stm);
                 throw ex;
             }
-        }, this)
+        }
     },
 
     /**
@@ -83,9 +85,8 @@ StorageConnection.prototype = {
      *        or a single function treated as handleCompletion() method.
      */
     executeAsync: function Connection_executeAsync(aStatements, aCallback) {
-        aStatements.forEach(function(statement) {
+        for (let statement in aStatements)
             statement._bindParams();
-        })
         let callback = new StatementCallback(aStatements, aCallback);
         this._writingStatementsQueue.add(aStatements, callback);
     },
@@ -364,11 +365,4 @@ WritingStatementsQueue.prototype = {
         this._executing = true;
     }
 
-}
-
-
-function log(aMessage) {
-    let consoleService = Cc['@mozilla.org/consoleservice;1']
-                         .getService(Ci.nsIConsoleService);
-    consoleService.logStringMessage(aMessage);
 }

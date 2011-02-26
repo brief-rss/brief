@@ -1,7 +1,13 @@
-var EXPORTED_SYMBOLS = ['Storage', 'Query'];
+const EXPORTED_SYMBOLS = ['Storage', 'Query'];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://brief/StorageUtils.jsm');
+Components.utils.import('resource://brief/FeedContainer.jsm');
+Components.utils.import('resource://brief/FeedUpdateService.jsm');
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+
+IMPORT_COMMON(this);
+
 
 const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
@@ -61,15 +67,8 @@ const ENTRY_TAGS_TABLE_SCHEMA = [
     'entryID  INTEGER '
 ]
 
-
 const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
 const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
-
-
-Components.utils.import('resource://brief/StorageUtils.jsm');
-Components.utils.import('resource://brief/FeedContainer.jsm');
-Components.utils.import('resource://brief/FeedUpdateService.jsm');
-Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 XPCOMUtils.defineLazyServiceGetter(this, 'ObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
 XPCOMUtils.defineLazyServiceGetter(this, 'Bookmarks', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
@@ -559,9 +558,8 @@ var StorageInternal = {
             return;
 
         new Query(aEntryID).getEntryList(function(aList) {
-            StorageInternal.observers.forEach(function(observer) {
+            for (let observer in StorageInternal.observers)
                 observer.onEntriesStarred(aList, aState);
-            })
         })
     },
 
@@ -597,9 +595,8 @@ var StorageInternal = {
             })
 
             new Query(aEntryID).getEntryList(function(aList) {
-                StorageInternal.observers.forEach(function(observer) {
+                for (let observer in StorageInternal.observers)
                     observer.onEntriesTagged(aList, aState, aTagName);
-                })
             })
         })
     },
@@ -816,9 +813,8 @@ FeedProcessor.prototype = {
                         return;
 
                     new Query(self.insertedEntries).getEntryList(function(aList) {
-                        StorageInternal.observers.forEach(function(observer) {
+                        for (let observer in StorageInternal.observers)
                             observer.onEntriesAdded(aList);
-                        })
                     })
 
                     // XXX This should be optimized and/or be asynchronous
@@ -832,9 +828,8 @@ FeedProcessor.prototype = {
 
             Connection.executeAsync(statements, function() {
                 new Query(self.updatedEntries).getEntryList(function(aList) {
-                    StorageInternal.observers.forEach(function(observer) {
+                    for (let observer in StorageInternal.observers)
                         observer.onEntriesUpdated(aList);
-                    })
                 })
             })
         }
@@ -1120,11 +1115,9 @@ Query.prototype = {
                         feedIDs.push(row.feedID);
 
                     if (row.tags) {
-                        tagArray = row.tags.split(', ');
-                        for (let i = 0; i < tagArray.length; i++) {
-                            if (tags.indexOf(tagArray[i]) === -1)
-                                tags.push(tagArray[i]);
-                        }
+                        let arr = row.tags.split(', ');
+                        let newTags = arr.filter(function(t) tags.indexOf(t) === -1);
+                        tags = tags.concat(newTags);
                     }
                 }
             },
@@ -1166,9 +1159,8 @@ Query.prototype = {
                 return;
 
             update.executeAsync(function() {
-                StorageInternal.observers.forEach(function(observer) {
+                for (let observer in StorageInternal.observers)
                     observer.onEntriesMarkedRead(aList, aState);
-                })
             })
         })
     },
@@ -1204,9 +1196,8 @@ Query.prototype = {
                 return;
 
             new Statement(sql).executeAsync(function() {
-                StorageInternal.observers.forEach(function(observer) {
+                for (let observer in StorageInternal.observers)
                     observer.onEntriesDeleted(aList, aState);
-                })
             })
         })
     },
@@ -1226,7 +1217,7 @@ Query.prototype = {
         var transactions = [];
 
         this.getFullEntries(function(entries) {
-            entries.forEach(function(entry) {
+            for (let entry in entries) {
                 let uri = Utils.newURI(entry.entryURL);
                 if (!uri)
                     return;
@@ -1251,7 +1242,7 @@ Query.prototype = {
                         StorageInternal.starEntry(false, entry.id, bookmarks[0]);
                     }
                 }
-            })
+            }
 
             let aggregatedTrans = new PlacesAggregatedTransaction('', transactions);
             Places.transactionManager.doTransaction(aggregatedTrans);
@@ -1270,7 +1261,7 @@ Query.prototype = {
      */
     verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
         this.getFullEntries(function(entries) {
-            entries.forEach(function(entry) {
+            for (let entry in entries) {
                 let uri = Utils.newURI(entry.entryURL);
                 if (!uri)
                     return;
@@ -1291,16 +1282,16 @@ Query.prototype = {
                                               .filter(Utils.isTagFolder)
                                               .map(function(id) Bookmarks.getItemTitle(id));
 
-                storedTags.forEach(function(tag) {
+                for (let tag in storedTags) {
                     if (currentTags.indexOf(tag) === -1)
                         Places.tagging.tagURI(uri, [tag]);
-                })
+                }
 
-                currentTags.forEach(function(tag) {
+                for (let tag in currentTags) {
                     if (storedTags.indexOf(tag) === -1)
                         StorageInternal.tagEntry(true, entry.id, tag);
-                })
-            })
+                }
+            }
         })
     },
 
@@ -1457,13 +1448,12 @@ Query.prototype = {
 
     _traverseFolderChildren: function Query__traverseFolderChildren(aFolder) {
         var isEffectiveFolder = (this._effectiveFolders.indexOf(aFolder) != -1);
-        var items = StorageInternal.getAllFeeds(true);
 
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].parent == aFolder && items[i].isFolder) {
+        for (let item in StorageInternal.getAllFeeds(true)) {
+            if (item.parent == aFolder && item.isFolder) {
                 if (isEffectiveFolder)
-                    this._effectiveFolders.push(items[i].feedID);
-                this._traverseFolderChildren(items[i].feedID);
+                    this._effectiveFolders.push(item.feedID);
+                this._traverseFolderChildren(item.feedID);
             }
         }
     }
@@ -1506,7 +1496,7 @@ var BookmarkObserver = {
         var isTag = Utils.isTagFolder(aFolder);
 
         Utils.getEntriesByURL(url, function(aEntries) {
-            aEntries.forEach(function(entry) {
+            for (let entry in aEntries) {
                 if (isTag) {
                     let tagName = Bookmarks.getItemTitle(aFolder);
                     StorageInternal.tagEntry(true, entry, tagName, aItemID);
@@ -1514,7 +1504,7 @@ var BookmarkObserver = {
                 else {
                     StorageInternal.starEntry(true, entry, aItemID);
                 }
-            })
+            }
         })
     },
 
@@ -1539,9 +1529,8 @@ var BookmarkObserver = {
             let tagName = Bookmarks.getItemTitle(aFolder);
 
             Utils.getEntriesByTagName(tagName, function(aEntries) {
-                aEntries.forEach(function(entry) {
+                for (let entry in aEntries)
                     StorageInternal.tagEntry(false, entry, tagName);
-                })
             })
         }
         else {
@@ -1556,12 +1545,12 @@ var BookmarkObserver = {
                                               filter(Utils.isNormalBookmark);
                 }
 
-                aEntries.forEach(function(entry) {
+                for (let entry in aEntries) {
                     if (bookmarks.length)
                         StorageInternal.starEntry(true, entry.id, bookmarks[0], true);
                     else
                         StorageInternal.starEntry(false, entry.id);
-                })
+                }
             })
         }
     },
@@ -1601,16 +1590,14 @@ var BookmarkObserver = {
         case 'uri':
             // Unstar any entries with the old URI.
             Utils.getEntriesByBookmarkID(aItemID, function(aEntries) {
-                aEntries.forEach(function(entry) {
+                for (let entry in aEntries)
                     StorageInternal.starEntry(false, entry.id);
-                })
             })
 
             // Star any entries with the new URI.
             Utils.getEntriesByURL(aNewValue, function(aEntries) {
-                aEntries.forEach(function(entry) {
+                for (let entry in aEntries)
                     StorageInternal.starEntry(true, entry, aItemID);
-                })
             })
 
             break;
@@ -1661,8 +1648,7 @@ var BookmarkObserver = {
             let uri = Bookmarks.getBookmarkURI(tagID);
 
             Utils.getEntriesByURL(uri.spec, function(aEntries) {
-                aEntries.forEach(function(entryID) {
-
+                for (let entryID in aEntries) {
                     StorageInternal.tagEntry(true, entryID, aNewName);
 
                     let storedTags = Utils.getTagsForEntry(entryID);
@@ -1671,11 +1657,11 @@ var BookmarkObserver = {
                                                .filter(Utils.isTagFolder)
                                                .map(function(id) Bookmarks.getItemTitle(id));
 
-                    storedTags.forEach(function(tag) {
+                    for (let tag in storedTags) {
                         if (currentTags.indexOf(tag) === -1)
                             StorageInternal.tagEntry(false, entryID, tag);
-                    })
-                })
+                    }
+                }
             })
         }
 
@@ -1720,11 +1706,11 @@ function LivemarksSync() {
 
         let storedFeeds = [row for each (row in new Statement(sql).results)];
 
-        livemarks.forEach(function(livemark) {
+        for (let livemark in livemarks) {
             let feed = null;
-            for (let i = 0; i < storedFeeds.length; i++) {
-                if (storedFeeds[i].feedID == livemark.feedID) {
-                    feed = storedFeeds[i];
+            for (let storedFeed in storedFeeds) {
+                if (storedFeed.feedID == livemark.feedID) {
+                    feed = storedFeed;
                     break;
                 }
             }
@@ -1737,12 +1723,10 @@ function LivemarksSync() {
                 this.insertFeed(livemark);
                 newLivemarks.push(livemark);
             }
-        }, this)
+        }
 
-        storedFeeds.forEach(function(feed) {
-            if (!feed.bookmarked && feed.hidden == 0)
-                this.hideFeed(feed);
-        }, this)
+        storedFeeds.filter(function(feed) !feed.bookmarked && feed.hidden == 0)
+                   .forEach(this.hideFeed, this);
     }, this)
 
     if (this.feedListChanged) {
@@ -2156,10 +2140,9 @@ var Utils = {
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
         var foundFeed = null;
-        var feeds = StorageInternal.getAllFeeds(true);
-        for (let i = 0; i < feeds.length; i++) {
-            if (feeds[i].bookmarkID == aBookmarkID) {
-                foundFeed = feeds[i];
+        for (let feed in StorageInternal.getAllFeeds(true)) {
+            if (feed.bookmarkID == aBookmarkID) {
+                foundFeed = feed;
                 break;
             }
         }
@@ -2302,13 +2285,6 @@ var Utils = {
         return hexrep.join('');
     }
 
-}
-
-
-function log(aMessage) {
-    var consoleService = Cc['@mozilla.org/consoleservice;1']
-                         .getService(Ci.nsIConsoleService);
-    consoleService.logStringMessage(aMessage);
 }
 
 
