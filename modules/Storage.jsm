@@ -74,15 +74,15 @@ Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 XPCOMUtils.defineLazyServiceGetter(this, 'ObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
 XPCOMUtils.defineLazyServiceGetter(this, 'Bookmarks', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
-XPCOMUtils.defineLazyGetter(this, 'Prefs', function()
-    Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
-                                             getBranch('extensions.brief.').
-                                             QueryInterface(Ci.nsIPrefBranch2)
-);
+XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
+    return Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService)
+                                                   .getBranch('extensions.brief.')
+                                                   .QueryInterface(Ci.nsIPrefBranch2)
+})
 XPCOMUtils.defineLazyGetter(this, 'Places', function() {
     Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
     return PlacesUtils;
-});
+})
 
 
 var Connection = null;
@@ -364,9 +364,9 @@ var StorageInternal = {
             this.feedsCache = [];
             this.feedsAndFoldersCache = [];
 
-            var results = Stm.getAllFeeds.getResults(), row;
+            var results = Stm.getAllFeeds.getResults();
 
-            while (row = results.next()) {
+            for (let row in results.next()) {
                 let feed = new Feed();
                 for (let column in row)
                     feed[column] = row[column];
@@ -561,9 +561,10 @@ var StorageInternal = {
             return;
 
         new Query(aEntryID).getEntryList(function(aList) {
-            for each (let observer in StorageInternal.observers)
+            StorageInternal.observers.forEach(function(observer) {
                 observer.onEntriesStarred(aList, aState);
-        });
+            })
+        })
     },
 
     /**
@@ -595,12 +596,13 @@ var StorageInternal = {
             Stm.setSerializedTagList.execute({
                 'tags': Utils.getTagsForEntry(aEntryID).join(', '),
                 'entryID': aEntryID
-            });
+            })
 
             new Query(aEntryID).getEntryList(function(aList) {
-                for each (let observer in StorageInternal.observers)
+                StorageInternal.observers.forEach(function(observer) {
                     observer.onEntriesTagged(aList, aState, aTagName);
-            });
+                })
+            })
         })
     },
 
@@ -738,7 +740,7 @@ FeedProcessor.prototype = {
                 if (!--self.remainingEntriesCount)
                     self.executeAndNotify();
             }
-        });
+        })
     },
 
     addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
@@ -749,14 +751,14 @@ FeedProcessor.prototype = {
             'date': aEntry.date,
             'read': markUnread || !aIsRead ? 0 : 1,
             'id': aStoredEntryID
-        });
+        })
 
         this.updateEntryText.paramSets.push({
             'title': title,
             'content': aEntry.content || aEntry.summary,
             'authors': aEntry.authors,
             'id': aStoredEntryID
-        });
+        })
 
         this.entriesToUpdateCount++;
         this.updatedEntries.push(aStoredEntryID);
@@ -773,7 +775,7 @@ FeedProcessor.prototype = {
                 'providedID': aEntry.wrappedEntry.id,
                 'entryURL': aEntry.entryURL,
                 'date': aEntry.date || Date.now()
-            });
+            })
         }
         catch (ex) {
             Connection.reportDatabaseError('Error updating feeds. Failed to bind parameters to insertEntry.');
@@ -785,7 +787,7 @@ FeedProcessor.prototype = {
                 'title': title,
                 'content': aEntry.content || aEntry.summary,
                 'authors': aEntry.authors
-            });
+            })
         }
         catch (ex) {
             this.insertEntry.paramSets.pop();
@@ -817,14 +819,15 @@ FeedProcessor.prototype = {
                         return;
 
                     new Query(self.insertedEntries).getEntryList(function(aList) {
-                        for each (let observer in StorageInternal.observers)
+                        StorageInternal.observers.forEach(function(observer) {
                             observer.onEntriesAdded(aList);
-                    });
+                        })
+                    })
 
                     // XXX This should be optimized and/or be asynchronous
                     // query.verifyBookmarksAndTags();
                 }
-            });
+            })
         }
 
         if (this.entriesToUpdateCount) {
@@ -832,14 +835,16 @@ FeedProcessor.prototype = {
 
             Connection.executeAsync(statements, function() {
                 new Query(self.updatedEntries).getEntryList(function(aList) {
-                    for each (let observer in StorageInternal.observers)
+                    StorageInternal.observers.forEach(function(observer) {
                         observer.onEntriesUpdated(aList);
-                });
-            });
+                    })
+                })
+            })
         }
 
         this.callback(this.entriesToInsertCount);
     }
+
 }
 
 
@@ -1144,7 +1149,7 @@ Query.prototype = {
 
                 aCallback(list);
             }
-        });
+        })
     },
 
 
@@ -1169,13 +1174,15 @@ Query.prototype = {
         this.getEntryList(function(aList) {
             this.read = tempRead;
 
+            if (!aList.length)
+                return;
+
             update.executeAsync(function() {
-                if (aList.length) {
-                    for each (let observer in StorageInternal.observers)
-                        observer.onEntriesMarkedRead(aList, aState);
-                }
-            });
-        });
+                StorageInternal.observers.forEach(function(observer) {
+                    observer.onEntriesMarkedRead(aList, aState);
+                })
+            })
+        })
     },
 
     /**
@@ -1205,13 +1212,15 @@ Query.prototype = {
         }
 
         this.getEntryList(function(aList) {
+            if (!aList.length)
+                return;
+
             new Statement(sql).executeAsync(function() {
-                if (aList.length) {
-                    for each (let observer in StorageInternal.observers)
-                        observer.onEntriesDeleted(aList, aState);
-                }
-            });
-        });
+                StorageInternal.observers.forEach(function(observer) {
+                    observer.onEntriesDeleted(aList, aState);
+                })
+            })
+        })
     },
 
 
@@ -1226,9 +1235,6 @@ Query.prototype = {
      * observer.
      */
     bookmarkEntries: function Query_bookmarkEntries(aState) {
-        Components.utils.import('resource://gre/modules/PlacesUIUtils.jsm');
-        let transSrv = PlacesUIUtils.ptm;
-
         var transactions = [];
 
         this.getFullEntries(function(entries) {
@@ -1238,18 +1244,17 @@ Query.prototype = {
                     return;
 
                 if (aState) {
-                    let trans = transSrv.createItem(uri, Places.unfiledBookmarksFolderId,
-                                                    Bookmarks.DEFAULT_INDEX, entry.title);
+                    let container = Places.unfiledBookmarksFolderId;
+                    let trans = new PlacesCreateBookmarkTransaction(uri, container,
+                                                                    -1, entry.title);
                     transactions.push(trans);
                 }
                 else {
                     let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {})
                                              .filter(Utils.isNormalBookmark);
                     if (bookmarks.length) {
-                        for (let i = bookmarks.length - 1; i >= 0; i--) {
-                            let trans = transSrv.removeItem(bookmarks[i]);
-                            transactions.push(trans);
-                        }
+                        for (let i = bookmarks.length - 1; i >= 0; i--)
+                            transactions.push(new PlacesRemoveItemTransaction(bookmarks[i]));
                     }
                     else {
                         // If there are no bookmarks for an URL that is starred in our
@@ -1260,8 +1265,8 @@ Query.prototype = {
                 }
             })
 
-            let aggregatedTrans = transSrv.aggregateTransactions('', transactions);
-            transSrv.doTransaction(aggregatedTrans);
+            let aggregatedTrans = new PlacesAggregatedTransaction('', transactions);
+            Places.transactionManager.doTransaction(aggregatedTrans);
         })
     },
 
@@ -1808,7 +1813,7 @@ LivemarksSync.prototype = {
             'isFolder': aBookmark.isFolder ? 1 : 0,
             'parent': aBookmark.parent,
             'bookmarkID': aBookmark.bookmarkID
-        });
+        })
 
         this.feedListChanged = true;
     },
@@ -1829,7 +1834,7 @@ LivemarksSync.prototype = {
             'parent': aItem.parent,
             'bookmarkID': aItem.bookmarkID,
             'feedID': aItem.feedID
-        });
+        })
 
         if (aItem.rowIndex != aFeed.rowIndex || aItem.parent != aFeed.parent || aFeed.hidden > 0) {
             this.feedListChanged = true;
@@ -2204,7 +2209,7 @@ var Utils = {
                     entries.push({
                         id: row.id,
                         url: row.entryURL
-                    });
+                    })
                 }
             },
 
