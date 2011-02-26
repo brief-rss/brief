@@ -179,17 +179,18 @@ StorageStatement.prototype = {
     /**
      * Returns a generator for the results.
      *
-     * @param aParams
-     * @param aOnError [optional]
-     *
      * Note: the generator catches database errors when stepping the statement and resets
-     * the statement, so the consumer doesn't have to wrap everything in try...finally
-     * (as long it itself avoids doing anything that could possibly throw).
+     * the statement when they occur, so the consumer doesn't have to wrap everything
+     * in try...finally (as long it itself avoids doing anything that risks exceptions).
      */
-    getResults: function(aParams, aOnError) {
-        if (aParams)
-            this.params = aParams;
+    get results() {
+        if (!this._resultsGenerator)
+            this._resultsGenerator = this._createResultGenerator();
 
+        return this._resultsGenerator;
+    },
+
+    _createResultGenerator: function() {
         this._bindParams();
 
         // Avoid property lookup for better performance.
@@ -204,52 +205,32 @@ StorageStatement.prototype = {
             this._connection._transactionStatements.push(this);
 
         try {
-            while (true) {
-                let row = null;
-
+            while (nativeStatement.step()) {
                 // Copy row's properties to make them enumerable.
                 // This may not be worth the performance cost...
-                if (nativeStatement.step()) {
-                    row = {};
-                    for (let i = 0; i < columnCount; i++)
-                        row[columns[i]] = nativeStatement.row[columns[i]];
-                }
-
+                let row = {};
+                for (let i = 0; i < columnCount; i++)
+                    row[columns[i]] = nativeStatement.row[columns[i]];
                 yield row;
             }
         }
-        catch (ex) {
-            if (aOnError)
-                aOnError();
-            else
-                throw ex;
-        }
         finally {
             nativeStatement.reset();
+            this._resultsGenerator = null;
         }
     },
 
-    getSingleResult: function(aParams, aOnError) {
-        let results = this.getResults(aParams, aOnError);
-        let row = results.next();
-        results.close();
+    getSingleResult: function() {
+        let row = this.results.next();
+        this.reset()
 
         return row;
-    },
-
-    getAllResults: function(aParams, aOnError) {
-        let results = this.getResults(aParams, aOnError);
-        let row, rows = [];
-        while (row = results.next())
-            rows.push(row);
-
-        return rows;
     },
 
     reset: function() {
         this.paramSets = [];
         this.params = {};
-        this._nativeStatement.reset();
+        this.results.close();
     },
 
     clone: function() {
@@ -307,17 +288,13 @@ StatementCallback.prototype = {
         for (let i = 0; i < columnCount; i++)
             columns.push(nativeStatement.getColumnName(i));
 
-        while (true) {
-            let obj = null;
-
-            let row = aResultSet.getNextRow();
-            if (row) {
-                obj = {};
-                for (let i = 0; i < columnCount; i++)
-                    obj[columns[i]] = row.getResultByName(columns[i]);
-            }
-
+        let row = aResultSet.getNextRow();
+        while (row) {
+            let obj = {};
+            for (let i = 0; i < columnCount; i++)
+                obj[columns[i]] = row.getResultByName(columns[i]);
             yield obj;
+            row = aResultSet.getNextRow();
         }
     }
 }

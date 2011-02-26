@@ -364,9 +364,7 @@ var StorageInternal = {
             this.feedsCache = [];
             this.feedsAndFoldersCache = [];
 
-            var results = Stm.getAllFeeds.getResults();
-
-            for (let row in results.next()) {
+            for (let row in Stm.getAllFeeds.results) {
                 let feed = new Feed();
                 for (let column in row)
                     feed[column] = row[column];
@@ -382,7 +380,7 @@ var StorageInternal = {
 
     // See Storage.
     getAllTags: function StorageInternal_getAllTags() {
-        return Stm.getAllTags.getAllResults().map(function(row) row.tagName);
+        return [row.tagName for each (row in Stm.getAllTags.results)];
     },
 
 
@@ -719,7 +717,7 @@ FeedProcessor.prototype = {
 
         select.executeAsync({
             handleResult: function(aResults) {
-                var row = aResults.next()
+                let row = aResults.next();
                 storedID = row.id;
                 storedDate = row.date;
                 isEntryRead = row.read;
@@ -809,8 +807,7 @@ FeedProcessor.prototype = {
             Connection.executeAsync(statements, {
 
                 handleResult: function(aResults) {
-                    let row;
-                    while (row = aResults.next())
+                    for (let row in aResults)
                         self.insertedEntries.push(row.id);
                 },
 
@@ -961,11 +958,9 @@ Query.prototype = {
      */
     hasMatches: function Query_hasMatches(aCallback) {
         let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
-        new Statement(sql).executeAsync({
-            handleResult: function(aResults) {
-                aCallback(aResults.next().found);
-            },
 
+        new Statement(sql).executeAsync({
+            handleResult: function(aResults) aCallback(aResults.next().found),
             handleError: this._onDatabaseError
         })
     },
@@ -983,8 +978,7 @@ Query.prototype = {
         new Statement(sql).executeAsync({
             handleResult: function(aResults) {
                 // XXX Check performance.
-                let row;
-                while (row = aResults.next())
+                for (let row in aResults)
                     entries.push(row.id);
             },
 
@@ -1014,8 +1008,7 @@ Query.prototype = {
 
         new Statement(sql).executeAsync({
             handleResult: function(aResults) {
-                let row;
-                while (row = aResults.next()) {
+                for (let row in aResults) {
                     let entry = new Entry();
 
                     for (let column in row)
@@ -1064,9 +1057,8 @@ Query.prototype = {
 
         new Statement(sql).executeAsync({
 
-            handleResult: function(aResult) {
-                let row;
-                while (row = aResult.next()) {
+            handleResult: function(aResults) {
+                for (let row in aResults) {
                     let value = row[aPropertyName];
                     if (aDistinct && values.indexOf(value) != -1)
                         continue;
@@ -1097,10 +1089,7 @@ Query.prototype = {
         let sql = 'SELECT COUNT(1) AS count ' + this._getQueryString(true);
 
         new Statement(sql).executeAsync({
-            handleResult: function(aResults) {
-                aCallback(aResults.next().count);
-            },
-
+            handleResult: function(aResults) aCallback(aResults.next().count),
             handleError: this._onDatabaseError
         })
 
@@ -1124,8 +1113,7 @@ Query.prototype = {
 
         new Statement(sql).executeAsync({
             handleResult: function(aResults) {
-                var row;
-                while (row = aResults.next()) {
+                for (let row in aResults) {
                     entryIDs.push(row.id);
 
                     if (feedIDs.indexOf(row.feedID) == -1)
@@ -1729,7 +1717,8 @@ function LivemarksSync() {
     Connection.runTransaction(function() {
         // Get a list all feeds stored in the database.
         var sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
-        var storedFeeds = new Statement(sql).getAllResults();
+
+        let storedFeeds = [row for each (row in new Statement(sql).results)];
 
         livemarks.forEach(function(livemark) {
             let feed = null;
@@ -2161,8 +2150,8 @@ var Stm = {
 var Utils = {
 
     getTagsForEntry: function getTagsForEntry(aEntryID) {
-        return Stm.getTagsForEntry.getAllResults({ 'entryID': aEntryID })
-                                  .map(function(r) r.tagName);
+        Stm.getTagsForEntry.params = { 'entryID': aEntryID };
+        return [row.tagName for each (row in Stm.getTagsForEntry.results)];
     },
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
@@ -2187,8 +2176,7 @@ var Utils = {
         Stm.selectEntriesByURL.params.url = aURL;
         Stm.selectEntriesByURL.executeAsync({
             handleResult: function(aResults) {
-                var row;
-                while (row = aResults.next())
+                for (let row in aResults)
                     entries.push(row.id);
             },
 
@@ -2204,8 +2192,7 @@ var Utils = {
         Stm.selectEntriesByBookmarkID.params.bookmarkID = aBookmarkID;
         Stm.selectEntriesByBookmarkID.executeAsync({
             handleResult: function(aResults) {
-                var row;
-                while (row = aResults.next()) {
+                for (let row in aResults) {
                     entries.push({
                         id: row.id,
                         url: row.entryURL
@@ -2225,8 +2212,7 @@ var Utils = {
         Stm.selectEntriesByTagName.params.tagName = aTagName;
         Stm.selectEntriesByTagName.executeAsync({
             handleResult: function(aResults) {
-                var row;
-                while (row = aResults.next())
+                for (let row in aResults)
                     entries.push(row.id)
             },
 
