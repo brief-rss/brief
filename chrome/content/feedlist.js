@@ -1057,15 +1057,14 @@ var FeedListContextMenu = {
 
 
     _deleteBookmarks: function FeedListContextMenu__deleteBookmarks(aFeeds) {
-        Components.utils.import('resource://gre/modules/PlacesUIUtils.jsm');
-        let transSrv = PlacesUIUtils.ptm;
+        Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
-        var transactions = [];
+        let transactions = [];
         for (let i = aFeeds.length - 1; i >= 0; i--)
-            transactions.push(transSrv.removeItem(aFeeds[i].bookmarkID));
+            transactions.push(new PlacesRemoveItemTransaction(aFeeds[i].bookmarkID));
 
-        var txn = transSrv.aggregateTransactions('Remove items', transactions);
-        transSrv.doTransaction(txn);
+        let aggregatedTrans = new PlacesAggregatedTransaction('', transactions);
+        PlacesUtils.transactionManager.doTransaction(aggregatedTrans);
     },
 
 
