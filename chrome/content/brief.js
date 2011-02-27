@@ -249,9 +249,10 @@ var Commands = {
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
         if (gCurrentView.selectedEntry && PrefCache.showHeadlinesOnly) {
-            var selectedElement = gCurrentView.selectedElement;
-            var newState = !selectedElement.hasAttribute('collapsed');
-            gCurrentView.collapseEntry(gCurrentView.selectedEntry, newState, true);
+            if (gCurrentView.selectedElement.hasAttribute('collapsed'))
+                gCurrentView.uncollapseEntry(gCurrentView.selectedEntry, true);
+            else
+                gCurrentView.collapseEntry(gCurrentView.selectedEntry, true);
         }
     },
 
@@ -400,7 +401,7 @@ var PrefCache = {};
 var PrefObserver = {
 
     register: function PrefObserver_register() {
-        for (key in this._cachedPrefs)
+        for (let key in this._cachedPrefs)
             this._updateCachedPref(key);
 
         Prefs.addObserver('', this, false);

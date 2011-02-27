@@ -135,19 +135,104 @@ FeedView.prototype = {
         return copy;
     },
 
-    collapseEntry: function FeedView_collapseEntry(aEntry, aNewState, aAnimate) {
-        if (aNewState)
-            var eventType = aAnimate ? 'CollapseEntryAnimated' : 'CollapseEntry';
-        else
-            eventType = aAnimate ? 'UnCollapseEntryAnimated' : 'UnCollapseEntry';
+    collapseEntry: function FeedView_collapseEntry(aEntry, aAnimate) {
+        let entryContainer = this.document.getElementById(aEntry);
+        if (entryContainer.hasAttribute('collapsed'))
+            return;
 
-        var entryElement = this.document.getElementById(aEntry);
+        let entryContent = entryContainer.getElementsByClassName('article-content')[0];
 
-        var evt = this.document.createEvent('Events');
-        evt.initEvent(eventType, false, false);
-        entryElement.dispatchEvent(evt);
+        let finish = function() {
+            entryContent.removeEventListener('transitionend', finish, true);
+            if (entryContainer.parentNode != this.feedContent)
+                return;
 
-        if (!aNewState && this.query.searchString) {
+            entryContainer.removeAttribute('collapsing');
+            entryContainer.setAttribute('collapsed', true);
+
+            let date = entryContainer.getElementsByClassName('article-date')[0];
+            let feedName = entryContainer.getElementsByClassName('feed-name')[0];
+            let collapsedSubheader = entryContainer.getElementsByClassName('collapsed-article-subheader')[0];
+
+            collapsedSubheader.insertBefore(date, null);
+            collapsedSubheader.insertBefore(feedName, null);
+        }.bind(this)
+
+        entryContent.style.height = '0';
+        entryContent.style.opacity = '0';
+
+        if (aAnimate) {
+            entryContent.addEventListener('transitionend', finish, true);
+            entryContainer.setAttribute('collapsing', true);
+        }
+        else {
+            finish();
+        }
+    },
+
+    uncollapseEntry: function FeedView_uncollapseEntry(aEntry, aAnimate) {
+        let entryContainer = this.document.getElementById(aEntry);
+        if (!entryContainer.hasAttribute('collapsed'))
+            return;
+
+        let entryContent = entryContainer.getElementsByClassName('article-content')[0];
+
+        let finish = function() {
+            entryContent.removeEventListener('transitionend', finish, true);
+            if (entryContainer.parentNode != this.feedContent)
+                return;
+
+            entryContainer.removeAttribute('collapsing');
+
+            if (PrefCache.autoMarkRead && this.query.read !== false)
+                Commands.markEntryRead(aEntry, true);
+
+            if (aEntry == this.selectedEntry) {
+                let entryBottom = this.selectedElement.offsetTop + this.selectedElement.offsetHeight;
+                let windowBottom = this.window.pageYOffset + this.window.innerHeight;
+                if (entryBottom > windowBottom)
+                    this.scrollToEntry(aEntry, false, true);
+            }
+        }.bind(this)
+
+        let subheaderLeft = entryContainer.getElementsByClassName('article-subheader-left')[0];
+        let subheaderRight = entryContainer.getElementsByClassName('article-subheader-right')[0];
+        let date = entryContainer.getElementsByClassName('article-date')[0];
+        let feedName = entryContainer.getElementsByClassName('feed-name')[0];
+        let tagsElem = entryContainer.getElementsByClassName('article-tags')[0];
+
+        subheaderLeft.insertBefore(feedName, tagsElem);
+        subheaderRight.insertBefore(date, null);
+
+        entryContainer.removeAttribute('collapsed');
+
+        // CSS transitions don't work with "height: auto". To work around it, we retrieve
+        // the computed style of "height: auto" content and we set the height explicitly.
+        // This de-facto height has to be retrieved before the entry is uncollapsed
+        // - it cannot be saved upfront, when the entry is inserted, because it may
+        // change as images and such are loaded.
+        entryContent.style.height = '';
+        entryContent.offsetHeight; // Force reflow.
+        let naturalHeight = this.window.getComputedStyle(entryContent)
+                                       .getPropertyValue('height');
+
+        // Restore the old height.
+        entryContent.style.height = '0';
+        entryContent.offsetHeight; // Force reflow.
+
+        // Uncollapse.
+        entryContent.style.height = naturalHeight;
+        entryContent.style.opacity = '1';
+
+        if (aAnimate) {
+            entryContainer.setAttribute('collapsing', true);
+            entryContent.addEventListener('transitionend', finish, true);
+        }
+        else {
+            finish();
+        }
+
+        if (this.query.searchString) {
             this._highlightSearchTerms(aEntry);
             entryElement.setAttribute('searchTermsHighlighted', true);
         }
@@ -416,7 +501,10 @@ FeedView.prototype = {
 
     toggleHeadlinesView: function FeedView_toggleHeadlinesView() {
         this._loadedEntries.forEach(function(entry) {
-            this.collapseEntry(entry, PrefCache.showHeadlinesOnly, false);
+            if (PrefCache.showHeadlinesOnly)
+                this.collapseEntry(entry, false);
+            else
+                this.uncollapseEntry(entry, false);
         }, this)
 
         if (PrefCache.showHeadlinesOnly) {
@@ -435,7 +523,6 @@ FeedView.prototype = {
      */
     uninit: function FeedView_uninit() {
         getTopWindow().gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
-        this.document.removeEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
         this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
         for each (let event in this._events)
@@ -451,7 +538,7 @@ FeedView.prototype = {
     /**
      * Events which the view listens to in the template page.
      */
-    _events: ['EntryUncollapsed', 'click', 'scroll', 'keypress'],
+    _events: ['click', 'scroll', 'keypress'],
 
     handleEvent: function FeedView_handleEvent(aEvent) {
         var target = aEvent.target;
@@ -464,18 +551,6 @@ FeedView.prototype = {
             return;
 
         switch (aEvent.type) {
-            case 'EntryUncollapsed':
-                if (PrefCache.autoMarkRead && this.query.read !== false)
-                    Commands.markEntryRead(id, true);
-
-                if (id == this.selectedEntry) {
-                    let entryBottom = this.selectedElement.offsetTop + this.selectedElement.offsetHeight;
-                    let windowBottom = this.window.pageYOffset + this.window.innerHeight;
-                    if (entryBottom > windowBottom)
-                        this.scrollToEntry(id, false, true);
-                }
-                break;
-
             // Set up the template page when it's loaded.
             case 'load':
                 getElement('feed-view-header').hidden = !this.active;
@@ -499,8 +574,6 @@ FeedView.prototype = {
                     this._ignoreNextScrollEvent = false;
                     break;
                 }
-
-                log('scroll')
 
                 if (PrefCache.entrySelectionEnabled && !this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
@@ -615,13 +688,13 @@ FeedView.prototype = {
             }
         }
         else if (entryElement.hasAttribute('collapsed')) {
-            this.collapseEntry(entryID, false, true);
+            this.uncollapseEntry(entryID, true);
         }
         else {
             let className = aEvent.target.className;
             if ((className == 'article-header' || className == 'article-title-link-box')
                     && PrefCache.showHeadlinesOnly) {
-                this.collapseEntry(entryID, true, true);
+                this.collapseEntry(entryID, true);
             }
         }
     },
@@ -819,28 +892,8 @@ FeedView.prototype = {
         this._ignoreNextScrollEvent = true;
         getTopWindow().StarUI.panel.hidePopup();
 
-        // Remember index of selected entry if it is removed.
+        // If the selected entry is being removed, remember its index.
         var selectedEntryIndex = -1;
-
-        let view = this;
-        this._onEntriesRemovedFinish = function() {
-            view.document.removeEventListener('EntryRemoved', arguments.callee, true);
-
-            if (aLoadNewEntries)
-                view._fillWindow(WINDOW_HEIGHTS_LOAD, IHateNestedAsyncCallbacks);
-            else
-                IHateNestedAsyncCallbacks();
-
-            function IHateNestedAsyncCallbacks() {
-                view._setEmptyViewMessage();
-
-                if (view._loadedEntries.length && selectedEntryIndex != -1) {
-                    let newSelection = view._loadedEntries[selectedEntryIndex] ||
-                                       view._loadedEntries[view._loadedEntries.length - 1];
-                    view.selectEntry(newSelection);
-                }
-            }
-        }
 
         if (indices.length == 1 && aAnimate) {
             let entryID = this._loadedEntries[indices[0]];
@@ -850,15 +903,20 @@ FeedView.prototype = {
                 selectedEntryIndex = indices[0];
             }
 
-            // Gracefully fade the entry using jQuery. For callback, the binding
-            // will send EntryRemoved event when it's finished.
-            this.document.addEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
+            let entryContainer = this.document.getElementById(entryID);
 
-            var evt = this.document.createEvent('Events');
-            evt.initEvent('RemoveEntry', false, false);
-            this.document.getElementById(entryID).dispatchEvent(evt);
+            entryContainer.addEventListener('transitionend', function() {
+                // The element may have been removed in the meantime
+                // if the view had been refreshed.
+                if (entryContainer.parentNode != this.feedContent)
+                    return;
 
-            this._loadedEntries.splice(indices[0], 1);
+                this.feedContent.removeChild(entryContainer);
+                this._loadedEntries.splice(indices[0], 1);
+                this._afterEntriesRemoved(aLoadNewEntries, selectedEntryIndex);
+            }.bind(this), true);
+
+            entryContainer.setAttribute('removing', true);
         }
         else {
             indices.sort(function(a, b) a - b);
@@ -877,10 +935,27 @@ FeedView.prototype = {
                 this._loadedEntries.splice(indices[i], 1);
             }
 
-            this._onEntriesRemovedFinish();
+            this._afterEntriesRemoved(aLoadNewEntries, selectedEntryIndex);
         }
     },
 
+    _afterEntriesRemoved: function FeedView__afterEntriesRemoved(aLoadNewEntries,
+                                                                 aPrevSelectedIndex) {
+        if (aLoadNewEntries)
+            this._fillWindow(WINDOW_HEIGHTS_LOAD, finish.bind(this));
+        else
+            finish.call(this);
+
+        function finish() {
+            this._setEmptyViewMessage();
+
+            if (this._loadedEntries.length && aPrevSelectedIndex != -1) {
+                let newSelection = this._loadedEntries[aPrevSelectedIndex] ||
+                                   this._loadedEntries[this._loadedEntries.length - 1];
+                this.selectEntry(newSelection);
+            }
+        }
+    },
 
     /**
      * Refreshes the feed view. Removes the old content and builds the new one.
@@ -891,7 +966,6 @@ FeedView.prototype = {
 
         // Clean up.
         this._stopSmoothScrolling();
-        this.document.removeEventListener('EntryRemoved', this._onEntriesRemovedFinish, true);
         clearTimeout(this._markVisibleTimeout);
         getTopWindow().StarUI.panel.hidePopup();
 
@@ -952,28 +1026,28 @@ FeedView.prototype = {
      *        position.
      */
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
-        if (this._loadingEntries)
-            return;
+        let enoughLoadedAhead = this.window.scrollMaxY - this.window.pageYOffset >
+                                this.window.innerHeight * MIN_LOADED_WINDOW_HEIGHTS;
+        let lastEntryInCenter = this._getMiddleEntryElement() == this.feedContent.lastChild;
 
-        var win = this.document.defaultView;
-        var middleEntry = this._getMiddleEntryElement();
-
-        if (win.scrollMaxY - win.pageYOffset > win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS
-                && middleEntry != this.feedContent.lastChild) {
+        if (this._loadingEntries || enoughLoadedAhead && !lastEntryInCenter) {
+            if (aCallback)
+                aCallback();
             return;
         }
 
-        var stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
+        let stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
                                                    : LOAD_STEP_SIZE;
 
         this._loadEntries(stepSize, function(loadedEntriesCount) {
-            if ((win.scrollMaxY - win.pageYOffset < win.innerHeight * aWindowHeights
-                    || middleEntry == this.feedContent.lastChild) && loadedEntriesCount) {
+            let enoughLoadedAhead = this.window.scrollMaxY - this.window.pageYOffset >
+                                    this.window.innerHeight * aWindowHeights;
+            let lastEntryInCenter = this._getMiddleEntryElement() == this.feedContent.lastChild;
+
+            if (loadedEntriesCount && (!enoughLoadedAhead || lastEntryInCenter))
                 this._loadEntries(stepSize, arguments.callee.bind(this));
-            }
-            else if (aCallback) {
+            else if (aCallback)
                 aCallback();
-            }
         }.bind(this))
     },
 
@@ -1100,16 +1174,12 @@ FeedView.prototype = {
 
         var contentElem = entryContainer.getElementsByClassName('article-content')[0];
         if (PrefCache.showHeadlinesOnly) {
-            this.collapseEntry(aEntry.id, true, false);
+            this.collapseEntry(aEntry.id, false);
 
             // In headlines view, insert the entry content asynchornously for better
             // perceived performance.
             async(function() {
-                // Temporarily set display:block so that layout is done immediatelly
-                // on insertion, not delayed until the entry is unfolded.
-                contentElem.style.display = 'block';
                 contentElem.innerHTML = aEntry.content;
-                contentElem.style.display = 'none';
 
                 // Highlight search terms in the entry title.
                 if (this.query.searchString)
