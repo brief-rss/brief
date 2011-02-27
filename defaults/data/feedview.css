@@ -52,7 +52,6 @@ body {
     margin: 0 auto;
     background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
     background-clip: padding-box;
-    -moz-background-clip: padding; /* Firefox 3.6 compatibility */
     border-right: 6px #e6e9ed solid;
     -moz-border-right-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
     border-left: 6px #e6e9ed solid;
@@ -221,9 +220,6 @@ pre, code {
 .article-container[collapsed] {
     position: relative;
     min-height: 50px;
-}
-
-.article-container[collapsed] {
     background-image: none;
     background-color: #F0F9FF;
 }
@@ -234,6 +230,10 @@ pre, code {
 
 .article-container[collapsed]:hover {
     background-color: #d3eeff;
+}
+
+.article-container[collapsed] > .article-content {
+    display: none;
 }
 
 .article-container[collapsed] .article-title-link {
@@ -364,7 +364,6 @@ pre, code {
     background-position: 0 -50px;
 }
 
-
 .article-star {
     width: 24px;
     height: 24px;
@@ -391,4 +390,18 @@ pre, code {
 
 .article-container[starred] .article-star:active:hover {
     background-position: -96px 5px;
+}
+
+
+/* --------- Transitions ------------ */
+
+.article-container[removing] {
+    -moz-transition: opacity 250ms;
+    opacity: 0;
+}
+
+.article-container[collapsing] > .article-content {
+    -moz-transition-property: opacity, height;
+    -moz-transition-duration: 250ms;
+    overflow: hidden;
 }
