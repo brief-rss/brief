@@ -1,7 +1,11 @@
-var EXPORTED_SYMBOLS = ['FeedUpdateService'];
+const EXPORTED_SYMBOLS = ['FeedUpdateService'];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://brief/FeedContainer.jsm');
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+
+IMPORT_COMMON(this);
+
 
 const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
 const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
@@ -12,9 +16,6 @@ const FEED_ICON_URL = 'chrome://brief/skin/icon.png';
 const TIMER_TYPE_ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
 const TIMER_TYPE_PRECISE  = Ci.nsITimer.TYPE_REPEATING_PRECISE;
 const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
-
-Components.utils.import('resource://brief/FeedContainer.jsm');
-Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 XPCOMUtils.defineLazyServiceGetter(this, 'ObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
 XPCOMUtils.defineLazyServiceGetter(this, 'IOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
@@ -560,13 +561,6 @@ FaviconFetcher.prototype = {
                                           [Ci.nsIHttpEventSink],
                                           [Ci.nsIProgressEventSink])
 
-}
-
-
-function log(aMessage) {
-  var consoleService = Cc['@mozilla.org/consoleservice;1']
-                       .getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage(aMessage);
 }
 
 

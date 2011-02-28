@@ -1,7 +1,8 @@
-var EXPORTED_SYMBOLS = ['Feed', 'Entry', 'EntryList'];
+const EXPORTED_SYMBOLS = ['Feed', 'Entry', 'EntryList'];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+Components.utils.import('resource://brief/common.jsm');
+
+IMPORT_COMMON(this);
 
 /**
  * Container for feed properties. You can pass an instance of nsIFeed to wrap
@@ -160,7 +161,7 @@ function Entry(aEntry) {
         }
     }
     catch (e) {
-        // XXX With some feeds accessing nsIFeedContainer.authors throws.
+        // With some feeds accessing nsIFeedContainer.authors throws.
     }
 }
 
@@ -272,10 +273,4 @@ var milTimezoneCodesMap = {
     A: '-1',  B: '-2',  C: '-3',  D: '-4', E: '-5',  F: '-6',  G: '-7',  H: '-8', I: '-9',
     K: '-10', L: '-11', M: '-12', N: '+1', O: '+2',  P: '+3',  Q: '+4',  R: '+5',
     S: '+6',  T: '+7',  U: '+8',  V: '+9', W: '+10', X: '+11', Y: '+12', Z: 'UT',
-}
-
-function log(aMessage) {
-  var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                       getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage(aMessage);
 }

@@ -185,7 +185,7 @@ var TagList = {
         if (!this.ready)
             return;
 
-        aTags.forEach(function(tag) {
+        for (let tag in aTags) {
             if (aPossiblyAdded) {
                 if (this.tags.indexOf(tag) == -1)
                     this._rebuild();
@@ -211,7 +211,7 @@ var TagList = {
             else {
                 this._refreshLabel(tag);
             }
-        }, this)
+        }
     },
 
     _rebuild: function TagList__rebuild() {
@@ -667,13 +667,13 @@ var FeedList = {
             refreshProgressmeter(aData);
 
             if (aData == 'canceled') {
-                Storage.getAllFeeds().forEach(function(feed) {
+                for (let feed in Storage.getAllFeeds()) {
                     let item = getElement(feed.feedID);
                     if (item.hasAttribute('loading')) {
                         item.removeAttribute('loading');
                         this._refreshFavicon(feed.feedID);
                     }
-                }, this)
+                }
             }
             break;
 
@@ -885,7 +885,7 @@ var TagListContextMenu = {
         })
 
         query.getProperty('entryURL', true, function(urls) {
-            urls.forEach(function(url) {
+            for (let url in urls) {
                 try {
                     var uri = NetUtil.newURI(url, null, null);
                 }
@@ -893,7 +893,7 @@ var TagListContextMenu = {
                     return;
                 }
                 taggingService.untagURI(uri, [tag]);
-            })
+            }
         })
     }
 

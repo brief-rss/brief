@@ -2,6 +2,10 @@
  * Original code by Christopher Finke, "OPML Support" extension. Used with permisson.
  */
 
+Components.utils.import('resource://brief/common.jsm');
+
+IMPORT_COMMON(this);
+
 var opml = {
 
     init: function() {
@@ -326,10 +330,4 @@ var opml = {
         return str;
     }
 
-}
-
-function log(aMessage) {
-  var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                       getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage(aMessage);
 }
