@@ -1,6 +1,7 @@
 const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement'];
 
 Components.utils.import('resource://brief/common.jsm');
+
 IMPORT_COMMON(this);
 
 

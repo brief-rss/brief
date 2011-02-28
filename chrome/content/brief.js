@@ -1,9 +1,10 @@
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-
+Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/NetUtil.jsm');
+
+IMPORT_COMMON(this);
+
 
 var gTemplateURI = NetUtil.newURI('resource://brief-content/feedview-template.html');
 var gStringBundle;
@@ -489,19 +490,4 @@ function async(aFunction, aDelay, aObject, arg1, arg2) {
         aFunction.call(aObject || this, arg1, arg2);
     }
     return setTimeout(asc, aDelay || 0);
-}
-
-function intersect(arr1, arr2) {
-    var commonPart = [];
-    for (let i = 0; i < arr1.length; i++) {
-        if (arr2.indexOf(arr1[i]) != -1)
-            commonPart.push(arr1[i]);
-    }
-    return commonPart;
-}
-
-function log(aMessage) {
-  var consoleService = Cc['@mozilla.org/consoleservice;1'].
-                       getService(Ci.nsIConsoleService);
-  consoleService.logStringMessage(aMessage);
 }

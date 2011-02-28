@@ -1,8 +1,13 @@
 const EXPORTED_SYMBOLS = ['IMPORT_COMMON'];
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
 function IMPORT_COMMON(aScope) {
-    aScope.Cc = Components.classes;
-    aScope.Ci = Components.interfaces;
+    aScope.Cc = Cc;
+    aScope.Ci = Ci;
+    aScope.Cu = Cu;
 
     aScope.log = function log(aMessage) {
         let consoleService = Cc['@mozilla.org/consoleservice;1']
@@ -11,6 +16,15 @@ function IMPORT_COMMON(aScope) {
     }
 
     aScope.Array.prototype.__iterator__ = function() new ArrayIterator(this);
+
+    aScope.Array.prototype.intersect = function intersect(aArr) {
+        let commonItems = [];
+        for (let i = 0; i < this.length; i++) {
+            if (aArr.indexOf(this[i]) != -1)
+                commonItems.push(this[i]);
+        }
+        return commonItems;
+    }
 }
 
 function ArrayIterator(aArray) {
@@ -24,3 +38,5 @@ ArrayIterator.prototype.next = function() {
     else
         throw StopIteration;
 }
+
+Array.prototype.__iterator__ = function() new ArrayIterator(this);

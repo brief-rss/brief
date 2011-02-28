@@ -500,12 +500,12 @@ FeedView.prototype = {
     },
 
     toggleHeadlinesView: function FeedView_toggleHeadlinesView() {
-        this._loadedEntries.forEach(function(entry) {
+        for (let entry in this._loadedEntries) {
             if (PrefCache.showHeadlinesOnly)
                 this.collapseEntry(entry, false);
             else
                 this.uncollapseEntry(entry, false);
-        }, this)
+        }
 
         if (PrefCache.showHeadlinesOnly) {
             this.feedContent.setAttribute('showHeadlinesOnly', true);
@@ -731,8 +731,8 @@ FeedView.prototype = {
             else
                 this._onEntriesAdded(aEntryList.IDs);
         }
-
-        intersect(this._loadedEntries, aEntryList.IDs).forEach(function(entry) {
+        
+        for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
             let entryElement = this.document.getElementById(entry);
             let markReadButton = entryElement.getElementsByClassName('mark-read')[0];
 
@@ -751,7 +751,7 @@ FeedView.prototype = {
                 entryElement.removeAttribute('read');
                 markReadButton.textContent = this._strings.markAsRead;
             }
-        }, this)
+        }
     },
 
     onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
@@ -765,20 +765,20 @@ FeedView.prototype = {
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
         }
 
-        intersect(this._loadedEntries, aEntryList.IDs).forEach(function(entry) {
+        for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
             let entryElement = this.document.getElementById(entry);
             if (aNewState)
                 entryElement.setAttribute('starred', 'true');
             else
                 entryElement.removeAttribute('starred');
-        }, this)
+        }
     },
 
     onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
         if (!this.active)
             return;
 
-        intersect(this._loadedEntries, aEntryList.IDs).forEach(function(entry) {
+        for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
             let entryElement = this.document.getElementById(entry);
 
             let tags = entryElement.getAttribute('tags');
@@ -798,7 +798,7 @@ FeedView.prototype = {
             entryElement.setAttribute('tags', tags);
             var tagsElement = entryElement.getElementsByClassName('article-tags')[0];
             tagsElement.textContent = tags;
-        }, this)
+        }
 
         if (this.query.tags && this.query.tags[0] === aTag) {
             if (aNewState)
@@ -861,10 +861,10 @@ FeedView.prototype = {
             })
 
             query.getFullEntries(function(fullEntries) {
-                fullEntries.forEach(function(entry) {
+                for (let entry in fullEntries) {
                     let index = view._loadedEntries.indexOf(entry.id);
                     view._insertEntry(entry, index);
-                })
+                }
 
                 view._setEmptyViewMessage();
             })
@@ -1321,7 +1321,7 @@ FeedView.prototype = {
         let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
         finder.caseSensitive = false;
 
-        this.query.searchString.match(/[A-Za-z0-9]+/g).forEach(function(term) {
+        for (let term in this.query.searchString.match(/[A-Za-z0-9]+/g)) {
             let searchRange = this.document.createRange();
             searchRange.setStart(entryElement, 0);
             searchRange.setEnd(entryElement, entryElement.childNodes.length);
@@ -1348,7 +1348,7 @@ FeedView.prototype = {
                 startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
                 startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
             }
-        }, this)
+        }
     },
 
     QueryInterface: function FeedView_QueryInterface(aIID) {
