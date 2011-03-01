@@ -184,7 +184,8 @@ let FeedUpdateServiceInternal = {
 
     // See FeedUpdateService.
     stopUpdating: function FeedUpdateServiceInternal_stopUpdating() {
-        this.finishUpdate('canceled');
+        if (this.status != this.NOT_UPDATING)
+            this.finishUpdate('canceled');
     },
 
     // nsITimerCallback
