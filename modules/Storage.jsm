@@ -275,6 +275,8 @@ let StorageInternal = {
             }
         }
 
+        this.refreshFeedsCache();
+
         this.homeFolderID = Prefs.getIntPref('homeFolder');
         Prefs.addObserver('', this, false);
         Services.obs.addObserver(this, 'quit-application', false);
@@ -353,6 +355,10 @@ let StorageInternal = {
 
     // See Storage.
     getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders) {
+        // It's not worth the trouble to make this function asynchronous like the
+        // rest of the IO, as in-memory cache is practically always available.
+        // However, in the rare case when the cache has just been invalidated
+        // and hasn't been refreshed yet, we must fall back to a synchronous query.
         if (!this.feedsCache) {
             this.feedsCache = [];
             this.feedsAndFoldersCache = [];
@@ -369,6 +375,37 @@ let StorageInternal = {
         }
 
         return aIncludeFolders ? this.feedsAndFoldersCache : this.feedsCache;
+    },
+
+    refreshFeedsCache: function StorageInternal_refreshFeedsCache(aNotify) {
+        this.feedsCache = null;
+        this.feedsAndFoldersCache = null;
+
+        let feeds = [];
+        let feedsAndFolders = [];
+
+        Stm.getAllFeeds.executeAsync({
+            handleResult: function(results) {
+                for (let row in results) {
+                    let feed = new Feed();
+
+                    for (let column in row)
+                        feed[column] = row[column];
+
+                    feedsAndFolders.push(feed);
+                    if (!feed.isFolder)
+                        feeds.push(feed);
+                }
+            },
+
+            handleCompletion: function(reason) {
+                this.feedsCache = feeds;
+                this.feedsAndFoldersCache = feedsAndFolders;
+
+                if (aNotify)
+                    Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '')
+            }.bind(this)
+        })
     },
 
     // See Storage.
@@ -1723,10 +1760,8 @@ function LivemarksSync() {
                    .forEach(this.hideFeed, this);
     }, this)
 
-    if (this.feedListChanged) {
-        StorageInternal.feedsCache = StorageInternal.feedsAndFoldersCache = null;
-        Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
-    }
+    if (this.feedListChanged)
+        StorageInternal.refreshFeedsCache(true);
 
     // Update the newly added feeds.
     if (newLivemarks.length) {
@@ -1748,8 +1783,7 @@ LivemarksSync.prototype = {
             let hideAllFeeds = new Statement('UPDATE feeds SET hidden = :hidden');
             hideAllFeeds.execute({ 'hidden': Date.now() });
 
-            StorageInternal.feedsCache = StorageInternal.feedsAndFoldersCache = null;
-            Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
+            StorageInternal.refreshFeedsCache(true);
             folderValid = false;
         }
         else {
@@ -1807,8 +1841,8 @@ LivemarksSync.prototype = {
             this.feedListChanged = true;
         }
         else {
-            // Invalidate feeds cache.
-            StorageInternal.feedsCache = StorageInternal.feedsAndFoldersCache = null;
+            let cachedFeed = StorageInternal.getFeed(aFeed.feedID);
+            cachedFeed.title = aItem.title; // Update cache.
             Services.obs.notifyObservers(null, 'brief:feed-title-changed', aItem.feedID);
         }
     },
