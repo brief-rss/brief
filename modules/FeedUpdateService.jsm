@@ -2,9 +2,17 @@ const EXPORTED_SYMBOLS = ['FeedUpdateService'];
 
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/FeedContainer.jsm');
+Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 IMPORT_COMMON(this);
+
+// Can't use the Cc shorthand imported from common.jsm here. Components object
+// is different in each scope and because of this, testing equality of instances
+// of XPCOM objects may bizzarely return false.
+// Namely, couldn't check aTimer in nsITimerCallback.notify().
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
 
 const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
@@ -17,18 +25,15 @@ const TIMER_TYPE_ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
 const TIMER_TYPE_PRECISE  = Ci.nsITimer.TYPE_REPEATING_PRECISE;
 const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
 
-XPCOMUtils.defineLazyServiceGetter(this, 'ObserverService', '@mozilla.org/observer-service;1', 'nsIObserverService');
-XPCOMUtils.defineLazyServiceGetter(this, 'IOService', '@mozilla.org/network/io-service;1', 'nsIIOService');
-XPCOMUtils.defineLazyGetter(this, 'Prefs', function()
-    Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService)
-                                            .getBranch('extensions.brief.')
-                                            .QueryInterface(Ci.nsIPrefBranch2)
-);
+
+XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
+    return Services.prefs.getBranch('extensions.brief.').QueryInterface(Ci.nsIPrefBranch2);
+})
 XPCOMUtils.defineLazyGetter(this, 'Storage', function() {
     var tempScope = {};
     Components.utils.import('resource://brief/Storage.jsm', tempScope);
     return tempScope.Storage;
-});
+})
 
 
 // Exported object exposing public properties.
@@ -118,18 +123,20 @@ var FeedUpdateServiceInternal = {
 
 
     init: function FeedUpdateServiceInternal_init() {
-        ObserverService.addObserver(this, 'brief:feed-updated', false);
-        ObserverService.addObserver(this, 'quit-application', false);
+        Services.obs.addObserver(this, 'brief:feed-updated', false);
+        Services.obs.addObserver(this, 'quit-application', false);
         Prefs.addObserver('', this, false);
 
-        XPCOMUtils.defineLazyGetter(this, 'updateTimer', function()
-            Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer));
-        XPCOMUtils.defineLazyGetter(this, 'startupDelayTimer', function()
-            Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer));
-        XPCOMUtils.defineLazyGetter(this, 'fetchDelayTimer', function()
-             Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer));
+        XPCOMUtils.defineLazyGetter(this, 'updateTimer', function() {
+            return Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+        })
+
+        XPCOMUtils.defineLazyGetter(this, 'fetchDelayTimer', function() {
+            return Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+        })
 
         // Delay the initial autoupdate check in order not to slow down the startup.
+        this.startupDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
         let startupDelay = Prefs.getIntPref('update.startupDelay');
         this.startupDelayTimer.initWithCallback(this, startupDelay, TIMER_TYPE_ONE_SHOT);
     },
@@ -172,7 +179,7 @@ var FeedUpdateServiceInternal = {
         }
 
         if (newFeeds.length)
-            ObserverService.notifyObservers(null, 'brief:feed-update-queued', '');
+            Services.obs.notifyObservers(null, 'brief:feed-update-queued', '');
     },
 
     // See FeedUpdateService.
@@ -237,9 +244,9 @@ var FeedUpdateServiceInternal = {
         if (aNewEntriesCount > 0)
             this.feedsWithNewEntriesCount++;
 
-        ObserverService.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
+        Services.obs.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
         if (aError)
-            ObserverService.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
+            Services.obs.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
 
         if (this.completedFeeds.length == this.scheduledFeeds.length)
             this.finishUpdate('completed');
@@ -252,9 +259,7 @@ var FeedUpdateServiceInternal = {
 
         var showNotification = Prefs.getBoolPref('update.showNotification');
         if (this.feedsWithNewEntriesCount > 0 && showNotification) {
-            let bundle = Cc['@mozilla.org/intl/stringbundle;1']
-                         .getService(Ci.nsIStringBundleService)
-                         .createBundle('chrome://brief/locale/brief.properties');
+            let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
             let title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
             let params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
             let text = bundle.formatStringFromName('updateAlertText', params, 2);
@@ -275,7 +280,7 @@ var FeedUpdateServiceInternal = {
         this.scheduledFeeds = [];
         this.updateQueue = [];
 
-        ObserverService.notifyObservers(null, 'brief:feed-update-finished', aReason);
+        Services.obs.notifyObservers(null, 'brief:feed-update-finished', aReason);
     },
 
 
@@ -286,9 +291,7 @@ var FeedUpdateServiceInternal = {
         // Notification from nsIAlertsService that user has clicked the link in
         // the alert.
         case 'alertclickcallback':
-            var window = Cc['@mozilla.org/appshell/window-mediator;1']
-                         .getService(Ci.nsIWindowMediator)
-                         .getMostRecentWindow('navigator:browser');
+            let window = Services.wm.getMostRecentWindow('navigator:browser');
             if (window) {
                 window.Brief.open();
                 window.focus();
@@ -301,8 +304,8 @@ var FeedUpdateServiceInternal = {
             break;
 
         case 'quit-application':
-            ObserverService.removeObserver(this, 'brief:feed-updated');
-            ObserverService.removeObserver(this, 'quit-application');
+            Services.obs.removeObserver(this, 'brief:feed-updated');
+            Services.obs.removeObserver(this, 'quit-application');
             Prefs.removeObserver('', this);
             break;
 
@@ -328,8 +331,8 @@ function FeedFetcher(aFeed) {
 
     this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
-    ObserverService.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
-    ObserverService.addObserver(this, 'brief:feed-update-finished', false);
+    Services.obs.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
+    Services.obs.addObserver(this, 'brief:feed-update-finished', false);
 
     this.requestFeed();
 }
@@ -380,7 +383,7 @@ FeedFetcher.prototype = {
         function onRequestLoad() {
             self.timeoutTimer.cancel();
             try {
-                let uri = IOService.newURI(self.feed.feedURL, null, null);
+                let uri = Services.io.newURI(self.feed.feedURL, null, null);
                 self.parser.parseFromString(self.request.responseText, uri);
             }
             catch (ex) {
@@ -463,7 +466,7 @@ FeedFetcher.prototype = {
     },
 
     cleanup: function FeedFetcher_cleanup() {
-        ObserverService.removeObserver(this, 'brief:feed-update-finished');
+        Services.obs.removeObserver(this, 'brief:feed-update-finished');
         this.request = null;
         this.timeoutTimer.cancel();
         this.timeoutTimer = null;
@@ -483,10 +486,10 @@ FeedFetcher.prototype = {
  *        Callback to use when finished.
  */
 function FaviconFetcher(aWebsiteURL, aCallback) {
-    var websiteURI = IOService.newURI(aWebsiteURL, null, null)
-    var faviconURI = IOService.newURI(websiteURI.prePath + '/favicon.ico', null, null);
+    var websiteURI = Services.io.newURI(aWebsiteURL, null, null)
+    var faviconURI = Services.io.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
-    var chan = IOService.newChannelFromURI(faviconURI);
+    var chan = Services.io.newChannelFromURI(faviconURI);
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 

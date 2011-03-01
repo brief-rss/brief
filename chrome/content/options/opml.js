@@ -3,6 +3,7 @@
  */
 
 Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://gre/modules/Services.jsm');
 
 IMPORT_COMMON(this);
 
@@ -15,8 +16,6 @@ var opml = {
                                 getService(Ci.nsINavBookmarksService);
         this.livemarkService  = Cc['@mozilla.org/browser/livemark-service;2'].
                                 getService(Ci.nsILivemarkService);
-        this.ioService = Cc['@mozilla.org/network/io-service;1'].
-                         getService(Ci.nsIIOService);
     },
 
     importOPML: function() {
@@ -45,10 +44,8 @@ var opml = {
             var opmldoc = reader.responseXML;
 
             if (opmldoc.documentElement.localName == 'parsererror') {
-                var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
-                                    getService(Ci.nsIPromptService);
-                promptService.alert(window, bundle.getString('invalidFileAlertTitle'),
-                                    bundle.getString('invalidFileAlertText'));
+                Services.prompt.alert(window, bundle.getString('invalidFileAlertTitle'),
+                                      bundle.getString('invalidFileAlertText'));
                 return;
             }
 
@@ -99,7 +96,7 @@ var opml = {
             case 'feed':
                 var siteURI = null, feedURI = null;
                 try {
-                    var feedURI = this.ioService.newURI(node.feedURL, null, null);
+                    var feedURI = Services.io.newURI(node.feedURL, null, null);
                 }
                 catch (ex) {
                     log('Brief\nFailed to import feed ' + node.title +
@@ -107,7 +104,7 @@ var opml = {
                     break;
                 }
                 try {
-                    var siteURI = this.ioService.newURI(node.url, null, null);
+                    var siteURI = Services.io.newURI(node.url, null, null);
                 }
                 catch (ex) {
                     // We can live without siteURI.
@@ -119,7 +116,7 @@ var opml = {
 
             case 'link':
                 try {
-                    var uri = this.ioService.newURI(node.url, null, null);
+                    var uri = Services.io.newURI(node.url, null, null);
                 }
                 catch (ex) {
                     break;

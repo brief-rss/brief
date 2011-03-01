@@ -1,14 +1,13 @@
 const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement'];
 
 Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://gre/modules/Services.jsm');
 
 IMPORT_COMMON(this);
 
 
 function StorageConnection(aDatabaseFile) {
-    this._nativeConnection = Cc['@mozilla.org/storage/service;1']
-                             .getService(Ci.mozIStorageService)
-                             .openUnsharedDatabase(aDatabaseFile);
+    this._nativeConnection = Services.storage.openUnsharedDatabase(aDatabaseFile);
     this._writingStatementsQueue = new WritingStatementsQueue(this);
     this._transactionStatements = [];
 }

@@ -13,10 +13,8 @@ const Brief = {
 
     get prefs() {
         delete this.prefs;
-        return this.prefs = Cc['@mozilla.org/preferences-service;1'].
-                            getService(Ci.nsIPrefService).
-                            getBranch('extensions.brief.').
-                            QueryInterface(Ci.nsIPrefBranch2);
+        return this.prefs = Services.prefs.getBranch('extensions.brief.')
+                                          .QueryInterface(Ci.nsIPrefBranch2);
     },
 
     get storage() {
@@ -84,9 +82,7 @@ const Brief = {
     },
 
     showOptions: function cmd_showOptions() {
-        var prefBranch = Cc['@mozilla.org/preferences-service;1'].
-                         getService(Ci.nsIPrefBranch);
-        var instantApply = prefBranch.getBoolPref('browser.preferences.instantApply');
+        var instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
         var features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
@@ -204,11 +200,9 @@ const Brief = {
             }
             else {
                 let prevVersion = this.prefs.getCharPref('lastVersion');
-                let verComparator = Cc['@mozilla.org/xpcom/version-comparator;1']
-                                    .getService(Ci.nsIVersionComparator);
 
                 // If Brief has been updated, load the new version info page.
-                if (verComparator.compare(prevVersion, this.VERSION) < 0) {
+                if (Services.vc.compare(prevVersion, this.VERSION) < 0) {
                     setTimeout(function() {
                         gBrowser.loadOneTab(Brief.RELEASE_NOTES_URL, {
                             relatedToCurrent: false,
@@ -238,16 +232,11 @@ const Brief = {
             if (this.prefs.getBoolPref('hideChrome'))
                 XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
 
-            // Observe changes to the feed database in order to keep
-            // the status panel up-to-date.
-            var observerService = Cc['@mozilla.org/observer-service;1']
-                                  .getService(Ci.nsIObserverService);
-            observerService.addObserver(this, 'brief:invalidate-feedlist', false);
-
             gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
             this.prefs.addObserver('', this, false);
             this.storage.addObserver(this);
+            Services.obs.addObserver(this, 'brief:invalidate-feedlist', false);
 
             window.addEventListener('unload', this, false);
             break;
@@ -255,10 +244,7 @@ const Brief = {
         case 'unload':
             this.prefs.removeObserver('', this);
             this.storage.removeObserver(this);
-
-            var observerService = Cc['@mozilla.org/observer-service;1']
-                                  .getService(Ci.nsIObserverService);
-            observerService.removeObserver(this, 'brief:invalidate-feedlist');
+            Services.obs.removeObserver(this, 'brief:invalidate-feedlist');
             break;
         }
     },
@@ -315,10 +301,8 @@ const Brief = {
         }
 
         // Create the default feeds folder.
-        var name = Cc['@mozilla.org/intl/stringbundle;1']
-                   .getService(Ci.nsIStringBundleService)
-                   .createBundle('chrome://brief/locale/brief.properties')
-                   .GetStringFromName('defaultFeedsFolderName');
+        let name = Services.strings.createBundle('chrome://brief/locale/brief.properties')
+                                   .GetStringFromName('defaultFeedsFolderName');
         var bookmarks = PlacesUtils.bookmarks;
         var folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
                                               bookmarks.DEFAULT_INDEX);

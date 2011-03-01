@@ -731,7 +731,7 @@ FeedView.prototype = {
             else
                 this._onEntriesAdded(aEntryList.IDs);
         }
-        
+
         for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
             let entryElement = this.document.getElementById(entry);
             let markReadButton = entryElement.getElementsByClassName('mark-read')[0];

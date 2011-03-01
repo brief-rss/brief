@@ -1,5 +1,7 @@
 const EXPORTED_SYMBOLS = ['IMPORT_COMMON'];
 
+Components.utils.import('resource://gre/modules/Services.jsm');
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -9,23 +11,12 @@ function IMPORT_COMMON(aScope) {
     aScope.Ci = Ci;
     aScope.Cu = Cu;
 
-    aScope.log = function log(aMessage) {
-        let consoleService = Cc['@mozilla.org/consoleservice;1']
-                             .getService(Ci.nsIConsoleService);
-        consoleService.logStringMessage(aMessage);
-    }
+    aScope.log = log;
 
-    aScope.Array.prototype.__iterator__ = function() new ArrayIterator(this);
-
-    aScope.Array.prototype.intersect = function intersect(aArr) {
-        let commonItems = [];
-        for (let i = 0; i < this.length; i++) {
-            if (aArr.indexOf(this[i]) != -1)
-                commonItems.push(this[i]);
-        }
-        return commonItems;
-    }
+    aScope.Array.prototype.__iterator__ = Array.prototype.__iterator__;
+    aScope.Array.prototype.intersect = Array.prototype.intersect;
 }
+
 
 function ArrayIterator(aArray) {
     this.array = aArray;
@@ -40,3 +31,16 @@ ArrayIterator.prototype.next = function() {
 }
 
 Array.prototype.__iterator__ = function() new ArrayIterator(this);
+
+Array.prototype.intersect = function intersect(aArr) {
+    let commonItems = [];
+    for (let i = 0; i < this.length; i++) {
+        if (aArr.indexOf(this[i]) != -1)
+            commonItems.push(this[i]);
+    }
+    return commonItems;
+}
+
+function log(aMessage) {
+    Services.console.logStringMessage(aMessage);
+}
