@@ -18,7 +18,7 @@ const Brief = {
     },
 
     get storage() {
-        var tempScope = {};
+        let tempScope = {};
         Components.utils.import('resource://brief/Storage.jsm', tempScope);
 
         delete this.storage;
@@ -34,9 +34,9 @@ const Brief = {
     },
 
     open: function Brief_open(aInCurrentTab) {
-        var loading = gBrowser.webProgress.isLoadingDocument;
-        var blank = (gBrowser.currentURI.spec == 'about:blank');
-        var briefTab = this.getBriefTab();
+        let loading = gBrowser.webProgress.isLoadingDocument;
+        let blank = (gBrowser.currentURI.spec == 'about:blank');
+        let briefTab = this.getBriefTab();
 
         if (briefTab)
             gBrowser.selectedTab = briefTab;
@@ -66,7 +66,7 @@ const Brief = {
 
 
     updateAllFeeds: function Brief_updateAllFeeds() {
-        var tempScope = {};
+        let tempScope = {};
         Components.utils.import('resource://brief/FeedUpdateService.jsm', tempScope);
         tempScope.FeedUpdateService.updateAllFeeds();
     },
@@ -76,14 +76,14 @@ const Brief = {
     },
 
     toggleUnreadCounter: function Brief_toggleUnreadCounter() {
-        var menuitem = document.getElementById('brief-show-unread-counter');
-        var checked = menuitem.getAttribute('checked') == 'true';
+        let menuitem = document.getElementById('brief-show-unread-counter');
+        let checked = menuitem.getAttribute('checked') == 'true';
         Brief.prefs.setBoolPref('showUnreadCounter', !checked);
     },
 
     showOptions: function cmd_showOptions() {
-        var instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
-        var features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
+        let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
+        let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
         window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
@@ -102,7 +102,7 @@ const Brief = {
         if (!Brief.toolbarbutton || !Brief.prefs.getBoolPref('showUnreadCounter'))
             return;
 
-        var query = new Brief.query({
+        let query = new Brief.query({
             deleted: Brief.storage.ENTRY_STATE_NORMAL,
             read: false
         })
@@ -115,18 +115,18 @@ const Brief = {
 
 
     constructTooltip: function Brief_constructTooltip() {
-        var bundle = document.getElementById('brief-bundle');
-        var rows = document.getElementById('brief-tooltip-rows');
-        var tooltip = document.getElementById('brief-tooltip');
+        let bundle = document.getElementById('brief-bundle');
+        let rows = document.getElementById('brief-tooltip-rows');
+        let tooltip = document.getElementById('brief-tooltip');
 
         // Integer prefs are longs while Date is a long long.
-        var now = Math.round(Date.now() / 1000);
-        var lastUpdateTime = Brief.prefs.getIntPref('update.lastUpdateTime');
-        var elapsedTime = now - lastUpdateTime;
-        var hours = Math.floor(elapsedTime / 3600);
-        var minutes = Math.floor((elapsedTime - hours * 3600) / 60);
+        let now = Math.round(Date.now() / 1000);
+        let lastUpdateTime = Brief.prefs.getIntPref('update.lastUpdateTime');
+        let elapsedTime = now - lastUpdateTime;
+        let hours = Math.floor(elapsedTime / 3600);
+        let minutes = Math.floor((elapsedTime - hours * 3600) / 60);
 
-        var label = document.getElementById('brief-tooltip-last-updated');
+        let label = document.getElementById('brief-tooltip-last-updated');
         if (hours > 1)
             label.value = bundle.getFormattedString('lastUpdatedWithHours', [hours, minutes]);
         else if (hours == 1)
@@ -137,7 +137,7 @@ const Brief = {
         while (rows.lastChild)
             rows.removeChild(rows.lastChild);
 
-        var query = new this.query({
+        let query = new this.query({
             deleted: this.storage.ENTRY_STATE_NORMAL,
             read: false,
             sortOrder: this.query.SORT_BY_FEED_ROW_INDEX,
@@ -145,8 +145,8 @@ const Brief = {
         })
 
         query.getProperty('feedID', true, function(unreadFeeds) {
-            var noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
-            var value = bundle.getString('noUnreadFeedsTooltip');
+            let noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
+            let value = bundle.getString('noUnreadFeedsTooltip');
             noUnreadLabel.setAttribute('value', value);
             noUnreadLabel.hidden = unreadFeeds.length;
 
@@ -293,7 +293,7 @@ const Brief = {
 
     onFirstRun: function Brief_onFirstRun() {
         // Add the toolbar button at the end of the Navigation Bar.
-        var navbar = document.getElementById('nav-bar');
+        let navbar = document.getElementById('nav-bar');
         if (!navbar.currentSet.match('brief-button')) {
             navbar.insertItem('brief-button', null, null, false);
             navbar.setAttribute('currentset', navbar.currentSet);
@@ -303,8 +303,8 @@ const Brief = {
         // Create the default feeds folder.
         let name = Services.strings.createBundle('chrome://brief/locale/brief.properties')
                                    .GetStringFromName('defaultFeedsFolderName');
-        var bookmarks = PlacesUtils.bookmarks;
-        var folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
+        let bookmarks = PlacesUtils.bookmarks;
+        let folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
                                               bookmarks.DEFAULT_INDEX);
         Brief.prefs.setIntPref('homeFolder', folderID);
 

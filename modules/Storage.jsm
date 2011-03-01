@@ -82,7 +82,7 @@ XPCOMUtils.defineLazyGetter(this, 'Places', function() {
 })
 
 
-var Connection = null;
+let Connection = null;
 
 function Statement(aStatement, aDefaultParams) {
     StorageStatement.call(this, Connection, aStatement, aDefaultParams);
@@ -92,7 +92,7 @@ Statement.prototype = StorageStatement.prototype;
 
 
 // Exported object exposing public properties.
-var Storage = {
+const Storage = {
 
     ENTRY_STATE_NORMAL: 0,
     ENTRY_STATE_TRASHED: 1,
@@ -218,23 +218,23 @@ var Storage = {
 }
 
 
-var StorageInternal = {
+let StorageInternal = {
 
     feedsAndFoldersCache: null,
     feedsCache:           null,
 
 
     init: function StorageInternal_init() {
-        var profileDir = Services.dirsvc.get('ProfD', Ci.nsIFile);
-        var databaseFile = profileDir.clone();
+        let profileDir = Services.dirsvc.get('ProfD', Ci.nsIFile);
+        let databaseFile = profileDir.clone();
         databaseFile.append('brief.sqlite');
-        var databaseIsNew = !databaseFile.exists();
+        let databaseIsNew = !databaseFile.exists();
 
         Connection = new StorageConnection(databaseFile);
-        var schemaVersion = Connection.schemaVersion;
+        let schemaVersion = Connection.schemaVersion;
 
         // Remove the backup file after certain amount of time.
-        var backupFile = profileDir.clone();
+        let backupFile = profileDir.clone();
         backupFile.append('brief-backup-' + (schemaVersion - 1) + '.sqlite');
         if (backupFile.exists() && Date.now() - backupFile.lastModifiedTime > BACKUP_FILE_EXPIRATION_AGE)
             backupFile.remove(false);
@@ -256,8 +256,8 @@ var StorageInternal = {
                 backupFile.remove(false);
 
             // Backup the database before migration.
-            var newBackupFile = profileDir;
-            var filename = 'brief-backup-' + schemaVersion + '.sqlite';
+            let newBackupFile = profileDir;
+            let filename = 'brief-backup-' + schemaVersion + '.sqlite';
             newBackupFile.append(filename);
             if (!newBackupFile.exists())
                 Services.storage.backupDatabaseFile(databaseFile, filename);
@@ -340,9 +340,9 @@ var StorageInternal = {
 
     // See Storage.
     getFeed: function StorageInternal_getFeed(aFeedID) {
-        var foundFeed = null;
-        var feeds = this.getAllFeeds(true);
-        for (var i = 0; i < feeds.length; i++) {
+        let foundFeed = null;
+        let feeds = this.getAllFeeds(true);
+        for (let i = 0; i < feeds.length; i++) {
             if (feeds[i].feedID == aFeedID) {
                 foundFeed = feeds[i];
                 break;
@@ -394,7 +394,7 @@ var StorageInternal = {
 
         // Update the cache if neccassary (it may not be if Feed instance that was
         // passed to us was itself taken from the cache).
-        var feed = this.getFeed(aFeed.feedID);
+        let feed = this.getFeed(aFeed.feedID);
         if (feed != aFeed) {
             feed.entryAgeLimit = aFeed.entryAgeLimit;
             feed.maxEntries = aFeed.maxEntries;
@@ -480,7 +480,7 @@ var StorageInternal = {
         }, this)
 
         // Prefs can only store longs while Date is a long long.
-        var now = Math.round(Date.now() / 1000);
+        let now = Math.round(Date.now() / 1000);
         Prefs.setIntPref('database.lastPurgeTime', now);
     },
 
@@ -489,8 +489,8 @@ var StorageInternal = {
         switch (aTopic) {
             case 'quit-application':
                 // Integer prefs are longs while Date is a long long.
-                var now = Math.round(Date.now() / 1000);
-                var lastPurgeTime = Prefs.getIntPref('database.lastPurgeTime');
+                let now = Math.round(Date.now() / 1000);
+                let lastPurgeTime = Prefs.getIntPref('database.lastPurgeTime');
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeEntries(true);
 
@@ -525,7 +525,7 @@ var StorageInternal = {
 
     // See Storage.
     removeObserver: function StorageInternal_removeObserver(aObserver) {
-        var index = this.observers.indexOf(aObserver);
+        let index = this.observers.indexOf(aObserver);
         if (index !== -1)
             this.observers.splice(index, 1);
     },
@@ -569,7 +569,7 @@ var StorageInternal = {
      */
     tagEntry: function StorageInternal_tagEntry(aState, aEntryID, aTagName) {
         Connection.runTransaction(function() {
-            var params = { 'entryID': aEntryID, 'tagName': aTagName };
+            let params = { 'entryID': aEntryID, 'tagName': aTagName };
 
             if (aState) {
                 let alreadyTagged = Stm.checkTag.getSingleResult(params).alreadyExists;
@@ -608,11 +608,11 @@ function FeedProcessor(aFeed, aCallback) {
     this.feed = aFeed;
     this.callback = aCallback;
 
-    var storedFeed = StorageInternal.getFeed(aFeed.feedID);
+    let storedFeed = StorageInternal.getFeed(aFeed.feedID);
     this.oldestEntryDate = storedFeed.oldestEntryDate;
 
-    var newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-    var prevDateModified = storedFeed.dateModified;
+    let newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
+    let prevDateModified = storedFeed.dateModified;
 
     if (aFeed.entries.length && (!newDateModified || newDateModified > prevDateModified)) {
         this.remainingEntriesCount = aFeed.entries.length;
@@ -633,7 +633,7 @@ function FeedProcessor(aFeed, aCallback) {
         aCallback(0);
     }
 
-    var properties = {
+    let properties = {
         'websiteURL': aFeed.websiteURL,
         'subtitle': aFeed.subtitle,
         'favicon': aFeed.favicon,
@@ -648,7 +648,7 @@ function FeedProcessor(aFeed, aCallback) {
     Stm.updateFeed.executeAsync();
 
     // Keep cache up to date.
-    var cachedFeed = StorageInternal.getFeed(aFeed.feedID);
+    let cachedFeed = StorageInternal.getFeed(aFeed.feedID);
     for (let p in properties)
         cachedFeed[p] = properties[p];
 }
@@ -676,22 +676,22 @@ FeedProcessor.prototype = {
         // This is why we need a secondary hash, which is always based on the URL. If the
         // GUID is empty (either because it was lost or because it wasn't provided to
         // begin with), we look up the entry using the secondary hash.
-        var providedID = aEntry.wrappedEntry.id;
-        var primarySet = providedID ? [this.feed.feedID, providedID]
+        let providedID = aEntry.wrappedEntry.id;
+        let primarySet = providedID ? [this.feed.feedID, providedID]
                                     : [this.feed.feedID, aEntry.entryURL];
-        var secondarySet = [this.feed.feedID, aEntry.entryURL];
+        let secondarySet = [this.feed.feedID, aEntry.entryURL];
 
         // Special case for MediaWiki feeds: include the date in the hash. In
         // "Recent changes" feeds, entries for subsequent edits of a page differ
         // only in date (not in URL or GUID).
-        var generator = this.feed.wrappedFeed.generator;
+        let generator = this.feed.wrappedFeed.generator;
         if (generator && generator.agent.match('MediaWiki')) {
             primarySet.push(aEntry.date);
             secondarySet.push(aEntry.date);
         }
 
-        var primaryHash = Utils.hashString(primarySet.join(''));
-        var secondaryHash = Utils.hashString(secondarySet.join(''));
+        let primaryHash = Utils.hashString(primarySet.join(''));
+        let secondaryHash = Utils.hashString(secondarySet.join(''));
 
         // Look up if the entry is already present in the database.
         if (providedID) {
@@ -703,8 +703,8 @@ FeedProcessor.prototype = {
             select.params.secondaryHash = secondaryHash;
         }
 
-        var storedID, storedDate, isEntryRead;
-        var self = this;
+        let storedID, storedDate, isEntryRead;
+        let self = this;
 
         select.executeAsync({
             handleResult: function(aResults) {
@@ -733,8 +733,8 @@ FeedProcessor.prototype = {
     },
 
     addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
-        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
-        var markUnread = StorageInternal.getFeed(this.feed.feedID).markModifiedEntriesUnread;
+        let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
+        let markUnread = StorageInternal.getFeed(this.feed.feedID).markModifiedEntriesUnread;
 
         this.updateEntry.paramSets.push({
             'date': aEntry.date,
@@ -754,7 +754,7 @@ FeedProcessor.prototype = {
     },
 
     addInsertParams: function FeedProcessor_addInsertParams(aEntry, aPrimaryHash, aSecondaryHash) {
-        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
+        let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
         try {
             this.insertEntry.paramSets.push({
@@ -788,7 +788,7 @@ FeedProcessor.prototype = {
     },
 
     executeAndNotify: function FeedProcessor_executeAndNotify() {
-        var self = this;
+        let self = this;
 
         if (this.entriesToInsertCount) {
             let getLastRowids = new Statement(Stm.getLastRowids);
@@ -1090,13 +1090,13 @@ Query.prototype = {
      * Get an EntryList of entries.
      */
     getEntryList: function Query_getEntryList(aCallback) {
-        var entryIDs = [];
-        var feedIDs = [];
-        var tags = [];
+        let entryIDs = [];
+        let feedIDs = [];
+        let tags = [];
 
-        var tempHidden = this.includeHiddenFeeds;
+        let tempHidden = this.includeHiddenFeeds;
         this.includeHiddenFeeds = false;
-        var sql = 'SELECT entries.id, entries.feedID, entries_text.tags '
+        let sql = 'SELECT entries.id, entries.feedID, entries_text.tags '
                    + this._getQueryString(true, true);
         this.includeHiddenFeeds = tempHidden;
 
@@ -1117,7 +1117,7 @@ Query.prototype = {
             },
 
             handleCompletion: function(aReason) {
-                var list = new EntryList();
+                let list = new EntryList();
                 list.IDs = entryIDs;
                 list.feedIDs = feedIDs;
                 list.tags = tags;
@@ -1138,12 +1138,12 @@ Query.prototype = {
         // Try not to include entries which already have the desired state,
         // but we can't omit them if a specific range of the selected entries
         // is meant to be marked.
-        var tempRead = this.read;
+        let tempRead = this.read;
         if (!this.limit && !this.offset)
             this.read = !aState;
 
-        var sql = 'UPDATE entries SET read = :read, updated = 0 ' + this._getQueryString();
-        var update = new Statement(sql);
+        let sql = 'UPDATE entries SET read = :read, updated = 0 ' + this._getQueryString();
+        let update = new Statement(sql);
         update.params.read = aState ? 1 : 0;
 
         this.getEntryList(function(aList) {
@@ -1208,7 +1208,7 @@ Query.prototype = {
      * observer.
      */
     bookmarkEntries: function Query_bookmarkEntries(aState) {
-        var transactions = [];
+        let transactions = [];
 
         this.getFullEntries(function(entries) {
             for (let entry in entries) {
@@ -1271,8 +1271,8 @@ Query.prototype = {
                     StorageInternal.starEntry(true, entry.id, normalBookmarks[0]);
 
                 // Verify tags.
-                var storedTags = Utils.getTagsForEntry(entry.id);
-                var currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
+                let storedTags = Utils.getTagsForEntry(entry.id);
+                let currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
                                               .filter(Utils.isTagFolder)
                                               .map(function(id) Bookmarks.getItemTitle(id));
 
@@ -1315,7 +1315,7 @@ Query.prototype = {
      * @returns String containing the part of an SQL statement after WHERE clause.
      */
     _getQueryString: function Query__getQueryString(aForSelect, aGetFullEntries) {
-        var text = aForSelect ? ' FROM entries '
+        let text = aForSelect ? ' FROM entries '
                               : ' WHERE entries.id IN (SELECT entries.id FROM entries ';
 
         if (!this.feeds && !this.includeHiddenFeeds)
@@ -1327,7 +1327,7 @@ Query.prototype = {
         if (this.tags)
             text += ' INNER JOIN entry_tags ON entries.id = entry_tags.entryID ';
 
-        var constraints = [];
+        let constraints = [];
 
         if (this.folders) {
             if (!this.folders.length)
@@ -1420,7 +1420,7 @@ Query.prototype = {
                     throw Components.results.NS_ERROR_ILLEGAL_VALUE;
             }
 
-            var sortDir = (this.sortDirection == this.SORT_ASCENDING) ? 'ASC' : 'DESC';
+            let sortDir = (this.sortDirection == this.SORT_ASCENDING) ? 'ASC' : 'DESC';
             text += 'ORDER BY ' + sortOrder + sortDir;
 
             // Sort by rowid, so that entries that are equal in respect of primary
@@ -1441,7 +1441,7 @@ Query.prototype = {
     },
 
     _traverseFolderChildren: function Query__traverseFolderChildren(aFolder) {
-        var isEffectiveFolder = (this._effectiveFolders.indexOf(aFolder) != -1);
+        let isEffectiveFolder = (this._effectiveFolders.indexOf(aFolder) != -1);
 
         for (let item in StorageInternal.getAllFeeds(true)) {
             if (item.parent == aFolder && item.isFolder) {
@@ -1455,7 +1455,7 @@ Query.prototype = {
 }
 
 
-var BookmarkObserver = {
+let BookmarkObserver = {
 
     livemarksSyncPending: false,
     batching: false,
@@ -1486,8 +1486,8 @@ var BookmarkObserver = {
             return;
 
         // Find entries with the same URI as the added item and tag or star them.
-        var url = Bookmarks.getBookmarkURI(aItemID).spec;
-        var isTag = Utils.isTagFolder(aFolder);
+        let url = Bookmarks.getBookmarkURI(aItemID).spec;
+        let isTag = Utils.isTagFolder(aFolder);
 
         Utils.getEntriesByURL(url, function(aEntries) {
             for (let entry in aEntries) {
@@ -1517,7 +1517,7 @@ var BookmarkObserver = {
         if (Utils.isLivemark(aFolder) || aItemType != Bookmarks.TYPE_BOOKMARK)
             return;
 
-        var isTag = Utils.isTagFolder(aFolder);
+        let isTag = Utils.isTagFolder(aFolder);
 
         if (isTag) {
             let tagName = Bookmarks.getItemTitle(aFolder);
@@ -1552,8 +1552,8 @@ var BookmarkObserver = {
     // nsINavBookmarkObserver
     onItemMoved: function BookmarkObserver_onItemMoved(aItemID, aOldParent, aOldIndex,
                                                    aNewParent, aNewIndex, aItemType) {
-        var wasInHome = Utils.isLivemarkStored(aItemID);
-        var isInHome = aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aNewParent);
+        let wasInHome = Utils.isLivemarkStored(aItemID);
+        let isInHome = aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aNewParent);
         if (wasInHome || isInHome)
             this.delayedLivemarksSync();
     },
@@ -1631,10 +1631,10 @@ var BookmarkObserver = {
      */
     renameTag: function BookmarkObserver_renameTag(aTagFolderID, aNewName) {
         // Get bookmarks in the renamed tag folder.
-        var options = Places.history.getNewQueryOptions();
-        var query = Places.history.getNewQuery();
+        let options = Places.history.getNewQueryOptions();
+        let query = Places.history.getNewQuery();
         query.setFolders([aTagFolderID], 1);
-        var result = Places.history.executeQuery(query, options);
+        let result = Places.history.executeQuery(query, options);
         result.root.containerOpen = true;
 
         for (let i = 0; i < result.root.childCount; i++) {
@@ -1682,21 +1682,21 @@ function LivemarksSync() {
     if (!this.checkHomeFolder())
         return;
 
-    var homeFolder = Prefs.getIntPref('homeFolder');
-    var livemarks = [];
-    var newLivemarks = [];
+    let homeFolder = Prefs.getIntPref('homeFolder');
+    let livemarks = [];
+    let newLivemarks = [];
 
     // Get a list of folders and Live Bookmarks in the user's home folder.
-    var options = Places.history.getNewQueryOptions();
-    var query = Places.history.getNewQuery();
+    let options = Places.history.getNewQueryOptions();
+    let query = Places.history.getNewQuery();
     query.setFolders([homeFolder], 1);
     options.excludeItems = true;
-    var result = Places.history.executeQuery(query, options);
+    let result = Places.history.executeQuery(query, options);
     this.traversePlacesQueryResults(result.root, livemarks);
 
     Connection.runTransaction(function() {
         // Get a list all feeds stored in the database.
-        var sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
+        let sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
 
         let storedFeeds = [row for each (row in new Statement(sql).results)];
 
@@ -1741,8 +1741,8 @@ LivemarksSync.prototype = {
     feedListChanged: false,
 
     checkHomeFolder: function BookmarksSync_checkHomeFolder() {
-        var folderValid = true;
-        var homeFolder = Prefs.getIntPref('homeFolder');
+        let folderValid = true;
+        let homeFolder = Prefs.getIntPref('homeFolder');
 
         if (homeFolder == -1) {
             let hideAllFeeds = new Statement('UPDATE feeds SET hidden = :hidden');
@@ -1768,7 +1768,7 @@ LivemarksSync.prototype = {
 
 
     insertFeed: function BookmarksSync_insertFeed(aBookmark) {
-        var sql = 'INSERT OR IGNORE INTO feeds                                                   ' +
+        let sql = 'INSERT OR IGNORE INTO feeds                                                   ' +
                   '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID)              ' +
                   'VALUES (:feedID, :feedURL, :title, :rowIndex, :isFolder, :parent, :bookmarkID)';
 
@@ -1787,11 +1787,11 @@ LivemarksSync.prototype = {
 
 
     updateFeedFromLivemark: function BookmarksSync_updateFeedFromLivemark(aItem, aFeed) {
-        var properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
+        let properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
         if (!aFeed.hidden && properties.every(function(p) aFeed[p] == aItem[p]))
             return;
 
-        var sql = 'UPDATE feeds SET title = :title, rowIndex = :rowIndex, parent = :parent, ' +
+        let sql = 'UPDATE feeds SET title = :title, rowIndex = :rowIndex, parent = :parent, ' +
                   '                 bookmarkID = :bookmarkID, hidden = 0                    ' +
                   'WHERE feedID = :feedID                                                   ';
 
@@ -1870,10 +1870,10 @@ LivemarksSync.prototype = {
 
 
 // Cached statements.
-var Stm = {
+let Stm = {
 
     get getAllFeeds() {
-        var sql = 'SELECT feedID, feedURL, websiteURL, title, subtitle, dateModified,   ' +
+        let sql = 'SELECT feedID, feedURL, websiteURL, title, subtitle, dateModified,   ' +
                   '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,      ' +
                   '       isFolder, bookmarkID, entryAgeLimit, maxEntries,              ' +
                   '       updateInterval, markModifiedEntriesUnread, lastFaviconRefresh ' +
@@ -1885,7 +1885,7 @@ var Stm = {
     },
 
     get getAllTags() {
-        var sql = 'SELECT DISTINCT entry_tags.tagName                                    '+
+        let sql = 'SELECT DISTINCT entry_tags.tagName                                    '+
                   'FROM entry_tags INNER JOIN entries ON entry_tags.entryID = entries.id '+
                   'WHERE entries.deleted = :deletedState                                 '+
                   'ORDER BY entry_tags.tagName                                           ';
@@ -1894,7 +1894,7 @@ var Stm = {
     },
 
     get updateFeed() {
-        var sql = 'UPDATE feeds                                  ' +
+        let sql = 'UPDATE feeds                                  ' +
                   'SET websiteURL = :websiteURL,                 ' +
                   '    subtitle = :subtitle,                     ' +
                   '    imageURL = :imageURL,                     ' +
@@ -1911,13 +1911,13 @@ var Stm = {
     },
 
     get setFeedTitle() {
-        var sql = 'UPDATE feeds SET title = :title WHERE feedID = :feedID';
+        let sql = 'UPDATE feeds SET title = :title WHERE feedID = :feedID';
         delete this.setFeedTitle;
         return this.setFeedTitle = new Statement(sql);
     },
 
     get setFeedOptions() {
-        var sql = 'UPDATE feeds                                ' +
+        let sql = 'UPDATE feeds                                ' +
                   'SET entryAgeLimit  = :entryAgeLimit,        ' +
                   '    maxEntries     = :maxEntries,           ' +
                   '    updateInterval = :updateInterval,       ' +
@@ -1928,41 +1928,41 @@ var Stm = {
     },
 
     get insertEntry() {
-        var sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
+        let sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
                   'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date)        ';
         delete this.insertEntry;
         return this.insertEntry = new Statement(sql);
     },
 
     get insertEntryText() {
-        var sql = 'INSERT INTO entries_text (title, content, authors) ' +
+        let sql = 'INSERT INTO entries_text (title, content, authors) ' +
                   'VALUES(:title, :content, :authors)   ';
         delete this.insertEntryText;
         return this.insertEntryText = new Statement(sql);
     },
 
     get updateEntry() {
-        var sql = 'UPDATE entries SET date = :date, read = :read, updated = 1 '+
+        let sql = 'UPDATE entries SET date = :date, read = :read, updated = 1 '+
                   'WHERE id = :id                                             ';
         delete this.updateEntry;
         return this.updateEntry = new Statement(sql);
     },
 
     get updateEntryText() {
-        var sql = 'UPDATE entries_text SET title = :title, content = :content, '+
+        let sql = 'UPDATE entries_text SET title = :title, content = :content, '+
                   'authors = :authors WHERE rowid = :id                        ';
         delete this.updateEntryText;
         return this.updateEntryText = new Statement(sql);
     },
 
     get getLastRowids() {
-        var sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT :count';
+        let sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT :count';
         delete this.getLastRowids;
         return this.getLastRowids = new Statement(sql);
     },
 
     get purgeDeletedEntriesText() {
-        var sql = 'DELETE FROM entries_text                                                 '+
+        let sql = 'DELETE FROM entries_text                                                 '+
                   'WHERE rowid IN (                                                         '+
                   '   SELECT entries.id                                                     '+
                   '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
@@ -1974,7 +1974,7 @@ var Stm = {
     },
 
     get purgeDeletedEntries() {
-        var sql = 'DELETE FROM entries                                                      '+
+        let sql = 'DELETE FROM entries                                                      '+
                   'WHERE id IN (                                                            '+
                   '   SELECT entries.id                                                     '+
                   '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
@@ -1986,7 +1986,7 @@ var Stm = {
     },
 
     get purgeDeletedFeeds() {
-        var sql = 'DELETE FROM feeds                                      '+
+        let sql = 'DELETE FROM feeds                                      '+
                   'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
                   '      feeds.hidden != 0                                ';
         delete this.purgeDeletedFeeds;
@@ -1994,7 +1994,7 @@ var Stm = {
     },
 
     get expireEntriesByAgeGlobal() {
-        var sql = 'UPDATE entries SET deleted = :newState                            ' +
+        let sql = 'UPDATE entries SET deleted = :newState                            ' +
                   'WHERE id IN (                                                     ' +
                   '   SELECT entries.id                                              ' +
                   '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
@@ -2008,7 +2008,7 @@ var Stm = {
     },
 
     get expireEntriesByAgePerFeed() {
-        var sql = 'UPDATE entries SET deleted = :newState  ' +
+        let sql = 'UPDATE entries SET deleted = :newState  ' +
                   'WHERE entries.deleted = :oldState AND   ' +
                   '      starred = 0 AND                   ' +
                   '      entries.date < :edgeDate AND      ' +
@@ -2018,7 +2018,7 @@ var Stm = {
     },
 
     get expireEntriesByNumber() {
-        var sql = 'UPDATE entries                    ' +
+        let sql = 'UPDATE entries                    ' +
                   'SET deleted = :newState           ' +
                   'WHERE rowid IN (                  ' +
                   '    SELECT rowid                  ' +
@@ -2034,7 +2034,7 @@ var Stm = {
     },
 
     get getDeletedEntriesCount() {
-        var sql = 'SELECT COUNT(1) AS entryCount FROM entries  ' +
+        let sql = 'SELECT COUNT(1) AS entryCount FROM entries  ' +
                   'WHERE feedID = :feedID AND                  ' +
                   '      starred = 0 AND                       ' +
                   '      deleted = :deletedState               ';
@@ -2043,31 +2043,31 @@ var Stm = {
     },
 
     get getEntryByPrimaryHash() {
-        var sql = 'SELECT id, date, read FROM entries WHERE primaryHash = :primaryHash';
+        let sql = 'SELECT id, date, read FROM entries WHERE primaryHash = :primaryHash';
         delete this.getEntryByPrimaryHash;
         return this.getEntryByPrimaryHash = new Statement(sql);
     },
 
     get getEntryBySecondaryHash() {
-        var sql = 'SELECT id, date, read FROM entries WHERE secondaryHash = :secondaryHash';
+        let sql = 'SELECT id, date, read FROM entries WHERE secondaryHash = :secondaryHash';
         delete this.getEntryBySecondaryHash;
         return this.getEntryBySecondaryHash = new Statement(sql);
     },
 
     get selectEntriesByURL() {
-        var sql = 'SELECT id FROM entries WHERE entryURL = :url';
+        let sql = 'SELECT id FROM entries WHERE entryURL = :url';
         delete this.selectEntriesByURL;
         return this.selectEntriesByURL = new Statement(sql);
     },
 
     get selectEntriesByBookmarkID() {
-        var sql = 'SELECT id, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
+        let sql = 'SELECT id, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
         delete this.selectEntriesByBookmarkID;
         return this.selectEntriesByBookmarkID = new Statement(sql);
     },
 
     get selectEntriesByTagName() {
-        var sql = 'SELECT id, entryURL FROM entries WHERE id IN (          '+
+        let sql = 'SELECT id, entryURL FROM entries WHERE id IN (          '+
                   '    SELECT entryID FROM entry_tags WHERE tagName = :tagName '+
                   ')                                                       ';
         delete this.selectEntriesByTagName;
@@ -2075,19 +2075,19 @@ var Stm = {
     },
 
     get starEntry() {
-        var sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
+        let sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
         delete this.starEntry;
         return this.starEntry = new Statement(sql);
     },
 
     get unstarEntry() {
-        var sql = 'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE id = :id';
+        let sql = 'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE id = :id';
         delete this.unstarEntry;
         return this.unstarEntry = new Statement(sql);
     },
 
     get checkTag() {
-        var sql = 'SELECT EXISTS (                  '+
+        let sql = 'SELECT EXISTS (                  '+
                   '    SELECT tagName               '+
                   '    FROM entry_tags              '+
                   '    WHERE tagName = :tagName AND '+
@@ -2098,26 +2098,26 @@ var Stm = {
     },
 
     get tagEntry() {
-        var sql = 'INSERT INTO entry_tags (entryID, tagName) '+
+        let sql = 'INSERT INTO entry_tags (entryID, tagName) '+
                   'VALUES (:entryID, :tagName)               ';
         delete this.tagEntry;
         return this.tagEntry = new Statement(sql);
     },
 
     get untagEntry() {
-        var sql = 'DELETE FROM entry_tags WHERE entryID = :entryID AND tagName = :tagName';
+        let sql = 'DELETE FROM entry_tags WHERE entryID = :entryID AND tagName = :tagName';
         delete this.untagEntry;
         return this.untagEntry = new Statement(sql);
     },
 
     get getTagsForEntry() {
-        var sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
+        let sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
         delete this.getTagsForEntry;
         return this.getTagsForEntry = new Statement(sql);
     },
 
     get setSerializedTagList() {
-        var sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
+        let sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
         delete this.setSerializedTagList;
         return this.setSerializedTagList = new Statement(sql);
     }
@@ -2125,7 +2125,7 @@ var Stm = {
 }
 
 
-var Utils = {
+let Utils = {
 
     getTagsForEntry: function getTagsForEntry(aEntryID) {
         Stm.getTagsForEntry.params = { 'entryID': aEntryID };
@@ -2133,7 +2133,7 @@ var Utils = {
     },
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
-        var foundFeed = null;
+        let foundFeed = null;
         for (let feed in StorageInternal.getAllFeeds(true)) {
             if (feed.bookmarkID == aBookmarkID) {
                 foundFeed = feed;
@@ -2148,7 +2148,7 @@ var Utils = {
     },
 
     getEntriesByURL: function getEntriesByURL(aURL, aCallback) {
-        var entries = [];
+        let entries = [];
 
         Stm.selectEntriesByURL.params.url = aURL;
         Stm.selectEntriesByURL.executeAsync({
@@ -2164,7 +2164,7 @@ var Utils = {
     },
 
     getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID, aCallback) {
-        var entries = [];
+        let entries = [];
 
         Stm.selectEntriesByBookmarkID.params.bookmarkID = aBookmarkID;
         Stm.selectEntriesByBookmarkID.executeAsync({
@@ -2184,7 +2184,7 @@ var Utils = {
     },
 
     getEntriesByTagName: function getEntriesByTagName(aTagName, aCallback) {
-        var entries = [];
+        let entries = [];
 
         Stm.selectEntriesByTagName.params.tagName = aTagName;
         Stm.selectEntriesByTagName.executeAsync({
@@ -2232,15 +2232,15 @@ var Utils = {
 
     // Returns TRUE if an item is a subfolder of Brief's home folder.
     isInHomeFolder: function(aItemID) {
-        var homeID = StorageInternal.homeFolderID;
+        let homeID = StorageInternal.homeFolderID;
         if (homeID === -1)
             return false;
 
         if (homeID === aItemID)
             return true;
 
-        var inHome = false;
-        var parent = aItemID;
+        let inHome = false;
+        let parent = aItemID;
         while (parent !== Places.placesRootId) {
             parent = Bookmarks.getFolderIdForItem(parent);
             if (parent === homeID) {
@@ -2256,20 +2256,20 @@ var Utils = {
         // nsICryptoHash can read the data either from an array or a stream.
         // Creating a stream ought to be faster than converting a long string
         // into an array using JS.
-        var unicodeConverter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].
+        let unicodeConverter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].
                                createInstance(Ci.nsIScriptableUnicodeConverter);
         unicodeConverter.charset = 'UTF-8';
-        var stream = unicodeConverter.convertToInputStream(aString);
+        let stream = unicodeConverter.convertToInputStream(aString);
 
-        var hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
+        let hasher = Cc['@mozilla.org/security/hash;1'].createInstance(Ci.nsICryptoHash);
         hasher.init(Ci.nsICryptoHash.MD5);
         hasher.updateFromStream(stream, stream.available());
-        var hash = hasher.finish(false);
+        let hash = hasher.finish(false);
 
         // Convert the hash to a hex-encoded string.
-        var hexchars = '0123456789ABCDEF';
-        var hexrep = new Array(hash.length * 2);
-        for (var i = 0; i < hash.length; ++i) {
+        let hexchars = '0123456789ABCDEF';
+        let hexrep = new Array(hash.length * 2);
+        for (let i = 0; i < hash.length; ++i) {
             hexrep[i * 2] = hexchars.charAt((hash.charCodeAt(i) >> 4) & 15);
             hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
         }

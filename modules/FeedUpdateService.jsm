@@ -30,14 +30,14 @@ XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
     return Services.prefs.getBranch('extensions.brief.').QueryInterface(Ci.nsIPrefBranch2);
 })
 XPCOMUtils.defineLazyGetter(this, 'Storage', function() {
-    var tempScope = {};
+    let tempScope = {};
     Components.utils.import('resource://brief/Storage.jsm', tempScope);
     return tempScope.Storage;
 })
 
 
 // Exported object exposing public properties.
-var FeedUpdateService = {
+const FeedUpdateService = {
 
     /**
      * Indicates if updating is in progress.
@@ -98,7 +98,7 @@ var FeedUpdateService = {
 }
 
 
-var FeedUpdateServiceInternal = {
+let FeedUpdateServiceInternal = {
 
     NOT_UPDATING: 0,
     BACKGROUND_UPDATING: 1,
@@ -149,7 +149,7 @@ var FeedUpdateServiceInternal = {
     // See FeedUpdateService.
     updateFeeds: function FeedUpdateServiceInternal_updateFeeds(aFeeds, aInBackground) {
         // Don't add the same feed be added twice.
-        var newFeeds = aFeeds.filter(function(f) this.updateQueue.indexOf(f) == -1, this);
+        let newFeeds = aFeeds.filter(function(f) this.updateQueue.indexOf(f) == -1, this);
 
         this.scheduledFeeds = this.scheduledFeeds.concat(newFeeds);
         this.updateQueue = this.updateQueue.concat(newFeeds);
@@ -159,7 +159,7 @@ var FeedUpdateServiceInternal = {
 
         // Start an update if it isn't in progress yet.
         if (this.status == this.NOT_UPDATING) {
-            var delay = aInBackground ? Prefs.getIntPref('update.backgroundFetchDelay')
+            let delay = aInBackground ? Prefs.getIntPref('update.backgroundFetchDelay')
                                       : Prefs.getIntPref('update.defaultFetchDelay');
 
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
@@ -171,7 +171,7 @@ var FeedUpdateServiceInternal = {
             // Stop the background update and continue with a foreground one.
             this.fetchDelayTimer.cancel();
 
-            var delay = Prefs.getIntPref('update.defaultFetchDelay');
+            let delay = Prefs.getIntPref('update.defaultFetchDelay');
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
             this.status = this.NORMAL_UPDATING;
 
@@ -199,20 +199,20 @@ var FeedUpdateServiceInternal = {
             if (this.status != this.NOT_UPDATING)
                 return;
 
-            var globalUpdatingEnabled = Prefs.getBoolPref('update.enableAutoUpdate');
+            let globalUpdatingEnabled = Prefs.getBoolPref('update.enableAutoUpdate');
             // Preferencos are in seconds, because they can only store 32 bit integers.
-            var globalInterval = Prefs.getIntPref('update.interval') * 1000;
-            var lastGlobalUpdateTime = Prefs.getIntPref('update.lastUpdateTime') * 1000;
-            var now = Date.now();
+            let globalInterval = Prefs.getIntPref('update.interval') * 1000;
+            let lastGlobalUpdateTime = Prefs.getIntPref('update.lastUpdateTime') * 1000;
+            let now = Date.now();
 
-            var itsGlobalUpdateTime = globalUpdatingEnabled &&
+            let itsGlobalUpdateTime = globalUpdatingEnabled &&
                                       now - lastGlobalUpdateTime > globalInterval;
 
             // Filter feeds which need to be updated, according to either the global
             // update interval or their own feed-specific interval.
             function filter(f) (f.updateInterval == 0 && itsGlobalUpdateTime) ||
                                (f.updateInterval > 0 && now - f.lastUpdated > f.updateInterval);
-            var feedsToUpdate = Storage.getAllFeeds().filter(filter);
+            let feedsToUpdate = Storage.getAllFeeds().filter(filter);
 
             if (feedsToUpdate.length)
                 this.updateFeeds(feedsToUpdate, feedsToUpdate.length, true);
@@ -232,7 +232,7 @@ var FeedUpdateServiceInternal = {
     fetchNextFeed: function FeedUpdateServiceInternal_fetchNextFeed() {
         // All feeds in the update queue may have already been requested,
         // because we don't cancel the timer until after all feeds are completed.
-        var feed = this.updateQueue.shift();
+        let feed = this.updateQueue.shift();
         if (feed)
             new FeedFetcher(feed);
     },
@@ -257,7 +257,7 @@ var FeedUpdateServiceInternal = {
         this.status = this.NOT_UPDATING;
         this.fetchDelayTimer.cancel();
 
-        var showNotification = Prefs.getBoolPref('update.showNotification');
+        let showNotification = Prefs.getBoolPref('update.showNotification');
         if (this.feedsWithNewEntriesCount > 0 && showNotification) {
             let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
             let title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
@@ -365,7 +365,7 @@ FeedFetcher.prototype = {
 
         this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
 
-        var self = this;
+        let self = this;
 
         function onRequestError() {
             // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
@@ -405,7 +405,7 @@ FeedFetcher.prototype = {
 
         this.bozo = aResult.bozo;
 
-        var feed = aResult.doc.QueryInterface(Ci.nsIFeed);
+        let feed = aResult.doc.QueryInterface(Ci.nsIFeed);
         this.downloadedFeed = new Feed(feed);
 
         // The URI that we passed and aResult.uri (which is actual URI from which the data
@@ -416,7 +416,7 @@ FeedFetcher.prototype = {
         this.downloadedFeed.favicon = this.feed.favicon;
         this.downloadedFeed.lastFaviconRefresh = this.feed.lastFaviconRefresh;
 
-        var self = this;
+        let self = this;
 
         if (Date.now() - this.downloadedFeed.lastFaviconRefresh > FAVICON_REFRESH_INTERVAL
                 || !this.downloadedFeed.favicon) {
@@ -486,10 +486,10 @@ FeedFetcher.prototype = {
  *        Callback to use when finished.
  */
 function FaviconFetcher(aWebsiteURL, aCallback) {
-    var websiteURI = Services.io.newURI(aWebsiteURL, null, null)
-    var faviconURI = Services.io.newURI(websiteURI.prePath + '/favicon.ico', null, null);
+    let websiteURI = Services.io.newURI(aWebsiteURL, null, null)
+    let faviconURI = Services.io.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
-    var chan = Services.io.newChannelFromURI(faviconURI);
+    let chan = Services.io.newChannelFromURI(faviconURI);
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
@@ -514,7 +514,7 @@ FaviconFetcher.prototype = {
     },
 
     onStopRequest: function FaviconFetcher_onStopRequest(aRequest, aContext, aStatusCode) {
-        var requestFailed = !Components.isSuccessCode(aStatusCode);
+        let requestFailed = !Components.isSuccessCode(aStatusCode);
         if (!requestFailed && (aRequest instanceof Ci.nsIHttpChannel))
             requestFailed = !aRequest.requestSucceeded;
 

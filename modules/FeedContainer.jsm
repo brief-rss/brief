@@ -243,7 +243,7 @@ EntryList.prototype = {
 
 
 function RFC822Date(aDateString) {
-    var date = new Date(aDateString);
+    let date = new Date(aDateString);
 
     // If the date is invalid, it may be caused by the fact that the built-in date parser
     // doesn't handle military timezone codes, even though they are part of RFC822.
@@ -269,7 +269,7 @@ function RFC822Date(aDateString) {
 }
 
 // Conversion table for military coded timezones.
-var milTimezoneCodesMap = {
+let milTimezoneCodesMap = {
     A: '-1',  B: '-2',  C: '-3',  D: '-4', E: '-5',  F: '-6',  G: '-7',  H: '-8', I: '-9',
     K: '-10', L: '-11', M: '-12', N: '+1', O: '+2',  P: '+3',  Q: '+4',  R: '+5',
     S: '+6',  T: '+7',  U: '+8',  V: '+9', W: '+10', X: '+11', Y: '+12', Z: 'UT',

@@ -1,7 +1,7 @@
 const THROBBER_URL = 'chrome://brief/skin/throbber.gif';
 const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
-var ViewList = {
+let ViewList = {
 
     get richlistbox() {
         delete this.richlistbox;
@@ -33,8 +33,8 @@ var ViewList = {
         TagList.deselect();
         FeedList.deselect();
 
-        var title = this.selectedItem.getAttribute('name');
-        var query = new Query();
+        let title = this.selectedItem.getAttribute('name');
+        let query = new Query();
 
         switch (this.selectedItem.id) {
             case 'all-items-folder':
@@ -66,7 +66,7 @@ var ViewList = {
     // the already selected item, should bring back the feed view.
     onClick: function ViewList_onClick(aEvent) {
         // Find the target richlistitem in the event target's parent chain
-        var targetItem = aEvent.target;
+        let targetItem = aEvent.target;
         while (targetItem) {
             if (targetItem.localName == 'richlistitem')
                 break;
@@ -78,9 +78,9 @@ var ViewList = {
     },
 
     refreshItem: function ViewList_refreshItem(aItemID) {
-        var item = getElement(aItemID);
+        let item = getElement(aItemID);
 
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             read: false,
             starred: (aItemID == 'starred-folder') ? true : undefined
@@ -104,7 +104,7 @@ var ViewList = {
 }
 
 
-var TagList = {
+let TagList = {
 
     ready: false,
 
@@ -158,7 +158,7 @@ var TagList = {
         ViewList.deselect();
         FeedList.deselect();
 
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             tags: [this.selectedItem.id]
         })
@@ -258,7 +258,7 @@ var TagList = {
 }
 
 
-var FeedList = {
+let FeedList = {
 
     get tree() {
         delete this.tree;
@@ -275,8 +275,8 @@ var FeedList = {
     treeReady: false,
 
     get selectedItem() {
-        var item = null;
-        var currentIndex = this.tree.currentIndex;
+        let item = null;
+        let currentIndex = this.tree.currentIndex;
         if (currentIndex != -1 && currentIndex < this.tree.view.rowCount)
             item = this.tree.view.getItemAtIndex(currentIndex);
         return item;
@@ -287,8 +287,8 @@ var FeedList = {
         if (!this.selectedItem)
             return null;
 
-        var feed = null;
-        var feedID = this.selectedItem.id;
+        let feed = null;
+        let feedID = this.selectedItem.id;
         if (feedID)
             feed = Storage.getFeed(feedID);
         return feed;
@@ -299,7 +299,7 @@ var FeedList = {
     },
 
     onSelect: function FeedList_onSelect(aEvent) {
-        var selectedItem = this.selectedItem;
+        let selectedItem = this.selectedItem;
         if (!selectedItem) {
             this._lastSelectedItem = null;
             return;
@@ -316,7 +316,7 @@ var FeedList = {
         // the new selected item is the same.
         this._lastSelectedItem = selectedItem;
 
-        var query = new Query({ deleted: Storage.ENTRY_STATE_NORMAL });
+        let query = new Query({ deleted: Storage.ENTRY_STATE_NORMAL });
 
         if (selectedItem.hasAttribute('container'))
             query.folders = [this.selectedFeed.feedID];
@@ -328,9 +328,9 @@ var FeedList = {
 
 
     onClick: function FeedList_onClick(aEvent) {
-        var row = FeedList.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
+        let row = FeedList.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
         if (row != -1) {
-            var item = FeedList.tree.view.getItemAtIndex(row);
+            let item = FeedList.tree.view.getItemAtIndex(row);
 
             // Detect when folder is collapsed/expanded.
             if (item.hasAttribute('container')) {
@@ -353,7 +353,7 @@ var FeedList = {
 
 
     onKeyUp: function FeedList_onKeyUp(aEvent) {
-        var isContainer = this.selectedItem.hasAttribute('container');
+        let isContainer = this.selectedItem.hasAttribute('container');
         if (isContainer && aEvent.keyCode == aEvent.DOM_VK_RETURN) {
             if (this.selectedItem.id != 'starred-folder')
                 this.refreshFolderTreeitems([this.selectedItem.id]);
@@ -364,7 +364,7 @@ var FeedList = {
 
     // Sets the visibility of context menuitem depending on the target.
     onContextMenuShowing: function FeedList_onContextMenuShowing(aEvent) {
-        var row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
+        let row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
         if (row == -1) {
             aEvent.preventDefault(); // Target is empty space.
         }
@@ -460,9 +460,9 @@ var FeedList = {
     },
 
     _refreshFavicon: function FeedList__refreshFavicon(aFeedID) {
-        var feed = Storage.getFeed(aFeedID);
-        var treeitem = getElement(aFeedID);
-        var treecell = treeitem.firstChild.firstChild;
+        let feed = Storage.getFeed(aFeedID);
+        let treeitem = getElement(aFeedID);
+        let treecell = treeitem.firstChild.firstChild;
 
         // Update the favicon.
         if (treeitem.hasAttribute('loading'))
@@ -486,7 +486,7 @@ var FeedList = {
         this.lastSelectedID = this.selectedItem ? this.selectedItem.id : '';
 
         // Clear the existing tree.
-        var topLevelChildren = getElement('top-level-children');
+        let topLevelChildren = getElement('top-level-children');
         while (topLevelChildren.hasChildNodes())
             topLevelChildren.removeChild(topLevelChildren.lastChild);
 
@@ -512,17 +512,17 @@ var FeedList = {
 
         this._containerRow = document.createDocumentFragment();
 
-        var treeitem = document.createElement('treeitem');
+        let treeitem = document.createElement('treeitem');
         treeitem.setAttribute('container', 'true');
         treeitem = this._containerRow.appendChild(treeitem);
 
-        var treerow = document.createElement('treerow');
+        let treerow = document.createElement('treerow');
         treerow = treeitem.appendChild(treerow);
 
-        var treecell = document.createElement('treecell');
+        let treecell = document.createElement('treecell');
         treecell = treerow.appendChild(treecell);
 
-        var treechildren = document.createElement('treechildren');
+        let treechildren = document.createElement('treechildren');
         treechildren = treeitem.appendChild(treechildren);
 
         return this._containerRow;
@@ -533,13 +533,13 @@ var FeedList = {
 
         this._flatRow = document.createDocumentFragment();
 
-        var treeitem = document.createElement('treeitem');
+        let treeitem = document.createElement('treeitem');
         treeitem = this._flatRow.appendChild(treeitem);
 
-        var treerow = document.createElement('treerow');
+        let treerow = document.createElement('treerow');
         treeitem.appendChild(treerow);
 
-        var treecell = document.createElement('treecell');
+        let treecell = document.createElement('treecell');
         treerow.appendChild(treecell);
 
         return this._flatRow;
@@ -552,21 +552,18 @@ var FeedList = {
      * @param aParentFolder feedID of the folder.
      */
     _buildFolderChildren: function FeedList__buildFolderChildren(aParentFolder) {
-        // Iterate over all feeds to find the children.
-        for (var i = 0; i < this.feeds.length; i++) {
-            var feed = this.feeds[i];
-
+        for (let feed in this.feeds) {
             if (feed.parent != aParentFolder)
                 continue;
 
-            var parent = this._folderParentChain[this._folderParentChain.length - 1];
+            let parent = this._folderParentChain[this._folderParentChain.length - 1];
 
             if (feed.isFolder) {
-                var closedFolders = this.tree.getAttribute('closedFolders');
-                var isOpen = !closedFolders.match(escape(feed.feedID));
+                let closedFolders = this.tree.getAttribute('closedFolders');
+                let isOpen = !closedFolders.match(escape(feed.feedID));
 
-                var fragment = this._containerRow.cloneNode(true);
-                var treeitem = fragment.firstChild;
+                let fragment = this._containerRow.cloneNode(true);
+                let treeitem = fragment.firstChild;
                 treeitem.setAttribute('open', isOpen);
                 treeitem.setAttribute('id', feed.feedID);
 
@@ -579,12 +576,12 @@ var FeedList = {
                 this._buildFolderChildren(feed.feedID);
             }
             else {
-                var fragment = this._flatRow.cloneNode(true);
-                var treeitem = fragment.firstChild;
+                let fragment = this._flatRow.cloneNode(true);
+                let treeitem = fragment.firstChild;
                 treeitem.setAttribute('id', feed.feedID);
                 treeitem.setAttribute('url', feed.feedURL);
 
-                var treecell = treeitem.firstChild.firstChild;
+                let treecell = treeitem.firstChild.firstChild;
                 treecell.setAttribute('properties', 'feed-item ');
 
                 parent.appendChild(fragment);
@@ -599,7 +596,7 @@ var FeedList = {
         if (!this.lastSelectedID)
             return;
 
-        var itemToSelect = getElement(this.lastSelectedID);
+        let itemToSelect = getElement(this.lastSelectedID);
         if (itemToSelect) {
             let index = this.tree.view.getIndexOfItem(itemToSelect);
             this.ignoreSelectEvent = true;
@@ -625,7 +622,7 @@ var FeedList = {
             break;
 
         case 'brief:feed-title-changed':
-            var feed = Storage.getFeed(aData);
+            let feed = Storage.getFeed(aData);
             if (feed.isFolder)
                 this.refreshFolderTreeitems([aData]);
             else
@@ -725,27 +722,27 @@ var FeedList = {
 
     _persistFolderState: function FeedList_persistFolderState() {
         // Persist the folders open/closed state.
-        var closedFolders = '';
-        for (var i = 0; i < this.items.length; i++) {
-            var item = this.items[i];
+        let closedFolders = '';
+        for (let i = 0; i < this.items.length; i++) {
+            let item = this.items[i];
             if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
                 closedFolders += item.id;
         }
         FeedList.tree.setAttribute('closedFolders', escape(closedFolders));
 
-        var starredFolder = getElement('starred-folder');
+        let starredFolder = getElement('starred-folder');
         starredFolder.setAttribute('wasOpen', starredFolder.getAttribute('open'));
     },
 
 
     setProperty: function FeedList_setProperty(aItem, aProperty) {
-        var properties = aItem.getAttribute('properties');
+        let properties = aItem.getAttribute('properties');
         if (!properties.match(aProperty + ' '))
             aItem.setAttribute('properties', properties + aProperty + ' ');
     },
 
     removeProperty: function FeedList_removeProperty(aItem, aProperty) {
-        var properties = aItem.getAttribute('properties');
+        let properties = aItem.getAttribute('properties');
         if (properties.match(aProperty)) {
             properties = properties.replace(aProperty + ' ', '');
             aItem.setAttribute('properties', properties);
@@ -764,7 +761,7 @@ var FeedList = {
 
 
 
-var ViewListContextMenu = {
+let ViewListContextMenu = {
 
     targetItem: null,
 
@@ -791,7 +788,7 @@ var ViewListContextMenu = {
     },
 
     markFolderRead: function ViewListContextMenu_markFolderRead() {
-        var query = new Query();
+        let query = new Query();
 
         if (this.targetIsUnreadFolder) {
             query.deleted = Storage.ENTRY_STATE_NORMAL;
@@ -809,14 +806,14 @@ var ViewListContextMenu = {
     },
 
     restoreTrashed: function ViewListContextMenu_restoreTrashed() {
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_TRASHED
         })
         query.deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
     emptyUnreadFolder: function ViewListContextMenu_emptyUnreadFolder() {
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             starred: false,
             read: false
@@ -825,22 +822,22 @@ var ViewListContextMenu = {
     },
 
     emptyTrash: function gCurrentViewContextMenu_emptyTrash() {
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_TRASHED
         })
         query.deleteEntries(Storage.ENTRY_STATE_DELETED);
 
-        var prompt = Services.prompt;
+        let prompt = Services.prompt;
 
-        var dialogTitle = gStringBundle.getString('compactPromptTitle');
-        var dialogText = gStringBundle.getString('compactPromptText');
-        var dialogConfirmLabel = gStringBundle.getString('compactPromptConfirmButton');
+        let dialogTitle = gStringBundle.getString('compactPromptTitle');
+        let dialogText = gStringBundle.getString('compactPromptText');
+        let dialogConfirmLabel = gStringBundle.getString('compactPromptConfirmButton');
 
-        var buttonFlags = prompt.BUTTON_POS_0 * prompt.BUTTON_TITLE_IS_STRING +
+        let buttonFlags = prompt.BUTTON_POS_0 * prompt.BUTTON_TITLE_IS_STRING +
                           prompt.BUTTON_POS_1 * prompt.BUTTON_TITLE_NO +
                           prompt.BUTTON_POS_0_DEFAULT;
 
-        var shouldCompact = prompt.confirmEx(window, dialogTitle, dialogText,
+        let shouldCompact = prompt.confirmEx(window, dialogTitle, dialogText,
                                              buttonFlags, dialogConfirmLabel,
                                              null, null, null, {value:0});
 
@@ -853,12 +850,12 @@ var ViewListContextMenu = {
 }
 
 
-var TagListContextMenu = {
+let TagListContextMenu = {
 
     targetItem: null,
 
     markTagRead: function TagListContextMenu_markTagRead() {
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             tags: [this.targetItem.id]
         })
@@ -866,13 +863,13 @@ var TagListContextMenu = {
     },
 
     deleteTag: function TagListContextMenu_deleteTag() {
-        var taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
+        let taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
                              getService(Ci.nsITaggingService);
 
-        var tag = this.targetItem.id;
+        let tag = this.targetItem.id;
 
-        var dialogTitle = gStringBundle.getString('confirmTagDeletionTitle');
-        var dialogText = gStringBundle.getFormattedString('confirmTagDeletionText', [tag]);
+        let dialogTitle = gStringBundle.getString('confirmTagDeletionTitle');
+        let dialogText = gStringBundle.getFormattedString('confirmTagDeletionText', [tag]);
 
         if (!Services.prompt.confirm(window, dialogTitle, dialogText))
             return;
@@ -897,7 +894,7 @@ var TagListContextMenu = {
 }
 
 
-var FeedListContextMenu = {
+let FeedListContextMenu = {
 
     targetItem: null,
 
@@ -916,7 +913,7 @@ var FeedListContextMenu = {
         getElement('ctx-update-feed').hidden = !this.targetIsFeed;
         getElement('ctx-update-folder').hidden = !this.targetIsFolder;
 
-        var openWebsite = getElement('ctx-open-website');
+        let openWebsite = getElement('ctx-open-website');
         openWebsite.hidden = !this.targetIsFeed;
         if (this.targetIsFeed)
             openWebsite.disabled = !Storage.getFeed(this.targetItem.id).websiteURL;
@@ -935,7 +932,7 @@ var FeedListContextMenu = {
 
 
     markFeedRead: function FeedListContextMenu_markFeedRead() {
-        var query = new Query({
+        let query = new Query({
             feeds: [this.targetID],
             deleted: Storage.ENTRY_STATE_NORMAL
         })
@@ -944,7 +941,7 @@ var FeedListContextMenu = {
 
 
     markFolderRead: function FeedListContextMenu_markFolderRead() {
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             folders: [this.targetID]
         })
@@ -958,8 +955,8 @@ var FeedListContextMenu = {
 
 
     updateFolder: function FeedListContextMenu_updateFolder() {
-        var items = this.targetItem.getElementsByTagName('treeitem');
-        var feeds = [];
+        let items = this.targetItem.getElementsByTagName('treeitem');
+        let feeds = [];
 
         for (let i = 0; i < items.length; i++) {
             if (!items[i].hasAttribute('container'))
@@ -971,13 +968,13 @@ var FeedListContextMenu = {
 
 
     openWebsite: function FeedListContextMenu_openWebsite() {
-        var url = this.targetFeed.websiteURL;
+        let url = this.targetFeed.websiteURL;
         getTopWindow().gBrowser.loadOneTab(url);
     },
 
 
     emptyFeed: function FeedListContextMenu_emptyFeed() {
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             starred: false,
             feeds: [this.targetID]
@@ -987,7 +984,7 @@ var FeedListContextMenu = {
 
 
     emptyFolder: function FeedListContextMenu_emptyFolder() {
-        var query = new Query({
+        let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             starred: false,
             folders: [this.targetID]
@@ -997,8 +994,8 @@ var FeedListContextMenu = {
 
 
     deleteFeed: function FeedListContextMenu_deleteFeed() {
-        var title = gStringBundle.getString('confirmFeedDeletionTitle');
-        var text = gStringBundle.getFormattedString('confirmFeedDeletionText',
+        let title = gStringBundle.getString('confirmFeedDeletionTitle');
+        let text = gStringBundle.getFormattedString('confirmFeedDeletionText',
                                                    [this.targetFeed.title]);
         if (Services.prompt.confirm(window, title, text)) {
             this._removeTreeitem(this.targetItem);
@@ -1008,15 +1005,15 @@ var FeedListContextMenu = {
 
 
     deleteFolder: function FeedListContextMenu_deleteFolder() {
-        var title = gStringBundle.getString('confirmFolderDeletionTitle');
-        var text = gStringBundle.getFormattedString('confirmFolderDeletionText',
+        let title = gStringBundle.getString('confirmFolderDeletionTitle');
+        let text = gStringBundle.getFormattedString('confirmFolderDeletionText',
                                                    [this.targetFeed.title]);
 
         if (Services.prompt.confirm(window, title, text)) {
             this._removeTreeitem(this.targetItem);
 
-            var items = this.targetItem.getElementsByTagName('treeitem');
-            var feeds = [this.targetFeed];
+            let items = this.targetItem.getElementsByTagName('treeitem');
+            let feeds = [this.targetFeed];
             for (let i = 0; i < items.length; i++)
                 feeds.push(Storage.getFeed(items[i].id));
 
@@ -1027,10 +1024,10 @@ var FeedListContextMenu = {
 
     // Removes a treeitem and updates selection if it was selected.
     _removeTreeitem: function FeedListContextMenu__removeTreeitem(aTreeitem) {
-        var treeview = FeedList.tree.view;
-        var currentIndex = treeview.selection.currentIndex;
-        var rowCount = treeview.rowCount;
-        var indexToSelect = -1;
+        let treeview = FeedList.tree.view;
+        let currentIndex = treeview.selection.currentIndex;
+        let rowCount = treeview.rowCount;
+        let indexToSelect = -1;
 
         if (FeedList.selectedItem == aTreeitem) {
             if (currentIndex == rowCount - 1)
