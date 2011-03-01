@@ -7,8 +7,8 @@ Components.utils.import('resource://gre/modules/NetUtil.jsm');
 IMPORT_COMMON(this);
 
 
-var gTemplateURI = NetUtil.newURI('resource://brief-content/feedview-template.html');
-var gStringBundle;
+let gTemplateURI = NetUtil.newURI('resource://brief-content/feedview-template.html');
+let gStringBundle;
 
 
 function init() {
@@ -66,9 +66,9 @@ function init() {
 
 
 function unload() {
-    var viewList = getElement('view-list');
-    var id = viewList.selectedItem && viewList.selectedItem.id;
-    var startView = (id == 'unread-folder') ? 'unread-folder' : 'all-items-folder';
+    let viewList = getElement('view-list');
+    let id = viewList.selectedItem && viewList.selectedItem.id;
+    let startView = (id == 'unread-folder') ? 'unread-folder' : 'all-items-folder';
     viewList.setAttribute('startview', startView);
 
     Services.obs.removeObserver(FeedList, 'brief:feed-updated');
@@ -86,7 +86,7 @@ function unload() {
 }
 
 
-var Commands = {
+let Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
         getElement('sidebar').hidden = true;
@@ -121,8 +121,8 @@ var Commands = {
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
-        var instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
-        var features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
+        let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
+        let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
         window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
@@ -138,7 +138,7 @@ var Commands = {
     },
 
     toggleHeadlinesView: function cmd_toggleHeadlinesView() {
-        var newState = !PrefCache.showHeadlinesOnly;
+        let newState = !PrefCache.showHeadlinesOnly;
         Prefs.setBoolPref('feedview.showHeadlinesOnly', newState);
         getElement('headlines-checkbox').checked = newState;
     },
@@ -196,13 +196,13 @@ var Commands = {
     },
 
     toggleEntrySelection: function toggleEntrySelection() {
-        var oldValue = PrefCache.entrySelectionEnabled;
+        let oldValue = PrefCache.entrySelectionEnabled;
         Prefs.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
     },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
         if (gCurrentView.selectedEntry) {
-            var newState = !gCurrentView.selectedElement.hasAttribute('read');
+            let newState = !gCurrentView.selectedElement.hasAttribute('read');
             Commands.markEntryRead(gCurrentView.selectedEntry, newState);
         }
     },
@@ -233,7 +233,7 @@ var Commands = {
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
         if (gCurrentView.selectedEntry) {
-            var newState = !gCurrentView.selectedElement.hasAttribute('starred');
+            let newState = !gCurrentView.selectedElement.hasAttribute('starred');
             Commands.starEntry(gCurrentView.selectedEntry, newState);
         }
     },
@@ -260,7 +260,7 @@ var Commands = {
     },
 
     openEntryLink: function cmd_openEntryLink(aEntryElement, aNewTab) {
-        var url = aEntryElement.getAttribute('entryURL');
+        let url = aEntryElement.getAttribute('entryURL');
         Commands.openLink(url, aNewTab);
 
         if (!aEntryElement.hasAttribute('read')) {
@@ -270,7 +270,7 @@ var Commands = {
     },
 
     openLink: function cmd_openLink(aURL, aNewTab) {
-        var docURI = NetUtil.newURI(document.documentURI);
+        let docURI = NetUtil.newURI(document.documentURI);
 
         if (aNewTab)
             getTopWindow().gBrowser.loadOneTab(aURL, docURI);
@@ -279,9 +279,9 @@ var Commands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        var height = Math.min(window.screen.availHeight, 610);
-        var features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
-        var url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
+        let height = Math.min(window.screen.availHeight, 610);
+        let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
+        let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
         window.openDialog(url, 'Brief shortcuts', features);
     }
@@ -314,7 +314,7 @@ function refreshProgressmeter(aReason) {
 
 
 function onSearchbarCommand() {
-    var searchbar = getElement('searchbar');
+    let searchbar = getElement('searchbar');
     if (searchbar.value) {
         gCurrentView.titleOverride = gStringBundle.getFormattedString('searchResults',
                                                                       [searchbar.value]);
@@ -328,7 +328,7 @@ function onSearchbarCommand() {
 }
 
 function onSearchbarBlur() {
-    var searchbar = getElement('searchbar');
+    let searchbar = getElement('searchbar');
     if (!searchbar.value && gCurrentView.query.searchString) {
         gCurrentView.titleOverride = '';
         gCurrentView.query.searchString = searchbar.value;
@@ -385,13 +385,13 @@ function getTopWindow() {
 }
 
 
-var Prefs = Services.prefs.getBranch('extensions.brief.')
+let Prefs = Services.prefs.getBranch('extensions.brief.')
                           .QueryInterface(Ci.nsIPrefBranch2);
 
-var PrefCache = {};
+let PrefCache = {};
 
 // Preferences cache and observer.
-var PrefObserver = {
+let PrefObserver = {
 
     register: function PrefObserver_register() {
         for (let key in this._cachedPrefs)
@@ -419,7 +419,7 @@ var PrefObserver = {
     },
 
     _updateCachedPref: function PrefObserver__updateCachedPref(aKey) {
-        var prefName = this._cachedPrefs[aKey];
+        let prefName = this._cachedPrefs[aKey];
 
         switch (Prefs.getPrefType(prefName)) {
             case Ci.nsIPrefBranch.PREF_STRING:

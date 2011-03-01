@@ -22,15 +22,15 @@ function unload() {
 }
 
 
-var gMainPane = {
+let gMainPane = {
 
     setUpPlacesTree: function() {
-        var tree = document.getElementById('places-tree');
-        var pref = document.getElementById('extensions.brief.homeFolder');
+        let tree = document.getElementById('places-tree');
+        let pref = document.getElementById('extensions.brief.homeFolder');
 
         // Populate the tree.
-        var query = PlacesUtils.history.getNewQuery();
-        var options = PlacesUtils.history.getNewQueryOptions();
+        let query = PlacesUtils.history.getNewQuery();
+        let options = PlacesUtils.history.getNewQueryOptions();
         query.setFolders([PlacesUIUtils.allBookmarksFolderId], 1);
         options.excludeItems = true;
         tree.load([query], options);
@@ -39,8 +39,8 @@ var gMainPane = {
     },
 
     onPlacesTreeSelect: function(aEvent) {
-        var placesTree = document.getElementById('places-tree');
-        var pref = document.getElementById('extensions.brief.homeFolder');
+        let placesTree = document.getElementById('places-tree');
+        let pref = document.getElementById('extensions.brief.homeFolder');
 
         if (placesTree.currentIndex != -1)
             pref.value = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
@@ -49,24 +49,24 @@ var gMainPane = {
 }
 
 
-var gFeedsPane = {
+let gFeedsPane = {
 
     updateIntervalDisabledState: function() {
-        var textbox = document.getElementById('updateInterval');
-        var checkbox = document.getElementById('checkForUpdates');
-        var menulist = document.getElementById('update-time-menulist');
+        let textbox = document.getElementById('updateInterval');
+        let checkbox = document.getElementById('checkForUpdates');
+        let menulist = document.getElementById('update-time-menulist');
 
         textbox.disabled = menulist.disabled = !checkbox.checked;
     },
 
     initUpdateIntervalControls: function() {
-        var pref = document.getElementById('extensions.brief.update.interval').value;
-        var menulist = document.getElementById('update-time-menulist');
-        var textbox = document.getElementById('updateInterval');
+        let pref = document.getElementById('extensions.brief.update.interval').value;
+        let menulist = document.getElementById('update-time-menulist');
+        let textbox = document.getElementById('updateInterval');
 
-        var toDays = pref / (60*60*24);
-        var toHours = pref / (60*60);
-        var toMinutes = pref / 60;
+        let toDays = pref / (60*60*24);
+        let toHours = pref / (60*60);
+        let toMinutes = pref / 60;
 
         switch (true) {
             // The pref value is in seconds. If it is dividable by days then use the
@@ -91,11 +91,11 @@ var gFeedsPane = {
     },
 
     saveUpdateIntervalPref: function() {
-        var pref = document.getElementById('extensions.brief.update.interval');
-        var textbox = document.getElementById('updateInterval');
-        var menulist = document.getElementById('update-time-menulist');
+        let pref = document.getElementById('extensions.brief.update.interval');
+        let textbox = document.getElementById('updateInterval');
+        let menulist = document.getElementById('update-time-menulist');
 
-        var intervalInSeconds;
+        let intervalInSeconds;
         switch (menulist.selectedIndex) {
             case 0:
                 intervalInSeconds = textbox.value * 60; // textbox.value is in minutes
@@ -112,30 +112,30 @@ var gFeedsPane = {
     },
 
     updateExpirationDisabledState: function() {
-        var textbox = document.getElementById('expiration-textbox');
-        var checkbox = document.getElementById('expiration-checkbox');
+        let textbox = document.getElementById('expiration-textbox');
+        let checkbox = document.getElementById('expiration-checkbox');
 
         textbox.disabled = !checkbox.checked;
     },
 
     updateStoredEntriesDisabledState: function() {
-        var textbox = document.getElementById('stored-entries-textbox');
-        var checkbox = document.getElementById('stored-entries-checkbox');
+        let textbox = document.getElementById('stored-entries-textbox');
+        let checkbox = document.getElementById('stored-entries-checkbox');
 
         textbox.disabled = !checkbox.checked;
     },
 
     onClearAllEntriesCmd: function(aEvent) {
-        var keepStarred = Services.prefs.getBoolPref('extensions.brief.database.keepStarredWhenClearing');
+        let keepStarred = Services.prefs.getBoolPref('extensions.brief.database.keepStarredWhenClearing');
 
-        var stringbundle = document.getElementById('options-bundle');
-        var title = stringbundle.getString('confirmClearAllEntriesTitle');
-        var text = stringbundle.getString('confirmClearAllEntriesText');
-        var checkboxLabel = stringbundle.getString('confirmClearAllEntriesCheckbox');
-        var checked = { value: keepStarred };
+        let stringbundle = document.getElementById('options-bundle');
+        let title = stringbundle.getString('confirmClearAllEntriesTitle');
+        let text = stringbundle.getString('confirmClearAllEntriesText');
+        let checkboxLabel = stringbundle.getString('confirmClearAllEntriesCheckbox');
+        let checked = { value: keepStarred };
 
         if (Services.prompt.confirmCheck(window, title, text, checkboxLabel, checked)) {
-            var query = new Query({
+            let query = new Query({
                 starred: checked.value ? false : undefined,
                 includeHiddenFeeds: true
             });
@@ -148,7 +148,7 @@ var gFeedsPane = {
 }
 
 
-var gDisplayPane = {
+let gDisplayPane = {
 
     editCustomStyle: function() {
         window.openDialog('chrome://brief/content/options/style-editor.xul',

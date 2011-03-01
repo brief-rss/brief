@@ -16,7 +16,7 @@ const HEADLINES_LOAD_STEP_SIZE = 20;
 
 
 // The currently active instance of FeedView.
-var gCurrentView = null;
+let gCurrentView = null;
 
 /**
  * This object represents the main feed display. It stores and manages display parameters.
@@ -128,8 +128,8 @@ FeedView.prototype = {
      * permanently changing the view parameters.
      */
     getQueryCopy: function FeedView_getQueryCopy() {
-        var query = this.query;
-        var copy = new Query();
+        let query = this.query;
+        let copy = new Query();
         for (let property in query)
             copy[property] = query[property];
         return copy;
@@ -248,7 +248,7 @@ FeedView.prototype = {
             return;
 
         if (PrefCache.entrySelectionEnabled) {
-            var entryElement = this.selectedElement.nextSibling;
+            let entryElement = this.selectedElement.nextSibling;
             if (entryElement)
                 this.selectEntry(parseInt(entryElement.id), true, true);
         }
@@ -262,7 +262,7 @@ FeedView.prototype = {
             return;
 
         if (PrefCache.entrySelectionEnabled) {
-            var entryElement = this.selectedElement.previousSibling;
+            let entryElement = this.selectedElement.previousSibling;
             if (entryElement)
                 this.selectEntry(parseInt(entryElement.id), true, true);
         }
@@ -287,7 +287,7 @@ FeedView.prototype = {
         if (!this.active)
             return;
 
-        var entry = (typeof aEntry == 'number' || !aEntry) ? aEntry
+        let entry = (typeof aEntry == 'number' || !aEntry) ? aEntry
                                                            : parseInt(aEntry.id);
 
         if (this.selectedElement)
@@ -311,7 +311,7 @@ FeedView.prototype = {
      *        target position.
      */
     scrollToPrevEntry: function FeedView_scrollToPrevEntry(aSmooth) {
-        var middleElement = this._getMiddleEntryElement();
+        let middleElement = this._getMiddleEntryElement();
         if (middleElement)
             var previousElement = middleElement.previousSibling;
 
@@ -322,7 +322,7 @@ FeedView.prototype = {
 
     // See scrollToPrevEntry.
     scrollToNextEntry: function FeedView_scrollToNextEntry(aSmooth) {
-        var middleElement = this._getMiddleEntryElement();
+        let middleElement = this._getMiddleEntryElement();
         if (middleElement)
             var nextElement = middleElement.nextSibling;
 
@@ -334,11 +334,11 @@ FeedView.prototype = {
      * Scroll down by 10 entries, loading more entries if necessary.
      */
     skipDown: function FeedView_skipDown() {
-        var middleEntry = parseInt(this._getMiddleEntryElement().id);
-        var index = this._loadedEntries.indexOf(middleEntry);
+        let middleEntry = parseInt(this._getMiddleEntryElement().id);
+        let index = this._loadedEntries.indexOf(middleEntry);
 
         let doSkipDown = function(aCount) {
-            var targetEntry = this._loadedEntries[index + 10] ||
+            let targetEntry = this._loadedEntries[index + 10] ||
                               this._loadedEntries[this._loadedEntries.length - 1];
 
             if (PrefCache.entrySelectionEnabled)
@@ -355,9 +355,9 @@ FeedView.prototype = {
 
     // See scrollDown.
     skipUp: function FeedView_skipUp() {
-        var middleEntry = parseInt(this._getMiddleEntryElement().id);
-        var index = this._loadedEntries.indexOf(middleEntry);
-        var targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
+        let middleEntry = parseInt(this._getMiddleEntryElement().id);
+        let index = this._loadedEntries.indexOf(middleEntry);
+        let targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
 
         if (PrefCache.entrySelectionEnabled)
             this.selectEntry(targetEntry, true, true);
@@ -381,8 +381,8 @@ FeedView.prototype = {
      *        target position.
      */
     scrollToEntry: function FeedView_scrollToEntry(aEntry, aCentre, aSmooth) {
-        var win = this.window;
-        var entryElement = this.document.getElementById(aEntry);
+        let win = this.window;
+        let entryElement = this.document.getElementById(aEntry);
 
         if (entryElement.offsetHeight >= win.innerHeight) {
             var targetPosition = entryElement.offsetTop;
@@ -410,38 +410,34 @@ FeedView.prototype = {
         if (this._scrolling)
             return;
 
-        var win = this.window;
+        let win = this.window;
 
-        var distance = aTargetPosition - win.pageYOffset;
+        let distance = aTargetPosition - win.pageYOffset;
         with (Math) {
-            var jumpCount = exp(abs(distance) / 400) + 6;
+            let jumpCount = exp(abs(distance) / 400) + 6;
             jumpCount = max(jumpCount, 7);
             jumpCount = min(jumpCount, 15);
 
             var jump = round(distance / jumpCount);
         }
 
-        var self = this;
-
-        function scroll() {
+        this._scrolling = setInterval(function() {
             // If we are within epsilon smaller or equal to the jump,
             // then scroll directly to the target position.
             if (Math.abs(aTargetPosition - win.pageYOffset) <= Math.abs(jump)) {
                 win.scroll(win.pageXOffset, aTargetPosition)
-                self._stopSmoothScrolling();
+                this._stopSmoothScrolling();
 
                 // One more scroll event will be sent but _scrolling is already null,
                 // so the event handler will try to automatically select the central
                 // entry. This has to be prevented, because it may deselect the entry
                 // that the user has just selected manually.
-                self._ignoreNextScrollEvent = true;
+                this._ignoreNextScrollEvent = true;
             }
             else {
                 win.scroll(win.pageXOffset, win.pageYOffset + jump);
             }
-        }
-
-        this._scrolling = setInterval(scroll, 10);
+        }.bind(this), 10)
     },
 
     _stopSmoothScrolling: function FeedView__stopSmoothScrolling() {
@@ -451,11 +447,11 @@ FeedView.prototype = {
 
     // Return the entry element closest to the middle of the screen.
     _getMiddleEntryElement: function FeedView__getMiddleEntryElement() {
-        var elems = this.feedContent.childNodes;
+        let elems = this.feedContent.childNodes;
         if (!elems.length)
             return null;
 
-        var middleLine = this.window.pageYOffset + Math.round(this.window.innerHeight / 2);
+        let middleLine = this.window.pageYOffset + Math.round(this.window.innerHeight / 2);
 
         // Iterate starting from the last entry, because the scroll position is
         // likely to be closer to the end than to the beginning of the page.
@@ -478,11 +474,11 @@ FeedView.prototype = {
     },
 
     markVisibleEntriesRead: function FeedView_markVisibleEntriesRead() {
-        var winTop = this.window.pageYOffset;
-        var winBottom = winTop + this.window.innerHeight;
-        var entries = this.feedContent.childNodes;
+        let winTop = this.window.pageYOffset;
+        let winBottom = winTop + this.window.innerHeight;
+        let entries = this.feedContent.childNodes;
 
-        var entriesToMark = [];
+        let entriesToMark = [];
 
         // Iterate starting from the last entry, because the scroll position is
         // likely to be closer to the end than to the beginning of the page.
@@ -541,8 +537,8 @@ FeedView.prototype = {
     _events: ['click', 'scroll', 'keypress'],
 
     handleEvent: function FeedView_handleEvent(aEvent) {
-        var target = aEvent.target;
-        var id = parseInt(target.id);
+        let target = aEvent.target;
+        let id = parseInt(target.id);
 
         // Checking if default action has been prevented helps Brief play nicely with
         // other extensions. In Gecko <1.9.2 getPreventDefault() is available only
@@ -612,7 +608,7 @@ FeedView.prototype = {
     _onClick: function FeedView__onClick(aEvent) {
         // This loop walks the parent chain of the even target to check if the
         // article-container and/or an anchor were clicked.
-        var elem = aEvent.target;
+        let elem = aEvent.target;
         while (elem != this.document.documentElement) {
             if (elem.localName.toUpperCase() == 'A')
                 var anchor = elem;
@@ -634,8 +630,8 @@ FeedView.prototype = {
             if (aEvent.button == 1)
                 aEvent.stopPropagation();
 
-            var openInTabs = Prefs.getBoolPref('feedview.openEntriesInTabs');
-            var newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
+            let openInTabs = Prefs.getBoolPref('feedview.openEntriesInTabs');
+            let newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
 
             if (anchor.className == 'article-title-link')
                 Commands.openEntryLink(entryElement, newTab);
@@ -649,8 +645,8 @@ FeedView.prototype = {
         if (PrefCache.entrySelectionEnabled)
             this.selectEntry(parseInt(entryElement.id));
 
-        var entryID = parseInt(entryElement.id);
-        var command = aEvent.target.getAttribute('command');
+        let entryID = parseInt(entryElement.id);
+        let command = aEvent.target.getAttribute('command');
 
         if (aEvent.detail == 2 && PrefCache.doubleClickMarks && !command)
             Commands.markEntryRead(entryID, !entryElement.hasAttribute('read'));
@@ -796,7 +792,7 @@ FeedView.prototype = {
             tags = tags.join(', ');
 
             entryElement.setAttribute('tags', tags);
-            var tagsElement = entryElement.getElementsByClassName('article-tags')[0];
+            let tagsElement = entryElement.getElementsByClassName('article-tags')[0];
             tagsElement.textContent = tags;
         }
 
@@ -883,7 +879,7 @@ FeedView.prototype = {
      */
     _onEntriesRemoved: function FeedView__onEntriesRemoved(aRemovedEntries, aAnimate,
                                                            aLoadNewEntries) {
-        var indices = aRemovedEntries.map(function(e) this._loadedEntries.indexOf(e), this)
+        let indices = aRemovedEntries.map(function(e) this._loadedEntries.indexOf(e), this)
                                      .filter(function(i) i != -1);
         if (!indices.length)
             return;
@@ -893,7 +889,7 @@ FeedView.prototype = {
         getTopWindow().StarUI.panel.hidePopup();
 
         // If the selected entry is being removed, remember its index.
-        var selectedEntryIndex = -1;
+        let selectedEntryIndex = -1;
 
         if (indices.length == 1 && aAnimate) {
             let entryID = this._loadedEntries[indices[0]];
@@ -977,9 +973,9 @@ FeedView.prototype = {
 
         // Clear the old entries.
         this._loadedEntries = [];
-        var container = this.document.getElementById('container');
+        let container = this.document.getElementById('container');
         container.removeChild(this.feedContent);
-        var content = this.document.createElement('div');
+        let content = this.document.createElement('div');
         content.id = 'feed-content';
         container.appendChild(content);
 
@@ -1062,10 +1058,10 @@ FeedView.prototype = {
      * @return The actual number of entries that were loaded.
      */
     _loadEntries: function FeedView__loadEntries(aCount, aCallback) {
-        var dateQuery = this.getQueryCopy();
-        var edgeDate = undefined;
+        let dateQuery = this.getQueryCopy();
+        let edgeDate = undefined;
 
-        var lastEntryElement = this.feedContent.lastChild;
+        let lastEntryElement = this.feedContent.lastChild;
         if (lastEntryElement) {
             let lastEntryDate = parseInt(lastEntryElement.getAttribute('date'));
             if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
@@ -1092,7 +1088,7 @@ FeedView.prototype = {
                 return;
             }
 
-            var query = this.getQueryCopy();
+            let query = this.getQueryCopy();
             if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
                 query.startDate = dates[dates.length - 1];
                 query.endDate = edgeDate;
@@ -1119,10 +1115,10 @@ FeedView.prototype = {
     },
 
     _insertEntry: function FeedView__appendEntry(aEntry, aPosition) {
-        var entryContainer = this.document.getElementById('article-template')
+        let entryContainer = this.document.getElementById('article-template')
                                           .cloneNode(true);
 
-        var nextEntry = this.feedContent.childNodes[aPosition];
+        let nextEntry = this.feedContent.childNodes[aPosition];
         this.feedContent.insertBefore(entryContainer, nextEntry);
 
         entryContainer.setAttribute('id', aEntry.id);
@@ -1130,7 +1126,7 @@ FeedView.prototype = {
         if (aEntry.read)
             entryContainer.setAttribute('read', true);
 
-        var titleElem = entryContainer.getElementsByClassName('article-title-link')[0];
+        let titleElem = entryContainer.getElementsByClassName('article-title-link')[0];
         if (aEntry.entryURL) {
             entryContainer.setAttribute('entryURL', aEntry.entryURL);
             titleElem.setAttribute('href', aEntry.entryURL);
@@ -1139,10 +1135,10 @@ FeedView.prototype = {
         // Use innerHTML instead of textContent, so that the entities are resolved.
         titleElem.innerHTML = aEntry.title || aEntry.entryURL;
 
-        var tagsElem = entryContainer.getElementsByClassName('article-tags')[0];
+        let tagsElem = entryContainer.getElementsByClassName('article-tags')[0];
         tagsElem.textContent = aEntry.tags;
 
-        var markReadElem = entryContainer.getElementsByClassName('mark-read')[0];
+        let markReadElem = entryContainer.getElementsByClassName('mark-read')[0];
         markReadElem.textContent = aEntry.read ? this._strings.markAsUnread
                                                : this._strings.markAsRead;
 
@@ -1152,7 +1148,7 @@ FeedView.prototype = {
             feedNameElem.innerHTML = Storage.getFeed(aEntry.feedID).title;
         }
 
-        var authorsElem = entryContainer.getElementsByClassName('article-authors')[0];
+        let authorsElem = entryContainer.getElementsByClassName('article-authors')[0];
         if (aEntry.authors) {
             authorsElem.innerHTML = aEntry.authors;
         }
@@ -1162,17 +1158,17 @@ FeedView.prototype = {
 
         entryContainer.setAttribute('date', aEntry.date);
 
-        var dateString = this._constructEntryDate(aEntry);
+        let dateString = this._constructEntryDate(aEntry);
         if (aEntry.updated) {
             var updatedString = dateString + ' <span class="article-updated">'
                                 + this._strings.entryUpdated + '</span>'
             entryContainer.setAttribute('updated', true);
         }
 
-        var dateElem = entryContainer.getElementsByClassName('article-date')[0];
+        let dateElem = entryContainer.getElementsByClassName('article-date')[0];
         dateElem.innerHTML = updatedString || dateString;
 
-        var contentElem = entryContainer.getElementsByClassName('article-content')[0];
+        let contentElem = entryContainer.getElementsByClassName('article-content')[0];
         if (PrefCache.showHeadlinesOnly) {
             this.collapseEntry(aEntry.id, false);
 
@@ -1202,18 +1198,18 @@ FeedView.prototype = {
 
 
     _constructEntryDate: function FeedView__constructEntryDate(aEntry) {
-        var entryDate = new Date(aEntry.date);
-        var entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
+        let entryDate = new Date(aEntry.date);
+        let entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
 
-        var now = new Date();
-        var nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
+        let now = new Date();
+        let nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
 
-        var today = Math.ceil(nowTime / 86400000);
-        var entryDay = Math.ceil(entryTime / 86400000);
-        var deltaDays = today - entryDay;
-        var deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
+        let today = Math.ceil(nowTime / 86400000);
+        let entryDay = Math.ceil(entryTime / 86400000);
+        let deltaDays = today - entryDay;
+        let deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
 
-        var string = '';
+        let string = '';
         switch (true) {
             case deltaDays === 0:
                 string = entryDate.toLocaleFormat(', %X ');
@@ -1269,13 +1265,13 @@ FeedView.prototype = {
     },
 
     _setEmptyViewMessage: function FeedView__setEmptyViewMessage() {
-        var messageBox = this.document.getElementById('message-box');
+        let messageBox = this.document.getElementById('message-box');
         if (this._loadedEntries.length) {
             messageBox.style.display = 'none';
             return;
         }
 
-        var mainMessage = '', secondaryMessage = '';
+        let mainMessage = '', secondaryMessage = '';
 
         if (this.query.searchString) {
             mainMessage = gStringBundle.getString('noEntriesFound');
@@ -1369,8 +1365,8 @@ __defineGetter__('gSecurityManager', function() {
 });
 
 __defineGetter__('gBriefPrincipal', function() {
-    var uri = NetUtil.newURI(document.documentURI);
-    var resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1']
+    let uri = NetUtil.newURI(document.documentURI);
+    let resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1']
                       .getService(Ci.nsIChromeRegistry)
                       .convertChromeURL(uri);
 

@@ -6,9 +6,9 @@ IMPORT_COMMON(this);
 document.addEventListener('DOMContentLoaded', onload, false);
 document.addEventListener('unload', onunload, false);
 
-var prefBranch = Services.prefs.getBranch('extensions.brief.')
+let prefBranch = Services.prefs.getBranch('extensions.brief.')
                                .QueryInterface(Ci.nsIPrefBranch2);
-var prefObserver = {
+let prefObserver = {
     observe: function(aSubject, aTopic, aData) {
         if (aTopic == 'nsPref:changed' && aData == 'homeFolder')
             buildHeader();
@@ -19,10 +19,10 @@ prefBranch.addObserver('', prefObserver, false);
 
 function onload() {
     // Show steps approperiate for the running Firefox version.
-    var className = Services.vc.compare(Application.version, '4.0b6') >= 0
+    let className = Services.vc.compare(Application.version, '4.0b6') >= 0
                     ? 'firefox-old'
                     : 'firefox-new';
-    var elements = document.getElementsByClassName(className);
+    let elements = document.getElementsByClassName(className);
     for (let i = 0; i < elements.length; i++)
         elements[i].style.display = 'none';
 
@@ -36,37 +36,37 @@ function onunload() {
 }
 
 function buildHeader() {
-    var bookmarks = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
-                    getService(Ci.nsINavBookmarksService);
-    var bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
+    let bookmarks = Cc['@mozilla.org/browser/nav-bookmarks-service;1']
+                    .getService(Ci.nsINavBookmarksService);
+    let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
 
-    var folderID = prefBranch.getIntPref('homeFolder');
-    var folderName = '<span id="home-folder">' + bookmarks.getItemTitle(folderID) +
+    let folderID = prefBranch.getIntPref('homeFolder');
+    let folderName = '<span id="home-folder">' + bookmarks.getItemTitle(folderID) +
                      '</span>';
-    var string = bundle.formatStringFromName('howToSubscribeHeader', [folderName], 1);
+    let string = bundle.formatStringFromName('howToSubscribeHeader', [folderName], 1);
 
-    var subscribeHeader = document.getElementById('subscribe');
+    let subscribeHeader = document.getElementById('subscribe');
     subscribeHeader.innerHTML = string;
 
-    var homeFolderSpan = document.getElementById('home-folder');
+    let homeFolderSpan = document.getElementById('home-folder');
     homeFolderSpan.addEventListener('click', openOptions, false);
 }
 
 function openOptions() {
-    var instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
-    var modality = instantApply ? 'modal=no,dialog=no' : 'modal';
-    var features = 'chrome,titlebar,toolbar,centerscreen,resizable,' + modality;
+    let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
+    let modality = instantApply ? 'modal=no,dialog=no' : 'modal';
+    let features = 'chrome,titlebar,toolbar,centerscreen,resizable,' + modality;
 
     window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
                       features, 'feeds-pane');
 }
 
 function openBrief() {
-    var topWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
-                           .getInterface(Ci.nsIWebNavigation)
-                           .QueryInterface(Ci.nsIDocShellTreeItem)
-                           .rootTreeItem
-                           .QueryInterface(Ci.nsIInterfaceRequestor)
-                           .getInterface(Ci.nsIDOMWindow);
+    let topWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
+                          .getInterface(Ci.nsIWebNavigation)
+                          .QueryInterface(Ci.nsIDocShellTreeItem)
+                          .rootTreeItem
+                          .QueryInterface(Ci.nsIInterfaceRequestor)
+                          .getInterface(Ci.nsIDOMWindow);
     topWindow.Brief.open(true);
 }

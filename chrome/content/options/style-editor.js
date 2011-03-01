@@ -5,8 +5,8 @@ Components.utils.import('resource://gre/modules/AddonManager.jsm');
 IMPORT_COMMON(this);
 
 
-var gCustomStyleFile = null;
-var gTextbox = null;
+let gCustomStyleFile = null;
+let gTextbox = null;
 
 function init() {
     sizeToContent();
@@ -44,7 +44,7 @@ function populateTextbox() {
 
 
 function fetchCSSText(aURI) {
-    var request = new XMLHttpRequest();
+    let request = new XMLHttpRequest();
     request.open('GET', aURI.spec, false);
     request.overrideMimeType('text/css');
     request.send(null);
@@ -54,7 +54,7 @@ function fetchCSSText(aURI) {
 
 
 function writeCustomCSSFile(aData) {
-    var stream = Cc['@mozilla.org/network/file-output-stream;1']
+    let stream = Cc['@mozilla.org/network/file-output-stream;1']
                  .createInstance(Ci.nsIFileOutputStream);
     stream.init(gCustomStyleFile, 0x02 | 0x08 | 0x20, -1, 0); // write, create, truncate
     stream.write(aData, aData.length);
