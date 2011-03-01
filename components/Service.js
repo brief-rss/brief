@@ -21,10 +21,33 @@ function BriefService() {
 
 BriefService.prototype = {
 
+    // mozIStorageVacuumParticipant
+    get databaseConnection() {
+        return Components.utils.getGlobalForObject(Storage).Connection._nativeConnection;
+    },
+
+    // mozIStorageVacuumParticipant
+    expectedDatabasePageSize: Ci.mozIStorageConnection.DEFAULT_PAGE_SIZE,
+
+    // mozIStorageVacuumParticipant
+    onBeginVacuum: function onBeginVacuum() {
+        Components.utils.import('resource://brief/FeedUpdateService.jsm');
+        FeedUpdateService.stopUpdating();
+
+        Components.utils.getGlobalForObject(Storage).StorageInternal.purgeEntries(false);
+        
+        return true;
+    },
+
+    // mozIStorageVacuumParticipant
+    onEndVacuum: function onEndVacuum(aSucceeded) {
+
+    },
+
     classDescription: 'Service of Brief extension',
     classID: Components.ID('{943b2280-6457-11df-a08a-0800200c9a66}'),
     contractID: '@brief.mozdev.org/briefservice;1',
-    QueryInterface: XPCOMUtils.generateQI()
+    QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageVacuumParticipant])
 
 }
 

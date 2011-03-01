@@ -826,25 +826,6 @@ let ViewListContextMenu = {
             deleted: Storage.ENTRY_STATE_TRASHED
         })
         query.deleteEntries(Storage.ENTRY_STATE_DELETED);
-
-        let prompt = Services.prompt;
-
-        let dialogTitle = gStringBundle.getString('compactPromptTitle');
-        let dialogText = gStringBundle.getString('compactPromptText');
-        let dialogConfirmLabel = gStringBundle.getString('compactPromptConfirmButton');
-
-        let buttonFlags = prompt.BUTTON_POS_0 * prompt.BUTTON_TITLE_IS_STRING +
-                          prompt.BUTTON_POS_1 * prompt.BUTTON_TITLE_NO +
-                          prompt.BUTTON_POS_0_DEFAULT;
-
-        let shouldCompact = prompt.confirmEx(window, dialogTitle, dialogText,
-                                             buttonFlags, dialogConfirmLabel,
-                                             null, null, null, {value:0});
-
-        if (shouldCompact === 0) {
-            window.openDialog('chrome://brief/content/compacting-progress.xul', 'Brief',
-                              'chrome,titlebar,centerscreen');
-        }
     }
 
 }
