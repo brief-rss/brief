@@ -830,20 +830,19 @@ var ViewListContextMenu = {
         })
         query.deleteEntries(Storage.ENTRY_STATE_DELETED);
 
-        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1']
-                            .getService(Ci.nsIPromptService);
+        var prompt = Services.prompt;
 
         var dialogTitle = gStringBundle.getString('compactPromptTitle');
         var dialogText = gStringBundle.getString('compactPromptText');
         var dialogConfirmLabel = gStringBundle.getString('compactPromptConfirmButton');
 
-        var buttonFlags = promptService.BUTTON_POS_0 * promptService.BUTTON_TITLE_IS_STRING +
-                          promptService.BUTTON_POS_1 * promptService.BUTTON_TITLE_NO +
-                          promptService.BUTTON_POS_0_DEFAULT;
+        var buttonFlags = prompt.BUTTON_POS_0 * prompt.BUTTON_TITLE_IS_STRING +
+                          prompt.BUTTON_POS_1 * prompt.BUTTON_TITLE_NO +
+                          prompt.BUTTON_POS_0_DEFAULT;
 
-        var shouldCompact = promptService.confirmEx(window, dialogTitle, dialogText,
-                                                    buttonFlags, dialogConfirmLabel,
-                                                    null, null, null, {value:0});
+        var shouldCompact = prompt.confirmEx(window, dialogTitle, dialogText,
+                                             buttonFlags, dialogConfirmLabel,
+                                             null, null, null, {value:0});
 
         if (shouldCompact === 0) {
             window.openDialog('chrome://brief/content/compacting-progress.xul', 'Brief',
@@ -867,8 +866,6 @@ var TagListContextMenu = {
     },
 
     deleteTag: function TagListContextMenu_deleteTag() {
-        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
-                            getService(Ci.nsIPromptService);
         var taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
                              getService(Ci.nsITaggingService);
 
@@ -877,7 +874,7 @@ var TagListContextMenu = {
         var dialogTitle = gStringBundle.getString('confirmTagDeletionTitle');
         var dialogText = gStringBundle.getFormattedString('confirmTagDeletionText', [tag]);
 
-        if (!promptService.confirm(window, dialogTitle, dialogText))
+        if (!Services.prompt.confirm(window, dialogTitle, dialogText))
             return;
 
         let query = new Query({
@@ -1000,14 +997,10 @@ var FeedListContextMenu = {
 
 
     deleteFeed: function FeedListContextMenu_deleteFeed() {
-        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
-                            getService(Ci.nsIPromptService);
         var title = gStringBundle.getString('confirmFeedDeletionTitle');
         var text = gStringBundle.getFormattedString('confirmFeedDeletionText',
                                                    [this.targetFeed.title]);
-        var weHaveAGo = promptService.confirm(window, title, text);
-
-        if (weHaveAGo) {
+        if (Services.prompt.confirm(window, title, text)) {
             this._removeTreeitem(this.targetItem);
             this._deleteBookmarks([this.targetFeed]);
         }
@@ -1015,14 +1008,11 @@ var FeedListContextMenu = {
 
 
     deleteFolder: function FeedListContextMenu_deleteFolder() {
-        var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1'].
-                            getService(Ci.nsIPromptService);
         var title = gStringBundle.getString('confirmFolderDeletionTitle');
         var text = gStringBundle.getFormattedString('confirmFolderDeletionText',
                                                    [this.targetFeed.title]);
-        var weHaveAGo = promptService.confirm(window, title, text);
 
-        if (weHaveAGo) {
+        if (Services.prompt.confirm(window, title, text)) {
             this._removeTreeitem(this.targetItem);
 
             var items = this.targetItem.getElementsByTagName('treeitem');

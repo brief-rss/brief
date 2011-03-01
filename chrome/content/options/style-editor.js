@@ -1,7 +1,9 @@
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-
+Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/AddonManager.jsm');
+
+IMPORT_COMMON(this);
+
 
 var gCustomStyleFile = null;
 var gTextbox = null;
@@ -11,9 +13,7 @@ function init() {
 
     gTextbox = document.getElementById('custom-style-textbox');
 
-    var chromeDir = Cc['@mozilla.org/file/directory_service;1'].
-                    getService(Ci.nsIProperties).
-                    get('ProfD', Ci.nsIFile);
+    let chromeDir = Services.dirsvc.get('ProfD', Ci.nsIFile);
     chromeDir.append('chrome');
 
     gCustomStyleFile = chromeDir.clone();
@@ -64,8 +64,5 @@ function writeCustomCSSFile(aData) {
 
 function onAccept() {
     writeCustomCSSFile(gTextbox.value, gTextbox.value.length);
-
-    var observerService = Cc['@mozilla.org/observer-service;1'].
-                          getService(Ci.nsIObserverService);
-    observerService.notifyObservers(null, 'brief:custom-style-changed', '');
+    Services.obs.notifyObservers(null, 'brief:custom-style-changed', '');
 }

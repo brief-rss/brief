@@ -1,11 +1,11 @@
-const Ci = Components.interfaces;
-const Cc = Components.classes;
-
+Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/Storage.jsm');
+Components.utils.import('resource://gre/modules/Services.jsm');
+
+IMPORT_COMMON(this);
 
 var gFeed = null;
-var gPrefs = Cc['@mozilla.org/preferences-service;1'].getService(Ci.nsIPrefService).
-                                                      getBranch('extensions.brief.');
+var gPrefs = Services.prefs.getBranch('extensions.brief.');
 
 function getElement(aId) document.getElementById(aId);
 
@@ -144,7 +144,7 @@ function saveChanges() {
 
 function saveLivemarksData() {
     var nameTextbox = getElement('feed-name-textbox');
-    var urlTextbox = getElement('feed-url-textbox')
+    var urlTextbox = getElement('feed-url-textbox');
 
     var bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
                            getService(Ci.nsINavBookmarksService);
@@ -155,9 +155,7 @@ function saveLivemarksData() {
         bookmarksService.setItemTitle(gFeed.bookmarkID, nameTextbox.value);
 
     if (gFeed.feedURL != urlTextbox.value) {
-        var ioService = Cc['@mozilla.org/network/io-service;1'].
-                        getService(Ci.nsIIOService);
-        var uri = ioService.newURI(urlTextbox.value, null, null);
+        let uri = Services.io.newURI(urlTextbox.value, null, null);
         livemarkService.setFeedURI(gFeed.bookmarkID, uri);
     }
 }
