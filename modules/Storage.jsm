@@ -152,15 +152,6 @@ const Storage = {
         return StorageInternal.setFeedOptions(aFeed);
     },
 
-
-    /**
-     * Physically removes all deleted items and runs SQL VACUUM command to reclaim
-     * disc space and defragment the database.
-     */
-    compactDatabase: function() {
-        return StorageInternal.compactDatabase();
-    },
-
     /**
      * Synchronizes database with Live Bookmarks from home folder which ID is
      * specified by extensions.brief.homeFolder.
@@ -441,13 +432,6 @@ let StorageInternal = {
     },
 
 
-    // See Storage.
-    compactDatabase: function StorageInternal_compactDatabase() {
-        this.purgeEntries(false);
-        Connection.executeSQL('VACUUM');
-    },
-
-
     // Moves expired entries to Trash and permanently removes
     // the deleted items from database.
     purgeEntries: function StorageInternal_purgeEntries(aDeleteExpired) {
@@ -632,7 +616,7 @@ let StorageInternal = {
         })
     },
 
-    QueryInterface: XPCOMUtils.generateQI(Ci.nsIObserver)
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
 
 }
 

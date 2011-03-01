@@ -35,6 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
 <!ENTITY showUnreadCounter.label "Show number of unread items">
 <!ENTITY ctxShowOptions.label "Options">
-
-<!ENTITY compactingWindow.title "Compacting feeds">
-<!ENTITY compactingInProgress.label "Brief is compacting stored feeds. This may take a few minutes...">
