@@ -437,56 +437,54 @@ let StorageInternal = {
     },
 
 
-    // Moves expired entries to Trash and permanently removes
-    // the deleted items from database.
-    purgeEntries: function StorageInternal_purgeEntries(aDeleteExpired) {
-        Connection.runTransaction(function() {
-            if (aDeleteExpired) {
-                // Delete old entries in feeds that don't have per-feed setting enabled.
-                if (Prefs.getBoolPref('database.expireEntries')) {
-                    let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
-
-                    Stm.expireEntriesByAgeGlobal.execute({
-                        'oldState': Storage.ENTRY_STATE_NORMAL,
-                        'newState': Storage.ENTRY_STATE_TRASHED,
-                        'edgeDate': Date.now() - expirationAge * 86400000
-                    });
-                }
-
-                // Delete old entries based on per-feed limit.
-                this.getAllFeeds().forEach(function(feed) {
-                    if (feed.entryAgeLimit > 0) {
-                        Stm.expireEntriesByAgePerFeed.execute({
-                            'oldState': Storage.ENTRY_STATE_NORMAL,
-                            'newState': Storage.ENTRY_STATE_TRASHED,
-                            'edgeDate': Date.now() - feed.entryAgeLimit * 86400000,
-                            'feedID': feed.feedID
-                        });
-                    }
+    expireEntries: function StorageInternal_expireEntries(aFeed) {
+        new Task(function() {
+            // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
+            if (Prefs.getBoolPref('database.limitStoredEntries')) {
+                let query = new Query({
+                    feeds: [aFeed.feedID],
+                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    starred: false,
+                    sortOrder: Query.prototype.SORT_BY_DATE,
+                    offset: Prefs.getIntPref('database.maxStoredEntries')
                 })
 
-                // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
-                if (Prefs.getBoolPref('database.limitStoredEntries')) {
-                    let maxEntries = Prefs.getIntPref('database.maxStoredEntries');
-
-                    this.getAllFeeds().forEach(function(feed) {
-                        let row = Stm.getDeletedEntriesCount.getSingleResult({
-                            'feedID': feed.feedID,
-                            'deletedState': Storage.ENTRY_STATE_NORMAL
-                        })
-
-                        if (row.entryCount - maxEntries > 0) {
-                            Stm.expireEntriesByNumber.execute({
-                                'oldState': Storage.ENTRY_STATE_NORMAL,
-                                'newState': Storage.ENTRY_STATE_TRASHED,
-                                'feedID': feed.feedID,
-                                'limit': row.entryCount - maxEntries
-                            });
-                        }
-                    })
-                }
+                query.deleteEntries(Storage.ENTRY_STATE_TRASHED, this.resume);
+                yield;
             }
 
+            // Delete old entries in feeds that don't have per-feed setting enabled.
+            if (Prefs.getBoolPref('database.expireEntries') && !aFeed.entryAgeLimit) {
+                let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
+
+                let query = new Query({
+                    feeds: [aFeed.feedID],
+                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    starred: false,
+                    endDate: Date.now() - expirationAge * 86400000
+                })
+
+                query.deleteEntries(Storage.ENTRY_STATE_TRASHED, this.resume);
+                yield;
+            }
+
+            // Delete old entries based on per-feed limit.
+            if (aFeed.entryAgeLimit > 0) {
+                let query = new Query({
+                    feeds: [aFeed.feedID],
+                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    starred: false,
+                    endDate: Date.now() - aFeed.entryAgeLimit * 86400000
+                })
+
+                query.deleteEntries(Storage.ENTRY_STATE_TRASHED, this.resume);
+            }
+        })
+    },
+
+    // Permanently removes deleted items from database.
+    purgeDeleted: function StorageInternal_purgeDeleted() {
+        Connection.runTransaction(function() {
             Stm.purgeDeletedEntriesText.execute({
                 'deletedState': Storage.ENTRY_STATE_DELETED,
                 'currentDate': Date.now(),
@@ -518,7 +516,7 @@ let StorageInternal = {
                 let now = Math.round(Date.now() / 1000);
                 let lastPurgeTime = Prefs.getIntPref('database.lastPurgeTime');
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
-                    this.purgeEntries(true);
+                    this.purgeDeleted();
 
                 Bookmarks.removeObserver(BookmarkObserver);
                 Prefs.removeObserver('', this);
@@ -835,6 +833,9 @@ FeedProcessor.prototype = {
                     new Query(self.insertedEntries).getEntryList(function(aList) {
                         for (let observer in StorageInternal.observers)
                             observer.onEntriesAdded(aList);
+
+                        let feed = StorageInternal.getFeed(self.feed.feedID);
+                        StorageInternal.expireEntries(feed);
                     })
 
                     // XXX This should be optimized and/or be asynchronous
@@ -1197,7 +1198,7 @@ Query.prototype = {
      */
     REMOVE_FROM_DATABASE: 4,
 
-    deleteEntries: function Query_deleteEntries(aState) {
+    deleteEntries: function Query_deleteEntries(aState, aCallback) {
         switch (aState) {
             case Storage.ENTRY_STATE_NORMAL:
             case Storage.ENTRY_STATE_TRASHED:
@@ -1212,12 +1213,18 @@ Query.prototype = {
         }
 
         this.getEntryList(function(aList) {
-            if (!aList.length)
+            if (!aList.length) {
+                if (aCallback)
+                    aCallback(aList);
                 return;
+            }
 
             new Statement(sql).executeAsync(function() {
                 for (let observer in StorageInternal.observers)
                     observer.onEntriesDeleted(aList, aState);
+
+                if (aCallback)
+                    aCallback(aList);
             })
         })
     },
@@ -1457,8 +1464,11 @@ Query.prototype = {
 
         if (this.limit !== undefined)
             text += ' LIMIT ' + this.limit;
-        if (this.offset > 0)
+        if (this.offset > 0) {
+            if (this.limit === undefined)
+                text += ' LIMIT -1 '
             text += ' OFFSET ' + this.offset;
+        }
 
         if (!aForSelect)
             text += ') ';
@@ -2014,46 +2024,6 @@ let Stm = {
                   '      feeds.hidden != 0                                ';
         delete this.purgeDeletedFeeds;
         return this.purgeDeletedFeeds = new Statement(sql);
-    },
-
-    get expireEntriesByAgeGlobal() {
-        let sql = 'UPDATE entries SET deleted = :newState                            ' +
-                  'WHERE id IN (                                                     ' +
-                  '   SELECT entries.id                                              ' +
-                  '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID ' +
-                  '   WHERE entries.deleted = :oldState AND                          ' +
-                  '         feeds.entryAgeLimit = 0 AND                              ' +
-                  '         entries.starred = 0 AND                                  ' +
-                  '         entries.date < :edgeDate                                 ' +
-                  ')                                                                 ';
-        delete expireEntriesByAgeGlobal;
-        return expireEntriesByAgeGlobal = new Statement(sql);
-    },
-
-    get expireEntriesByAgePerFeed() {
-        let sql = 'UPDATE entries SET deleted = :newState  ' +
-                  'WHERE entries.deleted = :oldState AND   ' +
-                  '      starred = 0 AND                   ' +
-                  '      entries.date < :edgeDate AND      ' +
-                  '      feedID = :feedID                  ';
-        delete expireEntriesByAgePerFeed;
-        return expireEntriesByAgePerFeed = new Statement(sql);
-    },
-
-    get expireEntriesByNumber() {
-        let sql = 'UPDATE entries                    ' +
-                  'SET deleted = :newState           ' +
-                  'WHERE rowid IN (                  ' +
-                  '    SELECT rowid                  ' +
-                  '    FROM entries                  ' +
-                  '    WHERE deleted = :oldState AND ' +
-                  '          starred = 0 AND         ' +
-                  '          feedID = :feedID        ' +
-                  '    ORDER BY date ASC             ' +
-                  '    LIMIT :limit                  ' +
-                  ')                                 ';
-        delete this.expireEntriesByNumber;
-        return this.expireEntriesByNumber = new Statement(sql);
     },
 
     get getDeletedEntriesCount() {
