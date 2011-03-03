@@ -15,6 +15,8 @@ function IMPORT_COMMON(aScope) {
 
     aScope.Array.prototype.__iterator__ = Array.prototype.__iterator__;
     aScope.Array.prototype.intersect = Array.prototype.intersect;
+
+    aScope.Task = Task;
 }
 
 
@@ -43,4 +45,21 @@ Array.prototype.intersect = function intersect(aArr) {
 
 function log(aMessage) {
     Services.console.logStringMessage(aMessage);
+}
+
+
+function Task(aGenerator) {
+    let generator = aGenerator.call(this);
+
+    this.resume = function(aReturnValue) {
+        try {
+            generator.send(aReturnValue);
+        }
+        catch (ex if ex == StopIteration) {}
+    }
+
+    try {
+        generator.next();
+    }
+    catch (ex if ex == StopIteration) {}
 }
