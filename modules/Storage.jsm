@@ -270,7 +270,9 @@ let StorageInternal = {
 
         this.homeFolderID = Prefs.getIntPref('homeFolder');
         Prefs.addObserver('', this, false);
+
         Services.obs.addObserver(this, 'quit-application', false);
+        Services.obs.addObserver(this, 'idle-daily', false);
 
         // This has to be on the end, in case getting bookmarks service throws.
         Bookmarks.addObserver(BookmarkObserver, false);
@@ -436,7 +438,7 @@ let StorageInternal = {
         }
     },
 
-
+    // Moves items to Trash based on age and number limits.
     expireEntries: function StorageInternal_expireEntries(aFeed) {
         new Task(function() {
             // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
@@ -484,24 +486,26 @@ let StorageInternal = {
 
     // Permanently removes deleted items from database.
     purgeDeleted: function StorageInternal_purgeDeleted() {
-        Connection.runTransaction(function() {
-            Stm.purgeDeletedEntriesText.execute({
-                'deletedState': Storage.ENTRY_STATE_DELETED,
-                'currentDate': Date.now(),
-                'retentionTime': DELETED_FEEDS_RETENTION_TIME
-            });
+        Stm.purgeDeletedEntriesText.params = {
+            'deletedState': Storage.ENTRY_STATE_DELETED,
+            'currentDate': Date.now(),
+            'retentionTime': DELETED_FEEDS_RETENTION_TIME
+        }
 
-            Stm.purgeDeletedEntries.execute({
-                'deletedState': Storage.ENTRY_STATE_DELETED,
-                'currentDate': Date.now(),
-                'retentionTime': DELETED_FEEDS_RETENTION_TIME
-            });
+        Stm.purgeDeletedEntries.params = {
+            'deletedState': Storage.ENTRY_STATE_DELETED,
+            'currentDate': Date.now(),
+            'retentionTime': DELETED_FEEDS_RETENTION_TIME
+        }
 
-            Stm.purgeDeletedFeeds.execute({
-                'currentDate': Date.now(),
-                'retentionTime': DELETED_FEEDS_RETENTION_TIME
-            });
-        }, this)
+        Stm.purgeDeletedFeeds.params = {
+            'currentDate': Date.now(),
+            'retentionTime': DELETED_FEEDS_RETENTION_TIME
+        }
+
+        Connection.executeAsync([Stm.purgeDeletedEntriesText,
+                                 Stm.purgeDeletedEntries,
+                                 Stm.purgeDeletedFeeds])
 
         // Prefs can only store longs while Date is a long long.
         let now = Math.round(Date.now() / 1000);
@@ -512,17 +516,21 @@ let StorageInternal = {
     observe: function StorageInternal_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'quit-application':
+                Bookmarks.removeObserver(BookmarkObserver);
+                Prefs.removeObserver('', this);
+
+                Services.obs.removeObserver(this, 'quit-application');
+                Services.obs.removeObserver(this, 'idle-daily');
+
+                BookmarkObserver.syncDelayTimer = null;
+                break;
+
+            case 'idle-daily':
                 // Integer prefs are longs while Date is a long long.
                 let now = Math.round(Date.now() / 1000);
                 let lastPurgeTime = Prefs.getIntPref('database.lastPurgeTime');
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeDeleted();
-
-                Bookmarks.removeObserver(BookmarkObserver);
-                Prefs.removeObserver('', this);
-                Services.obs.removeObserver(this, 'quit-application');
-
-                BookmarkObserver.syncDelayTimer = null;
                 break;
 
             case 'nsPref:changed':
