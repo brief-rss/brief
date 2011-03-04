@@ -6,8 +6,12 @@ Components.utils.import('resource://gre/modules/Services.jsm');
 IMPORT_COMMON(this);
 
 
-function StorageConnection(aDatabaseFile) {
-    this._nativeConnection = Services.storage.openUnsharedDatabase(aDatabaseFile);
+function StorageConnection(aDatabaseFile, aUnsharedCache) {
+    if (aUnsharedCache)
+        this._nativeConnection = Services.storage.openUnsharedDatabase(aDatabaseFile);
+    else
+        this._nativeConnection = Services.storage.openDatabase(aDatabaseFile);
+
     this._writingStatementsQueue = new WritingStatementsQueue(this);
     this._transactionStatements = [];
 }
@@ -26,10 +30,10 @@ StorageConnection.prototype = {
         return this._nativeConnection.close()
     },
 
-    runTransaction: function(aFunction, aThisObject, aOnError) {
+    runTransaction: function(aFunction, aOnError) {
         this._nativeConnection.beginTransaction();
         try {
-            aFunction.call(aThisObject);
+            aFunction();
         }
         catch (ex) {
             if (aOnError)

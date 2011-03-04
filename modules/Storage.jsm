@@ -221,7 +221,7 @@ let StorageInternal = {
         databaseFile.append('brief.sqlite');
         let databaseIsNew = !databaseFile.exists();
 
-        Connection = new StorageConnection(databaseFile);
+        Connection = new StorageConnection(databaseFile, true);
         let schemaVersion = Connection.schemaVersion;
 
         // Remove the backup file after certain amount of time.
@@ -235,7 +235,7 @@ let StorageInternal = {
             Services.storage.backupDatabaseFile(databaseFile, 'brief-backup.sqlite');
             Connection.close();
             databaseFile.remove(false);
-            Connection = new StorageConnection(databaseFile);
+            Connection = new StorageConnection(databaseFile, true);
             this.setupDatabase();
         }
         else if (databaseIsNew) {
@@ -1181,15 +1181,15 @@ Query.prototype = {
         let update = new Statement(sql);
         update.params.read = aState ? 1 : 0;
 
-        this.getEntryList(function(aList) {
+        this.getEntryList(function(list) {
             this.read = tempRead;
 
-            if (!aList.length)
+            if (!list.length)
                 return;
 
             update.executeAsync(function() {
                 for (let observer in StorageInternal.observers)
-                    observer.onEntriesMarkedRead(aList, aState);
+                    observer.onEntriesMarkedRead(list, aState);
             })
         })
     },
@@ -1198,41 +1198,24 @@ Query.prototype = {
      * Set the deleted state of the selected entries or remove them from the database.
      *
      * @param aState
-     *        The new deleted state (as defined by constants in Storage)
-     *        or instruction to physically remove the entries from the
-     *        database (REMOVE_FROM_DATABASE constant below).
-     *
-     * @throws NS_ERROR_INVALID_ARG on invalid |aState| parameter.
+     *        The new deleted state (as defined by constants in Storage).
+     * @param aCallback
      */
-    REMOVE_FROM_DATABASE: 4,
-
     deleteEntries: function Query_deleteEntries(aState, aCallback) {
-        switch (aState) {
-            case Storage.ENTRY_STATE_NORMAL:
-            case Storage.ENTRY_STATE_TRASHED:
-            case Storage.ENTRY_STATE_DELETED:
-                var sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
-                break;
-            case this.REMOVE_FROM_DATABASE:
-                var sql = 'DELETE FROM entries ' + this._getQueryString();
-                break;
-            default:
-                throw Components.results.NS_ERROR_INVALID_ARG;
-        }
-
-        this.getEntryList(function(aList) {
-            if (!aList.length) {
+        this.getEntryList(function(list) {
+            if (!list.length) {
                 if (aCallback)
-                    aCallback(aList);
+                    aCallback();
                 return;
             }
 
+            let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
             new Statement(sql).executeAsync(function() {
                 for (let observer in StorageInternal.observers)
-                    observer.onEntriesDeleted(aList, aState);
+                    observer.onEntriesDeleted(list, aState);
 
                 if (aCallback)
-                    aCallback(aList);
+                    aCallback();
             })
         })
     },
@@ -1241,7 +1224,7 @@ Query.prototype = {
     /**
      * Bookmark/unbookmark URLs of the selected entries.
      *
-     * @param state
+     * @param aState
      *        New state of entries. TRUE to bookmark, FALSE to unbookmark.
      *
      * This function bookmarks URIs of the selected entries. It doesn't star the entries
@@ -1249,9 +1232,9 @@ Query.prototype = {
      * observer.
      */
     bookmarkEntries: function Query_bookmarkEntries(aState) {
-        let transactions = [];
-
         this.getFullEntries(function(entries) {
+            let transactions = [];
+
             for (let entry in entries) {
                 let uri = Utils.newURI(entry.entryURL);
                 if (!uri)
@@ -1765,7 +1748,7 @@ function LivemarksSync() {
 
         storedFeeds.filter(function(feed) !feed.bookmarked && feed.hidden == 0)
                    .forEach(this.hideFeed, this);
-    }, this)
+    }.bind(this))
 
     if (this.feedListChanged)
         StorageInternal.refreshFeedsCache(true);
