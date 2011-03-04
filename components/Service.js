@@ -34,8 +34,6 @@ BriefService.prototype = {
         Components.utils.import('resource://brief/FeedUpdateService.jsm');
         FeedUpdateService.stopUpdating();
 
-        Components.utils.getGlobalForObject(Storage).StorageInternal.purgeEntries(false);
-        
         return true;
     },
 
