@@ -61,7 +61,7 @@ function init() {
     ViewList.richlistbox.suppressOnSelect = false;
 
     async(FeedList.rebuild, 0, FeedList);
-    async(Storage.syncWithLivemarks, 2000, Storage);
+    async(Storage.syncWithLivemarks, 1000, Storage);
 }
 
 
