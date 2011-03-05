@@ -42,10 +42,16 @@ BriefService.prototype = {
 
     },
 
+    // nsIObserver
+    observe: function() {
+
+    },
+
     classDescription: 'Service of Brief extension',
     classID: Components.ID('{943b2280-6457-11df-a08a-0800200c9a66}'),
     contractID: '@brief.mozdev.org/briefservice;1',
-    QueryInterface: XPCOMUtils.generateQI([Ci.mozIStorageVacuumParticipant])
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,
+                                           Ci.mozIStorageVacuumParticipant])
 
 }
 
