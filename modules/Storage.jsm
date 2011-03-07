@@ -733,35 +733,32 @@ FeedProcessor.prototype = {
     },
 
     addInsertParams: function FeedProcessor_addInsertParams(aEntry, aPrimaryHash, aSecondaryHash) {
-        var title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
+        let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
         try {
-            this.insertEntry.paramSets.push({
+            var insertEntryParamSet = {
                 'feedID': this.feed.feedID,
                 'primaryHash': aPrimaryHash,
                 'secondaryHash': aSecondaryHash,
                 'providedID': aEntry.wrappedEntry.id,
                 'entryURL': aEntry.entryURL,
                 'date': aEntry.date || Date.now()
-            });
-        }
-        catch (ex) {
-            ReportError('Error updating feeds. Failed to bind parameters to insertEntry.');
-            throw ex;
-        }
+            }
 
-        try {
-            this.insertEntryText.paramSets.push({
+            var insertEntryTextParamSet = {
                 'title': title,
                 'content': aEntry.content || aEntry.summary,
                 'authors': aEntry.authors
-            });
+            }
         }
         catch (ex) {
-            this.insertEntry.paramSets.pop();
-            ReportError('Error updating feeds. Failed to bind parameters to insertEntryText.');
-            throw ex;
+            Cu.reportError('Error updating feeds. Failed to bind parameters to insert statement.');
+            Cu.reportError(ex);
+            return;
         }
+
+        this.insertEntry.paramSets.push(insertEntryParamSet);
+        this.insertEntryText.paramSets.push(insertEntryTextParamSet);
 
         this.entriesToInsertCount++;
     },
