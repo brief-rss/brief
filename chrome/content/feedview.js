@@ -135,6 +135,14 @@ FeedView.prototype = {
         return copy;
     },
 
+    containsEntry: function FeedView_containsEntry(aEntry) {
+        return this._loadedEntries.indexOf(aEntry) != -1;
+    },
+
+    getEntryIndex: function FeedView_getEntryIndex(aEntry) {
+        return this._loadedEntries.indexOf(aEntry);
+    },
+
     collapseEntry: function FeedView_collapseEntry(aEntry, aAnimate) {
         let entryContainer = this.document.getElementById(aEntry);
         if (entryContainer.hasAttribute('collapsed'))
@@ -335,7 +343,7 @@ FeedView.prototype = {
      */
     skipDown: function FeedView_skipDown() {
         let middleEntry = parseInt(this._getMiddleEntryElement().id);
-        let index = this._loadedEntries.indexOf(middleEntry);
+        let index = this.getEntryIndex(middleEntry);
 
         let doSkipDown = function(aCount) {
             let targetEntry = this._loadedEntries[index + 10] ||
@@ -356,7 +364,7 @@ FeedView.prototype = {
     // See scrollDown.
     skipUp: function FeedView_skipUp() {
         let middleEntry = parseInt(this._getMiddleEntryElement().id);
-        let index = this._loadedEntries.indexOf(middleEntry);
+        let index = this.getEntryIndex(middleEntry);
         let targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
 
         if (PrefCache.entrySelectionEnabled)
@@ -816,7 +824,7 @@ FeedView.prototype = {
 
 
     /**
-     * Checks if given entries belong to the view and inserts them.
+     * Checks if given entries belong to the view and inserts them if necessary.
      *
      * If the previously loaded entries fill the window, the added entries need to
      * be inserted only if they have a more recent date than the last loaded
@@ -830,6 +838,8 @@ FeedView.prototype = {
      *        Array of IDs of entries.
      */
     _onEntriesAdded: function FeedView__onEntriesAdded(aAddedEntries) {
+        let resume = FeedView__onEntriesAdded.resume;
+
         let win = this.window;
         if (win.scrollMaxY - win.pageYOffset < win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS) {
             this.refresh()
@@ -839,33 +849,22 @@ FeedView.prototype = {
         let query = this.getQueryCopy();
         query.startDate = parseInt(this.feedContent.lastChild.getAttribute('date'));
 
-        let view = this;
+        this._loadedEntries = yield query.getEntries(resume);
 
-        query.getEntries(function(entries) {
-            view._loadedEntries = entries;
-
-            function filterNew(entryID) view._loadedEntries.indexOf(entryID) != -1;
-            let newEntries = aAddedEntries.filter(filterNew);
-
-            if (!newEntries.length)
-                return;
-
+        let newEntries = aAddedEntries.filter(this.containsEntry, this);
+        if (newEntries.length) {
             let query = new Query({
-                sortOrder: view.query.sortOrder,
-                sortDirection: view.query.sortDirection,
+                sortOrder: this.query.sortOrder,
+                sortDirection: this.query.sortDirection,
                 entries: newEntries
             })
 
-            query.getFullEntries(function(fullEntries) {
-                for (let entry in fullEntries) {
-                    let index = view._loadedEntries.indexOf(entry.id);
-                    view._insertEntry(entry, index);
-                }
+            for (let entry in yield query.getFullEntries(resume))
+                this._insertEntry(entry, this.getEntryIndex(entry.id));
 
-                view._setEmptyViewMessage();
-            })
-        })
-    },
+            this._setEmptyViewMessage();
+        }
+    }.gen(),
 
     /**
      * Checks if given entries are in the view and removes them.
@@ -879,10 +878,11 @@ FeedView.prototype = {
      */
     _onEntriesRemoved: function FeedView__onEntriesRemoved(aRemovedEntries, aAnimate,
                                                            aLoadNewEntries) {
-        let indices = aRemovedEntries.map(function(e) this._loadedEntries.indexOf(e), this)
-                                     .filter(function(i) i != -1);
-        if (!indices.length)
+        let containedEntries = aRemovedEntries.filter(this.containsEntry, this);
+        if (!containedEntries.length)
             return;
+
+        let indices = containedEntries.map(this.getEntryIndex, this);
 
         // Removing content may cause a scroll event, which should be ignored.
         this._ignoreNextScrollEvent = true;
@@ -1004,9 +1004,9 @@ FeedView.prototype = {
             this._autoMarkRead();
 
             if (PrefCache.entrySelectionEnabled) {
-                let entry = (this._loadedEntries.indexOf(this.selectedEntry) != -1)
-                            ? this.selectedEntry
-                            : this._loadedEntries[0];
+                let lastSelectedEntry = this.selectedEntry;
+                let entry = this.containsEntry(lastSelectedEntry) ? lastSelectedEntry
+                                                                  : this._loadedEntries[0];
                 this.selectEntry(entry, true);
             }
         }.bind(this))
@@ -1096,7 +1096,7 @@ FeedView.prototype = {
         }
 
         this._loadingEntries = false;
-        
+
         aCallback(entries ? entries.length : 0);
     }.gen(),
 
