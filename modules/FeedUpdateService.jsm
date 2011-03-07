@@ -239,14 +239,14 @@ let FeedUpdateServiceInternal = {
     },
 
 
-    onFeedUpdated: function FeedUpdateServiceInternal_onFeedUpdated(aFeed, aError, aNewEntriesCount) {
+    onFeedUpdated: function FeedUpdateServiceInternal_onFeedUpdated(aFeed, aSuccess, aNewEntriesCount) {
         this.completedFeeds.push(aFeed);
         this.newEntriesCount += aNewEntriesCount;
         if (aNewEntriesCount > 0)
             this.feedsWithNewEntriesCount++;
 
         Services.obs.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
-        if (aError)
+        if (!aSuccess)
             Services.obs.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
 
         if (this.completedFeeds.length == this.scheduledFeeds.length)
@@ -377,7 +377,7 @@ FeedFetcher.prototype = {
                 self.requestFeed();
             }
             else {
-                self.finish(true);
+                self.finish(false);
             }
         }
 
@@ -388,7 +388,7 @@ FeedFetcher.prototype = {
                 self.parser.parseFromString(self.request.responseText, uri);
             }
             catch (ex) {
-                self.finish(true);
+                self.finish(false);
             }
         }
     },
@@ -400,7 +400,7 @@ FeedFetcher.prototype = {
         this.parser.listener = null;
 
         if (!aResult || !aResult.doc) {
-            this.finish(true);
+            this.finish(false);
             return;
         }
 
@@ -417,10 +417,9 @@ FeedFetcher.prototype = {
         this.downloadedFeed.favicon = this.feed.favicon;
         this.downloadedFeed.lastFaviconRefresh = this.feed.lastFaviconRefresh;
 
-        let self = this;
+        let timeSinceRefresh = Date.now() - this.downloadedFeed.lastFaviconRefresh;
 
-        if (Date.now() - this.downloadedFeed.lastFaviconRefresh > FAVICON_REFRESH_INTERVAL
-                || !this.downloadedFeed.favicon) {
+        if (!this.downloadedFeed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL) {
             this.downloadedFeed.lastFaviconRefresh = Date.now();
 
             // We use websiteURL instead of feedURL for resolving the favicon URL,
@@ -428,25 +427,21 @@ FeedFetcher.prototype = {
             // feeds and we'd get the Feedburner's favicon instead.
             if (this.downloadedFeed.websiteURL) {
                 new FaviconFetcher(this.downloadedFeed.websiteURL, function(aFavicon) {
-                    self.downloadedFeed.favicon = aFavicon;
-                    Storage.processFeed(self.downloadedFeed, function(aNewEntriesCount) {
-                        self.finish(self.bozo, aNewEntriesCount);
-                    });
-                });
-                return;
+                    this.downloadedFeed.favicon = aFavicon;
+                    Storage.processFeed(this.downloadedFeed, this.finish.bind(this));
+                }.bind(this))
             }
             else {
                 this.downloadedFeed.favicon = 'no-favicon';
             }
         }
-
-        Storage.processFeed(this.downloadedFeed, function(aNewEntriesCount) {
-            self.finish(self.bozo, aNewEntriesCount);
-        });
+        else {
+            Storage.processFeed(this.downloadedFeed, this.finish.bind(this));
+        }
     },
 
-    finish: function FeedFetcher_finish(aError, aNewEntriesCount) {
-        FeedUpdateServiceInternal.onFeedUpdated(this.feed, aError, aNewEntriesCount || 0);
+    finish: function FeedFetcher_finish(aSuccess, aNewEntriesCount) {
+        FeedUpdateServiceInternal.onFeedUpdated(this.feed, aSuccess, aNewEntriesCount || 0);
         this.cleanup();
     },
 
@@ -454,7 +449,7 @@ FeedFetcher.prototype = {
         switch (aTopic) {
             case 'timer-callback':
                 this.request.abort();
-                this.finish(true);
+                this.finish(false);
                 break;
 
             case 'brief:feed-update-finished':
