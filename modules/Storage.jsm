@@ -991,7 +991,9 @@ Query.prototype = {
      */
     getEntries: function Query_getEntries(aCallback) {
         let sql = 'SELECT entries.id ' + this._getQueryString(true);
-        new Statement(sql).getResultsAsync(aCallback, this._onDatabaseError);
+        new Statement(sql).getResultsAsync(function(results) {
+			aCallback([row.id for each (row in results)])
+		}, this._onDatabaseError);
     },
 
 
