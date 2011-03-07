@@ -1022,11 +1022,7 @@ FeedView.prototype = {
      *        position.
      */
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
-        let enoughLoadedAhead = this.window.scrollMaxY - this.window.pageYOffset >
-                                this.window.innerHeight * MIN_LOADED_WINDOW_HEIGHTS;
-        let lastEntryInCenter = this._getMiddleEntryElement() == this.feedContent.lastChild;
-
-        if (this._loadingEntries || enoughLoadedAhead && !lastEntryInCenter) {
+        if (this._loadingEntries || this.enoughEntriesPreloaded && !this.lastEntryInCenter) {
             if (aCallback)
                 aCallback();
             return;
@@ -1035,16 +1031,20 @@ FeedView.prototype = {
         let stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
                                                    : LOAD_STEP_SIZE;
 
-        this._loadEntries(stepSize, function(loadedEntriesCount) {
-            let enoughLoadedAhead = this.window.scrollMaxY - this.window.pageYOffset >
-                                    this.window.innerHeight * aWindowHeights;
-            let lastEntryInCenter = this._getMiddleEntryElement() == this.feedContent.lastChild;
+        do var loadedCount = yield this._loadEntries(stepSize, arguments.callee.resume);
+        while (loadedCount && (!this.enoughEntriesPreloaded || this.lastEntryInCenter))
 
-            if (loadedEntriesCount && (!enoughLoadedAhead || lastEntryInCenter))
-                this._loadEntries(stepSize, arguments.callee.bind(this));
-            else if (aCallback)
-                aCallback();
-        }.bind(this))
+        if (aCallback)
+            aCallback();
+    }.gen(),
+
+    get lastEntryInCenter() {
+        return this._getMiddleEntryElement() == this.feedContent.lastChild;
+    },
+
+    get enoughEntriesPreloaded() {
+        return this.window.scrollMaxY - this.window.pageYOffset >
+               this.window.innerHeight * MIN_LOADED_WINDOW_HEIGHTS;
     },
 
     /**
@@ -1058,6 +1058,8 @@ FeedView.prototype = {
      * @return The actual number of entries that were loaded.
      */
     _loadEntries: function FeedView__loadEntries(aCount, aCallback) {
+        this._loadingEntries = true;
+
         let dateQuery = this.getQueryCopy();
         let edgeDate = undefined;
 
@@ -1077,17 +1079,8 @@ FeedView.prototype = {
 
         dateQuery.limit = aCount;
 
-        this._loadingEntries = true;
-
-        dateQuery.getProperty('date', false, function(dates) {
-            if (!dates.length) {
-                this._loadingEntries = false;
-                if (aCallback)
-                    aCallback(0);
-
-                return;
-            }
-
+        let dates = yield dateQuery.getProperty('date', false, arguments.callee.resume);
+        if (dates.length) {
             let query = this.getQueryCopy();
             if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
                 query.startDate = dates[dates.length - 1];
@@ -1098,16 +1091,14 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            query.getFullEntries(function(entries) {
-                entries.forEach(this._appendEntry, this);
+            var entries = yield query.getFullEntries(arguments.callee.resume);
+            entries.forEach(this._appendEntry, this);
+        }
 
-                this._loadingEntries = false;
-
-                if (aCallback)
-                    aCallback(entries.length);
-            }.bind(this))
-        }.bind(this))
-    },
+        this._loadingEntries = false;
+        
+        aCallback(entries ? entries.length : 0);
+    }.gen(),
 
     _appendEntry: function FeedView__appendEntry(aEntry) {
         this._insertEntry(aEntry, this._loadedEntries.length);
