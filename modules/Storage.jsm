@@ -221,7 +221,7 @@ let StorageInternal = {
         databaseFile.append('brief.sqlite');
         let databaseIsNew = !databaseFile.exists();
 
-        Connection = new StorageConnection(databaseFile, true);
+        Connection = new StorageConnection(databaseFile, false);
         let schemaVersion = Connection.schemaVersion;
 
         // Remove the backup file after certain amount of time.
@@ -235,7 +235,7 @@ let StorageInternal = {
             Services.storage.backupDatabaseFile(databaseFile, 'brief-backup.sqlite');
             Connection.close();
             databaseFile.remove(false);
-            Connection = new StorageConnection(databaseFile, true);
+            Connection = new StorageConnection(databaseFile, false);
             this.setupDatabase();
         }
         else if (databaseIsNew) {
@@ -258,7 +258,7 @@ let StorageInternal = {
             if (schemaVersion < 9) {
                 Connection.close();
                 databaseFile.remove(false);
-                Connection = new StorageConnection(databaseFile);
+                Connection = new StorageConnection(databaseFile, false);
                 this.setupDatabase();
             }
             else {
@@ -279,7 +279,7 @@ let StorageInternal = {
     },
 
     setupDatabase: function Database_setupDatabase() {
-        Connection.executeSQL([
+        Connection.executeSQL(
             'CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA.join(',') + ') ',
             'CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA.join(',') + ') ',
             'CREATE TABLE IF NOT EXISTS entry_tags (' + ENTRY_TAGS_TABLE_SCHEMA.join(',') + ') ',
@@ -300,7 +300,7 @@ let StorageInternal = {
             'PRAGMA journal_mode=WAL',
 
             'ANALYZE'
-        ])
+        )
 
         Connection.schemaVersion = DATABASE_VERSION;
     },
@@ -379,34 +379,30 @@ let StorageInternal = {
         this.feedsCache = null;
         this.feedsAndFoldersCache = null;
 
-        let feeds = [];
-        let feedsAndFolders = [];
+        Stm.getAllActiveFeeds.getResultsAsync(function(results) {
+            let feeds = [];
+            let feedsAndFolders = [];
 
-        Stm.getAllActiveFeeds.executeAsync({
-            handleResult: function(results) {
-                for (let row in results) {
-                    let feed = new Feed();
+            for (let row in results) {
+                let feed = new Feed();
 
-                    for (let column in row)
-                        feed[column] = row[column];
+                for (let column in row)
+                    feed[column] = row[column];
 
-                    feedsAndFolders.push(feed);
-                    if (!feed.isFolder)
-                        feeds.push(feed);
-                }
-            },
+                feedsAndFolders.push(feed);
+                if (!feed.isFolder)
+                    feeds.push(feed);
+            }
 
-            handleCompletion: function(reason) {
-                this.feedsCache = feeds;
-                this.feedsAndFoldersCache = feedsAndFolders;
+            this.feedsCache = feeds;
+            this.feedsAndFoldersCache = feedsAndFolders;
 
-                if (aNotify)
-                    Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '')
+            if (aNotify)
+                Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '')
 
-                if (aCallback)
-                    aCallback();
-            }.bind(this)
-        })
+            if (aCallback)
+                aCallback();
+        }.bind(this))
     },
 
     // See Storage.
@@ -443,49 +439,45 @@ let StorageInternal = {
 
     // Moves items to Trash based on age and number limits.
     expireEntries: function StorageInternal_expireEntries(aFeed) {
-        new Task(function() {
-            // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
-            if (Prefs.getBoolPref('database.limitStoredEntries')) {
-                let query = new Query({
-                    feeds: [aFeed.feedID],
-                    deleted: Storage.ENTRY_STATE_NORMAL,
-                    starred: false,
-                    sortOrder: Query.prototype.SORT_BY_DATE,
-                    offset: Prefs.getIntPref('database.maxStoredEntries')
-                })
+        // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
+        if (Prefs.getBoolPref('database.limitStoredEntries')) {
+            let query = new Query({
+                feeds: [aFeed.feedID],
+                deleted: Storage.ENTRY_STATE_NORMAL,
+                starred: false,
+                sortOrder: Query.prototype.SORT_BY_DATE,
+                offset: Prefs.getIntPref('database.maxStoredEntries')
+            })
 
-                query.deleteEntries(Storage.ENTRY_STATE_TRASHED, this.resume);
-                yield;
-            }
+            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, arguments.callee.resume);
+        }
 
-            // Delete old entries in feeds that don't have per-feed setting enabled.
-            if (Prefs.getBoolPref('database.expireEntries') && !aFeed.entryAgeLimit) {
-                let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
+        // Delete old entries in feeds that don't have per-feed setting enabled.
+        if (Prefs.getBoolPref('database.expireEntries') && !aFeed.entryAgeLimit) {
+            let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
 
-                let query = new Query({
-                    feeds: [aFeed.feedID],
-                    deleted: Storage.ENTRY_STATE_NORMAL,
-                    starred: false,
-                    endDate: Date.now() - expirationAge * 86400000
-                })
+            let query = new Query({
+                feeds: [aFeed.feedID],
+                deleted: Storage.ENTRY_STATE_NORMAL,
+                starred: false,
+                endDate: Date.now() - expirationAge * 86400000
+            })
 
-                query.deleteEntries(Storage.ENTRY_STATE_TRASHED, this.resume);
-                yield;
-            }
+            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, arguments.callee.resume);
+        }
 
-            // Delete old entries based on per-feed limit.
-            if (aFeed.entryAgeLimit > 0) {
-                let query = new Query({
-                    feeds: [aFeed.feedID],
-                    deleted: Storage.ENTRY_STATE_NORMAL,
-                    starred: false,
-                    endDate: Date.now() - aFeed.entryAgeLimit * 86400000
-                })
+        // Delete old entries based on per-feed limit.
+        if (aFeed.entryAgeLimit > 0) {
+            let query = new Query({
+                feeds: [aFeed.feedID],
+                deleted: Storage.ENTRY_STATE_NORMAL,
+                starred: false,
+                endDate: Date.now() - aFeed.entryAgeLimit * 86400000
+            })
 
-                query.deleteEntries(Storage.ENTRY_STATE_TRASHED, this.resume);
-            }
-        })
-    },
+            query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+        }
+    }.gen(),
 
     // Permanently removes deleted items from database.
     purgeDeleted: function StorageInternal_purgeDeleted() {
@@ -742,8 +734,7 @@ FeedProcessor.prototype = {
         let self = this;
 
         select.executeAsync({
-            handleResult: function(aResults) {
-                let row = aResults.next();
+            handleResult: function(row) {
                 storedID = row.id;
                 storedDate = row.date;
                 isEntryRead = row.read;
@@ -802,7 +793,7 @@ FeedProcessor.prototype = {
             })
         }
         catch (ex) {
-            Connection.reportDatabaseError('Error updating feeds. Failed to bind parameters to insertEntry.');
+            Connection.reportDatabaseError(null, 'Error updating feeds. Failed to bind parameters to insertEntry.');
             throw ex;
         }
 
@@ -815,7 +806,7 @@ FeedProcessor.prototype = {
         }
         catch (ex) {
             this.insertEntry.paramSets.pop();
-            Connection.reportDatabaseError('Error updating feeds. Failed to bind parameters to insertEntryText.');
+            Connection.reportDatabaseError(null, 'Error updating feeds. Failed to bind parameters to insertEntryText.');
             throw ex;
         }
 
@@ -832,9 +823,8 @@ FeedProcessor.prototype = {
 
             Connection.executeAsync(statements, {
 
-                handleResult: function(aResults) {
-                    for (let row in aResults)
-                        self.insertedEntries.push(row.id);
+                handleResult: function(row) {
+                    self.insertedEntries.push(row.id);
                 },
 
                 handleCompletion: function(aReason) {
@@ -987,34 +977,21 @@ Query.prototype = {
         let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
 
         new Statement(sql).executeAsync({
-            handleResult: function(aResults) aCallback(aResults.next().found),
+            handleResult: function(row) aCallback(row.found),
             handleError: this._onDatabaseError
         })
     },
 
     /**
      * Get a simple list of entries.
+     * XXX Check performance.
      *
      * @param aCallback
      *        Receives an array if IDs.
      */
     getEntries: function Query_getEntries(aCallback) {
-        let entries = [];
         let sql = 'SELECT entries.id ' + this._getQueryString(true);
-
-        new Statement(sql).executeAsync({
-            handleResult: function(aResults) {
-                // XXX Check performance.
-                for (let row in aResults)
-                    entries.push(row.id);
-            },
-
-            handleCompletion: function(aReason) {
-                aCallback(entries);
-            },
-
-            handleError: this._onDatabaseError
-        })
+        new Statement(sql).getResultsAsync(aCallback, this._onDatabaseError);
     },
 
 
@@ -1031,26 +1008,18 @@ Query.prototype = {
                   '       entries_text.authors, entries_text.tags                       ';
         sql += this._getQueryString(true, true);
 
-        let entries = [];
+        new Statement(sql).getResultsAsync(function(results) {
+            let entries = results.map(function(row) {
+                let entry = new Entry();
 
-        new Statement(sql).executeAsync({
-            handleResult: function(aResults) {
-                for (let row in aResults) {
-                    let entry = new Entry();
+                for (let column in row)
+                    entry[column] = row[column]
 
-                    for (let column in row)
-                        entry[column] = row[column]
+                return entry;
+            })
 
-                    entries.push(entry);
-                }
-            },
-
-            handleCompletion: function(aReason) {
-                aCallback(entries);
-            },
-
-            handleError: this._onDatabaseError
-        })
+            aCallback(entries);
+        }, this._onDatabaseError)
     },
 
 
@@ -1083,15 +1052,10 @@ Query.prototype = {
         let values = [];
 
         new Statement(sql).executeAsync({
-
-            handleResult: function(aResults) {
-                for (let row in aResults) {
-                    let value = row[aPropertyName];
-                    if (aDistinct && values.indexOf(value) != -1)
-                        continue;
-
+            handleResult: function(row) {
+                let value = row[aPropertyName];
+                if (!aDistinct || values.indexOf(value) == -1)
                     values.push(value);
-                }
             },
 
             handleCompletion: function(aReason) {
@@ -1116,7 +1080,7 @@ Query.prototype = {
         let sql = 'SELECT COUNT(1) AS count ' + this._getQueryString(true);
 
         new Statement(sql).executeAsync({
-            handleResult: function(aResults) aCallback(aResults.next().count),
+            handleResult: function(row) aCallback(row.count),
             handleError: this._onDatabaseError
         })
 
@@ -1139,18 +1103,16 @@ Query.prototype = {
         this.includeHiddenFeeds = tempHidden;
 
         new Statement(sql).executeAsync({
-            handleResult: function(aResults) {
-                for (let row in aResults) {
-                    entryIDs.push(row.id);
+            handleResult: function(row) {
+                entryIDs.push(row.id);
 
-                    if (feedIDs.indexOf(row.feedID) == -1)
-                        feedIDs.push(row.feedID);
+                if (feedIDs.indexOf(row.feedID) == -1)
+                    feedIDs.push(row.feedID);
 
-                    if (row.tags) {
-                        let arr = row.tags.split(', ');
-                        let newTags = arr.filter(function(t) tags.indexOf(t) === -1);
-                        tags = tags.concat(newTags);
-                    }
+                if (row.tags) {
+                    let arr = row.tags.split(', ');
+                    let newTags = arr.filter(function(t) tags.indexOf(t) === -1);
+                    tags = tags.concat(newTags);
                 }
             },
 
@@ -1180,22 +1142,20 @@ Query.prototype = {
         if (!this.limit && !this.offset)
             this.read = !aState;
 
-        let sql = 'UPDATE entries SET read = :read, updated = 0 ' + this._getQueryString();
-        let update = new Statement(sql);
-        update.params.read = aState ? 1 : 0;
+        let list = yield this.getEntryList(arguments.callee.resume);
 
-        this.getEntryList(function(list) {
-            this.read = tempRead;
+        this.read = tempRead;
 
-            if (!list.length)
-                return;
+        if (list.length) {
+            let sql = 'UPDATE entries SET read = :read, updated = 0 ';
+            let update = new Statement(sql + this._getQueryString());
+            update.params.read = aState ? 1 : 0;
+            yield update.executeAsync(arguments.callee.resume);
 
-            update.executeAsync(function() {
-                for (let observer in StorageInternal.observers)
-                    observer.onEntriesMarkedRead(list, aState);
-            })
-        })
-    },
+            for (let observer in StorageInternal.observers)
+                observer.onEntriesMarkedRead(list, aState);
+        }
+    }.gen(),
 
     /**
      * Set the deleted state of the selected entries or remove them from the database.
@@ -1205,23 +1165,18 @@ Query.prototype = {
      * @param aCallback
      */
     deleteEntries: function Query_deleteEntries(aState, aCallback) {
-        this.getEntryList(function(list) {
-            if (!list.length) {
-                if (aCallback)
-                    aCallback();
-                return;
-            }
-
+        let list = yield this.getEntryList(arguments.callee.resume);
+        if (list.length) {
             let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
-            new Statement(sql).executeAsync(function() {
-                for (let observer in StorageInternal.observers)
-                    observer.onEntriesDeleted(list, aState);
+            yield new Statement(sql).executeAsync(arguments.callee.resume);
 
-                if (aCallback)
-                    aCallback();
-            })
-        })
-    },
+            for (let observer in StorageInternal.observers)
+                observer.onEntriesDeleted(list, aState);
+        }
+
+        if (aCallback)
+            aCallback();
+    }.gen(),
 
 
     /**
@@ -1328,7 +1283,7 @@ Query.prototype = {
         // Ignore "SQL logic error or missing database" error which full-text search
         // throws when the query doesn't contain at least one non-excluded term.
         if (aError.result != 1) {
-            Connection.reportDatabaseError('', aError);
+            Connection.reportDatabaseError(aError);
             throw 'Database error';
         }
     },
@@ -1709,113 +1664,104 @@ let BookmarkObserver = {
  * the livemarks available in the Brief's home folder.
  */
 function LivemarksSync() {
-    let task = new Task(function() {
-        if (!this.checkHomeFolder())
-            return;
+    if (!this.checkHomeFolder())
+        return;
 
-        let livemarks = [];
-        let newLivemarks = [];
+    let livemarks = [];
+    let newLivemarks = [];
 
-        let feedListChanged = false;
+    let feedListChanged = false;
 
-        // Get a list of folders and Live Bookmarks in the user's home folder.
-        let options = Places.history.getNewQueryOptions();
-        let query = Places.history.getNewQuery();
-        query.setFolders([StorageInternal.homeFolderID], 1);
-        options.excludeItems = true;
-        let result = Places.history.executeQuery(query, options);
-        this.traversePlacesQueryResults(result.root, livemarks);
+    // Get a list of folders and Live Bookmarks in the user's home folder.
+    let options = Places.history.getNewQueryOptions();
+    let query = Places.history.getNewQuery();
+    query.setFolders([StorageInternal.homeFolderID], 1);
+    options.excludeItems = true;
+    let result = Places.history.executeQuery(query, options);
+    this.traversePlacesQueryResults(result.root, livemarks);
 
-        // Get a list all feeds stored in the database.
-        let storedFeeds = [];
-        yield Stm.getAllFeeds.executeAsync({
-            handleResult: function(results) {
-                for (let row in results)
-                    storedFeeds.push(row);
-            },
-            handleCompletion: function() {
-                task.resume();
-            }
-        })
+    // Get a list all feeds stored in the database.
+    let storedFeeds = yield Stm.getAllFeeds.getResultsAsync(arguments.callee.resume);
 
-        for (let livemark in livemarks) {
-            let feed = null;
-            for (let storedFeed in storedFeeds) {
-                if (storedFeed.feedID == livemark.feedID) {
-                    feed = storedFeed;
-                    break;
-                }
-            }
-
-            // Feed already in the database. Update its properties if neccessary.
-            if (feed) {
-                feed.bookmarked = true;
-
-                let properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
-                if (!feed.hidden && properties.every(function(p) feed[p] == livemark[p]))
-                    continue;
-
-                Stm.updateFeedProperties.paramSets.push({
-                    'title': livemark.title,
-                    'rowIndex': livemark.rowIndex,
-                    'parent': livemark.parent,
-                    'bookmarkID': livemark.bookmarkID,
-                    'hidden': 0,
-                    'feedID': livemark.feedID
-                })
-
-                feedListChanged = feedListChanged ||
-                                  livemark.rowIndex != feed.rowIndex ||
-                                  livemark.parent != feed.parent ||
-                                  livemark.title != feed.title ||
-                                  feed.hidden > 0;
-            }
-            // Feed not found in the database. Insert new feed.
-            else {
-                Stm.insertFeed.paramSets.push({
-                    'feedID': livemark.feedID,
-                    'feedURL': livemark.feedURL || null,
-                    'title': livemark.title,
-                    'rowIndex': livemark.rowIndex,
-                    'isFolder': livemark.isFolder ? 1 : 0,
-                    'parent': livemark.parent,
-                    'bookmarkID': livemark.bookmarkID
-                })
-
-                feedListChanged = true;
-                newLivemarks.push(livemark);
+    for (let livemark in livemarks) {
+        let feed = null;
+        for (let storedFeed in storedFeeds) {
+            if (storedFeed.feedID == livemark.feedID) {
+                feed = storedFeed;
+                break;
             }
         }
 
-        // Hide feeds and delete folders not found in bookmarks any more.
-        for (let feed in storedFeeds.filter(function(f) !f.bookmarked && !f.hidden)) {
-            if (feed.isFolder)
-                Stm.deleteFolder.paramSets.push({ 'feedID': feed.feedID });
-            else
-                Stm.hideFeed.paramSets.push({ 'hidden': Date.now(), 'feedID': feed.feedID });
+        // Feed already in the database. Update its properties if neccessary.
+        if (feed) {
+            feed.bookmarked = true;
+
+            let properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
+            if (!feed.hidden && properties.every(function(p) feed[p] == livemark[p]))
+                continue;
+
+            Stm.updateFeedProperties.paramSets.push({
+                'title': livemark.title,
+                'rowIndex': livemark.rowIndex,
+                'parent': livemark.parent,
+                'bookmarkID': livemark.bookmarkID,
+                'hidden': 0,
+                'feedID': livemark.feedID
+            })
+
+            feedListChanged = feedListChanged ||
+                              livemark.rowIndex != feed.rowIndex ||
+                              livemark.parent != feed.parent ||
+                              livemark.title != feed.title ||
+                              feed.hidden > 0;
+        }
+        // Feed not found in the database. Insert new feed.
+        else {
+            Stm.insertFeed.paramSets.push({
+                'feedID': livemark.feedID,
+                'feedURL': livemark.feedURL || null,
+                'title': livemark.title,
+                'rowIndex': livemark.rowIndex,
+                'isFolder': livemark.isFolder ? 1 : 0,
+                'parent': livemark.parent,
+                'bookmarkID': livemark.bookmarkID
+            })
 
             feedListChanged = true;
+            newLivemarks.push(livemark);
         }
+    }
 
-        let statements = [Stm.updateFeedProperties, Stm.insertFeed,
-                          Stm.deleteFolder, Stm.hideFeed];
-        statements = statements.filter(function(s) s.paramSets.length);
-        if (!statements.length)
-            return;
+    // Hide feeds and delete folders not found in bookmarks any more.
+    for (let feed in storedFeeds.filter(function(f) !f.bookmarked && !f.hidden)) {
+        if (feed.isFolder)
+            Stm.deleteFolder.paramSets.push({ 'feedID': feed.feedID });
+        else
+            Stm.hideFeed.paramSets.push({ 'hidden': Date.now(), 'feedID': feed.feedID });
 
-        yield Connection.executeAsync(statements, task.resume);
+        feedListChanged = true;
+    }
 
-        if (feedListChanged) {
-            yield StorageInternal.refreshFeedsCache(true, task.resume);
+    let statements = [Stm.updateFeedProperties, Stm.insertFeed,
+                      Stm.deleteFolder, Stm.hideFeed];
+    statements = statements.filter(function(s) s.paramSets.length);
+    if (!statements.length)
+        return;
 
-            let newFeeds = newLivemarks.filter(function(l) !l.isFolder);
-            if (newFeeds.length) {
-                newFeeds = newFeeds.map(function(f) StorageInternal.getFeed(f.feedID));
-                FeedUpdateService.updateFeeds(newFeeds);
-            }
+    yield Connection.executeAsync(statements, arguments.callee.resume);
+
+    if (feedListChanged) {
+        yield StorageInternal.refreshFeedsCache(true, arguments.callee.resume);
+
+        let newFeeds = newLivemarks.filter(function(l) !l.isFolder);
+        if (newFeeds.length) {
+            newFeeds = newFeeds.map(function(f) StorageInternal.getFeed(f.feedID));
+            FeedUpdateService.updateFeeds(newFeeds);
         }
-    }.bind(this))
+    }
 }
+
+LivemarksSync = LivemarksSync.gen();
 
 LivemarksSync.prototype = {
 
@@ -2157,54 +2103,23 @@ let Utils = {
     },
 
     getEntriesByURL: function getEntriesByURL(aURL, aCallback) {
-        let entries = [];
-
         Stm.selectEntriesByURL.params.url = aURL;
-        Stm.selectEntriesByURL.executeAsync({
-            handleResult: function(aResults) {
-                for (let row in aResults)
-                    entries.push(row.id);
-            },
-
-            handleCompletion: function(aReason) {
-                aCallback(entries);
-            }
+        Stm.selectEntriesByURL.getResultsAsync(function(results) {
+            aCallback([row.id for each (row in results)]);
         })
     },
 
     getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID, aCallback) {
-        let entries = [];
-
         Stm.selectEntriesByBookmarkID.params.bookmarkID = aBookmarkID;
-        Stm.selectEntriesByBookmarkID.executeAsync({
-            handleResult: function(aResults) {
-                for (let row in aResults) {
-                    entries.push({
-                        id: row.id,
-                        url: row.entryURL
-                    })
-                }
-            },
-
-            handleCompletion: function(aReason) {
-                aCallback(entries);
-            }
+        Stm.selectEntriesByBookmarkID.getResultsAsync(function(results) {
+            aCallback([{ id: row.id, url: row.entryURL } for each (row in results)])
         })
     },
 
     getEntriesByTagName: function getEntriesByTagName(aTagName, aCallback) {
-        let entries = [];
-
         Stm.selectEntriesByTagName.params.tagName = aTagName;
-        Stm.selectEntriesByTagName.executeAsync({
-            handleResult: function(aResults) {
-                for (let row in aResults)
-                    entries.push(row.id)
-            },
-
-            handleCompletion: function(aReason) {
-                aCallback(entries);
-            }
+        Stm.selectEntriesByTagName.getResultsAsync(function(results) {
+            aCallback([row.id for each (row in results)]);
         })
     },
 
