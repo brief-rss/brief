@@ -1859,7 +1859,6 @@ var BookmarkObserver = {
  * the livemarks available in the Brief's home folder.
  */
 function LivemarksSync() {
-    return;
     if (!this.checkHomeFolder())
         return;
 
