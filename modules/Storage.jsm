@@ -645,7 +645,6 @@ function FeedProcessor(aFeed, aCallback) {
         this.remainingEntriesCount = aFeed.entries.length;
 
         this.updatedEntries = [];
-        this.insertedEntries = [];
 
         this.updateEntry = new Statement(Stm.updateEntry);
         this.insertEntry = new Statement(Stm.insertEntry);
@@ -657,7 +656,7 @@ function FeedProcessor(aFeed, aCallback) {
         aFeed.entries.forEach(this.processEntry, this);
     }
     else {
-        aCallback(0);
+        aCallback(true, 0);
     }
 
     let properties = {
@@ -681,9 +680,6 @@ function FeedProcessor(aFeed, aCallback) {
 }
 
 FeedProcessor.prototype = {
-
-    entriesToUpdateCount: 0,
-    entriesToInsertCount: 0,
 
     processEntry: function FeedProcessor_processEntry(aEntry) {
         if (aEntry.date && aEntry.date < this.oldestEntryDate)
@@ -775,7 +771,6 @@ FeedProcessor.prototype = {
             'id': aStoredEntryID
         })
 
-        this.entriesToUpdateCount++;
         this.updatedEntries.push(aStoredEntryID);
     },
 
@@ -783,81 +778,71 @@ FeedProcessor.prototype = {
         let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
         try {
-            this.insertEntry.paramSets.push({
+            var insertEntryParamSet = {
                 'feedID': this.feed.feedID,
                 'primaryHash': aPrimaryHash,
                 'secondaryHash': aSecondaryHash,
                 'providedID': aEntry.wrappedEntry.id,
                 'entryURL': aEntry.entryURL,
                 'date': aEntry.date || Date.now()
-            })
-        }
-        catch (ex) {
-            Connection.reportDatabaseError(null, 'Error updating feeds. Failed to bind parameters to insertEntry.');
-            throw ex;
-        }
+            }
 
-        try {
-            this.insertEntryText.paramSets.push({
+            var insertEntryTextParamSet = {
                 'title': title,
                 'content': aEntry.content || aEntry.summary,
                 'authors': aEntry.authors
-            })
+            }
         }
         catch (ex) {
-            this.insertEntry.paramSets.pop();
-            Connection.reportDatabaseError(null, 'Error updating feeds. Failed to bind parameters to insertEntryText.');
-            throw ex;
+            Cu.reportError('Error updating feeds. Failed to bind parameters to insert statement.');
+            Cu.reportError(ex);
+            return;
         }
 
-        this.entriesToInsertCount++;
+        this.insertEntry.paramSets.push(insertEntryParamSet);
+        this.insertEntryText.paramSets.push(insertEntryTextParamSet);
     },
 
     executeAndNotify: function FeedProcessor_executeAndNotify() {
-        let self = this;
+        let resume = FeedProcessor_executeAndNotify.resume;
 
-        if (this.entriesToInsertCount) {
+        if (this.insertEntry.paramSets.length) {
+            let insertedEntries = [];
+
             let getLastRowids = new Statement(Stm.getLastRowids);
-            getLastRowids.params.count = this.entriesToInsertCount;
+            getLastRowids.params.count = this.insertEntry.paramSets.length;
+
             let statements = [this.insertEntry, this.insertEntryText, getLastRowids];
 
-            Connection.executeAsync(statements, {
-
+            let reason = yield Connection.executeAsync(statements, {
                 handleResult: function(row) {
-                    self.insertedEntries.push(row.id);
+                    insertedEntries.push(row.id);
                 },
-
-                handleCompletion: function(aReason) {
-                    if (aReason == REASON_ERROR)
-                        return;
-
-                    new Query(self.insertedEntries).getEntryList(function(aList) {
-                        for (let observer in StorageInternal.observers)
-                            observer.onEntriesAdded(aList);
-
-                        let feed = StorageInternal.getFeed(self.feed.feedID);
-                        StorageInternal.expireEntries(feed);
-                    })
-
-                    // XXX This should be optimized and/or be asynchronous
-                    // query.verifyBookmarksAndTags();
-                }
+                handleCompletion: resume
             })
+
+            if (reason === REASON_FINISHED) {
+                let list = yield new Query(insertedEntries).getEntryList(resume);
+                for (let observer in StorageInternal.observers)
+                    observer.onEntriesAdded(list);
+
+                let feed = StorageInternal.getFeed(this.feed.feedID);
+                StorageInternal.expireEntries(feed);
+            }
+
+            this.callback(reason === REASON_FINISHED, insertedEntries.length);
         }
 
-        if (this.entriesToUpdateCount) {
+        if (this.updateEntry.paramSets.length) {
             let statements = [this.updateEntry, this.updateEntryText];
 
-            Connection.executeAsync(statements, function() {
-                new Query(self.updatedEntries).getEntryList(function(aList) {
-                    for (let observer in StorageInternal.observers)
-                        observer.onEntriesUpdated(aList);
-                })
-            })
-        }
+            yield Connection.executeAsync(statements, resume);
 
-        this.callback(this.entriesToInsertCount);
-    }
+            let list = yield new Query(this.updatedEntries).getEntryList(resume);
+            for (let observer in StorageInternal.observers)
+                observer.onEntriesUpdated(list);
+        }
+    }.gen()
 
 }
 
