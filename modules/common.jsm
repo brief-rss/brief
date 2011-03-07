@@ -1,4 +1,4 @@
-const EXPORTED_SYMBOLS = ['IMPORT_COMMON'];
+const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'Task', 'log'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 
@@ -7,16 +7,10 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 function IMPORT_COMMON(aScope) {
-    aScope.Cc = Cc;
-    aScope.Ci = Ci;
-    aScope.Cu = Cu;
-
-    aScope.log = log;
-
     aScope.Array.prototype.__iterator__ = Array.prototype.__iterator__;
     aScope.Array.prototype.intersect = Array.prototype.intersect;
 
-    aScope.Task = Task;
+    aScope.Function.prototype.gen = Function.prototype.gen;
 }
 
 
@@ -48,18 +42,31 @@ function log(aMessage) {
 }
 
 
-function Task(aGenerator) {
-    let generator = aGenerator.call(this);
+function Task(aGeneratorFunction) {
+    let generatorInstance = aGeneratorFunction.call(this, resume);
+    resume();
 
-    this.resume = function(aReturnValue) {
+    function resume() {
         try {
-            generator.send(aReturnValue);
+            generatorInstance.send.apply(generatorInstance, arguments);
         }
         catch (ex if ex == StopIteration) {}
     }
+}
 
-    try {
-        generator.next();
+Function.prototype.gen = function() {
+    let generatorFunction = this;
+
+    return function generatorWrapper() {
+        let generatorInstance = generatorFunction.apply(this, arguments);
+        resume();
+
+        function resume() {
+            try {
+                generatorFunction.resume = resume;
+                generatorInstance.send.apply(generatorInstance, arguments);
+            }
+            catch (ex if ex == StopIteration) {}
+        }
     }
-    catch (ex if ex == StopIteration) {}
 }
