@@ -7,7 +7,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 12;
+const DATABASE_VERSION = 13;
 
 const FEEDS_TABLE_SCHEMA = [
     'feedID          TEXT UNIQUE',
@@ -2412,6 +2412,23 @@ var Migration = {
         // To 1.5
         case 11:
             ExecuteSQL('ANALYZE');
+
+        // To 1.5.2
+        // Correct out-of-sync rowids between entries and entries_text tables.
+        case 12:
+            let sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT 1';
+            let topEntriesRowid = new Statement(sql).getSingleResult().rowid;
+
+            sql = 'SELECT rowid FROM entries_text ORDER BY rowid DESC LIMIT 1';
+            let topEntriesTextRowid = new Statement(sql).getSingleResult().rowid;
+
+            if (topEntriesRowid != topEntriesTextRowid) {
+                sql = 'DELETE FROM entries WHERE rowid > :topEntriesTextRowid';
+                new Statement(sql).execute({ topEntriesTextRowid: topEntriesTextRowid })
+
+                sql = 'UPDATE sqlite_sequence SET seq = :topEntriesTextRowid WHERE name = "entries"';
+                new Statement(sql).execute({ topEntriesTextRowid: topEntriesTextRowid })
+            }
 
         }
 
