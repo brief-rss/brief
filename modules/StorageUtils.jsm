@@ -1,4 +1,4 @@
-const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement'];
+const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement', 'StorageAsyncStatement'];
 
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
@@ -105,6 +105,15 @@ StorageConnection.prototype = {
     },
 
     /**
+     * Creates a new StorageAsyncStatement for this connection.
+     *
+     * @see StorageConnection.createStatement().
+     */
+    createAsyncStatement: function Connection_createAsyncStatement(aStatement, aDefaultParams) {
+        return new StorageAsyncStatement(this, aStatement, aDefaultParams);
+    },
+
+    /**
      * Wrapper for mozIStorageConnection.executeAsync().
      *
      * @param aStatements
@@ -138,68 +147,28 @@ StorageConnection.prototype = {
 
 
 /**
- * Wrapper object for mozIStorageStatement.
+ * Wrapper object for mozIStorageAsyncStatement.
  *
- * @param aConnection
- *        StorageConnection to create a statement for.
- * @param aStatement
- *        SQL string of the statement, or another StorageStatement object to clone.
- * @param aDefaultParams [optional]
- *        Object whose properties are name-value pairs of the default parameters.
- *        Default parameters are the parameters which will be used if no other
- *        parameters are bound.
+ * See StorageStatement for description of parameters.
  */
-function StorageStatement(aConnection, aStatement, aDefaultParams) {
-    // Copy constructor.
-    if (aStatement instanceof StorageStatement) {
-        this._nativeStatement = aStatement._nativeStatement.clone();
-        this._connection = aStatement._connection;
-        this._defaultParams = aStatement._defaultParams;
-        this._isWritingStatement = aStatement._isWritingStatement;
-    }
-    // New statement from an SQL string.
-    else {
-        this._connection = aConnection;
+function StorageAsyncStatement(aConnection, aStatement, aDefaultParams) {
+    this._init(aConnection, aStatement, aDefaultParams);
 
-        try {
-            this._nativeStatement = aConnection._nativeConnection.createStatement(aStatement);
-        }
-        catch (ex) {
-            this._connection.reportDatabaseError(null, 'Statement:\n' + aStatement);
-            throw ex;
-        }
-
-        this._defaultParams = aDefaultParams || null;
-        this._isWritingStatement = !/^\s*SELECT/.test(aStatement);
-    }
-
-    this.paramSets = [];
-    this.params = {};
+    if (typeof aStatement == 'string')
+        this._nativeStatement = aConnection._nativeConnection.createAsyncStatement(aStatement);
 }
 
-StorageStatement.prototype = {
-
-    // Object whose properties are name-value pairs of parameters
-    params: {},
-
-    // Array of objects whose properties are name-value pairs of parameters.
-    paramSets: [],
+StorageAsyncStatement.prototype = {
 
     /**
-     * Synchronously executes the statement with the bound parameters.
-     * Parameters passed directly to this function are favored over
-     * the ones bound in the params property.
-     *
-     * @param aParams [optional]
-     *        Object whose properties are name-value pairs of parameters to bind.
+     * Object whose properties are name-value pairs of parameters
      */
-    execute: function Statement_execute(aParams) {
-        if (aParams)
-            this.params = aParams;
+    params: {},
 
-        this._bindParams();
-        this._nativeStatement.execute();
-    },
+    /**
+     * Array of objects whose properties are name-value pairs of parameters.
+     */
+    paramSets: [],
 
     /**
      * Asynchronously executes the statement with the bound parameters.
@@ -210,7 +179,7 @@ StorageStatement.prototype = {
      *        An object implementing any of mozIStorageStatementCallback's methods,
      *        or a single function treated as handleCompletion() method.
      */
-    executeAsync: function Statement_executeAsync(aCallback) {
+    executeAsync: function StorageAsyncStatement_executeAsync(aCallback) {
         this._bindParams();
         let callback = new StatementCallback(this, aCallback);
         if (this._isWritingStatement)
@@ -228,7 +197,7 @@ StorageStatement.prototype = {
      * @param aOnError [optional]
      *        Function called in case of an error, taking mozIStorageError as argument.
      */
-    getResultsAsync: function Statement_getResultsAsync(aCallback, aOnError) {
+    getResultsAsync: function StorageAsyncStatement_getResultsAsync(aCallback, aOnError) {
         if (this._isWritingStatement)
             throw new Error('StorageStatement.getResultsAsync() can be used only with SELECT statements');
 
@@ -261,30 +230,94 @@ StorageStatement.prototype = {
         })
     },
 
-    _bindParams: function Statement__bindParams() {
+    clone: function StorageAsyncStatement_clone() {
+        return new StorageAsyncStatement(null, this);
+    },
+
+    _init: function StorageAsyncStatement__init(aConnection, aStatement, aDefaultParams) {
+        // Copy constructor.
+        if (aStatement instanceof StorageAsyncStatement) {
+            this._nativeStatement = aStatement._nativeStatement.clone();
+            this._connection = aStatement._connection;
+            this._defaultParams = aStatement._defaultParams;
+            this._isWritingStatement = aStatement._isWritingStatement;
+            this._sqlString = aStatement._sqlString;
+        }
+        // New statement from an SQL string.
+        else {
+            this._connection = aConnection;
+            this._defaultParams = aDefaultParams || null;
+            this._isWritingStatement = !/^\s*SELECT/.test(aStatement);
+            this._sqlString = aStatement;
+        }
+
+        this.params = {};
+        this.paramSets = [];
+    },
+
+    _bindParams: function StorageAsyncStatement__bindParams() {
         for (let column in this._defaultParams)
             this._nativeStatement.params[column] = this._defaultParams[column];
 
-        if (!this.paramSets.length) {
-            for (let column in this.params)
-                this._nativeStatement.params[column] = this.params[column];
-        }
-        else {
+        if (this.paramSets.length) {
             let bindingParamsArray = this._nativeStatement.newBindingParamsArray();
-
             for (let i = 0; i < this.paramSets.length; i++) {
                 let set = this.paramSets[i];
                 let bp = bindingParamsArray.newBindingParams();
                 for (let column in set)
-                    bp.bindByName(column, set[column])
+                    bp.bindByName(column, set[column]);
                 bindingParamsArray.addParams(bp);
             }
 
             this._nativeStatement.bindParameters(bindingParamsArray);
         }
+        else {
+            for (let column in this.params)
+            this._nativeStatement.params[column] = this.params[column];
+        }
 
-        this.paramSets = [];
         this.params = {};
+        this.paramSets = [];
+    }
+
+}
+
+
+/**
+ * Wrapper object for mozIStorageStatement.
+ *
+ * @param aConnection
+ *        StorageConnection to create a statement for.
+ * @param aStatement
+ *        SQL string of the statement, or another StorageStatement object to clone.
+ * @param aDefaultParams [optional]
+ *        Object whose properties are name-value pairs of the default parameters.
+ *        Default parameters are the parameters which will be used if no other
+ *        parameters are bound.
+ */
+function StorageStatement(aConnection, aStatement, aDefaultParams) {
+    this._init(aConnection, aStatement, aDefaultParams);
+
+    if (typeof aStatement == 'string')
+        this._nativeStatement = aConnection._nativeConnection.createStatement(aStatement);
+}
+
+StorageStatement.prototype = {
+
+    /**
+     * Synchronously executes the statement with the bound parameters.
+     * Parameters passed directly to this function are favored over
+     * the ones bound in the params property.
+     *
+     * @param aParams [optional]
+     *        Object whose properties are name-value pairs of parameters to bind.
+     */
+    execute: function StorageStatement_execute(aParams) {
+        if (aParams)
+            this.params = aParams;
+
+        this._bindParams();
+        this._nativeStatement.execute();
     },
 
     /**
@@ -302,7 +335,30 @@ StorageStatement.prototype = {
         return this._resultsGenerator;
     },
 
-    _createResultGenerator: function Statement__createResultGenerator() {
+    /**
+     * Returns the first row of the results and resets the statement.
+     */
+    getSingleResult: function StorageStatement_getSingleResult() {
+        let row = this.results.next();
+        this.reset()
+
+        return row;
+    },
+
+    /**
+     * Unbinds parameters and resets the statement.
+     */
+    reset: function StorageStatement_reset() {
+        this.results.close();
+        this.params = {};
+        this.paramSets = [];
+    },
+
+    clone: function StorageStatement_clone() {
+        return new StorageStatement(null, this);
+    },
+
+    _createResultGenerator: function StorageStatement__createResultGenerator() {
         this._bindParams();
 
         // Avoid property lookup for performance.
@@ -330,32 +386,12 @@ StorageStatement.prototype = {
             nativeStatement.reset();
             this._resultsGenerator = null;
         }
-    },
-
-    /**
-     * Returns the first row of the results and resets the statement.
-     */
-    getSingleResult: function Statement_getSingleResult() {
-        let row = this.results.next();
-        this.reset()
-
-        return row;
-    },
-
-    /**
-     * Unbinds parameters and resets the statement.
-     */
-    reset: function Statement_reset() {
-        this.paramSets = [];
-        this.params = {};
-        this.results.close();
-    },
-
-    clone: function Statement_clone() {
-        return new StorageStatement(null, this);
     }
 
 }
+
+extend(StorageStatement, StorageAsyncStatement);
+
 
 /**
  * Wrapper object for mozIStorageStatementCallback.
