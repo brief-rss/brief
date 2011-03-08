@@ -232,6 +232,8 @@ StorageStatement.prototype = {
         if (this._isWritingStatement)
             throw new Error('StorageStatement.getResultsAsync() can be used only with SELECT statements');
 
+        this._bindParams();
+
         let rowArray = [];
 
         // Avoid property lookup for performance.
