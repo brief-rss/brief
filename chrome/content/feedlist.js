@@ -50,8 +50,10 @@ let ViewList = {
                 query.deleted = Storage.ENTRY_STATE_NORMAL;
                 query.starred = true;
 
-                if (TagList.tags.length)
-                    TagList.show();
+                Storage.getAllTags(function(tags) {
+                    if (tags.length)
+                        TagList.show();
+                })
                 break;
 
             case 'trash-folder':
@@ -108,16 +110,7 @@ let TagList = {
 
     ready: false,
 
-    get tags() {
-        if (!this.__tags)
-            this.__tags = Storage.getAllTags();
-        return this.__tags;
-    },
-
-    set tags(aTags) {
-        this.__tags = aTags;
-        return aTags;
-    },
+    tags: null,
 
     get selectedItem() {
         return this._listbox.selectedItem;
@@ -218,7 +211,7 @@ let TagList = {
         while (this._listbox.hasChildNodes())
             this._listbox.removeChild(this._listbox.lastChild);
 
-        this.tags = Storage.getAllTags();
+        this.tags = yield Storage.getAllTags(TagList__rebuild.resume);
 
         for (let i = 0; i < this.tags.length; i++) {
             let item = document.createElement('listitem');
@@ -231,7 +224,7 @@ let TagList = {
         }
 
         this.ready = true;
-    },
+    }.gen(),
 
     _refreshLabel: function TagList__refreshLabel(aTagName) {
         let query = new Query({
@@ -684,9 +677,6 @@ let FeedList = {
     onEntriesAdded: function FeedList_onEntriesAdded(aEntryList) {
         this.refreshFeedTreeitems(aEntryList.feedIDs);
         ViewList.refreshItem('unread-folder');
-
-        //ViewList.refreshItem('starred-folder');
-        //TagList.refreshTags(aEntryList.tags, true);
     },
 
     onEntriesUpdated: function FeedList_onEntriesUpdated(aEntryList) {

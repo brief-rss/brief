@@ -14,7 +14,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 13;
+const DATABASE_VERSION = 14;
 
 const FEEDS_TABLE_SCHEMA = [
     'feedID          TEXT UNIQUE',
@@ -121,10 +121,11 @@ const Storage = {
     /**
      * Gets a list of distinct tags for URLs of entries stored in the database.
      *
-     * @returns Array of tag names.
+     * @param aCallback
+     *        Receives an array of tag names.
      */
-    getAllTags: function() {
-        return StorageInternal.getAllTags();
+    getAllTags: function(aCallback) {
+        return StorageInternal.getAllTags(aCallback);
     },
 
     /**
@@ -406,8 +407,10 @@ let StorageInternal = {
     },
 
     // See Storage.
-    getAllTags: function StorageInternal_getAllTags() {
-        return [row.tagName for each (row in Stm.getAllTags.results)];
+    getAllTags: function StorageInternal_getAllTags(aCallback) {
+        Stm.getAllTags.getResultsAsync(function(results) {
+            aCallback([row.tagName for each (row in results)]);
+        })
     },
 
 
@@ -418,23 +421,14 @@ let StorageInternal = {
 
     // See Storage.
     setFeedOptions: function StorageInternal_setFeedOptions(aFeed) {
-        Stm.setFeedOptions.execute({
+        Stm.setFeedOptions.params = {
             'entryAgeLimit': aFeed.entryAgeLimit,
             'maxEntries': aFeed.maxEntries,
             'updateInterval': aFeed.updateInterval,
             'markUnread': aFeed.markModifiedEntriesUnread ? 1 : 0,
             'feedID': aFeed.feedID
-        });
-
-        // Update the cache if neccassary (it may not be if Feed instance that was
-        // passed to us was itself taken from the cache).
-        let feed = this.getFeed(aFeed.feedID);
-        if (feed != aFeed) {
-            feed.entryAgeLimit = aFeed.entryAgeLimit;
-            feed.maxEntries = aFeed.maxEntries;
-            feed.updateInterval = aFeed.updateInterval;
-            feed.markModifiedEntriesUnread = aFeed.markModifiedEntriesUnread;
         }
+        Stm.setFeedOptions.executeAsync();
     },
 
     // Moves items to Trash based on age and number limits.
@@ -570,19 +564,23 @@ let StorageInternal = {
      *        Don't notify observers.
      */
     starEntry: function StorageInternal_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
-        if (aState)
-            Stm.starEntry.execute({ 'bookmarkID': aBookmarkID, 'entryID': aEntryID });
-        else
-            Stm.unstarEntry.execute({ 'id': aEntryID });
+        let resume = StorageInternal_starEntry.resume;
 
-        if (aDontNotify)
-            return;
+        if (aState) {
+            Stm.starEntry.params = { 'bookmarkID': aBookmarkID, 'entryID': aEntryID };
+            yield Stm.starEntry.executeAsync(resume);
+        }
+        else {
+            Stm.unstarEntry.params = { 'id': aEntryID };
+            yield Stm.unstarEntry.executeAsync(resume);
+        }
 
-        new Query(aEntryID).getEntryList(function(aList) {
+        if (!aDontNotify) {
+            let list = yield new Query(aEntryID).getEntryList(resume);
             for (let observer in StorageInternal.observers)
-                observer.onEntriesStarred(aList, aState);
-        })
-    },
+                observer.onEntriesStarred(list, aState);
+        }
+    }.gen(),
 
     /**
      * Adds or removes a tag for an entry.
@@ -595,32 +593,36 @@ let StorageInternal = {
      *        Name of the tag.
      */
     tagEntry: function StorageInternal_tagEntry(aState, aEntryID, aTagName) {
-        Connection.runTransaction(function() {
-            let params = { 'entryID': aEntryID, 'tagName': aTagName };
+        let resume = StorageInternal_tagEntry.resume;
 
-            if (aState) {
-                let alreadyTagged = Stm.checkTag.getSingleResult(params).alreadyExists;
-                if (alreadyTagged)
-                    return;
+        let params = { 'entryID': aEntryID, 'tagName': aTagName };
 
-                Stm.tagEntry.execute(params);
-            }
-            else {
-                Stm.untagEntry.execute(params);
-            }
+        if (aState) {
+            Stm.checkTag.params = params;
+            let results = yield Stm.checkTag.getResultsAsync(resume);
+            if (results[0].alreadyTagged)
+                return;
 
-            // Update the serialized list of tags stored in entries_text table.
-            Stm.setSerializedTagList.execute({
-                'tags': Utils.getTagsForEntry(aEntryID).join(', '),
-                'entryID': aEntryID
-            })
+            Stm.tagEntry.params = params;
+            yield Stm.tagEntry.executeAsync(resume);
+        }
+        else {
+            Stm.untagEntry.params = params;
+            yield Stm.untagEntry.executeAsync(resume);
+        }
 
-            new Query(aEntryID).getEntryList(function(aList) {
-                for (let observer in StorageInternal.observers)
-                    observer.onEntriesTagged(aList, aState, aTagName);
-            })
-        })
-    },
+        // Update the serialized list of tags stored in entries_text table.
+        let newTags = yield Utils.getTagsForEntry(aEntryID, resume);
+        Stm.setSerializedTagList.params = {
+            'tags': newTags.join(', '),
+            'entryID': aEntryID
+        }
+        yield Stm.setSerializedTagList.executeAsync(resume);
+
+        let list = yield new Query(aEntryID).getEntryList(resume);
+        for (let observer in StorageInternal.observers)
+            observer.onEntriesTagged(list, aState, aTagName);
+    }.gen(),
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
 
@@ -1223,40 +1225,41 @@ Query.prototype = {
      * Tags are verified in the same manner.
      */
     verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
-        this.getFullEntries(function(entries) {
-            for (let entry in entries) {
-                let uri = Utils.newURI(entry.entryURL);
-                if (!uri)
-                    return;
+        let resume = Query_verifyBookmarksAndTags.resume;
 
-                let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
+        for (let entry in yield this.getFullEntries(resume)) {
+            let uri = Utils.newURI(entry.entryURL);
+            if (!uri)
+                return;
 
-                // Verify bookmarks.
-                let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
-                if (entry.starred && !normalBookmarks.length)
-                    new Query(entry.id).bookmarkEntries(true);
+            let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
 
-                else if (!entry.starred && normalBookmarks.length)
-                    StorageInternal.starEntry(true, entry.id, normalBookmarks[0]);
-
-                // Verify tags.
-                let storedTags = Utils.getTagsForEntry(entry.id);
-                let currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
-                                              .filter(Utils.isTagFolder)
-                                              .map(function(id) Bookmarks.getItemTitle(id));
-
-                for (let tag in storedTags) {
-                    if (currentTags.indexOf(tag) === -1)
-                        Places.tagging.tagURI(uri, [tag]);
-                }
-
-                for (let tag in currentTags) {
-                    if (storedTags.indexOf(tag) === -1)
-                        StorageInternal.tagEntry(true, entry.id, tag);
-                }
+            // Verify bookmarks.
+            let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
+            if (entry.starred && !normalBookmarks.length) {
+                new Query(entry.id).bookmarkEntries(true);
             }
-        })
-    },
+            else if (!entry.starred && normalBookmarks.length) {
+                StorageInternal.starEntry(true, entry.id, normalBookmarks[0]);
+            }
+
+            // Verify tags.
+            let storedTags = yield Utils.getTagsForEntry(entry.id, resume);
+            let currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
+                                          .filter(Utils.isTagFolder)
+                                          .map(function(id) Bookmarks.getItemTitle(id));
+
+            for (let tag in storedTags) {
+                if (currentTags.indexOf(tag) === -1)
+                    Places.tagging.tagURI(uri, [tag]);
+            }
+
+            for (let tag in currentTags) {
+                if (storedTags.indexOf(tag) === -1)
+                    StorageInternal.tagEntry(true, entry.id, tag);
+            }
+        }
+    }.gen(),
 
 
     /**
@@ -1507,8 +1510,8 @@ let BookmarkObserver = {
                 // its bookmarkID to point to that bookmark.
                 if (aEntries.length) {
                     let uri = Utils.newURI(aEntries[0].url);
-                    var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {}).
-                                              filter(Utils.isNormalBookmark);
+                    var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {})
+                                             .filter(Utils.isNormalBookmark);
                 }
 
                 for (let entry in aEntries) {
@@ -1538,10 +1541,11 @@ let BookmarkObserver = {
         case 'title':
             let feed = Utils.getFeedByBookmarkID(aItemID);
             if (feed) {
-                Stm.setFeedTitle.execute({ 'title': aNewValue, 'feedID': feed.feedID });
-                feed.title = aNewValue; // Update the cache.
-
-                Services.obs.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
+                Stm.setFeedTitle.params = { 'title': aNewValue, 'feedID': feed.feedID };
+                Stm.setFeedTitle.executeAsync(function() {
+                    feed.title = aNewValue; // Update cache.
+                    Services.obs.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
+                })
             }
             else if (Utils.isTagFolder(aItemID)) {
                 this.renameTag(aItemID, aNewValue);
@@ -1602,6 +1606,8 @@ let BookmarkObserver = {
      *        New name of the tag folder, i.e. new name of the tag.
      */
     renameTag: function BookmarkObserver_renameTag(aTagFolderID, aNewName) {
+        let resume = BookmarkObserver_renameTag.resume;
+
         // Get bookmarks in the renamed tag folder.
         let options = Places.history.getNewQueryOptions();
         let query = Places.history.getNewQuery();
@@ -1613,26 +1619,25 @@ let BookmarkObserver = {
             let tagID = result.root.getChild(i).itemId;
             let uri = Bookmarks.getBookmarkURI(tagID);
 
-            Utils.getEntriesByURL(uri.spec, function(aEntries) {
-                for (let entryID in aEntries) {
-                    StorageInternal.tagEntry(true, entryID, aNewName);
+            for (let entryID in yield Utils.getEntriesByURL(uri.spec, resume)) {
+                StorageInternal.tagEntry(true, entryID, aNewName);
 
-                    let storedTags = Utils.getTagsForEntry(entryID);
-                    let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
-                                               .map(function(id) Bookmarks.getFolderIdForItem(id))
-                                               .filter(Utils.isTagFolder)
-                                               .map(function(id) Bookmarks.getItemTitle(id));
+                let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
+                                           .map(function(id) Bookmarks.getFolderIdForItem(id))
+                                           .filter(Utils.isTagFolder)
+                                           .map(function(id) Bookmarks.getItemTitle(id));
 
-                    for (let tag in storedTags) {
-                        if (currentTags.indexOf(tag) === -1)
-                            StorageInternal.tagEntry(false, entryID, tag);
-                    }
-                }
-            })
+                let storedTags = yield Utils.getTagsForEntry(entryID, resume);
+
+                let removedTags = storedTags.filter(function(t) currentTags.indexOf(t) === -1);
+
+                for (let tag in removedTags)
+                    StorageInternal.tagEntry(false, entryID, tag);
+            }
         }
 
         result.root.containerOpen = false;
-    },
+    }.gen(),
 
     observe: function BookmarkObserver_observe(aSubject, aTopic, aData) {
         if (aTopic == 'timer-callback') {
@@ -1650,7 +1655,7 @@ let BookmarkObserver = {
  * Synchronizes the list of feeds stored in the database with
  * the livemarks available in the Brief's home folder.
  */
-function LivemarksSync() {
+let LivemarksSync = function LivemarksSync() {
     if (!this.checkHomeFolder())
         return;
 
@@ -1746,9 +1751,7 @@ function LivemarksSync() {
             FeedUpdateService.updateFeeds(newFeeds);
         }
     }
-}
-
-LivemarksSync = LivemarksSync.gen();
+}.gen();
 
 LivemarksSync.prototype = {
 
@@ -1756,10 +1759,10 @@ LivemarksSync.prototype = {
         let folderValid = true;
 
         if (StorageInternal.homeFolderID == -1) {
-            let hideAllFeeds = new Statement('UPDATE feeds SET hidden = :hidden');
-            hideAllFeeds.execute({ 'hidden': Date.now() });
-
-            StorageInternal.refreshFeedsCache(true);
+            Stm.hideAllFeeds.params.hidden = Date.now();
+            Stm.hideAllFeeds.executeAsync(function() {
+                StorageInternal.refreshFeedsCache(true);
+            })
             folderValid = false;
         }
         else {
@@ -2048,6 +2051,12 @@ let Stm = {
         return this.hideFeed = new Statement(sql);
     },
 
+    get hideAllFeeds() {
+        let sql = 'UPDATE feeds SET hidden = :hidden';
+        delete this.hideAllFeeds;
+        return this.hideAllFeeds = new Statement(sql);
+    },
+
     get updateFeedProperties() {
         let sql = 'UPDATE feeds SET title = :title, rowIndex = :rowIndex, parent = :parent, ' +
                   '                 bookmarkID = :bookmarkID, hidden = :hidden              ' +
@@ -2069,9 +2078,11 @@ let Stm = {
 
 let Utils = {
 
-    getTagsForEntry: function getTagsForEntry(aEntryID) {
+    getTagsForEntry: function getTagsForEntry(aEntryID, aCallback) {
         Stm.getTagsForEntry.params = { 'entryID': aEntryID };
-        return [row.tagName for each (row in Stm.getTagsForEntry.results)];
+        Stm.getTagsForEntry.getResultsAsync(function(results) {
+            aCallback([row.tagName for each (row in results)]);
+        })
     },
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
