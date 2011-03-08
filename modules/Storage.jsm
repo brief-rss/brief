@@ -808,9 +808,9 @@ FeedProcessor.prototype = {
     executeAndNotify: function FeedProcessor_executeAndNotify() {
         let resume = FeedProcessor_executeAndNotify.resume;
 
-        if (this.insertEntry.paramSets.length) {
-            let insertedEntries = [];
+        let insertedEntries = [];
 
+        if (this.insertEntry.paramSets.length) {
             let getLastRowids = new Statement(Stm.getLastRowids);
             getLastRowids.params.count = this.insertEntry.paramSets.length;
 
@@ -831,8 +831,6 @@ FeedProcessor.prototype = {
                 let feed = StorageInternal.getFeed(this.feed.feedID);
                 StorageInternal.expireEntries(feed);
             }
-
-            this.callback(reason === REASON_FINISHED, insertedEntries.length);
         }
 
         if (this.updateEntry.paramSets.length) {
@@ -844,6 +842,8 @@ FeedProcessor.prototype = {
             for (let observer in StorageInternal.observers)
                 observer.onEntriesUpdated(list);
         }
+
+        this.callback(insertedEntries.length);
     }.gen()
 
 }

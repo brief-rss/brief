@@ -428,7 +428,9 @@ FeedFetcher.prototype = {
             if (this.downloadedFeed.websiteURL) {
                 new FaviconFetcher(this.downloadedFeed.websiteURL, function(aFavicon) {
                     this.downloadedFeed.favicon = aFavicon;
-                    Storage.processFeed(this.downloadedFeed, this.finish.bind(this));
+                    Storage.processFeed(this.downloadedFeed, function(aNewEntriesCount) {
+                        this.finish(true, aNewEntriesCount);
+                    }.bind(this));
                 }.bind(this))
             }
             else {
@@ -436,7 +438,9 @@ FeedFetcher.prototype = {
             }
         }
         else {
-            Storage.processFeed(this.downloadedFeed, this.finish.bind(this));
+            Storage.processFeed(this.downloadedFeed, function(aNewEntriesCount) {
+                this.finish(true, aNewEntriesCount);
+            }.bind(this));
         }
     },
 
