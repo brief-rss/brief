@@ -1,4 +1,4 @@
-const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'Task', 'log'];
+const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'Task', 'log', 'extend'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 
@@ -35,6 +35,11 @@ Array.prototype.intersect = function intersect(aArr) {
             commonItems.push(this[i]);
     }
     return commonItems;
+}
+
+
+function extend(aSubtype, aSupertype) {
+    aSubtype.prototype.__proto__ = aSupertype.prototype;
 }
 
 function log(aMessage) {
