@@ -1,8 +1,7 @@
 const Brief = {
 
-    VERSION: '1.5.1',
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
-    RELEASE_NOTES_URL: 'http://brief.mozdev.org/versions/1.5.1.html',
+    RELEASE_NOTES_URL_PREFIX: 'http://brief.mozdev.org/versions/',
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
@@ -199,19 +198,17 @@ const Brief = {
                 this.onFirstRun();
             }
             else {
-                let prevVersion = this.prefs.getCharPref('lastVersion');
-
                 // If Brief has been updated, load the new version info page.
-                if (Services.vc.compare(prevVersion, this.VERSION) < 0) {
-                    setTimeout(function() {
-                        gBrowser.loadOneTab(Brief.RELEASE_NOTES_URL, {
-                            relatedToCurrent: false,
-                            inBackground: false
-                        });
-                    }, 0);
+                AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
+                    let prevVersion = this.prefs.getCharPref('lastVersion');
 
-                    this.prefs.setCharPref('lastVersion', this.VERSION);
-                }
+                    if (Services.vc.compare(prevVersion, addon.version) < 0) {
+                        let url = this.RELEASE_NOTES_URL_PREFIX + addon.version + '.html';
+                        gBrowser.loadOneTab(url, { relatedToCurrent: false,
+                                                   inBackground: false });
+                        this.prefs.setCharPref('lastVersion', addon.version);
+                    }
+                }.bind(this))
             }
 
             if (this.toolbarbutton) {
