@@ -3,20 +3,13 @@
  */
 
 Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 
 IMPORT_COMMON(this);
 
-let opml = {
 
-    init: function() {
-        this.historyService   = Cc['@mozilla.org/browser/nav-history-service;1'].
-                                getService(Ci.nsINavHistoryService);
-        this.bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].
-                                getService(Ci.nsINavBookmarksService);
-        this.livemarkService  = Cc['@mozilla.org/browser/livemark-service;2'].
-                                getService(Ci.nsILivemarkService);
-    },
+let opml = {
 
     importOPML: function() {
         let bundle = document.getElementById('options-bundle');
@@ -64,32 +57,29 @@ let opml = {
             for (let i = 0; i < results.length; i++)
                 carr = this.countItems(results[i], carr);
 
-            this.importLevel(results, null);
+            let transactions = [];
+
+            let homeFolder = document.getElementById('extensions.brief.homeFolder').value;
+            this.importLevel(results, homeFolder, transactions);
+
+            let aggregatedTrans = new PlacesAggregatedTransaction('Import feeds',
+                                                                  transactions);
+            PlacesUtils.transactionManager.doTransaction(aggregatedTrans);
         }
     },
 
-    importLevel: function(aNodes, aCreateIn) {
-        let createIn = aCreateIn;
-
-        // If aCreateIn is null then we are in the root level of the file.
-        if (!createIn) {
-            let home = document.getElementById('extensions.brief.homeFolder');
-            if (home != -1) {
-                createIn = home.value;
-            }
-            else {
-                // If there is no home folder set, then import livemarks into the
-                // bookmarks folder and set it as the home folder.
-                createIn = home.value = this.bookmarksService.bookmarksMenuFolder;
-            }
-        }
-
+    importLevel: function(aNodes, aCreateIn, aTransactions) {
         for (let i = 0; i < aNodes.length; i++) {
             let node = aNodes[i];
+
             switch (node.type) {
             case 'folder':
-                let newCreateIn = this.bookmarksService.createFolder(createIn, node.title, -1);
-                this.importLevel(node.children, newCreateIn);
+                let childItemsTransactions = [];
+                this.importLevel(node.children, null, childItemsTransactions);
+
+                let trans = new PlacesCreateFolderTransaction(node.title, aCreateIn, -1,
+                                                              null, childItemsTransactions);
+                aTransactions.push(trans);
                 break;
 
             case 'feed':
@@ -111,8 +101,9 @@ let opml = {
                     // We can live without siteURI.
                 }
 
-                this.livemarkService.createLivemark(createIn, node.title, siteURI,
-                                                    feedURI, -1);
+                trans = new PlacesCreateLivemarkTransaction(feedURI, siteURI,
+                                                            node.title, aCreateIn);
+                aTransactions.push(trans)
                 break;
 
             case 'link':
@@ -122,7 +113,8 @@ let opml = {
                 catch (ex) {
                     break;
                 }
-                this.bookmarksService.insertBookmark(createIn, uri, -1, node.title);
+                trans = new PlacesCreateBookmarkTransaction(uri, aCreateIn, -1, node.title);
+                aTransactions.push(trans);
                 break;
             }
         }
@@ -192,17 +184,13 @@ let opml = {
         let file = this.promptForFile(filePrefix);
 
         if (file) {
-            let home = document.getElementById('extensions.brief.homeFolder').value;
-            let folder = (home != -1) ? home
-                                      : this.bookmarksService.bookmarksMenuFolder;
+            let folder = document.getElementById('extensions.brief.homeFolder').value;
 
-            let options = this.historyService.getNewQueryOptions();
-            let query = this.historyService.getNewQuery();
-
+            let options = PlacesUtils.history.getNewQueryOptions();
+            let query = PlacesUtils.history.getNewQuery();
             query.setFolders([folder], 1);
             options.excludeItems = true;
-            let result = this.historyService.executeQuery(query, options);
-            let root = result.root;
+            let result = PlacesUtils.history.executeQuery(query, options);
 
             let data = '';
             data += '<?xml version="1.0" encoding="UTF-8"?>' + '\n';
@@ -213,20 +201,19 @@ let opml = {
             data += '\t' + '</head>' + '\n';
             data += '\t' + '<body>' + '\n';
 
-            data = this.addFolderToOPML(data, root, 0, true);
+            data = this.addFolderToOPML(data, result.root, 0, true);
 
             data += '\t' + '</body>' + '\n';
             data += '</opml>';
 
             // convert to utf-8 from native unicode
-            let converter = Cc['@mozilla.org/intl/scriptableunicodeconverter'].
-                            getService(Ci.nsIScriptableUnicodeConverter);
+            let converter = Cc['@mozilla.org/intl/scriptableunicodeconverter']
+                            .getService(Ci.nsIScriptableUnicodeConverter);
             converter.charset = 'UTF-8';
             data = converter.ConvertFromUnicode(data);
 
-            let outputStream = Cc['@mozilla.org/network/file-output-stream;1'].
-                               createInstance(Ci.nsIFileOutputStream);
-
+            let outputStream = Cc['@mozilla.org/network/file-output-stream;1']
+                               .createInstance(Ci.nsIFileOutputStream);
             outputStream.init(file, 0x04 | 0x08 | 0x20, 420, 0 );
             outputStream.write(data, data.length);
             outputStream.close();
@@ -243,7 +230,7 @@ let opml = {
             for (let i = 1; i < level; i++)
                 dataString += '\t';
 
-            let name = this.bookmarksService.getItemTitle(folder.itemId);
+            let name = PlacesUtils.bookmarks.getItemTitle(folder.itemId);
             dataString += '<outline text="' + this.cleanXMLText(name) + '">' + '\n';
         }
 
@@ -255,15 +242,15 @@ let opml = {
             if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
                 continue;
 
-            if (this.livemarkService.isLivemark(node.itemId)) {
+            if (PlacesUtils.livemarks.isLivemark(node.itemId)) {
                 dataString += '\t\t';
 
                 for (let j = 1; j < level; j++)
                     dataString += '\t';
 
-                let name = this.bookmarksService.getItemTitle(node.itemId);
-                let url = this.livemarkService.getSiteURI(node.itemId).spec;
-                let feedURL = this.livemarkService.getFeedURI(node.itemId).spec
+                let name = PlacesUtils.bookmarks.getItemTitle(node.itemId);
+                let url = PlacesUtils.livemarks.getSiteURI(node.itemId).spec;
+                let feedURL = PlacesUtils.livemarks.getFeedURI(node.itemId).spec
 
                 dataString += '<outline type="rss" version="RSS" '           +
                               'text="'          + this.cleanXMLText(name)    +
