@@ -13,8 +13,6 @@ function init() {
     gFeedsPane.initUpdateIntervalControls();
     gFeedsPane.updateExpirationDisabledState();
     gFeedsPane.updateStoredEntriesDisabledState();
-
-    opml.init();
 }
 
 function unload() {
