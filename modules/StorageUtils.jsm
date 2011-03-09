@@ -142,39 +142,29 @@ StorageConnection.prototype = {
  *
  * @param aConnection
  *        StorageConnection to create a statement for.
- * @param aStatement
+ * @param aSQLString
  *        SQL string of the statement, or another StorageStatement object to clone.
  * @param aDefaultParams [optional]
  *        Object whose properties are name-value pairs of the default parameters.
  *        Default parameters are the parameters which will be used if no other
  *        parameters are bound.
  */
-function StorageStatement(aConnection, aStatement, aDefaultParams) {
-    // Copy constructor.
-    if (aStatement instanceof StorageStatement) {
-        this._nativeStatement = aStatement._nativeStatement.clone();
-        this._connection = aStatement._connection;
-        this._defaultParams = aStatement._defaultParams;
-        this._isWritingStatement = aStatement._isWritingStatement;
-    }
-    // New statement from an SQL string.
-    else {
-        this._connection = aConnection;
-
-        try {
-            this._nativeStatement = aConnection._nativeConnection.createStatement(aStatement);
-        }
-        catch (ex) {
-            this._connection.reportDatabaseError(null, 'Statement:\n' + aStatement);
-            throw ex;
-        }
-
-        this._defaultParams = aDefaultParams || null;
-        this._isWritingStatement = !/^\s*SELECT/.test(aStatement);
-    }
+function StorageStatement(aConnection, aSQLString, aDefaultParams) {
+    this.connection = aConnection;
+    this.sqlString = aSQLString;
+    this.defaultParams = aDefaultParams || null;
+    this.isWritingStatement = !/^\s*SELECT/.test(aSQLString);
 
     this.paramSets = [];
     this.params = {};
+
+    try {
+        this._nativeStatement = aConnection._nativeConnection.createStatement(aSQLString);
+    }
+    catch (ex) {
+        this.connection.reportDatabaseError(null, 'Statement:\n' + aSQLString);
+        throw ex;
+    }
 }
 
 StorageStatement.prototype = {
@@ -213,8 +203,8 @@ StorageStatement.prototype = {
     executeAsync: function Statement_executeAsync(aCallback) {
         this._bindParams();
         let callback = new StatementCallback(this, aCallback);
-        if (this._isWritingStatement)
-            this._connection._writingStatementsQueue.add(this, callback);
+        if (this.isWritingStatement)
+            this.connection._writingStatementsQueue.add(this, callback);
         else
             this._nativeStatement.executeAsync(callback);
     },
@@ -229,7 +219,7 @@ StorageStatement.prototype = {
      *        Function called in case of an error, taking mozIStorageError as argument.
      */
     getResultsAsync: function Statement_getResultsAsync(aCallback, aOnError) {
-        if (this._isWritingStatement)
+        if (this.isWritingStatement)
             throw new Error('StorageStatement.getResultsAsync() can be used only with SELECT statements');
 
         this._bindParams();
@@ -257,29 +247,26 @@ StorageStatement.prototype = {
             handleCompletion: function(aReason) {
                 aCallback(rowArray);
             },
-            handleError: aOnError || this._connection.reportDatabaseError
+            handleError: aOnError || this.connection.reportDatabaseError
         })
     },
 
     _bindParams: function Statement__bindParams() {
-        for (let column in this._defaultParams)
-            this._nativeStatement.params[column] = this._defaultParams[column];
-
         if (!this.paramSets.length) {
+            for (let column in this.defaultParams)
+                this._nativeStatement.params[column] = this.defaultParams[column];
+
             for (let column in this.params)
                 this._nativeStatement.params[column] = this.params[column];
         }
         else {
             let bindingParamsArray = this._nativeStatement.newBindingParamsArray();
-
-            for (let i = 0; i < this.paramSets.length; i++) {
-                let set = this.paramSets[i];
+            for (let set in this.paramSets) {
                 let bp = bindingParamsArray.newBindingParams();
                 for (let column in set)
                     bp.bindByName(column, set[column])
                 bindingParamsArray.addParams(bp);
             }
-
             this._nativeStatement.bindParameters(bindingParamsArray);
         }
 
@@ -313,8 +300,8 @@ StorageStatement.prototype = {
         for (let i = 0; i < columnCount; i++)
             columns.push(nativeStatement.getColumnName(i));
 
-        if (this._connection.transactionInProgress)
-            this._connection._transactionStatements.push(this);
+        if (this.connection.transactionInProgress)
+            this.connection._transactionStatements.push(this);
 
         try {
             while (nativeStatement.step()) {
@@ -352,7 +339,12 @@ StorageStatement.prototype = {
     },
 
     clone: function Statement_clone() {
-        return new StorageStatement(null, this);
+        let statement = new StorageStatement(this.connection, this.sqlString,
+                                             this.defaultParams);
+        statement.params = this.params;
+        statement.paramSets = this.paramSets;
+
+        return statement;
     }
 
 }
@@ -368,7 +360,7 @@ StorageStatement.prototype = {
 function StatementCallback(aStatements, aCallback) {
     let statements = Array.isArray(aStatements) ? aStatements : [aStatements];
 
-    let selects = statements.filter(function(s) !s._isWritingStatement);
+    let selects = statements.filter(function(s) !s.isWritingStatement);
     if (selects.length == 1)
         this._selectStatement = selects[0];
     else if (selects.length > 1)
@@ -379,7 +371,7 @@ function StatementCallback(aStatements, aCallback) {
     else
         this._callback = aCallback || {};
 
-    this._connection = statements[0]._connection;
+    this.connection = statements[0].connection;
 }
 
 StatementCallback.prototype = {
@@ -421,7 +413,7 @@ StatementCallback.prototype = {
         if (this._callback.handleError)
             this._callback.handleError(aError);
         else
-            this._connection.reportDatabaseError(aError);
+            this.connection.reportDatabaseError(aError);
     }
 }
 
