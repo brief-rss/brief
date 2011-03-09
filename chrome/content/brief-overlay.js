@@ -55,14 +55,12 @@ const Brief = {
         return null;
     },
 
-
     doCommand: function Brief_doCommand(aCommand) {
         if (gBrowser.currentURI.spec == this.BRIEF_URL) {
             let win = gBrowser.contentDocument.defaultView.wrappedJSObject;
             win.Commands[aCommand]();
         }
     },
-
 
     updateAllFeeds: function Brief_updateAllFeeds() {
         let tempScope = {};
@@ -87,14 +85,106 @@ const Brief = {
 
         window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
                           features);
+    }
+
+    onTabLoad: function Brief_onTabLoad(aEvent) {
+        if (aEvent.target && aEvent.target.documentURI == Brief.BRIEF_URL)
+            gBrowser.setIcon(Brief.getBriefTab(), Brief.BRIEF_FAVICON_URL);
     },
 
-    refreshUI: function Brief_refreshUI() {
+    onWindowLoad: function Brief_onWindowLoad(aEvent) {
+        window.removeEventListener('load', arguments.callee, false);
+
+        if (this.prefs.getBoolPref('firstRun')) {
+            this.onFirstRun();
+        }
+        else {
+            // If Brief has been updated, load the new version info page.
+            AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
+                let prevVersion = this.prefs.getCharPref('lastVersion');
+
+                if (Services.vc.compare(prevVersion, addon.version) < 0) {
+                    let url = this.RELEASE_NOTES_URL_PREFIX + addon.version + '.html';
+                    gBrowser.loadOneTab(url, { relatedToCurrent: false,
+                                               inBackground: false });
+                    this.prefs.setCharPref('lastVersion', addon.version);
+                }
+            }.bind(this))
+        }
+
+        if (this.toolbarbutton) {
+            let showCounter = this.prefs.getBoolPref('showUnreadCounter');
+            this.statusCounter.hidden = !showCounter;
+
+            let menuitem = document.getElementById('brief-show-unread-counter');
+            menuitem.setAttribute('checked', showCounter);
+
+            // Because Brief's toolbarbutton doesn't use toolbarbutton's binding content,
+            // we must manually set the label in "icons and text" toolbar mode.
+            let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
+            label.value = this.toolbarbutton.label;
+        }
+
         this.updateStatus();
+
+        if (this.prefs.getBoolPref('hideChrome'))
+            XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
+
+        gBrowser.addEventListener('pageshow', this.onTabLoad, false);
+
+        this.storage.addObserver(this);
+        this.prefs.addObserver('', this.onPrefChanged, false);
+        Services.obs.addObserver(this.refreshUI, 'brief:invalidate-feedlist', false);
+
+        window.addEventListener('unload', this.onWindowUnload.bind(this), false);
+    },
+
+    onWindowUnload: function Brief_onWindowUnload(aEvent) {
+        this.storage.removeObserver(this);
+        this.prefs.removeObserver('', this.onPrefChanged);
+        Services.obs.removeObserver(this.refreshUI, 'brief:invalidate-feedlist');
+    },
+
+
+    onPrefChanged: function Brief_onPrefChanged(aSubject, aTopic, aData) {
+        if (aData == 'showUnreadCounter') {
+            let newValue = Brief.prefs.getBoolPref('showUnreadCounter');
+            Brief.statusCounter.hidden = !newValue;
+
+            let menuitem = document.getElementById('brief-show-unread-counter');
+            menuitem.setAttribute('checked', newValue);
+
+            if (newValue)
+                this.updateStatus();
+        }
+    },
+
+
+    onEntriesAdded: function Brief_onEntriesAdded(aEntryList) {
+        this.refreshUI();
+    },
+
+    onEntriesUpdated: function Brief_onEntriesUpdated(aEntryList) {
+        this.refreshUI();
+    },
+
+    onEntriesMarkedRead: function Brief_onEntriesMarkedRead(aEntryList, aState) {
+        this.refreshUI();
+    },
+
+    onEntriesDeleted: function Brief_onEntriesDeleted(aEntryList, aState) {
+        this.refreshUI();
+    },
+
+    onEntriesTagged: function() { },
+    onEntriesStarred: function() { },
+
+    refreshUI: function Brief_refreshUI() {
+        Brief.updateStatus();
 
         let tooltip = document.getElementById('brief-tooltip');
         if (tooltip.state == 'open' || tooltip.state == 'showing')
-            this.constructTooltip();
+            Brief.constructTooltip();
     },
 
     updateStatus: function Brief_updateStatus() {
@@ -184,110 +274,6 @@ const Brief = {
         }.bind(this))
     },
 
-    onTabLoad: function Brief_onTabLoad(aEvent) {
-        if (aEvent.target && aEvent.target.documentURI == Brief.BRIEF_URL)
-            gBrowser.setIcon(Brief.getBriefTab(), Brief.BRIEF_FAVICON_URL);
-    },
-
-    handleEvent: function Brief_handleEvent(aEvent) {
-        switch (aEvent.type) {
-        case 'load':
-            window.removeEventListener('load', this, false);
-
-            if (this.prefs.getBoolPref('firstRun')) {
-                this.onFirstRun();
-            }
-            else {
-                // If Brief has been updated, load the new version info page.
-                AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
-                    let prevVersion = this.prefs.getCharPref('lastVersion');
-
-                    if (Services.vc.compare(prevVersion, addon.version) < 0) {
-                        let url = this.RELEASE_NOTES_URL_PREFIX + addon.version + '.html';
-                        gBrowser.loadOneTab(url, { relatedToCurrent: false,
-                                                   inBackground: false });
-                        this.prefs.setCharPref('lastVersion', addon.version);
-                    }
-                }.bind(this))
-            }
-
-            if (this.toolbarbutton) {
-                let showCounter = this.prefs.getBoolPref('showUnreadCounter');
-                this.statusCounter.hidden = !showCounter;
-
-                let menuitem = document.getElementById('brief-show-unread-counter');
-                menuitem.setAttribute('checked', showCounter);
-
-                // Because Brief's toolbarbutton doesn't use toolbarbutton's binding content,
-                // we must manually set the label in "icons and text" toolbar mode.
-                let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
-                label.value = this.toolbarbutton.label;
-            }
-
-            this.updateStatus();
-
-            if (this.prefs.getBoolPref('hideChrome'))
-                XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
-
-            gBrowser.addEventListener('pageshow', this.onTabLoad, false);
-
-            this.prefs.addObserver('', this, false);
-            this.storage.addObserver(this);
-            Services.obs.addObserver(this, 'brief:invalidate-feedlist', false);
-
-            window.addEventListener('unload', this, false);
-            break;
-
-        case 'unload':
-            this.prefs.removeObserver('', this);
-            this.storage.removeObserver(this);
-            Services.obs.removeObserver(this, 'brief:invalidate-feedlist');
-            break;
-        }
-    },
-
-
-    observe: function Brief_observe(aSubject, aTopic, aData) {
-        switch (aTopic) {
-        case 'brief:invalidate-feedlist':
-            this.refreshUI();
-            break;
-
-        case 'nsPref:changed':
-            if (aData == 'showUnreadCounter') {
-                let newValue = this.prefs.getBoolPref('showUnreadCounter');
-                this.statusCounter.hidden = !newValue;
-
-                let menuitem = document.getElementById('brief-show-unread-counter');
-                menuitem.setAttribute('checked', newValue);
-
-                if (newValue)
-                    this.updateStatus();
-            }
-            break;
-        }
-    },
-
-
-    onEntriesAdded: function Brief_onEntriesAdded(aEntryList) {
-        this.refreshUI();
-    },
-
-    onEntriesUpdated: function Brief_onEntriesUpdated(aEntryList) {
-        this.refreshUI();
-    },
-
-    onEntriesMarkedRead: function Brief_onEntriesMarkedRead(aEntryList, aState) {
-        this.refreshUI();
-    },
-
-    onEntriesDeleted: function Brief_onEntriesDeleted(aEntryList, aState) {
-        this.refreshUI();
-    },
-
-    onEntriesTagged: function() { },
-    onEntriesStarred: function() { },
-
     onFirstRun: function Brief_onFirstRun() {
         // Add the toolbar button at the end of the Navigation Bar.
         let navbar = document.getElementById('nav-bar');
@@ -303,25 +289,17 @@ const Brief = {
         let bookmarks = PlacesUtils.bookmarks;
         let folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
                                               bookmarks.DEFAULT_INDEX);
-        Brief.prefs.setIntPref('homeFolder', folderID);
+        this.prefs.setIntPref('homeFolder', folderID);
 
         // Load the first run page.
         setTimeout(function() {
-            gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, {
-                relatedToCurrent: false,
-                inBackground: false
-            });
+            gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, { relatedToCurrent: false,
+                                                            inBackground: false      })
         }, 0)
 
-        Brief.prefs.setBoolPref('firstRun', false);
-    },
-
-    QueryInterface: function Brief_QueryInterface(aIID) {
-        if (aIID.equals(Ci.nsISupports) || aIID.equals(Ci.nsIDOMEventListener))
-            return this;
-        throw Components.results.NS_ERROR_NO_INTERFACE;
+        this.prefs.setBoolPref('firstRun', false);
     }
 
 }
 
-window.addEventListener('load', Brief, false);
+window.addEventListener('load', Brief.onWindowLoad.bind(Brief), false);
