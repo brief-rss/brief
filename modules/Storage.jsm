@@ -648,10 +648,10 @@ function FeedProcessor(aFeed, aCallback) {
 
         this.updatedEntries = [];
 
-        this.updateEntry = new Statement(Stm.updateEntry);
-        this.insertEntry = new Statement(Stm.insertEntry);
-        this.updateEntryText = new Statement(Stm.updateEntryText);
-        this.insertEntryText = new Statement(Stm.insertEntryText);
+        this.updateEntry = Stm.updateEntry.clone()
+        this.insertEntry = Stm.insertEntry.clone()
+        this.updateEntryText = Stm.updateEntryText.clone()
+        this.insertEntryText = Stm.insertEntryText.clone()
 
         this.oldestEntryDate = Date.now();
 
