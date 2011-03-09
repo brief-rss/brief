@@ -1,8 +1,8 @@
 const Brief = {
 
-    VERSION: '1.5.1',
+    VERSION: '1.5.2',
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
-    RELEASE_NOTES_URL: 'http://brief.mozdev.org/versions/1.5.1.html',
+    RELEASE_NOTES_URL: 'http://brief.mozdev.org/versions/1.5.2.html',
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
