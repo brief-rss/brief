@@ -811,10 +811,8 @@ FeedProcessor.prototype = {
         let insertedEntries = [];
 
         if (this.insertEntry.paramSets.length) {
-            let getLastRowids = new Statement(Stm.getLastRowids);
-            getLastRowids.params.count = this.insertEntry.paramSets.length;
-
-            let statements = [this.insertEntry, this.insertEntryText, getLastRowids];
+            Stm.getLastRowids.params.count = this.insertEntry.paramSets.length;
+            let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
 
             let reason = yield Connection.executeAsync(statements, {
                 handleResult: function(row) {
