@@ -85,7 +85,7 @@ const Brief = {
 
         window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
                           features);
-    }
+    },
 
     onTabLoad: function Brief_onTabLoad(aEvent) {
         if (aEvent.target && aEvent.target.documentURI == Brief.BRIEF_URL)
