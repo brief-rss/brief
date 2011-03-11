@@ -406,39 +406,40 @@ FeedFetcher.prototype = {
 
         this.bozo = aResult.bozo;
 
-        let feed = aResult.doc.QueryInterface(Ci.nsIFeed);
-        this.downloadedFeed = new Feed(feed);
+        let downloadedFeed = aResult.doc.QueryInterface(Ci.nsIFeed);
+        this.feed.mapProperties(downloadedFeed);
 
-        // The URI that we passed and aResult.uri (which is actual URI from which the data
-        // was fetched) may differ because of redirects. We want to use the former one
-        // here, because that's the one which is stored in the Live Bookmark.
-        this.downloadedFeed.feedURL = this.feed.feedURL;
-        this.downloadedFeed.feedID = this.feed.feedID;
-        this.downloadedFeed.favicon = this.feed.favicon;
-        this.downloadedFeed.lastFaviconRefresh = this.feed.lastFaviconRefresh;
+        entries = [];
+        if (downloadedFeed.items) {
+            // Counting down, because the order of items is reversed after parsing.
+            for (let i = downloadedFeed.items.length - 1; i >= 0; i--) {
+                let entry = downloadedFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
+                entries.push(new Entry(entry));
+            }
+        }
 
-        let timeSinceRefresh = Date.now() - this.downloadedFeed.lastFaviconRefresh;
+        let timeSinceRefresh = Date.now() - this.feed.lastFaviconRefresh;
 
-        if (!this.downloadedFeed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL) {
-            this.downloadedFeed.lastFaviconRefresh = Date.now();
+        if (!this.feed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL) {
+            this.feed.lastFaviconRefresh = Date.now();
 
             // We use websiteURL instead of feedURL for resolving the favicon URL,
             // because many websites use services like Feedburner for generating their
             // feeds and we'd get the Feedburner's favicon instead.
-            if (this.downloadedFeed.websiteURL) {
-                new FaviconFetcher(this.downloadedFeed.websiteURL, function(aFavicon) {
-                    this.downloadedFeed.favicon = aFavicon;
-                    Storage.processFeed(this.downloadedFeed, function(aNewEntriesCount) {
+            if (this.feed.websiteURL) {
+                new FaviconFetcher(this.feed.websiteURL, function(aFavicon) {
+                    this.feed.favicon = aFavicon;
+                    Storage.processFeed(this.feed, entries, function(aNewEntriesCount) {
                         this.finish(true, aNewEntriesCount);
                     }.bind(this));
                 }.bind(this))
             }
             else {
-                this.downloadedFeed.favicon = 'no-favicon';
+                this.feed.favicon = 'no-favicon';
             }
         }
         else {
-            Storage.processFeed(this.downloadedFeed, function(aNewEntriesCount) {
+            Storage.processFeed(this.feed, entries, function(aNewEntriesCount) {
                 this.finish(true, aNewEntriesCount);
             }.bind(this));
         }

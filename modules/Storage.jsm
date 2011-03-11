@@ -129,16 +129,16 @@ const Storage = {
     },
 
     /**
-     * Evaluates provided entries, inserting any new items and updating existing
-     * items when newer versions are found. Also updates feed's properties.
+     * Updates feed properties and inserts/updates entries.
      *
      * @param aFeed
-     *        Contains the feed and the entries to evaluate.
+     *        Feed object containing the current feed's properties.
+     * @param aEntries
+     *        Array of Entry objects to process.
      * @param aCallback
-     *        Callback after the database is updated.
      */
-    processFeed: function(aFeed, aCallback) {
-        return StorageInternal.processFeed(aFeed, aCallback);
+    processFeed: function(aFeed, aEntries, aCallback) {
+        return StorageInternal.processFeed(aFeed, aEntries, aCallback);
     },
 
     /**
@@ -415,8 +415,8 @@ let StorageInternal = {
 
 
     // See Storage.
-    processFeed: function StorageInternal_processFeed(aFeed, aCallback) {
-        new FeedProcessor(aFeed, aCallback);
+    processFeed: function StorageInternal_processFeed(aFeed, aEntries, aCallback) {
+        new FeedProcessor(aFeed, aEntries, aCallback);
     },
 
     // See Storage.
@@ -633,59 +633,48 @@ let StorageInternal = {
  * Evaluates provided entries, inserting any new items and updating existing
  * items when newer versions are found. Also updates feed's properties.
  */
-function FeedProcessor(aFeed, aCallback) {
+function FeedProcessor(aFeed, aEntries, aCallback) {
     this.feed = aFeed;
     this.callback = aCallback;
 
-    let storedFeed = StorageInternal.getFeed(aFeed.feedID);
-    this.oldestEntryDate = storedFeed.oldestEntryDate;
-
     let newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-    let prevDateModified = storedFeed.dateModified;
+    let prevDateModified = aFeed.dateModified;
 
-    if (aFeed.entries.length && (!newDateModified || newDateModified > prevDateModified)) {
-        this.remainingEntriesCount = aFeed.entries.length;
+    if (aEntries.length && (!newDateModified || newDateModified > prevDateModified)) {
+        this.remainingEntriesCount = aEntries.length;
+        this.newOldestEntryDate = Date.now();
 
         this.updatedEntries = [];
 
-        this.updateEntry = Stm.updateEntry.clone()
-        this.insertEntry = Stm.insertEntry.clone()
-        this.updateEntryText = Stm.updateEntryText.clone()
-        this.insertEntryText = Stm.insertEntryText.clone()
+        this.updateEntry = Stm.updateEntry.clone();
+        this.insertEntry = Stm.insertEntry.clone();
+        this.updateEntryText = Stm.updateEntryText.clone();
+        this.insertEntryText = Stm.insertEntryText.clone();
 
-        this.oldestEntryDate = Date.now();
-
-        aFeed.entries.forEach(this.processEntry, this);
+        aEntries.forEach(this.processEntry, this);
     }
     else {
-        aCallback(true, 0);
+        aCallback(0);
     }
 
-    let properties = {
+    Stm.updateFeed.params = {
         'websiteURL': aFeed.websiteURL,
         'subtitle': aFeed.subtitle,
         'favicon': aFeed.favicon,
         'lastUpdated': Date.now(),
         'lastFaviconRefresh': aFeed.lastFaviconRefresh,
         'dateModified': newDateModified,
-        'oldestEntryDate': this.oldestEntryDate,
+        'oldestEntryDate': this.newOldestEntryDate || aFeed.oldestEntryDate,
         'feedID': aFeed.feedID
     }
-
-    Stm.updateFeed.params = properties;
     Stm.updateFeed.executeAsync();
-
-    // Keep cache up to date.
-    let cachedFeed = StorageInternal.getFeed(aFeed.feedID);
-    for (let p in properties)
-        cachedFeed[p] = properties[p];
 }
 
 FeedProcessor.prototype = {
 
     processEntry: function FeedProcessor_processEntry(aEntry) {
-        if (aEntry.date && aEntry.date < this.oldestEntryDate)
-            this.oldestEntryDate = aEntry.date;
+        if (aEntry.date && aEntry.date < this.newOldestEntryDate)
+            this.newOldestEntryDate = aEntry.date;
 
         // This function checks whether a downloaded entry is already in the database or
         // it is a new one. To do this we need a way to uniquely identify entries. Many
@@ -826,8 +815,7 @@ FeedProcessor.prototype = {
                 for (let observer in StorageInternal.observers)
                     observer.onEntriesAdded(list);
 
-                let feed = StorageInternal.getFeed(this.feed.feedID);
-                StorageInternal.expireEntries(feed);
+                StorageInternal.expireEntries(this.feed);
             }
         }
 
