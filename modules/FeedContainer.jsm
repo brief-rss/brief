@@ -5,42 +5,9 @@ Components.utils.import('resource://brief/common.jsm');
 IMPORT_COMMON(this);
 
 /**
- * Container for feed properties. You can pass an instance of nsIFeed to wrap
- * and map some of its selected properties for easier access.
- *
- * @param aFeed [optional]
- *        nsIFeed to wrap.
+ * Container for feed properties.
  */
-function Feed(aFeed) {
-    if (!aFeed)
-        return;
-
-    this.wrappedFeed = aFeed;
-
-    if (aFeed.title)
-        this.title = aFeed.title.text;
-    if (aFeed.link)
-        this.websiteURL = aFeed.link.spec;
-    if (aFeed.subtitle)
-        this.subtitle = aFeed.subtitle.text;
-    if (aFeed.image) {
-        try {
-            this.imageURL = aFeed.image.getPropertyAsAString('url');
-            this.imageLink = aFeed.image.getPropertyAsAString('link');
-            this.imageTitle = aFeed.image.getPropertyAsAString('title');
-        }
-        catch (e) {}
-    }
-    if (aFeed.items) {
-        this.entries = [];
-
-        // Counting down, because the order of items is reversed after parsing.
-        for (let i = aFeed.items.length - 1; i >= 0; i--) {
-            let entry = aFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
-            this.entries.push(new Entry(entry));
-        }
-    }
-}
+function Feed() { }
 
 Feed.prototype = {
 
@@ -56,9 +23,6 @@ Feed.prototype = {
     websiteURL: '',
     title:      '',
     subtitle:   '',
-    imageURL:   '',
-    imageLink:  '',
-    imageTitle: '',
     dateModified: 0,
 
     /**
@@ -94,16 +58,6 @@ Feed.prototype = {
     parent:   '',
 
     /**
-     * The wrapped nsIFeed.
-     */
-    wrappedFeed: null,
-
-    /**
-     * Entries from the wrapped nsIFeed, array of Entry objects.
-     */
-    entries: null,
-
-    /**
      * Feed's preferences.
      */
     entryAgeLimit:  0,
@@ -115,7 +69,29 @@ Feed.prototype = {
      * Date of the oldest entry that was available
      * when the feed was checked for updates.
      */
-    oldestEntryDate: 0
+    oldestEntryDate: 0,
+
+    /**
+     * The wrapped nsIFeed.
+     */
+    wrappedFeed: null,
+
+    /**
+     * Wrapp an instance of nsIFeed and maps its properties.
+     *
+     * @param aFeed [optional]
+     *        nsIFeed to wrap.
+     */
+    mapProperties: function Feed_mapProperties(aFeed) {
+        this.wrappedFeed = aFeed;
+
+        if (aFeed.title)
+            this.title = aFeed.title.text;
+        if (aFeed.link)
+            this.websiteURL = aFeed.link.spec;
+        if (aFeed.subtitle)
+            this.subtitle = aFeed.subtitle.text;
+    }
 
 }
 
