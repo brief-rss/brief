@@ -136,7 +136,7 @@ function saveChanges() {
 
     gFeed.markModifiedEntriesUnread = !getElement('updated-entries-checkbox').checked;
 
-    Storage.setFeedOptions(gFeed);
+    Storage.updateFeedProperties(gFeed);
 
     saveLivemarksData();
 
