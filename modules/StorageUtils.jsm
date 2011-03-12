@@ -286,7 +286,8 @@ StorageStatement.prototype = {
         }
 
         this.paramSets = [];
-        this.params = {};
+        for (paramName in this.params)
+            this.params[paramName] = undefined;
     },
 
     /**
