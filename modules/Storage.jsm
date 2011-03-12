@@ -22,9 +22,6 @@ const FEEDS_TABLE_SCHEMA = [
     'websiteURL      TEXT',
     'title           TEXT',
     'subtitle        TEXT',
-    'imageURL        TEXT',
-    'imageLink       TEXT',
-    'imageTitle      TEXT',
     'favicon         TEXT',
     'bookmarkID      TEXT',
     'parent          TEXT',
@@ -112,9 +109,10 @@ const Storage = {
      * Gets all feeds, without entries.
      *
      * @param aIncludeFolders [optional]
-     * @returns array of Feed's.
+     * @param aIncludeInactive [optional]
+     * @returns array of Feed objects.
      */
-    getAllFeeds: function(aIncludeFolders) {
+    getAllFeeds: function(aIncludeFolders, aIncludeInactive) {
         return StorageInternal.getAllFeeds(aIncludeFolders);
     },
 
@@ -122,7 +120,7 @@ const Storage = {
      * Gets a list of distinct tags for URLs of entries stored in the database.
      *
      * @param aCallback
-     *        Receives an array of tag names.
+     *        Receives an array of strings of tag names.
      */
     getAllTags: function(aCallback) {
         return StorageInternal.getAllTags(aCallback);
@@ -142,15 +140,15 @@ const Storage = {
     },
 
     /**
-     * Saves feed settings: entryAgeLimit, maxEntries, updateInterval and
-     * markModifiedEntriesUnread.
+     * Updates feed's properties and settings.
      *
      * @param aFeed
      *        Feed object whose properties to use to update the respective
      *        columns in the database.
+     * @param aCallback [optional]
      */
-    setFeedOptions: function(aFeed) {
-        return StorageInternal.setFeedOptions(aFeed);
+    updateFeedProperties: function(aFeed, aCallback) {
+        return StorageInternal.updateFeedProperties(aFeed, aCallback);
     },
 
     /**
@@ -212,9 +210,9 @@ const Storage = {
 
 let StorageInternal = {
 
-    feedsAndFoldersCache: null,
-    feedsCache:           null,
-
+    allItemsCache:    null,
+    activeItemsCache: null,
+    activeFeedsCache: null,
 
     init: function StorageInternal_init() {
         let profileDir = Services.dirsvc.get('ProfD', Ci.nsIFile);
@@ -353,50 +351,60 @@ let StorageInternal = {
     },
 
     // See Storage.
-    getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders) {
+    getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders, aIncludeInactive) {
         // It's not worth the trouble to make this function asynchronous like the
         // rest of the IO, as in-memory cache is practically always available.
         // However, in the rare case when the cache has just been invalidated
         // and hasn't been refreshed yet, we must fall back to a synchronous query.
-        if (!this.feedsCache) {
-            this.feedsCache = [];
-            this.feedsAndFoldersCache = [];
+        if (!this.allItemsCache) {
+            this.allItemsCache = [];
+            this.activeItemsCache = [];
+            this.activeFeedsCache = [];
 
-            for (let row in Stm.getAllActiveFeeds.results) {
+            for (let row in Stm.getAllFeeds.results) {
                 let feed = new Feed();
                 for (let column in row)
                     feed[column] = row[column];
 
-                this.feedsAndFoldersCache.push(feed);
-                if (!feed.isFolder)
-                    this.feedsCache.push(feed);
+                this.allItemsCache.push(feed);
+                if (!feed.hidden) {
+                    this.activeItemsCache.push(feed);
+                    if (!feed.isFolder)
+                        this.activeFeedsCache.push(feed);
+                }
             }
         }
 
-        return aIncludeFolders ? this.feedsAndFoldersCache : this.feedsCache;
+        if (aIncludeFolders && aIncludeInactive)
+            return this.allItemsCache;
+        else if (aIncludeFolders)
+            return this.activeItemsCache;
+        else
+            return this.activeFeedsCache;
     },
 
     refreshFeedsCache: function StorageInternal_refreshFeedsCache(aNotify, aCallback) {
-        this.feedsCache = null;
-        this.feedsAndFoldersCache = null;
+        this.allItemsCache = null;
+        this.activeItemsCache = null;
+        this.activeFeedsCache = null;
 
-        Stm.getAllActiveFeeds.getResultsAsync(function(results) {
-            let feeds = [];
-            let feedsAndFolders = [];
+        Stm.getAllFeeds.getResultsAsync(function(results) {
+            this.allItemsCache = [];
+            this.activeItemsCache = [];
+            this.activeFeedsCache = [];
 
             for (let row in results) {
                 let feed = new Feed();
-
                 for (let column in row)
                     feed[column] = row[column];
 
-                feedsAndFolders.push(feed);
-                if (!feed.isFolder)
-                    feeds.push(feed);
+                this.allItemsCache.push(feed);
+                if (!feed.hidden) {
+                    this.activeItemsCache.push(feed);
+                    if (!feed.isFolder)
+                        this.activeFeedsCache.push(feed);
+                }
             }
-
-            this.feedsCache = feeds;
-            this.feedsAndFoldersCache = feedsAndFolders;
 
             if (aNotify)
                 Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '')
@@ -420,19 +428,16 @@ let StorageInternal = {
     },
 
     // See Storage.
-    setFeedOptions: function StorageInternal_setFeedOptions(aFeed) {
-        Stm.setFeedOptions.params = {
-            'entryAgeLimit': aFeed.entryAgeLimit,
-            'maxEntries': aFeed.maxEntries,
-            'updateInterval': aFeed.updateInterval,
-            'markUnread': aFeed.markModifiedEntriesUnread ? 1 : 0,
-            'feedID': aFeed.feedID
-        }
-        Stm.setFeedOptions.executeAsync();
+    updateFeedProperties: function StorageInternal_updateFeedProperties(aFeed, aCallback) {
+        for (let paramName in Stm.updateFeedProperties.params)
+            Stm.updateFeedProperties.params[paramName] = aFeed[paramName];
+
+        Stm.updateFeedProperties.executeAsync(aCallback);
     },
 
     // Moves items to Trash based on age and number limits.
     expireEntries: function StorageInternal_expireEntries(aFeed) {
+        let resume = StorageInternal_expireEntries.resume;
         // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
         if (Prefs.getBoolPref('database.limitStoredEntries')) {
             let query = new Query({
@@ -443,7 +448,7 @@ let StorageInternal = {
                 offset: Prefs.getIntPref('database.maxStoredEntries')
             })
 
-            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, arguments.callee.resume);
+            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, resume);
         }
 
         // Delete old entries in feeds that don't have per-feed setting enabled.
@@ -457,7 +462,7 @@ let StorageInternal = {
                 endDate: Date.now() - expirationAge * 86400000
             })
 
-            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, arguments.callee.resume);
+            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, resume);
         }
 
         // Delete old entries based on per-feed limit.
@@ -657,17 +662,11 @@ function FeedProcessor(aFeed, aEntries, aCallback) {
         aCallback(0);
     }
 
-    Stm.updateFeed.params = {
-        'websiteURL': aFeed.websiteURL,
-        'subtitle': aFeed.subtitle,
-        'favicon': aFeed.favicon,
-        'lastUpdated': Date.now(),
-        'lastFaviconRefresh': aFeed.lastFaviconRefresh,
-        'dateModified': newDateModified,
-        'oldestEntryDate': this.newOldestEntryDate || aFeed.oldestEntryDate,
-        'feedID': aFeed.feedID
-    }
-    Stm.updateFeed.executeAsync();
+    aFeed.oldestEntryDate = this.newOldestEntryDate || aFeed.oldestEntryDate;
+    aFeed.lastUpdated = Date.now();
+    aFeed.dateModified = newDateModified;
+
+    StorageInternal.updateFeedProperties(aFeed);
 }
 
 FeedProcessor.prototype = {
@@ -1110,6 +1109,8 @@ Query.prototype = {
      *        New state of entries (TRUE for read, FALSE for unread).
      */
     markEntriesRead: function Query_markEntriesRead(aState) {
+        let resume = Query_markEntriesRead.resume;
+
         // Try not to include entries which already have the desired state,
         // but we can't omit them if a specific range of the selected entries
         // is meant to be marked.
@@ -1117,7 +1118,7 @@ Query.prototype = {
         if (!this.limit && !this.offset)
             this.read = !aState;
 
-        let list = yield this.getEntryList(arguments.callee.resume);
+        let list = yield this.getEntryList(resume);
 
         this.read = tempRead;
 
@@ -1125,7 +1126,7 @@ Query.prototype = {
             let sql = 'UPDATE entries SET read = :read, updated = 0 ';
             let update = new Statement(sql + this._getQueryString());
             update.params.read = aState ? 1 : 0;
-            yield update.executeAsync(arguments.callee.resume);
+            yield update.executeAsync(resume);
 
             for (let observer in StorageInternal.observers)
                 observer.onEntriesMarkedRead(list, aState);
@@ -1140,10 +1141,12 @@ Query.prototype = {
      * @param aCallback
      */
     deleteEntries: function Query_deleteEntries(aState, aCallback) {
-        let list = yield this.getEntryList(arguments.callee.resume);
+        let resume = Query_deleteEntries.resume;
+
+        let list = yield this.getEntryList(resume);
         if (list.length) {
             let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
-            yield new Statement(sql).executeAsync(arguments.callee.resume);
+            yield new Statement(sql).executeAsync(resume);
 
             for (let observer in StorageInternal.observers)
                 observer.onEntriesDeleted(list, aState);
@@ -1642,6 +1645,8 @@ let BookmarkObserver = {
  * the livemarks available in the Brief's home folder.
  */
 let LivemarksSync = function LivemarksSync() {
+    let resume = LivemarksSync.resume;
+
     if (!this.checkHomeFolder())
         return;
 
@@ -1658,8 +1663,9 @@ let LivemarksSync = function LivemarksSync() {
     let result = Places.history.executeQuery(query, options);
     this.traversePlacesQueryResults(result.root, livemarks);
 
-    // Get a list all feeds stored in the database.
-    let storedFeeds = yield Stm.getAllFeeds.getResultsAsync(arguments.callee.resume);
+    let storedFeeds = StorageInternal.getAllFeeds(true, true);
+
+    let bookmarkedFeeds = {};
 
     for (let livemark in livemarks) {
         let feed = null;
@@ -1672,26 +1678,19 @@ let LivemarksSync = function LivemarksSync() {
 
         // Feed already in the database. Update its properties if neccessary.
         if (feed) {
-            feed.bookmarked = true;
+            bookmarkedFeeds[feed.feedID] = true;
 
             let properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
-            if (!feed.hidden && properties.every(function(p) feed[p] == livemark[p]))
-                continue;
 
-            Stm.updateFeedProperties.paramSets.push({
-                'title': livemark.title,
-                'rowIndex': livemark.rowIndex,
-                'parent': livemark.parent,
-                'bookmarkID': livemark.bookmarkID,
-                'hidden': 0,
-                'feedID': livemark.feedID
-            })
+            if (feed.hidden || properties.some(function(p) feed[p] != livemark[p])) {
+                feed.hidden = 0;
+                for (let prop in properties)
+                    feed[prop] = livemark[prop];
 
-            feedListChanged = feedListChanged ||
-                              livemark.rowIndex != feed.rowIndex ||
-                              livemark.parent != feed.parent ||
-                              livemark.title != feed.title ||
-                              feed.hidden > 0;
+                yield StorageInternal.updateFeedProperties(feed, resume);
+
+                feedListChanged = true;
+            }
         }
         // Feed not found in the database. Insert new feed.
         else {
@@ -1710,8 +1709,10 @@ let LivemarksSync = function LivemarksSync() {
         }
     }
 
-    // Hide feeds and delete folders not found in bookmarks any more.
-    for (let feed in storedFeeds.filter(function(f) !f.bookmarked && !f.hidden)) {
+    let deletedFeeds = [feed for each (feed in storedFeeds) if
+                        (!bookmarkedFeeds.hasOwnProperty(feed.feedID) && !feed.hidden)]
+
+    for (let feed in deletedFeeds) {
         if (feed.isFolder)
             Stm.deleteFolder.paramSets.push({ 'feedID': feed.feedID });
         else
@@ -1720,16 +1721,15 @@ let LivemarksSync = function LivemarksSync() {
         feedListChanged = true;
     }
 
-    let statements = [Stm.updateFeedProperties, Stm.insertFeed,
-                      Stm.deleteFolder, Stm.hideFeed];
+    let statements = [Stm.insertFeed, Stm.deleteFolder, Stm.hideFeed];
     statements = statements.filter(function(s) s.paramSets.length);
     if (!statements.length)
         return;
 
-    yield Connection.executeAsync(statements, arguments.callee.resume);
+    yield Connection.executeAsync(statements, resume);
 
     if (feedListChanged) {
-        yield StorageInternal.refreshFeedsCache(true, arguments.callee.resume);
+        yield StorageInternal.refreshFeedsCache(true, resume);
 
         let newFeeds = newLivemarks.filter(function(l) !l.isFolder);
         if (newFeeds.length) {
@@ -1809,16 +1809,15 @@ LivemarksSync.prototype = {
 // Cached statements.
 let Stm = {
 
-    get getAllActiveFeeds() {
+    get getAllFeeds() {
         let sql = 'SELECT feedID, feedURL, websiteURL, title, subtitle, dateModified,   ' +
                   '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,      ' +
-                  '       isFolder, bookmarkID, entryAgeLimit, maxEntries,              ' +
+                  '       isFolder, bookmarkID, entryAgeLimit, maxEntries, hidden,      ' +
                   '       updateInterval, markModifiedEntriesUnread, lastFaviconRefresh ' +
                   'FROM feeds                                                           ' +
-                  'WHERE hidden = 0                                                     ' +
                   'ORDER BY rowIndex ASC                                                ';
-        delete this.getAllActiveFeeds;
-        return this.getAllActiveFeeds = new Statement(sql);
+        delete this.getAllFeeds;
+        return this.getAllFeeds = new Statement(sql);
     },
 
     get getAllTags() {
@@ -1830,38 +1829,33 @@ let Stm = {
         return this.getAllTags = new Statement(sql, { 'deletedState': Storage.ENTRY_STATE_NORMAL });
     },
 
-    get updateFeed() {
+    get updateFeedProperties() {
         let sql = 'UPDATE feeds                                  ' +
-                  'SET websiteURL = :websiteURL,                 ' +
+                  'SET title = :title,                           ' +
                   '    subtitle = :subtitle,                     ' +
-                  '    imageURL = :imageURL,                     ' +
-                  '    imageLink = :imageLink,                   ' +
-                  '    imageTitle = :imageTitle,                 ' +
+                  '    websiteURL = :websiteURL,                 ' +
                   '    favicon = :favicon,                       ' +
                   '    lastUpdated = :lastUpdated,               ' +
                   '    dateModified = :dateModified,             ' +
                   '    oldestEntryDate = :oldestEntryDate,       ' +
-                  '    lastFaviconRefresh = :lastFaviconRefresh  ' +
+                  '    lastFaviconRefresh = :lastFaviconRefresh, ' +
+                  '    entryAgeLimit  = :entryAgeLimit,          ' +
+                  '    maxEntries     = :maxEntries,             ' +
+                  '    updateInterval = :updateInterval,         ' +
+                  '    rowIndex = :rowIndex,                     ' +
+                  '    parent = :parent,                         ' +
+                  '    bookmarkID = :bookmarkID,                 ' +
+                  '    hidden = :hidden,                         ' +
+                  '    markModifiedEntriesUnread = :markModifiedEntriesUnread ' +
                   'WHERE feedID = :feedID                        ';
-        delete this.updateFeed;
-        return this.updateFeed = new Statement(sql);
+        delete this.updateFeedProperties;
+        return this.updateFeedProperties = new Statement(sql);
     },
 
     get setFeedTitle() {
         let sql = 'UPDATE feeds SET title = :title WHERE feedID = :feedID';
         delete this.setFeedTitle;
         return this.setFeedTitle = new Statement(sql);
-    },
-
-    get setFeedOptions() {
-        let sql = 'UPDATE feeds                                ' +
-                  'SET entryAgeLimit  = :entryAgeLimit,        ' +
-                  '    maxEntries     = :maxEntries,           ' +
-                  '    updateInterval = :updateInterval,       ' +
-                  '    markModifiedEntriesUnread = :markUnread ' +
-                  'WHERE feedID = :feedID                      ';
-        delete this.setFeedOptions;
-        return this.setFeedOptions = new Statement(sql);
     },
 
     get insertEntry() {
@@ -2019,12 +2013,6 @@ let Stm = {
         return this.setSerializedTagList = new Statement(sql);
     },
 
-    get getAllFeeds() {
-        let sql = 'SELECT feedID, title, rowIndex, isFolder, parent, bookmarkID, hidden FROM feeds';
-        delete this.getAllFeeds;
-        return this.getAllFeeds = new Statement(sql);
-    },
-
     get deleteFolder() {
         let sql = 'DELETE FROM feeds WHERE feedID = :feedID';
         delete this.deleteFolder;
@@ -2041,14 +2029,6 @@ let Stm = {
         let sql = 'UPDATE feeds SET hidden = :hidden';
         delete this.hideAllFeeds;
         return this.hideAllFeeds = new Statement(sql);
-    },
-
-    get updateFeedProperties() {
-        let sql = 'UPDATE feeds SET title = :title, rowIndex = :rowIndex, parent = :parent, ' +
-                  '                 bookmarkID = :bookmarkID, hidden = :hidden              ' +
-                  'WHERE feedID = :feedID                                                   ';
-        delete this.updateFeedProperties;
-        return this.updateFeedProperties = new Statement(sql);
     },
 
     get insertFeed() {
