@@ -176,9 +176,6 @@ const Brief = {
         this.refreshUI();
     },
 
-    onEntriesTagged: function() { },
-    onEntriesStarred: function() { },
-
     refreshUI: function Brief_refreshUI() {
         Brief.updateStatus();
 
