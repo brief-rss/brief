@@ -152,11 +152,7 @@ StorageConnection.prototype = {
 function StorageStatement(aConnection, aSQLString, aDefaultParams) {
     this.connection = aConnection;
     this.sqlString = aSQLString;
-    this.defaultParams = aDefaultParams || null;
     this.isWritingStatement = !/^\s*SELECT/.test(aSQLString);
-
-    this.paramSets = [];
-    this.params = {};
 
     try {
         this._nativeStatement = aConnection._nativeConnection.createStatement(aSQLString);
@@ -165,14 +161,33 @@ function StorageStatement(aConnection, aSQLString, aDefaultParams) {
         this.connection.reportDatabaseError(null, 'Statement:\n' + aSQLString);
         throw ex;
     }
+
+    this.paramSets = [];
+    this.defaultParams = aDefaultParams || null;
+    this.params = {};
+
+    // Fill in empty params so that consumers can enumerate them.
+    for (let paramName in this._nativeStatement.params)
+        this.params[paramName] = undefined;
 }
 
 StorageStatement.prototype = {
 
-    // Object whose properties are name-value pairs of parameters
+    /**
+     * Object whose properties are name-value pairs of the default parameters.
+     * Default parameters are the parameters which will be used if no other
+     * parameters are bound.
+     */
+    defaultParams: {},
+
+    /**
+     * Object whose properties are name-value pairs of parameters.
+     */
     params: {},
 
-    // Array of objects whose properties are name-value pairs of parameters.
+    /**
+     * Array of objects whose properties are name-value pairs of parameters.
+     */
     paramSets: [],
 
     /**
@@ -341,8 +356,6 @@ StorageStatement.prototype = {
     clone: function Statement_clone() {
         let statement = new StorageStatement(this.connection, this.sqlString,
                                              this.defaultParams);
-        statement.params = this.params;
-        statement.paramSets = this.paramSets;
 
         return statement;
     }
