@@ -350,29 +350,18 @@ let StorageInternal = {
         return foundFeed;
     },
 
-    // See Storage.
+    /**
+     * See Storage.
+     *
+     * It's not worth the trouble to make this function asynchronous like the
+     * rest of the IO, as in-memory cache is practically always available.
+     * However, in the rare case when the cache has just been invalidated
+     * and hasn't been refreshed yet, we must fall back to a synchronous query.
+     */
     getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders, aIncludeInactive) {
-        // It's not worth the trouble to make this function asynchronous like the
-        // rest of the IO, as in-memory cache is practically always available.
-        // However, in the rare case when the cache has just been invalidated
-        // and hasn't been refreshed yet, we must fall back to a synchronous query.
         if (!this.allItemsCache) {
-            this.allItemsCache = [];
-            this.activeItemsCache = [];
-            this.activeFeedsCache = [];
-
-            for (let row in Stm.getAllFeeds.results) {
-                let feed = new Feed();
-                for (let column in row)
-                    feed[column] = row[column];
-
-                this.allItemsCache.push(feed);
-                if (!feed.hidden) {
-                    this.activeItemsCache.push(feed);
-                    if (!feed.isFolder)
-                        this.activeFeedsCache.push(feed);
-                }
-            }
+            Stm.getAllFeeds.cancel();
+            this.refreshFeedsCache(true);
         }
 
         if (aIncludeFolders && aIncludeInactive)
@@ -383,36 +372,43 @@ let StorageInternal = {
             return this.activeFeedsCache;
     },
 
-    refreshFeedsCache: function StorageInternal_refreshFeedsCache(aNotify, aCallback) {
+    refreshFeedsCache: function StorageInternal_refreshFeedsCache(aSynchronous, aNotify, aCallback) {
+        let resume = StorageInternal_refreshFeedsCache.resume;
+
         this.allItemsCache = null;
         this.activeItemsCache = null;
         this.activeFeedsCache = null;
 
-        Stm.getAllFeeds.getResultsAsync(function(results) {
-            this.allItemsCache = [];
-            this.activeItemsCache = [];
-            this.activeFeedsCache = [];
+        let results = aSynchronous ? Stm.getAllFeeds.results
+                                   : yield Stm.getAllFeeds.getResultsAsync(resume);
 
-            for (let row in results) {
-                let feed = new Feed();
-                for (let column in row)
-                    feed[column] = row[column];
+        this.allItemsCache = [];
+        this.activeItemsCache = [];
+        this.activeFeedsCache = [];
 
-                this.allItemsCache.push(feed);
-                if (!feed.hidden) {
-                    this.activeItemsCache.push(feed);
-                    if (!feed.isFolder)
-                        this.activeFeedsCache.push(feed);
-                }
+        for (let row in results) {
+            let feed = new Feed();
+            for (let column in row)
+                feed[column] = row[column];
+
+            this.allItemsCache.push(feed);
+            if (!feed.hidden) {
+                this.activeItemsCache.push(feed);
+                if (!feed.isFolder)
+                    this.activeFeedsCache.push(feed);
             }
+        }
 
-            if (aNotify)
-                Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '')
+        Object.freeze(this.allItemsCache);
+        Object.freeze(this.activeItemsCache);
+        Object.freeze(this.activeFeedsCache);
 
-            if (aCallback)
-                aCallback();
-        }.bind(this))
-    },
+        if (aNotify)
+            Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '')
+
+        if (aCallback)
+            aCallback();
+    }.gen(),
 
     // See Storage.
     getAllTags: function StorageInternal_getAllTags(aCallback) {
@@ -1729,7 +1725,7 @@ let LivemarksSync = function LivemarksSync() {
     yield Connection.executeAsync(statements, resume);
 
     if (feedListChanged) {
-        yield StorageInternal.refreshFeedsCache(true, resume);
+        yield StorageInternal.refreshFeedsCache(false, true, resume);
 
         let newFeeds = newLivemarks.filter(function(l) !l.isFolder);
         if (newFeeds.length) {
@@ -1747,7 +1743,7 @@ LivemarksSync.prototype = {
         if (StorageInternal.homeFolderID == -1) {
             Stm.hideAllFeeds.params.hidden = Date.now();
             Stm.hideAllFeeds.executeAsync(function() {
-                StorageInternal.refreshFeedsCache(true);
+                StorageInternal.refreshFeedsCache(false, true);
             })
             folderValid = false;
         }
@@ -1834,6 +1830,10 @@ let Stm = {
                   'SET title = :title,                           ' +
                   '    subtitle = :subtitle,                     ' +
                   '    websiteURL = :websiteURL,                 ' +
+                  '    hidden = :hidden,                         ' +
+                  '    rowIndex = :rowIndex,                     ' +
+                  '    parent = :parent,                         ' +
+                  '    bookmarkID = :bookmarkID,                 ' +
                   '    favicon = :favicon,                       ' +
                   '    lastUpdated = :lastUpdated,               ' +
                   '    dateModified = :dateModified,             ' +
@@ -1842,10 +1842,6 @@ let Stm = {
                   '    entryAgeLimit  = :entryAgeLimit,          ' +
                   '    maxEntries     = :maxEntries,             ' +
                   '    updateInterval = :updateInterval,         ' +
-                  '    rowIndex = :rowIndex,                     ' +
-                  '    parent = :parent,                         ' +
-                  '    bookmarkID = :bookmarkID,                 ' +
-                  '    hidden = :hidden,                         ' +
                   '    markModifiedEntriesUnread = :markModifiedEntriesUnread ' +
                   'WHERE feedID = :feedID                        ';
         delete this.updateFeedProperties;
