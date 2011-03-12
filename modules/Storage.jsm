@@ -140,15 +140,14 @@ const Storage = {
     },
 
     /**
-     * Updates feed's properties and settings.
+     * Updates feed properties and settings.
      *
-     * @param aFeed
-     *        Feed object whose properties to use to update the respective
-     *        columns in the database.
+     * @param aFeeds
+     *        Feed object, or array of Feed objects, containing the current properties.
      * @param aCallback [optional]
      */
-    updateFeedProperties: function(aFeed, aCallback) {
-        return StorageInternal.updateFeedProperties(aFeed, aCallback);
+    updateFeedProperties: function(aFeeds, aCallback) {
+        return StorageInternal.updateFeedProperties(aFeeds, aCallback);
     },
 
     /**
@@ -424,9 +423,15 @@ let StorageInternal = {
     },
 
     // See Storage.
-    updateFeedProperties: function StorageInternal_updateFeedProperties(aFeed, aCallback) {
-        for (let paramName in Stm.updateFeedProperties.params)
-            Stm.updateFeedProperties.params[paramName] = aFeed[paramName];
+    updateFeedProperties: function StorageInternal_updateFeedProperties(aFeeds, aCallback) {
+        let feeds = Array.isArray(aFeeds) ? aFeeds : [aFeeds];
+
+        for (let feed in feeds) {
+            let params = {};
+            for (let paramName in Stm.updateFeedProperties.params)
+                params[paramName] = feed[paramName];
+            Stm.updateFeedProperties.paramSets.push(params);
+        }
 
         Stm.updateFeedProperties.executeAsync(aCallback);
     },
@@ -1647,9 +1652,6 @@ let LivemarksSync = function LivemarksSync() {
         return;
 
     let livemarks = [];
-    let newLivemarks = [];
-
-    let feedListChanged = false;
 
     // Get a list of folders and Live Bookmarks in the user's home folder.
     let options = Places.history.getNewQueryOptions();
@@ -1660,8 +1662,9 @@ let LivemarksSync = function LivemarksSync() {
     this.traversePlacesQueryResults(result.root, livemarks);
 
     let storedFeeds = StorageInternal.getAllFeeds(true, true);
-
-    let bookmarkedFeeds = {};
+    let foundFeeds = [];
+    let newFeeds = [];
+    let changedFeeds = [];
 
     for (let livemark in livemarks) {
         let feed = null;
@@ -1672,20 +1675,20 @@ let LivemarksSync = function LivemarksSync() {
             }
         }
 
-        // Feed already in the database. Update its properties if neccessary.
+        // Feed already in the database.
         if (feed) {
-            bookmarkedFeeds[feed.feedID] = true;
+            foundFeeds.push(feed);
 
             let properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
 
+            // Check if properties are up to date.
             if (feed.hidden || properties.some(function(p) feed[p] != livemark[p])) {
-                feed.hidden = 0;
                 for (let prop in properties)
                     feed[prop] = livemark[prop];
 
-                yield StorageInternal.updateFeedProperties(feed, resume);
+                feed.hidden = 0;
 
-                feedListChanged = true;
+                changedFeeds.push(feed);
             }
         }
         // Feed not found in the database. Insert new feed.
@@ -1700,34 +1703,26 @@ let LivemarksSync = function LivemarksSync() {
                 'bookmarkID': livemark.bookmarkID
             })
 
-            feedListChanged = true;
-            newLivemarks.push(livemark);
+            newFeeds.push(livemark);
         }
     }
 
-    let deletedFeeds = [feed for each (feed in storedFeeds) if
-                        (!bookmarkedFeeds.hasOwnProperty(feed.feedID) && !feed.hidden)]
-
-    for (let feed in deletedFeeds) {
-        if (feed.isFolder)
-            Stm.deleteFolder.paramSets.push({ 'feedID': feed.feedID });
-        else
-            Stm.hideFeed.paramSets.push({ 'hidden': Date.now(), 'feedID': feed.feedID });
-
-        feedListChanged = true;
+    let missingFeeds = storedFeeds.filter(function(f) foundFeeds.indexOf(f) == -1 && !f.hidden);
+    for (let feed in missingFeeds) {
+        feed.hidden = Date.now();
+        changedFeeds.push(feed);
     }
 
-    let statements = [Stm.insertFeed, Stm.deleteFolder, Stm.hideFeed];
-    statements = statements.filter(function(s) s.paramSets.length);
-    if (!statements.length)
-        return;
+    if (changedFeeds.length)
+        yield StorageInternal.updateFeedProperties(changedFeeds, resume);
 
-    yield Connection.executeAsync(statements, resume);
+    if (Stm.insertFeed.paramSets.length)
+        yield Stm.insertFeed.executeAsync(resume);
 
-    if (feedListChanged) {
+    if (changedFeeds.length || missingFeeds.length || newFeeds.length) {
         yield StorageInternal.refreshFeedsCache(false, true, resume);
 
-        let newFeeds = newLivemarks.filter(function(l) !l.isFolder);
+        let newFeeds = newFeeds.filter(function(l) !l.isFolder);
         if (newFeeds.length) {
             newFeeds = newFeeds.map(function(f) StorageInternal.getFeed(f.feedID));
             FeedUpdateService.updateFeeds(newFeeds);
@@ -1741,8 +1736,11 @@ LivemarksSync.prototype = {
         let folderValid = true;
 
         if (StorageInternal.homeFolderID == -1) {
-            Stm.hideAllFeeds.params.hidden = Date.now();
-            Stm.hideAllFeeds.executeAsync(function() {
+            let allFeeds = StorageInternal.getAllFeeds(true);
+            for (let feed in allFeeds)
+                feed.hidden = Date.now();
+
+            StorageInternal.updateFeedProperties(allFeeds, function() {
                 StorageInternal.refreshFeedsCache(false, true);
             })
             folderValid = false;
@@ -1840,7 +1838,7 @@ let Stm = {
                   '    oldestEntryDate = :oldestEntryDate,       ' +
                   '    lastFaviconRefresh = :lastFaviconRefresh, ' +
                   '    entryAgeLimit  = :entryAgeLimit,          ' +
-                  '    maxEntries     = :maxEntries,             ' +
+                  '    maxEntries =     :maxEntries,             ' +
                   '    updateInterval = :updateInterval,         ' +
                   '    markModifiedEntriesUnread = :markModifiedEntriesUnread ' +
                   'WHERE feedID = :feedID                        ';
@@ -2007,24 +2005,6 @@ let Stm = {
         let sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
         delete this.setSerializedTagList;
         return this.setSerializedTagList = new Statement(sql);
-    },
-
-    get deleteFolder() {
-        let sql = 'DELETE FROM feeds WHERE feedID = :feedID';
-        delete this.deleteFolder;
-        return this.deleteFolder = new Statement(sql);
-    },
-
-    get hideFeed() {
-        let sql = 'UPDATE feeds SET hidden = :hidden WHERE feedID = :feedID';
-        delete this.hideFeed;
-        return this.hideFeed = new Statement(sql);
-    },
-
-    get hideAllFeeds() {
-        let sql = 'UPDATE feeds SET hidden = :hidden';
-        delete this.hideAllFeeds;
-        return this.hideAllFeeds = new Statement(sql);
     },
 
     get insertFeed() {
