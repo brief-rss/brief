@@ -419,30 +419,12 @@ FeedFetcher.prototype = {
         }
 
         let timeSinceRefresh = Date.now() - this.feed.lastFaviconRefresh;
+        if (!this.feed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL)
+            new FaviconFetcher(this.feed)
 
-        if (!this.feed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL) {
-            this.feed.lastFaviconRefresh = Date.now();
-
-            // We use websiteURL instead of feedURL for resolving the favicon URL,
-            // because many websites use services like Feedburner for generating their
-            // feeds and we'd get the Feedburner's favicon instead.
-            if (this.feed.websiteURL) {
-                new FaviconFetcher(this.feed.websiteURL, function(aFavicon) {
-                    this.feed.favicon = aFavicon;
-                    Storage.processFeed(this.feed, entries, function(aNewEntriesCount) {
-                        this.finish(true, aNewEntriesCount);
-                    }.bind(this));
-                }.bind(this))
-            }
-            else {
-                this.feed.favicon = 'no-favicon';
-            }
-        }
-        else {
-            Storage.processFeed(this.feed, entries, function(aNewEntriesCount) {
-                this.finish(true, aNewEntriesCount);
-            }.bind(this));
-        }
+        Storage.processFeed(this.feed, entries, function(aNewEntriesCount) {
+            this.finish(true, aNewEntriesCount);
+        }.bind(this));
     },
 
     finish: function FeedFetcher_finish(aSuccess, aNewEntriesCount) {
@@ -478,23 +460,29 @@ FeedFetcher.prototype = {
 }
 
 /**
- * Downloads a favicon of a webpage and base64-encodes it.
+ * Downloads a favicon for a feed and base64-encodes it.
  *
- * @param aWebsiteURL
- *        URL of webpage which favicon to download (not URI of the
- *        favicon itself).
- * @param aCallback
- *        Callback to use when finished.
+ * @param aFeed
+ *        Feed object of the feed whose favicon to download.
  */
-function FaviconFetcher(aWebsiteURL, aCallback) {
-    let websiteURI = Services.io.newURI(aWebsiteURL, null, null)
+function FaviconFetcher(aFeed) {
+    this.feed = aFeed;
+
+    if (!aFeed.websiteURL) {
+        this.finish('no-favicon');
+        return;
+    }
+
+    // Use websiteURL instead of feedURL for resolving the favicon URL,
+    // because many websites use services like Feedburner for generating their
+    // feeds and we would get the Feedburner's favicon instead.
+    let websiteURI = Services.io.newURI(aFeed.websiteURL, null, null)
     let faviconURI = Services.io.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
     let chan = Services.io.newChannelFromURI(faviconURI);
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
-    this.callback = aCallback;
     this.websiteURI = websiteURI;
     this._channel = chan;
     this._bytes = [];
@@ -507,6 +495,16 @@ FaviconFetcher.prototype = {
     _channel:   null,
     _countRead: 0,
     _stream:    null,
+
+    finish: function FaviconFetcher_finish(aFaviconString) {
+        this.feed.lastFaviconRefresh = Date.now();
+
+        if (this.feed.favicon != aFaviconString) {
+            this.feed.favicon = aFaviconString;
+            Storage.updateFeedProperties(this.feed);
+            Services.obs.notifyObservers(null, 'brief:feed-favicon-changed', this.feed.feedID);
+        }
+    },
 
     // nsIRequestObserver
     onStartRequest: function FaviconFetcher_lonStartRequest(aRequest, aContext) {
@@ -521,13 +519,11 @@ FaviconFetcher.prototype = {
 
         if (!requestFailed && this._countRead != 0) {
             let base64DataString =  btoa(String.fromCharCode.apply(null, this._bytes))
-            var favicon = 'data:image/x-icon;base64,' + base64DataString;
+            this.finish('data:image/x-icon;base64,' + base64DataString);
         }
         else {
-            favicon = 'no-favicon';
+            this.finish('no-favicon');
         }
-
-        this.callback(favicon);
 
         this._channel = null;
         this._element  = null;
