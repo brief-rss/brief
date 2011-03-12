@@ -89,7 +89,7 @@ Statement.prototype = StorageStatement.prototype;
 
 
 // Exported object exposing public properties.
-const Storage = {
+const Storage = Object.freeze({
 
     ENTRY_STATE_NORMAL: 0,
     ENTRY_STATE_TRASHED: 1,
@@ -161,37 +161,36 @@ const Storage = {
     },
 
     /**
-     * Registers an object to be notified of entry changes. A strong reference
+     * Registers an object to be notified of changes to feed entries. A strong reference
      * is held to this object, so all observers have to be removed using
      * Storage.removeObserver().
      *
-     * Observer must implement the following functions.
-     *
-     * Called when new entries are added to the database.
+     * An observer may implement any of the following functions:
      *
      *     function onEntriesAdded(aEntryList)
      *
-     * Called when properties of existing entries, such as title, content, authors
-     * and date, are changed. When entries are updated, they can also be marked as unread.
+     * Called when new entries are added to the database.
      *
      *     function onEntriesUpdated(aEntryList);
      *
-     * Called when the read/unread state of entries changes.
+     * Called when properties of existing entries - such as title, content, authors
+     * and date - are changed. When entries are updated, they can also be marked as unread.
      *
      *     function onEntriesMarkedRead(aEntryList, aNewState);
      *
-     * Called when URLs of entries are bookmarked/unbookmarked.
+     * Called when the read/unread state of entries changes.
      *
      *     function onEntriesStarred(aEntryList, aNewState);
      *
-     * Called when a tag is added or removed from entries.
+     * Called when URLs of entries are bookmarked/unbookmarked.
      *
      *     function onEntriesTagged(aEntryList, aNewState, aTagName);
      *
-     * Called when the deleted state of entries changes.
+     * Called when a tag is added or removed from entries.
      *
      *     function onEntriesDeleted(aEntryList, aNewState);
      *
+     * Called when the deleted state of entries changes.
      */
     addObserver: function(aObserver) {
         return StorageInternal.addObserver(aObserver);
@@ -204,7 +203,7 @@ const Storage = {
         return StorageInternal.removeObserver(aObserver);
     }
 
-}
+})
 
 
 let StorageInternal = {
@@ -583,8 +582,10 @@ let StorageInternal = {
 
         if (!aDontNotify) {
             let list = yield new Query(aEntryID).getEntryList(resume);
-            for (let observer in StorageInternal.observers)
-                observer.onEntriesStarred(list, aState);
+            for (let observer in StorageInternal.observers) {
+                if (observer.onEntriesStarred)
+                    observer.onEntriesStarred(list, aState);
+            }
         }
     }.gen(),
 
@@ -626,8 +627,10 @@ let StorageInternal = {
         yield Stm.setSerializedTagList.executeAsync(resume);
 
         let list = yield new Query(aEntryID).getEntryList(resume);
-        for (let observer in StorageInternal.observers)
-            observer.onEntriesTagged(list, aState, aTagName);
+        for (let observer in StorageInternal.observers) {
+            if (observer.onEntriesTagged)
+                observer.onEntriesTagged(list, aState, aTagName);
+        }
     }.gen(),
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
@@ -812,8 +815,10 @@ FeedProcessor.prototype = {
 
             if (reason === REASON_FINISHED) {
                 let list = yield new Query(insertedEntries).getEntryList(resume);
-                for (let observer in StorageInternal.observers)
-                    observer.onEntriesAdded(list);
+                for (let observer in StorageInternal.observers) {
+                    if (observer.onEntriesAdded)
+                        observer.onEntriesAdded(list);
+                }
 
                 StorageInternal.expireEntries(this.feed);
             }
@@ -825,8 +830,10 @@ FeedProcessor.prototype = {
             yield Connection.executeAsync(statements, resume);
 
             let list = yield new Query(this.updatedEntries).getEntryList(resume);
-            for (let observer in StorageInternal.observers)
-                observer.onEntriesUpdated(list);
+            for (let observer in StorageInternal.observers) {
+                if (observer.onEntriesUpdated)
+                    observer.onEntriesUpdated(list);
+            }
         }
 
         this.callback(insertedEntries.length);
@@ -1129,8 +1136,10 @@ Query.prototype = {
             update.params.read = aState ? 1 : 0;
             yield update.executeAsync(resume);
 
-            for (let observer in StorageInternal.observers)
-                observer.onEntriesMarkedRead(list, aState);
+            for (let observer in StorageInternal.observers) {
+                if (observer.onEntriesMarkedRead)
+                    observer.onEntriesMarkedRead(list, aState);
+            }
         }
     }.gen(),
 
@@ -1149,8 +1158,10 @@ Query.prototype = {
             let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
             yield new Statement(sql).executeAsync(resume);
 
-            for (let observer in StorageInternal.observers)
-                observer.onEntriesDeleted(list, aState);
+            for (let observer in StorageInternal.observers) {
+                if (observer.onEntriesDeleted)
+                    observer.onEntriesDeleted(list, aState);
+            }
         }
 
         if (aCallback)
