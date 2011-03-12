@@ -72,6 +72,13 @@ Feed.prototype = {
     oldestEntryDate: 0,
 
     /**
+     * Indicates if feed is active, i.e. can be found in the home folder.
+     * The value is 0 if the feed is active, otherwise it indicates the time
+     * when it was set to inactive.
+     */
+    hidden: 0,
+
+    /**
      * The wrapped nsIFeed.
      */
     wrappedFeed: null,
