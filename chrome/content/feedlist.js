@@ -622,6 +622,10 @@ let FeedList = {
                 this.refreshFeedTreeitems([aData]);
             break;
 
+        case 'brief:feed-favicon-changed':
+            this._refreshFavicon(aData)
+            break;
+
         case 'brief:feed-updated':
             if (this.treeReady) {
                 let item = getElement(aData);
