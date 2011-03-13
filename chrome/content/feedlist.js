@@ -701,6 +701,9 @@ let FeedList = {
     },
 
     onEntriesTagged: function FeedList_onEntriesTagged(aEntryList, aNewState, aTag) {
+        if (ViewList.selectedItem && ViewList.selectedItem.id == 'starred-folder')
+            TagList.show();
+
         TagList.refreshTags([aTag], aNewState, !aNewState);
     },
 
