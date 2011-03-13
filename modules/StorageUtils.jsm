@@ -163,7 +163,7 @@ function StorageStatement(aConnection, aSQLString, aDefaultParams) {
     }
 
     this.paramSets = [];
-    this.defaultParams = aDefaultParams || null;
+    this.defaultParams = aDefaultParams || this.defaultParams;
     this.params = {};
 
     // Fill in empty params so that consumers can enumerate them.
@@ -271,8 +271,10 @@ StorageStatement.prototype = {
             for (let column in this.defaultParams)
                 this._nativeStatement.params[column] = this.defaultParams[column];
 
-            for (let column in this.params)
-                this._nativeStatement.params[column] = this.params[column];
+            for (let column in this.params) {
+                if (this.params[column] !== undefined)
+                    this._nativeStatement.params[column] = this.params[column];
+            }
         }
         else {
             let bindingParamsArray = this._nativeStatement.newBindingParamsArray();
@@ -286,7 +288,10 @@ StorageStatement.prototype = {
         }
 
         this.paramSets = [];
-        for (paramName in this.params)
+        this.params = {};
+
+        // Fill in empty params so that consumers can enumerate them.
+        for (let paramName in this._nativeStatement.params)
             this.params[paramName] = undefined;
     },
 
