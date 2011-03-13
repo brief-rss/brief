@@ -1705,12 +1705,12 @@ let LivemarksSync = function LivemarksSync() {
         // Feed not found in the database. Insert new feed.
         else {
             Stm.insertFeed.paramSets.push({
-                'feedID': livemark.feedID,
-                'feedURL': livemark.feedURL || null,
-                'title': livemark.title,
-                'rowIndex': livemark.rowIndex,
-                'isFolder': livemark.isFolder ? 1 : 0,
-                'parent': livemark.parent,
+                'feedID'    : livemark.feedID,
+                'feedURL'   : livemark.feedURL || null,
+                'title'     : livemark.title,
+                'rowIndex'  : livemark.rowIndex,
+                'isFolder'  : livemark.isFolder ? 1 : 0,
+                'parent'    : livemark.parent,
                 'bookmarkID': livemark.bookmarkID
             })
 
@@ -1730,10 +1730,10 @@ let LivemarksSync = function LivemarksSync() {
     if (Stm.insertFeed.paramSets.length)
         yield Stm.insertFeed.executeAsync(resume);
 
-    if (changedFeeds.length || missingFeeds.length || newFeeds.length) {
+    if (newFeeds.length || missingFeeds.length || changedFeeds.length) {
         yield StorageInternal.refreshFeedsCache(false, true, resume);
 
-        let newFeeds = newFeeds.filter(function(l) !l.isFolder);
+        newFeeds = newFeeds.filter(function(feed) !feed.isFolder);
         if (newFeeds.length) {
             newFeeds = newFeeds.map(function(f) StorageInternal.getFeed(f.feedID));
             FeedUpdateService.updateFeeds(newFeeds);
@@ -1794,7 +1794,7 @@ LivemarksSync.prototype = {
                 aLivemarks.push(item);
             }
             else {
-                item.feedURL = '';
+                item.feedURL = null;
                 item.feedID = node.itemId.toFixed().toString();
                 item.isFolder = true;
 
