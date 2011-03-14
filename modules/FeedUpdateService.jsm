@@ -37,7 +37,7 @@ XPCOMUtils.defineLazyGetter(this, 'Storage', function() {
 
 
 // Exported object exposing public properties.
-const FeedUpdateService = {
+const FeedUpdateService = Object.freeze({
 
     /**
      * Indicates if updating is in progress.
@@ -95,7 +95,7 @@ const FeedUpdateService = {
     stopUpdating: function() {
         return FeedUpdateServiceInternal.stopUpdating();
     }
-}
+})
 
 
 let FeedUpdateServiceInternal = {
