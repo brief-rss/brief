@@ -162,33 +162,46 @@ function StorageStatement(aConnection, aSQLString, aDefaultParams) {
         throw ex;
     }
 
+    /**
+     * Array of objects whose properties are name-value pairs of parameters.
+     */
     this.paramSets = [];
-    this.defaultParams = aDefaultParams || this.defaultParams;
-    this.params = {};
-
-    // Fill in empty params so that consumers can enumerate them.
-    for (let paramName in this._nativeStatement.params)
-        this.params[paramName] = undefined;
-}
-
-StorageStatement.prototype = {
 
     /**
      * Object whose properties are name-value pairs of the default parameters.
      * Default parameters are the parameters which will be used if no other
      * parameters are bound.
      */
-    defaultParams: {},
+    this.defaultParams = aDefaultParams || {};
+
+    Object.freeze(this.defaultParams);
+}
+
+StorageStatement.prototype = {
 
     /**
      * Object whose properties are name-value pairs of parameters.
      */
-    params: {},
+    get params() {
+        if (!this.__params) {
+            this.__params = {};
 
-    /**
-     * Array of objects whose properties are name-value pairs of parameters.
-     */
-    paramSets: [],
+            // Fill in empty params so that consumers can enumerate them.
+            for (let paramName in this._nativeStatement.params)
+                this.__params[paramName] = undefined;
+
+            Object.seal(this.__params);
+            Object.preventExtensions(this.__params);
+        }
+
+        return this.__params;
+    },
+    set params(aValue) {
+        for (let paramName in this.__params)
+            this.__params[paramName] = aValue[paramName]
+
+        return this.__params;
+    },
 
     /**
      * Synchronously executes the statement with the bound parameters.
@@ -225,6 +238,31 @@ StorageStatement.prototype = {
     },
 
     /**
+     * Returns a generator for the results. The statement is automatically reset
+     * after all rows are iterated, otherwise it must be reset manually.
+     *
+     * Note: the generator catches database errors when stepping the statement and resets
+     * the statement when they occur, so the consumer doesn't have to wrap everything
+     * in try...finally (as long it itself avoids doing anything that risks exceptions).
+     */
+    get results() {
+        if (!this._resultsGenerator)
+            this._resultsGenerator = this._createResultGenerator();
+
+        return this._resultsGenerator;
+    },
+
+    /**
+     * Returns the first row of the results and resets the statement.
+     */
+    getSingleResult: function Statement_getSingleResult() {
+        let row = this.results.next();
+        this.reset()
+
+        return row;
+    },
+
+    /**
      * Asynchronously executes the statement and collects the result rows
      * into an array. To be used only with SELECT statements.
      *
@@ -241,7 +279,7 @@ StorageStatement.prototype = {
 
         let rowArray = [];
 
-        // Avoid property lookup for performance.
+        // Avoid repeated XPCOM calls for performance.
         let columnCount = this._nativeStatement.columnCount;
 
         let columns = [];
@@ -266,15 +304,32 @@ StorageStatement.prototype = {
         })
     },
 
+    /**
+     * Unbinds parameters and resets the statement.
+     */
+    reset: function Statement_reset() {
+        this.paramSets = [];
+        this.params = {};
+
+        if (this._resultsGenerator)
+            this._resultsGenerator.close();
+    },
+
     _bindParams: function Statement__bindParams() {
         if (!this.paramSets.length) {
-            for (let column in this.defaultParams)
-                this._nativeStatement.params[column] = this.defaultParams[column];
 
-            for (let column in this.params) {
-                if (this.params[column] !== undefined)
-                    this._nativeStatement.params[column] = this.params[column];
+            // For undefined parameters, use the default params.
+            for (let paramName in this.params) {
+                if (this.params[paramName] === undefined) {
+                    if (this.defaultParams[paramName] !== undefined)
+                        this.params[paramName] = this.defaultParams[paramName];
+                    else
+                        throw new Error('Undefined "' + paramName + '" parameter. Statement:\n' + this.sqlString);
+                }
             }
+
+            for (let paramName in this.params)
+                this._nativeStatement.params[paramName] = this.params[paramName];
         }
         else {
             let bindingParamsArray = this._nativeStatement.newBindingParamsArray();
@@ -289,80 +344,40 @@ StorageStatement.prototype = {
 
         this.paramSets = [];
         this.params = {};
-
-        // Fill in empty params so that consumers can enumerate them.
-        for (let paramName in this._nativeStatement.params)
-            this.params[paramName] = undefined;
-    },
-
-    /**
-     * Returns a generator for the results. The statement is automatically reset
-     * after all rows are iterated, otherwise it must be reset manually.
-     *
-     * Note: the generator catches database errors when stepping the statement and resets
-     * the statement when they occur, so the consumer doesn't have to wrap everything
-     * in try...finally (as long it itself avoids doing anything that risks exceptions).
-     */
-    get results() {
-        if (!this._resultsGenerator)
-            this._resultsGenerator = this._createResultGenerator();
-
-        return this._resultsGenerator;
     },
 
     _createResultGenerator: function Statement__createResultGenerator() {
         this._bindParams();
 
-        // Avoid property lookup for performance.
-        let nativeStatement = this._nativeStatement;
+        // Avoid repeated XPCOM calls for performance.
         let columnCount = nativeStatement.columnCount;
 
         let columns = [];
         for (let i = 0; i < columnCount; i++)
-            columns.push(nativeStatement.getColumnName(i));
+            columns.push(this._nativeStatement.getColumnName(i));
 
         if (this.connection.transactionInProgress)
             this.connection._transactionStatements.push(this);
 
         try {
-            while (nativeStatement.step()) {
+            while (this._nativeStatement.step()) {
                 // Copy row's properties to make them enumerable.
-                // This may not be worth the performance cost...
+                // This may be a significant performance hit...
                 let row = {};
                 for (let i = 0; i < columnCount; i++)
-                    row[columns[i]] = nativeStatement.row[columns[i]];
+                    row[columns[i]] = this._nativeStatement.row[columns[i]];
                 yield row;
             }
         }
         finally {
-            nativeStatement.reset();
+            this._nativeStatement.reset();
             this._resultsGenerator = null;
         }
-    },
-
-    /**
-     * Returns the first row of the results and resets the statement.
-     */
-    getSingleResult: function Statement_getSingleResult() {
-        let row = this.results.next();
-        this.reset()
-
-        return row;
-    },
-
-    /**
-     * Unbinds parameters and resets the statement.
-     */
-    reset: function Statement_reset() {
-        this.paramSets = [];
-        this.params = {};
-        this.results.close();
     },
 
     clone: function Statement_clone() {
         let statement = new StorageStatement(this.connection, this.sqlString,
                                              this.defaultParams);
-
         return statement;
     }
 
@@ -401,7 +416,6 @@ StatementCallback.prototype = {
         if (!this._callback.handleResult)
             return;
 
-        // Avoid property look-up for performance.
         let nativeStatement = this._selectStatement._nativeStatement;
         let columnCount = nativeStatement.columnCount;
 
