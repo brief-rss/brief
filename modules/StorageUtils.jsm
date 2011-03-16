@@ -163,18 +163,24 @@ function StorageStatement(aConnection, aSQLString, aDefaultParams) {
     }
 
     /**
-     * Array of objects whose properties are name-value pairs of parameters.
-     */
-    this.paramSets = [];
-
-    /**
      * Object whose properties are name-value pairs of the default parameters.
      * Default parameters are the parameters which will be used if no other
      * parameters are bound.
      */
     this.defaultParams = aDefaultParams || {};
-
     Object.freeze(this.defaultParams);
+
+    // Fill in empty params so that consumers can enumerate them.
+    this.__params = {};
+    for (let paramName in this._nativeStatement.params)
+        this.__params[paramName] = undefined;
+    Object.seal(this.__params);
+    Object.preventExtensions(this.__params);
+
+    /**
+     * Array of objects whose properties are name-value pairs of parameters.
+     */
+    this.paramSets = [];
 }
 
 StorageStatement.prototype = {
@@ -183,22 +189,11 @@ StorageStatement.prototype = {
      * Object whose properties are name-value pairs of parameters.
      */
     get params() {
-        if (!this.__params) {
-            this.__params = {};
-
-            // Fill in empty params so that consumers can enumerate them.
-            for (let paramName in this._nativeStatement.params)
-                this.__params[paramName] = undefined;
-
-            Object.seal(this.__params);
-            Object.preventExtensions(this.__params);
-        }
-
         return this.__params;
     },
     set params(aValue) {
         for (let paramName in this.__params)
-            this.__params[paramName] = aValue[paramName]
+            this.__params[paramName] = aValue[paramName];
 
         return this.__params;
     },
