@@ -210,9 +210,6 @@ let Commands = {
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
         new Query(aEntry).markEntriesRead(aNewState);
-
-        if (PrefCache.autoMarkRead && !aNewState)
-            gCurrentView.entriesMarkedUnread.push(aEntry);
     },
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
