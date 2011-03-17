@@ -52,7 +52,7 @@ function FeedView(aTitle, aQuery) {
 
     // List of entries manually marked as unread by the user. They won't be
     // marked as read again when autoMarkRead is on.
-    this.entriesMarkedUnread = [];
+    this._entriesMarkedUnread = [];
 
     if (gCurrentView)
         gCurrentView.uninit();
@@ -73,8 +73,8 @@ function FeedView(aTitle, aQuery) {
         this.browser.loadURI(gTemplateURI.spec);
     }
     else {
-        for each (let event in this._events)
-            this.document.addEventListener(event, this, true);
+        this.document.addEventListener('scroll', this, true);
+        this.document.addEventListener('keypress', this, true);
 
         // Refresh asynchronously, because it might take a while
         // and UI may be waiting to be redrawn.
@@ -219,7 +219,7 @@ FeedView.prototype = {
     scrollToPrevEntry: function FeedView_scrollToPrevEntry(aSmooth) {
         let previousEntry = null;
 
-        let middleEntry = this._getEntryInScreenCenter();
+        let middleEntry = this.getEntryInScreenCenter();
         if (middleEntry)
             previousEntry = this._loadedEntries[this.getEntryIndex(middleEntry) - 1];
 
@@ -232,7 +232,7 @@ FeedView.prototype = {
     scrollToNextEntry: function FeedView_scrollToNextEntry(aSmooth) {
         let nextEntry = null;
 
-        let middleEntry = this._getEntryInScreenCenter();
+        let middleEntry = this.getEntryInScreenCenter();
         if (middleEntry)
             nextEntry = this._loadedEntries[this.getEntryIndex(middleEntry) + 1];
 
@@ -244,7 +244,7 @@ FeedView.prototype = {
      * Scroll down by 10 entries, loading more entries if necessary.
      */
     skipDown: function FeedView_skipDown() {
-        let middleEntry = this._getEntryInScreenCenter();
+        let middleEntry = this.getEntryInScreenCenter();
         let index = this.getEntryIndex(middleEntry);
 
         let doSkipDown = function(aCount) {
@@ -264,7 +264,7 @@ FeedView.prototype = {
 
     // See scrollDown.
     skipUp: function FeedView_skipUp() {
-        let middleEntry = this._getEntryInScreenCenter();
+        let middleEntry = this.getEntryInScreenCenter();
         let index = this.getEntryIndex(middleEntry);
         let targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
 
@@ -352,7 +352,7 @@ FeedView.prototype = {
     },
 
     // Return the entry element closest to the middle of the screen.
-    _getEntryInScreenCenter: function FeedView__getEntryInScreenCenter() {
+    getEntryInScreenCenter: function FeedView_getEntryInScreenCenter() {
         if (!this._loadedEntries.length)
             return null;
 
@@ -388,7 +388,7 @@ FeedView.prototype = {
         for (let i = entries.length - 1; i >= 0; i--) {
             let entryTop = entries[i].offsetTop;
             let id = entries[i].id;
-            let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(id) != -1);
+            let wasMarkedUnread = (this._entriesMarkedUnread.indexOf(id) != -1);
 
             if (entryTop >= winTop && entryTop < winBottom - 50 && !wasMarkedUnread)
                 entriesToMark.push(id);
@@ -424,8 +424,8 @@ FeedView.prototype = {
         getTopWindow().gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
         this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
-        for each (let event in this._events)
-            this.document.removeEventListener(event, this, true);
+        this.document.removeEventListener('scroll', this, true);
+        this.document.removeEventListener('keypress', this, true);
 
         Storage.removeObserver(this);
 
@@ -434,29 +434,21 @@ FeedView.prototype = {
     },
 
 
-    /**
-     * Events which the view listens to in the template page.
-     * XXX Remove.
-     */
-    _events: ['scroll', 'keypress'],
-
     handleEvent: function FeedView_handleEvent(aEvent) {
-        let target = aEvent.target;
-        let id = parseInt(target.id);
-
         // Checking if default action has been prevented helps Brief play nicely with
         // other extensions.
         if (aEvent.getPreventDefault())
             return;
 
         switch (aEvent.type) {
+
             // Set up the template page when it's loaded.
             case 'load':
                 getElement('feed-view-header').hidden = !this.active;
 
                 if (this.active) {
-                    for each (let event in this._events)
-                        this.document.addEventListener(event, this, true);
+                    this.document.addEventListener('scroll', this, true);
+                    this.document.addEventListener('keypress', this, true);
 
                     // Some feeds include scripts that use document.write() which screw
                     // us up, because we insert them dynamically after the page is loaded.
@@ -478,7 +470,7 @@ FeedView.prototype = {
                     clearTimeout(this._scrollSelectionTimeout);
 
                     function selectCentralEntry() {
-                        this.selectEntry(this._getEntryInScreenCenter());
+                        this.selectEntry(this.getEntryInScreenCenter());
                     }
                     this._scrollSelectionTimeout = async(selectCentralEntry, 100, this);
                 }
@@ -536,8 +528,12 @@ FeedView.prototype = {
                 this._onEntriesAdded(aEntryList.IDs);
         }
 
-        for (let entry in this._loadedEntries.intersect(aEntryList.IDs))
+        for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
             this.getEntryView(entry).read = aNewState;
+
+            if (PrefCache.autoMarkRead && !aNewState)
+                this._entriesMarkedUnread.push(entry);
+        }
     },
 
     onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
@@ -800,7 +796,7 @@ FeedView.prototype = {
     }.gen(),
 
     get lastEntryInCenter() {
-        return this._getEntryInScreenCenter() == this.lastEntry;
+        return this.getEntryInScreenCenter() == this.lastEntry;
     },
 
     get enoughEntriesPreloaded() {
