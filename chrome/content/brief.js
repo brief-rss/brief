@@ -458,7 +458,7 @@ let PrefObserver = {
 
             case 'feedview.entrySelectionEnabled':
                 if (PrefCache.entrySelectionEnabled)
-                    gCurrentView.selectEntry(gCurrentView._getMiddleEntryElement());
+                    gCurrentView.selectEntry(gCurrentView.getEntryInScreenCenter());
                 else
                     gCurrentView.selectEntry(null);
                 break;
