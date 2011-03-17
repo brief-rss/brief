@@ -63,7 +63,7 @@ function FeedView(aTitle, aQuery) {
         getElement('searchbar').value = '';
 
     this.browser.addEventListener('load', this, false);
-    getTopWindow().gBrowser.tabContainer.addEventListener('TabSelect', this, true);
+    getTopWindow().gBrowser.tabContainer.addEventListener('TabSelect', this, false);
     Storage.addObserver(this);
 
     // Load the template page if it hasn't been loaded yet. We also have to make sure to
