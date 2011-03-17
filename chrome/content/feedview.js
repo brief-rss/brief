@@ -44,8 +44,11 @@ function FeedView(aTitle, aQuery) {
     aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
     this.query = aQuery;
 
-    // Ordered array of IDs of entries that have been loaded.
+    // Array of IDs of entries that have been loaded.
     this._loadedEntries = [];
+
+    // Array of EntryView's of entries that have been loaded.
+    this._entryViews = [];
 
     // List of entries manually marked as unread by the user. They won't be
     // marked as read again when autoMarkRead is on.
@@ -90,6 +93,7 @@ FeedView.prototype = {
 
     _refreshPending: false,
 
+
     get browser() getElement('feed-view'),
 
     get document() this.browser.contentDocument,
@@ -99,6 +103,16 @@ FeedView.prototype = {
     get feedContent() this.document.getElementById('feed-content'),
 
     get active() this.browser.currentURI.equals(gTemplateURI) && gCurrentView == this,
+
+
+    containsEntry: function(aEntry) this._loadedEntries.indexOf(aEntry) !== -1,
+
+    getEntryIndex: function(aEntry) this._loadedEntries.indexOf(aEntry),
+
+    getEntryView: function(aEntry) this._entryViews[this.getEntryIndex(aEntry)],
+
+    get lastEntry() this._loadedEntries[this._loadedEntries.length - 1],
+
 
     /**
      * Query selecting all entries contained by the view.
@@ -135,130 +149,16 @@ FeedView.prototype = {
         return copy;
     },
 
-    containsEntry: function FeedView_containsEntry(aEntry) {
-        return this._loadedEntries.indexOf(aEntry) != -1;
-    },
-
-    getEntryIndex: function FeedView_getEntryIndex(aEntry) {
-        return this._loadedEntries.indexOf(aEntry);
-    },
-
-    collapseEntry: function FeedView_collapseEntry(aEntry, aAnimate) {
-        let entryContainer = this.document.getElementById(aEntry);
-        if (entryContainer.hasAttribute('collapsed'))
-            return;
-
-        let entryContent = entryContainer.getElementsByClassName('article-content')[0];
-
-        let finish = function() {
-            entryContent.removeEventListener('transitionend', finish, true);
-            if (entryContainer.parentNode != this.feedContent)
-                return;
-
-            entryContainer.removeAttribute('collapsing');
-            entryContainer.setAttribute('collapsed', true);
-
-            let date = entryContainer.getElementsByClassName('article-date')[0];
-            let feedName = entryContainer.getElementsByClassName('feed-name')[0];
-            let collapsedSubheader = entryContainer.getElementsByClassName('collapsed-article-subheader')[0];
-
-            collapsedSubheader.insertBefore(date, null);
-            collapsedSubheader.insertBefore(feedName, null);
-        }.bind(this)
-
-        entryContent.style.height = '0';
-        entryContent.style.opacity = '0';
-
-        if (aAnimate) {
-            entryContent.addEventListener('transitionend', finish, true);
-            entryContainer.setAttribute('collapsing', true);
-        }
-        else {
-            finish();
-        }
-    },
-
-    uncollapseEntry: function FeedView_uncollapseEntry(aEntry, aAnimate) {
-        let entryContainer = this.document.getElementById(aEntry);
-        if (!entryContainer.hasAttribute('collapsed'))
-            return;
-
-        let entryContent = entryContainer.getElementsByClassName('article-content')[0];
-
-        let finish = function() {
-            entryContent.removeEventListener('transitionend', finish, true);
-            if (entryContainer.parentNode != this.feedContent)
-                return;
-
-            entryContainer.removeAttribute('collapsing');
-
-            if (PrefCache.autoMarkRead && this.query.read !== false)
-                Commands.markEntryRead(aEntry, true);
-
-            if (aEntry == this.selectedEntry) {
-                let entryBottom = this.selectedElement.offsetTop + this.selectedElement.offsetHeight;
-                let windowBottom = this.window.pageYOffset + this.window.innerHeight;
-                if (entryBottom > windowBottom)
-                    this.scrollToEntry(aEntry, false, true);
-            }
-        }.bind(this)
-
-        let subheaderLeft = entryContainer.getElementsByClassName('article-subheader-left')[0];
-        let subheaderRight = entryContainer.getElementsByClassName('article-subheader-right')[0];
-        let date = entryContainer.getElementsByClassName('article-date')[0];
-        let feedName = entryContainer.getElementsByClassName('feed-name')[0];
-        let tagsElem = entryContainer.getElementsByClassName('article-tags')[0];
-
-        subheaderLeft.insertBefore(feedName, tagsElem);
-        subheaderRight.insertBefore(date, null);
-
-        entryContainer.removeAttribute('collapsed');
-
-        // CSS transitions don't work with "height: auto". To work around it, we retrieve
-        // the computed style of "height: auto" content and we set the height explicitly.
-        // This de-facto height has to be retrieved before the entry is uncollapsed
-        // - it cannot be saved upfront, when the entry is inserted, because it may
-        // change as images and such are loaded.
-        entryContent.style.height = '';
-        entryContent.offsetHeight; // Force reflow.
-        let naturalHeight = this.window.getComputedStyle(entryContent)
-                                       .getPropertyValue('height');
-
-        // Restore the old height.
-        entryContent.style.height = '0';
-        entryContent.offsetHeight; // Force reflow.
-
-        // Uncollapse.
-        entryContent.style.height = naturalHeight;
-        entryContent.style.opacity = '1';
-
-        if (aAnimate) {
-            entryContainer.setAttribute('collapsing', true);
-            entryContent.addEventListener('transitionend', finish, true);
-        }
-        else {
-            finish();
-        }
-
-        if (this.query.searchString) {
-            this._highlightSearchTerms(aEntry);
-            entryElement.setAttribute('searchTermsHighlighted', true);
-        }
-    },
-
-    get selectedElement() {
-        return this.selectedEntry ? this.document.getElementById(this.selectedEntry)
-                                  : null;
-    },
 
     selectNextEntry: function FeedView_selectNextEntry() {
         if (this._scrolling)
             return;
 
         if (PrefCache.entrySelectionEnabled) {
-            let entryElement = this.selectedElement.nextSibling;
-            if (entryElement)
-                this.selectEntry(parseInt(entryElement.id), true, true);
+            let selectedIndex = this.getEntryIndex(this.selectedEntry);
+            let nextEntry = this._loadedEntries[selectedIndex + 1];
+            if (nextEntry)
+                this.selectEntry(nextEntry, true, true);
         }
         else {
             Prefs.setBoolPref('feedview.entrySelectionEnabled', true);
@@ -270,9 +170,10 @@ FeedView.prototype = {
             return;
 
         if (PrefCache.entrySelectionEnabled) {
-            let entryElement = this.selectedElement.previousSibling;
-            if (entryElement)
-                this.selectEntry(parseInt(entryElement.id), true, true);
+            let selectedIndex = this.getEntryIndex(this.selectedEntry);
+            let prevEntry = this._loadedEntries[selectedIndex - 1];
+            if (prevEntry)
+                this.selectEntry(prevEntry, true, true);
         }
         else {
             Prefs.setBoolPref('feedview.entrySelectionEnabled', true);
@@ -283,7 +184,7 @@ FeedView.prototype = {
      * Selects the given entry and optionally scrolls it into view.
      *
      * @param aEntry
-     *        ID or DOM element of entry to select.
+     *        ID of entry to select.
      *        Pass null to deselect current entry.
      * @param aScroll
      *        Set to TRUE to scroll the entry into view.
@@ -295,19 +196,16 @@ FeedView.prototype = {
         if (!this.active)
             return;
 
-        let entry = (typeof aEntry == 'number' || !aEntry) ? aEntry
-                                                           : parseInt(aEntry.id);
+        if (this.selectedEntry)
+            this.getEntryView(this.selectedEntry).selected = false;
 
-        if (this.selectedElement)
-            this.selectedElement.removeAttribute('selected');
+        this.selectedEntry = aEntry;
 
-        this.selectedEntry = entry;
-
-        if (entry) {
-            this.selectedElement.setAttribute('selected', true);
+        if (aEntry) {
+            this.getEntryView(aEntry).selected = true;
 
             if (aScroll)
-                this.scrollToEntry(entry, true, aScrollSmoothly);
+                this.scrollToEntry(aEntry, true, aScrollSmoothly);
         }
     },
 
@@ -319,35 +217,38 @@ FeedView.prototype = {
      *        target position.
      */
     scrollToPrevEntry: function FeedView_scrollToPrevEntry(aSmooth) {
-        let middleElement = this._getMiddleEntryElement();
-        if (middleElement)
-            var previousElement = middleElement.previousSibling;
+        let previousEntry = null;
 
-        if (previousElement)
-            this.scrollToEntry(parseInt(previousElement.id), true, aSmooth);
+        let middleEntry = this._getEntryInScreenCenter();
+        if (middleEntry)
+            previousEntry = this._loadedEntries[this.getEntryIndex(middleEntry) - 1];
+
+        if (previousEntry)
+            this.scrollToEntry(previousEntry, true, aSmooth);
     },
 
 
     // See scrollToPrevEntry.
     scrollToNextEntry: function FeedView_scrollToNextEntry(aSmooth) {
-        let middleElement = this._getMiddleEntryElement();
-        if (middleElement)
-            var nextElement = middleElement.nextSibling;
+        let nextEntry = null;
 
-        if (nextElement)
-            this.scrollToEntry(parseInt(nextElement.id), true, aSmooth);
+        let middleEntry = this._getEntryInScreenCenter();
+        if (middleEntry)
+            nextEntry = this._loadedEntries[this.getEntryIndex(middleEntry) + 1];
+
+        if (nextEntry)
+            this.scrollToEntry(nextEntry, true, aSmooth);
     },
 
     /**
      * Scroll down by 10 entries, loading more entries if necessary.
      */
     skipDown: function FeedView_skipDown() {
-        let middleEntry = parseInt(this._getMiddleEntryElement().id);
+        let middleEntry = this._getEntryInScreenCenter();
         let index = this.getEntryIndex(middleEntry);
 
         let doSkipDown = function(aCount) {
-            let targetEntry = this._loadedEntries[index + 10] ||
-                              this._loadedEntries[this._loadedEntries.length - 1];
+            let targetEntry = this._loadedEntries[index + 10] || this.lastEntry;
 
             if (PrefCache.entrySelectionEnabled)
                 this.selectEntry(targetEntry, true, true);
@@ -363,7 +264,7 @@ FeedView.prototype = {
 
     // See scrollDown.
     skipUp: function FeedView_skipUp() {
-        let middleEntry = parseInt(this._getMiddleEntryElement().id);
+        let middleEntry = this._getEntryInScreenCenter();
         let index = this.getEntryIndex(middleEntry);
         let targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
 
@@ -390,17 +291,18 @@ FeedView.prototype = {
      */
     scrollToEntry: function FeedView_scrollToEntry(aEntry, aCentre, aSmooth) {
         let win = this.window;
-        let entryElement = this.document.getElementById(aEntry);
+        let entryView = this.getEntryView(aEntry);
+        let targetPosition;
 
-        if (entryElement.offsetHeight >= win.innerHeight) {
-            var targetPosition = entryElement.offsetTop;
+        if (entryView.height >= win.innerHeight) {
+            targetPosition = entryView.offsetTop;
         }
         else if (aCentre) {
-            let difference = win.innerHeight - entryElement.offsetHeight;
-            targetPosition = entryElement.offsetTop - Math.floor(difference / 2);
+            let difference = win.innerHeight - entryView.height;
+            targetPosition = entryView.offsetTop - Math.floor(difference / 2);
         }
         else {
-            targetPosition = (entryElement.offsetTop + entryElement.offsetHeight) - win.innerHeight;
+            targetPosition = (entryView.offsetTop + entryView.height) - win.innerHeight;
         }
 
         targetPosition = Math.max(targetPosition, 0);
@@ -418,22 +320,18 @@ FeedView.prototype = {
         if (this._scrolling)
             return;
 
-        let win = this.window;
+        let distance = aTargetPosition - this.window.pageYOffset;
+        let jumpCount = Math.exp(Math.abs(distance) / 400) + 6;
+        jumpCount = Math.max(jumpCount, 7);
+        jumpCount = Math.min(jumpCount, 15);
 
-        let distance = aTargetPosition - win.pageYOffset;
-        with (Math) {
-            let jumpCount = exp(abs(distance) / 400) + 6;
-            jumpCount = max(jumpCount, 7);
-            jumpCount = min(jumpCount, 15);
-
-            var jump = round(distance / jumpCount);
-        }
+        let jump = Math.round(distance / jumpCount);
 
         this._scrolling = setInterval(function() {
             // If we are within epsilon smaller or equal to the jump,
             // then scroll directly to the target position.
-            if (Math.abs(aTargetPosition - win.pageYOffset) <= Math.abs(jump)) {
-                win.scroll(win.pageXOffset, aTargetPosition)
+            if (Math.abs(aTargetPosition - this.window.pageYOffset) <= Math.abs(jump)) {
+                this.window.scroll(this.window.pageXOffset, aTargetPosition)
                 this._stopSmoothScrolling();
 
                 // One more scroll event will be sent but _scrolling is already null,
@@ -443,7 +341,7 @@ FeedView.prototype = {
                 this._ignoreNextScrollEvent = true;
             }
             else {
-                win.scroll(win.pageXOffset, win.pageYOffset + jump);
+                this.window.scroll(this.window.pageXOffset, this.window.pageYOffset + jump);
             }
         }.bind(this), 10)
     },
@@ -454,24 +352,21 @@ FeedView.prototype = {
     },
 
     // Return the entry element closest to the middle of the screen.
-    _getMiddleEntryElement: function FeedView__getMiddleEntryElement() {
-        let elems = this.feedContent.childNodes;
-        if (!elems.length)
+    _getEntryInScreenCenter: function FeedView__getEntryInScreenCenter() {
+        if (!this._loadedEntries.length)
             return null;
 
         let middleLine = this.window.pageYOffset + Math.round(this.window.innerHeight / 2);
 
         // Iterate starting from the last entry, because the scroll position is
         // likely to be closer to the end than to the beginning of the page.
-        for (let i = elems.length - 1; i >= 0; i--) {
-            if ((elems[i].offsetTop <= middleLine)
-                && (!elems[i + 1] || elems[i + 1].offsetTop > middleLine)) {
-                var middleElement = elems[i];
-                break;
-            }
+        let entries = this._entryViews;
+        for (let i = entries.length - 1; i >= 0; i--) {
+            if ((entries[i].offsetTop <= middleLine) && (!entries[i + 1] || entries[i + 1].offsetTop > middleLine))
+                return entries[i].id;
         }
 
-        return middleElement || elems[elems.length - 1];
+        return this.lastEntry;
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
@@ -484,7 +379,7 @@ FeedView.prototype = {
     markVisibleEntriesRead: function FeedView_markVisibleEntriesRead() {
         let winTop = this.window.pageYOffset;
         let winBottom = winTop + this.window.innerHeight;
-        let entries = this.feedContent.childNodes;
+        let entries = this._entryViews;
 
         let entriesToMark = [];
 
@@ -492,7 +387,7 @@ FeedView.prototype = {
         // likely to be closer to the end than to the beginning of the page.
         for (let i = entries.length - 1; i >= 0; i--) {
             let entryTop = entries[i].offsetTop;
-            let id = parseInt(entries[i].id);
+            let id = entries[i].id;
             let wasMarkedUnread = (this.entriesMarkedUnread.indexOf(id) != -1);
 
             if (entryTop >= winTop && entryTop < winBottom - 50 && !wasMarkedUnread)
@@ -504,11 +399,11 @@ FeedView.prototype = {
     },
 
     toggleHeadlinesView: function FeedView_toggleHeadlinesView() {
-        for (let entry in this._loadedEntries) {
+        for (let entryView in this._entryViews) {
             if (PrefCache.showHeadlinesOnly)
-                this.collapseEntry(entry, false);
+                entryView.collapse(false);
             else
-                this.uncollapseEntry(entry, false);
+                entryView.uncollapse(false);
         }
 
         if (PrefCache.showHeadlinesOnly) {
@@ -541,17 +436,17 @@ FeedView.prototype = {
 
     /**
      * Events which the view listens to in the template page.
+     * XXX Remove.
      */
-    _events: ['click', 'scroll', 'keypress'],
+    _events: ['scroll', 'keypress'],
 
     handleEvent: function FeedView_handleEvent(aEvent) {
         let target = aEvent.target;
         let id = parseInt(target.id);
 
         // Checking if default action has been prevented helps Brief play nicely with
-        // other extensions. In Gecko <1.9.2 getPreventDefault() is available only
-        // for UI events.
-        if (aEvent instanceof Ci.nsIDOMNSUIEvent && aEvent.getPreventDefault())
+        // other extensions.
+        if (aEvent.getPreventDefault())
             return;
 
         switch (aEvent.type) {
@@ -583,8 +478,7 @@ FeedView.prototype = {
                     clearTimeout(this._scrollSelectionTimeout);
 
                     function selectCentralEntry() {
-                        let elem = this._getMiddleEntryElement();
-                        this.selectEntry(elem);
+                        this.selectEntry(this._getEntryInScreenCenter());
                     }
                     this._scrollSelectionTimeout = async(selectCentralEntry, 100, this);
                 }
@@ -594,10 +488,6 @@ FeedView.prototype = {
 
             case 'resize':
                 this._fillWindow(WINDOW_HEIGHTS_LOAD);
-                break;
-
-            case 'click':
-                this._onClick(aEvent);
                 break;
 
             case 'keypress':
@@ -610,96 +500,6 @@ FeedView.prototype = {
                     this._refreshPending = false;
                 }
                 break;
-        }
-    },
-
-    _onClick: function FeedView__onClick(aEvent) {
-        // This loop walks the parent chain of the even target to check if the
-        // article-container and/or an anchor were clicked.
-        let elem = aEvent.target;
-        while (elem != this.document.documentElement) {
-            if (elem.localName.toUpperCase() == 'A')
-                var anchor = elem;
-
-            if (elem.className == 'article-container') {
-                var entryElement = elem;
-                break;
-            }
-
-            elem = elem.parentNode;
-        }
-
-        // Divert links to new tabs according to user preferences.
-        if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
-            aEvent.preventDefault();
-
-            // preventDefault doesn't stop the default action for middle-clicks,
-            // so we've got stop propagation as well.
-            if (aEvent.button == 1)
-                aEvent.stopPropagation();
-
-            let openInTabs = Prefs.getBoolPref('feedview.openEntriesInTabs');
-            let newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
-
-            if (anchor.className == 'article-title-link')
-                Commands.openEntryLink(entryElement, newTab);
-            else if (anchor.hasAttribute('href'))
-                Commands.openLink(anchor.getAttribute('href'), newTab);
-        }
-
-        if (!entryElement)
-            return;
-
-        if (PrefCache.entrySelectionEnabled)
-            this.selectEntry(parseInt(entryElement.id));
-
-        let entryID = parseInt(entryElement.id);
-        let command = aEvent.target.getAttribute('command');
-
-        if (aEvent.detail == 2 && PrefCache.doubleClickMarks && !command)
-            Commands.markEntryRead(entryID, !entryElement.hasAttribute('read'));
-
-        if (command) {
-            switch (command) {
-                case 'switchRead':
-                    Commands.markEntryRead(entryID, !entryElement.hasAttribute('read'));
-                    break;
-
-                case 'star':
-                    if (entryElement.hasAttribute('starred')) {
-                        let query = new Query(entryID);
-
-                        query.verifyBookmarksAndTags();
-
-                        query.getProperty('bookmarkID', false, function(ids) {
-                            let starElem = entryElement.getElementsByClassName('article-star')[0];
-                            getTopWindow().StarUI.showEditBookmarkPopup(ids[0], starElem,
-                                                                        'after_start');
-                        })
-                    }
-                    else {
-                        Commands.starEntry(entryID, true);
-                    }
-                    break;
-
-                case 'delete':
-                    Commands.deleteEntry(entryID);
-                    break;
-
-                case 'restore':
-                    Commands.restoreEntry(entryID);
-                    break;
-            }
-        }
-        else if (entryElement.hasAttribute('collapsed')) {
-            this.uncollapseEntry(entryID, true);
-        }
-        else {
-            let className = aEvent.target.className;
-            if ((className == 'article-header' || className == 'article-title-link-box')
-                    && PrefCache.showHeadlinesOnly) {
-                this.collapseEntry(entryID, true);
-            }
         }
     },
 
@@ -736,26 +536,8 @@ FeedView.prototype = {
                 this._onEntriesAdded(aEntryList.IDs);
         }
 
-        for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
-            let entryElement = this.document.getElementById(entry);
-            let markReadButton = entryElement.getElementsByClassName('mark-read')[0];
-
-            if (aNewState) {
-                entryElement.setAttribute('read', 'true');
-                markReadButton.textContent = this._strings.markAsUnread;
-
-                // XXX
-                if (entryElement.hasAttribute('updated')) {
-                    entryElement.removeAttribute('updated');
-                    let dateElement = entryElement.getElementsByClassName('article-date')[0];
-                    dateElement.innerHTML = entryElement.getAttribute('dateString');
-                }
-            }
-            else {
-                entryElement.removeAttribute('read');
-                markReadButton.textContent = this._strings.markAsRead;
-            }
-        }
+        for (let entry in this._loadedEntries.intersect(aEntryList.IDs))
+            this.getEntryView(entry).read = aNewState;
     },
 
     onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
@@ -769,13 +551,8 @@ FeedView.prototype = {
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
         }
 
-        for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
-            let entryElement = this.document.getElementById(entry);
-            if (aNewState)
-                entryElement.setAttribute('starred', 'true');
-            else
-                entryElement.removeAttribute('starred');
-        }
+        for (let entry in this._loadedEntries.intersect(aEntryList.IDs))
+            this.getEntryView(entry).starred = aNewState;
     },
 
     onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
@@ -783,25 +560,15 @@ FeedView.prototype = {
             return;
 
         for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
-            let entryElement = this.document.getElementById(entry);
+            let entryView = this.getEntryView(entry);
+            let tags = entryView.tags;
 
-            let tags = entryElement.getAttribute('tags');
-            tags = tags ? tags.split(', ') : [];
-
-            if (aNewState) {
+            if (aNewState)
                 tags.push(aTag);
-                tags.sort();
-            }
-            else {
-                let index = tags.indexOf(aTag);
-                tags.splice(index, 1);
-            }
+            else
+                tags.splice(tags.indexOf(aTag), 1);
 
-            tags = tags.join(', ');
-
-            entryElement.setAttribute('tags', tags);
-            let tagsElement = entryElement.getElementsByClassName('article-tags')[0];
-            tagsElement.textContent = tags;
+            entryView.tags = tags;
         }
 
         if (this.query.tags && this.query.tags[0] === aTag) {
@@ -847,7 +614,7 @@ FeedView.prototype = {
         }
 
         let query = this.getQueryCopy();
-        query.startDate = parseInt(this.feedContent.lastChild.getAttribute('date'));
+        query.startDate = this.getEntryView(this.lastEntry).date;
 
         this._loadedEntries = yield query.getEntries(resume);
 
@@ -899,20 +666,12 @@ FeedView.prototype = {
                 selectedEntryIndex = indices[0];
             }
 
-            let entryContainer = this.document.getElementById(entryID);
-
-            entryContainer.addEventListener('transitionend', function() {
-                // The element may have been removed in the meantime
-                // if the view had been refreshed.
-                if (entryContainer.parentNode != this.feedContent)
-                    return;
-
-                this.feedContent.removeChild(entryContainer);
+            this.getEntryView(entryID).remove(true, function() {
                 this._loadedEntries.splice(indices[0], 1);
-                this._afterEntriesRemoved(aLoadNewEntries, selectedEntryIndex);
-            }.bind(this), true);
+                this._entryViews.splice(indices[0], 1);
 
-            entryContainer.setAttribute('removing', true);
+                this._afterEntriesRemoved(aLoadNewEntries, selectedEntryIndex);
+            }.bind(this))
         }
         else {
             indices.sort(function(a, b) a - b);
@@ -920,15 +679,15 @@ FeedView.prototype = {
             // Start from the oldest entry so that we don't change the relative
             // insertion positions of consecutive entries.
             for (let i = indices.length - 1; i >= 0; i--) {
-                let element = this.feedContent.childNodes[indices[i]];
-                this.feedContent.removeChild(element);
-
                 if (this._loadedEntries[indices[i]] == this.selectedEntry) {
                     this.selectEntry(null);
                     selectedEntryIndex = indices[i];
                 }
 
+                this.getEntryView(this._loadedEntries[indices[i]]).remove();
+
                 this._loadedEntries.splice(indices[i], 1);
+                this._entryViews.splice(indices[i], 1);
             }
 
             this._afterEntriesRemoved(aLoadNewEntries, selectedEntryIndex);
@@ -946,8 +705,7 @@ FeedView.prototype = {
             this._setEmptyViewMessage();
 
             if (this._loadedEntries.length && aPrevSelectedIndex != -1) {
-                let newSelection = this._loadedEntries[aPrevSelectedIndex] ||
-                                   this._loadedEntries[this._loadedEntries.length - 1];
+                let newSelection = this._loadedEntries[aPrevSelectedIndex] || this.lastEntry;
                 this.selectEntry(newSelection);
             }
         }
@@ -973,6 +731,7 @@ FeedView.prototype = {
 
         // Clear the old entries.
         this._loadedEntries = [];
+        this._entryViews = [];
         let container = this.document.getElementById('container');
         container.removeChild(this.feedContent);
         let content = this.document.createElement('div');
@@ -984,7 +743,6 @@ FeedView.prototype = {
 
         this._buildHeader();
 
-        // Pass parameters to content.
         if (this.query.deleted == Storage.ENTRY_STATE_TRASHED)
             this.feedContent.setAttribute('trash', true);
         if (PrefCache.showHeadlinesOnly)
@@ -996,8 +754,8 @@ FeedView.prototype = {
 
         this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD, function() {
             // Resize events can be dispatched asynchronously, so this listener shouldn't
-            // be earlier along with others, because then it could be triggered before
-            // the initial refresh.
+            // be added earlier along with other ones, because then it could be triggered
+            // before the initial refresh.
             this.window.addEventListener('resize', this, false);
 
             this._setEmptyViewMessage();
@@ -1005,6 +763,7 @@ FeedView.prototype = {
 
             if (PrefCache.entrySelectionEnabled) {
                 let lastSelectedEntry = this.selectedEntry;
+                this.selectedEntry = null;
                 let entry = this.containsEntry(lastSelectedEntry) ? lastSelectedEntry
                                                                   : this._loadedEntries[0];
                 this.selectEntry(entry, true);
@@ -1022,6 +781,8 @@ FeedView.prototype = {
      *        position.
      */
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
+        let resume = FeedView__fillWindow.resume;
+
         if (this._loadingEntries || this.enoughEntriesPreloaded && !this.lastEntryInCenter) {
             if (aCallback)
                 aCallback();
@@ -1031,7 +792,7 @@ FeedView.prototype = {
         let stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
                                                    : LOAD_STEP_SIZE;
 
-        do var loadedCount = yield this._loadEntries(stepSize, arguments.callee.resume);
+        do var loadedCount = yield this._loadEntries(stepSize, resume);
         while (loadedCount && (!this.enoughEntriesPreloaded || this.lastEntryInCenter))
 
         if (aCallback)
@@ -1039,7 +800,7 @@ FeedView.prototype = {
     }.gen(),
 
     get lastEntryInCenter() {
-        return this._getMiddleEntryElement() == this.feedContent.lastChild;
+        return this._getEntryInScreenCenter() == this.lastEntry;
     },
 
     get enoughEntriesPreloaded() {
@@ -1058,14 +819,16 @@ FeedView.prototype = {
      * @return The actual number of entries that were loaded.
      */
     _loadEntries: function FeedView__loadEntries(aCount, aCallback) {
+        let resume = FeedView__loadEntries.resume;
+
         this._loadingEntries = true;
+        let loadedEntries = null;
 
         let dateQuery = this.getQueryCopy();
         let edgeDate = undefined;
 
-        let lastEntryElement = this.feedContent.lastChild;
-        if (lastEntryElement) {
-            let lastEntryDate = parseInt(lastEntryElement.getAttribute('date'));
+        if (this._loadedEntries.length) {
+            let lastEntryDate = this.getEntryView(this.lastEntry).date;
             if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
                 edgeDate = lastEntryDate - 1;
             else
@@ -1079,7 +842,7 @@ FeedView.prototype = {
 
         dateQuery.limit = aCount;
 
-        let dates = yield dateQuery.getProperty('date', false, arguments.callee.resume);
+        let dates = yield dateQuery.getProperty('date', false, resume);
         if (dates.length) {
             let query = this.getQueryCopy();
             if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
@@ -1091,140 +854,25 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            var entries = yield query.getFullEntries(arguments.callee.resume);
-            entries.forEach(this._appendEntry, this);
+            loadedEntries = yield query.getFullEntries(resume);
+            for (let entry in loadedEntries) {
+                this._insertEntry(entry, this._loadedEntries.length);
+                this._loadedEntries.push(entry.id);
+            }
         }
 
         this._loadingEntries = false;
 
-        aCallback(entries ? entries.length : 0);
+        aCallback(loadedEntries ? loadedEntries.length : 0);
     }.gen(),
 
-    _appendEntry: function FeedView__appendEntry(aEntry) {
-        this._insertEntry(aEntry, this._loadedEntries.length);
-        this._loadedEntries.push(aEntry.id);
-    },
-
-    _insertEntry: function FeedView__appendEntry(aEntry, aPosition) {
-        let entryContainer = this.document.getElementById('article-template')
-                                          .cloneNode(true);
+    _insertEntry: function FeedView__insertEntry(aEntryData, aPosition) {
+        let entryView = new EntryView(this, aEntryData);
 
         let nextEntry = this.feedContent.childNodes[aPosition];
-        this.feedContent.insertBefore(entryContainer, nextEntry);
+        this.feedContent.insertBefore(entryView.container, nextEntry);
 
-        entryContainer.setAttribute('id', aEntry.id);
-
-        if (aEntry.read)
-            entryContainer.setAttribute('read', true);
-
-        let titleElem = entryContainer.getElementsByClassName('article-title-link')[0];
-        if (aEntry.entryURL) {
-            entryContainer.setAttribute('entryURL', aEntry.entryURL);
-            titleElem.setAttribute('href', aEntry.entryURL);
-        }
-
-        // Use innerHTML instead of textContent, so that the entities are resolved.
-        titleElem.innerHTML = aEntry.title || aEntry.entryURL;
-
-        let tagsElem = entryContainer.getElementsByClassName('article-tags')[0];
-        tagsElem.textContent = aEntry.tags;
-
-        let markReadElem = entryContainer.getElementsByClassName('mark-read')[0];
-        markReadElem.textContent = aEntry.read ? this._strings.markAsUnread
-                                               : this._strings.markAsRead;
-
-        // When view contains entries from many feeds, show feed name on each entry.
-        if (!Storage.getFeed(this.query.feeds)) {
-            let feedNameElem = entryContainer.getElementsByClassName('feed-name')[0];
-            feedNameElem.innerHTML = Storage.getFeed(aEntry.feedID).title;
-        }
-
-        let authorsElem = entryContainer.getElementsByClassName('article-authors')[0];
-        if (aEntry.authors) {
-            authorsElem.innerHTML = aEntry.authors;
-        }
-
-        if (aEntry.starred)
-            entryContainer.setAttribute('starred', true);
-
-        entryContainer.setAttribute('date', aEntry.date);
-
-        let dateString = this._constructEntryDate(aEntry);
-        if (aEntry.updated) {
-            var updatedString = dateString + ' <span class="article-updated">'
-                                + this._strings.entryUpdated + '</span>'
-            entryContainer.setAttribute('updated', true);
-        }
-
-        let dateElem = entryContainer.getElementsByClassName('article-date')[0];
-        dateElem.innerHTML = updatedString || dateString;
-
-        let contentElem = entryContainer.getElementsByClassName('article-content')[0];
-        if (PrefCache.showHeadlinesOnly) {
-            this.collapseEntry(aEntry.id, false);
-
-            // In headlines view, insert the entry content asynchornously for better
-            // perceived performance.
-            async(function() {
-                contentElem.innerHTML = aEntry.content;
-
-                // Highlight search terms in the entry title.
-                if (this.query.searchString)
-                    async(function() this._highlightSearchTerms(aEntry.id), 0, this);
-            }, 0, this)
-        }
-        else {
-            contentElem.innerHTML = aEntry.content;
-
-            if (this.query.searchString) {
-                async(function() {
-                    this._highlightSearchTerms(aEntry.id);
-                    entryContainer.setAttribute('searchTermsHighlighted', true);
-                } , 0, this);
-            }
-        }
-
-        return entryContainer;
-    },
-
-
-    _constructEntryDate: function FeedView__constructEntryDate(aEntry) {
-        let entryDate = new Date(aEntry.date);
-        let entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
-
-        let now = new Date();
-        let nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
-
-        let today = Math.ceil(nowTime / 86400000);
-        let entryDay = Math.ceil(entryTime / 86400000);
-        let deltaDays = today - entryDay;
-        let deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
-
-        let string = '';
-        switch (true) {
-            case deltaDays === 0:
-                string = entryDate.toLocaleFormat(', %X ');
-                string = this._strings.today + string;
-                break;
-            case deltaDays === 1:
-                string = entryDate.toLocaleFormat(', %X ');
-                string = this._strings.yesterday + string
-                break;
-            case deltaDays < 7:
-                string = entryDate.toLocaleFormat('%A, %X ');
-                break;
-            case deltaYears > 0:
-                string = entryDate.toLocaleFormat('%d %B %Y, %X ');
-                break;
-            default:
-                string = entryDate.toLocaleFormat('%d %B, %X ');
-        }
-
-        string = string.replace(/:\d\d /, ' ');
-        // We do it because %e conversion specification doesn't work
-        string = string.replace(/^0/, '');
-
-        return string;
+        this._entryViews.splice(aPosition, 0, entryView);
     },
 
     _buildHeader: function FeedView__buildHeader() {
@@ -1285,6 +933,446 @@ FeedView.prototype = {
         this.document.getElementById('secondary-message').textContent = secondaryMessage;
 
         messageBox.style.display = 'block';
+    }
+
+}
+
+
+function EntryView(aFeedView, aEntryData) {
+    this.feedView = aFeedView;
+    this.id = aEntryData.id;
+    this.date = aEntryData.date;
+    this.entryURL = aEntryData.entryURL;
+
+    this.container = this.feedView.document.getElementById('article-template')
+                                           .cloneNode(true);
+    this.container.id = aEntryData.id;
+    this.container.addEventListener('click', this._onClick.bind(this), true);
+
+    // Setters do the work.
+    this.read = aEntryData.read;
+    this.starred = aEntryData.starred;
+    this.tags = aEntryData.tags ? aEntryData.tags.split(', ') : [];
+
+    this.entryURL = aEntryData.entryURL;
+
+    let titleElem = this._getElement('article-title-link');
+    if (aEntryData.entryURL) {
+        titleElem.setAttribute('href', aEntryData.entryURL);
+    }
+
+    // Use innerHTML instead of textContent to resolve entities.
+    titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
+
+    if (!Storage.getFeed(this.feedView.query.feeds)) {
+        this._getElement('feed-name').innerHTML = Storage.getFeed(aEntryData.feedID).title;
+    }
+
+    if (aEntryData.authors) {
+        this._getElement('article-authors').innerHTML = aEntryData.authors;
+    }
+
+    this.updated = aEntryData.updated;
+    let dateString = this._constructDate();
+    if (this.updated) {
+        dateString += ' <span class="article-updated">' + this._strings.entryUpdated + '</span>'
+    }
+    this._getElement('article-date').innerHTML = dateString;
+
+    if (PrefCache.showHeadlinesOnly) {
+        this.collapse(false);
+
+        // In headlines view, insert the entry content asynchronously for better
+        // perceived performance.
+        async(function() {
+            this._getElement('article-content').innerHTML = aEntryData.content;
+
+            // Highlights search terms in the entry title, the rest will be highlighted
+            // when the entry is uncollapsed.
+            if (this.feedView.query.searchString)
+                async(this._highlightSearchTerms, 0, this);
+        }, 0, this)
+    }
+    else {
+        this._getElement('article-content').innerHTML = aEntryData.content;
+
+        if (this.feedView.query.searchString) {
+            async(function() {
+                this._highlightSearchTerms();
+                this.searchTermsHighlighted = true;
+            }, 0, this);
+        }
+    }
+}
+
+EntryView.prototype = {
+
+    get read() {
+        return this.__read;
+    },
+    set read(aValue) {
+        this.__read = aValue;
+
+        if (aValue) {
+            this.container.setAttribute('read', 'true');
+            this._getElement('mark-read').textContent = this._strings.markAsUnread;
+
+            if (this.updated) {
+                this.updated = false;
+                this._getElement('article-date').innerHTML = this._constructDate();
+            }
+        }
+        else {
+            this.container.removeAttribute('read');
+            this._getElement('mark-read').textContent = this._strings.markAsRead;
+        }
+    },
+
+
+    get starred() {
+        return this.__starred;
+    },
+    set starred(aValue) {
+        this.__starred = aValue;
+
+        if (aValue)
+            this.container.setAttribute('starred', 'true');
+        else
+            this.container.removeAttribute('starred');
+    },
+
+
+    get tags() {
+        return this.__tags;
+    },
+    set tags(aValue) {
+        this.__tags = aValue;
+        this._getElement('article-tags').textContent = aValue.sort().join(', ');
+    },
+
+
+    __collapsed: false,
+
+    get collapsed() {
+        return this.__collapsed;
+    },
+
+
+    get selected() {
+        return this.container.hasAttribute('selected');
+    },
+    set selected(aValue) {
+        if (aValue)
+            this.container.setAttribute('selected', true);
+        else
+            this.container.removeAttribute('selected');
+    },
+
+
+    get offsetTop() {
+        return this.container.offsetTop;
+    },
+
+    get height() {
+        return this.container.offsetHeight;
+    },
+
+
+    remove: function EntryView_remove(aAnimate, aCallback) {
+        if (aAnimate) {
+            this.container.addEventListener('transitionend', function() {
+                // The element may have been removed in the meantime
+                // if the view had been refreshed.
+                if (this.container.parentNode == this.feedView.feedContent) {
+                    this.feedView.feedContent.removeChild(this.container);
+                    aCallback();
+                }
+            }.bind(this), true);
+
+            this.container.setAttribute('removing', true);
+        }
+        else {
+            this.feedView.feedContent.removeChild(this.container);
+        }
+    },
+
+    collapse: function EntryView_collapse(aAnimate) {
+        if (this.collapsed)
+            return;
+
+        let entryContent = this._getElement('article-content');
+
+        let finish = function() {
+            entryContent.removeEventListener('transitionend', finish, true);
+
+            this.container.removeAttribute('collapsing');
+            this.container.setAttribute('collapsed', true);
+
+            let date = this._getElement('article-date');
+            let feedName = this._getElement('feed-name');
+            let collapsedSubheader = this._getElement('collapsed-article-subheader');
+
+            collapsedSubheader.insertBefore(date, null);
+            collapsedSubheader.insertBefore(feedName, null);
+        }.bind(this)
+
+        if (aAnimate) {
+            // CSS transitions don't work with height: auto. See EntryView.uncollapse().
+            let naturalHeight = this.feedView.window.getComputedStyle(entryContent)
+                                                    .getPropertyValue('height');
+            entryContent.style.height = naturalHeight;
+            entryContent.offsetHeight; // Force reflow.
+
+            entryContent.style.height = '0';
+            entryContent.style.opacity = '0';
+
+            entryContent.addEventListener('transitionend', finish, true);
+            this.container.setAttribute('collapsing', true);
+        }
+        else {
+            entryContent.style.height = '0';
+            entryContent.style.opacity = '0';
+
+            finish();
+        }
+
+        this.__collapsed = true;
+    },
+
+    uncollapse: function EntryView_uncollapse(aAnimate) {
+        if (!this.collapsed)
+            return;
+
+        let entryContent = this._getElement('article-content');
+
+        let finish = function() {
+            entryContent.removeEventListener('transitionend', finish, true);
+            if (this.container.parentNode != this.feedView.feedContent)
+                return;
+
+            this.container.removeAttribute('collapsing');
+            entryContent.style.height = '';
+
+            if (PrefCache.autoMarkRead && this.feedView.query.read !== false)
+                Commands.markEntryRead(this.id, true);
+
+            if (this.id == this.feedView.selectedEntry) {
+                let entryBottom = this.offsetTop + this.height;
+                let screenBottom = this.feedView.window.pageYOffset +
+                                   this.feedView.window.innerHeight;
+                if (entryBottom > screenBottom)
+                    this.feedView.scrollToEntry(this.id, false, true);
+            }
+        }.bind(this)
+
+        let subheaderLeft = this._getElement('article-subheader-left');
+        let subheaderRight = this._getElement('article-subheader-right');
+        let date = this._getElement('article-date');
+        let feedName = this._getElement('feed-name');
+        let tagsElem = this._getElement('article-tags');
+
+        subheaderLeft.insertBefore(feedName, tagsElem);
+        subheaderRight.insertBefore(date, null);
+
+        this.container.removeAttribute('collapsed');
+
+        if (aAnimate) {
+            // CSS transitions don't work with height: auto. For a workaround,
+            // temporarily set height: auto and read the actual computed height...
+            entryContent.style.height = '';
+            entryContent.offsetHeight; // Force reflow.
+            let naturalHeight = this.feedView.window.getComputedStyle(entryContent)
+                                                    .getPropertyValue('height');
+
+            // Set the height back to 0...
+            entryContent.style.height = '0';
+            entryContent.offsetHeight; // Force reflow.
+
+            // Finally, transition the height to the previously computed value.
+            entryContent.style.height = naturalHeight;
+            entryContent.style.opacity = '1';
+
+            // However, the natural height isn't always exactly right so after the
+            // transition is finished, we set the height back to auto.
+            this.container.setAttribute('collapsing', true);
+            entryContent.addEventListener('transitionend', finish, true);
+        }
+        else {
+            entryContent.style.opacity = '1';
+
+            finish();
+        }
+
+        if (this.feedView.query.searchString) {
+            this._highlightSearchTerms();
+            this.searchTermsHighlighted = true;
+        }
+
+        this.__collapsed = false;
+    },
+
+    _onClick: function EntryView__onClick(aEvent) {
+        if (PrefCache.entrySelectionEnabled)
+            this.feedView.selectEntry(this.id);
+
+        // Walk the parent chain of the even target to check if an anchor was clicked.
+        let anchor = null;
+        let element = aEvent.target;
+        while (element != this.container) {
+            if (element.localName.toUpperCase() == 'A') {
+                anchor = element;
+                break;
+            }
+            element = element.parentNode;
+        }
+
+        // Divert links to new tabs according to user preferences.
+        if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
+            aEvent.preventDefault();
+
+            // preventDefault doesn't stop the default action for middle-clicks,
+            // so we've got stop propagation as well.
+            if (aEvent.button == 1)
+                aEvent.stopPropagation();
+
+            let openInTabs = Prefs.getBoolPref('feedview.openEntriesInTabs');
+            let newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
+
+            if (anchor.className == 'article-title-link') {
+                Commands.openEntryLink(this.id, newTab);
+                return;
+            }
+            else if (anchor.hasAttribute('href')) {
+                Commands.openLink(anchor.getAttribute('href'), newTab);
+                return;
+            }
+        }
+
+        let command = aEvent.target.getAttribute('command');
+
+        if (aEvent.detail == 2 && PrefCache.doubleClickMarks && !command)
+            Commands.markEntryRead(this.id, !this.read);
+
+        switch (command) {
+            case 'switchRead':
+                Commands.markEntryRead(this.id, !this.read);
+                break;
+
+            case 'star':
+                if (this.starred) {
+                    let query = new Query(this.id);
+
+                    query.verifyBookmarksAndTags();
+
+                    query.getProperty('bookmarkID', false, function(ids) {
+                        let starElem = this._getElement('article-star');
+                        getTopWindow().StarUI.showEditBookmarkPopup(ids[0], starElem, 'after_start');
+                    }.bind(this))
+                }
+                else {
+                    Commands.starEntry(this.id, true);
+                }
+                break;
+
+            case 'delete':
+                Commands.deleteEntry(this.id);
+                break;
+
+            case 'restore':
+                Commands.restoreEntry(this.id);
+                break;
+
+            default:
+                if (this.collapsed) {
+                    this.uncollapse(true);
+                }
+                else {
+                    let className = aEvent.target.className;
+                    if ((className == 'article-header' || className == 'article-title-link-box')
+                            && PrefCache.showHeadlinesOnly) {
+                        this.collapse(true);
+                    }
+                }
+        }
+    },
+
+    _getElement: function EntryView__getElement(aClassName) {
+        return this.container.getElementsByClassName(aClassName)[0];
+    },
+
+    _constructDate: function EntryView__constructDate() {
+        let entryDate = new Date(this.date);
+        let entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
+
+        let now = new Date();
+        let nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
+
+        let today = Math.ceil(nowTime / 86400000);
+        let entryDay = Math.ceil(entryTime / 86400000);
+        let deltaDays = today - entryDay;
+        let deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
+
+        let string = '';
+        switch (true) {
+            case deltaDays === 0:
+                string = entryDate.toLocaleFormat(', %X ');
+                string = this._strings.today + string;
+                break;
+            case deltaDays === 1:
+                string = entryDate.toLocaleFormat(', %X ');
+                string = this._strings.yesterday + string
+                break;
+            case deltaDays < 7:
+                string = entryDate.toLocaleFormat('%A, %X ');
+                break;
+            case deltaYears > 0:
+                string = entryDate.toLocaleFormat('%d %B %Y, %X ');
+                break;
+            default:
+                string = entryDate.toLocaleFormat('%d %B, %X ');
+        }
+
+        string = string.replace(/:\d\d /, ' ');
+        // We do it because %e conversion specification doesn't work
+        string = string.replace(/^0/, '');
+
+        return string;
+    },
+
+    _highlightSearchTerms: function EntryView__highlightSearchTerms() {
+        if (this.container.hasAttribute('searchTermsHighlighted'))
+            return;
+
+        for (let term in this.feedView.query.searchString.match(/[A-Za-z0-9]+/g)) {
+            let searchRange = this.feedView.document.createRange();
+            searchRange.setStart(this.container, 0);
+            searchRange.setEnd(this.container, this.container.childNodes.length);
+
+            let startPoint = this.feedView.document.createRange();
+            startPoint.setStart(this.container, 0);
+            startPoint.setEnd(this.container, 0);
+
+            let endPoint = this.feedView.document.createRange();
+            endPoint.setStart(this.container, this.container.childNodes.length);
+            endPoint.setEnd(this.container, this.container.childNodes.length);
+
+            let baseNode = this.feedView.document.createElement('span');
+            baseNode.className = 'search-highlight';
+
+            let retRange = Finder.Find(term, searchRange, startPoint, endPoint);
+            while (retRange) {
+                let surroundingNode = baseNode.cloneNode(false);
+                surroundingNode.appendChild(retRange.extractContents());
+
+                let before = retRange.startContainer.splitText(retRange.startOffset);
+                before.parentNode.insertBefore(surroundingNode, before);
+
+                startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
+                startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
+
+                retRange = Finder.Find(term, searchRange, startPoint, endPoint)
+            }
+        }
     },
 
     get _strings() {
@@ -1294,66 +1382,26 @@ FeedView.prototype = {
             yesterday:    gStringBundle.getString('yesterday'),
             entryUpdated: gStringBundle.getString('entryWasUpdated'),
             markAsRead:   gStringBundle.getString('markEntryAsRead'),
-            markAsUnread: gStringBundle.getString('markEntryAsUnread'),
+            markAsUnread: gStringBundle.getString('markEntryAsUnread')
         }
-    },
-
-
-    _highlightSearchTerms: function FeedView__highlightSearchTerms(aEntry) {
-        let entryElement = this.document.getElementById(aEntry);
-
-        if (entryElement.hasAttribute('searchTermsHighlighted'))
-            return;
-
-        let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
-        finder.caseSensitive = false;
-
-        for (let term in this.query.searchString.match(/[A-Za-z0-9]+/g)) {
-            let searchRange = this.document.createRange();
-            searchRange.setStart(entryElement, 0);
-            searchRange.setEnd(entryElement, entryElement.childNodes.length);
-
-            let startPoint = this.document.createRange();
-            startPoint.setStart(entryElement, 0);
-            startPoint.setEnd(entryElement, 0);
-
-            let endPoint = this.document.createRange();
-            endPoint.setStart(entryElement, entryElement.childNodes.length);
-            endPoint.setEnd(entryElement, entryElement.childNodes.length);
-
-            let baseNode = this.document.createElement('span');
-            baseNode.className = 'search-highlight';
-
-            let retRange;
-            while (retRange = finder.Find(term, searchRange, startPoint, endPoint)) {
-                let surroundingNode = baseNode.cloneNode(false);
-                surroundingNode.appendChild(retRange.extractContents());
-
-                let before = retRange.startContainer.splitText(retRange.startOffset);
-                before.parentNode.insertBefore(surroundingNode, before);
-
-                startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
-                startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
-            }
-        }
-    },
-
-    QueryInterface: function FeedView_QueryInterface(aIID) {
-        if (aIID.equals(Ci.nsISupports) ||
-            aIID.equals(Ci.nsIDOMEventListener)) {
-            return this;
-        }
-        throw Components.results.NS_ERROR_NO_INTERFACE;
     }
 
 }
 
 
+__defineGetter__('Finder', function() {
+    let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
+    finder.caseSensitive = false;
+
+    delete this.Finder;
+    return this.Finder = finder;
+})
+
 __defineGetter__('gSecurityManager', function() {
     delete this.gSecurityManager;
     return this.gSecurityManager = Cc['@mozilla.org/scriptsecuritymanager;1']
                                    .getService(Ci.nsIScriptSecurityManager);
-});
+})
 
 __defineGetter__('gBriefPrincipal', function() {
     let uri = NetUtil.newURI(document.documentURI);
@@ -1363,4 +1411,4 @@ __defineGetter__('gBriefPrincipal', function() {
 
     delete this.gBriefPrincipal;
     return this.gBriefPrincipal = gSecurityManager.getCodebasePrincipal(resolvedURI);
-});
+})

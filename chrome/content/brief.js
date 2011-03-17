@@ -201,9 +201,10 @@ let Commands = {
     },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
-        if (gCurrentView.selectedEntry) {
-            let newState = !gCurrentView.selectedElement.hasAttribute('read');
-            Commands.markEntryRead(gCurrentView.selectedEntry, newState);
+        let entry = gCurrentView.selectedEntry;
+        if (entry) {
+            let newState = !gCurrentView.getEntryView(entry).read;
+            Commands.markEntryRead(entry, newState);
         }
     },
 
@@ -232,9 +233,10 @@ let Commands = {
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
-        if (gCurrentView.selectedEntry) {
-            let newState = !gCurrentView.selectedElement.hasAttribute('starred');
-            Commands.starEntry(gCurrentView.selectedEntry, newState);
+        let entry = gCurrentView.selectedEntry;
+        if (entry) {
+            let newState = !gCurrentView.getEntryView(entry).starred;
+            Commands.starEntry(entry, newState);
         }
     },
 
@@ -243,30 +245,31 @@ let Commands = {
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
-        if (gCurrentView.selectedEntry && PrefCache.showHeadlinesOnly) {
-            if (gCurrentView.selectedElement.hasAttribute('collapsed'))
-                gCurrentView.uncollapseEntry(gCurrentView.selectedEntry, true);
-            else
-                gCurrentView.collapseEntry(gCurrentView.selectedEntry, true);
-        }
+        if (!PrefCache.showHeadlinesOnly || !gCurrentView.selectedEntry)
+            return;
+
+        let entryView = gCurrentView.getEntryView(gCurrentView.selectedEntry);
+        if (entryView.collapsed)
+            entryView.uncollapse(true);
+        else
+            entryView.collapse(true);
     },
 
 
     openSelectedEntryLink: function cmd_openSelectedEntryLink() {
-        if (gCurrentView.selectedEntry) {
-            let newTab = Prefs.getBoolPref('feedview.openEntriesInTabs');
-            Commands.openEntryLink(gCurrentView.selectedElement, newTab);
-        }
+        if (!gCurrentView.selectedEntry)
+            return;
+
+        let newTab = Prefs.getBoolPref('feedview.openEntriesInTabs');
+        Commands.openEntryLink(gCurrentView.selectedEntry, newTab);
     },
 
-    openEntryLink: function cmd_openEntryLink(aEntryElement, aNewTab) {
-        let url = aEntryElement.getAttribute('entryURL');
-        Commands.openLink(url, aNewTab);
+    openEntryLink: function cmd_openEntryLink(aEntry, aNewTab) {
+        let entryView = gCurrentView.getEntryView(aEntry);
+        Commands.openLink(entryView.entryURL, aNewTab);
 
-        if (!aEntryElement.hasAttribute('read')) {
-            let entryID = parseInt(aEntryElement.id);
-            new Query(entryID).markEntriesRead(true);
-        }
+        if (!entryView.read)
+            new Query(aEntry).markEntriesRead(true);
     },
 
     openLink: function cmd_openLink(aURL, aNewTab) {
