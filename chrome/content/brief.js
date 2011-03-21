@@ -461,7 +461,7 @@ let PrefObserver = {
                 break;
 
             case 'feedview.showHeadlinesOnly':
-                gCurrentView.toggleHeadlinesView();
+                gCurrentView.refresh();
                 break;
         }
     }
