@@ -73,6 +73,7 @@ function FeedView(aTitle, aQuery) {
         this.browser.loadURI(gTemplateURI.spec);
     }
     else {
+        this.document.addEventListener('click', this, true);
         this.document.addEventListener('scroll', this, true);
         this.document.addEventListener('keypress', this, true);
 
@@ -87,6 +88,8 @@ FeedView.prototype = {
 
     // Temporarily override the title without losing the old one.
     titleOverride: '',
+
+    headlinesMode: false,
 
     // ID of the selected entry.
     selectedEntry: null,
@@ -398,24 +401,6 @@ FeedView.prototype = {
             new Query(entriesToMark).markEntriesRead(true);
     },
 
-    toggleHeadlinesView: function FeedView_toggleHeadlinesView() {
-        for (let entryView in this._entryViews) {
-            if (PrefCache.showHeadlinesOnly)
-                entryView.collapse(false);
-            else
-                entryView.uncollapse(false);
-        }
-
-        if (PrefCache.showHeadlinesOnly) {
-            this.feedContent.setAttribute('showHeadlinesOnly', true);
-            this._fillWindow(WINDOW_HEIGHTS_LOAD);
-        }
-        else {
-            this.feedContent.removeAttribute('showHeadlinesOnly');
-            this._autoMarkRead();
-        }
-    },
-
 
     /**
      * Deactivates the view.
@@ -424,6 +409,7 @@ FeedView.prototype = {
         getTopWindow().gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
         this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
+        this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
         this.document.removeEventListener('keypress', this, true);
 
@@ -447,6 +433,7 @@ FeedView.prototype = {
                 getElement('feed-view-header').hidden = !this.active;
 
                 if (this.active) {
+                    this.document.addEventListener('click', this, true);
                     this.document.addEventListener('scroll', this, true);
                     this.document.addEventListener('keypress', this, true);
 
@@ -455,6 +442,19 @@ FeedView.prototype = {
                     document.write = document.writeln = function() { };
 
                     this.refresh();
+                }
+                break;
+
+            // Click listener must be attached to the document, not the entry container,
+            // in order to catch middle-clicks.
+            case 'click':
+                let node = aEvent.target;
+                while (node) {
+                    if (node.classList && node.classList.contains('entry')) {
+                        this.getEntryView(parseInt(node.id)).onClick(aEvent);
+                        break;
+                    }
+                    node = node.parentNode;
                 }
                 break;
 
@@ -728,21 +728,27 @@ FeedView.prototype = {
         // Clear the old entries.
         this._loadedEntries = [];
         this._entryViews = [];
-        let container = this.document.getElementById('container');
-        container.removeChild(this.feedContent);
+        this.document.body.removeChild(this.feedContent);
         let content = this.document.createElement('div');
         content.id = 'feed-content';
-        container.appendChild(content);
+        this.document.body.appendChild(content);
 
         // Prevent the message from briefly showing up before entries are loaded.
         this.document.getElementById('message-box').style.display = 'none';
 
         this._buildHeader();
 
-        if (this.query.deleted == Storage.ENTRY_STATE_TRASHED)
-            this.feedContent.setAttribute('trash', true);
-        if (PrefCache.showHeadlinesOnly)
-            this.feedContent.setAttribute('showHeadlinesOnly', true);
+        this.headlinesMode = PrefCache.showHeadlinesOnly;
+
+        if (!this.query.feeds || this.query.feeds.length > 1)
+            this.document.body.classList.add('multiple-feeds');
+        else
+            this.document.body.classList.remove('multiple-feeds');
+
+        if (this.headlinesMode)
+            this.document.body.classList.add('headlines-mode');
+        else
+            this.document.body.classList.remove('headlines-mode');
 
         // Temporarily remove the listener because reading window.innerHeight
         // can trigger a resize event (!?).
@@ -863,7 +869,7 @@ FeedView.prototype = {
     }.gen(),
 
     _insertEntry: function FeedView__insertEntry(aEntryData, aPosition) {
-        let entryView = new EntryView(this, aEntryData);
+        let entryView = new EntryView(this, aEntryData, this.headlinesMode);
 
         let nextEntry = this.feedContent.childNodes[aPosition];
         this.feedContent.insertBefore(entryView.container, nextEntry);
@@ -934,70 +940,66 @@ FeedView.prototype = {
 }
 
 
-function EntryView(aFeedView, aEntryData) {
+const DEFAULT_FAVICON_URL = 'chrome://brief/skin/icons/feed-favicon.png';
+
+function EntryView(aFeedView, aEntryData, aHeadline) {
     this.feedView = aFeedView;
+    this.headline = aHeadline;
+
     this.id = aEntryData.id;
     this.date = aEntryData.date;
     this.entryURL = aEntryData.entryURL;
+    this.updated = aEntryData.updated;
 
-    this.container = this.feedView.document.getElementById('article-template')
-                                           .cloneNode(true);
+    let templateId = this.headline ? 'headline-template' : 'article-template';
+    this.container = this.feedView.document.getElementById(templateId).cloneNode(true);
+
     this.container.id = aEntryData.id;
-    this.container.addEventListener('click', this._onClick.bind(this), true);
 
     // Setters do the work.
     this.read = aEntryData.read;
     this.starred = aEntryData.starred;
     this.tags = aEntryData.tags ? aEntryData.tags.split(', ') : [];
 
-    this.entryURL = aEntryData.entryURL;
+    let feed = Storage.getFeed(aEntryData.feedID);
+
+    let controls = this._getElement('entry-controls');
+    if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED)
+        controls.removeChild(this._getElement('delete-entry'));
+    else
+        controls.removeChild(this._getElement('restore-entry'));
 
     let titleElem = this._getElement('article-title-link');
-    if (aEntryData.entryURL) {
+    if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
-    }
 
     // Use innerHTML instead of textContent to resolve entities.
     titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
 
-    if (!Storage.getFeed(this.feedView.query.feeds)) {
-        this._getElement('feed-name').innerHTML = Storage.getFeed(aEntryData.feedID).title;
-    }
+    this._getElement('article-feed-name').innerHTML = feed.title;
+    this._getElement('article-authors').innerHTML = aEntryData.authors;
+    this._getElement('article-date').innerHTML = this._constructDate();
+    this._getElement('entry-content').innerHTML = aEntryData.content;
 
-    if (aEntryData.authors) {
-        this._getElement('article-authors').innerHTML = aEntryData.authors;
-    }
-
-    this.updated = aEntryData.updated;
-    let dateString = this._constructDate();
-    if (this.updated) {
-        dateString += ' <span class="article-updated">' + this._strings.entryUpdated + '</span>'
-    }
-    this._getElement('article-date').innerHTML = dateString;
-
-    if (PrefCache.showHeadlinesOnly) {
+    if (this.headline) {
         this.collapse(false);
 
-        // In headlines view, insert the entry content asynchronously for better
-        // perceived performance.
-        async(function() {
-            this._getElement('article-content').innerHTML = aEntryData.content;
+        if (aEntryData.entryURL)
+            this._getElement('headline-link').setAttribute('href', aEntryData.entryURL);
 
-            // Highlights search terms in the entry title, the rest will be highlighted
-            // when the entry is uncollapsed.
-            if (this.feedView.query.searchString)
-                async(this._highlightSearchTerms, 0, this);
-        }, 0, this)
+        this._getElement('headline-title').innerHTML = aEntryData.title || aEntryData.entryURL;
+        this._getElement('headline-title').setAttribute('title', aEntryData.title);
+        this._getElement('headline-feed-name').textContent = feed.title;
+
+        let favicon = (feed.favicon != 'no-favicon') ? feed.favicon : DEFAULT_FAVICON_URL;
+        this._getElement('headline-feed-icon').src = favicon;
     }
-    else {
-        this._getElement('article-content').innerHTML = aEntryData.content;
 
-        if (this.feedView.query.searchString) {
-            async(function() {
-                this._highlightSearchTerms();
-                this.searchTermsHighlighted = true;
-            }, 0, this);
-        }
+    if (this.feedView.query.searchString) {
+        async(function() {
+            this._highlightSearchTerms();
+            this.searchTermsHighlighted = true;
+        }, 0, this);
     }
 }
 
@@ -1010,7 +1012,7 @@ EntryView.prototype = {
         this.__read = aValue;
 
         if (aValue) {
-            this.container.setAttribute('read', 'true');
+            this.container.classList.add('read');
             this._getElement('mark-read').textContent = this._strings.markAsUnread;
 
             if (this.updated) {
@@ -1019,7 +1021,7 @@ EntryView.prototype = {
             }
         }
         else {
-            this.container.removeAttribute('read');
+            this.container.classList.remove('read');
             this._getElement('mark-read').textContent = this._strings.markAsRead;
         }
     },
@@ -1032,9 +1034,9 @@ EntryView.prototype = {
         this.__starred = aValue;
 
         if (aValue)
-            this.container.setAttribute('starred', 'true');
+            this.container.classList.add('starred');
         else
-            this.container.removeAttribute('starred');
+            this.container.classList.remove('starred');
     },
 
 
@@ -1054,14 +1056,11 @@ EntryView.prototype = {
     },
 
 
-    get selected() {
-        return this.container.hasAttribute('selected');
-    },
     set selected(aValue) {
         if (aValue)
-            this.container.setAttribute('selected', true);
+            this.container.classList.add('selected');
         else
-            this.container.removeAttribute('selected');
+            this.container.classList.remove('selected');
     },
 
 
@@ -1096,41 +1095,16 @@ EntryView.prototype = {
         if (this.collapsed)
             return;
 
-        let entryContent = this._getElement('article-content');
+        this.container.classList.add('collapsed');
+        if (this.container.previousSibling)
+            this.container.previousSibling.classList.remove('next-expanded');
 
-        let finish = function() {
-            entryContent.removeEventListener('transitionend', finish, true);
+        showElement(this._getElement('headline-collapsed'));
 
-            this.container.removeAttribute('collapsing');
-            this.container.setAttribute('collapsed', true);
-
-            let date = this._getElement('article-date');
-            let feedName = this._getElement('feed-name');
-            let collapsedSubheader = this._getElement('collapsed-article-subheader');
-
-            collapsedSubheader.insertBefore(date, null);
-            collapsedSubheader.insertBefore(feedName, null);
-        }.bind(this)
-
-        if (aAnimate) {
-            // CSS transitions don't work with height: auto. See EntryView.uncollapse().
-            let naturalHeight = this.feedView.window.getComputedStyle(entryContent)
-                                                    .getPropertyValue('height');
-            entryContent.style.height = naturalHeight;
-            entryContent.offsetHeight; // Force reflow.
-
-            entryContent.style.height = '0';
-            entryContent.style.opacity = '0';
-
-            entryContent.addEventListener('transitionend', finish, true);
-            this.container.setAttribute('collapsing', true);
-        }
-        else {
-            entryContent.style.height = '0';
-            entryContent.style.opacity = '0';
-
-            finish();
-        }
+        hideElement(this._getElement('headline-expanded'), aAnimate, function() {
+            let controls = this._getElement('entry-controls');
+            this._getElement('headline-collapsed').appendChild(controls);
+        }.bind(this))
 
         this.__collapsed = true;
     },
@@ -1139,15 +1113,18 @@ EntryView.prototype = {
         if (!this.collapsed)
             return;
 
-        let entryContent = this._getElement('article-content');
+        this.container.classList.remove('collapsed');
+        if (this.container.previousSibling)
+            this.container.previousSibling.classList.add('next-expanded');
 
-        let finish = function() {
-            entryContent.removeEventListener('transitionend', finish, true);
+        let controls = this._getElement('entry-controls');
+        this._getElement('article-header').appendChild(controls);
+
+        hideElement(this._getElement('headline-collapsed'));
+
+        showElement(this._getElement('headline-expanded'), aAnimate, function() {
             if (this.container.parentNode != this.feedView.feedContent)
                 return;
-
-            this.container.removeAttribute('collapsing');
-            entryContent.style.height = '';
 
             if (PrefCache.autoMarkRead && this.feedView.query.read !== false)
                 Commands.markEntryRead(this.id, true);
@@ -1159,45 +1136,8 @@ EntryView.prototype = {
                 if (entryBottom > screenBottom)
                     this.feedView.scrollToEntry(this.id, false, true);
             }
-        }.bind(this)
+        }.bind(this))
 
-        let subheaderLeft = this._getElement('article-subheader-left');
-        let subheaderRight = this._getElement('article-subheader-right');
-        let date = this._getElement('article-date');
-        let feedName = this._getElement('feed-name');
-        let tagsElem = this._getElement('article-tags');
-
-        subheaderLeft.insertBefore(feedName, tagsElem);
-        subheaderRight.insertBefore(date, null);
-
-        this.container.removeAttribute('collapsed');
-
-        if (aAnimate) {
-            // CSS transitions don't work with height: auto. For a workaround,
-            // temporarily set height: auto and read the actual computed height...
-            entryContent.style.height = '';
-            entryContent.offsetHeight; // Force reflow.
-            let naturalHeight = this.feedView.window.getComputedStyle(entryContent)
-                                                    .getPropertyValue('height');
-
-            // Set the height back to 0...
-            entryContent.style.height = '0';
-            entryContent.offsetHeight; // Force reflow.
-
-            // Finally, transition the height to the previously computed value.
-            entryContent.style.height = naturalHeight;
-            entryContent.style.opacity = '1';
-
-            // However, the natural height isn't always exactly right so after the
-            // transition is finished, we set the height back to auto.
-            this.container.setAttribute('collapsing', true);
-            entryContent.addEventListener('transitionend', finish, true);
-        }
-        else {
-            entryContent.style.opacity = '1';
-
-            finish();
-        }
 
         if (this.feedView.query.searchString) {
             this._highlightSearchTerms();
@@ -1207,7 +1147,7 @@ EntryView.prototype = {
         this.__collapsed = false;
     },
 
-    _onClick: function EntryView__onClick(aEvent) {
+    onClick: function EntryView_onClick(aEvent) {
         if (PrefCache.entrySelectionEnabled)
             this.feedView.selectEntry(this.id);
 
@@ -1234,7 +1174,7 @@ EntryView.prototype = {
             let openInTabs = Prefs.getBoolPref('feedview.openEntriesInTabs');
             let newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
 
-            if (anchor.className == 'article-title-link') {
+            if (anchor.getAttribute('command') == 'open') {
                 Commands.openEntryLink(this.id, newTab);
                 return;
             }
@@ -1279,6 +1219,9 @@ EntryView.prototype = {
                 break;
 
             default:
+                if (aEvent.button != 0)
+                    return;
+
                 if (this.collapsed) {
                     this.uncollapse(true);
                 }
@@ -1332,6 +1275,9 @@ EntryView.prototype = {
         // We do it because %e conversion specification doesn't work
         string = string.replace(/^0/, '');
 
+        if (this.updated)
+            string += ' <span class="article-updated">' + this._strings.entryUpdated + '</span>';
+
         return string;
     },
 
@@ -1384,6 +1330,85 @@ EntryView.prototype = {
 
 }
 
+
+function hideElement(aElement, aAnimate, aCallback) {
+    if (!aAnimate) {
+        aElement.style.display = 'none';
+        aElement.style.height = '0';
+        aElement.style.opacity = '0';
+
+        if (aCallback)
+            aCallback();
+        return;
+    }
+
+    // CSS transitions don't work with height: auto.
+    let win = aElement.ownerDocument.defaultView;
+    let naturalHeight = win.getComputedStyle(aElement).getPropertyValue('height');
+    aElement.style.height = naturalHeight;
+    aElement.offsetHeight; // Force reflow.
+
+    aElement.style.height = '0';
+    aElement.style.opacity = '0';
+
+    aElement.setAttribute('hiding', true);
+    aElement.addEventListener('transitionend', listener, false);
+
+    function listener() {
+        aElement.removeAttribute('hiding');
+        aElement.removeEventListener('transitionend', listener, false);
+
+        aElement.style.display = 'none';
+
+        if (aCallback)
+            aCallback();
+    }
+}
+
+function showElement(aElement, aAnimate, aCallback) {
+    if (!aAnimate) {
+        aElement.style.display = '';
+        aElement.style.height = '';
+        aElement.style.opacity = '';
+
+        if (aCallback)
+            aCallback();
+        return;
+    }
+
+    aElement.style.display = '';
+
+    // CSS transitions don't work with height: auto. For a workaround,
+    // temporarily set height: auto and read the actual computed height...
+    aElement.style.height = '';
+    aElement.offsetHeight; // Force reflow.
+
+    let win = aElement.ownerDocument.defaultView;
+    let naturalHeight = win.getComputedStyle(aElement).getPropertyValue('height');
+
+    // Set the height back to 0...
+    aElement.style.height = '0';
+    aElement.offsetHeight; // Force reflow.
+
+    // Finally, transition the height to the previously computed value.
+    aElement.style.height = naturalHeight;
+    aElement.style.opacity = '';
+
+    aElement.setAttribute('showing', true);
+    aElement.addEventListener('transitionend', listener, false);
+
+    function listener() {
+        aElement.removeAttribute('showing');
+        aElement.removeEventListener('transitionend', listener, false);
+
+        // However, the natural height isn't always exactly right so after the
+        // transition is finished, we set the height back to auto.
+        aElement.style.height = '';
+
+        if (aCallback)
+            aCallback();
+    }
+}
 
 __defineGetter__('Finder', function() {
     let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
