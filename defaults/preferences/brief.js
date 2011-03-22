@@ -7,6 +7,7 @@ pref("extensions.brief@mozdev.org.description", "chrome://brief/locale/brief.pro
 pref("extensions.brief.assumeStandardKeys", true);
 pref("extensions.brief.showFavicons", true);
 pref("extensions.brief.hideChrome", false);
+pref("extensions.brief.firefox4ToolbarbuttonMigrated", false);
 
 pref("extensions.brief.feedview.showHeadlinesOnly", false);
 pref("extensions.brief.feedview.filterUnread", false);

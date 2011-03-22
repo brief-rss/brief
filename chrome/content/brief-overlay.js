@@ -234,6 +234,15 @@ const Brief = {
             }
 
             if (this.firefox4) {
+                if (!this.toolbarbutton && !this.prefs.getBoolPref('firefox4ToolbarbuttonMigrated')) {
+                    let navbar = document.getElementById('nav-bar');
+                    navbar.insertItem('brief-button', null, null, false);
+                    navbar.setAttribute('currentset', navbar.currentSet);
+                    document.persist('nav-bar', 'currentset');
+                }
+
+                this.prefs.setBoolPref('firefox4ToolbarbuttonMigrated', true);
+
                 if (this.toolbarbutton) {
                     let showCounter = this.prefs.getBoolPref('showUnreadCounter');
                     this.statusCounter.hidden = !showCounter;
