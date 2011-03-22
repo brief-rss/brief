@@ -7,7 +7,7 @@ Components.utils.import('resource://gre/modules/NetUtil.jsm');
 IMPORT_COMMON(this);
 
 
-let gTemplateURI = NetUtil.newURI('resource://brief-content/feedview-template.html');
+let gTemplateURI = NetUtil.newURI('resource://brief-content/feedview.html');
 let gStringBundle;
 
 

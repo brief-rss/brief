@@ -227,7 +227,7 @@
             <browser id="feed-view" flex="1"
                      disablehistory="true"
                      type="content"
-                     src="resource://brief-content/feedview-template.html"/>
+                     src="resource://brief-content/feedview.html"/>
         </hbox>
     </vbox>
 
