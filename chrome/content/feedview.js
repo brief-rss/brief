@@ -12,7 +12,7 @@ const INITIAL_WINDOW_HEIGHTS_LOAD = 2;
 const LOAD_STEP_SIZE = 5;
 
 // Same as above, but applies to headlines view.
-const HEADLINES_LOAD_STEP_SIZE = 20;
+const HEADLINES_LOAD_STEP_SIZE = 25;
 
 
 // The currently active instance of FeedView.
@@ -951,10 +951,9 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
     this.entryURL = aEntryData.entryURL;
     this.updated = aEntryData.updated;
 
-    let templateId = this.headline ? 'headline-template' : 'article-template';
-    this.container = this.feedView.document.getElementById(templateId).cloneNode(true);
-
+    this.container = this.feedView.document.getElementById('article-template').cloneNode(true);
     this.container.id = aEntryData.id;
+    this.container.classList.add(this.headline ? 'headline' : 'full');
 
     // Setters do the work.
     this.read = aEntryData.read;
@@ -963,23 +962,23 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
 
     let feed = Storage.getFeed(aEntryData.feedID);
 
-    let controls = this._getElement('entry-controls');
+    let controls = this._getElement('controls');
     if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED)
-        controls.removeChild(this._getElement('delete-entry'));
+        controls.removeChild(this._getElement('delete'));
     else
-        controls.removeChild(this._getElement('restore-entry'));
+        controls.removeChild(this._getElement('restore'));
 
-    let titleElem = this._getElement('article-title-link');
+    let titleElem = this._getElement('title-link');
     if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
 
     // Use innerHTML instead of textContent to resolve entities.
     titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
 
-    this._getElement('article-feed-name').innerHTML = feed.title;
-    this._getElement('article-authors').innerHTML = aEntryData.authors;
-    this._getElement('article-date').innerHTML = this._constructDate();
-    this._getElement('entry-content').innerHTML = aEntryData.content;
+    this._getElement('feed-name').innerHTML = feed.title;
+    this._getElement('authors').innerHTML = aEntryData.authors;
+    this._getElement('date').innerHTML = this._constructDate();
+    this._getElement('content').innerHTML = aEntryData.content;
 
     if (this.headline) {
         this.collapse(false);
@@ -992,7 +991,7 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
         this._getElement('headline-feed-name').textContent = feed.title;
 
         let favicon = (feed.favicon != 'no-favicon') ? feed.favicon : DEFAULT_FAVICON_URL;
-        this._getElement('headline-feed-icon').src = favicon;
+        this._getElement('feed-icon').src = favicon;
     }
 
     if (this.feedView.query.searchString) {
@@ -1017,7 +1016,7 @@ EntryView.prototype = {
 
             if (this.updated) {
                 this.updated = false;
-                this._getElement('article-date').innerHTML = this._constructDate();
+                this._getElement('date').innerHTML = this._constructDate();
             }
         }
         else {
@@ -1045,7 +1044,7 @@ EntryView.prototype = {
     },
     set tags(aValue) {
         this.__tags = aValue;
-        this._getElement('article-tags').textContent = aValue.sort().join(', ');
+        this._getElement('tags').textContent = aValue.sort().join(', ');
     },
 
 
@@ -1099,11 +1098,11 @@ EntryView.prototype = {
         if (this.container.previousSibling)
             this.container.previousSibling.classList.remove('next-expanded');
 
-        showElement(this._getElement('headline-collapsed'));
+        showElement(this._getElement('headline-container'));
 
-        hideElement(this._getElement('headline-expanded'), aAnimate, function() {
-            let controls = this._getElement('entry-controls');
-            this._getElement('headline-collapsed').appendChild(controls);
+        hideElement(this._getElement('full-container'), aAnimate, function() {
+            let controls = this._getElement('controls');
+            this._getElement('headline-container').appendChild(controls);
         }.bind(this))
 
         this.__collapsed = true;
@@ -1117,12 +1116,12 @@ EntryView.prototype = {
         if (this.container.previousSibling)
             this.container.previousSibling.classList.add('next-expanded');
 
-        let controls = this._getElement('entry-controls');
-        this._getElement('article-header').appendChild(controls);
+        let controls = this._getElement('controls');
+        this._getElement('header').appendChild(controls);
 
-        hideElement(this._getElement('headline-collapsed'));
+        hideElement(this._getElement('headline-container'));
 
-        showElement(this._getElement('headline-expanded'), aAnimate, function() {
+        showElement(this._getElement('full-container'), aAnimate, function() {
             if (this.container.parentNode != this.feedView.feedContent)
                 return;
 
@@ -1227,7 +1226,7 @@ EntryView.prototype = {
                 }
                 else {
                     let className = aEvent.target.className;
-                    if ((className == 'article-header' || className == 'article-title-link-box')
+                    if ((className == 'header' || className == 'title')
                             && PrefCache.showHeadlinesOnly) {
                         this.collapse(true);
                     }
@@ -1276,7 +1275,7 @@ EntryView.prototype = {
         string = string.replace(/^0/, '');
 
         if (this.updated)
-            string += ' <span class="article-updated">' + this._strings.entryUpdated + '</span>';
+            string += ' <span class="updated">' + this._strings.entryUpdated + '</span>';
 
         return string;
     },
