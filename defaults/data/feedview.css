@@ -40,6 +40,13 @@ body {
     display: none;
 }
 
+.search-highlight {
+    border: 1px solid #45e500;
+    -moz-border-radius: 3px;
+    color: black;
+    background-color: #adff89;
+}
+
 /* ----------------------  Entry content  ---------------------- */
 
 .content {
@@ -83,14 +90,6 @@ pre, code {
     white-space: pre-wrap;
     width: -moz-available;
 }
-
-.search-highlight {
-    border: 1px solid #45e500;
-    -moz-border-radius: 3px;
-    color: black;
-    background-color: #adff89;
-}
-
 
 
 /* ----------------------  Item controls ------------------- */

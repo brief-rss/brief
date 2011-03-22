@@ -1,24 +1,26 @@
-body.headlines-mode > #feed-content {
-    width: -moz-fit-content;
+article.headline {
+    min-width: 500px;
+    max-width: 693px;
     margin: 0 auto;
 }
 
-article.headline {
-
+body.multiple-feeds article.headline {
+    max-width: 834px;
 }
 
 .headline-container {
     display: -moz-box;
     width: -moz-available;
     height: 34px;
-    -moz-box-flex: 1;
+    -moz-box-flex: 1; /* xxx */
     cursor: default;
 }
 
 .headline-header {
     display: -moz-box;
+    -moz-box-flex: 1;
     -moz-box-align: center;
-    padding: 0 5px;
+    padding: 0 5px 0 5px;
     border-bottom: 1px solid #D4DEE6;
 }
 
@@ -72,11 +74,11 @@ body:not(.multiple-feeds) .headline-feed-name {
 
 .headline-title {
     display: -moz-box;
-    width: 525px;
     -moz-box-flex: 1;
     overflow: hidden;
     font-weight: bold;
     font-size: 13px;
+    line-height: 20px;
     color: #26547f;
 }
 
@@ -87,30 +89,20 @@ article.read .headline-title {
 
 .headline-container > .controls {
     margin-left: 10px;
+    margin-right: 6px;
     visibility: hidden;
 }
 
-article.headline:hover > .headline-container > .controls {
+.headline-container:hover > .controls {
     visibility: visible;
 }
 
 
 article.headline > .full-container {
-    min-width: -moz-min-content;
-    width: 685px;
+    max-width: 700px;
     margin-left: -5px;
-    margin-right: 5px;
-}
-
-body.multiple-feeds article.headline > .full-container {
-    width: 710px;
-}
-
-article.headline:not(.next-expanded) > .full-container > .content {
-    /*border-bottom: 1px solid #D4DEE6;*/
 }
 
 article.headline.selected > .full-container {
     margin-left: 0;
-    margin-right: 0;
 }
