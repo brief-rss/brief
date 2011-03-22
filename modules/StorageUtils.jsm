@@ -1,4 +1,4 @@
-const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement'];
+const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement', 'StorageError'];
 
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
@@ -84,8 +84,8 @@ StorageConnection.prototype = {
                 this._nativeConnection.executeSimpleSQL(sql);
             }
             catch (ex) {
-                this.reportDatabaseError(null, 'SQL statement:\n' + sql);
-                throw ex;
+                throw new StorageError('Error when executing simple SQL:\n' + sql,
+                                       this.lastErrorString);
             }
         }
     },
@@ -126,12 +126,6 @@ StorageConnection.prototype = {
 
     createFunction: function Connection_createFunction(aName, aNumArguments, aFunction) {
         return this._nativeConnection.createFunction(aName, aNumArguments, aFunction);
-    },
-
-    reportDatabaseError: function Connection_reportDatabaseError(aError, aMessage) {
-        let message = aMessage ? aMessage + '\n' : '';
-        message += aError ? aError.message : this.lastErrorString;
-        Components.utils.reportError(message);
     }
 
 }
@@ -158,8 +152,7 @@ function StorageStatement(aConnection, aSQLString, aDefaultParams) {
         this._nativeStatement = aConnection._nativeConnection.createStatement(aSQLString);
     }
     catch (ex) {
-        this.connection.reportDatabaseError(null, 'Statement:\n' + aSQLString);
-        throw ex;
+        throw new StorageError('Error when creating statement', aConnection.lastErrorString, this);
     }
 
     /**
@@ -295,7 +288,15 @@ StorageStatement.prototype = {
             handleCompletion: function(aReason) {
                 aCallback(rowArray);
             },
-            handleError: aOnError || this.connection.reportDatabaseError
+            handleError: function(aError) {
+                if (aOnError) {
+                    aOnError();
+                }
+                else {
+                    throw new StorageError('Error when executing statement',
+                                           aError.message, this);
+                }
+            }.bind(this)
         })
     },
 
@@ -387,9 +388,9 @@ StorageStatement.prototype = {
  *        Object implementing any of the mozIStorageStatementCallback methods.
  */
 function StatementCallback(aStatements, aCallback) {
-    let statements = Array.isArray(aStatements) ? aStatements : [aStatements];
+    this._statements = Array.isArray(aStatements) ? aStatements : [aStatements];
 
-    let selects = statements.filter(function(s) !s.isWritingStatement);
+    let selects = this._statements.filter(function(s) !s.isWritingStatement);
     if (selects.length == 1)
         this._selectStatement = selects[0];
     else if (selects.length > 1)
@@ -400,7 +401,7 @@ function StatementCallback(aStatements, aCallback) {
     else
         this._callback = aCallback || {};
 
-    this.connection = statements[0].connection;
+    this.connection = this._statements[0].connection;
 }
 
 StatementCallback.prototype = {
@@ -438,10 +439,13 @@ StatementCallback.prototype = {
     },
 
     handleError: function StatementCallback_handleError(aError) {
-        if (this._callback.handleError)
+        if (this._callback.handleError) {
             this._callback.handleError(aError);
-        else
-            this.connection.reportDatabaseError(aError);
+        }
+        else {
+            let statement = this._statements.length == 1 ? this._statements[0] : null;
+            throw new StorageError('Error when executing statement', aError.message, statement);
+        }
     }
 }
 
@@ -511,4 +515,16 @@ WritingStatementsQueue.prototype = {
         this._executing = true;
     }
 
+}
+
+function StorageError(aCustomMessage, aErrorString, aStatement) {
+    let message = aCustomMessage ? aCustomMessage + '\n' : 'Brief database error';
+
+    if (aErrorString)
+        message += aErrorString + '\n';
+
+    if (aStatement)
+        message += 'SQL statement\n' + aStatement.sqlString;
+
+    return new Error(message);
 }

@@ -1273,10 +1273,8 @@ Query.prototype = {
     _onDatabaseError: function BriefQuery__onDatabaseError(aError) {
         // Ignore "SQL logic error or missing database" error which full-text search
         // throws when the query doesn't contain at least one non-excluded term.
-        if (aError.result != 1) {
-            Connection.reportDatabaseError(aError);
-            throw 'Database error';
-        }
+        if (aError.result != 1)
+            throw new StorageError('Error when executing Query', aError.message);
     },
 
     /**
