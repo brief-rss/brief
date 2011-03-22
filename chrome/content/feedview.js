@@ -955,7 +955,6 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
     this.container.id = aEntryData.id;
     this.container.classList.add(this.headline ? 'headline' : 'full');
 
-    // Setters do the work.
     this.read = aEntryData.read;
     this.starred = aEntryData.starred;
     this.tags = aEntryData.tags ? aEntryData.tags.split(', ') : [];
@@ -978,7 +977,6 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
     this._getElement('feed-name').innerHTML = feed.title;
     this._getElement('authors').innerHTML = aEntryData.authors;
     this._getElement('date').innerHTML = this._constructDate();
-    this._getElement('content').innerHTML = aEntryData.content;
 
     if (this.headline) {
         this.collapse(false);
@@ -992,13 +990,25 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
 
         let favicon = (feed.favicon != 'no-favicon') ? feed.favicon : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
-    }
 
-    if (this.feedView.query.searchString) {
         async(function() {
-            this._highlightSearchTerms();
-            this.searchTermsHighlighted = true;
-        }, 0, this);
+            this._getElement('content').innerHTML = aEntryData.content;
+
+            if (this.feedView.query.searchString)
+                this._highlightSearchTerms(this._getElement('headline-title'));
+        }.bind(this))
+    }
+    else {
+        this._getElement('content').innerHTML = aEntryData.content;
+
+        if (this.feedView.query.searchString) {
+            async(function() {
+                for (let elem in ['authors', 'tags', 'title', 'content'])
+                    this._highlightSearchTerms(this._getElement(elem));
+
+                this._searchTermsHighlighted = true;
+            }.bind(this));
+        }
     }
 }
 
@@ -1108,7 +1118,7 @@ EntryView.prototype = {
         this.__collapsed = true;
     },
 
-    uncollapse: function EntryView_uncollapse(aAnimate) {
+    expand: function EntryView_expand(aAnimate) {
         if (!this.collapsed)
             return;
 
@@ -1138,9 +1148,11 @@ EntryView.prototype = {
         }.bind(this))
 
 
-        if (this.feedView.query.searchString) {
-            this._highlightSearchTerms();
-            this.searchTermsHighlighted = true;
+        if (this.feedView.query.searchString && !this._searchTermsHighlighted) {
+            for (let elem in ['authors', 'tags', 'title', 'content'])
+                this._highlightSearchTerms(this._getElement(elem));
+
+            this._searchTermsHighlighted = true;
         }
 
         this.__collapsed = false;
@@ -1222,7 +1234,7 @@ EntryView.prototype = {
                     return;
 
                 if (this.collapsed) {
-                    this.uncollapse(true);
+                    this.expand(true);
                 }
                 else {
                     let className = aEvent.target.className;
@@ -1280,22 +1292,19 @@ EntryView.prototype = {
         return string;
     },
 
-    _highlightSearchTerms: function EntryView__highlightSearchTerms() {
-        if (this.container.hasAttribute('searchTermsHighlighted'))
-            return;
-
+    _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
         for (let term in this.feedView.query.searchString.match(/[A-Za-z0-9]+/g)) {
             let searchRange = this.feedView.document.createRange();
-            searchRange.setStart(this.container, 0);
-            searchRange.setEnd(this.container, this.container.childNodes.length);
+            searchRange.setStart(aElement, 0);
+            searchRange.setEnd(aElement, aElement.childNodes.length);
 
             let startPoint = this.feedView.document.createRange();
-            startPoint.setStart(this.container, 0);
-            startPoint.setEnd(this.container, 0);
+            startPoint.setStart(aElement, 0);
+            startPoint.setEnd(aElement, 0);
 
             let endPoint = this.feedView.document.createRange();
-            endPoint.setStart(this.container, this.container.childNodes.length);
-            endPoint.setEnd(this.container, this.container.childNodes.length);
+            endPoint.setStart(aElement, aElement.childNodes.length);
+            endPoint.setEnd(aElement, aElement.childNodes.length);
 
             let baseNode = this.feedView.document.createElement('span');
             baseNode.className = 'search-highlight';

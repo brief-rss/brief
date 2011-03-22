@@ -247,7 +247,7 @@ let Commands = {
 
         let entryView = gCurrentView.getEntryView(gCurrentView.selectedEntry);
         if (entryView.collapsed)
-            entryView.uncollapse(true);
+            entryView.expand(true);
         else
             entryView.collapse(true);
     },
