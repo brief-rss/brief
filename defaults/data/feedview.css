@@ -12,7 +12,7 @@ body {
 }
 
 #feed-content {
-    padding: 10px 10px 10px;
+    padding: 0 10px 10px;
 }
 
 #message-box {
@@ -103,7 +103,7 @@ pre, code {
     display: -moz-box;
 }
 
-.mark-read {
+.mark-read-button {
     -moz-box-align: center;
     -moz-box-pack: center;
     height: 25px;
@@ -118,62 +118,62 @@ pre, code {
     -moz-user-select: none;
 }
 
-.mark-read:hover {
+.mark-read-button:hover {
     -moz-border-image: url(chrome://brief/skin/mark-read-button-hover.png) 0 6 stretch;
 }
 
-.mark-read:active {
+.mark-read-button:active {
     -moz-border-image: url(chrome://brief/skin/mark-read-button-active.png) 0 6 stretch;
 }
 
-.delete, .restore {
+.delete-button, .restore-button {
     width: 29px;
     height: 25px;
 }
 
-.delete {
+.delete-button {
     background-image: url(chrome://brief/skin/delete-button.png);
 }
 
-.restore {
+.restore-button {
     background-image: url(chrome://brief/skin/restore-button.png);
 }
 
-.delete:hover,
-.restore:hover {
+.delete-button:hover,
+.restore-button:hover {
     background-position: 0 -25px;
 }
 
-.delete:active,
-.restore:active {
+.delete-button:active,
+.restore-button:active {
     background-position: 0 -50px;
 }
 
-.bookmark {
+.bookmark-button {
     width: 24px;
     height: 24px;
-    margin: -6px 2px 0 -24px;
+    margin: -5px 2px 0 -24px;
     background: url(chrome://brief/skin/icons/entry-star.png) no-repeat;
     background-position: 0 5px;
 }
 
-article:not(.starred) .bookmark:hover {
+article:not(.starred) .bookmark-button:hover {
     background-position: -24px 5px;
 }
 
-article:not(.starred) .bookmark:active:hover {
+article:not(.starred) .bookmark-button:active:hover {
     background-position: -48px 5px;
 }
 
-article.starred .bookmark {
+article.starred .bookmark-button {
     background-position: -48px 5px;
 }
 
-article.starred .bookmark:hover {
+article.starred .bookmark-button:hover {
     background-position: -72px 5px;
 }
 
-article.starred .bookmark:active:hover {
+article.starred .bookmark-button:active:hover {
     background-position: -96px 5px;
 }
 

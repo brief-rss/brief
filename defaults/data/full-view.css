@@ -10,10 +10,10 @@ article.full > .headline-container {
 
 .full-container {
     margin: 10px 0;
-    background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
-    background-clip: padding-box;
     border-width: 0 6px 6px;
     -moz-border-image: url(chrome://brief/skin/article-border.png) 6 repeat;
+    background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
+    background-clip: padding-box;
 }
 
 article.selected > .full-container {
@@ -41,7 +41,7 @@ article.read .title-link {
     -moz-box-align: start;
     width: -moz-available;
     margin-bottom: 5px;
-    padding: 5px 5px 0 24px;
+    padding: 7px 5px 0 24px;
     border-top: 1px #abbfc9 solid;
 }
 
@@ -64,8 +64,12 @@ article.read .title-link {
 
 /* ----------------------  Article subheader  ---------------------- */
 
-.subheader {
+.subheader, .subheader-left, .subheader-right,
+.feed-name, .tags, .date, .authors {
     display: -moz-box;
+}
+
+.subheader {
     width: -moz-available;
     margin: 5px 10px 5px 40px;
     font-size: 12px;
@@ -74,13 +78,11 @@ article.read .title-link {
 }
 
 .subheader-right {
-    display: -moz-box;
     -moz-box-flex: 1;
     -moz-box-pack: end;
 }
 
 .subheader-left {
-    display: -moz-box;
     -moz-box-flex: 1;
     -moz-box-orient: vertical;
 }

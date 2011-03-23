@@ -963,9 +963,9 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
 
     let controls = this._getElement('controls');
     if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED)
-        controls.removeChild(this._getElement('delete'));
+        controls.removeChild(this._getElement('delete-button'));
     else
-        controls.removeChild(this._getElement('restore'));
+        controls.removeChild(this._getElement('restore-button'));
 
     let titleElem = this._getElement('title-link');
     if (aEntryData.entryURL)
@@ -1022,7 +1022,7 @@ EntryView.prototype = {
 
         if (aValue) {
             this.container.classList.add('read');
-            this._getElement('mark-read').textContent = this._strings.markAsUnread;
+            this._getElement('mark-read-button').textContent = this._strings.markAsUnread;
 
             if (this.updated) {
                 this.updated = false;
@@ -1031,7 +1031,7 @@ EntryView.prototype = {
         }
         else {
             this.container.classList.remove('read');
-            this._getElement('mark-read').textContent = this._strings.markAsRead;
+            this._getElement('mark-read-button').textContent = this._strings.markAsRead;
         }
     },
 
@@ -1212,8 +1212,8 @@ EntryView.prototype = {
                     query.verifyBookmarksAndTags();
 
                     query.getProperty('bookmarkID', false, function(ids) {
-                        let starElem = this._getElement('article-star');
-                        getTopWindow().StarUI.showEditBookmarkPopup(ids[0], starElem, 'after_start');
+                        let anchor = this._getElement('bookmark-button');
+                        getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
                     }.bind(this))
                 }
                 else {
