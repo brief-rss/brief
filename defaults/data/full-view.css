@@ -12,22 +12,16 @@ article.full > .headline-container {
     margin: 10px 0;
     background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
     background-clip: padding-box;
-    border-right: 6px #d8dadc solid;
-    -moz-border-right-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
-    border-left: 6px #d8dadc solid;
-    -moz-border-left-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
-    border-bottom: 5px #e6e9ed solid;
-    -moz-border-bottom-colors: #fafcff #f7f9fc #f3f5f8 #eff0f3 #d8dadc;
+    border-width: 0 6px 6px;
+    -moz-border-image: url(chrome://brief/skin/article-border.png) 6 repeat;
 }
 
 article.selected > .full-container {
-    border-right-width: 1px;
-    -moz-border-right-colors: none;
-    border-left-width: 1px;
-    -moz-border-left-colors: none;
-    border-bottom-width: 1px;
-    -moz-border-bottom-colors: none;
-    margin: 10px 5px 14px;
+    border-right: 1px solid #d8dadc;
+    border-bottom: 1px solid #d8dadc;
+    border-left: 1px solid #d8dadc;
+    -moz-border-image: none;
+    margin: 10px 5px 15px;
     box-shadow: 0 1px 15px rgba(0, 0, 0, 0.3);
 }
 
