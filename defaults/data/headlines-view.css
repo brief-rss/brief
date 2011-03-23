@@ -12,7 +12,6 @@ body.multiple-feeds article.headline {
     display: -moz-box;
     width: -moz-available;
     height: 34px;
-    -moz-box-flex: 1; /* xxx */
     cursor: default;
 }
 
@@ -20,7 +19,7 @@ body.multiple-feeds article.headline {
     display: -moz-box;
     -moz-box-flex: 1;
     -moz-box-align: center;
-    padding: 0 5px 0 5px;
+    padding-left: 5px;
     border-bottom: 1px solid #D4DEE6;
 }
 
@@ -55,17 +54,17 @@ body:not(.multiple-feeds) .headline-feed-name {
 .headline-link {
     display: -moz-box;
     margin-top: 2px;
-    width: 20px;
-    height: 19px;
-    background: url(chrome://brief/skin/icons/entry-arrow.png) no-repeat -3px 0;
+    width: 30px;
+    height: 30px;
+    background: url(chrome://brief/skin/icons/entry-arrow.png) no-repeat 3px 0;
 }
 
 .headline-link:hover {
-    background-position: -3px -19px;
+    background-position: 3px -30px;
 }
 
 .headline-link:active {
-    background-position: -3px -38px;
+    background-position: 3px -60px;
 }
 
 .headline-link:not([href]) {
