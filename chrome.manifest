@@ -1,4 +1,4 @@
-content  brief  chrome/content/  contentaccessible=yes
+content  brief  chrome/content/
 skin  brief  classic  chrome/skin/
 
 resource brief-content  defaults/data/
