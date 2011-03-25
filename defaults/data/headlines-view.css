@@ -11,9 +11,8 @@ body.headlines-mode.multiple-feeds > #feed-content {
 
 
 .day-header {
-    width: -moz-fit-content;
     padding: 20px 0 5px; /* Use padding to avoid margin collapsing */
-    margin-left: -50px;
+    margin-left: -40px;
     font-size: 13px;
     text-transform: uppercase;
     color: #5e9c3e;
@@ -92,7 +91,6 @@ article.read .headline-title {
     font-weight: normal;
 }
 
-
 .headline-container > .controls {
     margin-left: 10px;
     margin-right: 6px;
@@ -104,9 +102,18 @@ article.read .headline-title {
 }
 
 
+body:not(.multiple-feeds) article.headline:not(.collapsed) {
+    margin-left: -50px;
+}
+
+
 article.headline > .full-container {
     max-width: 700px;
     margin-left: -5px;
+}
+
+article.headline > .full-container[showing] {
+    -moz-transition-duration: 250ms;
 }
 
 article.headline.selected > .full-container {

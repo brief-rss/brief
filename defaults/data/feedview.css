@@ -186,13 +186,9 @@ article[removing] {
 }
 
 *[hiding] {
-    -moz-transition-property: opacity, height;
-    -moz-transition-duration: 250ms;
-    overflow: hidden;
+    -moz-transition-property: opacity;
 }
 
 *[showing] {
-    -moz-transition-property: opacity, height;
-    -moz-transition-duration: 250ms;
-    overflow: hidden;
+    -moz-transition-property: opacity;
 }
