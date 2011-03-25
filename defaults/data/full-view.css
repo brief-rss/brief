@@ -65,7 +65,7 @@ article.read .title-link {
 /* ----------------------  Article subheader  ---------------------- */
 
 .subheader, .subheader-left, .subheader-right,
-.feed-name, .tags, .date, .authors {
+.feed-name, .tags, .date, .updated, .authors {
     display: -moz-box;
 }
 
@@ -109,5 +109,10 @@ body:not(.multiple-feeds) .feed-name {
 }
 
 .updated {
+    margin-left: 5px;
     color: #de5b00;
+}
+
+.updated:empty {
+    display: none;
 }

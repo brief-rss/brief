@@ -1,11 +1,22 @@
-article.headline {
+body.headlines-mode > #feed-content {
     min-width: 500px;
     max-width: 693px;
     margin: 0 auto;
+    padding-left: 60px;
 }
 
-body.multiple-feeds article.headline {
+body.headlines-mode.multiple-feeds > #feed-content {
     max-width: 834px;
+}
+
+
+.day-header {
+    width: -moz-fit-content;
+    padding: 20px 0 5px; /* Use padding to avoid margin collapsing */
+    margin-left: -50px;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #5e9c3e;
 }
 
 .headline-container {
@@ -25,10 +36,6 @@ body.multiple-feeds article.headline {
 
 .headline-container:hover > .headline-header {
     background-color: #DEF2FF;
-}
-
-article.headline.next-expanded > .headline-header {
-    border-bottom-color: transparent;
 }
 
 .feed-icon {
