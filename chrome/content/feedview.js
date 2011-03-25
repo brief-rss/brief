@@ -675,10 +675,13 @@ FeedView.prototype = {
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
 
-                let dayHeader = this.document.getElementById('day' + entryView.day);
-                if (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1')
-                    this.feedContent.removeChild(dayHeader);
+                if (this.headlinesMode) {
+                    let dayHeader = this.document.getElementById('day' + entryView.day);
+                    if (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1')
+                        this.feedContent.removeChild(dayHeader);
+                }
 
+                // XXX What if the view was refreshed in the meantime?
                 if (++removedCount == indices.length) {
                     if (aLoadNewEntries)
                         this._fillWindow(WINDOW_HEIGHTS_LOAD, afterEntriesRemoved.bind(this));
@@ -1119,14 +1122,13 @@ EntryView.prototype = {
         if (this.collapsed)
             return;
 
-        this.container.classList.add('collapsed');
-
+        hideElement(this._getElement('full-container'));
         showElement(this._getElement('headline-container'));
 
-        hideElement(this._getElement('full-container'), aAnimate, function() {
-            let controls = this._getElement('controls');
-            this._getElement('headline-container').appendChild(controls);
-        }.bind(this))
+        this.container.classList.add('collapsed');
+
+        let controls = this._getElement('controls');
+        this._getElement('headline-container').appendChild(controls);
 
         this.__collapsed = true;
     },
@@ -1142,7 +1144,7 @@ EntryView.prototype = {
 
         hideElement(this._getElement('headline-container'));
 
-        showElement(this._getElement('full-container'), aAnimate, function() {
+        showElement(this._getElement('full-container'), aAnimate ? 300 : 0, function() {
             if (this.container.parentNode != this.feedView.feedContent)
                 return;
 
@@ -1340,79 +1342,55 @@ EntryView.prototype = {
 }
 
 
-function hideElement(aElement, aAnimate, aCallback) {
-    if (!aAnimate) {
+function hideElement(aElement, aTranstionDuration, aCallback) {
+    if (aTranstionDuration) {
+        aElement.style.opacity = '0';
+
+        aElement.setAttribute('hiding', true);
+        aElement.addEventListener('transitionend', listener, false);
+    }
+    else {
         aElement.style.display = 'none';
-        aElement.style.height = '0';
         aElement.style.opacity = '0';
 
         if (aCallback)
             aCallback();
-        return;
     }
 
-    // CSS transitions don't work with height: auto.
-    let win = aElement.ownerDocument.defaultView;
-    let naturalHeight = win.getComputedStyle(aElement).getPropertyValue('height');
-    aElement.style.height = naturalHeight;
-    aElement.offsetHeight; // Force reflow.
-
-    aElement.style.height = '0';
-    aElement.style.opacity = '0';
-
-    aElement.setAttribute('hiding', true);
-    aElement.addEventListener('transitionend', listener, false);
-
     function listener() {
-        aElement.removeAttribute('hiding');
         aElement.removeEventListener('transitionend', listener, false);
+        aElement.removeAttribute('hiding');
 
         aElement.style.display = 'none';
+        aElement.style.opacity = '';
 
         if (aCallback)
             aCallback();
     }
 }
 
-function showElement(aElement, aAnimate, aCallback) {
-    if (!aAnimate) {
+function showElement(aElement, aTranstionDuration, aCallback) {
+    if (aTranstionDuration) {
         aElement.style.display = '';
-        aElement.style.height = '';
+        aElement.style.opacity = '0';
+        aElement.offsetHeight; // Force reflow.
+
+        aElement.style.opacity = '';
+
+        aElement.setAttribute('showing', true);
+        aElement.addEventListener('transitionend', listener, false);
+    }
+    else {
+        aElement.style.display = '';
         aElement.style.opacity = '';
 
         if (aCallback)
             aCallback();
-        return;
     }
 
-    aElement.style.display = '';
-
-    // CSS transitions don't work with height: auto. For a workaround,
-    // temporarily set height: auto and read the actual computed height...
-    aElement.style.height = '';
-    aElement.offsetHeight; // Force reflow.
-
-    let win = aElement.ownerDocument.defaultView;
-    let naturalHeight = win.getComputedStyle(aElement).getPropertyValue('height');
-
-    // Set the height back to 0...
-    aElement.style.height = '0';
-    aElement.offsetHeight; // Force reflow.
-
-    // Finally, transition the height to the previously computed value.
-    aElement.style.height = naturalHeight;
-    aElement.style.opacity = '';
-
-    aElement.setAttribute('showing', true);
-    aElement.addEventListener('transitionend', listener, false);
-
     function listener() {
-        aElement.removeAttribute('showing');
         aElement.removeEventListener('transitionend', listener, false);
-
-        // However, the natural height isn't always exactly right so after the
-        // transition is finished, we set the height back to auto.
-        aElement.style.height = '';
+        aElement.removeAttribute('showing');
 
         if (aCallback)
             aCallback();
