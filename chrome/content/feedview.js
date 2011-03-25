@@ -645,63 +645,54 @@ FeedView.prototype = {
         if (!containedEntries.length)
             return;
 
-        let indices = containedEntries.map(this.getEntryIndex, this);
+        let animate = aAnimate && containedEntries.length < 30;
 
-        // Removing content may cause a scroll event, which should be ignored.
+        // Removing content may cause a scroll event that should be ignored.
         this._ignoreNextScrollEvent = true;
+
         getTopWindow().StarUI.panel.hidePopup();
 
-        // If the selected entry is being removed, remember its index.
         let selectedEntryIndex = -1;
 
-        if (indices.length == 1 && aAnimate) {
-            let entryID = this._loadedEntries[indices[0]];
+        let indices = containedEntries.map(this.getEntryIndex, this)
+                                      .sort(function(a, b) a - b);
 
-            if (entryID == this.selectedEntry) {
+        // Iterate starting from the last entry to avoid changing
+        // positions of consecutive entries.
+        let removedCount = 0;
+        for (let i = indices.length - 1; i >= 0; i--) {
+            let entry = this._loadedEntries[indices[i]];
+
+            if (entry == this.selectedEntry) {
                 this.selectEntry(null);
-                selectedEntryIndex = indices[0];
+                selectedEntryIndex = indices[i];
             }
 
-            this.getEntryView(entryID).remove(true, function() {
-                this._loadedEntries.splice(indices[0], 1);
-                this._entryViews.splice(indices[0], 1);
+            let entryView = this.getEntryView(entry);
 
-                this._afterEntriesRemoved(aLoadNewEntries, selectedEntryIndex);
+            entryView.remove(animate, function() {
+                let index = this._loadedEntries.indexOf(entry);
+                this._loadedEntries.splice(index, 1);
+                this._entryViews.splice(index, 1);
+
+                let dayHeader = this.document.getElementById('day' + entryView.day);
+                if (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1')
+                    this.feedContent.removeChild(dayHeader);
+
+                if (++removedCount == indices.length) {
+                    if (aLoadNewEntries)
+                        this._fillWindow(WINDOW_HEIGHTS_LOAD, afterEntriesRemoved.bind(this));
+                    else
+                        afterEntriesRemoved.call(this);
+                }
             }.bind(this))
         }
-        else {
-            indices.sort(function(a, b) a - b);
 
-            // Start from the oldest entry so that we don't change the relative
-            // insertion positions of consecutive entries.
-            for (let i = indices.length - 1; i >= 0; i--) {
-                if (this._loadedEntries[indices[i]] == this.selectedEntry) {
-                    this.selectEntry(null);
-                    selectedEntryIndex = indices[i];
-                }
-
-                this.getEntryView(this._loadedEntries[indices[i]]).remove();
-
-                this._loadedEntries.splice(indices[i], 1);
-                this._entryViews.splice(indices[i], 1);
-            }
-
-            this._afterEntriesRemoved(aLoadNewEntries, selectedEntryIndex);
-        }
-    },
-
-    _afterEntriesRemoved: function FeedView__afterEntriesRemoved(aLoadNewEntries,
-                                                                 aPrevSelectedIndex) {
-        if (aLoadNewEntries)
-            this._fillWindow(WINDOW_HEIGHTS_LOAD, finish.bind(this));
-        else
-            finish.call(this);
-
-        function finish() {
+        function afterEntriesRemoved() {
             this._setEmptyViewMessage();
 
-            if (this._loadedEntries.length && aPrevSelectedIndex != -1) {
-                let newSelection = this._loadedEntries[aPrevSelectedIndex] || this.lastEntry;
+            if (this._loadedEntries.length && selectedEntryIndex != -1) {
+                let newSelection = this._loadedEntries[selectedEntryIndex] || this.lastEntry;
                 this.selectEntry(newSelection);
             }
         }
@@ -869,10 +860,21 @@ FeedView.prototype = {
     }.gen(),
 
     _insertEntry: function FeedView__insertEntry(aEntryData, aPosition) {
-        let entryView = new EntryView(this, aEntryData, this.headlinesMode);
+        let entryView = new EntryView(this, aEntryData);
 
-        let nextEntry = this.feedContent.childNodes[aPosition];
-        this.feedContent.insertBefore(entryView.container, nextEntry);
+        let nextEntryView = this._entryViews[aPosition];
+        let nextElem = nextEntryView ? nextEntryView.container : null;
+
+        if (this.headlinesMode && !this.document.getElementById('day' + entryView.day)) {
+            let dayHeader = this.document.createElement('H1');
+            dayHeader.id = 'day' + entryView.day;
+            dayHeader.className = 'day-header';
+            dayHeader.textContent = entryView.getDateString(true);
+
+            this.feedContent.insertBefore(dayHeader, nextElem);
+        }
+
+        this.feedContent.insertBefore(entryView.container, nextElem);
 
         this._entryViews.splice(aPosition, 0, entryView);
     },
@@ -934,7 +936,7 @@ FeedView.prototype = {
         this.document.getElementById('main-message').textContent = mainMessage;
         this.document.getElementById('secondary-message').textContent = secondaryMessage;
 
-        messageBox.style.display = 'block';
+        messageBox.style.display = '';
     }
 
 }
@@ -942,14 +944,15 @@ FeedView.prototype = {
 
 const DEFAULT_FAVICON_URL = 'chrome://brief/skin/icons/feed-favicon.png';
 
-function EntryView(aFeedView, aEntryData, aHeadline) {
+function EntryView(aFeedView, aEntryData) {
     this.feedView = aFeedView;
-    this.headline = aHeadline;
 
     this.id = aEntryData.id;
     this.date = aEntryData.date;
     this.entryURL = aEntryData.entryURL;
     this.updated = aEntryData.updated;
+
+    this.headline = this.feedView.headlinesMode;
 
     this.container = this.feedView.document.getElementById('article-template').cloneNode(true);
     this.container.id = aEntryData.id;
@@ -976,7 +979,10 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
 
     this._getElement('feed-name').innerHTML = feed.title;
     this._getElement('authors').innerHTML = aEntryData.authors;
-    this._getElement('date').innerHTML = this._constructDate();
+    this._getElement('date').textContent = this.getDateString();
+
+    if (this.updated)
+        this._getElement('updated').textContent = this._strings.entryUpdated;
 
     if (this.headline) {
         this.collapse(false);
@@ -1014,6 +1020,12 @@ function EntryView(aFeedView, aEntryData, aHeadline) {
 
 EntryView.prototype = {
 
+    get day() {
+        let date = new Date(this.date);
+        let time = date.getTime() - date.getTimezoneOffset() * 60000;
+        return Math.ceil(time / 86400000);
+    },
+
     get read() {
         return this.__read;
     },
@@ -1026,7 +1038,7 @@ EntryView.prototype = {
 
             if (this.updated) {
                 this.updated = false;
-                this._getElement('date').innerHTML = this._constructDate();
+                this._getElement('updated').textContent = '';
             }
         }
         else {
@@ -1089,7 +1101,8 @@ EntryView.prototype = {
                 // if the view had been refreshed.
                 if (this.container.parentNode == this.feedView.feedContent) {
                     this.feedView.feedContent.removeChild(this.container);
-                    aCallback();
+                    if (aCallback)
+                        aCallback();
                 }
             }.bind(this), true);
 
@@ -1097,6 +1110,8 @@ EntryView.prototype = {
         }
         else {
             this.feedView.feedContent.removeChild(this.container);
+            if (aCallback)
+                aCallback();
         }
     },
 
@@ -1105,8 +1120,6 @@ EntryView.prototype = {
             return;
 
         this.container.classList.add('collapsed');
-        if (this.container.previousSibling)
-            this.container.previousSibling.classList.remove('next-expanded');
 
         showElement(this._getElement('headline-container'));
 
@@ -1123,8 +1136,6 @@ EntryView.prototype = {
             return;
 
         this.container.classList.remove('collapsed');
-        if (this.container.previousSibling)
-            this.container.previousSibling.classList.add('next-expanded');
 
         let controls = this._getElement('controls');
         this._getElement('header').appendChild(controls);
@@ -1250,46 +1261,36 @@ EntryView.prototype = {
         return this.container.getElementsByClassName(aClassName)[0];
     },
 
-    _constructDate: function EntryView__constructDate() {
-        let entryDate = new Date(this.date);
-        let entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
-
+    getDateString: function EntryView_getDateString(aOnlyDatePart) {
         let now = new Date();
         let nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
-
         let today = Math.ceil(nowTime / 86400000);
+
+        let entryDate = new Date(this.date);
+        let entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
         let entryDay = Math.ceil(entryTime / 86400000);
+
         let deltaDays = today - entryDay;
         let deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
 
-        let string = '';
-        switch (true) {
-            case deltaDays === 0:
-                string = entryDate.toLocaleFormat(', %X ');
-                string = this._strings.today + string;
-                break;
-            case deltaDays === 1:
-                string = entryDate.toLocaleFormat(', %X ');
-                string = this._strings.yesterday + string
-                break;
-            case deltaDays < 7:
-                string = entryDate.toLocaleFormat('%A, %X ');
-                break;
-            case deltaYears > 0:
-                string = entryDate.toLocaleFormat('%d %B %Y, %X ');
-                break;
-            default:
-                string = entryDate.toLocaleFormat('%d %B, %X ');
-        }
+        let format;
 
-        string = string.replace(/:\d\d /, ' ');
-        // We do it because %e conversion specification doesn't work
-        string = string.replace(/^0/, '');
+        if (deltaDays === 0)
+            format = this._strings.today;
+        else if (deltaDays === 1)
+            format = this._strings.yesterday;
+        else if (deltaDays < 7)
+            format = '%A';
+        else if (deltaYears < 1)
+            format = ('%d %b');
+        else
+            format = ('%d %b %Y');
 
-        if (this.updated)
-            string += ' <span class="updated">' + this._strings.entryUpdated + '</span>';
+        if (!aOnlyDatePart)
+            format += ', %X';
 
-        return string;
+        return entryDate.toLocaleFormat(format).replace(/:\d\d$/, ' ')
+                                               .replace(/^0/, '');
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
@@ -1417,6 +1418,7 @@ function showElement(aElement, aAnimate, aCallback) {
             aCallback();
     }
 }
+
 
 __defineGetter__('Finder', function() {
     let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
