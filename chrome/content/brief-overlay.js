@@ -295,6 +295,10 @@ const Brief = {
         }, 0)
 
         this.prefs.setBoolPref('firstRun', false);
+
+        AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
+            this.prefs.setCharPref('lastVersion', addon.version);
+        }.bind(this))
     }
 
 }
