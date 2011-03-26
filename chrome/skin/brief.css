@@ -283,47 +283,6 @@ page {
 }
 
 
-#places-tree {
-    -moz-box-flex: 1;
-    max-height: 400px !important;
-    border-bottom: 1px solid #7c909f !important;
-    font-size: 13px;
-}
-
-
-#confirm-home-folder {
-    margin: 10px 3px 5px 0 !important;
-    border: 1px solid #7c909f !important;
-    padding: 3px 6px !important;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-#confirm-home-folder {
-    -moz-appearance: button;
-    border: 3px solid !important;
-    -moz-border-top-colors: transparent ThreeDHighlight ThreeDLightShadow;
-    -moz-border-right-colors: transparent ThreeDDarkShadow ThreeDShadow;
-    -moz-border-bottom-colors: transparent ThreeDDarkShadow ThreeDShadow;
-    -moz-border-left-colors: transparent ThreeDHighlight ThreeDLightShadow;
-    background-color: ThreeDFace;
-    color: ButtonText !important;
-}
-
-#confirm-home-folder .button-box {
-    border: 1px solid transparent !important;
-    padding-top: 1px !important;
-    padding-bottom: 2px !important;
-    -moz-padding-start: 3px !important;
-    -moz-padding-end: 4px !important;
-}
-
-#confirm-home-folder .button-text {
-    margin: 0 !important;
-    text-align: center;
-}
-
-
 /* ======= Reset default properties ======= */
 
 .brief-button {
