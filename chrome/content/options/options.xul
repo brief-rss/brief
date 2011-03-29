@@ -59,9 +59,6 @@
             <preference id="extensions.brief.showUnreadCounter"
                         name="extensions.brief.showUnreadCounter"
                         type="bool"/>
-            <preference id="extensions.brief.feedview.entrySelectionEnabled"
-                        name="extensions.brief.feedview.entrySelectionEnabled"
-                        type="bool"/>
         </preferences>
 
         <groupbox>
@@ -104,10 +101,6 @@
                       label="&sortUnreadViewOldestFirst.label;"
                       accesskey="&sortUnreadViewOldestFirst.accesskey;"
                       preference="extensions.brief.feedview.sortUnreadViewOldestFirst"/>
-            <checkbox id="enable-item-selection-checkbox"
-                      label="&enableItemHightlight.label;"
-                      accesskey="&enableItemHightlight.accesskey;"
-                      preference="extensions.brief.feedview.entrySelectionEnabled"/>
         </groupbox>
 
         <groupbox>

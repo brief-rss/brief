@@ -158,30 +158,20 @@ FeedView.prototype = {
         if (this._scrolling)
             return;
 
-        if (PrefCache.entrySelectionEnabled) {
-            let selectedIndex = this.getEntryIndex(this.selectedEntry);
-            let nextEntry = this._loadedEntries[selectedIndex + 1];
-            if (nextEntry)
-                this.selectEntry(nextEntry, true, true);
-        }
-        else {
-            Prefs.setBoolPref('feedview.entrySelectionEnabled', true);
-        }
+        let selectedIndex = this.getEntryIndex(this.selectedEntry);
+        let nextEntry = this._loadedEntries[selectedIndex + 1];
+        if (nextEntry)
+            this.selectEntry(nextEntry, true, true);
     },
 
     selectPrevEntry: function FeedView_selectPrevEntry() {
         if (this._scrolling)
             return;
 
-        if (PrefCache.entrySelectionEnabled) {
-            let selectedIndex = this.getEntryIndex(this.selectedEntry);
-            let prevEntry = this._loadedEntries[selectedIndex - 1];
-            if (prevEntry)
-                this.selectEntry(prevEntry, true, true);
-        }
-        else {
-            Prefs.setBoolPref('feedview.entrySelectionEnabled', true);
-        }
+        let selectedIndex = this.getEntryIndex(this.selectedEntry);
+        let prevEntry = this._loadedEntries[selectedIndex - 1];
+        if (prevEntry)
+            this.selectEntry(prevEntry, true, true);
     },
 
     /**
@@ -214,37 +204,6 @@ FeedView.prototype = {
     },
 
     /**
-     * Scrolls to the entry before the entry closest to the middle of the screen.
-     *
-     * @param aSmooth
-     *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
-     *        target position.
-     */
-    scrollToPrevEntry: function FeedView_scrollToPrevEntry(aSmooth) {
-        let previousEntry = null;
-
-        let middleEntry = this.getEntryInScreenCenter();
-        if (middleEntry)
-            previousEntry = this._loadedEntries[this.getEntryIndex(middleEntry) - 1];
-
-        if (previousEntry)
-            this.scrollToEntry(previousEntry, true, aSmooth);
-    },
-
-
-    // See scrollToPrevEntry.
-    scrollToNextEntry: function FeedView_scrollToNextEntry(aSmooth) {
-        let nextEntry = null;
-
-        let middleEntry = this.getEntryInScreenCenter();
-        if (middleEntry)
-            nextEntry = this._loadedEntries[this.getEntryIndex(middleEntry) + 1];
-
-        if (nextEntry)
-            this.scrollToEntry(nextEntry, true, aSmooth);
-    },
-
-    /**
      * Scroll down by 10 entries, loading more entries if necessary.
      */
     skipDown: function FeedView_skipDown() {
@@ -253,11 +212,7 @@ FeedView.prototype = {
 
         let doSkipDown = function(aCount) {
             let targetEntry = this._loadedEntries[index + 10] || this.lastEntry;
-
-            if (PrefCache.entrySelectionEnabled)
-                this.selectEntry(targetEntry, true, true);
-            else
-                this.scrollToEntry(targetEntry, true, true);
+            this.selectEntry(targetEntry, true, true);
         }.bind(this);
 
         if (index + 10 > this._loadedEntries.length - 1)
@@ -272,10 +227,7 @@ FeedView.prototype = {
         let index = this.getEntryIndex(middleEntry);
         let targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
 
-        if (PrefCache.entrySelectionEnabled)
-            this.selectEntry(targetEntry, true, true);
-        else
-            this.scrollToEntry(targetEntry, true, true);
+        this.selectEntry(targetEntry, true, true);
     },
 
 
@@ -467,7 +419,7 @@ FeedView.prototype = {
                     break;
                 }
 
-                if (PrefCache.entrySelectionEnabled && !this._scrolling) {
+                if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
 
                     function selectCentralEntry() {
@@ -758,13 +710,11 @@ FeedView.prototype = {
             this._setEmptyViewMessage();
             this._autoMarkRead();
 
-            if (PrefCache.entrySelectionEnabled) {
-                let lastSelectedEntry = this.selectedEntry;
-                this.selectedEntry = null;
-                let entry = this.containsEntry(lastSelectedEntry) ? lastSelectedEntry
-                                                                  : this._loadedEntries[0];
-                this.selectEntry(entry, true);
-            }
+            let lastSelectedEntry = this.selectedEntry;
+            this.selectedEntry = null;
+            let entry = this.containsEntry(lastSelectedEntry) ? lastSelectedEntry
+                                                              : this._loadedEntries[0];
+            this.selectEntry(entry, true);
         }.bind(this))
     },
 
@@ -1184,8 +1134,7 @@ EntryView.prototype = {
     },
 
     onClick: function EntryView_onClick(aEvent) {
-        if (PrefCache.entrySelectionEnabled)
-            this.feedView.selectEntry(this.id);
+        this.feedView.selectEntry(this.id);
 
         // Walk the parent chain of the even target to check if an anchor was clicked.
         let anchor = null;
