@@ -105,9 +105,6 @@ FeedView.prototype = {
 
     get feedContent() this.document.getElementById('feed-content'),
 
-    // XXX
-    get active() this.browser.currentURI.equals(gTemplateURI) && gCurrentView == this,
-
 
     containsEntry: function(aEntry) this._loadedEntries.indexOf(aEntry) !== -1,
 
@@ -187,9 +184,6 @@ FeedView.prototype = {
      *        directly to the target position.
      */
     selectEntry: function FeedView_selectEntry(aEntry, aScroll, aScrollSmoothly) {
-        if (!this.active)
-            return;
-
         if (this.selectedEntry)
             this.getEntryView(this.selectedEntry).selected = false;
 
@@ -383,19 +377,15 @@ FeedView.prototype = {
 
             // Set up the template page when it's loaded.
             case 'load':
-                getElement('feed-view-header').hidden = !this.active;
+                this.document.addEventListener('click', this, true);
+                this.document.addEventListener('scroll', this, true);
+                this.document.addEventListener('keypress', this, true);
 
-                if (this.active) {
-                    this.document.addEventListener('click', this, true);
-                    this.document.addEventListener('scroll', this, true);
-                    this.document.addEventListener('keypress', this, true);
+                // Some feeds include scripts that use document.write() which screw
+                // us up, because we insert them dynamically after the page is loaded.
+                document.write = document.writeln = function() { };
 
-                    // Some feeds include scripts that use document.write() which screw
-                    // us up, because we insert them dynamically after the page is loaded.
-                    document.write = document.writeln = function() { };
-
-                    this.refresh();
-                }
+                this.refresh();
                 break;
 
             // Click listener must be attached to the document, not the entry container,
@@ -449,31 +439,23 @@ FeedView.prototype = {
     },
 
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
-        if (getTopWindow().gBrowser.currentURI.spec != document.documentURI) {
-            this._refreshPending = true;
-            return;
-        }
-
-        if (this.active)
+        if (getTopWindow().gBrowser.currentURI.spec == document.documentURI)
             this._onEntriesAdded(aEntryList.IDs);
+        else
+            this._refreshPending = true;
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
-        if (getTopWindow().gBrowser.currentURI.spec != document.documentURI) {
-            this._refreshPending = true;
-            return;
-        }
-
-        if (this.active) {
+        if (getTopWindow().gBrowser.currentURI.spec == document.documentURI) {
             this._onEntriesRemoved(aEntryList.IDs, false, false);
             this._onEntriesAdded(aEntryList.IDs);
+        }
+        else {
+            this._refreshPending = true;
         }
     },
 
     onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntryList, aNewState) {
-        if (!this.active)
-            return;
-
         if (this.query.read === false) {
             if (aNewState)
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
@@ -490,9 +472,6 @@ FeedView.prototype = {
     },
 
     onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
-        if (!this.active)
-            return;
-
         if (this.query.starred === true) {
             if (aNewState)
                 this._onEntriesAdded(aEntryList.IDs);
@@ -505,9 +484,6 @@ FeedView.prototype = {
     },
 
     onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
-        if (!this.active)
-            return;
-
         for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
             let entryView = this.getEntryView(entry);
             let tags = entryView.tags;
@@ -529,9 +505,6 @@ FeedView.prototype = {
     },
 
     onEntriesDeleted: function FeedView_onEntriesDeleted(aEntryList, aNewState) {
-        if (!this.active)
-            return;
-
         if (aNewState === this.query.deleted)
             this._onEntriesAdded(aEntryList.IDs);
         else
@@ -658,9 +631,6 @@ FeedView.prototype = {
      * Refreshes the feed view. Removes the old content and builds the new one.
      */
     refresh: function FeedView_refresh() {
-        if (!this.active)
-            return;
-
         // Clean up.
         this._stopSmoothScrolling();
         clearTimeout(this._markVisibleTimeout);
