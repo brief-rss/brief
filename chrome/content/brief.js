@@ -38,20 +38,8 @@ function init() {
 
     ViewList.init();
 
-    // Load feed view.
     let startView = getElement('view-list').getAttribute('startview');
-    let name = getElement(startView).getAttribute('name');
-
-    let query = new Query({
-        deleted: Storage.ENTRY_STATE_NORMAL,
-        read: startView == 'unread-folder' ? false : undefined
-    })
-
-    gCurrentView = new FeedView(name, query);
-
-    ViewList.richlistbox.suppressOnSelect = true;
     ViewList.selectedItem = getElement(startView);
-    ViewList.richlistbox.suppressOnSelect = false;
 
     async(FeedList.rebuild, 0, FeedList);
     async(Storage.syncWithLivemarks, 1000, Storage);

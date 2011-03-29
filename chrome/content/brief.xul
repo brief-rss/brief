@@ -99,6 +99,7 @@
                      startview="all-items-folder"
                      persist="startview"
                      context="view-list-popup"
+                     suppressonselect="true"
                      onselect="ViewList.onSelect(event)">
             <richlistitem id="all-items-folder">
                 <image class="view-icon"/>

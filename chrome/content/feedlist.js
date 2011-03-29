@@ -18,6 +18,11 @@ let ViewList = {
     },
 
     init: function ViewList_init() {
+        // The select event was suppressed because richlistbox initiates selection
+        // during document load, before the feed view browser is ready.
+        this.richlistbox.suppressOnSelect = false;
+        this.richlistbox.selectedIndex = -1;
+
         this.refreshItem('unread-folder');
         this.refreshItem('starred-folder');
     },
@@ -445,7 +450,8 @@ let FeedList = {
                 else {
                     this.persistFolderState();
                     this.rebuild();
-                    ViewList.init();
+                    ViewList.refreshItem('unread-folder');
+                    ViewList.refreshItem('starred-folder');
                     async(gCurrentView.refresh, 0, gCurrentView);
                 }
                 break;
