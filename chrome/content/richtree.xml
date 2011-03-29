@@ -198,17 +198,21 @@
         </method>
 
         <method name="setSelectedItem">
-          <parameter name="aEvent" />
-          <parameter name="aValue" />
-          <body>
-            <![CDATA[
-              this._setItemSelection(aValue);
-              if (aValue) {
-                this.fireActiveItemEvent();
-                this._fireOnSelect(aEvent);
-              }
-          ]]>
-          </body>
+            <parameter name="aEvent" />
+            <parameter name="aValue" />
+            <body>
+                <![CDATA[
+                if (aValue == this.selectedItem)
+                    return;
+
+                this._setItemSelection(aValue);
+
+                if (aValue) {
+                    this.fireActiveItemEvent();
+                    this._fireOnSelect(aEvent);
+                }
+              ]]>
+            </body>
         </method>
 
         <property name="selectedItem">
