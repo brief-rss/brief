@@ -33,6 +33,15 @@ body.headlines-mode.multiple-feeds > #feed-content {
     border-bottom: 1px solid #D4DEE6;
 }
 
+article.selected .headline-header {
+    background-color: #ecf7ff;
+}
+
+article.selected:not(:hover) .headline-header,
+article.was-selected:not(:hover) .headline-header {
+    -moz-transition: background-color 500ms;
+}
+
 .headline-container:hover > .headline-header {
     background-color: #DEF2FF;
 }
