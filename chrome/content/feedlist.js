@@ -33,7 +33,7 @@ let ViewList = {
         TagList.deselect();
         FeedList.deselect();
 
-        let title = this.selectedItem.getAttribute('name');
+        let title = this.selectedItem.lastChild.value;
         let query = new Query();
 
         switch (this.selectedItem.id) {
@@ -80,8 +80,6 @@ let ViewList = {
     },
 
     refreshItem: function ViewList_refreshItem(aItemID) {
-        let item = getElement(aItemID);
-
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             read: false,
@@ -89,17 +87,14 @@ let ViewList = {
         })
 
         query.getEntryCount(function(unreadCount) {
-            let name = item.getAttribute('name');
-            if (unreadCount > 0) {
-                name += ' (' + unreadCount +')';
-                item.setAttribute('unread', true);
-            }
-            else {
-                item.removeAttribute('unread');
-            }
+            let element = getElement(aItemID);
 
-            let label = item.lastChild;
-            label.setAttribute('value', name);
+            element.lastChild.value = unreadCount;
+
+            if (unreadCount > 0)
+                element.classList.add('unread');
+            else
+                element.classList.remove('unread');
         })
     }
 
@@ -258,113 +253,33 @@ let FeedList = {
         return this.tree = getElement('feed-list');
     },
 
-    // All treeitems in the tree.
-    items: null,
-
-    _lastSelectedItem: null,
-
-    ignoreSelectEvent: false,
-
-    treeReady: false,
-
     get selectedItem() {
-        let item = null;
-        let currentIndex = this.tree.currentIndex;
-        if (currentIndex != -1 && currentIndex < this.tree.view.rowCount)
-            item = this.tree.view.getItemAtIndex(currentIndex);
-        return item;
+        return this.tree.selectedItem;
     },
 
-    // Feed object of currently selected feed, or null.
     get selectedFeed() {
-        if (!this.selectedItem)
-            return null;
-
-        let feed = null;
-        let feedID = this.selectedItem.id;
-        if (feedID)
-            feed = Storage.getFeed(feedID);
-        return feed;
+        return this.selectedItem ? Storage.getFeed(this.selectedItem.id) : null;
     },
 
     deselect: function FeedList_deselect() {
-        this.tree.view.selection.select(-1);
+        this.tree.selectedItem = null;
     },
 
     onSelect: function FeedList_onSelect(aEvent) {
-        let selectedItem = this.selectedItem;
-        if (!selectedItem) {
-            this._lastSelectedItem = null;
-            return;
-        }
-
-        if (this.ignoreSelectEvent || this._lastSelectedItem == selectedItem)
+        if (!this.selectedItem)
             return;
 
         ViewList.deselect();
         TagList.deselect();
 
-        // Clicking the twisty also triggers the select event, although the selection
-        // doesn't change. We remember the previous selected item and do nothing when
-        // the new selected item is the same.
-        this._lastSelectedItem = selectedItem;
-
         let query = new Query({ deleted: Storage.ENTRY_STATE_NORMAL });
 
-        if (selectedItem.hasAttribute('container'))
+        if (this.selectedFeed.isFolder)
             query.folders = [this.selectedFeed.feedID];
         else
             query.feeds = [this.selectedFeed.feedID];
 
         gCurrentView = new FeedView(this.selectedFeed.title, query);
-    },
-
-
-    onClick: function FeedList_onClick(aEvent) {
-        let row = FeedList.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
-        if (row != -1) {
-            let item = FeedList.tree.view.getItemAtIndex(row);
-
-            // Detect when folder is collapsed/expanded.
-            if (item.hasAttribute('container')) {
-                // This must be done asynchronously, because this listener was called
-                // during capture and the folder hasn't actually been opened or closed yet.
-                async(function() FeedList.refreshFolderTreeitems([item.id]));
-
-                // Folder states must be persisted immediatelly instead of when
-                // Brief is closed, because otherwise if the feedlist is rebuilt,
-                // the changes will be lost.
-                async(FeedList._persistFolderState, 0, FeedList);
-            }
-
-            // If there is a webpage open in the browser then clicking on
-            // the already selected item, should bring back the feed view.
-            if (!gCurrentView.active && item == FeedList.selectedItem && aEvent.button == 0)
-                gCurrentView.browser.loadURI(gTemplateURI.spec);
-        }
-    },
-
-
-    onKeyUp: function FeedList_onKeyUp(aEvent) {
-        let isContainer = this.selectedItem.hasAttribute('container');
-        if (isContainer && aEvent.keyCode == aEvent.DOM_VK_RETURN) {
-            if (this.selectedItem.id != 'starred-folder')
-                this.refreshFolderTreeitems([this.selectedItem.id]);
-
-            async(this._persistFolderState, 0, this);
-        }
-    },
-
-    // Sets the visibility of context menuitem depending on the target.
-    onContextMenuShowing: function FeedList_onContextMenuShowing(aEvent) {
-        let row = this.tree.treeBoxObject.getRowAt(aEvent.clientX, aEvent.clientY);
-        if (row == -1) {
-            aEvent.preventDefault(); // Target is empty space.
-        }
-        else {
-            let target = this.tree.view.getItemAtIndex(row);
-            FeedListContextMenu.init(target);
-        }
     },
 
     /**
@@ -374,22 +289,8 @@ let FeedList = {
      *        An array of feed IDs.
      */
     refreshFolderTreeitems: function FeedList_refreshFolderTreeitems(aFolders) {
-        if (!this.treeReady)
-            return;
-
-        for (let i = 0; i < aFolders.length; i++) {
-            let folder = Storage.getFeed(aFolders[i]);
-            let treeitem = getElement(folder.feedID);
-
-            if (treeitem.getAttribute('open') == 'true') {
-                let treecell = getElement(folder.feedID).firstChild.firstChild;
-                this.removeProperty(treecell, 'unread');
-                treecell.setAttribute('label', folder.title);
-            }
-            else {
-                this._refreshLabel(folder);
-            }
-        }
+        aFolders.map(function(f) Storage.getFeed(f))
+                .forEach(this._refreshLabel, this);
     },
 
     /**
@@ -400,31 +301,23 @@ let FeedList = {
      *        An array of feed IDs.
      */
     refreshFeedTreeitems: function FeedList_refreshFeedTreeitems(aFeeds) {
-        if (!this.treeReady)
-            return;
-
-        for (let i = 0; i < aFeeds.length; i++) {
-            let feed = Storage.getFeed(aFeeds[i]);
+        let feeds = aFeeds.map(function(f) Storage.getFeed(f));
+        for (let feed in feeds) {
             this._refreshLabel(feed);
             this._refreshFavicon(feed.feedID);
 
-            // FeedList.items is null before the tree finishes building. We don't need to
-            // refresh the parent folders then, anyway, because _buildFolderChildren does
-            // it itself.
-            if (this.items) {
-                // Build an array of IDs of folders in the the parent chains of
-                // the given feeds.
-                let folders = [];
-                let parentID = feed.parent;
+            // Build an array of IDs of folders in the the parent chains of
+            // the given feeds.
+            let folders = [];
+            let parentID = feed.parent;
 
-                while (parentID != PrefCache.homeFolder) {
-                    if (folders.indexOf(parentID) == -1)
-                        folders.push(parentID);
-                    parentID = Storage.getFeed(parentID).parent;
-                }
-
-                this.refreshFolderTreeitems(folders);
+            while (parentID != PrefCache.homeFolder) {
+                if (folders.indexOf(parentID) == -1)
+                    folders.push(parentID);
+                parentID = Storage.getFeed(parentID).parent;
             }
+
+            this.refreshFolderTreeitems(folders);
         }
     },
 
@@ -437,105 +330,56 @@ let FeedList = {
         })
 
         query.getEntryCount(function(unreadCount) {
-            let treecell = getElement(aFeed.feedID).firstChild.firstChild;
-            let label;
-            if (unreadCount > 0) {
-                label = aFeed.title + ' (' + unreadCount +')';
-                this.setProperty(treecell, 'unread');
-            }
-            else {
-                label = aFeed.title;
-                this.removeProperty(treecell, 'unread');
-            }
+            let treeitem = getElement(aFeed.feedID);
 
-            treecell.setAttribute('label', label);
-        }.bind(this))
+            treeitem.setAttribute('title', aFeed.title);
+            treeitem.setAttribute('unreadcount', unreadCount);
+
+            if (unreadCount > 0)
+                treeitem.classList.add('unread');
+            else
+                treeitem.classList.remove('unread');
+        })
     },
 
     _refreshFavicon: function FeedList__refreshFavicon(aFeedID) {
         let feed = Storage.getFeed(aFeedID);
         let treeitem = getElement(aFeedID);
-        let treecell = treeitem.firstChild.firstChild;
 
-        // Update the favicon.
+        let icon = '';
         if (treeitem.hasAttribute('loading'))
-            treecell.setAttribute('src', THROBBER_URL);
+            icon = THROBBER_URL;
         else if (treeitem.hasAttribute('error'))
-            treecell.setAttribute('src', ERROR_ICON_URL);
+            icon = ERROR_ICON_URL;
         else if (PrefCache.showFavicons && feed.favicon != 'no-favicon')
-            treecell.setAttribute('src', feed.favicon);
-        else
-            treecell.removeAttribute('src');
+            icon = feed.favicon;
+
+        treeitem.setAttribute('icon', icon);
     },
 
     rebuild: function FeedList_rebuild() {
-        // Can't build the tree if it is hidden and has no view.
-        if (!this.tree.view)
-            return;
-
-        this.treeReady = true;
-
-        // Remember selection.
         this.lastSelectedID = this.selectedItem ? this.selectedItem.id : '';
 
         // Clear the existing tree.
-        let topLevelChildren = getElement('top-level-children');
-        while (topLevelChildren.hasChildNodes())
-            topLevelChildren.removeChild(topLevelChildren.lastChild);
+        while (this.tree.hasChildNodes())
+            this.tree.removeChild(this.tree.lastChild);
 
         this.feeds = Storage.getAllFeeds(true);
 
         // This a helper array used by _buildFolderChildren. As the function recurses,
-        // the array stores the <treechildren> elements of all folders in the parent
-        // chain of the currently processed folder. This is how it tracks where to
-        // append the items.
-        this._folderParentChain = [topLevelChildren];
+        // the array stores folders in the parent chain of the currently processed folder.
+        // This is how it tracks where to append the items.
+        this._folderParentChain = [this.tree];
 
         this._buildFolderChildren(PrefCache.homeFolder);
 
-        this._restoreSelection();
+        if (this.lastSelectedID) {
+            this.tree.suppressOnSelect = true;
+            this.tree.selectedItem = getElement(this.lastSelectedID) || this.tree.getItemAtIndex(0);
+            this.tree.suppressOnSelect = false;
 
-        // Fill the items cache.
-        this.items = this.tree.getElementsByTagName('treeitem');
-    },
-
-    // Cached document fragments, "bricks" used to build the tree.
-    get _containerRow() {
-        delete this._containerRow;
-
-        this._containerRow = document.createDocumentFragment();
-
-        let treeitem = document.createElement('treeitem');
-        treeitem.setAttribute('container', 'true');
-        treeitem = this._containerRow.appendChild(treeitem);
-
-        let treerow = document.createElement('treerow');
-        treerow = treeitem.appendChild(treerow);
-
-        let treecell = document.createElement('treecell');
-        treecell = treerow.appendChild(treecell);
-
-        let treechildren = document.createElement('treechildren');
-        treechildren = treeitem.appendChild(treechildren);
-
-        return this._containerRow;
-    },
-
-    get _flatRow() {
-        delete this._flatRow;
-
-        this._flatRow = document.createDocumentFragment();
-
-        let treeitem = document.createElement('treeitem');
-        treeitem = this._flatRow.appendChild(treeitem);
-
-        let treerow = document.createElement('treerow');
-        treeitem.appendChild(treerow);
-
-        let treecell = document.createElement('treecell');
-        treerow.appendChild(treecell);
-
-        return this._flatRow;
+            this.lastSelectedID = '';
+        }
     },
 
     /**
@@ -555,52 +399,33 @@ let FeedList = {
                 let closedFolders = this.tree.getAttribute('closedFolders');
                 let isOpen = !closedFolders.match(escape(feed.feedID));
 
-                let fragment = this._containerRow.cloneNode(true);
-                let treeitem = fragment.firstChild;
-                treeitem.setAttribute('open', isOpen);
-                treeitem.setAttribute('id', feed.feedID);
+                let folder = document.createElement('richtreefolder');
+                folder.id = feed.feedID;
+                folder.className = 'feed-folder';
+                folder.contextMenu = 'folder-context-menu';
+                folder.setAttribute('open', isOpen);
 
-                parent.appendChild(fragment);
+                parent.appendChild(folder);
 
                 this.refreshFolderTreeitems([feed.feedID]);
 
-                this._folderParentChain.push(treeitem.lastChild);
+                this._folderParentChain.push(folder);
 
                 this._buildFolderChildren(feed.feedID);
             }
             else {
-                let fragment = this._flatRow.cloneNode(true);
-                let treeitem = fragment.firstChild;
-                treeitem.setAttribute('id', feed.feedID);
-                treeitem.setAttribute('url', feed.feedURL);
+                let treeitem = document.createElement('richtreeitem');
+                treeitem.id = feed.feedID;
+                treeitem.className = 'feed-treeitem';
+                treeitem.contextMenu = 'feed-context-menu';
+                parent.appendChild(treeitem);
 
-                let treecell = treeitem.firstChild.firstChild;
-                treecell.setAttribute('properties', 'feed-item ');
-
-                parent.appendChild(fragment);
-
-                this.refreshFeedTreeitems([feed.feedID]);
+                this._refreshLabel(feed);
+                this._refreshFavicon(feed.feedID);
             }
         }
+
         this._folderParentChain.pop();
-    },
-
-    _restoreSelection: function FeedList__restoreSelection() {
-        if (!this.lastSelectedID)
-            return;
-
-        let itemToSelect = getElement(this.lastSelectedID);
-        if (itemToSelect) {
-            let index = this.tree.view.getIndexOfItem(itemToSelect);
-            this.ignoreSelectEvent = true;
-            this.tree.view.selection.select(index);
-            this.ignoreSelectEvent = false;
-        }
-        else {
-            this.tree.view.selection.select(0);
-        }
-
-        this.lastSelectedID = '';
     },
 
 
@@ -610,6 +435,7 @@ let FeedList = {
         // The Live Bookmarks stored is user's folder of choice were read and the
         // in-database list of feeds was synchronized.
         case 'brief:invalidate-feedlist':
+            this.persistFolderState();
             this.rebuild();
             async(gCurrentView.refresh, 0, gCurrentView);
             break;
@@ -627,30 +453,23 @@ let FeedList = {
             break;
 
         case 'brief:feed-updated':
-            if (this.treeReady) {
-                let item = getElement(aData);
-                item.removeAttribute('error');
-                item.removeAttribute('loading');
-                this._refreshFavicon(aData);
-            }
+            let item = getElement(aData);
+            item.removeAttribute('error');
+            item.removeAttribute('loading');
+            this._refreshFavicon(aData);
             refreshProgressmeter();
             break;
 
         case 'brief:feed-loading':
-            if (this.treeReady) {
-                let item = getElement(aData);
-                item.setAttribute('loading', true);
-                this._refreshFavicon(aData);
-            }
+            item = getElement(aData);
+            item.setAttribute('loading', true);
+            this._refreshFavicon(aData);
             break;
 
-        // Error occured when downloading or parsing the feed, show error icon.
         case 'brief:feed-error':
-            if (this.treeReady) {
-                let item = getElement(aData);
-                item.setAttribute('error', true);
-                this._refreshFavicon(aData);
-            }
+            item = getElement(aData);
+            item.setAttribute('error', true);
+            this._refreshFavicon(aData);
             break;
 
         case 'brief:feed-update-queued':
@@ -717,41 +536,27 @@ let FeedList = {
     },
 
 
-    _persistFolderState: function FeedList_persistFolderState() {
-        // Persist the folders open/closed state.
+    persistFolderState: function FeedList_persistFolderState() {
+        let folders = this.tree.getElementsByTagName('richtreefolder');
         let closedFolders = '';
-        for (let i = 0; i < this.items.length; i++) {
-            let item = this.items[i];
-            if (item.hasAttribute('container') && item.getAttribute('open') == 'false')
-                closedFolders += item.id;
+        for (let i = 0; i < folders.length; i++) {
+            if (folders[i].getAttribute('open') == 'false')
+                closedFolders += folders[i].id;
         }
+
         FeedList.tree.setAttribute('closedFolders', escape(closedFolders));
-
-        let starredFolder = getElement('starred-folder');
-        starredFolder.setAttribute('wasOpen', starredFolder.getAttribute('open'));
     },
 
+    removeItem: function FeedList_removeItem(aElement) {
+        let itemToSelect = null;
 
-    setProperty: function FeedList_setProperty(aItem, aProperty) {
-        let properties = aItem.getAttribute('properties');
-        if (!properties.match(aProperty + ' '))
-            aItem.setAttribute('properties', properties + aProperty + ' ');
-    },
+        if (this.selectedItem == aElement)
+            itemToSelect = aElement.nextSibling || aElement.previousSibling || aElement.parentNode;
 
-    removeProperty: function FeedList_removeProperty(aItem, aProperty) {
-        let properties = aItem.getAttribute('properties');
-        if (properties.match(aProperty)) {
-            properties = properties.replace(aProperty + ' ', '');
-            aItem.setAttribute('properties', properties);
-        }
-    },
+        aElement.parentNode.removeChild(aElement);
 
-    QueryInterface: function FeedList_QueryInterface(aIID) {
-        if (aIID.equals(Ci.nsISupports) ||
-            aIID.equals(Ci.nsIObserver)) {
-            return this;
-        }
-        throw Components.results.NS_ERROR_NO_INTERFACE;
+        if (itemToSelect)
+            this.tree.selectedItem = itemToSelect;
     }
 
 }
@@ -767,8 +572,8 @@ let ViewListContextMenu = {
     get targetIsStarredFolder()  this.targetItem.id == 'starred-folder',
     get targetIsTrashFolder()    this.targetItem.id == 'trash-folder',
 
-    init: function ViewListContextMenu_init(aTargetItem) {
-        this.targetItem = aTargetItem;
+    init: function ViewListContextMenu_init() {
+        this.targetItem = ViewList.selectedItem;
 
         getElement('ctx-mark-special-folder-read').hidden = !this.targetIsUnreadFolder &&
                                                             !this.targetIsTrashFolder &&
@@ -830,12 +635,10 @@ let ViewListContextMenu = {
 
 let TagListContextMenu = {
 
-    targetItem: null,
-
     markTagRead: function TagListContextMenu_markTagRead() {
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
-            tags: [this.targetItem.id]
+            tags: [TagList.selectedItem.id]
         })
         query.markEntriesRead(true);
     },
@@ -844,7 +647,7 @@ let TagListContextMenu = {
         let taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
                              getService(Ci.nsITaggingService);
 
-        let tag = this.targetItem.id;
+        let tag = TagList.selectedItem.id;
 
         let dialogTitle = gStringBundle.getString('confirmTagDeletionTitle');
         let dialogText = gStringBundle.getFormattedString('confirmTagDeletionText', [tag]);
@@ -872,44 +675,21 @@ let TagListContextMenu = {
 }
 
 
-let FeedListContextMenu = {
+let FeedContextMenu = {
 
     targetItem: null,
 
-    get targetID() this.targetItem.id,
+    get targetID()   this.targetItem.id,
     get targetFeed() Storage.getFeed(this.targetID),
 
-    get targetIsFeed() this.targetItem.hasAttribute('url'),
-    get targetIsFolder() this.targetItem.hasAttribute('container'),
+    init: function FeedContextMenu_init() {
+        this.targetItem = FeedList.selectedItem;
 
-
-    init: function FeedListContextMenu_init(aTargetItem) {
-        this.targetItem = aTargetItem;
-
-        getElement('ctx-mark-feed-read').hidden = !this.targetIsFeed;
-        getElement('ctx-mark-folder-read').hidden = !this.targetIsFolder;
-        getElement('ctx-update-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-update-folder').hidden = !this.targetIsFolder;
-
-        let openWebsite = getElement('ctx-open-website');
-        openWebsite.hidden = !this.targetIsFeed;
-        if (this.targetIsFeed)
-            openWebsite.disabled = !Storage.getFeed(this.targetItem.id).websiteURL;
-
-        getElement('ctx-properties-separator').hidden = !this.targetIsFeed;
-        getElement('ctx-feed-properties').hidden = !this.targetIsFeed;
-
-        // Menuitems related to deleting feeds and folders.
-        getElement('ctx-delete-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-delete-folder').hidden = !this.targetIsFolder;
-
-        // Menuitems related to emptying feeds and folders.
-        getElement('ctx-empty-feed').hidden = !this.targetIsFeed;
-        getElement('ctx-empty-folder').hidden = !this.targetIsFolder;
+        getElement('ctx-open-website').disabled = !this.targetFeed.websiteURL;
     },
 
 
-    markFeedRead: function FeedListContextMenu_markFeedRead() {
+    markFeedRead: function FeedContextMenu_markFeedRead() {
         let query = new Query({
             feeds: [this.targetID],
             deleted: Storage.ENTRY_STATE_NORMAL
@@ -918,40 +698,17 @@ let FeedListContextMenu = {
     },
 
 
-    markFolderRead: function FeedListContextMenu_markFolderRead() {
-        let query = new Query({
-            deleted: Storage.ENTRY_STATE_NORMAL,
-            folders: [this.targetID]
-        })
-        query.markEntriesRead(true);
-    },
-
-
-    updateFeed: function FeedListContextMenu_updateFeed() {
+    updateFeed: function FeedContextMenu_updateFeed() {
         FeedUpdateService.updateFeeds([this.targetFeed]);
     },
 
-
-    updateFolder: function FeedListContextMenu_updateFolder() {
-        let items = this.targetItem.getElementsByTagName('treeitem');
-        let feeds = [];
-
-        for (let i = 0; i < items.length; i++) {
-            if (!items[i].hasAttribute('container'))
-                feeds.push(Storage.getFeed(items[i].id));
-        }
-
-        FeedUpdateService.updateFeeds(feeds);
-    },
-
-
-    openWebsite: function FeedListContextMenu_openWebsite() {
+    openWebsite: function FeedContextMenu_openWebsite() {
         let url = this.targetFeed.websiteURL;
         getTopWindow().gBrowser.loadOneTab(url);
     },
 
 
-    emptyFeed: function FeedListContextMenu_emptyFeed() {
+    emptyFeed: function FeedContextMenu_emptyFeed() {
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             starred: false,
@@ -960,82 +717,71 @@ let FeedListContextMenu = {
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
+    deleteFeed: function FeedContextMenu_deleteFeed() {
+        let title = gStringBundle.getString('confirmFeedDeletionTitle');
+        let text = gStringBundle.getFormattedString('confirmFeedDeletionText',
+                                                    [this.targetFeed.title]);
+        if (Services.prompt.confirm(window, title, text)) {
+            FeedList.removeItem(this.targetItem);
 
-    emptyFolder: function FeedListContextMenu_emptyFolder() {
+            Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
+
+            let txn = new PlacesRemoveItemTransaction(this.targetFeed.bookmarkID);
+            PlacesUtils.transactionManager.doTransaction(txn);
+        }
+    },
+
+    showFeedProperties: function FeedContextMenu_showFeedProperties() {
+        openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
+                   'chrome,titlebar,toolbar,centerscreen,modal', this.targetID);
+    }
+
+}
+
+let FolderContextMenu = {
+
+    markFolderRead: function FolderContextMenu_markFolderRead() {
+        let query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            folders: [FeedList.selectedFeed.feedID]
+        })
+        query.markEntriesRead(true);
+    },
+
+    updateFolder: function FolderContextMenu_updateFolder() {
+        let items = FeedList.selectedItem.getElementsByTagName('richtreeitem');
+        let feeds = [];
+        for (let i = 0; i < items.length; i++)
+            feeds.push(Storage.getFeed(items[i].id));
+
+        FeedUpdateService.updateFeeds(feeds);
+    },
+
+    emptyFolder: function FolderContextMenu_emptyFolder() {
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             starred: false,
-            folders: [this.targetID]
+            folders: [FeedList.selectedFeed.feedID]
         })
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
+    deleteFolder: function FolderContextMenu_deleteFolder() {
+        let item = FeedList.selectedItem;
+        let feed = FeedList.selectedFeed;
 
-    deleteFeed: function FeedListContextMenu_deleteFeed() {
-        let title = gStringBundle.getString('confirmFeedDeletionTitle');
-        let text = gStringBundle.getFormattedString('confirmFeedDeletionText',
-                                                   [this.targetFeed.title]);
-        if (Services.prompt.confirm(window, title, text)) {
-            this._removeTreeitem(this.targetItem);
-            this._deleteBookmarks([this.targetFeed]);
-        }
-    },
-
-
-    deleteFolder: function FeedListContextMenu_deleteFolder() {
         let title = gStringBundle.getString('confirmFolderDeletionTitle');
         let text = gStringBundle.getFormattedString('confirmFolderDeletionText',
-                                                   [this.targetFeed.title]);
+                                                    [feed.title]);
 
         if (Services.prompt.confirm(window, title, text)) {
-            this._removeTreeitem(this.targetItem);
+            FeedList.removeItem(item);
 
-            let items = this.targetItem.getElementsByTagName('treeitem');
-            let feeds = [this.targetFeed];
-            for (let i = 0; i < items.length; i++)
-                feeds.push(Storage.getFeed(items[i].id));
+            Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
-            this._deleteBookmarks(feeds);
+            let txn = new PlacesRemoveItemTransaction(feed.bookmarkID);
+            PlacesUtils.transactionManager.doTransaction(txn);
         }
-    },
-
-
-    // Removes a treeitem and updates selection if it was selected.
-    _removeTreeitem: function FeedListContextMenu__removeTreeitem(aTreeitem) {
-        let treeview = FeedList.tree.view;
-        let currentIndex = treeview.selection.currentIndex;
-        let rowCount = treeview.rowCount;
-        let indexToSelect = -1;
-
-        if (FeedList.selectedItem == aTreeitem) {
-            if (currentIndex == rowCount - 1)
-                indexToSelect = treeview.getIndexOfItem(aTreeitem.previousSibling);
-            else
-                indexToSelect = currentIndex;
-        }
-
-        aTreeitem.parentNode.removeChild(aTreeitem);
-
-        if (indexToSelect != -1)
-            async(treeview.selection.select, 0, treeview.selection, indexToSelect);
-    },
-
-
-    _deleteBookmarks: function FeedListContextMenu__deleteBookmarks(aFeeds) {
-        Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
-
-        let transactions = [];
-        for (let i = aFeeds.length - 1; i >= 0; i--)
-            transactions.push(new PlacesRemoveItemTransaction(aFeeds[i].bookmarkID));
-
-        let aggregatedTrans = new PlacesAggregatedTransaction('', transactions);
-        PlacesUtils.transactionManager.doTransaction(aggregatedTrans);
-    },
-
-
-    showFeedProperties: function FeedListContextMenu_showFeedProperties() {
-        openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
-                   'chrome,titlebar,toolbar,centerscreen,modal', this.targetID);
     }
 
 }

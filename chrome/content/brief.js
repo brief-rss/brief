@@ -25,13 +25,6 @@ function init() {
 
     document.addEventListener('keypress', onKeyPress, true);
 
-    // This listener has to use capturing, because it handles persisting of open/collapsed
-    // folder state. If the tree is scrolled as a result of collapsing a folder, we can
-    // no longer find the target of the click event, because event.clientY points to
-    // where it used to be before scrolling occurred. Therefore, we have to catch the
-    // click event before the folder is actually collapsed.
-    FeedList.tree.addEventListener('click', FeedList.onClick, true);
-
     Services.obs.addObserver(FeedList, 'brief:feed-update-queued', false);
     Services.obs.addObserver(FeedList, 'brief:feed-update-finished', false);
     Services.obs.addObserver(FeedList, 'brief:feed-updated', false);
@@ -70,6 +63,8 @@ function unload() {
     let id = viewList.selectedItem && viewList.selectedItem.id;
     let startView = (id == 'unread-folder') ? 'unread-folder' : 'all-items-folder';
     viewList.setAttribute('startview', startView);
+
+    FeedList.persistFolderState();
 
     Services.obs.removeObserver(FeedList, 'brief:feed-updated');
     Services.obs.removeObserver(FeedList, 'brief:feed-loading');
