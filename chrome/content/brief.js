@@ -178,11 +178,6 @@ let Commands = {
         getElement('searchbar').focus();
     },
 
-    toggleEntrySelection: function toggleEntrySelection() {
-        let oldValue = PrefCache.entrySelectionEnabled;
-        Prefs.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
-    },
-
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
         let entry = gCurrentView.selectedEntry;
         if (entry) {
@@ -335,16 +330,10 @@ function onKeyPress(aEvent) {
 
     if (Prefs.getBoolPref('assumeStandardKeys') && aEvent.charCode == aEvent.DOM_VK_SPACE) {
         if (aEvent.shiftKey) {
-            if (PrefCache.entrySelectionEnabled)
-                gCurrentView.selectPrevEntry();
-            else
-                gCurrentView.scrollToPrevEntry(true);
+            gCurrentView.selectPrevEntry();
         }
         else {
-            if (PrefCache.entrySelectionEnabled)
-                gCurrentView.selectNextEntry();
-            else
-                gCurrentView.scrollToNextEntry(true);
+            gCurrentView.selectNextEntry();
         }
 
         aEvent.preventDefault();
@@ -392,7 +381,6 @@ let PrefObserver = {
     _cachedPrefs: {
         doubleClickMarks:          'feedview.doubleClickMarks',
         showHeadlinesOnly:         'feedview.showHeadlinesOnly',
-        entrySelectionEnabled:     'feedview.entrySelectionEnabled',
         autoMarkRead:              'feedview.autoMarkRead',
         filterUnread:              'feedview.filterUnread',
         filterStarred:             'feedview.filterStarred',
@@ -434,13 +422,6 @@ let PrefObserver = {
             case 'feedview.sortUnreadViewOldestFirst':
                 if (gCurrentView.query.read === false)
                     gCurrentView.refresh();
-                break;
-
-            case 'feedview.entrySelectionEnabled':
-                if (PrefCache.entrySelectionEnabled)
-                    gCurrentView.selectEntry(gCurrentView.getEntryInScreenCenter());
-                else
-                    gCurrentView.selectEntry(null);
                 break;
 
             case 'feedview.showHeadlinesOnly':
