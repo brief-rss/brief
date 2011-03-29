@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Behavior">
 <!ENTITY openInNewTab.label "Open Brief in a new tab">
 <!ENTITY openInNewTab.accesskey "B">
-<!ENTITY openEntriesInTabs.label "Open items in new tabs">
-<!ENTITY openEntriesInTabs.accesskey "e">
 <!ENTITY storingGroup.caption "Storing">
 <!ENTITY expirationBefore.label "Remove downloaded items after">
 <!ENTITY expirationAfter.label "days">
