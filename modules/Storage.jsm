@@ -357,10 +357,8 @@ let StorageInternal = {
      * and hasn't been refreshed yet, we must fall back to a synchronous query.
      */
     getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders, aIncludeInactive) {
-        if (!this.allItemsCache) {
-            Stm.getAllFeeds.cancel();
+        if (!this.allItemsCache)
             this.refreshFeedsCache(true);
-        }
 
         if (aIncludeFolders && aIncludeInactive)
             return this.allItemsCache;
@@ -1779,9 +1777,12 @@ LivemarksSync.prototype = {
 
             let item = {};
             item.title = Bookmarks.getItemTitle(node.itemId);
-            item.bookmarkID = node.itemId;
             item.rowIndex = aLivemarks.length;
-            item.parent = aContainer.itemId.toFixed().toString();
+
+            // Convert the ids to strings ourselves, because when database does it
+            // it includes a decimal point in the string representation (e.g. 43523.0).
+            item.bookmarkID = node.itemId.toString();
+            item.parent = aContainer.itemId.toString();
 
             if (Utils.isLivemark(node.itemId)) {
                 let feedURL = Places.livemarks.getFeedURI(node.itemId).spec;
