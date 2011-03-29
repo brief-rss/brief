@@ -69,21 +69,6 @@ let ViewList = {
         gCurrentView = new FeedView(title, query);
     },
 
-    // If there is a webpage open in the browser then clicking on
-    // the already selected item, should bring back the feed view.
-    onClick: function ViewList_onClick(aEvent) {
-        // Find the target richlistitem in the event target's parent chain
-        let targetItem = aEvent.target;
-        while (targetItem) {
-            if (targetItem.localName == 'richlistitem')
-                break;
-            targetItem = targetItem.parentNode;
-        }
-
-        if (!gCurrentView.active && targetItem && aEvent.button == 0)
-            gCurrentView.browser.loadURI(gTemplateURI.spec);
-    },
-
     refreshItem: function ViewList_refreshItem(aItemID) {
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
@@ -157,13 +142,6 @@ let TagList = {
         })
 
         gCurrentView = new FeedView(this.selectedItem.id, query);
-    },
-
-    // If there is a webpage open in the browser then clicking on
-    // the already selected item, should bring back the feed view.
-    onClick: function TagList_onClick(aEvent) {
-        if (!gCurrentView.active && aEvent.target.localName != 'listitem' && aEvent.button == 0)
-            gCurrentView.browser.loadURI(gTemplateURI.spec);
     },
 
     /**
