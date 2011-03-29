@@ -92,8 +92,6 @@ Feed.prototype = {
     mapProperties: function Feed_mapProperties(aFeed) {
         this.wrappedFeed = aFeed;
 
-        if (aFeed.title)
-            this.title = aFeed.title.text;
         if (aFeed.link)
             this.websiteURL = aFeed.link.spec;
         if (aFeed.subtitle)
