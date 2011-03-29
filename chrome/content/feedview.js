@@ -1156,15 +1156,12 @@ EntryView.prototype = {
             if (aEvent.button == 1)
                 aEvent.stopPropagation();
 
-            let openInTabs = Prefs.getBoolPref('feedview.openEntriesInTabs');
-            let newTab = openInTabs || aEvent.button == 1 || aEvent.ctrlKey;
-
             if (anchor.getAttribute('command') == 'open') {
-                Commands.openEntryLink(this.id, newTab);
+                Commands.openEntryLink(this.id);
                 return;
             }
             else if (anchor.hasAttribute('href')) {
-                Commands.openLink(anchor.getAttribute('href'), newTab);
+                Commands.openLink(anchor.getAttribute('href'));
                 return;
             }
         }

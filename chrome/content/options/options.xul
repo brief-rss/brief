@@ -32,9 +32,6 @@
             <preference id="extensions.brief.update.enableAutoUpdate"
                         name="extensions.brief.update.enableAutoUpdate"
                         type="bool"/>
-            <preference id="extensions.brief.feedview.openEntriesInTabs"
-                        name="extensions.brief.feedview.openEntriesInTabs"
-                        type="bool"/>
             <preference id="extensions.brief.database.expireEntries"
                         name="extensions.brief.database.expireEntries"
                         type="bool"/>
@@ -91,9 +88,6 @@
                       label="&showUnreadCounter.label;"
                       accesskey="&showUnreadCounter.accesskey;"
                       preference="extensions.brief.showUnreadCounter"/>
-            <checkbox label="&openEntriesInTabs.label;"
-                      accesskey="&openEntriesInTabs.accesskey;"
-                      preference="extensions.brief.feedview.openEntriesInTabs"/>
             <checkbox label="&autoMarkRead.label;"
                       accesskey="&autoMarkRead.accesskey;"
                       preference="extensions.brief.feedview.autoMarkRead"/>

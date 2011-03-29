@@ -235,25 +235,20 @@ let Commands = {
         if (!gCurrentView.selectedEntry)
             return;
 
-        let newTab = Prefs.getBoolPref('feedview.openEntriesInTabs');
-        Commands.openEntryLink(gCurrentView.selectedEntry, newTab);
+        Commands.openEntryLink(gCurrentView.selectedEntry);
     },
 
-    openEntryLink: function cmd_openEntryLink(aEntry, aNewTab) {
+    openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
-        Commands.openLink(entryView.entryURL, aNewTab);
+        Commands.openLink(entryView.entryURL);
 
         if (!entryView.read)
             new Query(aEntry).markEntriesRead(true);
     },
 
-    openLink: function cmd_openLink(aURL, aNewTab) {
+    openLink: function cmd_openLink(aURL) {
         let docURI = NetUtil.newURI(document.documentURI);
-
-        if (aNewTab)
-            getTopWindow().gBrowser.loadOneTab(aURL, docURI);
-        else
-            gCurrentView.browser.loadURI(aURL);
+        getTopWindow().gBrowser.loadOneTab(aURL, docURI);
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
