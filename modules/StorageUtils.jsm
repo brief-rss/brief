@@ -346,7 +346,7 @@ StorageStatement.prototype = {
         this._bindParams();
 
         // Avoid repeated XPCOM calls for performance.
-        let columnCount = nativeStatement.columnCount;
+        let columnCount = this._nativeStatement.columnCount;
 
         let columns = [];
         for (let i = 0; i < columnCount; i++)
