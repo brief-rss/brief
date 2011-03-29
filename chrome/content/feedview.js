@@ -105,6 +105,7 @@ FeedView.prototype = {
 
     get feedContent() this.document.getElementById('feed-content'),
 
+    // XXX
     get active() this.browser.currentURI.equals(gTemplateURI) && gCurrentView == this,
 
 
@@ -867,6 +868,8 @@ FeedView.prototype = {
 
         let nextEntryView = this._entryViews[aPosition];
         let nextElem = nextEntryView ? nextEntryView.container : null;
+        if (nextElem && nextElem.previousSibling.tagName == 'H1')
+            nextElem = nextElem.previousSibling;
 
         if (this.headlinesMode && !this.document.getElementById('day' + entryView.day)) {
             let dayHeader = this.document.createElement('H1');
@@ -1055,12 +1058,12 @@ EntryView.prototype = {
         return this.__starred;
     },
     set starred(aValue) {
-        this.__starred = aValue;
-
         if (aValue)
             this.container.classList.add('starred');
         else
             this.container.classList.remove('starred');
+
+        return this.__starred = aValue;
     },
 
 
@@ -1068,8 +1071,8 @@ EntryView.prototype = {
         return this.__tags;
     },
     set tags(aValue) {
-        this.__tags = aValue;
         this._getElement('tags').textContent = aValue.sort().join(', ');
+        return this.__tags = aValue;
     },
 
 
@@ -1080,11 +1083,20 @@ EntryView.prototype = {
     },
 
 
+    get selected() {
+        return this.feedView.selectedEntry == this.id;
+    },
     set selected(aValue) {
-        if (aValue)
+        if (aValue) {
             this.container.classList.add('selected');
-        else
+        }
+        else {
             this.container.classList.remove('selected');
+            this.container.classList.add('was-selected');
+            async(function() { this.container.classList.remove('was-selected') }, 600, this);
+        }
+
+        return aValue;
     },
 
 
@@ -1151,7 +1163,7 @@ EntryView.prototype = {
             if (PrefCache.autoMarkRead && this.feedView.query.read !== false)
                 Commands.markEntryRead(this.id, true);
 
-            if (this.id == this.feedView.selectedEntry) {
+            if (this.selected) {
                 let entryBottom = this.offsetTop + this.height;
                 let screenBottom = this.feedView.window.pageYOffset +
                                    this.feedView.window.innerHeight;
