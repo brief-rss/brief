@@ -374,9 +374,15 @@ let FeedList = {
         this._buildFolderChildren(PrefCache.homeFolder);
 
         if (this.lastSelectedID) {
-            this.tree.suppressOnSelect = true;
-            this.tree.selectedItem = getElement(this.lastSelectedID) || this.tree.getItemAtIndex(0);
-            this.tree.suppressOnSelect = false;
+            let prevSelectedItem = getElement(this.lastSelectedID);
+            if (prevSelectedItem) {
+                this.tree.suppressOnSelect = true;
+                this.tree.selectedItem = prevSelectedItem;
+                this.tree.suppressOnSelect = false;
+            }
+            else {
+                ViewList.selectedItem = getElement('all-items-folder');
+            }
 
             this.lastSelectedID = '';
         }
@@ -432,67 +438,71 @@ let FeedList = {
     observe: function FeedList_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
 
-        // The Live Bookmarks stored is user's folder of choice were read and the
-        // in-database list of feeds was synchronized.
-        case 'brief:invalidate-feedlist':
-            this.persistFolderState();
-            this.rebuild();
-            async(gCurrentView.refresh, 0, gCurrentView);
-            break;
+            case 'brief:invalidate-feedlist':
+                if (this.ignoreInvalidateNotification) {
+                    FeedList.ignoreInvalidateNotification = false;
+                }
+                else {
+                    this.persistFolderState();
+                    this.rebuild();
+                    ViewList.init();
+                    async(gCurrentView.refresh, 0, gCurrentView);
+                }
+                break;
 
-        case 'brief:feed-title-changed':
-            let feed = Storage.getFeed(aData);
-            if (feed.isFolder)
-                this.refreshFolderTreeitems([aData]);
-            else
-                this.refreshFeedTreeitems([aData]);
-            break;
+            case 'brief:feed-title-changed':
+                let feed = Storage.getFeed(aData);
+                if (feed.isFolder)
+                    this.refreshFolderTreeitems([aData]);
+                else
+                    this.refreshFeedTreeitems([aData]);
+                break;
 
-        case 'brief:feed-favicon-changed':
-            this._refreshFavicon(aData)
-            break;
+            case 'brief:feed-favicon-changed':
+                this._refreshFavicon(aData)
+                break;
 
-        case 'brief:feed-updated':
-            let item = getElement(aData);
-            item.removeAttribute('error');
-            item.removeAttribute('loading');
-            this._refreshFavicon(aData);
-            refreshProgressmeter();
-            break;
+            case 'brief:feed-updated':
+                let item = getElement(aData);
+                item.removeAttribute('error');
+                item.removeAttribute('loading');
+                this._refreshFavicon(aData);
+                refreshProgressmeter();
+                break;
 
-        case 'brief:feed-loading':
-            item = getElement(aData);
-            item.setAttribute('loading', true);
-            this._refreshFavicon(aData);
-            break;
+            case 'brief:feed-loading':
+                item = getElement(aData);
+                item.setAttribute('loading', true);
+                this._refreshFavicon(aData);
+                break;
 
-        case 'brief:feed-error':
-            item = getElement(aData);
-            item.setAttribute('error', true);
-            this._refreshFavicon(aData);
-            break;
+            case 'brief:feed-error':
+                item = getElement(aData);
+                item.setAttribute('error', true);
+                this._refreshFavicon(aData);
+                break;
 
-        case 'brief:feed-update-queued':
-            refreshProgressmeter();
-            break;
+            case 'brief:feed-update-queued':
+                refreshProgressmeter();
+                break;
 
-        case 'brief:feed-update-finished':
-            refreshProgressmeter(aData);
+            case 'brief:feed-update-finished':
+                refreshProgressmeter(aData);
 
-            if (aData == 'canceled') {
-                for (let feed in Storage.getAllFeeds()) {
-                    let item = getElement(feed.feedID);
-                    if (item.hasAttribute('loading')) {
-                        item.removeAttribute('loading');
-                        this._refreshFavicon(feed.feedID);
+                if (aData == 'canceled') {
+                    for (let feed in Storage.getAllFeeds()) {
+                        let item = getElement(feed.feedID);
+                        if (item.hasAttribute('loading')) {
+                            item.removeAttribute('loading');
+                            this._refreshFavicon(feed.feedID);
+                        }
                     }
                 }
-            }
-            break;
+                break;
 
-        case 'brief:custom-style-changed':
-            gCurrentView.browser.loadURI(gTemplateURI.spec);
-            break;
+            case 'brief:custom-style-changed':
+                gCurrentView.browser.loadURI(gTemplateURI.spec);
+                break;
         }
     },
 
@@ -723,6 +733,7 @@ let FeedContextMenu = {
                                                     [this.targetFeed.title]);
         if (Services.prompt.confirm(window, title, text)) {
             FeedList.removeItem(this.targetItem);
+            FeedList.ignoreInvalidateNotification = true;
 
             Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
@@ -776,6 +787,7 @@ let FolderContextMenu = {
 
         if (Services.prompt.confirm(window, title, text)) {
             FeedList.removeItem(item);
+            FeedList.ignoreInvalidateNotification = true;
 
             Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
