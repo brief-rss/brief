@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  BEGIN FLOCK GPL
+
+  Copyright Flock Inc. 2005-2008
+  http://flock.com
+
+  This file may be used under the terms of the
+  GNU General Public License Version 2 or later (the "GPL"),
+  http://www.gnu.org/licenses/gpl.html
+
+  Software distributed under the License is distributed on an "AS IS" basis,
+  WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+  for the specific language governing rights and limitations under the
+  License.
+
+  END FLOCK GPL
+-->
+<bindings id="richtree_bindings"
+          xmlns="http://www.mozilla.org/xbl"
+          xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+          xmlns:xbl="http://www.mozilla.org/xbl">
+
+<binding id="richtree">
+
+    <content>
+      <xul:vbox flex="1">
+        <xul:scrollbox anonid="outer" orient="vertical" style="overflow: auto;" class="richtree-container" flex="1">
+          <children />
+        </xul:scrollbox>
+      </xul:vbox>
+    </content>
+
+    <handlers>
+        <handler event="keypress" keycode="VK_UP" action="selectPreviousItem(); event.preventDefault();"/>
+        <handler event="keypress" keycode="VK_DOWN" action="selectNextItem(); event.preventDefault();"/>
+        <!--
+        <handler event="keypress" keycode="VK_PAGE_UP" action="scrollOnePage(-1); event.preventDefault();"/>
+        <handler event="keypress" keycode="VK_PAGE_DOWN" action="scrollOnePage(1); event.preventDefault();"/>
+        <handler event="keypress" keycode="VK_HOME" action="clearSelection(); goDown(); event.preventDefault();"/>
+        <handler event="keypress" keycode="VK_END" action="clearSelection(); goUp(); event.preventDefault();"/>
+        <handler event="keypress" keycode="VK_LEFT" action="clearSelection(); goUp(); event.preventDefault();"/>
+        <handler event="keypress" keycode="VK_RIGHT" action="clearSelection(); goUp(); event.preventDefault();"/>
+        -->
+    </handlers>
+
+    <implementation implements="nsIAccessibleProvider, nsIDOMXULSelectControlElement">
+
+        <field name="scrollBoxObject">null</field>
+        <field name="_selectedItem">null</field>
+        <field name="selectedItems">[]</field>
+
+        <constructor>
+            <![CDATA[
+            this.scrollBoxObject = this.mScrollBox.boxObject.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+            ]]>
+        </constructor>
+
+        <method name="getPreviousItem">
+            <parameter name="aItem" />
+            <body>
+                <![CDATA[
+                function getLastInFolder(folder) {
+                  if (folder.lastChild.localName.toLowerCase() == "richtreefolder" &&
+                      folder.lastChild.openState)
+                  {
+                    return getLastInFolder(folder.lastChild);
+                  } else {
+                    return folder.lastChild;
+                  }
+                }
+
+                if (aItem.previousSibling &&
+                    (aItem.previousSibling.localName.toLowerCase() == "richtreeitem" ||
+                     aItem.previousSibling.localName.toLowerCase() == "richtreefolder"))
+                {
+                  if (aItem.previousSibling.localName.toLowerCase() == "richtreefolder" &&
+                      aItem.previousSibling.openState &&
+                      aItem.previousSibling.childNodes.length > 0)
+                  {
+                    return getLastInFolder(aItem.previousSibling);
+                  } else {
+                    return aItem.previousSibling;
+                  }
+                } else {
+                  if (aItem.parentNode.localName.toLowerCase() != "richtreefolder") {
+                    return null;
+                  } else {
+                    return aItem.parentNode;
+                  }
+                }
+                ]]>
+            </body>
+        </method>
+
+        <method name="getNextItem">
+          <parameter name="aItem" />
+          <body>
+            <![CDATA[
+              function getNextInParent(parent) {
+                if (parent.localName.toLowerCase() != "richtreefolder") {
+                  return null;
+                } else {
+                  if (parent.nextSibling) {
+                    return parent.nextSibling;
+                  } else {
+                    return getNextInParent(parent.parentNode);
+                  }
+                }
+              }
+
+              if (aItem.localName.toLowerCase() == "richtreefolder" &&
+                  aItem.openState &&
+                  aItem.childNodes.length > 0)
+              {
+               return aItem.firstChild;
+              } else if (aItem.nextSibling &&
+                         (aItem.nextSibling.localName.toLowerCase() == "richtreeitem" ||
+                          aItem.nextSibling.localName.toLowerCase() == "richtreefolder"))
+              {
+                return aItem.nextSibling;
+              } else {
+                return getNextInParent(aItem.parentNode);
+              }
+            ]]>
+          </body>
+        </method>
+
+        <method name="selectPreviousItem">
+          <body>
+            <![CDATA[
+              if (this.selectedItem) {
+                var previousItem = this.getPreviousItem(this.selectedItem);
+                if (previousItem) {
+                  this.selectedItem = previousItem;
+                }
+              }
+            ]]>
+          </body>
+        </method>
+
+        <method name="selectNextItem">
+          <body>
+            <![CDATA[
+              if (this.selectedItem) {
+                var nextItem = this.getNextItem(this.selectedItem);
+                if (nextItem) {
+                  this.selectedItem = nextItem;
+                }
+              }
+            ]]>
+          </body>
+        </method>
+
+        <method name="isItemVisible">
+          <parameter name="aItem" />
+          <body>
+            <![CDATA[
+              if (!aItem)
+                return false;
+
+              var y = {};
+              this.scrollBoxObject.getPosition({}, y);
+              y.value += this.scrollBoxObject.y;
+
+              return (aItem.boxObject.y > y.value) && (aItem.boxObject.y < y.value + this.scrollBoxObject.height);
+            ]]>
+          </body>
+        </method>
+
+        <method name="getRowCount">
+          <body>
+            <![CDATA[
+              return this.children.length;
+             ]]>
+          </body>
+        </method>
+
+        <method name="getItemAtIndex">
+          <parameter name="index"/>
+          <body>
+            <![CDATA[
+              return this.children[index];
+            ]]>
+          </body>
+        </method>
+
+        <method name="removeItemAt">
+          <parameter name="index"/>
+          <body>
+          <![CDATA[
+            var remove = this.getItemAtIndex(index);
+            if (remove)
+              this.removeChild(remove);
+            return remove;
+          ]]>
+          </body>
+        </method>
+
+        <method name="setSelectedItem">
+          <parameter name="aEvent" />
+          <parameter name="aValue" />
+          <body>
+            <![CDATA[
+              this._setItemSelection(aValue);
+              if (aValue) {
+                this.fireActiveItemEvent();
+                this._fireOnSelect(aEvent);
+              }
+          ]]>
+          </body>
+        </method>
+
+        <property name="selectedItem">
+          <getter>
+            <![CDATA[
+              return this._selectedItem;
+            ]]>
+          </getter>
+          <setter>
+            <![CDATA[
+              //if (this._selectedItem == val)
+              //  return;
+
+              this._setItemSelection(val);
+
+              if (val) {
+                this.fireActiveItemEvent();
+                this._fireOnSelect();
+              }
+            ]]>
+          </setter>
+        </property>
+
+        <property name="selType" onget="return this.getAttribute('seltype')"
+          onset="this.setAttribute('seltype', val); return val;" />
+
+        <property name="selectedCount" onget="return this.selectedItems.length;" />
+
+        <property name="supportsMouseOveride"
+                  onget="return this.getAttribute('supportsmouseoveride')" />
+
+        <method name="scrollABit">
+          <!-- aDirection is 1 (up) -1 (down) -->
+          <parameter name="aDirection" />
+          <body>
+            <![CDATA[
+              var dir = parseInt(aDirection);
+              var dy = -1 * dir * 20;
+              this.scrollBoxObject.scrollBy(0, dy);
+            ]]>
+          </body>
+        </method>
+
+        <method name="clearSelection">
+          <body>
+            <![CDATA[
+              if (this.selectedItem) {
+                this.selectedItem.removeAttribute('selected');
+                // this.selectedItem.removeAttribute('dragging');
+              }
+
+              this.selectedItems.splice(0, this.selectedItems.length);
+              this.selectedItem = null;
+            ]]>
+          </body>
+        </method>
+
+        <method name="removeItemFromSelection">
+          <parameter name="item" />
+          <body>
+            <![CDATA[
+              for (var i = 0; i < this.selectedItems.length; ++i) {
+                if (this.selectedItems[i] == item) {
+                  this.selectedItems.splice(i, 1);
+                  item.selected = false;
+                  break;
+                }
+              }
+
+              this._fireOnSelect();
+            ]]>
+          </body>
+        </method>
+
+        <!-- sets selection but doesn't cause any events -->
+        <method name="_setItemSelection">
+          <parameter name="aItem" />
+          <body>
+            <![CDATA[
+              // unselect current item
+              if (this._selectedItem)
+                this._selectedItem.selected = false
+                this._selectedItem = aItem;
+                //this._selectedIndex = this.getIndexOf(aItem);
+                this.ensureElementIsVisible(aItem);
+              if (aItem) {
+                aItem.selected = true;
+                aItem.focus();
+              }
+            ]]>
+          </body>
+        </method>
+
+        <method name="addItemToSelection">
+          <parameter name="item" />
+          <body>
+            <![CDATA[
+              if (this.selType != "multiple" && this.selectedCount)
+                return;
+
+              if (item.selected)
+                return;
+
+              this.selectedItems.push(item);
+              item.selected = true;
+
+              this._fireOnSelect();
+            ]]>
+          </body>
+        </method>
+
+        <method name="setItemById">
+          <parameter name="aItemId" />
+          <body>
+            <![CDATA[
+              if (!aItemId || !aItemId.length)
+                return;
+              var item = this.mScrollBox.getElementsByAttribute('id', aItemId)[0];
+              if (item) {
+                this._setItemSelection(item);
+              }
+            ]]>
+          </body>
+        </method>
+
+        <method name="toggleItemSelection">
+          <parameter name="item" />
+          <body>
+            <![CDATA[
+              if (item.selected)
+                this.removeItemFromSelection(item);
+              else
+                this.addItemToSelection(item);
+            ]]>
+          </body>
+        </method>
+
+        <method name="selectItemRange">
+          <parameter name="item" />
+          <body>
+            <![CDATA[
+              if (!this._lastSelectedItem)
+                this.toggleItemSelection(item);
+              else {
+                // Loop on the children, status = 0;
+                // 1. The first time we hit either the currentItem or the selected item, start to add
+                //    and set status = 1
+                // 2. The second time we hit either the currentItem or the selected item, stop to add
+                //    and set status = 0
+                var children = this.childNodes;
+                var status = 0;
+                for (i = 0; i < children.length; i++) {
+                  var child = children[i];
+                  if ((child == this._lastSelectedItem) || (child == item)) {
+                    this.addItemToSelection(child);
+                    if (status == 0) {
+                      status = 1;
+                    }
+                    else {
+                      status = 0;
+                    }
+                  }
+                  else if (status == 1)
+                    this.addItemToSelection(child);
+                }
+              }
+            ]]>
+          </body>
+        </method>
+
+        <method name="_fireOnSelect">
+          <parameter name="aEvent" />
+          <body>
+            <![CDATA[
+              if (this.selectedItem)
+                this.setAttribute("last-selected", this.selectedItem.getAttribute("id"));
+              else
+                this.removeAttribute("last-selected");
+
+              if (!this.suppressOnSelect) {
+
+                // For cases that need to handle mouse clicks (left/right/middle)
+                if (this.supportsMouseOveride == "true") {
+                  var mouseButton = 1;
+                  if (aEvent.button) {
+                    mouseButton = aEvent.button;
+                  }
+
+                  // Open a new tab for a middle click, ctrlKey, or metaKey
+                  var newTabEvent = false;
+                  if (aEvent.ctrlKey || aEvent.button == 1 || aEvent.metaKey) {
+                    newTabEvent = true;
+                  }
+
+                  // Create and Dispatch a mouse event which resembles
+                  // the event created by the user.
+                  var event = document.createEvent("MouseEvents");
+                  event.initMouseEvent("mouseup", true, true, window, 0, 0, 0, 0, 0,
+                                       newTabEvent, aEvent.altKey, aEvent.shiftKey,
+                                       aEvent.metaKey, mouseButton, null);
+                  this.dispatchEvent(event);
+                } else {
+                  var event = document.createEvent("Events");
+                  event.initEvent("select", true, true);
+                  this.dispatchEvent(event);
+                }
+
+                // if we have controllers, notify the command dispatcher
+                if (this.controllers.getControllerCount() > 0)
+                  document.commandDispatcher.updateCommands("richtree-select");
+              }
+            ]]>
+          </body>
+        </method>
+
+        <method name="fireActiveItemEvent">
+          <body>
+            <![CDATA[
+              if (this.selectedItem) {
+                var event = document.createEvent("Events");
+                event.initEvent("DOMMenuItemActive", true, true);
+                this.selectedItem.dispatchEvent(event);
+              }
+              return false;
+            ]]>
+          </body>
+        </method>
+
+        <method name="ensureElementIsVisible">
+          <parameter name="aElement" />
+          <body>
+            <![CDATA[
+              if (aElement) {
+                // ensure all contained folders are visible
+                var parent = aElement.parentNode;
+                while (parent &&
+                       parent.localName.toLowerCase() == 'richtreefolder')
+                {
+                  parent.setAttribute("open", true);
+                  parent = parent.parentNode;
+                }
+                this.scrollBoxObject.ensureElementIsVisible(aElement);
+              }
+            ]]>
+          </body>
+        </method>
+
+        <property name="children" readonly="true">
+          <getter>
+            <![CDATA[
+              var childNodes = [];
+              for (var i = 0; i < this.childNodes.length; ++i) {
+                if (this.childNodes[i] instanceof Components.interfaces.nsIDOMXULSelectControlItemElement)
+                  childNodes.push(this.childNodes[i]);
+              }
+              return childNodes;
+            ]]>
+          </getter>
+        </property>
+
+        <property name="mScrollBox" readonly="true">
+          <getter>
+            <![CDATA[
+              return document.getAnonymousElementByAttribute(this, "anonid", "outer");
+            ]]>
+          </getter>
+        </property>
+    </implementation>
+
+</binding>
+
+<binding id="richtreeitem"
+         extends="chrome://global/content/bindings/general.xml#basecontrol">
+
+    <content>
+        <xul:image class="feed-icon" xbl:inherits="src=icon" />
+        <xul:label class="feed-title" flex="1" crop="end" xbl:inherits="value=title" />
+        <xul:label class="unread-count" xbl:inherits="value=unreadcount" />
+        <children />
+    </content>
+
+    <handlers>
+        <handler event="mousedown">
+            <![CDATA[
+            var parentNode = this.mParentTree;
+            if (parentNode.selType != "multiple") {
+              if ((event.target == this) && event.ctrlKey && (parentNode.selectedItem == this)) {
+                parentNode.clearSelection();
+              } else {
+                parentNode.setSelectedItem(event, this);
+              }
+            }
+            else if (event.ctrlKey) {
+              parentNode.toggleItemSelection(this);
+              parentNode.currentItem = this;
+              parentNode._lastSelectedItem = this;
+            }
+            else if (event.shiftKey) {
+              parentNode.selectItemRange(this);
+              parentNode._lastSelectedItem = this;
+            }
+            else {
+              // Only suppress the selection if the clicked item is newly selected
+              // otherwise, the selection will be suppressed onclick
+              // (so the user can drag/drop/right click)
+              if (!this.selected) {
+                var didSuppressSelect = false;
+                while (parentNode.selectedItems.length > 0) {
+                  if (!didSuppressSelect) {
+                    parentNode._suppressOnSelect = true;
+                    didSuppressSelect = true;
+                  }
+                  parentNode.removeItemFromSelection(parentNode.selectedItems[0]);
+                }
+              }
+              parentNode.addItemToSelection(this);
+              parentNode._lastSelectedItem = this;
+
+              if (didSuppressSelect) {
+                parentNode._suppressOnSelect = false;
+                parentNode._fireOnSelect();
+              }
+
+            }
+            event.stopPropagation();
+            ]]>
+        </handler>
+        <handler event="click">
+            <![CDATA[
+            // Delete the selection UNLESS it's a right click (or the mac equivalent)
+            if (event.button != 2) {
+              var parentNode = event.target.parentNode;
+              if ((parentNode.selType == "multiple") &&
+                !event.metaKey && !event.ctrlKey && !event.shiftKey) {
+                var i = 0;
+                while (parentNode.selectedItems.length > i) {
+                  if (parentNode.selectedItems[i] == this)
+                    i++
+                  else
+                    parentNode.removeItemFromSelection(parentNode.selectedItems[i]);
+                }
+              }
+            }
+            ]]>
+        </handler>
+
+    </handlers>
+
+    <implementation implements="nsIAccessibleProvider, nsIDOMXULSelectControlItemElement">
+
+        <property name="mParentTree" readonly="true">
+            <getter>
+                <![CDATA[
+                var parent = this;
+                while (1) {
+                    parent = parent.parentNode;
+                    if (parent.localName.toLowerCase() == 'richtree')
+                        break;
+                }
+                return parent;
+                ]]>
+            </getter>
+        </property>
+
+        <property name="selected" onget="return this.getAttribute('selected') == 'true';" onset="return this.setAttribute('selected',val);" />
+
+        <!-- nsIAccessibleProvider -->
+        <property name="accessible">
+            <getter>
+                <![CDATA[
+                var accService = Components.classes["@mozilla.org/accessibilityService;1"].getService(Components.interfaces.nsIAccessibilityService);
+                return accService.createXULListitemAccessible(this);
+                ]]>
+            </getter>
+        </property>
+
+        <!-- nsIDOMXULSelectControlItemElement -->
+        <property name="value" onget="return this.getAttribute('value');" onset="this.setAttribute('value', val); return val;" />
+
+    </implementation>
+
+</binding>
+
+
+<binding id="richtreefolder"
+         extends="chrome://brief/content/richtree.xml#richtreeitem">
+    <content>
+      <xul:hbox class="folder-title-container" flex="1">
+        <xul:image class="folder-twisty" onmousedown="toggleOpen(); event.stopPropagation();" />
+        <xul:label class="folder-title" flex="1" crop="end" xbl:inherits="value=title" />
+        <xul:label class="unread-count" xbl:inherits="value=unreadcount" />
+      </xul:hbox>
+      <xul:vbox class="folder-container">
+        <children />
+      </xul:vbox>
+    </content>
+
+  <implementation>
+
+    <method name="toggleOpen">
+      <body>
+        <![CDATA[
+          this.setAttribute("open", !this.openState);
+        ]]>
+      </body>
+    </method>
+
+    <property name="openState" readonly="true">
+      <getter>
+        <![CDATA[
+          var open = this.getAttribute("open");
+          if (open) {
+            if (typeof open == "string" && open == "false") {
+              return false;
+            }
+            return true;
+          }
+          return false;
+        ]]>
+      </getter>
+    </property>
+    <property name="children" readonly="true">
+      <getter>
+        <![CDATA[
+          var childNodes = [];
+          for (var i = 0; i < this.childNodes.length; ++i) {
+            if (this.childNodes[i] instanceof Components.interfaces.nsIDOMXULSelectControlItemElement)
+              childNodes.push(this.childNodes[i]);
+          }
+          return childNodes;
+        ]]>
+      </getter>
+    </property>
+
+  </implementation>
+
+</binding>
+
+</bindings>

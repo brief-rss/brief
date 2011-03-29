@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/feedview-header.css"?>
+<?xml-stylesheet href="chrome://brief/skin/feedlist.css" type="text/css"?>
 <?xml-stylesheet href="resource://profile-chrome-dir/brief-custom-style.css"?>
 
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
@@ -23,7 +24,7 @@
 
     <popupset id="main-popupset">
         <menupopup id="view-list-popup"
-                   onpopupshowing="ViewListContextMenu.init(ViewList.selectedItem)">
+                   onpopupshowing="ViewListContextMenu.init()">
             <menuitem id="ctx-mark-special-folder-read"
                       label="&ctxMarkFolderRead.label;"
                       oncommand="ViewListContextMenu.markFolderRead()"/>
@@ -44,50 +45,52 @@
                       label="&ctxEmptyTrash.label;"
                       oncommand="ViewListContextMenu.emptyTrash()"/>
         </menupopup>
-        <menupopup id="tag-list-popup"
-                   onpopupshowing="TagListContextMenu.targetItem = TagList.selectedItem">
+        <menupopup id="tag-list-popup">
             <menuitem id="ctx-mark-tag-read"
                       label="&ctxMarkTagRead.label;"
                       oncommand="TagListContextMenu.markTagRead()"/>
-            <menuseparator id="ctx-tag-list-separator"/>
+            <menuseparator/>
             <menuitem id="ctx-delete-tag"
                       label="&ctxDeleteTag.label;"
                       oncommand="TagListContextMenu.deleteTag()"/>
         </menupopup>
-        <menupopup id="feed-list-popup"
-                   onpopupshowing="FeedList.onContextMenuShowing(event)">
+        <menupopup id="feed-context-menu"
+                   onpopupshowing="FeedContextMenu.init()">
             <menuitem id="ctx-mark-feed-read"
                       label="&ctxMarkFeedRead.label;"
-                      oncommand="FeedListContextMenu.markFeedRead()"/>
-            <menuitem id="ctx-mark-folder-read"
-                      label="&ctxMarkFolderRead.label;"
-                      oncommand="FeedListContextMenu.markFolderRead()"/>
+                      oncommand="FeedContextMenu.markFeedRead()"/>
             <menuitem id="ctx-update-feed"
                       label="&ctxUpdateFeed.label;"
-                      oncommand="FeedListContextMenu.updateFeed()"/>
-            <menuitem id="ctx-update-folder"
-                      label="&ctxUpdateFolder.label;"
-                      oncommand="FeedListContextMenu.updateFolder()"/>
+                      oncommand="FeedContextMenu.updateFeed()"/>
             <menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
-                      oncommand="FeedListContextMenu.openWebsite()"/>
-            <menuseparator id="ctx-dangerous-cmds-separator"/>
+                      oncommand="FeedContextMenu.openWebsite()"/>
+            <menuseparator/>
             <menuitem id="ctx-delete-feed"
                       label="&ctxDeleteFeed.label;"
-                      oncommand="FeedListContextMenu.deleteFeed()"/>
-            <menuitem id="ctx-delete-folder"
-                      label="&ctxDeleteFolder.label;"
-                      oncommand="FeedListContextMenu.deleteFolder()"/>
+                      oncommand="FeedContextMenu.deleteFeed()"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
-                      oncommand="FeedListContextMenu.emptyFeed()"/>
-            <menuitem id="ctx-empty-folder"
-                      label="&ctxEmptyFolder.label;"
-                      oncommand="FeedListContextMenu.emptyFolder()"/>
-            <menuseparator id="ctx-properties-separator"/>
+                      oncommand="FeedContextMenu.emptyFeed()"/>
+            <menuseparator/>
             <menuitem id="ctx-feed-properties"
                       label="&ctxFeedProperties.label;"
-                      oncommand="FeedListContextMenu.showFeedProperties()"/>
+                      oncommand="FeedContextMenu.showFeedProperties()"/>
+        </menupopup>
+        <menupopup id="folder-context-menu">
+            <menuitem id="ctx-mark-folder-read"
+                      label="&ctxMarkFolderRead.label;"
+                      oncommand="FolderContextMenu.markFolderRead()"/>
+            <menuitem id="ctx-update-folder"
+                      label="&ctxUpdateFolder.label;"
+                      oncommand="FolderContextMenu.updateFolder()"/>
+            <menuseparator/>
+            <menuitem id="ctx-delete-folder"
+                      label="&ctxDeleteFolder.label;"
+                      oncommand="FolderContextMenu.deleteFolder()"/>
+            <menuitem id="ctx-empty-folder"
+                      label="&ctxEmptyFolder.label;"
+                      oncommand="FolderContextMenu.emptyFolder()"/>
         </menupopup>
     </popupset>
 
@@ -95,33 +98,25 @@
         <richlistbox id="view-list"
                      startview="all-items-folder"
                      persist="startview"
-                     suppressonselect="true"
                      context="view-list-popup"
-                     onselect="ViewList.onSelect(event)"
-                     onclick="ViewList.onClick(event)">
-            <richlistitem id="all-items-folder"
-                          class="view-list-item"
-                          name="&allItemsFolder.label;">
+                     onselect="ViewList.onSelect(event)">
+            <richlistitem id="all-items-folder">
                 <image class="view-icon"/>
-                <label value="&allItemsFolder.label;"/>
+                <label class="view-title" value="&allItemsFolder.label;"/>
             </richlistitem>
-            <richlistitem id="unread-folder"
-                          class="view-list-item"
-                          name="&unreadFolder.label;">
+            <richlistitem id="unread-folder">
                 <image class="view-icon"/>
-                <label value="&unreadFolder.label;"/>
+                <label class="view-title" flex="1" value="&unreadFolder.label;"/>
+                <label class="unread-count"/>
             </richlistitem>
-            <richlistitem id="starred-folder"
-                          class="view-list-item"
-                          name="&starredFolder.label;">
+            <richlistitem id="starred-folder">
                 <image class="view-icon"/>
-                <label value="&starredFolder.label;"/>
+                <label class="view-title" flex="1" value="&starredFolder.label;"/>
+                <label class="unread-count"/>
             </richlistitem>
-            <richlistitem id="trash-folder"
-                          class="view-list-item"
-                          name="&trashFolder.label;">
+            <richlistitem id="trash-folder">
                 <image class="view-icon"/>
-                <label value="&trashFolder.label;"/>
+                <label class="view-title" value="&trashFolder.label;"/>
             </richlistitem>
         </richlistbox>
 
@@ -151,22 +146,14 @@
             </hbox>
         </hbox>
 
-        <tree id="feed-list" flex="1"
-              hidecolumnpicker="true"
-              seltype="single"
-              contextmenu="feed-list-popup"
-              persist="closedFolders"
-              onselect="FeedList.onSelect(event)"
-              onkeyup="FeedList.onKeyUp(event)">
+        <richtree id="feed-list" flex="1"
+                  seltype="single"
+                  contextmenu="feed-list-popup"
+                  persist="closedFolders"
+                  onselect="FeedList.onSelect(event)"
+                  onkeyup="FeedList.onKeyUp(event)">
 
-            <treecols>
-                <treecol id="name" flex="1"
-                         primary="true"
-                         hideheader="true"/>
-            </treecols>
-
-            <treechildren id="top-level-children"/>
-        </tree>
+        </richtree>
     </vbox>
 
     <splitter id="sidebar-splitter"
