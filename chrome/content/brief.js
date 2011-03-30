@@ -7,8 +7,7 @@ Components.utils.import('resource://gre/modules/NetUtil.jsm');
 IMPORT_COMMON(this);
 
 
-let gTemplateURI = NetUtil.newURI('resource://brief-content/feedview.html');
-let gStringBundle;
+let gCurrentView;
 
 
 function init() {
@@ -20,8 +19,6 @@ function init() {
     getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
     refreshProgressmeter();
-
-    gStringBundle = getElement('main-bundle');
 
     document.addEventListener('keypress', onKeyPress, true);
 
@@ -288,13 +285,12 @@ function refreshProgressmeter(aReason) {
 
 function onSearchbarCommand() {
     let searchbar = getElement('searchbar');
-    if (searchbar.value) {
-        gCurrentView.titleOverride = gStringBundle.getFormattedString('searchResults',
-                                                                      [searchbar.value]);
-    }
-    else {
+    let bundle = getElement('main-bundle');
+
+    if (searchbar.value)
+        gCurrentView.titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
+    else
         gCurrentView.titleOverride = '';
-    }
 
     gCurrentView.query.searchString = searchbar.value;
     gCurrentView.refresh();

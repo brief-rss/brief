@@ -5,7 +5,7 @@ const MIN_LOADED_WINDOW_HEIGHTS = 1;
 // Number of window heights worth of entries to load when the above threshold is crossed.
 const WINDOW_HEIGHTS_LOAD = 2;
 
-// Number of window heights worth of entries to load when creating a view.
+// Number of window heights worth of entries to load initially when refreshing a view.
 const INITIAL_WINDOW_HEIGHTS_LOAD = 2;
 
 // Number of entries queried in each step until they fill the defined height.
@@ -15,15 +15,9 @@ const LOAD_STEP_SIZE = 5;
 const HEADLINES_LOAD_STEP_SIZE = 25;
 
 
-// The currently active instance of FeedView.
-let gCurrentView = null;
-
 /**
- * This object represents the main feed display. It stores and manages display parameters.
- * The feed is displayed using a local, unprivileged template page. We insert third-party
- * content in it (entries are served with full HTML markup), so the template page has to
- * be untrusted and we respect XPCNativeWrappers when interacting with it. Individual
- * entries are inserted dynamically and have their own XBL bindings.
+ * This object manages the display of feed content.
+ * The feed is displayed using a local, unprivileged template page.
  *
  * @param aTitle
  *        Title of the view which will be shown in the header.
@@ -56,31 +50,19 @@ function FeedView(aTitle, aQuery) {
 
     if (gCurrentView)
         gCurrentView.uninit();
-    else
-        var noExistingView = true;
 
     if (!this.query.searchString)
         getElement('searchbar').value = '';
 
-    this.browser.addEventListener('load', this, false);
     getTopWindow().gBrowser.tabContainer.addEventListener('TabSelect', this, false);
+
     Storage.addObserver(this);
 
-    // Load the template page if it hasn't been loaded yet. We also have to make sure to
-    // load it at startup, when no view was attached yet, because the template page
-    // may have been restored by SessionStore - before any FeedView was attached.
-    if (!this.browser.currentURI.equals(gTemplateURI) || noExistingView) {
-        this.browser.loadURI(gTemplateURI.spec);
-    }
-    else {
-        this.document.addEventListener('click', this, true);
-        this.document.addEventListener('scroll', this, true);
-        this.document.addEventListener('keypress', this, true);
+    this.document.addEventListener('click', this, true);
+    this.document.addEventListener('scroll', this, true);
+    this.document.addEventListener('keypress', this, true);
 
-        // Refresh asynchronously, because it might take a while
-        // and UI may be waiting to be redrawn.
-        async(this.refresh, 0, this);
-    }
+    this.refresh();
 }
 
 
@@ -106,13 +88,13 @@ FeedView.prototype = {
     get feedContent() this.document.getElementById('feed-content'),
 
 
-    containsEntry: function(aEntry) this._loadedEntries.indexOf(aEntry) !== -1,
-
     getEntryIndex: function(aEntry) this._loadedEntries.indexOf(aEntry),
+
+    containsEntry: function(aEntry) this.getEntryIndex(aEntry) !== -1,
 
     getEntryView: function(aEntry) this._entryViews[this.getEntryIndex(aEntry)],
 
-    get lastEntry() this._loadedEntries[this._loadedEntries.length - 1],
+    get lastLoadedEntry() this._loadedEntries[this._loadedEntries.length - 1],
 
 
     /**
@@ -205,7 +187,7 @@ FeedView.prototype = {
         let index = this.getEntryIndex(middleEntry);
 
         let doSkipDown = function(aCount) {
-            let targetEntry = this._loadedEntries[index + 10] || this.lastEntry;
+            let targetEntry = this._loadedEntries[index + 10] || this.lastLoadedEntry;
             this.selectEntry(targetEntry, true, true);
         }.bind(this);
 
@@ -316,7 +298,7 @@ FeedView.prototype = {
                 return entries[i].id;
         }
 
-        return this.lastEntry;
+        return this.lastLoadedEntry;
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
@@ -349,12 +331,8 @@ FeedView.prototype = {
     },
 
 
-    /**
-     * Deactivates the view.
-     */
     uninit: function FeedView_uninit() {
         getTopWindow().gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
-        this.browser.removeEventListener('load', this, false);
         this.window.removeEventListener('resize', this, false);
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
@@ -368,25 +346,12 @@ FeedView.prototype = {
 
 
     handleEvent: function FeedView_handleEvent(aEvent) {
-        // Checking if default action has been prevented helps Brief play nicely with
+        // Checking if default action has been prevented helps Brief play nice with
         // other extensions.
         if (aEvent.getPreventDefault())
             return;
 
         switch (aEvent.type) {
-
-            // Set up the template page when it's loaded.
-            case 'load':
-                this.document.addEventListener('click', this, true);
-                this.document.addEventListener('scroll', this, true);
-                this.document.addEventListener('keypress', this, true);
-
-                // Some feeds include scripts that use document.write() which screw
-                // us up, because we insert them dynamically after the page is loaded.
-                document.write = document.writeln = function() { };
-
-                this.refresh();
-                break;
 
             // Click listener must be attached to the document, not the entry container,
             // in order to catch middle-clicks.
@@ -536,7 +501,7 @@ FeedView.prototype = {
         }
 
         let query = this.getQueryCopy();
-        query.startDate = this.getEntryView(this.lastEntry).date;
+        query.startDate = this.getEntryView(this.lastLoadedEntry).date;
 
         this._loadedEntries = yield query.getEntries(resume);
 
@@ -621,7 +586,7 @@ FeedView.prototype = {
             this._setEmptyViewMessage();
 
             if (this._loadedEntries.length && selectedEntryIndex != -1) {
-                let newSelection = this._loadedEntries[selectedEntryIndex] || this.lastEntry;
+                let newSelection = this._loadedEntries[selectedEntryIndex] || this.lastLoadedEntry;
                 this.selectEntry(newSelection);
             }
         }
@@ -717,7 +682,7 @@ FeedView.prototype = {
     }.gen(),
 
     get lastEntryInCenter() {
-        return this.getEntryInScreenCenter() == this.lastEntry;
+        return this.getEntryInScreenCenter() == this.lastLoadedEntry;
     },
 
     get enoughEntriesPreloaded() {
@@ -745,7 +710,7 @@ FeedView.prototype = {
         let edgeDate = undefined;
 
         if (this._loadedEntries.length) {
-            let lastEntryDate = this.getEntryView(this.lastEntry).date;
+            let lastEntryDate = this.getEntryView(this.lastLoadedEntry).date;
             if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
                 edgeDate = lastEntryDate - 1;
             else
@@ -813,11 +778,13 @@ FeedView.prototype = {
 
         let feed = Storage.getFeed(this.query.feeds);
         if (feed) {
+            let securityManager = Cc['@mozilla.org/scriptsecuritymanager;1']
+                                  .getService(Ci.nsIScriptSecurityManager);
             let url = feed.websiteURL || feed.feedURL;
             let flags = Ci.nsIScriptSecurityManager.DISALLOW_INHERIT_PRINCIPAL;
             let securityCheckOK = true;
             try {
-                gSecurityManager.checkLoadURIStrWithPrincipal(gBriefPrincipal, url, flags);
+                securityManager.checkLoadURIStrWithPrincipal(gBriefPrincipal, url, flags);
             }
             catch (ex) {
                 log('Brief: security error.' + ex);
@@ -840,27 +807,28 @@ FeedView.prototype = {
             return;
         }
 
-        let mainMessage = '', secondaryMessage = '';
+        let bundle = getElement('main-bundle');
+        let mainMessage, secondaryMessage;
 
         if (this.query.searchString) {
-            mainMessage = gStringBundle.getString('noEntriesFound');
+            mainMessage = bundle.getString('noEntriesFound');
         }
         else if (this.query.read === false) {
-            mainMessage = gStringBundle.getString('noUnreadEntries');
+            mainMessage = bundle.getString('noUnreadEntries');
         }
         else if (this.query.starred === true) {
-            mainMessage = gStringBundle.getString('noStarredEntries');
-            secondaryMessage = gStringBundle.getString('noStarredEntriesAdvice');
+            mainMessage = bundle.getString('noStarredEntries');
+            secondaryMessage = bundle.getString('noStarredEntriesAdvice');
         }
         else if (this.query.deleted == Storage.ENTRY_STATE_TRASHED) {
-            mainMessage = gStringBundle.getString('trashIsEmpty');
+            mainMessage = bundle.getString('trashIsEmpty');
         }
         else {
-            mainMessage = gStringBundle.getString('noEntries');
+            mainMessage = bundle.getString('noEntries');
         }
 
-        this.document.getElementById('main-message').textContent = mainMessage;
-        this.document.getElementById('secondary-message').textContent = secondaryMessage;
+        this.document.getElementById('main-message').textContent = mainMessage || '' ;
+        this.document.getElementById('secondary-message').textContent = secondaryMessage || '';
 
         messageBox.style.display = '';
     }
@@ -908,7 +876,7 @@ function EntryView(aFeedView, aEntryData) {
     this._getElement('date').textContent = this.getDateString();
 
     if (this.updated)
-        this._getElement('updated').textContent = this._strings.entryUpdated;
+        this._getElement('updated').textContent = Strings.entryUpdated;
 
     if (this.headline) {
         this.collapse(false);
@@ -960,7 +928,7 @@ EntryView.prototype = {
 
         if (aValue) {
             this.container.classList.add('read');
-            this._getElement('mark-read-button').textContent = this._strings.markAsUnread;
+            this._getElement('mark-read-button').textContent = Strings.markAsUnread;
 
             if (this.updated) {
                 this.updated = false;
@@ -969,7 +937,7 @@ EntryView.prototype = {
         }
         else {
             this.container.classList.remove('read');
-            this._getElement('mark-read-button').textContent = this._strings.markAsRead;
+            this._getElement('mark-read-button').textContent = Strings.markAsRead;
         }
     },
 
@@ -1206,9 +1174,9 @@ EntryView.prototype = {
         let format;
 
         if (deltaDays === 0)
-            format = this._strings.today;
+            format = Strings.today;
         else if (deltaDays === 1)
-            format = this._strings.yesterday;
+            format = Strings.yesterday;
         else if (deltaDays < 7)
             format = '%A';
         else if (deltaYears < 1)
@@ -1253,17 +1221,6 @@ EntryView.prototype = {
 
                 retRange = Finder.Find(term, searchRange, startPoint, endPoint)
             }
-        }
-    },
-
-    get _strings() {
-        delete this.__proto__._strings;
-        return this.__proto__._strings = {
-            today:        gStringBundle.getString('today'),
-            yesterday:    gStringBundle.getString('yesterday'),
-            entryUpdated: gStringBundle.getString('entryWasUpdated'),
-            markAsRead:   gStringBundle.getString('markEntryAsRead'),
-            markAsUnread: gStringBundle.getString('markEntryAsUnread')
         }
     }
 
@@ -1326,6 +1283,18 @@ function showElement(aElement, aTranstionDuration, aCallback) {
 }
 
 
+__defineGetter__('Strings', function() {
+    let bundle = getElement('main-bundle');
+    delete this.Strings;
+    return this.Strings = {
+        today        : bundle.getString('today'),
+        yesterday    : bundle.getString('yesterday'),
+        entryUpdated : bundle.getString('entryWasUpdated'),
+        markAsRead   : bundle.getString('markEntryAsRead'),
+        markAsUnread : bundle.getString('markEntryAsUnread')
+    }
+})
+
 __defineGetter__('Finder', function() {
     let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
     finder.caseSensitive = false;
@@ -1334,18 +1303,14 @@ __defineGetter__('Finder', function() {
     return this.Finder = finder;
 })
 
-__defineGetter__('gSecurityManager', function() {
-    delete this.gSecurityManager;
-    return this.gSecurityManager = Cc['@mozilla.org/scriptsecuritymanager;1']
-                                   .getService(Ci.nsIScriptSecurityManager);
-})
-
 __defineGetter__('gBriefPrincipal', function() {
+    let securityManager = Cc['@mozilla.org/scriptsecuritymanager;1']
+                          .getService(Ci.nsIScriptSecurityManager);
     let uri = NetUtil.newURI(document.documentURI);
     let resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1']
                       .getService(Ci.nsIChromeRegistry)
                       .convertChromeURL(uri);
 
     delete this.gBriefPrincipal;
-    return this.gBriefPrincipal = gSecurityManager.getCodebasePrincipal(resolvedURI);
+    return this.gBriefPrincipal = securityManager.getCodebasePrincipal(resolvedURI);
 })

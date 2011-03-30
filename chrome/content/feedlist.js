@@ -21,7 +21,7 @@ let ViewList = {
         // The select event was suppressed because richlistbox initiates selection
         // during document load, before the feed view browser is ready.
         this.richlistbox.suppressOnSelect = false;
-        this.richlistbox.selectedIndex = -1;
+        this.deselect()
 
         this.refreshItem('unread-folder');
         this.refreshItem('starred-folder');
@@ -485,7 +485,9 @@ let FeedList = {
                 break;
 
             case 'brief:custom-style-changed':
-                gCurrentView.browser.loadURI(gTemplateURI.spec);
+                gCurrentView.browser.reload();
+                ViewList.deselect();
+                ViewList.selectedItem = getElement('all-items-folder');
                 break;
         }
     },
@@ -643,8 +645,9 @@ let TagListContextMenu = {
 
         let tag = TagList.selectedItem.id;
 
-        let dialogTitle = gStringBundle.getString('confirmTagDeletionTitle');
-        let dialogText = gStringBundle.getFormattedString('confirmTagDeletionText', [tag]);
+        let bundle = getElement('main-bundle');
+        let dialogTitle = bundle.getString('confirmTagDeletionTitle');
+        let dialogText = bundle.getFormattedString('confirmTagDeletionText', [tag]);
 
         if (!Services.prompt.confirm(window, dialogTitle, dialogText))
             return;
@@ -712,9 +715,10 @@ let FeedContextMenu = {
     },
 
     deleteFeed: function FeedContextMenu_deleteFeed() {
-        let title = gStringBundle.getString('confirmFeedDeletionTitle');
-        let text = gStringBundle.getFormattedString('confirmFeedDeletionText',
-                                                    [this.targetFeed.title]);
+        let bundle = getElement('main-bundle');
+        let title = bundle.getString('confirmFeedDeletionTitle');
+        let text = bundle.getFormattedString('confirmFeedDeletionText', [this.targetFeed.title]);
+
         if (Services.prompt.confirm(window, title, text)) {
             FeedList.removeItem(this.targetItem);
             FeedList.ignoreInvalidateNotification = true;
@@ -765,9 +769,9 @@ let FolderContextMenu = {
         let item = FeedList.selectedItem;
         let feed = FeedList.selectedFeed;
 
-        let title = gStringBundle.getString('confirmFolderDeletionTitle');
-        let text = gStringBundle.getFormattedString('confirmFolderDeletionText',
-                                                    [feed.title]);
+        let bundle = getElement('main-bundle');
+        let title = bundle.getString('confirmFolderDeletionTitle');
+        let text = bundle.getFormattedString('confirmFolderDeletionText', [feed.title]);
 
         if (Services.prompt.confirm(window, title, text)) {
             FeedList.removeItem(item);
