@@ -9,7 +9,7 @@
 
 <!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
 
-<prefwindow id="brief-options2"
+<prefwindow id="brief-options3"
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             title="&optionsWindow.title;"
             persist="screenX screenY width height"
