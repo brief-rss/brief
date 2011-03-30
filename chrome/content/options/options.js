@@ -8,8 +8,6 @@ IMPORT_COMMON(this);
 function init() {
     gMainPane.setUpPlacesTree();
 
-    sizeToContent();
-
     gFeedsPane.initUpdateIntervalControls();
     gFeedsPane.updateExpirationDisabledState();
     gFeedsPane.updateStoredEntriesDisabledState();
