@@ -315,15 +315,18 @@ FeedView.prototype = {
 
         let entriesToMark = [];
 
-        // Iterate starting from the last entry, because the scroll position is
-        // likely to be closer to the end than to the beginning of the page.
+        // Iterate starting from the last entry, because scroll position is
+        // likely to be closer to the end than to the beginning of the page
+        // when a lot of entries are loaded.
         for (let i = entries.length - 1; i >= 0; i--) {
-            let entryTop = entries[i].offsetTop;
-            let id = entries[i].id;
-            let wasMarkedUnread = (this._entriesMarkedUnread.indexOf(id) != -1);
+            if (this._entriesMarkedUnread.indexOf(entries[i].id) != -1)
+                continue;
 
-            if (entryTop >= winTop && entryTop < winBottom - 50 && !wasMarkedUnread)
-                entriesToMark.push(id);
+            let entryTop = entries[i].offsetTop;
+            let entryBottom = entryTop + entries[i].height;
+
+            if (entryTop >= winTop && (entryBottom < winBottom || entryTop < winBottom - 200))
+                entriesToMark.push(entries[i].id);
         }
 
         if (entriesToMark.length)
