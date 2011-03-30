@@ -174,7 +174,7 @@
               hidden="true"/>
 
     <vbox flex="1">
-        <hbox id="feed-view-header" hidden="true">
+        <hbox id="feed-view-header">
             <button id="mark-view-read"
                     class="brief-button feed-header-button"
                     tooltiptext="&markViewRead.tooltip;"
