@@ -599,7 +599,6 @@ FeedView.prototype = {
      * Refreshes the feed view. Removes the old content and builds the new one.
      */
     refresh: function FeedView_refresh() {
-        // Clean up.
         this._stopSmoothScrolling();
         clearTimeout(this._markVisibleTimeout);
         getTopWindow().StarUI.panel.hidePopup();
@@ -756,16 +755,19 @@ FeedView.prototype = {
 
         let nextEntryView = this._entryViews[aPosition];
         let nextElem = nextEntryView ? nextEntryView.container : null;
-        if (nextElem && nextElem.previousSibling.tagName == 'H1')
-            nextElem = nextElem.previousSibling;
 
-        if (this.headlinesMode && !this.document.getElementById('day' + entryView.day)) {
-            let dayHeader = this.document.createElement('H1');
-            dayHeader.id = 'day' + entryView.day;
-            dayHeader.className = 'day-header';
-            dayHeader.textContent = entryView.getDateString(true);
+        if (this.headlinesMode) {
+            if (nextElem && nextElem.previousSibling && nextElem.previousSibling.tagName == 'H1')
+                nextElem = nextElem.previousSibling;
 
-            this.feedContent.insertBefore(dayHeader, nextElem);
+            if (!this.document.getElementById('day' + entryView.day)) {
+                let dayHeader = this.document.createElement('H1');
+                dayHeader.id = 'day' + entryView.day;
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = entryView.getDateString(true);
+
+                this.feedContent.insertBefore(dayHeader, nextElem);
+            }
         }
 
         this.feedContent.insertBefore(entryView.container, nextElem);
