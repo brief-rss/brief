@@ -77,6 +77,8 @@ FeedView.prototype = {
 
     _refreshPending: false,
 
+    _allEntriesLoaded: false,
+
 
     get browser() getElement('feed-view'),
 
@@ -482,43 +484,56 @@ FeedView.prototype = {
     /**
      * Checks if given entries belong to the view and inserts them if necessary.
      *
-     * If the previously loaded entries fill the window, the added entries need to
-     * be inserted only if they have a more recent date than the last loaded
-     * entry. We can use the date of the last loaded entry as an anchor and
-     * determine the new list of entries by selecting entries with a newer date
-     * than that.
-     * However, this doesn't work if the previously loaded entries don't fill
-     * the window, in which case we must do a full refresh.
-     *
      * @param aAddedEntries
      *        Array of IDs of entries.
      */
     _onEntriesAdded: function FeedView__onEntriesAdded(aAddedEntries) {
         let resume = this._getRefreshGuard(FeedView__onEntriesAdded.resume);
 
-        let win = this.window;
-        if (win.scrollMaxY - win.pageYOffset < win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS) {
-            this.refresh()
-            return;
+        // The simplest way would be to query the current list of all entries in the view
+        // and intersect it with the list of added ones. However, this is expansive for
+        // large views and we try to avoid it.
+        //
+        // If the previously loaded entries satisfy the desired preload amount, the added
+        // entries need to be inserted only if they have a more recent date than the last
+        // loaded entry. Hence, we can use the date of the last loaded entry as an anchor
+        // and determine the current list of entries that should be loaded by selecting
+        // entries with a newer date than that anchor.
+        if (this.enoughEntriesPreloaded) {
+            let query = this.getQueryCopy();
+            query.startDate = this.getEntryView(this.lastLoadedEntry).date;
+
+            this._loadedEntries = yield query.getEntries(resume);
+
+            let newEntries = aAddedEntries.filter(this.containsEntry, this);
+            if (newEntries.length) {
+                let query = new Query({
+                    sortOrder: this.query.sortOrder,
+                    sortDirection: this.query.sortDirection,
+                    entries: newEntries
+                })
+
+                for (let entry in yield query.getFullEntries(resume))
+                    this._insertEntry(entry, this.getEntryIndex(entry.id));
+
+                this._setEmptyViewMessage();
+            }
         }
-
-        let query = this.getQueryCopy();
-        query.startDate = this.getEntryView(this.lastLoadedEntry).date;
-
-        this._loadedEntries = yield query.getEntries(resume);
-
-        let newEntries = aAddedEntries.filter(this.containsEntry, this);
-        if (newEntries.length) {
-            let query = new Query({
-                sortOrder: this.query.sortOrder,
-                sortDirection: this.query.sortDirection,
-                entries: newEntries
-            })
-
-            for (let entry in yield query.getFullEntries(resume))
-                this._insertEntry(entry, this.getEntryIndex(entry.id));
-
-            this._setEmptyViewMessage();
+        // If the previously loaded entries don't satisfy the desired preload amount,
+        // we have no anchor to use the above approach.
+        // If all entries in the view have already been loaded it means it's a very
+        // small view, so it's cheap to use the simplest solution and just query the
+        // current list of all entries.
+        // Otherwise, just blow it all away and refresh from scratch.
+        else {
+            if (this._allEntriesLoaded) {
+                let currentEntryList = yield this.query.getEntries(resume);
+                if (currentEntryList.intersect(aAddedEntries).length)
+                    this.refresh()
+            }
+            else {
+                this.refresh();
+            }
         }
     }.gen(),
 
@@ -601,6 +616,8 @@ FeedView.prototype = {
         this.viewID = Math.floor(Math.random() * 1000000);
 
         this._loading = false;
+        this._allEntriesLoaded = false;
+
         this._stopSmoothScrolling();
         getTopWindow().StarUI.panel.hidePopup();
 
@@ -668,7 +685,7 @@ FeedView.prototype = {
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
         let resume = FeedView__fillWindow.resume;
 
-        if (this._loading || this.enoughEntriesPreloaded && !this.lastEntryInCenter) {
+        if (this._loading || this._allEntriesLoaded || this.enoughEntriesPreloaded && !this.lastEntryInCenter) {
             if (aCallback)
                 aCallback();
             return;
@@ -695,7 +712,7 @@ FeedView.prototype = {
 
     /**
      * Queries and appends a requested number of entries. The actual number of loaded
-     * entries may be different. If there are many entries with the same date, we must
+     * entries may be different; if there are many entries with the same date, we must
      * make sure to load all of them in a single batch, in order to avoid loading them
      * again later.
      *
@@ -749,6 +766,7 @@ FeedView.prototype = {
         }
         else {
             this._loading = false;
+            this._allEntriesLoaded = true;
             aCallback(0);
         }
     }.gen(),
