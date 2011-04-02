@@ -14,7 +14,6 @@ const LOAD_STEP_SIZE = 5;
 // Same as above, but applies to headlines view.
 const HEADLINES_LOAD_STEP_SIZE = 25;
 
-
 /**
  * This object manages the display of feed content.
  * The feed is displayed using a local, unprivileged template page.
@@ -304,7 +303,8 @@ FeedView.prototype = {
     _autoMarkRead: function FeedView__autoMarkRead() {
         if (PrefCache.autoMarkRead && !PrefCache.showHeadlinesOnly && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
-            this._markVisibleTimeout = async(this.markVisibleEntriesRead, 1000, this);
+            let callback = this._getRefreshGuard(this.markVisibleEntriesRead);
+            this._markVisibleTimeout = async(callback, 1000, this);
         }
     },
 
@@ -344,7 +344,6 @@ FeedView.prototype = {
         Storage.removeObserver(this);
 
         this._stopSmoothScrolling();
-        clearTimeout(this._markVisibleTimeout);
     },
 
 
@@ -495,7 +494,7 @@ FeedView.prototype = {
      *        Array of IDs of entries.
      */
     _onEntriesAdded: function FeedView__onEntriesAdded(aAddedEntries) {
-        let resume = FeedView__onEntriesAdded.resume;
+        let resume = this._getRefreshGuard(FeedView__onEntriesAdded.resume);
 
         let win = this.window;
         if (win.scrollMaxY - win.pageYOffset < win.innerHeight * MIN_LOADED_WINDOW_HEIGHTS) {
@@ -565,7 +564,7 @@ FeedView.prototype = {
             let entryView = this.getEntryView(entry);
 
             entryView.remove(animate, function() {
-                let index = this._loadedEntries.indexOf(entry);
+                let index = this.getEntryIndex(entry);
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
 
@@ -599,8 +598,10 @@ FeedView.prototype = {
      * Refreshes the feed view. Removes the old content and builds the new one.
      */
     refresh: function FeedView_refresh() {
+        this.viewID = Math.floor(Math.random() * 1000000);
+
+        this._loading = false;
         this._stopSmoothScrolling();
-        clearTimeout(this._markVisibleTimeout);
         getTopWindow().StarUI.panel.hidePopup();
 
         // Manually reset the scroll position, otherwise weird stuff happens.
@@ -667,7 +668,7 @@ FeedView.prototype = {
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
         let resume = FeedView__fillWindow.resume;
 
-        if (this._loadingEntries || this.enoughEntriesPreloaded && !this.lastEntryInCenter) {
+        if (this._loading || this.enoughEntriesPreloaded && !this.lastEntryInCenter) {
             if (aCallback)
                 aCallback();
             return;
@@ -703,10 +704,9 @@ FeedView.prototype = {
      * @return The actual number of entries that were loaded.
      */
     _loadEntries: function FeedView__loadEntries(aCount, aCallback) {
-        let resume = FeedView__loadEntries.resume;
+        let resume = this._getRefreshGuard(FeedView__loadEntries.resume);
 
-        this._loadingEntries = true;
-        let loadedEntries = null;
+        this._loading = true;
 
         let dateQuery = this.getQueryCopy();
         let edgeDate = undefined;
@@ -738,16 +738,19 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            loadedEntries = yield query.getFullEntries(resume);
+            let loadedEntries = yield query.getFullEntries(resume);
             for (let entry in loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
             }
+
+            this._loading = false;
+            aCallback(loadedEntries.length);
         }
-
-        this._loadingEntries = false;
-
-        aCallback(loadedEntries ? loadedEntries.length : 0);
+        else {
+            this._loading = false;
+            aCallback(0);
+        }
     }.gen(),
 
     _insertEntry: function FeedView__insertEntry(aEntryData, aPosition) {
@@ -836,6 +839,15 @@ FeedView.prototype = {
         this.document.getElementById('secondary-message').textContent = secondaryMessage || '';
 
         messageBox.style.display = '';
+    },
+
+    _getRefreshGuard: function FeedView__getRefreshGuard(aWrappedResumeFunction) {
+        let oldViewID = this.viewID;
+
+        return function refreshGuard() {
+            if (this.viewID == oldViewID && this == gCurrentView)
+                aWrappedResumeFunction.apply(undefined, arguments);
+        }.bind(this);
     }
 
 }
@@ -1125,7 +1137,12 @@ EntryView.prototype = {
 
                     query.verifyBookmarksAndTags();
 
+                    let oldViewID = this.feedView.viewID;
+
                     query.getProperty('bookmarkID', false, function(ids) {
+                        if (this.feedView.viewID != oldViewID)
+                            return;
+
                         let anchor = this._getElement('bookmark-button');
                         getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
                     }.bind(this))
