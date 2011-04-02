@@ -3,6 +3,7 @@
 <!ENTITY unreadFolder.label "Μη αναγνωσμένα">
 <!ENTITY starredFolder.label "Σελιδοδείκτες">
 <!ENTITY trashFolder.label "Κάδος">
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Εμφάνιση μόνο επικεφαλίδων">
 <!ENTITY filterUnread.tooltip "Προβολή μόνο μη αναγνωσμένων εγγραφών">
 <!ENTITY filterStarred.tooltip "Προβολή μόνο σελιδοδεικτών">
@@ -12,6 +13,7 @@
 <!ENTITY sidebarSplitter.tooltip "Για απόκρυψη της πλευρικής στήλης, κάντε διπλό κλικ">
 <!ENTITY revealSidebar.tooltip "Εμφάνιση πλευρικής στήλης">
 <!ENTITY markViewRead.tooltip "Σημείωση όλων ως αναγνωσμένων">
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Σημείωση αρχείου ροής ως αναγνωσμένου">
 <!ENTITY ctxMarkFeedUnread.label "Σημείωση αρχείου ροής ως μη αναγνωσμένου">
 <!ENTITY ctxMarkFolderRead.label "Σημείωση καταλόγου ως αναγνωσμένου">
