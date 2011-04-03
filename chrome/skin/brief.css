@@ -188,6 +188,10 @@ page {
     outline: none;
 }
 
-.tag-list-item[unread] {
-    font-weight: bold;
+.tag-list-item .listcell-icon {
+    list-style-image: url(chrome://brief/skin/icons/tag.png);
+}
+
+.tag-list-item:not(.unread) > .unread-count {
+    display: none;
 }
