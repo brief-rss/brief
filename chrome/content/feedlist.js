@@ -191,14 +191,18 @@ let TagList = {
 
         this.tags = yield Storage.getAllTags(TagList__rebuild.resume);
 
-        for (let i = 0; i < this.tags.length; i++) {
+        for (let tagName in this.tags) {
             let item = document.createElement('listitem');
-            item.id = this.tags[i];
+            item.id = tagName;
             item.className = 'listitem-iconic tag-list-item';
-            item.setAttribute('image', 'chrome://brief/skin/icons/tag.png');
+            item.setAttribute('label', tagName);
             this._listbox.appendChild(item);
 
-            this._refreshLabel(this.tags[i]);
+            let unreadCount = document.createElement('label');
+            unreadCount.className = 'unread-count';
+            item.appendChild(unreadCount);
+
+            this._refreshLabel(tagName);
         }
 
         this.ready = true;
@@ -213,16 +217,12 @@ let TagList = {
 
         query.getEntryCount(function(unreadCount) {
             let listitem = getElement(aTagName);
-            let name = aTagName;
-            if (unreadCount > 0) {
-                name += ' (' + unreadCount +')';
-                listitem.setAttribute('unread', true);
-            }
-            else {
-                listitem.removeAttribute('unread');
-            }
+            listitem.lastChild.value = unreadCount;
 
-            listitem.setAttribute('label', name);
+            if (unreadCount > 0)
+                listitem.classList.add('unread');
+            else
+                listitem.classList.remove('unread');
         })
     }
 
