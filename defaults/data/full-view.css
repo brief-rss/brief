@@ -57,7 +57,7 @@ article.read .title-link {
     text-decoration: none;
 }
 
-.full-container .controls {
+.full-container > .header > .controls {
     margin: -2px 0 0 5px;
 }
 

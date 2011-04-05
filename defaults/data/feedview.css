@@ -99,54 +99,59 @@ pre, code {
     -moz-box-align: center;
 }
 
-.controls > * {
+.button {
     display: -moz-box;
 }
 
+.button:hover {
+    background-position: 0 -25px;
+}
+
+.button:active {
+    background-position: 0 -50px;
+}
+
 .mark-read-button {
-    -moz-box-align: center;
-    -moz-box-pack: center;
+    width: 47px;
     height: 25px;
-    min-width: 84px;
-    margin-right: 3px;
-    border-width: 0 7px;
-    -moz-border-image: url(chrome://brief/skin/mark-read-button-normal.png) 0 6 stretch;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    color: #326585;
-    cursor: default;
-    -moz-user-select: none;
+    background-image: url(chrome://brief/skin/mark-read-button.png);
 }
 
-.mark-read-button:hover {
-    -moz-border-image: url(chrome://brief/skin/mark-read-button-hover.png) 0 6 stretch;
+.mark-read-button:hover + .delete-button,
+.mark-read-button:hover + .restore-button {
+    border-left-color: #4f7ac4;
 }
 
-.mark-read-button:active {
-    -moz-border-image: url(chrome://brief/skin/mark-read-button-active.png) 0 6 stretch;
+body.trash-folder .delete-button {
+    display: none;
 }
 
-.delete-button, .restore-button {
-    width: 29px;
+body:not(.trash-folder) .restore-button {
+    display: none;
+}
+
+.delete-button,
+.restore-button {
+    width: 30px;
     height: 25px;
 }
 
 .delete-button {
+    border-left: 1px solid #99a7bf;
     background-image: url(chrome://brief/skin/delete-button.png);
 }
 
+.delete-button:hover {
+    border-left-color: #cc6565;
+}
+
 .restore-button {
+    border-left: 1px solid #99a7bf;
     background-image: url(chrome://brief/skin/restore-button.png);
 }
 
-.delete-button:hover,
 .restore-button:hover {
-    background-position: 0 -25px;
-}
-
-.delete-button:active,
-.restore-button:active {
-    background-position: 0 -50px;
+    border-left-color: #63b236;
 }
 
 .bookmark-button {

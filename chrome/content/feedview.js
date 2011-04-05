@@ -615,8 +615,15 @@ FeedView.prototype = {
     refresh: function FeedView_refresh() {
         this.viewID = Math.floor(Math.random() * 1000000);
 
+        // Reset view state.
         this._loading = false;
         this._allEntriesLoaded = false;
+        this._loadedEntries = [];
+        this._entryViews = [];
+
+        this.document.body.classList.remove('trash-folder');
+        this.document.body.classList.remove('headlines-mode');
+        this.document.body.classList.remove('multiple-feeds');
 
         this._stopSmoothScrolling();
         getTopWindow().StarUI.panel.hidePopup();
@@ -627,9 +634,7 @@ FeedView.prototype = {
             this._ignoreNextScrollEvent = true;
         }
 
-        // Clear the old entries.
-        this._loadedEntries = [];
-        this._entryViews = [];
+        // Clear DOM content.
         this.document.body.removeChild(this.feedContent);
         let content = this.document.createElement('div');
         content.id = 'feed-content';
@@ -644,13 +649,12 @@ FeedView.prototype = {
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');
-        else
-            this.document.body.classList.remove('multiple-feeds');
 
         if (this.headlinesMode)
             this.document.body.classList.add('headlines-mode');
-        else
-            this.document.body.classList.remove('headlines-mode');
+
+        if (this.query.deleted == Storage.ENTRY_STATE_TRASHED)
+            this.document.body.classList.add('trash-folder');
 
         // Temporarily remove the listener because reading window.innerHeight
         // can trigger a resize event (!?).
@@ -891,20 +895,14 @@ function EntryView(aFeedView, aEntryData) {
     this.starred = aEntryData.starred;
     this.tags = aEntryData.tags ? aEntryData.tags.split(', ') : [];
 
-    let feed = Storage.getFeed(aEntryData.feedID);
-
-    let controls = this._getElement('controls');
-    if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED)
-        controls.removeChild(this._getElement('delete-button'));
-    else
-        controls.removeChild(this._getElement('restore-button'));
-
     let titleElem = this._getElement('title-link');
     if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
 
     // Use innerHTML instead of textContent to resolve entities.
     titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
+
+    let feed = Storage.getFeed(aEntryData.feedID);
 
     this._getElement('feed-name').innerHTML = feed.title;
     this._getElement('authors').innerHTML = aEntryData.authors;
@@ -963,7 +961,6 @@ EntryView.prototype = {
 
         if (aValue) {
             this.container.classList.add('read');
-            this._getElement('mark-read-button').textContent = Strings.markAsUnread;
 
             if (this.updated) {
                 this.updated = false;
@@ -972,7 +969,6 @@ EntryView.prototype = {
         }
         else {
             this.container.classList.remove('read');
-            this._getElement('mark-read-button').textContent = Strings.markAsRead;
         }
     },
 
@@ -1062,9 +1058,6 @@ EntryView.prototype = {
 
         this.container.classList.add('collapsed');
 
-        let controls = this._getElement('controls');
-        this._getElement('headline-container').appendChild(controls);
-
         this.__collapsed = true;
     },
 
@@ -1073,9 +1066,6 @@ EntryView.prototype = {
             return;
 
         this.container.classList.remove('collapsed');
-
-        let controls = this._getElement('controls');
-        this._getElement('header').appendChild(controls);
 
         hideElement(this._getElement('headline-container'));
 
