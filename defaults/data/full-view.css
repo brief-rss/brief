@@ -57,7 +57,7 @@ article.read .title-link {
     text-decoration: none;
 }
 
-.full-container > .header > .controls {
+.controls {
     margin: -2px 0 0 5px;
 }
 
@@ -73,6 +73,7 @@ article.read .title-link {
     width: -moz-available;
     margin: 5px 10px 5px 40px;
     font-size: 12px;
+    font-family: Arial, sans-serif;
     line-height: 17px; /* Make the height the same for both Lucida and Verdana */
     color: #2a7d00;
 }

@@ -18,12 +18,13 @@ body {
 #message-box {
     -moz-user-select: none;
     padding: 0 15px;
+    font-family: Arial, sans-serif;
 }
 
 #main-message {
     margin-top: 200px;
     text-align: center;
-    font-size: 19px;
+    font-size: 24px;
     color: #274b5d;
 }
 
@@ -31,7 +32,7 @@ body {
     margin: 75px auto 0;
     max-width: 500px;
     text-align: center;
-    font-size: 14px;
+    font-size: 16px;
     color: #4b606c;
 }
 
