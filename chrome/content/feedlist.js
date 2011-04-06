@@ -38,7 +38,7 @@ let ViewList = {
         TagList.deselect();
         FeedList.deselect();
 
-        let title = this.selectedItem.lastChild.value;
+        let title = this.selectedItem.getElementsByClassName('view-title')[0].value;
         let query = new Query();
 
         switch (this.selectedItem.id) {
