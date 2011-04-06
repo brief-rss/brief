@@ -14,7 +14,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 14;
+const DATABASE_VERSION = 15;
 
 const FEEDS_TABLE_SCHEMA = [
     'feedID          TEXT UNIQUE',
@@ -327,8 +327,14 @@ let StorageInternal = {
             case 11:
                 Connection.executeSQL('ANALYZE');
 
+            // These were for one-time fixes on 1.5 branch.
             case 12:
+            case 13:
+
+            // To 1.6.
+            case 14:
                 Connection.executeSQL('PRAGMA journal_mode=WAL');
+
         }
 
         Connection.schemaVersion = DATABASE_VERSION;
@@ -801,6 +807,11 @@ FeedProcessor.prototype = {
         let insertedEntries = [];
 
         if (this.insertEntry.paramSets.length) {
+            if (this.insertEntry.paramSets.length != this.insertEntryText.paramSets.length) {
+                this.callback(0);
+                throw new Error('Mismatched parameteres between insertEntry and insertEntryText statements.');
+            }
+
             Stm.getLastRowids.params.count = this.insertEntry.paramSets.length;
             let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
 
