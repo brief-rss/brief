@@ -578,7 +578,7 @@ FeedView.prototype = {
 
             let entryView = this.getEntryView(entry);
 
-            entryView.remove(animate, function() {
+            entryView.remove(animate, this._getRefreshGuard(function() {
                 let index = this.getEntryIndex(entry);
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
@@ -589,14 +589,13 @@ FeedView.prototype = {
                         this.feedContent.removeChild(dayHeader);
                 }
 
-                // XXX What if the view was refreshed in the meantime?
                 if (++removedCount == indices.length) {
                     if (aLoadNewEntries)
                         this._fillWindow(WINDOW_HEIGHTS_LOAD, afterEntriesRemoved.bind(this));
                     else
                         afterEntriesRemoved.call(this);
                 }
-            }.bind(this))
+            }.bind(this)))
         }
 
         function afterEntriesRemoved() {
