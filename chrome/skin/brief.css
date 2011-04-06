@@ -1,5 +1,5 @@
 /* Reset these properties on everything but context menu popups */
-page, deck, richlistbox, richlistitem, button, progressmeter,
+page, deck, hbox, vbox, image, richlistbox, richlistitem, button, progressmeter,
 progressmeter *, textbox, splitter, browser, listbox, listitem {
     -moz-appearance: none;
     height: auto !important;
