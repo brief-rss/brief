@@ -6,9 +6,21 @@ body.headlines-mode > #feed-content {
 }
 
 body.headlines-mode.multiple-feeds > #feed-content {
-    max-width: 834px;
+    max-width: 793px;
 }
 
+body:not(.multiple-feeds) article.headline:not(.collapsed) {
+    margin-left: -40px;
+}
+
+article.headline > .full-container {
+    max-width: 700px;
+    margin-left: -5px;
+}
+
+article.headline.selected > .full-container {
+    margin-left: 0;
+}
 
 .day-header {
     padding: 20px 0 5px; /* Use padding to avoid margin collapsing */
@@ -111,21 +123,6 @@ article.read .headline-title {
     visibility: visible;
 }
 
-
-body:not(.multiple-feeds) article.headline:not(.collapsed) {
-    margin-left: -50px;
-}
-
-
-article.headline > .full-container {
-    max-width: 700px;
-    margin-left: -5px;
-}
-
 article.headline > .full-container[showing] {
     -moz-transition-duration: 250ms;
-}
-
-article.headline.selected > .full-container {
-    margin-left: 0;
 }
