@@ -124,6 +124,14 @@ const Brief = {
             let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
             label.value = this.toolbarbutton.label;
         }
+        else if (!this.prefs.getBoolPref('firefox4ToolbarbuttonMigrated')) {
+            let navbar = document.getElementById('nav-bar');
+            navbar.insertItem('brief-button', null, null, false);
+            navbar.setAttribute('currentset', navbar.currentSet);
+            document.persist('nav-bar', 'currentset');
+        }
+
+        this.prefs.setBoolPref('firefox4ToolbarbuttonMigrated', true);
 
         this.updateStatus();
 
@@ -288,17 +296,18 @@ const Brief = {
                                               bookmarks.DEFAULT_INDEX);
         this.prefs.setIntPref('homeFolder', folderID);
 
-        // Load the first run page.
-        setTimeout(function() {
-            gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, { relatedToCurrent: false,
-                                                            inBackground: false      })
-        }, 0)
-
         this.prefs.setBoolPref('firstRun', false);
+        this.prefs.setBoolPref('firefox4ToolbarbuttonMigrated', true);
 
         AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
-            this.prefs.setCharPref('lastVersion', addon.version);
-        }.bind(this))
+            Brief.prefs.setCharPref('lastVersion', addon.version);
+        })
+
+        // Load the first run page.
+        setTimeout(function() {
+            let parameters = { relatedToCurrent: false, inBackground: false };
+            gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, parameters)
+        }, 0)
     }
 
 }
