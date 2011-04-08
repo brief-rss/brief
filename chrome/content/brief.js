@@ -249,7 +249,7 @@ let Commands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        let height = Math.min(window.screen.availHeight, 610);
+        let height = Math.min(window.screen.availHeight, 620);
         let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
         let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
