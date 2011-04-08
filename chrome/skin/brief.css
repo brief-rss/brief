@@ -180,16 +180,13 @@ page {
     padding: 2px 3px !important;
     font-size: 13px !important;
     color: #000000 !important;
+    list-style-image: url(chrome://brief/skin/icons/tag.png);
 }
 
 .tag-list-item[selected="true"] {
     background-color: #d5ecfd !important;
     color: #00344f !important;
     outline: none;
-}
-
-.tag-list-item .listcell-icon {
-    list-style-image: url(chrome://brief/skin/icons/tag.png);
 }
 
 .tag-list-item:not(.unread) > .unread-count {
