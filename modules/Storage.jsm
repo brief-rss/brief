@@ -1487,26 +1487,26 @@ let BookmarkObserver = {
 
 
     // nsINavBookmarkObserver
-    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved(aItemID, aItemType) {},
-
-    // nsINavBookmarkObserver
-    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType) {
+    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved(aItemID, aItemType) {
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
         }
 
+        let folderID = Bookmarks.getFolderIdForItem(aItemID);
+
         // Only care about plain bookmarks and tags.
-        if (Utils.isLivemark(aFolder) || aItemType != Bookmarks.TYPE_BOOKMARK)
+        if (aItemType != Bookmarks.TYPE_BOOKMARK || Utils.isLivemark(folderID))
             return;
 
-        let isTag = Utils.isTagFolder(aFolder);
+        let isTag = Utils.isTagFolder(folderID);
 
         if (isTag) {
-            let tagName = Bookmarks.getItemTitle(aFolder);
+            let tagURL = Bookmarks.getBookmarkURI(aItemID).spec;
+            let tagName = Bookmarks.getItemTitle(folderID);
 
-            Utils.getEntriesByTagName(tagName, function(aEntries) {
-                for (let entry in aEntries)
+            Utils.getEntriesByURL(tagURL, function(entries) {
+                for (let entry in entries)
                     StorageInternal.tagEntry(false, entry, tagName);
             })
         }
@@ -1531,6 +1531,9 @@ let BookmarkObserver = {
             })
         }
     },
+
+    // nsINavBookmarkObserver
+    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType) { },
 
     // nsINavBookmarkObserver
     onItemMoved: function BookmarkObserver_onItemMoved(aItemID, aOldParent, aOldIndex,
