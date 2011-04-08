@@ -198,9 +198,12 @@ let TagList = {
             item.setAttribute('label', tagName);
             this._listbox.appendChild(item);
 
-            let unreadCount = document.createElement('label');
-            unreadCount.className = 'unread-count';
-            item.appendChild(unreadCount);
+            let cell = document.getAnonymousElementByAttribute(item, 'class', 'listcell-iconic');
+
+            let unreadCountLabel = document.createElement('label');
+            unreadCountLabel.className = 'unread-count';
+            item.unreadCountLabel = unreadCountLabel;
+            cell.appendChild(unreadCountLabel);
 
             this._refreshLabel(tagName);
         }
@@ -217,7 +220,8 @@ let TagList = {
 
         query.getEntryCount(function(unreadCount) {
             let listitem = getElement(aTagName);
-            listitem.lastChild.value = unreadCount;
+
+            listitem.unreadCountLabel.value = unreadCount;
 
             if (unreadCount > 0)
                 listitem.classList.add('unread');
