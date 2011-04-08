@@ -167,8 +167,7 @@
              hidden="true"
              persist="width"
              context="tag-list-popup"
-             onselect="TagList.onSelect(event)"
-             onclick="TagList.onClick(event)"/>
+             onselect="TagList.onSelect(event)"/>
 
     <splitter id="tag-list-splitter"
               hidden="true"/>
