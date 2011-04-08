@@ -1,0 +1,128 @@
+body.headlines-mode > #feed-content {
+    min-width: 500px;
+    max-width: 693px;
+    margin: 0 auto;
+    padding-left: 60px;
+}
+
+body.headlines-mode.multiple-feeds > #feed-content {
+    max-width: 793px;
+}
+
+body:not(.multiple-feeds) article.headline:not(.collapsed) {
+    margin-left: -40px;
+}
+
+article.headline > .full-container {
+    max-width: 700px;
+    margin-left: -5px;
+}
+
+article.headline.selected > .full-container {
+    margin-left: 0;
+}
+
+.day-header {
+    padding: 20px 0 5px; /* Use padding to avoid margin collapsing */
+    margin-left: -40px;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #5e9c3e;
+}
+
+.headline-container {
+    display: -moz-box;
+    width: -moz-available;
+    height: 34px;
+    cursor: default;
+}
+
+.headline-header {
+    display: -moz-box;
+    -moz-box-flex: 1;
+    -moz-box-align: center;
+    padding-left: 5px;
+    border-bottom: 1px solid #D4DEE6;
+}
+
+article.selected .headline-header {
+    background-color: #ecf7ff;
+}
+
+article.selected:not(:hover) .headline-header,
+article.was-selected:not(:hover) .headline-header {
+    -moz-transition: background-color 500ms;
+}
+
+.headline-container:hover > .headline-header {
+    background-color: #DEF2FF;
+}
+
+.feed-icon {
+    display: -moz-box;
+    margin: 0 5px 0 0;
+    opacity: 0.6;
+}
+
+.headline-feed-name {
+    display: -moz-box;
+    margin-right: 35px;
+    width: 100px;
+    overflow: hidden;
+    font-size: 10px;
+    color: #808080;
+}
+
+body:not(.multiple-feeds) .feed-icon,
+body:not(.multiple-feeds) .headline-feed-name {
+    display: none;
+}
+
+.headline-link {
+    display: -moz-box;
+    margin-top: 2px;
+    width: 30px;
+    height: 30px;
+    background: url(chrome://brief/skin/icons/entry-arrow.png) no-repeat 3px 0;
+}
+
+.headline-link:hover {
+    background-position: 3px -30px;
+}
+
+.headline-link:active {
+    background-position: 3px -60px;
+}
+
+.headline-link:not([href]) {
+    visibility: hidden;
+}
+
+.headline-title {
+    display: -moz-box;
+    -moz-box-flex: 1;
+    overflow: hidden;
+    font-weight: bold;
+    font-size: 13px;
+    line-height: 20px;
+    color: #26547f;
+}
+
+article.read .headline-title {
+    font-weight: normal;
+}
+
+
+.headline-container > .controls {
+    margin-left: 8px;
+    margin-right: 6px;
+    visibility: hidden;
+}
+
+.headline-container:hover > .controls {
+    visibility: visible;
+}
+
+article.headline > .full-container[showing] {
+    -moz-transition-duration: 250ms;
+}
