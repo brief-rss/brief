@@ -11,8 +11,8 @@
 <!ENTITY openEntry "Abrir el elemento actual">
 <!ENTITY showItem "Conmutar la visibilidad del elemento actual (en la vista de titulares)">
 <!ENTITY entries.header "Elementos">
-<!ENTITY tab.key "Pestaña">
-<!ENTITY enableEntryHightlight "Habilitar el resaltado del elemento actual">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Conmutar el resaltado del elemento actual">
 <!ENTITY markCurrentItemRead "Marcar el elemento actual como leído o no leído">
 <!ENTITY markVisibleRead "Marcar todos los elementos en pantalla como leídos">
 <!ENTITY altN.key "Alt + N">
@@ -29,4 +29,4 @@
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
 <!ENTITY openBrief "Abrir Brief">
 <!ENTITY focusSearchbar "Activar la casilla de búsqueda">
-<!ENTITY displayShortcuts "Mostrar la lista de atajos de teclado">
+<!ENTITY displayShortcuts "Mostrar esta lista de atajos de teclado">

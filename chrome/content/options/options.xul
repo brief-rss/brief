@@ -9,7 +9,7 @@
 
 <!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
 
-<prefwindow id="brief-options2"
+<prefwindow id="brief-options3"
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             title="&optionsWindow.title;"
             persist="screenX screenY width height"
@@ -31,9 +31,6 @@
                         type="int"/>
             <preference id="extensions.brief.update.enableAutoUpdate"
                         name="extensions.brief.update.enableAutoUpdate"
-                        type="bool"/>
-            <preference id="extensions.brief.feedview.openEntriesInTabs"
-                        name="extensions.brief.feedview.openEntriesInTabs"
                         type="bool"/>
             <preference id="extensions.brief.database.expireEntries"
                         name="extensions.brief.database.expireEntries"
@@ -58,9 +55,6 @@
                         type="bool"/>
             <preference id="extensions.brief.showUnreadCounter"
                         name="extensions.brief.showUnreadCounter"
-                        type="bool"/>
-            <preference id="extensions.brief.feedview.entrySelectionEnabled"
-                        name="extensions.brief.feedview.entrySelectionEnabled"
                         type="bool"/>
         </preferences>
 
@@ -94,9 +88,6 @@
                       label="&showUnreadCounter.label;"
                       accesskey="&showUnreadCounter.accesskey;"
                       preference="extensions.brief.showUnreadCounter"/>
-            <checkbox label="&openEntriesInTabs.label;"
-                      accesskey="&openEntriesInTabs.accesskey;"
-                      preference="extensions.brief.feedview.openEntriesInTabs"/>
             <checkbox label="&autoMarkRead.label;"
                       accesskey="&autoMarkRead.accesskey;"
                       preference="extensions.brief.feedview.autoMarkRead"/>
@@ -104,10 +95,6 @@
                       label="&sortUnreadViewOldestFirst.label;"
                       accesskey="&sortUnreadViewOldestFirst.accesskey;"
                       preference="extensions.brief.feedview.sortUnreadViewOldestFirst"/>
-            <checkbox id="enable-item-selection-checkbox"
-                      label="&enableItemHightlight.label;"
-                      accesskey="&enableItemHightlight.accesskey;"
-                      preference="extensions.brief.feedview.entrySelectionEnabled"/>
         </groupbox>
 
         <groupbox>

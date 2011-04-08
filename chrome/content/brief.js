@@ -7,8 +7,7 @@ Components.utils.import('resource://gre/modules/NetUtil.jsm');
 IMPORT_COMMON(this);
 
 
-let gTemplateURI = NetUtil.newURI('resource://brief-content/feedview-template.html');
-let gStringBundle;
+let gCurrentView;
 
 
 function init() {
@@ -21,16 +20,7 @@ function init() {
 
     refreshProgressmeter();
 
-    gStringBundle = getElement('main-bundle');
-
     document.addEventListener('keypress', onKeyPress, true);
-
-    // This listener has to use capturing, because it handles persisting of open/collapsed
-    // folder state. If the tree is scrolled as a result of collapsing a folder, we can
-    // no longer find the target of the click event, because event.clientY points to
-    // where it used to be before scrolling occurred. Therefore, we have to catch the
-    // click event before the folder is actually collapsed.
-    FeedList.tree.addEventListener('click', FeedList.onClick, true);
 
     Services.obs.addObserver(FeedList, 'brief:feed-update-queued', false);
     Services.obs.addObserver(FeedList, 'brief:feed-update-finished', false);
@@ -45,20 +35,8 @@ function init() {
 
     ViewList.init();
 
-    // Load feed view.
     let startView = getElement('view-list').getAttribute('startview');
-    let name = getElement(startView).getAttribute('name');
-
-    let query = new Query({
-        deleted: Storage.ENTRY_STATE_NORMAL,
-        read: startView == 'unread-folder' ? false : undefined
-    })
-
-    gCurrentView = new FeedView(name, query);
-
-    ViewList.richlistbox.suppressOnSelect = true;
     ViewList.selectedItem = getElement(startView);
-    ViewList.richlistbox.suppressOnSelect = false;
 
     async(FeedList.rebuild, 0, FeedList);
     async(Storage.syncWithLivemarks, 1000, Storage);
@@ -70,6 +48,8 @@ function unload() {
     let id = viewList.selectedItem && viewList.selectedItem.id;
     let startView = (id == 'unread-folder') ? 'unread-folder' : 'all-items-folder';
     viewList.setAttribute('startview', startView);
+
+    FeedList.persistFolderState();
 
     Services.obs.removeObserver(FeedList, 'brief:feed-updated');
     Services.obs.removeObserver(FeedList, 'brief:feed-loading');
@@ -195,23 +175,16 @@ let Commands = {
         getElement('searchbar').focus();
     },
 
-    toggleEntrySelection: function toggleEntrySelection() {
-        let oldValue = PrefCache.entrySelectionEnabled;
-        Prefs.setBoolPref('feedview.entrySelectionEnabled', !oldValue);
-    },
-
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
-        if (gCurrentView.selectedEntry) {
-            let newState = !gCurrentView.selectedElement.hasAttribute('read');
-            Commands.markEntryRead(gCurrentView.selectedEntry, newState);
+        let entry = gCurrentView.selectedEntry;
+        if (entry) {
+            let newState = !gCurrentView.getEntryView(entry).read;
+            Commands.markEntryRead(entry, newState);
         }
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
         new Query(aEntry).markEntriesRead(aNewState);
-
-        if (PrefCache.autoMarkRead && !aNewState)
-            gCurrentView.entriesMarkedUnread.push(aEntry);
     },
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
@@ -232,9 +205,10 @@ let Commands = {
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
-        if (gCurrentView.selectedEntry) {
-            let newState = !gCurrentView.selectedElement.hasAttribute('starred');
-            Commands.starEntry(gCurrentView.selectedEntry, newState);
+        let entry = gCurrentView.selectedEntry;
+        if (entry) {
+            let newState = !gCurrentView.getEntryView(entry).starred;
+            Commands.starEntry(entry, newState);
         }
     },
 
@@ -243,43 +217,39 @@ let Commands = {
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
-        if (gCurrentView.selectedEntry && PrefCache.showHeadlinesOnly) {
-            if (gCurrentView.selectedElement.hasAttribute('collapsed'))
-                gCurrentView.uncollapseEntry(gCurrentView.selectedEntry, true);
-            else
-                gCurrentView.collapseEntry(gCurrentView.selectedEntry, true);
-        }
+        if (!PrefCache.showHeadlinesOnly || !gCurrentView.selectedEntry)
+            return;
+
+        let entryView = gCurrentView.getEntryView(gCurrentView.selectedEntry);
+        if (entryView.collapsed)
+            entryView.expand(true);
+        else
+            entryView.collapse(true);
     },
 
 
     openSelectedEntryLink: function cmd_openSelectedEntryLink() {
-        if (gCurrentView.selectedEntry) {
-            let newTab = Prefs.getBoolPref('feedview.openEntriesInTabs');
-            Commands.openEntryLink(gCurrentView.selectedElement, newTab);
-        }
+        if (!gCurrentView.selectedEntry)
+            return;
+
+        Commands.openEntryLink(gCurrentView.selectedEntry);
     },
 
-    openEntryLink: function cmd_openEntryLink(aEntryElement, aNewTab) {
-        let url = aEntryElement.getAttribute('entryURL');
-        Commands.openLink(url, aNewTab);
+    openEntryLink: function cmd_openEntryLink(aEntry) {
+        let entryView = gCurrentView.getEntryView(aEntry);
+        Commands.openLink(entryView.entryURL);
 
-        if (!aEntryElement.hasAttribute('read')) {
-            let entryID = parseInt(aEntryElement.id);
-            new Query(entryID).markEntriesRead(true);
-        }
+        if (!entryView.read)
+            new Query(aEntry).markEntriesRead(true);
     },
 
-    openLink: function cmd_openLink(aURL, aNewTab) {
+    openLink: function cmd_openLink(aURL) {
         let docURI = NetUtil.newURI(document.documentURI);
-
-        if (aNewTab)
-            getTopWindow().gBrowser.loadOneTab(aURL, docURI);
-        else
-            gCurrentView.browser.loadURI(aURL);
+        getTopWindow().gBrowser.loadOneTab(aURL, docURI);
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        let height = Math.min(window.screen.availHeight, 610);
+        let height = Math.min(window.screen.availHeight, 620);
         let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
         let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
@@ -315,13 +285,12 @@ function refreshProgressmeter(aReason) {
 
 function onSearchbarCommand() {
     let searchbar = getElement('searchbar');
-    if (searchbar.value) {
-        gCurrentView.titleOverride = gStringBundle.getFormattedString('searchResults',
-                                                                      [searchbar.value]);
-    }
-    else {
+    let bundle = getElement('main-bundle');
+
+    if (searchbar.value)
+        gCurrentView.titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
+    else
         gCurrentView.titleOverride = '';
-    }
 
     gCurrentView.query.searchString = searchbar.value;
     gCurrentView.refresh();
@@ -352,16 +321,10 @@ function onKeyPress(aEvent) {
 
     if (Prefs.getBoolPref('assumeStandardKeys') && aEvent.charCode == aEvent.DOM_VK_SPACE) {
         if (aEvent.shiftKey) {
-            if (PrefCache.entrySelectionEnabled)
-                gCurrentView.selectPrevEntry();
-            else
-                gCurrentView.scrollToPrevEntry(true);
+            gCurrentView.selectPrevEntry();
         }
         else {
-            if (PrefCache.entrySelectionEnabled)
-                gCurrentView.selectNextEntry();
-            else
-                gCurrentView.scrollToNextEntry(true);
+            gCurrentView.selectNextEntry();
         }
 
         aEvent.preventDefault();
@@ -409,7 +372,6 @@ let PrefObserver = {
     _cachedPrefs: {
         doubleClickMarks:          'feedview.doubleClickMarks',
         showHeadlinesOnly:         'feedview.showHeadlinesOnly',
-        entrySelectionEnabled:     'feedview.entrySelectionEnabled',
         autoMarkRead:              'feedview.autoMarkRead',
         filterUnread:              'feedview.filterUnread',
         filterStarred:             'feedview.filterStarred',
@@ -453,15 +415,8 @@ let PrefObserver = {
                     gCurrentView.refresh();
                 break;
 
-            case 'feedview.entrySelectionEnabled':
-                if (PrefCache.entrySelectionEnabled)
-                    gCurrentView.selectEntry(gCurrentView._getMiddleEntryElement());
-                else
-                    gCurrentView.selectEntry(null);
-                break;
-
             case 'feedview.showHeadlinesOnly':
-                gCurrentView.toggleHeadlinesView();
+                gCurrentView.refresh();
                 break;
         }
     }

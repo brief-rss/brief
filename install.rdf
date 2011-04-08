@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>1.5.1</version>
+    <version>1.6b1</version>
     <type>2</type>
     <name>Brief</name>
     <description>A feed reading extension.</description>
@@ -46,6 +46,7 @@
     <translator>gandhi2 (nb-NO)</translator>
     <translator>markh (nl)</translator>
     <translator>cachopo (pt-BR)</translator>
+    <translator>micnic (ro-RO)</translator>
     <translator>Merlyel (ru-RU)</translator>
     <translator>Modex (ru-RU)</translator>
     <translator>Jacen (sk-SK)</translator>

@@ -453,6 +453,7 @@ FeedFetcher.prototype = {
         this.request = null;
         this.timeoutTimer.cancel();
         this.timeoutTimer = null;
+        this.parser.listener = null;
     },
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver, Ci.nsIFeedResultListener])

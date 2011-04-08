@@ -5,7 +5,6 @@
     background: url('header-background.png') repeat-x top right !important;
     background-color: #d7eefe !important;
     border-bottom: 1px solid #7c909f !important;
-    font-family: Verdana, Helvetica, Arial, sans-serif;
     overflow: hidden;
 }
 
@@ -36,7 +35,6 @@
 
 #feed-title {
     color: #05447e;
-    font-family: Arial, sans-serif;
     font-size: 18px;
     font-weight: bold;
     text-decoration: none;
@@ -113,6 +111,7 @@
     -moz-border-radius: 4px;
     background-color: #ffffff !important;
     font-size: 12px;
+    font-family: Verdana, Helvetica, Arial, sans-serif;
 }
 
 

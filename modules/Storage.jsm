@@ -14,7 +14,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 14;
+const DATABASE_VERSION = 15;
 
 const FEEDS_TABLE_SCHEMA = [
     'feedID          TEXT UNIQUE',
@@ -327,8 +327,14 @@ let StorageInternal = {
             case 11:
                 Connection.executeSQL('ANALYZE');
 
+            // These were for one-time fixes on 1.5 branch.
             case 12:
+            case 13:
+
+            // To 1.6.
+            case 14:
                 Connection.executeSQL('PRAGMA journal_mode=WAL');
+
         }
 
         Connection.schemaVersion = DATABASE_VERSION;
@@ -357,10 +363,8 @@ let StorageInternal = {
      * and hasn't been refreshed yet, we must fall back to a synchronous query.
      */
     getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders, aIncludeInactive) {
-        if (!this.allItemsCache) {
-            Stm.getAllFeeds.cancel();
+        if (!this.allItemsCache)
             this.refreshFeedsCache(true);
-        }
 
         if (aIncludeFolders && aIncludeInactive)
             return this.allItemsCache;
@@ -803,6 +807,11 @@ FeedProcessor.prototype = {
         let insertedEntries = [];
 
         if (this.insertEntry.paramSets.length) {
+            if (this.insertEntry.paramSets.length != this.insertEntryText.paramSets.length) {
+                this.callback(0);
+                throw new Error('Mismatched parameteres between insertEntry and insertEntryText statements.');
+            }
+
             Stm.getLastRowids.params.count = this.insertEntry.paramSets.length;
             let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
 
@@ -1273,10 +1282,8 @@ Query.prototype = {
     _onDatabaseError: function BriefQuery__onDatabaseError(aError) {
         // Ignore "SQL logic error or missing database" error which full-text search
         // throws when the query doesn't contain at least one non-excluded term.
-        if (aError.result != 1) {
-            Connection.reportDatabaseError(aError);
-            throw 'Database error';
-        }
+        if (aError.result != 1)
+            throw new StorageError('Error when executing Query', aError.message);
     },
 
     /**
@@ -1480,26 +1487,26 @@ let BookmarkObserver = {
 
 
     // nsINavBookmarkObserver
-    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved(aItemID, aItemType) {},
-
-    // nsINavBookmarkObserver
-    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType) {
+    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved(aItemID, aItemType) {
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
         }
 
+        let folderID = Bookmarks.getFolderIdForItem(aItemID);
+
         // Only care about plain bookmarks and tags.
-        if (Utils.isLivemark(aFolder) || aItemType != Bookmarks.TYPE_BOOKMARK)
+        if (aItemType != Bookmarks.TYPE_BOOKMARK || Utils.isLivemark(folderID))
             return;
 
-        let isTag = Utils.isTagFolder(aFolder);
+        let isTag = Utils.isTagFolder(folderID);
 
         if (isTag) {
-            let tagName = Bookmarks.getItemTitle(aFolder);
+            let tagURL = Bookmarks.getBookmarkURI(aItemID).spec;
+            let tagName = Bookmarks.getItemTitle(folderID);
 
-            Utils.getEntriesByTagName(tagName, function(aEntries) {
-                for (let entry in aEntries)
+            Utils.getEntriesByURL(tagURL, function(entries) {
+                for (let entry in entries)
                     StorageInternal.tagEntry(false, entry, tagName);
             })
         }
@@ -1524,6 +1531,9 @@ let BookmarkObserver = {
             })
         }
     },
+
+    // nsINavBookmarkObserver
+    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType) { },
 
     // nsINavBookmarkObserver
     onItemMoved: function BookmarkObserver_onItemMoved(aItemID, aOldParent, aOldIndex,
@@ -1781,9 +1791,12 @@ LivemarksSync.prototype = {
 
             let item = {};
             item.title = Bookmarks.getItemTitle(node.itemId);
-            item.bookmarkID = node.itemId;
             item.rowIndex = aLivemarks.length;
-            item.parent = aContainer.itemId.toFixed().toString();
+
+            // Convert the ids to strings ourselves, because when database does it
+            // it includes a decimal point in the string representation (e.g. 43523.0).
+            item.bookmarkID = node.itemId.toString();
+            item.parent = aContainer.itemId.toString();
 
             if (Utils.isLivemark(node.itemId)) {
                 let feedURL = Places.livemarks.getFeedURI(node.itemId).spec;

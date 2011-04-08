@@ -1,4 +1,4 @@
-content  brief  chrome/content/  contentaccessible=yes
+content  brief  chrome/content/
 skin  brief  classic  chrome/skin/
 
 resource brief-content  defaults/data/
@@ -28,6 +28,7 @@ locale  brief   nb-NO  chrome/locale/nb-NO/
 locale  brief   nl     chrome/locale/nl/
 locale  brief   pl     chrome/locale/pl/
 locale  brief   pt-BR  chrome/locale/pt-BR/
+locale  brief   ro-RO  chrome/locale/ro-RO/
 locale  brief   ru-RU  chrome/locale/ru-RU/
 locale  brief   sk-SK  chrome/locale/sk-SK/
 locale  brief   sv-SE  chrome/locale/sv-SE/

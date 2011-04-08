@@ -10,10 +10,8 @@ pref("extensions.brief.hideChrome", false);
 pref("extensions.brief.feedview.showHeadlinesOnly", false);
 pref("extensions.brief.feedview.filterUnread", false);
 pref("extensions.brief.feedview.filterStarred", false);
-pref("extensions.brief.feedview.openEntriesInTabs", true);
 pref("extensions.brief.feedview.doubleClickMarks", true);
 pref("extensions.brief.feedview.autoMarkRead", false);
-pref("extensions.brief.feedview.entrySelectionEnabled", true);
 pref("extensions.brief.feedview.sortUnreadViewOldestFirst", false);
 
 pref("extensions.brief.update.interval", 3600);

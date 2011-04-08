@@ -1,7 +1,6 @@
 /* Reset these properties on everything but context menu popups */
-page, hbox, vbox, deck, richlistbox, richlistitem, image, button, progressmeter,
-progressmeter *, textbox, tree, treecols, treecol, treechildren, splitter, browser,
-listbox, listitem {
+page, deck, hbox, vbox, image, richlistbox, richlistitem, button, progressmeter,
+progressmeter *, textbox, splitter, browser, listbox, listitem {
     -moz-appearance: none;
     height: auto !important;
     width: auto !important;
@@ -23,6 +22,11 @@ listbox, listitem {
 page {
     font-family: Arial, Helvetica, sans-serif;
     background: #ffffff !important;
+}
+
+.brief-button {
+    -moz-box-flex: 0;
+    -moz-user-focus: none;
 }
 
 .brief-button > .button-box {
@@ -116,39 +120,42 @@ page {
     list-style-image: url(icons/tag.png);
 }
 
+
 /* =========== View list richlistbox =========== */
 
 #view-list {
     padding-top: 4px !important;
-    font-size: 13px !important;
 }
 
-.view-list-item {
-    padding: 1px 0 1px 15px !important;
-    color: #000000 !important;
+#view-list > richlistitem {
+    -moz-border-radius: 2px;
+    padding: 1px 2px 1px 15px !important;
+    -moz-box-align: center !important;
 }
 
-.view-list-item[selected="true"] {
+#view-list > richlistitem[selected="true"],
+#view-list:focus > richlistitem[selected="true"] {
     background-color: #d5ecfd !important;
-    color: #00344f !important;
-}
-
-#view-list:focus > .view-list-item[selected="true"] {
-    background-color: #d5ecfd !important;
-    color: #00344f !important;
-}
-
-.view-list-item[unread] {
-    font-weight: bold;
-}
-
-.view-list-item > label {
-    padding: 1px 4px 0 5px !important;
 }
 
 .view-icon {
     padding: 1px 0 2px !important;
     list-style-image: url(icons/folders.png);
+}
+
+#view-list > richlistitem > .view-title {
+    padding: 1px 4px 0 5px !important;
+    font-size: 13px !important;
+    color: #000000 !important;
+}
+
+#view-list > richlistitem[selected="true"] > .view-title,
+#view-list:focus > richlistitem[selected="true"] > .view-title {
+    color: #00344f !important;
+}
+
+#view-list > richlistitem:not(.unread) > .unread-count {
+    display: none;
 }
 
 
@@ -173,6 +180,7 @@ page {
     padding: 2px 3px !important;
     font-size: 13px !important;
     color: #000000 !important;
+    list-style-image: url(chrome://brief/skin/icons/tag.png);
 }
 
 .tag-list-item[selected="true"] {
@@ -181,152 +189,6 @@ page {
     outline: none;
 }
 
-.tag-list-item[unread] {
-    font-weight: bold;
-}
-
-
-/* =========== Feed list tree =========== */
-
-#feed-list {
-    margin-top: 2px !important;
-}
-
-
-#feed-list > treechildren::-moz-tree-row {
-    height: 20px;
-    padding-bottom: 2px;
-    border: 0 !important;
-    background: none !important;
-    border: none !important;
-}
-#feed-list > treechildren::-moz-tree-row(selected),
-#feed-list > treechildren::-moz-tree-row(selected, focus){
-    background-color: #d5ecfd !important;
-
-}
-#feed-list > treechildren::-moz-tree-row(container) {
-    border-bottom: 1px solid #c4cdd5 !important;
-    margin-bottom: 2px;
-    padding-bottom: 0px;
-}
-
-#feed-list > treechildren::-moz-tree-cell(feed-item) {
-    -moz-padding-start: 10px !important;
-}
-
-
-#feed-list > treechildren::-moz-tree-cell-text {
-    font-family: Arial, sans-serif !important;
-    font-size: 12px !important;
-    color: #000000 !important;
-}
-#feed-list > treechildren::-moz-tree-cell-text(unread) {
-    font-weight: bold;
-}
-#feed-list > treechildren::-moz-tree-cell-text(selected),
-#feed-list > treechildren::-moz-tree-cell-text(selected, focus) {
-    color: #00344f !important;
-}
-#feed-list > treechildren::-moz-tree-cell-text(container) {
-    font-size: 13px !important;
-    font-weight: bold;
-    color: #203f4f !important;
-    padding-left: 6px;
-}
-
-
-#feed-list > treechildren::-moz-tree-line {
-    visibility: hidden;
-}
-
-#feed-list > treechildren::-moz-tree-indentation {
-    width: 11px;
-}
-
-
-#feed-list > treechildren::-moz-tree-twisty(container) {
-    -moz-padding-end: 0;
-    -moz-padding-start: 2px;
-    width: 11px;
-    height: 11px;
-    list-style-image: url(icons/twisty.png);
-    -moz-image-region: rect(0px, 11px, 11px, 0px);
-}
-#feed-list > treechildren::-moz-tree-twisty(open) {
-    -moz-image-region: rect(11px, 11px, 22px, 0px);
-}
-
-#feed-list > treechildren::-moz-tree-twisty(feed-item) {
-    width: 0 !important;
-    -moz-padding-end: 0;
-    -moz-padding-start: 0;
-}
-
-
-#feed-list > treechildren::-moz-tree-image {
-    -moz-padding-end: 6px;
-    -moz-padding-start: 2px;
-}
-#feed-list > treechildren::-moz-tree-image(container) {
-    -moz-padding-end: 0;
-    -moz-padding-start: 0;
-    width: 0;
-}
-#feed-list > treechildren::-moz-tree-image(feed-item) {
-    list-style-image: url(icons/feed-favicon.png) !important;
-    width: 16px;
-    height: 16px;
-}
-#feed-list > treechildren::-moz-tree-image(feed-item, unread) {
-    list-style-image: url(icons/feed-favicon.png) !important;
-}
-
-
-#places-tree {
-    -moz-box-flex: 1;
-    max-height: 400px !important;
-    border-bottom: 1px solid #7c909f !important;
-    font-size: 13px;
-}
-
-
-#confirm-home-folder {
-    margin: 10px 3px 5px 0 !important;
-    border: 1px solid #7c909f !important;
-    padding: 3px 6px !important;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-#confirm-home-folder {
-    -moz-appearance: button;
-    border: 3px solid !important;
-    -moz-border-top-colors: transparent ThreeDHighlight ThreeDLightShadow;
-    -moz-border-right-colors: transparent ThreeDDarkShadow ThreeDShadow;
-    -moz-border-bottom-colors: transparent ThreeDDarkShadow ThreeDShadow;
-    -moz-border-left-colors: transparent ThreeDHighlight ThreeDLightShadow;
-    background-color: ThreeDFace;
-    color: ButtonText !important;
-}
-
-#confirm-home-folder .button-box {
-    border: 1px solid transparent !important;
-    padding-top: 1px !important;
-    padding-bottom: 2px !important;
-    -moz-padding-start: 3px !important;
-    -moz-padding-end: 4px !important;
-}
-
-#confirm-home-folder .button-text {
-    margin: 0 !important;
-    text-align: center;
-}
-
-
-/* ======= Reset default properties ======= */
-
-.brief-button {
-    -moz-box-flex: 0;
-    -moz-user-focus: none;
+.tag-list-item:not(.unread) > .unread-count {
+    display: none;
 }
