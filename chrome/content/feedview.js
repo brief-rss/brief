@@ -781,7 +781,7 @@ FeedView.prototype = {
         let nextElem = nextEntryView ? nextEntryView.container : null;
 
         if (this.headlinesMode) {
-            if (nextElem && nextElem.previousSibling && nextElem.previousSibling.tagName == 'H1')
+            if (nextEntryView && entryView.day > nextEntryView.day)
                 nextElem = nextElem.previousSibling;
 
             if (!this.document.getElementById('day' + entryView.day)) {
@@ -1318,9 +1318,7 @@ __defineGetter__('Strings', function() {
     return this.Strings = {
         today        : bundle.getString('today'),
         yesterday    : bundle.getString('yesterday'),
-        entryUpdated : bundle.getString('entryWasUpdated'),
-        markAsRead   : bundle.getString('markEntryAsRead'),
-        markAsUnread : bundle.getString('markEntryAsUnread')
+        entryUpdated : bundle.getString('entryWasUpdated')
     }
 })
 
