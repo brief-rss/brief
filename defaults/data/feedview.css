@@ -123,14 +123,6 @@ pre, code {
     border-left-color: #4f7ac4;
 }
 
-body.trash-folder .delete-button {
-    display: none;
-}
-
-body:not(.trash-folder) .restore-button {
-    display: none;
-}
-
 .delete-button,
 .restore-button {
     width: 30px;
