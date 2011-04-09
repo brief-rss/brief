@@ -652,9 +652,6 @@ FeedView.prototype = {
         if (this.headlinesMode)
             this.document.body.classList.add('headlines-mode');
 
-        if (this.query.deleted == Storage.ENTRY_STATE_TRASHED)
-            this.document.body.classList.add('trash-folder');
-
         // Temporarily remove the listener because reading window.innerHeight
         // can trigger a resize event (!?).
         this.window.removeEventListener('resize', this, false);
@@ -894,6 +891,17 @@ function EntryView(aFeedView, aEntryData) {
     this.starred = aEntryData.starred;
     this.tags = aEntryData.tags ? aEntryData.tags.split(', ') : [];
 
+    let deleteButton = this._getElement('delete-button');
+    let restoreButton = this._getElement('restore-button');
+    if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED) {
+        deleteButton.parentNode.removeChild(deleteButton);
+        restoreButton.setAttribute('title', Strings.restoreEntryTooltip);
+    }
+    else {
+        restoreButton.parentNode.removeChild(restoreButton);
+        deleteButton.setAttribute('title', Strings.deleteEntryTooltip);
+    }
+
     let titleElem = this._getElement('title-link');
     if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
@@ -958,8 +966,11 @@ EntryView.prototype = {
     set read(aValue) {
         this.__read = aValue;
 
+        let button = this._getElement('mark-read-button');
+
         if (aValue) {
             this.container.classList.add('read');
+            button.setAttribute('title', Strings.markEntryAsUnreadTooltip);
 
             if (this.updated) {
                 this.updated = false;
@@ -968,6 +979,7 @@ EntryView.prototype = {
         }
         else {
             this.container.classList.remove('read');
+            button.setAttribute('title', Strings.markEntryAsReadTooltip);
         }
     },
 
@@ -1052,6 +1064,8 @@ EntryView.prototype = {
         if (this.collapsed)
             return;
 
+        this._getElement('headline-container').appendChild(this._getElement('controls'));
+
         hideElement(this._getElement('full-container'));
         showElement(this._getElement('headline-container'));
 
@@ -1063,6 +1077,8 @@ EntryView.prototype = {
     expand: function EntryView_expand(aAnimate) {
         if (!this.collapsed)
             return;
+
+        this._getElement('header').appendChild(this._getElement('controls'));
 
         this.container.classList.remove('collapsed');
 
@@ -1316,9 +1332,13 @@ __defineGetter__('Strings', function() {
     let bundle = getElement('main-bundle');
     delete this.Strings;
     return this.Strings = {
-        today        : bundle.getString('today'),
-        yesterday    : bundle.getString('yesterday'),
-        entryUpdated : bundle.getString('entryWasUpdated')
+        today                    : bundle.getString('today'),
+        yesterday                : bundle.getString('yesterday'),
+        entryUpdated             : bundle.getString('entryWasUpdated'),
+        markEntryAsUnreadTooltip : bundle.getString('markEntryAsUnreadTooltip'),
+        markEntryAsReadTooltip   : bundle.getString('markEntryAsReadTooltip'),
+        deleteEntryTooltip       : bundle.getString('deleteEntryTooltip'),
+        restoreEntryTooltip      : bundle.getString('restoreEntryTooltip')
     }
 })
 
