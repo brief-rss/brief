@@ -261,14 +261,23 @@ let FeedUpdateServiceInternal = {
         let showNotification = Prefs.getBoolPref('update.showNotification');
         if (this.feedsWithNewEntriesCount > 0 && showNotification) {
             let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
-            let title = bundle.GetStringFromName('feedsUpdatedAlertTitle');
-            let params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
-            let text = bundle.formatStringFromName('updateAlertText', params, 2);
+            let alertTitle = bundle.GetStringFromName('feedsUpdatedAlertTitle');
+            let alertText;
+            if (this.feedsWithNewEntriesCount == 1) {
+                let feedTitle = this.completedFeeds[0].title;
+                feedTitle = feedTitle.length < 30 ? feedTitle : feedTitle.substr(0, 30) + '\u2026';
+                alertText = bundle.formatStringFromName('updateAlertTextSingleFeed',
+                                                        [this.newEntriesCount, feedTitle], 2);
+            } else {
+                let params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
+                alertText = bundle.formatStringFromName('updateAlertText', params, 2);
+            }
 
             try {
                 let alertsService = Cc['@mozilla.org/alerts-service;1']
                                     .getService(Ci.nsIAlertsService);
-                alertsService.showAlertNotification(FEED_ICON_URL, title, text, true, null, this);
+                alertsService.showAlertNotification(FEED_ICON_URL, alertTitle, alertText,
+                                                    true, null, this);
             }
             catch (ex) {
                 // Apparently nsIAlertsService may fail on OS X with Growl installed.
