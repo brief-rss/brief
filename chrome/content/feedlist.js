@@ -47,6 +47,7 @@ let ViewList = {
                 break;
 
             case 'unread-folder':
+                query.includeOmittedUnread = false;
                 query.deleted = Storage.ENTRY_STATE_NORMAL;
                 query.read = false;
                 break;
@@ -71,6 +72,7 @@ let ViewList = {
 
     refreshItem: function ViewList_refreshItem(aItemID) {
         let query = new Query({
+            includeOmittedUnread: aItemID == 'unread-folder' ? false : true,
             deleted: Storage.ENTRY_STATE_NORMAL,
             read: false,
             starred: (aItemID == 'starred-folder') ? true : undefined
@@ -495,6 +497,12 @@ let FeedList = {
                     ViewList.deselect();
                     ViewList.selectedItem = getElement('all-items-folder');
                 }, false)
+                break;
+
+            case 'brief:omit-in-unread-changed':
+                ViewList.refreshItem('unread-folder');
+                if (ViewList.selectedItem && ViewList.selectedItem.id == 'unread-folder')
+                    gCurrentView.refresh();
                 break;
         }
     },

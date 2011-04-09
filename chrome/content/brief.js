@@ -30,6 +30,7 @@ function init() {
     Services.obs.addObserver(FeedList, 'brief:invalidate-feedlist', false);
     Services.obs.addObserver(FeedList, 'brief:feed-title-changed', false);
     Services.obs.addObserver(FeedList, 'brief:custom-style-changed', false);
+    Services.obs.addObserver(FeedList, 'brief:omit-in-unread-changed', false);
 
     Storage.addObserver(FeedList);
 
@@ -59,6 +60,7 @@ function unload() {
     Services.obs.removeObserver(FeedList, 'brief:invalidate-feedlist');
     Services.obs.removeObserver(FeedList, 'brief:feed-title-changed');
     Services.obs.removeObserver(FeedList, 'brief:custom-style-changed');
+    Services.obs.removeObserver(FeedList, 'brief:omit-in-unread-changed');
 
     PrefObserver.unregister();
     Storage.removeObserver(FeedList);

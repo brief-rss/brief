@@ -14,7 +14,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 15;
+const DATABASE_VERSION = 16;
 
 const FEEDS_TABLE_SCHEMA = [
     'feedID          TEXT UNIQUE',
@@ -35,7 +35,8 @@ const FEEDS_TABLE_SCHEMA = [
     'updateInterval  INTEGER DEFAULT 0',
     'dateModified    INTEGER DEFAULT 0',
     'lastFaviconRefresh INTEGER DEFAULT 0',
-    'markModifiedEntriesUnread INTEGER DEFAULT 1'
+    'markModifiedEntriesUnread INTEGER DEFAULT 1',
+    'omitInUnread     INTEGER DEFAULT 0'
 ]
 
 const ENTRIES_TABLE_SCHEMA = [
@@ -334,6 +335,10 @@ let StorageInternal = {
             // To 1.6.
             case 14:
                 Connection.executeSQL('PRAGMA journal_mode=WAL');
+
+            // To 1.7
+            case 15:
+                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN omitInUnread INTEGER DEFAULT 0');
 
         }
 
@@ -957,6 +962,11 @@ Query.prototype = {
      */
     includeHiddenFeeds: false,
 
+     /**
+     * Include feeds the user has explicitly marked to be omitted from global unread views.
+     */
+    includeOmittedUnread: true,
+
     /**
      * Indicates if there are any entries that match this query.
      *
@@ -1308,6 +1318,9 @@ Query.prototype = {
             text += ' INNER JOIN entry_tags ON entries.id = entry_tags.entryID ';
 
         let constraints = [];
+
+        if (!this.includeOmittedUnread)
+            constraints.push('(feeds.omitInUnread = 0)');
 
         if (this.folders) {
             if (!this.folders.length)
@@ -1831,7 +1844,8 @@ let Stm = {
         let sql = 'SELECT feedID, feedURL, websiteURL, title, subtitle, dateModified,   ' +
                   '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,      ' +
                   '       isFolder, bookmarkID, entryAgeLimit, maxEntries, hidden,      ' +
-                  '       updateInterval, markModifiedEntriesUnread, lastFaviconRefresh ' +
+                  '       updateInterval, markModifiedEntriesUnread, omitInUnread,      ' +
+                  '       lastFaviconRefresh '                                            +
                   'FROM feeds                                                           ' +
                   'ORDER BY rowIndex ASC                                                ';
         delete this.getAllFeeds;
@@ -1864,7 +1878,8 @@ let Stm = {
                   '    entryAgeLimit  = :entryAgeLimit,          ' +
                   '    maxEntries =     :maxEntries,             ' +
                   '    updateInterval = :updateInterval,         ' +
-                  '    markModifiedEntriesUnread = :markModifiedEntriesUnread ' +
+                  '    markModifiedEntriesUnread = :markModifiedEntriesUnread, ' +
+                  '    omitInUnread = :omitInUnread              ' +
                   'WHERE feedID = :feedID                        ';
         delete this.updateFeedProperties;
         return this.updateFeedProperties = new Statement(sql);
