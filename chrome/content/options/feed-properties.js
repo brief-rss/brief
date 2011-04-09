@@ -30,6 +30,7 @@ function setupWindow() {
     expirationTextbox.value = gFeed.entryAgeLimit || Prefs.getIntPref('database.entryExpirationAge');
 
     getElement('updated-entries-checkbox').checked = !gFeed.markModifiedEntriesUnread;
+    getElement('omit-in-unread-checkbox').checked = gFeed.omitInUnread;
 
     let index = getFeedIndex(gFeed);
     getElement('next-feed').disabled = (index == Storage.getAllFeeds().length - 1);
@@ -97,6 +98,8 @@ function onCheckUpdatesCheckboxCmd(aEvent) {
 
 
 function saveChanges() {
+    saveLivemarksData();
+
     let expirationCheckbox = getElement('expiration-checkbox');
     let expirationTextbox = getElement('expiration-textbox');
 
@@ -135,12 +138,25 @@ function saveChanges() {
     }
 
     gFeed.markModifiedEntriesUnread = !getElement('updated-entries-checkbox').checked;
+    let omitInUnread = getElement('omit-in-unread-checkbox').checked ? 1 : 0;
 
-    Storage.updateFeedProperties(gFeed);
+    if (gFeed.omitInUnread != omitInUnread) {
+        gFeed.omitInUnread = omitInUnread;
 
-    saveLivemarksData();
+        Storage.updateFeedProperties(gFeed, function() {
+            Services.obs.notifyObservers(null, 'brief:omit-in-unread-changed', '');
+            window.close();
+        })
 
-    return true;
+        // Cancel closing the window because global variables are destroyed when the
+        // window is closed and observer service wouldn't be available in
+        // updateFeedProperties() callback above.
+        return false;
+    }
+    else {
+        Storage.updateFeedProperties(gFeed);
+        return true;
+    }
 }
 
 function saveLivemarksData() {

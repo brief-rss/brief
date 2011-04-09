@@ -70,6 +70,9 @@
         <checkbox id="updated-entries-checkbox"
                   accesskey="&updatedEntries.accesskey;"
                   label="&updatedEntries.label;"/>
+        <checkbox id="omit-in-unread-checkbox"
+                  accesskey="&omitInUnread.accesskey;"
+                  label="&omitInUnread.label;"/>
     <separator class="thin"/>
     </groupbox>
 

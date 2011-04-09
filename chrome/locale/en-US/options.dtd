@@ -55,6 +55,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "days">
 <!ENTITY updatedEntries.label "Don&apos;t mark changed items back as unread">
 <!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Previous">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Next &gt;">
