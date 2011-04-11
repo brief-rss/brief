@@ -989,10 +989,16 @@ EntryView.prototype = {
         return this.__starred;
     },
     set starred(aValue) {
-        if (aValue)
+        let button = this._getElement('bookmark-button')
+
+        if (aValue) {
             this.container.classList.add('starred');
-        else
+            button.setAttribute('title', Strings.editBookmarkTooltip);
+        }
+        else {
             this.container.classList.remove('starred');
+            button.setAttribute('title', Strings.bookmarkEntryTooltip);
+        }
 
         return this.__starred = aValue;
     },
@@ -1358,6 +1364,8 @@ __defineGetter__('Strings', function() {
         'markEntryAsReadTooltip',
         'deleteEntryTooltip',
         'restoreEntryTooltip',
+        'bookmarkEntryTooltip',
+        'editBookmarkTooltip',
     ]
 
     let bundle = getElement('main-bundle');
