@@ -501,7 +501,7 @@ FeedView.prototype = {
         // entries with a newer date than that anchor.
         if (this.enoughEntriesPreloaded) {
             let query = this.getQueryCopy();
-            query.startDate = this.getEntryView(this.lastLoadedEntry).date;
+            query.startDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
 
             this._loadedEntries = yield query.getEntries(resume);
 
@@ -729,7 +729,7 @@ FeedView.prototype = {
         let edgeDate = undefined;
 
         if (this._loadedEntries.length) {
-            let lastEntryDate = this.getEntryView(this.lastLoadedEntry).date;
+            let lastEntryDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
             if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
                 edgeDate = lastEntryDate - 1;
             else
@@ -877,7 +877,7 @@ function EntryView(aFeedView, aEntryData) {
     this.feedView = aFeedView;
 
     this.id = aEntryData.id;
-    this.date = aEntryData.date;
+    this.date = new Date(aEntryData.date);
     this.entryURL = aEntryData.entryURL;
     this.updated = aEntryData.updated;
 
@@ -913,10 +913,12 @@ function EntryView(aFeedView, aEntryData) {
 
     this._getElement('feed-name').innerHTML = feed.title;
     this._getElement('authors').innerHTML = aEntryData.authors;
+
     this._getElement('date').textContent = this.getDateString();
+    this._getElement('date').setAttribute('title', this.date.toLocaleString());
 
     if (this.updated)
-        this._getElement('updated').textContent = Strings.entryUpdated;
+        this._getElement('updated').textContent = Strings.entryWasUpdated;
 
     if (this.headline) {
         this.collapse(false);
@@ -955,8 +957,7 @@ function EntryView(aFeedView, aEntryData) {
 EntryView.prototype = {
 
     get day() {
-        let date = new Date(this.date);
-        let time = date.getTime() - date.getTimezoneOffset() * 60000;
+        let time = this.date.getTime() - this.date.getTimezoneOffset() * 60000;
         return Math.ceil(time / 86400000);
     },
 
@@ -1205,35 +1206,52 @@ EntryView.prototype = {
     },
 
     getDateString: function EntryView_getDateString(aOnlyDatePart) {
-        let now = new Date();
-        let nowTime = now.getTime() - now.getTimezoneOffset() * 60000;
-        let today = Math.ceil(nowTime / 86400000);
-
-        let entryDate = new Date(this.date);
-        let entryTime = entryDate.getTime() - entryDate.getTimezoneOffset() * 60000;
-        let entryDay = Math.ceil(entryTime / 86400000);
-
-        let deltaDays = today - entryDay;
-        let deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
-
+        let bundle = getElement('main-bundle');
+        let relativeDate = new RelativeDate(this.date.getTime());
         let format;
 
-        if (deltaDays === 0)
-            format = Strings.today;
-        else if (deltaDays === 1)
-            format = Strings.yesterday;
-        else if (deltaDays < 7)
-            format = '%A';
-        else if (deltaYears < 1)
-            format = ('%d %b');
-        else
-            format = ('%d %b %Y');
+        let currentDate = new Date();
 
-        if (!aOnlyDatePart)
+        switch (true) {
+            case relativeDate.deltaMinutes === 0 && !aOnlyDatePart:
+                format = Strings['entryDate.justNow'];
+                break;
+
+            case relativeDate.deltaHours === 0 && !aOnlyDatePart:
+                let pluralForm = getPluralForm(relativeDate.deltaMinutes, Strings['entryDate.minutes']);
+                format = pluralForm.replace('#number', relativeDate.deltaMinutes);
+                break;
+
+            case relativeDate.deltaHours <= 12 && !aOnlyDatePart:
+                pluralForm = getPluralForm(relativeDate.deltaHours, Strings['entryDate.hours']);
+                format = pluralForm.replace('#number', relativeDate.deltaHours);
+                break;
+
+            case relativeDate.deltaDays === 0:
+                format = Strings['entryDate.today'];
+                break;
+
+            case relativeDate.deltaDays === 1:
+                format = Strings['entryDate.yesterday'];
+                break;
+
+            case relativeDate.deltaDays < 5:
+                format = '%A';
+                break;
+
+            case currentDate.getFullYear() === this.date.getFullYear():
+                format = '%d %b';
+                break;
+
+            default:
+                format = '%d %b %Y';
+                break;
+        }
+
+        if (!aOnlyDatePart && relativeDate.deltaHours > 12)
             format += ', %X';
 
-        return entryDate.toLocaleFormat(format).replace(/:\d\d$/, ' ')
-                                               .replace(/^0/, '');
+        return this.date.toLocaleFormat(format).replace(/:\d\d$/, ' ').replace(/^0/, '');
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
@@ -1329,17 +1347,26 @@ function showElement(aElement, aTranstionDuration, aCallback) {
 
 
 __defineGetter__('Strings', function() {
+    let cachedStringsList = [
+        'entryDate.justNow',
+        'entryDate.minutes',
+        'entryDate.hours',
+        'entryDate.today',
+        'entryDate.yesterday',
+        'entryWasUpdated',
+        'markEntryAsUnreadTooltip',
+        'markEntryAsReadTooltip',
+        'deleteEntryTooltip',
+        'restoreEntryTooltip',
+    ]
+
     let bundle = getElement('main-bundle');
+    let obj = {};
+    for (let stringName in cachedStringsList)
+        obj[stringName] = bundle.getString(stringName);
+
     delete this.Strings;
-    return this.Strings = {
-        today                    : bundle.getString('today'),
-        yesterday                : bundle.getString('yesterday'),
-        entryUpdated             : bundle.getString('entryWasUpdated'),
-        markEntryAsUnreadTooltip : bundle.getString('markEntryAsUnreadTooltip'),
-        markEntryAsReadTooltip   : bundle.getString('markEntryAsReadTooltip'),
-        deleteEntryTooltip       : bundle.getString('deleteEntryTooltip'),
-        restoreEntryTooltip      : bundle.getString('restoreEntryTooltip')
-    }
+    return this.Strings = obj;
 })
 
 __defineGetter__('Finder', function() {
