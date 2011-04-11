@@ -275,7 +275,8 @@ let FeedUpdateServiceInternal = {
 
                 alertText = bundle.formatStringFromName('updateAlertText.singleFeed', [itemString, feedTitle], 2)
                                   .replace('#numItems', this.newEntriesCount);
-            } else {
+            }
+            else {
                 alertText = bundle.formatStringFromName('updateAlertText.manyFeeds', [itemString, feedString], 2)
                                   .replace('#numItems', this.newEntriesCount)
                                   .replace('#numFeeds', this.feedsWithNewEntriesCount);
@@ -369,6 +370,8 @@ FeedFetcher.prototype = {
     // error occurred.
     bozo: false,
 
+    finished: false,
+
 
     requestFeed: function FeedFetcher_requestFeed() {
         this.request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1']
@@ -446,7 +449,10 @@ FeedFetcher.prototype = {
 
     finish: function FeedFetcher_finish(aSuccess, aNewEntriesCount) {
         FeedUpdateServiceInternal.onFeedUpdated(this.feed, aSuccess, aNewEntriesCount || 0);
-        this.cleanup();
+        if (!this.finished)
+            this.cleanup();
+
+        this.finished = true;
     },
 
     observe: function FeedFetcher_observe(aSubject, aTopic, aData) {
@@ -457,9 +463,10 @@ FeedFetcher.prototype = {
                 break;
 
             case 'brief:feed-update-finished':
-                if (aData == 'canceled') {
+                if (aData == 'canceled' && !this.finished) {
                     this.request.abort();
                     this.cleanup();
+                    this.finished = true;
                 }
                 break;
             }
