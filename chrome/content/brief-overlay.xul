@@ -80,16 +80,11 @@
                 <columns>
                     <column id="brief-tooltip-feed-name"/>
                     <column id="brief-tooltip-unread-count"/>
-                    <column id="brief-tooltip-unread-desc"/>
                 </columns>
                 <rows id="brief-tooltip-rows"/>
             </grid>
         </tooltip>
     </popupset>
-
-    <stringbundleset id="stringbundleset">
-        <stringbundle id="brief-bundle" src="chrome://brief/locale/brief.properties"/>
-    </stringbundleset>
 
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="brief-button"

@@ -261,16 +261,24 @@ let FeedUpdateServiceInternal = {
         let showNotification = Prefs.getBoolPref('update.showNotification');
         if (this.feedsWithNewEntriesCount > 0 && showNotification) {
             let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
-            let alertTitle = bundle.GetStringFromName('feedsUpdatedAlertTitle');
+            let alertTitle = bundle.GetStringFromName('updateAlertTitle');
+
+            let feedForms = bundle.GetStringFromName('feeds');
+            let feedString = getPluralForm(this.feedsWithNewEntriesCount, feedForms);
+            let itemForms = bundle.GetStringFromName('items');
+            let itemString = getPluralForm(this.newEntriesCount, itemForms);
             let alertText;
+
             if (this.feedsWithNewEntriesCount == 1) {
                 let feedTitle = this.completedFeeds[0].title;
                 feedTitle = feedTitle.length < 30 ? feedTitle : feedTitle.substr(0, 30) + '\u2026';
-                alertText = bundle.formatStringFromName('updateAlertTextSingleFeed',
-                                                        [this.newEntriesCount, feedTitle], 2);
+
+                alertText = bundle.formatStringFromName('updateAlertText.singleFeed', [itemString, feedTitle], 2)
+                                  .replace('#numItems', this.newEntriesCount);
             } else {
-                let params = [this.newEntriesCount, this.feedsWithNewEntriesCount];
-                alertText = bundle.formatStringFromName('updateAlertText', params, 2);
+                alertText = bundle.formatStringFromName('updateAlertText.manyFeeds', [itemString, feedString], 2)
+                                  .replace('#numItems', this.newEntriesCount)
+                                  .replace('#numFeeds', this.feedsWithNewEntriesCount);
             }
 
             try {

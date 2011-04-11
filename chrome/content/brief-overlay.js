@@ -32,6 +32,14 @@ const Brief = {
         return this.query = tempScope.Query
     },
 
+    get common() {
+        let tempScope = {};
+        Components.utils.import('resource://brief/common.jsm', tempScope);
+
+        delete this.common;
+        return this.common = tempScope;
+    },
+
     open: function Brief_open(aInCurrentTab) {
         let loading = gBrowser.webProgress.isLoadingDocument;
         let blank = (gBrowser.currentURI.spec == 'about:blank');
@@ -212,24 +220,60 @@ const Brief = {
 
 
     constructTooltip: function Brief_constructTooltip() {
-        let bundle = document.getElementById('brief-bundle');
+        let label = document.getElementById('brief-tooltip-last-updated');
+        let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
+
+        let lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime') * 1000;
+        let date = new Date(lastUpdateTime);
+        let relativeDate = new this.common.RelativeDate(lastUpdateTime);
+
+
+        switch (true) {
+            case relativeDate.deltaMinutes === 0:
+                label.value = bundle.GetStringFromName('lastUpdated.rightNow');
+                break;
+
+            case relativeDate.deltaHours === 0:
+                let string = bundle.GetStringFromName('lastUpdated.minutes');
+                label.value = this.common.getPluralForm(relativeDate.deltaMinutes, string)
+                                         .replace('#number', relativeDate.deltaMinutes);
+                break;
+
+            case relativeDate.deltaHours <= 12:
+                string = bundle.GetStringFromName('lastUpdated.hours');
+                label.value = this.common.getPluralForm(relativeDate.deltaHours, string)
+                                         .replace('#number', relativeDate.deltaHours);
+                break;
+
+            case relativeDate.deltaDays === 0:
+                let time = date.toLocaleFormat('%X').replace(/:\d\d$/, ' ');
+                label.value = bundle.formatStringFromName('lastUpdated.today', [time], 1);
+                break;
+
+            case relativeDate.deltaDays === 1:
+                time = date.toLocaleFormat('%X').replace(/:\d\d$/, ' ');
+                label.value = bundle.formatStringFromName('lastUpdated.yesterday', [time], 1);
+                break;
+
+            case relativeDate.deltaDays < 5:
+                string = bundle.GetStringFromName('lastUpdated.days');
+                label.value = this.common.getPluralForm(relativeDate.deltaDays, string)
+                                         .replace('#number', relativeDate.deltaDays);
+                break;
+
+            case currentDate.getFullYear() === entryDate.getFullYear():
+                time = date.toLocaleFormat('%d %b').replace(/^0/, '');
+                string = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
+                break;
+
+            default:
+                time = date.toLocaleFormat('%d %b %Y').replace(/^0/, '');
+                string = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
+                break;
+        }
+
         let rows = document.getElementById('brief-tooltip-rows');
         let tooltip = document.getElementById('brief-tooltip');
-
-        // Integer prefs are longs while Date is a long long.
-        let now = Math.round(Date.now() / 1000);
-        let lastUpdateTime = Brief.prefs.getIntPref('update.lastUpdateTime');
-        let elapsedTime = now - lastUpdateTime;
-        let hours = Math.floor(elapsedTime / 3600);
-        let minutes = Math.floor((elapsedTime - hours * 3600) / 60);
-
-        let label = document.getElementById('brief-tooltip-last-updated');
-        if (hours > 1)
-            label.value = bundle.getFormattedString('lastUpdatedWithHours', [hours, minutes]);
-        else if (hours == 1)
-            label.value = bundle.getFormattedString('lastUpdatedOneHour', [minutes]);
-        else
-            label.value = bundle.getFormattedString('lastUpdatedOnlyMinutes', [minutes]);
 
         while (rows.lastChild)
             rows.removeChild(rows.lastChild);
@@ -243,7 +287,7 @@ const Brief = {
 
         query.getProperty('feedID', true, function(unreadFeeds) {
             let noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
-            let value = bundle.getString('noUnreadFeedsTooltip');
+            let value = bundle.GetStringFromName('noUnreadFeedsTooltip');
             noUnreadLabel.setAttribute('value', value);
             noUnreadLabel.hidden = unreadFeeds.length;
 
@@ -269,13 +313,6 @@ const Brief = {
                     let label = document.createElement('label');
                     label.setAttribute('class', 'unread-entries-count');
                     label.setAttribute('value', unreadCount);
-                    row.appendChild(label);
-
-                    let value = unreadCount > 1 ? bundle.getString('manyUnreadEntries')
-                                                : bundle.getString('singleUnreadEntry');
-                    label = document.createElement('label');
-                    label.setAttribute('class', 'unread-entries-desc');
-                    label.setAttribute('value', value);
                     row.appendChild(label);
                 }.bind(this))
             }.bind(this))

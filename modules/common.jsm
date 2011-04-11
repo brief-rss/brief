@@ -1,4 +1,5 @@
-const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'Task', 'log', 'extend'];
+const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'Task', 'log', 'extend',
+                          'getPluralForm', 'RelativeDate'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 
@@ -75,3 +76,35 @@ Function.prototype.gen = function() {
         }
     }
 }
+
+function RelativeDate(aAbsoluteTime) {
+    let currentDate = new Date();
+    this.currentTime = currentDate.getTime() - currentDate.getTimezoneOffset() * 60000;
+
+    let targetDate = new Date(aAbsoluteTime);
+    this.targetTime = targetDate.getTime() - targetDate.getTimezoneOffset() * 60000;
+}
+
+RelativeDate.prototype = {
+
+    get deltaMinutes() this._getDelta(60000),
+
+    get deltaHours() this._getDelta(3600000),
+
+    get deltaDays() this._getDelta(86400000),
+
+    get deltaYears() this._getDelta(31536000000),
+
+    _getDelta: function RelativeDate__getDelta(aDivisor) {
+        let current = Math.ceil(this.currentTime / aDivisor);
+        let target = Math.ceil(this.targetTime / aDivisor);
+        return current - target;
+    }
+
+}
+
+
+Components.utils.import('resource://gre/modules/PluralForm.jsm');
+let pluralRule = Services.strings.createBundle('chrome://brief/locale/brief.properties')
+                                 .GetStringFromName('pluralRule');
+let getPluralForm = PluralForm.makeGetter(pluralRule)[0];
