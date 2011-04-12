@@ -643,13 +643,13 @@ FeedView.prototype = {
 
         this._buildHeader();
 
-        this.headlinesView = PrefCache.showHeadlinesOnly;
+        this.__headlinesView = PrefCache.showHeadlinesOnly;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');
 
         if (this.headlinesView)
-            this.document.body.classList.add('headline-view');
+            this.document.body.classList.add('headlines-view');
 
         // Temporarily remove the listener because reading window.innerHeight
         // can trigger a resize event (!?).
