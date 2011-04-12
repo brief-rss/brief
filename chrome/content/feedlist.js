@@ -479,7 +479,7 @@ let FeedList = {
             case 'brief:feed-update-finished':
                 refreshProgressmeter(aData);
 
-                if (aData == 'canceled') {
+                if (aData == 'cancelled') {
                     for (let feed in Storage.getAllFeeds()) {
                         let item = getElement(feed.feedID);
                         if (item.hasAttribute('loading')) {
