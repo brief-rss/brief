@@ -15,19 +15,15 @@ const LOAD_STEP_SIZE = 5;
 const HEADLINES_LOAD_STEP_SIZE = 25;
 
 /**
- * This object manages the display of feed content.
- * The feed is displayed using a local, unprivileged template page.
+ * Manages display of feed content.
  *
  * @param aTitle
  *        Title of the view which will be shown in the header.
  * @param aQuery
- *        Query which selects contained entries.
+ *        Query that selects entries contained by the view.
  */
 function FeedView(aTitle, aQuery) {
     this.title = aTitle;
-
-    // If any of read, starred, or tags parameters is specified in the query,
-    // then it is fixed for the view and the user can't toggle the filter.
     this.fixedUnread = aQuery.read !== undefined;
     this.fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
 
@@ -35,16 +31,10 @@ function FeedView(aTitle, aQuery) {
     getElement('filter-starred-checkbox').disabled = this.fixedStarred;
 
     aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
-    this.query = aQuery;
+    this.__query = aQuery;
 
-    // Array of IDs of entries that have been loaded.
     this._loadedEntries = [];
-
-    // Array of EntryView's of entries that have been loaded.
     this._entryViews = [];
-
-    // List of entries manually marked as unread by the user. They won't be
-    // marked as read again when autoMarkRead is on.
     this._entriesMarkedUnread = [];
 
     if (gCurrentView)
@@ -67,17 +57,30 @@ function FeedView(aTitle, aQuery) {
 
 FeedView.prototype = {
 
-    // Temporarily override the title without losing the old one.
+    title: '',
+
     titleOverride: '',
 
-    headlinesMode: false,
+    // Indicates if a filter paramater is fixed and cannot be toggled by the user.
+    fixedUnread: false,
+    fixedStarred: false,
 
-    // ID of the selected entry.
-    selectedEntry: null,
+    __headlinesView: false,
+    get headlinesView() this.__headlinesView,
+
+    // IDs of entries that have been loaded.
+    _loadedEntries: [],
+
+    // EntryView objects of entries that have been loaded.
+    entryViews: [],
 
     _refreshPending: false,
 
     _allEntriesLoaded: false,
+
+
+    __selectedEntry: null,
+    get selectedEntry() this.__selectedEntry,
 
 
     get browser() getElement('feed-view'),
@@ -91,21 +94,15 @@ FeedView.prototype = {
 
     getEntryIndex: function(aEntry) this._loadedEntries.indexOf(aEntry),
 
-    containsEntry: function(aEntry) this.getEntryIndex(aEntry) !== -1,
-
     getEntryView: function(aEntry) this._entryViews[this.getEntryIndex(aEntry)],
+
+    isEntryLoaded: function(aEntry) this.getEntryIndex(aEntry) !== -1,
 
     get lastLoadedEntry() this._loadedEntries[this._loadedEntries.length - 1],
 
 
-    /**
-     * Query selecting all entries contained by the view.
-     */
-    set query(aQuery) {
-        this.__query = aQuery;
-        return aQuery;
-    },
-
+    // Query that selects all entries contained by the view.
+    __query: null,
     get query() {
         if (!this.fixedUnread)
             this.__query.read = PrefCache.filterUnread ? false : undefined;
@@ -180,9 +177,7 @@ FeedView.prototype = {
         }
     },
 
-    /**
-     * Scroll down by 10 entries, loading more entries if necessary.
-     */
+    // Scroll down by 10 entries, loading more entries if necessary.
     skipDown: function FeedView_skipDown() {
         let middleEntry = this.getEntryInScreenCenter();
         let index = this.getEntryIndex(middleEntry);
@@ -309,6 +304,10 @@ FeedView.prototype = {
             this._markVisibleTimeout = async(callback, 1000, this);
         }
     },
+
+    // Array of entries manually marked as unread by the user. They won't be
+    // marked as read again when autoMarkRead is on.
+    _entriesMarkedUnread: [],
 
     markVisibleEntriesRead: function FeedView_markVisibleEntriesRead() {
         let winTop = this.window.pageYOffset;
@@ -505,7 +504,7 @@ FeedView.prototype = {
 
             this._loadedEntries = yield query.getEntries(resume);
 
-            let newEntries = aAddedEntries.filter(this.containsEntry, this);
+            let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
                 let query = new Query({
                     sortOrder: this.query.sortOrder,
@@ -549,7 +548,7 @@ FeedView.prototype = {
      */
     _onEntriesRemoved: function FeedView__onEntriesRemoved(aRemovedEntries, aAnimate,
                                                            aLoadNewEntries) {
-        let containedEntries = aRemovedEntries.filter(this.containsEntry, this);
+        let containedEntries = aRemovedEntries.filter(this.isEntryLoaded, this);
         if (!containedEntries.length)
             return;
 
@@ -583,7 +582,7 @@ FeedView.prototype = {
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
 
-                if (this.headlinesMode) {
+                if (this.headlinesView) {
                     let dayHeader = this.document.getElementById('day' + entryView.day);
                     if (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1')
                         this.feedContent.removeChild(dayHeader);
@@ -621,7 +620,7 @@ FeedView.prototype = {
         this._entryViews = [];
 
         this.document.body.classList.remove('trash-folder');
-        this.document.body.classList.remove('headlines-mode');
+        this.document.body.classList.remove('headline-view');
         this.document.body.classList.remove('multiple-feeds');
 
         this._stopSmoothScrolling();
@@ -644,13 +643,13 @@ FeedView.prototype = {
 
         this._buildHeader();
 
-        this.headlinesMode = PrefCache.showHeadlinesOnly;
+        this.headlinesView = PrefCache.showHeadlinesOnly;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');
 
-        if (this.headlinesMode)
-            this.document.body.classList.add('headlines-mode');
+        if (this.headlinesView)
+            this.document.body.classList.add('headline-view');
 
         // Temporarily remove the listener because reading window.innerHeight
         // can trigger a resize event (!?).
@@ -667,7 +666,7 @@ FeedView.prototype = {
 
             let lastSelectedEntry = this.selectedEntry;
             this.selectedEntry = null;
-            let entry = this.containsEntry(lastSelectedEntry) ? lastSelectedEntry
+            let entry = this.isEntryLoaded(lastSelectedEntry) ? lastSelectedEntry
                                                               : this._loadedEntries[0];
             this.selectEntry(entry, true);
         }.bind(this))
@@ -777,7 +776,7 @@ FeedView.prototype = {
         let nextEntryView = this._entryViews[aPosition];
         let nextElem = nextEntryView ? nextEntryView.container : null;
 
-        if (this.headlinesMode) {
+        if (this.headlinesView) {
             if (nextEntryView && entryView.day > nextEntryView.day)
                 nextElem = nextElem.previousSibling;
 
@@ -881,7 +880,7 @@ function EntryView(aFeedView, aEntryData) {
     this.entryURL = aEntryData.entryURL;
     this.updated = aEntryData.updated;
 
-    this.headline = this.feedView.headlinesMode;
+    this.headline = this.feedView.headlinesView;
 
     this.container = this.feedView.document.getElementById('article-template').cloneNode(true);
     this.container.id = aEntryData.id;
