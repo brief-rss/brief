@@ -15,7 +15,7 @@ const LOAD_STEP_SIZE = 5;
 const HEADLINES_LOAD_STEP_SIZE = 25;
 
 /**
- * Manages display of feed content.
+ * Manages the display of feed content.
  *
  * @param aTitle
  *        Title of the view which will be shown in the header.
@@ -167,7 +167,7 @@ FeedView.prototype = {
         if (this.selectedEntry)
             this.getEntryView(this.selectedEntry).selected = false;
 
-        this.selectedEntry = aEntry;
+        this.__selectedEntry = aEntry;
 
         if (aEntry) {
             this.getEntryView(aEntry).selected = true;
@@ -665,7 +665,7 @@ FeedView.prototype = {
             this._autoMarkRead();
 
             let lastSelectedEntry = this.selectedEntry;
-            this.selectedEntry = null;
+            this.__selectedEntry = null;
             let entry = this.isEntryLoaded(lastSelectedEntry) ? lastSelectedEntry
                                                               : this._loadedEntries[0];
             this.selectEntry(entry, true);
