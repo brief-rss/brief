@@ -165,12 +165,12 @@ let Commands = {
         gCurrentView.selectPrevEntry();
     },
 
-    skipDown: function cmd_skipDown() {
-        gCurrentView.skipDown();
+    scrollDownByScreen: function cmd_scrollDownByScreen() {
+        gCurrentView.scrollDownByScreen();
     },
 
-    skipUp: function cmd_skipUp() {
-        gCurrentView.skipUp();
+    scrollUpByScreen: function cmd_scrollUpByScreen() {
+        gCurrentView.scrollUpByScreen();
     },
 
     focusSearchbar: function cmd_focusSearchbar() {
@@ -323,10 +323,16 @@ function onKeyPress(aEvent) {
 
     if (Prefs.getBoolPref('assumeStandardKeys') && aEvent.charCode == aEvent.DOM_VK_SPACE) {
         if (aEvent.shiftKey) {
-            gCurrentView.selectPrevEntry();
+            if (gCurrentView.headlinesView)
+                gCurrentView.scrollUpByScreen();
+            else
+                gCurrentView.selectPrevEntry();
         }
         else {
-            gCurrentView.selectNextEntry();
+            if (gCurrentView.headlinesView)
+                gCurrentView.scrollDownByScreen();
+            else
+                gCurrentView.selectNextEntry();
         }
 
         aEvent.preventDefault();

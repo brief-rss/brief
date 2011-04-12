@@ -6,8 +6,8 @@
 <!ENTITY shiftSpace.key "Shift + Space">
 <!ENTITY nextItem "Go to the next item">
 <!ENTITY previousItem "Go to the previous item">
-<!ENTITY skipDown "Skip down by 10 items">
-<!ENTITY skipUp "Skip up by 10 items">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Open the current item">
 <!ENTITY showItem "Show/hide the current item (in headlines view)">

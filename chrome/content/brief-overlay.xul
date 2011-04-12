@@ -16,10 +16,10 @@
              oncommand="Brief.doCommand('selectNextEntry')"/>
         <key id="Brief_selectPreviousEntry" key="k"
              oncommand="Brief.doCommand('selectPrevEntry')"/>
-        <key id="Brief_skipDown" key="u"
-             oncommand="Brief.doCommand('skipDown')"/>
-        <key id="Brief_skipUp" key="i"
-             oncommand="Brief.doCommand('skipUp')"/>
+        <key id="Brief_scrollDownByScreen" key="u"
+             oncommand="Brief.doCommand('scrollDownByScreen')"/>
+        <key id="Brief_scrollUpByScreen" key="i"
+             oncommand="Brief.doCommand('scrollUpByScreen')"/>
 
         <key id="Brief_toggleSelectedEntryRead" key="m"
              oncommand="Brief.doCommand('toggleSelectedEntryRead')"/>
