@@ -185,7 +185,7 @@ let FeedUpdateServiceInternal = {
     // See FeedUpdateService.
     stopUpdating: function FeedUpdateServiceInternal_stopUpdating() {
         if (this.status != this.NOT_UPDATING)
-            this.finishUpdate('canceled');
+            this.finishUpdate('cancelled');
     },
 
     // nsITimerCallback
@@ -239,14 +239,14 @@ let FeedUpdateServiceInternal = {
     },
 
 
-    onFeedUpdated: function FeedUpdateServiceInternal_onFeedUpdated(aFeed, aSuccess, aNewEntriesCount) {
+    onFeedUpdated: function FeedUpdateServiceInternal_onFeedUpdated(aFeed, aResult, aNewEntriesCount) {
         this.completedFeeds.push(aFeed);
         this.newEntriesCount += aNewEntriesCount;
         if (aNewEntriesCount > 0)
             this.feedsWithNewEntriesCount++;
 
         Services.obs.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
-        if (!aSuccess)
+        if (aResult == 'error')
             Services.obs.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
 
         if (this.completedFeeds.length == this.scheduledFeeds.length)
@@ -397,7 +397,7 @@ FeedFetcher.prototype = {
                 self.requestFeed();
             }
             else {
-                self.finish(false);
+                self.finish('error');
             }
         }
 
@@ -408,7 +408,7 @@ FeedFetcher.prototype = {
                 self.parser.parseFromString(self.request.responseText, uri);
             }
             catch (ex) {
-                self.finish(false);
+                self.finish('error');
             }
         }
     },
@@ -420,14 +420,20 @@ FeedFetcher.prototype = {
         this.parser.listener = null;
 
         if (!aResult || !aResult.doc) {
-            this.finish(false);
+            this.finish('error');
             return;
         }
 
         this.bozo = aResult.bozo;
 
         let downloadedFeed = aResult.doc.QueryInterface(Ci.nsIFeed);
-        this.feed.mapProperties(downloadedFeed);
+
+        if (downloadedFeed.link)
+            this.feed.websiteURL = downloadedFeed.link.spec;
+        if (downloadedFeed.subtitle)
+            this.feed.subtitle = downloadedFeed.subtitle.text;
+
+        this.feed.wrappedFeed = downloadedFeed;
 
         entries = [];
         if (downloadedFeed.items) {
@@ -443,14 +449,22 @@ FeedFetcher.prototype = {
             new FaviconFetcher(this.feed)
 
         Storage.processFeed(this.feed, entries, function(aNewEntriesCount) {
-            this.finish(true, aNewEntriesCount);
+            this.finish('ok', aNewEntriesCount);
         }.bind(this));
     },
 
-    finish: function FeedFetcher_finish(aSuccess, aNewEntriesCount) {
-        FeedUpdateServiceInternal.onFeedUpdated(this.feed, aSuccess, aNewEntriesCount || 0);
-        if (!this.finished)
-            this.cleanup();
+    finish: function FeedFetcher_finish(aResult, aNewEntriesCount) {
+        if (this.finished)
+            return;
+
+        if (aResult == 'ok' || aResult == 'error')
+            FeedUpdateServiceInternal.onFeedUpdated(this.feed, aResult, aNewEntriesCount || 0);
+
+        Services.obs.removeObserver(this, 'brief:feed-update-finished');
+        this.request = null;
+        this.timeoutTimer.cancel();
+        this.timeoutTimer = null;
+        this.parser.listener = null;
 
         this.finished = true;
     },
@@ -459,25 +473,16 @@ FeedFetcher.prototype = {
         switch (aTopic) {
             case 'timer-callback':
                 this.request.abort();
-                this.finish(false);
+                this.finish('error');
                 break;
 
             case 'brief:feed-update-finished':
-                if (aData == 'canceled' && !this.finished) {
+                if (aData == 'cancelled') {
                     this.request.abort();
-                    this.cleanup();
-                    this.finished = true;
+                    this.finish('cancelled');
                 }
                 break;
             }
-    },
-
-    cleanup: function FeedFetcher_cleanup() {
-        Services.obs.removeObserver(this, 'brief:feed-update-finished');
-        this.request = null;
-        this.timeoutTimer.cancel();
-        this.timeoutTimer = null;
-        this.parser.listener = null;
     },
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver, Ci.nsIFeedResultListener])

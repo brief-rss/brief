@@ -84,21 +84,6 @@ Feed.prototype = {
      */
     wrappedFeed: null,
 
-    /**
-     * Wrapp an instance of nsIFeed and maps its properties.
-     *
-     * @param aFeed [optional]
-     *        nsIFeed to wrap.
-     */
-    mapProperties: function Feed_mapProperties(aFeed) {
-        this.wrappedFeed = aFeed;
-
-        if (aFeed.link)
-            this.websiteURL = aFeed.link.spec;
-        if (aFeed.subtitle)
-            this.subtitle = aFeed.subtitle.text;
-    }
-
 }
 
 
