@@ -1,11 +1,11 @@
-body.headline-view > #feed-content {
+body.headlines-view > #feed-content {
     min-width: 500px;
     max-width: 693px;
     margin: 0 auto;
     padding-left: 60px;
 }
 
-body.headline-view.multiple-feeds > #feed-content {
+body.headlines-view.multiple-feeds > #feed-content {
     max-width: 793px;
 }
 
