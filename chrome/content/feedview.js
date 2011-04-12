@@ -24,17 +24,15 @@ const HEADLINES_LOAD_STEP_SIZE = 25;
  */
 function FeedView(aTitle, aQuery) {
     this.title = aTitle;
-    this.fixedUnread = aQuery.read !== undefined;
-    this.fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
+    this._fixedUnread = aQuery.read !== undefined;
+    this._fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
 
-    getElement('filter-unread-checkbox').disabled = this.fixedUnread;
-    getElement('filter-starred-checkbox').disabled = this.fixedStarred;
+    getElement('filter-unread-checkbox').disabled = this._fixedUnread;
+    getElement('filter-starred-checkbox').disabled = this._fixedStarred;
 
     aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
     this.__query = aQuery;
 
-    this._loadedEntries = [];
-    this._entryViews = [];
     this._entriesMarkedUnread = [];
 
     if (gCurrentView)
@@ -61,26 +59,30 @@ FeedView.prototype = {
 
     titleOverride: '',
 
-    // Indicates if a filter paramater is fixed and cannot be toggled by the user.
-    fixedUnread: false,
-    fixedStarred: false,
+    get headlinesView() this.__headlinesView || false,
 
-    __headlinesView: false,
-    get headlinesView() this.__headlinesView,
+    get selectedEntry() this.__selectedEntry || null,
 
-    // IDs of entries that have been loaded.
-    _loadedEntries: [],
-
-    // EntryView objects of entries that have been loaded.
+    // Ordered list of EntryView objects of entries that have been loaded.
     entryViews: [],
+
+    // Ordered list of IDs of entries that have been loaded.
+    _loadedEntries: [],
 
     _refreshPending: false,
 
+    // Indicates if entries are being loaded (i.e. they have been queried and
+    // the view is waiting to insert the results).
+    _loading: false,
+
     _allEntriesLoaded: false,
 
+    // ID of the animation interval if the view is being scrolled, or null otherwise.
+    _scrolling: null,
 
-    __selectedEntry: null,
-    get selectedEntry() this.__selectedEntry,
+    // Indicates if a filter paramater is fixed and cannot be toggled by the user.
+    _fixedUnread: false,
+    _fixedStarred: false,
 
 
     get browser() getElement('feed-view'),
@@ -94,7 +96,7 @@ FeedView.prototype = {
 
     getEntryIndex: function(aEntry) this._loadedEntries.indexOf(aEntry),
 
-    getEntryView: function(aEntry) this._entryViews[this.getEntryIndex(aEntry)],
+    getEntryView:  function(aEntry) this._entryViews[this.getEntryIndex(aEntry)],
 
     isEntryLoaded: function(aEntry) this.getEntryIndex(aEntry) !== -1,
 
@@ -102,11 +104,10 @@ FeedView.prototype = {
 
 
     // Query that selects all entries contained by the view.
-    __query: null,
     get query() {
-        if (!this.fixedUnread)
+        if (!this._fixedUnread)
             this.__query.read = PrefCache.filterUnread ? false : undefined;
-        if (!this.fixedStarred)
+        if (!this._fixedStarred)
             this.__query.starred = PrefCache.filterStarred ? true : undefined;
 
         if (this.__query.read === false && PrefCache.sortUnreadViewOldestFirst)
@@ -173,33 +174,8 @@ FeedView.prototype = {
             this.getEntryView(aEntry).selected = true;
 
             if (aScroll)
-                this.scrollToEntry(aEntry, true, aScrollSmoothly);
+                this.scrollToEntry(aEntry, true, aScrollSmoothly, true);
         }
-    },
-
-    // Scroll down by 10 entries, loading more entries if necessary.
-    skipDown: function FeedView_skipDown() {
-        let middleEntry = this.getEntryInScreenCenter();
-        let index = this.getEntryIndex(middleEntry);
-
-        let doSkipDown = function(aCount) {
-            let targetEntry = this._loadedEntries[index + 10] || this.lastLoadedEntry;
-            this.selectEntry(targetEntry, true, true);
-        }.bind(this);
-
-        if (index + 10 > this._loadedEntries.length - 1)
-            this._loadEntries(10, doSkipDown);
-        else
-            doSkipDown();
-    },
-
-    // See scrollDown.
-    skipUp: function FeedView_skipUp() {
-        let middleEntry = this.getEntryInScreenCenter();
-        let index = this.getEntryIndex(middleEntry);
-        let targetEntry = this._loadedEntries[index - 10] || this._loadedEntries[0];
-
-        this.selectEntry(targetEntry, true, true);
     },
 
 
@@ -216,8 +192,10 @@ FeedView.prototype = {
      * @param aSmooth
      *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
      *        target position.
+     * @param aSuppressSelection
+     *        Set to TRUE to prevent scrolling from altering selection.
      */
-    scrollToEntry: function FeedView_scrollToEntry(aEntry, aCentre, aSmooth) {
+    scrollToEntry: function FeedView_scrollToEntry(aEntry, aCentre, aSmooth, aSuppressSelection) {
         let win = this.window;
         let entryView = this.getEntryView(aEntry);
         let targetPosition;
@@ -233,45 +211,72 @@ FeedView.prototype = {
             targetPosition = (entryView.offsetTop + entryView.height) - win.innerHeight;
         }
 
-        targetPosition = Math.max(targetPosition, 0);
-        targetPosition = Math.min(targetPosition, win.scrollMaxY);
-
-        if (targetPosition != win.pageYOffset) {
-            if (aSmooth)
-                this._scrollSmoothly(targetPosition);
-            else
-                win.scroll(win.pageXOffset, targetPosition);
-        }
+        this.scroll(targetPosition, aSmooth, aSuppressSelection);
     },
 
-    _scrollSmoothly: function FeedView__scrollSmoothly(aTargetPosition) {
+    // Scroll down by the height of the viewport.
+    scrollDownByScreen: function FeedView_scrollDownByScreen() {
+        this.scroll(this.window.pageYOffset + this.window.innerHeight - 20, true);
+    },
+
+    // See scrollUpByScreen.
+    scrollUpByScreen: function FeedView_scrollUpByScreen() {
+        this.scroll(this.window.pageYOffset - this.window.innerHeight + 20, true);
+    },
+
+    /**
+     * Scrolls smoothly to the given position
+     *
+     * @param aTargetPosition
+     *        Y coordinate with which to line up the top edge of the viewport.
+     * @param aSmooth
+     *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
+     *        target position.
+     * @param aSuppressSelection
+     *        Set to TRUE to prevent scrolling from altering selection.
+     */
+    scroll: function FeedView_scroll(aTargetPosition, aSmooth, aSuppressSelection) {
         if (this._scrolling)
             return;
 
-        let distance = aTargetPosition - this.window.pageYOffset;
-        let jumpCount = Math.exp(Math.abs(distance) / 400) + 6;
-        jumpCount = Math.max(jumpCount, 7);
-        jumpCount = Math.min(jumpCount, 15);
+        // Clamp the target position.
+        let targetPosition = Math.max(aTargetPosition, 0);
+        targetPosition = Math.min(targetPosition, this.window.scrollMaxY);
 
-        let jump = Math.round(distance / jumpCount);
+        if (targetPosition == this.window.pageYOffset)
+            return;
 
-        this._scrolling = setInterval(function() {
-            // If we are within epsilon smaller or equal to the jump,
-            // then scroll directly to the target position.
-            if (Math.abs(aTargetPosition - this.window.pageYOffset) <= Math.abs(jump)) {
-                this.window.scroll(this.window.pageXOffset, aTargetPosition)
-                this._stopSmoothScrolling();
+        if (aSmooth) {
+            let distance = targetPosition - this.window.pageYOffset;
+            let jumpCount = Math.exp(Math.abs(distance) / 400) + 6;
+            jumpCount = Math.max(jumpCount, 7);
+            jumpCount = Math.min(jumpCount, 15);
 
-                // One more scroll event will be sent but _scrolling is already null,
-                // so the event handler will try to automatically select the central
-                // entry. This has to be prevented, because it may deselect the entry
-                // that the user has just selected manually.
-                this._ignoreNextScrollEvent = true;
-            }
-            else {
-                this.window.scroll(this.window.pageXOffset, this.window.pageYOffset + jump);
-            }
-        }.bind(this), 10)
+            let jump = Math.round(distance / jumpCount);
+
+            this._scrolling = setInterval(function() {
+                // If we are within epsilon smaller or equal to the jump,
+                // then scroll directly to the target position.
+                if (Math.abs(targetPosition - this.window.pageYOffset) <= Math.abs(jump)) {
+                    this.window.scroll(this.window.pageXOffset, targetPosition)
+                    this._stopSmoothScrolling();
+
+                    // One more scroll event will be sent but _scrolling is already null,
+                    // so the event handler will try to automatically select the central entry.
+                    if (aSuppressSelection)
+                        this._suppressSelectionOnNextScroll = true;
+                }
+                else {
+                    this.window.scroll(this.window.pageXOffset, this.window.pageYOffset + jump);
+                }
+            }.bind(this), 10)
+        }
+        else {
+            if (aSuppressSelection)
+                this._suppressSelectionOnNextScroll = true;
+
+            this.window.scroll(this.window.pageXOffset, targetPosition);
+        }
     },
 
     _stopSmoothScrolling: function FeedView__stopSmoothScrolling() {
@@ -372,12 +377,10 @@ FeedView.prototype = {
             case 'scroll':
                 this._autoMarkRead();
 
-                if (this._ignoreNextScrollEvent) {
-                    this._ignoreNextScrollEvent = false;
-                    break;
+                if (this._suppressSelectionOnNextScroll) {
+                    this._suppressSelectionOnNextScroll = false;
                 }
-
-                if (!this._scrolling) {
+                else if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
 
                     function selectCentralEntry() {
@@ -555,7 +558,7 @@ FeedView.prototype = {
         let animate = aAnimate && containedEntries.length < 30;
 
         // Removing content may cause a scroll event that should be ignored.
-        this._ignoreNextScrollEvent = true;
+        this._suppressSelectionOnNextScroll = true;
 
         getTopWindow().StarUI.panel.hidePopup();
 
@@ -627,10 +630,7 @@ FeedView.prototype = {
         getTopWindow().StarUI.panel.hidePopup();
 
         // Manually reset the scroll position, otherwise weird stuff happens.
-        if (this.window.pageYOffset != 0) {
-            this.window.scroll(this.window.pageXOffset, 0);
-            this._ignoreNextScrollEvent = true;
-        }
+        this.scroll(0, false, true);
 
         // Clear DOM content.
         this.document.body.removeChild(this.feedContent);
@@ -1102,7 +1102,7 @@ EntryView.prototype = {
                 let screenBottom = this.feedView.window.pageYOffset +
                                    this.feedView.window.innerHeight;
                 if (entryBottom > screenBottom)
-                    this.feedView.scrollToEntry(this.id, false, true);
+                    this.feedView.scrollToEntry(this.id, false, true, true);
             }
         }.bind(this))
 
