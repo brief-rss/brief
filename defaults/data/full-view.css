@@ -9,7 +9,7 @@ article.full > .headline-container {
 }
 
 .full-container {
-    margin-top: 5px;
+    margin: 5px 0 5px; /* The margins are collapsed in full view but are necessary if headlines view */
     background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0.5) 24px, rgba(211, 231, 242, 0) 40px) #ffffff;
     background-clip: padding-box;
     border: 6px solid #d8dadc;
