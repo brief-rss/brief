@@ -44,7 +44,6 @@ article.headline.selected > .full-container {
     -moz-box-flex: 1;
     height: 34px;
     -moz-box-align: center;
-    padding-left: 5px;
     border-bottom: 1px solid #D4DEE6;
 }
 
@@ -67,21 +66,27 @@ article.was-selected:not(:hover) .headline-header {
     width: 30px;
 }
 
-.headline-container:hover > .bookmark-button,
+.bookmark-button:hover,
 .entry.starred > .headline-container > .bookmark-button {
     opacity: 1;
+}
+
+.feed-icon-wrapper {
+    margin-left: 5px;
+    margin-right: 7px;
 }
 
 .feed-icon {
     display: block;
     width: 16px;
     height: 16px;
+    margin: 0;
     opacity: 0.6;
 }
 
 .headline-feed-name {
     display: -moz-box;
-    margin-right: 35px;
+    margin-right: 30px;
     width: 100px;
     overflow: hidden;
     font-size: 10px;
