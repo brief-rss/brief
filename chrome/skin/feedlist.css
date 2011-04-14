@@ -28,6 +28,8 @@ richtreeitem[selected="true"] {
 }
 
 .feed-icon {
+    width: 16px !important;
+    height: 16px !important;
     margin-right: 6px !important;
     list-style-image: url(icons/feed-favicon.png);
 }

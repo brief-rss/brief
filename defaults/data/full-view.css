@@ -53,6 +53,10 @@ article.read .title-link {
     padding: 7px 5px 0 24px;
 }
 
+.header > .bookmark-button {
+    margin: -5px 0 0 -24px;
+}
+
 .title {
     -moz-box-flex: 1;
 }
