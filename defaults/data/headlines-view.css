@@ -72,16 +72,10 @@ article.was-selected:not(:hover) .headline-header {
     opacity: 1;
 }
 
-
-.feed-icon-wrapper {
-    display: -moz-box;
-    overflow: hidden;
+.feed-icon {
+    display: block;
     width: 16px;
     height: 16px;
-    margin: 0 5px 0 0;
-}
-
-.feed-icon {
     opacity: 0.6;
 }
 
