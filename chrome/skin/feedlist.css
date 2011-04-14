@@ -28,6 +28,8 @@ richtreeitem[selected="true"] {
 }
 
 .feed-icon {
+    width: 16px !important;
+    height: 16px !important;
     margin-right: 6px !important;
     list-style-image: url(icons/feed-favicon.png);
 }
@@ -45,7 +47,7 @@ richtreeitem[selected="true"] {
     text-align: center;
     font-size: 12px !important;
     font-weight: bold !important;
-    background-color: #f2faff !important;
+    background-color: rgba(229, 246, 255, 0.3) !important;
     color: #457499 !important;
 }
 

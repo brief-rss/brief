@@ -1,19 +1,20 @@
-body.headlines-mode > #feed-content {
+body.headlines-view > #feed-content {
     min-width: 500px;
     max-width: 693px;
     margin: 0 auto;
-    padding-left: 60px;
+    padding-left: 50px;
 }
 
-body.headlines-mode.multiple-feeds > #feed-content {
+body.headlines-view.multiple-feeds > #feed-content {
     max-width: 793px;
 }
 
 body:not(.multiple-feeds) article.headline:not(.collapsed) {
-    margin-left: -40px;
+    margin-left: -30px;
 }
 
 article.headline > .full-container {
+    min-width: -moz-min-content;
     max-width: 700px;
     margin-left: -5px;
 }
@@ -24,7 +25,7 @@ article.headline.selected > .full-container {
 
 .day-header {
     padding: 20px 0 5px; /* Use padding to avoid margin collapsing */
-    margin-left: -40px;
+    margin-left: -30px;
     font-size: 13px;
     text-transform: uppercase;
     color: #5e9c3e;
@@ -34,12 +35,14 @@ article.headline.selected > .full-container {
     display: -moz-box;
     width: -moz-available;
     height: 34px;
+    -moz-box-align: center;
     cursor: default;
 }
 
 .headline-header {
     display: -moz-box;
     -moz-box-flex: 1;
+    height: 34px;
     -moz-box-align: center;
     padding-left: 5px;
     border-bottom: 1px solid #D4DEE6;
@@ -58,9 +61,27 @@ article.was-selected:not(:hover) .headline-header {
     background-color: #DEF2FF;
 }
 
-.feed-icon {
+.headline-container > .bookmark-button {
+    opacity: 0;
+    margin-left: -30px;
+    width: 30px;
+}
+
+.headline-container:hover > .bookmark-button,
+.entry.starred > .headline-container > .bookmark-button {
+    opacity: 1;
+}
+
+
+.feed-icon-wrapper {
     display: -moz-box;
+    overflow: hidden;
+    width: 16px;
+    height: 16px;
     margin: 0 5px 0 0;
+}
+
+.feed-icon {
     opacity: 0.6;
 }
 

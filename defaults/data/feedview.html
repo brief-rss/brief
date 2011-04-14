@@ -26,17 +26,13 @@
         <article id="article-template" class="entry">
             <div class="headline-container">
                 <header class="headline-header">
-                    <img class="feed-icon"></img>
+                    <div class="feed-icon-wrapper">
+                        <img class="feed-icon"></img>
+                    </div>
                     <div class="headline-feed-name"></div>
                     <h1 class="headline-title"></h1>
                     <a class="headline-link" command="open"></a>
                 </header>
-
-                <div class="controls">
-                    <div class="button mark-read-button" command="switchRead"></div>
-                    <div class="button delete-button" command="delete"></div>
-                    <div class="button restore-button" command="delete"></div>
-                </div>
             </div>
 
             <div class="full-container">
@@ -49,7 +45,7 @@
                     <div class="controls">
                         <div class="button mark-read-button" command="switchRead"></div>
                         <div class="button delete-button" command="delete"></div>
-                        <div class="button restore-button" command="delete"></div>
+                        <div class="button restore-button" command="restore"></div>
                     </div>
                 </header>
 
