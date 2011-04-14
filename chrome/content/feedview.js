@@ -1070,7 +1070,9 @@ EntryView.prototype = {
         if (this.collapsed)
             return;
 
-        this._getElement('headline-container').appendChild(this._getElement('controls'));
+        let headline = this._getElement('headline-container');
+        headline.insertBefore(this._getElement('bookmark-button'), headline.firstChild);
+        headline.appendChild(this._getElement('controls'));
 
         hideElement(this._getElement('full-container'));
         showElement(this._getElement('headline-container'));
@@ -1084,7 +1086,9 @@ EntryView.prototype = {
         if (!this.collapsed)
             return;
 
-        this._getElement('header').appendChild(this._getElement('controls'));
+        let header = this._getElement('header');
+        header.insertBefore(this._getElement('bookmark-button'), header.firstChild);
+        header.appendChild(this._getElement('controls'));
 
         this.container.classList.remove('collapsed');
 
