@@ -70,7 +70,7 @@ FeedView.prototype = {
     // Temporarily override the title without losing the old one.
     titleOverride: '',
 
-    headlinesMode: false,
+    headlinesView: false,
 
     // ID of the selected entry.
     selectedEntry: null,
@@ -583,7 +583,7 @@ FeedView.prototype = {
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
 
-                if (this.headlinesMode) {
+                if (this.headlinesView) {
                     let dayHeader = this.document.getElementById('day' + entryView.day);
                     if (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1')
                         this.feedContent.removeChild(dayHeader);
@@ -644,16 +644,13 @@ FeedView.prototype = {
 
         this._buildHeader();
 
-        this.headlinesMode = PrefCache.showHeadlinesOnly;
+        this.headlinesView = PrefCache.showHeadlinesOnly;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');
 
-        if (this.headlinesMode)
-            this.document.body.classList.add('headlines-mode');
-
-        if (this.query.deleted == Storage.ENTRY_STATE_TRASHED)
-            this.document.body.classList.add('trash-folder');
+        if (this.headlinesView)
+            this.document.body.classList.add('headlines-view');
 
         // Temporarily remove the listener because reading window.innerHeight
         // can trigger a resize event (!?).
@@ -780,7 +777,7 @@ FeedView.prototype = {
         let nextEntryView = this._entryViews[aPosition];
         let nextElem = nextEntryView ? nextEntryView.container : null;
 
-        if (this.headlinesMode) {
+        if (this.headlinesView) {
             if (nextEntryView && entryView.day > nextEntryView.day)
                 nextElem = nextElem.previousSibling;
 
@@ -884,7 +881,7 @@ function EntryView(aFeedView, aEntryData) {
     this.entryURL = aEntryData.entryURL;
     this.updated = aEntryData.updated;
 
-    this.headline = this.feedView.headlinesMode;
+    this.headline = this.feedView.headlinesView;
 
     this.container = this.feedView.document.getElementById('article-template').cloneNode(true);
     this.container.id = aEntryData.id;
@@ -896,7 +893,7 @@ function EntryView(aFeedView, aEntryData) {
 
     let deleteButton = this._getElement('delete-button');
     let restoreButton = this._getElement('restore-button');
-    if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED) {
+    if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED)
         deleteButton.parentNode.removeChild(deleteButton);
     else
         restoreButton.parentNode.removeChild(restoreButton);
