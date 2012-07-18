@@ -1,0 +1,18 @@
+<!ENTITY shortcutsPage.title "Brief - klavye kısayolları">
+<!ENTITY or "ya da">
+<!ENTITY navigation.header "Navigasyon">
+<!ENTITY space.key "Space">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Geçerli öğeyi aç">
+<!ENTITY entries.header "Öğeler">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Seçili öğenin belirginleştirilmesini etkinleştir.">
+<!ENTITY moveToTrash "Seçili öğeyi çöp kutusuna taşı">
+<!ENTITY view.header "Göster(view)">
+<!ENTITY showAll "Tüm öğeleri göster">
+<!ENTITY showStarred "İşaretlenmiş öğeleri göster">
+<!ENTITY showUnread "Okunmamış öğeleri göster">
+<!ENTITY headlinesView "Başlık görünümünü değiştir">
+<!ENTITY openBrief "Brief&apos;i aç">
+<!ENTITY focusSearchbar "Arama çubuğuna odaklan">
+<!ENTITY displayShortcuts "Kısayol tuşlarının listesini göster">
