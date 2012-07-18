@@ -181,6 +181,7 @@
             <html:div id="feed-title-box" flex="1">
                 <html:a id="feed-title" target="_blank"/>
             </html:div>
+            <spacer flex="1"/>
             <button id="headlines-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
