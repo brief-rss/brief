@@ -32,4 +32,5 @@ locale  brief   ro-RO  chrome/locale/ro-RO/
 locale  brief   ru-RU  chrome/locale/ru-RU/
 locale  brief   sk-SK  chrome/locale/sk-SK/
 locale  brief   sv-SE  chrome/locale/sv-SE/
+locale  brief   tr     chrome/locale/tr/
 locale  brief   zh-CN  chrome/locale/zh-CN/
