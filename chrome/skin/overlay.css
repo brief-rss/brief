@@ -4,43 +4,12 @@
     -moz-box-orient: horizontal;
 }
 
-
-#brief-button {
-    padding: 2px 6px !important;
-    background: none repeat scroll 0% 0% padding-box rgba(231, 237, 242, 0) !important;
-    border-radius: 2px 2px 2px 2px !important;
-    border: 1px solid rgba(23, 51, 78, 0) !important;
-    box-shadow: 0px 1px rgba(255, 255, 255, 0) inset, 0px 1px rgba(23, 51, 78, 0), 0px 0px 2px rgba(23, 51, 78, 0) !important;
-    -moz-transition-property: background-color, border-color, box-shadow !important;
-    -moz-transition-duration: 150ms !important;
-}
-
-#brief-button:hover {
-    background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1)) !important;
-    border-color: rgba(23, 51, 78, 0.15) rgba(23, 51, 78, 0.2) rgba(23, 51, 78, 0.25) !important;
-    box-shadow: 0px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px rgba(23, 51, 78, 0.03), 0px 0px 2px rgba(23, 51, 78, 0.1) !important;
-}
-
-#brief-button:hover:active {
-    background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1)) !important;
-    background-color: rgba(23, 51, 78, 0.15) !important;
-    border-color: rgba(23, 51, 78, 0.3) rgba(23, 51, 78, 0.35) rgba(23, 51, 78, 0.4) !important;
-    box-shadow: 0px 1px 1px rgba(23, 51, 78, 0.1) inset, 0px 0px 1px rgba(23, 51, 78, 0.2) inset, 0px 1px 0px rgba(23, 51, 78, 0), 0px 0px 2px rgba(23, 51, 78, 0) !important;
-    text-shadow: none !important;
-    -moz-transition: none 0s ease 0s !important;
-}
-
 toolbar[iconsize=small] #brief-button {
     list-style-image: url(chrome://brief/skin/feed-icon-16x16.png);
 }
 
-#brief-button .toolbarbutton-icon {
-    -moz-margin-end: 0;
-}
-
-.brief-status-counter {
-    display: -moz-box;
-    margin: 0;
+toolbar[mode=full] #brief-status-counter {
+    display: none;
 }
 
 #brief-tooltip-last-updated {
@@ -53,9 +22,4 @@ toolbar[iconsize=small] #brief-button {
 
 #brief-tooltip-feed-name {
   max-width: 15em;
-}
-
-.unread-entries-count {
-  font-weight: bold;
-  margin-right: 0px;
 }

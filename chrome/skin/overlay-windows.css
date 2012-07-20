@@ -1,0 +1,28 @@
+#brief-status-counter {
+    margin: -1px 0 0 5px;
+}
+
+#navigator-toolbox[iconsize=large][mode=icons] > #nav-bar #brief-button > #brief-button-inner-box {
+    padding: 2px 6px !important;
+    background: none repeat scroll 0% 0% padding-box rgba(231, 237, 242, 0) !important;
+    border-radius: 2px 2px 2px 2px !important;
+    border: 1px solid rgba(23, 51, 78, 0) !important;
+    box-shadow: 0px 1px rgba(255, 255, 255, 0) inset, 0px 1px rgba(23, 51, 78, 0), 0px 0px 2px rgba(23, 51, 78, 0) !important;
+    -moz-transition-property: background-color, border-color, box-shadow !important;
+    -moz-transition-duration: 150ms !important;
+}
+
+#navigator-toolbox[iconsize=large][mode=icons] > #nav-bar #brief-button:hover #brief-button-inner-box {
+    background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1)) !important;
+    border-color: rgba(23, 51, 78, 0.15) rgba(23, 51, 78, 0.2) rgba(23, 51, 78, 0.25) !important;
+    box-shadow: 0px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px rgba(23, 51, 78, 0.03), 0px 0px 2px rgba(23, 51, 78, 0.1) !important;
+}
+
+#navigator-toolbox[iconsize=large][mode=icons] > #nav-bar #brief-button:hover:active #brief-button-inner-box {
+    background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1)) !important;
+    background-color: rgba(23, 51, 78, 0.15) !important;
+    border-color: rgba(23, 51, 78, 0.3) rgba(23, 51, 78, 0.35) rgba(23, 51, 78, 0.4) !important;
+    box-shadow: 0px 1px 1px rgba(23, 51, 78, 0.1) inset, 0px 0px 1px rgba(23, 51, 78, 0.2) inset, 0px 1px 0px rgba(23, 51, 78, 0), 0px 0px 2px rgba(23, 51, 78, 0) !important;
+    text-shadow: none !important;
+    -moz-transition: none 0s ease 0s !important;
+}
