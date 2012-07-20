@@ -33,6 +33,8 @@
 <!ENTITY displayPane.label "Görünüm">
 <!ENTITY showStatusbarIcon.label "Durum çubuğunda simge göster">
 <!ENTITY showStatusbarIcon.accesskey "R">
+<!ENTITY showUnreadCounter.label "Show the number of unread items next to Brief's icon">
+<!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Okunmadı görünümünde önce en eski öğeleri göster">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Öğeleri gördükten sonra okundu olarak işaretle">
@@ -40,6 +42,7 @@
 <!ENTITY enableItemHightlight.label "Seçili öğeyi her zaman vurgula">
 <!ENTITY enableItemHightlight.accesskey "A">
 <!ENTITY customizeGroup.caption "Dış Görünüm">
+<!ENTITY shortcutsPane.label "Shorcuts">
 <!ENTITY editStyleDescription.label "Beslemelerin görünümünü özelleştir">
 <!ENTITY editStyleButton.label "Özelleştir">
 <!ENTITY editStyleButton.accesskey "Z">

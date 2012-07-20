@@ -2,17 +2,31 @@
 <!ENTITY or "ya da">
 <!ENTITY navigation.header "Navigasyon">
 <!ENTITY space.key "Space">
+<!ENTITY shiftSpace.key "Shift + Space">
+<!ENTITY nextItem "Go to the next item">
+<!ENTITY previousItem "Go to the previous item">
+<!ENTITY skipDown "Skip down by 10 items">
+<!ENTITY skipUp "Skip up by 10 items">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Geçerli öğeyi aç">
+<!ENTITY showItem "Show/hide the current item (in headlines view)">
 <!ENTITY entries.header "Öğeler">
 <!ENTITY tab.key "Tab">
 <!ENTITY enableEntryHightlight "Seçili öğenin belirginleştirilmesini etkinleştir.">
+<!ENTITY markCurrentItemRead "Mark the current item as read/unread">
+<!ENTITY markVisibleRead "Mark all items on the screen as read">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Mark all items as read">
+<!ENTITY starItem "Bookmark the current item">
 <!ENTITY moveToTrash "Seçili öğeyi çöp kutusuna taşı">
 <!ENTITY view.header "Göster(view)">
 <!ENTITY showAll "Tüm öğeleri göster">
 <!ENTITY showStarred "İşaretlenmiş öğeleri göster">
 <!ENTITY showUnread "Okunmamış öğeleri göster">
 <!ENTITY headlinesView "Başlık görünümünü değiştir">
+<!ENTITY general.header "General">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
 <!ENTITY openBrief "Brief&apos;i aç">
 <!ENTITY focusSearchbar "Arama çubuğuna odaklan">
 <!ENTITY displayShortcuts "Kısayol tuşlarının listesini göster">
