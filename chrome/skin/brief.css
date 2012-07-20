@@ -189,6 +189,6 @@ page {
     outline: none;
 }
 
-.tag-list-item:not(.unread) > .unread-count {
+.tag-list-item:not(.unread) .unread-count {
     display: none;
 }
