@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>1.6</version>
+    <version>1.6.1</version>
     <type>2</type>
     <name>Brief</name>
     <description>A feed reading extension.</description>
