@@ -227,7 +227,6 @@ const Brief = {
         let date = new Date(lastUpdateTime);
         let relativeDate = new this.common.RelativeDate(lastUpdateTime);
 
-
         switch (true) {
             case relativeDate.deltaMinutes === 0:
                 label.value = bundle.GetStringFromName('lastUpdated.rightNow');
@@ -261,14 +260,14 @@ const Brief = {
                                          .replace('#number', relativeDate.deltaDays);
                 break;
 
-            case currentDate.getFullYear() === entryDate.getFullYear():
-                time = date.toLocaleFormat('%d %b').replace(/^0/, '');
-                string = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
+            case relativeDate.deltaYears === 0:
+                time = date.toLocaleFormat('%d %B').replace(/^0/, '');
+                label.value = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
                 break;
 
             default:
-                time = date.toLocaleFormat('%d %b %Y').replace(/^0/, '');
-                string = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
+                time = date.toLocaleFormat('%d %B %Y').replace(/^0/, '');
+                label.value = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
                 break;
         }
 
