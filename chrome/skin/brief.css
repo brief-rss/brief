@@ -154,7 +154,7 @@ page {
     color: #00344f !important;
 }
 
-#view-list > richlistitem:not(.unread) > .unread-count {
+#view-list > richlistitem:not(.unread) .unread-count {
     display: none;
 }
 
