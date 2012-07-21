@@ -101,7 +101,7 @@ div {
     color: #FFFFFF;
     text-shadow: -1px -1px 1px #7BAB29;
     border: 1px solid #488F03;
-    -moz-border-radius: 10px;
+    border-radius: 10px;
     background: url(chrome://brief/skin/get-started-button.png) repeat-x center;
     }
 
