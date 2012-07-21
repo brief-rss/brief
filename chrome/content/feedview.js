@@ -305,8 +305,8 @@ FeedView.prototype = {
     _autoMarkRead: function FeedView__autoMarkRead() {
         if (PrefCache.autoMarkRead && !PrefCache.showHeadlinesOnly && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
-            let callback = this._getRefreshGuard(this.markVisibleEntriesRead);
-            this._markVisibleTimeout = async(callback, 1000, this);
+            let callback = this._getRefreshGuard(this.markVisibleEntriesRead.bind(this));
+            this._markVisibleTimeout = async(callback, 500, this);
         }
     },
 
