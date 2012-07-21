@@ -43,7 +43,7 @@ body {
 
 .search-highlight {
     border: 1px solid #45e500;
-    -moz-border-radius: 3px;
+    border-radius: 3px;
     color: black;
     background-color: #adff89;
 }

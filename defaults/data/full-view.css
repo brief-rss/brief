@@ -17,7 +17,7 @@ article.full > .headline-container {
     -moz-border-right-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #f3f5f8 #d8dadc;
     -moz-border-bottom-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #f3f5f8 #d8dadc;
     -moz-border-left-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #f3f5f8 #d8dadc;
-    -moz-border-radius: 9px;
+    border-radius: 9px;
 }
 
 article.selected > .full-container {
@@ -29,7 +29,7 @@ article.selected > .full-container {
     -moz-border-right-colors: none;
     -moz-border-bottom-colors: none;
     -moz-border-left-colors: none;
-    -moz-border-radius: 4px;
+    border-radius: 4px;
     margin: 10px 5px 10px;
     box-shadow: 0 1px 15px rgba(0, 0, 0, 0.3);
 }
