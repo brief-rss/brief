@@ -622,8 +622,7 @@ FeedView.prototype = {
         this._loadedEntries = [];
         this._entryViews = [];
 
-        this.document.body.classList.remove('trash-folder');
-        this.document.body.classList.remove('headline-view');
+        this.document.body.classList.remove('headlines-view');
         this.document.body.classList.remove('multiple-feeds');
 
         this._stopSmoothScrolling();
