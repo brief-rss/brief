@@ -138,25 +138,22 @@ function saveChanges() {
     }
 
     gFeed.markModifiedEntriesUnread = !getElement('updated-entries-checkbox').checked;
+
     let omitInUnread = getElement('omit-in-unread-checkbox').checked ? 1 : 0;
+    let omitInUnreadModified = gFeed.omitInUnread != omitInUnread;
+    gFeed.omitInUnread = omitInUnread;
 
-    if (gFeed.omitInUnread != omitInUnread) {
-        gFeed.omitInUnread = omitInUnread;
+    Storage.updateFeedProperties(gFeed, function() {
+        if (omitInUnreadModified) {
+            // Can't use any global variables here, because they are destroyed when
+            // window is closed.
+            Components.classes['@mozilla.org/observer-service;1']
+                      .getService(Components.interfaces.nsIObserverService)
+                      .notifyObservers(null, 'brief:omit-in-unread-changed', '');
+        }
+    })
 
-        Storage.updateFeedProperties(gFeed, function() {
-            Services.obs.notifyObservers(null, 'brief:omit-in-unread-changed', '');
-            window.close();
-        })
-
-        // Cancel closing the window because global variables are destroyed when the
-        // window is closed and observer service wouldn't be available in
-        // updateFeedProperties() callback above.
-        return false;
-    }
-    else {
-        Storage.updateFeedProperties(gFeed);
-        return true;
-    }
+    return true;
 }
 
 function saveLivemarksData() {
