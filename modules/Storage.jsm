@@ -15,6 +15,7 @@ const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
 const DATABASE_VERSION = 16;
+const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 
 const FEEDS_TABLE_SCHEMA = [
     'feedID          TEXT UNIQUE',
@@ -263,6 +264,8 @@ let StorageInternal = {
                 this.upgradeDatabase();
             }
         }
+
+        Connection.executeSQL('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE);
 
         this.refreshFeedsCache();
 
