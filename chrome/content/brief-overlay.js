@@ -185,7 +185,9 @@ const Brief = {
     },
 
     refreshUI: function Brief_refreshUI() {
-        Brief.updateStatus();
+        setTimeout(function(){
+            Brief.updateStatus();
+        }, 500);
 
         let tooltip = document.getElementById('brief-tooltip');
         if (tooltip.state == 'open' || tooltip.state == 'showing')
