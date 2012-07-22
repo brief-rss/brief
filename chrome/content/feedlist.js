@@ -520,10 +520,15 @@ let FeedList = {
     },
 
     onEntriesMarkedRead: function FeedList_onEntriesMarkedRead(aEntryList, aNewState) {
-        this.refreshFeedTreeitems(aEntryList.feedIDs);
-        ViewList.refreshItem('unread-folder');
-        ViewList.refreshItem('starred-folder');
-        TagList.refreshTags(aEntryList.tags);
+        async(function() {
+            FeedList.refreshFeedTreeitems(aEntryList.feedIDs);
+        }, 250)
+
+        async(function() {
+            ViewList.refreshItem('unread-folder');
+            ViewList.refreshItem('starred-folder');
+            TagList.refreshTags(aEntryList.tags);
+        }, 500)
     },
 
     onEntriesStarred: function FeedList_onEntriesStarred(aEntryList, aNewState) {
@@ -538,9 +543,14 @@ let FeedList = {
     },
 
     onEntriesDeleted: function FeedList_onEntriesDeleted(aEntryList, aNewState) {
-        this.refreshFeedTreeitems(aEntryList.feedIDs);
-        ViewList.refreshItem('unread-folder');
-        ViewList.refreshItem('starred-folder');
+        async(function() {
+            FeedList.refreshFeedTreeitems(aEntryList.feedIDs);
+        }, 250)
+
+        async(function() {
+            ViewList.refreshItem('unread-folder');
+            ViewList.refreshItem('starred-folder');
+        }, 500)
 
         let entriesRestored = (aNewState == Storage.ENTRY_STATE_NORMAL);
         TagList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);
