@@ -801,21 +801,19 @@ FeedView.prototype = {
         feedTitle.textContent = this.titleOverride || this.title;
 
         let feed = Storage.getFeed(this.query.feeds);
+
         if (feed) {
-            let securityManager = Cc['@mozilla.org/scriptsecuritymanager;1']
-                                  .getService(Ci.nsIScriptSecurityManager);
             let url = feed.websiteURL || feed.feedURL;
             let flags = Ci.nsIScriptSecurityManager.DISALLOW_INHERIT_PRINCIPAL;
-            let securityCheckOK = true;
             try {
-                securityManager.checkLoadURIStrWithPrincipal(gBriefPrincipal, url, flags);
+                Services.scriptSecurityManager.checkLoadURIStrWithPrincipal(gBriefPrincipal, url, flags);
             }
             catch (ex) {
                 log('Brief: security error.' + ex);
-                securityCheckOK = false;
+                var securityCheckFailed = true;
             }
 
-            if (securityCheckOK && !this.query.searchString) {
+            if (!securityCheckFailed && !this.query.searchString) {
                 feedTitle.setAttribute('href', url);
                 feedTitle.className = 'feed-link';
             }
@@ -1388,13 +1386,16 @@ __defineGetter__('Finder', function() {
 })
 
 __defineGetter__('gBriefPrincipal', function() {
-    let securityManager = Cc['@mozilla.org/scriptsecuritymanager;1']
-                          .getService(Ci.nsIScriptSecurityManager);
     let uri = NetUtil.newURI(document.documentURI);
     let resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1']
                       .getService(Ci.nsIChromeRegistry)
                       .convertChromeURL(uri);
 
+    // Firefox 16 compatibility.
+    let ssm = Services.scriptSecurityManager;
+    let principal = ssm.getCodebasePrincipal ? ssm.getCodebasePrincipal(resolvedURI)
+                                             : ssm.getSimpleCodebasePrincipal(resolvedURI);
+
     delete this.gBriefPrincipal;
-    return this.gBriefPrincipal = securityManager.getCodebasePrincipal(resolvedURI);
+    return this.gBriefPrincipal = principal;
 })
