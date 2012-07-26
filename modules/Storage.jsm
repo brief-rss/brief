@@ -1150,18 +1150,21 @@ Query.prototype = {
 
         let list = yield this.getEntryList(resume);
 
-        this.read = tempRead;
-
         if (list.length) {
             let sql = 'UPDATE entries SET read = :read, updated = 0 ';
             let update = new Statement(sql + this._getQueryString());
             update.params.read = aState ? 1 : 0;
             yield update.executeAsync(resume);
 
+            this.read = tempRead;
+
             for (let observer in StorageInternal.observers) {
                 if (observer.onEntriesMarkedRead)
                     observer.onEntriesMarkedRead(list, aState);
             }
+        }
+        else {
+            this.read = tempRead;
         }
     }.gen(),
 
