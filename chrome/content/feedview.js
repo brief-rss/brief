@@ -1226,24 +1226,21 @@ EntryView.prototype = {
         let deltaDays = today - entryDay;
         let deltaYears = Math.ceil(today / 365) - Math.ceil(entryDay / 365);
 
-        let format;
-
+        // Important: toLocaleFolder doesn't support Unicode, so localized strings can't
+        // be passed to that method and must be manually concatenated.
+        let string;
         if (deltaDays === 0)
-            format = Strings.today;
+            string = Strings.today + (aOnlyDatePart ? '' : entryDate.toLocaleFormat(', %X'));
         else if (deltaDays === 1)
-            format = Strings.yesterday;
+            string = Strings.yesterday + (aOnlyDatePart ? '' : entryDate.toLocaleFormat(', %X'));
         else if (deltaDays < 7)
-            format = '%A';
+            string = entryDate.toLocaleFormat(aOnlyDatePart ? '%A' : '%A, %X');
         else if (deltaYears < 1)
-            format = ('%d %b');
+            string = entryDate.toLocaleFormat(aOnlyDatePart ? '%d %B' : '%d %B, %X');
         else
-            format = ('%d %b %Y');
+            string = entryDate.toLocaleFormat(aOnlyDatePart ? '%d %B %Y' : '%d %B %Y, %X');
 
-        if (!aOnlyDatePart)
-            format += ', %X';
-
-        return entryDate.toLocaleFormat(format).replace(/:\d\d$/, ' ')
-                                               .replace(/^0/, '');
+        return string.replace(/:\d\d$/, ' ').replace(/^0/, '');
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
