@@ -246,11 +246,8 @@ let StorageInternal = {
                 backupFile.remove(false);
 
             // Backup the database before migration.
-            let newBackupFile = profileDir;
             let filename = 'brief-backup-' + schemaVersion + '.sqlite';
-            newBackupFile.append(filename);
-            if (!newBackupFile.exists())
-                Services.storage.backupDatabaseFile(databaseFile, filename);
+            Services.storage.backupDatabaseFile(databaseFile, filename);
 
             // No support for migration from versions older than 1.2,
             // create a new database.
