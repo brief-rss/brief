@@ -1212,52 +1212,47 @@ EntryView.prototype = {
     },
 
     getDateString: function EntryView_getDateString(aOnlyDatePart) {
-        let bundle = getElement('main-bundle');
         let relativeDate = new RelativeDate(this.date.getTime());
-        let format;
-
         let currentDate = new Date();
+        let string;
 
         switch (true) {
             case relativeDate.deltaMinutes === 0 && !aOnlyDatePart:
-                format = Strings['entryDate.justNow'];
+                string = Strings['entryDate.justNow'];
                 break;
 
             case relativeDate.deltaHours === 0 && !aOnlyDatePart:
                 let pluralForm = getPluralForm(relativeDate.deltaMinutes, Strings['entryDate.minutes']);
-                format = pluralForm.replace('#number', relativeDate.deltaMinutes);
+                string = pluralForm.replace('#number', relativeDate.deltaMinutes);
                 break;
 
             case relativeDate.deltaHours <= 12 && !aOnlyDatePart:
                 pluralForm = getPluralForm(relativeDate.deltaHours, Strings['entryDate.hours']);
-                format = pluralForm.replace('#number', relativeDate.deltaHours);
+                string = pluralForm.replace('#number', relativeDate.deltaHours);
                 break;
 
             case relativeDate.deltaDays === 0:
-                format = Strings['entryDate.today'];
+                string = Strings['entryDate.today'] + this.date.toLocaleFormat(', %X');
                 break;
 
             case relativeDate.deltaDays === 1:
-                format = Strings['entryDate.yesterday'];
+                string = Strings['entryDate.yesterday'] + this.date.toLocaleFormat(', %X');
                 break;
 
             case relativeDate.deltaDays < 5:
-                format = '%A';
+                string = this.date.toLocaleFormat('%A, %X')
                 break;
 
             case currentDate.getFullYear() === this.date.getFullYear():
-                format = '%d %b';
+                string = this.date.toLocaleFormat('%d %b, %X')
                 break;
 
             default:
-                format = '%d %b %Y';
+                string = this.date.toLocaleFormat('%d %b %Y, %X')
                 break;
         }
 
-        if (!aOnlyDatePart && relativeDate.deltaHours > 12)
-            format += ', %X';
-
-        return this.date.toLocaleFormat(format).replace(/:\d\d$/, ' ').replace(/^0/, '');
+        return string.replace(/:\d\d$/, ' ').replace(/^0/, '');
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
