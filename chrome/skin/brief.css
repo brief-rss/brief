@@ -1,0 +1,194 @@
+/* Reset these properties on everything but context menu popups */
+page, deck, hbox, vbox, image, richlistbox, richlistitem, button, progressmeter,
+progressmeter *, textbox, splitter, browser, listbox, listitem {
+    -moz-appearance: none;
+    height: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    -moz-border-bottom-colors: none !important;
+    -moz-border-left-colors: none !important;
+    -moz-border-right-colors: none !important;
+    -moz-border-top-colors: none !important;
+}
+
+page {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #ffffff !important;
+}
+
+.brief-button {
+    -moz-box-flex: 0;
+    -moz-user-focus: none;
+}
+
+.brief-button > .button-box {
+    padding: 0 !important;
+}
+
+.brief-button .button-text {
+    margin: 0 !important;
+}
+
+#sidebar-splitter {
+    border-left: 5px solid #ffffff !important;
+    border-right: 1px solid #7c909f !important;
+}
+
+#sidebar-splitter:hover {
+    border-right-color: #ffb754 !important;
+    -moz-border-left-colors: #ffffff #ffebd2 #ffdfb1 #ffd090 #ffc36f !important;
+}
+
+#tag-list-splitter {
+    border-right: 1px solid #7c909f !important;
+}
+
+#tag-list-splitter:hover {
+    border-right-color: #ffb754 !important;
+}
+
+#reveal-sidebar-button {
+    list-style-image: url(reveal-sidebar.png);
+    -moz-image-region: rect(0px, 12px, 20px, 0px);
+    padding: 0 2px 0 2px !important;
+    border-right: 1px solid #20699f !important;
+    background: #fafcff !important;
+}
+
+#reveal-sidebar-button:hover {
+    -moz-image-region: rect(20px, 12px, 40px, 0px);
+    border-right-color: #ffac62 !important;
+}
+
+#sidebar-toolbar {
+    min-height: 20px !important;
+}
+
+#sidebar-separator {
+    border-bottom: 1px solid #7c909f !important;
+    margin-right: 5px !important;
+}
+
+#update-progress {
+    border: 1px solid #c4cdd5 !important;
+    margin: 2px 15px 2px 13px !important;
+}
+
+#update-progress > .progress-bar {
+    background: url(progressmeter.png) repeat-x !important;
+}
+
+
+.sidebar-button {
+    list-style-image: url(sidebar-buttons.png);
+    margin-right: 5px !important;
+    opacity: 0.7;
+}
+.sidebar-button:hover {
+    opacity: 1;
+}
+
+
+#update-button {
+    -moz-image-region: rect(0px, 32px, 16px, 16px);
+}
+#update-button:hover {
+    -moz-image-region: rect(16px, 32px, 32px, 16px);
+}
+#stop-updating-button {
+    -moz-image-region: rect(0px, 16px, 16px, 0px);
+}
+#stop-updating-button:hover {
+    -moz-image-region: rect(16px, 16px, 32px, 0px);
+}
+#options-button {
+    -moz-image-region: rect(0px, 48px, 16px, 32px);
+}
+#options-button:hover {
+    -moz-image-region: rect(16px, 48px, 32px, 32px);
+}
+
+#tags-button {
+    list-style-image: url(icons/tag.png);
+}
+
+
+/* =========== View list richlistbox =========== */
+
+#view-list {
+    padding-top: 4px !important;
+}
+
+#view-list > richlistitem {
+    border-radius: 2px;
+    padding: 1px 2px 1px 15px !important;
+    -moz-box-align: center !important;
+}
+
+#view-list > richlistitem[selected="true"],
+#view-list:focus > richlistitem[selected="true"] {
+    background-color: #d5ecfd !important;
+}
+
+.view-icon {
+    padding: 1px 0 2px !important;
+    list-style-image: url(icons/folders.png);
+}
+
+#view-list > richlistitem > .view-title {
+    padding: 1px 4px 0 5px !important;
+    font-size: 13px !important;
+    color: #000000 !important;
+}
+
+#view-list > richlistitem[selected="true"] > .view-title,
+#view-list:focus > richlistitem[selected="true"] > .view-title {
+    color: #00344f !important;
+}
+
+#view-list > richlistitem:not(.unread) .unread-count {
+    display: none;
+}
+
+
+#all-items-folder > .view-icon {
+    -moz-image-region: rect(0px, 16px, 16px, 0px);
+}
+#unread-folder > .view-icon {
+    -moz-image-region: rect(16px, 16px, 32px, 0px);
+}
+#starred-folder > .view-icon {
+    -moz-image-region: rect(32px, 16px, 48px, 0px);
+}
+#trash-folder > .view-icon {
+    -moz-image-region: rect(48px, 16px, 64px, 0px);
+}
+
+
+/* =========== Tag listbox ========== */
+
+.tag-list-item {
+    width: 140px !important;
+    padding: 2px 3px !important;
+    font-size: 13px !important;
+    color: #000000 !important;
+    list-style-image: url(chrome://brief/skin/icons/tag.png);
+}
+
+.tag-list-item[selected="true"] {
+    background-color: #d5ecfd !important;
+    color: #00344f !important;
+    outline: none;
+}
+
+.tag-list-item:not(.unread) > .unread-count {
+    display: none;
+}

@@ -1,0 +1,17 @@
+content  brief  chrome/content/
+skin  brief  classic  chrome/skin/
+
+resource brief-content  defaults/data/
+resource brief          modules/
+
+overlay  chrome://browser/content/browser.xul  chrome://brief/content/brief-overlay.xul
+style  chrome://browser/content/browser.xul  chrome://brief/skin/overlay-windows.css os=WINNT
+
+style  chrome://global/content/customizeToolbar.xul  chrome://brief/skin/overlay.css
+
+component  {943b2280-6457-11df-a08a-0800200c9a66}  components/Service.js
+contract  @brief.mozdev.org/briefservice;1  {943b2280-6457-11df-a08a-0800200c9a66}
+category  profile-after-change  BriefService  @brief.mozdev.org/briefservice;1
+category  vacuum-participant    BriefService  @brief.mozdev.org/briefservice;1
+
+locale  brief   en-US  chrome/locale/en-US/

@@ -1,0 +1,190 @@
+body, h1, h2 {
+    margin: 0;
+    padding: 0;
+    font-weight: inherit;
+    font-size: 100%;
+}
+
+body {
+    background: #fcfdff;
+    font-family: "Lucida Grande", Verdana, sans-serif;
+    font-size: 10px;
+}
+
+#feed-content {
+    padding: 0 10px 10px;
+}
+
+#message-box {
+    -moz-user-select: none;
+    padding: 0 15px;
+    font-family: Arial, sans-serif;
+}
+
+#main-message {
+    margin-top: 200px;
+    text-align: center;
+    font-size: 24px;
+    color: #274b5d;
+}
+
+#secondary-message {
+    margin: 75px auto 0;
+    max-width: 500px;
+    text-align: center;
+    font-size: 16px;
+    color: #4b606c;
+}
+
+
+#article-template {
+    display: none;
+}
+
+.search-highlight {
+    border: 1px solid #45e500;
+    border-radius: 3px;
+    color: black;
+    background-color: #adff89;
+}
+
+/* ----------------------  Entry content  ---------------------- */
+
+.content {
+    padding: 10px 25px 25px;
+    overflow: auto;
+    color: #404040;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: justify;
+}
+
+.content:empty {
+    padding: 0 0 10px !important;
+}
+
+/* Reset the top margin, so that the gap between
+   header and content is always the same */
+.content > *:first-child {
+    margin-top: 0 !important;
+}
+
+.content a {
+    color: #003b73;
+}
+
+.content a:visited {
+    color: #4b667e;
+}
+
+img {
+    margin: 0.75em;
+}
+
+blockquote {
+    font-style: italic;
+}
+
+pre, code {
+    font-family: "Courier New", monospace;
+    font-size: 1em;
+    white-space: pre-wrap;
+    width: -moz-available;
+}
+
+
+/* ----------------------  Item controls ------------------- */
+
+.controls {
+    display: -moz-box;
+    -moz-box-align: center;
+}
+
+.button {
+    display: -moz-box;
+}
+
+.button:hover {
+    background-position: 0 -25px;
+}
+
+.button:active {
+    background-position: 0 -50px;
+}
+
+.mark-read-button {
+    width: 47px;
+    height: 25px;
+    background-image: url(chrome://brief/skin/mark-read-button.png);
+}
+
+.mark-read-button:hover + .delete-button,
+.mark-read-button:hover + .restore-button {
+    border-left-color: #4f7ac4;
+}
+
+.delete-button,
+.restore-button {
+    width: 30px;
+    height: 25px;
+}
+
+.delete-button {
+    border-left: 1px solid #99a7bf;
+    background-image: url(chrome://brief/skin/delete-button.png);
+}
+
+.delete-button:hover {
+    border-left-color: #cc6565;
+}
+
+.restore-button {
+    border-left: 1px solid #99a7bf;
+    background-image: url(chrome://brief/skin/restore-button.png);
+}
+
+.restore-button:hover {
+    border-left-color: #63b236;
+}
+
+.bookmark-button {
+    width: 24px;
+    height: 24px;
+    background: url(chrome://brief/skin/icons/entry-star.png) no-repeat;
+}
+
+article:not(.starred) .bookmark-button:hover {
+    background-position: 0 -24px;
+}
+
+article:not(.starred) .bookmark-button:active:hover {
+    background-position: 0 -48px;
+}
+
+article.starred .bookmark-button {
+    background-position: 0 -48px;
+}
+
+article.starred .bookmark-button:hover {
+    background-position: 0 -72px;
+}
+
+article.starred .bookmark-button:active:hover {
+    background-position: 0 -96px;
+}
+
+
+/* --------- Transitions ------------ */
+
+article[removing] {
+    -moz-transition: opacity 250ms;
+    opacity: 0;
+}
+
+*[hiding] {
+    -moz-transition-property: opacity;
+}
+
+*[showing] {
+    -moz-transition-property: opacity;
+}

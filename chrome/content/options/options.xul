@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://brief/skin/options.css" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
+<?xml-stylesheet href="chrome://browser/content/places/places.css"?>
+
+<?xul-overlay href="chrome://browser/content/places/placesOverlay.xul"?>
+
+<!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
+
+<prefwindow id="brief-options3"
+            xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+            title="&optionsWindow.title;"
+            persist="screenX screenY width height"
+            onload="init();"
+            onunload="unload();">
+
+    <prefpane id="main-pane" label="&mainPane.label;">
+
+        <script type="application/x-javascript" src="options.js"/>
+        <script type="application/x-javascript" src="opml.js"/>
+
+        <stringbundleset id="string-bundles">
+            <stringbundle id="options-bundle" src="chrome://brief/locale/options.properties"/>
+        </stringbundleset>
+
+        <preferences>
+            <preference id="extensions.brief.update.interval"
+                        name="extensions.brief.update.interval"
+                        type="int"/>
+            <preference id="extensions.brief.update.enableAutoUpdate"
+                        name="extensions.brief.update.enableAutoUpdate"
+                        type="bool"/>
+            <preference id="extensions.brief.database.expireEntries"
+                        name="extensions.brief.database.expireEntries"
+                        type="bool"/>
+            <preference id="extensions.brief.database.entryExpirationAge"
+                        name="extensions.brief.database.entryExpirationAge"
+                        type="int"/>
+            <preference id="extensions.brief.database.limitStoredEntries"
+                        name="extensions.brief.database.limitStoredEntries"
+                        type="bool"/>
+            <preference id="extensions.brief.database.maxStoredEntries"
+                        name="extensions.brief.database.maxStoredEntries"
+                        type="int"/>
+            <preference id="extensions.brief.update.showNotification"
+                        name="extensions.brief.update.showNotification"
+                        type="bool"/>
+            <preference id="extensions.brief.feedview.sortUnreadViewOldestFirst"
+                        name="extensions.brief.feedview.sortUnreadViewOldestFirst"
+                        type="bool"/>
+            <preference id="extensions.brief.feedview.autoMarkRead"
+                        name="extensions.brief.feedview.autoMarkRead"
+                        type="bool"/>
+            <preference id="extensions.brief.showUnreadCounter"
+                        name="extensions.brief.showUnreadCounter"
+                        type="bool"/>
+        </preferences>
+
+        <groupbox>
+            <caption label="&updateGroup.caption;"/>
+            <hbox align="center">
+                <checkbox id="checkForUpdates"
+                          label="&checkForUpdatesBefore.label;"
+                          accesskey="&checkForUpdates.accesskey;"
+                          preference="extensions.brief.update.enableAutoUpdate"
+                          oncommand="gFeedsPane.updateIntervalDisabledState();"/>
+                <textbox id="updateInterval"
+                         type="number"
+                         min="1"
+                         size="1"/>
+                <menulist id="update-time-menulist">
+                    <menupopup>
+                        <menuitem label="&updateIntervalMinutes.label;"/>
+                        <menuitem label="&updateIntervalHours.label;"/>
+                        <menuitem label="&updateIntervalDays.label;"/>
+                    </menupopup>
+                </menulist>
+            </hbox>
+            <checkbox label="&showNotification.label;"
+                      accesskey="&showNotification.accesskey;"
+                      preference="extensions.brief.update.showNotification"/>
+        </groupbox>
+
+        <groupbox align="stretch">
+            <checkbox id="show-unread-counter"
+                      label="&showUnreadCounter.label;"
+                      accesskey="&showUnreadCounter.accesskey;"
+                      preference="extensions.brief.showUnreadCounter"/>
+            <checkbox label="&autoMarkRead.label;"
+                      accesskey="&autoMarkRead.accesskey;"
+                      preference="extensions.brief.feedview.autoMarkRead"/>
+            <checkbox id="unread-oldest-first-checkbox"
+                      label="&sortUnreadViewOldestFirst.label;"
+                      accesskey="&sortUnreadViewOldestFirst.accesskey;"
+                      preference="extensions.brief.feedview.sortUnreadViewOldestFirst"/>
+        </groupbox>
+
+        <groupbox>
+            <caption label="&storingGroup.caption;"/>
+            <hbox align="center">
+                <checkbox id="expiration-checkbox"
+                          label="&expirationBefore.label;"
+                          accesskey="&expirationCheckbox.accesskey;"
+                          tooltiptext="&starredItemsKept.tooltip;"
+                          preference="extensions.brief.database.expireEntries"
+                          oncommand="gFeedsPane.updateExpirationDisabledState();"/>
+                <textbox id="expiration-textbox"
+                         size="1"
+                         type="number"
+                         min="1"
+                         preference="extensions.brief.database.entryExpirationAge"/>
+                <label value="&expirationAfter.label;"/>
+            </hbox>
+            <hbox align="center">
+                <checkbox id="stored-entries-checkbox"
+                          label="&storedEntriesBefore.label;"
+                          accesskey="&storedEntriesCheckbox.accesskey;"
+                          tooltiptext="&starredItemsKept.tooltip;"
+                          preference="extensions.brief.database.limitStoredEntries"
+                          oncommand="gFeedsPane.updateStoredEntriesDisabledState();"/>
+                <textbox id="stored-entries-textbox"
+                         size="2"
+                         type="number"
+                         min="1"
+                         preference="extensions.brief.database.maxStoredEntries"/>
+                <label value="&storedEntriesAfter.label;"/>
+            </hbox>
+            <separator class="thin"/>
+            <hbox pack="end">
+                <button id="clear-all-entries"
+                        label="&clearAllEntriesButton.label;"
+                        accesskey="&clearAllEntriesButton.accesskey;"
+                        oncommand="gFeedsPane.onClearAllEntriesCmd(event);"/>
+            </hbox>
+        </groupbox>
+
+        <groupbox align="center" orient="horizontal">
+            <caption label="&customizeGroup.caption;"/>
+            <label value="&editStyleDescription.label;"/>
+            <spacer flex="1"/>
+            <button id="edit-custom-style"
+                    label="&editStyleButton.label;"
+                    accesskey="&editStyleButton.accesskey;"
+                    oncommand="gDisplayPane.editCustomStyle();"/>
+        </groupbox>
+
+    </prefpane>
+
+    <prefpane id="feeds-pane" label="&feedsPane.label;">
+
+        <preferences>
+            <preference id="extensions.brief.homeFolder"
+                        name="extensions.brief.homeFolder"
+                        type="int"/>
+        </preferences>
+
+        <label id="places-tree-label" value="&folderTree.label;"/>
+        <separator class="thin"/>
+
+        <tree id="places-tree"
+              class="placesTree"
+              type="places"
+              hidecolumnpicker="true"
+              onselect="gMainPane.onPlacesTreeSelect(event)">
+            <treecols>
+                <treecol id="title" flex="1"
+                         primary="true"
+                         hideheader="true"/>
+            </treecols>
+            <treechildren flex="1"/>
+        </tree>
+
+        <hbox id="import-export-box" pack="end">
+            <button id="import-opml"
+                    label="&importOPML.label;"
+                    accesskey="&importOPML.accesskey;"
+                    oncommand="opml.importOPML()"/>
+            <button id="export-opml"
+                    label="&exportOPML.label;"
+                    accesskey="&exportOPML.accesskey;"
+                    oncommand="opml.exportOPML()"/>
+        </hbox>
+
+    </prefpane>
+
+    <prefpane id="shortcuts-pane" label="&shortcutsPane.label;">
+        <browser id="shortcuts-browser"
+                 flex="1"
+                 disablehistory="true"
+                 src="chrome://brief/content/keyboard-shortcuts.xhtml"/>
+    </prefpane>
+
+</prefwindow>

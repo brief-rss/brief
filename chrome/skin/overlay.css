@@ -1,0 +1,25 @@
+#brief-button {
+    list-style-image: url(chrome://brief/skin/toolbarbutton.png);
+    -moz-box-align: center;
+    -moz-box-orient: horizontal;
+}
+
+toolbar[iconsize=small] #brief-button {
+    list-style-image: url(chrome://brief/skin/feed-icon-16x16.png);
+}
+
+toolbar[mode=full] #brief-status-counter {
+    display: none;
+}
+
+#brief-tooltip-last-updated {
+  margin-bottom: 0.75em;
+}
+
+#brief-tooltip-no-unread {
+  font-weight: bold;
+}
+
+#brief-tooltip-feed-name {
+  max-width: 15em;
+}

@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Search">
+<!ENTITY allItemsFolder.label "All items">
+<!ENTITY unreadFolder.label "Unread">
+<!ENTITY starredFolder.label "Bookmarks">
+<!ENTITY trashFolder.label "Trash">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "View headlines (F)">
+<!ENTITY filterUnread.tooltip "View only unread items (D)">
+<!ENTITY filterStarred.tooltip "View only bookmarks (S)">
+<!ENTITY updateButton.tooltip "Check all feeds for updates">
+<!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
+<!ENTITY showOptions.tooltip "Open Brief options">
+<!ENTITY sidebarSplitter.tooltip "Double-click to hide the sidebar">
+<!ENTITY revealSidebar.tooltip "Reveal the sidebar">
+<!ENTITY markViewRead.tooltip "Mark all items as read (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Mark Feed As Read">
+<!ENTITY ctxMarkFeedUnread.label "Mark Feed As Unread">
+<!ENTITY ctxMarkFolderRead.label "Mark Folder As Read">
+<!ENTITY ctxMarkTagRead.label "Mark Tagged Items As Read">
+<!ENTITY ctxUpdateFeed.label "Update Feed">
+<!ENTITY ctxUpdateFolder.label "Update Folder">
+<!ENTITY ctxOpenWebsite.label "Open Website">
+<!ENTITY ctxDeleteFeed.label "Delete Feed">
+<!ENTITY ctxDeleteFolder.label "Delete Folder">
+<!ENTITY ctxDeleteTag.label "Delete Tag">
+<!ENTITY ctxEmptyFeed.label "Empty Feed">
+<!ENTITY ctxEmptyFolder.label "Empty Folder">
+<!ENTITY ctxRestoreTrashed.label "Restore All Items">
+<!ENTITY ctxEmptyTrash.label "Empty Trash">
+<!ENTITY ctxFeedProperties.label "Properties">
+<!ENTITY ctxUpdateFeeds.label "Update Feeds Now">
+<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
+<!ENTITY showUnreadCounter.label "Show number of unread items">
+<!ENTITY ctxShowOptions.label "Options">

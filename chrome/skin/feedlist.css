@@ -1,0 +1,104 @@
+richtree {
+    -moz-binding: url(chrome://brief/content/richtree.xml#richtree);
+}
+
+richtreeitem {
+    -moz-binding: url(chrome://brief/content/richtree.xml#richtreeitem);
+}
+
+richtreefolder {
+    -moz-binding: url(chrome://brief/content/richtree.xml#richtreefolder);
+}
+
+
+richtreeitem,
+richtreefolder > .folder-title-container {
+    padding: 0 2px 0 6px !important;
+}
+
+richtreeitem {
+    height: 20px !important;
+    -moz-box-align: center;
+}
+
+richtreeitem[selected="true"] {
+    border-radius: 2px;
+    background-color: #d5ecfd !important;
+    color: #00344f !important;
+}
+
+.feed-icon {
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 6px !important;
+    list-style-image: url(icons/feed-favicon.png);
+}
+
+.feed-title {
+    font-size: 13px !important;
+}
+
+.unread-count {
+    min-width: 24px !important;
+    margin-left: 5px !important;
+    padding: 0 3px !important;
+    border: 1px solid #92b6d0 !important;
+    border-radius: 2px;
+    text-align: center;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    background-color: rgba(229, 246, 255, 0.3) !important;
+    color: #457499 !important;
+}
+
+richtreeitem:not(.unread) > .unread-count,
+richtreefolder:not(.unread) > .folder-title-container > .unread-count,
+richtreefolder[open="true"] > .folder-title-container > .unread-count {
+    display: none;
+}
+
+
+
+richtreefolder {
+    -moz-box-orient: vertical;
+}
+
+richtreefolder > .folder-title-container {
+    height: 22px !important;
+    margin: 0 0 5px !important;
+    -moz-box-align: center;
+    border-bottom: 1px solid #c4cdd5 !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+}
+
+richtreefolder[selected="true"] > .folder-title-container {
+    border-radius-topright: 2px;
+    border-radius-topleft: 2px;
+    background-color: #d5ecfd !important;
+    color: #00344f !important;
+}
+
+.folder-container {
+    display: none;
+    margin-bottom: 10px !important;
+    padding-left: 20px !important;
+}
+
+richtreefolder[open="true"] > .folder-container {
+    display: -moz-box;
+}
+
+.folder-twisty {
+    margin-right: 5px !important;
+    list-style-image: url(icons/twisty.png);
+    -moz-image-region: rect(0px, 11px, 11px, 0px);
+}
+
+richtreefolder[open="true"] > .folder-title-container > .folder-twisty {
+    -moz-image-region: rect(11px, 11px, 22px, 0px);
+}
+
+richtreeitem + richtreefolder {
+    margin-top: 5px !important;
+}

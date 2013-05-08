@@ -1,0 +1,60 @@
+radio[pane] {
+  list-style-image: url('icons/prefpane-icons.png');
+}
+
+radio[pane=main-pane] {
+  -moz-image-region: rect(0px, 32px, 32px, 0px);
+ }
+
+radio[pane=display-pane] {
+  -moz-image-region: rect(32px, 32px, 64px, 0px);
+  }
+
+radio[pane=feeds-pane] {
+  -moz-image-region: rect(64px, 32px, 96px, 0px);
+  }
+
+radio[pane=shortcuts-pane] {
+    -moz-image-region: rect(96px, 32px, 128px, 0px);
+}
+
+textbox[type="number"] > spinbuttons {
+  margin-left: 4px;
+}
+
+#places-tree-label {
+    font-size: 110%;
+}
+
+#places-tree {
+  height: 25em;
+}
+
+#import-export-box {
+  margin: 0.5em 0 1em;
+}
+
+.content-box {
+  height: auto !important;
+}
+
+#custom-style-textbox {
+  margin: 0;
+  font-family: monospace;
+}
+
+#learn-more-link {
+  margin: 5px 0;
+  color: #0049de;
+}
+
+#shortcuts-pane {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+#shortcuts-browser {
+    height: 450px;
+    width: 500px;
+}

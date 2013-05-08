@@ -1,0 +1,121 @@
+#feed-view-header {
+    -moz-box-align: center;
+    height: 38px !important;
+    padding: 0 10px !important;
+    background: url('header-background.png') repeat-x top right !important;
+    background-color: #d7eefe !important;
+    border-bottom: 1px solid #7c909f !important;
+    overflow: hidden;
+}
+
+#mark-view-read {
+    padding-top: 4px !important;
+    margin-right: 5px !important;
+    list-style-image: url(mark-read-checkmark.png);
+    -moz-image-region: rect(0px, 32px, 32px, 0px);
+}
+
+#mark-view-read:hover {
+    -moz-image-region: rect(32px, 32px, 64px, 0px);
+}
+
+#mark-view-read:hover:active {
+    -moz-image-region: rect(64px, 32px, 96px, 0px);
+}
+
+
+#feed-title-box {
+    display: -moz-box;
+    margin-right: 10px !important;
+    /* These are to cut off the later lines when the title wraps. */
+    overflow: hidden;
+    line-height: 36px;
+    max-height: 36px !important;
+}
+
+#feed-title {
+    color: #05447e;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#feed-title.feed-link:hover {
+    text-decoration: underline;
+}
+
+
+.view-button {
+    border-left: 1px solid transparent !important; /* Placeholder for checked state border */
+    margin-top: 3px !important;
+    margin-bottom: 2px !important;
+    -moz-image-region: rect(0px, 28px, 31px, 0px);
+}
+
+.view-button:hover {
+    -moz-image-region: rect(31px, 28px, 62px, 0px);
+}
+
+.view-button[checked] {
+    -moz-image-region: rect(62px, 28px, 93px, 0px);
+}
+
+.view-button:not([disabled])[checked]:hover,
+.view-button:active {
+    -moz-image-region: rect(93px, 28px, 124px, 0px);
+}
+
+.view-button[disabled] {
+    -moz-image-region: rect(124px, 28px, 155px, 0px);
+}
+
+
+.view-button:not([disabled])[checked],
+.view-button:not([disabled]):active {
+    border-left-color: #7898b0 !important;
+}
+
+.view-button:not([disabled])[checked] + .view-button,
+.view-button:not([disabled]):active + .view-button {
+    border-left-color: #7898b0 !important;
+}
+
+#filter-starred-checkbox {
+    border-right: 1px solid transparent !important;
+}
+
+#filter-starred-checkbox:not([disabled])[checked],
+#filter-starred-checkbox:not([disabled]):active {
+    border-right-color: #7898b0 !important;
+}
+
+
+#headlines-checkbox {
+    list-style-image: url(headlines-button.png);
+}
+
+#filter-unread-checkbox {
+    list-style-image: url(filter-unread.png);
+}
+
+#filter-starred-checkbox {
+    list-style-image: url(filter-starred.png);
+}
+
+
+#searchbar {
+    width: 150px;
+    margin: 6px 0 6px 10px !important;
+    padding: 0 3px 0 5px !important;
+    border: 1px solid #7c909f !important;
+    border-radius: 4px;
+    background-color: #ffffff !important;
+    font-size: 12px;
+    font-family: Verdana, Helvetica, Arial, sans-serif;
+}
+
+
+#searchbar[isempty="true"] .textbox-input {
+    color: #7c909f !important;
+    font-style: normal !important;
+}

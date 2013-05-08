@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<rdf:RDF xmlns="http://www.mozilla.org/2004/em-rdf#"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <rdf:Description about="urn:mozilla:install-manifest">
+    <id>brief@mozdev.org</id>
+    <version>1.7a1</version>
+    <type>2</type>
+    <name>Brief</name>
+    <description>A feed reading extension.</description>
+    <creator>Adam Kowalczyk</creator>
+    <homepageURL>http://brief.mozdev.org/</homepageURL>
+    <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
+
+    <targetApplication>
+      <rdf:Description>
+        <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
+        <minVersion>4.0</minVersion>
+        <maxVersion>17.0a1</maxVersion>
+      </rdf:Description>
+    </targetApplication>
+
+    <contributor>Leszek "teo" Życzkowski</contributor>
+    <contributor>Christopher Finke</contributor>
+    <contributor>Moritz Schallaböck</contributor>
+    <contributor>Ngamer01</contributor>
+    <contributor>Some of the icons courtesy of the talented Arvid Axelsson.</contributor>
+    <contributor>Some of the icons were made as part of the Tango Desktop Project.</contributor>
+    <contributor>Thanks to all the great people on #extdev at irc.mozilla.org: Christian Biesinger, Mark Finkle, Mook, Nickolay Ponomarev, Doron Rosenberg, Dave Townsend and Mike Shaver.</contributor>
+
+    <translator>The Zero (cs)</translator>
+    <translator>AlleyKat (da)</translator>
+    <translator>Joergen (da)</translator>
+    <translator>Fenian (de)</translator>
+    <translator>Fux (de)</translator>
+    <translator>Team erweiterungen.de (de)</translator>
+    <translator>Sonickydon (el)</translator>
+    <translator>cmellib (es-ES)</translator>
+    <translator>nico@nc (fr)</translator>
+    <translator>Goofy (fr)</translator>
+    <translator>lois (gl)</translator>
+    <translator>kami (hu-HU)</translator>
+    <translator>Cashman (hu-HU)</translator>
+    <translator>Luana (it)</translator>
+    <translator>drry (ja)</translator>
+    <translator>gandhi2 (nb-NO)</translator>
+    <translator>markh (nl)</translator>
+    <translator>cachopo (pt-BR)</translator>
+    <translator>micnic (ro-RO)</translator>
+    <translator>Merlyel (ru-RU)</translator>
+    <translator>Modex (ru-RU)</translator>
+    <translator>Jacen (sk-SK)</translator>
+    <translator>Lakrits</translator>
+    <translator>xmoke (zh-CN)</translator>
+
+  </rdf:Description>
+</rdf:RDF>

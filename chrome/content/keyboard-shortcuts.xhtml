@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html SYSTEM "chrome://brief/locale/shortcuts.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>&shortcutsPage.title;</title>
+        <style type="text/css">
+            body {
+                margin: 0;
+            }
+
+            body[embedded="true"] {
+                color: -moz-DialogText;
+            }
+
+            #shortcuts-table {
+                font-size: 12px;
+                font-family: "Lucida Grande", Verdana, sans-serif;
+                border-spacing: 0;
+                margin: 0 auto;
+            }
+
+            td {
+                padding: 4px 10px;
+            }
+
+            body:not([embedded="true"]) td {
+                border-bottom: 1px solid lightgray;
+            }
+
+            .shortcut-key {
+                font-weight: bold;
+                text-align: center;
+            }
+
+            body:not([embedded="true"]) .shortcut-key {
+                border-right: 1px solid lightgray;
+            }
+
+            .shortcuts-plain {
+                font-weight: normal;
+            }
+
+            .shortucts-header {
+                font-size: 14px;
+                text-align: center;
+                padding-top: 20px;
+            }
+        </style>
+        <script type="text/javascript;version=1.8">
+            <![CDATA[
+            function onload(aEvent) {
+                var elems = window.navigator.platform.match('Mac')
+                            ? document.getElementsByClassName('noMac')
+                            : document.getElementsByClassName('onlyMac');
+
+                for (let i = 0; i < elems.length; i++)
+                    elems[i].style.display = 'none';
+
+                if (window.top != window)
+                    document.body.setAttribute('embedded', true);
+            }
+
+            function onKeypress(aEvent) {
+                if (aEvent.keyCode == aEvent.DOM_VK_ESCAPE)
+                    window.close();
+            }
+
+            window.addEventListener('load', onload, false);
+            document.addEventListener('keypress', onKeypress, false);
+            ]]>
+        </script>
+    </head>
+
+    <body>
+        <table id="shortcuts-table">
+            <tr>
+                <td colspan="2" class="shortucts-header" style="padding-top: 10px;">&navigation.header;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">&space.key; <span class="shortcuts-plain">&or;</span> J</td>
+                <td>&nextItem;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">&shiftSpace.key; <span class="shortcuts-plain">&or;</span> K</td>
+                <td>&previousItem;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">U</td>
+                <td>&scrollDownByScreen;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">I</td>
+                <td>&scrollUpByScreen;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">&enter.key;</td>
+                <td>&openEntry;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">H</td>
+                <td>&showItem;</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="shortucts-header">&entries.header;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">M</td>
+                <td>&markCurrentItemRead;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">N</td>
+                <td>&markVisibleRead;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">&altN.key;</td>
+                <td>&markAllRead;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">B</td>
+                <td>&starItem;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">T</td>
+                <td>&moveToTrash;</td>
+            </tr>
+
+            <tr>
+                <td colspan="2" class="shortucts-header">&view.header;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">A</td>
+                <td>&showAll;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">S</td>
+                <td>&showStarred;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">D</td>
+                <td>&showUnread;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">F</td>
+                <td>&headlinesView;</td>
+            </tr>
+
+            <tr>
+                <td colspan="2" class="shortucts-header">&general.header;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">
+                    <span class="noMac">&ctrlAltD.key;</span>
+                    <span class="onlyMac">&cmdAltD.key;</span>
+                </td>
+                <td>&openBrief;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">/</td>
+                <td>&focusSearchbar;</td>
+            </tr>
+            <tr>
+                <td class="shortcut-key">?</td>
+                <td>&displayShortcuts;</td>
+            </tr>
+        </table>
+    </body>
+</html>
