@@ -162,9 +162,4 @@ function saveLivemarksData() {
 
     if (gFeed.title != nameTextbox.value)
         PlacesUtils.bookmarks.setItemTitle(gFeed.bookmarkID, nameTextbox.value);
-
-    if (gFeed.feedURL != urlTextbox.value) {
-        let uri = Services.io.newURI(urlTextbox.value, null, null);
-        PlacesUtils.livemarks.setFeedURI(gFeed.bookmarkID, uri);
-    }
 }
