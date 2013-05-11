@@ -1202,7 +1202,8 @@ Query.prototype = {
      * observer.
      */
     bookmarkEntries: function Query_bookmarkEntries(aState) {
-        this.getFullEntries(function(entries) {
+        this.getFullEntries(function Query_bookmarkEntries_int(entries) {
+            let resume = Query_bookmarkEntries_int.resume;
             let transactions = [];
 
             for (let entry in entries) {
@@ -1217,8 +1218,7 @@ Query.prototype = {
                     transactions.push(trans);
                 }
                 else {
-                    let bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {})
-                                             .filter(Utils.isNormalBookmark);
+                    let bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {})) if (yield Utils.isNormalBookmark(b, resume))];
                     if (bookmarks.length) {
                         for (let i = bookmarks.length - 1; i >= 0; i--)
                             transactions.push(new PlacesRemoveItemTransaction(bookmarks[i]));
@@ -1234,7 +1234,7 @@ Query.prototype = {
 
             let aggregatedTrans = new PlacesAggregatedTransaction('', transactions);
             Places.transactionManager.doTransaction(aggregatedTrans);
-        })
+        }.gen())
     },
 
     /**
@@ -1258,7 +1258,7 @@ Query.prototype = {
             let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
 
             // Verify bookmarks.
-            let normalBookmarks = allBookmarks.filter(Utils.isNormalBookmark);
+            let normalBookmarks = [b for (b of allBookmarks) if (yield Utils.isNormalBookmark(b, resume))];
             if (entry.starred && !normalBookmarks.length) {
                 new Query(entry.id).bookmarkEntries(true);
             }
@@ -1475,13 +1475,14 @@ let BookmarkObserver = {
 
     // nsINavBookmarkObserver
     onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aFolder, aIndex, aItemType) {
+        let resume = BookmarkObserver_onItemAdded.resume;
         if (aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aFolder)) {
             this.delayedLivemarksSync();
             return;
         }
 
         // Only care about plain bookmarks and tags.
-        if (Utils.isLivemark(aFolder) || aItemType != Bookmarks.TYPE_BOOKMARK)
+        if ((yield Utils.isLivemark(aFolder, resume)) || aItemType != Bookmarks.TYPE_BOOKMARK)
             return;
 
         // Find entries with the same URI as the added item and tag or star them.
@@ -1499,11 +1500,12 @@ let BookmarkObserver = {
                 }
             }
         })
-    },
+    }.gen(),
 
 
     // nsINavBookmarkObserver
     onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved(aItemID, aItemType) {
+        let resume = BookmarkObserver_onBeforeItemRemoved.resume;
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
@@ -1512,7 +1514,7 @@ let BookmarkObserver = {
         let folderID = Bookmarks.getFolderIdForItem(aItemID);
 
         // Only care about plain bookmarks and tags.
-        if (aItemType != Bookmarks.TYPE_BOOKMARK || Utils.isLivemark(folderID))
+        if (aItemType != Bookmarks.TYPE_BOOKMARK || (yield Utils.isLivemark(folderID, resume)))
             return;
 
         let isTag = Utils.isTagFolder(folderID);
@@ -1527,15 +1529,15 @@ let BookmarkObserver = {
             })
         }
         else {
-            Utils.getEntriesByBookmarkID(aItemID, function(aEntries) {
+            Utils.getEntriesByBookmarkID(aItemID, function BookmarkObserver_onBeforeItemRemoved_int(aEntries) {
+                let resume = BookmarkObserver_onBeforeItemRemoved_int.resume;
 
                 // Look for other bookmarks for this URI. If there is another
                 // bookmark for this URI, don't unstar the entry, but update
                 // its bookmarkID to point to that bookmark.
                 if (aEntries.length) {
                     let uri = Utils.newURI(aEntries[0].url);
-                    var bookmarks = Bookmarks.getBookmarkIdsForURI(uri, {})
-                                             .filter(Utils.isNormalBookmark);
+                    var bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {})) if (yield Utils.isNormalBookmark(b, resume))];
                 }
 
                 for (let entry in aEntries) {
@@ -1544,9 +1546,9 @@ let BookmarkObserver = {
                     else
                         StorageInternal.starEntry(false, entry.id);
                 }
-            })
+            }.gen())
         }
-    },
+    }.gen(),
 
     // nsINavBookmarkObserver
     onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType) { },
@@ -2124,14 +2126,16 @@ let Utils = {
         return (Bookmarks.getItemType(aItemID) === Bookmarks.TYPE_BOOKMARK);
     },
 
-    isNormalBookmark: function(aItemID) {
+    isNormalBookmark: function Utils_isNormalBookmark(aItemID, aCallback) {
+        let resume = Utils_isNormalBookmark.resume;
         let parent = Bookmarks.getFolderIdForItem(aItemID);
-        return !Utils.isLivemark(parent) && !Utils.isTagFolder(parent);
-    },
+        aCallback(!(yield Utils.isLivemark(parent, resume)) && !Utils.isTagFolder(parent));
+    }.gen(),
 
-    isLivemark: function(aItemID) {
-        return Places.livemarks.isLivemark(aItemID);
-    },
+    isLivemark: function Utils_isLivemark(aItemID, aCallback) {
+        let resume = Utils_isLivemark.resume;
+        aCallback(Components.isSuccessCode(yield Places.livemarks.getLivemark({"id": aItemID}, function(status) resume(status))));
+    }.gen(),
 
     isFolder: function(aItemID) {
         return (Bookmarks.getItemType(aItemID) === Bookmarks.TYPE_FOLDER);
