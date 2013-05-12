@@ -47,7 +47,7 @@ BriefService.prototype = {
 
     },
 
-    classDescription: 'Service of Brief extension',
+    classDescription: 'Service of Digest extension',
     classID: Components.ID('{943b2280-6457-11df-a08a-0800200c9a66}'),
     contractID: '@brief.mozdev.org/briefservice;1',
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,

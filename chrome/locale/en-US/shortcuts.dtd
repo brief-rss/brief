@@ -1,4 +1,4 @@
-<!ENTITY shortcutsPage.title "Brief - keyboard shortcuts">
+<!ENTITY shortcutsPage.title "Digest - keyboard shortcuts">
 <!ENTITY or "or">
 
 <!ENTITY navigation.header "Navigation">
@@ -31,6 +31,6 @@
 <!ENTITY general.header "General">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Open Brief">
+<!ENTITY openBrief "Open Digest">
 <!ENTITY focusSearchbar "Focus the search box">
 <!ENTITY displayShortcuts "Display the list of keyboard shortcuts">

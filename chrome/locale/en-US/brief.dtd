@@ -10,7 +10,7 @@
 <!ENTITY filterStarred.tooltip "View only bookmarks (S)">
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
-<!ENTITY showOptions.tooltip "Open Brief options">
+<!ENTITY showOptions.tooltip "Open Digest options">
 <!ENTITY sidebarSplitter.tooltip "Double-click to hide the sidebar">
 <!ENTITY revealSidebar.tooltip "Reveal the sidebar">
 <!ENTITY markViewRead.tooltip "Mark all items as read (Alt + N)">

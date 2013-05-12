@@ -1,5 +1,5 @@
-<!ENTITY pageTitle "Brief">
-<!ENTITY thankYou.header "Thanks for installing Brief">
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Thanks for installing Digest">
 <!ENTITY subscribingStep1.description "Click on the icon in the Location Bar to preview the feed.">
 <!ENTITY subscribingStep1firefox4.description "Open the <strong>Bookmarks</strong> menu and select <strong>Subscribe to This Page</strong>.">
 <!ENTITY subscribingStep2.description "Select <strong>Live Bookmarks</strong> and click <strong>Subscribe Now</strong>.">

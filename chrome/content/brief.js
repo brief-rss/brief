@@ -107,7 +107,7 @@ let Commands = {
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
+        window.openDialog('chrome://brief/content/options/options.xul', 'Digest options',
                           features, aPaneID);
     },
 
@@ -255,7 +255,7 @@ let Commands = {
         let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
         let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
-        window.openDialog(url, 'Brief shortcuts', features);
+        window.openDialog(url, 'Digest shortcuts', features);
     }
 }
 

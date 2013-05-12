@@ -57,7 +57,7 @@ function openOptions() {
     let modality = instantApply ? 'modal=no,dialog=no' : 'modal';
     let features = 'chrome,titlebar,toolbar,centerscreen,resizable,' + modality;
 
-    window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
+    window.openDialog('chrome://brief/content/options/options.xul', 'Digest options',
                       features, 'feeds-pane');
 }
 

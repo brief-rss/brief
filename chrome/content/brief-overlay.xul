@@ -89,7 +89,7 @@
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="brief-button"
                        class="toolbarbutton-1 chromeclass-toolbar-additional"
-                       label="Brief"
+                       label="Digest"
                        tooltip="brief-tooltip"
                        context="brief-status-context"
                        onclick="if (event.button == 0 || event.button == 1) Brief.open()">

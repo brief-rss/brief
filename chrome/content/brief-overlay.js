@@ -1,7 +1,7 @@
 const Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
-    RELEASE_NOTES_URL_PREFIX: 'http://brief.mozdev.org/versions/',
+    RELEASE_NOTES_URL_PREFIX: 'https://github.com/Tanriol/digest',
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
@@ -91,7 +91,7 @@ const Brief = {
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
+        window.openDialog('chrome://brief/content/options/options.xul', 'Digest options',
                           features);
     },
 
