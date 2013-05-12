@@ -1,0 +1,14 @@
+Digest
+
+Digest is a lightweight RSS reader extension for Firefox.
+It is a fork of Brief by Adam Kowalczyk (brief.mozdev.org,
+https://addons.mozilla.org/en-US/firefox/addon/brief/).
+The aim of this fork is to make the addon compatible with Firefox 21+
+and possibly make future improvements.
+
+Digest is released under MPL 2.0, which is an upgrade from
+Brief's MPL 1.1.
+
+No version of Digest has been released yet.
+
+Issues and pull requests are welcome.
