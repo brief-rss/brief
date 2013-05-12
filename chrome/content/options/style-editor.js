@@ -22,7 +22,7 @@ function init() {
     if (!gCustomStyleFile.exists()) {
         gCustomStyleFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, 777);
 
-        AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
+        AddonManager.getAddonByID('digest@tanriol.github.io', function(addon) {
             let uri = addon.getResourceURI('/defaults/data/example-custom-style.css');
             let cssText = fetchCSSText(uri);
             writeCustomCSSFile(cssText);

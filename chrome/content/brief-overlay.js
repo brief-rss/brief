@@ -108,7 +108,7 @@ const Brief = {
         }
         else {
             // If Brief has been updated, load the new version info page.
-            AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
+            AddonManager.getAddonByID('digest@tanriol.github.io', function(addon) {
                 let prevVersion = this.prefs.getCharPref('lastVersion');
 
                 if (Services.vc.compare(prevVersion, addon.version) < 0) {
@@ -340,7 +340,7 @@ const Brief = {
         this.prefs.setBoolPref('firstRun', false);
         this.prefs.setBoolPref('firefox4ToolbarbuttonMigrated', true);
 
-        AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
+        AddonManager.getAddonByID('digest@tanriol.github.io', function(addon) {
             Brief.prefs.setCharPref('lastVersion', addon.version);
         })
 

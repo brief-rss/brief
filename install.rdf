@@ -4,22 +4,24 @@
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 
   <rdf:Description about="urn:mozilla:install-manifest">
-    <id>brief@mozdev.org</id>
-    <version>1.7a1</version>
+    <id>digest@tanriol.github.io</id>
+    <version>1.0b1</version>
     <type>2</type>
-    <name>Brief</name>
-    <description>A feed reading extension.</description>
-    <creator>Adam Kowalczyk</creator>
-    <homepageURL>http://brief.mozdev.org/</homepageURL>
+    <name>Digest</name>
+    <description>A lightweight feed reader, fork of Brief 1.7alpha.</description>
+    <creator>Denis Lisov</creator>
+    <homepageURL>https://github.com/Tanriol/digest</homepageURL>
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
 
     <targetApplication>
       <rdf:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
         <minVersion>13.0</minVersion>
-        <maxVersion>17.0a1</maxVersion>
+        <maxVersion>23.0a1</maxVersion>
       </rdf:Description>
     </targetApplication>
+
+    <developer>Adam Kowalczyk</developer>
 
     <contributor>Leszek "teo" Życzkowski</contributor>
     <contributor>Christopher Finke</contributor>
