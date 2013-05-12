@@ -177,7 +177,8 @@ let opml = {
         return results;
     },
 
-    exportOPML: function() {
+    exportOPML: function opml_exportOPML() {
+        let resume = opml_exportOPML.resume;
         let filePrefix = 'feeds';
         let title = 'Feeds';
 
@@ -201,7 +202,7 @@ let opml = {
             data += '\t' + '</head>' + '\n';
             data += '\t' + '<body>' + '\n';
 
-            data = this.addFolderToOPML(data, result.root, 0, true);
+            data = (yield this.addFolderToOPML(data, result.root, 0, true, resume));
 
             data += '\t' + '</body>' + '\n';
             data += '</opml>';
@@ -218,10 +219,11 @@ let opml = {
             outputStream.write(data, data.length);
             outputStream.close();
         }
-    },
+    }.gen(),
 
 
-    addFolderToOPML: function(dataString, folder, level, isBase) {
+    addFolderToOPML: function opml_addFolderToOPML(dataString, folder, level, isBase, aCallback) {
+        let resume = opml_addFolderToOPML.resume;
         level++;
 
         if (!isBase) {
@@ -242,15 +244,17 @@ let opml = {
             if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
                 continue;
 
-            if (PlacesUtils.livemarks.isLivemark(node.itemId)) {
+            let [status, placesItem] = yield PlacesUtils.livemarks.getLivemark({"id": node.itemId}, function() resume(arguments));
+
+            if (Components.isSuccessCode(status)) {
                 dataString += '\t\t';
 
                 for (let j = 1; j < level; j++)
                     dataString += '\t';
 
                 let name = PlacesUtils.bookmarks.getItemTitle(node.itemId);
-                let url = PlacesUtils.livemarks.getSiteURI(node.itemId).spec;
-                let feedURL = PlacesUtils.livemarks.getFeedURI(node.itemId).spec
+                let url = placesItem.siteURI.spec;
+                let feedURL = placesItem.feedURI.spec;
 
                 dataString += '<outline type="rss" version="RSS" '           +
                               'text="'          + this.cleanXMLText(name)    +
@@ -259,7 +263,7 @@ let opml = {
                               '"/>' + "\n";
             }
             else if (node instanceof Ci.nsINavHistoryContainerResultNode) {
-                dataString = this.addFolderToOPML(dataString, node, level, false);
+                dataString = (yield this.addFolderToOPML(dataString, node, level, false, resume));
             }
         }
 
@@ -274,8 +278,9 @@ let opml = {
             dataString += '</outline>' + '\n';
         }
 
-        return dataString;
-    },
+        if(aCallback)
+            aCallback(dataString);
+    }.gen(),
 
     promptForFile: function (filePrefix) {
         let bundle = document.getElementById('options-bundle');
