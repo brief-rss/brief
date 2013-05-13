@@ -1,7 +1,7 @@
 const Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://digest/content/firstrun.xhtml',
-    RELEASE_NOTES_URL_PREFIX: 'https://github.com/Tanriol/digest',
+    RELEASE_NOTES_URL_PREFIX: 'https://github.com/Tanriol/digest/wiki/Digest-',
 
     BRIEF_URL: 'chrome://digest/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://digest/skin/feed-icon-16x16.png',
@@ -112,7 +112,7 @@ const Brief = {
                 let prevVersion = this.prefs.getCharPref('lastVersion');
 
                 if (Services.vc.compare(prevVersion, addon.version) < 0) {
-                    let url = this.RELEASE_NOTES_URL_PREFIX + addon.version + '.html';
+                    let url = this.RELEASE_NOTES_URL_PREFIX + addon.version;
                     gBrowser.loadOneTab(url, { relatedToCurrent: false,
                                                inBackground: false });
                     this.prefs.setCharPref('lastVersion', addon.version);
