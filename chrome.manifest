@@ -1,7 +1,7 @@
 content  brief  chrome/content/
 skin  brief  classic  chrome/skin/
 
-resource brief-content  defaults/data/
+resource digest-content  defaults/data/
 resource brief          modules/
 
 overlay  chrome://browser/content/browser.xul  chrome://brief/content/brief-overlay.xul
