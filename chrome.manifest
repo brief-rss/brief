@@ -10,8 +10,8 @@ style  chrome://browser/content/browser.xul  chrome://digest/skin/overlay-window
 style  chrome://global/content/customizeToolbar.xul  chrome://digest/skin/overlay.css
 
 component  {7be39418-cdae-4f37-8c97-ae5323954682}  components/Service.js
-contract  @brief.mozdev.org/briefservice;1  {7be39418-cdae-4f37-8c97-ae5323954682}
-category  profile-after-change  BriefService  @brief.mozdev.org/briefservice;1
-category  vacuum-participant    BriefService  @brief.mozdev.org/briefservice;1
+contract  @tanriol.github.io/digest/service;1  {7be39418-cdae-4f37-8c97-ae5323954682}
+category  profile-after-change  DigestService  @tanriol.github.io/digest/service;1
+category  vacuum-participant    DigestService  @tanriol.github.io/digest/service;1
 
 locale  digest   en-US  chrome/locale/en-US/

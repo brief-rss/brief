@@ -4,7 +4,7 @@ Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
 IMPORT_COMMON(this);
 
-function BriefService() {
+function DigestService() {
     // Initialize Storage module.
     Components.utils.import('resource://digest/Storage.jsm');
 
@@ -19,7 +19,7 @@ function BriefService() {
     }
 }
 
-BriefService.prototype = {
+DigestService.prototype = {
 
     // mozIStorageVacuumParticipant
     get databaseConnection() {
@@ -49,10 +49,10 @@ BriefService.prototype = {
 
     classDescription: 'Service of Digest extension',
     classID: Components.ID('{7be39418-cdae-4f37-8c97-ae5323954682}'),
-    contractID: '@brief.mozdev.org/briefservice;1',
+    contractID: '@tanriol.github.io/digest/service;1',
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver,
                                            Ci.mozIStorageVacuumParticipant])
 
 }
 
-let NSGetFactory = XPCOMUtils.generateNSGetFactory([BriefService]);
+let NSGetFactory = XPCOMUtils.generateNSGetFactory([DigestService]);
