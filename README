@@ -9,6 +9,7 @@ and possibly make future improvements.
 Digest is released under MPL 2.0, which is an upgrade from
 Brief's MPL 1.1.
 
-No version of Digest has been released yet.
+Version 1.0 has been released on 2013-05-14
+ - Support Firefox 21-23
 
 Issues and pull requests are welcome.
