@@ -9,8 +9,8 @@ style  chrome://browser/content/browser.xul  chrome://digest/skin/overlay-window
 
 style  chrome://global/content/customizeToolbar.xul  chrome://digest/skin/overlay.css
 
-component  {943b2280-6457-11df-a08a-0800200c9a66}  components/Service.js
-contract  @brief.mozdev.org/briefservice;1  {943b2280-6457-11df-a08a-0800200c9a66}
+component  {7be39418-cdae-4f37-8c97-ae5323954682}  components/Service.js
+contract  @brief.mozdev.org/briefservice;1  {7be39418-cdae-4f37-8c97-ae5323954682}
 category  profile-after-change  BriefService  @brief.mozdev.org/briefservice;1
 category  vacuum-participant    BriefService  @brief.mozdev.org/briefservice;1
 
