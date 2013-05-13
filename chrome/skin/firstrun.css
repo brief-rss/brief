@@ -55,7 +55,7 @@ div {
 #home-folder {
     display: inline-block;
     padding-left: 20px;
-    background: url(chrome://brief/skin/icons/folder.png) center left no-repeat;
+    background: url(chrome://digest/skin/icons/folder.png) center left no-repeat;
     color: #0082c6;
     border-bottom: 2px solid transparent;
     }
@@ -102,9 +102,9 @@ div {
     text-shadow: -1px -1px 1px #7BAB29;
     border: 1px solid #488F03;
     border-radius: 10px;
-    background: url(chrome://brief/skin/get-started-button.png) repeat-x center;
+    background: url(chrome://digest/skin/get-started-button.png) repeat-x center;
     }
 
 #open-brief:hover {
-    background-image: url(chrome://brief/skin/get-started-button-hover.png);
+    background-image: url(chrome://digest/skin/get-started-button-hover.png);
     }

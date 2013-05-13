@@ -1,5 +1,5 @@
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/Storage.jsm');
+Components.utils.import('resource://digest/common.jsm');
+Components.utils.import('resource://digest/Storage.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 
 IMPORT_COMMON(this);
@@ -147,7 +147,7 @@ let gFeedsPane = {
 let gDisplayPane = {
 
     editCustomStyle: function() {
-        window.openDialog('chrome://brief/content/options/style-editor.xul',
+        window.openDialog('chrome://digest/content/options/style-editor.xul',
                           'Style editor', 'chrome,centerscreen,titlebar,resizable');
     }
 

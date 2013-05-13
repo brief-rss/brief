@@ -103,7 +103,7 @@ body:not(.multiple-feeds) .headline-feed-name {
     margin-top: 2px;
     width: 30px;
     height: 30px;
-    background: url(chrome://brief/skin/icons/entry-arrow.png) no-repeat 3px 0;
+    background: url(chrome://digest/skin/icons/entry-arrow.png) no-repeat 3px 0;
 }
 
 .headline-link:hover {

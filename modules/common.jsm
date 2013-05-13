@@ -120,6 +120,6 @@ RelativeDate.prototype = {
 
 
 Components.utils.import('resource://gre/modules/PluralForm.jsm');
-let pluralRule = Services.strings.createBundle('chrome://brief/locale/brief.properties')
+let pluralRule = Services.strings.createBundle('chrome://digest/locale/brief.properties')
                                  .GetStringFromName('pluralRule');
 let getPluralForm = PluralForm.makeGetter(pluralRule)[0];

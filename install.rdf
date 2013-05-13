@@ -11,7 +11,7 @@
     <description>A lightweight feed reader, fork of Brief 1.7alpha.</description>
     <creator>Denis Lisov</creator>
     <homepageURL>https://github.com/Tanriol/digest</homepageURL>
-    <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
+    <optionsURL>chrome://digest/content/options/options.xul</optionsURL>
 
     <targetApplication>
       <rdf:Description>

@@ -1,11 +1,11 @@
 #brief-button {
-    list-style-image: url(chrome://brief/skin/toolbarbutton.png);
+    list-style-image: url(chrome://digest/skin/toolbarbutton.png);
     -moz-box-align: center;
     -moz-box-orient: horizontal;
 }
 
 toolbar[iconsize=small] #brief-button {
-    list-style-image: url(chrome://brief/skin/feed-icon-16x16.png);
+    list-style-image: url(chrome://digest/skin/feed-icon-16x16.png);
 }
 
 toolbar[mode=full] #brief-status-counter {

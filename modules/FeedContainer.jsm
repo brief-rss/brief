@@ -1,6 +1,6 @@
 const EXPORTED_SYMBOLS = ['Feed', 'Entry', 'EntryList'];
 
-Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://digest/common.jsm');
 
 IMPORT_COMMON(this);
 

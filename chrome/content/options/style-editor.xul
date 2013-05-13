@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
-<?xml-stylesheet href="chrome://brief/skin/options.css" type="text/css"?>
+<?xml-stylesheet href="chrome://digest/skin/options.css" type="text/css"?>
 
-<!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
+<!DOCTYPE prefwindow SYSTEM "chrome://digest/locale/options.dtd">
 
 <dialog id="brief-style-editor"
         title="&styleEditor.title;"

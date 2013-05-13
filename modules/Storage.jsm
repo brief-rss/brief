@@ -1,9 +1,9 @@
 const EXPORTED_SYMBOLS = ['Storage', 'Query'];
 
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/StorageUtils.jsm');
-Components.utils.import('resource://brief/FeedContainer.jsm');
-Components.utils.import('resource://brief/FeedUpdateService.jsm');
+Components.utils.import('resource://digest/common.jsm');
+Components.utils.import('resource://digest/StorageUtils.jsm');
+Components.utils.import('resource://digest/FeedContainer.jsm');
+Components.utils.import('resource://digest/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 

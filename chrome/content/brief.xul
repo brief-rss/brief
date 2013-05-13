@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
-<?xml-stylesheet href="chrome://brief/skin/feedview-header.css"?>
-<?xml-stylesheet href="chrome://brief/skin/feedlist.css" type="text/css"?>
+<?xml-stylesheet href="chrome://digest/skin/brief.css" type="text/css"?>
+<?xml-stylesheet href="chrome://digest/skin/feedview-header.css"?>
+<?xml-stylesheet href="chrome://digest/skin/feedlist.css" type="text/css"?>
 <?xml-stylesheet href="resource://profile-chrome-dir/brief-custom-style.css"?>
 
-<!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
+<!DOCTYPE window SYSTEM "chrome://digest/locale/brief.dtd">
 
 <page id="brief-window"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -19,7 +19,7 @@
     <script type="application/x-javascript" src="feedview.js"/>
 
     <stringbundleset id="string-bundles">
-        <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
+        <stringbundle id="main-bundle" src="chrome://digest/locale/brief.properties"/>
     </stringbundleset>
 
     <popupset id="main-popupset">

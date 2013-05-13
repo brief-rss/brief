@@ -2,7 +2,7 @@
  * Original code by Christopher Finke, "OPML Support" extension. Used with permisson.
  */
 
-Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://digest/common.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 

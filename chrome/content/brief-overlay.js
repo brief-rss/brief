@@ -1,10 +1,10 @@
 const Brief = {
 
-    FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
+    FIRST_RUN_PAGE_URL: 'chrome://digest/content/firstrun.xhtml',
     RELEASE_NOTES_URL_PREFIX: 'https://github.com/Tanriol/digest',
 
-    BRIEF_URL: 'chrome://brief/content/brief.xul',
-    BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
+    BRIEF_URL: 'chrome://digest/content/brief.xul',
+    BRIEF_FAVICON_URL: 'chrome://digest/skin/feed-icon-16x16.png',
 
     get statusCounter() document.getElementById('brief-status-counter'),
 
@@ -18,7 +18,7 @@ const Brief = {
 
     get storage() {
         let tempScope = {};
-        Components.utils.import('resource://brief/Storage.jsm', tempScope);
+        Components.utils.import('resource://digest/Storage.jsm', tempScope);
 
         delete this.storage;
         return this.storage = tempScope.Storage;
@@ -26,7 +26,7 @@ const Brief = {
 
     get query() {
         let tempScope = {};
-        Components.utils.import('resource://brief/Storage.jsm', tempScope);
+        Components.utils.import('resource://digest/Storage.jsm', tempScope);
 
         delete this.query;
         return this.query = tempScope.Query
@@ -34,7 +34,7 @@ const Brief = {
 
     get common() {
         let tempScope = {};
-        Components.utils.import('resource://brief/common.jsm', tempScope);
+        Components.utils.import('resource://digest/common.jsm', tempScope);
 
         delete this.common;
         return this.common = tempScope;
@@ -72,7 +72,7 @@ const Brief = {
 
     updateAllFeeds: function Brief_updateAllFeeds() {
         let tempScope = {};
-        Components.utils.import('resource://brief/FeedUpdateService.jsm', tempScope);
+        Components.utils.import('resource://digest/FeedUpdateService.jsm', tempScope);
         tempScope.FeedUpdateService.updateAllFeeds();
     },
 
@@ -91,7 +91,7 @@ const Brief = {
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://brief/content/options/options.xul', 'Digest options',
+        window.openDialog('chrome://digest/content/options/options.xul', 'Digest options',
                           features);
     },
 
@@ -223,7 +223,7 @@ const Brief = {
 
     constructTooltip: function Brief_constructTooltip() {
         let label = document.getElementById('brief-tooltip-last-updated');
-        let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
+        let bundle = Services.strings.createBundle('chrome://digest/locale/brief.properties');
 
         let lastUpdateTime = this.prefs.getIntPref('update.lastUpdateTime') * 1000;
         let date = new Date(lastUpdateTime);
@@ -330,7 +330,7 @@ const Brief = {
         }
 
         // Create the default feeds folder.
-        let name = Services.strings.createBundle('chrome://brief/locale/brief.properties')
+        let name = Services.strings.createBundle('chrome://digest/locale/brief.properties')
                                    .GetStringFromName('defaultFeedsFolderName');
         let bookmarks = PlacesUtils.bookmarks;
         let folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,

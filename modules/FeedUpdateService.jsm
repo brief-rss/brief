@@ -1,7 +1,7 @@
 const EXPORTED_SYMBOLS = ['FeedUpdateService'];
 
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/FeedContainer.jsm');
+Components.utils.import('resource://digest/common.jsm');
+Components.utils.import('resource://digest/FeedContainer.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
@@ -19,7 +19,7 @@ const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
 const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
 const FAVICON_REFRESH_INTERVAL = 14*24*60*60*1000; // 2 weeks
 
-const FEED_ICON_URL = 'chrome://brief/skin/icon.png';
+const FEED_ICON_URL = 'chrome://digest/skin/icon.png';
 
 const TIMER_TYPE_ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
 const TIMER_TYPE_PRECISE  = Ci.nsITimer.TYPE_REPEATING_PRECISE;
@@ -31,7 +31,7 @@ XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
 })
 XPCOMUtils.defineLazyGetter(this, 'Storage', function() {
     let tempScope = {};
-    Components.utils.import('resource://brief/Storage.jsm', tempScope);
+    Components.utils.import('resource://digest/Storage.jsm', tempScope);
     return tempScope.Storage;
 })
 
@@ -260,7 +260,7 @@ let FeedUpdateServiceInternal = {
 
         let showNotification = Prefs.getBoolPref('update.showNotification');
         if (this.feedsWithNewEntriesCount > 0 && showNotification) {
-            let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
+            let bundle = Services.strings.createBundle('chrome://digest/locale/brief.properties');
             let alertTitle = bundle.GetStringFromName('updateAlertTitle');
 
             let feedForms = bundle.GetStringFromName('feeds');

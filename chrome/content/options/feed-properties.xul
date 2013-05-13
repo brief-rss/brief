@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
-<?xml-stylesheet href="chrome://brief/skin/options.css" type="text/css"?>
+<?xml-stylesheet href="chrome://digest/skin/options.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://brief/locale/options.dtd">
+<!DOCTYPE window SYSTEM "chrome://digest/locale/options.dtd">
 
 <dialog id="brief-feed-properties"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -15,7 +15,7 @@
     <script type="application/x-javascript" src="feed-properties.js"/>
 
     <stringbundleset id="string-bundles">
-        <stringbundle id="options-bundle" src="chrome://brief/locale/options.properties"/>
+        <stringbundle id="options-bundle" src="chrome://digest/locale/options.properties"/>
     </stringbundleset>
 
     <grid>

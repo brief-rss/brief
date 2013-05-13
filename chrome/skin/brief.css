@@ -180,7 +180,7 @@ page {
     padding: 2px 3px !important;
     font-size: 13px !important;
     color: #000000 !important;
-    list-style-image: url(chrome://brief/skin/icons/tag.png);
+    list-style-image: url(chrome://digest/skin/icons/tag.png);
 }
 
 .tag-list-item[selected="true"] {

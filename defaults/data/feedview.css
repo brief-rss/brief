@@ -115,7 +115,7 @@ pre, code {
 .mark-read-button {
     width: 47px;
     height: 25px;
-    background-image: url(chrome://brief/skin/mark-read-button.png);
+    background-image: url(chrome://digest/skin/mark-read-button.png);
 }
 
 .mark-read-button:hover + .delete-button,
@@ -131,7 +131,7 @@ pre, code {
 
 .delete-button {
     border-left: 1px solid #99a7bf;
-    background-image: url(chrome://brief/skin/delete-button.png);
+    background-image: url(chrome://digest/skin/delete-button.png);
 }
 
 .delete-button:hover {
@@ -140,7 +140,7 @@ pre, code {
 
 .restore-button {
     border-left: 1px solid #99a7bf;
-    background-image: url(chrome://brief/skin/restore-button.png);
+    background-image: url(chrome://digest/skin/restore-button.png);
 }
 
 .restore-button:hover {
@@ -150,7 +150,7 @@ pre, code {
 .bookmark-button {
     width: 24px;
     height: 24px;
-    background: url(chrome://brief/skin/icons/entry-star.png) no-repeat;
+    background: url(chrome://digest/skin/icons/entry-star.png) no-repeat;
 }
 
 article:not(.starred) .bookmark-button:hover {

@@ -114,7 +114,7 @@ body:not(.multiple-feeds) .feed-name {
 
 .tags {
     padding-left: 20px;
-    background: url(chrome://brief/skin/icons/tag.png) 1px no-repeat;
+    background: url(chrome://digest/skin/icons/tag.png) 1px no-repeat;
 }
 
 .tags:not(:empty) {

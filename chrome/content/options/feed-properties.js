@@ -1,5 +1,5 @@
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/Storage.jsm');
+Components.utils.import('resource://digest/common.jsm');
+Components.utils.import('resource://digest/Storage.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 

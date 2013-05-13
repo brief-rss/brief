@@ -1,6 +1,6 @@
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/Storage.jsm');
-Components.utils.import('resource://brief/FeedUpdateService.jsm');
+Components.utils.import('resource://digest/common.jsm');
+Components.utils.import('resource://digest/Storage.jsm');
+Components.utils.import('resource://digest/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/NetUtil.jsm');
 
@@ -107,7 +107,7 @@ let Commands = {
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://brief/content/options/options.xul', 'Digest options',
+        window.openDialog('chrome://digest/content/options/options.xul', 'Digest options',
                           features, aPaneID);
     },
 
@@ -253,7 +253,7 @@ let Commands = {
     displayShortcuts: function cmd_displayShortcuts() {
         let height = Math.min(window.screen.availHeight, 620);
         let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
-        let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
+        let url = 'chrome://digest/content/keyboard-shortcuts.xhtml';
 
         window.openDialog(url, 'Digest shortcuts', features);
     }

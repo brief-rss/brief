@@ -1,4 +1,4 @@
-Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://digest/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
@@ -6,7 +6,7 @@ IMPORT_COMMON(this);
 
 function BriefService() {
     // Initialize Storage module.
-    Components.utils.import('resource://brief/Storage.jsm');
+    Components.utils.import('resource://digest/Storage.jsm');
 
     // Registers %profile%/chrome directory under a resource URI.
     let resourceProtocolHandler = Services.io.getProtocolHandler('resource')
@@ -31,7 +31,7 @@ BriefService.prototype = {
 
     // mozIStorageVacuumParticipant
     onBeginVacuum: function onBeginVacuum() {
-        Components.utils.import('resource://brief/FeedUpdateService.jsm');
+        Components.utils.import('resource://digest/FeedUpdateService.jsm');
         FeedUpdateService.stopUpdating();
 
         return true;

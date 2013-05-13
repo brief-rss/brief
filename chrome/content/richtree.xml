@@ -598,7 +598,7 @@
 
 
 <binding id="richtreefolder"
-         extends="chrome://brief/content/richtree.xml#richtreeitem">
+         extends="chrome://digest/content/richtree.xml#richtreeitem">
     <content>
       <xul:hbox class="folder-title-container" flex="1">
         <xul:image class="folder-twisty" onmousedown="toggleOpen(); event.stopPropagation();" />

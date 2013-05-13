@@ -1,4 +1,4 @@
-Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://digest/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 
 IMPORT_COMMON(this);
@@ -38,7 +38,7 @@ function onunload() {
 function buildHeader() {
     let bookmarks = Cc['@mozilla.org/browser/nav-bookmarks-service;1']
                     .getService(Ci.nsINavBookmarksService);
-    let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
+    let bundle = Services.strings.createBundle('chrome://digest/locale/brief.properties');
 
     let folderID = prefBranch.getIntPref('homeFolder');
     let folderName = '<span id="home-folder">' + bookmarks.getItemTitle(folderID) +
@@ -57,7 +57,7 @@ function openOptions() {
     let modality = instantApply ? 'modal=no,dialog=no' : 'modal';
     let features = 'chrome,titlebar,toolbar,centerscreen,resizable,' + modality;
 
-    window.openDialog('chrome://brief/content/options/options.xul', 'Digest options',
+    window.openDialog('chrome://digest/content/options/options.xul', 'Digest options',
                       features, 'feeds-pane');
 }
 

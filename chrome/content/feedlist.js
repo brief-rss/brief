@@ -1,5 +1,5 @@
-const THROBBER_URL = 'chrome://brief/skin/throbber.gif';
-const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
+const THROBBER_URL = 'chrome://digest/skin/throbber.gif';
+const ERROR_ICON_URL = 'chrome://digest/skin/icons/error.png';
 
 let ViewList = {
 
@@ -756,7 +756,7 @@ let FeedContextMenu = {
     },
 
     showFeedProperties: function FeedContextMenu_showFeedProperties() {
-        openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
+        openDialog('chrome://digest/content/options/feed-properties.xul', 'FeedProperties',
                    'chrome,titlebar,toolbar,centerscreen,modal', this.targetID);
     }
 

@@ -1,6 +1,6 @@
 const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement', 'StorageError'];
 
-Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://digest/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 
 IMPORT_COMMON(this);

@@ -867,7 +867,7 @@ FeedView.prototype = {
 }
 
 
-const DEFAULT_FAVICON_URL = 'chrome://brief/skin/icons/feed-favicon.png';
+const DEFAULT_FAVICON_URL = 'chrome://digest/skin/icons/feed-favicon.png';
 
 function EntryView(aFeedView, aEntryData) {
     this.feedView = aFeedView;

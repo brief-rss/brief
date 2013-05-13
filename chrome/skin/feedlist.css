@@ -1,13 +1,13 @@
 richtree {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtree);
+    -moz-binding: url(chrome://digest/content/richtree.xml#richtree);
 }
 
 richtreeitem {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtreeitem);
+    -moz-binding: url(chrome://digest/content/richtree.xml#richtreeitem);
 }
 
 richtreefolder {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtreefolder);
+    -moz-binding: url(chrome://digest/content/richtree.xml#richtreefolder);
 }
 
 
