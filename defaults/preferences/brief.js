@@ -1,3 +1,5 @@
+pref("extensions.digest.migrated", false);
+
 pref("extensions.brief.homeFolder", -1);
 pref("extensions.brief.showUnreadCounter", true);
 pref("extensions.brief.firstRun", true);

@@ -107,15 +107,19 @@ const Brief = {
             this.onFirstRun();
         }
         else {
-            // If Brief has been updated, load the new version info page.
+            // If Digest has been updated, load the new version info page.
             AddonManager.getAddonByID('digest@tanriol.github.io', function(addon) {
                 let prevVersion = this.prefs.getCharPref('lastVersion');
+                let migrated = Services.prefs.getBranch('extensions.digest.').
+                        QueryInterface(Ci.nsIPrefBranch2).getBoolPref('migrated');
 
-                if (Services.vc.compare(prevVersion, addon.version) < 0) {
+                if (!migrated || (Services.vc.compare(prevVersion, addon.version) < 0)) {
                     let url = this.RELEASE_NOTES_URL_PREFIX + addon.version;
                     gBrowser.loadOneTab(url, { relatedToCurrent: false,
                                                inBackground: false });
                     this.prefs.setCharPref('lastVersion', addon.version);
+                    Services.prefs.getBranch('extensions.digest.').
+                            QueryInterface(Ci.nsIPrefBranch2).setBoolPref('migrated', true);
                 }
             }.bind(this))
         }
