@@ -357,4 +357,4 @@ const Brief = {
 
 }
 
-window.addEventListener('load', Brief.onWindowLoad.bind(Brief), false);
+ifNoAddon('brief@mozdev.org', function() window.addEventListener('load', Brief.onWindowLoad.bind(Brief), false));

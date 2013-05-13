@@ -2,6 +2,7 @@ const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'Task', 'log', 'ext
                           'getPluralForm', 'RelativeDate'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
+Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -56,6 +57,25 @@ function defer(fn, ctx) {
 		fn = fn.bind(ctx);
 	}
 	MainThread.dispatch(fn, 0);
+}
+
+
+function restart() {
+    let canceled = Cc["@mozilla.org/supports-PRBool;1"]
+        .createInstance(Ci.nsISupportsPRBool);
+    Services.obs.notifyObservers(canceled, "quit-application-requested", "restart");
+    if (canceled.data) return false; // somebody canceled our quit request
+    // restart
+    Cc['@mozilla.org/toolkit/app-startup;1'].getService(Ci.nsIAppStartup)
+        .quit(Ci.nsIAppStartup.eAttemptQuit | Ci.nsIAppStartup.eRestart);
+    return true;
+}
+
+function ifNoAddon(id, aCallback) {
+    AddonManager.getAddonByID(id, function(addon) {
+        if(addon == null)
+            aCallback();
+    })
 }
 
 

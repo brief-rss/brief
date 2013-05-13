@@ -1,6 +1,7 @@
 Components.utils.import('resource://digest/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+Components.utils.import("resource://gre/modules/AddonManager.jsm");
 
 IMPORT_COMMON(this);
 
@@ -43,8 +44,23 @@ DigestService.prototype = {
     },
 
     // nsIObserver
-    observe: function() {
-
+    observe: function(key, topic) {
+        if(topic == 'profile-after-change') {
+            log("profile-after-change");
+            AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
+                if(addon.isActive) {
+                    let prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+                            .getService(Components.interfaces.nsIPromptService);
+                    let result = prompts.confirm(null, "Upgrade to Digest",
+                            "The extension Brief is enabled.\n" +
+                            "Digest needs to disable it and restart the browser.");
+                    if(result) {
+                        addon.userDisabled = true;
+                        restart();
+                    }
+                }
+            })
+        }
     },
 
     classDescription: 'Service of Digest extension',
