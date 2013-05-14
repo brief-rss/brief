@@ -121,8 +121,10 @@ const Brief = {
 
                 if (!migrated || (Services.vc.compare(prevVersion, addon.version) < 0)) {
                     let url = this.RELEASE_NOTES_URL_PREFIX + addon.version;
-                    gBrowser.loadOneTab(url, { relatedToCurrent: false,
-                                               inBackground: false });
+                    setTimeout(function() {
+                        let parameters = { relatedToCurrent: false, inBackground: false };
+                        gBrowser.loadOneTab(url, parameters)
+                    }, 500)
                     this.prefs.setCharPref('lastVersion', addon.version);
                     Services.prefs.getBranch('extensions.digest.').
                             QueryInterface(Ci.nsIPrefBranch2).setBoolPref('migrated', true);
@@ -358,7 +360,7 @@ const Brief = {
         setTimeout(function() {
             let parameters = { relatedToCurrent: false, inBackground: false };
             gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, parameters)
-        }, 0)
+        }, 500)
     }
 
 }
