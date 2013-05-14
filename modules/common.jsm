@@ -1,5 +1,5 @@
 const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'Task', 'log', 'extend',
-                          'getPluralForm', 'RelativeDate'];
+                          'getPluralForm', 'RelativeDate', 'ifNoAddon', 'restart'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import("resource://gre/modules/AddonManager.jsm");
@@ -73,7 +73,7 @@ function restart() {
 
 function ifNoAddon(id, aCallback) {
     AddonManager.getAddonByID(id, function(addon) {
-        if(addon == null)
+        if(addon == null || !addon.isActive)
             aCallback();
     })
 }

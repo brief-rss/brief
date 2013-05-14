@@ -102,7 +102,13 @@ const Brief = {
 
     onWindowLoad: function Brief_onWindowLoad(aEvent) {
         window.removeEventListener('load', arguments.callee, false);
+        let tempScope = {};
+        Components.utils.import('resource://digest/common.jsm', tempScope);
+        tempScope.ifNoAddon('brief@mozdev.org', function() {this.onWindowLoad_continue(aEvent)}.bind(this));
+    },
 
+
+    onWindowLoad_continue: function Brief_onWindowLoad_continue(aEvent) {
         if (this.prefs.getBoolPref('firstRun')) {
             this.onFirstRun();
         }
@@ -357,4 +363,4 @@ const Brief = {
 
 }
 
-ifNoAddon('brief@mozdev.org', function() window.addEventListener('load', Brief.onWindowLoad.bind(Brief), false));
+window.addEventListener('load', Brief.onWindowLoad.bind(Brief), false);

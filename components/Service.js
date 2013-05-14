@@ -48,7 +48,7 @@ DigestService.prototype = {
         if(topic == 'profile-after-change') {
             log("profile-after-change");
             AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
-                if(addon.isActive) {
+                if(addon && addon.isActive) {
                     let prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
                             .getService(Components.interfaces.nsIPromptService);
                     let result = prompts.confirm(null, "Upgrade to Digest",
