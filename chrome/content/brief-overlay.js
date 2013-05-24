@@ -229,6 +229,10 @@ const Brief = {
         query.getEntryCount(function(unreadEntriesCount) {
             Brief.statusCounter.value = unreadEntriesCount;
             Brief.statusCounter.hidden = (unreadEntriesCount == 0);
+            if (unreadEntriesCount > 0)
+                Brief.toolbarbutton.removeAttribute("brief_noUnread");
+            else
+                Brief.toolbarbutton.setAttribute("brief_noUnread", "true");
         })
     },
 

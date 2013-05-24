@@ -3,6 +3,10 @@
     -moz-box-align: center;
     -moz-box-orient: horizontal;
 }
+#brief-button[brief_noUnread] {
+    opacity: 0.85;
+    filter: url("chrome://mozapps/skin/extensions/extensions.svg#greyscale");
+}
 
 toolbar[iconsize=small] #brief-button {
     list-style-image: url(chrome://digest/skin/feed-icon-16x16.png);
