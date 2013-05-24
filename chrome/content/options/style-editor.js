@@ -20,7 +20,7 @@ function init() {
     gCustomStyleFile.append('brief-custom-style.css');
 
     if (!gCustomStyleFile.exists()) {
-        gCustomStyleFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, 777);
+        gCustomStyleFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, parseInt("0644", 8));
 
         AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
             let uri = addon.getResourceURI('/defaults/data/example-custom-style.css');
