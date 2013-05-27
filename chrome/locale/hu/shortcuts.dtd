@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief – billentyű rövidítések">
+<!ENTITY shortcutsPage.title "Digest – billentyű rövidítések">
 <!ENTITY or "vagy">
 <!ENTITY navigation.header "Navigáció">
 <!ENTITY space.key "Space">
 <!ENTITY shiftSpace.key "Shift + Space">
 <!ENTITY nextItem "Ugrás a következő elemre">
 <!ENTITY previousItem "Ugrás az előző elemre">
-<!ENTITY skipDown "Ugrás 10 elemet előre">
-<!ENTITY skipUp "Ugrás 10 elemet vissza">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Elem megnyitása">
 <!ENTITY showItem "Aktuális elem megjelenítése/elrejtése">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Általános">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Ctrl + Alt + D">
-<!ENTITY openBrief "Brief megnyitása">
+<!ENTITY openBrief "Digest megnyitása">
 <!ENTITY focusSearchbar "Keresősáv fókuszálása">
 <!ENTITY displayShortcuts "Gyorsbillentyűk megjelenítése">

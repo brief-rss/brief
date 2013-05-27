@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief - キーボードショートカット">
+<!ENTITY shortcutsPage.title "Digest - キーボードショートカット">
 <!ENTITY or "または">
 <!ENTITY navigation.header "ナビゲーション">
 <!ENTITY space.key "Space">
 <!ENTITY shiftSpace.key "Shift + スペース">
 <!ENTITY nextItem "次の項目へ移動">
 <!ENTITY previousItem "以前の項目へ移動">
-<!ENTITY skipDown "10項目下へ飛ばす">
-<!ENTITY skipUp "10項目上へ飛ばす">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "現在の項目を開く">
 <!ENTITY showItem "現在の項目の表示・非表示 (ヘッドライン表示にて)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "全般">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Brief を開く">
+<!ENTITY openBrief "Digest を開く">
 <!ENTITY focusSearchbar "検索バーにフォーカスを移す">
 <!ENTITY displayShortcuts "ショートカットキーの一覧を表示する">

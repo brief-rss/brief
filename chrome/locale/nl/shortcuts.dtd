@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief - sneltoetsen">
+<!ENTITY shortcutsPage.title "Digest - sneltoetsen">
 <!ENTITY or "of">
 <!ENTITY navigation.header "Navigatie">
 <!ENTITY space.key "Spatie">
 <!ENTITY shiftSpace.key "Shift + Spatie">
 <!ENTITY nextItem "Volgende bericht">
 <!ENTITY previousItem "Vorige bericht">
-<!ENTITY skipDown "Volgende 10 berichten">
-<!ENTITY skipUp "Vorige 10 berichten">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Invoeren">
 <!ENTITY openEntry "Huidige bericht openen">
 <!ENTITY showItem "Huidige bericht weergeven/verbergen (in beeld kopteksten)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Algemeen">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Brief openen">
+<!ENTITY openBrief "Digest openen">
 <!ENTITY focusSearchbar "Zoekbalk focus geven">
 <!ENTITY displayShortcuts "Lijst met sneltoetsen weergeven">

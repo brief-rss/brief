@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Scorciatoie da tastiera di Brief">
+<!ENTITY shortcutsPage.title "Scorciatoie da tastiera di Digest">
 <!ENTITY or "o">
 <!ENTITY navigation.header "Navigazione">
 <!ENTITY space.key "Spazio">
 <!ENTITY shiftSpace.key "Maiusc + spazio">
 <!ENTITY nextItem "Mostra l&apos;elemento successivo">
 <!ENTITY previousItem "Mostra l&apos;elemento precedente">
-<!ENTITY skipDown "Mostra i 10 elementi successivi">
-<!ENTITY skipUp "Mostra i 10 elementi precedenti">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Invio">
 <!ENTITY openEntry "Apre l&apos;elemento selezionato">
 <!ENTITY showItem "Mostra/nasconde l&apos;anteprima dell&apos;elemento selezionato">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Generali">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D ">
 <!ENTITY cmdAltD.key "Cmd + Alt + D ">
-<!ENTITY openBrief "Apre Brief">
+<!ENTITY openBrief "Apre Digest">
 <!ENTITY focusSearchbar "Seleziona la barra di ricerca">
 <!ENTITY displayShortcuts "Mostra la lista delle scorciatoie da tastiera">

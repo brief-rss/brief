@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief – skróty klawiszowe">
+<!ENTITY shortcutsPage.title "Digest – skróty klawiszowe">
 <!ENTITY or "lub">
 <!ENTITY navigation.header "Nawigacja">
 <!ENTITY space.key "Spacja">
 <!ENTITY shiftSpace.key "Shift + Spacja">
 <!ENTITY nextItem "Wyświetl następną wiadomość">
 <!ENTITY previousItem "Wyświetl poprzednią wiadomość">
-<!ENTITY skipDown "Przejdź w dół o 10 wiadomości">
-<!ENTITY skipUp "Przejdź w górę o 10 wiadomości">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Otwórz wybraną wiadomość">
 <!ENTITY showItem "Rozwiń lub zwiń wybraną wiadomość (w trybie widoku nagłówków)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Ogólne">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Otwórz Briefa">
+<!ENTITY openBrief "Otwórz Digesta">
 <!ENTITY focusSearchbar "Uaktywnij pasek szukania">
 <!ENTITY displayShortcuts "Wyświetl listę skrótów klawiszowych">

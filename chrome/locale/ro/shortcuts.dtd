@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief - scurtăturile pentru tastatură">
+<!ENTITY shortcutsPage.title "Digest - scurtăturile pentru tastatură">
 <!ENTITY or "sau">
 <!ENTITY navigation.header "Navigare">
 <!ENTITY space.key "Spațiu">
 <!ENTITY shiftSpace.key "Shift + Spațiu">
 <!ENTITY nextItem "Mergi la elementul următor">
 <!ENTITY previousItem "Mergi la elementul anterior">
-<!ENTITY skipDown "Sari peste 10 elemente în jos">
-<!ENTITY skipUp "Sari peste 10 elemente în sus">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Deschide elementul curent">
 <!ENTITY showItem "Arată/ascunde elementul curent (în vederea titlurilor)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "General">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Deschide Brief">
+<!ENTITY openBrief "Deschide Digest">
 <!ENTITY focusSearchbar "Focusează cîmpul pentru căutare">
 <!ENTITY displayShortcuts "Arată lista scurtăturilor de la tastatură">

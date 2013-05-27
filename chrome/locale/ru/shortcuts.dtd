@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief — клавиатурные сокращения">
+<!ENTITY shortcutsPage.title "Digest — клавиатурные сокращения">
 <!ENTITY or "или">
 <!ENTITY navigation.header "Навигация">
 <!ENTITY space.key "Пробел">
 <!ENTITY shiftSpace.key "Shift + Space">
 <!ENTITY nextItem "Перейти к следующему">
 <!ENTITY previousItem "Вернуться к предыдущему">
-<!ENTITY skipDown "Пропустить вниз 10 элементов">
-<!ENTITY skipUp "Вернуться вверх на 10 элементов">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Открыть текущую запись">
 <!ENTITY showItem "Показать/скрыть текущий элемент (в режиме заголовков)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Основные">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Открыть Brief">
+<!ENTITY openBrief "Открыть Digest">
 <!ENTITY focusSearchbar "Переместить фокус в строку поиска">
 <!ENTITY displayShortcuts "Показать список клавиатурных сокращений">

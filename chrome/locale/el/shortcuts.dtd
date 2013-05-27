@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Πλήκτρα συντομεύσεων Brief">
+<!ENTITY shortcutsPage.title "Πλήκτρα συντομεύσεων Digest">
 <!ENTITY or "ή">
 <!ENTITY navigation.header "Πλοήγηση">
 <!ENTITY space.key "Κενό">
 <!ENTITY shiftSpace.key "Shift + Κενό διάστημα">
 <!ENTITY nextItem "Μετάβαση στην επόμενη εγγραφή">
 <!ENTITY previousItem "Μετάβαση στην προηγούμενη εγγραφή">
-<!ENTITY skipDown "Παράκαμψη 10 εγγραφών προς τα κάτω">
-<!ENTITY skipUp "Παράκαμψη 10 εγγραφών προς τα πάνω">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Άνοιγμα τρέχουσας εγγραφής">
 <!ENTITY showItem "Εμφάνιση/απόκρυψη τρέχουσας εγγραφής (στην προβολή κεφαλίδων)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Γενικά">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Άνοιγμα του Brief">
+<!ENTITY openBrief "Άνοιγμα του Digest">
 <!ENTITY focusSearchbar "Εστίαση εργαλειοθήκης αναζήτησης">
 <!ENTITY displayShortcuts "Προβολή λίστας πλήκτρων συντομεύσεων">

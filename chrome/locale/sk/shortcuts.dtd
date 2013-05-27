@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief - klávesové skratky">
+<!ENTITY shortcutsPage.title "Digest - klávesové skratky">
 <!ENTITY or "alebo">
 <!ENTITY navigation.header "Navigácia">
 <!ENTITY space.key "Space">
 <!ENTITY shiftSpace.key "Shift + Space">
 <!ENTITY nextItem "Prejsť na ďalšiu položku">
 <!ENTITY previousItem "Prejsť na predchádzajúcu položku">
-<!ENTITY skipDown "Preskočiť nižšie o 10 položiek">
-<!ENTITY skipUp "Preskočiť vyššie o 10 položiek">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Otvoriť aktuálny článok">
 <!ENTITY showItem "Zobraziť/skryť aktuálnu položku (v náhľade tituliek)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Všeobecné">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Otvoriť Brief">
+<!ENTITY openBrief "Otvoriť Digest">
 <!ENTITY focusSearchbar "Zamerať vyhľadávací panel">
 <!ENTITY displayShortcuts "Zobraziť zoznam klávesových skratiek">

@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief - Atallos do teclado">
+<!ENTITY shortcutsPage.title "Digest - Atallos do teclado">
 <!ENTITY or "ou">
 <!ENTITY navigation.header "Navegación">
 <!ENTITY space.key "Espazo">
 <!ENTITY shiftSpace.key "Maiús + Espazo">
 <!ENTITY nextItem "Ir ao seguinte elemento">
 <!ENTITY previousItem "Ir ao elemento anterior">
-<!ENTITY skipDown "Baixar 10 elementos">
-<!ENTITY skipUp "Subir 10 elementos">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Intro">
 <!ENTITY openEntry "Abrir o elemento actual">
 <!ENTITY showItem "Amosar/Ocultar o elemento acutal(na vista de cabeceiras)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Xeral">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt +D">
-<!ENTITY openBrief "Abrir o Brief">
+<!ENTITY openBrief "Abrir o Digest">
 <!ENTITY focusSearchbar "Foco na caixa de procuras">
 <!ENTITY displayShortcuts "Amosar a listaxe de atallos">

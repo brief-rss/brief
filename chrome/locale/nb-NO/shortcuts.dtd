@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief - snarveistaster">
+<!ENTITY shortcutsPage.title "Digest - snarveistaster">
 <!ENTITY or "eller">
 <!ENTITY navigation.header "Navigasjon">
 <!ENTITY space.key "Mellomrom">
 <!ENTITY shiftSpace.key "Shift + mellomrom">
 <!ENTITY nextItem "Gå til neste element">
 <!ENTITY previousItem "Gå til forrige element">
-<!ENTITY skipDown "Hopp ned 10 elementer av gangen">
-<!ENTITY skipUp "Hopp opp 10 elementer av gangen">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Åpne valgt element">
 <!ENTITY showItem "Vis/skjul valt element (i overskriftsvisningen)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Generelt">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Åpne Brief">
+<!ENTITY openBrief "Åpne Digest">
 <!ENTITY focusSearchbar "Gi fokus til søkelinja">
 <!ENTITY displayShortcuts "Vis liste over snarveistaster">

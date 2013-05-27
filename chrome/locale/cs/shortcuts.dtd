@@ -1,12 +1,11 @@
-<!ENTITY shortcutsPage.title "Brief - klávesové zkratky">
+<!ENTITY shortcutsPage.title "Digest - klávesové zkratky">
 <!ENTITY or "nebo">
 <!ENTITY navigation.header "Navigace">
 <!ENTITY space.key "Mezerník">
 <!ENTITY shiftSpace.key "Shift + Mezerník">
 <!ENTITY nextItem "Přejít na následující položku">
 <!ENTITY previousItem "Přejít na předchozí položku">
-<!ENTITY skipDown "Přejít dolů o 10 položek">
-<!ENTITY skipUp "Přejít nahoru o 10 položek">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen"><!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Otevřít aktuální položku">
 <!ENTITY showItem "Zobrazit/skrýt aktuální položku (v zobrazení záhlaví)">
@@ -27,6 +26,6 @@
 <!ENTITY general.header "Obecné">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
-<!ENTITY openBrief "Otevřít Brief">
+<!ENTITY openBrief "Otevřít Digest">
 <!ENTITY focusSearchbar "Přenést zaměření na vyhledávání">
 <!ENTITY displayShortcuts "Zobrazit seznam klávesových zkratek">
