@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Preferencias de Brief">
+<!ENTITY optionsWindow.title "Preferencias de Digest">
 <!ENTITY mainPane.label "Principal">
 <!ENTITY updateGroup.caption "Actualizaciones">
 <!ENTITY checkForUpdatesBefore.label "Actualizar automáticamente los canales web cada">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Mostrar una notificación cuando se encuentren nuevos elementos">
 <!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "Comportamiento">
-<!ENTITY openInNewTab.label "Abrir Brief en una pestaña nueva">
+<!ENTITY openInNewTab.label "Abrir Digest en una pestaña nueva">
 <!ENTITY openInNewTab.accesskey "f">
 <!ENTITY openEntriesInTabs.label "Abrir los elementos en pestañas nuevas">
 <!ENTITY openEntriesInTabs.accesskey "l">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Presentación">
 <!ENTITY showStatusbarIcon.label "Mostrar un icono en la barra de estado">
 <!ENTITY showStatusbarIcon.accesskey "i">
-<!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos junto al icono de Brief">
+<!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos junto al icono de Digest">
 <!ENTITY showUnreadCounter.accesskey "r">
 <!ENTITY sortUnreadViewOldestFirst.label "Ordenar los elementos comenzando por el más antiguo en la vista de no leídos">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "días">
 <!ENTITY updatedEntries.label "No marcar los elementos modificados como no leídos">
 <!ENTITY updatedEntries.accesskey "m">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Anterior">
 <!ENTITY previousFeed.accesskey "A">
 <!ENTITY nextFeed.label "Siguiente &gt;">

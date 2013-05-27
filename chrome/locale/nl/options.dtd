@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Brief-opties">
+<!ENTITY optionsWindow.title "Digest-opties">
 <!ENTITY mainPane.label "Hoofdvenster">
 <!ENTITY updateGroup.caption "Bijwerken">
 <!ENTITY checkForUpdatesBefore.label "Elke">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Waarschuwing geven wanneer nieuwe berichten worden gevonden">
 <!ENTITY showNotification.accesskey "W">
 <!ENTITY behaviorGroup.caption "Gedrag">
-<!ENTITY openInNewTab.label "Brief in een nieuw tabblad openen">
+<!ENTITY openInNewTab.label "Digest in een nieuw tabblad openen">
 <!ENTITY openInNewTab.accesskey "O">
 <!ENTITY openEntriesInTabs.label "Berichten in nieuwe tabbladen openen">
 <!ENTITY openEntriesInTabs.accesskey "t">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Weergave">
 <!ENTITY showStatusbarIcon.label "Statusbalkpictogram weergeven">
 <!ENTITY showStatusbarIcon.accesskey "g">
-<!ENTITY showUnreadCounter.label "Aantal ongelezen berichten weergeven naast pictogram van Brief">
+<!ENTITY showUnreadCounter.label "Aantal ongelezen berichten weergeven naast pictogram van Digest">
 <!ENTITY showUnreadCounter.accesskey "t">
 <!ENTITY sortUnreadViewOldestFirst.label "Oudste berichten bovenaan zetten bij weergave ongelezen berichten">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dagen">
 <!ENTITY updatedEntries.label "Gewijzigde berichten niet als ongelezen markeren">
 <!ENTITY updatedEntries.accesskey "O">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Vorige">
 <!ENTITY previousFeed.accesskey "V">
 <!ENTITY nextFeed.label "Volgende &gt;">

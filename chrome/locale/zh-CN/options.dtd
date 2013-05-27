@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Brief 选项">
+<!ENTITY optionsWindow.title "Digest 选项">
 <!ENTITY mainPane.label "主要">
 <!ENTITY updateGroup.caption "更新">
 <!ENTITY checkForUpdatesBefore.label "每">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "找到新项目时通知我">
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY behaviorGroup.caption "行为">
-<!ENTITY openInNewTab.label "在新标签页打开 Brief">
+<!ENTITY openInNewTab.label "在新标签页打开 Digest">
 <!ENTITY openInNewTab.accesskey "O">
 <!ENTITY openEntriesInTabs.label "在新标签页打开项目">
 <!ENTITY openEntriesInTabs.accesskey "t">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "显示">
 <!ENTITY showStatusbarIcon.label "在状态栏显示图标">
 <!ENTITY showStatusbarIcon.accesskey "h">
-<!ENTITY showUnreadCounter.label "在 Brief 图标旁边显示未读项目数目">
+<!ENTITY showUnreadCounter.label "在 Digest 图标旁边显示未读项目数目">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "将旧的未读项目排列在前">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "天后移除已下载的项目">
 <!ENTITY updatedEntries.label "不要标记更改的项目为未读">
 <!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "上一个">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "下一个">

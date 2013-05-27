@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Možnosti rozšíření Brief">
+<!ENTITY optionsWindow.title "Možnosti rozšíření Digest">
 <!ENTITY mainPane.label "Hlavní">
 <!ENTITY updateGroup.caption "Aktualizace">
 <!ENTITY checkForUpdatesBefore.label "Kontrolovat kanály každých">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Zobrazit oznámení, když jsou nalezeny nové položky">
 <!ENTITY showNotification.accesskey "Z">
 <!ENTITY behaviorGroup.caption "Chování">
-<!ENTITY openInNewTab.label "Zobrazit Brief v novém panelu">
+<!ENTITY openInNewTab.label "Zobrazit Digest v novém panelu">
 <!ENTITY openInNewTab.accesskey "b">
 <!ENTITY openEntriesInTabs.label "Zobrazit položky v novém panelu">
 <!ENTITY openEntriesInTabs.accesskey "b">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Zobrazení">
 <!ENTITY showStatusbarIcon.label "Zobrazit ikonku ve stavovém řádku">
 <!ENTITY showStatusbarIcon.accesskey "s">
-<!ENTITY showUnreadCounter.label "Zobrazit počet nepřečtených položek vedle ikonky Briefu">
+<!ENTITY showUnreadCounter.label "Zobrazit počet nepřečtených položek vedle ikonky Digest">
 <!ENTITY showUnreadCounter.accesskey "i">
 <!ENTITY sortUnreadViewOldestFirst.label "Seřadit od nejstarší při zobrazení nepřečtených položek">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "n">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dnech">
 <!ENTITY updatedEntries.label "Neoznačovat změněné položky jako přečtené">
 <!ENTITY updatedEntries.accesskey "z">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Předchozí">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Následující &gt;">

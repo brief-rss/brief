@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Inställningar för Brief">
+<!ENTITY optionsWindow.title "Inställningar för Digest">
 <!ENTITY mainPane.label "Allmänt">
 <!ENTITY updateGroup.caption "Uppdatering">
 <!ENTITY checkForUpdatesBefore.label "Sök efter flödesuppdateringar var">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Visa ett meddelande när nya objekt hittas">
 <!ENTITY showNotification.accesskey "m">
 <!ENTITY behaviorGroup.caption "Beteende">
-<!ENTITY openInNewTab.label "Öppna Brief i en ny flik">
+<!ENTITY openInNewTab.label "Öppna Digest i en ny flik">
 <!ENTITY openInNewTab.accesskey "Ö">
 <!ENTITY openEntriesInTabs.label "Öppna objekt i nya flikar">
 <!ENTITY openEntriesInTabs.accesskey "o">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Visning">
 <!ENTITY showStatusbarIcon.label "Visa statusfältikonen">
 <!ENTITY showStatusbarIcon.accesskey "s">
-<!ENTITY showUnreadCounter.label "Visa antalet olästa objekt bredvid Briefs ikon">
+<!ENTITY showUnreadCounter.label "Visa antalet olästa objekt bredvid Digests ikon">
 <!ENTITY showUnreadCounter.accesskey "V">
 <!ENTITY sortUnreadViewOldestFirst.label "Sortera de äldsta objekten först i olästa-vyn">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dagar">
 <!ENTITY updatedEntries.label "Återmärk inte ändrade objekt som olästa">
 <!ENTITY updatedEntries.accesskey "Å">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Föregående">
 <!ENTITY previousFeed.accesskey "F">
 <!ENTITY nextFeed.label "Nästa &gt;">

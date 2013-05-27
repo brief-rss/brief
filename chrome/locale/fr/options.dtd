@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Options de Brief">
+<!ENTITY optionsWindow.title "Options de Digest">
 <!ENTITY mainPane.label "Générales">
 <!ENTITY updateGroup.caption "Mises à jour">
 <!ENTITY checkForUpdatesBefore.label "Mettre les flux à jour tou(te)s les">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "M&apos;avertir si des mises à jour ont été trouvées">
 <!ENTITY showNotification.accesskey "a">
 <!ENTITY behaviorGroup.caption "Comportement">
-<!ENTITY openInNewTab.label "Ouvrir Brief dans un nouvel onglet">
+<!ENTITY openInNewTab.label "Ouvrir Digest dans un nouvel onglet">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY openEntriesInTabs.label "Ouvrir les articles dans de nouveaux onglets">
 <!ENTITY openEntriesInTabs.accesskey "O">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Affichage">
 <!ENTITY showStatusbarIcon.label "Afficher l&apos;icône dans la barre d&apos;état">
 <!ENTITY showStatusbarIcon.accesskey "f">
-<!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus à côté de l'icône de Brief.">
+<!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus à côté de l'icône de Digest.">
 <!ENTITY showUnreadCounter.accesskey "l">
 <!ENTITY sortUnreadViewOldestFirst.label "Afficher les plus anciens en premier dans l&apos;affichage des articles non lus">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "A">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "jours">
 <!ENTITY updatedEntries.label "Ne pas marquer les articles mis à jour comme non lus">
 <!ENTITY updatedEntries.accesskey "N">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Précédent">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Suivant &gt;">

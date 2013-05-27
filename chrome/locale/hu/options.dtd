@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Értesítés új elemek találatakor">
 <!ENTITY showNotification.accesskey "t">
 <!ENTITY behaviorGroup.caption "Viselkedés">
-<!ENTITY openInNewTab.label "Brief megnyitása új lapon">
+<!ENTITY openInNewTab.label "Digest megnyitása új lapon">
 <!ENTITY openInNewTab.accesskey "l">
 <!ENTITY openEntriesInTabs.label "Bejegyzések megnyitása új lapon">
 <!ENTITY openEntriesInTabs.accesskey "B">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Megjelenítés">
 <!ENTITY showStatusbarIcon.label "Állapotsor ikon megjelenítése">
 <!ENTITY showStatusbarIcon.accesskey "s">
-<!ENTITY showUnreadCounter.label "Olvasatlan elemek számának megjelenítése a Brief ikonja után">
+<!ENTITY showUnreadCounter.label "Olvasatlan elemek számának megjelenítése a Digest ikonja után">
 <!ENTITY showUnreadCounter.accesskey "u">
 <!ENTITY sortUnreadViewOldestFirst.label "Az olvasatlan nézetben a régebbi elemek megjelenítése először">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "nap elteltével">
 <!ENTITY updatedEntries.label "Ne jelölje olvasatlannak a módosított elemeket">
 <!ENTITY updatedEntries.accesskey "N">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Előző">
 <!ENTITY previousFeed.accesskey "E">
 <!ENTITY nextFeed.label "Következő &gt;">

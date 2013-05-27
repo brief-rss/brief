@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Brief indstillinger">
+<!ENTITY optionsWindow.title "Digest indstillinger">
 <!ENTITY mainPane.label "Hoved">
 <!ENTITY updateGroup.caption "Opdatering">
 <!ENTITY checkForUpdatesBefore.label "Tjek feeds for opdateringer hver">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Vis notifikation når nye emner findes">
 <!ENTITY showNotification.accesskey "V">
 <!ENTITY behaviorGroup.caption "Opførsel">
-<!ENTITY openInNewTab.label "Åbn Brief i et nyt faneblad">
+<!ENTITY openInNewTab.label "Åbn Digest i et nyt faneblad">
 <!ENTITY openInNewTab.accesskey "Å">
 <!ENTITY openEntriesInTabs.label "Åbn emner i nye faneblade">
 <!ENTITY openEntriesInTabs.accesskey "b">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Vis">
 <!ENTITY showStatusbarIcon.label "Vis statuslinje-ikon">
 <!ENTITY showStatusbarIcon.accesskey "u">
-<!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner ved siden af Brief-ikonet">
+<!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner ved siden af Digest-ikonet">
 <!ENTITY showUnreadCounter.accesskey "V">
 <!ENTITY sortUnreadViewOldestFirst.label "Sorter ældste emner først i ulæste-visning">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dage">
 <!ENTITY updatedEntries.label "Marker ikke ændrede emner som ulæste">
 <!ENTITY updatedEntries.accesskey "M">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Foregående">
 <!ENTITY previousFeed.accesskey "F">
 <!ENTITY nextFeed.label "Næste &gt;">

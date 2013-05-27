@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Επιλογές Brief">
+<!ENTITY optionsWindow.title "Επιλογές Digest">
 <!ENTITY mainPane.label "Γενικά">
 <!ENTITY updateGroup.caption "Ενημερώσεις">
 <!ENTITY checkForUpdatesBefore.label "Έλεγχος ενημερώσεων αρχείων ροής κάθε">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Προβολή ειδοποίησης όταν υπάρχουν νέες εγγραφές">
 <!ENTITY showNotification.accesskey "Π">
 <!ENTITY behaviorGroup.caption "Συμπεριφορά">
-<!ENTITY openInNewTab.label "Άνοιγμα του Brief σε νέα καρτέλα">
+<!ENTITY openInNewTab.label "Άνοιγμα του Digest σε νέα καρτέλα">
 <!ENTITY openInNewTab.accesskey "α">
 <!ENTITY openEntriesInTabs.label "Άνοιγμα εγγραφών σε νέες καρτέλες">
 <!ENTITY openEntriesInTabs.accesskey "ι">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Εμφάνιση">
 <!ENTITY showStatusbarIcon.label "Προβολή εικονιδίου στη γραμμή κατάστασης">
 <!ENTITY showStatusbarIcon.accesskey "κ">
-<!ENTITY showUnreadCounter.label "Προβολή αριθμού μη αναγνωσμένων δίπλα από το εικονίδιο του Brief">
+<!ENTITY showUnreadCounter.label "Προβολή αριθμού μη αναγνωσμένων δίπλα από το εικονίδιο του Digest">
 <!ENTITY showUnreadCounter.accesskey "α">
 <!ENTITY sortUnreadViewOldestFirst.label "Εμφάνιση των παλαιότερων πρώτα στην εμφάνιση μόνο μη αναγνωσμένων">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "η">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "ημέρες">
 <!ENTITY updatedEntries.label "Να μη σημειωθούν εγγραφές που έχουν υποστεί μεταβολές ως μη αναγνωσμένες">
 <!ENTITY updatedEntries.accesskey "η">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Προηγούμενο">
 <!ENTITY previousFeed.accesskey "Π">
 <!ENTITY nextFeed.label "Επόμενο &gt;">

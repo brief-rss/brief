@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Настройки Brief">
+<!ENTITY optionsWindow.title "Настройки Digest">
 <!ENTITY mainPane.label "Основные">
 <!ENTITY updateGroup.caption "Обновление">
 <!ENTITY checkForUpdatesBefore.label "Проверять обновления лент каждые">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Показывать оповещение при появлении новых записей">
 <!ENTITY showNotification.accesskey "П">
 <!ENTITY behaviorGroup.caption "Поведение">
-<!ENTITY openInNewTab.label "Открывать Brief в новой вкладке">
+<!ENTITY openInNewTab.label "Открывать Digest в новой вкладке">
 <!ENTITY openInNewTab.accesskey "в">
 <!ENTITY openEntriesInTabs.label "Открывать записи в новых вкладках">
 <!ENTITY openEntriesInTabs.accesskey "з">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "дней">
 <!ENTITY updatedEntries.label "Не отмечать измененные записи прочитанными">
 <!ENTITY updatedEntries.accesskey "Н">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "« Предыдущая">
 <!ENTITY previousFeed.accesskey "П">
 <!ENTITY nextFeed.label "Следующая »">

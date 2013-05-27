@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Opțiunile Brief">
+<!ENTITY optionsWindow.title "Opțiunile Digest">
 <!ENTITY mainPane.label "General">
 <!ENTITY updateGroup.caption "Actualizare">
 <!ENTITY checkForUpdatesBefore.label "Verifică fluxurile pentru actualizări fiecare">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Arată o notificare cînd elemente noi sunt găsite">
 <!ENTITY showNotification.accesskey "A">
 <!ENTITY behaviorGroup.caption "Comportament">
-<!ENTITY openInNewTab.label "Deschide Brief în filă nouă">
+<!ENTITY openInNewTab.label "Deschide Digest în filă nouă">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY openEntriesInTabs.label "Dechide elementele în file noi">
 <!ENTITY openEntriesInTabs.accesskey "E">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Aspect">
 <!ENTITY showStatusbarIcon.label "Arată iconița în bara de stare">
 <!ENTITY showStatusbarIcon.accesskey "T">
-<!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite alături de iconița Brief">
+<!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite alături de iconița Digest">
 <!ENTITY showUnreadCounter.accesskey "W">
 <!ENTITY sortUnreadViewOldestFirst.label "Sortează cele mai vechi elemente ca primele în vederea elementelor necitite">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "zile">
 <!ENTITY updatedEntries.label "Nu marchează elementele înapoi ca necitite">
 <!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Precedent">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Următor &gt;">

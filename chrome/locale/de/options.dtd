@@ -1,4 +1,4 @@
-<!ENTITY optionsWindow.title "Brief - Einstellungen">
+<!ENTITY optionsWindow.title "Digest - Einstellungen">
 <!ENTITY mainPane.label "Allgemein">
 <!ENTITY updateGroup.caption "Aktualisierung">
 <!ENTITY checkForUpdatesBefore.label "Feeds überprüfen alle">
@@ -10,7 +10,7 @@
 <!ENTITY showNotification.label "Benachrichtigen, wenn neue Einträge gefunden wurden">
 <!ENTITY showNotification.accesskey "B">
 <!ENTITY behaviorGroup.caption "Verhalten">
-<!ENTITY openInNewTab.label "Brief in neuem Tab öffnen">
+<!ENTITY openInNewTab.label "Digest in neuem Tab öffnen">
 <!ENTITY openInNewTab.accesskey "T">
 <!ENTITY openEntriesInTabs.label "Einträge in neuen Tabs öffnen">
 <!ENTITY openEntriesInTabs.accesskey "E">
@@ -33,7 +33,7 @@
 <!ENTITY displayPane.label "Anzeige">
 <!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
 <!ENTITY showStatusbarIcon.accesskey "S">
-<!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Einträge neben dem Brief-Symbol anzeigen">
+<!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Einträge neben dem Digest-Symbol anzeigen">
 <!ENTITY showUnreadCounter.accesskey "A">
 <!ENTITY sortUnreadViewOldestFirst.label "Bei Anzeige ungelesener Einträge älteste zuerst anzeigen">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "u">
@@ -59,6 +59,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "Tage speichern">
 <!ENTITY updatedEntries.label "Aktualisierte Einträge nicht als ungelesen markieren">
 <!ENTITY updatedEntries.accesskey "u">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Vorheriger">
 <!ENTITY previousFeed.accesskey "V">
 <!ENTITY nextFeed.label "Nächster &gt;">
