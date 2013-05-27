@@ -15,3 +15,22 @@ category  profile-after-change  DigestService  @tanriol.github.io/digest/service
 category  vacuum-participant    DigestService  @tanriol.github.io/digest/service;1
 
 locale  digest   en-US  chrome/locale/en-US/
+locale  digest   cs     chrome/locale/cs/
+locale  digest   da     chrome/locale/da/
+locale  digest   de     chrome/locale/de/
+locale  digest   el     chrome/locale/el/
+locale  digest   es-ES  chrome/locale/es-ES/
+locale  digest   fr     chrome/locale/fr/
+locale  digest   gl     chrome/locale/gl/
+locale  digest   hu     chrome/locale/hu/
+locale  digest   it     chrome/locale/it/
+locale  digest   ja     chrome/locale/ja/
+locale  digest   nb-NO  chrome/locale/nb-NO/
+locale  digest   nl     chrome/locale/nl/
+locale  digest   pl     chrome/locale/pl/
+locale  digest   pt-BR  chrome/locale/pt-BR/
+locale  digest   ro     chrome/locale/ro/
+locale  digest   ru     chrome/locale/ru/
+locale  digest   sk     chrome/locale/sk/
+locale  digest   sv-SE  chrome/locale/sv-SE/
+locale  digest   zh-CN  chrome/locale/zh-CN/
