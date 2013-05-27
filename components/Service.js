@@ -46,7 +46,6 @@ DigestService.prototype = {
     // nsIObserver
     observe: function(key, topic) {
         if(topic == 'profile-after-change') {
-            log("profile-after-change");
             AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
                 if(addon && addon.isActive) {
                     let prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
