@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - klávesové zkratky">
+<!ENTITY or "nebo">
+
+<!ENTITY navigation.header "Navigace">
+<!ENTITY space.key "Mezerník">
+<!ENTITY shiftSpace.key "Shift + Mezerník">
+<!ENTITY nextItem "Přejít na následující položku">
+<!ENTITY previousItem "Přejít na předchozí položku">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Otevřít aktuální položku">
+<!ENTITY showItem "Zobrazit/skrýt aktuální položku (v zobrazení záhlaví)">
+
+<!ENTITY entries.header "Položky">
+<!ENTITY tab.key "Tabulátor">
+<!ENTITY enableEntryHightlight "Povolit zvýrazňování aktuální položky">
+<!ENTITY markCurrentItemRead "Označit aktuální položku za přečtenou/nepřečtenou">
+<!ENTITY markVisibleRead "Označit všechny položky v okně za přečtené">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Označit všechny položky za přečtené">
+<!ENTITY starItem "Přidat aktuální položku do záložek">
+<!ENTITY moveToTrash "Přesunout aktuální položku do Koše">
+
+<!ENTITY view.header "Zobrazit">
+<!ENTITY showAll "Zobrazit všechny položky">
+<!ENTITY showStarred "Zobrazit položky uložené do záložek">
+<!ENTITY showUnread "Zobrazit nepřečtené položky">
+<!ENTITY headlinesView "Přepnout zobrazení záhlaví">
+
+<!ENTITY general.header "Obecné">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Otevřít Digest">
+<!ENTITY focusSearchbar "Přenést zaměření na vyhledávání">
+<!ENTITY displayShortcuts "Zobrazit seznam klávesových zkratek">

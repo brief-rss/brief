@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - atajos de teclado">
+<!ENTITY or "o">
+
+<!ENTITY navigation.header "Navegación">
+<!ENTITY space.key "Espacio">
+<!ENTITY shiftSpace.key "Mayús. + Espacio">
+<!ENTITY nextItem "Ir al elemento siguiente">
+<!ENTITY previousItem "Ir al elemento anterior">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Abrir el elemento actual">
+<!ENTITY showItem "Conmutar la visibilidad del elemento actual (en la vista de titulares)">
+
+<!ENTITY entries.header "Elementos">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Conmutar el resaltado del elemento actual">
+<!ENTITY markCurrentItemRead "Marcar el elemento actual como leído o no leído">
+<!ENTITY markVisibleRead "Marcar todos los elementos en pantalla como leídos">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Marcar todos los elementos como leídos">
+<!ENTITY starItem "Añadir el elemento actual a marcadores">
+<!ENTITY moveToTrash "Mover el elemento actual a la papelera">
+
+<!ENTITY view.header "Ver">
+<!ENTITY showAll "Mostrar todos los elementos">
+<!ENTITY showStarred "Mostrar todos los elementos en marcadores">
+<!ENTITY showUnread "Mostrar todos los elementos no leídos">
+<!ENTITY headlinesView "Conmutar la vista de titulares">
+
+<!ENTITY general.header "General">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Abrir Digest">
+<!ENTITY focusSearchbar "Activar la casilla de búsqueda">
+<!ENTITY displayShortcuts "Mostrar esta lista de atajos de teclado">

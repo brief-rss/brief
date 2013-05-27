@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Szukaj">
+<!ENTITY allItemsFolder.label "Wszystkie">
+<!ENTITY unreadFolder.label "Nieprzeczytane">
+<!ENTITY starredFolder.label "Zakładki">
+<!ENTITY trashFolder.label "Kosz">
+<!ENTITY headlinesCheckbox.tooltip "Zmień widok nagłówków (F)">
+
+<!-- Button tooltips -->
+<!ENTITY filterUnread.tooltip "Wyświetlaj tylko nieprzeczytane (D)">
+<!ENTITY filterStarred.tooltip "Wyświetlaj tylko zakładki (S)">
+<!ENTITY updateButton.tooltip "Pobierz nowe wiadomości ze wszystkich kanałów">
+<!ENTITY stopUpdatingButton.tooltip "Przerwij aktualizowanie kanałów">
+<!ENTITY showOptions.tooltip "Otwórz opcje rozszerzenia">
+<!ENTITY sidebarSplitter.tooltip "Kliknij dwukrotnie, aby ukryć panel">
+<!ENTITY revealSidebar.tooltip "Przywróć panel">
+<!ENTITY markViewRead.tooltip "Oznacz wszystkie wiadomości jako przeczytane (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Oznacz kanał jako przeczytany">
+<!ENTITY ctxMarkFeedUnread.label "Oznacz kanał jako nieprzeczytany">
+<!ENTITY ctxMarkFolderRead.label "Oznacz folder jako przeczytany">
+<!ENTITY ctxMarkTagRead.label "Oznacz wiadomości z etykietami jako przeczytane">
+<!ENTITY ctxUpdateFeed.label "Aktualizuj kanał">
+<!ENTITY ctxUpdateFolder.label "Aktualizuj folder">
+<!ENTITY ctxOpenWebsite.label "Otwórz witrynę">
+<!ENTITY ctxDeleteFeed.label "Usuń kanał">
+<!ENTITY ctxDeleteFolder.label "Usuń folder">
+<!ENTITY ctxDeleteTag.label "Usuń etykietę">
+<!ENTITY ctxEmptyFeed.label "Opróżnij kanał">
+<!ENTITY ctxEmptyFolder.label "Opróżnij folder">
+<!ENTITY ctxRestoreTrashed.label "Przywróć usunięte wiadomości">
+<!ENTITY ctxEmptyTrash.label "Opróżnij kosz">
+<!ENTITY ctxFeedProperties.label "Właściwości">
+<!ENTITY ctxUpdateFeeds.label "Aktualizuj kanały">
+<!ENTITY ctxMarkFeedsAsRead.label "Oznacz wszystkie kanały jako przeczytane">
+<!ENTITY showUnreadCounter.label "Wyświetlaj liczbę nieprzeczytanych wiadomości">
+<!ENTITY ctxShowOptions.label "Opcje">

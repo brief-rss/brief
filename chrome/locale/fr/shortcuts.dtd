@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - raccourcis clavier">
+<!ENTITY or "ou">
+
+<!ENTITY navigation.header "Navigation">
+<!ENTITY space.key "Espace">
+<!ENTITY shiftSpace.key "Maj + Espace">
+<!ENTITY nextItem "Avancer vers l'article suivant">
+<!ENTITY previousItem "Reculer vers l'article précédent">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Entrée">
+<!ENTITY openEntry "Ouvrir l'article courant">
+<!ENTITY showItem "Afficher / masquer l'article courant (en mode d'affichage des titres)">
+
+<!ENTITY entries.header "Articles">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Activer le surlignage de l'article courant">
+<!ENTITY markCurrentItemRead "Marquer l'article courant comme lu / non lu">
+<!ENTITY markVisibleRead "Marquer tous les article de l'écran comme lus">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Marquer tous les articles comme lus">
+<!ENTITY starItem "Marquer l'article courant">
+<!ENTITY moveToTrash "Déplacer l'article courant dans la corbeille">
+
+<!ENTITY view.header "Affichage">
+<!ENTITY showAll "Afficher tous les articles">
+<!ENTITY showStarred "Afficher les articles marqués">
+<!ENTITY showUnread "Afficher les articles non lus">
+<!ENTITY headlinesView "Activer / désactiver le mode d'affichage des titres">
+
+<!ENTITY general.header "Général">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Ouvrir Digest">
+<!ENTITY focusSearchbar "Focus sur la barre de recherche">
+<!ENTITY displayShortcuts "Afficher la liste des raccourcis clavier">

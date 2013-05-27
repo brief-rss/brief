@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Inställningar för Digest">
+<!ENTITY mainPane.label "Allmänt">
+<!ENTITY updateGroup.caption "Uppdatering">
+<!ENTITY checkForUpdatesBefore.label "Sök efter flödesuppdateringar var">
+<!ENTITY checkForUpdates.accesskey "u">
+<!ENTITY updateIntervalMinutes.label "minut">
+<!ENTITY updateIntervalHours.label "timme">
+<!ENTITY updateIntervalDays.label "dag">
+<!ENTITY checkForUpdatesAfter.label "minut">
+<!ENTITY showNotification.label "Visa ett meddelande när nya objekt hittas">
+<!ENTITY showNotification.accesskey "m">
+<!ENTITY behaviorGroup.caption "Beteende">
+<!ENTITY openInNewTab.label "Öppna Digest i en ny flik">
+<!ENTITY openInNewTab.accesskey "Ö">
+<!ENTITY storingGroup.caption "Lagring">
+<!ENTITY expirationBefore.label "Ta bort nerladdade objekt efter">
+<!ENTITY expirationAfter.label "dagar">
+<!ENTITY expirationCheckbox.accesskey "T">
+<!ENTITY starredItemsKept.tooltip "Bokmärkta objekt kommer att behållas">
+<!ENTITY storedEntriesBefore.label "Spara inte fler än de">
+<!ENTITY storedEntriesAfter.label "senaste objekten i varje flöde">
+<!ENTITY storedEntriesCheckbox.accesskey "p">
+<!ENTITY clearAllEntriesButton.label "Rensa alla objekt...">
+<!ENTITY clearAllEntriesButton.accesskey "a">
+<!ENTITY feedsPane.label "Flöden">
+<!ENTITY folderTree.label "Mapp som innehåller mina Aktiva bokmärken:">
+<!ENTITY importOPML.label "Importera...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportera...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Visning">
+<!ENTITY showStatusbarIcon.label "Visa statusfältikonen">
+<!ENTITY showStatusbarIcon.accesskey "s">
+<!ENTITY showUnreadCounter.label "Visa antalet olästa objekt bredvid Digests ikon">
+<!ENTITY showUnreadCounter.accesskey "V">
+<!ENTITY sortUnreadViewOldestFirst.label "Sortera de äldsta objekten först i olästa-vyn">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "Märk automatiskt objekt som lästa efter att jag har sett dem">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "Utseende">
+<!ENTITY shortcutsPane.label "Kortkommandon">
+<!ENTITY editStyleDescription.label "Anpassa utseendet på flöden">
+<!ENTITY editStyleButton.label "Anpassa...">
+<!ENTITY editStyleButton.accesskey "p">
+<!ENTITY styleEditor.title "Redigera anpassad stil">
+<!ENTITY seeCustomizationTips.label "Läs mer om anpassning av utseende med CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Namn">
+<!ENTITY feedURL.label "Plats">
+<!ENTITY optionsGroupbox.caption "Flödesinställningar">
+<!ENTITY checkUpdatesPerFeedBefore.label "Sök efter uppdateringar var">
+<!ENTITY checkUpdatesPerFeed.accesskey "u">
+<!ENTITY expireEntriesPerFeedBefore.label "Ta bort nerladdade objekt efter">
+<!ENTITY expireEntriesPerFeed.accesskey "T">
+<!ENTITY expireEntriesPerFeedAfter.label "dagar">
+<!ENTITY updatedEntries.label "Återmärk inte ändrade objekt som olästa">
+<!ENTITY updatedEntries.accesskey "Å">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Föregående">
+<!ENTITY previousFeed.accesskey "F">
+<!ENTITY nextFeed.label "Nästa &gt;">
+<!ENTITY nextFeed.accesskey "N">

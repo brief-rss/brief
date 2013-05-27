@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Tak fordi du installerede Digest">
+<!ENTITY subscribingStep1.description "Klik på ikonet i adresselinjen for at forhåndsvise feedet.">
+<!ENTITY subscribingStep1firefox4.description "Åbn menuen <strong>Bogmærker</strong> og vælg <strong>Abonner på denne side</strong>.">
+<!ENTITY subscribingStep2.description "Vælg <strong>Live bogmærker</strong> og klik <strong>Abonner nu</strong>.">
+<!ENTITY subscribingStep3.description "Vælg mappen <strong>Feeds du abonnerer på</strong> i Bogmærkemenuen.">
+<!ENTITY getStartedButton.label "Kom i gang">

@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Procurar">
+<!ENTITY allItemsFolder.label "Todos os elementos">
+<!ENTITY unreadFolder.label "Sen ler">
+<!ENTITY starredFolder.label "Marcadores">
+<!ENTITY trashFolder.label "Lixo">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Ver as cabeceiras (F)">
+<!ENTITY filterUnread.tooltip "Visualizar só os elementos sen ler (D)">
+<!ENTITY filterStarred.tooltip "Visualizar só os marcadores (S)">
+<!ENTITY updateButton.tooltip "Actualizar todas as fontes">
+<!ENTITY stopUpdatingButton.tooltip "Deter a actualización das fontes">
+<!ENTITY showOptions.tooltip "Abrir as opcións de Digest">
+<!ENTITY sidebarSplitter.tooltip "Facer dobre clic para ocultar a barra lateral">
+<!ENTITY revealSidebar.tooltip "Amosar a barra lateral">
+<!ENTITY markViewRead.tooltip "Marcar todos os elementos como lidos (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Marcar a fonte como lida">
+<!ENTITY ctxMarkFeedUnread.label "Marcar a fonte como non lida">
+<!ENTITY ctxMarkFolderRead.label "Marcar o cartafol como lido">
+<!ENTITY ctxMarkTagRead.label "Marcar os elementos etiquetados como lidos">
+<!ENTITY ctxUpdateFeed.label "Actualizar a fonte">
+<!ENTITY ctxUpdateFolder.label "Actualizar o cartafol">
+<!ENTITY ctxOpenWebsite.label "Abrir a páxina web">
+<!ENTITY ctxDeleteFeed.label "Borrar a fonte">
+<!ENTITY ctxDeleteFolder.label "Borrar o cartafol">
+<!ENTITY ctxDeleteTag.label "Borrar a etiqueta">
+<!ENTITY ctxEmptyFeed.label "Baleirar a fonte">
+<!ENTITY ctxEmptyFolder.label "Baleirar o cartafol">
+<!ENTITY ctxRestoreTrashed.label "Restaurar todos os elementos">
+<!ENTITY ctxEmptyTrash.label "Baleirar o lixo">
+<!ENTITY ctxFeedProperties.label "Propiedades">
+<!ENTITY ctxUpdateFeeds.label "Actualizar as fontes">
+<!ENTITY ctxMarkFeedsAsRead.label "Marcar todas as fontes como lidas">
+<!ENTITY showUnreadCounter.label "Amosar o nome de elementos sen ler">
+<!ENTITY ctxShowOptions.label "Opcións">

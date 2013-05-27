@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Tack för att du installerar Digest">
+<!ENTITY subscribingStep1.description "Klicka på ikonen i adressfältet för att förhandsgranska flödet.">
+<!ENTITY subscribingStep1firefox4.description "Öppna <strong>Bokmärken</strong>-menyn och välj <strong>Prenumerera på denna sida</strong>.">
+<!ENTITY subscribingStep2.description "Välj <strong>Aktiva bokmärken</strong> och klicka på <strong>Prenumerera</strong>.">
+<!ENTITY subscribingStep3.description "Välj mappen <strong>Mina prenumerationer</strong> i Bokmärken-menyn.">
+<!ENTITY getStartedButton.label "Sätt igång!">

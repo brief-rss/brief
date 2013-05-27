@@ -1,0 +1,35 @@
+<!ENTITY searchBox.label "Buscar">
+<!ENTITY allItemsFolder.label "Todos los elementos">
+<!ENTITY unreadFolder.label "No leídos">
+<!ENTITY starredFolder.label "Marcadores">
+<!ENTITY trashFolder.label "Papelera">
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Ver sólo los titulares (F)">
+<!ENTITY filterUnread.tooltip "Ver sólo los elementos no leídos (D)">
+<!ENTITY filterStarred.tooltip "Ver sólo los elementos en marcadores (S)">
+<!ENTITY updateButton.tooltip "Actualizar todos los canales web">
+<!ENTITY stopUpdatingButton.tooltip "Detener el proceso de actualización">
+<!ENTITY showOptions.tooltip "Abrir el panel de preferencias de Digest">
+<!ENTITY sidebarSplitter.tooltip "Doble clic ocultará el panel lateral">
+<!ENTITY revealSidebar.tooltip "Mostrar el panel lateral">
+<!ENTITY markViewRead.tooltip "Marcar todos los elementos como leídos (Alt+N)">
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Marcar el canal como leído">
+<!ENTITY ctxMarkFeedUnread.label "Marcar el canal como no leído">
+<!ENTITY ctxMarkFolderRead.label "Marcar la carpeta como leída">
+<!ENTITY ctxMarkTagRead.label "Marcar elementos etiquetados como leídos">
+<!ENTITY ctxUpdateFeed.label "Actualizar el canal">
+<!ENTITY ctxUpdateFolder.label "Actualizar la carpeta">
+<!ENTITY ctxOpenWebsite.label "Ir al sitio web">
+<!ENTITY ctxDeleteFeed.label "Eliminar el canal">
+<!ENTITY ctxDeleteFolder.label "Eliminar la carpeta">
+<!ENTITY ctxDeleteTag.label "Eliminar la etiqueta">
+<!ENTITY ctxEmptyFeed.label "Vaciar el canal">
+<!ENTITY ctxEmptyFolder.label "Vaciar la carpeta">
+<!ENTITY ctxRestoreTrashed.label "Restaurar todos los elementos">
+<!ENTITY ctxEmptyTrash.label "Vaciar la papelera">
+<!ENTITY ctxFeedProperties.label "Propiedades">
+<!ENTITY ctxUpdateFeeds.label "Actualizar los canales ahora">
+<!ENTITY ctxMarkFeedsAsRead.label "Marcar todos los canales como leídos">
+<!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos">
+<!ENTITY ctxShowOptions.label "Preferencias">

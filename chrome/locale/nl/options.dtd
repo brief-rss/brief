@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Digest-opties">
+<!ENTITY mainPane.label "Hoofdvenster">
+<!ENTITY updateGroup.caption "Bijwerken">
+<!ENTITY checkForUpdatesBefore.label "Elke">
+<!ENTITY checkForUpdates.accesskey "E">
+<!ENTITY updateIntervalMinutes.label "minuten">
+<!ENTITY updateIntervalHours.label "uur">
+<!ENTITY updateIntervalDays.label "dagen">
+<!ENTITY checkForUpdatesAfter.label "minuten controleren op updates voor feeds">
+<!ENTITY showNotification.label "Waarschuwing geven wanneer nieuwe berichten worden gevonden">
+<!ENTITY showNotification.accesskey "W">
+<!ENTITY behaviorGroup.caption "Gedrag">
+<!ENTITY openInNewTab.label "Digest in een nieuw tabblad openen">
+<!ENTITY openInNewTab.accesskey "O">
+<!ENTITY storingGroup.caption "Opslaan">
+<!ENTITY expirationBefore.label "Gedownloade berichten verwijderen na">
+<!ENTITY expirationAfter.label "dagen">
+<!ENTITY expirationCheckbox.accesskey "V">
+<!ENTITY starredItemsKept.tooltip "Berichten waarvan een bladwijzer is gemaakt zullen worden bewaard">
+<!ENTITY storedEntriesBefore.label "Niet meer dan">
+<!ENTITY storedEntriesAfter.label "meest recente berichten in elke feed opslaan">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
+<!ENTITY clearAllEntriesButton.label "Alle berichten wissen…">
+<!ENTITY clearAllEntriesButton.accesskey "A">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY folderTree.label "Map met mijn livebladwijzers:">
+<!ENTITY importOPML.label "Importeren…">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exporteren…">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Weergave">
+<!ENTITY showStatusbarIcon.label "Statusbalkpictogram weergeven">
+<!ENTITY showStatusbarIcon.accesskey "g">
+<!ENTITY showUnreadCounter.label "Aantal ongelezen berichten weergeven naast pictogram van Digest">
+<!ENTITY showUnreadCounter.accesskey "t">
+<!ENTITY sortUnreadViewOldestFirst.label "Oudste berichten bovenaan zetten bij weergave ongelezen berichten">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "O">
+<!ENTITY autoMarkRead.label "Berichten als gelezen markeren als ik ze heb gezien">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "Weergave">
+<!ENTITY shortcutsPane.label "Snelkoppelingen">
+<!ENTITY editStyleDescription.label "Weergave van feeds aanpassen">
+<!ENTITY editStyleButton.label "Aanpassen">
+<!ENTITY editStyleButton.accesskey "A">
+<!ENTITY styleEditor.title "Aangepaste stijl bewerken">
+<!ENTITY seeCustomizationTips.label "Lees meer over het aanpassen van de weergave met CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Naam">
+<!ENTITY feedURL.label "Locatie">
+<!ENTITY optionsGroupbox.caption "Feedinstellingen">
+<!ENTITY checkUpdatesPerFeedBefore.label "Op updates controleren om de">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "Gedownloade berichten verwijderen na">
+<!ENTITY expireEntriesPerFeed.accesskey "w">
+<!ENTITY expireEntriesPerFeedAfter.label "dagen">
+<!ENTITY updatedEntries.label "Gewijzigde berichten niet als ongelezen markeren">
+<!ENTITY updatedEntries.accesskey "O">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Vorige">
+<!ENTITY previousFeed.accesskey "V">
+<!ENTITY nextFeed.label "Volgende &gt;">
+<!ENTITY nextFeed.accesskey "o">

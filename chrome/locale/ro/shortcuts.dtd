@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - scurtăturile pentru tastatură">
+<!ENTITY or "sau">
+
+<!ENTITY navigation.header "Navigare">
+<!ENTITY space.key "Spațiu">
+<!ENTITY shiftSpace.key "Shift + Spațiu">
+<!ENTITY nextItem "Mergi la elementul următor">
+<!ENTITY previousItem "Mergi la elementul anterior">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Deschide elementul curent">
+<!ENTITY showItem "Arată/ascunde elementul curent (în vederea titlurilor)">
+
+<!ENTITY entries.header "Elemente">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Activează selecția elementului curent">
+<!ENTITY markCurrentItemRead "Marchează elementul curent ca citit/necitit">
+<!ENTITY markVisibleRead "Marchează toate elementele de pe ecran ca citite">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Marchează toate elementele ca citite">
+<!ENTITY starItem "Marchează elementul curent">
+<!ENTITY moveToTrash "Mută elementul curent în gunoi">
+
+<!ENTITY view.header "Vedere">
+<!ENTITY showAll "Arată toate elementele">
+<!ENTITY showStarred "Arată elementele marcate">
+<!ENTITY showUnread "Arată elementele necitite">
+<!ENTITY headlinesView "Comută vederea titlurilor">
+
+<!ENTITY general.header "General">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Deschide Digest">
+<!ENTITY focusSearchbar "Focusează cîmpul pentru căutare">
+<!ENTITY displayShortcuts "Arată lista scurtăturilor de la tastatură">

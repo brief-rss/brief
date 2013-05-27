@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Dziękuję za zainstalowanie Digesta">
+<!ENTITY subscribingStep1.description "Kliknij ikonę w pasku adresu, by wyświetlić podgląd kanału.">
+<!ENTITY subscribingStep1firefox4.description "Z menu <strong>Zakładki</strong> wybierz <strong>Subskrybuj tę stronę…</strong>.">
+<!ENTITY subscribingStep2.description "Zaznacz <strong>Dynamiczne zakładki</strong> i kliknij <strong>Subskrybuj teraz</strong>.">
+<!ENTITY subscribingStep3.description "Z menu Zakładki wybierz folder <strong>Subskrybowane kanały</strong>.">
+<!ENTITY getStartedButton.label "Zaczynamy">

@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "感谢安装 Digest">
+<!ENTITY subscribingStep1.description "点击地址栏的图标以便预览该订阅">
+<!ENTITY subscribingStep1firefox4.description "打开<strong>书签</strong>菜单再选择<strong><strong>提交此页</strong>. </strong>.">
+<!ENTITY subscribingStep2.description "选择<strong>实时书签</strong> 再点击<strong>现在提交</strong>。">
+<!ENTITY subscribingStep3.description "在书签菜单选择<strong>已提交订阅</strong>文件夹">
+<!ENTITY getStartedButton.label "开始">

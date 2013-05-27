@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest – skróty klawiszowe">
+<!ENTITY or "lub">
+
+<!ENTITY navigation.header "Nawigacja">
+<!ENTITY space.key "Spacja">
+<!ENTITY shiftSpace.key "Shift + Spacja">
+<!ENTITY nextItem "Wyświetl następną wiadomość">
+<!ENTITY previousItem "Wyświetl poprzednią wiadomość">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Otwórz wybraną wiadomość">
+<!ENTITY showItem "Rozwiń lub zwiń wybraną wiadomość (w trybie widoku nagłówków)">
+
+<!ENTITY entries.header "Wiadomości">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Włącz wyróżnianie wybranej wiadomości">
+<!ENTITY markCurrentItemRead "Oznacz wybraną wiadomość jako przeczytaną/nieprzeczytaną">
+<!ENTITY markVisibleRead "Oznacz wszystkie widoczne wiadomości jako przeczytane">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Oznacz wszystkie wiadomości jako przeczytane">
+<!ENTITY starItem "Dodaj zakładkę do wybranej wiadomości">
+<!ENTITY moveToTrash "Przenieś wybraną wiadomość do kosza">
+
+<!ENTITY view.header "Podgląd">
+<!ENTITY showAll "Wyświetl wszystkie wiadomości">
+<!ENTITY showStarred "Wyświetl wiadomości wyróżnione gwiazdką">
+<!ENTITY showUnread "Wyświetl nieprzeczytane wiadomości">
+<!ENTITY headlinesView "Przełącz widok nagłówków">
+
+<!ENTITY general.header "Ogólne">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Otwórz Digesta">
+<!ENTITY focusSearchbar "Uaktywnij pasek szukania">
+<!ENTITY displayShortcuts "Wyświetl listę skrótów klawiszowych">

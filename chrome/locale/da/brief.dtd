@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Søg">
+<!ENTITY allItemsFolder.label "Alle emner">
+<!ENTITY unreadFolder.label "Ulæste">
+<!ENTITY starredFolder.label "Bogmærker">
+<!ENTITY trashFolder.label "Skraldespand">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Brug overskrift-visning (F)">
+<!ENTITY filterUnread.tooltip "Vis kun ulæste emner (D)">
+<!ENTITY filterStarred.tooltip "Vis kun bogmærker (S)">
+<!ENTITY updateButton.tooltip "Tjek alle feeds for opdateringer">
+<!ENTITY stopUpdatingButton.tooltip "Stop tjek af feeds for opdateringer">
+<!ENTITY showOptions.tooltip "Andre Digest-indstillinger">
+<!ENTITY sidebarSplitter.tooltip "Dobbeltklik for at skjule sidebjælken">
+<!ENTITY revealSidebar.tooltip "Vis sidebjælken">
+<!ENTITY markViewRead.tooltip "Marker alle emner som læste (ALT + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Marker feed som læst">
+<!ENTITY ctxMarkFeedUnread.label "Marker feed som ulæst">
+<!ENTITY ctxMarkFolderRead.label "Marker mappe som læst">
+<!ENTITY ctxMarkTagRead.label "Marker mærkede emner som læste">
+<!ENTITY ctxUpdateFeed.label "Opdater feed">
+<!ENTITY ctxUpdateFolder.label "Opdater mappe">
+<!ENTITY ctxOpenWebsite.label "Åbn websted">
+<!ENTITY ctxDeleteFeed.label "Slet feed">
+<!ENTITY ctxDeleteFolder.label "Slet mappe">
+<!ENTITY ctxDeleteTag.label "Slet mærke">
+<!ENTITY ctxEmptyFeed.label "Tøm feed">
+<!ENTITY ctxEmptyFolder.label "Tom mappe">
+<!ENTITY ctxRestoreTrashed.label "Gendan alle emner">
+<!ENTITY ctxEmptyTrash.label "Tøm skraldespand">
+<!ENTITY ctxFeedProperties.label "Egenskaber">
+<!ENTITY ctxUpdateFeeds.label "Opdater feeds nu">
+<!ENTITY ctxMarkFeedsAsRead.label "Marker alle feeds som læste">
+<!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner">
+<!ENTITY ctxShowOptions.label "Indstillinger">

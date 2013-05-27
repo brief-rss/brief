@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Căutare">
+<!ENTITY allItemsFolder.label "Toate elementele">
+<!ENTITY unreadFolder.label "Necitite">
+<!ENTITY starredFolder.label "Marcaje">
+<!ENTITY trashFolder.label "Gunoi">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Vizualizează titlurile (F)">
+<!ENTITY filterUnread.tooltip "Vizualizează doar elementele necitite (D)">
+<!ENTITY filterStarred.tooltip "Vizualizează doar marcajele (S)">
+<!ENTITY updateButton.tooltip "Verifică toate fluxurile pentru actualizări">
+<!ENTITY stopUpdatingButton.tooltip "Oprește verificarea fluxurilor pentru actualizări">
+<!ENTITY showOptions.tooltip "Deschide opțiunile Digest">
+<!ENTITY sidebarSplitter.tooltip "Dublu-clic pentru a ascunde bara laterală">
+<!ENTITY revealSidebar.tooltip "Arată bara laterală">
+<!ENTITY markViewRead.tooltip "Marchează toate elementele ca citite (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Marchează fluxul ca citit">
+<!ENTITY ctxMarkFeedUnread.label "Marchează fluxul ca necitit">
+<!ENTITY ctxMarkFolderRead.label "Marchează mapa ca citit">
+<!ENTITY ctxMarkTagRead.label "Marchează elementele etichetate ca citite">
+<!ENTITY ctxUpdateFeed.label "Actualizează flux">
+<!ENTITY ctxUpdateFolder.label "Actualizează mapă">
+<!ENTITY ctxOpenWebsite.label "Deschide site">
+<!ENTITY ctxDeleteFeed.label "Șterge flux">
+<!ENTITY ctxDeleteFolder.label "Șterge mapă">
+<!ENTITY ctxDeleteTag.label "Șterge etichetă">
+<!ENTITY ctxEmptyFeed.label "Golește flux">
+<!ENTITY ctxEmptyFolder.label "Golește mapă">
+<!ENTITY ctxRestoreTrashed.label "Restabilește toate elementele">
+<!ENTITY ctxEmptyTrash.label "Golește gunoiul">
+<!ENTITY ctxFeedProperties.label "Proprietăți">
+<!ENTITY ctxUpdateFeeds.label "Actualizează fluxurile acum">
+<!ENTITY ctxMarkFeedsAsRead.label "Marchează toate fluxurile ca citite">
+<!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite">
+<!ENTITY ctxShowOptions.label "Opțiuni">

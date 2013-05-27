@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Možnosti Digest">
+<!ENTITY mainPane.label "Hlavné">
+<!ENTITY updateGroup.caption "Aktualizácia">
+<!ENTITY checkForUpdatesBefore.label "Kontrolovať aktualizáciu kanálov každých">
+<!ENTITY checkForUpdates.accesskey "C">
+<!ENTITY updateIntervalMinutes.label "minút">
+<!ENTITY updateIntervalHours.label "hodín">
+<!ENTITY updateIntervalDays.label "dní">
+<!ENTITY checkForUpdatesAfter.label "minút">
+<!ENTITY showNotification.label "Zobraziť upozornenie pri nájdení nového článku">
+<!ENTITY showNotification.accesskey "Z">
+<!ENTITY behaviorGroup.caption "Režim">
+<!ENTITY openInNewTab.label "Otvoriť Digest na novej karte">
+<!ENTITY openInNewTab.accesskey "O">
+<!ENTITY storingGroup.caption "Ukladanie">
+<!ENTITY expirationBefore.label "Odstrániť stiahnuté položky po">
+<!ENTITY expirationAfter.label "dňoch">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "Uložené články budú zachované">
+<!ENTITY storedEntriesBefore.label "Uchovať nie dlhšie než">
+<!ENTITY storedEntriesAfter.label "posledné položky každého kanála">
+<!ENTITY storedEntriesCheckbox.accesskey "p">
+<!ENTITY clearAllEntriesButton.label "Vyčistiť všetky položky...">
+<!ENTITY clearAllEntriesButton.accesskey "s">
+<!ENTITY feedsPane.label "Kanaly">
+<!ENTITY folderTree.label "Priečinok obsahujúci aktívne záložky:">
+<!ENTITY importOPML.label "Importovať...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportovať...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Zobraziť">
+<!ENTITY showStatusbarIcon.label "Zobraziť ikonu v stavom riadku">
+<!ENTITY showStatusbarIcon.accesskey "i">
+<!ENTITY showUnreadCounter.label "Zobraziť počet neprečítaných položiek vedľa ikony Digest">
+<!ENTITY showUnreadCounter.accesskey "b">
+<!ENTITY sortUnreadViewOldestFirst.label "V náhľade neprečítaných zobraziť najprv najstaršie články">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "n">
+<!ENTITY autoMarkRead.label "Pred zobrazením označiť články ako prečítané">
+<!ENTITY autoMarkRead.accesskey "z">
+<!ENTITY customizeGroup.caption "Vzhľad">
+<!ENTITY shortcutsPane.label "Klávesové skratky">
+<!ENTITY editStyleDescription.label "Prispôsobiť vzhľad kanálov">
+<!ENTITY editStyleButton.label "Prispôsobiť">
+<!ENTITY editStyleButton.accesskey "P">
+<!ENTITY styleEditor.title "Upraviť vlastný štýl">
+<!ENTITY seeCustomizationTips.label "Získať viac o prispôsobení vzhľadu pomocou CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Názov">
+<!ENTITY feedURL.label "Umiestnenie">
+<!ENTITY optionsGroupbox.caption "Nastavenia kanála">
+<!ENTITY checkUpdatesPerFeedBefore.label "Kontrolovať aktualizácie každých">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "Odstrániť stiahnuté položky po">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "dňoch">
+<!ENTITY updatedEntries.label "Zmenené kanály neoznačiť ako neprečítané">
+<!ENTITY updatedEntries.accesskey "a">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Predchádzajúci">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Ďalší &gt;">
+<!ENTITY nextFeed.accesskey "Ď">

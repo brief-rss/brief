@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Digest 选项">
+<!ENTITY mainPane.label "主要">
+<!ENTITY updateGroup.caption "更新">
+<!ENTITY checkForUpdatesBefore.label "每">
+<!ENTITY checkForUpdates.accesskey "C">
+<!ENTITY updateIntervalMinutes.label "分钟">
+<!ENTITY updateIntervalHours.label "小时">
+<!ENTITY updateIntervalDays.label "天">
+<!ENTITY checkForUpdatesAfter.label "分钟">
+<!ENTITY showNotification.label "找到新项目时通知我">
+<!ENTITY showNotification.accesskey "S">
+<!ENTITY behaviorGroup.caption "行为">
+<!ENTITY openInNewTab.label "在新标签页打开 Digest">
+<!ENTITY openInNewTab.accesskey "O">
+<!ENTITY storingGroup.caption "保存">
+<!ENTITY expirationBefore.label "在">
+<!ENTITY expirationAfter.label "天后清除已下载项目">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "加入书签的项目将被保留">
+<!ENTITY storedEntriesBefore.label "每个订阅只保存最新的">
+<!ENTITY storedEntriesAfter.label "个项目">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
+<!ENTITY clearAllEntriesButton.label "清除所有项目...">
+<!ENTITY clearAllEntriesButton.accesskey "a">
+<!ENTITY feedsPane.label "订阅">
+<!ENTITY folderTree.label "保存实时标签的文件夹：">
+<!ENTITY importOPML.label "导入...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "导出...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "显示">
+<!ENTITY showStatusbarIcon.label "在状态栏显示图标">
+<!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY showUnreadCounter.label "在 Digest 图标旁边显示未读项目数目">
+<!ENTITY showUnreadCounter.accesskey "w">
+<!ENTITY sortUnreadViewOldestFirst.label "将旧的未读项目排列在前">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "将我看过的项目标为已读">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "外观">
+<!ENTITY shortcutsPane.label "快捷键">
+<!ENTITY editStyleDescription.label "定制订阅的外观">
+<!ENTITY editStyleButton.label "自定义">
+<!ENTITY editStyleButton.accesskey "C">
+<!ENTITY styleEditor.title "编辑样式">
+<!ENTITY seeCustomizationTips.label "学习使用 CSS 定制外观">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "名称">
+<!ENTITY feedURL.label "地址">
+<!ENTITY optionsGroupbox.caption "订阅设置">
+<!ENTITY checkUpdatesPerFeedBefore.label "每隔多久检查更新：">
+<!ENTITY checkUpdatesPerFeed.accesskey "每">
+<!ENTITY expireEntriesPerFeedBefore.label "在">
+<!ENTITY expireEntriesPerFeed.accesskey "在">
+<!ENTITY expireEntriesPerFeedAfter.label "天后移除已下载的项目">
+<!ENTITY updatedEntries.label "不要标记更改的项目为未读">
+<!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "上一个">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "下一个">
+<!ENTITY nextFeed.accesskey "N">

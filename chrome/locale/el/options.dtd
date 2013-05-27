@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Επιλογές Digest">
+<!ENTITY mainPane.label "Γενικά">
+<!ENTITY updateGroup.caption "Ενημερώσεις">
+<!ENTITY checkForUpdatesBefore.label "Έλεγχος ενημερώσεων αρχείων ροής κάθε">
+<!ENTITY checkForUpdates.accesskey "λ">
+<!ENTITY updateIntervalMinutes.label "λεπτά">
+<!ENTITY updateIntervalHours.label "ώρες">
+<!ENTITY updateIntervalDays.label "ημέρες">
+<!ENTITY checkForUpdatesAfter.label "λεπτά">
+<!ENTITY showNotification.label "Προβολή ειδοποίησης όταν υπάρχουν νέες εγγραφές">
+<!ENTITY showNotification.accesskey "Π">
+<!ENTITY behaviorGroup.caption "Συμπεριφορά">
+<!ENTITY openInNewTab.label "Άνοιγμα του Digest σε νέα καρτέλα">
+<!ENTITY openInNewTab.accesskey "α">
+<!ENTITY storingGroup.caption "Αποθήκευση">
+<!ENTITY expirationBefore.label "Αφαίρεση εμφανισμένων εγγραφών μετά από">
+<!ENTITY expirationAfter.label "ημέρες">
+<!ENTITY expirationCheckbox.accesskey "φ">
+<!ENTITY starredItemsKept.tooltip "Εγγραφές με σελιδοδείκτες θα διατηρούνται">
+<!ENTITY storedEntriesBefore.label "Αποθήκευση το πολύ">
+<!ENTITY storedEntriesAfter.label "πρόσφατων εγγραφών από κάθε αρχείο ροής">
+<!ENTITY storedEntriesCheckbox.accesskey "ο">
+<!ENTITY clearAllEntriesButton.label "Εκκαθάριση όλων των εγγραφών">
+<!ENTITY clearAllEntriesButton.accesskey "α">
+<!ENTITY feedsPane.label "Αρχεία ροής">
+<!ENTITY folderTree.label "Κατάλογος που περιέχει δυναμικούς σελιδοδείκτες:">
+<!ENTITY importOPML.label "Εισαγωγή...">
+<!ENTITY importOPML.accesskey "ι">
+<!ENTITY exportOPML.label "Εξαγωγή...">
+<!ENTITY exportOPML.accesskey "ω">
+<!ENTITY displayPane.label "Εμφάνιση">
+<!ENTITY showStatusbarIcon.label "Προβολή εικονιδίου στη γραμμή κατάστασης">
+<!ENTITY showStatusbarIcon.accesskey "κ">
+<!ENTITY showUnreadCounter.label "Προβολή αριθμού μη αναγνωσμένων δίπλα από το εικονίδιο του Digest">
+<!ENTITY showUnreadCounter.accesskey "α">
+<!ENTITY sortUnreadViewOldestFirst.label "Εμφάνιση των παλαιότερων πρώτα στην εμφάνιση μόνο μη αναγνωσμένων">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "η">
+<!ENTITY autoMarkRead.label "Αυτόματη σήμανση εγγραφών ως αναγνωσμένων μετά την προβολή τους">
+<!ENTITY autoMarkRead.accesskey "σ">
+<!ENTITY customizeGroup.caption "Εμφάνιση">
+<!ENTITY shortcutsPane.label "Συντομεύσεις πληκτρολογίου">
+<!ENTITY editStyleDescription.label "Προσαρμογή της εμφάνισης των αρχείων ροής">
+<!ENTITY editStyleButton.label "Προσαρμογή">
+<!ENTITY editStyleButton.accesskey "Π">
+<!ENTITY styleEditor.title "Επεξεργασία προσαρμοσμένου στυλ">
+<!ENTITY seeCustomizationTips.label "Μάθετε περισσότερα σχετικά με την προσαρμογή της εμφάνισης με χρήση CSS (Αγγλικά)">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Όνομα">
+<!ENTITY feedURL.label "Τοποθεσία">
+<!ENTITY optionsGroupbox.caption "Ρυθμίσεις αρχείου ροής">
+<!ENTITY checkUpdatesPerFeedBefore.label "Έλεγχος για ενημερώσεις κάθε">
+<!ENTITY checkUpdatesPerFeed.accesskey "χ">
+<!ENTITY expireEntriesPerFeedBefore.label "Αφαίρεση εμφανισμένων εγγραφών μετά από">
+<!ENTITY expireEntriesPerFeed.accesskey "φ">
+<!ENTITY expireEntriesPerFeedAfter.label "ημέρες">
+<!ENTITY updatedEntries.label "Να μη σημειωθούν εγγραφές που έχουν υποστεί μεταβολές ως μη αναγνωσμένες">
+<!ENTITY updatedEntries.accesskey "η">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Προηγούμενο">
+<!ENTITY previousFeed.accesskey "Π">
+<!ENTITY nextFeed.label "Επόμενο &gt;">
+<!ENTITY nextFeed.accesskey "Ε">

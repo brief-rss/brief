@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Πλήκτρα συντομεύσεων Digest">
+<!ENTITY or "ή">
+
+<!ENTITY navigation.header "Πλοήγηση">
+<!ENTITY space.key "Κενό">
+<!ENTITY shiftSpace.key "Shift + Κενό διάστημα">
+<!ENTITY nextItem "Μετάβαση στην επόμενη εγγραφή">
+<!ENTITY previousItem "Μετάβαση στην προηγούμενη εγγραφή">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Άνοιγμα τρέχουσας εγγραφής">
+<!ENTITY showItem "Εμφάνιση/απόκρυψη τρέχουσας εγγραφής (στην προβολή κεφαλίδων)">
+
+<!ENTITY entries.header "Εγγραφές">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Ενεργοποίηση επισήμανσης για την τρέχουσα εγγραφή">
+<!ENTITY markCurrentItemRead "Σημείωση τρέχουσας εγγραφής ως αναγνωσμένη/μη αναγνωσμένη">
+<!ENTITY markVisibleRead "Σημείωση όλων των εγγραφών στην οθόνη ως αναγνωσμένων">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Σημείωση όλων των εγγραφών ως αναγνωσμένων">
+<!ENTITY starItem "Προσθήκη της τρέχουσας εγγραφής στους σελιδοδείκτες">
+<!ENTITY moveToTrash "Μετακίνηση τρέχουσας εγγραφής στον κάδο">
+
+<!ENTITY view.header "Εμφάνιση">
+<!ENTITY showAll "Προβολή όλων των εγγραφών">
+<!ENTITY showStarred "Προβολή εγγραφών με σελιδοδείκτη">
+<!ENTITY showUnread "Προβολή μη αναγνωσμένων εγγραφών">
+<!ENTITY headlinesView "Εναλλαγή εμφάνισης επικεφαλίδων">
+
+<!ENTITY general.header "Γενικά">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Άνοιγμα του Digest">
+<!ENTITY focusSearchbar "Εστίαση εργαλειοθήκης αναζήτησης">
+<!ENTITY displayShortcuts "Προβολή λίστας πλήκτρων συντομεύσεων">

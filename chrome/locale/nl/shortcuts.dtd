@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - sneltoetsen">
+<!ENTITY or "of">
+
+<!ENTITY navigation.header "Navigatie">
+<!ENTITY space.key "Spatie">
+<!ENTITY shiftSpace.key "Shift + Spatie">
+<!ENTITY nextItem "Volgende bericht">
+<!ENTITY previousItem "Vorige bericht">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Invoeren">
+<!ENTITY openEntry "Huidige bericht openen">
+<!ENTITY showItem "Huidige bericht weergeven/verbergen (in beeld kopteksten)">
+
+<!ENTITY entries.header "Berichten">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Accentueren van huidige bericht inschakelen">
+<!ENTITY markCurrentItemRead "Huidige bericht als gelezen/ongelezen markeren">
+<!ENTITY markVisibleRead "Alle berichten op scherm als gelezen markeren">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Alle berichten als gelezen markeren">
+<!ENTITY starItem "Bladwijzer van huidig bericht maken">
+<!ENTITY moveToTrash "Huidig bericht naar Prullenbak verplaatsen">
+
+<!ENTITY view.header "Beeld">
+<!ENTITY showAll "Alle berichten weergeven">
+<!ENTITY showStarred "Bladwijzerberichten weergeven">
+<!ENTITY showUnread "Ongelezen berichten weergeven">
+<!ENTITY headlinesView "Kopteksten aan- of uitzetten">
+
+<!ENTITY general.header "Algemeen">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Digest openen">
+<!ENTITY focusSearchbar "Zoekbalk focus geven">
+<!ENTITY displayShortcuts "Lijst met sneltoetsen weergeven">

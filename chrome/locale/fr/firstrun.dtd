@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Merci d'avoir installé Digest">
+<!ENTITY subscribingStep1.description "Cliquez sur l'icône dans la barre d'adresse pour avoir un aperçu du flux.">
+<!ENTITY subscribingStep1firefox4.description "Ouvrez le menu <strong>Marque-pages</strong> et choisissez <strong>S'abonner à cette page</strong>.">
+<!ENTITY subscribingStep2.description "Choisissez <strong>Marque-pages dynamiques</strong> et cliquez sur <strong>S'abonner maintenant</strong>.">
+<!ENTITY subscribingStep3.description "Choisissez le dossier <strong>Flux</strong> dans le menu des marque-pages.">
+<!ENTITY getStartedButton.label "Commencer">

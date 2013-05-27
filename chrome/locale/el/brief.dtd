@@ -1,0 +1,35 @@
+<!ENTITY searchBox.label "Αναζήτηση">
+<!ENTITY allItemsFolder.label "Όλες οι εγγραφές">
+<!ENTITY unreadFolder.label "Μη αναγνωσμένα">
+<!ENTITY starredFolder.label "Σελιδοδείκτες">
+<!ENTITY trashFolder.label "Κάδος">
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Εμφάνιση μόνο επικεφαλίδων">
+<!ENTITY filterUnread.tooltip "Προβολή μόνο μη αναγνωσμένων εγγραφών">
+<!ENTITY filterStarred.tooltip "Προβολή μόνο σελιδοδεικτών">
+<!ENTITY updateButton.tooltip "Έλεγχος όλων των αρχείων ροής για ενημερώσεις">
+<!ENTITY stopUpdatingButton.tooltip "Διακοπή ελέγχου για ενημερώσεις">
+<!ENTITY showOptions.tooltip "Άνοιγμα επιλογών Digest">
+<!ENTITY sidebarSplitter.tooltip "Για απόκρυψη της πλευρικής στήλης, κάντε διπλό κλικ">
+<!ENTITY revealSidebar.tooltip "Εμφάνιση πλευρικής στήλης">
+<!ENTITY markViewRead.tooltip "Σημείωση όλων ως αναγνωσμένων (Alt + N)">
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Σημείωση αρχείου ροής ως αναγνωσμένου">
+<!ENTITY ctxMarkFeedUnread.label "Σημείωση αρχείου ροής ως μη αναγνωσμένου">
+<!ENTITY ctxMarkFolderRead.label "Σημείωση καταλόγου ως αναγνωσμένου">
+<!ENTITY ctxMarkTagRead.label "Σημείωση ως αναγνωσμένων των εγγραφών με ετικέτες">
+<!ENTITY ctxUpdateFeed.label "Ενημέρωση αρχείου ροής">
+<!ENTITY ctxUpdateFolder.label "Ενημέρωση καταλόγου">
+<!ENTITY ctxOpenWebsite.label "Άνοιγμα ιστότοπου">
+<!ENTITY ctxDeleteFeed.label "Διαγραφή αρχείου ροής">
+<!ENTITY ctxDeleteFolder.label "Διαγραφή καταλόγου">
+<!ENTITY ctxDeleteTag.label "Διαγραφή ετικέτας">
+<!ENTITY ctxEmptyFeed.label "Εκκαθάριση αρχείου ροής">
+<!ENTITY ctxEmptyFolder.label "Εκκαθάριση καταλόγου">
+<!ENTITY ctxRestoreTrashed.label "Επαναφορά εγγραφών από τον κάδο">
+<!ENTITY ctxEmptyTrash.label "Άδειασμα κάδου">
+<!ENTITY ctxFeedProperties.label "Ιδιότητες">
+<!ENTITY ctxUpdateFeeds.label "Ενημέρωση εγγραφής τώρα">
+<!ENTITY ctxMarkFeedsAsRead.label "Σημείωση όλων ως αναγνωσμένων">
+<!ENTITY showUnreadCounter.label "Προβολή αριθμού μη αναγνωσμένων εγγραφών">
+<!ENTITY ctxShowOptions.label "Επιλογές">

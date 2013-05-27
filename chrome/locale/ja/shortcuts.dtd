@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - キーボードショートカット">
+<!ENTITY or "または">
+
+<!ENTITY navigation.header "ナビゲーション">
+<!ENTITY space.key "Space">
+<!ENTITY shiftSpace.key "Shift + スペース">
+<!ENTITY nextItem "次の項目へ移動">
+<!ENTITY previousItem "以前の項目へ移動">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "現在の項目を開く">
+<!ENTITY showItem "現在の項目の表示・非表示 (ヘッドライン表示にて)">
+
+<!ENTITY entries.header "項目">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "現在の項目の強調表示を有効にする">
+<!ENTITY markCurrentItemRead "現在の項目を既読・未読にする">
+<!ENTITY markVisibleRead "画面上のすべての項目を既読にする">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "すべての項目を既読にする">
+<!ENTITY starItem "現在の項目をブックマーク">
+<!ENTITY moveToTrash "現在の項目をごみ箱へ移動する">
+
+<!ENTITY view.header "表示">
+<!ENTITY showAll "すべての項目を表示する">
+<!ENTITY showStarred "ブックマーク済み項目を表示する">
+<!ENTITY showUnread "未読項目を表示する">
+<!ENTITY headlinesView "見出し表示を切り替える">
+
+<!ENTITY general.header "全般">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Digest を開く">
+<!ENTITY focusSearchbar "検索バーにフォーカスを移す">
+<!ENTITY displayShortcuts "ショートカットキーの一覧を表示する">

@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - Tastaturkürzel">
+<!ENTITY or "oder">
+
+<!ENTITY navigation.header "Navigation">
+<!ENTITY space.key "Leertaste">
+<!ENTITY shiftSpace.key "Umschalt + Leertaste">
+<!ENTITY nextItem "Zum nächsten Eintrag springen">
+<!ENTITY previousItem "Zum vorherigen Eintrag springen">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Eingabetaste">
+<!ENTITY openEntry "Eintrag öffnen">
+<!ENTITY showItem "Ein-/ausblenden des aktuellen Eintrags (im Überschriftenmodus)">
+
+<!ENTITY entries.header "Einträge">
+<!ENTITY tab.key "Tabulator">
+<!ENTITY enableEntryHightlight "Hervorheben der Einträge aktivieren">
+<!ENTITY markCurrentItemRead "Den aktuellen Eintrag als gelesen/ungelesen markieren">
+<!ENTITY markVisibleRead "Alle Einträge auf dem Bildschirm als gelesen markieren">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Alle Einträge als gelesen markieren">
+<!ENTITY starItem "Lesezeichen für den aktuellen Eintrag setzen">
+<!ENTITY moveToTrash "Ausgewählten Eintrag in den Papierkorb verschieben">
+
+<!ENTITY view.header "Anzeige">
+<!ENTITY showAll "Alle Einträge anzeigen">
+<!ENTITY showStarred "Als Lesezeichen markierte Einträge anzeigen">
+<!ENTITY showUnread "Ungelesene Einträge anzeigen">
+<!ENTITY headlinesView "Überschriftenmodus umschalten">
+
+<!ENTITY general.header "Allgemein">
+<!ENTITY ctrlAltD.key "Strg + Alt + D">
+<!ENTITY cmdAltD.key "Befehlstaste + Alt + D">
+<!ENTITY openBrief "Digest anzeigen">
+<!ENTITY focusSearchbar "Digest-Suchleiste fokussieren">
+<!ENTITY displayShortcuts "Liste der Tastaturkürzel anzeigen">

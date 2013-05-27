@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Søk">
+<!ENTITY allItemsFolder.label "Alle">
+<!ENTITY unreadFolder.label "Ulest">
+<!ENTITY starredFolder.label "Bokmerker">
+<!ENTITY trashFolder.label "Papirkurv">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Bruk overskriftsvisning (F)">
+<!ENTITY filterUnread.tooltip "Vis kun uleste elementer (D)">
+<!ENTITY filterStarred.tooltip "Vis kun bokmerker elementer (S)">
+<!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
+<!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskilder">
+<!ENTITY showOptions.tooltip "Innstillinger for Digest">
+<!ENTITY sidebarSplitter.tooltip "Dobbeltklikk for å skjule sidestolpen">
+<!ENTITY revealSidebar.tooltip "Vis sidestolpen">
+<!ENTITY markViewRead.tooltip "Merk alle elementer som lest (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Merk nyhetskilden som lest">
+<!ENTITY ctxMarkFeedUnread.label "Merk nyhetskilden som ulest">
+<!ENTITY ctxMarkFolderRead.label "Merk mappe som lest">
+<!ENTITY ctxMarkTagRead.label "Merk elementer med merkelapper som lest">
+<!ENTITY ctxUpdateFeed.label "Oppdater nyhetskilde">
+<!ENTITY ctxUpdateFolder.label "Oppdater mappe">
+<!ENTITY ctxOpenWebsite.label "Åpne nettside">
+<!ENTITY ctxDeleteFeed.label "Slett nyhetskilde">
+<!ENTITY ctxDeleteFolder.label "Slett mappe">
+<!ENTITY ctxDeleteTag.label "Slett merkelapp">
+<!ENTITY ctxEmptyFeed.label "Tøm nyhetskilde">
+<!ENTITY ctxEmptyFolder.label "Tøm mappe">
+<!ENTITY ctxRestoreTrashed.label "Gjenopprett elementer">
+<!ENTITY ctxEmptyTrash.label "Tøm papirkurven">
+<!ENTITY ctxFeedProperties.label "Egenskaper">
+<!ENTITY ctxUpdateFeeds.label "Oppdater nyhetskilder nå">
+<!ENTITY ctxMarkFeedsAsRead.label "Merk alle nyhetskilder som lest">
+<!ENTITY showUnreadCounter.label "Vis antall uleste elementer">
+<!ENTITY ctxShowOptions.label "Innstillinger">

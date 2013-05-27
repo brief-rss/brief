@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "検索">
+<!ENTITY allItemsFolder.label "すべての項目">
+<!ENTITY unreadFolder.label "未読">
+<!ENTITY starredFolder.label "ブックマーク">
+<!ENTITY trashFolder.label "ごみ箱">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "ヘッドラインを表示します (F)">
+<!ENTITY filterUnread.tooltip "未読の項目のみを表示します (D)">
+<!ENTITY filterStarred.tooltip "ブックマークのみを表示します (S)">
+<!ENTITY updateButton.tooltip "すべてのフィードの更新を確認します">
+<!ENTITY stopUpdatingButton.tooltip "フィード更新の確認を停止します">
+<!ENTITY showOptions.tooltip "Digest のオプションを開きます">
+<!ENTITY sidebarSplitter.tooltip "ダブルクリックするとサイドバーを非表示にします">
+<!ENTITY revealSidebar.tooltip "サイドバーを表示させます">
+<!ENTITY markViewRead.tooltip "すべての項目を既読にします (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "フィードを既読にする">
+<!ENTITY ctxMarkFeedUnread.label "フィードを未読にする">
+<!ENTITY ctxMarkFolderRead.label "フォルダを既読にする">
+<!ENTITY ctxMarkTagRead.label "タグ付けされた項目を既読にする">
+<!ENTITY ctxUpdateFeed.label "フィードを更新する">
+<!ENTITY ctxUpdateFolder.label "フォルダを更新する">
+<!ENTITY ctxOpenWebsite.label "ウェブサイトを開く">
+<!ENTITY ctxDeleteFeed.label "フィードを削除する">
+<!ENTITY ctxDeleteFolder.label "フォルダを削除する">
+<!ENTITY ctxDeleteTag.label "タグを削除する">
+<!ENTITY ctxEmptyFeed.label "フィードを空にする">
+<!ENTITY ctxEmptyFolder.label "フォルダを空にする">
+<!ENTITY ctxRestoreTrashed.label "すべての項目を元に戻す">
+<!ENTITY ctxEmptyTrash.label "ごみ箱を空にする">
+<!ENTITY ctxFeedProperties.label "プロパティ">
+<!ENTITY ctxUpdateFeeds.label "今すぐフィードを更新する">
+<!ENTITY ctxMarkFeedsAsRead.label "すべてのフィードを既読にする">
+<!ENTITY showUnreadCounter.label "未読数を表示する">
+<!ENTITY ctxShowOptions.label "オプション">

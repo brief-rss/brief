@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest – billentyű rövidítések">
+<!ENTITY or "vagy">
+
+<!ENTITY navigation.header "Navigáció">
+<!ENTITY space.key "Space">
+<!ENTITY shiftSpace.key "Shift + Space">
+<!ENTITY nextItem "Ugrás a következő elemre">
+<!ENTITY previousItem "Ugrás az előző elemre">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Elem megnyitása">
+<!ENTITY showItem "Aktuális elem megjelenítése/elrejtése">
+
+<!ENTITY entries.header "Elemek">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Elem megjelölhetőségének engedélyezése">
+<!ENTITY markCurrentItemRead "Aktuális elem olvasott/olvasatlan">
+<!ENTITY markVisibleRead "Összes elem a képernyőn olvasottnak jelöl">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Összes elem olvasott">
+<!ENTITY starItem "Aktuális elem könyvjelzőkhöz adása">
+<!ENTITY moveToTrash "Elem áthelyezése a lomtárba">
+
+<!ENTITY view.header "Nézet">
+<!ENTITY showAll "Összes elem megjelenítése">
+<!ENTITY showStarred "Könyvjelzők megjelenítése">
+<!ENTITY showUnread "Olvasatlan elemek megjelenítése">
+<!ENTITY headlinesView "Váltás fejléc nézetre">
+
+<!ENTITY general.header "Általános">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Ctrl + Alt + D">
+<!ENTITY openBrief "Digest megnyitása">
+<!ENTITY focusSearchbar "Keresősáv fókuszálása">
+<!ENTITY displayShortcuts "Gyorsbillentyűk megjelenítése">

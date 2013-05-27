@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Digest – opcje">
+<!ENTITY mainPane.label "Ogólne">
+<!ENTITY updateGroup.caption "Aktualizacje">
+<!ENTITY checkForUpdatesBefore.label "Sprawdzaj kanały co">
+<!ENTITY checkForUpdates.accesskey "S">
+<!ENTITY updateIntervalMinutes.label "min">
+<!ENTITY updateIntervalHours.label "godz.">
+<!ENTITY updateIntervalDays.label "dni">
+<!ENTITY checkForUpdatesAfter.label "min">
+<!ENTITY showNotification.label "Wyświetlaj powiadomienie o nowych wiadomościach">
+<!ENTITY showNotification.accesskey "M">
+<!ENTITY behaviorGroup.caption "Zachowanie">
+<!ENTITY openInNewTab.label "Otwieraj Digest w nowej karcie">
+<!ENTITY openInNewTab.accesskey "O">
+<!ENTITY storingGroup.caption "Przechowywanie">
+<!ENTITY expirationBefore.label "Usuń pobrane wiadomości po">
+<!ENTITY expirationAfter.label "dniach">
+<!ENTITY expirationCheckbox.accesskey "B">
+<!ENTITY starredItemsKept.tooltip "Wiadomości posiadające zakładki zostaną zachowane">
+<!ENTITY storedEntriesBefore.label "Przechowuj do">
+<!ENTITY storedEntriesAfter.label "ostatnich wiadomości w kanale">
+<!ENTITY storedEntriesCheckbox.accesskey "P">
+<!ENTITY clearAllEntriesButton.label "Usuń wszystkie wiadomości…">
+<!ENTITY clearAllEntriesButton.accesskey "U">
+<!ENTITY feedsPane.label "Kanały">
+<!ENTITY folderTree.label "Folder zawierający dynamiczne zakładki:">
+<!ENTITY importOPML.label "Importuj…">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Eksportuj…">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Widok">
+<!ENTITY showStatusbarIcon.label "Wyświetlaj ikonę rozszerzenia na pasku stanu">
+<!ENTITY showStatusbarIcon.accesskey "A">
+<!ENTITY showUnreadCounter.label "Liczbę nieprzeczytanych wiadomości wyświetlaj za ikoną Digesta">
+<!ENTITY showUnreadCounter.accesskey "L">
+<!ENTITY sortUnreadViewOldestFirst.label "W nieprzeczytanych wyświetlaj najpierw najstarsze wiadomości">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "S">
+<!ENTITY autoMarkRead.label "Oznaczaj wyświetlone wiadomości jako przeczytane">
+<!ENTITY autoMarkRead.accesskey "C">
+<!ENTITY customizeGroup.caption "Wygląd">
+<!ENTITY shortcutsPane.label "Skróty">
+<!ENTITY editStyleDescription.label "Dostosuj wygląd kanałów">
+<!ENTITY editStyleButton.label "Dostosuj">
+<!ENTITY editStyleButton.accesskey "D">
+<!ENTITY styleEditor.title "Dostosowywanie wyglądu kanałów">
+<!ENTITY seeCustomizationTips.label "Informacje o dostosowywaniu wyglądu za pomocą CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Nazwa">
+<!ENTITY feedURL.label "Lokalizacja">
+<!ENTITY optionsGroupbox.caption "Ustawienia kanału">
+<!ENTITY checkUpdatesPerFeedBefore.label "Sprawdzaj kanał co">
+<!ENTITY checkUpdatesPerFeed.accesskey "S">
+<!ENTITY expireEntriesPerFeedBefore.label "Usuń pobrane wiadomości po">
+<!ENTITY expireEntriesPerFeed.accesskey "U">
+<!ENTITY expireEntriesPerFeedAfter.label "dniach">
+<!ENTITY updatedEntries.label "Nie oznaczaj zmienionych wiadomości jako nieprzeczytanych">
+<!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "« Poprzedni">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Następny »">
+<!ENTITY nextFeed.accesskey "N">

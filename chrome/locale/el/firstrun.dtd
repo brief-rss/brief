@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Σας ευχαριστούμε που εγκαταστήσατε το Digest">
+<!ENTITY subscribingStep1.description "Κάντε κλικ στο εικονίδιο της εργαλειοθήκης πλοήγησης για προεπισκόπηση της εγγραφής.">
+<!ENTITY subscribingStep1firefox4.description "Ανοίξτε το μενού «<strong>Σελιδοδείκτες</strong>» και επιλέξτε «<strong>Συνδρομή σε αυτή τη σελίδα</strong>».">
+<!ENTITY subscribingStep2.description "Επιλέξτε τους <strong>δυναμικούς σελιδοδείκτες</strong> και κάντε κλικ στο <strong>εγγραφή τώρα</strong>.">
+<!ENTITY subscribingStep3.description "Επιλέξτε τον κατάλογο <strong>Αρχεία ροής με συνδρομή</strong> του μενού σελιδοδεικτών.">
+<!ENTITY getStartedButton.label "Ξεκινήστε!">

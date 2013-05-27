@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Hledat">
+<!ENTITY allItemsFolder.label "Všechny položky">
+<!ENTITY unreadFolder.label "Nepřečtené">
+<!ENTITY starredFolder.label "Záložky">
+<!ENTITY trashFolder.label "Koš">
+<!ENTITY headlinesCheckbox.tooltip "Použít zobrazení záhlaví (F)">
+
+<!-- Button tooltips -->
+<!ENTITY filterUnread.tooltip "Zobrazit pouze nepřečtené položky (D)">
+<!ENTITY filterStarred.tooltip "Zobrazit pouze záložky (S)">
+<!ENTITY updateButton.tooltip "Zkontrolovat všechny kanály pro novinky">
+<!ENTITY stopUpdatingButton.tooltip "Zastavit kontrolu kanálů pro novinky">
+<!ENTITY showOptions.tooltip "Otevřít možnosti rozšíření Digest">
+<!ENTITY sidebarSplitter.tooltip "Dvojím klepnutím skryjete postranní lištu">
+<!ENTITY revealSidebar.tooltip "Znovu zobrazit postranní lištu">
+<!ENTITY markViewRead.tooltip "Označit všechny položky jako přečtené (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Označit kanál jako přečtený">
+<!ENTITY ctxMarkFeedUnread.label "Označit kanál jako nepřečtený">
+<!ENTITY ctxMarkFolderRead.label "Označit složku jako přečtenou">
+<!ENTITY ctxMarkTagRead.label "Označit položky se štítkem jako přečtené">
+<!ENTITY ctxUpdateFeed.label "Aktualizovat kanál">
+<!ENTITY ctxUpdateFolder.label "Aktualizovat složku">
+<!ENTITY ctxOpenWebsite.label "Otevřít webovou stránku">
+<!ENTITY ctxDeleteFeed.label "Smazat kanál">
+<!ENTITY ctxDeleteFolder.label "Smazat složku">
+<!ENTITY ctxDeleteTag.label "Smazat štítek">
+<!ENTITY ctxEmptyFeed.label "Vyprázdnit kanál">
+<!ENTITY ctxEmptyFolder.label "Vyprázdnit složku">
+<!ENTITY ctxRestoreTrashed.label "Obnovit všechny položky">
+<!ENTITY ctxEmptyTrash.label "Vysypat Koš">
+<!ENTITY ctxFeedProperties.label "Vlastnosti">
+<!ENTITY ctxUpdateFeeds.label "Aktualizovat kanály teď">
+<!ENTITY ctxMarkFeedsAsRead.label "Označit všechny kanály jako přečtené">
+<!ENTITY showUnreadCounter.label "Zobrazit počet nepřečtených položek">
+<!ENTITY ctxShowOptions.label "Možnosti">

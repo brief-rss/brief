@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - tastaturgenveje">
+<!ENTITY or "eller">
+
+<!ENTITY navigation.header "Navigation">
+<!ENTITY space.key "Mellemrum">
+<!ENTITY shiftSpace.key "Shift + Mellemrum">
+<!ENTITY nextItem "Gå til næste emne">
+<!ENTITY previousItem "Gå til forrige emne">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Åbn nuværende emne">
+<!ENTITY showItem "Vis/skjul nuværende emne (i overskrift-visning)">
+
+<!ENTITY entries.header "Emner">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Aktiver fremhævning af nuværende emne">
+<!ENTITY markCurrentItemRead "Marker det nuværende emne som læst/ulæst">
+<!ENTITY markVisibleRead "Marker alle emner på skærmen som læste">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Marker alle emner som læste">
+<!ENTITY starItem "Bogmærk den nuværende emne">
+<!ENTITY moveToTrash "Flyt nuværende emne til skraldespand">
+
+<!ENTITY view.header "Vis">
+<!ENTITY showAll "Vis alle emner">
+<!ENTITY showStarred "Vis bogmærkede emner">
+<!ENTITY showUnread "Vis ulæste emner">
+<!ENTITY headlinesView "Slå overskrift-visning til/fra">
+
+<!ENTITY general.header "Generelt">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Åbn Digest">
+<!ENTITY focusSearchbar "Fokuser søgelinje">
+<!ENTITY displayShortcuts "Vis liste over genvejstaster">

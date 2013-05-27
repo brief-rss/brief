@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Digest オプション">
+<!ENTITY mainPane.label "メイン">
+<!ENTITY updateGroup.caption "更新中">
+<!ENTITY checkForUpdatesBefore.label "フィード更新の確認間隔">
+<!ENTITY checkForUpdates.accesskey "C">
+<!ENTITY updateIntervalMinutes.label "分">
+<!ENTITY updateIntervalHours.label "時間">
+<!ENTITY updateIntervalDays.label "日">
+<!ENTITY checkForUpdatesAfter.label "分毎に確認する">
+<!ENTITY showNotification.label "新着の項目が見つかったら通知を表示する">
+<!ENTITY showNotification.accesskey "S">
+<!ENTITY behaviorGroup.caption "動作">
+<!ENTITY openInNewTab.label "Digest を新しいタブで開く">
+<!ENTITY openInNewTab.accesskey "O">
+<!ENTITY storingGroup.caption "保管">
+<!ENTITY expirationBefore.label "ダウンロードした項目を">
+<!ENTITY expirationAfter.label "日後に削除する">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "ブックマークした項目は保持されます">
+<!ENTITY storedEntriesBefore.label "フィードごとに最新">
+<!ENTITY storedEntriesAfter.label "項目以上は保管しない">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
+<!ENTITY clearAllEntriesButton.label "すべての項目を消去する...">
+<!ENTITY clearAllEntriesButton.accesskey "a">
+<!ENTITY feedsPane.label "フィード">
+<!ENTITY folderTree.label "ライブブックマークを含むフォルダ:">
+<!ENTITY importOPML.label "取り込む...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "書き出す...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "表示">
+<!ENTITY showStatusbarIcon.label "ステータスバーアイコンを表示する">
+<!ENTITY showStatusbarIcon.accesskey "h">
+<!ENTITY showUnreadCounter.label "未読数を Digest のアイコンに表示する">
+<!ENTITY showUnreadCounter.accesskey "w">
+<!ENTITY sortUnreadViewOldestFirst.label "未読表示で古い項目から先に並び替える">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "項目を見たら既読にする">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "外観">
+<!ENTITY shortcutsPane.label "ショートカット">
+<!ENTITY editStyleDescription.label "フィードの外観をカスタマイズする">
+<!ENTITY editStyleButton.label "カスタマイズ">
+<!ENTITY editStyleButton.accesskey "C">
+<!ENTITY styleEditor.title "カスタムスタイルの編集">
+<!ENTITY seeCustomizationTips.label "CSS 用いた外観のカスタマイズについて確認する">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "名前">
+<!ENTITY feedURL.label "場所">
+<!ENTITY optionsGroupbox.caption "フィード設定">
+<!ENTITY checkUpdatesPerFeedBefore.label "更新の確認間隔">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "ダウンロードした項目を">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "日後に削除する">
+<!ENTITY updatedEntries.label "更新されている項目を未読にしない">
+<!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; 前">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "次 &gt;">
+<!ENTITY nextFeed.accesskey "N">

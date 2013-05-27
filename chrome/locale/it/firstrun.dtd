@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Grazie per aver installato Digest">
+<!ENTITY subscribingStep1.description "Fare clic sull&apos;icona nella barra degli indirizzi per visualizzare l&apos;anteprima del feed ed effettuare la sottoscrizione">
+<!ENTITY subscribingStep1firefox4.description "Aprire il menu principale <strong>Segnalibri </strong> e selezionare <strong>Abbonati a questa pagina…</strong>">
+<!ENTITY subscribingStep2.description "Selezionare <strong>Segnalibri Live </strong> e fare clic sul pulsante <strong>Abbonati adesso</strong>">
+<!ENTITY subscribingStep3.description "Selezionare la cartella <strong>Sottoscrizioni di feed</strong> nel menu principale Segnalibri">
+<!ENTITY getStartedButton.label "Avvia Digest">

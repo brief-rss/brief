@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Köszönjük, hogy telepítette a Digest kiterjesztést">
+<!ENTITY subscribingStep1.description "A Hely sávon található ikonra kattintva megtekintheti a hírforrás előnézetét.">
+<!ENTITY subscribingStep1firefox4.description "A <strong>Könyvjelzők</strong> menü megnyitása és a <strong>Feliratkozás erre az oldalra</strong> kiválasztása.">
+<!ENTITY subscribingStep2.description "Válassza ki a <strong>Élő könyvjelzők</strong> lehetőséget majd kattintson az <strong>Előfizetés</strong> menüre.">
+<!ENTITY subscribingStep3.description "Válassza ki a <strong>Subscribed Feeds</strong> mappát a Könyvjelzők menüben.">
+<!ENTITY getStartedButton.label "Használat megkezdése">

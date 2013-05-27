@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Keresés">
+<!ENTITY allItemsFolder.label "Összes elem">
+<!ENTITY unreadFolder.label "Olvasatlan">
+<!ENTITY starredFolder.label "Könyvjelzők">
+<!ENTITY trashFolder.label "Törölt bejegyzések">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Fejléc nézet használata (F)">
+<!ENTITY filterUnread.tooltip "Csak olvasatlan elemek (D)">
+<!ENTITY filterStarred.tooltip "Csak a Könyvjelzők (S)">
+<!ENTITY updateButton.tooltip "Hírforrások frissítése">
+<!ENTITY stopUpdatingButton.tooltip "Hírforrás felfüggesztése">
+<!ENTITY showOptions.tooltip "Digest – Beállítások">
+<!ENTITY sidebarSplitter.tooltip "Duplakattintás az oldalsáv elrejtéséhez">
+<!ENTITY revealSidebar.tooltip "Oldalsáv megjelenítése">
+<!ENTITY markViewRead.tooltip "Mindegyik elem megjelölése olvasottként (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Hírforrást olvasottnak jelöl">
+<!ENTITY ctxMarkFeedUnread.label "Megjelölés olvasatlanként">
+<!ENTITY ctxMarkFolderRead.label "Mappát olvasottnak jelöl">
+<!ENTITY ctxMarkTagRead.label "Kijelölt elemek megjelölése olvasottként">
+<!ENTITY ctxUpdateFeed.label "Hírforrás frissítése">
+<!ENTITY ctxUpdateFolder.label "Frissítési mappa">
+<!ENTITY ctxOpenWebsite.label "Weblap megnyitása">
+<!ENTITY ctxDeleteFeed.label "Hírforrás törlése">
+<!ENTITY ctxDeleteFolder.label "Mappa törlése">
+<!ENTITY ctxDeleteTag.label "Címke törlése">
+<!ENTITY ctxEmptyFeed.label "Hírforrás ürítése">
+<!ENTITY ctxEmptyFolder.label "Mappa ürítése">
+<!ENTITY ctxRestoreTrashed.label "Törölt bejegyzések visszaállítása">
+<!ENTITY ctxEmptyTrash.label "Törölt bejegyzések ürítése">
+<!ENTITY ctxFeedProperties.label "Tulajdonságok">
+<!ENTITY ctxUpdateFeeds.label "Hírforrások frissítése azonnal">
+<!ENTITY ctxMarkFeedsAsRead.label "Hírforrások jelölése olvasottként">
+<!ENTITY showUnreadCounter.label "Olvasatlan elemek számának megjelenítése">
+<!ENTITY ctxShowOptions.label "Beállítások">

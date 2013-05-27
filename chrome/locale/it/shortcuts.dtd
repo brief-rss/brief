@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Scorciatoie da tastiera di Digest">
+<!ENTITY or "o">
+
+<!ENTITY navigation.header "Navigazione">
+<!ENTITY space.key "Spazio">
+<!ENTITY shiftSpace.key "Maiusc + spazio">
+<!ENTITY nextItem "Mostra l&apos;elemento successivo">
+<!ENTITY previousItem "Mostra l&apos;elemento precedente">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Invio">
+<!ENTITY openEntry "Apre l&apos;elemento selezionato">
+<!ENTITY showItem "Mostra/nasconde l&apos;anteprima dell&apos;elemento selezionato">
+
+<!ENTITY entries.header "Elementi">
+<!ENTITY tab.key "Tab ">
+<!ENTITY enableEntryHightlight "Attiva l&apos;evidenziatura dell&apos;elemento attuale">
+<!ENTITY markCurrentItemRead "Segna l&apos;elemento selezionato come letto/non letto">
+<!ENTITY markVisibleRead "Segna gli elementi visibili sullo schermo come letti">
+<!ENTITY altN.key "Alt + N ">
+<!ENTITY markAllRead "Segna tutti gli elementi come letti">
+<!ENTITY starItem "Associa l&apos;elemento selezionato ai segnalibri">
+<!ENTITY moveToTrash "Sposta l&apos;elemento selezionato nel cestino">
+
+<!ENTITY view.header "Visualizzazione">
+<!ENTITY showAll "Mostra tutti gli elementi">
+<!ENTITY showStarred "Mostra gli elementi associati ai segnalibri">
+<!ENTITY showUnread "Mostra gli elementi non letti">
+<!ENTITY headlinesView "Mostra/nasconde le anteprime di tutti gli elementi">
+
+<!ENTITY general.header "Generali">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D ">
+<!ENTITY cmdAltD.key "Cmd + Alt + D ">
+<!ENTITY openBrief "Apre Digest">
+<!ENTITY focusSearchbar "Seleziona la barra di ricerca">
+<!ENTITY displayShortcuts "Mostra la lista delle scorciatoie da tastiera">

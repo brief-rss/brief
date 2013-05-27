@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Digest indstillinger">
+<!ENTITY mainPane.label "Hoved">
+<!ENTITY updateGroup.caption "Opdatering">
+<!ENTITY checkForUpdatesBefore.label "Tjek feeds for opdateringer hver">
+<!ENTITY checkForUpdates.accesskey "T">
+<!ENTITY updateIntervalMinutes.label "minut">
+<!ENTITY updateIntervalHours.label "time">
+<!ENTITY updateIntervalDays.label "dag">
+<!ENTITY checkForUpdatesAfter.label "minut">
+<!ENTITY showNotification.label "Vis notifikation når nye emner findes">
+<!ENTITY showNotification.accesskey "V">
+<!ENTITY behaviorGroup.caption "Opførsel">
+<!ENTITY openInNewTab.label "Åbn Digest i et nyt faneblad">
+<!ENTITY openInNewTab.accesskey "Å">
+<!ENTITY storingGroup.caption "Opbevaring">
+<!ENTITY expirationBefore.label "Fjern hentede emner efter">
+<!ENTITY expirationAfter.label "dage">
+<!ENTITY expirationCheckbox.accesskey "j">
+<!ENTITY starredItemsKept.tooltip "Bogmærkede emner bevares">
+<!ENTITY storedEntriesBefore.label "Gem ikke flere end de">
+<!ENTITY storedEntriesAfter.label "seneste indlæg af hvert feed">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
+<!ENTITY clearAllEntriesButton.label "Ryd alle emner…">
+<!ENTITY clearAllEntriesButton.accesskey "a">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY folderTree.label "Mappe der indeholder mine Live bogmærker:">
+<!ENTITY importOPML.label "Importer…">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Eksporter…">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Vis">
+<!ENTITY showStatusbarIcon.label "Vis statuslinje-ikon">
+<!ENTITY showStatusbarIcon.accesskey "u">
+<!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner ved siden af Digest-ikonet">
+<!ENTITY showUnreadCounter.accesskey "V">
+<!ENTITY sortUnreadViewOldestFirst.label "Sorter ældste emner først i ulæste-visning">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "Marker emner som læste efter jeg har set dem">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "Udseende">
+<!ENTITY shortcutsPane.label "Genveje">
+<!ENTITY editStyleDescription.label "Tilpas udseendet for feeds">
+<!ENTITY editStyleButton.label "Tilpas">
+<!ENTITY editStyleButton.accesskey "p">
+<!ENTITY styleEditor.title "Rediger brugertilpasset stilark">
+<!ENTITY seeCustomizationTips.label "Lær mere om at tilpasse udseendet med CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Navn">
+<!ENTITY feedURL.label "Placering">
+<!ENTITY optionsGroupbox.caption "Feed-indstillinger">
+<!ENTITY checkUpdatesPerFeedBefore.label "Tjek for opdateringer hver">
+<!ENTITY checkUpdatesPerFeed.accesskey "T">
+<!ENTITY expireEntriesPerFeedBefore.label "Fjern hentede emner efter">
+<!ENTITY expireEntriesPerFeed.accesskey "r">
+<!ENTITY expireEntriesPerFeedAfter.label "dage">
+<!ENTITY updatedEntries.label "Marker ikke ændrede emner som ulæste">
+<!ENTITY updatedEntries.accesskey "M">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Foregående">
+<!ENTITY previousFeed.accesskey "F">
+<!ENTITY nextFeed.label "Næste &gt;">
+<!ENTITY nextFeed.accesskey "N">

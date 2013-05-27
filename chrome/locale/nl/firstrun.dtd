@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Bedankt voor het installeren van Digest">
+<!ENTITY subscribingStep1.description "Klik op het pictogram in de adresbalk om een voorbeeld van de feed te krijgen.">
+<!ENTITY subscribingStep1firefox4.description "Open het menu <strong>Bladwijzers</strong> en selecteer <strong>Abonneren op deze pagina</strong>.">
+<!ENTITY subscribingStep2.description "Selecteer <strong>Livebladwijzers</strong> en klik op <strong>Nu abonneren</strong>.">
+<!ENTITY subscribingStep3.description "Kies de map <strong>Feedabonnementen</strong> in het menu Bladwijzers.">
+<!ENTITY getStartedButton.label "Van start">

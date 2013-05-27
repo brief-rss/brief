@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Ďakujeme za nainštalovanie Digest">
+<!ENTITY subscribingStep1.description "Kliknite na ikonku v paneli na zobrazenie kanála.">
+<!ENTITY subscribingStep1firefox4.description "Otvoriť ponuku <strong>Záložky</strong> a vybrať <strong>Prihlásiť sa k odberu</strong>.">
+<!ENTITY subscribingStep2.description "Vyberte <strong>Aktívne záložky</strong> a kliknite na <strong>Odoberať</strong>.">
+<!ENTITY subscribingStep3.description "Vyberte priečinok <strong>Odoberané kanály</strong> v ponuke Záložky.">
+<!ENTITY getStartedButton.label "Začíname">

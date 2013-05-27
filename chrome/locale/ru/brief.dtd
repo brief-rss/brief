@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Поиск">
+<!ENTITY allItemsFolder.label "Все элементы">
+<!ENTITY unreadFolder.label "Непрочитанные">
+<!ENTITY starredFolder.label "Отмеченные записи">
+<!ENTITY trashFolder.label "Корзина">
+<!ENTITY headlinesCheckbox.tooltip "Режим просмотра заголовков">
+
+<!-- Button tooltips -->
+<!ENTITY filterUnread.tooltip "Показывать только непрочитанное (D)">
+<!ENTITY filterStarred.tooltip "Показывать только закладки (S)">
+<!ENTITY updateButton.tooltip "Проверить обновления для всех лент">
+<!ENTITY stopUpdatingButton.tooltip "Остановить проверку обновления">
+<!ENTITY showOptions.tooltip "Открыть настройки Digest">
+<!ENTITY sidebarSplitter.tooltip "Двойной клик для скрытия панели">
+<!ENTITY revealSidebar.tooltip "Показать панель">
+<!ENTITY markViewRead.tooltip "Отметить все записи прочитанными (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Отметить ленту как прочитанную">
+<!ENTITY ctxMarkFeedUnread.label "Отметить ленту как непрочитанную">
+<!ENTITY ctxMarkFolderRead.label "Отметить папку как прочитанную">
+<!ENTITY ctxMarkTagRead.label "Отметить закладки с метками как прочитанные">
+<!ENTITY ctxUpdateFeed.label "Обновить ленту">
+<!ENTITY ctxUpdateFolder.label "Обновить папку">
+<!ENTITY ctxOpenWebsite.label "Открыть веб-сайт">
+<!ENTITY ctxDeleteFeed.label "Удалить ленту">
+<!ENTITY ctxDeleteFolder.label "Удалить папку">
+<!ENTITY ctxDeleteTag.label "Удалить метку">
+<!ENTITY ctxEmptyFeed.label "Очистить ленту">
+<!ENTITY ctxEmptyFolder.label "Очистить папку">
+<!ENTITY ctxRestoreTrashed.label "Восстановить удалённые записи">
+<!ENTITY ctxEmptyTrash.label "Очистить корзину">
+<!ENTITY ctxFeedProperties.label "Свойства">
+<!ENTITY ctxUpdateFeeds.label "Обновить ленты новостей">
+<!ENTITY ctxMarkFeedsAsRead.label "Отметить все ленты как прочитанные">
+<!ENTITY showUnreadCounter.label "Показывать количество непрочитанного">
+<!ENTITY ctxShowOptions.label "Опции">

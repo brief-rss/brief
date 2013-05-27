@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Opțiunile Digest">
+<!ENTITY mainPane.label "General">
+<!ENTITY updateGroup.caption "Actualizare">
+<!ENTITY checkForUpdatesBefore.label "Verifică fluxurile pentru actualizări fiecare">
+<!ENTITY checkForUpdates.accesskey "V">
+<!ENTITY updateIntervalMinutes.label "minute">
+<!ENTITY updateIntervalHours.label "ore">
+<!ENTITY updateIntervalDays.label "zile">
+<!ENTITY checkForUpdatesAfter.label "minute">
+<!ENTITY showNotification.label "Arată o notificare cînd elemente noi sunt găsite">
+<!ENTITY showNotification.accesskey "A">
+<!ENTITY behaviorGroup.caption "Comportament">
+<!ENTITY openInNewTab.label "Deschide Digest în filă nouă">
+<!ENTITY openInNewTab.accesskey "B">
+<!ENTITY storingGroup.caption "Stocare">
+<!ENTITY expirationBefore.label "Elimină elementele descărcare după">
+<!ENTITY expirationAfter.label "zile">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "Elementele marcate vor fi păstrate">
+<!ENTITY storedEntriesBefore.label "Păstrează nu mai mult ca">
+<!ENTITY storedEntriesAfter.label "ultimele elemente ale fiecărui flux">
+<!ENTITY storedEntriesCheckbox.accesskey "N">
+<!ENTITY clearAllEntriesButton.label "Curăță toate elementele...">
+<!ENTITY clearAllEntriesButton.accesskey "A">
+<!ENTITY feedsPane.label "Fluxuri">
+<!ENTITY folderTree.label "Mapa care conține Live Bookmarks:">
+<!ENTITY importOPML.label "Importă...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportă...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Aspect">
+<!ENTITY showStatusbarIcon.label "Arată iconița în bara de stare">
+<!ENTITY showStatusbarIcon.accesskey "T">
+<!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite alături de iconița Digest">
+<!ENTITY showUnreadCounter.accesskey "W">
+<!ENTITY sortUnreadViewOldestFirst.label "Sortează cele mai vechi elemente ca primele în vederea elementelor necitite">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "O">
+<!ENTITY autoMarkRead.label "Automat marchează elementele ca citite după ce le văd">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "Aspect">
+<!ENTITY shortcutsPane.label "Scurtături">
+<!ENTITY editStyleDescription.label "Personalizează aspectul fluxurilor">
+<!ENTITY editStyleButton.label "Personalizare">
+<!ENTITY editStyleButton.accesskey "N">
+<!ENTITY styleEditor.title "Editează stilul personalizat">
+<!ENTITY seeCustomizationTips.label "Află despre personalizarea aspectului prin CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Nume">
+<!ENTITY feedURL.label "Locație">
+<!ENTITY optionsGroupbox.caption "Setările fluxului">
+<!ENTITY checkUpdatesPerFeedBefore.label "Verifică pentru actualizări fiecare">
+<!ENTITY checkUpdatesPerFeed.accesskey "V">
+<!ENTITY expireEntriesPerFeedBefore.label "Elimină elementele descărcare după">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "zile">
+<!ENTITY updatedEntries.label "Nu marchează elementele înapoi ca necitite">
+<!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Precedent">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Următor &gt;">
+<!ENTITY nextFeed.accesskey "U">

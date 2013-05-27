@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Rövid hírforrások - beállítások">
+<!ENTITY mainPane.label "Általános">
+<!ENTITY updateGroup.caption "Frissítés">
+<!ENTITY checkForUpdatesBefore.label "Hírforrások frissítése minden">
+<!ENTITY checkForUpdates.accesskey "H">
+<!ENTITY updateIntervalMinutes.label "perc">
+<!ENTITY updateIntervalHours.label "óra">
+<!ENTITY updateIntervalDays.label "nap">
+<!ENTITY checkForUpdatesAfter.label "percben">
+<!ENTITY showNotification.label "Értesítés új elemek találatakor">
+<!ENTITY showNotification.accesskey "t">
+<!ENTITY behaviorGroup.caption "Viselkedés">
+<!ENTITY openInNewTab.label "Digest megnyitása új lapon">
+<!ENTITY openInNewTab.accesskey "l">
+<!ENTITY storingGroup.caption "Tárolás">
+<!ENTITY expirationBefore.label "Letöltött bejegyzések eltávolítása">
+<!ENTITY expirationAfter.label "nap elteltével">
+<!ENTITY expirationCheckbox.accesskey "L">
+<!ENTITY starredItemsKept.tooltip "Hozzáadott könyvjelzők eltárolása">
+<!ENTITY storedEntriesBefore.label "Ne tároljon többet mint">
+<!ENTITY storedEntriesAfter.label "bejegyzés hírforrásonként">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
+<!ENTITY clearAllEntriesButton.label "Minden bejegyzés törlése...">
+<!ENTITY clearAllEntriesButton.accesskey "t">
+<!ENTITY feedsPane.label "Hírforrások">
+<!ENTITY folderTree.label "Saját élő könyvjelzőket tartalmazó mappa:">
+<!ENTITY importOPML.label "Importálás...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportálás...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Megjelenítés">
+<!ENTITY showStatusbarIcon.label "Állapotsor ikon megjelenítése">
+<!ENTITY showStatusbarIcon.accesskey "s">
+<!ENTITY showUnreadCounter.label "Olvasatlan elemek számának megjelenítése a Digest ikonja után">
+<!ENTITY showUnreadCounter.accesskey "u">
+<!ENTITY sortUnreadViewOldestFirst.label "Az olvasatlan nézetben a régebbi elemek megjelenítése először">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "Elem megtekintése után annak megjelölése olvasottként">
+<!ENTITY autoMarkRead.accesskey "m">
+<!ENTITY customizeGroup.caption "Megjelenés">
+<!ENTITY shortcutsPane.label "Gyorsbillentyűk">
+<!ENTITY editStyleDescription.label "Hírforrások megjelenésének testreszabása">
+<!ENTITY editStyleButton.label "Testreszabás">
+<!ENTITY editStyleButton.accesskey "T">
+<!ENTITY styleEditor.title "Felhasználói stílus szerkesztése">
+<!ENTITY seeCustomizationTips.label "Megjelenés testreszabása CSS segítségével">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Név">
+<!ENTITY feedURL.label "Hely">
+<!ENTITY optionsGroupbox.caption "Hírforrás beállítások">
+<!ENTITY checkUpdatesPerFeedBefore.label "Hírforrások frissítése minden">
+<!ENTITY checkUpdatesPerFeed.accesskey "f">
+<!ENTITY expireEntriesPerFeedBefore.label "Letöltött bejegyzések eltávolítása">
+<!ENTITY expireEntriesPerFeed.accesskey "e">
+<!ENTITY expireEntriesPerFeedAfter.label "nap elteltével">
+<!ENTITY updatedEntries.label "Ne jelölje olvasatlannak a módosított elemeket">
+<!ENTITY updatedEntries.accesskey "N">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Előző">
+<!ENTITY previousFeed.accesskey "E">
+<!ENTITY nextFeed.label "Következő &gt;">
+<!ENTITY nextFeed.accesskey "K">

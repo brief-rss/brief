@@ -1,0 +1,35 @@
+<!ENTITY searchBox.label "Cerca">
+<!ENTITY allItemsFolder.label "Tutti gli elementi">
+<!ENTITY unreadFolder.label "Elementi non letti">
+<!ENTITY starredFolder.label "Elementi nei segnalibri">
+<!ENTITY trashFolder.label "Cestino">
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Mostra/nascondi le anteprime di tutti gli elementi">
+<!ENTITY filterUnread.tooltip "Mostra gli elementi non letti">
+<!ENTITY filterStarred.tooltip "Mostra gli elementi associati ai segnalibri">
+<!ENTITY updateButton.tooltip "Controlla gli aggiornamenti di tutti i feed">
+<!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
+<!ENTITY showOptions.tooltip "Impostazioni di Digest…">
+<!ENTITY sidebarSplitter.tooltip "Fare doppio clic per nascondere la barra laterale">
+<!ENTITY revealSidebar.tooltip "Mostra la barra laterale">
+<!ENTITY markViewRead.tooltip "Segna tutti gli elementi come letti (Alt + N)">
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Segna il feed come letto">
+<!ENTITY ctxMarkFeedUnread.label "Segna il feed come non letto">
+<!ENTITY ctxMarkFolderRead.label "Segna la cartella come letta">
+<!ENTITY ctxMarkTagRead.label "Segna gli elementi con etichetta come letti">
+<!ENTITY ctxUpdateFeed.label "Aggiorna il feed">
+<!ENTITY ctxUpdateFolder.label "Aggiorna la cartella">
+<!ENTITY ctxOpenWebsite.label "Apri il sito web">
+<!ENTITY ctxDeleteFeed.label "Elimina il feed">
+<!ENTITY ctxDeleteFolder.label "Elimina la cartella">
+<!ENTITY ctxDeleteTag.label "Elimina l&apos;etichetta">
+<!ENTITY ctxEmptyFeed.label "Svuota il feed">
+<!ENTITY ctxEmptyFolder.label "Svuota la cartella">
+<!ENTITY ctxRestoreTrashed.label "Ripristina gli elementi eliminati">
+<!ENTITY ctxEmptyTrash.label "Svuota il cestino">
+<!ENTITY ctxFeedProperties.label "Proprietà">
+<!ENTITY ctxUpdateFeeds.label "Aggiorna i feed ora">
+<!ENTITY ctxMarkFeedsAsRead.label "Segna tutti i feed come letti">
+<!ENTITY showUnreadCounter.label "Mostra il numero degli elementi non letti">
+<!ENTITY ctxShowOptions.label "Impostazioni di Digest…">

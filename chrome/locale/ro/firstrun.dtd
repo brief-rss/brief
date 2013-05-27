@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Vă mulțumim pentru intalarea extensiei Digest">
+<!ENTITY subscribingStep1.description "Clic pe iconița din bara de navigare pentru a vizualiza fluxurile.">
+<!ENTITY subscribingStep1firefox4.description "Deschideți meniul <strong>Marcaje</strong> și selectați <strong>Abonare la această pagină</strong>.">
+<!ENTITY subscribingStep2.description "Selectați <strong>Live Bookmarks</strong> și faceți clic pe <strong>Abonarea acum</strong>.">
+<!ENTITY subscribingStep3.description "Alegeți mapa <strong>Fluxuri subscrise</strong> în meniul marcajelor.">
+<!ENTITY getStartedButton.label "Începeți">

@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Hľadať">
+<!ENTITY allItemsFolder.label "Všetky položky">
+<!ENTITY unreadFolder.label "Neprečítané">
+<!ENTITY starredFolder.label "Záložky">
+<!ENTITY trashFolder.label "Kôš">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Použiť zobrazenie titulkov (F)">
+<!ENTITY filterUnread.tooltip "Zobraziť len neprečítané položky (D)">
+<!ENTITY filterStarred.tooltip "Zobraziť len záložky (S)">
+<!ENTITY updateButton.tooltip "Skontrolovať aktualizáciu všetkých kanálov">
+<!ENTITY stopUpdatingButton.tooltip "Zastaviť kontrolu aktualizácie">
+<!ENTITY showOptions.tooltip "Otvoriť Možnosti Digest">
+<!ENTITY sidebarSplitter.tooltip "Dvojkliknutím skryť bočný panel">
+<!ENTITY revealSidebar.tooltip "Ukázať bočný panel">
+<!ENTITY markViewRead.tooltip "Označiť všetko ako prečítané (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Označiť kanál ako prečítaný">
+<!ENTITY ctxMarkFeedUnread.label "Označiť kanál ako neprečítaný">
+<!ENTITY ctxMarkFolderRead.label "Označiť priečinok ako prečítaný">
+<!ENTITY ctxMarkTagRead.label "Označiť vybraté články ako prečítané">
+<!ENTITY ctxUpdateFeed.label "Aktualizovať kanál">
+<!ENTITY ctxUpdateFolder.label "Priečinok aktualizácie">
+<!ENTITY ctxOpenWebsite.label "Otvoriť webovú stránku">
+<!ENTITY ctxDeleteFeed.label "Zmazať kanál">
+<!ENTITY ctxDeleteFolder.label "Zmazať priečinok">
+<!ENTITY ctxDeleteTag.label "Zmazať označenie">
+<!ENTITY ctxEmptyFeed.label "Prázdny kanál">
+<!ENTITY ctxEmptyFolder.label "Prázdny priečinok">
+<!ENTITY ctxRestoreTrashed.label "Obnoviť odstránené položky">
+<!ENTITY ctxEmptyTrash.label "Vyprázdniť Kôš">
+<!ENTITY ctxFeedProperties.label "Vlastnosti">
+<!ENTITY ctxUpdateFeeds.label "Aktualizovať kanály teraz">
+<!ENTITY ctxMarkFeedsAsRead.label "Označiť všetky kanály ako prečítané">
+<!ENTITY showUnreadCounter.label "Zobraziť počet neprečítaných položiek">
+<!ENTITY ctxShowOptions.label "Možnosti">

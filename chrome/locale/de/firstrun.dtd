@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Danke für die Installation von Digest">
+<!ENTITY subscribingStep1.description "Klicken Sie auf das Symbol in der Adressleiste, um eine Vorschau des Feeds anzuzeigen.">
+<!ENTITY subscribingStep1firefox4.description "Öffnen Sie das Menü <strong>Lesezeichen</strong> öffnen und wählen den Eintrag <strong>Diese Seite abonnieren</strong> aus.">
+<!ENTITY subscribingStep2.description "<strong>Dynamische Lesezeichen</strong> auswählen und auf <strong>Jetzt abonnieren</strong> klicken.">
+<!ENTITY subscribingStep3.description "Den Ordner <strong>Abonnierte Feeds</strong> im Lesezeichenmenü auswählen.">
+<!ENTITY getStartedButton.label "Erste Schritte">

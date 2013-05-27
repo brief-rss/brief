@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Opções do Digest">
+<!ENTITY mainPane.label "Principal">
+<!ENTITY updateGroup.caption "Atualização">
+<!ENTITY checkForUpdatesBefore.label "Verificar se há atualizações a cada">
+<!ENTITY checkForUpdates.accesskey "V">
+<!ENTITY updateIntervalMinutes.label "minutos">
+<!ENTITY updateIntervalHours.label "horas">
+<!ENTITY updateIntervalDays.label "dias">
+<!ENTITY checkForUpdatesAfter.label "minutos">
+<!ENTITY showNotification.label "Mostrar uma notificação quando novos itens forem encontrados">
+<!ENTITY showNotification.accesskey "S">
+<!ENTITY behaviorGroup.caption "Comportamento">
+<!ENTITY openInNewTab.label "Abrir Digest em uma nova aba">
+<!ENTITY openInNewTab.accesskey "O">
+<!ENTITY storingGroup.caption "Armazenamento">
+<!ENTITY expirationBefore.label "Remover itens recebidos após">
+<!ENTITY expirationAfter.label "dias">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "Itens favoritos serão mantidos">
+<!ENTITY storedEntriesBefore.label "Armazenar apenas os">
+<!ENTITY storedEntriesAfter.label "itens mais recentes por feed">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
+<!ENTITY clearAllEntriesButton.label "Limpar todos os itens...">
+<!ENTITY clearAllEntriesButton.accesskey "L">
+<!ENTITY feedsPane.label "Feeds">
+<!ENTITY folderTree.label "Pasta que contém meus favoritos RSS:">
+<!ENTITY importOPML.label "Importar...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportar...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Exibir">
+<!ENTITY showStatusbarIcon.label "Mostrar ícone na barra de status">
+<!ENTITY showStatusbarIcon.accesskey "">
+<!ENTITY showUnreadCounter.label "Mostrar o número de itens não lidos ao lado do ícone do Digest">
+<!ENTITY showUnreadCounter.accesskey "w">
+<!ENTITY sortUnreadViewOldestFirst.label "Classificar itens mais antigos primeiro na exibição de itens não lidos">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "Marcar itens como lidos depois que eu vê-los">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "Aparência">
+<!ENTITY shortcutsPane.label "Atalhos">
+<!ENTITY editStyleDescription.label "Personalizar a aparência dos feeds">
+<!ENTITY editStyleButton.label "Personalizar">
+<!ENTITY editStyleButton.accesskey "">
+<!ENTITY styleEditor.title "Editar estilo personalizado">
+<!ENTITY seeCustomizationTips.label "Saiba mais sobre como personalizar a aparência com CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Nome">
+<!ENTITY feedURL.label "Endereço">
+<!ENTITY optionsGroupbox.caption "Configurações do feed">
+<!ENTITY checkUpdatesPerFeedBefore.label "Verificar se há atualizações a cada">
+<!ENTITY checkUpdatesPerFeed.accesskey "V">
+<!ENTITY expireEntriesPerFeedBefore.label "Remover itens recebidos após">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "dias">
+<!ENTITY updatedEntries.label "Não marcar itens alterados como não lidos">
+<!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Anterior">
+<!ENTITY previousFeed.accesskey "A">
+<!ENTITY nextFeed.label "Próximo &gt;">
+<!ENTITY nextFeed.accesskey "P">

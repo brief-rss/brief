@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "搜索">
+<!ENTITY allItemsFolder.label "全部项目">
+<!ENTITY unreadFolder.label "未读项目">
+<!ENTITY starredFolder.label "书签">
+<!ENTITY trashFolder.label "垃圾箱">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "只显示标题 (F)">
+<!ENTITY filterUnread.tooltip "只查看未读项目 (D)">
+<!ENTITY filterStarred.tooltip "只查看书签 (S)">
+<!ENTITY updateButton.tooltip "更新订阅">
+<!ENTITY stopUpdatingButton.tooltip "停止更新订阅">
+<!ENTITY showOptions.tooltip "打开 Digest 选项">
+<!ENTITY sidebarSplitter.tooltip "双击隐藏侧栏">
+<!ENTITY revealSidebar.tooltip "打开侧栏">
+<!ENTITY markViewRead.tooltip "标记所有项目为已读(Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "标记订阅为已读">
+<!ENTITY ctxMarkFeedUnread.label "标记定个月为未读">
+<!ENTITY ctxMarkFolderRead.label "标记文件夹为已读">
+<!ENTITY ctxMarkTagRead.label "标记加标签的项目为已读">
+<!ENTITY ctxUpdateFeed.label "更新订阅">
+<!ENTITY ctxUpdateFolder.label "更新文件夹">
+<!ENTITY ctxOpenWebsite.label "打开网页">
+<!ENTITY ctxDeleteFeed.label "删除订阅">
+<!ENTITY ctxDeleteFolder.label "删除文件夹">
+<!ENTITY ctxDeleteTag.label "删除标签">
+<!ENTITY ctxEmptyFeed.label "清空订阅">
+<!ENTITY ctxEmptyFolder.label "清空文件夹">
+<!ENTITY ctxRestoreTrashed.label "还原垃圾箱的项目">
+<!ENTITY ctxEmptyTrash.label "清空垃圾箱">
+<!ENTITY ctxFeedProperties.label "属性">
+<!ENTITY ctxUpdateFeeds.label "立即更新订阅">
+<!ENTITY ctxMarkFeedsAsRead.label "标记所有订阅为已读">
+<!ENTITY showUnreadCounter.label "显示未读项目数目">
+<!ENTITY ctxShowOptions.label "选项">

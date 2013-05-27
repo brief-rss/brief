@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Pesquisar">
+<!ENTITY allItemsFolder.label "Todos os itens">
+<!ENTITY unreadFolder.label "Não lidos">
+<!ENTITY starredFolder.label "Favoritos">
+<!ENTITY trashFolder.label "Lixeira">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Visualizar títulos (F)">
+<!ENTITY filterUnread.tooltip "Visualizar apenas itens não lidos (D)">
+<!ENTITY filterStarred.tooltip "Visualizar apenas favoritos (S)">
+<!ENTITY updateButton.tooltip "Verificar se há atualizações para os feeds">
+<!ENTITY stopUpdatingButton.tooltip "Parar de verificar se há atualizações para os feeds">
+<!ENTITY showOptions.tooltip "Abrir opções do Digest">
+<!ENTITY sidebarSplitter.tooltip "Clique duas vezes para ocultar a barra lateral">
+<!ENTITY revealSidebar.tooltip "Mostrar a barra lateral">
+<!ENTITY markViewRead.tooltip "Marcar todos os itens como lidos (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Marcar feed como lido">
+<!ENTITY ctxMarkFeedUnread.label "Marcar feed como não lido">
+<!ENTITY ctxMarkFolderRead.label "Marcar pasta como lida">
+<!ENTITY ctxMarkTagRead.label "Marcar itens com tag como lidos">
+<!ENTITY ctxUpdateFeed.label "Atualizar feed">
+<!ENTITY ctxUpdateFolder.label "Atualizar pasta">
+<!ENTITY ctxOpenWebsite.label "Abrir o site">
+<!ENTITY ctxDeleteFeed.label "Excluir feed">
+<!ENTITY ctxDeleteFolder.label "Excluir pasta">
+<!ENTITY ctxDeleteTag.label "Excluir tag">
+<!ENTITY ctxEmptyFeed.label "Esvaziar feed">
+<!ENTITY ctxEmptyFolder.label "Esvaziar pasta">
+<!ENTITY ctxRestoreTrashed.label "Restaurar todos os itens">
+<!ENTITY ctxEmptyTrash.label "Esvaziar lixeira">
+<!ENTITY ctxFeedProperties.label "Propriedades">
+<!ENTITY ctxUpdateFeeds.label "Atualizar feeds agora">
+<!ENTITY ctxMarkFeedsAsRead.label "Marcar todos os feeds como lidos">
+<!ENTITY showUnreadCounter.label "Mostrar número de itens não lidos">
+<!ENTITY ctxShowOptions.label "Opções">

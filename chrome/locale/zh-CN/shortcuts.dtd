@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest 快捷键">
+<!ENTITY or "或">
+
+<!ENTITY navigation.header "导航">
+<!ENTITY space.key "Space">
+<!ENTITY shiftSpace.key "Shift + 空格">
+<!ENTITY nextItem "跳到下个项目">
+<!ENTITY previousItem "跳到上个项目">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "打开当前阅读的项目">
+
+<!ENTITY showItem "显示或隐藏当前项目（在头条阅读模式）">
+<!ENTITY entries.header "项目">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "高亮当前阅读的项目">
+<!ENTITY markCurrentItemRead "标记当前项目为已读或未读">
+<!ENTITY markVisibleRead "标记所有项目为已读或未读">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "标记所有项目为已读">
+<!ENTITY starItem "将当前项目加入书签">
+<!ENTITY moveToTrash "将当前阅读的项目移到垃圾箱">
+
+<!ENTITY view.header "查看">
+<!ENTITY showAll "显示所有项目">
+<!ENTITY showStarred "显示加入书签的项目">
+<!ENTITY showUnread "显示未读项目">
+<!ENTITY headlinesView "切换只显示标题">
+
+<!ENTITY general.header "常规">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "打开 Digest">
+<!ENTITY focusSearchbar "切换焦点到搜索栏">
+<!ENTITY displayShortcuts "显示快捷键列表">

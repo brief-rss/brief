@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Настройки Digest">
+<!ENTITY mainPane.label "Основные">
+<!ENTITY updateGroup.caption "Обновление">
+<!ENTITY checkForUpdatesBefore.label "Проверять обновления лент каждые">
+<!ENTITY checkForUpdates.accesskey "о">
+<!ENTITY updateIntervalMinutes.label "минут(ы)">
+<!ENTITY updateIntervalHours.label "час(ов)">
+<!ENTITY updateIntervalDays.label "дней">
+<!ENTITY checkForUpdatesAfter.label "минут(ы)">
+<!ENTITY showNotification.label "Показывать оповещение при появлении новых записей">
+<!ENTITY showNotification.accesskey "П">
+<!ENTITY behaviorGroup.caption "Поведение">
+<!ENTITY openInNewTab.label "Открывать Digest в новой вкладке">
+<!ENTITY openInNewTab.accesskey "в">
+<!ENTITY storingGroup.caption "Хранение">
+<!ENTITY expirationBefore.label "Удалять загруженные записи после">
+<!ENTITY expirationAfter.label "дней">
+<!ENTITY expirationCheckbox.accesskey "У">
+<!ENTITY starredItemsKept.tooltip "Отмеченные записи будут сохранены">
+<!ENTITY storedEntriesBefore.label "Хранить не больше чем">
+<!ENTITY storedEntriesAfter.label "последних записей в каждой ленте">
+<!ENTITY storedEntriesCheckbox.accesskey "р">
+<!ENTITY clearAllEntriesButton.label "Удалить все записи…">
+<!ENTITY clearAllEntriesButton.accesskey "л">
+<!ENTITY feedsPane.label "Ленты">
+<!ENTITY folderTree.label "Папка, содержащая закладки на ленты новостей:">
+<!ENTITY importOPML.label "Импорт…">
+<!ENTITY importOPML.accesskey "И">
+<!ENTITY exportOPML.label "Экспорт…">
+<!ENTITY exportOPML.accesskey "Э">
+<!ENTITY displayPane.label "Отображение">
+<!ENTITY showStatusbarIcon.label "Показывать значок в строке состояния">
+<!ENTITY showStatusbarIcon.accesskey "з">
+<!ENTITY showUnreadCounter.label "Показывать число непрочитанных новостей возле значка">
+<!ENTITY showUnreadCounter.accesskey "ы">
+<!ENTITY sortUnreadViewOldestFirst.label "В списке непрочитанных новостей показывать старые записи в начале">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "о">
+<!ENTITY autoMarkRead.label "Отмечать записи прочитанными после просмотра">
+<!ENTITY autoMarkRead.accesskey "п">
+<!ENTITY customizeGroup.caption "Внешний вид">
+<!ENTITY shortcutsPane.label "Быстрый вызов">
+<!ENTITY editStyleDescription.label "Настройка внешнего вида лент">
+<!ENTITY editStyleButton.label "Настроить">
+<!ENTITY editStyleButton.accesskey "Н">
+<!ENTITY styleEditor.title "Отредактировать пользовательский стиль">
+<!ENTITY seeCustomizationTips.label "Информация о настройке внешнего вида с помощью CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Название">
+<!ENTITY feedURL.label "Адрес">
+<!ENTITY optionsGroupbox.caption "Настройки лент">
+<!ENTITY checkUpdatesPerFeedBefore.label "Проверять обновления каждые">
+<!ENTITY checkUpdatesPerFeed.accesskey "о">
+<!ENTITY expireEntriesPerFeedBefore.label "Удалять загруженные записи после">
+<!ENTITY expireEntriesPerFeed.accesskey "У">
+<!ENTITY expireEntriesPerFeedAfter.label "дней">
+<!ENTITY updatedEntries.label "Не отмечать измененные записи прочитанными">
+<!ENTITY updatedEntries.accesskey "Н">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "« Предыдущая">
+<!ENTITY previousFeed.accesskey "П">
+<!ENTITY nextFeed.label "Следующая »">
+<!ENTITY nextFeed.accesskey "С">

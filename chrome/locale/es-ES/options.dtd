@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Preferencias de Digest">
+<!ENTITY mainPane.label "Principal">
+<!ENTITY updateGroup.caption "Actualizaciones">
+<!ENTITY checkForUpdatesBefore.label "Actualizar automáticamente los canales web cada">
+<!ENTITY checkForUpdates.accesskey "A">
+<!ENTITY updateIntervalMinutes.label "minutos">
+<!ENTITY updateIntervalHours.label "horas">
+<!ENTITY updateIntervalDays.label "días">
+<!ENTITY checkForUpdatesAfter.label "minutos">
+<!ENTITY showNotification.label "Mostrar una notificación cuando se encuentren nuevos elementos">
+<!ENTITY showNotification.accesskey "n">
+<!ENTITY behaviorGroup.caption "Comportamiento">
+<!ENTITY openInNewTab.label "Abrir Digest en una pestaña nueva">
+<!ENTITY openInNewTab.accesskey "f">
+<!ENTITY storingGroup.caption "Almacenamiento">
+<!ENTITY expirationBefore.label "Eliminar los elementos descargados hace más de">
+<!ENTITY expirationAfter.label "días">
+<!ENTITY expirationCheckbox.accesskey "E">
+<!ENTITY starredItemsKept.tooltip "Los elementos en marcadores se conservarán">
+<!ENTITY storedEntriesBefore.label "Almacenar no más de">
+<!ENTITY storedEntriesAfter.label "elementos recientes para cada canal web">
+<!ENTITY storedEntriesCheckbox.accesskey "c">
+<!ENTITY clearAllEntriesButton.label "Eliminar todos los elementos...">
+<!ENTITY clearAllEntriesButton.accesskey "t">
+<!ENTITY feedsPane.label "Canales web">
+<!ENTITY folderTree.label "Carpeta contenedora de mis marcadores dinámicos:">
+<!ENTITY importOPML.label "Importar...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportar...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Presentación">
+<!ENTITY showStatusbarIcon.label "Mostrar un icono en la barra de estado">
+<!ENTITY showStatusbarIcon.accesskey "i">
+<!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos junto al icono de Digest">
+<!ENTITY showUnreadCounter.accesskey "r">
+<!ENTITY sortUnreadViewOldestFirst.label "Ordenar los elementos comenzando por el más antiguo en la vista de no leídos">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "O">
+<!ENTITY autoMarkRead.label "Marcar los elementos automáticamente como leídos después de verlos">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "Apariencia">
+<!ENTITY shortcutsPane.label "Atajos de teclado">
+<!ENTITY editStyleDescription.label "Personalizar la apariencia de los canales web">
+<!ENTITY editStyleButton.label "Personalizar">
+<!ENTITY editStyleButton.accesskey "P">
+<!ENTITY styleEditor.title "Personalizar la apariencia">
+<!ENTITY seeCustomizationTips.label "Aprende a personalizar la apariencia usando CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Nombre">
+<!ENTITY feedURL.label "Ubicación">
+<!ENTITY optionsGroupbox.caption "Preferencias del canal">
+<!ENTITY checkUpdatesPerFeedBefore.label "Buscar actualizaciones cada">
+<!ENTITY checkUpdatesPerFeed.accesskey "B">
+<!ENTITY expireEntriesPerFeedBefore.label "Eliminar los elementos descargados hace más de">
+<!ENTITY expireEntriesPerFeed.accesskey "E">
+<!ENTITY expireEntriesPerFeedAfter.label "días">
+<!ENTITY updatedEntries.label "No marcar los elementos modificados como no leídos">
+<!ENTITY updatedEntries.accesskey "m">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Anterior">
+<!ENTITY previousFeed.accesskey "A">
+<!ENTITY nextFeed.label "Siguiente &gt;">
+<!ENTITY nextFeed.accesskey "S">

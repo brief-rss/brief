@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Grazas por instalar Digest">
+<!ENTITY subscribingStep1.description "Prema na icona da barra de localización para previsualizar a fonte.">
+<!ENTITY subscribingStep1firefox4.description "Abrir o menú de <strong>Marcadores</strong> e seleccionar <strong>Marcar esta páxina</strong>">
+<!ENTITY subscribingStep2.description "Seleccionar os <strong>Marcadores dinámicos</strong> e prema en <strong>Subscribirse agora</strong>.">
+<!ENTITY subscribingStep3.description "Escoller o cartafol das <strong>fontes subscritas</strong> no menús dos marcadores.">
+<!ENTITY getStartedButton.label "Comezar">

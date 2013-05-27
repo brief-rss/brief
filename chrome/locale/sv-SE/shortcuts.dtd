@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Kortkommandon i Digest">
+<!ENTITY or "eller">
+
+<!ENTITY navigation.header "Navigering">
+<!ENTITY space.key "Blanksteg">
+<!ENTITY shiftSpace.key "Skift + Blanksteg">
+<!ENTITY nextItem "Gå till nästa objekt">
+<!ENTITY previousItem "Gå till föregående objekt">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Retur">
+<!ENTITY openEntry "Öppna det aktuella objektet">
+<!ENTITY showItem "Visa/göm det aktuella objektet (i rubrikvyn)">
+
+<!ENTITY entries.header "Objekt">
+<!ENTITY tab.key "Tabulator">
+<!ENTITY enableEntryHightlight "Aktivera markering av det aktuella objektet">
+<!ENTITY markCurrentItemRead "Märk det aktuella objektet som läst/oläst">
+<!ENTITY markVisibleRead "Märk alla objekt på skärmen som lästa">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Märk alla objekt som lästa">
+<!ENTITY starItem "Bokmärk det aktuella objektet">
+<!ENTITY moveToTrash "Flytta det aktuella objektet till papperskorgen">
+
+<!ENTITY view.header "Visa">
+<!ENTITY showAll "Visa alla objekt">
+<!ENTITY showStarred "Visa bokmärkta objekt">
+<!ENTITY showUnread "Visa olästa objekt">
+<!ENTITY headlinesView "Växla rubrikvyn">
+
+<!ENTITY general.header "Allmänt">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Öppna Digest">
+<!ENTITY focusSearchbar "Fokusera sökrutan">
+<!ENTITY displayShortcuts "Visa listan över kortkommandon">

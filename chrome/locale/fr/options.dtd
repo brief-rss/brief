@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Options de Digest">
+<!ENTITY mainPane.label "Générales">
+<!ENTITY updateGroup.caption "Mises à jour">
+<!ENTITY checkForUpdatesBefore.label "Mettre les flux à jour tou(te)s les">
+<!ENTITY checkForUpdates.accesskey "M">
+<!ENTITY updateIntervalMinutes.label "minutes">
+<!ENTITY updateIntervalHours.label "heures">
+<!ENTITY updateIntervalDays.label "jours">
+<!ENTITY checkForUpdatesAfter.label "minutes">
+<!ENTITY showNotification.label "M&apos;avertir si des mises à jour ont été trouvées">
+<!ENTITY showNotification.accesskey "a">
+<!ENTITY behaviorGroup.caption "Comportement">
+<!ENTITY openInNewTab.label "Ouvrir Digest dans un nouvel onglet">
+<!ENTITY openInNewTab.accesskey "B">
+<!ENTITY storingGroup.caption "Enregistrement">
+<!ENTITY expirationBefore.label "Supprimer les articles téléchargés il y a plus de">
+<!ENTITY expirationAfter.label "jours">
+<!ENTITY expirationCheckbox.accesskey "S">
+<!ENTITY starredItemsKept.tooltip "Conserver les articles marqués">
+<!ENTITY storedEntriesBefore.label "N&apos;enregistrer que les">
+<!ENTITY storedEntriesAfter.label "derniers articles de chaque flux">
+<!ENTITY storedEntriesCheckbox.accesskey "N">
+<!ENTITY clearAllEntriesButton.label "Supprimer tous les articles…">
+<!ENTITY clearAllEntriesButton.accesskey "t">
+<!ENTITY feedsPane.label "Flux">
+<!ENTITY folderTree.label "Dossier contenant vos marque-pages dynamiques :">
+<!ENTITY importOPML.label "Importer…">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exporter…">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Affichage">
+<!ENTITY showStatusbarIcon.label "Afficher l&apos;icône dans la barre d&apos;état">
+<!ENTITY showStatusbarIcon.accesskey "f">
+<!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus à côté de l'icône de Digest.">
+<!ENTITY showUnreadCounter.accesskey "l">
+<!ENTITY sortUnreadViewOldestFirst.label "Afficher les plus anciens en premier dans l&apos;affichage des articles non lus">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "A">
+<!ENTITY autoMarkRead.label "Marquer les articles vus comme lus">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "Apparence">
+<!ENTITY shortcutsPane.label "Raccourcis">
+<!ENTITY editStyleDescription.label "Personnaliser l&apos;apparence des flux">
+<!ENTITY editStyleButton.label "Personnaliser">
+<!ENTITY editStyleButton.accesskey "P">
+<!ENTITY styleEditor.title "Modifier le style personnel">
+<!ENTITY seeCustomizationTips.label "Informations sur la personnalisation de l&apos;apparence avec les CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Nom :">
+<!ENTITY feedURL.label "Adresse :">
+<!ENTITY optionsGroupbox.caption "Réglages des flux">
+<!ENTITY checkUpdatesPerFeedBefore.label "Mettre les flux à jour toutes les">
+<!ENTITY checkUpdatesPerFeed.accesskey "M">
+<!ENTITY expireEntriesPerFeedBefore.label "Supprimer les articles de plus de">
+<!ENTITY expireEntriesPerFeed.accesskey "S">
+<!ENTITY expireEntriesPerFeedAfter.label "jours">
+<!ENTITY updatedEntries.label "Ne pas marquer les articles mis à jour comme non lus">
+<!ENTITY updatedEntries.accesskey "N">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; Précédent">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Suivant &gt;">
+<!ENTITY nextFeed.accesskey "u">

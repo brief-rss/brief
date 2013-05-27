@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Obrigado por instalar o Digest">
+<!ENTITY subscribingStep1.description "Clique no ícone na barra de endereços para pré-visualizar o feed.">
+<!ENTITY subscribingStep1firefox4.description "Abra o menu <strong>Favoritos</strong> e selecione <strong>Inscrever RSS</strong>.">
+<!ENTITY subscribingStep2.description "Selecione <strong>Favoritos</strong> e clique em <strong>Inscrever agora</strong>.">
+<!ENTITY subscribingStep3.description "Escolha a pasta <strong>Feeds inscritos</strong> no menu Favoritos.">
+<!ENTITY getStartedButton.label "Começar">

@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Opcións de Digest">
+<!ENTITY mainPane.label "Principal">
+<!ENTITY updateGroup.caption "Actualizacións">
+<!ENTITY checkForUpdatesBefore.label "Procurar novas actualizacións cada">
+<!ENTITY checkForUpdates.accesskey "C">
+<!ENTITY updateIntervalMinutes.label "minutos">
+<!ENTITY updateIntervalHours.label "horas">
+<!ENTITY updateIntervalDays.label "días">
+<!ENTITY checkForUpdatesAfter.label "minutos">
+<!ENTITY showNotification.label "Amosar un aviso cando se atopen novos elementos">
+<!ENTITY showNotification.accesskey "S">
+<!ENTITY behaviorGroup.caption "Comportamento">
+<!ENTITY openInNewTab.label "Abrir o Digest nunha nova pestana">
+<!ENTITY openInNewTab.accesskey "O">
+<!ENTITY storingGroup.caption "Gardando">
+<!ENTITY expirationBefore.label "Eliminar os elementos descargados despois de">
+<!ENTITY expirationAfter.label "días">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "Os elementos marcados manteranse">
+<!ENTITY storedEntriesBefore.label "Non gardar máis de">
+<!ENTITY storedEntriesAfter.label "elementos recentes por fonte">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
+<!ENTITY clearAllEntriesButton.label "Limpar todos os elementos">
+<!ENTITY clearAllEntriesButton.accesskey "a">
+<!ENTITY feedsPane.label "Fontes">
+<!ENTITY folderTree.label "Cartafol cos marcadores dinámicos:">
+<!ENTITY importOPML.label "Importar...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "Exportar...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "Amosar">
+<!ENTITY showStatusbarIcon.label "Amosar unha icona na barra de estado">
+<!ENTITY showStatusbarIcon.accesskey "c">
+<!ENTITY showUnreadCounter.label "Amosar o número de elementos sen ler a carón da icona de Digest">
+<!ENTITY showUnreadCounter.accesskey "w">
+<!ENTITY sortUnreadViewOldestFirst.label "Na vista 'Sen ler' mostrar primeiro os máis antigos">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "Marcar os elementos como lidos despois de os ver">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "Aparencia">
+<!ENTITY shortcutsPane.label "Atallos">
+<!ENTITY editStyleDescription.label "Personalizar a aparencia das fontes">
+<!ENTITY editStyleButton.label "Personalizar">
+<!ENTITY editStyleButton.accesskey "C">
+<!ENTITY styleEditor.title "Editar o estilo personalizado">
+<!ENTITY seeCustomizationTips.label "Aprender a personalizar a aparencia con CSS">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Nome">
+<!ENTITY feedURL.label "Localización">
+<!ENTITY optionsGroupbox.caption "Axustes da fonte">
+<!ENTITY checkUpdatesPerFeedBefore.label "Procurar actualizacións cada">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "Eliminar elementos descargados despois de">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "días">
+<!ENTITY updatedEntries.label "Non marcar elementos cambiados como non lidos">
+<!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt;Anterior">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "Seguinte&gt;">
+<!ENTITY nextFeed.accesskey "N">

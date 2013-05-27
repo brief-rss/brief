@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest — клавиатурные сокращения">
+<!ENTITY or "или">
+
+<!ENTITY navigation.header "Навигация">
+<!ENTITY space.key "Пробел">
+<!ENTITY shiftSpace.key "Shift + Space">
+<!ENTITY nextItem "Перейти к следующему">
+<!ENTITY previousItem "Вернуться к предыдущему">
+<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
+<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Открыть текущую запись">
+<!ENTITY showItem "Показать/скрыть текущий элемент (в режиме заголовков)">
+
+<!ENTITY entries.header "Записи">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "Включить подсветку текущей записи">
+<!ENTITY markCurrentItemRead "Отметить как (не)прочитанное">
+<!ENTITY markVisibleRead "Отметить все элементы на экране как прочитанные">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Отметить всё прочитанным">
+<!ENTITY starItem "Добавить в закладки текущее">
+<!ENTITY moveToTrash "Переместить текущую запись в корзину">
+
+<!ENTITY view.header "Вид">
+<!ENTITY showAll "Показать все записи">
+<!ENTITY showStarred "Показать отмеченные записи">
+<!ENTITY showUnread "Показать непрочитанные записи">
+<!ENTITY headlinesView "Переключить режим просмотра заголовков">
+
+<!ENTITY general.header "Основные">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Открыть Digest">
+<!ENTITY focusSearchbar "Переместить фокус в строку поиска">
+<!ENTITY displayShortcuts "Показать список клавиатурных сокращений">

@@ -1,0 +1,37 @@
+<!ENTITY searchBox.label "Sök">
+<!ENTITY allItemsFolder.label "Alla objekt">
+<!ENTITY unreadFolder.label "Olästa">
+<!ENTITY starredFolder.label "Bokmärken">
+<!ENTITY trashFolder.label "Papperskorgen">
+
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Visa rubriker (F)">
+<!ENTITY filterUnread.tooltip "Visa endast olästa objekt (D)">
+<!ENTITY filterStarred.tooltip "Visa endast bokmärken (S)">
+<!ENTITY updateButton.tooltip "Sök i alla flöden efter uppdateringar">
+<!ENTITY stopUpdatingButton.tooltip "Sluta söka i flöden efter uppdateringar">
+<!ENTITY showOptions.tooltip "Öppna dialogen Inställningar för Digest">
+<!ENTITY sidebarSplitter.tooltip "Dubbelklicka för att gömma sidofältet">
+<!ENTITY revealSidebar.tooltip "Öppna sidofältet">
+<!ENTITY markViewRead.tooltip "Märk alla objekt som lästa (Alt + N)">
+
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Märk flöde som läst">
+<!ENTITY ctxMarkFeedUnread.label "Märk flöde som oläst">
+<!ENTITY ctxMarkFolderRead.label "Märk mapp som läst">
+<!ENTITY ctxMarkTagRead.label "Märk taggade objekt som lästa">
+<!ENTITY ctxUpdateFeed.label "Uppdatera flöde">
+<!ENTITY ctxUpdateFolder.label "Uppdatera mapp">
+<!ENTITY ctxOpenWebsite.label "Öppna webbplats">
+<!ENTITY ctxDeleteFeed.label "Ta bort flöde">
+<!ENTITY ctxDeleteFolder.label "Ta bort mapp">
+<!ENTITY ctxDeleteTag.label "Ta bort tagg">
+<!ENTITY ctxEmptyFeed.label "Töm flöde">
+<!ENTITY ctxEmptyFolder.label "Töm mapp">
+<!ENTITY ctxRestoreTrashed.label "Återställ alla objekt">
+<!ENTITY ctxEmptyTrash.label "Töm papperskorgen">
+<!ENTITY ctxFeedProperties.label "Egenskaper">
+<!ENTITY ctxUpdateFeeds.label "Uppdatera flöden nu">
+<!ENTITY ctxMarkFeedsAsRead.label "Märk alla flöden som lästa">
+<!ENTITY showUnreadCounter.label "Visa antalet olästa objekt">
+<!ENTITY ctxShowOptions.label "Inställningar">
