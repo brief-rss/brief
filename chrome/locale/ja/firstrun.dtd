@@ -1,5 +1,5 @@
-<!ENTITY pageTitle "Brief">
-<!ENTITY thankYou.header "Brief のインストールありがとうございます">
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "Digest のインストールありがとうございます">
 <!ENTITY subscribingStep1.description "フィードをプレビューするにはロケーションバーにあるアイコンをクリックしてください。">
 <!ENTITY subscribingStep1firefox4.description "<strong>ブックマーク</strong>メニューを開いて<strong>このページの購読</strong>を選択する">
 <!ENTITY subscribingStep2.description "<strong>ライブブックマーク</strong>を選択して<strong>購読</strong>をクリックしてください。">
