@@ -9,7 +9,7 @@
 <!ENTITY filterStarred.tooltip "Προβολή μόνο σελιδοδεικτών">
 <!ENTITY updateButton.tooltip "Έλεγχος όλων των αρχείων ροής για ενημερώσεις">
 <!ENTITY stopUpdatingButton.tooltip "Διακοπή ελέγχου για ενημερώσεις">
-<!ENTITY showOptions.tooltip "Άνοιγμα επιλογών Brief">
+<!ENTITY showOptions.tooltip "Άνοιγμα επιλογών Digest">
 <!ENTITY sidebarSplitter.tooltip "Για απόκρυψη της πλευρικής στήλης, κάντε διπλό κλικ">
 <!ENTITY revealSidebar.tooltip "Εμφάνιση πλευρικής στήλης">
 <!ENTITY markViewRead.tooltip "Σημείωση όλων ως αναγνωσμένων">
@@ -34,4 +34,4 @@
 <!ENTITY showUnreadCounter.label "Προβολή αριθμού μη αναγνωσμένων εγγραφών">
 <!ENTITY ctxShowOptions.label "Επιλογές">
 <!ENTITY compactingWindow.title "Γίνεται σύμπτυξη αρχείων ροής">
-<!ENTITY compactingInProgress.label "Το Brief συμπτύσσει τα αποθηκευμένα αρχεία ροής. Αυτό μπορεί να διαρκέσει μερικά λεπτά...">
+<!ENTITY compactingInProgress.label "Το Digest συμπτύσσει τα αποθηκευμένα αρχεία ροής. Αυτό μπορεί να διαρκέσει μερικά λεπτά...">

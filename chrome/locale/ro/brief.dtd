@@ -9,7 +9,7 @@
 <!ENTITY filterStarred.tooltip "Vizualizează doar marcajele (S)">
 <!ENTITY updateButton.tooltip "Verifică toate fluxurile pentru actualizări">
 <!ENTITY stopUpdatingButton.tooltip "Oprește verificarea fluxurilor pentru actualizări">
-<!ENTITY showOptions.tooltip "Deschide opțiunile Brief">
+<!ENTITY showOptions.tooltip "Deschide opțiunile Digest">
 <!ENTITY sidebarSplitter.tooltip "Dublu-clic pentru a ascunde bara laterală">
 <!ENTITY revealSidebar.tooltip "Arată bara laterală">
 <!ENTITY markViewRead.tooltip "Marchează toate elementele ca citite (Alt + N)">
@@ -34,4 +34,4 @@
 <!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite">
 <!ENTITY ctxShowOptions.label "Opțiuni">
 <!ENTITY compactingWindow.title "Comprimă fluxurile">
-<!ENTITY compactingInProgress.label "Brief comprimă fluxurile păstrate. Acest lucru poate lua cîteva minute...">
+<!ENTITY compactingInProgress.label "Digest comprimă fluxurile păstrate. Acest lucru poate lua cîteva minute...">

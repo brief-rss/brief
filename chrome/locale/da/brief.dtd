@@ -8,7 +8,7 @@
 <!ENTITY filterStarred.tooltip "Vis kun bogmærker (S)">
 <!ENTITY updateButton.tooltip "Tjek alle feeds for opdateringer">
 <!ENTITY stopUpdatingButton.tooltip "Stop tjek af feeds for opdateringer">
-<!ENTITY showOptions.tooltip "Andre Brief-indstillinger">
+<!ENTITY showOptions.tooltip "Andre Digest-indstillinger">
 <!ENTITY sidebarSplitter.tooltip "Dobbeltklik for at skjule sidebjælken">
 <!ENTITY revealSidebar.tooltip "Vis sidebjælken">
 <!ENTITY markViewRead.tooltip "Marker alle emner som læste (ALT + N)">
@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner">
 <!ENTITY ctxShowOptions.label "Indstillinger">
 <!ENTITY compactingWindow.title "Komprimerer feeds">
-<!ENTITY compactingInProgress.label "Brief komprimerer gemte feeds. Dette kan tage et par minutter...">
+<!ENTITY compactingInProgress.label "Digest komprimerer gemte feeds. Dette kan tage et par minutter...">

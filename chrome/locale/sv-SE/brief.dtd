@@ -9,7 +9,7 @@
 <!ENTITY filterStarred.tooltip "Visa endast bokmärken (S)">
 <!ENTITY updateButton.tooltip "Sök i alla flöden efter uppdateringar">
 <!ENTITY stopUpdatingButton.tooltip "Sluta söka i flöden efter uppdateringar">
-<!ENTITY showOptions.tooltip "Öppna dialogen Inställningar för Brief">
+<!ENTITY showOptions.tooltip "Öppna dialogen Inställningar för Digest">
 <!ENTITY sidebarSplitter.tooltip "Dubbelklicka för att gömma sidofältet">
 <!ENTITY revealSidebar.tooltip "Öppna sidofältet">
 <!ENTITY markViewRead.tooltip "Märk alla objekt som lästa (Alt + N)">
@@ -34,4 +34,4 @@
 <!ENTITY showUnreadCounter.label "Visa antalet olästa objekt">
 <!ENTITY ctxShowOptions.label "Inställningar">
 <!ENTITY compactingWindow.title "Komprimerar flöden">
-<!ENTITY compactingInProgress.label "Brief komprimerar lagrade flöden. Det här kan ta några minuter...">
+<!ENTITY compactingInProgress.label "Digest komprimerar lagrade flöden. Det här kan ta några minuter...">

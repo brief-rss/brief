@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "Wyświetlaj liczbę nieprzeczytanych wiadomości">
 <!ENTITY ctxShowOptions.label "Opcje">
 <!ENTITY compactingWindow.title "Porządkowanie kanałów">
-<!ENTITY compactingInProgress.label "Brief porządkuje kanały… Operacja ta może potrwać dłuższą chwilę.">
+<!ENTITY compactingInProgress.label "Digest porządkuje kanały… Operacja ta może potrwać dłuższą chwilę.">

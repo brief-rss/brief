@@ -8,7 +8,7 @@
 <!ENTITY filterStarred.tooltip "Visualizar só os marcadores (S)">
 <!ENTITY updateButton.tooltip "Actualizar todas as fontes">
 <!ENTITY stopUpdatingButton.tooltip "Deter a actualización das fontes">
-<!ENTITY showOptions.tooltip "Abrir as opcións de Brief">
+<!ENTITY showOptions.tooltip "Abrir as opcións de Digest">
 <!ENTITY sidebarSplitter.tooltip "Facer dobre clic para ocultar a barra lateral">
 <!ENTITY revealSidebar.tooltip "Amosar a barra lateral">
 <!ENTITY markViewRead.tooltip "Marcar todos os elementos como lidos (Alt + N)">
@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "Amosar o nome de elementos sen ler">
 <!ENTITY ctxShowOptions.label "Opcións">
 <!ENTITY compactingWindow.title "Compactando as fontes">
-<!ENTITY compactingInProgress.label "O Brief está a compactar as fontes almacenadas. Este proceso pode levar algúns minutos...">
+<!ENTITY compactingInProgress.label "O Digest está a compactar as fontes almacenadas. Este proceso pode levar algúns minutos...">

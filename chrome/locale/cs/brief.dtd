@@ -8,7 +8,7 @@
 <!ENTITY filterStarred.tooltip "Zobrazit pouze záložky (S)">
 <!ENTITY updateButton.tooltip "Zkontrolovat všechny kanály pro novinky">
 <!ENTITY stopUpdatingButton.tooltip "Zastavit kontrolu kanálů pro novinky">
-<!ENTITY showOptions.tooltip "Otevřít možnosti rozšíření Brief">
+<!ENTITY showOptions.tooltip "Otevřít možnosti rozšíření Digest">
 <!ENTITY sidebarSplitter.tooltip "Dvojím klepnutím skryjete postranní lištu">
 <!ENTITY revealSidebar.tooltip "Znovu zobrazit postranní lištu">
 <!ENTITY markViewRead.tooltip "Označit všechny položky jako přečtené (Alt + N)">
@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "Zobrazit počet nepřečtených položek">
 <!ENTITY ctxShowOptions.label "Možnosti">
 <!ENTITY compactingWindow.title "Zhušťování kanálů">
-<!ENTITY compactingInProgress.label "Brief zhušťuje uložené kanály. To může trvat několik minut...">
+<!ENTITY compactingInProgress.label "Digest zhušťuje uložené kanály. To může trvat několik minut...">

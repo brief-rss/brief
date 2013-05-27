@@ -8,7 +8,7 @@
 <!ENTITY filterStarred.tooltip "Afficher seulement les articles marqués (S)">
 <!ENTITY updateButton.tooltip "Mettre à jour tous les flux">
 <!ENTITY stopUpdatingButton.tooltip "Arrêter la recherche de mises à jour">
-<!ENTITY showOptions.tooltip "Ouvrir les options de Brief">
+<!ENTITY showOptions.tooltip "Ouvrir les options de Digest">
 <!ENTITY sidebarSplitter.tooltip "Double-cliquer pour masquer ce panneau latéral">
 <!ENTITY revealSidebar.tooltip "Afficher le panneau latéral">
 <!ENTITY markViewRead.tooltip "Marquer les articles courants comme lus (Alt + N)">
@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus">
 <!ENTITY ctxShowOptions.label "Options">
 <!ENTITY compactingWindow.title "Compactage des flux">
-<!ENTITY compactingInProgress.label "Brief est en train de procéder au compactage des flux sauvegardés. Ceci peut durer quelques minutes…">
+<!ENTITY compactingInProgress.label "Digest est en train de procéder au compactage des flux sauvegardés. Ceci peut durer quelques minutes…">

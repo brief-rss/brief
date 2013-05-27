@@ -9,7 +9,7 @@
 <!ENTITY filterStarred.tooltip "Mostra gli elementi associati ai segnalibri">
 <!ENTITY updateButton.tooltip "Controlla gli aggiornamenti di tutti i feed">
 <!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
-<!ENTITY showOptions.tooltip "Impostazioni di Brief…">
+<!ENTITY showOptions.tooltip "Impostazioni di Digest…">
 <!ENTITY sidebarSplitter.tooltip "Fare doppio clic per nascondere la barra laterale">
 <!ENTITY revealSidebar.tooltip "Mostra la barra laterale">
 <!ENTITY markViewRead.tooltip "Segna tutti gli elementi come letti (Alt + N)">
@@ -32,6 +32,6 @@
 <!ENTITY ctxUpdateFeeds.label "Aggiorna i feed ora">
 <!ENTITY ctxMarkFeedsAsRead.label "Segna tutti i feed come letti">
 <!ENTITY showUnreadCounter.label "Mostra il numero degli elementi non letti">
-<!ENTITY ctxShowOptions.label "Impostazioni di Brief…">
+<!ENTITY ctxShowOptions.label "Impostazioni di Digest…">
 <!ENTITY compactingWindow.title "Compattazione dei feed">
-<!ENTITY compactingInProgress.label "Brief sta compattando i feed memorizzati. Potrebbero essere necessari alcuni minuti…">
+<!ENTITY compactingInProgress.label "Digest sta compattando i feed memorizzati. Potrebbero essere necessari alcuni minuti…">

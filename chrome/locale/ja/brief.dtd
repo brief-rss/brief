@@ -8,7 +8,7 @@
 <!ENTITY filterStarred.tooltip "ブックマークのみを表示します (S)">
 <!ENTITY updateButton.tooltip "すべてのフィードの更新を確認します">
 <!ENTITY stopUpdatingButton.tooltip "フィード更新の確認を停止します">
-<!ENTITY showOptions.tooltip "Brief のオプションを開きます">
+<!ENTITY showOptions.tooltip "Digest のオプションを開きます">
 <!ENTITY sidebarSplitter.tooltip "ダブルクリックするとサイドバーを非表示にします">
 <!ENTITY revealSidebar.tooltip "サイドバーを表示させます">
 <!ENTITY markViewRead.tooltip "すべての項目を既読にします (Alt + N)">
@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "未読数を表示する">
 <!ENTITY ctxShowOptions.label "オプション">
 <!ENTITY compactingWindow.title "フィード圧縮中">
-<!ENTITY compactingInProgress.label "Brief は保管済みのフィードを圧縮しています。これにはしばらく時間がかかることがあります...">
+<!ENTITY compactingInProgress.label "Digest は保管済みのフィードを圧縮しています。これにはしばらく時間がかかることがあります...">

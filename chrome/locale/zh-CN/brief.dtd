@@ -8,7 +8,7 @@
 <!ENTITY filterStarred.tooltip "只查看书签 (S)">
 <!ENTITY updateButton.tooltip "更新订阅">
 <!ENTITY stopUpdatingButton.tooltip "停止更新订阅">
-<!ENTITY showOptions.tooltip "打开 Brief 选项">
+<!ENTITY showOptions.tooltip "打开 Digest 选项">
 <!ENTITY sidebarSplitter.tooltip "双击隐藏侧栏">
 <!ENTITY revealSidebar.tooltip "打开侧栏">
 <!ENTITY markViewRead.tooltip "标记所有项目为已读（按住 Ctrl 只会标记当前页）">
@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "显示未读项目数目">
 <!ENTITY ctxShowOptions.label "选项">
 <!ENTITY compactingWindow.title "正在压缩订阅">
-<!ENTITY compactingInProgress.label "Brief 正在压缩保存的聚合，这可能要花几分钟...">
+<!ENTITY compactingInProgress.label "Digest 正在压缩保存的聚合，这可能要花几分钟...">

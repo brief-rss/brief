@@ -8,7 +8,7 @@
 <!ENTITY filterStarred.tooltip "Alleen bladwijzers bekijken (S)">
 <!ENTITY updateButton.tooltip "Alle feeds controleren op updates">
 <!ENTITY stopUpdatingButton.tooltip "Feeds niet meer op updates controleren">
-<!ENTITY showOptions.tooltip "Brief-opties openen">
+<!ENTITY showOptions.tooltip "Digest-opties openen">
 <!ENTITY sidebarSplitter.tooltip "Dubbelklik om de zijbalk te verbergen">
 <!ENTITY revealSidebar.tooltip "Zijbalk weergeven">
 <!ENTITY markViewRead.tooltip "Alle berichten als gelezen markeren (houd Ctrl ingedrukt om alleen de huidige pagina te markeren)">
@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "Aantal ongelezen berichten weergeven">
 <!ENTITY ctxShowOptions.label "Opties">
 <!ENTITY compactingWindow.title "Feeds compacteren">
-<!ENTITY compactingInProgress.label "Brief compacteert opgeslagen feeds. Dit kan enkele minuten duren…">
+<!ENTITY compactingInProgress.label "Digest compacteert opgeslagen feeds. Dit kan enkele minuten duren…">

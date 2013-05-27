@@ -8,7 +8,7 @@
 <!ENTITY filterStarred.tooltip "Vis kun bokmerker elementer (S)">
 <!ENTITY updateButton.tooltip "Finn oppdateringer for alle nyhetskilder">
 <!ENTITY stopUpdatingButton.tooltip "Stopp oppdateringssjekk for nyhetskilder">
-<!ENTITY showOptions.tooltip "Innstillinger for Brief">
+<!ENTITY showOptions.tooltip "Innstillinger for Digest">
 <!ENTITY sidebarSplitter.tooltip "Dobbeltklikk for å skjule sidestolpen">
 <!ENTITY revealSidebar.tooltip "Vis sidestolpen">
 <!ENTITY markViewRead.tooltip "Merk alle elementer som lest (hold Ctrl for å kun merke gjeldende side)">
@@ -32,4 +32,4 @@
 <!ENTITY showUnreadCounter.label "Vis antall uleste elementer">
 <!ENTITY ctxShowOptions.label "Innstillinger">
 <!ENTITY compactingWindow.title "Komprimerer nyhetskilder">
-<!ENTITY compactingInProgress.label "Brief komprimerer lagrede nyhetskilder. Dette kan ta noen minutter ...">
+<!ENTITY compactingInProgress.label "Digest komprimerer lagrede nyhetskilder. Dette kan ta noen minutter ...">
