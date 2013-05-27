@@ -3,6 +3,8 @@
 <!ENTITY unreadFolder.label "Non lus">
 <!ENTITY starredFolder.label "Marqués">
 <!ENTITY trashFolder.label "Corbeille">
+
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Utiliser l'affichage des titres (F)">
 <!ENTITY filterUnread.tooltip "Afficher seulement les articles non lus (D)">
 <!ENTITY filterStarred.tooltip "Afficher seulement les articles marqués (S)">
@@ -12,6 +14,8 @@
 <!ENTITY sidebarSplitter.tooltip "Double-cliquer pour masquer ce panneau latéral">
 <!ENTITY revealSidebar.tooltip "Afficher le panneau latéral">
 <!ENTITY markViewRead.tooltip "Marquer les articles courants comme lus (Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Marquer le flux comme lu">
 <!ENTITY ctxMarkFeedUnread.label "Marquer le flux comme non lu">
 <!ENTITY ctxMarkFolderRead.label "Marquer le dossier comme lu">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Marquer tous les flux comme lus">
 <!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus">
 <!ENTITY ctxShowOptions.label "Options">
-<!ENTITY compactingWindow.title "Compactage des flux">
-<!ENTITY compactingInProgress.label "Digest est en train de procéder au compactage des flux sauvegardés. Ceci peut durer quelques minutes…">

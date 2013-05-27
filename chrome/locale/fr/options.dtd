@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Comportement">
 <!ENTITY openInNewTab.label "Ouvrir Digest dans un nouvel onglet">
 <!ENTITY openInNewTab.accesskey "B">
-<!ENTITY openEntriesInTabs.label "Ouvrir les articles dans de nouveaux onglets">
-<!ENTITY openEntriesInTabs.accesskey "O">
 <!ENTITY storingGroup.caption "Enregistrement">
 <!ENTITY expirationBefore.label "Supprimer les articles téléchargés il y a plus de">
 <!ENTITY expirationAfter.label "jours">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "A">
 <!ENTITY autoMarkRead.label "Marquer les articles vus comme lus">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Toujours surligner l&apos;article courant">
-<!ENTITY enableItemHightlight.accesskey "T">
 <!ENTITY customizeGroup.caption "Apparence">
 <!ENTITY shortcutsPane.label "Raccourcis">
 <!ENTITY editStyleDescription.label "Personnaliser l&apos;apparence des flux">

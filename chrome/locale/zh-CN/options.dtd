@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "行为">
 <!ENTITY openInNewTab.label "在新标签页打开 Digest">
 <!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "在新标签页打开项目">
-<!ENTITY openEntriesInTabs.accesskey "t">
 <!ENTITY storingGroup.caption "保存">
 <!ENTITY expirationBefore.label "在">
 <!ENTITY expirationAfter.label "天后清除已下载项目">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "将我看过的项目标为已读">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "总是高亮当前阅读的项目">
-<!ENTITY enableItemHightlight.accesskey "A">
 <!ENTITY customizeGroup.caption "外观">
 <!ENTITY shortcutsPane.label "快捷键">
 <!ENTITY editStyleDescription.label "定制订阅的外观">

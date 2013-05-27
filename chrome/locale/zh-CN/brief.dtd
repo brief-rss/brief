@@ -3,6 +3,8 @@
 <!ENTITY unreadFolder.label "未读项目">
 <!ENTITY starredFolder.label "书签">
 <!ENTITY trashFolder.label "垃圾箱">
+
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "只显示标题 (F)">
 <!ENTITY filterUnread.tooltip "只查看未读项目 (D)">
 <!ENTITY filterStarred.tooltip "只查看书签 (S)">
@@ -11,7 +13,9 @@
 <!ENTITY showOptions.tooltip "打开 Digest 选项">
 <!ENTITY sidebarSplitter.tooltip "双击隐藏侧栏">
 <!ENTITY revealSidebar.tooltip "打开侧栏">
-<!ENTITY markViewRead.tooltip "标记所有项目为已读（按住 Ctrl 只会标记当前页）">
+<!ENTITY markViewRead.tooltip "标记所有项目为已读(Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "标记订阅为已读">
 <!ENTITY ctxMarkFeedUnread.label "标记定个月为未读">
 <!ENTITY ctxMarkFolderRead.label "标记文件夹为已读">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "标记所有订阅为已读">
 <!ENTITY showUnreadCounter.label "显示未读项目数目">
 <!ENTITY ctxShowOptions.label "选项">
-<!ENTITY compactingWindow.title "正在压缩订阅">
-<!ENTITY compactingInProgress.label "Digest 正在压缩保存的聚合，这可能要花几分钟...">

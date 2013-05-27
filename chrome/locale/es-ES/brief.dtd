@@ -33,5 +33,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Marcar todos los canales como leídos">
 <!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos">
 <!ENTITY ctxShowOptions.label "Preferencias">
-<!ENTITY compactingWindow.title "Compactando los canales web">
-<!ENTITY compactingInProgress.label "Digest está compactando los canales web almacenados. Esto puede tomar algunos minutos...">

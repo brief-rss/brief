@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Verhalten">
 <!ENTITY openInNewTab.label "Digest in neuem Tab öffnen">
 <!ENTITY openInNewTab.accesskey "T">
-<!ENTITY openEntriesInTabs.label "Einträge in neuen Tabs öffnen">
-<!ENTITY openEntriesInTabs.accesskey "E">
 <!ENTITY storingGroup.caption "Speicherung">
 <!ENTITY expirationBefore.label "Heruntergeladene Einträge für">
 <!ENTITY expirationAfter.label "Tage speichern">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "u">
 <!ENTITY autoMarkRead.label "Einträge nach Anzeige in der Liste als gelesen markieren">
 <!ENTITY autoMarkRead.accesskey "A">
-<!ENTITY enableItemHightlight.label "Den aktuellen Eintrag immer hervorheben">
-<!ENTITY enableItemHightlight.accesskey "a">
 <!ENTITY customizeGroup.caption "Anzeige">
 <!ENTITY shortcutsPane.label "Tastaturkürzel">
 <!ENTITY editStyleDescription.label "Darstellung der Feeds anpassen">

@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Συμπεριφορά">
 <!ENTITY openInNewTab.label "Άνοιγμα του Digest σε νέα καρτέλα">
 <!ENTITY openInNewTab.accesskey "α">
-<!ENTITY openEntriesInTabs.label "Άνοιγμα εγγραφών σε νέες καρτέλες">
-<!ENTITY openEntriesInTabs.accesskey "ι">
 <!ENTITY storingGroup.caption "Αποθήκευση">
 <!ENTITY expirationBefore.label "Αφαίρεση εμφανισμένων εγγραφών μετά από">
 <!ENTITY expirationAfter.label "ημέρες">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "η">
 <!ENTITY autoMarkRead.label "Αυτόματη σήμανση εγγραφών ως αναγνωσμένων μετά την προβολή τους">
 <!ENTITY autoMarkRead.accesskey "σ">
-<!ENTITY enableItemHightlight.label "Επιλογή ενεργής εγγραφής για διαχείριση με συντομεύσεις πληκτρολογίου">
-<!ENTITY enableItemHightlight.accesskey "ε">
 <!ENTITY customizeGroup.caption "Εμφάνιση">
 <!ENTITY shortcutsPane.label "Συντομεύσεις πληκτρολογίου">
 <!ENTITY editStyleDescription.label "Προσαρμογή της εμφάνισης των αρχείων ροής">

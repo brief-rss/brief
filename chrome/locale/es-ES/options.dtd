@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Comportamiento">
 <!ENTITY openInNewTab.label "Abrir Digest en una pestaña nueva">
 <!ENTITY openInNewTab.accesskey "f">
-<!ENTITY openEntriesInTabs.label "Abrir los elementos en pestañas nuevas">
-<!ENTITY openEntriesInTabs.accesskey "l">
 <!ENTITY storingGroup.caption "Almacenamiento">
 <!ENTITY expirationBefore.label "Eliminar los elementos descargados hace más de">
 <!ENTITY expirationAfter.label "días">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Marcar los elementos automáticamente como leídos después de verlos">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Destacar el elemento actual para poder aplicar en él atajos de teclado">
-<!ENTITY enableItemHightlight.accesskey "D">
 <!ENTITY customizeGroup.caption "Apariencia">
 <!ENTITY shortcutsPane.label "Atajos de teclado">
 <!ENTITY editStyleDescription.label "Personalizar la apariencia de los canales web">

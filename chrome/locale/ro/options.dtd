@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Comportament">
 <!ENTITY openInNewTab.label "Deschide Digest în filă nouă">
 <!ENTITY openInNewTab.accesskey "B">
-<!ENTITY openEntriesInTabs.label "Dechide elementele în file noi">
-<!ENTITY openEntriesInTabs.accesskey "E">
 <!ENTITY storingGroup.caption "Stocare">
 <!ENTITY expirationBefore.label "Elimină elementele descărcare după">
 <!ENTITY expirationAfter.label "zile">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Automat marchează elementele ca citite după ce le văd">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Evidențiază elementele active pentru a permite gestionarea scurtăturile tastaturii">
-<!ENTITY enableItemHightlight.accesskey "H">
 <!ENTITY customizeGroup.caption "Aspect">
 <!ENTITY shortcutsPane.label "Scurtături">
 <!ENTITY editStyleDescription.label "Personalizează aspectul fluxurilor">

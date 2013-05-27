@@ -3,6 +3,8 @@
 <!ENTITY unreadFolder.label "Neprečítané">
 <!ENTITY starredFolder.label "Záložky">
 <!ENTITY trashFolder.label "Kôš">
+
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Použiť zobrazenie titulkov (F)">
 <!ENTITY filterUnread.tooltip "Zobraziť len neprečítané položky (D)">
 <!ENTITY filterStarred.tooltip "Zobraziť len záložky (S)">
@@ -11,7 +13,9 @@
 <!ENTITY showOptions.tooltip "Otvoriť Možnosti Digest">
 <!ENTITY sidebarSplitter.tooltip "Dvojkliknutím skryť bočný panel">
 <!ENTITY revealSidebar.tooltip "Ukázať bočný panel">
-<!ENTITY markViewRead.tooltip "Označiť všetko ako prečítané (stlačte Ctrl pre označenie na aktuálnej stránke)">
+<!ENTITY markViewRead.tooltip "Označiť všetko ako prečítané (Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Označiť kanál ako prečítaný">
 <!ENTITY ctxMarkFeedUnread.label "Označiť kanál ako neprečítaný">
 <!ENTITY ctxMarkFolderRead.label "Označiť priečinok ako prečítaný">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Označiť všetky kanály ako prečítané">
 <!ENTITY showUnreadCounter.label "Zobraziť počet neprečítaných položiek">
 <!ENTITY ctxShowOptions.label "Možnosti">
-<!ENTITY compactingWindow.title "Zhusťovanie kanálov">
-<!ENTITY compactingInProgress.label "Digest zhusťuje uložené kanály. To môže trvať niekoľko minút...">

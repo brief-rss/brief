@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Režim">
 <!ENTITY openInNewTab.label "Otvoriť Digest na novej karte">
 <!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "Otvoriť položky na nových kartách">
-<!ENTITY openEntriesInTabs.accesskey "t">
 <!ENTITY storingGroup.caption "Ukladanie">
 <!ENTITY expirationBefore.label "Odstrániť stiahnuté položky po">
 <!ENTITY expirationAfter.label "dňoch">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "n">
 <!ENTITY autoMarkRead.label "Pred zobrazením označiť články ako prečítané">
 <!ENTITY autoMarkRead.accesskey "z">
-<!ENTITY enableItemHightlight.label "Vždy zvýrazniť aktuálny článok">
-<!ENTITY enableItemHightlight.accesskey "V">
 <!ENTITY customizeGroup.caption "Vzhľad">
 <!ENTITY shortcutsPane.label "Klávesové skratky">
 <!ENTITY editStyleDescription.label "Prispôsobiť vzhľad kanálov">

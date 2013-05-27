@@ -33,5 +33,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Segna tutti i feed come letti">
 <!ENTITY showUnreadCounter.label "Mostra il numero degli elementi non letti">
 <!ENTITY ctxShowOptions.label "Impostazioni di Digest…">
-<!ENTITY compactingWindow.title "Compattazione dei feed">
-<!ENTITY compactingInProgress.label "Digest sta compattando i feed memorizzati. Potrebbero essere necessari alcuni minuti…">

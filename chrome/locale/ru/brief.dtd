@@ -4,6 +4,8 @@
 <!ENTITY starredFolder.label "Отмеченные записи">
 <!ENTITY trashFolder.label "Корзина">
 <!ENTITY headlinesCheckbox.tooltip "Режим просмотра заголовков">
+
+<!-- Button tooltips -->
 <!ENTITY filterUnread.tooltip "Показывать только непрочитанное (D)">
 <!ENTITY filterStarred.tooltip "Показывать только закладки (S)">
 <!ENTITY updateButton.tooltip "Проверить обновления для всех лент">
@@ -11,7 +13,9 @@
 <!ENTITY showOptions.tooltip "Открыть настройки Digest">
 <!ENTITY sidebarSplitter.tooltip "Двойной клик для скрытия панели">
 <!ENTITY revealSidebar.tooltip "Показать панель">
-<!ENTITY markViewRead.tooltip "Отметить все записи прочитанными (нажмите Ctrl, чтобы отметить только текущую страницу)">
+<!ENTITY markViewRead.tooltip "Отметить все записи прочитанными (Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Отметить ленту как прочитанную">
 <!ENTITY ctxMarkFeedUnread.label "Отметить ленту как непрочитанную">
 <!ENTITY ctxMarkFolderRead.label "Отметить папку как прочитанную">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Отметить все ленты как прочитанные">
 <!ENTITY showUnreadCounter.label "Показывать количество непрочитанного">
 <!ENTITY ctxShowOptions.label "Опции">
-<!ENTITY compactingWindow.title "Сжатие лент…">
-<!ENTITY compactingInProgress.label "Digest выполняет сжатие сохранённых лент. Выполнение данной операции может занять несколько минут…">

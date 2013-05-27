@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Zachowanie">
 <!ENTITY openInNewTab.label "Otwieraj Digest w nowej karcie">
 <!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "Otwieraj wiadomości w nowej karcie">
-<!ENTITY openEntriesInTabs.accesskey "T">
 <!ENTITY storingGroup.caption "Przechowywanie">
 <!ENTITY expirationBefore.label "Usuń pobrane wiadomości po">
 <!ENTITY expirationAfter.label "dniach">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "S">
 <!ENTITY autoMarkRead.label "Oznaczaj wyświetlone wiadomości jako przeczytane">
 <!ENTITY autoMarkRead.accesskey "C">
-<!ENTITY enableItemHightlight.label "Wyróżniaj aktywną wiadomość">
-<!ENTITY enableItemHightlight.accesskey "W">
 <!ENTITY customizeGroup.caption "Wygląd">
 <!ENTITY shortcutsPane.label "Skróty">
 <!ENTITY editStyleDescription.label "Dostosuj wygląd kanałów">

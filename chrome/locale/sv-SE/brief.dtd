@@ -3,6 +3,7 @@
 <!ENTITY unreadFolder.label "Olästa">
 <!ENTITY starredFolder.label "Bokmärken">
 <!ENTITY trashFolder.label "Papperskorgen">
+
 <!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Visa rubriker (F)">
 <!ENTITY filterUnread.tooltip "Visa endast olästa objekt (D)">
@@ -13,6 +14,7 @@
 <!ENTITY sidebarSplitter.tooltip "Dubbelklicka för att gömma sidofältet">
 <!ENTITY revealSidebar.tooltip "Öppna sidofältet">
 <!ENTITY markViewRead.tooltip "Märk alla objekt som lästa (Alt + N)">
+
 <!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Märk flöde som läst">
 <!ENTITY ctxMarkFeedUnread.label "Märk flöde som oläst">
@@ -33,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Märk alla flöden som lästa">
 <!ENTITY showUnreadCounter.label "Visa antalet olästa objekt">
 <!ENTITY ctxShowOptions.label "Inställningar">
-<!ENTITY compactingWindow.title "Komprimerar flöden">
-<!ENTITY compactingInProgress.label "Digest komprimerar lagrade flöden. Det här kan ta några minuter...">

@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Oppførsel">
 <!ENTITY openInNewTab.label "Åpne Digest i ny fane">
 <!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "Åpne elementer i ny fane">
-<!ENTITY openEntriesInTabs.accesskey "t">
 <!ENTITY storingGroup.caption "Lagring">
 <!ENTITY expirationBefore.label "Fjern lagrede elementer etter">
 <!ENTITY expirationAfter.label "dager">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Merk elementer som lest etter at jeg har sett dem">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Uthev alltid valgte element">
-<!ENTITY enableItemHightlight.accesskey "A">
 <!ENTITY customizeGroup.caption "Utseende">
 <!ENTITY shortcutsPane.label "Snarveier">
 <!ENTITY editStyleDescription.label "Tilpass utseende til nyhetskilder">

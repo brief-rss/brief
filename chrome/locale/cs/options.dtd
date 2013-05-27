@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Chování">
 <!ENTITY openInNewTab.label "Zobrazit Digest v novém panelu">
 <!ENTITY openInNewTab.accesskey "b">
-<!ENTITY openEntriesInTabs.label "Zobrazit položky v novém panelu">
-<!ENTITY openEntriesInTabs.accesskey "b">
 <!ENTITY storingGroup.caption "Ukládání">
 <!ENTITY expirationBefore.label "Odstranit stažené položky po">
 <!ENTITY expirationAfter.label "dnech">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "n">
 <!ENTITY autoMarkRead.label "Označit položky za přečtené poté, co je uvidím">
 <!ENTITY autoMarkRead.accesskey "O">
-<!ENTITY enableItemHightlight.label "Vždy zvýraznit aktuální položku">
-<!ENTITY enableItemHightlight.accesskey "V">
 <!ENTITY customizeGroup.caption "Vzhled">
 <!ENTITY shortcutsPane.label "Zkratky">
 <!ENTITY editStyleDescription.label "Přizpůsobit vzhled kanálů">

@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Comportamento">
 <!ENTITY openInNewTab.label "Abrir Digest em uma nova aba">
 <!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "Abrir itens em novas abas">
-<!ENTITY openEntriesInTabs.accesskey "b">
 <!ENTITY storingGroup.caption "Armazenamento">
 <!ENTITY expirationBefore.label "Remover itens recebidos após">
 <!ENTITY expirationAfter.label "dias">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Marcar itens como lidos depois que eu vê-los">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Sempre destacar o item atual">
-<!ENTITY enableItemHightlight.accesskey "A">
 <!ENTITY customizeGroup.caption "Aparência">
 <!ENTITY shortcutsPane.label "Atalhos">
 <!ENTITY editStyleDescription.label "Personalizar a aparência dos feeds">

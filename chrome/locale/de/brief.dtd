@@ -3,6 +3,8 @@
 <!ENTITY unreadFolder.label "Ungelesen">
 <!ENTITY starredFolder.label "Lesezeichen">
 <!ENTITY trashFolder.label "Papierkorb">
+
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Überschriftenmodus verwenden (F)">
 <!ENTITY filterUnread.tooltip "Nur ungelesene Einträge anzeigen (D)">
 <!ENTITY filterStarred.tooltip "Nur Lesezeichen anzeigen (S)">
@@ -12,6 +14,8 @@
 <!ENTITY sidebarSplitter.tooltip "Doppelklick zum Ausblenden der Sidebar">
 <!ENTITY revealSidebar.tooltip "Sidebar einblenden">
 <!ENTITY markViewRead.tooltip "Alle Einträge als gelesen markieren (Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Feed als gelesen markieren">
 <!ENTITY ctxMarkFeedUnread.label "Feed als ungelesen markieren">
 <!ENTITY ctxMarkFolderRead.label "Ordner als gelesen markieren">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Alle Feeds als gelesen markieren">
 <!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Einträge anzeigen">
 <!ENTITY ctxShowOptions.label "Optionen">
-<!ENTITY compactingWindow.title "Feeds komprimieren">
-<!ENTITY compactingInProgress.label "Gespeicherte Feeds werden komprimiert. Dies kann einige Minuten in Anspruch nehmen...">

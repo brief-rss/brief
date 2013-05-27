@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Gedrag">
 <!ENTITY openInNewTab.label "Digest in een nieuw tabblad openen">
 <!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "Berichten in nieuwe tabbladen openen">
-<!ENTITY openEntriesInTabs.accesskey "t">
 <!ENTITY storingGroup.caption "Opslaan">
 <!ENTITY expirationBefore.label "Gedownloade berichten verwijderen na">
 <!ENTITY expirationAfter.label "dagen">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Berichten als gelezen markeren als ik ze heb gezien">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Altijd het huidige bericht accentueren">
-<!ENTITY enableItemHightlight.accesskey "H">
 <!ENTITY customizeGroup.caption "Weergave">
 <!ENTITY shortcutsPane.label "Snelkoppelingen">
 <!ENTITY editStyleDescription.label "Weergave van feeds aanpassen">

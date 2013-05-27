@@ -3,6 +3,8 @@
 <!ENTITY unreadFolder.label "Ongelezen">
 <!ENTITY starredFolder.label "Bladwijzers">
 <!ENTITY trashFolder.label "Prullenbak">
+
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Koptekstweergave gebruiken">
 <!ENTITY filterUnread.tooltip "Alleen ongelezen berichten bekijken (D)">
 <!ENTITY filterStarred.tooltip "Alleen bladwijzers bekijken (S)">
@@ -11,7 +13,9 @@
 <!ENTITY showOptions.tooltip "Digest-opties openen">
 <!ENTITY sidebarSplitter.tooltip "Dubbelklik om de zijbalk te verbergen">
 <!ENTITY revealSidebar.tooltip "Zijbalk weergeven">
-<!ENTITY markViewRead.tooltip "Alle berichten als gelezen markeren (houd Ctrl ingedrukt om alleen de huidige pagina te markeren)">
+<!ENTITY markViewRead.tooltip "Alle berichten als gelezen markeren (Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Feed als gelezen markeren">
 <!ENTITY ctxMarkFeedUnread.label "Als ongelezen markeren">
 <!ENTITY ctxMarkFolderRead.label "Map als gelezen markeren">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Alle feeds als gelezen markeren">
 <!ENTITY showUnreadCounter.label "Aantal ongelezen berichten weergeven">
 <!ENTITY ctxShowOptions.label "Opties">
-<!ENTITY compactingWindow.title "Feeds compacteren">
-<!ENTITY compactingInProgress.label "Digest compacteert opgeslagen feeds. Dit kan enkele minuten duren…">

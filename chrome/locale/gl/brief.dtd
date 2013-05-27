@@ -3,6 +3,8 @@
 <!ENTITY unreadFolder.label "Sen ler">
 <!ENTITY starredFolder.label "Marcadores">
 <!ENTITY trashFolder.label "Lixo">
+
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Ver as cabeceiras (F)">
 <!ENTITY filterUnread.tooltip "Visualizar só os elementos sen ler (D)">
 <!ENTITY filterStarred.tooltip "Visualizar só os marcadores (S)">
@@ -12,6 +14,8 @@
 <!ENTITY sidebarSplitter.tooltip "Facer dobre clic para ocultar a barra lateral">
 <!ENTITY revealSidebar.tooltip "Amosar a barra lateral">
 <!ENTITY markViewRead.tooltip "Marcar todos os elementos como lidos (Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Marcar a fonte como lida">
 <!ENTITY ctxMarkFeedUnread.label "Marcar a fonte como non lida">
 <!ENTITY ctxMarkFolderRead.label "Marcar o cartafol como lido">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Marcar todas as fontes como lidas">
 <!ENTITY showUnreadCounter.label "Amosar o nome de elementos sen ler">
 <!ENTITY ctxShowOptions.label "Opcións">
-<!ENTITY compactingWindow.title "Compactando as fontes">
-<!ENTITY compactingInProgress.label "O Digest está a compactar as fontes almacenadas. Este proceso pode levar algúns minutos...">

@@ -4,6 +4,8 @@
 <!ENTITY starredFolder.label "Zakładki">
 <!ENTITY trashFolder.label "Kosz">
 <!ENTITY headlinesCheckbox.tooltip "Zmień widok nagłówków (F)">
+
+<!-- Button tooltips -->
 <!ENTITY filterUnread.tooltip "Wyświetlaj tylko nieprzeczytane (D)">
 <!ENTITY filterStarred.tooltip "Wyświetlaj tylko zakładki (S)">
 <!ENTITY updateButton.tooltip "Pobierz nowe wiadomości ze wszystkich kanałów">
@@ -11,7 +13,9 @@
 <!ENTITY showOptions.tooltip "Otwórz opcje rozszerzenia">
 <!ENTITY sidebarSplitter.tooltip "Kliknij dwukrotnie, aby ukryć panel">
 <!ENTITY revealSidebar.tooltip "Przywróć panel">
-<!ENTITY markViewRead.tooltip "Oznacz wszystkie wiadomości jako przeczytane">
+<!ENTITY markViewRead.tooltip "Oznacz wszystkie wiadomości jako przeczytane (Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Oznacz kanał jako przeczytany">
 <!ENTITY ctxMarkFeedUnread.label "Oznacz kanał jako nieprzeczytany">
 <!ENTITY ctxMarkFolderRead.label "Oznacz folder jako przeczytany">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Oznacz wszystkie kanały jako przeczytane">
 <!ENTITY showUnreadCounter.label "Wyświetlaj liczbę nieprzeczytanych wiadomości">
 <!ENTITY ctxShowOptions.label "Opcje">
-<!ENTITY compactingWindow.title "Porządkowanie kanałów">
-<!ENTITY compactingInProgress.label "Digest porządkuje kanały… Operacja ta może potrwać dłuższą chwilę.">

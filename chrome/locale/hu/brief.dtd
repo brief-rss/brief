@@ -3,6 +3,8 @@
 <!ENTITY unreadFolder.label "Olvasatlan">
 <!ENTITY starredFolder.label "Könyvjelzők">
 <!ENTITY trashFolder.label "Törölt bejegyzések">
+
+<!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Fejléc nézet használata (F)">
 <!ENTITY filterUnread.tooltip "Csak olvasatlan elemek (D)">
 <!ENTITY filterStarred.tooltip "Csak a Könyvjelzők (S)">
@@ -11,7 +13,9 @@
 <!ENTITY showOptions.tooltip "Digest – Beállítások">
 <!ENTITY sidebarSplitter.tooltip "Duplakattintás az oldalsáv elrejtéséhez">
 <!ENTITY revealSidebar.tooltip "Oldalsáv megjelenítése">
-<!ENTITY markViewRead.tooltip "Mindegyik elem megjelölése olvasottként (CTRL csak a jelenlegit)">
+<!ENTITY markViewRead.tooltip "Mindegyik elem megjelölése olvasottként (Alt + N)">
+
+<!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Hírforrást olvasottnak jelöl">
 <!ENTITY ctxMarkFeedUnread.label "Megjelölés olvasatlanként">
 <!ENTITY ctxMarkFolderRead.label "Mappát olvasottnak jelöl">
@@ -31,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Hírforrások jelölése olvasottként">
 <!ENTITY showUnreadCounter.label "Olvasatlan elemek számának megjelenítése">
 <!ENTITY ctxShowOptions.label "Beállítások">
-<!ENTITY compactingWindow.title "Hírforrások tömörítése">
-<!ENTITY compactingInProgress.label "A Digest tömöríti a mentett hírforrásokat. Kérem várjon...">

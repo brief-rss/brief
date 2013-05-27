@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "Opførsel">
 <!ENTITY openInNewTab.label "Åbn Digest i et nyt faneblad">
 <!ENTITY openInNewTab.accesskey "Å">
-<!ENTITY openEntriesInTabs.label "Åbn emner i nye faneblade">
-<!ENTITY openEntriesInTabs.accesskey "b">
 <!ENTITY storingGroup.caption "Opbevaring">
 <!ENTITY expirationBefore.label "Fjern hentede emner efter">
 <!ENTITY expirationAfter.label "dage">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Marker emner som læste efter jeg har set dem">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Fremhæv altid nuværende emne">
-<!ENTITY enableItemHightlight.accesskey "F">
 <!ENTITY customizeGroup.caption "Udseende">
 <!ENTITY shortcutsPane.label "Genveje">
 <!ENTITY editStyleDescription.label "Tilpas udseendet for feeds">

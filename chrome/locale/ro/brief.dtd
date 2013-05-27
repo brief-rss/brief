@@ -3,6 +3,7 @@
 <!ENTITY unreadFolder.label "Necitite">
 <!ENTITY starredFolder.label "Marcaje">
 <!ENTITY trashFolder.label "Gunoi">
+
 <!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Vizualizează titlurile (F)">
 <!ENTITY filterUnread.tooltip "Vizualizează doar elementele necitite (D)">
@@ -13,6 +14,7 @@
 <!ENTITY sidebarSplitter.tooltip "Dublu-clic pentru a ascunde bara laterală">
 <!ENTITY revealSidebar.tooltip "Arată bara laterală">
 <!ENTITY markViewRead.tooltip "Marchează toate elementele ca citite (Alt + N)">
+
 <!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Marchează fluxul ca citit">
 <!ENTITY ctxMarkFeedUnread.label "Marchează fluxul ca necitit">
@@ -33,5 +35,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Marchează toate fluxurile ca citite">
 <!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite">
 <!ENTITY ctxShowOptions.label "Opțiuni">
-<!ENTITY compactingWindow.title "Comprimă fluxurile">
-<!ENTITY compactingInProgress.label "Digest comprimă fluxurile păstrate. Acest lucru poate lua cîteva minute...">

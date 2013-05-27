@@ -12,8 +12,6 @@
 <!ENTITY behaviorGroup.caption "動作">
 <!ENTITY openInNewTab.label "Digest を新しいタブで開く">
 <!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "項目を新しいタブで開く">
-<!ENTITY openEntriesInTabs.accesskey "e">
 <!ENTITY storingGroup.caption "保管">
 <!ENTITY expirationBefore.label "ダウンロードした項目を">
 <!ENTITY expirationAfter.label "日後に削除する">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "項目を見たら既読にする">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "常に現在の項目を強調表示する">
-<!ENTITY enableItemHightlight.accesskey "A">
 <!ENTITY customizeGroup.caption "外観">
 <!ENTITY shortcutsPane.label "ショートカット">
 <!ENTITY editStyleDescription.label "フィードの外観をカスタマイズする">
