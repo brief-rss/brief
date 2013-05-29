@@ -405,7 +405,7 @@ let PrefObserver = {
         if (aTopic != 'nsPref:changed')
             return;
 
-        for (key in this._cachedPrefs) {
+        for (let key in this._cachedPrefs) {
             if (aData == this._cachedPrefs[key])
                 this._updateCachedPref(key);
         }
