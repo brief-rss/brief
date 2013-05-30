@@ -2,6 +2,7 @@ const Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://digest/content/firstrun.xhtml',
     RELEASE_NOTES_URL_PREFIX: 'https://github.com/Tanriol/digest/wiki/Digest-',
+    RELEASE_NOTES_VERSION_REGEXP: /^\w+\.\w+/,
 
     BRIEF_URL: 'chrome://digest/content/brief.xul',
     BRIEF_FAVICON_URL: 'chrome://digest/skin/feed-icon-16x16.png',
@@ -118,9 +119,10 @@ const Brief = {
                 let prevVersion = this.prefs.getCharPref('lastVersion');
                 let migrated = Services.prefs.getBranch('extensions.digest.').
                         QueryInterface(Ci.nsIPrefBranch2).getBoolPref('migrated');
+                let regexp = this.RELEASE_NOTES_VERSION_REGEXP;
 
-                if (!migrated || (Services.vc.compare(prevVersion, addon.version) < 0)) {
-                    let url = this.RELEASE_NOTES_URL_PREFIX + addon.version;
+                if (!migrated || (Services.vc.compare(regexp.exec(prevVersion), regexp.exec(addon.version)) < 0)) {
+                    let url = this.RELEASE_NOTES_URL_PREFIX + regexp.exec(addon.version);
                     setTimeout(function() {
                         let parameters = { relatedToCurrent: false, inBackground: false };
                         gBrowser.loadOneTab(url, parameters)
