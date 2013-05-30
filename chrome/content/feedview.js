@@ -1126,6 +1126,10 @@ EntryView.prototype = {
     },
 
     onClick: function EntryView_onClick(aEvent) {
+        // If the item is already being removed, no action should be taken
+        if(this.container.getAttribute("removing"))
+            return;
+
         this.feedView.selectEntry(this.id);
 
         // Walk the parent chain of the even target to check if an anchor was clicked.
