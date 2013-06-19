@@ -356,7 +356,7 @@ FeedView.prototype = {
     handleEvent: function FeedView_handleEvent(aEvent) {
         // Checking if default action has been prevented helps Brief play nice with
         // other extensions.
-        if (aEvent.getPreventDefault())
+        if (aEvent.defaultPrevented)
             return;
 
         switch (aEvent.type) {
