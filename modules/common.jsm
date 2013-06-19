@@ -110,12 +110,23 @@ RelativeDate.prototype = {
 
     get deltaYears() this._getDelta(31536000000),
 
+    get intervalMinutes() this._getInterval(60000),
+
+    get intervalHours() this._getInterval(3600000),
+
+    get intervalDays() this._getInterval(86400000),
+
+    get intervalYears() this._getInterval(31536000000),
+
     _getDelta: function RelativeDate__getDelta(aDivisor) {
         let current = Math.ceil(this.currentTime / aDivisor);
         let target = Math.ceil(this.targetTime / aDivisor);
         return current - target;
-    }
+    },
 
+    _getInterval: function RelativeDate__getInterval(aDivisor) {
+        return Math.floor((this.currentTime - this.targetTime) / aDivisor);
+    }
 }
 
 

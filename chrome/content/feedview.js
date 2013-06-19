@@ -1265,22 +1265,22 @@ EntryView.prototype = {
         }
         else {
             switch (true) {
-                case relativeDate.deltaMinutes === 0:
+                case relativeDate.intervalMinutes === 0:
                     string = Strings['entryDate.justNow'];
                     break;
 
-                case relativeDate.deltaHours === 0:
-                    let minuteForm = getPluralForm(relativeDate.deltaMinutes,
+                case relativeDate.intervalHours === 0:
+                    let minuteForm = getPluralForm(relativeDate.intervalMinutes,
                                                    Strings['minute.pluralForms']);
                     string = bundle.getFormattedString('entryDate.ago', [minuteForm], 1)
-                                   .replace('#number', relativeDate.deltaMinutes);
+                                   .replace('#number', relativeDate.intervalMinutes);
                     break;
 
-                case relativeDate.deltaHours <= 12:
-                    let hourForm = getPluralForm(relativeDate.deltaHours,
+                case relativeDate.intervalHours <= 12:
+                    let hourForm = getPluralForm(relativeDate.intervalHours,
                                                  Strings['hour.pluralForms']);
                     string = bundle.getFormattedString('entryDate.ago', [hourForm], 1)
-                                   .replace('#number', relativeDate.deltaHours);
+                                   .replace('#number', relativeDate.intervalHours);
                     break;
 
                 case relativeDate.deltaDays === 0:
