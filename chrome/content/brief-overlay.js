@@ -248,20 +248,20 @@ const Brief = {
         let relativeDate = new this.common.RelativeDate(lastUpdateTime);
 
         switch (true) {
-            case relativeDate.deltaMinutes === 0:
+            case relativeDate.intervalMinutes === 0:
                 label.value = bundle.GetStringFromName('lastUpdated.rightNow');
                 break;
 
-            case relativeDate.deltaHours === 0:
+            case relativeDate.intervalHours === 0:
                 let string = bundle.GetStringFromName('lastUpdated.minutes');
-                label.value = this.common.getPluralForm(relativeDate.deltaMinutes, string)
-                                         .replace('#number', relativeDate.deltaMinutes);
+                label.value = this.common.getPluralForm(relativeDate.intervalMinutes, string)
+                                         .replace('#number', relativeDate.intervalMinutes);
                 break;
 
             case relativeDate.deltaHours <= 12:
                 string = bundle.GetStringFromName('lastUpdated.hours');
-                label.value = this.common.getPluralForm(relativeDate.deltaHours, string)
-                                         .replace('#number', relativeDate.deltaHours);
+                label.value = this.common.getPluralForm(relativeDate.intervalHours, string)
+                                         .replace('#number', relativeDate.intervalHours);
                 break;
 
             case relativeDate.deltaDays === 0:

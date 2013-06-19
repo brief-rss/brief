@@ -1226,18 +1226,18 @@ EntryView.prototype = {
         let string;
 
         switch (true) {
-            case relativeDate.deltaMinutes === 0 && !aOnlyDatePart:
+            case relativeDate.intervalMinutes === 0 && !aOnlyDatePart:
                 string = Strings['entryDate.justNow'];
                 break;
 
-            case relativeDate.deltaHours === 0 && !aOnlyDatePart:
-                let pluralForm = getPluralForm(relativeDate.deltaMinutes, Strings['entryDate.minutes']);
-                string = pluralForm.replace('#number', relativeDate.deltaMinutes);
+            case relativeDate.intervalHours === 0 && !aOnlyDatePart:
+                let pluralForm = getPluralForm(relativeDate.intervalMinutes, Strings['entryDate.minutes']);
+                string = pluralForm.replace('#number', relativeDate.intervalMinutes);
                 break;
 
             case relativeDate.deltaHours <= 12 && !aOnlyDatePart:
-                pluralForm = getPluralForm(relativeDate.deltaHours, Strings['entryDate.hours']);
-                string = pluralForm.replace('#number', relativeDate.deltaHours);
+                pluralForm = getPluralForm(relativeDate.intervalHours, Strings['entryDate.hours']);
+                string = pluralForm.replace('#number', relativeDate.intervalHours);
                 break;
 
             case relativeDate.deltaDays === 0:
