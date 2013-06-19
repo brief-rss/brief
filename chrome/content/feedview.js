@@ -382,11 +382,7 @@ FeedView.prototype = {
                 }
                 else if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
-
-                    function selectCentralEntry() {
-                        this.selectEntry(this.getEntryInScreenCenter());
-                    }
-                    this._scrollSelectionTimeout = async(selectCentralEntry, 100, this);
+                    this._scrollSelectionTimeout = async(function() this.selectEntry(this.getEntryInScreenCenter()), 100, this);
                 }
 
                 this._fillWindow(WINDOW_HEIGHTS_LOAD);
