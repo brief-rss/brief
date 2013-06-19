@@ -75,12 +75,15 @@ article.read .title-link {
 
 
 /* ----------------------  Article subheader  ---------------------- */
-/*
-.subheader, .subheader-left, .subheader-right,
-.feed-name, .tags, .date, .updated, .authors {
+
+.subheader, .subheader-left, .subheader-right {
     display: -moz-box;
 }
-*/
+
+.feed-name, .tags, .date, .updated, .authors {
+    display: inline-block;
+}
+
 .subheader {
     width: -moz-available;
     margin: 5px 10px 5px 40px;
