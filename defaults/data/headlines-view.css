@@ -85,7 +85,7 @@ article.was-selected:not(:hover) .headline-header {
 }
 
 .headline-feed-name {
-    display: -moz-box;
+    /*display: -moz-box;*/
     margin-right: 30px;
     width: 100px;
     overflow: hidden;
@@ -119,7 +119,7 @@ body:not(.multiple-feeds) .headline-feed-name {
 }
 
 .headline-title {
-    display: -moz-box;
+    /*display: -moz-box;*/
     -moz-box-flex: 1;
     overflow: hidden;
     font-weight: bold;
