@@ -503,7 +503,12 @@ FeedView.prototype = {
         // entries with a newer date than that anchor.
         if (this.enoughEntriesPreloaded) {
             let query = this.getQueryCopy();
-            query.startDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
+            let edgeDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
+
+            if (query.sortDirection == Query.prototype.SORT_DESCENDING)
+                query.startDate = edgeDate;
+            else
+                query.endDate = edgeDate;
 
             this._loadedEntries = yield query.getEntries(resume);
 
