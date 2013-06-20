@@ -14,7 +14,7 @@ const Brief = {
     get prefs() {
         delete this.prefs;
         return this.prefs = Services.prefs.getBranch('extensions.brief.')
-                                          .QueryInterface(Ci.nsIPrefBranch2);
+                                          .QueryInterface(Ci.nsIPrefBranch);
     },
 
     get storage() {
@@ -118,7 +118,7 @@ const Brief = {
             AddonManager.getAddonByID('digest@tanriol.github.io', function(addon) {
                 let prevVersion = this.prefs.getCharPref('lastVersion');
                 let migrated = Services.prefs.getBranch('extensions.digest.').
-                        QueryInterface(Ci.nsIPrefBranch2).getBoolPref('migrated');
+                        QueryInterface(Ci.nsIPrefBranch).getBoolPref('migrated');
                 let regexp = this.RELEASE_NOTES_VERSION_REGEXP;
 
                 if (!migrated || (Services.vc.compare(regexp.exec(prevVersion), regexp.exec(addon.version)) < 0)) {
@@ -129,7 +129,7 @@ const Brief = {
                     }, 500)
                     this.prefs.setCharPref('lastVersion', addon.version);
                     Services.prefs.getBranch('extensions.digest.').
-                            QueryInterface(Ci.nsIPrefBranch2).setBoolPref('migrated', true);
+                            QueryInterface(Ci.nsIPrefBranch).setBoolPref('migrated', true);
                 }
             }.bind(this))
         }

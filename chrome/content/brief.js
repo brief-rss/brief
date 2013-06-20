@@ -357,7 +357,7 @@ function getTopWindow() {
 
 
 let Prefs = Services.prefs.getBranch('extensions.brief.')
-                          .QueryInterface(Ci.nsIPrefBranch2);
+                          .QueryInterface(Ci.nsIPrefBranch);
 
 let PrefCache = {};
 

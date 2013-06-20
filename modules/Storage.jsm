@@ -73,7 +73,7 @@ const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 XPCOMUtils.defineLazyServiceGetter(this, 'Bookmarks', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
 XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
-    return Services.prefs.getBranch('extensions.brief.').QueryInterface(Ci.nsIPrefBranch2);
+    return Services.prefs.getBranch('extensions.brief.').QueryInterface(Ci.nsIPrefBranch);
 })
 XPCOMUtils.defineLazyGetter(this, 'Places', function() {
     Components.utils.import('resource://gre/modules/PlacesUtils.jsm');

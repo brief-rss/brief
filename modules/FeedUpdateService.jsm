@@ -27,7 +27,7 @@ const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
 
 
 XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
-    return Services.prefs.getBranch('extensions.brief.').QueryInterface(Ci.nsIPrefBranch2);
+    return Services.prefs.getBranch('extensions.brief.').QueryInterface(Ci.nsIPrefBranch);
 })
 XPCOMUtils.defineLazyGetter(this, 'Storage', function() {
     let tempScope = {};
