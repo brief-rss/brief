@@ -1526,8 +1526,8 @@ let BookmarkObserver = {
             })
         }
         else {
-            Utils.getEntriesByBookmarkID(aItemID, function BookmarkObserver_onBeforeItemRemoved_int(aEntries) {
-                let resume = BookmarkObserver_onBeforeItemRemoved_int.resume;
+            Utils.getEntriesByBookmarkID(aItemID, function BookmarkObserver_onItemRemoved_int(aEntries) {
+                let resume = BookmarkObserver_onItemRemoved_int.resume;
 
                 // Look for other bookmarks for this URI. If there is another
                 // bookmark for this URI, don't unstar the entry, but update
