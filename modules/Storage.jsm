@@ -1503,9 +1503,6 @@ let BookmarkObserver = {
     }.gen(),
 
     // nsINavBookmarkObserver
-    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved(aItemID, aItemType) { },
-
-    // nsINavBookmarkObserver
     onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType, aURI) {
         let resume = BookmarkObserver_onItemRemoved.resume;
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
