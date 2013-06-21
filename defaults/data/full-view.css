@@ -76,12 +76,9 @@ article.read .title-link {
 
 /* ----------------------  Article subheader  ---------------------- */
 
-.subheader, .subheader-left, .subheader-right {
-    display: -moz-box;
-}
-
+.subheader, .subheader-left, .subheader-right,
 .feed-name, .tags, .date, .updated, .authors {
-    display: inline-block;
+    display: -moz-box;
 }
 
 .subheader {
