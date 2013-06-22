@@ -55,9 +55,9 @@
 <!ENTITY expireEntriesPerFeedAfter.label "días">
 <!ENTITY updatedEntries.label "No marcar los elementos modificados como no leídos">
 <!ENTITY updatedEntries.accesskey "m">
-<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
-<!ENTITY omitInUnread.accesskey "O">
-<!ENTITY previousFeed.label "&lt; Anterior">
+<!ENTITY omitInUnread.label "Excluir los elementos de este canal de la cuenta global de elementos no leídos">
+<!ENTITY omitInUnread.accesskey "x">
+<!ENTITY previousFeed.label "« Anterior">
 <!ENTITY previousFeed.accesskey "A">
-<!ENTITY nextFeed.label "Siguiente &gt;">
+<!ENTITY nextFeed.label "Siguiente »">
 <!ENTITY nextFeed.accesskey "S">

@@ -6,11 +6,11 @@
 <!ENTITY shiftSpace.key "Mayús. + Espacio">
 <!ENTITY nextItem "Ir al elemento siguiente">
 <!ENTITY previousItem "Ir al elemento anterior">
-<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
-<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY scrollDownByScreen "Desplazarse una pantalla hacia abajo">
+<!ENTITY scrollUpByScreen "Desplazarse una pantalla hacia arriba">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Abrir el elemento actual">
-<!ENTITY showItem "Conmutar la visibilidad del elemento actual (en la vista de titulares)">
+<!ENTITY showItem "Cambiar la visibilidad del elemento actual (en la vista de titulares)">
 
 <!ENTITY entries.header "Elementos">
 <!ENTITY tab.key "Tab">
