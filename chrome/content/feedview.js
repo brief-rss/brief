@@ -590,6 +590,10 @@ FeedView.prototype = {
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
 
+                if (this.selectedEntry == entry) {
+                    this.__selectedEntry = null;
+                }
+
                 if (this.headlinesView) {
                     let dayHeader = this.document.getElementById('day' + entryView.day);
                     if (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1')
