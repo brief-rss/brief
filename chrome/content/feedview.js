@@ -505,18 +505,17 @@ FeedView.prototype = {
             let query = this.getQueryCopy();
             query.startDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
 
-            this._loadedEntries = yield query.getEntries(resume);
+            let expectedEntries = yield query.getEntries(resume);
 
-            let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
+            let newEntries = aAddedEntries.filter(function(entry) expectedEntries.indexOf(entry) !== -1, this);
             if (newEntries.length) {
                 let query = new Query({
                     sortOrder: this.query.sortOrder,
                     sortDirection: this.query.sortDirection,
                     entries: newEntries
                 })
-
                 for (let entry in yield query.getFullEntries(resume))
-                    this._insertEntry(entry, this.getEntryIndex(entry.id));
+                    this._insertEntry(entry, expectedEntries.indexOf(entry.id));
 
                 this._setEmptyViewMessage();
             }
@@ -758,10 +757,8 @@ FeedView.prototype = {
             }
 
             let loadedEntries = yield query.getFullEntries(resume);
-            for (let entry in loadedEntries) {
+            for (let entry in loadedEntries)
                 this._insertEntry(entry, this._loadedEntries.length);
-                this._loadedEntries.push(entry.id);
-            }
 
             this._loading = false;
             aCallback(loadedEntries.length);
@@ -795,6 +792,7 @@ FeedView.prototype = {
 
         this.feedContent.insertBefore(entryView.container, nextElem);
 
+        this._loadedEntries.splice(aPosition, 0, aEntryData.id);
         this._entryViews.splice(aPosition, 0, entryView);
     },
 
