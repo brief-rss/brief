@@ -1,0 +1,36 @@
+<!ENTITY shortcutsPage.title "Digest - 鍵盤快速鍵">
+<!ENTITY or "或">
+
+<!ENTITY navigation.header "導覽">
+<!ENTITY space.key "空白鍵">
+<!ENTITY shiftSpace.key "Shift - 空白鍵">
+<!ENTITY nextItem "跳到下一個項目">
+<!ENTITY previousItem "跳到前一個項目">
+<!ENTITY scrollDownByScreen "向下捲動螢幕高度">
+<!ENTITY scrollUpByScreen "向上捲動螢幕高度">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "開啟目前的項目">
+<!ENTITY showItem "顯示/隱藏目前的項目 (在標題條列模式)">
+
+<!ENTITY entries.header "項目">
+<!ENTITY tab.key "Tab">
+<!ENTITY enableEntryHightlight "突顯目前的項目">
+<!ENTITY markCurrentItemRead "標記目前的項目為已讀/未讀">
+<!ENTITY markVisibleRead "標記螢幕上所有項目為已讀">
+<!ENTITY altN.key "Alt - N">
+<!ENTITY markAllRead "標記所有項目為已讀">
+<!ENTITY starItem "目前項目加入書籤">
+<!ENTITY moveToTrash "目前項目移到垃圾筒">
+
+<!ENTITY view.header "觀看">
+<!ENTITY showAll "顯示所有項目">
+<!ENTITY showStarred "顯示加入書籤的項目">
+<!ENTITY showUnread "顯示未讀項目">
+<!ENTITY headlinesView "切換為標題條列模式">
+
+<!ENTITY general.header "一般">
+<!ENTITY ctrlAltD.key "Ctrl - Alt - D">
+<!ENTITY cmdAltD.key "Command - Alt - D">
+<!ENTITY openBrief "開啟 Digest">
+<!ENTITY focusSearchbar "切換到搜尋欄">
+<!ENTITY displayShortcuts "顯示鍵盤快速鍵清單">

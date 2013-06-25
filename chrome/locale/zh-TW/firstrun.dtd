@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Digest">
+<!ENTITY thankYou.header "感謝安裝 Digest">
+<!ENTITY subscribingStep1.description "點位址列裏的圖示即可預覽來源。">
+<!ENTITY subscribingStep1firefox4.description "開啟<strong>書籤</strong>選單、選<strong>訂閱這個網頁</strong>。">
+<!ENTITY subscribingStep2.description "選<strong>動態書籤</strong>、點擊<strong>立即訂閱</strong>。">
+<!ENTITY subscribingStep3.description "選擇書籤選單中的<strong>RSS Feeds</strong>資料夾。">
+<!ENTITY getStartedButton.label "開始使用">

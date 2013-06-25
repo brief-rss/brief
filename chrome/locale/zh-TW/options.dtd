@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Digest 選項">
+<!ENTITY mainPane.label "主要">
+<!ENTITY updateGroup.caption "更新">
+<!ENTITY checkForUpdatesBefore.label "檢查更新：每">
+<!ENTITY checkForUpdates.accesskey "C">
+<!ENTITY updateIntervalMinutes.label "分鐘">
+<!ENTITY updateIntervalHours.label "小時">
+<!ENTITY updateIntervalDays.label "天">
+<!ENTITY checkForUpdatesAfter.label "分鐘">
+<!ENTITY showNotification.label "找到新項目時顯示通知">
+<!ENTITY showNotification.accesskey "S">
+<!ENTITY behaviorGroup.caption "動作">
+<!ENTITY openInNewTab.label "在新分頁開啟 Digest">
+<!ENTITY openInNewTab.accesskey "B">
+<!ENTITY storingGroup.caption "儲存">
+<!ENTITY expirationBefore.label "移除下載項目：">
+<!ENTITY expirationAfter.label "天後">
+<!ENTITY expirationCheckbox.accesskey "R">
+<!ENTITY starredItemsKept.tooltip "保存已加入書籤的項目">
+<!ENTITY storedEntriesBefore.label "每個來源只保存">
+<!ENTITY storedEntriesAfter.label "個最新的項目">
+<!ENTITY storedEntriesCheckbox.accesskey "n">
+<!ENTITY clearAllEntriesButton.label "清除所有項目...">
+<!ENTITY clearAllEntriesButton.accesskey "a">
+<!ENTITY feedsPane.label "來源">
+<!ENTITY folderTree.label "存放動態書籤的資料夾：">
+<!ENTITY importOPML.label "匯入...">
+<!ENTITY importOPML.accesskey "I">
+<!ENTITY exportOPML.label "匯出...">
+<!ENTITY exportOPML.accesskey "E">
+<!ENTITY displayPane.label "顯示">
+<!ENTITY showStatusbarIcon.label "顯示狀態列圖示">
+<!ENTITY showStatusbarIcon.accesskey "t">
+<!ENTITY showUnreadCounter.label "在 Digest 圖示旁顯示未讀項目數量">
+<!ENTITY showUnreadCounter.accesskey "w">
+<!ENTITY sortUnreadViewOldestFirst.label "顯示未讀項目時舊的排在前面">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "o">
+<!ENTITY autoMarkRead.label "在我看過之後自動將項目標為已讀">
+<!ENTITY autoMarkRead.accesskey "M">
+<!ENTITY customizeGroup.caption "外觀">
+<!ENTITY shortcutsPane.label "快速鍵">
+<!ENTITY editStyleDescription.label "自訂來源的外觀">
+<!ENTITY editStyleButton.label "自訂">
+<!ENTITY editStyleButton.accesskey "u">
+<!ENTITY styleEditor.title "編輯自訂樣式">
+<!ENTITY seeCustomizationTips.label "學習用 CSS 自訂外觀">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "名稱">
+<!ENTITY feedURL.label "網址">
+<!ENTITY optionsGroupbox.caption "來源設定">
+<!ENTITY checkUpdatesPerFeedBefore.label "檢查更新：每">
+<!ENTITY checkUpdatesPerFeed.accesskey "C">
+<!ENTITY expireEntriesPerFeedBefore.label "移除已下載項目：">
+<!ENTITY expireEntriesPerFeed.accesskey "R">
+<!ENTITY expireEntriesPerFeedAfter.label "天後">
+<!ENTITY updatedEntries.label "不要將有更新的項目又改標記為未讀">
+<!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "不要將這個來源的未讀項目數加入總未讀數量">
+<!ENTITY omitInUnread.accesskey "O">
+<!ENTITY previousFeed.label "&lt; 上一個">
+<!ENTITY previousFeed.accesskey "P">
+<!ENTITY nextFeed.label "下一個 &gt;">
+<!ENTITY nextFeed.accesskey "N">
