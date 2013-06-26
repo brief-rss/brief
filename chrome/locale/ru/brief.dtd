@@ -3,9 +3,9 @@
 <!ENTITY unreadFolder.label "Непрочитанные">
 <!ENTITY starredFolder.label "Отмеченные записи">
 <!ENTITY trashFolder.label "Корзина">
-<!ENTITY headlinesCheckbox.tooltip "Режим просмотра заголовков">
 
 <!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Режим просмотра заголовков (F)">
 <!ENTITY filterUnread.tooltip "Показывать только непрочитанное (D)">
 <!ENTITY filterStarred.tooltip "Показывать только закладки (S)">
 <!ENTITY updateButton.tooltip "Проверить обновления для всех лент">

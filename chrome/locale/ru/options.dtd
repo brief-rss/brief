@@ -55,7 +55,7 @@
 <!ENTITY expireEntriesPerFeedAfter.label "дней">
 <!ENTITY updatedEntries.label "Не отмечать измененные записи прочитанными">
 <!ENTITY updatedEntries.accesskey "Н">
-<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.label "Не включать записи этой ленты в общее число непрочитанных">
 <!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "« Предыдущая">
 <!ENTITY previousFeed.accesskey "П">
