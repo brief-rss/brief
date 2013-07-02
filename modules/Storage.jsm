@@ -266,6 +266,15 @@ let StorageInternal = {
 
         Connection.executeSQL('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE);
 
+        Connection.executeSQL(
+            'DELETE FROM entries WHERE rowid NOT IN ' +
+            '(SELECT docid FROM entries_text)');
+        Connection.executeSQL(
+            'DELETE FROM entries_text WHERE docid NOT IN ' +
+            '(SELECT rowid FROM entries)');
+        Connection.executeSQL(
+            'INSERT OR IGNORE INTO entries_text(rowid) SELECT seq FROM sqlite_sequence WHERE name=\'entries\';');
+
         this.refreshFeedsCache();
 
         this.homeFolderID = Prefs.getIntPref('homeFolder');
