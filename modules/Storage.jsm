@@ -318,7 +318,7 @@ let StorageInternal = {
                                       '         FROM entries                          '+
                                       '         WHERE entries_text.rowid = entries.id '+
                                       '     )                                         '+
-                                     ')                                              ');
+                                     ')  AND rowid <> (SELECT max(rowid) from entries_text)  ');
 
             // To 1.5b3
             case 10:
@@ -1930,13 +1930,14 @@ let Stm = {
     },
 
     get purgeDeletedEntriesText() {
+        // Fixed for index mismatch between entries and entries_text
         let sql = 'DELETE FROM entries_text                                                 '+
                   'WHERE rowid IN (                                                         '+
                   '   SELECT entries.id                                                     '+
                   '   FROM entries INNER JOIN feeds ON entries.feedID = feeds.feedID        '+
                   '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
                   '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
-                  ')                                                                                   ';
+                  ') AND rowid <> (SELECT max(rowid) from entries_text)                                ';
         delete this.purgeDeletedEntriesText;
         return this.purgeDeletedEntriesText = new Statement(sql);
     },
