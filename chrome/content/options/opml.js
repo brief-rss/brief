@@ -253,7 +253,7 @@ let opml = {
                     dataString += '\t';
 
                 let name = PlacesUtils.bookmarks.getItemTitle(node.itemId);
-                let url = placesItem.siteURI.spec;
+                let url = placesItem.siteURI ? placesItem.siteURI.spec : "";
                 let feedURL = placesItem.feedURI.spec;
 
                 dataString += '<outline type="rss" version="RSS" '           +
