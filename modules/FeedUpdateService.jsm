@@ -115,6 +115,9 @@ let FeedUpdateServiceInternal = {
     // Feeds that have already been fetched and parsed
     completedFeeds: [],
 
+    // The latest feed with new entries
+    latestChangedFeed: null,
+
     // Number of feeds updated in the current batch that have new entries
     feedsWithNewEntriesCount: 0,
 
@@ -242,8 +245,10 @@ let FeedUpdateServiceInternal = {
     onFeedUpdated: function FeedUpdateServiceInternal_onFeedUpdated(aFeed, aResult, aNewEntriesCount) {
         this.completedFeeds.push(aFeed);
         this.newEntriesCount += aNewEntriesCount;
-        if (aNewEntriesCount > 0)
+        if (aNewEntriesCount > 0) {
+            this.latestChangedFeed = aFeed;
             this.feedsWithNewEntriesCount++;
+        }
 
         Services.obs.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
         if (aResult == 'error')
@@ -270,7 +275,7 @@ let FeedUpdateServiceInternal = {
             let alertText;
 
             if (this.feedsWithNewEntriesCount == 1) {
-                let feedTitle = this.completedFeeds[0].title;
+                let feedTitle = this.latestChangedFeed.title;
                 feedTitle = feedTitle.length < 30 ? feedTitle : feedTitle.substr(0, 30) + '\u2026';
 
                 alertText = bundle.formatStringFromName('updateAlertText.singleFeed', [itemString, feedTitle], 2)
@@ -296,6 +301,7 @@ let FeedUpdateServiceInternal = {
 
         this.newEntriesCount = this.feedsWithNewEntriesCount = 0;
         this.completedFeeds = [];
+        this.latestChangedFeed = null;
         this.scheduledFeeds = [];
         this.updateQueue = [];
 
