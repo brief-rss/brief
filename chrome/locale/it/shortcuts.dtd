@@ -6,8 +6,8 @@
 <!ENTITY shiftSpace.key "Maiusc + spazio">
 <!ENTITY nextItem "Mostra l&apos;elemento successivo">
 <!ENTITY previousItem "Mostra l&apos;elemento precedente">
-<!ENTITY scrollDownByScreen "Scroll down by the height of the screen">
-<!ENTITY scrollUpByScreen "Scroll up by the height of the screen">
+<!ENTITY scrollDownByScreen "Mostra gli elementi successivi">
+<!ENTITY scrollUpByScreen "Mostra gli elementi precedenti">
 <!ENTITY enter.key "Invio">
 <!ENTITY openEntry "Apre l&apos;elemento selezionato">
 <!ENTITY showItem "Mostra/nasconde l&apos;anteprima dell&apos;elemento selezionato">

@@ -55,7 +55,7 @@
 <!ENTITY expireEntriesPerFeedAfter.label "">
 <!ENTITY updatedEntries.label "Non segnare elementi modificati come non letti">
 <!ENTITY updatedEntries.accesskey "N">
-<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.label "Non includere gli elementi di questo feed nel conteggio totale dei non letti">
 <!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Precedente">
 <!ENTITY previousFeed.accesskey "P">
