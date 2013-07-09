@@ -1686,7 +1686,7 @@ let LivemarksSync = function LivemarksSync() {
     query.setFolders([StorageInternal.homeFolderID], 1);
     options.excludeItems = true;
     let result = Places.history.executeQuery(query, options);
-    this.traversePlacesQueryResults(result.root, livemarks);
+    yield this.traversePlacesQueryResults(result.root, livemarks, resume);
 
     let storedFeeds = StorageInternal.getAllFeeds(true, true);
     let foundFeeds = [];
@@ -1786,7 +1786,9 @@ LivemarksSync.prototype = {
         return folderValid;
     },
 
-    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer, aLivemarks) {
+    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer, aLivemarks, aCallback) {
+        let resume = BookmarksSync_traversePlacesQueryResults.resume;
+
         aContainer.containerOpen = true;
 
         for (let i = 0; i < aContainer.childCount; i++) {
@@ -1804,10 +1806,11 @@ LivemarksSync.prototype = {
             item.bookmarkID = node.itemId.toString();
             item.parent = aContainer.itemId.toString();
 
-            if (Utils.isLivemark(node.itemId)) {
-                let feedURL = Places.livemarks.getFeedURI(node.itemId).spec;
-                item.feedURL = feedURL;
-                item.feedID = Utils.hashString(feedURL);
+            let [status, placesItem] = yield Places.livemarks.getLivemark({'id': node.itemId }, resume);
+
+            if (Components.isSuccessCode(status)) {
+                item.feedURL = placesItem.feedURI.spec;
+                item.feedID = Utils.hashString(item.feedURL);
                 item.isFolder = false;
 
                 aLivemarks.push(item);
@@ -1820,12 +1823,14 @@ LivemarksSync.prototype = {
                 aLivemarks.push(item);
 
                 if (node instanceof Ci.nsINavHistoryContainerResultNode)
-                    this.traversePlacesQueryResults(node, aLivemarks);
+                    yield this.traversePlacesQueryResults(node, aLivemarks, resume);
             }
         }
 
         aContainer.containerOpen = false;
-    }
+
+        aCallback();
+    }.gen()
 
 }
 
