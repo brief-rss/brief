@@ -1226,6 +1226,7 @@ EntryView.prototype = {
         let relativeDate = new RelativeDate(this.date.getTime());
         let currentDate = new Date();
         let string;
+        let time = aOnlyDatePart ? '' : this.date.toLocaleFormat(', %X');
 
         switch (true) {
             case relativeDate.intervalMinutes === 0 && !aOnlyDatePart:
@@ -1243,23 +1244,23 @@ EntryView.prototype = {
                 break;
 
             case relativeDate.deltaDays === 0:
-                string = Strings['entryDate.today'] + this.date.toLocaleFormat(', %X');
+                string = Strings['entryDate.today'] + time;
                 break;
 
             case relativeDate.deltaDays === 1:
-                string = Strings['entryDate.yesterday'] + this.date.toLocaleFormat(', %X');
+                string = Strings['entryDate.yesterday'] + time;
                 break;
 
             case relativeDate.deltaDays < 5:
-                string = this.date.toLocaleFormat('%A, %X')
+                string = this.date.toLocaleFormat('%A') + time;
                 break;
 
             case currentDate.getFullYear() === this.date.getFullYear():
-                string = this.date.toLocaleFormat('%d %b, %X')
+                string = this.date.toLocaleFormat('%d %b') + time;
                 break;
 
             default:
-                string = this.date.toLocaleFormat('%d %b %Y, %X')
+                string = this.date.toLocaleFormat('%d %b %Y') + time;
                 break;
         }
 
