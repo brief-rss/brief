@@ -70,7 +70,8 @@ Function.prototype.gen = function() {
         function resume() {
             try {
                 generatorFunction.resume = resume;
-                generatorInstance.send.apply(generatorInstance, arguments);
+                let arg = arguments.length <= 1 ? arguments[0] : arguments;
+                generatorInstance.send.call(generatorInstance, arg);
             }
             catch (ex if ex == StopIteration) {}
         }
