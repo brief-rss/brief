@@ -2108,7 +2108,7 @@ let Utils = {
         return uri;
     },
 
-    isBookmark: function(aItemID) {
+    isBookmark: function(aItemID) {q
         return (Bookmarks.getItemType(aItemID) === Bookmarks.TYPE_BOOKMARK);
     },
 
@@ -2118,7 +2118,8 @@ let Utils = {
     },
 
     isLivemark: function(aItemID) {
-        return Places.livemarks.isLivemark(aItemID);
+        return Utils.isFolder(aItemID) &&
+               Places.annotations.itemHasAnnotation(aItemID, Places.LMANNO_FEEDURI);
     },
 
     isFolder: function(aItemID) {
