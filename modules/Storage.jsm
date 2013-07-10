@@ -2130,7 +2130,8 @@ let Utils = {
     },
 
     isLivemark: function(aItemID) {
-        return Places.livemarks.isLivemark(aItemID);
+        return Utils.isFolder(aItemID) &&
+               Places.annotations.itemHasAnnotation(aItemID, Places.LMANNO_FEEDURI);
     },
 
     isFolder: function(aItemID) {
