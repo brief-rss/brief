@@ -1256,11 +1256,11 @@ EntryView.prototype = {
                 break;
 
             case currentDate.getFullYear() === this.date.getFullYear():
-                string = this.date.toLocaleFormat('%d %b') + time;
+                string = this.date.toLocaleFormat('%d %B') + time;
                 break;
 
             default:
-                string = this.date.toLocaleFormat('%d %b %Y') + time;
+                string = this.date.toLocaleFormat('%d %B %Y') + time;
                 break;
         }
 
