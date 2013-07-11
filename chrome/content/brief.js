@@ -103,12 +103,22 @@ let Commands = {
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
+        let url = 'chrome://digest/content/options/options.xul';
+
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == url) {
+                win.focus();
+                return;
+            }
+        }
+
         let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://digest/content/options/options.xul', 'Digest options',
-                          features, aPaneID);
+        window.openDialog(url, 'Digest options', features, aPaneID);
     },
 
     markViewRead: function cmd_markViewRead() {
@@ -251,9 +261,19 @@ let Commands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
+        let url = 'chrome://digest/content/keyboard-shortcuts.xhtml';
+
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == url) {
+                win.focus();
+                return;
+            }
+        }
+
         let height = Math.min(window.screen.availHeight, 620);
         let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
-        let url = 'chrome://digest/content/keyboard-shortcuts.xhtml';
 
         window.openDialog(url, 'Digest shortcuts', features);
     }
