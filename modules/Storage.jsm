@@ -1831,7 +1831,7 @@ LivemarksSync.prototype = {
                 aLivemarks.push(item);
 
                 if (node instanceof Ci.nsINavHistoryContainerResultNode)
-                    this.traversePlacesQueryResults(node, aLivemarks);
+                    yield this.traversePlacesQueryResults(node, aLivemarks, resume);
             }
         }
 
