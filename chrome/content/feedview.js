@@ -1216,40 +1216,65 @@ EntryView.prototype = {
         let currentDate = new Date();
         let string;
 
-        switch (true) {
-            case relativeDate.deltaMinutes === 0 && !aOnlyDatePart:
-                string = Strings['entryDate.justNow'];
-                break;
+        if (aOnlyDatePart) {
+            switch (true) {
+                case relativeDate.deltaDays === 0:
+                    string = Strings['entryDate.today'];
+                    break;
 
-            case relativeDate.deltaHours === 0 && !aOnlyDatePart:
-                let pluralForm = getPluralForm(relativeDate.deltaMinutes, Strings['entryDate.minutes']);
-                string = pluralForm.replace('#number', relativeDate.deltaMinutes);
-                break;
+                case relativeDate.deltaDays === 1:
+                    string = Strings['entryDate.yesterday'];
+                    break;
 
-            case relativeDate.deltaHours <= 12 && !aOnlyDatePart:
-                pluralForm = getPluralForm(relativeDate.deltaHours, Strings['entryDate.hours']);
-                string = pluralForm.replace('#number', relativeDate.deltaHours);
-                break;
+                case relativeDate.deltaDays < 5:
+                    string = this.date.toLocaleFormat('%A');
+                    break;
 
-            case relativeDate.deltaDays === 0:
-                string = Strings['entryDate.today'] + this.date.toLocaleFormat(', %X');
-                break;
+                case currentDate.getFullYear() === this.date.getFullYear():
+                    string = this.date.toLocaleFormat('%d %B');
+                    break;
 
-            case relativeDate.deltaDays === 1:
-                string = Strings['entryDate.yesterday'] + this.date.toLocaleFormat(', %X');
-                break;
+                default:
+                    string = this.date.toLocaleFormat('%d %B %Y');
+                    break;
+            }
+        }
+        else {
+            switch (true) {
+                case relativeDate.deltaMinutes === 0:
+                    string = Strings['entryDate.justNow'];
+                    break;
 
-            case relativeDate.deltaDays < 5:
-                string = this.date.toLocaleFormat('%A, %X')
-                break;
+                case relativeDate.deltaHours === 0:
+                    let pluralForm = getPluralForm(relativeDate.deltaMinutes, Strings['entryDate.minutes']);
+                    string = pluralForm.replace('#number', relativeDate.deltaMinutes);
+                    break;
 
-            case currentDate.getFullYear() === this.date.getFullYear():
-                string = this.date.toLocaleFormat('%d %b, %X')
-                break;
+                case relativeDate.deltaHours <= 12:
+                    pluralForm = getPluralForm(relativeDate.deltaHours, Strings['entryDate.hours']);
+                    string = pluralForm.replace('#number', relativeDate.deltaHours);
+                    break;
 
-            default:
-                string = this.date.toLocaleFormat('%d %b %Y, %X')
-                break;
+                case relativeDate.deltaDays === 0:
+                    string = Strings['entryDate.today'] + this.date.toLocaleFormat(', %X');
+                    break;
+
+                case relativeDate.deltaDays === 1:
+                    string = Strings['entryDate.yesterday'] + this.date.toLocaleFormat(', %X');
+                    break;
+
+                case relativeDate.deltaDays < 5:
+                    string = this.date.toLocaleFormat('%A, %X')
+                    break;
+
+                case currentDate.getFullYear() === this.date.getFullYear():
+                    string = this.date.toLocaleFormat('%d %b, %X')
+                    break;
+
+                default:
+                    string = this.date.toLocaleFormat('%d %b %Y, %X')
+                    break;
+            }
         }
 
         return string.replace(/:\d\d$/, ' ').replace(/^0/, '');
