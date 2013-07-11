@@ -4,6 +4,7 @@ const Brief = {
     RELEASE_NOTES_URL_PREFIX: 'http://brief.mozdev.org/versions/',
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
+    BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
 
     get statusCounter() document.getElementById('brief-status-counter'),
@@ -86,12 +87,20 @@ const Brief = {
     },
 
     showOptions: function cmd_showOptions() {
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == Brief.BRIEF_OPTIONS_URL) {
+                win.focus();
+                return;
+            }
+        }
+
         let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
-                          features);
+        window.openDialog(Brief.BRIEF_OPTIONS_URL, 'Brief options', features);
     },
 
     onTabLoad: function Brief_onTabLoad(aEvent) {
