@@ -5,6 +5,7 @@ const Brief = {
     RELEASE_NOTES_VERSION_REGEXP: /^\w+\.\w+/,
 
     BRIEF_URL: 'chrome://digest/content/brief.xul',
+    BRIEF_OPTIONS_URL: 'chrome://digest/content/options/options.xul',
     BRIEF_FAVICON_URL: 'chrome://digest/skin/feed-icon-16x16.png',
 
     get statusCounter() document.getElementById('brief-status-counter'),
@@ -88,12 +89,20 @@ const Brief = {
     },
 
     showOptions: function cmd_showOptions() {
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == Brief.BRIEF_OPTIONS_URL) {
+                win.focus();
+                return;
+            }
+        }
+
         let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://digest/content/options/options.xul', 'Digest options',
-                          features);
+        window.openDialog(Brief.BRIEF_OPTIONS_URL, 'Digest options', features);
     },
 
     onTabLoad: function Brief_onTabLoad(aEvent) {
