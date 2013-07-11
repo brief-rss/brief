@@ -48,6 +48,16 @@ function log(aMessage) {
 }
 
 
+const ThreadManager = Cc['@mozilla.org/thread-manager;1'].getService(Ci.nsIThreadManager);
+
+function defer(fn, ctx) {
+    if (ctx) {
+        fn = fn.bind(ctx);
+    }
+    ThreadManager.mainThread.dispatch(fn, 0);
+}
+
+
 function Task(aGeneratorFunction) {
     let generatorInstance = aGeneratorFunction.call(this, resume);
     resume();
@@ -74,6 +84,10 @@ Function.prototype.gen = function() {
                 generatorInstance.send.call(generatorInstance, arg);
             }
             catch (ex if ex == StopIteration) {}
+            catch (ex if ex.name == "TypeError" && // Not instanceof - it's an 'object'
+                   ex.message == "already executing generator") {
+                defer(function() resume.apply(arguments));
+            }
         }
     }
 }
