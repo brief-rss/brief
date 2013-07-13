@@ -246,7 +246,7 @@ FeedView.prototype = {
         if (targetPosition == this.window.pageYOffset)
             return;
 
-        if (aSmooth) {
+        if (aSmooth && Services.prefs.getBoolPref('general.smoothScroll')) {
             let distance = targetPosition - this.window.pageYOffset;
             let jumpCount = Math.exp(Math.abs(distance) / 400) + 6;
             jumpCount = Math.max(jumpCount, 7);
