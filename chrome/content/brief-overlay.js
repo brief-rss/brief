@@ -151,7 +151,6 @@ const Brief = {
         this.storage.addObserver(this);
         this.prefs.addObserver('', this.onPrefChanged, false);
         Services.obs.addObserver(this.refreshUI, 'brief:invalidate-feedlist', false);
-        Services.obs.addObserver(this.refreshUI, 'brief:omit-in-unread-changed', false);
 
         window.addEventListener('unload', this.onWindowUnload.bind(this), false);
     },
@@ -160,7 +159,6 @@ const Brief = {
         this.storage.removeObserver(this);
         this.prefs.removeObserver('', this.onPrefChanged);
         Services.obs.removeObserver(this.refreshUI, 'brief:invalidate-feedlist');
-        Services.obs.removeObserver(this.refreshUI, 'brief:omit-in-unread-changed');
     },
 
 

@@ -527,13 +527,13 @@ FaviconFetcher.prototype = {
     _stream:    null,
 
     finish: function FaviconFetcher_finish(aFaviconString) {
-        this.feed.lastFaviconRefresh = Date.now();
-        let oldFaviconString = this.feed.favicon;
-        this.feed.favicon = aFaviconString;
+        yield Storage.changeFeedProperties({
+            feedID: this.feed.feedID,
+            lastFaviconRefresh: Date.now(),
+            favicon: aFaviconString
+        }, FaviconFetcher_finish.resume);
 
-        yield Storage.updateFeedProperties(this.feed, FaviconFetcher_finish.resume);
-
-        if (oldFaviconString != aFaviconString)
+        if (aFaviconString != this.feed.favicon)
             Services.obs.notifyObservers(null, 'brief:feed-favicon-changed', this.feed.feedID);
     }.gen(),
 

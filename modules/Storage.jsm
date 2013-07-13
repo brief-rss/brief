@@ -144,12 +144,13 @@ const Storage = Object.freeze({
     /**
      * Updates feed properties and settings.
      *
-     * @param aFeeds
-     *        Feed object, or array of Feed objects, containing the current properties.
+     * @param aPropertyBags
+     *        An object or an array of objects containing a feedID property and name-value
+     *        pairs of properties to update. Invalid properties are ignored.
      * @param aCallback [optional]
      */
-    updateFeedProperties: function(aFeeds, aCallback) {
-        return StorageInternal.updateFeedProperties(aFeeds, aCallback);
+    changeFeedProperties: function(aPropertyBags, aCallback) {
+        return StorageInternal.changeFeedProperties(aPropertyBags, aCallback);
     },
 
     /**
@@ -379,7 +380,7 @@ let StorageInternal = {
             return this.activeFeedsCache;
     },
 
-    refreshFeedsCache: function StorageInternal_refreshFeedsCache(aSynchronous, aNotify, aCallback) {
+    refreshFeedsCache: function StorageInternal_refreshFeedsCache(aSynchronous, aCallback) {
         let resume = StorageInternal_refreshFeedsCache.resume;
 
         this.allItemsCache = null;
@@ -410,9 +411,6 @@ let StorageInternal = {
         Object.freeze(this.activeItemsCache);
         Object.freeze(this.activeFeedsCache);
 
-        if (aNotify)
-            Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '')
-
         if (aCallback)
             aCallback();
     }.gen(),
@@ -431,18 +429,50 @@ let StorageInternal = {
     },
 
     // See Storage.
-    updateFeedProperties: function StorageInternal_updateFeedProperties(aFeeds, aCallback) {
-        let feeds = Array.isArray(aFeeds) ? aFeeds : [aFeeds];
+    changeFeedProperties: function StorageInternal_changeFeedProperties(aPropertyBags, aCallback) {
+        let resume = StorageInternal_changeFeedProperties.resume;
 
-        for (let feed in feeds) {
+        let propertyBags = Array.isArray(aPropertyBags) ? aPropertyBags : [aPropertyBags];
+
+        let invalidateCache = false;
+        let invalidateFeedlist = false;
+
+        for (let propertyBag in propertyBags) {
+            let cachedFeed = Storage.getFeed(propertyBag.feedID);
+
             let params = {};
-            for (let paramName in Stm.updateFeedProperties.params)
-                params[paramName] = feed[paramName];
-            Stm.updateFeedProperties.paramSets.push(params);
+            for (let property in Stm.changeFeedProperties.params) {
+                if (property in propertyBag) {
+                    params[property] = propertyBag[property];
+
+                    cachedFeed[property] = propertyBag[property];
+                    if (property == 'hidden')
+                        invalidateCache = true;
+                }
+                else {
+                    params[property] = cachedFeed[property];
+                }
+            }
+
+            Stm.changeFeedProperties.paramSets.push(params);
+
+            for (let prop in ['hidden', 'parent', 'rowIndex', 'title', 'omitInUnread']) {
+                if (prop in propertyBag && propertyBag[prop] != cachedFeed[prop])
+                    invalidateFeedlist = true;
+            }
         }
 
-        Stm.updateFeedProperties.executeAsync(aCallback);
-    },
+        yield Stm.changeFeedProperties.executeAsync(resume);
+
+        if (invalidateCache)
+            yield StorageInternal.refreshFeedsCache(false, resume);
+
+        if (invalidateFeedlist)
+            Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
+
+        if (aCallback)
+            aCallback();
+    }.gen(),
 
     // Moves items to Trash based on age and number limits.
     expireEntries: function StorageInternal_expireEntries(aFeed) {
@@ -675,11 +705,12 @@ function FeedProcessor(aFeed, aEntries, aCallback) {
         aCallback(0);
     }
 
-    aFeed.oldestEntryDate = this.newOldestEntryDate || aFeed.oldestEntryDate;
-    aFeed.lastUpdated = Date.now();
-    aFeed.dateModified = newDateModified;
-
-    StorageInternal.updateFeedProperties(aFeed);
+    Storage.changeFeedProperties({
+        feedID: aFeed.feedID,
+        oldestEntryDate: this.newOldestEntryDate || aFeed.oldestEntryDate,
+        lastUpdated: Date.now(),
+        dateModified: newDateModified
+    });
 }
 
 FeedProcessor.prototype = {
@@ -1697,11 +1728,14 @@ let LivemarksSync = function LivemarksSync() {
     yield this.traversePlacesQueryResults(result.root, livemarks, resume);
 
     let storedFeeds = StorageInternal.getAllFeeds(true, true);
-    let foundFeeds = [];
+    let oldFeeds = [];
     let newFeeds = [];
     let changedFeeds = [];
 
+    // Iterate through the found livemarks and compare them
+    // with the feeds in the database.
     for (let livemark in livemarks) {
+        // Find the matching feed in the database.
         let feed = null;
         for (let storedFeed in storedFeeds) {
             if (storedFeed.feedID == livemark.feedID) {
@@ -1712,18 +1746,19 @@ let LivemarksSync = function LivemarksSync() {
 
         // Feed already in the database.
         if (feed) {
-            foundFeeds.push(feed);
+            oldFeeds.push(feed);
 
+            // Check if feed's properties are up to date.
             let properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
-
-            // Check if properties are up to date.
             if (feed.hidden || properties.some(function(p) feed[p] != livemark[p])) {
-                for (let prop in properties)
-                    feed[prop] = livemark[prop];
-
-                feed.hidden = 0;
-
-                changedFeeds.push(feed);
+                changedFeeds.push({
+                    'feedID'    : feed.feedID,
+                    'hidden'    : 0,
+                    'rowIndex'  : livemark.rowIndex,
+                    'parent'    : livemark.parent,
+                    'title'     : livemark.title,
+                    'bookmarkID': livemark.bookmarkID
+                });
             }
         }
         // Feed not found in the database. Insert new feed.
@@ -1742,21 +1777,29 @@ let LivemarksSync = function LivemarksSync() {
         }
     }
 
-    let missingFeeds = storedFeeds.filter(function(f) foundFeeds.indexOf(f) == -1 && !f.hidden);
+    // Hide any feeds that are no longer found among the livemarks.
+    let missingFeeds = storedFeeds.filter(function(f) oldFeeds.indexOf(f) == -1 && !f.hidden);
     for (let feed in missingFeeds) {
-        feed.hidden = Date.now();
-        changedFeeds.push(feed);
+        changedFeeds.push({
+            'feedID': feed.feedID,
+            'hidden': Date.now()
+        });
     }
 
-    if (changedFeeds.length)
-        yield StorageInternal.updateFeedProperties(changedFeeds, resume);
-
-    if (Stm.insertFeed.paramSets.length)
+    if (Stm.insertFeed.paramSets.length) {
         yield Stm.insertFeed.executeAsync(resume);
 
-    if (newFeeds.length || missingFeeds.length || changedFeeds.length) {
-        yield StorageInternal.refreshFeedsCache(false, true, resume);
+        yield StorageInternal.refreshFeedsCache(false, resume);
+        Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
+    }
 
+    if (changedFeeds.length) {
+        yield StorageInternal.changeFeedProperties(changedFeeds, false, resume);
+    }
+
+    // Update new and changed feeds. Changed feeds may need updating because
+    // they may have been unhidden.
+    if (newFeeds.length || changedFeeds.length) {
         newFeeds = newFeeds.filter(function(feed) !feed.isFolder);
         if (newFeeds.length) {
             newFeeds = newFeeds.map(function(f) StorageInternal.getFeed(f.feedID));
@@ -1775,9 +1818,8 @@ LivemarksSync.prototype = {
             for (let feed in allFeeds)
                 feed.hidden = Date.now();
 
-            StorageInternal.updateFeedProperties(allFeeds, function() {
-                StorageInternal.refreshFeedsCache(false, true);
-            })
+            StorageInternal.changeFeedProperties(allFeeds);
+
             folderValid = false;
         }
         else {
@@ -1867,7 +1909,7 @@ let Stm = {
         return this.getAllTags = new Statement(sql, { 'deletedState': Storage.ENTRY_STATE_NORMAL });
     },
 
-    get updateFeedProperties() {
+    get changeFeedProperties() {
         let sql = 'UPDATE feeds                                  ' +
                   'SET title = :title,                           ' +
                   '    subtitle = :subtitle,                     ' +
@@ -1887,8 +1929,8 @@ let Stm = {
                   '    markModifiedEntriesUnread = :markModifiedEntriesUnread, ' +
                   '    omitInUnread = :omitInUnread              ' +
                   'WHERE feedID = :feedID                        ';
-        delete this.updateFeedProperties;
-        return this.updateFeedProperties = new Statement(sql);
+        delete this.changeFeedProperties;
+        return this.changeFeedProperties = new Statement(sql);
     },
 
     get setFeedTitle() {

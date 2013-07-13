@@ -100,13 +100,17 @@ function onCheckUpdatesCheckboxCmd(aEvent) {
 function saveChanges() {
     saveLivemarksData();
 
+    let properties = {
+        feedID: gFeed.feedID,
+        omitInUnread: getElement('omit-in-unread-checkbox').checked ? 1 : 0,
+        markModifiedEntriesUnread: !getElement('updated-entries-checkbox').checked
+    }
+
     let expirationCheckbox = getElement('expiration-checkbox');
     let expirationTextbox = getElement('expiration-textbox');
-
-    if (expirationCheckbox.checked && expirationTextbox.value)
-        gFeed.entryAgeLimit = expirationTextbox.value;
-    else
-        gFeed.entryAgeLimit = 0;
+    properties.entryAgeLimit = expirationCheckbox.checked && expirationTextbox.value
+                               ? expirationTextbox.value
+                               : 0;
 
     let checkUpdatesTextbox = getElement('check-updates-textbox');
     let checkUpdatesMenulist = getElement('update-time-menulist');
@@ -131,27 +135,13 @@ function saveChanges() {
                 break;
         }
 
-        gFeed.updateInterval = intervalInMilliseconds;
+        properties.updateInterval = intervalInMilliseconds;
     }
     else {
-        gFeed.updateInterval = 0;
+        properties.updateInterval = 0;
     }
 
-    gFeed.markModifiedEntriesUnread = !getElement('updated-entries-checkbox').checked;
-
-    let omitInUnread = getElement('omit-in-unread-checkbox').checked ? 1 : 0;
-    let omitInUnreadModified = gFeed.omitInUnread != omitInUnread;
-    gFeed.omitInUnread = omitInUnread;
-
-    Storage.updateFeedProperties(gFeed, function() {
-        if (omitInUnreadModified) {
-            // Can't use any global variables here, because they are destroyed when
-            // window is closed.
-            Components.classes['@mozilla.org/observer-service;1']
-                      .getService(Components.interfaces.nsIObserverService)
-                      .notifyObservers(null, 'brief:omit-in-unread-changed', '');
-        }
-    })
+    Storage.changeFeedProperties(properties);
 
     return true;
 }
