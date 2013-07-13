@@ -463,6 +463,10 @@ let StorageInternal = {
                             case 'omitInUnread':
                                 invalidateFeedlist = true;
                                 break;
+
+                            case 'entryAgeLimit':
+                                this.expireEntries(cachedFeed);
+                                break;
                         }
                     }
                 }
@@ -486,28 +490,42 @@ let StorageInternal = {
             aCallback();
     }.gen(),
 
-    // Moves items to Trash based on age and number limits.
+    /**
+     * Moves entries to Trash if they exceed the age limit or the number limit.
+     *
+     * @param aFeed [optional]
+     *        The feed whose entries to expire. If not provided, all feeds are processed.
+     */
     expireEntries: function StorageInternal_expireEntries(aFeed) {
+        log('expire');
         let resume = StorageInternal_expireEntries.resume;
-        // Delete entries exceeding the maximum amount specified by maxStoredEntries pref.
-        if (Prefs.getBoolPref('database.limitStoredEntries')) {
-            let query = new Query({
-                feeds: [aFeed.feedID],
-                deleted: Storage.ENTRY_STATE_NORMAL,
-                starred: false,
-                sortOrder: Query.prototype.SORT_BY_DATE,
-                offset: Prefs.getIntPref('database.maxStoredEntries')
-            })
 
-            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, resume);
+        let feeds = aFeed ? [aFeed] : this.getAllFeeds();
+
+        let feedsWithAgeLimit = feeds.filter(function(f) f.entryAgeLimit);
+        let feedsWithoutAgeLimit = feeds.filter(function(f) !f.entryAgeLimit);
+
+        // Delete entries exceeding the global number limit.
+        if (Prefs.getBoolPref('database.limitStoredEntries')) {
+            for (let feed in feeds) {
+                let query = new Query({
+                    feeds: [feed.feedID],
+                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    starred: false,
+                    sortOrder: Query.prototype.SORT_BY_DATE,
+                    offset: Prefs.getIntPref('database.maxStoredEntries')
+                })
+
+                yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, resume);
+            }
         }
 
         // Delete old entries in feeds that don't have per-feed setting enabled.
-        if (Prefs.getBoolPref('database.expireEntries') && !aFeed.entryAgeLimit) {
+        if (Prefs.getBoolPref('database.expireEntries') && feedsWithoutAgeLimit.length) {
             let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
 
             let query = new Query({
-                feeds: [aFeed.feedID],
+                feeds: feedsWithoutAgeLimit.map(function(f) f.feedID),
                 deleted: Storage.ENTRY_STATE_NORMAL,
                 starred: false,
                 endDate: Date.now() - expirationAge * 86400000
@@ -517,15 +535,17 @@ let StorageInternal = {
         }
 
         // Delete old entries based on per-feed limit.
-        if (aFeed.entryAgeLimit > 0) {
-            let query = new Query({
-                feeds: [aFeed.feedID],
-                deleted: Storage.ENTRY_STATE_NORMAL,
-                starred: false,
-                endDate: Date.now() - aFeed.entryAgeLimit * 86400000
-            })
+        if (feedsWithAgeLimit.length) {
+            for (let feed in feedsWithAgeLimit) {
+                let query = new Query({
+                    feeds: [feed.feedID],
+                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    starred: false,
+                    endDate: Date.now() - feed.entryAgeLimit * 86400000
+                })
 
-            query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+                query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+            }
         }
     }.gen(),
 
@@ -579,9 +599,22 @@ let StorageInternal = {
                 break;
 
             case 'nsPref:changed':
-                if (aData == 'homeFolder') {
-                    this.homeFolderID = Prefs.getIntPref('homeFolder');
-                    this.syncWithLivemarks();
+                switch (aData) {
+                    case 'homeFolder':
+                        this.homeFolderID = Prefs.getIntPref('homeFolder');
+                        this.syncWithLivemarks();
+                        break;
+
+                    case 'database.expireEntries':
+                    case 'database.limitStoredEntries':
+                        if (Prefs.getBoolPref(aData))
+                            this.expireEntries();
+                        break;
+
+                    case 'database.entryExpirationAge':
+                    case 'database.maxStoredEntries':
+                        this.expireEntries();
+                        break;
                 }
                 break;
         }
