@@ -340,7 +340,7 @@ let FeedList = {
             icon = THROBBER_URL;
         else if (treeitem.hasAttribute('error'))
             icon = ERROR_ICON_URL;
-        else if (PrefCache.showFavicons && feed.favicon != 'no-favicon')
+        else if (PrefCache.showFavicons && feed.favicon && feed.favicon != 'no-favicon')
             icon = feed.favicon;
 
         treeitem.setAttribute('icon', icon);
@@ -499,11 +499,6 @@ let FeedList = {
                 }, false)
                 break;
 
-            case 'brief:omit-in-unread-changed':
-                ViewList.refreshItem('unread-folder');
-                if (ViewList.selectedItem && ViewList.selectedItem.id == 'unread-folder')
-                    gCurrentView.refresh();
-                break;
         }
     },
 

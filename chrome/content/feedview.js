@@ -926,7 +926,8 @@ function EntryView(aFeedView, aEntryData) {
         this._getElement('headline-title').setAttribute('title', aEntryData.title);
         this._getElement('headline-feed-name').textContent = feed.title;
 
-        let favicon = (feed.favicon != 'no-favicon') ? feed.favicon : DEFAULT_FAVICON_URL;
+        let favicon = (feed.favicon && feed.favicon != 'no-favicon') ? feed.favicon
+                                                                     : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
 
         async(function() {
