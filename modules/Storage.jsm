@@ -434,20 +434,37 @@ let StorageInternal = {
 
         let propertyBags = Array.isArray(aPropertyBags) ? aPropertyBags : [aPropertyBags];
 
-        let invalidateCache = false;
+        let tearDownCache = false;
         let invalidateFeedlist = false;
 
         for (let propertyBag in propertyBags) {
             let cachedFeed = Storage.getFeed(propertyBag.feedID);
-
             let params = {};
+
             for (let property in Stm.changeFeedProperties.params) {
                 if (property in propertyBag) {
                     params[property] = propertyBag[property];
 
-                    cachedFeed[property] = propertyBag[property];
-                    if (property == 'hidden')
-                        invalidateCache = true;
+                    if (cachedFeed[property] != propertyBag[property]) {
+                        // Update cache manually to avoid tearing it down.
+                        cachedFeed[property] = propertyBag[property];
+
+                        switch (property) {
+                            // It would be more complex to manually update cache when
+                            // the "hidden" property changes, because there are separate
+                            // arrays for active and inactive feeds.
+                            case 'hidden':
+                                tearDownCache = true;
+                                // Fall through...
+
+                            case 'parent':
+                            case 'rowIndex':
+                            case 'title':
+                            case 'omitInUnread':
+                                invalidateFeedlist = true;
+                                break;
+                        }
+                    }
                 }
                 else {
                     params[property] = cachedFeed[property];
@@ -455,16 +472,11 @@ let StorageInternal = {
             }
 
             Stm.changeFeedProperties.paramSets.push(params);
-
-            for (let prop in ['hidden', 'parent', 'rowIndex', 'title', 'omitInUnread']) {
-                if (prop in propertyBag && propertyBag[prop] != cachedFeed[prop])
-                    invalidateFeedlist = true;
-            }
         }
 
         yield Stm.changeFeedProperties.executeAsync(resume);
 
-        if (invalidateCache)
+        if (tearDownCache)
             yield StorageInternal.refreshFeedsCache(false, resume);
 
         if (invalidateFeedlist)
