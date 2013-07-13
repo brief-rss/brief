@@ -790,7 +790,7 @@ FeedProcessor.prototype = {
 
     addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
         let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
-        let markUnread = StorageInternal.getFeed(this.feed.feedID).markModifiedEntriesUnread;
+        let markUnread = Storage.getFeed(this.feed.feedID).markModifiedEntriesUnread;
 
         this.updateEntry.paramSets.push({
             'date': aEntry.date,
@@ -1473,7 +1473,7 @@ Query.prototype = {
     _traverseFolderChildren: function Query__traverseFolderChildren(aFolder) {
         let isEffectiveFolder = (this._effectiveFolders.indexOf(aFolder) != -1);
 
-        for (let item in StorageInternal.getAllFeeds(true)) {
+        for (let item in Storage.getAllFeeds(true)) {
             if (item.parent == aFolder && item.isFolder) {
                 if (isEffectiveFolder)
                     this._effectiveFolders.push(item.feedID);
@@ -1698,7 +1698,7 @@ let BookmarkObserver = {
     observe: function BookmarkObserver_observe(aSubject, aTopic, aData) {
         if (aTopic == 'timer-callback') {
             this.livemarksSyncPending = false;
-            StorageInternal.syncWithLivemarks();
+            Storage.syncWithLivemarks();
         }
     },
 
@@ -1727,7 +1727,7 @@ let LivemarksSync = function LivemarksSync() {
     let result = Places.history.executeQuery(query, options);
     yield this.traversePlacesQueryResults(result.root, livemarks, resume);
 
-    let storedFeeds = StorageInternal.getAllFeeds(true, true);
+    let storedFeeds = Storage.getAllFeeds(true, true);
     let oldFeeds = [];
     let newFeeds = [];
     let changedFeeds = [];
@@ -1794,7 +1794,7 @@ let LivemarksSync = function LivemarksSync() {
     }
 
     if (changedFeeds.length) {
-        yield StorageInternal.changeFeedProperties(changedFeeds, false, resume);
+        yield Storage.changeFeedProperties(changedFeeds, false, resume);
     }
 
     // Update new and changed feeds. Changed feeds may need updating because
@@ -1802,7 +1802,7 @@ let LivemarksSync = function LivemarksSync() {
     if (newFeeds.length || changedFeeds.length) {
         newFeeds = newFeeds.filter(function(feed) !feed.isFolder);
         if (newFeeds.length) {
-            newFeeds = newFeeds.map(function(f) StorageInternal.getFeed(f.feedID));
+            newFeeds = newFeeds.map(function(f) Storage.getFeed(f.feedID));
             FeedUpdateService.updateFeeds(newFeeds);
         }
     }
@@ -1814,11 +1814,11 @@ LivemarksSync.prototype = {
         let folderValid = true;
 
         if (StorageInternal.homeFolderID == -1) {
-            let allFeeds = StorageInternal.getAllFeeds(true);
+            let allFeeds = Storage.getAllFeeds(true);
             for (let feed in allFeeds)
                 feed.hidden = Date.now();
 
-            StorageInternal.changeFeedProperties(allFeeds);
+            Storage.changeFeedProperties(allFeeds);
 
             folderValid = false;
         }
@@ -2116,7 +2116,7 @@ let Utils = {
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
         let foundFeed = null;
-        for (let feed in StorageInternal.getAllFeeds(true)) {
+        for (let feed in Storage.getAllFeeds(true)) {
             if (feed.bookmarkID == aBookmarkID) {
                 foundFeed = feed;
                 break;
