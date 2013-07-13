@@ -115,7 +115,7 @@ const Storage = Object.freeze({
      * @returns array of Feed objects.
      */
     getAllFeeds: function(aIncludeFolders, aIncludeInactive) {
-        return StorageInternal.getAllFeeds(aIncludeFolders);
+        return StorageInternal.getAllFeeds(aIncludeFolders, aIncludeInactive);
     },
 
     /**
@@ -350,7 +350,7 @@ let StorageInternal = {
     // See Storage.
     getFeed: function StorageInternal_getFeed(aFeedID) {
         let foundFeed = null;
-        let feeds = this.getAllFeeds(true);
+        let feeds = this.getAllFeeds(true, true);
         for (let i = 0; i < feeds.length; i++) {
             if (feeds[i].feedID == aFeedID) {
                 foundFeed = feeds[i];
