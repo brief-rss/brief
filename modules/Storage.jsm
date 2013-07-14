@@ -1555,24 +1555,24 @@ let BookmarkObserver = {
     },
 
     // nsINavBookmarkObserver
-    onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aFolder, aIndex, aItemType) {
-        if (aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aFolder)) {
+    onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aParentID, aIndex, aItemType,
+                                                       aURI, aTitle, aDateAdded) {
+        if (aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aParentID)) {
             this.delayedLivemarksSync();
             return;
         }
 
         // Only care about plain bookmarks and tags.
-        if (Utils.isLivemark(aFolder) || aItemType != Bookmarks.TYPE_BOOKMARK)
+        if (Utils.isLivemark(aParentID) || aItemType != Bookmarks.TYPE_BOOKMARK)
             return;
 
         // Find entries with the same URI as the added item and tag or star them.
-        let url = Bookmarks.getBookmarkURI(aItemID).spec;
-        let isTag = Utils.isTagFolder(aFolder);
+        Utils.getEntriesByURL(aURI.spec, function(aEntries) {
+            let isTag = Utils.isTagFolder(aParentID);
 
-        Utils.getEntriesByURL(url, function(aEntries) {
             for (let entry in aEntries) {
                 if (isTag) {
-                    let tagName = Bookmarks.getItemTitle(aFolder);
+                    let tagName = Bookmarks.getItemTitle(aParentID);
                     StorageInternal.tagEntry(true, entry, tagName, aItemID);
                 }
                 else {
@@ -1583,25 +1583,21 @@ let BookmarkObserver = {
     },
 
     // nsINavBookmarkObserver
-    onBeforeItemRemoved: function BookmarkObserver_onBeforeItemRemoved(aItemID, aItemType) { },
-
-
-    // nsINavBookmarkObserver
-    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aFolder, aIndex, aItemType, aURI) {
+    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aParentID, aIndex, aItemType, aURI) {
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
         }
 
         // Only care about plain bookmarks and tags.
-        if (aItemType != Bookmarks.TYPE_BOOKMARK || Utils.isLivemark(aFolder))
+        if (aItemType != Bookmarks.TYPE_BOOKMARK || Utils.isLivemark(aParentID))
             return;
 
-        let isTag = Utils.isTagFolder(aFolder);
+        let isTag = Utils.isTagFolder(aParentID);
 
         if (isTag) {
             let tagURL = aURI.spec;
-            let tagName = Bookmarks.getItemTitle(aFolder);
+            let tagName = Bookmarks.getItemTitle(aParentID);
 
             Utils.getEntriesByURL(tagURL, function(entries) {
                 for (let entry in entries)
@@ -1632,7 +1628,7 @@ let BookmarkObserver = {
 
     // nsINavBookmarkObserver
     onItemMoved: function BookmarkObserver_onItemMoved(aItemID, aOldParent, aOldIndex,
-                                                   aNewParent, aNewIndex, aItemType) {
+                                                       aNewParent, aNewIndex, aItemType) {
         let wasInHome = Utils.isLivemarkStored(aItemID);
         let isInHome = aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aNewParent);
         if (wasInHome || isInHome)
@@ -1642,7 +1638,7 @@ let BookmarkObserver = {
     // nsINavBookmarkObserver
     onItemChanged: function BookmarkObserver_onItemChanged(aItemID, aProperty,
                                                            aIsAnnotationProperty, aNewValue,
-                                                           aLastModified, aItemType) {
+                                                           aLastModified, aItemType, aParentID) {
         switch (aProperty) {
         case 'title':
             let feed = Utils.getFeedByBookmarkID(aItemID);
