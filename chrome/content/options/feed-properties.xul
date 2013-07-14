@@ -30,7 +30,7 @@
             </row>
             <row align="center">
                 <label value="&feedURL.label;"/>
-                <textbox id="feed-url-textbox"/>
+                <textbox id="feed-url-textbox" readonly="true"/>
             </row>
         </rows>
     </grid>

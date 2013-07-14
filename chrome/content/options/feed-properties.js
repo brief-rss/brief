@@ -98,7 +98,9 @@ function onCheckUpdatesCheckboxCmd(aEvent) {
 
 
 function saveChanges() {
-    saveLivemarksData();
+    let nameTextbox = getElement('feed-name-textbox');
+    if (gFeed.title != nameTextbox.value)
+        PlacesUtils.bookmarks.setItemTitle(gFeed.bookmarkID, nameTextbox.value);
 
     let properties = {
         feedID: gFeed.feedID,
@@ -144,17 +146,4 @@ function saveChanges() {
     Storage.changeFeedProperties(properties);
 
     return true;
-}
-
-function saveLivemarksData() {
-    let nameTextbox = getElement('feed-name-textbox');
-    let urlTextbox = getElement('feed-url-textbox');
-
-    if (gFeed.title != nameTextbox.value)
-        PlacesUtils.bookmarks.setItemTitle(gFeed.bookmarkID, nameTextbox.value);
-
-    if (gFeed.feedURL != urlTextbox.value) {
-        let uri = Services.io.newURI(urlTextbox.value, null, null);
-        PlacesUtils.livemarks.setFeedURI(gFeed.bookmarkID, uri);
-    }
 }

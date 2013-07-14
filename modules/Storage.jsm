@@ -1654,11 +1654,6 @@ let BookmarkObserver = {
             }
             break;
 
-        case 'livemark/feedURI':
-            if (Utils.isLivemarkStored(aItemID))
-                this.delayedLivemarksSync();
-            break;
-
         case 'uri':
             // Unstar any entries with the old URI.
             Utils.getEntriesByBookmarkID(aItemID, function(aEntries) {
