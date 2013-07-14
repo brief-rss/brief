@@ -875,7 +875,6 @@ function EntryView(aFeedView, aEntryData) {
     this.id = aEntryData.id;
     this.date = new Date(aEntryData.date);
     this.entryURL = aEntryData.entryURL;
-    this.updated = aEntryData.updated;
 
     this.headline = this.feedView.headlinesView;
 
@@ -913,8 +912,13 @@ function EntryView(aFeedView, aEntryData) {
     this._getElement('date').textContent = this.getDateString();
     this._getElement('date').setAttribute('title', this.date.toLocaleString());
 
-    if (this.updated)
-        this._getElement('updated').textContent = Strings.entryWasUpdated;
+    if (aEntryData.markedUnreadOnUpdate) {
+        this.container.classList.add('updated');
+        this._getElement('updated-label').textContent = Strings.entryWasUpdated;
+
+        let dateString = new Date(aEntryData.updated).toLocaleString();
+        this._getElement('updated-label').setAttribute('title', dateString);
+    }
 
     if (this.headline) {
         this.collapse(false);
@@ -970,10 +974,7 @@ EntryView.prototype = {
             this.container.classList.add('read');
             button.setAttribute('title', Strings.markEntryAsUnreadTooltip);
 
-            if (this.updated) {
-                this.updated = false;
-                this._getElement('updated').textContent = '';
-            }
+            this.container.classList.remove('updated');
         }
         else {
             this.container.classList.remove('read');
