@@ -77,7 +77,7 @@ article.read .title-link {
 /* ----------------------  Article subheader  ---------------------- */
 
 .subheader, .subheader-left, .subheader-right,
-.feed-name, .tags, .date, .updated, .authors {
+.feed-name, .tags, .date, .updated-label, .authors {
     display: -moz-box;
 }
 
@@ -121,11 +121,11 @@ body:not(.multiple-feeds) .feed-name {
     margin-top: 2px;
 }
 
-.updated {
+.updated-label {
     margin-left: 5px;
     color: #de5b00;
 }
 
-.updated:empty {
+article:not(.updated) .updated-label {
     display: none;
 }

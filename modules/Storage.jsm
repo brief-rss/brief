@@ -47,12 +47,13 @@ const ENTRIES_TABLE_SCHEMA = [
     'secondaryHash TEXT',
     'providedID    TEXT',
     'entryURL      TEXT',
-    'date          INTEGER',
-    'read          INTEGER DEFAULT 0',
-    'updated       INTEGER DEFAULT 0',
-    'starred       INTEGER DEFAULT 0',
-    'deleted       INTEGER DEFAULT 0',
-    'bookmarkID    INTEGER DEFAULT -1 '
+    'date          INTEGER', // Time.
+    'updated       INTEGER', // Time.
+    'read          INTEGER DEFAULT 0',  // Multi-state flag. 0 - unread, 1 - read,
+                                        // 2 - re-marked unread after entry was updated.
+    'starred       INTEGER DEFAULT 0',  // Boolean flag.
+    'deleted       INTEGER DEFAULT 0',  // Boolean flag.
+    'bookmarkID    INTEGER DEFAULT -1 ' // Numeric ID.
 ]
 
 const ENTRIES_TEXT_TABLE_SCHEMA = [
@@ -497,7 +498,6 @@ let StorageInternal = {
      *        The feed whose entries to expire. If not provided, all feeds are processed.
      */
     expireEntries: function StorageInternal_expireEntries(aFeed) {
-        log('expire');
         let resume = StorageInternal_expireEntries.resume;
 
         let feeds = aFeed ? [aFeed] : this.getAllFeeds();
@@ -805,20 +805,20 @@ FeedProcessor.prototype = {
             select.params.secondaryHash = secondaryHash;
         }
 
-        let storedID, storedDate, isEntryRead;
+        let storedID, storedDateUpdated, isEntryRead;
         let self = this;
 
         select.executeAsync({
             handleResult: function(row) {
                 storedID = row.id;
-                storedDate = row.date;
+                storedDateUpdated = row.updated;
                 isEntryRead = row.read;
             },
 
             handleCompletion: function(aReason) {
                 if (aReason == REASON_FINISHED) {
                     if (storedID) {
-                        if (aEntry.date && storedDate < aEntry.date) {
+                        if (aEntry.updated && aEntry.updated > storedDateUpdated) {
                             self.addUpdateParams(aEntry, storedID, isEntryRead);
                         }
                     }
@@ -838,8 +838,8 @@ FeedProcessor.prototype = {
         let markUnread = Storage.getFeed(this.feed.feedID).markModifiedEntriesUnread;
 
         this.updateEntry.paramSets.push({
-            'date': aEntry.date,
-            'read': markUnread || !aIsRead ? 0 : 1,
+            'updated': aEntry.updated,
+            'read': markUnread && aIsRead == 1 ? 2 : aIsRead,
             'id': aStoredEntryID
         })
 
@@ -863,7 +863,8 @@ FeedProcessor.prototype = {
                 'secondaryHash': aSecondaryHash,
                 'providedID': aEntry.wrappedEntry.id,
                 'entryURL': aEntry.entryURL,
-                'date': aEntry.date || Date.now()
+                'date': aEntry.date || Date.now(),
+                'updated': aEntry.updated || 0
             }
 
             var insertEntryTextParamSet = {
@@ -1092,6 +1093,9 @@ Query.prototype = {
                 for (let column in row)
                     entry[column] = row[column]
 
+                entry.markedUnreadOnUpdate = row['read'] == 2;
+                entry.read = row['read'] == 1;
+
                 return entry;
             })
 
@@ -1224,8 +1228,9 @@ Query.prototype = {
         let list = yield this.getEntryList(resume);
 
         if (list.length) {
-            let sql = 'UPDATE entries SET read = :read, updated = 0 ';
+            let sql = 'UPDATE entries SET read = :read ';
             let update = new Statement(sql + this._getQueryString());
+
             update.params.read = aState ? 1 : 0;
             yield update.executeAsync(resume);
 
@@ -1456,7 +1461,7 @@ Query.prototype = {
         if (this.read === true)
             constraints.push('entries.read = 1');
         else if (this.read === false)
-            constraints.push('entries.read = 0');
+            constraints.push('(entries.read = 0 OR entries.read = 2)');
 
         if (this.starred === true)
             constraints.push('entries.starred = 1');
@@ -1985,8 +1990,8 @@ let Stm = {
     },
 
     get insertEntry() {
-        let sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date) ' +
-                  'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date)        ';
+        let sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date, updated) ' +
+                  'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date, :updated)        ';
         delete this.insertEntry;
         return this.insertEntry = new Statement(sql);
     },
@@ -1999,7 +2004,7 @@ let Stm = {
     },
 
     get updateEntry() {
-        let sql = 'UPDATE entries SET date = :date, read = :read, updated = 1 '+
+        let sql = 'UPDATE entries SET read = :read, updated = :updated '+
                   'WHERE id = :id                                             ';
         delete this.updateEntry;
         return this.updateEntry = new Statement(sql);
@@ -2060,7 +2065,7 @@ let Stm = {
     },
 
     get getEntryByPrimaryHash() {
-        let sql = 'SELECT id, date, read FROM entries WHERE primaryHash = :primaryHash';
+        let sql = 'SELECT id, updated, read FROM entries WHERE primaryHash = :primaryHash';
         delete this.getEntryByPrimaryHash;
         return this.getEntryByPrimaryHash = new Statement(sql);
     },

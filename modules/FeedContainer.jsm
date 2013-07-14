@@ -112,10 +112,11 @@ function Entry(aEntry) {
     if (aEntry.content)
         this.content = aEntry.content.text;
 
-    if (aEntry.updated)
-        this.date = new RFC822Date(aEntry.updated).getTime();
-    else if (aEntry.published)
+    if (aEntry.published)
         this.date = new RFC822Date(aEntry.published).getTime();
+
+    if (aEntry.updated)
+        this.updated = new RFC822Date(aEntry.updated).getTime();
 
     try {
         if (aEntry.authors) {
@@ -147,19 +148,20 @@ Entry.prototype = {
     /**
      * Entry's data.
      */
-    entryURL: '',
-    title:    '',
-    summary:  '',
-    content:  '',
-    date:     0,
-    authors:  '',
+    entryURL:  '',
+    title:     '',
+    summary:   '',
+    content:   '',
+    published:  0,
+    updated:    0,
+    authors:   '',
 
     /**
      * Status information.
      */
     read:     false,
     starred:  false,
-    updated:  false,
+    markedUnreadOnUpdate: false,
 
     /**
      * ID if the corresponing bookmark, or -1 if entry isn't bookmarked.
