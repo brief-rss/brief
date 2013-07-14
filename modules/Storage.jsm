@@ -805,12 +805,13 @@ FeedProcessor.prototype = {
             select.params.secondaryHash = secondaryHash;
         }
 
-        let storedID, storedDateUpdated, isEntryRead;
+        let storedID, storedPubDate, storedDateUpdated, isEntryRead;
         let self = this;
 
         select.executeAsync({
             handleResult: function(row) {
                 storedID = row.id;
+                storedPubDate = row.date;
                 storedDateUpdated = row.updated;
                 isEntryRead = row.read;
             },
@@ -818,7 +819,8 @@ FeedProcessor.prototype = {
             handleCompletion: function(aReason) {
                 if (aReason == REASON_FINISHED) {
                     if (storedID) {
-                        if (aEntry.updated && aEntry.updated > storedDateUpdated) {
+                        if (aEntry.updated && aEntry.updated > storedDateUpdated
+                            && aEntry.updated > storedPubDate) {
                             self.addUpdateParams(aEntry, storedID, isEntryRead);
                         }
                     }
@@ -2056,13 +2058,13 @@ let Stm = {
     },
 
     get getEntryByPrimaryHash() {
-        let sql = 'SELECT id, updated, read FROM entries WHERE primaryHash = :primaryHash';
+        let sql = 'SELECT id, date, updated, read FROM entries WHERE primaryHash = :primaryHash';
         delete this.getEntryByPrimaryHash;
         return this.getEntryByPrimaryHash = new Statement(sql);
     },
 
     get getEntryBySecondaryHash() {
-        let sql = 'SELECT id, date, read FROM entries WHERE secondaryHash = :secondaryHash';
+        let sql = 'SELECT id, date, updated, read FROM entries WHERE secondaryHash = :secondaryHash';
         delete this.getEntryBySecondaryHash;
         return this.getEntryBySecondaryHash = new Statement(sql);
     },
