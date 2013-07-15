@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>1.7a1</version>
+    <version>1.7b1</version>
     <type>2</type>
     <name>Brief</name>
     <description>A feed reading extension.</description>
@@ -17,7 +17,7 @@
       <rdf:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
         <minVersion>4.0</minVersion>
-        <maxVersion>17.*</maxVersion>
+        <maxVersion>24.*</maxVersion>
       </rdf:Description>
     </targetApplication>
 
