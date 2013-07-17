@@ -12,8 +12,7 @@ const Brief = {
 
     get prefs() {
         delete this.prefs;
-        return this.prefs = Services.prefs.getBranch('extensions.brief.')
-                                          .QueryInterface(Ci.nsIPrefBranch2);
+        return this.prefs = Services.prefs.getBranch('extensions.brief.');
     },
 
     get storage() {

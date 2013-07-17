@@ -6,8 +6,7 @@ IMPORT_COMMON(this);
 document.addEventListener('DOMContentLoaded', onload, false);
 document.addEventListener('unload', onunload, false);
 
-let prefBranch = Services.prefs.getBranch('extensions.brief.')
-                               .QueryInterface(Ci.nsIPrefBranch2);
+let prefBranch = Services.prefs.getBranch('extensions.brief.');
 let prefObserver = {
     observe: function(aSubject, aTopic, aData) {
         if (aTopic == 'nsPref:changed' && aData == 'homeFolder')

@@ -74,7 +74,7 @@ const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 XPCOMUtils.defineLazyServiceGetter(this, 'Bookmarks', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
 XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
-    return Services.prefs.getBranch('extensions.brief.').QueryInterface(Ci.nsIPrefBranch2);
+    return Services.prefs.getBranch('extensions.brief.');
 })
 XPCOMUtils.defineLazyGetter(this, 'Places', function() {
     Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
@@ -819,8 +819,10 @@ FeedProcessor.prototype = {
             handleCompletion: function(aReason) {
                 if (aReason == REASON_FINISHED) {
                     if (storedID) {
+                        // XXX Comparing storedPubDate is temporary. Done to avoid suddenly
+                        // marking many entries as update for old user (before rev 1.72).
                         if (aEntry.updated && aEntry.updated > storedDateUpdated
-                            && aEntry.updated > storedPubDate) {
+                                           && aEntry.updated > storedPubDate) {
                             self.addUpdateParams(aEntry, storedID, isEntryRead);
                         }
                     }
