@@ -87,7 +87,7 @@ div {
     }
 
 .screenshot {
-    -moz-box-shadow: 5px 5px 5px #97b4be;
+    box-shadow: 5px 5px 5px #97b4be;
     }
 
 #open-brief {
