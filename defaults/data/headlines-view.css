@@ -53,7 +53,7 @@ article.selected .headline-header {
 
 article.selected:not(:hover) .headline-header,
 article.was-selected:not(:hover) .headline-header {
-    -moz-transition: background-color 500ms;
+    transition: background-color 500ms;
 }
 
 .headline-container:hover > .headline-header {
@@ -144,5 +144,5 @@ article.read .headline-title {
 }
 
 article.headline > .full-container[showing] {
-    -moz-transition-duration: 250ms;
+    transition-duration: 250ms;
 }
