@@ -12,7 +12,7 @@ body {
     display: -moz-box;
     font-family: Verdana, Helvetica, Arial, sans-serif;
     font-size: 13px;
-    background: -moz-linear-gradient(top, #c0e3f0, #eaf6fa 50%, #eaf6fa);
+    background: linear-gradient(to top, #c0e3f0, #eaf6fa 50%, #eaf6fa);
     }
 
 div {
