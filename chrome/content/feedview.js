@@ -804,6 +804,7 @@ FeedView.prototype = {
     _buildHeader: function FeedView__buildHeader() {
         let feedTitle = getElement('feed-title');
         feedTitle.removeAttribute('href');
+        feedTitle.removeAttribute('tooltiptext');
         feedTitle.className = '';
         feedTitle.textContent = this.titleOverride || this.title;
 
@@ -822,10 +823,9 @@ FeedView.prototype = {
 
             if (!securityCheckFailed && !this.query.searchString) {
                 feedTitle.setAttribute('href', url);
+                feedTitle.setAttribute('tooltiptext', feed.subtitle);
                 feedTitle.className = 'feed-link';
             }
-
-            feedTitle.setAttribute('tooltiptext', feed.subtitle);
         }
     },
 
