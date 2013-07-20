@@ -263,28 +263,34 @@ let FeedUpdateServiceInternal = {
             let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
             let alertTitle = bundle.GetStringFromName('updateAlertTitle');
 
-            let feedForms = bundle.GetStringFromName('feeds');
-            let feedString = getPluralForm(this.feedsWithNewEntriesCount, feedForms);
-            let itemForms = bundle.GetStringFromName('items');
+            let newForms = bundle.GetStringFromName('updateAlertText.new.pluralForms');
+            let newString = getPluralForm(this.newEntriesCount, newForms);
+
+            let itemForms = bundle.GetStringFromName('updateAlertText.item.pluralForms');
             let itemString = getPluralForm(this.newEntriesCount, itemForms);
+
+            let feedForms = bundle.GetStringFromName('updateAlertText.feed.pluralForms');
+            let feedString = getPluralForm(this.feedsWithNewEntriesCount, feedForms);
+
             let alertText;
 
             if (this.feedsWithNewEntriesCount == 1) {
                 let feedTitle = this.completedFeeds[0].title;
-                feedTitle = feedTitle.length < 30 ? feedTitle : feedTitle.substr(0, 30) + '\u2026';
+                feedTitle = feedTitle.length < 35 ? feedTitle : feedTitle.substr(0, 35) + '\u2026';
 
-                alertText = bundle.formatStringFromName('updateAlertText.singleFeed', [itemString, feedTitle], 2)
-                                  .replace('#numItems', this.newEntriesCount);
+                alertText = bundle.formatStringFromName('updateAlertText.singleFeedMessage',
+                                                        [feedTitle, newString, itemString], 3);
+                alertText = alertText.replace('#numItems', this.newEntriesCount);
             }
             else {
-                alertText = bundle.formatStringFromName('updateAlertText.manyFeeds', [itemString, feedString], 2)
-                                  .replace('#numItems', this.newEntriesCount)
-                                  .replace('#numFeeds', this.feedsWithNewEntriesCount);
+                alertText = bundle.formatStringFromName('updateAlertText.multpleFeedsMessage',
+                                                        [newString, itemString, feedString], 3);
+                alertText = alertText.replace('#numItems', this.newEntriesCount)
+                                     .replace('#numFeeds', this.feedsWithNewEntriesCount);
             }
 
             try {
-                let alertsService = Cc['@mozilla.org/alerts-service;1']
-                                    .getService(Ci.nsIAlertsService);
+                let alertsService = Cc['@mozilla.org/alerts-service;1'].getService(Ci.nsIAlertsService);
                 alertsService.showAlertNotification(FEED_ICON_URL, alertTitle, alertText,
                                                     true, null, this);
             }

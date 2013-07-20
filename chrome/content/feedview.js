@@ -1217,6 +1217,7 @@ EntryView.prototype = {
         let relativeDate = new RelativeDate(this.date.getTime());
         let currentDate = new Date();
         let string;
+        let bundle = getElement('main-bundle');
 
         if (aOnlyDatePart) {
             switch (true) {
@@ -1248,13 +1249,17 @@ EntryView.prototype = {
                     break;
 
                 case relativeDate.deltaHours === 0:
-                    let pluralForm = getPluralForm(relativeDate.deltaMinutes, Strings['entryDate.minutes']);
-                    string = pluralForm.replace('#number', relativeDate.deltaMinutes);
+                    let minuteForm = getPluralForm(relativeDate.deltaMinutes,
+                                                   Strings['minute.pluralForms']);
+                    string = bundle.getFormattedString('entryDate.ago', [minuteForm], 1)
+                                   .replace('#number', relativeDate.deltaMinutes);
                     break;
 
                 case relativeDate.deltaHours <= 12:
-                    pluralForm = getPluralForm(relativeDate.deltaHours, Strings['entryDate.hours']);
-                    string = pluralForm.replace('#number', relativeDate.deltaHours);
+                    let hourForm = getPluralForm(relativeDate.deltaHours,
+                                                 Strings['hour.pluralForms']);
+                    string = bundle.getFormattedString('entryDate.ago', [hourForm], 1)
+                                   .replace('#number', relativeDate.deltaHours);
                     break;
 
                 case relativeDate.deltaDays === 0:
@@ -1377,8 +1382,8 @@ function showElement(aElement, aTranstionDuration, aCallback) {
 __defineGetter__('Strings', function() {
     let cachedStringsList = [
         'entryDate.justNow',
-        'entryDate.minutes',
-        'entryDate.hours',
+        'minute.pluralForms',
+        'hour.pluralForms',
         'entryDate.today',
         'entryDate.yesterday',
         'entryWasUpdated',

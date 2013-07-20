@@ -232,15 +232,17 @@ const Brief = {
                 break;
 
             case relativeDate.deltaHours === 0:
-                let string = bundle.GetStringFromName('lastUpdated.minutes');
-                label.value = this.common.getPluralForm(relativeDate.deltaMinutes, string)
-                                         .replace('#number', relativeDate.deltaMinutes);
+                let pluralForms = bundle.GetStringFromName('minute.pluralForms');
+                let form = this.common.getPluralForm(relativeDate.deltaMinutes, pluralForms);
+                label.value = bundle.formatStringFromName('lastUpdated.ago', [form], 1)
+                                    .replace('#number', relativeDate.deltaMinutes);
                 break;
 
             case relativeDate.deltaHours <= 12:
-                string = bundle.GetStringFromName('lastUpdated.hours');
-                label.value = this.common.getPluralForm(relativeDate.deltaHours, string)
-                                         .replace('#number', relativeDate.deltaHours);
+                pluralForms = bundle.GetStringFromName('hour.pluralForms');
+                form = this.common.getPluralForm(relativeDate.deltaHours, pluralForms);
+                label.value = bundle.formatStringFromName('lastUpdated.ago', [form], 1)
+                                    .replace('#number', relativeDate.deltaHours);
                 break;
 
             case relativeDate.deltaDays === 0:
@@ -254,9 +256,10 @@ const Brief = {
                 break;
 
             case relativeDate.deltaDays < 5:
-                string = bundle.GetStringFromName('lastUpdated.days');
-                label.value = this.common.getPluralForm(relativeDate.deltaDays, string)
-                                         .replace('#number', relativeDate.deltaDays);
+                pluralForms = bundle.GetStringFromName('day.pluralForms');
+                form = this.common.getPluralForm(relativeDate.deltaDays, pluralForms);
+                label.value = bundle.formatStringFromName('lastUpdated.ago', [form], 1)
+                                    .replace('#number', relativeDate.deltaDays);
                 break;
 
             case relativeDate.deltaYears === 0:
