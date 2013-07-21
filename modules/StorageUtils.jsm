@@ -258,6 +258,7 @@ StorageStatement.prototype = {
      *        Receives an array of all the results row.
      * @param aOnError [optional]
      *        Function called in case of an error, taking mozIStorageError as argument.
+     * @returns mozIStoragePendingStatement
      */
     getResultsAsync: function Statement_getResultsAsync(aCallback, aOnError) {
         if (this.isWritingStatement)
@@ -274,7 +275,7 @@ StorageStatement.prototype = {
         for (let i = 0; i < columnCount; i++)
             columns.push(this._nativeStatement.getColumnName(i));
 
-        this._nativeStatement.executeAsync({
+        return this._nativeStatement.executeAsync({
             handleResult: function(aResultSet) {
                 let row = aResultSet.getNextRow();
                 while (row) {
@@ -286,7 +287,7 @@ StorageStatement.prototype = {
                 }
             },
             handleCompletion: function(aReason) {
-                aCallback(rowArray);
+                aCallback(rowArray, aReason);
             },
             handleError: function(aError) {
                 if (aOnError) {

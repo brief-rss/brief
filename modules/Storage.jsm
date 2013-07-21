@@ -388,8 +388,24 @@ let StorageInternal = {
         this.activeItemsCache = null;
         this.activeFeedsCache = null;
 
-        let results = aSynchronous ? Stm.getAllFeeds.results
-                                   : yield Stm.getAllFeeds.getResultsAsync(resume);
+        let results;
+        if (aSynchronous) {
+            if (this.pendingRefreshCacheStatement) {
+                this.pendingRefreshCacheStatement.cancel();
+                this.pendingRefreshCacheStatement = null;
+            }
+
+            results = Stm.getAllFeeds.results;
+        }
+        else {
+            this.pendingRefreshCacheStatement = Stm.getAllFeeds.getResultsAsync(function(aResults, aReason) {
+                if (!aReason)
+                    results = aResults;
+
+                this.pendingRefreshCacheStatement = null;
+            }.bind(this))
+            yield;
+        }
 
         this.allItemsCache = [];
         this.activeItemsCache = [];
