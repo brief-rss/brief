@@ -177,7 +177,7 @@ let opml = {
         return results;
     },
 
-    exportOPML: function() {
+    exportOPML: function exportOPML() {
         let filePrefix = 'feeds';
         let title = 'Feeds';
 
@@ -201,7 +201,7 @@ let opml = {
             data += '\t' + '</head>' + '\n';
             data += '\t' + '<body>' + '\n';
 
-            data = this.addFolderToOPML(data, result.root, 0, true);
+            data = yield this.addFolderToOPML(data, result.root, 0, true, exportOPML.resume);
 
             data += '\t' + '</body>' + '\n';
             data += '</opml>';
@@ -218,10 +218,10 @@ let opml = {
             outputStream.write(data, data.length);
             outputStream.close();
         }
-    },
+    }.gen(),
 
 
-    addFolderToOPML: function(dataString, folder, level, isBase) {
+    addFolderToOPML: function addFolderToOPML(dataString, folder, level, isBase, aCallback) {
         level++;
 
         if (!isBase) {
@@ -242,24 +242,32 @@ let opml = {
             if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
                 continue;
 
-            if (PlacesUtils.livemarks.isLivemark(node.itemId)) {
+            let isLivemark = PlacesUtils.annotations.itemHasAnnotation(node.itemId, PlacesUtils.LMANNO_FEEDURI);
+            if (isLivemark) {
                 dataString += '\t\t';
 
                 for (let j = 1; j < level; j++)
                     dataString += '\t';
 
                 let name = PlacesUtils.bookmarks.getItemTitle(node.itemId);
-                let url = PlacesUtils.livemarks.getSiteURI(node.itemId).spec;
-                let feedURL = PlacesUtils.livemarks.getFeedURI(node.itemId).spec
+                let [status, livemark] = yield PlacesUtils.livemarks.getLivemark({ id: node.itemId },
+                                                                                 addFolderToOPML.resume);
+
+                if (!Components.isSuccessCode(status))
+                    continue;
+
+                let feedURL = livemark.feedURL.spec;
+                let siteURL = livemark.siteURI ? livemark.siteURI.spec : '';
 
                 dataString += '<outline type="rss" version="RSS" '           +
                               'text="'          + this.cleanXMLText(name)    +
-                              '" htmlUrl="'     + this.cleanXMLText(url)     +
-                              '" xmlUrl="'      + this.cleanXMLText(feedURL) +
+                              '" htmlUrl="'     + this.cleanXMLText(feedURL) +
+                              '" xmlUrl="'      + this.cleanXMLText(siteURL) +
                               '"/>' + "\n";
             }
             else if (node instanceof Ci.nsINavHistoryContainerResultNode) {
-                dataString = this.addFolderToOPML(dataString, node, level, false);
+                dataString = yield this.addFolderToOPML(dataString, node, level, false,
+                                                        addFolderToOPML.resume);
             }
         }
 
@@ -274,8 +282,8 @@ let opml = {
             dataString += '</outline>' + '\n';
         }
 
-        return dataString;
-    },
+        aCallback(dataString);
+    }.gen(),
 
     promptForFile: function (filePrefix) {
         let bundle = document.getElementById('options-bundle');
