@@ -943,7 +943,8 @@ function EntryView(aFeedView, aEntryData) {
         async(function() {
             let target = this._getElement('content');
             let fragment = ParserUtils.parseFragment(
-                    aEntryData.content, ParserUtils.SanitizerAllowStyle, false, null, target);
+                    aEntryData.content, ParserUtils.SanitizerAllowStyle,
+                    false, NetUtil.newURI(feed.feedURL), target);
             target.appendChild(fragment);
 
             if (this.feedView.query.searchString)
@@ -953,7 +954,8 @@ function EntryView(aFeedView, aEntryData) {
     else {
         let target = this._getElement('content');
         let fragment = ParserUtils.parseFragment(
-                aEntryData.content, ParserUtils.SanitizerAllowStyle, false, null, target);
+                aEntryData.content, ParserUtils.SanitizerAllowStyle,
+                false, NetUtil.newURI(feed.feedURL), target);
         target.appendChild(fragment);
 
         if (this.feedView.query.searchString) {
