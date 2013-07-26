@@ -534,13 +534,14 @@ FaviconFetcher.prototype = {
 
     finish: function FaviconFetcher_finish(aFaviconString) {
         this.feed.lastFaviconRefresh = Date.now();
+        let oldFaviconString = this.feed.favicon;
+        this.feed.favicon = aFaviconString;
 
-        if (this.feed.favicon != aFaviconString) {
-            this.feed.favicon = aFaviconString;
-            Storage.updateFeedProperties(this.feed);
+        yield Storage.updateFeedProperties(this.feed, FaviconFetcher_finish.resume);
+
+        if (oldFaviconString != aFaviconString)
             Services.obs.notifyObservers(null, 'brief:feed-favicon-changed', this.feed.feedID);
-        }
-    },
+    }.gen(),
 
     // nsIRequestObserver
     onStartRequest: function FaviconFetcher_lonStartRequest(aRequest, aContext) {
