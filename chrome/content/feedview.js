@@ -909,13 +909,17 @@ function EntryView(aFeedView, aEntryData) {
     if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
 
-    // Use innerHTML instead of textContent to resolve entities.
-    titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
+    let entryTitle = ParserUtils.convertToPlainText(
+            aEntryData.title || aEntryData.entryURL, 0, 0);
+
+    titleElem.textContent = entryTitle;
 
     let feed = Storage.getFeed(aEntryData.feedID);
 
-    this._getElement('feed-name').innerHTML = feed.title;
-    this._getElement('authors').innerHTML = aEntryData.authors;
+    let feedTitle = ParserUtils.convertToPlainText(feed.title, 0, 0);
+    this._getElement('feed-name').textContent = feedTitle;
+    this._getElement('authors').textContent = ParserUtils.convertToPlainText(
+            aEntryData.authors, 0, 0);
 
     this._getElement('date').textContent = this.getDateString();
     this._getElement('date').setAttribute('title', this.date.toLocaleString());
@@ -934,23 +938,29 @@ function EntryView(aFeedView, aEntryData) {
         if (aEntryData.entryURL)
             this._getElement('headline-link').setAttribute('href', aEntryData.entryURL);
 
-        this._getElement('headline-title').innerHTML = aEntryData.title || aEntryData.entryURL;
+        this._getElement('headline-title').textContent = entryTitle;
         this._getElement('headline-title').setAttribute('title', aEntryData.title);
-        this._getElement('headline-feed-name').textContent = feed.title;
+        this._getElement('headline-feed-name').textContent = feedTitle;
 
         let favicon = (feed.favicon && feed.favicon != 'no-favicon') ? feed.favicon
                                                                      : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
 
         async(function() {
-            this._getElement('content').innerHTML = aEntryData.content;
+            let target = this._getElement('content');
+            let fragment = ParserUtils.parseFragment(
+                    aEntryData.content, ParserUtils.SanitizerAllowStyle, false, null, target);
+            target.appendChild(fragment);
 
             if (this.feedView.query.searchString)
                 this._highlightSearchTerms(this._getElement('headline-title'));
         }.bind(this))
     }
     else {
-        this._getElement('content').innerHTML = aEntryData.content;
+        let target = this._getElement('content');
+        let fragment = ParserUtils.parseFragment(
+                aEntryData.content, ParserUtils.SanitizerAllowStyle, false, null, target);
+        target.appendChild(fragment);
 
         if (this.feedView.query.searchString) {
             async(function() {
@@ -1422,6 +1432,13 @@ __defineGetter__('Finder', function() {
 
     delete this.Finder;
     return this.Finder = finder;
+})
+
+__defineGetter__('ParserUtils', function() {
+    let parserUtils = Cc['@mozilla.org/parserutils;1'].getService(Ci.nsIParserUtils);
+
+    delete this.ParserUtils;
+    return this.ParserUtils = parserUtils;
 })
 
 __defineGetter__('gBriefPrincipal', function() {
