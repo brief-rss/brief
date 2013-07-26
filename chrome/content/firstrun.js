@@ -46,7 +46,10 @@ function buildHeader() {
     let string = bundle.formatStringFromName('howToSubscribeHeader', [folderName], 1);
 
     let subscribeHeader = document.getElementById('subscribe');
-    subscribeHeader.innerHTML = string;
+    let parserUtils = Components.classes["@mozilla.org/parserutils;1"]
+            .getService(Components.interfaces.nsIParserUtils);
+    let fragment = parserUtils.parseFragment(string, 0, false, null, subscribeHeader);
+    subscribeHeader.appendChild(fragment);
 
     let homeFolderSpan = document.getElementById('home-folder');
     homeFolderSpan.addEventListener('click', openOptions, false);
