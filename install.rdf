@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>digest@tanriol.github.io</id>
-    <version>1.0.5</version>
+    <version>1.1.0</version>
     <type>2</type>
     <name>Digest</name>
     <description>A lightweight feed reader, fork of Brief 1.7alpha.</description>
