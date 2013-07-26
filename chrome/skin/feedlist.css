@@ -53,10 +53,10 @@ richtreeitem[selected="true"] {
 
 richtreeitem:not(.unread) > .unread-count,
 richtreefolder:not(.unread) > .folder-title-container > .unread-count,
-richtreefolder[open="true"] > .folder-title-container > .unread-count {
+richtreefolder[open="true"] > .folder-title-container > .unread-count,
+.tag-list-item:not(.unread) .unread-count {
     display: none;
 }
-
 
 
 richtreefolder {
