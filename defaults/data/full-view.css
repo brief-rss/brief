@@ -10,7 +10,7 @@ article.full > .headline-container {
 
 .full-container {
     margin: 5px 0 5px; /* The margins are collapsed in full view but are necessary if headlines view */
-    background: -moz-linear-gradient(top, rgba(211, 231, 242, 1), rgba(211, 231, 242, 0) 35px) #ffffff;
+    background: linear-gradient(to bottom , rgba(211, 231, 242, 1), rgba(211, 231, 242, 0) 35px) #ffffff;
     background-clip: padding-box;
     border: 6px solid #d8dadc;
     -moz-border-top-colors: transparent transparent transparent transparent transparent #abbfc9;
@@ -35,7 +35,7 @@ article.selected > .full-container {
 }
 
 article.read > .full-container {
-    background-image: -moz-linear-gradient(top, rgba(235, 238, 243, 1), rgba(235, 238, 243, 0) 35px);
+    background-image: linear-gradient(to bottom, rgba(235, 238, 243, 1), rgba(235, 238, 243, 0) 35px);
 }
 
 article.read .title-link {

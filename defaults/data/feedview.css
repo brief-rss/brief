@@ -177,14 +177,14 @@ article.starred .bookmark-button:active:hover {
 /* --------- Transitions ------------ */
 
 article[removing] {
-    -moz-transition: opacity 250ms;
+    transition: opacity 250ms;
     opacity: 0;
 }
 
 *[hiding] {
-    -moz-transition-property: opacity;
+    transition-property: opacity;
 }
 
 *[showing] {
-    -moz-transition-property: opacity;
+    transition-property: opacity;
 }
