@@ -1288,7 +1288,7 @@ EntryView.prototype = {
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
-        for (let term in this.feedView.query.searchString.match(/[A-Za-z0-9]+/g)) {
+        for (let term in this.feedView.query.searchString.match(/[^\s:\*"-]+/g)) {
             let searchRange = this.feedView.document.createRange();
             searchRange.setStart(aElement, 0);
             searchRange.setEnd(aElement, aElement.childNodes.length);
