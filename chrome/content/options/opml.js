@@ -261,8 +261,8 @@ let opml = {
 
                 dataString += '<outline type="rss" version="RSS" '           +
                               'text="'          + this.cleanXMLText(name)    +
-                              '" htmlUrl="'     + this.cleanXMLText(feedURL) +
-                              '" xmlUrl="'      + this.cleanXMLText(siteURL) +
+                              '" htmlUrl="'     + this.cleanXMLText(siteURL) +
+                              '" xmlUrl="'      + this.cleanXMLText(feedURL) +
                               '"/>' + "\n";
             }
             else if (node instanceof Ci.nsINavHistoryContainerResultNode) {
