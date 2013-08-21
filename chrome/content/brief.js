@@ -101,12 +101,22 @@ let Commands = {
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
+        let url = 'chrome://brief/content/options/options.xul';
+
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == url) {
+                win.focus();
+                return;
+            }
+        }
+
         let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
-                          features, aPaneID);
+        window.openDialog(url, 'Brief options', features, aPaneID);
     },
 
     markViewRead: function cmd_markViewRead() {
@@ -249,9 +259,19 @@ let Commands = {
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
+        let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
+
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == url) {
+                win.focus();
+                return;
+            }
+        }
+
         let height = Math.min(window.screen.availHeight, 620);
         let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
-        let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
         window.openDialog(url, 'Brief shortcuts', features);
     }
@@ -405,7 +425,7 @@ let PrefObserver = {
         if (aTopic != 'nsPref:changed')
             return;
 
-        for (key in this._cachedPrefs) {
+        for (let key in this._cachedPrefs) {
             if (aData == this._cachedPrefs[key])
                 this._updateCachedPref(key);
         }

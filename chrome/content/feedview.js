@@ -356,7 +356,7 @@ FeedView.prototype = {
     handleEvent: function FeedView_handleEvent(aEvent) {
         // Checking if default action has been prevented helps Brief play nice with
         // other extensions.
-        if (aEvent.getPreventDefault())
+        if (aEvent.defaultPrevented)
             return;
 
         switch (aEvent.type) {
@@ -382,10 +382,6 @@ FeedView.prototype = {
                 }
                 else if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
-
-                    function selectCentralEntry() {
-                        this.selectEntry(this.getEntryInScreenCenter());
-                    }
                     this._scrollSelectionTimeout = async(selectCentralEntry, 100, this);
                 }
 
@@ -406,6 +402,10 @@ FeedView.prototype = {
                     this._refreshPending = false;
                 }
                 break;
+        }
+
+        function selectCentralEntry() {
+            this.selectEntry(this.getEntryInScreenCenter());
         }
     },
 
@@ -503,20 +503,24 @@ FeedView.prototype = {
         // entries with a newer date than that anchor.
         if (this.enoughEntriesPreloaded) {
             let query = this.getQueryCopy();
-            query.startDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
+            let edgeDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
 
-            this._loadedEntries = yield query.getEntries(resume);
+            if (query.sortDirection == Query.prototype.SORT_DESCENDING)
+                query.startDate = edgeDate;
+            else
+                query.endDate = edgeDate;
 
-            let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
+            let expectedEntries = yield query.getEntries(resume);
+
+            let newEntries = aAddedEntries.filter(function(entry) expectedEntries.indexOf(entry) !== -1, this);
             if (newEntries.length) {
                 let query = new Query({
                     sortOrder: this.query.sortOrder,
                     sortDirection: this.query.sortDirection,
                     entries: newEntries
                 })
-
                 for (let entry in yield query.getFullEntries(resume))
-                    this._insertEntry(entry, this.getEntryIndex(entry.id));
+                    this._insertEntry(entry, expectedEntries.indexOf(entry.id));
 
                 this._setEmptyViewMessage();
             }
@@ -584,6 +588,10 @@ FeedView.prototype = {
                 let index = this.getEntryIndex(entry);
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
+
+                if (this.selectedEntry == entry) {
+                    this.__selectedEntry = null;
+                }
 
                 if (this.headlinesView) {
                     let dayHeader = this.document.getElementById('day' + entryView.day);
@@ -754,10 +762,8 @@ FeedView.prototype = {
             }
 
             let loadedEntries = yield query.getFullEntries(resume);
-            for (let entry in loadedEntries) {
+            for (let entry in loadedEntries)
                 this._insertEntry(entry, this._loadedEntries.length);
-                this._loadedEntries.push(entry.id);
-            }
 
             this._loading = false;
             aCallback(loadedEntries.length);
@@ -791,12 +797,14 @@ FeedView.prototype = {
 
         this.feedContent.insertBefore(entryView.container, nextElem);
 
+        this._loadedEntries.splice(aPosition, 0, aEntryData.id);
         this._entryViews.splice(aPosition, 0, entryView);
     },
 
     _buildHeader: function FeedView__buildHeader() {
         let feedTitle = getElement('feed-title');
         feedTitle.removeAttribute('href');
+        feedTitle.removeAttribute('tooltiptext');
         feedTitle.className = '';
         feedTitle.textContent = this.titleOverride || this.title;
 
@@ -815,10 +823,9 @@ FeedView.prototype = {
 
             if (!securityCheckFailed && !this.query.searchString) {
                 feedTitle.setAttribute('href', url);
+                feedTitle.setAttribute('tooltiptext', feed.subtitle);
                 feedTitle.className = 'feed-link';
             }
-
-            feedTitle.setAttribute('tooltiptext', feed.subtitle);
         }
     },
 
@@ -901,13 +908,17 @@ function EntryView(aFeedView, aEntryData) {
     if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
 
-    // Use innerHTML instead of textContent to resolve entities.
-    titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
+    let entryTitle = ParserUtils.convertToPlainText(
+            aEntryData.title || aEntryData.entryURL, 0, 0);
+
+    titleElem.textContent = entryTitle;
 
     let feed = Storage.getFeed(aEntryData.feedID);
 
-    this._getElement('feed-name').innerHTML = feed.title;
-    this._getElement('authors').innerHTML = aEntryData.authors;
+    let feedTitle = ParserUtils.convertToPlainText(feed.title, 0, 0);
+    this._getElement('feed-name').textContent = feedTitle;
+    this._getElement('authors').textContent = ParserUtils.convertToPlainText(
+            aEntryData.authors, 0, 0);
 
     this._getElement('date').textContent = this.getDateString();
     this._getElement('date').setAttribute('title', this.date.toLocaleString());
@@ -926,23 +937,29 @@ function EntryView(aFeedView, aEntryData) {
         if (aEntryData.entryURL)
             this._getElement('headline-link').setAttribute('href', aEntryData.entryURL);
 
-        this._getElement('headline-title').innerHTML = aEntryData.title || aEntryData.entryURL;
+        this._getElement('headline-title').textContent = entryTitle;
         this._getElement('headline-title').setAttribute('title', aEntryData.title);
-        this._getElement('headline-feed-name').textContent = feed.title;
+        this._getElement('headline-feed-name').textContent = feedTitle;
 
         let favicon = (feed.favicon && feed.favicon != 'no-favicon') ? feed.favicon
                                                                      : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
 
         async(function() {
-            this._getElement('content').innerHTML = aEntryData.content;
+            let target = this._getElement('content');
+            let fragment = ParserUtils.parseFragment(
+                    aEntryData.content, ParserUtils.SanitizerAllowStyle, false, null, target);
+            target.appendChild(fragment);
 
             if (this.feedView.query.searchString)
                 this._highlightSearchTerms(this._getElement('headline-title'));
         }.bind(this))
     }
     else {
-        this._getElement('content').innerHTML = aEntryData.content;
+        let target = this._getElement('content');
+        let fragment = ParserUtils.parseFragment(
+                aEntryData.content, ParserUtils.SanitizerAllowStyle, false, null, target);
+        target.appendChild(fragment);
 
         if (this.feedView.query.searchString) {
             async(function() {
@@ -1121,6 +1138,10 @@ EntryView.prototype = {
     },
 
     onClick: function EntryView_onClick(aEvent) {
+        // If the item is already being removed, no action should be taken
+        if(this.container.getAttribute("removing"))
+            return;
+
         this.feedView.selectEntry(this.id);
 
         // Walk the parent chain of the even target to check if an anchor was clicked.
@@ -1244,22 +1265,22 @@ EntryView.prototype = {
         }
         else {
             switch (true) {
-                case relativeDate.deltaMinutes === 0:
+                case relativeDate.intervalMinutes === 0:
                     string = Strings['entryDate.justNow'];
                     break;
 
-                case relativeDate.deltaHours === 0:
-                    let minuteForm = getPluralForm(relativeDate.deltaMinutes,
+                case relativeDate.intervalHours === 0:
+                    let minuteForm = getPluralForm(relativeDate.intervalMinutes,
                                                    Strings['minute.pluralForms']);
                     string = bundle.getFormattedString('entryDate.ago', [minuteForm], 1)
-                                   .replace('#number', relativeDate.deltaMinutes);
+                                   .replace('#number', relativeDate.intervalMinutes);
                     break;
 
-                case relativeDate.deltaHours <= 12:
-                    let hourForm = getPluralForm(relativeDate.deltaHours,
+                case relativeDate.intervalHours <= 12:
+                    let hourForm = getPluralForm(relativeDate.intervalHours,
                                                  Strings['hour.pluralForms']);
                     string = bundle.getFormattedString('entryDate.ago', [hourForm], 1)
-                                   .replace('#number', relativeDate.deltaHours);
+                                   .replace('#number', relativeDate.intervalHours);
                     break;
 
                 case relativeDate.deltaDays === 0:
@@ -1288,7 +1309,7 @@ EntryView.prototype = {
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
-        for (let term in this.feedView.query.searchString.match(/[A-Za-z0-9]+/g)) {
+        for (let term in this.feedView.query.searchString.match(/[^\s:\*"-]+/g)) {
             let searchRange = this.feedView.document.createRange();
             searchRange.setStart(aElement, 0);
             searchRange.setEnd(aElement, aElement.childNodes.length);
@@ -1410,6 +1431,13 @@ __defineGetter__('Finder', function() {
 
     delete this.Finder;
     return this.Finder = finder;
+})
+
+__defineGetter__('ParserUtils', function() {
+    let parserUtils = Cc['@mozilla.org/parserutils;1'].getService(Ci.nsIParserUtils);
+
+    delete this.ParserUtils;
+    return this.ParserUtils = parserUtils;
 })
 
 __defineGetter__('gBriefPrincipal', function() {

@@ -4,6 +4,7 @@ const Brief = {
     RELEASE_NOTES_URL_PREFIX: 'http://brief.mozdev.org/versions/',
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
+    BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
 
     get statusCounter() document.getElementById('brief-status-counter'),
@@ -86,12 +87,20 @@ const Brief = {
     },
 
     showOptions: function cmd_showOptions() {
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == Brief.BRIEF_OPTIONS_URL) {
+                win.focus();
+                return;
+            }
+        }
+
         let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
         let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
-        window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
-                          features);
+        window.openDialog(Brief.BRIEF_OPTIONS_URL, 'Brief options', features);
     },
 
     onTabLoad: function Brief_onTabLoad(aEvent) {
@@ -214,6 +223,10 @@ const Brief = {
         query.getEntryCount(function(unreadEntriesCount) {
             Brief.statusCounter.value = unreadEntriesCount;
             Brief.statusCounter.hidden = (unreadEntriesCount == 0);
+            if (unreadEntriesCount > 0)
+                Brief.toolbarbutton.removeAttribute("brief_noUnread");
+            else
+                Brief.toolbarbutton.setAttribute("brief_noUnread", "true");
         })
     },
 
@@ -227,22 +240,20 @@ const Brief = {
         let relativeDate = new this.common.RelativeDate(lastUpdateTime);
 
         switch (true) {
-            case relativeDate.deltaMinutes === 0:
+            case relativeDate.intervalMinutes === 0:
                 label.value = bundle.GetStringFromName('lastUpdated.rightNow');
                 break;
 
-            case relativeDate.deltaHours === 0:
-                let pluralForms = bundle.GetStringFromName('minute.pluralForms');
-                let form = this.common.getPluralForm(relativeDate.deltaMinutes, pluralForms);
-                label.value = bundle.formatStringFromName('lastUpdated.ago', [form], 1)
-                                    .replace('#number', relativeDate.deltaMinutes);
+            case relativeDate.intervalHours === 0:
+                let string = bundle.GetStringFromName('lastUpdated.minutes');
+                label.value = this.common.getPluralForm(relativeDate.intervalMinutes, string)
+                                         .replace('#number', relativeDate.intervalMinutes);
                 break;
 
-            case relativeDate.deltaHours <= 12:
-                pluralForms = bundle.GetStringFromName('hour.pluralForms');
-                form = this.common.getPluralForm(relativeDate.deltaHours, pluralForms);
-                label.value = bundle.formatStringFromName('lastUpdated.ago', [form], 1)
-                                    .replace('#number', relativeDate.deltaHours);
+            case relativeDate.intervalHours <= 12:
+                string = bundle.GetStringFromName('lastUpdated.hours');
+                label.value = this.common.getPluralForm(relativeDate.intervalHours, string)
+                                         .replace('#number', relativeDate.intervalHours);
                 break;
 
             case relativeDate.deltaDays === 0:
