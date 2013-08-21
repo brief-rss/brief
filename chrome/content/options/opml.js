@@ -242,20 +242,15 @@ let opml = {
             if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
                 continue;
 
-            let isLivemark = PlacesUtils.annotations.itemHasAnnotation(node.itemId, PlacesUtils.LMANNO_FEEDURI);
-            if (isLivemark) {
+            let [status, livemark] = yield PlacesUtils.livemarks.getLivemark({"id": node.itemId}, addFolderToOPML.resume);
+
+            if (Components.isSuccessCode(status)) {
                 dataString += '\t\t';
 
                 for (let j = 1; j < level; j++)
                     dataString += '\t';
 
                 let name = PlacesUtils.bookmarks.getItemTitle(node.itemId);
-                let [status, livemark] = yield PlacesUtils.livemarks.getLivemark({ id: node.itemId },
-                                                                                 addFolderToOPML.resume);
-
-                if (!Components.isSuccessCode(status))
-                    continue;
-
                 let feedURL = livemark.feedURL.spec;
                 let siteURL = livemark.siteURI ? livemark.siteURI.spec : '';
 
