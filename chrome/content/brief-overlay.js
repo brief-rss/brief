@@ -223,6 +223,9 @@ const Brief = {
         query.getEntryCount(function(unreadEntriesCount) {
             Brief.statusCounter.value = unreadEntriesCount;
             Brief.statusCounter.hidden = (unreadEntriesCount == 0);
+
+            // Attribute to enable custom styling via userChrome.css.
+            Brief.toolbarbutton.setAttribute('unread-entries', unreadEntriesCount);
         })
     },
 
