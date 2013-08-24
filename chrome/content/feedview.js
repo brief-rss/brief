@@ -1168,21 +1168,22 @@ EntryView.prototype = {
 
         // Divert links to new tabs according to user preferences.
         if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
-            aEvent.preventDefault();
+            // Lazily set the link target for activated links
+            if (anchor.hasAttribute('href'))
+                anchor.setAttribute('target', '_blank');
 
-            // preventDefault doesn't stop the default action for middle-clicks,
-            // so we've got stop propagation as well.
-            if (aEvent.button == 1)
-                aEvent.stopPropagation();
 
             if (anchor.getAttribute('command') == 'open') {
+                aEvent.preventDefault();
+
+                // preventDefault doesn't stop the default action for middle-clicks,
+                // so we've got stop propagation as well.
+                if (aEvent.button == 1)
+                    aEvent.stopPropagation();
                 Commands.openEntryLink(this.id);
                 return;
             }
-            else if (anchor.hasAttribute('href')) {
-                Commands.openLink(anchor.getAttribute('href'));
-                return;
-            }
+            return;
         }
 
         let command = aEvent.target.getAttribute('command');
