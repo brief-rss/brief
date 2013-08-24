@@ -1044,6 +1044,10 @@ EntryView.prototype = {
     set selected(aValue) {
         if (aValue) {
             this.container.classList.add('selected');
+            if (this.headline && this.__collapsed)
+                this._getElement('headline-link').focus();
+            else
+                this._getElement('title-link').focus();
         }
         else {
             this.container.classList.remove('selected');
@@ -1098,6 +1102,8 @@ EntryView.prototype = {
 
         this.container.classList.add('collapsed');
 
+        this._getElement('headline-link').focus();
+
         this.__collapsed = true;
     },
 
@@ -1136,6 +1142,8 @@ EntryView.prototype = {
 
             this._searchTermsHighlighted = true;
         }
+
+        this._getElement('title-link').focus();
 
         this.__collapsed = false;
     },
