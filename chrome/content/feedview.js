@@ -365,13 +365,15 @@ FeedView.prototype = {
             // in order to catch middle-clicks.
             case 'click':
                 let node = aEvent.target;
+                let target = null;
                 while (node) {
                     if (node.classList && node.classList.contains('entry')) {
-                        this.getEntryView(parseInt(node.id)).onClick(aEvent);
-                        break;
+                        target = node;
                     }
                     node = node.parentNode;
                 }
+                if (target)
+                    this.getEntryView(parseInt(target.id)).onClick(aEvent);
                 break;
 
             case 'scroll':
