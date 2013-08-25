@@ -237,27 +237,6 @@ let Commands = {
             entryView.collapse(true);
     },
 
-
-    openSelectedEntryLink: function cmd_openSelectedEntryLink() {
-        if (!gCurrentView.selectedEntry)
-            return;
-
-        Commands.openEntryLink(gCurrentView.selectedEntry);
-    },
-
-    openEntryLink: function cmd_openEntryLink(aEntry) {
-        let entryView = gCurrentView.getEntryView(aEntry);
-        Commands.openLink(entryView.entryURL);
-
-        if (!entryView.read)
-            new Query(aEntry).markEntriesRead(true);
-    },
-
-    openLink: function cmd_openLink(aURL) {
-        let docURI = NetUtil.newURI(document.documentURI);
-        getTopWindow().gBrowser.loadOneTab(aURL, docURI);
-    },
-
     displayShortcuts: function cmd_displayShortcuts() {
         let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 

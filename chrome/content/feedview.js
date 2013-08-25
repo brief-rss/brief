@@ -365,13 +365,15 @@ FeedView.prototype = {
             // in order to catch middle-clicks.
             case 'click':
                 let node = aEvent.target;
+                let target = null;
                 while (node) {
                     if (node.classList && node.classList.contains('entry')) {
-                        this.getEntryView(parseInt(node.id)).onClick(aEvent);
-                        break;
+                        target = node;
                     }
                     node = node.parentNode;
                 }
+                if (target)
+                    this.getEntryView(parseInt(target.id)).onClick(aEvent);
                 break;
 
             case 'scroll':
@@ -907,13 +909,17 @@ function EntryView(aFeedView, aEntryData) {
     if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
 
-    // Use innerHTML instead of textContent to resolve entities.
-    titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
+    let entryTitle = ParserUtils.convertToPlainText(
+            aEntryData.title || aEntryData.entryURL, 0, 0);
+
+    titleElem.textContent = entryTitle;
 
     let feed = Storage.getFeed(aEntryData.feedID);
 
-    this._getElement('feed-name').innerHTML = feed.title;
-    this._getElement('authors').innerHTML = aEntryData.authors;
+    let feedTitle = ParserUtils.convertToPlainText(feed.title, 0, 0);
+    this._getElement('feed-name').textContent = feedTitle;
+    this._getElement('authors').textContent = ParserUtils.convertToPlainText(
+            aEntryData.authors, 0, 0);
 
     this._getElement('date').textContent = this.getDateString();
     this._getElement('date').setAttribute('title', this.date.toLocaleString());
@@ -932,23 +938,31 @@ function EntryView(aFeedView, aEntryData) {
         if (aEntryData.entryURL)
             this._getElement('headline-link').setAttribute('href', aEntryData.entryURL);
 
-        this._getElement('headline-title').innerHTML = aEntryData.title || aEntryData.entryURL;
+        this._getElement('headline-title').textContent = entryTitle;
         this._getElement('headline-title').setAttribute('title', aEntryData.title);
-        this._getElement('headline-feed-name').textContent = feed.title;
+        this._getElement('headline-feed-name').textContent = feedTitle;
 
         let favicon = (feed.favicon && feed.favicon != 'no-favicon') ? feed.favicon
                                                                      : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
 
         async(function() {
-            this._getElement('content').innerHTML = aEntryData.content;
+            let target = this._getElement('content');
+            let fragment = ParserUtils.parseFragment(
+                    aEntryData.content, ParserUtils.SanitizerAllowStyle,
+                    false, NetUtil.newURI(feed.feedURL), target);
+            target.appendChild(fragment);
 
             if (this.feedView.query.searchString)
                 this._highlightSearchTerms(this._getElement('headline-title'));
         }.bind(this))
     }
     else {
-        this._getElement('content').innerHTML = aEntryData.content;
+        let target = this._getElement('content');
+        let fragment = ParserUtils.parseFragment(
+                aEntryData.content, ParserUtils.SanitizerAllowStyle,
+                false, NetUtil.newURI(feed.feedURL), target);
+        target.appendChild(fragment);
 
         if (this.feedView.query.searchString) {
             async(function() {
@@ -1030,6 +1044,10 @@ EntryView.prototype = {
     set selected(aValue) {
         if (aValue) {
             this.container.classList.add('selected');
+            if (this.headline && this.__collapsed)
+                this._getElement('headline-link').focus();
+            else
+                this._getElement('title-link').focus();
         }
         else {
             this.container.classList.remove('selected');
@@ -1084,6 +1102,8 @@ EntryView.prototype = {
 
         this.container.classList.add('collapsed');
 
+        this._getElement('headline-link').focus();
+
         this.__collapsed = true;
     },
 
@@ -1123,6 +1143,8 @@ EntryView.prototype = {
             this._searchTermsHighlighted = true;
         }
 
+        this._getElement('title-link').focus();
+
         this.__collapsed = false;
     },
 
@@ -1144,23 +1166,18 @@ EntryView.prototype = {
             element = element.parentNode;
         }
 
-        // Divert links to new tabs according to user preferences.
+        // Links need to be diverted and possibly accounted for
         if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
-            aEvent.preventDefault();
+            // Lazily set the link target for activated links
+            if (anchor.hasAttribute('href'))
+                anchor.setAttribute('target', '_blank');
 
-            // preventDefault doesn't stop the default action for middle-clicks,
-            // so we've got stop propagation as well.
-            if (aEvent.button == 1)
-                aEvent.stopPropagation();
-
+            // Remember as read if opening the item itself
             if (anchor.getAttribute('command') == 'open') {
-                Commands.openEntryLink(this.id);
-                return;
+                if (!this.read)
+                    new Query(this.id).markEntriesRead(true);
             }
-            else if (anchor.hasAttribute('href')) {
-                Commands.openLink(anchor.getAttribute('href'));
-                return;
-            }
+            return;
         }
 
         let command = aEvent.target.getAttribute('command');
@@ -1420,6 +1437,13 @@ __defineGetter__('Finder', function() {
 
     delete this.Finder;
     return this.Finder = finder;
+})
+
+__defineGetter__('ParserUtils', function() {
+    let parserUtils = Cc['@mozilla.org/parserutils;1'].getService(Ci.nsIParserUtils);
+
+    delete this.ParserUtils;
+    return this.ParserUtils = parserUtils;
 })
 
 __defineGetter__('gBriefPrincipal', function() {

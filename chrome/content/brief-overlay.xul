@@ -33,8 +33,6 @@
              oncommand="Brief.doCommand('toggleSelectedEntryStarred')"/>
         <key id="Brief_toggleSelectedEntryCollapsed" key="h"
              oncommand="Brief.doCommand('toggleSelectedEntryCollapsed')"/>
-        <key id="Brief_openSelectedEntry" keycode="VK_RETURN"
-             oncommand="Brief.doCommand('openSelectedEntryLink')"/>
 
         <key id="Brief_toggleHeadlinesView" key="f"
              oncommand="Brief.doCommand('toggleHeadlinesView')"/>
