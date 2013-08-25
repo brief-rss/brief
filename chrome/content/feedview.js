@@ -366,13 +366,13 @@ FeedView.prototype = {
             case 'click':
                 let node = aEvent.target;
                 let target = null;
-                while (node)
-                    if (node.classList && node.classList.contains('entry')) {
+                while (node) {
+                    if (node.classList && node.classList.contains('entry'))
                         target = node;
 
                     node = node.parentNode;
                 }
-                
+
                 if (target)
                     this.getEntryView(parseInt(target.id)).onClick(aEvent);
                 break;
