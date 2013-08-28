@@ -408,13 +408,16 @@ let StorageInternal = {
         }
         else {
             this.pendingRefreshCacheStatement = Stm.getAllFeeds.getResultsAsync(function(aResults, aReason) {
-                if (!aReason)
-                    results = aResults;
-
                 this.pendingRefreshCacheStatement = null;
+
+                resume(aReason ? null : aResults);
             }.bind(this))
-            yield;
+            results = yield;
         }
+
+        // Do not blow the cache in the case results could not be fetched
+        if (results === null)
+            return;
 
         this.allItemsCache = [];
         this.activeItemsCache = [];
