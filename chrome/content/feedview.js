@@ -906,14 +906,17 @@ function EntryView(aFeedView, aEntryData) {
         deleteButton.setAttribute('title', Strings.deleteEntryTooltip);
     }
 
+    let feed = Storage.getFeed(aEntryData.feedID);
+
+    // Set xml:base attribute to resolve relative URIs against the feed's URI.
+    this.container.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'base', feed.feedURL);
+
     let titleElem = this._getElement('title-link');
     if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
 
     // Use innerHTML instead of textContent to resolve entities.
     titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
-
-    let feed = Storage.getFeed(aEntryData.feedID);
 
     this._getElement('feed-name').innerHTML = feed.title;
     this._getElement('authors').innerHTML = aEntryData.authors;
