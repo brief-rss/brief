@@ -5,14 +5,12 @@
 <!ENTITY shiftSpace.key "Shift + Spatie">
 <!ENTITY nextItem "Volgende bericht">
 <!ENTITY previousItem "Vorige bericht">
-<!ENTITY skipDown "Volgende 10 berichten">
-<!ENTITY skipUp "Vorige 10 berichten">
+<!ENTITY scrollDownByScreen "Omlaag scrollen met de schermhoogte">
+<!ENTITY scrollUpByScreen "Omhoog scrollen met de schermhoogte">
 <!ENTITY enter.key "Invoeren">
 <!ENTITY openEntry "Huidige bericht openen">
 <!ENTITY showItem "Huidige bericht weergeven/verbergen (in beeld kopteksten)">
 <!ENTITY entries.header "Berichten">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "Accentueren van huidige bericht inschakelen">
 <!ENTITY markCurrentItemRead "Huidige bericht als gelezen/ongelezen markeren">
 <!ENTITY markVisibleRead "Alle berichten op scherm als gelezen markeren">
 <!ENTITY altN.key "Alt + N">

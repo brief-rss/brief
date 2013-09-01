@@ -1,8 +1,8 @@
-<!ENTITY optionsWindow.title "Innstillinger - Brief">
+<!ENTITY optionsWindow.title "Innstillinger">
 <!ENTITY mainPane.label "Generelt">
 <!ENTITY updateGroup.caption "Oppdatering">
 <!ENTITY checkForUpdatesBefore.label "Finn oppdateringer for nyhetskilder hver(t)">
-<!ENTITY checkForUpdates.accesskey "">
+<!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "minutt">
 <!ENTITY updateIntervalHours.label "time">
 <!ENTITY updateIntervalDays.label "dag">
@@ -11,9 +11,7 @@
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY behaviorGroup.caption "Oppførsel">
 <!ENTITY openInNewTab.label "Åpne Brief i ny fane">
-<!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "Åpne elementer i ny fane">
-<!ENTITY openEntriesInTabs.accesskey "t">
+<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Lagring">
 <!ENTITY expirationBefore.label "Fjern lagrede elementer etter">
 <!ENTITY expirationAfter.label "dager">
@@ -32,20 +30,18 @@
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Visning">
 <!ENTITY showStatusbarIcon.label "Vis ikon i statuslinja">
-<!ENTITY showStatusbarIcon.accesskey "">
+<!ENTITY showStatusbarIcon.accesskey "t">
 <!ENTITY showUnreadCounter.label "Vis antall uleste elementer ved siden av ikonet til Brief">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Sorter eldste elementer først i ulest visning">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Merk elementer som lest etter at jeg har sett dem">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Uthev alltid valgte element">
-<!ENTITY enableItemHightlight.accesskey "A">
 <!ENTITY customizeGroup.caption "Utseende">
 <!ENTITY shortcutsPane.label "Snarveier">
 <!ENTITY editStyleDescription.label "Tilpass utseende til nyhetskilder">
 <!ENTITY editStyleButton.label "Tilpass">
-<!ENTITY editStyleButton.accesskey "T">
+<!ENTITY editStyleButton.accesskey "s">
 <!ENTITY styleEditor.title "Rediger selvvalgt stil">
 <!ENTITY seeCustomizationTips.label "Les om tilpassing av utseende med CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
@@ -59,6 +55,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dager">
 <!ENTITY updatedEntries.label "Ikke merk endrede elementer som uleste">
 <!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Tell ikke med denne nyhetskildens elementer i totalt antall uleste">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Forrige">
 <!ENTITY previousFeed.accesskey "F">
 <!ENTITY nextFeed.label "Neste &gt;">

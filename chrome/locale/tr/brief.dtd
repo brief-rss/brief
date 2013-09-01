@@ -1,0 +1,35 @@
+<!ENTITY searchBox.label "Search">
+<!ENTITY allItemsFolder.label "All items">
+<!ENTITY unreadFolder.label "Okunmamış">
+<!ENTITY starredFolder.label "İşaretlenmiş">
+<!ENTITY trashFolder.label "Çöp Kutusu">
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Başlık görünümünü kullan">
+<!ENTITY filterUnread.tooltip "View only unread items (D)">
+<!ENTITY filterStarred.tooltip "View only bookmarks (S)">
+<!ENTITY updateButton.tooltip "Tüm beslemeleri güncellemeler için kontrol et">
+<!ENTITY stopUpdatingButton.tooltip "Beslemelerin güncellenmesini durdur">
+<!ENTITY showOptions.tooltip "Brief seçeneklerini aç">
+<!ENTITY sidebarSplitter.tooltip "Double-click to hide the sidebar">
+<!ENTITY revealSidebar.tooltip "Reveal the sidebar">
+<!ENTITY markViewRead.tooltip "Tüm öğeleri okundu olarak işaretle (Sadece geçerli sayfayı işaretlemek için CTRL&apos;ye basılı tutun)">
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Beslemeyi Okundu Olarak İşaretle">
+<!ENTITY ctxMarkFeedUnread.label "Beslemeyi Okunmadı Olarak İşaretle">
+<!ENTITY ctxMarkFolderRead.label "Klasörü Okundu Olarak İşaretle">
+<!ENTITY ctxMarkTagRead.label "Etiketlenmiş Öğeleri Okundu Olarak İşaretle">
+<!ENTITY ctxUpdateFeed.label "Beslemeyi Güncelle">
+<!ENTITY ctxUpdateFolder.label "Klasörü Güncelle">
+<!ENTITY ctxOpenWebsite.label "Web Sitesini Aç">
+<!ENTITY ctxDeleteFeed.label "Beslemeyi Sil">
+<!ENTITY ctxDeleteFolder.label "Klasörü Sil">
+<!ENTITY ctxDeleteTag.label "Etiketi Sil">
+<!ENTITY ctxEmptyFeed.label "Beslemeyi Temizle">
+<!ENTITY ctxEmptyFolder.label "Klasörü Temizle">
+<!ENTITY ctxRestoreTrashed.label "Tüm Öğeleri Geri Yükle">
+<!ENTITY ctxEmptyTrash.label "Çöp Kutusu&apos;nu Boşalt">
+<!ENTITY ctxFeedProperties.label "Özellikler">
+<!ENTITY ctxUpdateFeeds.label "Beslemeleri Şimdi Güncelle">
+<!ENTITY ctxMarkFeedsAsRead.label "Tüm Beslemeleri Okundu Olarak İşaretle">
+<!ENTITY showUnreadCounter.label "Show number of unread items">
+<!ENTITY ctxShowOptions.label "Options">

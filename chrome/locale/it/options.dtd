@@ -6,21 +6,16 @@
 <!ENTITY updateIntervalMinutes.label "minuto/i">
 <!ENTITY updateIntervalHours.label "ora/e">
 <!ENTITY updateIntervalDays.label "giorno/i">
-<!ENTITY checkForUpdatesAfter.label "">
 <!ENTITY showNotification.label "Mostra la finestra di notifica quando ci sono aggiornamenti">
 <!ENTITY showNotification.accesskey "n">
 <!ENTITY behaviorGroup.caption "Comportamento">
 <!ENTITY openInNewTab.label "Apri Brief in una nuova scheda">
 <!ENTITY openInNewTab.accesskey "A">
-<!ENTITY openEntriesInTabs.label "Apri elementi in nuove schede">
-<!ENTITY openEntriesInTabs.accesskey "s">
 <!ENTITY storingGroup.caption "Memorizzazione">
 <!ENTITY expirationBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
-<!ENTITY expirationAfter.label "">
 <!ENTITY expirationCheckbox.accesskey "G">
 <!ENTITY starredItemsKept.tooltip "Gli elementi associati ai segnalibri verranno mantenuti">
 <!ENTITY storedEntriesBefore.label "Numero massimo di elementi per feed da memorizzare:">
-<!ENTITY storedEntriesAfter.label "">
 <!ENTITY storedEntriesCheckbox.accesskey "u">
 <!ENTITY clearAllEntriesButton.label "Elimina tutti gli elementi…">
 <!ENTITY clearAllEntriesButton.accesskey "t">
@@ -39,8 +34,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Segna come letti gli elementi che vengono visualizzati">
 <!ENTITY autoMarkRead.accesskey "l">
-<!ENTITY enableItemHightlight.label "Evidenzia sempre l&apos;elemento attuale">
-<!ENTITY enableItemHightlight.accesskey "v">
 <!ENTITY customizeGroup.caption "Personalizzazioni">
 <!ENTITY shortcutsPane.label "Scorciatoie da tastiera">
 <!ENTITY editStyleDescription.label "Personalizza lo stile di visualizzazione dei feed">
@@ -56,9 +49,10 @@
 <!ENTITY checkUpdatesPerFeed.accesskey "C">
 <!ENTITY expireEntriesPerFeedBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
 <!ENTITY expireEntriesPerFeed.accesskey "G">
-<!ENTITY expireEntriesPerFeedAfter.label "">
 <!ENTITY updatedEntries.label "Non segnare elementi modificati come non letti">
 <!ENTITY updatedEntries.accesskey "N">
+<!ENTITY omitInUnread.label "Non includere gli elementi di questo feed nel conteggio totale dei non letti">
+<!ENTITY omitInUnread.accesskey "d">
 <!ENTITY previousFeed.label "&lt; Precedente">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Successivo &gt;">

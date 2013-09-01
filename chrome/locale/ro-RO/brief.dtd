@@ -1,14 +1,14 @@
 <!ENTITY searchBox.label "Căutare">
-<!ENTITY allItemsFolder.label "Toate elementele">
+<!ENTITY allItemsFolder.label "Toate fluxurile">
 <!ENTITY unreadFolder.label "Necitite">
-<!ENTITY starredFolder.label "Marcaje">
+<!ENTITY starredFolder.label "Marcate">
 <!ENTITY trashFolder.label "Gunoi">
 <!-- Button tooltips -->
-<!ENTITY headlinesCheckbox.tooltip "Vizualizează titlurile (F)">
-<!ENTITY filterUnread.tooltip "Vizualizează doar elementele necitite (D)">
-<!ENTITY filterStarred.tooltip "Vizualizează doar marcajele (S)">
-<!ENTITY updateButton.tooltip "Verifică toate fluxurile pentru actualizări">
-<!ENTITY stopUpdatingButton.tooltip "Oprește verificarea fluxurilor pentru actualizări">
+<!ENTITY headlinesCheckbox.tooltip "Arată doar titlurile (F)">
+<!ENTITY filterUnread.tooltip "Arată doar elementele necitite (D)">
+<!ENTITY filterStarred.tooltip "Arată doar elementele marcate (S)">
+<!ENTITY updateButton.tooltip "Actualizează fluxurile">
+<!ENTITY stopUpdatingButton.tooltip "Oprește actualizarea">
 <!ENTITY showOptions.tooltip "Deschide opțiunile Brief">
 <!ENTITY sidebarSplitter.tooltip "Dublu-clic pentru a ascunde bara laterală">
 <!ENTITY revealSidebar.tooltip "Arată bara laterală">
@@ -33,5 +33,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Marchează toate fluxurile ca citite">
 <!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite">
 <!ENTITY ctxShowOptions.label "Opțiuni">
-<!ENTITY compactingWindow.title "Comprimă fluxurile">
-<!ENTITY compactingInProgress.label "Brief comprimă fluxurile păstrate. Acest lucru poate lua cîteva minute...">

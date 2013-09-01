@@ -3,7 +3,7 @@
 <!ENTITY unreadFolder.label "未读项目">
 <!ENTITY starredFolder.label "书签">
 <!ENTITY trashFolder.label "垃圾箱">
-<!ENTITY headlinesCheckbox.tooltip "只显示标题 (F)">
+<!ENTITY headlinesCheckbox.tooltip "只显示标题">
 <!ENTITY filterUnread.tooltip "只查看未读项目 (D)">
 <!ENTITY filterStarred.tooltip "只查看书签 (S)">
 <!ENTITY updateButton.tooltip "更新订阅">
@@ -31,5 +31,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "标记所有订阅为已读">
 <!ENTITY showUnreadCounter.label "显示未读项目数目">
 <!ENTITY ctxShowOptions.label "选项">
-<!ENTITY compactingWindow.title "正在压缩订阅">
-<!ENTITY compactingInProgress.label "Brief 正在压缩保存的聚合，这可能要花几分钟...">

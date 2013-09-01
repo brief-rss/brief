@@ -5,14 +5,12 @@
 <!ENTITY shiftSpace.key "Shift + Mellemrum">
 <!ENTITY nextItem "Gå til næste emne">
 <!ENTITY previousItem "Gå til forrige emne">
-<!ENTITY skipDown "Hop 10 emner ned">
-<!ENTITY skipUp "Hop 10 emner op">
+<!ENTITY scrollDownByScreen "Rul ned med højden af skærmen">
+<!ENTITY scrollUpByScreen "Rul op med højden af skærmen">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Åbn nuværende emne">
 <!ENTITY showItem "Vis/skjul nuværende emne (i overskrift-visning)">
 <!ENTITY entries.header "Emner">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "Aktiver fremhævning af nuværende emne">
 <!ENTITY markCurrentItemRead "Marker det nuværende emne som læst/ulæst">
 <!ENTITY markVisibleRead "Marker alle emner på skærmen som læste">
 <!ENTITY altN.key "Alt + N">

@@ -31,5 +31,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Alle feeds als gelezen markeren">
 <!ENTITY showUnreadCounter.label "Aantal ongelezen berichten weergeven">
 <!ENTITY ctxShowOptions.label "Opties">
-<!ENTITY compactingWindow.title "Feeds compacteren">
-<!ENTITY compactingInProgress.label "Brief compacteert opgeslagen feeds. Dit kan enkele minuten duren…">

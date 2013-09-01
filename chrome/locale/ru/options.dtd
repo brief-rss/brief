@@ -12,10 +12,8 @@
 <!ENTITY behaviorGroup.caption "Поведение">
 <!ENTITY openInNewTab.label "Открывать Brief в новой вкладке">
 <!ENTITY openInNewTab.accesskey "в">
-<!ENTITY openEntriesInTabs.label "Открывать записи в новых вкладках">
-<!ENTITY openEntriesInTabs.accesskey "з">
 <!ENTITY storingGroup.caption "Хранение">
-<!ENTITY expirationBefore.label "Удалять загруженные записи после">
+<!ENTITY expirationBefore.label "Удалять загруженные записи через">
 <!ENTITY expirationAfter.label "дней">
 <!ENTITY expirationCheckbox.accesskey "У">
 <!ENTITY starredItemsKept.tooltip "Отмеченные записи будут сохранены">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "о">
 <!ENTITY autoMarkRead.label "Отмечать записи прочитанными после просмотра">
 <!ENTITY autoMarkRead.accesskey "п">
-<!ENTITY enableItemHightlight.label "Всегда подсвечивать текущую запись">
-<!ENTITY enableItemHightlight.accesskey "В">
 <!ENTITY customizeGroup.caption "Внешний вид">
 <!ENTITY shortcutsPane.label "Быстрый вызов">
 <!ENTITY editStyleDescription.label "Настройка внешнего вида лент">
@@ -59,6 +55,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "дней">
 <!ENTITY updatedEntries.label "Не отмечать измененные записи прочитанными">
 <!ENTITY updatedEntries.accesskey "Н">
+<!ENTITY omitInUnread.label "Не учитывать непрочитанные записи из этой ленты">
+<!ENTITY omitInUnread.accesskey "ч">
 <!ENTITY previousFeed.label "« Предыдущая">
 <!ENTITY previousFeed.accesskey "П">
 <!ENTITY nextFeed.label "Следующая »">

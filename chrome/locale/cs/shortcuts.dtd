@@ -5,14 +5,10 @@
 <!ENTITY shiftSpace.key "Shift + Mezerník">
 <!ENTITY nextItem "Přejít na následující položku">
 <!ENTITY previousItem "Přejít na předchozí položku">
-<!ENTITY skipDown "Přejít dolů o 10 položek">
-<!ENTITY skipUp "Přejít nahoru o 10 položek">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Otevřít aktuální položku">
 <!ENTITY showItem "Zobrazit/skrýt aktuální položku (v zobrazení záhlaví)">
 <!ENTITY entries.header "Položky">
-<!ENTITY tab.key "Tabulátor">
-<!ENTITY enableEntryHightlight "Povolit zvýrazňování aktuální položky">
 <!ENTITY markCurrentItemRead "Označit aktuální položku za přečtenou/nepřečtenou">
 <!ENTITY markVisibleRead "Označit všechny položky v okně za přečtené">
 <!ENTITY altN.key "Alt + N">

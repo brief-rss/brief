@@ -11,9 +11,7 @@
 <!ENTITY showNotification.accesskey "Π">
 <!ENTITY behaviorGroup.caption "Συμπεριφορά">
 <!ENTITY openInNewTab.label "Άνοιγμα του Brief σε νέα καρτέλα">
-<!ENTITY openInNewTab.accesskey "α">
-<!ENTITY openEntriesInTabs.label "Άνοιγμα εγγραφών σε νέες καρτέλες">
-<!ENTITY openEntriesInTabs.accesskey "ι">
+<!ENTITY openInNewTab.accesskey "ν">
 <!ENTITY storingGroup.caption "Αποθήκευση">
 <!ENTITY expirationBefore.label "Αφαίρεση εμφανισμένων εγγραφών μετά από">
 <!ENTITY expirationAfter.label "ημέρες">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "η">
 <!ENTITY autoMarkRead.label "Αυτόματη σήμανση εγγραφών ως αναγνωσμένων μετά την προβολή τους">
 <!ENTITY autoMarkRead.accesskey "σ">
-<!ENTITY enableItemHightlight.label "Επιλογή ενεργής εγγραφής για διαχείριση με συντομεύσεις πληκτρολογίου">
-<!ENTITY enableItemHightlight.accesskey "ε">
 <!ENTITY customizeGroup.caption "Εμφάνιση">
 <!ENTITY shortcutsPane.label "Συντομεύσεις πληκτρολογίου">
 <!ENTITY editStyleDescription.label "Προσαρμογή της εμφάνισης των αρχείων ροής">
@@ -59,6 +55,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "ημέρες">
 <!ENTITY updatedEntries.label "Να μη σημειωθούν εγγραφές που έχουν υποστεί μεταβολές ως μη αναγνωσμένες">
 <!ENTITY updatedEntries.accesskey "η">
+<!ENTITY omitInUnread.label "Να μην περιλαμβάνονται τα στοιχεία της ροής στο σύνολο μη αναγνωσθέντων">
+<!ENTITY omitInUnread.accesskey "η">
 <!ENTITY previousFeed.label "&lt; Προηγούμενο">
 <!ENTITY previousFeed.accesskey "Π">
 <!ENTITY nextFeed.label "Επόμενο &gt;">

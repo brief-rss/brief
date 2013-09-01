@@ -10,10 +10,6 @@
 <!ENTITY showNotification.label "Értesítés új elemek találatakor">
 <!ENTITY showNotification.accesskey "t">
 <!ENTITY behaviorGroup.caption "Viselkedés">
-<!ENTITY openInNewTab.label "Brief megnyitása új lapon">
-<!ENTITY openInNewTab.accesskey "l">
-<!ENTITY openEntriesInTabs.label "Bejegyzések megnyitása új lapon">
-<!ENTITY openEntriesInTabs.accesskey "B">
 <!ENTITY storingGroup.caption "Tárolás">
 <!ENTITY expirationBefore.label "Letöltött bejegyzések eltávolítása">
 <!ENTITY expirationAfter.label "nap elteltével">
@@ -39,8 +35,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Elem megtekintése után annak megjelölése olvasottként">
 <!ENTITY autoMarkRead.accesskey "m">
-<!ENTITY enableItemHightlight.label "Elem kiemelése mindig">
-<!ENTITY enableItemHightlight.accesskey "k">
 <!ENTITY customizeGroup.caption "Megjelenés">
 <!ENTITY shortcutsPane.label "Gyorsbillentyűk">
 <!ENTITY editStyleDescription.label "Hírforrások megjelenésének testreszabása">

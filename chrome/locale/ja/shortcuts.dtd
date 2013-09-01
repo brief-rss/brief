@@ -5,14 +5,12 @@
 <!ENTITY shiftSpace.key "Shift + スペース">
 <!ENTITY nextItem "次の項目へ移動">
 <!ENTITY previousItem "以前の項目へ移動">
-<!ENTITY skipDown "10項目下へ飛ばす">
-<!ENTITY skipUp "10項目上へ飛ばす">
+<!ENTITY scrollDownByScreen "画面の高さ分だけ下にスクロールする">
+<!ENTITY scrollUpByScreen "画面の高さ分だけ上にスクロールする">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "現在の項目を開く">
-<!ENTITY showItem "現在の項目の表示・非表示 (ヘッドライン表示にて)">
+<!ENTITY showItem "現在の項目の表示・非表示 (ヘッドライン表示中)">
 <!ENTITY entries.header "項目">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "現在の項目の強調表示を有効にする">
 <!ENTITY markCurrentItemRead "現在の項目を既読・未読にする">
 <!ENTITY markVisibleRead "画面上のすべての項目を既読にする">
 <!ENTITY altN.key "Alt + N">
@@ -23,7 +21,7 @@
 <!ENTITY showAll "すべての項目を表示する">
 <!ENTITY showStarred "ブックマーク済み項目を表示する">
 <!ENTITY showUnread "未読項目を表示する">
-<!ENTITY headlinesView "見出し表示を切り替える">
+<!ENTITY headlinesView "ヘッドライン表示を切り替える">
 <!ENTITY general.header "全般">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

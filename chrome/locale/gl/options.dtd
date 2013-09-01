@@ -10,10 +10,8 @@
 <!ENTITY showNotification.label "Amosar un aviso cando se atopen novos elementos">
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY behaviorGroup.caption "Comportamento">
-<!ENTITY openInNewTab.label "Abrir o Brief nunha nova pestana">
-<!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "Abrir os elementos en novas pestanas">
-<!ENTITY openEntriesInTabs.accesskey "e">
+<!ENTITY openInNewTab.label "Abrir Brief nunha nova lapela">
+<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Gardando">
 <!ENTITY expirationBefore.label "Eliminar os elementos descargados despois de">
 <!ENTITY expirationAfter.label "días">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Marcar os elementos como lidos despois de os ver">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Resaltar sempre o elemento actual">
-<!ENTITY enableItemHightlight.accesskey "A">
 <!ENTITY customizeGroup.caption "Aparencia">
 <!ENTITY shortcutsPane.label "Atallos">
 <!ENTITY editStyleDescription.label "Personalizar a aparencia das fontes">
@@ -59,6 +55,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "días">
 <!ENTITY updatedEntries.label "Non marcar elementos cambiados como non lidos">
 <!ENTITY updatedEntries.accesskey "D">
+<!ENTITY omitInUnread.label "Non incluír estes elementos na conta xeral de non lidos">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt;Anterior">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Seguinte&gt;">

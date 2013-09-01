@@ -5,14 +5,12 @@
 <!ENTITY shiftSpace.key "Shift + Spacja">
 <!ENTITY nextItem "Wyświetl następną wiadomość">
 <!ENTITY previousItem "Wyświetl poprzednią wiadomość">
-<!ENTITY skipDown "Przejdź w dół o 10 wiadomości">
-<!ENTITY skipUp "Przejdź w górę o 10 wiadomości">
+<!ENTITY scrollDownByScreen "Przewiń w dół ekranu">
+<!ENTITY scrollUpByScreen "Przewiń w górę ekranu">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Otwórz wybraną wiadomość">
 <!ENTITY showItem "Rozwiń lub zwiń wybraną wiadomość (w trybie widoku nagłówków)">
 <!ENTITY entries.header "Wiadomości">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "Włącz wyróżnianie wybranej wiadomości">
 <!ENTITY markCurrentItemRead "Oznacz wybraną wiadomość jako przeczytaną/nieprzeczytaną">
 <!ENTITY markVisibleRead "Oznacz wszystkie widoczne wiadomości jako przeczytane">
 <!ENTITY altN.key "Alt + N">

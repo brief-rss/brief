@@ -1,11 +1,17 @@
-<!ENTITY unreadFolder.label "未讀的">
+<!ENTITY searchBox.label "搜尋">
+<!ENTITY allItemsFolder.label "全部項目">
+<!ENTITY unreadFolder.label "未讀項目">
 <!ENTITY starredFolder.label "有標星號的">
 <!ENTITY trashFolder.label "垃圾桶">
-<!ENTITY headlinesCheckbox.tooltip "只顯示標題">
+<!ENTITY headlinesCheckbox.tooltip "只顯示標題(F)">
+<!ENTITY filterUnread.tooltip "只顯示未讀項目(D)">
+<!ENTITY filterStarred.tooltip "只顯示有標記星號的(S)">
 <!ENTITY updateButton.tooltip "逐一檢查消息來源是否有更新">
 <!ENTITY stopUpdatingButton.tooltip "停止繼續檢查消息來源的更新">
 <!ENTITY showOptions.tooltip "開啟 Brief 選項">
-<!ENTITY markViewRead.tooltip "所有項目標為已讀（按住 Ctrl 鍵再點擊可以只作用在當前這頁）">
+<!ENTITY sidebarSplitter.tooltip "連點兩下隱藏側邊攔">
+<!ENTITY revealSidebar.tooltip "顯示側邊攔">
+<!ENTITY markViewRead.tooltip "所有項目標為已讀(按住 Ctrl 鍵再點擊可以只作用在當前這頁)(Alt+N)">
 <!ENTITY ctxMarkFeedRead.label "消息來源標為已讀">
 <!ENTITY ctxMarkFeedUnread.label "消息來源標為未讀">
 <!ENTITY ctxMarkFolderRead.label "資料夾標為已讀">
@@ -22,6 +28,6 @@
 <!ENTITY ctxEmptyTrash.label "清空垃圾桶">
 <!ENTITY ctxFeedProperties.label "屬性設定">
 <!ENTITY ctxUpdateFeeds.label "立即更新消息來源">
-<!ENTITY ctxMarkFeedsAsRead.label "所有消息來源標為已讀">
-<!ENTITY compactingWindow.title "正在壓實消息來源">
-<!ENTITY compactingInProgress.label "Brief 正在壓實已保存的消息來源。也許會擔擱您幾分鐘的時間...">
+<!ENTITY ctxMarkFeedsAsRead.label "將所有消息來源標記為已讀">
+<!ENTITY showUnreadCounter.label "顯示未讀項目數量">
+<!ENTITY ctxShowOptions.label "選項">

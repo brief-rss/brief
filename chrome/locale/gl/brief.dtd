@@ -3,9 +3,9 @@
 <!ENTITY unreadFolder.label "Sen ler">
 <!ENTITY starredFolder.label "Marcadores">
 <!ENTITY trashFolder.label "Lixo">
-<!ENTITY headlinesCheckbox.tooltip "Ver as cabeceiras (F)">
+<!ENTITY headlinesCheckbox.tooltip "Ver as cabeceiras">
 <!ENTITY filterUnread.tooltip "Visualizar só os elementos sen ler (D)">
-<!ENTITY filterStarred.tooltip "Visualizar só os marcadores (S)">
+<!ENTITY filterStarred.tooltip "Visualizar só os marcadores(S)">
 <!ENTITY updateButton.tooltip "Actualizar todas as fontes">
 <!ENTITY stopUpdatingButton.tooltip "Deter a actualización das fontes">
 <!ENTITY showOptions.tooltip "Abrir as opcións de Brief">
@@ -31,5 +31,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Marcar todas as fontes como lidas">
 <!ENTITY showUnreadCounter.label "Amosar o nome de elementos sen ler">
 <!ENTITY ctxShowOptions.label "Opcións">
-<!ENTITY compactingWindow.title "Compactando as fontes">
-<!ENTITY compactingInProgress.label "O Brief está a compactar as fontes almacenadas. Este proceso pode levar algúns minutos...">

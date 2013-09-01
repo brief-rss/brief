@@ -5,14 +5,12 @@
 <!ENTITY shiftSpace.key "Shift + 空格">
 <!ENTITY nextItem "跳到下个项目">
 <!ENTITY previousItem "跳到上个项目">
-<!ENTITY skipDown "跳过10个项目">
-<!ENTITY skipUp "跳返10个项目">
+<!ENTITY scrollDownByScreen "下滚到窗口高度">
+<!ENTITY scrollUpByScreen "上滚到窗口高度">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "打开当前阅读的项目">
 <!ENTITY showItem "显示或隐藏当前项目（在头条阅读模式）">
 <!ENTITY entries.header "项目">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "高亮当前阅读的项目">
 <!ENTITY markCurrentItemRead "标记当前项目为已读或未读">
 <!ENTITY markVisibleRead "标记所有项目为已读或未读">
 <!ENTITY altN.key "Alt + N">

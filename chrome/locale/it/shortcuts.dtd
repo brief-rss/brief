@@ -5,14 +5,12 @@
 <!ENTITY shiftSpace.key "Maiusc + spazio">
 <!ENTITY nextItem "Mostra l&apos;elemento successivo">
 <!ENTITY previousItem "Mostra l&apos;elemento precedente">
-<!ENTITY skipDown "Mostra i 10 elementi successivi">
-<!ENTITY skipUp "Mostra i 10 elementi precedenti">
+<!ENTITY scrollDownByScreen "Scorri in basso per l&apos;altezza dello schermo">
+<!ENTITY scrollUpByScreen "Scorri in alto per l&apos;altezza dello schermo">
 <!ENTITY enter.key "Invio">
 <!ENTITY openEntry "Apre l&apos;elemento selezionato">
 <!ENTITY showItem "Mostra/nasconde l&apos;anteprima dell&apos;elemento selezionato">
 <!ENTITY entries.header "Elementi">
-<!ENTITY tab.key "Tab ">
-<!ENTITY enableEntryHightlight "Attiva l&apos;evidenziatura dell&apos;elemento attuale">
 <!ENTITY markCurrentItemRead "Segna l&apos;elemento selezionato come letto/non letto">
 <!ENTITY markVisibleRead "Segna gli elementi visibili sullo schermo come letti">
 <!ENTITY altN.key "Alt + N ">

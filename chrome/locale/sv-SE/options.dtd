@@ -10,10 +10,6 @@
 <!ENTITY showNotification.label "Visa ett meddelande när nya objekt hittas">
 <!ENTITY showNotification.accesskey "m">
 <!ENTITY behaviorGroup.caption "Beteende">
-<!ENTITY openInNewTab.label "Öppna Brief i en ny flik">
-<!ENTITY openInNewTab.accesskey "Ö">
-<!ENTITY openEntriesInTabs.label "Öppna objekt i nya flikar">
-<!ENTITY openEntriesInTabs.accesskey "o">
 <!ENTITY storingGroup.caption "Lagring">
 <!ENTITY expirationBefore.label "Ta bort nerladdade objekt efter">
 <!ENTITY expirationAfter.label "dagar">
@@ -39,8 +35,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Märk automatiskt objekt som lästa efter att jag har sett dem">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Markera det aktiva objektet för att låta mig hantera det m.h.a. kortkommandon">
-<!ENTITY enableItemHightlight.accesskey "k">
 <!ENTITY customizeGroup.caption "Utseende">
 <!ENTITY shortcutsPane.label "Kortkommandon">
 <!ENTITY editStyleDescription.label "Anpassa utseendet på flöden">
