@@ -7,44 +7,40 @@
 <!ENTITY updateIntervalHours.label "Stunden">
 <!ENTITY updateIntervalDays.label "Tage">
 <!ENTITY checkForUpdatesAfter.label "Minuten aktualisieren">
-<!ENTITY showNotification.label "Benachrichtigen, wenn neue Einträge gefunden wurden">
+<!ENTITY showNotification.label "Benachrichtigen, wenn neue Beiträge gefunden wurden">
 <!ENTITY showNotification.accesskey "B">
 <!ENTITY behaviorGroup.caption "Verhalten">
-<!ENTITY openInNewTab.label "Brief in neuem Tab öffnen">
-<!ENTITY openInNewTab.accesskey "T">
-<!ENTITY openEntriesInTabs.label "Einträge in neuen Tabs öffnen">
-<!ENTITY openEntriesInTabs.accesskey "E">
+<!ENTITY openInNewTab.label "Brief in einem neuem Tab öffnen">
+<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Speicherung">
-<!ENTITY expirationBefore.label "Heruntergeladene Einträge für">
+<!ENTITY expirationBefore.label "Heruntergeladene Beiträge für">
 <!ENTITY expirationAfter.label "Tage speichern">
 <!ENTITY expirationCheckbox.accesskey "H">
-<!ENTITY starredItemsKept.tooltip "Als Lesezeichen markierte Einträge werden gespeichert">
+<!ENTITY starredItemsKept.tooltip "Als Lesezeichen markierte Beiträge werden gespeichert">
 <!ENTITY storedEntriesBefore.label "Nicht mehr als">
-<!ENTITY storedEntriesAfter.label "Einträge pro Feed speichern">
+<!ENTITY storedEntriesAfter.label "Beiträge pro Feed speichern">
 <!ENTITY storedEntriesCheckbox.accesskey "n">
-<!ENTITY clearAllEntriesButton.label "Alle Einträge löschen...">
+<!ENTITY clearAllEntriesButton.label "Alle Beiträge löschen…">
 <!ENTITY clearAllEntriesButton.accesskey "A">
 <!ENTITY feedsPane.label "Feeds">
 <!ENTITY folderTree.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
-<!ENTITY importOPML.label "Importieren...">
+<!ENTITY importOPML.label "Importieren…">
 <!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportieren...">
+<!ENTITY exportOPML.label "Exportieren…">
 <!ENTITY exportOPML.accesskey "x">
-<!ENTITY displayPane.label "Anzeige">
+<!ENTITY displayPane.label "Ansicht">
 <!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
 <!ENTITY showStatusbarIcon.accesskey "S">
-<!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Einträge neben dem Brief-Symbol anzeigen">
+<!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Beiträge neben dem Brief-Symbol anzeigen">
 <!ENTITY showUnreadCounter.accesskey "A">
-<!ENTITY sortUnreadViewOldestFirst.label "Bei Anzeige ungelesener Einträge älteste zuerst anzeigen">
+<!ENTITY sortUnreadViewOldestFirst.label "Bei Anzeige ungelesener Beiträge älteste zuerst anzeigen">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "u">
-<!ENTITY autoMarkRead.label "Einträge nach Anzeige in der Liste als gelesen markieren">
+<!ENTITY autoMarkRead.label "Beiträge nach Anzeige in der Liste als gelesen markieren">
 <!ENTITY autoMarkRead.accesskey "A">
-<!ENTITY enableItemHightlight.label "Den aktuellen Eintrag immer hervorheben">
-<!ENTITY enableItemHightlight.accesskey "a">
-<!ENTITY customizeGroup.caption "Anzeige">
+<!ENTITY customizeGroup.caption "Aussehen">
 <!ENTITY shortcutsPane.label "Tastaturkürzel">
 <!ENTITY editStyleDescription.label "Darstellung der Feeds anpassen">
-<!ENTITY editStyleButton.label "Anpassen...">
+<!ENTITY editStyleButton.label "Anpassen…">
 <!ENTITY editStyleButton.accesskey "A">
 <!ENTITY styleEditor.title "Benutzerdefinierten Stil bearbeiten">
 <!ENTITY seeCustomizationTips.label "Mehr über benutzerdefinierte Stile mit CSS">
@@ -54,11 +50,13 @@
 <!ENTITY optionsGroupbox.caption "Feed-Einstellungen">
 <!ENTITY checkUpdatesPerFeedBefore.label "Auf Aktualisierung überprüfen alle">
 <!ENTITY checkUpdatesPerFeed.accesskey "A">
-<!ENTITY expireEntriesPerFeedBefore.label "Heruntergeladene Einträge für">
+<!ENTITY expireEntriesPerFeedBefore.label "Heruntergeladene Beiträge für">
 <!ENTITY expireEntriesPerFeed.accesskey "H">
 <!ENTITY expireEntriesPerFeedAfter.label "Tage speichern">
-<!ENTITY updatedEntries.label "Aktualisierte Einträge nicht als ungelesen markieren">
+<!ENTITY updatedEntries.label "Aktualisierte Beiträge nicht als ungelesen markieren">
 <!ENTITY updatedEntries.accesskey "u">
+<!ENTITY omitInUnread.label "Beiträge aus diesem Feed nicht in den ungelesen Beiträgen mitzählen">
+<!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Vorheriger">
 <!ENTITY previousFeed.accesskey "V">
 <!ENTITY nextFeed.label "Nächster &gt;">

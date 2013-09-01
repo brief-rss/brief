@@ -5,14 +5,12 @@
 <!ENTITY shiftSpace.key "Shift + Barra de espaço">
 <!ENTITY nextItem "Ir para o próximo item">
 <!ENTITY previousItem "Ir para o item anterior">
-<!ENTITY skipDown "Pular 10 itens abaixo">
-<!ENTITY skipUp "Pular 10 itens acima">
+<!ENTITY scrollDownByScreen "Rolar para baixo pela altura da tela">
+<!ENTITY scrollUpByScreen "Rolar para cima pela altura da tela">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Abrir item">
 <!ENTITY showItem "Mostrar/ocultar o item atual (na exibição de títulos)">
 <!ENTITY entries.header "Itens">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "Habilitar destaque do item atual">
 <!ENTITY markCurrentItemRead "Marcar item atual como lido/não lido">
 <!ENTITY markVisibleRead "Marcar todos os itens na tela como lidos">
 <!ENTITY altN.key "Alt + N">

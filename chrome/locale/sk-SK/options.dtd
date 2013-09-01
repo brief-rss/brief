@@ -11,9 +11,7 @@
 <!ENTITY showNotification.accesskey "Z">
 <!ENTITY behaviorGroup.caption "Režim">
 <!ENTITY openInNewTab.label "Otvoriť Brief na novej karte">
-<!ENTITY openInNewTab.accesskey "O">
-<!ENTITY openEntriesInTabs.label "Otvoriť položky na nových kartách">
-<!ENTITY openEntriesInTabs.accesskey "t">
+<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Ukladanie">
 <!ENTITY expirationBefore.label "Odstrániť stiahnuté položky po">
 <!ENTITY expirationAfter.label "dňoch">
@@ -39,8 +37,6 @@
 <!ENTITY sortUnreadViewOldestFirst.accesskey "n">
 <!ENTITY autoMarkRead.label "Pred zobrazením označiť články ako prečítané">
 <!ENTITY autoMarkRead.accesskey "z">
-<!ENTITY enableItemHightlight.label "Vždy zvýrazniť aktuálny článok">
-<!ENTITY enableItemHightlight.accesskey "V">
 <!ENTITY customizeGroup.caption "Vzhľad">
 <!ENTITY shortcutsPane.label "Klávesové skratky">
 <!ENTITY editStyleDescription.label "Prispôsobiť vzhľad kanálov">
@@ -59,6 +55,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dňoch">
 <!ENTITY updatedEntries.label "Zmenené kanály neoznačiť ako neprečítané">
 <!ENTITY updatedEntries.accesskey "a">
+<!ENTITY omitInUnread.label "Nezahrnúť tento príspevok do počtu neprečítaných">
+<!ENTITY omitInUnread.accesskey "N">
 <!ENTITY previousFeed.label "&lt; Predchádzajúci">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Ďalší &gt;">

@@ -1,5 +1,5 @@
 <!ENTITY optionsWindow.title "Brief indstillinger">
-<!ENTITY mainPane.label "Hoved">
+<!ENTITY mainPane.label "Generelt">
 <!ENTITY updateGroup.caption "Opdatering">
 <!ENTITY checkForUpdatesBefore.label "Tjek feeds for opdateringer hver">
 <!ENTITY checkForUpdates.accesskey "T">
@@ -8,19 +8,17 @@
 <!ENTITY updateIntervalDays.label "dag">
 <!ENTITY checkForUpdatesAfter.label "minut">
 <!ENTITY showNotification.label "Vis notifikation når nye emner findes">
-<!ENTITY showNotification.accesskey "V">
+<!ENTITY showNotification.accesskey "s">
 <!ENTITY behaviorGroup.caption "Opførsel">
 <!ENTITY openInNewTab.label "Åbn Brief i et nyt faneblad">
-<!ENTITY openInNewTab.accesskey "Å">
-<!ENTITY openEntriesInTabs.label "Åbn emner i nye faneblade">
-<!ENTITY openEntriesInTabs.accesskey "b">
+<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Opbevaring">
 <!ENTITY expirationBefore.label "Fjern hentede emner efter">
 <!ENTITY expirationAfter.label "dage">
 <!ENTITY expirationCheckbox.accesskey "j">
 <!ENTITY starredItemsKept.tooltip "Bogmærkede emner bevares">
 <!ENTITY storedEntriesBefore.label "Gem ikke flere end de">
-<!ENTITY storedEntriesAfter.label "seneste indlæg af hvert feed">
+<!ENTITY storedEntriesAfter.label "seneste emner af hvert feed">
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Ryd alle emner…">
 <!ENTITY clearAllEntriesButton.accesskey "a">
@@ -31,16 +29,14 @@
 <!ENTITY exportOPML.label "Eksporter…">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Vis">
-<!ENTITY showStatusbarIcon.label "Vis statuslinje-ikon">
+<!ENTITY showStatusbarIcon.label "Vis statuslinjeikon">
 <!ENTITY showStatusbarIcon.accesskey "u">
 <!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner ved siden af Brief-ikonet">
 <!ENTITY showUnreadCounter.accesskey "V">
 <!ENTITY sortUnreadViewOldestFirst.label "Sorter ældste emner først i ulæste-visning">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
-<!ENTITY autoMarkRead.label "Marker emner som læste efter jeg har set dem">
+<!ENTITY autoMarkRead.label "Marker automatisk emner som læste efter jeg har set dem">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY enableItemHightlight.label "Fremhæv altid nuværende emne">
-<!ENTITY enableItemHightlight.accesskey "F">
 <!ENTITY customizeGroup.caption "Udseende">
 <!ENTITY shortcutsPane.label "Genveje">
 <!ENTITY editStyleDescription.label "Tilpas udseendet for feeds">
@@ -50,7 +46,7 @@
 <!ENTITY seeCustomizationTips.label "Lær mere om at tilpasse udseendet med CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Navn">
-<!ENTITY feedURL.label "Placering">
+<!ENTITY feedURL.label "Adresse">
 <!ENTITY optionsGroupbox.caption "Feed-indstillinger">
 <!ENTITY checkUpdatesPerFeedBefore.label "Tjek for opdateringer hver">
 <!ENTITY checkUpdatesPerFeed.accesskey "T">
@@ -59,6 +55,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dage">
 <!ENTITY updatedEntries.label "Marker ikke ændrede emner som ulæste">
 <!ENTITY updatedEntries.accesskey "M">
+<!ENTITY omitInUnread.label "Medtag ikke dette feeds emner i det samlede antal ulæste">
+<!ENTITY omitInUnread.accesskey "e">
 <!ENTITY previousFeed.label "&lt; Foregående">
 <!ENTITY previousFeed.accesskey "F">
 <!ENTITY nextFeed.label "Næste &gt;">

@@ -5,14 +5,10 @@
 <!ENTITY shiftSpace.key "Shift + Space">
 <!ENTITY nextItem "Ugrás a következő elemre">
 <!ENTITY previousItem "Ugrás az előző elemre">
-<!ENTITY skipDown "Ugrás 10 elemet előre">
-<!ENTITY skipUp "Ugrás 10 elemet vissza">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Elem megnyitása">
 <!ENTITY showItem "Aktuális elem megjelenítése/elrejtése">
 <!ENTITY entries.header "Elemek">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "Elem megjelölhetőségének engedélyezése">
 <!ENTITY markCurrentItemRead "Aktuális elem olvasott/olvasatlan">
 <!ENTITY markVisibleRead "Összes elem a képernyőn olvasottnak jelöl">
 <!ENTITY altN.key "Alt + N">

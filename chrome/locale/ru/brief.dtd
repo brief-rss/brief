@@ -1,5 +1,5 @@
 <!ENTITY searchBox.label "Поиск">
-<!ENTITY allItemsFolder.label "Все элементы">
+<!ENTITY allItemsFolder.label "Все записи">
 <!ENTITY unreadFolder.label "Непрочитанные">
 <!ENTITY starredFolder.label "Отмеченные записи">
 <!ENTITY trashFolder.label "Корзина">
@@ -11,7 +11,7 @@
 <!ENTITY showOptions.tooltip "Открыть настройки Brief">
 <!ENTITY sidebarSplitter.tooltip "Двойной клик для скрытия панели">
 <!ENTITY revealSidebar.tooltip "Показать панель">
-<!ENTITY markViewRead.tooltip "Отметить все записи прочитанными (нажмите Ctrl, чтобы отметить только текущую страницу)">
+<!ENTITY markViewRead.tooltip "Отметить все записи как прочитанные (Alt+N)">
 <!ENTITY ctxMarkFeedRead.label "Отметить ленту как прочитанную">
 <!ENTITY ctxMarkFeedUnread.label "Отметить ленту как непрочитанную">
 <!ENTITY ctxMarkFolderRead.label "Отметить папку как прочитанную">
@@ -25,11 +25,9 @@
 <!ENTITY ctxEmptyFeed.label "Очистить ленту">
 <!ENTITY ctxEmptyFolder.label "Очистить папку">
 <!ENTITY ctxRestoreTrashed.label "Восстановить удалённые записи">
-<!ENTITY ctxEmptyTrash.label "Очистить корзину">
+<!ENTITY ctxEmptyTrash.label "Очистить Корзину">
 <!ENTITY ctxFeedProperties.label "Свойства">
 <!ENTITY ctxUpdateFeeds.label "Обновить ленты новостей">
 <!ENTITY ctxMarkFeedsAsRead.label "Отметить все ленты как прочитанные">
 <!ENTITY showUnreadCounter.label "Показывать количество непрочитанного">
-<!ENTITY ctxShowOptions.label "Опции">
-<!ENTITY compactingWindow.title "Сжатие лент…">
-<!ENTITY compactingInProgress.label "Brief выполняет сжатие сохранённых лент. Выполнение данной операции может занять несколько минут…">
+<!ENTITY ctxShowOptions.label "Настройки">

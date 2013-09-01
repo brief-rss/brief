@@ -23,7 +23,7 @@
 <!ENTITY ctxDeleteFolder.label "Slet mappe">
 <!ENTITY ctxDeleteTag.label "Slet mærke">
 <!ENTITY ctxEmptyFeed.label "Tøm feed">
-<!ENTITY ctxEmptyFolder.label "Tom mappe">
+<!ENTITY ctxEmptyFolder.label "Tøm mappe">
 <!ENTITY ctxRestoreTrashed.label "Gendan alle emner">
 <!ENTITY ctxEmptyTrash.label "Tøm skraldespand">
 <!ENTITY ctxFeedProperties.label "Egenskaber">
@@ -31,5 +31,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Marker alle feeds som læste">
 <!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner">
 <!ENTITY ctxShowOptions.label "Indstillinger">
-<!ENTITY compactingWindow.title "Komprimerer feeds">
-<!ENTITY compactingInProgress.label "Brief komprimerer gemte feeds. Dette kan tage et par minutter...">

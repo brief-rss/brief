@@ -33,5 +33,3 @@
 <!ENTITY ctxMarkFeedsAsRead.label "Märk alla flöden som lästa">
 <!ENTITY showUnreadCounter.label "Visa antalet olästa objekt">
 <!ENTITY ctxShowOptions.label "Inställningar">
-<!ENTITY compactingWindow.title "Komprimerar flöden">
-<!ENTITY compactingInProgress.label "Brief komprimerar lagrade flöden. Det här kan ta några minuter...">
