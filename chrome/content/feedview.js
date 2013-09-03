@@ -692,17 +692,13 @@ FeedView.prototype = {
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
         let resume = FeedView__fillWindow.resume;
 
-        if (this._loading || this._allEntriesLoaded || this.enoughEntriesPreloaded) {
-            if (aCallback)
-                aCallback();
-            return;
+        if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded) {
+            let stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
+                                                       : LOAD_STEP_SIZE;
+
+            do var loadedCount = yield this._loadEntries(stepSize, resume);
+            while (loadedCount && !this.enoughEntriesPreloaded)
         }
-
-        let stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
-                                                   : LOAD_STEP_SIZE;
-
-        do var loadedCount = yield this._loadEntries(stepSize, resume);
-        while (loadedCount && !this.enoughEntriesPreloaded)
 
         if (aCallback)
             aCallback();
