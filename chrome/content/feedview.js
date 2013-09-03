@@ -388,11 +388,13 @@ FeedView.prototype = {
                     this._scrollSelectionTimeout = async(function() this.selectEntry(this.getEntryInScreenCenter()), 100, this);
                 }
 
-                this._fillWindow(WINDOW_HEIGHTS_LOAD);
+                if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                    this._fillWindow(WINDOW_HEIGHTS_LOAD);
                 break;
 
             case 'resize':
-                this._fillWindow(WINDOW_HEIGHTS_LOAD);
+                if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                    this._fillWindow(WINDOW_HEIGHTS_LOAD);
                 break;
 
             case 'keypress':
@@ -500,7 +502,7 @@ FeedView.prototype = {
         // loaded entry. Hence, we can use the date of the last loaded entry as an anchor
         // and determine the current list of entries that should be loaded by selecting
         // entries with a newer date than that anchor.
-        if (this.enoughEntriesPreloaded) {
+        if (this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS)) {
             let query = this.getQueryCopy();
             let edgeDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
 
@@ -601,7 +603,7 @@ FeedView.prototype = {
                 }
 
                 if (++removedCount == indices.length) {
-                    if (aLoadNewEntries)
+                    if (aLoadNewEntries && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                         this._fillWindow(WINDOW_HEIGHTS_LOAD, afterEntriesRemoved.bind(this));
                     else
                         afterEntriesRemoved.call(this);
@@ -692,21 +694,27 @@ FeedView.prototype = {
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
         let resume = FeedView__fillWindow.resume;
 
-        if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded) {
+        if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
                                                        : LOAD_STEP_SIZE;
 
             do var loadedCount = yield this._loadEntries(stepSize, resume);
-            while (loadedCount && !this.enoughEntriesPreloaded)
+            while (loadedCount && !this.enoughEntriesPreloaded(aWindowHeights))
         }
 
         if (aCallback)
             aCallback();
     }.gen(),
 
-    get enoughEntriesPreloaded() {
+    /**
+     * Checks if enough entries have been loaded.
+     *
+     * @param aWindowHeights
+     *        See FeedView.fillWindow().
+     */
+    enoughEntriesPreloaded: function FeedView__enoughEntriesPreloaded(aWindowHeights) {
         return this.window.scrollMaxY - this.window.pageYOffset >
-               this.window.innerHeight * MIN_LOADED_WINDOW_HEIGHTS
+               this.window.innerHeight * aWindowHeights
                && this.getEntryInScreenCenter() != this.lastLoadedEntry;
     },
 
