@@ -75,6 +75,10 @@ FeedView.prototype = {
     // the view is waiting to insert the results).
     _loading: false,
 
+    // Note that because we don't refresh more than absolutely necessary in
+    // _onEntriesAdded, we don't strictly track whether all entries have been loaded. This
+    // flag is set conservatively, i.e. it is true only if we know for sure all entries
+    // have been loaded, but it is false if there *could* be more.
     _allEntriesLoaded: false,
 
     // ID of the animation interval if the view is being scrolled, or null otherwise.
@@ -503,6 +507,8 @@ FeedView.prototype = {
         // and determine the current list of entries that should be loaded by selecting
         // entries with a newer date than that anchor.
         if (this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS)) {
+            this._allEntriesLoaded = false;
+
             let query = this.getQueryCopy();
             let edgeDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
 
