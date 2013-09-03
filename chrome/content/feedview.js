@@ -692,7 +692,7 @@ FeedView.prototype = {
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
         let resume = FeedView__fillWindow.resume;
 
-        if (this._loading || this._allEntriesLoaded || this.enoughEntriesPreloaded && !this.lastEntryInCenter) {
+        if (this._loading || this._allEntriesLoaded || this.enoughEntriesPreloaded) {
             if (aCallback)
                 aCallback();
             return;
@@ -702,19 +702,16 @@ FeedView.prototype = {
                                                    : LOAD_STEP_SIZE;
 
         do var loadedCount = yield this._loadEntries(stepSize, resume);
-        while (loadedCount && (!this.enoughEntriesPreloaded || this.lastEntryInCenter))
+        while (loadedCount && !this.enoughEntriesPreloaded)
 
         if (aCallback)
             aCallback();
     }.gen(),
 
-    get lastEntryInCenter() {
-        return this.getEntryInScreenCenter() == this.lastLoadedEntry;
-    },
-
     get enoughEntriesPreloaded() {
         return this.window.scrollMaxY - this.window.pageYOffset >
-               this.window.innerHeight * MIN_LOADED_WINDOW_HEIGHTS;
+               this.window.innerHeight * MIN_LOADED_WINDOW_HEIGHTS
+               && this.getEntryInScreenCenter() != this.lastLoadedEntry;
     },
 
     /**
