@@ -15,22 +15,18 @@ category  profile-after-change  BriefService  @brief.mozdev.org/briefservice;1
 category  vacuum-participant    BriefService  @brief.mozdev.org/briefservice;1
 
 locale  brief   en-US  chrome/locale/en-US/
-locale  brief   cs     chrome/locale/cs/
 locale  brief   da     chrome/locale/da/
 locale  brief   de     chrome/locale/de/
-locale  brief   el     chrome/locale/el/
 locale  brief   es-ES  chrome/locale/es-ES/
 locale  brief   fr     chrome/locale/fr/
 locale  brief   gl     chrome/locale/gl/
-locale  brief   hu-HU  chrome/locale/hu-HU/
-locale  brief   it     chrome/locale/it/
 locale  brief   ja     chrome/locale/ja/
 locale  brief   nb-NO  chrome/locale/nb-NO/
 locale  brief   nl     chrome/locale/nl/
 locale  brief   pl     chrome/locale/pl/
 locale  brief   pt-BR  chrome/locale/pt-BR/
 locale  brief   ro-RO  chrome/locale/ro-RO/
-locale  brief   ru-RU  chrome/locale/ru-RU/
+locale  brief   ru     chrome/locale/ru/
 locale  brief   sk-SK  chrome/locale/sk-SK/
-locale  brief   sv-SE  chrome/locale/sv-SE/
+locale  brief   tr     chrome/locale/tr/
 locale  brief   zh-CN  chrome/locale/zh-CN/
