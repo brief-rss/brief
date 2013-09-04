@@ -251,7 +251,7 @@ let opml = {
                     dataString += '\t';
 
                 let name = PlacesUtils.bookmarks.getItemTitle(node.itemId);
-                let feedURL = livemark.feedURL.spec;
+                let feedURL = livemark.feedURI.spec;
                 let siteURL = livemark.siteURI ? livemark.siteURI.spec : '';
 
                 dataString += '<outline type="rss" version="RSS" '           +
