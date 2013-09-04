@@ -14,7 +14,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 16;
+const DATABASE_VERSION = 17;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 
 const FEEDS_TABLE_SCHEMA = [
@@ -266,15 +266,6 @@ let StorageInternal = {
 
         Connection.executeSQL('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE);
 
-        Connection.executeSQL(
-            'DELETE FROM entries WHERE rowid NOT IN ' +
-            '(SELECT docid FROM entries_text)');
-        Connection.executeSQL(
-            'DELETE FROM entries_text WHERE docid NOT IN ' +
-            '(SELECT rowid FROM entries)');
-        Connection.executeSQL(
-            'INSERT OR IGNORE INTO entries_text(rowid) SELECT seq FROM sqlite_sequence WHERE name=\'entries\';');
-
         this.refreshFeedsCache();
 
         this.homeFolderID = Prefs.getIntPref('homeFolder');
@@ -347,9 +338,17 @@ let StorageInternal = {
             case 14:
                 Connection.executeSQL('PRAGMA journal_mode=WAL');
 
-            // To 1.7
+            // To 1.7b1
             case 15:
                 Connection.executeSQL('ALTER TABLE feeds ADD COLUMN omitInUnread INTEGER DEFAULT 0');
+
+            // To 1.7. One-time fix for table corruption.
+            case 16:
+                Connection.executeSQL(
+                    'DELETE FROM entries WHERE rowid NOT IN (SELECT docid FROM entries_text)',
+                    'DELETE FROM entries_text WHERE docid NOT IN (SELECT rowid FROM entries)',
+                    'INSERT OR IGNORE INTO entries_text(rowid) SELECT seq FROM sqlite_sequence WHERE name=\'entries\''
+                );
 
         }
 
