@@ -179,7 +179,7 @@ const Brief = {
             menuitem.setAttribute('checked', newValue);
 
             if (newValue)
-                this.updateStatus();
+                Brief.updateStatus();
         }
     },
 
