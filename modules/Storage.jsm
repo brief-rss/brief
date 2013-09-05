@@ -14,7 +14,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 17;
+const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 
 const FEEDS_TABLE_SCHEMA = [
@@ -65,6 +65,7 @@ const ENTRIES_TEXT_TABLE_SCHEMA = [
 
 const ENTRY_TAGS_TABLE_SCHEMA = [
     'tagName  TEXT    ',
+    'tagID    INTEGER ',
     'entryID  INTEGER '
 ]
 
@@ -349,6 +350,36 @@ let StorageInternal = {
                     'DELETE FROM entries_text WHERE docid NOT IN (SELECT rowid FROM entries)',
                     'INSERT OR IGNORE INTO entries_text(rowid) SELECT seq FROM sqlite_sequence WHERE name=\'entries\''
                 );
+
+            // The tagID column was used in early versions, then it was deprecated, before
+            // it turned out to be necessary again. We must check if it's already present
+            // before adding it, as adding an existing column throws an exception.
+            case 17:
+                let cols = [c for (c of new Statement('PRAGMA table_info(entry_tags)').results)];
+                if (!cols.some(function(c) c.name == 'tagID'))
+                    Connection.executeSQL('ALTER TABLE entry_tags ADD COLUMN tagID INTEGER');
+
+                // Fill in tagIDs for existing tags.
+                let update = new Statement('UPDATE entry_tags SET tagID = :tagID           ' +
+                                           'WHERE tagName = :tagName AND entryID = :entryID');
+                let getTaggedEntries = new Statement('SELECT DISTINCT id, entryURL FROM entries   ' +
+                                                     'WHERE id IN (SELECT entryID FROM entry_tags)');
+
+                for (let entry of getTaggedEntries.results) {
+
+                    let uri = Utils.newURI(entry.entryURL);
+                    for (let bookmarkID in Places.bookmarks.getBookmarkIdsForURI(uri, {})) {
+
+                        let folderID = Bookmarks.getFolderIdForItem(bookmarkID);
+                        if (Utils.isTagFolder(folderID)) {
+                            update.paramSets.push({ entryID: entry.id,
+                                                    tagID:   bookmarkID,
+                                                    tagName: Bookmarks.getItemTitle(folderID) });
+                        }
+                    }
+                }
+
+                update.executeAsync();
 
         }
 
@@ -707,27 +738,27 @@ let StorageInternal = {
      *        TRUE to add the tag, FALSE to remove it.
      * @param aEntryID
      *        Subject entry.
+     * @param aTagID
+     *        Bookmark ID of the tag.
      * @param aTagName
-     *        Name of the tag.
+     *        Name of the tag (only when adding the tag).
      */
-    tagEntry: function StorageInternal_tagEntry(aState, aEntryID, aTagName) {
+    tagEntry: function StorageInternal_tagEntry(aState, aEntryID, aTagID, aTagName) {
         let resume = StorageInternal_tagEntry.resume;
 
-        let params = { 'entryID': aEntryID, 'tagName': aTagName };
-
         if (aState) {
-            Stm.tagEntry.params = params;
+            Stm.tagEntry.params = { 'entryID': aEntryID, 'tagID': aTagID, 'tagName': aTagName };
             yield Stm.tagEntry.executeAsync(resume);
         }
         else {
-            Stm.untagEntry.params = params;
+            Stm.untagEntry.params = { 'entryID': aEntryID, 'tagID': aTagID };
             yield Stm.untagEntry.executeAsync(resume);
         }
 
         // Update the serialized list of tags stored in entries_text table.
         let newTags = yield Utils.getTagsForEntry(aEntryID, resume);
         Stm.setSerializedTagList.params = {
-            'tags': newTags.join(', '),
+            'tags': newTags.map(function(tag) tag.tagName).join(', '),
             'entryID': aEntryID
         }
         yield Stm.setSerializedTagList.executeAsync(resume);
@@ -1374,18 +1405,22 @@ Query.prototype = {
 
             // Verify tags.
             let storedTags = yield Utils.getTagsForEntry(entry.id, resume);
-            let currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
-                                          .filter(Utils.isTagFolder)
-                                          .map(function(id) Bookmarks.getItemTitle(id));
 
-            for (let tag in storedTags) {
-                if (currentTags.indexOf(tag) === -1)
-                    Places.tagging.tagURI(uri, [tag]);
+            let currentTags = [];
+            for (let bm of allBookmarks) {
+                let folder = Bookmarks.getFolderIdForItem(bm);
+                if (Utils.isTagFolder(folder))
+                    currentTags.push({ tagID: bm, tagName: Bookmarks.getItemTitle(bm) });
             }
 
-            for (let tag in currentTags) {
-                if (storedTags.indexOf(tag) === -1)
-                    StorageInternal.tagEntry(true, entry.id, tag);
+            for (let stTag in storedTags) {
+                if (!currentTags.some(function(currTag) currTag.tagID == stTag.tagID))
+                    Places.tagging.tagURI(uri, [stTag.tagName]);
+            }
+
+            for (let currTag of currentTags) {
+                if (!storedTags.some(function(stTag) stTag.tagID == currTag.tagID))
+                    StorageInternal.tagEntry(true, entry.id, currTag.tagID, currTag.tagName);
             }
         }
     }.gen(),
@@ -1599,7 +1634,7 @@ let BookmarkObserver = {
             for (let entry in aEntries) {
                 if (isTag) {
                     let tagName = Bookmarks.getItemTitle(aParentID);
-                    StorageInternal.tagEntry(true, entry, tagName, aItemID);
+                    StorageInternal.tagEntry(true, entry, aItemID, tagName);
                 }
                 else {
                     StorageInternal.starEntry(true, entry, aItemID);
@@ -1612,6 +1647,7 @@ let BookmarkObserver = {
     // nsINavBookmarkObserver
     onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aParentID, aIndex, aItemType, aURI) {
         let resume = BookmarkObserver_onItemRemoved.resume;
+
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
@@ -1621,36 +1657,24 @@ let BookmarkObserver = {
         if (aItemType != Bookmarks.TYPE_BOOKMARK || (yield Utils.isLivemark(aParentID, resume)))
             return;
 
-        let isTag = Utils.isTagFolder(aParentID);
+        let starredEntries = yield Utils.getEntriesByBookmarkID(aItemID, resume);
+        if (starredEntries.length) {
+            // Look for other bookmarks for this URI and if there is one, don't unstar
+            // the entry, but update its bookmarkID to point to that bookmark.
+            let uri = Utils.newURI(aURI.spec);
+            let bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {}))
+                             if (yield Utils.isNormalBookmark(b, resume))];
 
-        if (isTag) {
-            let tagURL = aURI.spec;
-            let tagName = Bookmarks.getItemTitle(aParentID);
-
-            Utils.getEntriesByURL(tagURL, function(entries) {
-                for (let entry in entries)
-                    StorageInternal.tagEntry(false, entry, tagName);
-            })
+            for (let entry in starredEntries) {
+                if (bookmarks.length)
+                    StorageInternal.starEntry(true, entry.id, bookmarks[0], true);
+                else
+                    StorageInternal.starEntry(false, entry.id);
+            }
         }
-        else {
-            Utils.getEntriesByBookmarkID(aItemID, function BookmarkObserver_onItemRemoved_int(aEntries) {
-                let resume = BookmarkObserver_onItemRemoved_int.resume;
-
-                // Look for other bookmarks for this URI. If there is another
-                // bookmark for this URI, don't unstar the entry, but update
-                // its bookmarkID to point to that bookmark.
-                if (aEntries.length) {
-                    let uri = Utils.newURI(aEntries[0].url);
-                    var bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {})) if (yield Utils.isNormalBookmark(b, resume))];
-                }
-
-                for (let entry in aEntries) {
-                    if (bookmarks.length)
-                        StorageInternal.starEntry(true, entry.id, bookmarks[0], true);
-                    else
-                        StorageInternal.starEntry(false, entry.id);
-                }
-            }.gen())
+        else if (yield Utils.checkIfTagExists(aItemID, resume)) {
+            for (let entry of yield Utils.getEntriesByURL(aURI.spec, resume))
+                StorageInternal.tagEntry(false, entry, aItemID);
         }
     }.gen(),
 
@@ -1745,19 +1769,8 @@ let BookmarkObserver = {
             let uri = Bookmarks.getBookmarkURI(tagID);
 
             for (let entryID in yield Utils.getEntriesByURL(uri.spec, resume)) {
-                StorageInternal.tagEntry(true, entryID, aNewName);
-
-                let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
-                                           .map(function(id) Bookmarks.getFolderIdForItem(id))
-                                           .filter(Utils.isTagFolder)
-                                           .map(function(id) Bookmarks.getItemTitle(id));
-
-                let storedTags = yield Utils.getTagsForEntry(entryID, resume);
-
-                let removedTags = storedTags.filter(function(t) currentTags.indexOf(t) === -1);
-
-                for (let tag in removedTags)
-                    StorageInternal.tagEntry(false, entryID, tag);
+                StorageInternal.tagEntry(false, entryID, tagID);
+                StorageInternal.tagEntry(true, entryID, tagID, aNewName);
             }
         }
 
@@ -2128,21 +2141,27 @@ let Stm = {
         return this.unstarEntry = new Statement(sql);
     },
 
+    get checkIfTagExists() {
+        let sql = 'SELECT EXISTS (SELECT tagID FROM entry_tags WHERE tagID = :tagID) AS tagExists';
+        delete this.checkIfTagExists;
+        return this.checkIfTagExists = new Statement(sql);
+    },
+
     get tagEntry() {
-        let sql = 'INSERT INTO entry_tags (entryID, tagName) '+
-                  'VALUES (:entryID, :tagName)               ';
+        let sql = 'INSERT INTO entry_tags (entryID, tagID, tagName) '+
+                  'VALUES (:entryID, :tagID, :tagName)              ';
         delete this.tagEntry;
         return this.tagEntry = new Statement(sql);
     },
 
     get untagEntry() {
-        let sql = 'DELETE FROM entry_tags WHERE entryID = :entryID AND tagName = :tagName';
+        let sql = 'DELETE FROM entry_tags WHERE entryID = :entryID AND tagID = :tagID ';
         delete this.untagEntry;
         return this.untagEntry = new Statement(sql);
     },
 
     get getTagsForEntry() {
-        let sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
+        let sql = 'SELECT tagID, tagName FROM entry_tags WHERE entryID = :entryID';
         delete this.getTagsForEntry;
         return this.getTagsForEntry = new Statement(sql);
     },
@@ -2168,9 +2187,7 @@ let Utils = {
 
     getTagsForEntry: function getTagsForEntry(aEntryID, aCallback) {
         Stm.getTagsForEntry.params = { 'entryID': aEntryID };
-        Stm.getTagsForEntry.getResultsAsync(function(results) {
-            aCallback([row.tagName for each (row in results)]);
-        })
+        Stm.getTagsForEntry.getResultsAsync(function(results, reason) aCallback(results));
     },
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
@@ -2206,6 +2223,13 @@ let Utils = {
         Stm.selectEntriesByTagName.params.tagName = aTagName;
         Stm.selectEntriesByTagName.getResultsAsync(function(results) {
             aCallback([row.id for each (row in results)]);
+        })
+    },
+
+    checkIfTagExists: function checkIfTagExists(aTagID, aCallback) {
+        Stm.checkIfTagExists.params.tagID = aTagID;
+        Stm.checkIfTagExists.getResultsAsync(function(results, reason) {
+            aCallback(results[0].tagExists);
         })
     },
 
