@@ -5,8 +5,6 @@
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Abrir elemento actual">
 <!ENTITY entries.header "Elementos">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "Permitir destacar al elemento actual">
 <!ENTITY moveToTrash "Mover el elemento actual a la Papelera">
 <!ENTITY view.header "Ver">
 <!ENTITY showAll "Mostrar todos los elementos">

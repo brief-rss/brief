@@ -13,8 +13,6 @@
 <!ENTITY showItem "Show/hide the current item (in headlines view)">
 
 <!ENTITY entries.header "Items">
-<!ENTITY tab.key "Tab">
-<!ENTITY enableEntryHightlight "Enable highlighting of the current item">
 <!ENTITY markCurrentItemRead "Mark the current item as read/unread">
 <!ENTITY markVisibleRead "Mark all items on the screen as read">
 <!ENTITY altN.key "Alt + N">
