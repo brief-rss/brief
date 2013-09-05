@@ -716,11 +716,6 @@ let StorageInternal = {
         let params = { 'entryID': aEntryID, 'tagName': aTagName };
 
         if (aState) {
-            Stm.checkTag.params = params;
-            let results = yield Stm.checkTag.getResultsAsync(resume);
-            if (results[0].alreadyTagged)
-                return;
-
             Stm.tagEntry.params = params;
             yield Stm.tagEntry.executeAsync(resume);
         }
@@ -2131,17 +2126,6 @@ let Stm = {
         let sql = 'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE id = :id';
         delete this.unstarEntry;
         return this.unstarEntry = new Statement(sql);
-    },
-
-    get checkTag() {
-        let sql = 'SELECT EXISTS (                  '+
-                  '    SELECT tagName               '+
-                  '    FROM entry_tags              '+
-                  '    WHERE tagName = :tagName AND '+
-                  '          entryID = :entryID     '+
-                  ') AS alreadyTagged               ';
-        delete this.checkTag;
-        return this.checkTag = new Statement(sql);
     },
 
     get tagEntry() {
