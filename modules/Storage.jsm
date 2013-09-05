@@ -1674,17 +1674,8 @@ let BookmarkObserver = {
                                                            aLastModified, aItemType, aParentID) {
         switch (aProperty) {
         case 'title':
-            let feed = Utils.getFeedByBookmarkID(aItemID);
-            if (feed) {
-                Stm.setFeedTitle.params = { 'title': aNewValue, 'feedID': feed.feedID };
-                Stm.setFeedTitle.executeAsync(function() {
-                    feed.title = aNewValue; // Update cache.
-                    Services.obs.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
-                })
-            }
-            else if (Utils.isTagFolder(aItemID)) {
+            if (Utils.isTagFolder(aItemID))
                 this.renameTag(aItemID, aNewValue);
-            }
             break;
 
         case 'uri':
