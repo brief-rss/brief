@@ -1330,7 +1330,8 @@ Query.prototype = {
                 transactions.push(trans);
             }
             else {
-                let bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {})) if (yield Utils.isNormalBookmark(b, resume))];
+                let bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {}))
+                                 if (yield Utils.isNormalBookmark(b, resume))];
                 if (bookmarks.length) {
                     for (let i = bookmarks.length - 1; i >= 0; i--)
                         transactions.push(new PlacesRemoveItemTransaction(bookmarks[i]));
@@ -1582,6 +1583,7 @@ let BookmarkObserver = {
     onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aParentID, aIndex, aItemType,
                                                        aURI, aTitle, aDateAdded) {
         let resume = BookmarkObserver_onItemAdded.resume;
+
         if (aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aParentID)) {
             this.delayedLivemarksSync();
             return;
@@ -1592,32 +1594,29 @@ let BookmarkObserver = {
             return;
 
         // Find entries with the same URI as the added item and tag or star them.
-        Utils.getEntriesByURL(aURI.spec, function(aEntries) {
-            let isTag = Utils.isTagFolder(aParentID);
-
-            for (let entry in aEntries) {
-                if (isTag) {
-                    let tagName = Bookmarks.getItemTitle(aParentID);
-                    StorageInternal.tagEntry(true, entry, tagName, aItemID);
-                }
-                else {
-                    StorageInternal.starEntry(true, entry, aItemID);
-                }
+        for (let entry in yield Utils.getEntriesByURL(aURI.spec, resume)) {
+            if (Utils.isTagFolder(aParentID)) {
+                let tagName = Bookmarks.getItemTitle(aParentID);
+                StorageInternal.tagEntry(true, entry, tagName);
             }
-        })
+            else {
+                StorageInternal.starEntry(true, entry, aItemID);
+            }
+        }
     }.gen(),
 
 
     // nsINavBookmarkObserver
     onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aParentID, aIndex, aItemType, aURI) {
         let resume = BookmarkObserver_onItemRemoved.resume;
+
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
         }
 
-        // Obtain parent title and type before any async calls as it will
-        // likely be removed before the function resumes
+        // Obtain parent title and type before any async calls, as the parent may be
+        // removed before the function resumes.
         let parentTitle = Bookmarks.getItemTitle(aParentID);
         let isTag = Utils.isTagFolder(aParentID);
 
@@ -1627,10 +1626,7 @@ let BookmarkObserver = {
 
 
         if (isTag) {
-            let tagURL = aURI.spec;
-
-            let entries = yield Utils.getEntriesByURL(tagURL, resume);
-            for (let entry in entries)
+            for (let entry in yield Utils.getEntriesByURL(aURI.spec, resume))
                 StorageInternal.tagEntry(false, entry, parentTitle);
         }
         else {
@@ -1640,8 +1636,9 @@ let BookmarkObserver = {
             // bookmark for this URI, don't unstar the entry, but update
             // its bookmarkID to point to that bookmark.
             if (entries.length) {
-                let uri = Utils.newURI(entries[0].url);
-                var bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {})) if (yield Utils.isNormalBookmark(b, resume))];
+                let uri = Utils.newURI(aURI.spec);
+                var bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {}))
+                                 if (yield Utils.isNormalBookmark(b, resume))];
             }
 
             for (let entry in entries) {
@@ -1666,26 +1663,24 @@ let BookmarkObserver = {
     onItemChanged: function BookmarkObserver_onItemChanged(aItemID, aProperty,
                                                            aIsAnnotationProperty, aNewValue,
                                                            aLastModified, aItemType, aParentID) {
+        let resume = BookmarkObserver_onItemChanged.resume;
+
         switch (aProperty) {
-        case 'title':
-            if (Utils.isTagFolder(aItemID))
-                this.renameTag(aItemID, aNewValue);
-            break;
+            case 'title':
+                if (Utils.isTagFolder(aItemID))
+                    this.renameTag(aItemID, aNewValue);
+                break;
 
-        case 'uri':
-            // Unstar any entries with the old URI.
-            Utils.getEntriesByBookmarkID(aItemID, function(aEntries) {
-                for (let entry in aEntries)
+            case 'uri':
+                // Unstar any entries with the old URI.
+                for (let entry of yield Utils.getEntriesByBookmarkID(aItemID, resume))
                     StorageInternal.starEntry(false, entry.id);
-            })
 
-            // Star any entries with the new URI.
-            Utils.getEntriesByURL(aNewValue, function(aEntries) {
-                for (let entry in aEntries)
+                // Star any entries with the new URI.
+                for (let entry of yield Utils.getEntriesByURL(aNewValue, resume))
                     StorageInternal.starEntry(true, entry, aItemID);
-            })
 
-            break;
+                break;
         }
     },
 
