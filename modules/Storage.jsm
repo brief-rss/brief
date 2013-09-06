@@ -1351,12 +1351,8 @@ Query.prototype = {
     /**
      * Verifies entries' starred statuses and their tags.
      *
-     * Normally, the starred status is automatically kept in sync with user's bookmarks,
-     * but there's always a possibility that it goes out of sync, for example if
-     * Brief is disabled or uninstalled. If an entry is starred but no bookmarks are
-     * found for its URI, then a new bookmark is added. If an entry isn't starred,
-     * but there is a bookmark for its URI, this function stars the entry.
-     * Tags are verified in the same manner.
+     * This function syncs the entry status with user's bookmarks, in case it went
+     * out of sync, for example if Brief was disabled or uninstalled.
      */
     verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
         let resume = Query_verifyBookmarksAndTags.resume;
@@ -1370,12 +1366,10 @@ Query.prototype = {
 
             // Verify bookmarks.
             let normalBookmarks = [b for (b of allBookmarks) if (yield Utils.isNormalBookmark(b, resume))];
-            if (entry.starred && !normalBookmarks.length) {
-                new Query(entry.id).bookmarkEntries(true);
-            }
-            else if (!entry.starred && normalBookmarks.length) {
+            if (entry.starred && !normalBookmarks.length)
+                StorageInternal.starEntry(false, entry.id);
+            else if (!entry.starred && normalBookmarks.length)
                 StorageInternal.starEntry(true, entry.id, normalBookmarks[0]);
-            }
 
             // Verify tags.
             let storedTags = yield Utils.getTagsForEntry(entry.id, resume);
@@ -1385,7 +1379,7 @@ Query.prototype = {
 
             for (let tag in storedTags) {
                 if (currentTags.indexOf(tag) === -1)
-                    Places.tagging.tagURI(uri, [tag]);
+                    StorageInternal.tagEntry(false, entry.id, tag);
             }
 
             for (let tag in currentTags) {
