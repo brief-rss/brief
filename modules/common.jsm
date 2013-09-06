@@ -8,8 +8,15 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 function IMPORT_COMMON(aScope) {
-    aScope.Array.prototype.intersect = Array.prototype.intersect;
-    aScope.Function.prototype.gen = Function.prototype.gen;
+    Object.defineProperty(aScope.Array.prototype, 'intersect', {
+        value: Array.prototype.intersect,
+        enumerable: false
+    })
+
+    Object.defineProperty(aScope.Function.prototype, 'gen', {
+        value: Function.prototype.gen,
+        enumerable: false
+    })
 }
 
 
