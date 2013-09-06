@@ -1622,40 +1622,40 @@ let BookmarkObserver = {
             return;
         }
 
+        // Obtain parent title and type before any async calls as it will
+        // likely be removed before the function resumes
+        let parentTitle = Bookmarks.getItemTitle(aParentID);
+        let isTag = Utils.isTagFolder(aParentID);
+
         // Only care about plain bookmarks and tags.
         if (aItemType != Bookmarks.TYPE_BOOKMARK || (yield Utils.isLivemark(aParentID, resume)))
             return;
 
-        let isTag = Utils.isTagFolder(aParentID);
 
         if (isTag) {
             let tagURL = aURI.spec;
-            let tagName = Bookmarks.getItemTitle(aParentID);
 
-            Utils.getEntriesByURL(tagURL, function(entries) {
-                for (let entry in entries)
-                    StorageInternal.tagEntry(false, entry, tagName);
-            })
+            let entries = yield Utils.getEntriesByURL(tagURL, resume);
+            for (let entry in entries)
+                StorageInternal.tagEntry(false, entry, parentTitle);
         }
         else {
-            Utils.getEntriesByBookmarkID(aItemID, function BookmarkObserver_onItemRemoved_int(aEntries) {
-                let resume = BookmarkObserver_onItemRemoved_int.resume;
+            let entries = yield Utils.getEntriesByBookmarkID(aItemID, resume);
 
-                // Look for other bookmarks for this URI. If there is another
-                // bookmark for this URI, don't unstar the entry, but update
-                // its bookmarkID to point to that bookmark.
-                if (aEntries.length) {
-                    let uri = Utils.newURI(aEntries[0].url);
-                    var bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {})) if (yield Utils.isNormalBookmark(b, resume))];
-                }
+            // Look for other bookmarks for this URI. If there is another
+            // bookmark for this URI, don't unstar the entry, but update
+            // its bookmarkID to point to that bookmark.
+            if (entries.length) {
+                let uri = Utils.newURI(entries[0].url);
+                var bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {})) if (yield Utils.isNormalBookmark(b, resume))];
+            }
 
-                for (let entry in aEntries) {
-                    if (bookmarks.length)
-                        StorageInternal.starEntry(true, entry.id, bookmarks[0], true);
-                    else
-                        StorageInternal.starEntry(false, entry.id);
-                }
-            }.gen())
+            for (let entry in entries) {
+                if (bookmarks.length)
+                    StorageInternal.starEntry(true, entry.id, bookmarks[0], true);
+                else
+                    StorageInternal.starEntry(false, entry.id);
+            }
         }
     }.gen(),
 
