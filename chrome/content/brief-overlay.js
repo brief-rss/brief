@@ -54,10 +54,9 @@ const Brief = {
     },
 
     getBriefTab: function Brief_getBriefTab() {
-        let tabs = gBrowser.tabs;
-        for (let i = 0; i < tabs.length; i++) {
-            if (gBrowser.getBrowserForTab(tabs[i]).currentURI.spec == this.BRIEF_URL)
-                return tabs[i];
+        for (let tab of gBrowser.tabs) {
+            if (gBrowser.getBrowserForTab(tab).currentURI.spec == this.BRIEF_URL)
+                return tab;
         }
 
         return null;

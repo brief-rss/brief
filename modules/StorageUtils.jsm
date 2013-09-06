@@ -65,7 +65,7 @@ StorageConnection.prototype = {
                 throw ex;
         }
         finally {
-            for (let statement in this._transactionStatements)
+            for (let statement of this._transactionStatements)
                 statement.reset();
             this._transactionStatements = [];
         }
@@ -117,7 +117,7 @@ StorageConnection.prototype = {
         if (!aStatements || !aStatements.length)
             throw new Error('No statements to execute');
 
-        for (let statement in aStatements)
+        for (let statement of aStatements)
             statement._bindParams();
 
         let callback = new StatementCallback(aStatements, aCallback);
@@ -280,8 +280,11 @@ StorageStatement.prototype = {
                 let row = aResultSet.getNextRow();
                 while (row) {
                     let obj = {};
+
+                    // This is performance-critical so don't use for...of sugar.
                     for (let i = 0; i < columnCount; i++)
                         obj[columns[i]] = row.getResultByName(columns[i]);
+
                     rowArray.push(obj);
                     row = aResultSet.getNextRow();
                 }
@@ -330,7 +333,7 @@ StorageStatement.prototype = {
         }
         else {
             let bindingParamsArray = this._nativeStatement.newBindingParamsArray();
-            for (let set in this.paramSets) {
+            for (let set of this.paramSets) {
                 let bp = bindingParamsArray.newBindingParams();
                 for (let column in set)
                     bp.bindByName(column, set[column])
@@ -348,8 +351,9 @@ StorageStatement.prototype = {
 
         // Avoid repeated XPCOM calls for performance.
         let columnCount = this._nativeStatement.columnCount;
-
         let columns = [];
+
+        // This is performance-critical so don't use for...of sugar.
         for (let i = 0; i < columnCount; i++)
             columns.push(this._nativeStatement.getColumnName(i));
 
@@ -427,8 +431,11 @@ StatementCallback.prototype = {
         let row = aResultSet.getNextRow();
         while (row) {
             let obj = {};
+
+            // This is performance-critical so don't use for...of sugar.
             for (let i = 0; i < columnCount; i++)
                 obj[columns[i]] = row.getResultByName(columns[i]);
+
             this._callback.handleResult(obj);
             row = aResultSet.getNextRow();
         }
@@ -502,7 +509,7 @@ WritingStatementsQueue.prototype = {
             }
         }.bind(this);
 
-        let nativeStatements = [stmt._nativeStatement for each (stmt in statements)];
+        let nativeStatements = [stmt._nativeStatement for (stmt of statements)];
 
         if (nativeStatements.length > 1) {
             let nativeConnection = this._connection._nativeConnection;

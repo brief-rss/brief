@@ -44,18 +44,16 @@ let opml = {
             let results = [];
 
             // At this point, we have an XML doc in opmldoc
-            let nodes = opmldoc.getElementsByTagName('body')[0].childNodes;
-
-            for (let i = 0; i < nodes.length; i++) {
-                if (nodes[i].nodeName == 'outline')
-                    results = this.importNode(results, nodes[i]);
+            for (let node of opmldoc.getElementsByTagName('body')[0].childNodes) {
+                if (node.nodeName == 'outline')
+                    results = this.importNode(results, node);
             }
 
             // Now we have the structure of the file in an array.
             let carr = {folders : 0, links : 0, feeds : 0};
 
-            for (let i = 0; i < results.length; i++)
-                carr = this.countItems(results[i], carr);
+            for (result of results)
+                carr = this.countItems(result, carr);
 
             let transactions = [];
 
@@ -69,9 +67,7 @@ let opml = {
     },
 
     importLevel: function(aNodes, aCreateIn, aTransactions) {
-        for (let i = 0; i < aNodes.length; i++) {
-            let node = aNodes[i];
-
+        for (node of aNodes) {
             switch (node.type) {
             case 'folder':
                 let childItemsTransactions = [];
@@ -124,8 +120,8 @@ let opml = {
         if (arr.type == 'folder') {
             carr.folders++;
 
-            for (let i = 0; i < arr.children.length; i++)
-                carr = this.countItems(arr.children[i], carr);
+            for (let child of arr.children)
+                carr = this.countItems(child, carr);
         }
         else if (arr.type == 'link') {
             carr.links++;
@@ -148,11 +144,9 @@ let opml = {
             hash.type = 'folder';
             hash.children = [];
 
-            let children = node.childNodes;
-
-            for (let i = 0; i < children.length; i++) {
-                if (children[i].nodeName == 'outline')
-                    hash.children = this.importNode(hash.children, children[i]);
+            for (let child of node.childNodes) {
+                if (child.nodeName == 'outline')
+                    hash.children = this.importNode(hash.children, child);
             }
 
             results.push(hash);
@@ -301,17 +295,15 @@ let opml = {
     },
 
     cleanXMLText: function(str) {
-        let res = [
+        let characters = [
             {find : '&', replace : '&amp;'},
             {find : '"', replace : '&quot;'},
             {find : '<', replace : '&lt;'},
             {find : '>', replace : '&gt;'}
         ]
 
-        for (let i = 0; i < res.length; i++){
-            let re = new RegExp(res[i].find, 'g');
-            str = str.replace(re, res[i].replace);
-        }
+        for (let ch of characters)
+            str = str.replace(new RegExp(ch.find, 'g'), ch.replace);
 
         return str;
     }

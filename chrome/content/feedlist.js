@@ -158,7 +158,7 @@ let TagList = {
         if (!this.ready)
             return;
 
-        for (let tag in aTags) {
+        for (let tag of aTags) {
             if (aPossiblyAdded) {
                 if (this.tags.indexOf(tag) == -1)
                     this._rebuild();
@@ -193,7 +193,7 @@ let TagList = {
 
         this.tags = yield Storage.getAllTags(TagList__rebuild.resume);
 
-        for (let tagName in this.tags) {
+        for (let tagName of this.tags) {
             let item = document.createElement('listitem');
             item.id = tagName;
             item.className = 'listitem-iconic tag-list-item';
@@ -291,7 +291,7 @@ let FeedList = {
      */
     refreshFeedTreeitems: function FeedList_refreshFeedTreeitems(aFeeds) {
         let feeds = aFeeds.map(function(f) Storage.getFeed(f));
-        for (let feed in feeds) {
+        for (let feed of feeds) {
             this._refreshLabel(feed);
             this._refreshFavicon(feed.feedID);
 
@@ -384,7 +384,7 @@ let FeedList = {
      * @param aParentFolder feedID of the folder.
      */
     _buildFolderChildren: function FeedList__buildFolderChildren(aParentFolder) {
-        for (let feed in this.feeds) {
+        for (let feed of this.feeds) {
             if (feed.parent != aParentFolder)
                 continue;
 
@@ -480,7 +480,7 @@ let FeedList = {
                 refreshProgressmeter(aData);
 
                 if (aData == 'cancelled') {
-                    for (let feed in Storage.getAllFeeds()) {
+                    for (let feed of Storage.getAllFeeds()) {
                         let item = getElement(feed.feedID);
                         if (item.hasAttribute('loading')) {
                             item.removeAttribute('loading');
@@ -553,11 +553,10 @@ let FeedList = {
 
 
     persistFolderState: function FeedList_persistFolderState() {
-        let folders = this.tree.getElementsByTagName('richtreefolder');
         let closedFolders = '';
-        for (let i = 0; i < folders.length; i++) {
-            if (folders[i].getAttribute('open') == 'false')
-                closedFolders += folders[i].id;
+        for (let folder of this.tree.getElementsByTagName('richtreefolder')) {
+            if (folder.getAttribute('open') == 'false')
+                closedFolders += folder.id;
         }
 
         FeedList.tree.setAttribute('closedFolders', escape(closedFolders));
@@ -677,7 +676,7 @@ let TagListContextMenu = {
         })
 
         query.getProperty('entryURL', true, function(urls) {
-            for (let url in urls) {
+            for (let url of urls) {
                 try {
                     var uri = NetUtil.newURI(url, null, null);
                 }
@@ -768,10 +767,9 @@ let FolderContextMenu = {
     },
 
     updateFolder: function FolderContextMenu_updateFolder() {
-        let items = FeedList.selectedItem.getElementsByTagName('richtreeitem');
         let feeds = [];
-        for (let i = 0; i < items.length; i++)
-            feeds.push(Storage.getFeed(items[i].id));
+        for (let item of FeedList.selectedItem.getElementsByTagName('richtreeitem'))
+            feeds.push(Storage.getFeed(item.id));
 
         FeedUpdateService.updateFeeds(feeds);
     },

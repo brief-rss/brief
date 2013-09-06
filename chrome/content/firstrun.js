@@ -21,9 +21,9 @@ function onload() {
     let className = Services.vc.compare(Application.version, '4.0b6') >= 0
                     ? 'firefox-old'
                     : 'firefox-new';
-    let elements = document.getElementsByClassName(className);
-    for (let i = 0; i < elements.length; i++)
-        elements[i].style.display = 'none';
+
+    for (let element of document.getElementsByClassName(className))
+        element.style.display = 'none';
 
     buildHeader();
 

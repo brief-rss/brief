@@ -439,7 +439,7 @@ FeedView.prototype = {
                 this._onEntriesAdded(aEntryList.IDs);
         }
 
-        for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
+        for (let entry of this._loadedEntries.intersect(aEntryList.IDs)) {
             this.getEntryView(entry).read = aNewState;
 
             if (PrefCache.autoMarkRead && !aNewState)
@@ -455,12 +455,12 @@ FeedView.prototype = {
                 this._onEntriesRemoved(aEntryList.IDs, true, true);
         }
 
-        for (let entry in this._loadedEntries.intersect(aEntryList.IDs))
+        for (let entry of this._loadedEntries.intersect(aEntryList.IDs))
             this.getEntryView(entry).starred = aNewState;
     },
 
     onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
-        for (let entry in this._loadedEntries.intersect(aEntryList.IDs)) {
+        for (let entry of this._loadedEntries.intersect(aEntryList.IDs)) {
             let entryView = this.getEntryView(entry);
             let tags = entryView.tags;
 
@@ -527,7 +527,7 @@ FeedView.prototype = {
                     entries: newEntries
                 })
 
-                for (let entry in yield query.getFullEntries(resume))
+                for (let entry of yield query.getFullEntries(resume))
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
@@ -770,7 +770,7 @@ FeedView.prototype = {
             }
 
             let loadedEntries = yield query.getFullEntries(resume);
-            for (let entry in loadedEntries) {
+            for (let entry of loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
             }
@@ -965,7 +965,7 @@ function EntryView(aFeedView, aEntryData) {
 
         if (this.feedView.query.searchString) {
             async(function() {
-                for (let elem in ['authors', 'tags', 'title', 'content'])
+                for (let elem of ['authors', 'tags', 'title', 'content'])
                     this._highlightSearchTerms(this._getElement(elem));
 
                 this._searchTermsHighlighted = true;
@@ -1130,7 +1130,7 @@ EntryView.prototype = {
 
 
         if (this.feedView.query.searchString && !this._searchTermsHighlighted) {
-            for (let elem in ['authors', 'tags', 'title', 'content'])
+            for (let elem of ['authors', 'tags', 'title', 'content'])
                 this._highlightSearchTerms(this._getElement(elem));
 
             this._searchTermsHighlighted = true;
@@ -1305,7 +1305,7 @@ EntryView.prototype = {
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
-        for (let term in this.feedView.query.searchString.match(/[^\s:\*"-]+/g)) {
+        for (let term of this.feedView.query.searchString.match(/[^\s:\*"-]+/g)) {
             let searchRange = this.feedView.document.createRange();
             searchRange.setStart(aElement, 0);
             searchRange.setEnd(aElement, aElement.childNodes.length);
@@ -1414,7 +1414,7 @@ __defineGetter__('Strings', function() {
 
     let bundle = getElement('main-bundle');
     let obj = {};
-    for (let stringName in cachedStringsList)
+    for (let stringName of cachedStringsList)
         obj[stringName] = bundle.getString(stringName);
 
     delete this.Strings;

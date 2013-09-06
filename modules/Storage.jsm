@@ -358,15 +358,12 @@ let StorageInternal = {
 
     // See Storage.
     getFeed: function StorageInternal_getFeed(aFeedID) {
-        let foundFeed = null;
-        let feeds = this.getAllFeeds(true, true);
-        for (let i = 0; i < feeds.length; i++) {
-            if (feeds[i].feedID == aFeedID) {
-                foundFeed = feeds[i];
-                break;
-            }
+        for (let feed of this.getAllFeeds(true, true)) {
+            if (feed.feedID == aFeedID)
+                return feed;
         }
-        return foundFeed;
+
+        return null;
     },
 
     /**
@@ -422,7 +419,7 @@ let StorageInternal = {
         this.activeItemsCache = [];
         this.activeFeedsCache = [];
 
-        for (let row in results) {
+        for (let row of results) {
             let feed = new Feed();
             for (let column in row)
                 feed[column] = row[column];
@@ -446,7 +443,7 @@ let StorageInternal = {
     // See Storage.
     getAllTags: function StorageInternal_getAllTags(aCallback) {
         Stm.getAllTags.getResultsAsync(function(results) {
-            aCallback([row.tagName for each (row in results)]);
+            aCallback([row.tagName for (row of results)]);
         })
     },
 
@@ -465,7 +462,7 @@ let StorageInternal = {
         let tearDownCache = false;
         let invalidateFeedlist = false;
 
-        for (let propertyBag in propertyBags) {
+        for (let propertyBag of propertyBags) {
             let cachedFeed = Storage.getFeed(propertyBag.feedID);
             let params = {};
 
@@ -534,7 +531,7 @@ let StorageInternal = {
 
         // Delete entries exceeding the global number limit.
         if (Prefs.getBoolPref('database.limitStoredEntries')) {
-            for (let feed in feeds) {
+            for (let feed of feeds) {
                 let query = new Query({
                     feeds: [feed.feedID],
                     deleted: Storage.ENTRY_STATE_NORMAL,
@@ -563,7 +560,7 @@ let StorageInternal = {
 
         // Delete old entries based on per-feed limit.
         if (feedsWithAgeLimit.length) {
-            for (let feed in feedsWithAgeLimit) {
+            for (let feed of feedsWithAgeLimit) {
                 let query = new Query({
                     feeds: [feed.feedID],
                     deleted: Storage.ENTRY_STATE_NORMAL,
@@ -693,7 +690,7 @@ let StorageInternal = {
 
         if (!aDontNotify) {
             let list = yield new Query(aEntryID).getEntryList(resume);
-            for (let observer in StorageInternal.observers) {
+            for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesStarred)
                     observer.onEntriesStarred(list, aState);
             }
@@ -738,7 +735,7 @@ let StorageInternal = {
         yield Stm.setSerializedTagList.executeAsync(resume);
 
         let list = yield new Query(aEntryID).getEntryList(resume);
-        for (let observer in StorageInternal.observers) {
+        for (let observer of StorageInternal.observers) {
             if (observer.onEntriesTagged)
                 observer.onEntriesTagged(list, aState, aTagName);
         }
@@ -937,7 +934,7 @@ FeedProcessor.prototype = {
 
             if (reason === REASON_FINISHED) {
                 let list = yield new Query(insertedEntries).getEntryList(resume);
-                for (let observer in StorageInternal.observers) {
+                for (let observer of StorageInternal.observers) {
                     if (observer.onEntriesAdded)
                         observer.onEntriesAdded(list);
                 }
@@ -952,7 +949,7 @@ FeedProcessor.prototype = {
             yield Connection.executeAsync(statements, resume);
 
             let list = yield new Query(this.updatedEntries).getEntryList(resume);
-            for (let observer in StorageInternal.observers) {
+            for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesUpdated)
                     observer.onEntriesUpdated(list);
             }
@@ -978,7 +975,7 @@ function Query(aConstraints) {
     if (typeof aConstraints == 'number') {
         this.entries = [aConstraints];
     }
-    else if (aConstraints.splice) {
+    else if (Array.isArray(aConstraints)) {
         this.entries = aConstraints;
     }
     else {
@@ -1099,7 +1096,7 @@ Query.prototype = {
     getEntries: function Query_getEntries(aCallback) {
         let sql = 'SELECT entries.id ' + this._getQueryString(true);
         new Statement(sql).getResultsAsync(function(results) {
-			aCallback([row.id for each (row in results)])
+			aCallback([row.id for (row of results)])
 		}, this._onDatabaseError);
     },
 
@@ -1267,7 +1264,7 @@ Query.prototype = {
 
             this.read = tempRead;
 
-            for (let observer in StorageInternal.observers) {
+            for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesMarkedRead)
                     observer.onEntriesMarkedRead(list, aState);
             }
@@ -1292,7 +1289,7 @@ Query.prototype = {
             let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
             yield new Statement(sql).executeAsync(resume);
 
-            for (let observer in StorageInternal.observers) {
+            for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesDeleted)
                     observer.onEntriesDeleted(list, aState);
             }
@@ -1315,13 +1312,12 @@ Query.prototype = {
      */
     bookmarkEntries: function Query_bookmarkEntries(aState) {
         let resume = Query_bookmarkEntries.resume;
-        let entries = yield this.getFullEntries(resume);
         let transactions = [];
 
-        for (let entry in entries) {
+        for (let entry of yield this.getFullEntries(resume)) {
             let uri = Utils.newURI(entry.entryURL);
             if (!uri)
-                return;
+                continue;
 
             if (aState) {
                 let container = Places.unfiledBookmarksFolderId;
@@ -1358,7 +1354,7 @@ Query.prototype = {
     verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
         let resume = Query_verifyBookmarksAndTags.resume;
 
-        for (let entry in yield this.getFullEntries(resume)) {
+        for (let entry of yield this.getFullEntries(resume)) {
             let uri = Utils.newURI(entry.entryURL);
             if (!uri)
                 return;
@@ -1378,12 +1374,12 @@ Query.prototype = {
                                           .filter(Utils.isTagFolder)
                                           .map(function(id) Bookmarks.getItemTitle(id));
 
-            for (let tag in storedTags) {
+            for (let tag of storedTags) {
                 if (currentTags.indexOf(tag) === -1)
                     StorageInternal.tagEntry(false, entry.id, tag);
             }
 
-            for (let tag in currentTags) {
+            for (let tag of currentTags) {
                 if (storedTags.indexOf(tag) === -1)
                     StorageInternal.tagEntry(true, entry.id, tag);
             }
@@ -1548,7 +1544,7 @@ Query.prototype = {
     _traverseFolderChildren: function Query__traverseFolderChildren(aFolder) {
         let isEffectiveFolder = (this._effectiveFolders.indexOf(aFolder) != -1);
 
-        for (let item in Storage.getAllFeeds(true)) {
+        for (let item of Storage.getAllFeeds(true)) {
             if (item.parent == aFolder && item.isFolder) {
                 if (isEffectiveFolder)
                     this._effectiveFolders.push(item.feedID);
@@ -1594,7 +1590,7 @@ let BookmarkObserver = {
             return;
 
         // Find entries with the same URI as the added item and tag or star them.
-        for (let entry in yield Utils.getEntriesByURL(aURI.spec, resume)) {
+        for (let entry of yield Utils.getEntriesByURL(aURI.spec, resume)) {
             if (Utils.isTagFolder(aParentID)) {
                 let tagName = Bookmarks.getItemTitle(aParentID);
                 StorageInternal.tagEntry(true, entry, tagName);
@@ -1626,7 +1622,7 @@ let BookmarkObserver = {
 
 
         if (isTag) {
-            for (let entry in yield Utils.getEntriesByURL(aURI.spec, resume))
+            for (let entry of yield Utils.getEntriesByURL(aURI.spec, resume))
                 StorageInternal.tagEntry(false, entry, parentTitle);
         }
         else {
@@ -1641,7 +1637,7 @@ let BookmarkObserver = {
                                  if (yield Utils.isNormalBookmark(b, resume))];
             }
 
-            for (let entry in entries) {
+            for (let entry of entries) {
                 if (bookmarks.length)
                     StorageInternal.starEntry(true, entry.id, bookmarks[0], true);
                 else
@@ -1729,7 +1725,7 @@ let BookmarkObserver = {
             let tagID = result.root.getChild(i).itemId;
             let uri = Bookmarks.getBookmarkURI(tagID);
 
-            for (let entryID in yield Utils.getEntriesByURL(uri.spec, resume)) {
+            for (let entryID of yield Utils.getEntriesByURL(uri.spec, resume)) {
                 StorageInternal.tagEntry(true, entryID, aNewName);
 
                 let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
@@ -1741,7 +1737,7 @@ let BookmarkObserver = {
 
                 let removedTags = storedTags.filter(function(t) currentTags.indexOf(t) === -1);
 
-                for (let tag in removedTags)
+                for (let tag of removedTags)
                     StorageInternal.tagEntry(false, entryID, tag);
             }
         }
@@ -1788,10 +1784,10 @@ let LivemarksSync = function LivemarksSync() {
 
     // Iterate through the found livemarks and compare them
     // with the feeds in the database.
-    for (let livemark in livemarks) {
+    for (let livemark of livemarks) {
         // Find the matching feed in the database.
         let feed = null;
-        for (let storedFeed in storedFeeds) {
+        for (let storedFeed of storedFeeds) {
             if (storedFeed.feedID == livemark.feedID) {
                 feed = storedFeed;
                 break;
@@ -1833,7 +1829,7 @@ let LivemarksSync = function LivemarksSync() {
 
     // Hide any feeds that are no longer found among the livemarks.
     let missingFeeds = storedFeeds.filter(function(f) oldFeeds.indexOf(f) == -1 && !f.hidden);
-    for (let feed in missingFeeds) {
+    for (let feed of missingFeeds) {
         changedFeeds.push({
             'feedID': feed.feedID,
             'hidden': Date.now()
@@ -1869,7 +1865,7 @@ LivemarksSync.prototype = {
 
         if (StorageInternal.homeFolderID == -1) {
             let allFeeds = Storage.getAllFeeds(true);
-            for (let feed in allFeeds)
+            for (let feed of allFeeds)
                 feed.hidden = Date.now();
 
             Storage.changeFeedProperties(allFeeds);
@@ -2165,19 +2161,17 @@ let Utils = {
     getTagsForEntry: function getTagsForEntry(aEntryID, aCallback) {
         Stm.getTagsForEntry.params = { 'entryID': aEntryID };
         Stm.getTagsForEntry.getResultsAsync(function(results) {
-            aCallback([row.tagName for each (row in results)]);
+            aCallback([row.tagName for (row of results)]);
         })
     },
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
-        let foundFeed = null;
-        for (let feed in Storage.getAllFeeds(true)) {
-            if (feed.bookmarkID == aBookmarkID) {
-                foundFeed = feed;
-                break;
-            }
+        for (let feed of Storage.getAllFeeds(true)) {
+            if (feed.bookmarkID == aBookmarkID)
+                return feed;
         }
-        return foundFeed;
+
+        return null;
     },
 
     isLivemarkStored: function isLivemarkStored(aItemID) {
@@ -2187,21 +2181,21 @@ let Utils = {
     getEntriesByURL: function getEntriesByURL(aURL, aCallback) {
         Stm.selectEntriesByURL.params.url = aURL;
         Stm.selectEntriesByURL.getResultsAsync(function(results) {
-            aCallback([row.id for each (row in results)]);
+            aCallback([row.id for (row of results)]);
         })
     },
 
     getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID, aCallback) {
         Stm.selectEntriesByBookmarkID.params.bookmarkID = aBookmarkID;
         Stm.selectEntriesByBookmarkID.getResultsAsync(function(results) {
-            aCallback([{ id: row.id, url: row.entryURL } for each (row in results)])
+            aCallback([{ id: row.id, url: row.entryURL } for (row of results)])
         })
     },
 
     getEntriesByTagName: function getEntriesByTagName(aTagName, aCallback) {
         Stm.selectEntriesByTagName.params.tagName = aTagName;
         Stm.selectEntriesByTagName.getResultsAsync(function(results) {
-            aCallback([row.id for each (row in results)]);
+            aCallback([row.id for (row of results)]);
         })
     },
 

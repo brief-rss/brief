@@ -8,26 +8,10 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 function IMPORT_COMMON(aScope) {
-    aScope.Array.prototype.__iterator__ = Array.prototype.__iterator__;
     aScope.Array.prototype.intersect = Array.prototype.intersect;
-
     aScope.Function.prototype.gen = Function.prototype.gen;
 }
 
-
-function ArrayIterator(aArray) {
-    this.array = aArray;
-    this.currentIndex = 0;
-}
-
-ArrayIterator.prototype.next = function() {
-    if (this.currentIndex < this.array.length)
-        return this.array[this.currentIndex++];
-    else
-        throw StopIteration;
-}
-
-Array.prototype.__iterator__ = function() new ArrayIterator(this);
 
 Array.prototype.intersect = function intersect(aArr) {
     let commonItems = [];
