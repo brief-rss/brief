@@ -1622,19 +1622,22 @@ let BookmarkObserver = {
             return;
         }
 
+        // Obtain parent title and type before any async calls as it will
+        // likely be removed before the function resumes
+        let parentTitle = Bookmarks.getItemTitle(aParentID);
+        let isTag = Utils.isTagFolder(aParentID);
+
         // Only care about plain bookmarks and tags.
         if (aItemType != Bookmarks.TYPE_BOOKMARK || (yield Utils.isLivemark(aParentID, resume)))
             return;
 
-        let isTag = Utils.isTagFolder(aParentID);
 
         if (isTag) {
             let tagURL = aURI.spec;
-            let tagName = Bookmarks.getItemTitle(aParentID);
 
             let entries = yield Utils.getEntriesByURL(tagURL, resume);
             for (let entry in entries)
-                StorageInternal.tagEntry(false, entry, tagName);
+                StorageInternal.tagEntry(false, entry, parentTitle);
         }
         else {
             let entries = yield Utils.getEntriesByBookmarkID(aItemID, resume);
