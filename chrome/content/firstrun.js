@@ -17,16 +17,7 @@ prefBranch.addObserver('', prefObserver, false);
 
 
 function onload() {
-    // Show steps approperiate for the running Firefox version.
-    let className = Services.vc.compare(Application.version, '4.0b6') >= 0
-                    ? 'firefox-old'
-                    : 'firefox-new';
-
-    for (let element of document.getElementsByClassName(className))
-        element.style.display = 'none';
-
     buildHeader();
-
     document.removeEventListener('DOMContentLoaded', onload, false);
 }
 
