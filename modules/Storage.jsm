@@ -393,7 +393,7 @@ let StorageInternal = {
         this.activeItemsCache = null;
         this.activeFeedsCache = null;
 
-        let results;
+        let results, error;
         if (aSynchronous) {
             if (this.pendingRefreshCacheStatement) {
                 this.pendingRefreshCacheStatement.cancel();
@@ -403,16 +403,13 @@ let StorageInternal = {
             results = Stm.getAllFeeds.results;
         }
         else {
-            this.pendingRefreshCacheStatement = Stm.getAllFeeds.getResultsAsync(function(aResults, aReason) {
-                this.pendingRefreshCacheStatement = null;
-
-                resume(aReason ? null : aResults);
-            }.bind(this))
-            results = yield;
+            this.pendingRefreshCacheStatement = Stm.getAllFeeds.getResultsAsync(resume);
+            [results, error] = yield undefined;
+            this.pendingRefreshCacheStatement = null;
         }
 
-        // Do not blow the cache in the case results could not be fetched
-        if (results === null)
+        // Do not blow the cache in the case results could not be fetched.
+        if (error || !results)
             return;
 
         this.allItemsCache = [];
