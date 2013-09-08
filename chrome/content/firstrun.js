@@ -31,15 +31,9 @@ function buildHeader() {
     let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
 
     let folderID = prefBranch.getIntPref('homeFolder');
-    let folderName = '<span id="home-folder">' + bookmarks.getItemTitle(folderID) +
-                     '</span>';
+    let folderName = '<span id="home-folder">' + bookmarks.getItemTitle(folderID) + '</span>';
     let string = bundle.formatStringFromName('howToSubscribeHeader', [folderName], 1);
-
-    let subscribeHeader = document.getElementById('subscribe');
-    let parserUtils = Components.classes["@mozilla.org/parserutils;1"]
-            .getService(Components.interfaces.nsIParserUtils);
-    let fragment = parserUtils.parseFragment(string, 0, false, null, subscribeHeader);
-    subscribeHeader.appendChild(fragment);
+    document.getElementById('subscribe').innerHTML = string;
 
     let homeFolderSpan = document.getElementById('home-folder');
     homeFolderSpan.addEventListener('click', openOptions, false);
