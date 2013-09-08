@@ -1660,8 +1660,16 @@ let BookmarkObserver = {
 
         switch (aProperty) {
             case 'title':
-                if (Utils.isTagFolder(aItemID))
+                let feed = Utils.getFeedByBookmarkID(aItemID);
+                if (feed) {
+                    Stm.setFeedTitle.params = { 'title': aNewValue, 'feedID': feed.feedID };
+                    yield Stm.setFeedTitle.executeAsync(resume);
+                    feed.title = aNewValue; // Update cache.
+                    Services.obs.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
+                }
+                else if (Utils.isTagFolder(aItemID)) {
                     this.renameTag(aItemID, aNewValue);
+                }
                 break;
 
             case 'uri':
