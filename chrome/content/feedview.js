@@ -891,6 +891,7 @@ function EntryView(aFeedView, aEntryData) {
     this.id = aEntryData.id;
     this.date = new Date(aEntryData.date);
     this.entryURL = aEntryData.entryURL;
+    this.feedID = aEntryData.feedID;
 
     this.headline = this.feedView.headlinesView;
 
@@ -1168,10 +1169,15 @@ EntryView.prototype = {
 
             if (anchor.getAttribute('command') == 'open') {
                 Commands.openEntryLink(this.id);
+
                 return;
             }
             else if (anchor.hasAttribute('href')) {
-                Commands.openLink(anchor.getAttribute('href'));
+                let feedURL = Storage.getFeed(this.feedID).feedURL;
+                let baseURI = NetUtil.newURI(feedURL);
+                let linkURI = NetUtil.newURI(anchor.getAttribute('href'), null, baseURI);
+                Commands.openLink(linkURI.spec);
+
                 return;
             }
         }
