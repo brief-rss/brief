@@ -1157,17 +1157,23 @@ EntryView.prototype = {
             element = element.parentNode;
         }
 
-        // Divert links to new tabs.
+        // Divert links to new tabs according to user preferences.
         if (anchor && (aEvent.button == 0 || aEvent.button == 1)) {
-            // Lazily set the link target for activated links.
-            if (anchor.hasAttribute('href'))
-                anchor.setAttribute('target', '_blank');
+            aEvent.preventDefault();
 
-            // Mark the entry as read if the entry link was clicked.
-            if (!this.read && anchor.getAttribute('command') == 'open')
-                new Query(this.id).markEntriesRead(true);
+            // preventDefault doesn't stop the default action for middle-clicks,
+            // so we've got stop propagation as well.
+            if (aEvent.button == 1)
+                aEvent.stopPropagation();
 
-            return;
+            if (anchor.getAttribute('command') == 'open') {
+                Commands.openEntryLink(this.id);
+                return;
+            }
+            else if (anchor.hasAttribute('href')) {
+                Commands.openLink(anchor.getAttribute('href'));
+                return;
+            }
         }
 
         let command = aEvent.target.getAttribute('command');
