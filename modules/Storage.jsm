@@ -6,6 +6,7 @@ Components.utils.import('resource://brief/FeedContainer.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+Components.utils.import('resource://gre/modules/FileUtils.jsm');
 
 IMPORT_COMMON(this);
 
@@ -217,17 +218,15 @@ let StorageInternal = {
     activeFeedsCache: null,
 
     init: function StorageInternal_init() {
-        let profileDir = Services.dirsvc.get('ProfD', Ci.nsIFile);
-        let databaseFile = profileDir.clone();
-        databaseFile.append('brief.sqlite');
+        let databaseFile = FileUtils.getFile('ProfD', ['brief.sqlite']);
         let databaseIsNew = !databaseFile.exists();
 
         Connection = new StorageConnection(databaseFile, false);
         let schemaVersion = Connection.schemaVersion;
 
         // Remove the backup file after certain amount of time.
-        let backupFile = profileDir.clone();
-        backupFile.append('brief-backup-' + (schemaVersion - 1) + '.sqlite');
+        let backupFilename = 'brief-backup-' + (schemaVersion - 1) + '.sqlite';
+        let backupFile = FileUtils.getFile('ProfD', [backupFilename]);
         if (backupFile.exists() && Date.now() - backupFile.lastModifiedTime > BACKUP_FILE_EXPIRATION_AGE)
             backupFile.remove(false);
 

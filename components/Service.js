@@ -1,6 +1,7 @@
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+Components.utils.import('resource://gre/modules/FileUtils.jsm');
 
 IMPORT_COMMON(this);
 
@@ -12,8 +13,7 @@ function BriefService() {
     let resourceProtocolHandler = Services.io.getProtocolHandler('resource')
                                              .QueryInterface(Ci.nsIResProtocolHandler);
     if (!resourceProtocolHandler.hasSubstitution('profile-chrome-dir')) {
-        let chromeDir = Services.dirsvc.get('ProfD', Ci.nsIFile);
-        chromeDir.append('chrome');
+        let chromeDir = FileUtils.getFile('ProfD', ['chrome']);
         let chromeDirURI = Services.io.newFileURI(chromeDir);
         resourceProtocolHandler.setSubstitution('profile-chrome-dir', chromeDirURI);
     }

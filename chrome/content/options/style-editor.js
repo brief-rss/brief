@@ -1,6 +1,7 @@
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/AddonManager.jsm');
+Components.utils.import('resource://gre/modules/FileUtils.jsm');
 
 IMPORT_COMMON(this);
 
@@ -12,12 +13,7 @@ function init() {
     sizeToContent();
 
     gTextbox = document.getElementById('custom-style-textbox');
-
-    let chromeDir = Services.dirsvc.get('ProfD', Ci.nsIFile);
-    chromeDir.append('chrome');
-
-    gCustomStyleFile = chromeDir.clone();
-    gCustomStyleFile.append('brief-custom-style.css');
+    gCustomStyleFile = FileUtils.getFile('ProfD', ['chrome', 'brief-custom-style.css']);
 
     if (!gCustomStyleFile.exists()) {
         gCustomStyleFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, parseInt("0644", 8));
