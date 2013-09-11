@@ -55,7 +55,8 @@ function Task(aGeneratorFunction) {
 
     function resume() {
         try {
-            generatorInstance.send.apply(generatorInstance, arguments);
+            let arg = arguments.length <= 1 ? arguments[0] : arguments;
+            generatorInstance.send.call(generatorInstance, arg);
         }
         catch (ex if ex == StopIteration) {}
     }
