@@ -2,63 +2,46 @@ Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/AddonManager.jsm');
 Components.utils.import('resource://gre/modules/FileUtils.jsm');
+Components.utils.import('resource://gre/modules/NetUtil.jsm');
 
 IMPORT_COMMON(this);
 
+const EXAMPLE_CSS = '/* Example: change font size of item title */\n.title-link {\n    font-size: 15px;\n}';
 
-let gCustomStyleFile = null;
-let gTextbox = null;
+let file;
+let textbox;
 
 function init() {
     sizeToContent();
 
-    gTextbox = document.getElementById('custom-style-textbox');
-    gCustomStyleFile = FileUtils.getFile('ProfD', ['chrome', 'brief-custom-style.css']);
+    textbox = document.getElementById('custom-style-textbox');
+    file = FileUtils.getFile('ProfD', ['chrome', 'brief-custom-style.css']);
 
-    if (!gCustomStyleFile.exists()) {
-        gCustomStyleFile.create(Ci.nsIFile.NORMAL_FILE_TYPE, parseInt("0644", 8));
-
-        AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
-            let uri = addon.getResourceURI('/defaults/data/example-custom-style.css');
-            let cssText = fetchCSSText(uri);
-            writeCustomCSSFile(cssText);
-            gTextbox.value = cssText;
-        })
+    if (file.exists()) {
+        let request = new XMLHttpRequest();
+        request.open('GET', NetUtil.newURI(file).spec);
+        request.overrideMimeType('text/css');
+        request.onload = function() textbox.value = request.responseText;
+        request.send();
     }
     else {
-        populateTextbox();
+        textbox.value = EXAMPLE_CSS;
     }
-}
-
-
-function populateTextbox() {
-    let uri = Cc['@mozilla.org/network/protocol;1?name=file']
-              .getService(Ci.nsIFileProtocolHandler)
-              .newFileURI(gCustomStyleFile);
-    gTextbox.value = fetchCSSText(uri);
-}
-
-
-function fetchCSSText(aURI) {
-    let request = new XMLHttpRequest();
-    request.open('GET', aURI.spec, false);
-    request.overrideMimeType('text/css');
-    request.send(null);
-
-    return request.responseText;
-}
-
-
-function writeCustomCSSFile(aData) {
-    let stream = Cc['@mozilla.org/network/file-output-stream;1']
-                 .createInstance(Ci.nsIFileOutputStream);
-    stream.init(gCustomStyleFile, 0x02 | 0x08 | 0x20, -1, 0); // write, create, truncate
-    stream.write(aData, aData.length);
-    stream.close();
 }
 
 
 function onAccept() {
-    writeCustomCSSFile(gTextbox.value, gTextbox.value.length);
-    Services.obs.notifyObservers(null, 'brief:custom-style-changed', '');
+    let inputStream = Cc['@mozilla.org/io/string-input-stream;1']
+                      .createInstance(Ci.nsIStringInputStream);
+    // A little hack. An empty string wouldn't be written, making it impossible
+    // to save an empty file.
+    let string = textbox.value || ' ';
+    inputStream.setData(string, string.length);
+
+    let outputStream = FileUtils.openFileOutputStream(file);
+
+    NetUtil.asyncCopy(inputStream, outputStream, function(result) {
+        if (Components.isSuccessCode(result))
+            Services.obs.notifyObservers(null, 'brief:custom-style-changed', '');
+    })
 }
