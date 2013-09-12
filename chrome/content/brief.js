@@ -247,7 +247,11 @@ let Commands = {
 
     openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
-        Commands.openLink(entryView.entryURL);
+
+        let baseURI = NetUtil.newURI(Storage.getFeed(entryView.feedID).feedURL);
+        let linkURI = NetUtil.newURI(entryView.entryURL, null, baseURI);
+
+        Commands.openLink(linkURI.spec);
 
         if (!entryView.read)
             new Query(aEntry).markEntriesRead(true);
