@@ -9,14 +9,12 @@ function BriefService() {
     // Initialize Storage module.
     Components.utils.import('resource://brief/Storage.jsm');
 
-    // Registers %profile%/chrome directory under a resource URI.
+    // Register the custom CSS file under a resource URI.
     let resourceProtocolHandler = Services.io.getProtocolHandler('resource')
                                              .QueryInterface(Ci.nsIResProtocolHandler);
-    if (!resourceProtocolHandler.hasSubstitution('profile-chrome-dir')) {
-        let chromeDir = FileUtils.getFile('ProfD', ['chrome']);
-        let chromeDirURI = Services.io.newFileURI(chromeDir);
-        resourceProtocolHandler.setSubstitution('profile-chrome-dir', chromeDirURI);
-    }
+    let file = FileUtils.getFile('ProfD', ['chrome', 'brief-custom-style.css']);
+    let uri = Services.io.newFileURI(file);
+    resourceProtocolHandler.setSubstitution('brief-custom-style.css', uri);
 }
 
 BriefService.prototype = {

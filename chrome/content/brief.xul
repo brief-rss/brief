@@ -2,7 +2,7 @@
 <?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/feedview-header.css"?>
 <?xml-stylesheet href="chrome://brief/skin/feedlist.css" type="text/css"?>
-<?xml-stylesheet href="resource://profile-chrome-dir/brief-custom-style.css"?>
+<?xml-stylesheet href="resource://brief-custom-style.css"?>
 
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
