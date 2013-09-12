@@ -52,7 +52,7 @@ let opml = {
             // Now we have the structure of the file in an array.
             let carr = {folders : 0, links : 0, feeds : 0};
 
-            for (result of results)
+            for (let result of results)
                 carr = this.countItems(result, carr);
 
             let transactions = [];
@@ -67,7 +67,7 @@ let opml = {
     },
 
     importLevel: function(aNodes, aCreateIn, aTransactions) {
-        for (node of aNodes) {
+        for (let node of aNodes) {
             switch (node.type) {
             case 'folder':
                 let childItemsTransactions = [];
