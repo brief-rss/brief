@@ -43,7 +43,7 @@
 <!ENTITY editStyleButton.label "Personalizar">
 <!ENTITY editStyleButton.accesskey "P">
 <!ENTITY styleEditor.title "Personalizar la apariencia">
-<!ENTITY seeCustomizationTips.label "Aprende a personalizar la apariencia usando CSS">
+<!ENTITY seeCustomizationTips.label "Aprenda a personalizar la apariencia usando CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Nombre">
 <!ENTITY feedURL.label "Ubicación">

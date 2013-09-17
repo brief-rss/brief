@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "Brief">
+<!ENTITY thankYou.header "Дякуємо за встановлення Brief">
+<!ENTITY subscribingStep1.description "Натисніть на піктограму в панелі навігації, щоб переглянути стрічки">
+<!ENTITY subscribingStep1firefox4.description "Відкрийте меню <strong>Закладки</strong> і виберіть <strong>Підписатися на цю сторінку</strong>.">
+<!ENTITY subscribingStep2.description "Виберіть <strong>Живі закладки</strong> і натисніть <strong>Підписатись</strong>.">
+<!ENTITY subscribingStep3.description "Виберіть теку <strong>Живі закладки</strong> у меню Закладки.">
+<!ENTITY getStartedButton.label "Початок роботи">
