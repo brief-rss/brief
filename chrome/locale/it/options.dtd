@@ -2,20 +2,23 @@
 <!ENTITY mainPane.label "Generali">
 <!ENTITY updateGroup.caption "Aggiornamenti">
 <!ENTITY checkForUpdatesBefore.label "Periodo di tempo prima del controllo successivo:">
-<!ENTITY checkForUpdates.accesskey "P">
+<!ENTITY checkForUpdates.accesskey "c">
 <!ENTITY updateIntervalMinutes.label "minuto/i">
 <!ENTITY updateIntervalHours.label "ora/e">
 <!ENTITY updateIntervalDays.label "giorno/i">
+<!ENTITY checkForUpdatesAfter.label "minuto/i">
 <!ENTITY showNotification.label "Mostra la finestra di notifica quando ci sono aggiornamenti">
-<!ENTITY showNotification.accesskey "n">
+<!ENTITY showNotification.accesskey "f">
 <!ENTITY behaviorGroup.caption "Comportamento">
 <!ENTITY openInNewTab.label "Apri Brief in una nuova scheda">
 <!ENTITY openInNewTab.accesskey "A">
 <!ENTITY storingGroup.caption "Memorizzazione">
 <!ENTITY expirationBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
+<!ENTITY expirationAfter.label "giorno/i">
 <!ENTITY expirationCheckbox.accesskey "G">
 <!ENTITY starredItemsKept.tooltip "Gli elementi associati ai segnalibri verranno mantenuti">
 <!ENTITY storedEntriesBefore.label "Numero massimo di elementi per feed da memorizzare:">
+<!ENTITY storedEntriesAfter.label "elemento/i">
 <!ENTITY storedEntriesCheckbox.accesskey "u">
 <!ENTITY clearAllEntriesButton.label "Elimina tutti gli elementi…">
 <!ENTITY clearAllEntriesButton.accesskey "t">
@@ -26,9 +29,9 @@
 <!ENTITY exportOPML.label "Esporta…">
 <!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Aspetto">
-<!ENTITY showStatusbarIcon.label "Mostra l&apos;icona nella barra di stato">
+<!ENTITY showStatusbarIcon.label "Mostra l'icona nella barra di stato">
 <!ENTITY showStatusbarIcon.accesskey "M">
-<!ENTITY showUnreadCounter.label "Mostra il numero degli elementi non letti accanto all&apos;icona di Brief">
+<!ENTITY showUnreadCounter.label "Mostra il numero degli elementi non letti accanto all'icona di Brief">
 <!ENTITY showUnreadCounter.accesskey "n">
 <!ENTITY sortUnreadViewOldestFirst.label "Ordina prima gli elementi più vecchi fra quelli non letti">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
@@ -45,11 +48,12 @@
 <!ENTITY feedName.label "Nome:">
 <!ENTITY feedURL.label "Indirizzo:">
 <!ENTITY optionsGroupbox.caption "Impostazioni dei feed">
-<!ENTITY checkUpdatesPerFeedBefore.label "Controlla per aggiornamenti ogni:">
+<!ENTITY checkUpdatesPerFeedBefore.label "Controlla gli aggiornamenti ogni:">
 <!ENTITY checkUpdatesPerFeed.accesskey "C">
 <!ENTITY expireEntriesPerFeedBefore.label "Giorni dopo i quali eliminare gli elementi scaricati:">
 <!ENTITY expireEntriesPerFeed.accesskey "G">
-<!ENTITY updatedEntries.label "Non segnare elementi modificati come non letti">
+<!ENTITY expireEntriesPerFeedAfter.label "giorno/i">
+<!ENTITY updatedEntries.label "Non segnare gli elementi modificati come non letti">
 <!ENTITY updatedEntries.accesskey "N">
 <!ENTITY omitInUnread.label "Non includere gli elementi di questo feed nel conteggio totale dei non letti">
 <!ENTITY omitInUnread.accesskey "d">

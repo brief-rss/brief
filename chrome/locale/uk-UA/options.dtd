@@ -1,0 +1,63 @@
+<!ENTITY optionsWindow.title "Налаштування Brief">
+<!ENTITY mainPane.label "Головне">
+<!ENTITY updateGroup.caption "Оновлення">
+<!ENTITY checkForUpdatesBefore.label "Перевіряти оновлення стрічок кожні">
+<!ENTITY checkForUpdates.accesskey "о">
+<!ENTITY updateIntervalMinutes.label "хвилин">
+<!ENTITY updateIntervalHours.label "годин">
+<!ENTITY updateIntervalDays.label "днів">
+<!ENTITY checkForUpdatesAfter.label "хвилин">
+<!ENTITY showNotification.label "Відображати сповіщення, коли знайдено нові записи">
+<!ENTITY showNotification.accesskey "с">
+<!ENTITY behaviorGroup.caption "Поведінка">
+<!ENTITY openInNewTab.label "Відкривати Brief у новій вкладці">
+<!ENTITY openInNewTab.accesskey "н">
+<!ENTITY storingGroup.caption "Зберігання">
+<!ENTITY expirationBefore.label "Видаляти завантажені записи через">
+<!ENTITY expirationAfter.label "днів">
+<!ENTITY expirationCheckbox.accesskey "В">
+<!ENTITY starredItemsKept.tooltip "Записи з міткою будуть зберігатися">
+<!ENTITY storedEntriesBefore.label "Зберігати не більше">
+<!ENTITY storedEntriesAfter.label "останніх записів кожноі стрічки">
+<!ENTITY storedEntriesCheckbox.accesskey "З">
+<!ENTITY clearAllEntriesButton.label "Видалити всі записи...">
+<!ENTITY clearAllEntriesButton.accesskey "д">
+<!ENTITY feedsPane.label "Стрічки">
+<!ENTITY folderTree.label "Тека, яка містить мої Живі закладки:">
+<!ENTITY importOPML.label "Імпорт...">
+<!ENTITY importOPML.accesskey "І">
+<!ENTITY exportOPML.label "Експорт…">
+<!ENTITY exportOPML.accesskey "Е">
+<!ENTITY displayPane.label "Відображення">
+<!ENTITY showStatusbarIcon.label "Відображати піктограму у рядку стану">
+<!ENTITY showStatusbarIcon.accesskey "п">
+<!ENTITY showUnreadCounter.label "Відображати кількість непрочитаних записів поруч із піктограмою">
+<!ENTITY showUnreadCounter.accesskey "к">
+<!ENTITY sortUnreadViewOldestFirst.label "В поданні «Непрочитані» спочатку відображати найстаріші елементи">
+<!ENTITY sortUnreadViewOldestFirst.accesskey "Н">
+<!ENTITY autoMarkRead.label "Автоматично позначати елементи як прочитані після того, як я їх побачу">
+<!ENTITY autoMarkRead.accesskey "п">
+<!ENTITY customizeGroup.caption "Вигляд">
+<!ENTITY shortcutsPane.label "Швидкі клавіші">
+<!ENTITY editStyleDescription.label "Налаштування зовнішнього вигляду стрічок">
+<!ENTITY editStyleButton.label "Налаштувати">
+<!ENTITY editStyleButton.accesskey "ш">
+<!ENTITY styleEditor.title "Редагування власного стилю">
+<!ENTITY seeCustomizationTips.label "Дізнайтеся про налаштування зовнішнього вигляду за допомогою CSS (анг.)">
+<!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
+<!ENTITY feedName.label "Назва">
+<!ENTITY feedURL.label "Адреса">
+<!ENTITY optionsGroupbox.caption "Налаштування стрічки">
+<!ENTITY checkUpdatesPerFeedBefore.label "Перевіряти наявність оновлень кожні">
+<!ENTITY checkUpdatesPerFeed.accesskey "о">
+<!ENTITY expireEntriesPerFeedBefore.label "Видаляти завантажені записи через">
+<!ENTITY expireEntriesPerFeed.accesskey "В">
+<!ENTITY expireEntriesPerFeedAfter.label "днів">
+<!ENTITY updatedEntries.label "Не позначати змінені записи знову непрочитаними">
+<!ENTITY updatedEntries.accesskey "з">
+<!ENTITY omitInUnread.label "Не враховувати записи цього каналу в загальній кількості непрочитаних">
+<!ENTITY omitInUnread.accesskey "х">
+<!ENTITY previousFeed.label "« Попередня">
+<!ENTITY previousFeed.accesskey "П">
+<!ENTITY nextFeed.label "Наступна »">
+<!ENTITY nextFeed.accesskey "Н">

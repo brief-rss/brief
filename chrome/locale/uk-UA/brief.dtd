@@ -1,0 +1,35 @@
+<!ENTITY searchBox.label "Пошук">
+<!ENTITY allItemsFolder.label "Усі записи">
+<!ENTITY unreadFolder.label "Непрочитані">
+<!ENTITY starredFolder.label "Закладки">
+<!ENTITY trashFolder.label "Кошик">
+<!-- Button tooltips -->
+<!ENTITY headlinesCheckbox.tooltip "Перегляд заголовків (F)">
+<!ENTITY filterUnread.tooltip "Перегляд лише непрочитаних записів (D)">
+<!ENTITY filterStarred.tooltip "Перегляд лише закладок (S)">
+<!ENTITY updateButton.tooltip "Перевірити оновлення всіх стрічок">
+<!ENTITY stopUpdatingButton.tooltip "Зупинити перевірку оновлення">
+<!ENTITY showOptions.tooltip "Відкрити налаштування Brief">
+<!ENTITY sidebarSplitter.tooltip "Двічі клацніть, щоб приховати бічну панель">
+<!ENTITY revealSidebar.tooltip "Показати бічну панель">
+<!ENTITY markViewRead.tooltip "Позначити всі записи як прочитані (Alt + N)">
+<!-- # Context menu -->
+<!ENTITY ctxMarkFeedRead.label "Позначити стрічку як прочитану">
+<!ENTITY ctxMarkFeedUnread.label "Позначити стрічку як непрочитану">
+<!ENTITY ctxMarkFolderRead.label "Позначити теку як прочитану">
+<!ENTITY ctxMarkTagRead.label "Позначити записи з міткою як прочитані">
+<!ENTITY ctxUpdateFeed.label "Оновити стрічку">
+<!ENTITY ctxUpdateFolder.label "Оновити теку">
+<!ENTITY ctxOpenWebsite.label "Відкрити веб-сайт">
+<!ENTITY ctxDeleteFeed.label "Видалити стрічку">
+<!ENTITY ctxDeleteFolder.label "Видалити теку">
+<!ENTITY ctxDeleteTag.label "Видалити мітку">
+<!ENTITY ctxEmptyFeed.label "Очистити стрічку">
+<!ENTITY ctxEmptyFolder.label "Очистити теку">
+<!ENTITY ctxRestoreTrashed.label "Відновити всі записи">
+<!ENTITY ctxEmptyTrash.label "Очистити кошик">
+<!ENTITY ctxFeedProperties.label "Властивості">
+<!ENTITY ctxUpdateFeeds.label "Оновити стрічки новин">
+<!ENTITY ctxMarkFeedsAsRead.label "Позначити всі стрічки як прочитані">
+<!ENTITY showUnreadCounter.label "Показати кількість непрочитаних записів">
+<!ENTITY ctxShowOptions.label "Налаштування">

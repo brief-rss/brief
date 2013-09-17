@@ -3,28 +3,28 @@
 <!ENTITY navigation.header "Navigazione">
 <!ENTITY space.key "Spazio">
 <!ENTITY shiftSpace.key "Maiusc + spazio">
-<!ENTITY nextItem "Mostra l&apos;elemento successivo">
-<!ENTITY previousItem "Mostra l&apos;elemento precedente">
-<!ENTITY scrollDownByScreen "Scorri in basso per l&apos;altezza dello schermo">
-<!ENTITY scrollUpByScreen "Scorri in alto per l&apos;altezza dello schermo">
+<!ENTITY nextItem "Mostra l'elemento successivo">
+<!ENTITY previousItem "Mostra l'elemento precedente">
+<!ENTITY scrollDownByScreen "Mostra gli elementi successivi">
+<!ENTITY scrollUpByScreen "Mostra gli elementi precedenti">
 <!ENTITY enter.key "Invio">
-<!ENTITY openEntry "Apre l&apos;elemento selezionato">
-<!ENTITY showItem "Mostra/nasconde l&apos;anteprima dell&apos;elemento selezionato">
+<!ENTITY openEntry "Apre l'elemento selezionato">
+<!ENTITY showItem "Mostra/nasconde l'anteprima dell'elemento selezionato">
 <!ENTITY entries.header "Elementi">
-<!ENTITY markCurrentItemRead "Segna l&apos;elemento selezionato come letto/non letto">
+<!ENTITY markCurrentItemRead "Segna l'elemento selezionato come letto/non letto">
 <!ENTITY markVisibleRead "Segna gli elementi visibili sullo schermo come letti">
-<!ENTITY altN.key "Alt + N ">
+<!ENTITY altN.key "Alt + N">
 <!ENTITY markAllRead "Segna tutti gli elementi come letti">
-<!ENTITY starItem "Associa l&apos;elemento selezionato ai segnalibri">
-<!ENTITY moveToTrash "Sposta l&apos;elemento selezionato nel cestino">
+<!ENTITY starItem "Associa l'elemento selezionato ai segnalibri">
+<!ENTITY moveToTrash "Sposta l'elemento selezionato nel cestino">
 <!ENTITY view.header "Visualizzazione">
 <!ENTITY showAll "Mostra tutti gli elementi">
 <!ENTITY showStarred "Mostra gli elementi associati ai segnalibri">
 <!ENTITY showUnread "Mostra gli elementi non letti">
 <!ENTITY headlinesView "Mostra/nasconde le anteprime di tutti gli elementi">
 <!ENTITY general.header "Generali">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D ">
-<!ENTITY cmdAltD.key "Cmd + Alt + D ">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
 <!ENTITY openBrief "Apre Brief">
 <!ENTITY focusSearchbar "Seleziona la barra di ricerca">
 <!ENTITY displayShortcuts "Mostra la lista delle scorciatoie da tastiera">

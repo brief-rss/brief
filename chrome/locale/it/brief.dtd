@@ -5,10 +5,10 @@
 <!ENTITY trashFolder.label "Cestino">
 <!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Mostra/nascondi le anteprime di tutti gli elementi">
-<!ENTITY filterUnread.tooltip "Mostra gli elementi non letti">
+<!ENTITY filterUnread.tooltip "Mostra gli elementi letti/non letti">
 <!ENTITY filterStarred.tooltip "Mostra gli elementi associati ai segnalibri">
 <!ENTITY updateButton.tooltip "Controlla gli aggiornamenti di tutti i feed">
-<!ENTITY stopUpdatingButton.tooltip "Interrompi i controlli di aggiornamenti">
+<!ENTITY stopUpdatingButton.tooltip "Interrompi il controllo degli aggiornamenti">
 <!ENTITY showOptions.tooltip "Impostazioni di Brief…">
 <!ENTITY sidebarSplitter.tooltip "Fare doppio clic per nascondere la barra laterale">
 <!ENTITY revealSidebar.tooltip "Mostra la barra laterale">
@@ -23,7 +23,7 @@
 <!ENTITY ctxOpenWebsite.label "Apri il sito web">
 <!ENTITY ctxDeleteFeed.label "Elimina il feed">
 <!ENTITY ctxDeleteFolder.label "Elimina la cartella">
-<!ENTITY ctxDeleteTag.label "Elimina l&apos;etichetta">
+<!ENTITY ctxDeleteTag.label "Elimina l'etichetta">
 <!ENTITY ctxEmptyFeed.label "Svuota il feed">
 <!ENTITY ctxEmptyFolder.label "Svuota la cartella">
 <!ENTITY ctxRestoreTrashed.label "Ripristina gli elementi eliminati">
