@@ -27,8 +27,8 @@ function FeedView(aTitle, aQuery) {
     this._fixedUnread = aQuery.read !== undefined;
     this._fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
 
-    getElement('filter-unread-checkbox').disabled = this._fixedUnread;
-    getElement('filter-starred-checkbox').disabled = this._fixedStarred;
+    for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
+        getElement(id).hidden = this._fixedStarred || this._fixedUnread;
 
     aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
     this.__query = aQuery;
@@ -389,7 +389,7 @@ FeedView.prototype = {
                 }
                 else if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
-                    this._scrollSelectionTimeout = async(function() this.selectEntry(this.getEntryInScreenCenter()), 100, this);
+                    this._scrollSelectionTimeout = async(function() this.selectEntry(this.getEntryInScreenCenter()), 50, this);
                 }
 
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
@@ -1278,7 +1278,7 @@ EntryView.prototype = {
                     string = Strings['entryDate.yesterday'];
                     break;
 
-                case relativeDate.deltaDays < 5:
+                case relativeDate.deltaDays < 7:
                     string = this.date.toLocaleFormat('%A');
                     break;
 
