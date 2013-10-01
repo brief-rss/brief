@@ -1,32 +1,19 @@
 #feed-view-header {
     -moz-box-align: center;
-    height: 38px !important;
+    height: 40px !important;
     padding: 0 10px !important;
-    background: url('header-background.png') repeat-x top right !important;
-    background-color: #d7eefe !important;
-    border-bottom: 1px solid #7c909f !important;
+    border-bottom: 1px solid #d6d6d6 !important;
     overflow: hidden;
+    background: #fcfcfc !important;
 }
 
-#mark-view-read {
-    padding-top: 4px !important;
-    margin-right: 5px !important;
-    list-style-image: url(mark-read-checkmark.png);
-    -moz-image-region: rect(0px, 32px, 32px, 0px);
-}
 
-#mark-view-read:hover {
-    -moz-image-region: rect(32px, 32px, 64px, 0px);
-}
 
-#mark-view-read:hover:active {
-    -moz-image-region: rect(64px, 32px, 96px, 0px);
-}
-
+/* =========== View title =========== */
 
 #feed-title-box {
     display: -moz-box;
-    margin-right: 10px !important;
+    margin: 2px 0 0 14px !important;
     /* These are to cut off the later lines when the title wraps. */
     overflow: hidden;
     line-height: 36px;
@@ -34,8 +21,8 @@
 }
 
 #feed-title {
-    color: #05447e;
-    font-size: 18px;
+    color: #606b78;
+    font-size: 22px;
     font-weight: bold;
     text-decoration: none;
 }
@@ -45,77 +32,89 @@
 }
 
 
-.view-button {
-    border-left: 1px solid transparent !important; /* Placeholder for checked state border */
-    margin-top: 3px !important;
-    margin-bottom: 2px !important;
-    -moz-image-region: rect(0px, 28px, 31px, 0px);
+
+/* =========== View type buttons =========== */
+
+.button-spacer {
+    max-width: 60px !important;
+    min-width: 20px !important;
 }
 
-.view-button:hover {
-    -moz-image-region: rect(31px, 28px, 62px, 0px);
+.view-button,
+#mark-view-read {
+    -moz-image-region: rect(0px, 22px, 22px, 0px);
 }
 
+.view-button:hover,
+#mark-view-read:hover {
+    -moz-image-region: rect(22px, 22px, 44px, 0px);
+}
+
+.view-button:active,
+#mark-view-read:active,
 .view-button[checked] {
-    -moz-image-region: rect(62px, 28px, 93px, 0px);
+    -moz-image-region: rect(44px, 22px, 66px, 0px);
 }
-
-.view-button:not([disabled])[checked]:hover,
-.view-button:active {
-    -moz-image-region: rect(93px, 28px, 124px, 0px);
-}
-
-.view-button[disabled] {
-    -moz-image-region: rect(124px, 28px, 155px, 0px);
-}
-
-
-.view-button:not([disabled])[checked],
-.view-button:not([disabled]):active {
-    border-left-color: #7898b0 !important;
-}
-
-.view-button:not([disabled])[checked] + .view-button,
-.view-button:not([disabled]):active + .view-button {
-    border-left-color: #7898b0 !important;
-}
-
-#filter-starred-checkbox {
-    border-right: 1px solid transparent !important;
-}
-
-#filter-starred-checkbox:not([disabled])[checked],
-#filter-starred-checkbox:not([disabled]):active {
-    border-right-color: #7898b0 !important;
-}
-
 
 #headlines-checkbox {
-    list-style-image: url(headlines-button.png);
+    list-style-image: url(icons/view-headlines.png);
+}
+
+#full-view-checkbox {
+    list-style-image: url(icons/view-full-items.png);
+    margin-left: 11px !important;
+}
+
+
+
+/* =========== View filter buttons =========== */
+
+.filter-button {
+    -moz-image-region: rect(0px, 23px, 23px, 0px);
+}
+
+.filter-button:hover {
+    -moz-image-region: rect(23px, 23px, 46px, 0px);
+}
+
+.filter-button:active,
+.filter-button[checked] {
+    -moz-image-region: rect(46px, 23px, 69px, 0px);
+}
+
+
+#show-all-entries-checkbox {
+    list-style-image: url(icons/show-all-items.png);
 }
 
 #filter-unread-checkbox {
-    list-style-image: url(filter-unread.png);
+    list-style-image: url(icons/show-unread-items.png);
+    margin-left: 11px !important;
 }
 
 #filter-starred-checkbox {
-    list-style-image: url(filter-starred.png);
+    list-style-image: url(icons/show-starred-items.png);
+    margin-left: 11px !important;
 }
+
+#mark-view-read {
+    list-style-image: url(icons/mark-view-read.png);
+}
+
 
 
 #searchbar {
     width: 150px;
     margin: 6px 0 6px 10px !important;
     padding: 0 3px 0 5px !important;
-    border: 1px solid #7c909f !important;
+    border: 1px solid #9dabb8 !important;
     border-radius: 4px;
-    background-color: #ffffff !important;
     font-size: 12px;
     font-family: Verdana, Helvetica, Arial, sans-serif;
 }
 
 
-#searchbar[isempty="true"] .textbox-input {
-    color: #7c909f !important;
+#searchbar .textbox-input {
+    color: #4a6278 !important;
     font-style: normal !important;
 }

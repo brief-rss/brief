@@ -10,28 +10,22 @@ richtreefolder {
     -moz-binding: url(chrome://brief/content/richtree.xml#richtreefolder);
 }
 
-
-richtreeitem,
-richtreefolder > .folder-title-container {
-    padding: 0 2px 0 6px !important;
-}
-
 richtreeitem {
-    height: 20px !important;
     -moz-box-align: center;
+    border: 1px solid transparent !important; /* Placeholder for selection border */
+    padding: 2px 1px 2px 5px !important;
 }
 
-richtreeitem[selected="true"] {
-    border-radius: 2px;
-    background-color: #d5ecfd !important;
-    color: #00344f !important;
+
+#feed-list {
+    margin-top: 15px;
 }
 
 .feed-icon {
     width: 16px !important;
     height: 16px !important;
     margin-right: 6px !important;
-    list-style-image: url(icons/feed-favicon.png);
+    list-style-image: url(icons/default-feed-favicon.png);
 }
 
 .feed-title {
@@ -39,16 +33,12 @@ richtreeitem[selected="true"] {
 }
 
 .unread-count {
-    min-width: 24px !important;
+    min-width: 2em !important;
     margin-left: 5px !important;
-    padding: 0 3px !important;
-    border: 1px solid #92b6d0 !important;
-    border-radius: 2px;
     text-align: center;
-    font-size: 12px !important;
+    font-size: 13px !important;
     font-weight: bold !important;
-    background-color: rgba(229, 246, 255, 0.3) !important;
-    color: #457499 !important;
+    color: #539bcf !important;
 }
 
 richtreeitem:not(.unread) > .unread-count,
@@ -59,24 +49,55 @@ richtreefolder[open="true"] > .folder-title-container > .unread-count,
 }
 
 
+
 richtreefolder {
     -moz-box-orient: vertical;
 }
 
 richtreefolder > .folder-title-container {
-    height: 22px !important;
     margin: 0 0 5px !important;
+    padding: 3px 1px 0 5px !important;
+    border: 1px solid transparent !important; /* Placeholder for selection border */
     -moz-box-align: center;
-    border-bottom: 1px solid #c4cdd5 !important;
-    font-size: 13px !important;
-    font-weight: bold !important;
 }
 
-richtreefolder[selected="true"] > .folder-title-container {
-    border-radius-topright: 2px;
-    border-radius-topleft: 2px;
-    background-color: #d5ecfd !important;
-    color: #00344f !important;
+.folder-title {
+    color: #454545;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    border-bottom: 1px solid #d6d6d6;
+    padding: 0 0 3px 2px;
+}
+
+richtreefolder[selected="true"] .folder-title {
+    border-bottom: none;
+    padding-bottom: 4px;
+}
+
+.folder-twisty {
+    margin-right: 1em !important;
+    padding: 4px 5px !important;
+    list-style-image: url(icons/twisty.png);
+    -moz-image-region: rect(0, 22px, 11px, 11px);
+    opacity: 0;
+    transition: opacity 200ms;
+}
+
+.folder-twisty:hover {
+    -moz-image-region: rect(11px, 22px, 22px, 11px);
+}
+
+.folder-title-container:hover > .folder-twisty {
+    opacity: 1;
+}
+
+richtreefolder[open="true"] > .folder-title-container > .folder-twisty {
+    -moz-image-region: rect(0px, 11px, 11px, 0px);
+    margin-right: 3em !important;
+}
+
+richtreefolder[open="true"] > .folder-title-container > .folder-twisty:hover {
+    -moz-image-region: rect(11px, 11px, 22px, 0px);
 }
 
 .folder-container {
@@ -87,16 +108,6 @@ richtreefolder[selected="true"] > .folder-title-container {
 
 richtreefolder[open="true"] > .folder-container {
     display: -moz-box;
-}
-
-.folder-twisty {
-    margin-right: 5px !important;
-    list-style-image: url(icons/twisty.png);
-    -moz-image-region: rect(0px, 11px, 11px, 0px);
-}
-
-richtreefolder[open="true"] > .folder-title-container > .folder-twisty {
-    -moz-image-region: rect(11px, 11px, 22px, 0px);
 }
 
 richtreeitem + richtreefolder {

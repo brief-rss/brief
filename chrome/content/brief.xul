@@ -95,6 +95,36 @@
     </popupset>
 
     <vbox id="sidebar" width="250" persist="width hidden">
+
+        <hbox id="sidebar-toolbar">
+            <deck id="update-buttons-deck" selectedIndex="1">
+                <hbox id="update-button-box">
+                    <button id="update-button"
+                            class="brief-button sidebar-button"
+                            label="&updateButton.label;"
+                            tooltiptext="&updateButton.tooltip;"
+                            oncommand="Commands.updateAllFeeds()"/>
+                </hbox>
+                <hbox id="stop-button-box">
+                    <button id="stop-updating-button"
+                            class="brief-button sidebar-button"
+                            label="&stopUpdatingButton.label;"
+                            tooltiptext="&stopUpdatingButton.tooltip;"
+                            oncommand="Commands.stopUpdating()"/>
+                </hbox>
+            </deck>
+            <spacer flex="1"/>
+            <button id="options-button"
+                    class="brief-button sidebar-button"
+                    label="&optionsButton.label;"
+                    tooltiptext="&optionsButton.tooltip;"
+                    oncommand="Commands.openOptions()"/>
+        </hbox>
+
+        <hbox id="update-progress-container">
+            <progressmeter id="update-progress"/>
+        </hbox>
+
         <richlistbox id="view-list"
                      startview="all-items-folder"
                      persist="startview"
@@ -102,50 +132,20 @@
                      suppressonselect="true"
                      onselect="ViewList.onSelect(event)">
             <richlistitem id="all-items-folder">
-                <image class="view-icon"/>
                 <label class="view-title" value="&allItemsFolder.label;"/>
             </richlistitem>
             <richlistitem id="unread-folder">
-                <image class="view-icon"/>
                 <label class="view-title" flex="1" value="&unreadFolder.label;"/>
                 <label class="unread-count"/>
             </richlistitem>
             <richlistitem id="starred-folder">
-                <image class="view-icon"/>
                 <label class="view-title" flex="1" value="&starredFolder.label;"/>
                 <label class="unread-count"/>
             </richlistitem>
             <richlistitem id="trash-folder">
-                <image class="view-icon"/>
                 <label class="view-title" value="&trashFolder.label;"/>
             </richlistitem>
         </richlistbox>
-
-        <hbox id="sidebar-toolbar">
-            <deck id="update-progress-deck" flex="1"
-                  selectedIndex="0">
-                <vbox pack="center">
-                    <hbox id="sidebar-separator"/>
-                </vbox>
-                <progressmeter id="update-progress"/>
-            </deck>
-            <hbox id="sidebar-buttons">
-                <deck id="update-buttons-deck" selectedIndex="0">
-                    <button id="update-button"
-                            class="brief-button sidebar-button"
-                            tooltiptext="&updateButton.tooltip;"
-                            oncommand="Commands.updateAllFeeds()"/>
-                    <button id="stop-updating-button"
-                            class="brief-button sidebar-button"
-                            tooltiptext="&stopUpdatingButton.tooltip;"
-                            oncommand="Commands.stopUpdating()"/>
-                </deck>
-                <button id="options-button"
-                        class="brief-button sidebar-button"
-                        tooltiptext="&showOptions.tooltip;"
-                        oncommand="Commands.openOptions()"/>
-            </hbox>
-        </hbox>
 
         <richtree id="feed-list" flex="1"
                   seltype="single"
@@ -174,30 +174,47 @@
 
     <vbox flex="1">
         <hbox id="feed-view-header">
-            <button id="mark-view-read"
-                    class="brief-button feed-header-button"
-                    tooltiptext="&markViewRead.tooltip;"
-                    onclick="onMarkViewReadClick(event)"/>
             <html:div id="feed-title-box" flex="1">
                 <html:a id="feed-title" target="_blank"/>
             </html:div>
             <spacer flex="1"/>
+            <button id="mark-view-read"
+                    class="brief-button feed-header-button"
+                    tooltiptext="&markViewRead.tooltip;"
+                    onclick="onMarkViewReadClick(event)"/>
+            <spacer class="button-spacer" flex="1"/>
             <button id="headlines-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
                     autoCheck="false"
                     tooltiptext="&headlinesCheckbox.tooltip;"
-                    oncommand="Commands.toggleHeadlinesView()"/>
-            <button id="filter-unread-checkbox"
+                    oncommand="Commands.viewHeadlines()"/>
+            <button id="full-view-checkbox"
                     class="brief-button view-button"
+                    type="checkbox"
+                    autoCheck="false"
+                    tooltiptext="&fullViewCheckbox.tooltip;"
+                    oncommand="Commands.viewFullEntries()"/>
+            <spacer class="button-spacer" flex="1"/>
+            <button id="show-all-entries-checkbox"
+                    class="brief-button filter-button"
+                    tooltiptext="&showAllItems.tooltip;"
+                    type="checkbox"
+                    autoCheck="false"
+                    oncommand="Commands.showAllEntries()"/>
+            <button id="filter-unread-checkbox"
+                    class="brief-button filter-button"
                     tooltiptext="&filterUnread.tooltip;"
                     type="checkbox"
-                    oncommand="Commands.toggleUnreadEntriesFilter()"/>
+                    autoCheck="false"
+                    oncommand="Commands.showUnreadEntries()"/>
             <button id="filter-starred-checkbox"
-                    class="brief-button view-button"
+                    class="brief-button filter-button"
                     tooltiptext="&filterStarred.tooltip;"
                     type="checkbox"
-                    oncommand="Commands.toggleStarredEntriesFilter()"/>
+                    autoCheck="false"
+                    oncommand="Commands.showStarredEntries()"/>
+            <spacer class="button-spacer" flex="1"/>
             <textbox id="searchbar"
                      spellcheck="false"
                      type="search"

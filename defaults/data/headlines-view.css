@@ -16,19 +16,14 @@ body:not(.multiple-feeds) article.headline:not(.collapsed) {
 article.headline > .full-container {
     min-width: -moz-min-content;
     max-width: 700px;
-    margin-left: -5px;
-}
-
-article.headline.selected > .full-container {
-    margin-left: 0;
 }
 
 .day-header {
-    padding: 20px 0 5px; /* Use padding to avoid margin collapsing */
+    padding: 30px 0 10px; /* Use padding to avoid margin collapsing */
     margin-left: -30px;
-    font-size: 13px;
+    font-size: 14px;
     text-transform: uppercase;
-    color: #5e9c3e;
+    color: #606b78;
 }
 
 .headline-container {
@@ -44,7 +39,7 @@ article.headline.selected > .full-container {
     -moz-box-flex: 1;
     height: 34px;
     -moz-box-align: center;
-    border-bottom: 1px solid #D4DEE6;
+    border-bottom: 1px solid #d3dfe5;
 }
 
 article.selected .headline-header {
@@ -90,7 +85,7 @@ article.was-selected:not(:hover) .headline-header {
     width: 100px;
     overflow: hidden;
     font-size: 10px;
-    color: #808080;
+    color: #606b78;
 }
 
 body:not(.multiple-feeds) .feed-icon,
@@ -122,14 +117,16 @@ body:not(.multiple-feeds) .headline-feed-name {
     display: -moz-box;
     -moz-box-flex: 1;
     overflow: hidden;
+    font-family: Arial, sans-serif;
     font-weight: bold;
     font-size: 13px;
     line-height: 20px;
-    color: #26547f;
+    color: #475059;
 }
 
 article.read .headline-title {
     font-weight: normal;
+    color: #5c6773;
 }
 
 

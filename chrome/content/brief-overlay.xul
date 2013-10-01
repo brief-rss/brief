@@ -36,8 +36,10 @@
         <key id="Brief_openSelectedEntry" keycode="VK_RETURN"
              oncommand="Brief.doCommand('openSelectedEntryLink')"/>
 
-        <key id="Brief_toggleHeadlinesView" key="f"
-             oncommand="Brief.doCommand('toggleHeadlinesView')"/>
+        <key id="Brief_viewHeadlines" key="f"
+             oncommand="Brief.doCommand('viewHeadlines')"/>
+        <key id="Brief_viewFullItems" key="g"
+             oncommand="Brief.doCommand('viewFullEntries')"/>
         <key id="Brief_showAllEntries" key="a"
              oncommand="Brief.doCommand('showAllEntries')"/>
         <key id="Brief_showStarredEntries" key="s"

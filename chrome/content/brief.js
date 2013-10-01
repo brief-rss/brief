@@ -14,6 +14,8 @@ function init() {
     PrefObserver.register();
 
     getElement('headlines-checkbox').checked = PrefCache.showHeadlinesOnly;
+    getElement('full-view-checkbox').checked = !PrefCache.showHeadlinesOnly;
+    getElement('show-all-entries-checkbox').checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
     getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
     getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
     getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
@@ -135,42 +137,33 @@ let Commands = {
         gCurrentView.markVisibleEntriesRead();
     },
 
-    toggleHeadlinesView: function cmd_toggleHeadlinesView() {
-        let newState = !PrefCache.showHeadlinesOnly;
-        Prefs.setBoolPref('feedview.showHeadlinesOnly', newState);
-        getElement('headlines-checkbox').checked = newState;
+    viewHeadlines: function cmd_viewHeadlines() {
+        Prefs.setBoolPref('feedview.showHeadlinesOnly', true);
     },
 
+    viewFullEntries: function cmd_viewFullEntries() {
+        Prefs.setBoolPref('feedview.showHeadlinesOnly', false);
+    },
+
+
     showAllEntries: function cmd_showAllEntries() {
-        Prefs.setBoolPref('feedview.filterUnread', false);
-        getElement('filter-unread-checkbox').checked = false;
-
-        Prefs.setBoolPref('feedview.filterStarred', false);
-        getElement('filter-starred-checkbox').checked = false;
-
-        gCurrentView.refresh();
+        this.switchViewFilter('all');
     },
 
     showUnreadEntries: function cmd_showUnreadEntries() {
-        if (!PrefCache.filterUnread)
-            Commands.toggleUnreadEntriesFilter();
-    },
-
-    toggleUnreadEntriesFilter: function cmd_toggleUnreadEntriesFilter() {
-        Prefs.setBoolPref('feedview.filterUnread', !PrefCache.filterUnread);
-        getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
-        gCurrentView.refresh();
+        this.switchViewFilter('unread');
     },
 
     showStarredEntries: function cmd_showStarredEntries() {
-        if (!PrefCache.filterStarred)
-            Commands.toggleStarredEntriesFilter();
+        this.switchViewFilter('starred');
     },
 
-    toggleStarredEntriesFilter: function cmd_toggleStarredEntriesFilter() {
-        Prefs.setBoolPref('feedview.filterStarred', !PrefCache.filterStarred);
-        getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
-        gCurrentView.refresh();
+    switchViewFilter: function cmd_switchViewFilter(aFilter) {
+        let filterUnread = aFilter == 'unread';
+        let filterStarred = aFilter == 'starred';
+
+        Prefs.setBoolPref('feedview.filterUnread', filterUnread);
+        Prefs.setBoolPref('feedview.filterStarred', filterStarred);
     },
 
     selectNextEntry: function cmd_selectNextEntry() {
@@ -295,7 +288,7 @@ function refreshProgressmeter(aReason) {
         getElement('update-buttons-deck').selectedIndex = 1;
 
         if (FeedUpdateService.scheduledFeedsCount > 1)
-            getElement('update-progress-deck').selectedIndex = 1;
+            getElement('update-progress').setAttribute('show', true);
 
         getElement('update-progress').value = 100 * FeedUpdateService.completedFeedsCount /
                                                     FeedUpdateService.scheduledFeedsCount;
@@ -304,11 +297,11 @@ function refreshProgressmeter(aReason) {
         getElement('update-buttons-deck').selectedIndex = 0;
 
         if (aReason == 'cancelled') {
-            getElement('update-progress-deck').selectedIndex = 0;
+            getElement('update-progress').removeAttribute('show');
         }
         else {
             async(function() {
-                getElement('update-progress-deck').selectedIndex = 0;
+                getElement('update-progress').removeAttribute('show');
             }, 1000);
         }
     }
@@ -453,6 +446,18 @@ let PrefObserver = {
                 break;
 
             case 'feedview.showHeadlinesOnly':
+                getElement('headlines-checkbox').checked = PrefCache.showHeadlinesOnly;
+                getElement('full-view-checkbox').checked = !PrefCache.showHeadlinesOnly;
+
+                gCurrentView.refresh();
+                break;
+
+            case 'feedview.filterUnread':
+            case 'feedview.filterStarred':
+                getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
+                getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
+                getElement('show-all-entries-checkbox').checked = !PrefCache.filterUnread &&
+                                                                  !PrefCache.filterStarred;
                 gCurrentView.refresh();
                 break;
         }

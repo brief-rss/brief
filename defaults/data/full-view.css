@@ -9,33 +9,21 @@ article.full > .headline-container {
 }
 
 .full-container {
-    margin: 5px 0 5px; /* The margins are collapsed in full view but are necessary if headlines view */
-    background: linear-gradient(to bottom , rgba(211, 231, 242, 1), rgba(211, 231, 242, 0) 35px) #ffffff;
+    margin: 20px 0 20px; /* The margins are collapsed in full view but are necessary if headlines view */
+    border: 1px solid #abbfc9;
+    padding-right: 1px;
+    background: linear-gradient(to bottom , rgba(229, 244, 255, 1), rgba(229, 244, 255, 0) 35px);
     background-clip: padding-box;
-    border: 6px solid #d8dadc;
-    -moz-border-top-colors: transparent transparent transparent transparent transparent #abbfc9;
-    -moz-border-right-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #f3f5f8 #d8dadc;
-    -moz-border-bottom-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #f3f5f8 #d8dadc;
-    -moz-border-left-colors: #fafcff #fafcff #f7f9fc #f3f5f8 #f3f5f8 #d8dadc;
-    border-radius: 9px;
+    transition: border-color 200ms;
 }
 
 article.selected > .full-container {
-    border-top: 1px solid #abbfc9;
-    border-right: 1px solid #d8dadc;
-    border-bottom: 1px solid #d8dadc;
-    border-left: 1px solid #d8dadc;
-    -moz-border-top-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    border-radius: 4px;
-    margin: 10px 5px 10px;
-    box-shadow: 0 1px 15px rgba(0, 0, 0, 0.3);
+    border-right: 2px solid #3e8fb7;
+    padding-right: 0;
 }
 
 article.read > .full-container {
-    background-image: linear-gradient(to bottom, rgba(235, 238, 243, 1), rgba(235, 238, 243, 0) 35px);
+    background: none;
 }
 
 article.read .title-link {
@@ -62,7 +50,7 @@ article.read .title-link {
 }
 
 .title-link {
-    color: #05447e;
+    color: #475059;
     font-family: Arial, sans-serif;
     font-size: 15px;
     font-weight: bold;
@@ -87,7 +75,7 @@ article.read .title-link {
     font-size: 12px;
     font-family: Arial, sans-serif;
     line-height: 17px; /* Make the height the same for both Lucida and Verdana */
-    color: #2a7d00;
+    color: #7c7c7c;
 }
 
 .subheader-right {

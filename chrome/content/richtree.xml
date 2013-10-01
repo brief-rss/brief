@@ -601,8 +601,8 @@
          extends="chrome://brief/content/richtree.xml#richtreeitem">
     <content>
       <xul:hbox class="folder-title-container" flex="1">
-        <xul:image class="folder-twisty" onmousedown="toggleOpen(); event.stopPropagation();" />
         <xul:label class="folder-title" flex="1" crop="end" xbl:inherits="value=title" />
+        <xul:image class="folder-twisty" onmousedown="toggleOpen(); event.stopPropagation();" />
         <xul:label class="unread-count" xbl:inherits="value=unreadcount" />
       </xul:hbox>
       <xul:vbox class="folder-container">
