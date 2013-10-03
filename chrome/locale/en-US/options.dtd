@@ -38,7 +38,6 @@
 <!ENTITY autoMarkRead.label "Automatically mark items as read after I see them">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "Appearance">
-<!ENTITY shortcutsPane.label "Shortcuts">
 <!ENTITY editStyleDescription.label "Customize the appearance of feeds">
 <!ENTITY editStyleButton.label "Customize">
 <!ENTITY editStyleButton.accesskey "u">

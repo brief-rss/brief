@@ -113,12 +113,21 @@ page {
     -moz-image-region: rect(16px, 32px, 32px, 16px);
 }
 
-#options-button {
+#options-dropdown-button {
     -moz-image-region: rect(0, 48px, 16px, 32px);
 }
 
-#options-button:hover {
+#options-dropdown-button:hover {
     -moz-image-region: rect(16px, 48px, 32px, 32px)
+}
+
+#options-dropdown-button .button-menu-dropmarker {
+    list-style-image: url(icons/dropmarker.png) !important;
+    -moz-image-region: rect(0, 7px, 4px, 0) !important;
+}
+
+#options-dropdown-button:hover .button-menu-dropmarker {
+    -moz-image-region: rect(4px, 7px, 8px, 0) !important;
 }
 
 
