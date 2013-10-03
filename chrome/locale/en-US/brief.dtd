@@ -4,7 +4,7 @@
 <!ENTITY starredFolder.label "Bookmarks">
 <!ENTITY trashFolder.label "Trash">
 
-<!-- Button tooltips -->
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "View headlines (F)">
 <!ENTITY fullViewCheckbox.tooltip "View full items (G)">
 <!ENTITY showAllItems.tooltip "Show all items (A)">
@@ -14,8 +14,12 @@
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
 <!ENTITY stopUpdatingButton.label "Stop updating">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
-<!ENTITY optionsButton.label "Options">
-<!ENTITY optionsButton.tooltip "Show Brief options">
+<!ENTITY optionsDropdownButton.label "Options">
+<!ENTITY optionsDropdownButton.tooltip "Configure Brief">
+<!ENTITY organizeFeedsMenuitem.label "Organize Feeds">
+<!ENTITY showShortcutsMenuitem.label "Show Keyboard Shortcuts">
+<!ENTITY openOptionsMenuitem.label "Options">
+
 <!ENTITY sidebarSplitter.tooltip "Double-click to hide the sidebar">
 <!ENTITY revealSidebar.tooltip "Reveal the sidebar">
 <!ENTITY markViewRead.tooltip "Mark all items as read (Alt + N)">

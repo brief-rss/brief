@@ -275,10 +275,22 @@ let Commands = {
             }
         }
 
-        let height = Math.min(window.screen.availHeight, 620);
+        let height = Math.min(window.screen.availHeight, 650);
         let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
 
         window.openDialog(url, 'Brief shortcuts', features);
+    },
+
+    openLibrary: function cmd_openLibrary() {
+        let organizer = Services.wm.getMostRecentWindow('Places:Organizer');
+        if (!organizer) {
+            openDialog('chrome://browser/content/places/places.xul', '',
+                       'chrome,toolbar=yes,dialog=no,resizable', PrefCache.homeFolder);
+        }
+        else {
+            organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(PrefCache.homeFolder);
+            organizer.focus();
+        }
     }
 }
 
