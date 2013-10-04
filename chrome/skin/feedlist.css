@@ -18,7 +18,7 @@ richtreeitem {
 
 
 #feed-list {
-    margin-top: 15px;
+    margin-top: 15px !important;
 }
 
 .feed-icon {

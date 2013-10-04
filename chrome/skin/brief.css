@@ -1,6 +1,4 @@
-/* Reset these properties on everything but context menu popups */
-page, deck, hbox, vbox, image, richlistbox, richlistitem, button, progressmeter,
-.progress-bar, .progress-remainder, textbox, splitter, browser, listbox, listitem {
+* {
     -moz-appearance: none;
     height: auto !important;
     width: auto !important;
@@ -10,9 +8,11 @@ page, deck, hbox, vbox, image, richlistbox, richlistitem, button, progressmeter,
     max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    font-weight: normal !important;
     background-color: transparent !important;
-    background-image: none !important;
+    background: none !important;
     border: 0 !important;
+    box-shadow: none !important;
     -moz-border-bottom-colors: none !important;
     -moz-border-left-colors: none !important;
     -moz-border-right-colors: none !important;
@@ -25,6 +25,30 @@ page {
     font-family: Arial, Helvetica, sans-serif;
     background: #ffffff !important;
 }
+
+menupopup {
+    background-color: #ffffff !important;
+    border: 1px solid #c2c2c2 !important;
+    padding: 3px !important;
+    color:  #000000 !important;
+}
+
+menuitem {
+    font-size: 13px;
+    padding: 3px 10px 2px !important;
+}
+
+menuitem:hover {
+    background-color: #f2f2f2 !important;
+    transition: background-color 170ms;
+}
+
+menuseparator {
+    border-bottom: 1px solid #c2c2c2 !important;
+    margin: 5px 3px !important;
+}
+
+
 
 .brief-button {
     -moz-box-flex: 0;
@@ -79,13 +103,14 @@ page {
 .sidebar-button {
     margin: 9px 9px 0 !important;
     font-size: 12px;
+    color: #575757 !important;
     list-style-image: url(icons/sidebar-buttons.png);
 }
 .sidebar-button .button-icon {
     margin-right: 3px !important;
 }
 .sidebar-button:hover {
-    color: #ff6800;
+    color: #ff6800 !important;
 }
 
 
@@ -124,6 +149,7 @@ page {
 #options-dropdown-button .button-menu-dropmarker {
     list-style-image: url(icons/dropmarker.png) !important;
     -moz-image-region: rect(0, 7px, 4px, 0) !important;
+    margin-left: 5px !important;
 }
 
 #options-dropdown-button:hover .button-menu-dropmarker {
@@ -202,7 +228,6 @@ richtreeitem[selected="true"] {
     border: 1px solid transparent !important; /* Placeholder for selection border */
     font-size: 13px !important;
     color: #000000 !important;
-    box-shadow: none !important;
     border-radius: 0 !important;
     list-style-image: url(chrome://brief/skin/icons/tag.png);
 }
