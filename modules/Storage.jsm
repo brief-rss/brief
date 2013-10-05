@@ -475,11 +475,11 @@ let StorageInternal = {
                             // the "hidden" property changes, because there are separate
                             // arrays for active and inactive feeds.
                             case 'hidden':
+                            case 'rowIndex':
                                 tearDownCache = true;
                                 // Fall through...
 
                             case 'parent':
-                            case 'rowIndex':
                             case 'title':
                             case 'omitInUnread':
                                 invalidateFeedlist = true;
@@ -1682,7 +1682,7 @@ let BookmarkObserver = {
 
                 break;
         }
-    },
+    }.gen(),
 
     // nsINavBookmarkObserver
     onItemVisited: function BookmarkObserver_aOnItemVisited(aItemID, aVisitID, aTime) { },
