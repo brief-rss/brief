@@ -34,8 +34,9 @@ function extend(aSubtype, aSupertype) {
     aSubtype.prototype.__proto__ = aSupertype.prototype;
 }
 
-function log(aMessage) {
-    Services.console.logStringMessage(aMessage);
+function log(aThing) {
+    let str = aThing && typeof aThing == 'object' ? aThing.toSource() : aThing;
+    Services.console.logStringMessage(str);
 }
 
 
