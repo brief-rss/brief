@@ -35,7 +35,7 @@
                       label="&ctxRestoreTrashed.label;"
                       oncommand="ViewListContextMenu.restoreTrashed()"/>
             <menuseparator id="ctx-view-list-separator"/>
-            <menuitem id="ctx-empty-unread-folder"
+            <menuitem id="ctx-empty-today-folder"
                       label="&ctxEmptyFolder.label;"
                       oncommand="ViewListContextMenu.emptyUnreadFolder()"/>
             <menuitem id="ctx-delete-tag"
@@ -145,10 +145,11 @@
                      suppressonselect="true"
                      onselect="ViewList.onSelect(event)">
             <richlistitem id="all-items-folder">
-                <label class="view-title" value="&allItemsFolder.label;"/>
+                <label class="view-title" flex="1" value="&allItemsFolder.label;"/>
+                <label class="unread-count"/>
             </richlistitem>
-            <richlistitem id="unread-folder">
-                <label class="view-title" flex="1" value="&unreadFolder.label;"/>
+            <richlistitem id="today-folder">
+                <label class="view-title" flex="1" value="&todayFolder.label;"/>
                 <label class="unread-count"/>
             </richlistitem>
             <richlistitem id="starred-folder">
