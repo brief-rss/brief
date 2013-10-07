@@ -1,6 +1,6 @@
 <!ENTITY searchBox.label "Search">
 <!ENTITY allItemsFolder.label "All Items">
-<!ENTITY unreadFolder.label "Unread">
+<!ENTITY todayFolder.label "Today">
 <!ENTITY starredFolder.label "Bookmarks">
 <!ENTITY trashFolder.label "Trash">
 

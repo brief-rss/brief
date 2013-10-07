@@ -23,7 +23,8 @@ let ViewList = {
         this.richlistbox.suppressOnSelect = false;
         this.deselect()
 
-        this.refreshItem('unread-folder');
+        this.refreshItem('all-items-folder');
+        this.refreshItem('today-folder');
         this.refreshItem('starred-folder');
     },
 
@@ -33,11 +34,11 @@ let ViewList = {
                 var constraints = { deleted: Storage.ENTRY_STATE_NORMAL };
                 break;
 
-            case 'unread-folder':
+            case 'today-folder':
                 constraints = {
+                    startDate: new Date().setHours(0, 0, 0, 0),
                     includeOmittedUnread: false,
                     deleted: Storage.ENTRY_STATE_NORMAL,
-                    read: false,
                 }
                 break;
 
@@ -437,7 +438,8 @@ let FeedList = {
                 else {
                     this.persistFolderState();
                     this.rebuild();
-                    ViewList.refreshItem('unread-folder');
+                    ViewList.refreshItem('all-items-folder');
+                    ViewList.refreshItem('today-folder');
                     ViewList.refreshItem('starred-folder');
                     async(gCurrentView.refresh, 0, gCurrentView);
                 }
@@ -502,12 +504,14 @@ let FeedList = {
 
     onEntriesAdded: function FeedList_onEntriesAdded(aEntryList) {
         this.refreshFeedTreeitems(aEntryList.feedIDs);
-        ViewList.refreshItem('unread-folder');
+        ViewList.refreshItem('all-items-folder');
+        ViewList.refreshItem('today-folder');
     },
 
     onEntriesUpdated: function FeedList_onEntriesUpdated(aEntryList) {
         this.refreshFeedTreeitems(aEntryList.feedIDs);
-        ViewList.refreshItem('unread-folder');
+        ViewList.refreshItem('all-items-folder');
+        ViewList.refreshItem('today-folder');
         TagList.refreshTags(aEntryList.tags);
     },
 
@@ -517,7 +521,8 @@ let FeedList = {
         }, 250)
 
         async(function() {
-            ViewList.refreshItem('unread-folder');
+            ViewList.refreshItem('all-items-folder');
+            ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
             TagList.refreshTags(aEntryList.tags);
         }, 500)
@@ -540,7 +545,8 @@ let FeedList = {
         }, 250)
 
         async(function() {
-            ViewList.refreshItem('unread-folder');
+            ViewList.refreshItem('all-items-folder');
+            ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
         }, 500)
 
@@ -580,14 +586,14 @@ let ViewListContextMenu = {
     targetItem: null,
 
     get targetIsAllItemsFolder() this.targetItem.id == 'all-items-folder',
-    get targetIsUnreadFolder()   this.targetItem.id == 'unread-folder',
+    get targetIsTodayFolder()   this.targetItem.id == 'today-folder',
     get targetIsStarredFolder()  this.targetItem.id == 'starred-folder',
     get targetIsTrashFolder()    this.targetItem.id == 'trash-folder',
 
     init: function ViewListContextMenu_init() {
         this.targetItem = ViewList.selectedItem;
 
-        getElement('ctx-mark-special-folder-read').hidden = !this.targetIsUnreadFolder &&
+        getElement('ctx-mark-special-folder-read').hidden = !this.targetIsTodayFolder &&
                                                             !this.targetIsTrashFolder &&
                                                             !this.targetIsStarredFolder &&
                                                             !this.targetIsAllItemsFolder;
@@ -595,9 +601,9 @@ let ViewListContextMenu = {
         getElement('ctx-restore-trashed').hidden = !this.targetIsTrashFolder;
         getElement('ctx-view-list-separator').hidden = !this.targetIsTag &&
                                                        !this.targetIsTrashFolder &&
-                                                       !this.targetIsUnreadFolder;
+                                                       !this.targetIsTodayFolder;
         getElement('ctx-delete-tag').hidden = !this.targetIsTag;
-        getElement('ctx-empty-unread-folder').hidden = !this.targetIsUnreadFolder;
+        getElement('ctx-empty-today-folder').hidden = !this.targetIsTodayFolder;
         getElement('ctx-empty-trash').hidden = !this.targetIsTrashFolder;
     },
 
@@ -611,8 +617,8 @@ let ViewListContextMenu = {
                 .deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
-    emptyUnreadFolder: function ViewListContextMenu_emptyUnreadFolder() {
-        let query = ViewList.getQueryForView('unread-folder');
+    emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
+        let query = ViewList.getQueryForView('today-folder');
         query.starred = false;
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },

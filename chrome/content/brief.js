@@ -55,7 +55,7 @@ function init() {
 function unload() {
     let viewList = getElement('view-list');
     let id = viewList.selectedItem && viewList.selectedItem.id;
-    let startView = (id == 'unread-folder') ? 'unread-folder' : 'all-items-folder';
+    let startView = (id == 'today-folder') ? 'today-folder' : 'all-items-folder';
     viewList.setAttribute('startview', startView);
 
     FeedList.persistFolderState();
