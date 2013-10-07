@@ -214,7 +214,7 @@ const Brief = {
             return;
 
         let query = new Brief.query({
-            includeOmittedUnread: false,
+            includeFeedsExcludedFromGlobalViews: false,
             deleted: Brief.storage.ENTRY_STATE_NORMAL,
             read: false
         })
