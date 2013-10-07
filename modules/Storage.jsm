@@ -39,7 +39,7 @@ const FEEDS_TABLE_SCHEMA = [
     'dateModified    INTEGER DEFAULT 0',
     'lastFaviconRefresh INTEGER DEFAULT 0',
     'markModifiedEntriesUnread INTEGER DEFAULT 1',
-    'omitInUnread     INTEGER DEFAULT 0'
+    'omitInUnread     INTEGER DEFAULT 0' /* This is a misnomer, should be called omitInGlobalViews */
 ]
 
 const ENTRIES_TABLE_SCHEMA = [
@@ -1090,9 +1090,9 @@ Query.prototype = {
     includeHiddenFeeds: false,
 
      /**
-     * Include feeds the user has explicitly marked to be omitted from global unread views.
+     * Include feeds that the user marked as excluded from global views.
      */
-    includeOmittedUnread: true,
+    includeFeedsExcludedFromGlobalViews: true,
 
     /**
      * Indicates if there are any entries that match this query.
@@ -1446,7 +1446,7 @@ Query.prototype = {
 
         let constraints = [];
 
-        if (!this.includeOmittedUnread)
+        if (!this.includeFeedsExcludedFromGlobalViews)
             constraints.push('(feeds.omitInUnread = 0)');
 
         if (this.folders) {

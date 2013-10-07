@@ -31,13 +31,16 @@ let ViewList = {
     getQueryForView: function(aViewID) {
         switch (aViewID) {
             case 'all-items-folder':
-                var constraints = { deleted: Storage.ENTRY_STATE_NORMAL };
+                var constraints = {
+                    includeFeedsExcludedFromGlobalViews: false,
+                    deleted: Storage.ENTRY_STATE_NORMAL
+                };
                 break;
 
             case 'today-folder':
                 constraints = {
                     startDate: new Date().setHours(0, 0, 0, 0),
-                    includeOmittedUnread: false,
+                    includeFeedsExcludedFromGlobalViews: false,
                     deleted: Storage.ENTRY_STATE_NORMAL,
                 }
                 break;
