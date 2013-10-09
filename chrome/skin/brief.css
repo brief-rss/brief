@@ -165,9 +165,8 @@ menuseparator {
 
 #update-progress {
     -moz-box-flex: 1;
-    height: 7px !important;
-    margin: 0 10px !important;
-    border: 1px solid #37c62e !important;
+    height: 4px !important;
+    margin: 0 5px !important;
     opacity: 0;
     transition: opacity 500ms;
 }
@@ -182,6 +181,8 @@ menuseparator {
 
 
 
+/* =========== Rules applicable to all lists =========== */
+
 #view-list > richlistitem[selected="true"],
 #view-list:focus > richlistitem[selected="true"],
 .tag-list-item[selected="true"],
@@ -191,16 +192,32 @@ richtreeitem[selected="true"] {
     background-color: #fcd7bd !important;
 }
 
+#view-list > richlistitem:hover:not([selected="true"]),
+#view-list:focus > richlistitem:hover:not([selected="true"]),
+.tag-list-item:hover:not([selected="true"]),
+richtreefolder:not([selected="true"]) > .folder-title-container:hover,
+richtreeitem:hover:not([selected="true"]) {
+    border-color: #e5e5e5 !important;
+    background-color: #e5e5e5 !important;
+}
+
+richtreeitem:not(.unread) > .unread-count,
+richtreefolder:not(.unread) > .folder-title-container > .unread-count,
+richtreefolder[open="true"] > .folder-title-container > .unread-count,
+.tag-list-item:not(.unread) .unread-count {
+    display: none;
+}
+
 
 
 /* =========== View list richlistbox =========== */
 
 #view-list {
-    margin: 7px 0 0 20px !important;
+    margin: 7px 0 0 5px !important;
 }
 
 #view-list > richlistitem {
-    padding: 1px 1px 2px 5px !important;
+    padding: 2px 1px 1px 20px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
     -moz-box-align: center !important;
 }

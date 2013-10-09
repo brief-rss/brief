@@ -38,11 +38,7 @@ article.read .title-link {
     -moz-box-align: start;
     width: -moz-available;
     margin-bottom: 5px;
-    padding: 7px 5px 0 24px;
-}
-
-.header > .bookmark-button {
-    margin: -5px 2px 0 -24px;
+    padding: 7px 5px 0 25px;
 }
 
 .title {
@@ -52,9 +48,15 @@ article.read .title-link {
 .title-link {
     color: #475059;
     font-family: Arial, sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: bold;
     text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 170ms;
+}
+
+.title-link:hover {
+    border-bottom-color: #475059;
 }
 
 .controls {
@@ -71,8 +73,8 @@ article.read .title-link {
 
 .subheader {
     width: -moz-available;
-    margin: 5px 10px 5px 40px;
-    font-size: 12px;
+    margin: 5px 10px 5px 25px;
+    font-size: 13px;
     font-family: Arial, sans-serif;
     line-height: 17px; /* Make the height the same for both Lucida and Verdana */
     color: #7c7c7c;

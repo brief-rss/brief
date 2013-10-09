@@ -2,23 +2,20 @@ richtree {
     -moz-binding: url(chrome://brief/content/richtree.xml#richtree);
 }
 
+#feed-list {
+    margin-top: 15px !important;
+    padding-left: 5px !important;
+}
+
+
+
+/* =========== Feeds =========== */
+
 richtreeitem {
     -moz-binding: url(chrome://brief/content/richtree.xml#richtreeitem);
-}
-
-richtreefolder {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtreefolder);
-}
-
-richtreeitem {
     -moz-box-align: center;
     border: 1px solid transparent !important; /* Placeholder for selection border */
     padding: 2px 1px 2px 5px !important;
-}
-
-
-#feed-list {
-    margin-top: 15px !important;
 }
 
 .feed-icon {
@@ -41,22 +38,29 @@ richtreeitem {
     color: #539bcf !important;
 }
 
-richtreeitem:not(.unread) > .unread-count,
-richtreefolder:not(.unread) > .folder-title-container > .unread-count,
-richtreefolder[open="true"] > .folder-title-container > .unread-count,
-.tag-list-item:not(.unread) .unread-count {
-    display: none;
-}
 
 
+/* =========== Folders =========== */
 
 richtreefolder {
+    -moz-binding: url(chrome://brief/content/richtree.xml#richtreefolder);
     -moz-box-orient: vertical;
+    margin: 10px 0 13px !important;
 }
 
+richtreefolder + richtreefolder,
+richtreefolder:first-child {
+    margin-top: 0 !important;
+}
+
+richtreefolder:last-child {
+    margin-bottom: 0 !important;
+}
+
+
+
 richtreefolder > .folder-title-container {
-    margin: 0 0 5px !important;
-    padding: 3px 1px 0 5px !important;
+    padding: 2px 1px 2px 5px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
     -moz-box-align: center;
 }
@@ -65,18 +69,11 @@ richtreefolder > .folder-title-container {
     color: #454545;
     font-size: 13px !important;
     font-weight: bold !important;
-    border-bottom: 1px solid #d6d6d6;
-    padding: 0 0 3px 2px;
-}
-
-richtreefolder[selected="true"] .folder-title {
-    border-bottom: none;
-    padding-bottom: 4px;
 }
 
 .folder-twisty {
     margin-right: 1em !important;
-    padding: 4px 5px !important;
+    padding: 3px 5px 3px !important;
     list-style-image: url(icons/twisty.png);
     -moz-image-region: rect(0, 22px, 11px, 11px);
     opacity: 0;
@@ -93,23 +90,39 @@ richtreefolder[selected="true"] .folder-title {
 
 richtreefolder[open="true"] > .folder-title-container > .folder-twisty {
     -moz-image-region: rect(0px, 11px, 11px, 0px);
-    margin-right: 3em !important;
+    padding: 5px 5px 1px !important;
+    margin-right: 15px !important;
 }
 
 richtreefolder[open="true"] > .folder-title-container > .folder-twisty:hover {
     -moz-image-region: rect(11px, 11px, 22px, 0px);
 }
 
+
+
 .folder-container {
     display: none;
-    margin-bottom: 10px !important;
-    padding-left: 20px !important;
+    padding-top: 2px !important;
 }
 
 richtreefolder[open="true"] > .folder-container {
     display: -moz-box;
 }
 
-richtreeitem + richtreefolder {
-    margin-top: 5px !important;
+/* Indentation for first level nesting */
+richtreefolder[open="true"] > .feed-treeitem,
+richtreefolder[open="true"] > richtreefolder > .folder-title-container {
+    padding-left: 20px !important;
+}
+
+/* Indentation for second level nesting */
+richtreefolder[open="true"] > richtreefolder[open="true"] > .feed-treeitem,
+richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder > .folder-title-container {
+    padding-left: 40px !important;
+}
+
+/* Indentation for third level nesting */
+richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder[open="true"] > .feed-treeitem,
+richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder > .folder-title-container {
+    padding-left: 60px !important;
 }
