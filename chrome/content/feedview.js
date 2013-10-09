@@ -1110,7 +1110,6 @@ EntryView.prototype = {
             return;
 
         let headline = this._getElement('headline-container');
-        headline.insertBefore(this._getElement('bookmark-button'), headline.firstChild);
         headline.appendChild(this._getElement('controls'));
 
         hideElement(this._getElement('full-container'));
@@ -1126,7 +1125,6 @@ EntryView.prototype = {
             return;
 
         let header = this._getElement('header');
-        header.insertBefore(this._getElement('bookmark-button'), header.firstChild);
         header.appendChild(this._getElement('controls'));
 
         this.container.classList.remove('collapsed');

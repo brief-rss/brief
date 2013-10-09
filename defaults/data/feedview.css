@@ -70,11 +70,12 @@ body {
 }
 
 .content a {
-    color: #003b73;
+    color: #108ce6;
+    text-decoration: none;
 }
 
 .content a:visited {
-    color: #4b667e;
+    color: #79b0d8;
 }
 
 img {
@@ -102,14 +103,15 @@ pre, code {
 
 .button {
     display: -moz-box;
+    width: 40px;
+    height: 25px;
     background-repeat: no-repeat;
     border: 1px solid transparent;
     border-radius: 3px;
     transition: border-color 170ms;
 }
 
-.button:hover,
-.button:active {
+.button:hover {
     border-color: #ff8e42;
 }
 
@@ -118,29 +120,23 @@ pre, code {
 }
 
 .mark-read-button {
-    width: 47px;
-    height: 25px;
     background-image: url(chrome://brief/skin/icons/mark-item-read.png);
-    background-position: 14px -1px;
+    background-position: 10px -1px;
 }
 
 .mark-read-button:hover {
-    background-position: 14px -22px;
+    background-position: 10px -22px;
 }
 
 .delete-button,
 .restore-button {
-    width: 30px;
-    height: 25px;
     margin-left: 2px;
-    background-position: 6px 0;
+    background-position: 10px 0;
 }
 
 .delete-button:hover,
-.delete-button:active,
-.restore-button:hover,
-.restore-button:active {
-    background-position: 6px -22px;
+.restore-button:hover {
+    background-position: 10px -22px;
 }
 
 .delete-button {
@@ -153,29 +149,14 @@ pre, code {
 
 
 .bookmark-button {
-    width: 24px;
-    height: 24px;
-    background: url(chrome://brief/skin/icons/entry-star.png) no-repeat;
+    margin-left: 2px;
+    background: url(chrome://brief/skin/icons/bookmark-item.png) no-repeat;
+    background-position: 10px -1px;
 }
 
-article:not(.starred) .bookmark-button:hover {
-    background-position: 0 -24px;
-}
-
-article:not(.starred) .bookmark-button:active:hover {
-    background-position: 0 -48px;
-}
-
+.bookmark-button:hover,
 article.starred .bookmark-button {
-    background-position: 0 -48px;
-}
-
-article.starred .bookmark-button:hover {
-    background-position: 0 -72px;
-}
-
-article.starred .bookmark-button:active:hover {
-    background-position: 0 -96px;
+    background-position: 10px -26px;
 }
 
 
