@@ -40,19 +40,16 @@ article.headline > .full-container {
     height: 34px;
     -moz-box-align: center;
     border-bottom: 1px solid #d3dfe5;
+    border-left: 2px solid transparent;
+    transition: border-color 200ms;
 }
 
 article.selected .headline-header {
-    background-color: #ecf7ff;
-}
-
-article.selected:not(:hover) .headline-header,
-article.was-selected:not(:hover) .headline-header {
-    transition: background-color 500ms;
+    border-left-color: #3e8fb7;
 }
 
 .headline-container:hover > .headline-header {
-    background-color: #DEF2FF;
+    background-color: #f2f2f2;
 }
 
 .feed-icon-wrapper {
