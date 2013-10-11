@@ -919,6 +919,9 @@ function EntryView(aFeedView, aEntryData) {
     // Set xml:base attribute to resolve relative URIs against the feed's URI.
     this.container.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'base', feed.feedURL);
 
+    if (feed.language)
+        this.container.setAttribute('lang', feed.language);
+
     let titleElem = this._getElement('title-link');
     if (aEntryData.entryURL)
         titleElem.setAttribute('href', aEntryData.entryURL);
