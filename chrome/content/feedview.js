@@ -1062,14 +1062,10 @@ EntryView.prototype = {
         return this.feedView.selectedEntry == this.id;
     },
     set selected(aValue) {
-        if (aValue) {
+        if (aValue)
             this.container.classList.add('selected');
-        }
-        else {
+        else
             this.container.classList.remove('selected');
-            this.container.classList.add('was-selected');
-            async(function() { this.container.classList.remove('was-selected') }, 600, this);
-        }
 
         return aValue;
     },
