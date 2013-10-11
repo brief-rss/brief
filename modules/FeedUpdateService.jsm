@@ -443,10 +443,11 @@ FeedFetcher.prototype = {
             new FaviconFetcher(this.feed)
 
         let parsedFeed = aResult.doc.QueryInterface(Ci.nsIFeed);
-        Storage.processFeed(this.feed.feedID, parsedFeed, function(aNewEntriesCount) {
-            this.finish('ok', aNewEntriesCount);
-        }.bind(this));
-    },
+        let newEntriesCount = yield Storage.processFeed(this.feed.feedID, parsedFeed,
+                                                        this.request.responseXML,
+                                                        FeedFetcher_handleResult.resume);
+        this.finish('ok', newEntriesCount);
+    }.gen(),
 
     finish: function FeedFetcher_finish(aResult, aNewEntriesCount) {
         if (this.finished)
