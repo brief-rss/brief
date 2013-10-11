@@ -15,7 +15,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 17;
+const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 
 const FEEDS_TABLE_SCHEMA = [
@@ -24,6 +24,7 @@ const FEEDS_TABLE_SCHEMA = [
     'websiteURL      TEXT',
     'title           TEXT',
     'subtitle        TEXT',
+    'language        TEXT',
     'favicon         TEXT',
     'bookmarkID      TEXT',
     'parent          TEXT',
@@ -353,6 +354,9 @@ let StorageInternal = {
                     'INSERT OR IGNORE INTO entries_text(rowid) SELECT seq FROM sqlite_sequence WHERE name=\'entries\''
                 );
 
+            // To 2.0.
+            case 17:
+                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN language TEXT');
         }
 
         Connection.schemaVersion = DATABASE_VERSION;
@@ -486,6 +490,7 @@ let StorageInternal = {
                             case 'parent':
                             case 'title':
                             case 'omitInUnread':
+                            case 'language':
                                 invalidateFeedlist = true;
                                 break;
 
@@ -792,6 +797,8 @@ function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
         websiteURL: aParsedFeed.link ? aParsedFeed.link.spec : '',
         subtitle: aParsedFeed.subtitle ? aParsedFeed.subtitle.text : '',
         oldestEntryDate: this.newOldestEntryDate || this.feed.oldestEntryDate,
+        language: aParsedFeed.fields.get('language') ||
+                  aFeedDocument.documentElement.getAttribute('xml:lang'),
         lastUpdated: Date.now(),
         dateModified: newDateModified
     });
@@ -1966,7 +1973,7 @@ let Stm = {
                   '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,      ' +
                   '       isFolder, bookmarkID, entryAgeLimit, maxEntries, hidden,      ' +
                   '       updateInterval, markModifiedEntriesUnread, omitInUnread,      ' +
-                  '       lastFaviconRefresh '                                            +
+                  '       lastFaviconRefresh, language                                  ' +
                   'FROM feeds                                                           ' +
                   'ORDER BY rowIndex ASC                                                ';
         delete this.getAllFeeds;
@@ -1987,6 +1994,7 @@ let Stm = {
                   'SET title = :title,                           ' +
                   '    subtitle = :subtitle,                     ' +
                   '    websiteURL = :websiteURL,                 ' +
+                  '    language = :language,                     ' +
                   '    hidden = :hidden,                         ' +
                   '    rowIndex = :rowIndex,                     ' +
                   '    parent = :parent,                         ' +
