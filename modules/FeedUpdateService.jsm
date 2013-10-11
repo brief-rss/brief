@@ -438,29 +438,12 @@ FeedFetcher.prototype = {
 
         this.bozo = aResult.bozo;
 
-        let downloadedFeed = aResult.doc.QueryInterface(Ci.nsIFeed);
-
-        if (downloadedFeed.link)
-            this.feed.websiteURL = downloadedFeed.link.spec;
-        if (downloadedFeed.subtitle)
-            this.feed.subtitle = downloadedFeed.subtitle.text;
-
-        this.feed.wrappedFeed = downloadedFeed;
-
-        entries = [];
-        if (downloadedFeed.items) {
-            // Counting down, because the order of items is reversed after parsing.
-            for (let i = downloadedFeed.items.length - 1; i >= 0; i--) {
-                let entry = downloadedFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
-                entries.push(new Entry(entry));
-            }
-        }
-
         let timeSinceRefresh = Date.now() - this.feed.lastFaviconRefresh;
         if (!this.feed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL)
             new FaviconFetcher(this.feed)
 
-        Storage.processFeed(this.feed, entries, function(aNewEntriesCount) {
+        let parsedFeed = aResult.doc.QueryInterface(Ci.nsIFeed);
+        Storage.processFeed(this.feed.feedID, parsedFeed, function(aNewEntriesCount) {
             this.finish('ok', aNewEntriesCount);
         }.bind(this));
     },

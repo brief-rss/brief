@@ -79,11 +79,6 @@ Feed.prototype = {
      */
     hidden: 0,
 
-    /**
-     * The wrapped nsIFeed.
-     */
-    wrappedFeed: null,
-
 }
 
 
