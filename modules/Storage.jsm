@@ -138,11 +138,13 @@ const Storage = Object.freeze({
      *         ID of the feed to process.
      * @param aParsedFeed
      *        nsIFeed object returned by the parser.
+     * @param aXMLDocument
+     *        The feed's DOM document.
      * @param aCallback
      *        Callback that takes the number of newly inserted entries as an argument.
      */
-    processFeed: function(aFeedID, aParsedFeed, aCallback) {
-        return StorageInternal.processFeed(aFeedID, aParsedFeed, aCallback);
+    processFeed: function(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
+        return StorageInternal.processFeed(aFeedID, aParsedFeed, aFeedDocument, aCallback);
     },
 
     /**
@@ -447,8 +449,8 @@ let StorageInternal = {
 
 
     // See Storage.
-    processFeed: function StorageInternal_processFeed(aFeedID, aParsedFeed, aCallback) {
-        new FeedProcessor(aFeedID, aParsedFeed, aCallback);
+    processFeed: function StorageInternal_processFeed(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
+        new FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aCallback);
     },
 
     // See Storage.
@@ -745,7 +747,7 @@ let StorageInternal = {
 
 
 // See Storage.processFeed().
-function FeedProcessor(aFeedID, aParsedFeed, aCallback) {
+function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
     this.feed = Storage.getFeed(aFeedID);
     this.parsedFeed = aParsedFeed;
     this.callback = aCallback;
