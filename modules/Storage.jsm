@@ -601,6 +601,11 @@ let StorageInternal = {
     observe: function StorageInternal_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'quit-application':
+                for each (let statement in Stm)
+                    statement._nativeStatement.finalize();
+
+                Connection._nativeConnection.asyncClose();
+
                 Bookmarks.removeObserver(BookmarkObserver);
                 Prefs.removeObserver('', this);
 
