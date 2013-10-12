@@ -29,6 +29,7 @@ function init() {
     Services.obs.addObserver(FeedList, 'brief:feed-error', false);
     Services.obs.addObserver(FeedList, 'brief:invalidate-feedlist', false);
     Services.obs.addObserver(FeedList, 'brief:feed-title-changed', false);
+    Services.obs.addObserver(FeedList, 'brief:feed-favicon-changed', false);
     Services.obs.addObserver(FeedList, 'brief:custom-style-changed', false);
 
     Storage.addObserver(FeedList);
@@ -58,6 +59,7 @@ function unload() {
     Services.obs.removeObserver(FeedList, 'brief:feed-update-finished');
     Services.obs.removeObserver(FeedList, 'brief:invalidate-feedlist');
     Services.obs.removeObserver(FeedList, 'brief:feed-title-changed');
+    Services.obs.removeObserver(FeedList, 'brief:feed-favicon-changed');
     Services.obs.removeObserver(FeedList, 'brief:custom-style-changed');
 
     PrefObserver.unregister();

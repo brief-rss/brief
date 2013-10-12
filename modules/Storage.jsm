@@ -488,6 +488,11 @@ let StorageInternal = {
                             case 'entryAgeLimit':
                                 this.expireEntries(cachedFeed);
                                 break;
+
+                            case 'favicon':
+                                Services.obs.notifyObservers(null, 'brief:feed-favicon-changed',
+                                                             cachedFeed.feedID);
+                                break;
                         }
                     }
                 }
