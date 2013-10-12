@@ -15,7 +15,7 @@ const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
 const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
-const DATABASE_VERSION = 17;
+const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 
 const FEEDS_TABLE_SCHEMA = [
@@ -24,6 +24,7 @@ const FEEDS_TABLE_SCHEMA = [
     'websiteURL      TEXT',
     'title           TEXT',
     'subtitle        TEXT',
+    'language        TEXT',
     'favicon         TEXT',
     'bookmarkID      TEXT',
     'parent          TEXT',
@@ -131,16 +132,20 @@ const Storage = Object.freeze({
     },
 
     /**
-     * Updates feed properties and inserts/updates entries.
+     * Evaluates a feed, updating its properties, as well as inserting
+     * and updating its entries.
      *
-     * @param aFeed
-     *        Feed object containing the current feed's properties.
-     * @param aEntries
-     *        Array of Entry objects to process.
+     * @param aFeedID
+     *         ID of the feed to process.
+     * @param aParsedFeed
+     *        nsIFeed object returned by the parser.
+     * @param aXMLDocument
+     *        The feed's DOM document.
      * @param aCallback
+     *        Callback that takes the number of newly inserted entries as an argument.
      */
-    processFeed: function(aFeed, aEntries, aCallback) {
-        return StorageInternal.processFeed(aFeed, aEntries, aCallback);
+    processFeed: function(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
+        return StorageInternal.processFeed(aFeedID, aParsedFeed, aFeedDocument, aCallback);
     },
 
     /**
@@ -349,6 +354,9 @@ let StorageInternal = {
                     'INSERT OR IGNORE INTO entries_text(rowid) SELECT seq FROM sqlite_sequence WHERE name=\'entries\''
                 );
 
+            // To 2.0.
+            case 17:
+                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN language TEXT');
         }
 
         Connection.schemaVersion = DATABASE_VERSION;
@@ -445,8 +453,8 @@ let StorageInternal = {
 
 
     // See Storage.
-    processFeed: function StorageInternal_processFeed(aFeed, aEntries, aCallback) {
-        new FeedProcessor(aFeed, aEntries, aCallback);
+    processFeed: function StorageInternal_processFeed(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
+        new FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aCallback);
     },
 
     // See Storage.
@@ -482,6 +490,7 @@ let StorageInternal = {
                             case 'parent':
                             case 'title':
                             case 'omitInUnread':
+                            case 'language':
                                 invalidateFeedlist = true;
                                 break;
 
@@ -742,19 +751,18 @@ let StorageInternal = {
 }
 
 
-/**
- * Evaluates provided entries, inserting any new items and updating existing
- * items when newer versions are found. Also updates feed's properties.
- */
-function FeedProcessor(aFeed, aEntries, aCallback) {
-    this.feed = aFeed;
+// See Storage.processFeed().
+function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
+    this.feed = Storage.getFeed(aFeedID);
+    this.parsedFeed = aParsedFeed;
     this.callback = aCallback;
 
-    let newDateModified = new Date(aFeed.wrappedFeed.updated).getTime();
-    let prevDateModified = aFeed.dateModified;
+    let newDateModified = new Date(aParsedFeed.updated).getTime();
+    let prevDateModified = this.feed.dateModified;
 
-    if (aEntries.length && (!newDateModified || newDateModified > prevDateModified)) {
-        this.remainingEntriesCount = aEntries.length;
+    let hasItems = aParsedFeed.items && aParsedFeed.items.length;
+    if (hasItems && (!newDateModified || newDateModified > prevDateModified)) {
+        this.remainingEntriesCount = aParsedFeed.items.length;
         this.newOldestEntryDate = Date.now();
 
         this.updatedEntries = [];
@@ -764,15 +772,23 @@ function FeedProcessor(aFeed, aEntries, aCallback) {
         this.updateEntryText = Stm.updateEntryText.clone();
         this.insertEntryText = Stm.insertEntryText.clone();
 
-        aEntries.forEach(this.processEntry, this);
+        // Counting down, because the order of items is reversed after parsing.
+        for (let i = aParsedFeed.items.length - 1; i >= 0; i--) {
+            let parsedEntry = aParsedFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
+            this.processEntry(new Entry(parsedEntry));
+        }
     }
     else {
         aCallback(0);
     }
 
     Storage.changeFeedProperties({
-        feedID: aFeed.feedID,
-        oldestEntryDate: this.newOldestEntryDate || aFeed.oldestEntryDate,
+        feedID: aFeedID,
+        websiteURL: aParsedFeed.link ? aParsedFeed.link.spec : '',
+        subtitle: aParsedFeed.subtitle ? aParsedFeed.subtitle.text : '',
+        oldestEntryDate: this.newOldestEntryDate || this.feed.oldestEntryDate,
+        language: aParsedFeed.fields.get('language') ||
+                  aFeedDocument.documentElement.getAttribute('xml:lang'),
         lastUpdated: Date.now(),
         dateModified: newDateModified
     });
@@ -806,7 +822,7 @@ FeedProcessor.prototype = {
         // Special case for MediaWiki feeds: include the date in the hash. In
         // "Recent changes" feeds, entries for subsequent edits of a page differ
         // only in date (not in URL or GUID).
-        let generator = this.feed.wrappedFeed.generator;
+        let generator = this.parsedFeed.generator;
         if (generator && generator.agent.match('MediaWiki')) {
             primarySet.push(aEntry.date);
             secondarySet.push(aEntry.date);
@@ -1947,7 +1963,7 @@ let Stm = {
                   '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,      ' +
                   '       isFolder, bookmarkID, entryAgeLimit, maxEntries, hidden,      ' +
                   '       updateInterval, markModifiedEntriesUnread, omitInUnread,      ' +
-                  '       lastFaviconRefresh '                                            +
+                  '       lastFaviconRefresh, language                                  ' +
                   'FROM feeds                                                           ' +
                   'ORDER BY rowIndex ASC                                                ';
         delete this.getAllFeeds;
@@ -1968,6 +1984,7 @@ let Stm = {
                   'SET title = :title,                           ' +
                   '    subtitle = :subtitle,                     ' +
                   '    websiteURL = :websiteURL,                 ' +
+                  '    language = :language,                     ' +
                   '    hidden = :hidden,                         ' +
                   '    rowIndex = :rowIndex,                     ' +
                   '    parent = :parent,                         ' +

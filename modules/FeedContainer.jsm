@@ -24,6 +24,7 @@ Feed.prototype = {
     title:      '',
     subtitle:   '',
     dateModified: 0,
+    language: '',
 
     /**
      * base64-encoded data: URI of the favicon of the site under websiteURL.
@@ -78,11 +79,6 @@ Feed.prototype = {
      * when it was set to inactive.
      */
     hidden: 0,
-
-    /**
-     * The wrapped nsIFeed.
-     */
-    wrappedFeed: null,
 
 }
 
