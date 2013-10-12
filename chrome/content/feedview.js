@@ -6,7 +6,7 @@ const MIN_LOADED_WINDOW_HEIGHTS = 1;
 const WINDOW_HEIGHTS_LOAD = 2;
 
 // Number of window heights worth of entries to load initially when refreshing a view.
-const INITIAL_WINDOW_HEIGHTS_LOAD = 2;
+const INITIAL_WINDOW_HEIGHTS_LOAD = 1;
 
 // Number of entries queried in each step until they fill the defined height.
 const LOAD_STEP_SIZE = 5;
