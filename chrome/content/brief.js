@@ -34,6 +34,12 @@ function init() {
 
     Storage.addObserver(FeedList);
 
+    let chromeRegService = Cc['@mozilla.org/chrome/chrome-registry;1'].getService();
+    let selectedLocale = chromeRegService.QueryInterface(Ci.nsIXULChromeRegistry)
+                                         .getSelectedLocale('brief');
+    let doc = getElement('feed-view').contentDocument;
+    doc.documentElement.setAttribute('lang', selectedLocale);
+
     ViewList.init();
 
     let startView = getElement('view-list').getAttribute('startview');
