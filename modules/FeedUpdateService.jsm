@@ -539,15 +539,12 @@ FaviconFetcher.prototype = {
     _stream:    null,
 
     finish: function FaviconFetcher_finish(aFaviconString) {
-        yield Storage.changeFeedProperties({
+        Storage.changeFeedProperties({
             feedID: this.feed.feedID,
             lastFaviconRefresh: Date.now(),
             favicon: aFaviconString
-        }, FaviconFetcher_finish.resume);
-
-        if (aFaviconString != this.feed.favicon)
-            Services.obs.notifyObservers(null, 'brief:feed-favicon-changed', this.feed.feedID);
-    }.gen(),
+        });
+    },
 
     // nsIRequestObserver
     onStartRequest: function FaviconFetcher_lonStartRequest(aRequest, aContext) {
