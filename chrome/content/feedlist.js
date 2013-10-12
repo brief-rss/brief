@@ -491,14 +491,8 @@ let FeedList = {
                 break;
 
             case 'brief:custom-style-changed':
-                gCurrentView.browser.reload();
-                gCurrentView.browser.addEventListener('load', function() {
-                    gCurrentView.browser.removeEventListener('load', arguments.callee, false);
-                    ViewList.deselect();
-                    ViewList.selectedItem = getElement('all-items-folder');
-                }, false)
+                getTopWindow().gBrowser.getBrowserForDocument(document).reload();
                 break;
-
         }
     },
 
