@@ -884,6 +884,10 @@ FeedView.prototype = {
 
 
 const DEFAULT_FAVICON_URL = 'chrome://brief/skin/icons/feed-favicon.png';
+const RTL_LANGUAGE_CODES = ['ar', 'arc', 'dv', 'fa', 'ha', 'he', 'khw',
+                            'ks', 'ku', 'ps', 'syr', 'ur', 'yi' ]
+
+let detectRTL = new RegExp('^(' + RTL_LANGUAGE_CODES.join('|') + ')(-|$)');
 
 function EntryView(aFeedView, aEntryData) {
     this.feedView = aFeedView;
@@ -919,8 +923,12 @@ function EntryView(aFeedView, aEntryData) {
     // Set xml:base attribute to resolve relative URIs against the feed's URI.
     this.container.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'base', feed.feedURL);
 
-    if (feed.language)
+    if (feed.language) {
         this.container.setAttribute('lang', feed.language);
+
+        if (detectRTL.test(feed.language))
+            this.textDirection = 'rtl';
+    }
 
     let titleElem = this._getElement('title-link');
     if (aEntryData.entryURL)
@@ -949,8 +957,11 @@ function EntryView(aFeedView, aEntryData) {
         if (aEntryData.entryURL)
             this._getElement('headline-link').setAttribute('href', aEntryData.entryURL);
 
-        this._getElement('headline-title').innerHTML = aEntryData.title || aEntryData.entryURL;
-        this._getElement('headline-title').setAttribute('title', aEntryData.title);
+        let headlineTitle = this._getElement('headline-title');
+        headlineTitle.innerHTML = aEntryData.title || aEntryData.entryURL;
+        headlineTitle.setAttribute('title', aEntryData.title);
+        headlineTitle.setAttribute('dir', this.textDirection);
+
         this._getElement('headline-feed-name').textContent = feed.title;
 
         let favicon = (feed.favicon && feed.favicon != 'no-favicon') ? feed.favicon
@@ -965,7 +976,9 @@ function EntryView(aFeedView, aEntryData) {
         }.bind(this))
     }
     else {
-        this._getElement('content').innerHTML = aEntryData.content;
+        let contentElement = this._getElement('content');
+        contentElement.innerHTML = aEntryData.content;
+        contentElement.setAttribute('dir', this.textDirection);
 
         if (this.feedView.query.searchString) {
             async(function() {
@@ -979,6 +992,8 @@ function EntryView(aFeedView, aEntryData) {
 }
 
 EntryView.prototype = {
+
+    textDirection: 'ltr',
 
     get day() {
         let time = this.date.getTime() - this.date.getTimezoneOffset() * 60000;
