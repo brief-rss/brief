@@ -23,8 +23,40 @@ let ViewList = {
         this.richlistbox.suppressOnSelect = false;
         this.deselect()
 
-        this.refreshItem('unread-folder');
+        this.refreshItem('all-items-folder');
+        this.refreshItem('today-folder');
         this.refreshItem('starred-folder');
+    },
+
+    getQueryForView: function(aViewID) {
+        switch (aViewID) {
+            case 'all-items-folder':
+                var constraints = {
+                    includeFeedsExcludedFromGlobalViews: false,
+                    deleted: Storage.ENTRY_STATE_NORMAL
+                };
+                break;
+
+            case 'today-folder':
+                constraints = {
+                    startDate: new Date().setHours(0, 0, 0, 0),
+                    includeFeedsExcludedFromGlobalViews: false,
+                    deleted: Storage.ENTRY_STATE_NORMAL,
+                }
+                break;
+
+            case 'starred-folder':
+                constraints = {
+                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    starred: true
+                }
+                break;
+
+            case 'trash-folder':
+                constraints = { deleted: Storage.ENTRY_STATE_TRASHED };
+        }
+
+        return new Query(constraints);
     },
 
     deselect: function ViewList_deselect() {
@@ -38,57 +70,32 @@ let ViewList = {
         TagList.deselect();
         FeedList.deselect();
 
-        let title = this.selectedItem.getElementsByClassName('view-title')[0].value;
-        let query = new Query();
-
-        switch (this.selectedItem.id) {
-            case 'all-items-folder':
-                query.deleted = Storage.ENTRY_STATE_NORMAL;
-                break;
-
-            case 'unread-folder':
-                query.includeOmittedUnread = false;
-                query.deleted = Storage.ENTRY_STATE_NORMAL;
-                query.read = false;
-                break;
-
-            case 'starred-folder':
-                query.deleted = Storage.ENTRY_STATE_NORMAL;
-                query.starred = true;
-
-                Storage.getAllTags(function(tags) {
-                    if (tags.length)
-                        TagList.show();
-                })
-                break;
-
-            case 'trash-folder':
-                query.deleted = Storage.ENTRY_STATE_TRASHED;
-                break;
+        if (this.selectedItem.id == 'starred-folder') {
+            Storage.getAllTags(function(tags) {
+                if (tags.length)
+                    TagList.show();
+            })
         }
 
+        let title = this.selectedItem.getElementsByClassName('view-title')[0].value;
+        let query = this.getQueryForView(this.selectedItem.id);
         gCurrentView = new FeedView(title, query);
     },
 
     refreshItem: function ViewList_refreshItem(aItemID) {
-        let query = new Query({
-            includeOmittedUnread: aItemID == 'unread-folder' ? false : true,
-            deleted: Storage.ENTRY_STATE_NORMAL,
-            read: false,
-            starred: (aItemID == 'starred-folder') ? true : undefined
-        })
+        let query = this.getQueryForView(aItemID);
+        query.read = false;
 
-        query.getEntryCount(function(unreadCount) {
-            let element = getElement(aItemID);
+        let unreadCount = yield query.getEntryCount(ViewList_refreshItem.resume);
 
-            element.lastChild.value = unreadCount;
+        let element = getElement(aItemID);
+        element.lastChild.value = unreadCount;
 
-            if (unreadCount > 0)
-                element.classList.add('unread');
-            else
-                element.classList.remove('unread');
-        })
-    }
+        if (unreadCount > 0)
+            element.classList.add('unread');
+        else
+            element.classList.remove('unread');
+    }.gen()
 
 }
 
@@ -434,7 +441,8 @@ let FeedList = {
                 else {
                     this.persistFolderState();
                     this.rebuild();
-                    ViewList.refreshItem('unread-folder');
+                    ViewList.refreshItem('all-items-folder');
+                    ViewList.refreshItem('today-folder');
                     ViewList.refreshItem('starred-folder');
                     async(gCurrentView.refresh, 0, gCurrentView);
                 }
@@ -499,12 +507,14 @@ let FeedList = {
 
     onEntriesAdded: function FeedList_onEntriesAdded(aEntryList) {
         this.refreshFeedTreeitems(aEntryList.feedIDs);
-        ViewList.refreshItem('unread-folder');
+        ViewList.refreshItem('all-items-folder');
+        ViewList.refreshItem('today-folder');
     },
 
     onEntriesUpdated: function FeedList_onEntriesUpdated(aEntryList) {
         this.refreshFeedTreeitems(aEntryList.feedIDs);
-        ViewList.refreshItem('unread-folder');
+        ViewList.refreshItem('all-items-folder');
+        ViewList.refreshItem('today-folder');
         TagList.refreshTags(aEntryList.tags);
     },
 
@@ -514,7 +524,8 @@ let FeedList = {
         }, 250)
 
         async(function() {
-            ViewList.refreshItem('unread-folder');
+            ViewList.refreshItem('all-items-folder');
+            ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
             TagList.refreshTags(aEntryList.tags);
         }, 500)
@@ -537,7 +548,8 @@ let FeedList = {
         }, 250)
 
         async(function() {
-            ViewList.refreshItem('unread-folder');
+            ViewList.refreshItem('all-items-folder');
+            ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
         }, 500)
 
@@ -577,14 +589,14 @@ let ViewListContextMenu = {
     targetItem: null,
 
     get targetIsAllItemsFolder() this.targetItem.id == 'all-items-folder',
-    get targetIsUnreadFolder()   this.targetItem.id == 'unread-folder',
+    get targetIsTodayFolder()   this.targetItem.id == 'today-folder',
     get targetIsStarredFolder()  this.targetItem.id == 'starred-folder',
     get targetIsTrashFolder()    this.targetItem.id == 'trash-folder',
 
     init: function ViewListContextMenu_init() {
         this.targetItem = ViewList.selectedItem;
 
-        getElement('ctx-mark-special-folder-read').hidden = !this.targetIsUnreadFolder &&
+        getElement('ctx-mark-special-folder-read').hidden = !this.targetIsTodayFolder &&
                                                             !this.targetIsTrashFolder &&
                                                             !this.targetIsStarredFolder &&
                                                             !this.targetIsAllItemsFolder;
@@ -592,51 +604,31 @@ let ViewListContextMenu = {
         getElement('ctx-restore-trashed').hidden = !this.targetIsTrashFolder;
         getElement('ctx-view-list-separator').hidden = !this.targetIsTag &&
                                                        !this.targetIsTrashFolder &&
-                                                       !this.targetIsUnreadFolder;
+                                                       !this.targetIsTodayFolder;
         getElement('ctx-delete-tag').hidden = !this.targetIsTag;
-        getElement('ctx-empty-unread-folder').hidden = !this.targetIsUnreadFolder;
+        getElement('ctx-empty-today-folder').hidden = !this.targetIsTodayFolder;
         getElement('ctx-empty-trash').hidden = !this.targetIsTrashFolder;
     },
 
     markFolderRead: function ViewListContextMenu_markFolderRead() {
-        let query = new Query();
-
-        if (this.targetIsUnreadFolder) {
-            query.deleted = Storage.ENTRY_STATE_NORMAL;
-            query.read = false;
-        }
-        else if (this.targetIsStarredFolder) {
-            query.deleted = Storage.ENTRY_STATE_NORMAL;
-            query.starred = true;
-        }
-        else if (this.targetIsTrashFolder) {
-            query.deleted = Storage.ENTRY_STATE_TRASHED;
-        }
-
-        query.markEntriesRead(true);
+        ViewList.getQueryForView(this.targetItem.id)
+                .markEntriesRead(true);
     },
 
     restoreTrashed: function ViewListContextMenu_restoreTrashed() {
-        let query = new Query({
-            deleted: Storage.ENTRY_STATE_TRASHED
-        })
-        query.deleteEntries(Storage.ENTRY_STATE_NORMAL);
+        ViewList.getQueryForView('trash-folder')
+                .deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
-    emptyUnreadFolder: function ViewListContextMenu_emptyUnreadFolder() {
-        let query = new Query({
-            deleted: Storage.ENTRY_STATE_NORMAL,
-            starred: false,
-            read: false
-        })
+    emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
+        let query = ViewList.getQueryForView('today-folder');
+        query.starred = false;
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
     emptyTrash: function gCurrentViewContextMenu_emptyTrash() {
-        let query = new Query({
-            deleted: Storage.ENTRY_STATE_TRASHED
-        })
-        query.deleteEntries(Storage.ENTRY_STATE_DELETED);
+        ViewList.getQueryForView('trash-folder')
+                .deleteEntries(Storage.ENTRY_STATE_DELETED);
     }
 
 }

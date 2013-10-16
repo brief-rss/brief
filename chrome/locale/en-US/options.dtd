@@ -38,7 +38,6 @@
 <!ENTITY autoMarkRead.label "Automatically mark items as read after I see them">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "Appearance">
-<!ENTITY shortcutsPane.label "Shortcuts">
 <!ENTITY editStyleDescription.label "Customize the appearance of feeds">
 <!ENTITY editStyleButton.label "Customize">
 <!ENTITY editStyleButton.accesskey "u">
@@ -55,7 +54,7 @@
 <!ENTITY expireEntriesPerFeedAfter.label "days">
 <!ENTITY updatedEntries.label "Don&apos;t mark changed items back as unread">
 <!ENTITY updatedEntries.accesskey "D">
-<!ENTITY omitInUnread.label "Don&apos;t include this feed's items in the overall unread count">
+<!ENTITY omitInUnread.label "Exclude this feed from Today and All Items views">
 <!ENTITY omitInUnread.accesskey "O">
 <!ENTITY previousFeed.label "&lt; Previous">
 <!ENTITY previousFeed.accesskey "P">

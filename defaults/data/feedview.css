@@ -6,9 +6,9 @@ body, h1, h2 {
 }
 
 body {
-    background: #fcfdff;
-    font-family: "Lucida Grande", Verdana, sans-serif;
+    font-family: "Lucida Grande", Verdana, Arial, sans-serif;
     font-size: 10px;
+    background: #fcfcfc;
 }
 
 #feed-content {
@@ -25,7 +25,7 @@ body {
     margin-top: 200px;
     text-align: center;
     font-size: 24px;
-    color: #274b5d;
+    color: #606b78;
 }
 
 #secondary-message {
@@ -33,7 +33,7 @@ body {
     max-width: 500px;
     text-align: center;
     font-size: 16px;
-    color: #4b606c;
+    color: #606b78;
 }
 
 
@@ -55,7 +55,7 @@ body {
     overflow: auto;
     color: #404040;
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.5;
     text-align: justify;
 }
 
@@ -70,11 +70,12 @@ body {
 }
 
 .content a {
-    color: #003b73;
+    color: #108ce6;
+    text-decoration: none;
 }
 
 .content a:visited {
-    color: #4b667e;
+    color: #79b0d8;
 }
 
 img {
@@ -102,82 +103,67 @@ pre, code {
 
 .button {
     display: -moz-box;
+    width: 40px;
+    height: 25px;
+    background-repeat: no-repeat;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    transition: border-color 170ms;
 }
 
 .button:hover {
-    background-position: 0 -25px;
+    border-color: #ff8e42;
 }
 
 .button:active {
-    background-position: 0 -50px;
+    box-shadow: 0px 0px 3px #ffa060, inset 0px 0px 3px #ffa060;
 }
 
 .mark-read-button {
-    width: 47px;
-    height: 25px;
-    background-image: url(chrome://brief/skin/mark-read-button.png);
+    background-image: url(chrome://brief/skin/icons/mark-item-read.png);
+    background-position: 10px -1px;
 }
 
-.mark-read-button:hover + .delete-button,
-.mark-read-button:hover + .restore-button {
-    border-left-color: #4f7ac4;
+.mark-read-button:hover {
+    background-position: 10px -22px;
 }
 
 .delete-button,
 .restore-button {
-    width: 30px;
-    height: 25px;
+    margin-left: 2px;
+    background-position: 10px 0;
+}
+
+.delete-button:hover,
+.restore-button:hover {
+    background-position: 10px -22px;
 }
 
 .delete-button {
-    border-left: 1px solid #99a7bf;
-    background-image: url(chrome://brief/skin/delete-button.png);
-}
-
-.delete-button:hover {
-    border-left-color: #cc6565;
+    background-image: url(chrome://brief/skin/icons/delete-item.png);
 }
 
 .restore-button {
-    border-left: 1px solid #99a7bf;
-    background-image: url(chrome://brief/skin/restore-button.png);
+    background-image: url(chrome://brief/skin/icons/restore-item.png);
 }
 
-.restore-button:hover {
-    border-left-color: #63b236;
-}
 
 .bookmark-button {
-    width: 24px;
-    height: 24px;
-    background: url(chrome://brief/skin/icons/entry-star.png) no-repeat;
+    margin-left: 2px;
+    background: url(chrome://brief/skin/icons/bookmark-item.png) no-repeat;
+    background-position: 10px -1px;
 }
 
-article:not(.starred) .bookmark-button:hover {
-    background-position: 0 -24px;
-}
-
-article:not(.starred) .bookmark-button:active:hover {
-    background-position: 0 -48px;
-}
-
+.bookmark-button:hover,
 article.starred .bookmark-button {
-    background-position: 0 -48px;
-}
-
-article.starred .bookmark-button:hover {
-    background-position: 0 -72px;
-}
-
-article.starred .bookmark-button:active:hover {
-    background-position: 0 -96px;
+    background-position: 10px -26px;
 }
 
 
 /* --------- Transitions ------------ */
 
 article[removing] {
-    transition: opacity 250ms;
+    transition: opacity 170ms;
     opacity: 0;
 }
 

@@ -214,7 +214,7 @@ const Brief = {
             return;
 
         let query = new Brief.query({
-            includeOmittedUnread: false,
+            includeFeedsExcludedFromGlobalViews: false,
             deleted: Brief.storage.ENTRY_STATE_NORMAL,
             read: false
         })
@@ -266,7 +266,7 @@ const Brief = {
                 label.value = bundle.formatStringFromName('lastUpdated.yesterday', [time], 1);
                 break;
 
-            case relativeDate.deltaDays < 5:
+            case relativeDate.deltaDays < 7:
                 pluralForms = bundle.GetStringFromName('day.pluralForms');
                 form = this.common.getPluralForm(relativeDate.deltaDays, pluralForms);
                 label.value = bundle.formatStringFromName('lastUpdated.ago', [form], 1)

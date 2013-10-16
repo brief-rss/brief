@@ -27,8 +27,8 @@ function FeedView(aTitle, aQuery) {
     this._fixedUnread = aQuery.read !== undefined;
     this._fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
 
-    getElement('filter-unread-checkbox').disabled = this._fixedUnread;
-    getElement('filter-starred-checkbox').disabled = this._fixedStarred;
+    for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
+        getElement(id).hidden = this._fixedStarred || this._fixedUnread;
 
     aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
     this.__query = aQuery;
@@ -389,7 +389,7 @@ FeedView.prototype = {
                 }
                 else if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
-                    this._scrollSelectionTimeout = async(function() this.selectEntry(this.getEntryInScreenCenter()), 100, this);
+                    this._scrollSelectionTimeout = async(function() this.selectEntry(this.getEntryInScreenCenter()), 50, this);
                 }
 
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
@@ -1062,14 +1062,10 @@ EntryView.prototype = {
         return this.feedView.selectedEntry == this.id;
     },
     set selected(aValue) {
-        if (aValue) {
+        if (aValue)
             this.container.classList.add('selected');
-        }
-        else {
+        else
             this.container.classList.remove('selected');
-            this.container.classList.add('was-selected');
-            async(function() { this.container.classList.remove('was-selected') }, 600, this);
-        }
 
         return aValue;
     },
@@ -1110,7 +1106,6 @@ EntryView.prototype = {
             return;
 
         let headline = this._getElement('headline-container');
-        headline.insertBefore(this._getElement('bookmark-button'), headline.firstChild);
         headline.appendChild(this._getElement('controls'));
 
         hideElement(this._getElement('full-container'));
@@ -1126,7 +1121,6 @@ EntryView.prototype = {
             return;
 
         let header = this._getElement('header');
-        header.insertBefore(this._getElement('bookmark-button'), header.firstChild);
         header.appendChild(this._getElement('controls'));
 
         this.container.classList.remove('collapsed');
@@ -1278,7 +1272,7 @@ EntryView.prototype = {
                     string = Strings['entryDate.yesterday'];
                     break;
 
-                case relativeDate.deltaDays < 5:
+                case relativeDate.deltaDays < 7:
                     string = this.date.toLocaleFormat('%A');
                     break;
 

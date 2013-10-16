@@ -185,11 +185,4 @@
 
     </prefpane>
 
-    <prefpane id="shortcuts-pane" label="&shortcutsPane.label;">
-        <browser id="shortcuts-browser"
-                 flex="1"
-                 disablehistory="true"
-                 src="chrome://brief/content/keyboard-shortcuts.xhtml"/>
-    </prefpane>
-
 </prefwindow>

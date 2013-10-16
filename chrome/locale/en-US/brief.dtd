@@ -1,16 +1,25 @@
 <!ENTITY searchBox.label "Search">
-<!ENTITY allItemsFolder.label "All items">
-<!ENTITY unreadFolder.label "Unread">
+<!ENTITY allItemsFolder.label "All Items">
+<!ENTITY todayFolder.label "Today">
 <!ENTITY starredFolder.label "Bookmarks">
 <!ENTITY trashFolder.label "Trash">
 
-<!-- Button tooltips -->
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "View headlines (F)">
-<!ENTITY filterUnread.tooltip "View only unread items (D)">
-<!ENTITY filterStarred.tooltip "View only bookmarks (S)">
+<!ENTITY fullViewCheckbox.tooltip "View full items (G)">
+<!ENTITY showAllItems.tooltip "Show all items (A)">
+<!ENTITY filterUnread.tooltip "Show only unread items (D)">
+<!ENTITY filterStarred.tooltip "Show only bookmarks (S)">
+<!ENTITY updateButton.label "Refresh">
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
+<!ENTITY stopUpdatingButton.label "Stop updating">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
-<!ENTITY showOptions.tooltip "Open Brief options">
+<!ENTITY optionsDropdownButton.label "Options">
+<!ENTITY optionsDropdownButton.tooltip "Configure Brief">
+<!ENTITY organizeFeedsMenuitem.label "Organize Feeds">
+<!ENTITY showShortcutsMenuitem.label "Show Keyboard Shortcuts">
+<!ENTITY openOptionsMenuitem.label "Options">
+
 <!ENTITY sidebarSplitter.tooltip "Double-click to hide the sidebar">
 <!ENTITY revealSidebar.tooltip "Reveal the sidebar">
 <!ENTITY markViewRead.tooltip "Mark all items as read (Alt + N)">

@@ -24,7 +24,8 @@
 <!ENTITY showAll "Show all items">
 <!ENTITY showStarred "Show bookmarked items">
 <!ENTITY showUnread "Show unread items">
-<!ENTITY headlinesView "Toggle headlines view">
+<!ENTITY headlinesView "View headlines">
+<!ENTITY fullView "View full items">
 
 <!ENTITY general.header "General">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
