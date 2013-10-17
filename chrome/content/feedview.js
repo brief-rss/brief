@@ -884,7 +884,7 @@ FeedView.prototype = {
 
 
 
-const DEFAULT_FAVICON_URL = 'chrome://brief/skin/icons/feed-favicon.png';
+const DEFAULT_FAVICON_URL = 'chrome://brief/skin/icons/default-feed-favicon.png';
 const RTL_LANGUAGE_CODES = ['ar', 'arc', 'dv', 'fa', 'ha', 'he', 'khw',
                             'ks', 'ku', 'ps', 'syr', 'ur', 'yi' ]
 
@@ -1127,7 +1127,7 @@ EntryView.prototype = {
 
         hideElement(this._getElement('headline-container'));
 
-        showElement(this._getElement('full-container'), aAnimate ? 300 : 0, function() {
+        showElement(this._getElement('full-container'), aAnimate, function() {
             if (this.container.parentNode != this.feedView.feedContent)
                 return;
 
@@ -1235,20 +1235,14 @@ EntryView.prototype = {
                 Commands.restoreEntry(this.id);
                 break;
 
-            default:
-                if (aEvent.button != 0)
-                    return;
+            case 'collapse':
+                this.collapse(true);
+                break;
 
-                if (this.collapsed) {
+            default:
+                if (aEvent.button == 0 && this.collapsed)
                     this.expand(true);
-                }
-                else {
-                    let className = aEvent.target.className;
-                    if ((className == 'header' || className == 'title')
-                            && PrefCache.showHeadlinesOnly) {
-                        this.collapse(true);
-                    }
-                }
+
         }
     },
 
@@ -1366,8 +1360,8 @@ EntryView.prototype = {
 }
 
 
-function hideElement(aElement, aTranstionDuration, aCallback) {
-    if (aTranstionDuration) {
+function hideElement(aElement, aAnimate, aCallback) {
+    if (aAnimate) {
         aElement.style.opacity = '0';
 
         aElement.setAttribute('hiding', true);
@@ -1393,8 +1387,8 @@ function hideElement(aElement, aTranstionDuration, aCallback) {
     }
 }
 
-function showElement(aElement, aTranstionDuration, aCallback) {
-    if (aTranstionDuration) {
+function showElement(aElement, aAnimate, aCallback) {
+    if (aAnimate) {
         aElement.style.display = '';
         aElement.style.opacity = '0';
         aElement.offsetHeight; // Force reflow.

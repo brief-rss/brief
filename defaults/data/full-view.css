@@ -10,19 +10,22 @@ article.full > .headline-container {
 
 .full-container {
     margin: 20px 0 20px; /* The margins are collapsed in full view but are necessary if headlines view */
-    border: 1px solid #abbfc9;
-    padding-left: 1px;
-    background: linear-gradient(to bottom , rgba(229, 244, 255, 1), rgba(229, 244, 255, 0) 35px);
-    background-clip: padding-box;
     transition: border-color 200ms;
 }
 
-article.selected > .full-container {
+.full-container-inner {
+    border: 1px solid #abbfc9;
+    padding-left: 1px;
+    background: linear-gradient(to bottom, rgba(229, 244, 255, 1), rgba(229, 244, 255, 0) 35px);
+    background-clip: padding-box;
+}
+
+article.selected > .full-container > .full-container-inner {
     border-left: 2px solid #3e8fb7;
     padding-left: 0;
 }
 
-article.read > .full-container {
+article.read > .full-container > .full-container-inner {
     background: none;
 }
 
