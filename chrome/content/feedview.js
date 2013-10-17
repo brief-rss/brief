@@ -59,7 +59,15 @@ FeedView.prototype = {
 
     titleOverride: '',
 
-    get headlinesMode() this.__headlinesMode || false,
+    get headlinesMode() {
+        let feedIDs = this.query.feeds || this.query.folders;
+        if (feedIDs && feedIDs.length == 1)
+            var viewMode = Storage.getFeed(feedIDs[0]).viewMode;
+        else
+            viewMode = PrefCache.viewMode;
+
+        return viewMode == 1;
+    },
 
     get selectedEntry() this.__selectedEntry || null,
 
@@ -657,9 +665,10 @@ FeedView.prototype = {
         // Prevent the message from briefly showing up before entries are loaded.
         this.document.getElementById('message-box').style.display = 'none';
 
-        this._buildHeader();
+        getElement('full-view-checkbox').checked = !this.headlinesMode;
+        getElement('headlines-checkbox').checked = this.headlinesMode;
 
-        this.__headlinesMode = PrefCache.viewMode == 1;
+        this._buildHeader();
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');

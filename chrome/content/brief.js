@@ -13,8 +13,6 @@ let gCurrentView;
 function init() {
     PrefObserver.register();
 
-    getElement('headlines-checkbox').checked = PrefCache.viewMode == 1;
-    getElement('full-view-checkbox').checked = PrefCache.viewMode == 0;
     getElement('show-all-entries-checkbox').checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
     getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
     getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
@@ -138,11 +136,25 @@ let Commands = {
     },
 
     viewHeadlines: function cmd_viewHeadlines() {
-        Prefs.setIntPref('feedview.mode', 1);
+        this.switchViewMode(1);
     },
 
     viewFullEntries: function cmd_viewFullEntries() {
-        Prefs.setIntPref('feedview.mode', 0);
+        this.switchViewMode(0);
+    },
+
+    switchViewMode: function cmd_switchViewMode(aMode) {
+        if (FeedList.selectedFeed) {
+            Storage.changeFeedProperties({
+                feedID: FeedList.selectedFeed.feedID,
+                viewMode: aMode
+            });
+        }
+        else {
+            Prefs.setIntPref('feedview.mode', aMode);
+        }
+
+        gCurrentView.refresh();
     },
 
 
@@ -228,7 +240,7 @@ let Commands = {
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
-        if (PrefCache.viewMode == 0 || !gCurrentView.selectedEntry)
+        if (!gCurrentView.headlinesView || !gCurrentView.selectedEntry)
             return;
 
         let entryView = gCurrentView.getEntryView(gCurrentView.selectedEntry);
@@ -455,13 +467,6 @@ let PrefObserver = {
             case 'feedview.sortUnreadViewOldestFirst':
                 if (gCurrentView.query.read === false)
                     gCurrentView.refresh();
-                break;
-
-            case 'feedview.mode':
-                getElement('headlines-checkbox').checked = PrefCache.viewMode == 1;
-                getElement('full-view-checkbox').checked = PrefCache.viewMode == 0;
-
-                gCurrentView.refresh();
                 break;
 
             case 'feedview.filterUnread':
