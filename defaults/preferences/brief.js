@@ -7,7 +7,7 @@ pref("extensions.brief.assumeStandardKeys", true);
 pref("extensions.brief.showFavicons", true);
 pref("extensions.brief.hideChrome", false);
 
-pref("extensions.brief.feedview.showHeadlinesOnly", false);
+pref("extensions.brief.feedview.mode", 0);
 pref("extensions.brief.feedview.filterUnread", false);
 pref("extensions.brief.feedview.filterStarred", false);
 pref("extensions.brief.feedview.doubleClickMarks", true);

@@ -13,8 +13,8 @@ let gCurrentView;
 function init() {
     PrefObserver.register();
 
-    getElement('headlines-checkbox').checked = PrefCache.showHeadlinesOnly;
-    getElement('full-view-checkbox').checked = !PrefCache.showHeadlinesOnly;
+    getElement('headlines-checkbox').checked = PrefCache.viewMode == 1;
+    getElement('full-view-checkbox').checked = PrefCache.viewMode == 0;
     getElement('show-all-entries-checkbox').checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
     getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
     getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
@@ -138,11 +138,11 @@ let Commands = {
     },
 
     viewHeadlines: function cmd_viewHeadlines() {
-        Prefs.setBoolPref('feedview.showHeadlinesOnly', true);
+        Prefs.setIntPref('feedview.mode', 1);
     },
 
     viewFullEntries: function cmd_viewFullEntries() {
-        Prefs.setBoolPref('feedview.showHeadlinesOnly', false);
+        Prefs.setIntPref('feedview.mode', 0);
     },
 
 
@@ -228,7 +228,7 @@ let Commands = {
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
-        if (!PrefCache.showHeadlinesOnly || !gCurrentView.selectedEntry)
+        if (PrefCache.viewMode == 0 || !gCurrentView.selectedEntry)
             return;
 
         let entryView = gCurrentView.getEntryView(gCurrentView.selectedEntry);
@@ -413,7 +413,7 @@ let PrefObserver = {
     // of PrefCache.
     _cachedPrefs: {
         doubleClickMarks:          'feedview.doubleClickMarks',
-        showHeadlinesOnly:         'feedview.showHeadlinesOnly',
+        viewMode:                  'feedview.mode',
         autoMarkRead:              'feedview.autoMarkRead',
         filterUnread:              'feedview.filterUnread',
         filterStarred:             'feedview.filterStarred',
@@ -457,9 +457,9 @@ let PrefObserver = {
                     gCurrentView.refresh();
                 break;
 
-            case 'feedview.showHeadlinesOnly':
-                getElement('headlines-checkbox').checked = PrefCache.showHeadlinesOnly;
-                getElement('full-view-checkbox').checked = !PrefCache.showHeadlinesOnly;
+            case 'feedview.mode':
+                getElement('headlines-checkbox').checked = PrefCache.viewMode == 1;
+                getElement('full-view-checkbox').checked = PrefCache.viewMode == 0;
 
                 gCurrentView.refresh();
                 break;

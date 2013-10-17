@@ -307,7 +307,7 @@ FeedView.prototype = {
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
-        if (PrefCache.autoMarkRead && !PrefCache.showHeadlinesOnly && this.query.read !== false) {
+        if (PrefCache.autoMarkRead && !this.headlinesView && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
             let callback = this._getRefreshGuard(this.markVisibleEntriesRead.bind(this));
             this._markVisibleTimeout = async(callback, 500, this);
@@ -659,7 +659,7 @@ FeedView.prototype = {
 
         this._buildHeader();
 
-        this.__headlinesView = PrefCache.showHeadlinesOnly;
+        this.__headlinesView = PrefCache.viewMode == 1;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');
@@ -701,8 +701,8 @@ FeedView.prototype = {
         let resume = FeedView__fillWindow.resume;
 
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
-            let stepSize = PrefCache.showHeadlinesOnly ? HEADLINES_LOAD_STEP_SIZE
-                                                       : LOAD_STEP_SIZE;
+            let stepSize = this.headlinesView ? HEADLINES_LOAD_STEP_SIZE
+                                              : LOAD_STEP_SIZE;
 
             do var loadedCount = yield this._loadEntries(stepSize, resume);
             while (loadedCount && !this.enoughEntriesPreloaded(aWindowHeights))
