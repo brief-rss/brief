@@ -39,7 +39,8 @@ const FEEDS_TABLE_SCHEMA = [
     'dateModified    INTEGER DEFAULT 0',
     'lastFaviconRefresh INTEGER DEFAULT 0',
     'markModifiedEntriesUnread INTEGER DEFAULT 1',
-    'omitInUnread     INTEGER DEFAULT 0' /* This is a misnomer, should be called omitInGlobalViews */
+    'omitInUnread    INTEGER DEFAULT 0', /* This is a misnomer, should be called omitInGlobalViews */
+    'viewMode        INTEGER DEFAULT 0' /* 0 - full view, 1 - headlines view */
 ]
 
 const ENTRIES_TABLE_SCHEMA = [
@@ -357,6 +358,7 @@ let StorageInternal = {
             // To 2.0.
             case 17:
                 Connection.executeSQL('ALTER TABLE feeds ADD COLUMN language TEXT');
+                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN viewMode INTEGER DEFAULT 0');
         }
 
         Connection.schemaVersion = DATABASE_VERSION;
@@ -1973,7 +1975,7 @@ let Stm = {
                   '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,      ' +
                   '       isFolder, bookmarkID, entryAgeLimit, maxEntries, hidden,      ' +
                   '       updateInterval, markModifiedEntriesUnread, omitInUnread,      ' +
-                  '       lastFaviconRefresh, language                                  ' +
+                  '       lastFaviconRefresh, language, viewMode                        ' +
                   'FROM feeds                                                           ' +
                   'ORDER BY rowIndex ASC                                                ';
         delete this.getAllFeeds;
@@ -2008,7 +2010,8 @@ let Stm = {
                   '    maxEntries =     :maxEntries,             ' +
                   '    updateInterval = :updateInterval,         ' +
                   '    markModifiedEntriesUnread = :markModifiedEntriesUnread, ' +
-                  '    omitInUnread = :omitInUnread              ' +
+                  '    omitInUnread = :omitInUnread,             ' +
+                  '    viewMode = :viewMode                      ' +
                   'WHERE feedID = :feedID                        ';
         delete this.changeFeedProperties;
         return this.changeFeedProperties = new Statement(sql);

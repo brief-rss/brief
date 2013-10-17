@@ -66,6 +66,7 @@ Feed.prototype = {
     updateInterval: 0,
     markModifiedEntriesUnread: false,
     omitInUnread: 0,
+    viewMode: 0,
 
     /**
      * Date of the oldest entry that was available
