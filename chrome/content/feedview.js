@@ -59,7 +59,7 @@ FeedView.prototype = {
 
     titleOverride: '',
 
-    get headlinesView() this.__headlinesView || false,
+    get headlinesMode() this.__headlinesMode || false,
 
     get selectedEntry() this.__selectedEntry || null,
 
@@ -307,7 +307,7 @@ FeedView.prototype = {
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
-        if (PrefCache.autoMarkRead && !this.headlinesView && this.query.read !== false) {
+        if (PrefCache.autoMarkRead && !this.headlinesMode && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
             let callback = this._getRefreshGuard(this.markVisibleEntriesRead.bind(this));
             this._markVisibleTimeout = async(callback, 500, this);
@@ -602,7 +602,7 @@ FeedView.prototype = {
                     this.__selectedEntry = null;
                 }
 
-                if (this.headlinesView) {
+                if (this.headlinesMode) {
                     let dayHeader = this.document.getElementById('day' + entryView.day);
                     if (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1')
                         this.feedContent.removeChild(dayHeader);
@@ -659,12 +659,12 @@ FeedView.prototype = {
 
         this._buildHeader();
 
-        this.__headlinesView = PrefCache.viewMode == 1;
+        this.__headlinesMode = PrefCache.viewMode == 1;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');
 
-        if (this.headlinesView)
+        if (this.headlinesMode)
             this.document.body.classList.add('headlines-view');
 
         // Temporarily remove the listener because reading window.innerHeight
@@ -701,7 +701,7 @@ FeedView.prototype = {
         let resume = FeedView__fillWindow.resume;
 
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
-            let stepSize = this.headlinesView ? HEADLINES_LOAD_STEP_SIZE
+            let stepSize = this.headlinesMode ? HEADLINES_LOAD_STEP_SIZE
                                               : LOAD_STEP_SIZE;
 
             do var loadedCount = yield this._loadEntries(stepSize, resume);
@@ -791,7 +791,7 @@ FeedView.prototype = {
         let nextEntryView = this._entryViews[aPosition];
         let nextElem = nextEntryView ? nextEntryView.container : null;
 
-        if (this.headlinesView) {
+        if (this.headlinesMode) {
             if (nextEntryView && entryView.day > nextEntryView.day)
                 nextElem = nextElem.previousSibling;
 
@@ -897,7 +897,7 @@ function EntryView(aFeedView, aEntryData) {
     this.entryURL = aEntryData.entryURL;
     this.feedID = aEntryData.feedID;
 
-    this.headline = this.feedView.headlinesView;
+    this.headline = this.feedView.headlinesMode;
 
     this.container = this.feedView.document.getElementById('article-template').cloneNode(true);
     this.container.id = aEntryData.id;
