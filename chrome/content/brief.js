@@ -18,6 +18,10 @@ function init() {
     getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
     getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
+    // Remove the hardcoded flex from .button-box, impossible to do with CSS.
+    let optionsButton = getElement('options-dropdown-button');
+    document.getAnonymousNodes(optionsButton)[1].removeAttribute('flex');
+
     refreshProgressmeter();
 
     document.addEventListener('keypress', onKeyPress, true);

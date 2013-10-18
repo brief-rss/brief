@@ -27,6 +27,7 @@ richtreeitem {
 
 .feed-title {
     font-size: 13px !important;
+    color: #454545 !important;
 }
 
 .unread-count {
@@ -73,7 +74,7 @@ richtreefolder > .folder-title-container {
 
 .folder-twisty {
     margin-right: 1em !important;
-    padding: 3px 5px 3px !important;
+    padding: 3px 7px 3px !important;
     list-style-image: url(icons/twisty.png);
     -moz-image-region: rect(0, 22px, 11px, 11px);
     opacity: 0;

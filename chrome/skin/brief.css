@@ -100,50 +100,32 @@ menuseparator {
 
 /* =========== Sidebar toolbar =========== */
 
-.sidebar-button {
-    margin: 9px 9px 0 !important;
-    font-size: 12px;
-    color: #575757 !important;
-    list-style-image: url(icons/sidebar-buttons.png);
+#sidebar-top {
+    border-bottom: 1px solid #d6d6d6 !important;
 }
-.sidebar-button .button-icon {
-    margin-right: 3px !important;
+
+#update-buttons-deck,
+#update-button-box,
+#stop-button-box {
+    -moz-box-flex: 1;
+}
+
+.sidebar-button {
+    -moz-box-flex: 1;
+    padding: 12px 9px 8px !important;
+    font-size: 13px;
+    color: #454545 !important;
 }
 .sidebar-button:hover {
     color: #ff6800 !important;
 }
-
-
-#update-button {
-    -moz-image-region: rect(0, 16px, 16px, 0);
+.sidebar-button .button-icon {
+    display: none;
 }
 
-#update-button .button-icon {
-    margin-top: -1px !important;
-}
-
-#update-button:hover {
-    -moz-image-region: rect(16px, 16px, 32px, 0);
-}
-
-#stop-updating-button {
-    -moz-image-region: rect(0, 32px, 16px, 16px);
-}
-
-#stop-updating-button .button-icon {
-    margin-top: -2px !important;
-}
-
-#stop-updating-button:hover {
-    -moz-image-region: rect(16px, 32px, 32px, 16px);
-}
 
 #options-dropdown-button {
-    -moz-image-region: rect(0, 48px, 16px, 32px);
-}
-
-#options-dropdown-button:hover {
-    -moz-image-region: rect(16px, 48px, 32px, 32px)
+    -moz-box-pack: center !important;
 }
 
 #options-dropdown-button .button-menu-dropmarker {
@@ -160,13 +142,11 @@ menuseparator {
 
 #update-progress-container {
     -moz-box-pack: center;
-    margin-top: 7px !important;
 }
 
 #update-progress {
     -moz-box-flex: 1;
     height: 4px !important;
-    margin: 0 5px !important;
     opacity: 0;
     transition: opacity 500ms;
 }
@@ -217,15 +197,16 @@ richtreefolder[open="true"] > .folder-title-container > .unread-count,
 }
 
 #view-list > richlistitem {
-    padding: 2px 1px 1px 20px !important;
+    padding: 3px 1px 2px 20px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
     -moz-box-align: center !important;
 }
 
 #view-list > richlistitem > .view-title {
     margin: 0 4px 0 0 !important;
-    font-size: 14px !important;
-    color: #000000 !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    color: #454545 !important;
 }
 
 #view-list > richlistitem:not(.unread) > .unread-count {

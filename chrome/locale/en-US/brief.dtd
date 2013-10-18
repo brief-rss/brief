@@ -12,11 +12,12 @@
 <!ENTITY filterStarred.tooltip "Show only bookmarks (S)">
 <!ENTITY updateButton.label "Refresh">
 <!ENTITY updateButton.tooltip "Check all feeds for updates">
-<!ENTITY stopUpdatingButton.label "Stop updating">
+<!ENTITY stopUpdatingButton.label "Stop">
 <!ENTITY stopUpdatingButton.tooltip "Stop checking feeds for updates">
 <!ENTITY optionsDropdownButton.label "Options">
 <!ENTITY optionsDropdownButton.tooltip "Configure Brief">
-<!ENTITY organizeFeedsMenuitem.label "Organize Feeds">
+<!ENTITY organizeFeeds.label "Organize">
+<!ENTITY organizeFeeds.tooltip "Organize feeds">
 <!ENTITY showShortcutsMenuitem.label "Show Keyboard Shortcuts">
 <!ENTITY openOptionsMenuitem.label "Options">
 
