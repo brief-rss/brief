@@ -679,65 +679,18 @@ let TagListContextMenu = {
 
 let FeedContextMenu = {
 
-    targetItem: null,
-
-    get targetID()   this.targetItem.id,
-    get targetFeed() Storage.getFeed(this.targetID),
-
     init: function FeedContextMenu_init() {
-        this.targetItem = FeedList.selectedItem;
+        this.targetFeed = Storage.getFeed(FeedList.selectedItem.id);
 
         getElement('ctx-open-website').disabled = !this.targetFeed.websiteURL;
     },
 
-
     markFeedRead: function FeedContextMenu_markFeedRead() {
         let query = new Query({
-            feeds: [this.targetID],
+            feeds: [this.targetFeed.feedID],
             deleted: Storage.ENTRY_STATE_NORMAL
         })
         query.markEntriesRead(true);
-    },
-
-
-    updateFeed: function FeedContextMenu_updateFeed() {
-        FeedUpdateService.updateFeeds([this.targetFeed]);
-    },
-
-    openWebsite: function FeedContextMenu_openWebsite() {
-        let url = this.targetFeed.websiteURL;
-        getTopWindow().gBrowser.loadOneTab(url);
-    },
-
-
-    emptyFeed: function FeedContextMenu_emptyFeed() {
-        let query = new Query({
-            deleted: Storage.ENTRY_STATE_NORMAL,
-            starred: false,
-            feeds: [this.targetID]
-        })
-        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
-    },
-
-    deleteFeed: function FeedContextMenu_deleteFeed() {
-        let bundle = getElement('main-bundle');
-        let title = bundle.getString('confirmFeedDeletionTitle');
-        let text = bundle.getFormattedString('confirmFeedDeletionText', [this.targetFeed.title]);
-
-        if (Services.prompt.confirm(window, title, text)) {
-            FeedList.removeItem(this.targetItem);
-            FeedList.ignoreInvalidateNotification = true;
-
-            Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
-
-            let txn = new PlacesRemoveItemTransaction(this.targetFeed.bookmarkID);
-            PlacesUtils.transactionManager.doTransaction(txn);
-        }
-    },
-
-    showFeedProperties: function FeedContextMenu_showFeedProperties() {
-        openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
-                   'chrome,titlebar,toolbar,centerscreen,modal', this.targetID);
     }
 
 }

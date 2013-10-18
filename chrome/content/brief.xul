@@ -61,21 +61,21 @@
                       oncommand="FeedContextMenu.markFeedRead()"/>
             <menuitem id="ctx-update-feed"
                       label="&ctxUpdateFeed.label;"
-                      oncommand="FeedContextMenu.updateFeed()"/>
+                      oncommand="FeedUpdateService.updateFeeds([FeedContextMenu.targetFeed])"/>
             <menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
-                      oncommand="FeedContextMenu.openWebsite()"/>
+                      oncommand="Commands.openFeedWebsite(FeedContextMenu.targetFeed)"/>
             <menuseparator/>
             <menuitem id="ctx-delete-feed"
                       label="&ctxDeleteFeed.label;"
-                      oncommand="FeedContextMenu.deleteFeed()"/>
+                      oncommand="Commands.deleteFeed(FeedContextMenu.targetFeed)"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
-                      oncommand="FeedContextMenu.emptyFeed()"/>
+                      oncommand="Commands.emptyFeed(FeedContextMenu.targetFeed)"/>
             <menuseparator/>
             <menuitem id="ctx-feed-properties"
                       label="&ctxFeedProperties.label;"
-                      oncommand="FeedContextMenu.showFeedProperties()"/>
+                      oncommand="Commands.showFeedProperties(FeedContextMenu.targetFeed)"/>
         </menupopup>
         <menupopup id="folder-context-menu">
             <menuitem id="ctx-mark-folder-read"

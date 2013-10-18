@@ -153,6 +153,34 @@ let Commands = {
         Prefs.setBoolPref('feedview.filterStarred', filterStarred);
     },
 
+    openFeedWebsite: function cmd_openWebsite(aFeed) {
+        getTopWindow().gBrowser.loadOneTab(aFeed.websiteURL);
+    },
+
+    emptyFeed: function cmd_emptyFeed(aFeed) {
+        let query = new Query({
+            deleted: Storage.ENTRY_STATE_NORMAL,
+            starred: false,
+            feeds: [aFeed.feedID]
+        })
+        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+    },
+
+    deleteFeed: function cmd_deleteFeed(aFeed) {
+        let bundle = getElement('main-bundle');
+        let title = bundle.getString('confirmFeedDeletionTitle');
+        let text = bundle.getFormattedString('confirmFeedDeletionText', [aFeed.title]);
+
+        if (Services.prompt.confirm(window, title, text)) {
+            FeedList.removeItem(getElement(aFeed.feedID));
+            FeedList.ignoreInvalidateNotification = true;
+
+            Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
+
+            let txn = new PlacesRemoveItemTransaction(aFeed.bookmarkID);
+            PlacesUtils.transactionManager.doTransaction(txn);
+        }
+    },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
         let entry = gCurrentView.selectedEntry;
@@ -231,6 +259,11 @@ let Commands = {
         getTopWindow().gBrowser.loadOneTab(aURL, docURI);
     },
 
+
+    showFeedProperties: function cmd_showFeedProperties(aFeed) {
+        openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
+                   'chrome,titlebar,toolbar,centerscreen,modal', aFeed.feedID);
+    },
 
     displayShortcuts: function cmd_displayShortcuts() {
         let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
