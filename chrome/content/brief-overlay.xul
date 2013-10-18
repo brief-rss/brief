@@ -13,44 +13,44 @@
              oncommand="Brief.open()"/>
 
         <key id="Brief_selectNextEntry" key="j"
-             oncommand="Brief.doCommand('selectNextEntry')"/>
+             oncommand="if (Brief.win) Brief.win.gCurrentView.selectNextEntry()"/>
         <key id="Brief_selectPreviousEntry" key="k"
-             oncommand="Brief.doCommand('selectPrevEntry')"/>
+             oncommand="if (Brief.win) Brief.win.gCurrentView.selectPrevEntry()"/>
         <key id="Brief_scrollDownByScreen" key="u"
-             oncommand="Brief.doCommand('scrollDownByScreen')"/>
+             oncommand="if (Brief.win) Brief.win.gCurrentView.scrollDownByScreen()"/>
         <key id="Brief_scrollUpByScreen" key="i"
-             oncommand="Brief.doCommand('scrollUpByScreen')"/>
+             oncommand="if (Brief.win) Brief.win.gCurrentView.scrollUpByScreen()"/>
 
         <key id="Brief_toggleSelectedEntryRead" key="m"
-             oncommand="Brief.doCommand('toggleSelectedEntryRead')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.toggleSelectedEntryRead()"/>
         <key id="Brief_markVisibleEntriesRead" key="n"
-             oncommand="Brief.doCommand('markVisibleEntriesRead')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.markVisibleEntriesRead()"/>
         <key id="Brief_markCurrentViewRead" key="n" modifiers="alt"
-             oncommand="Brief.doCommand('markViewRead')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.markViewRead()"/>
         <key id="Brief_deleteOrRestoreSelectedEntry" key="t"
-             oncommand="Brief.doCommand('deleteOrRestoreSelectedEntry')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.deleteOrRestoreSelectedEntry()"/>
         <key id="Brief_toggleSelectedEntryStarred" key="b"
-             oncommand="Brief.doCommand('toggleSelectedEntryStarred')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.toggleSelectedEntryStarred()"/>
         <key id="Brief_toggleSelectedEntryCollapsed" key="h"
-             oncommand="Brief.doCommand('toggleSelectedEntryCollapsed')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.toggleSelectedEntryCollapsed()"/>
         <key id="Brief_openSelectedEntry" keycode="VK_RETURN"
-             oncommand="Brief.doCommand('openSelectedEntryLink')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.openSelectedEntryLink()"/>
 
         <key id="Brief_viewHeadlines" key="f"
-             oncommand="Brief.doCommand('viewHeadlines')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.switchViewMode(1)"/>
         <key id="Brief_viewFullItems" key="g"
-             oncommand="Brief.doCommand('viewFullEntries')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.switchViewMode(0)"/>
         <key id="Brief_showAllEntries" key="a"
-             oncommand="Brief.doCommand('showAllEntries')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.switchViewFilter('all')"/>
         <key id="Brief_showStarredEntries" key="s"
-             oncommand="Brief.doCommand('showStarredEntries')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.switchViewFilter('starred')"/>
         <key id="Brief_showUnreadEntries" key="d"
-             oncommand="Brief.doCommand('showUnreadEntries')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.switchViewFilter('unread')"/>
         <key id="Brief_focusSearchbar" key="/"
-             oncommand="Brief.doCommand('focusSearchbar')"/>
+             oncommand="if (Brief.win) Brief.win.getElement('searchbar').focus()"/>
 
         <key id="Brief_displayShortcuts" key="?" modifiers="shift"
-             oncommand="Brief.doCommand('displayShortcuts')"/>
+             oncommand="if (Brief.win) Brief.win.Commands.displayShortcuts()"/>
     </keyset>
 
     <popupset id="mainPopupSet">

@@ -104,14 +104,14 @@
                                 class="brief-button sidebar-button"
                                 label="&updateButton.label;"
                                 tooltiptext="&updateButton.tooltip;"
-                                oncommand="Commands.updateAllFeeds()"/>
+                                oncommand="FeedUpdateService.updateAllFeeds()"/>
                     </hbox>
                     <hbox id="stop-button-box">
                         <button id="stop-updating-button"
                                 class="brief-button sidebar-button"
                                 label="&stopUpdatingButton.label;"
                                 tooltiptext="&stopUpdatingButton.tooltip;"
-                                oncommand="Commands.stopUpdating()"/>
+                                oncommand="FeedUpdateService.stopUpdating()"/>
                     </hbox>
                 </deck>
                 <button id="organize-button"
@@ -204,32 +204,32 @@
                     type="checkbox"
                     autoCheck="false"
                     tooltiptext="&headlinesCheckbox.tooltip;"
-                    oncommand="Commands.viewHeadlines()"/>
+                    oncommand="Commands.switchViewMode(1)"/>
             <button id="full-view-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
                     autoCheck="false"
                     tooltiptext="&fullViewCheckbox.tooltip;"
-                    oncommand="Commands.viewFullEntries()"/>
+                    oncommand="Commands.switchViewMode(0)"/>
             <spacer class="button-spacer" flex="1"/>
             <button id="show-all-entries-checkbox"
                     class="brief-button filter-button"
                     tooltiptext="&showAllItems.tooltip;"
                     type="checkbox"
                     autoCheck="false"
-                    oncommand="Commands.showAllEntries()"/>
+                    oncommand="Commands.switchViewFilter('all')"/>
             <button id="filter-unread-checkbox"
                     class="brief-button filter-button"
                     tooltiptext="&filterUnread.tooltip;"
                     type="checkbox"
                     autoCheck="false"
-                    oncommand="Commands.showUnreadEntries()"/>
+                    oncommand="Commands.switchViewFilter('unread')"/>
             <button id="filter-starred-checkbox"
                     class="brief-button filter-button"
                     tooltiptext="&filterStarred.tooltip;"
                     type="checkbox"
                     autoCheck="false"
-                    oncommand="Commands.showStarredEntries()"/>
+                    oncommand="Commands.switchViewFilter('starred')"/>
             <spacer class="button-spacer" flex="1"/>
             <textbox id="searchbar"
                      spellcheck="false"

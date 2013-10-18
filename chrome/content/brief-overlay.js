@@ -62,11 +62,11 @@ const Brief = {
         return null;
     },
 
-    doCommand: function Brief_doCommand(aCommand) {
-        if (gBrowser.currentURI.spec == this.BRIEF_URL) {
-            let win = gBrowser.contentDocument.defaultView.wrappedJSObject;
-            win.Commands[aCommand]();
-        }
+    // Returns Brief's content window if the tab is selected.
+    get win() {
+        return gBrowser.currentURI.spec == this.BRIEF_URL
+               ? gBrowser.contentDocument.defaultView.wrappedJSObject
+               : null;
     },
 
     updateAllFeeds: function Brief_updateAllFeeds() {

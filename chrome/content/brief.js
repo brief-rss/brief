@@ -104,14 +104,6 @@ let Commands = {
             FeedList.rebuild();
     },
 
-    updateAllFeeds: function cmd_updateAllFeeds() {
-        FeedUpdateService.updateAllFeeds();
-    },
-
-    stopUpdating: function cmd_stopUpdating() {
-        FeedUpdateService.stopUpdating();
-    },
-
     openOptions: function cmd_openOptions(aPaneID) {
         let url = 'chrome://brief/content/options/options.xul';
 
@@ -139,14 +131,6 @@ let Commands = {
         gCurrentView.markVisibleEntriesRead();
     },
 
-    viewHeadlines: function cmd_viewHeadlines() {
-        this.switchViewMode(1);
-    },
-
-    viewFullEntries: function cmd_viewFullEntries() {
-        this.switchViewMode(0);
-    },
-
     switchViewMode: function cmd_switchViewMode(aMode) {
         if (FeedList.selectedFeed) {
             Storage.changeFeedProperties({
@@ -161,19 +145,6 @@ let Commands = {
         gCurrentView.refresh();
     },
 
-
-    showAllEntries: function cmd_showAllEntries() {
-        this.switchViewFilter('all');
-    },
-
-    showUnreadEntries: function cmd_showUnreadEntries() {
-        this.switchViewFilter('unread');
-    },
-
-    showStarredEntries: function cmd_showStarredEntries() {
-        this.switchViewFilter('starred');
-    },
-
     switchViewFilter: function cmd_switchViewFilter(aFilter) {
         let filterUnread = aFilter == 'unread';
         let filterStarred = aFilter == 'starred';
@@ -182,25 +153,6 @@ let Commands = {
         Prefs.setBoolPref('feedview.filterStarred', filterStarred);
     },
 
-    selectNextEntry: function cmd_selectNextEntry() {
-        gCurrentView.selectNextEntry();
-    },
-
-    selectPrevEntry: function cmd_selectPrevEntry() {
-        gCurrentView.selectPrevEntry();
-    },
-
-    scrollDownByScreen: function cmd_scrollDownByScreen() {
-        gCurrentView.scrollDownByScreen();
-    },
-
-    scrollUpByScreen: function cmd_scrollUpByScreen() {
-        gCurrentView.scrollUpByScreen();
-    },
-
-    focusSearchbar: function cmd_focusSearchbar() {
-        getElement('searchbar').focus();
-    },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
         let entry = gCurrentView.selectedEntry;
@@ -279,6 +231,7 @@ let Commands = {
         getTopWindow().gBrowser.loadOneTab(aURL, docURI);
     },
 
+
     displayShortcuts: function cmd_displayShortcuts() {
         let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
 
@@ -307,7 +260,8 @@ let Commands = {
             organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(PrefCache.homeFolder);
             organizer.focus();
         }
-    }
+    },
+
 }
 
 
