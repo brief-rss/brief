@@ -693,9 +693,10 @@ FeedView.prototype = {
 
             let lastSelectedEntry = this.selectedEntry;
             this.__selectedEntry = null;
-            let entry = this.isEntryLoaded(lastSelectedEntry) ? lastSelectedEntry
-                                                              : this._loadedEntries[0];
-            this.selectEntry(entry, true);
+            if (lastSelectedEntry != this._loadedEntries[0] && this.isEntryLoaded(lastSelectedEntry))
+                this.selectEntry(lastSelectedEntry, true);
+            else
+                this.selectEntry(this._loadedEntries[0], false);
         }.bind(this))
     },
 
