@@ -154,9 +154,12 @@ pre, code {
     background-position: 10px -1px;
 }
 
-.bookmark-button:hover,
-article.starred .bookmark-button {
+article:not(.starred) .bookmark-button:hover {
     background-position: 10px -26px;
+}
+
+article.starred .bookmark-button {
+    background-position: 10px -51px;
 }
 
 
