@@ -30,18 +30,18 @@
 <!ENTITY ctxMarkFeedUnread.label "Mark Feed As Unread">
 <!ENTITY ctxMarkFolderRead.label "Mark Folder As Read">
 <!ENTITY ctxMarkTagRead.label "Mark Tagged Items As Read">
-<!ENTITY ctxUpdateFeed.label "Update Feed">
-<!ENTITY ctxUpdateFolder.label "Update Folder">
+<!ENTITY ctxRefreshFeed.label "Refresh Now">
+<!ENTITY ctxRefreshFolder.label "Refresh Now">
 <!ENTITY ctxOpenWebsite.label "Open Website">
-<!ENTITY ctxDeleteFeed.label "Delete Feed">
+<!ENTITY ctxUnsubscribeFeed.label "Unsubscribe">
 <!ENTITY ctxDeleteFolder.label "Delete Folder">
 <!ENTITY ctxDeleteTag.label "Delete Tag">
 <!ENTITY ctxEmptyFeed.label "Empty Feed">
 <!ENTITY ctxEmptyFolder.label "Empty Folder">
 <!ENTITY ctxRestoreTrashed.label "Restore All Items">
 <!ENTITY ctxEmptyTrash.label "Empty Trash">
-<!ENTITY ctxFeedProperties.label "Properties">
-<!ENTITY ctxUpdateFeeds.label "Update Feeds Now">
+<!ENTITY ctxFeedSettings.label "Feed Settings">
+<!ENTITY ctxRefreshFeeds.label "Refresh Feeds Now">
 <!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
 <!ENTITY showUnreadCounter.label "Show number of unread items">
 <!ENTITY ctxShowOptions.label "Options">

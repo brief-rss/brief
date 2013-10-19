@@ -16,7 +16,7 @@ function setupWindow() {
         gFeed = Storage.getFeed(window.arguments[0]);
 
     let bundle = getElement('options-bundle');
-    document.title = bundle.getFormattedString('feedPropertiesDialogTitle', [gFeed.title]);
+    document.title = bundle.getFormattedString('feedSettingsDialogTitle', [gFeed.title]);
 
     getElement('feed-name-textbox').value = gFeed.title;
     getElement('feed-url-textbox').value = gFeed.feedURL;

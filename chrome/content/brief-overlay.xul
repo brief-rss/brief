@@ -56,7 +56,7 @@
     <popupset id="mainPopupSet">
         <menupopup id="brief-status-context">
             <menuitem id="brief-ctx-update-feeds"
-                      label="&ctxUpdateFeeds.label;"
+                      label="&ctxRefreshFeeds.label;"
                       oncommand="Brief.updateAllFeeds();"/>
             <menuitem id="brief-ctx-mark-read"
                       label="&ctxMarkFeedsAsRead.label;"

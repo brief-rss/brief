@@ -60,29 +60,29 @@
                       label="&ctxMarkFeedRead.label;"
                       oncommand="FeedContextMenu.markFeedRead()"/>
             <menuitem id="ctx-update-feed"
-                      label="&ctxUpdateFeed.label;"
+                      label="&ctxRefreshFeed.label;"
                       oncommand="FeedUpdateService.updateFeeds([FeedContextMenu.targetFeed])"/>
             <menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
                       oncommand="Commands.openFeedWebsite(FeedContextMenu.targetFeed)"/>
             <menuseparator/>
-            <menuitem id="ctx-delete-feed"
-                      label="&ctxDeleteFeed.label;"
+            <menuitem id="ctx-unsubscribe-feed"
+                      label="&ctxUnsubscribeFeed.label;"
                       oncommand="Commands.deleteFeed(FeedContextMenu.targetFeed)"/>
             <menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
                       oncommand="Commands.emptyFeed(FeedContextMenu.targetFeed)"/>
             <menuseparator/>
-            <menuitem id="ctx-feed-properties"
-                      label="&ctxFeedProperties.label;"
+            <menuitem id="ctx-feed-settomgs"
+                      label="&ctxFeedSettings.label;"
                       oncommand="Commands.showFeedProperties(FeedContextMenu.targetFeed)"/>
         </menupopup>
         <menupopup id="folder-context-menu">
             <menuitem id="ctx-mark-folder-read"
                       label="&ctxMarkFolderRead.label;"
                       oncommand="FolderContextMenu.markFolderRead()"/>
-            <menuitem id="ctx-update-folder"
-                      label="&ctxUpdateFolder.label;"
+            <menuitem id="ctx-refresh-folder"
+                      label="&ctxRefreshFolder.label;"
                       oncommand="FolderContextMenu.updateFolder()"/>
             <menuseparator/>
             <menuitem id="ctx-delete-folder"
@@ -196,21 +196,21 @@
                         type="menu">
                     <menupopup>
                         <menuitem id="dropdown-update-feed"
-                                  label="&ctxUpdateFeed.label;"
+                                  label="&ctxRefreshFeed.label;"
                                   oncommand="FeedUpdateService.updateFeeds([FeedList.selectedFeed])"/>
                         <menuitem id="dropdown-open-website"
                                   label="&ctxOpenWebsite.label;"
                                   oncommand="Commands.openFeedWebsite(FeedList.selectedFeed)"/>
                         <menuseparator/>
-                        <menuitem id="dropdown-delete-feed"
-                                  label="&ctxDeleteFeed.label;"
+                        <menuitem id="dropdown-unsubscribe-feed"
+                                  label="&ctxUnsubscribeFeed.label;"
                                   oncommand="Commands.deleteFeed(FeedList.selectedFeed)"/>
                         <menuitem id="dropdown-empty-feed"
                                   label="&ctxEmptyFeed.label;"
                                   oncommand="Commands.emptyFeed(FeedList.selectedFeed)"/>
                         <menuseparator/>
-                        <menuitem id="dropdown-feed-properties"
-                                  label="&ctxFeedProperties.label;"
+                        <menuitem id="dropdown-feed-settings"
+                                  label="&ctxFeedSettings.label;"
                                   oncommand="Commands.showFeedProperties(FeedList.selectedFeed)"/>
                     </menupopup>
                 </button>
