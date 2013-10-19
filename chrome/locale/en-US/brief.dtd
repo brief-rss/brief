@@ -41,7 +41,3 @@
 <!ENTITY ctxRestoreTrashed.label "Restore All Items">
 <!ENTITY ctxEmptyTrash.label "Empty Trash">
 <!ENTITY ctxFeedSettings.label "Feed Settings">
-<!ENTITY ctxRefreshFeeds.label "Refresh Feeds Now">
-<!ENTITY ctxMarkFeedsAsRead.label "Mark All Feeds As Read">
-<!ENTITY showUnreadCounter.label "Show number of unread items">
-<!ENTITY ctxShowOptions.label "Options">

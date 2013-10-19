@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://brief/skin/overlay.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
+<!DOCTYPE window SYSTEM "chrome://brief/locale/overlay.dtd">
 
 <overlay id="brief-overlay"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -56,20 +56,20 @@
     <popupset id="mainPopupSet">
         <menupopup id="brief-status-context">
             <menuitem id="brief-ctx-update-feeds"
-                      label="&ctxRefreshFeeds.label;"
+                      label="&briefCtxRefreshFeeds.label;"
                       oncommand="Brief.updateAllFeeds();"/>
             <menuitem id="brief-ctx-mark-read"
-                      label="&ctxMarkFeedsAsRead.label;"
+                      label="&briefCtxMarkFeedsAsRead.label;"
                       oncommand="Brief.markFeedsAsRead();"/>
             <menuseparator id="brief-show-unread-counter-separator"/>
             <menuitem id="brief-show-unread-counter"
-                      label="&showUnreadCounter.label;"
+                      label="&briefCtxShowUnreadCounter.label;"
                       type="checkbox"
                       autocheck="false"
                       oncommand="Brief.toggleUnreadCounter()"/>
             <menuseparator/>
             <menuitem id="brief-ctx-show-options"
-                      label="&ctxShowOptions.label;"
+                      label="&briefCtxShowOptions.label;"
                       oncommand="Brief.showOptions();"/>
         </menupopup>
 

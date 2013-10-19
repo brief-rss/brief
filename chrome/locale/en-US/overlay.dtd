@@ -1,0 +1,5 @@
+<!-- Toolbar button context menu -->
+<!ENTITY briefCtxRefreshFeeds.label "Refresh Feeds Now">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Mark All Feeds As Read">
+<!ENTITY briefCtxShowUnreadCounter.label "Show Number Of Unread Items">
+<!ENTITY briefCtxShowOptions.label "Options">
