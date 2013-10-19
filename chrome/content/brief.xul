@@ -98,42 +98,44 @@
 
         <vbox id="sidebar-top">
             <hbox id="sidebar-toolbar">
-                <deck id="update-buttons-deck" selectedIndex="1">
-                    <hbox id="update-button-box">
-                        <button id="update-button"
-                                class="brief-button sidebar-button"
-                                label="&updateButton.label;"
-                                tooltiptext="&updateButton.tooltip;"
-                                oncommand="FeedUpdateService.updateAllFeeds()"/>
-                    </hbox>
-                    <hbox id="stop-button-box">
-                        <button id="stop-updating-button"
-                                class="brief-button sidebar-button"
-                                label="&stopUpdatingButton.label;"
-                                tooltiptext="&stopUpdatingButton.tooltip;"
-                                oncommand="FeedUpdateService.stopUpdating()"/>
-                    </hbox>
+                <deck id="update-buttons-deck"
+                      class="sidebar-button-box"
+                      selectedIndex="1">
+                    <button id="update-button"
+                            class="brief-button sidebar-button"
+                            label="&updateButton.label;"
+                            tooltiptext="&updateButton.tooltip;"
+                            oncommand="FeedUpdateService.updateAllFeeds()"/>
+                    <button id="stop-updating-button"
+                            class="brief-button sidebar-button"
+                            label="&stopUpdatingButton.label;"
+                            tooltiptext="&stopUpdatingButton.tooltip;"
+                            oncommand="FeedUpdateService.stopUpdating()"/>
                 </deck>
-                <button id="organize-button"
-                        class="brief-button sidebar-button"
-                        label="&organizeFeeds.label;"
-                        tooltiptext="&organizeFeeds.tooltip;"
-                        oncommand="Commands.openLibrary()"/>
-                <button id="options-dropdown-button"
-                        class="brief-button sidebar-button"
-                        type="menu"
-                        label="&optionsDropdownButton.label;"
-                        tooltiptext="&optionsDropdownButton.tooltip;">
-                    <menupopup>
-                        <menuitem id="shortcuts-menuitem"
-                                  label="&showShortcutsMenuitem.label;"
-                                  oncommand="Commands.displayShortcuts()"/>
-                        <menuseparator/>
-                        <menuitem id="options-menuitem"
-                                  label="&openOptionsMenuitem.label;"
-                                  oncommand="Commands.openOptions()"/>
-                    </menupopup>
-                </button>
+                <hbox id="organize-button-box" class="sidebar-button-box">
+                    <button id="organize-button"
+                            class="brief-button sidebar-button"
+                            label="&organizeFeeds.label;"
+                            tooltiptext="&organizeFeeds.tooltip;"
+                            oncommand="Commands.openLibrary()"/>
+                </hbox>
+                <hbox id="options-dropdown-button-box" class="sidebar-button-box">
+                    <button id="options-dropdown-button"
+                            class="brief-button sidebar-button"
+                            type="menu"
+                            label="&optionsDropdownButton.label;"
+                            tooltiptext="&optionsDropdownButton.tooltip;">
+                        <menupopup>
+                            <menuitem id="shortcuts-menuitem"
+                                      label="&showShortcutsMenuitem.label;"
+                                      oncommand="Commands.displayShortcuts()"/>
+                            <menuseparator/>
+                            <menuitem id="options-menuitem"
+                                      label="&openOptionsMenuitem.label;"
+                                      oncommand="Commands.openOptions()"/>
+                        </menupopup>
+                    </button>
+                </hbox>
             </hbox>
             <hbox id="update-progress-container">
                 <progressmeter id="update-progress"/>
