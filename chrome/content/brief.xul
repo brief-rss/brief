@@ -190,9 +190,32 @@
 
     <vbox flex="1">
         <hbox id="feed-view-header">
-            <html:div id="feed-title-box" flex="1">
-                <html:a id="feed-title" target="_blank"/>
-            </html:div>
+            <hbox id="feed-title-box">
+                <button id="feed-settings-button"
+                        class="brief-button"
+                        type="menu">
+                    <menupopup>
+                        <menuitem id="dropdown-update-feed"
+                                  label="&ctxUpdateFeed.label;"
+                                  oncommand="FeedUpdateService.updateFeeds([FeedList.selectedFeed])"/>
+                        <menuitem id="dropdown-open-website"
+                                  label="&ctxOpenWebsite.label;"
+                                  oncommand="Commands.openFeedWebsite(FeedList.selectedFeed)"/>
+                        <menuseparator/>
+                        <menuitem id="dropdown-delete-feed"
+                                  label="&ctxDeleteFeed.label;"
+                                  oncommand="Commands.deleteFeed(FeedList.selectedFeed)"/>
+                        <menuitem id="dropdown-empty-feed"
+                                  label="&ctxEmptyFeed.label;"
+                                  oncommand="Commands.emptyFeed(FeedList.selectedFeed)"/>
+                        <menuseparator/>
+                        <menuitem id="dropdown-feed-properties"
+                                  label="&ctxFeedProperties.label;"
+                                  oncommand="Commands.showFeedProperties(FeedList.selectedFeed)"/>
+                    </menupopup>
+                </button>
+                <label id="feed-title"/>
+            </hbox>
             <spacer flex="1"/>
             <button id="mark-view-read"
                     class="brief-button feed-header-button"

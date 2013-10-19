@@ -38,6 +38,8 @@ function FeedView(aTitle, aQuery) {
     if (gCurrentView)
         gCurrentView.uninit();
 
+    getElement('feed-settings-button').hidden = !this.query.feeds || this.query.feeds.length != 1;
+
     if (!this.query.searchString)
         getElement('searchbar').value = '';
 
@@ -668,7 +670,7 @@ FeedView.prototype = {
         getElement('full-view-checkbox').checked = !this.headlinesMode;
         getElement('headlines-checkbox').checked = this.headlinesMode;
 
-        this._buildHeader();
+        getElement('feed-title').value = this.titleOverride || this.title;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');
@@ -817,34 +819,6 @@ FeedView.prototype = {
         this.feedContent.insertBefore(entryView.container, nextElem);
 
         this._entryViews.splice(aPosition, 0, entryView);
-    },
-
-    _buildHeader: function FeedView__buildHeader() {
-        let feedTitle = getElement('feed-title');
-        feedTitle.removeAttribute('href');
-        feedTitle.removeAttribute('tooltiptext');
-        feedTitle.className = '';
-        feedTitle.textContent = this.titleOverride || this.title;
-
-        let feed = Storage.getFeed(this.query.feeds);
-
-        if (feed) {
-            let url = feed.websiteURL || feed.feedURL;
-            let flags = Ci.nsIScriptSecurityManager.DISALLOW_INHERIT_PRINCIPAL;
-            try {
-                Services.scriptSecurityManager.checkLoadURIStrWithPrincipal(gBriefPrincipal, url, flags);
-            }
-            catch (ex) {
-                log('Brief: security error.' + ex);
-                var securityCheckFailed = true;
-            }
-
-            if (!securityCheckFailed && !this.query.searchString) {
-                feedTitle.setAttribute('href', url);
-                feedTitle.setAttribute('tooltiptext', feed.subtitle);
-                feedTitle.className = 'feed-link';
-            }
-        }
     },
 
     _setEmptyViewMessage: function FeedView__setEmptyViewMessage() {

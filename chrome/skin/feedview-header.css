@@ -12,24 +12,37 @@
 /* =========== View title =========== */
 
 #feed-title-box {
-    display: -moz-box;
-    margin: 2px 0 0 14px !important;
-    /* These are to cut off the later lines when the title wraps. */
-    overflow: hidden;
-    line-height: 36px;
-    max-height: 36px !important;
+    -moz-box-align: center;
+    margin-right: 10px !important;
 }
 
 #feed-title {
+    margin-left: 10px !important;
     color: #606b78;
     font-size: 22px;
-    font-weight: bold;
-    text-decoration: none;
+    font-weight: bold !important;
 }
 
-#feed-title.feed-link:hover {
-    text-decoration: underline;
+#feed-settings-button {
+    margin-top: -1px !important;
+    list-style-image: url(icons/feed-settings.png);
+    -moz-image-region: rect(0, 18px, 18px, 0);
 }
+
+#feed-settings-button:hover {
+    -moz-image-region: rect(18px, 18px, 36px, 0);
+}
+
+#feed-settings-button .button-menu-dropmarker {
+    list-style-image: url(icons/feed-settings-dropmarker.png) !important;
+    -moz-image-region: rect(0, 7px, 4px, 0) !important;
+    margin-left: 3px !important;
+}
+
+#feed-settings-button:hover .button-menu-dropmarker {
+    -moz-image-region: rect(4px, 7px, 8px, 0) !important;
+}
+
 
 
 
