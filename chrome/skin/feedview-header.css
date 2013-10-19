@@ -1,6 +1,6 @@
 #feed-view-header {
     -moz-box-align: center;
-    height: 40px !important;
+    height: 36px !important;
     padding: 0 10px !important;
     border-bottom: 1px solid #d6d6d6 !important;
     overflow: hidden;
@@ -13,7 +13,7 @@
 
 #feed-title-box {
     -moz-box-align: center;
-    margin-right: 10px !important;
+    margin: 4px 10px 0 0 !important;
 }
 
 #feed-title {
@@ -118,7 +118,7 @@
 
 #searchbar {
     width: 150px;
-    margin: 6px 0 6px 0 !important;
+    margin: 5px 0 5px 0 !important;
     padding: 0 3px 0 5px !important;
     border: 1px solid #9dabb8 !important;
     border-radius: 4px;

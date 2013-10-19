@@ -112,7 +112,7 @@ menuseparator {
 
 .sidebar-button {
     -moz-box-flex: 1;
-    padding: 12px 9px 8px !important;
+    padding: 10px 9px 6px !important;
     font-size: 13px;
     color: #454545 !important;
 }
