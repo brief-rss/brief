@@ -69,6 +69,10 @@ body {
     margin-top: 0 !important;
 }
 
+.content > *:last-child {
+    margin-bottom: 0 !important;
+}
+
 .content a {
     color: #108ce6;
     text-decoration: none;
