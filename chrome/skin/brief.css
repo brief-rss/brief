@@ -27,25 +27,25 @@ page {
 }
 
 menupopup {
-    background-color: #ffffff !important;
-    border: 1px solid #c2c2c2 !important;
-    padding: 3px !important;
-    color:  #000000 !important;
+    background-color: #f2f2f2 !important;
+    border: 1px solid #bdbdbd !important;
+    padding: 7px !important;
 }
 
 menuitem {
-    font-size: 13px;
-    padding: 3px 10px 2px !important;
+    height: 25px !important;
+    padding: 0 10px !important;
+    font-size: 13px !important;
+    color: #454545 !important;
 }
 
 menuitem:hover {
-    background-color: #f2f2f2 !important;
-    transition: background-color 170ms;
+    background-color: #e5e5e5 !important;
 }
 
 menuseparator {
-    border-bottom: 1px solid #c2c2c2 !important;
-    margin: 5px 3px !important;
+    border-top: 1px solid #bdbdbd !important;
+    margin: 6px 10px 6px !important;
 }
 
 

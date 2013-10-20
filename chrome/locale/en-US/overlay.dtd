@@ -3,3 +3,16 @@
 <!ENTITY briefCtxMarkFeedsAsRead.label "Mark All Feeds As Read">
 <!ENTITY briefCtxShowUnreadCounter.label "Show Number Of Unread Items">
 <!ENTITY briefCtxShowOptions.label "Options">
+
+<!-- Options panel -->
+<!ENTITY briefShowShortcutsMenuitem.label "Show Keyboard Shortcuts">
+<!ENTITY briefOpenOptionsMenuitem.label "Options">
+
+<!-- Context options panels -->
+<!ENTITY briefRefreshFeed.label "Refresh Now">
+<!ENTITY briefOpenWebsite.label "Open Website">
+<!ENTITY briefUnsubscribeFeed.label "Unsubscribe">
+<!ENTITY briefEmptyFeed.label "Empty Feed">
+<!ENTITY briefFeedSettings.label "Feed Settings">
+<!ENTITY briefRestoreTrashed.label "Restore All Items">
+<!ENTITY briefEmptyTrash.label "Empty Trash">

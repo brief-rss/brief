@@ -20,7 +20,7 @@ function init() {
 
     // Remove the hardcoded flex from .button-box, impossible to do with CSS.
     let optionsButton = getElement('options-dropdown-button');
-    document.getAnonymousNodes(optionsButton)[1].removeAttribute('flex');
+    document.getAnonymousNodes(optionsButton)[0].removeAttribute('flex');
 
     refreshProgressmeter();
 
@@ -182,6 +182,16 @@ let Commands = {
         }
     },
 
+    restoreTrashed: function cmd_restoreTrashed() {
+        ViewList.getQueryForView('trash-folder')
+                .deleteEntries(Storage.ENTRY_STATE_NORMAL);
+    },
+
+    emptyTrash: function cmd_emptyTrash() {
+        ViewList.getQueryForView('trash-folder')
+                .deleteEntries(Storage.ENTRY_STATE_DELETED);
+    },
+
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
         let entry = gCurrentView.selectedEntry;
         if (entry) {
@@ -297,6 +307,30 @@ let Commands = {
 
 }
 
+function showContextOptionsDropdown() {
+    if (ViewList.selectedItem && ViewList.selectedItem.id == 'trash-folder')
+        var panelID = 'brief-trash-actions-panel';
+    else if (FeedList.selectedFeed && !FeedList.selectedFeed.isFolder)
+        panelID = 'brief-feed-settings-panel';
+    else
+        return;
+
+    let panel = getTopWindow().document.getElementById(panelID);
+
+    // Modify the position to horizontally center the arrow on the anchor.
+    panel.openPopup(getElement('view-title-button-image'), '', -20, 5);
+}
+
+function showOptionsDropdown() {
+    let panel = getTopWindow().document.getElementById('brief-options-panel')
+
+    let button = getElement('options-dropdown-button');
+    let rect = button.getBoundingClientRect();
+
+    // Modify the position to horizontally center the arrow on the text.
+    // We must account for widths of the panel arrow and the button dropmarker.
+    panel.openPopup(button, 'after_start', (rect.width - 12) / 2 - 15, 0);
+}
 
 function refreshProgressmeter(aReason) {
     if (FeedUpdateService.status != FeedUpdateService.NOT_UPDATING) {

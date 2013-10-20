@@ -33,7 +33,7 @@
                       oncommand="ViewListContextMenu.markTagRead()"/>
             <menuitem id="ctx-restore-trashed"
                       label="&ctxRestoreTrashed.label;"
-                      oncommand="ViewListContextMenu.restoreTrashed()"/>
+                      oncommand="Brief.win.Commands.restoreTrashed()"/>
             <menuseparator id="ctx-view-list-separator"/>
             <menuitem id="ctx-empty-today-folder"
                       label="&ctxEmptyFolder.label;"
@@ -43,7 +43,7 @@
                       oncommand="ViewListContextMenu.deleteTag()"/>
             <menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
-                      oncommand="ViewListContextMenu.emptyTrash()"/>
+                      oncommand="Brief.win.Commands.emptyTrash()"/>
         </menupopup>
         <menupopup id="tag-list-popup">
             <menuitem id="ctx-mark-tag-read"
@@ -124,17 +124,8 @@
                             class="brief-button sidebar-button"
                             type="menu"
                             label="&optionsDropdownButton.label;"
-                            tooltiptext="&optionsDropdownButton.tooltip;">
-                        <menupopup>
-                            <menuitem id="shortcuts-menuitem"
-                                      label="&showShortcutsMenuitem.label;"
-                                      oncommand="Commands.displayShortcuts()"/>
-                            <menuseparator/>
-                            <menuitem id="options-menuitem"
-                                      label="&openOptionsMenuitem.label;"
-                                      oncommand="Commands.openOptions()"/>
-                        </menupopup>
-                    </button>
+                            tooltiptext="&optionsDropdownButton.tooltip;"
+                            onclick="showOptionsDropdown()"/>
                 </hbox>
             </hbox>
             <hbox id="update-progress-container">
@@ -192,32 +183,12 @@
 
     <vbox flex="1">
         <hbox id="feed-view-header">
-            <hbox id="feed-title-box">
-                <button id="feed-settings-button"
-                        class="brief-button"
-                        type="menu">
-                    <menupopup>
-                        <menuitem id="dropdown-update-feed"
-                                  label="&ctxRefreshFeed.label;"
-                                  oncommand="FeedUpdateService.updateFeeds([FeedList.selectedFeed])"/>
-                        <menuitem id="dropdown-open-website"
-                                  label="&ctxOpenWebsite.label;"
-                                  oncommand="Commands.openFeedWebsite(FeedList.selectedFeed)"/>
-                        <menuseparator/>
-                        <menuitem id="dropdown-unsubscribe-feed"
-                                  label="&ctxUnsubscribeFeed.label;"
-                                  oncommand="Commands.deleteFeed(FeedList.selectedFeed)"/>
-                        <menuitem id="dropdown-empty-feed"
-                                  label="&ctxEmptyFeed.label;"
-                                  oncommand="Commands.emptyFeed(FeedList.selectedFeed)"/>
-                        <menuseparator/>
-                        <menuitem id="dropdown-feed-settings"
-                                  label="&ctxFeedSettings.label;"
-                                  oncommand="Commands.showFeedProperties(FeedList.selectedFeed)"/>
-                    </menupopup>
-                </button>
-                <label id="feed-title"/>
-            </hbox>
+            <button id="view-title-button"
+                    class="brief-button"
+                    oncommand="showContextOptionsDropdown()">
+                <image id="view-title-button-image"/>
+                <label id="view-title-button-label"/>
+            </button>
             <spacer flex="1"/>
             <button id="mark-view-read"
                     class="brief-button feed-header-button"

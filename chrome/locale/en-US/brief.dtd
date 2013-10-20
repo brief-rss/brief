@@ -18,8 +18,6 @@
 <!ENTITY optionsDropdownButton.tooltip "Configure Brief">
 <!ENTITY organizeFeeds.label "Organize">
 <!ENTITY organizeFeeds.tooltip "Organize feeds">
-<!ENTITY showShortcutsMenuitem.label "Show Keyboard Shortcuts">
-<!ENTITY openOptionsMenuitem.label "Options">
 
 <!ENTITY sidebarSplitter.tooltip "Double-click to hide the sidebar">
 <!ENTITY revealSidebar.tooltip "Reveal the sidebar">

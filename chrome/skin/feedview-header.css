@@ -11,38 +11,34 @@
 
 /* =========== View title =========== */
 
-#feed-title-box {
-    -moz-box-align: center;
+#view-title-button {
     margin: 4px 10px 0 0 !important;
-}
-
-#feed-title {
-    margin-left: 10px !important;
     color: #606b78;
     font-size: 22px;
-    font-weight: bold !important;
 }
 
-#feed-settings-button {
+#view-title-button[contextOptions]:hover {
+    color: #ff8a39 !important;
+}
+
+#view-title-button:not([contextOptions]) > #view-title-button-image {
+    display: none;
+}
+
+#view-title-button-image {
     margin-top: -1px !important;
     list-style-image: url(icons/feed-settings.png);
     -moz-image-region: rect(0, 18px, 18px, 0);
 }
 
-#feed-settings-button:hover {
+#view-title-button:hover > #view-title-button-image {
     -moz-image-region: rect(18px, 18px, 36px, 0);
 }
 
-#feed-settings-button .button-menu-dropmarker {
-    list-style-image: url(icons/feed-settings-dropmarker.png) !important;
-    -moz-image-region: rect(0, 7px, 4px, 0) !important;
-    margin-left: 3px !important;
+#view-title-button-label {
+    margin-left: 5px !important;
+    font-weight: bold !important;
 }
-
-#feed-settings-button:hover .button-menu-dropmarker {
-    -moz-image-region: rect(4px, 7px, 8px, 0) !important;
-}
-
 
 
 

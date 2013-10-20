@@ -38,7 +38,13 @@ function FeedView(aTitle, aQuery) {
     if (gCurrentView)
         gCurrentView.uninit();
 
-    getElement('feed-settings-button').hidden = !this.query.feeds || this.query.feeds.length != 1;
+    let singleFeed = this.query.feeds && this.query.feeds.length == 1;
+    let trash = this.query.deleted == Storage.ENTRY_STATE_TRASHED;
+    if (singleFeed || trash)
+        getElement('view-title-button').setAttribute('contextOptions', true);
+    else
+        getElement('view-title-button').removeAttribute('contextOptions');
+
 
     if (!this.query.searchString)
         getElement('searchbar').value = '';
@@ -670,7 +676,7 @@ FeedView.prototype = {
         getElement('full-view-checkbox').checked = !this.headlinesMode;
         getElement('headlines-checkbox').checked = this.headlinesMode;
 
-        getElement('feed-title').value = this.titleOverride || this.title;
+        getElement('view-title-button-label').value = this.titleOverride || this.title;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');

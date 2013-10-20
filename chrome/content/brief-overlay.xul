@@ -54,13 +54,72 @@
     </keyset>
 
     <popupset id="mainPopupSet">
+        <!-- Although these panels are used in the Brief's tabs, they have to
+             live in the main window because otherwise it's impossible to remove
+             the hardcoded shadow. -->
+        <menupopup id="brief-options-panel"
+                   class="brief-panel"
+                   orient="vertical"
+                   consumeoutsideclicks="true">
+            <menuitem id="brief-shortcuts-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefShowShortcutsMenuitem.label;"
+                      oncommand="if (Brief.win) Brief.win.Commands.displayShortcuts()"/>
+            <menuseparator class="brief-panel-menuseparator"/>
+            <menuitem id="brief-options-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefOpenOptionsMenuitem.label;"
+                      oncommand="if (Brief.win) Brief.win.Commands.openOptions()"/>
+        </menupopup>
+        <menupopup id="brief-feed-settings-panel"
+                   class="brief-panel"
+                   orient="vertical"
+                   consumeoutsideclicks="true">
+            <menuitem id="brief-update-feed-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefRefreshFeed.label;"
+                      oncommand="Brief.updateService.updateFeeds([Brief.win.FeedList.selectedFeed])"/>
+            <menuitem id="brief-open-website"
+                      class="brief-panel-menuitem"
+                      label="&briefOpenWebsite.label;"
+                      oncommand="Brief.win.Commands.openFeedWebsite(Brief.win.FeedList.selectedFeed)"/>
+            <menuseparator class="brief-panel-menuseparator"/>
+            <menuitem id="brief-empty-feed-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefEmptyFeed.label;"
+                      oncommand="Brief.win.Commands.emptyFeed(Brief.win.FeedList.selectedFeed)"/>
+            <menuitem id="brief-unsubscribe-feed-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefUnsubscribeFeed.label;"
+                      oncommand="Brief.win.Commands.deleteFeed(Brief.win.FeedList.selectedFeed)"/>
+            <menuseparator class="brief-panel-menuseparator"/>
+            <menuitem id="brief-feed-settings-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefFeedSettings.label;"
+                      oncommand="Brief.win.Commands.showFeedProperties(Brief.win.FeedList.selectedFeed)"/>
+        </menupopup>
+        <menupopup id="brief-trash-actions-panel"
+                   class="brief-panel"
+                   orient="vertical"
+                   consumeoutsideclicks="true">
+            <menuitem id="brief-restore-trashed-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefRestoreTrashed.label;"
+                      oncommand="Brief.win.Commands.restoreTrashed()"/>
+            <menuseparator class="brief-panel-menuseparator"/>
+            <menuitem id="brief-empty-trash-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefEmptyTrash.label;"
+                      oncommand="Brief.win.Commands.emptyTrash()"/>
+        </menupopup>
+
         <menupopup id="brief-status-context">
             <menuitem id="brief-ctx-update-feeds"
                       label="&briefCtxRefreshFeeds.label;"
-                      oncommand="Brief.updateAllFeeds();"/>
+                      oncommand="Brief.updateService.updateAllFeeds()"/>
             <menuitem id="brief-ctx-mark-read"
                       label="&briefCtxMarkFeedsAsRead.label;"
-                      oncommand="Brief.markFeedsAsRead();"/>
+                      oncommand="new Brief.query().markEntriesRead(true)"/>
             <menuseparator id="brief-show-unread-counter-separator"/>
             <menuitem id="brief-show-unread-counter"
                       label="&briefCtxShowUnreadCounter.label;"

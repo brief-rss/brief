@@ -615,20 +615,10 @@ let ViewListContextMenu = {
                 .markEntriesRead(true);
     },
 
-    restoreTrashed: function ViewListContextMenu_restoreTrashed() {
-        ViewList.getQueryForView('trash-folder')
-                .deleteEntries(Storage.ENTRY_STATE_NORMAL);
-    },
-
     emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
         let query = ViewList.getQueryForView('today-folder');
         query.starred = false;
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
-    },
-
-    emptyTrash: function gCurrentViewContextMenu_emptyTrash() {
-        ViewList.getQueryForView('trash-folder')
-                .deleteEntries(Storage.ENTRY_STATE_DELETED);
     }
 
 }

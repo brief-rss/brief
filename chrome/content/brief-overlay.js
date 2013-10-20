@@ -24,6 +24,14 @@ const Brief = {
         return this.storage = tempScope.Storage;
     },
 
+    get updateService() {
+        let tempScope = {};
+        Components.utils.import('resource://brief/FeedUpdateService.jsm', tempScope);
+
+        delete this.updateService;
+        return this.updateService = tempScope.FeedUpdateService;
+    },
+
     get query() {
         let tempScope = {};
         Components.utils.import('resource://brief/Storage.jsm', tempScope);
@@ -67,16 +75,6 @@ const Brief = {
         return gBrowser.currentURI.spec == this.BRIEF_URL
                ? gBrowser.contentDocument.defaultView.wrappedJSObject
                : null;
-    },
-
-    updateAllFeeds: function Brief_updateAllFeeds() {
-        let tempScope = {};
-        Components.utils.import('resource://brief/FeedUpdateService.jsm', tempScope);
-        tempScope.FeedUpdateService.updateAllFeeds();
-    },
-
-    markFeedsAsRead: function Brief_markFeedsAsRead() {
-        new this.query().markEntriesRead(true);
     },
 
     toggleUnreadCounter: function Brief_toggleUnreadCounter() {
