@@ -45,6 +45,7 @@ function FeedView(aTitle, aQuery) {
     else
         getElement('view-title-button').removeAttribute('contextOptions');
 
+    getElement('feed-view-header').removeAttribute('border');
 
     if (!this.query.searchString)
         getElement('searchbar').value = '';
@@ -399,6 +400,11 @@ FeedView.prototype = {
 
             case 'scroll':
                 this._autoMarkRead();
+
+                if (this.window.pageYOffset > 0)
+                    getElement('feed-view-header').setAttribute('border', true);
+                else
+                    getElement('feed-view-header').removeAttribute('border');
 
                 if (this._suppressSelectionOnNextScroll) {
                     this._suppressSelectionOnNextScroll = false;
