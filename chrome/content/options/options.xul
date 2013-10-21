@@ -60,7 +60,7 @@
                           label="&checkForUpdatesBefore.label;"
                           accesskey="&checkForUpdates.accesskey;"
                           preference="extensions.brief.update.enableAutoUpdate"
-                          oncommand="gFeedsPane.updateIntervalDisabledState();"/>
+                          oncommand="updateIntervalDisabledState();"/>
                 <textbox id="updateInterval"
                          type="number"
                          min="1"
@@ -100,7 +100,7 @@
                           accesskey="&expirationCheckbox.accesskey;"
                           tooltiptext="&starredItemsKept.tooltip;"
                           preference="extensions.brief.database.expireEntries"
-                          oncommand="gFeedsPane.updateExpirationDisabledState();"/>
+                          oncommand="updateExpirationDisabledState();"/>
                 <textbox id="expiration-textbox"
                          size="1"
                          type="number"
@@ -114,7 +114,7 @@
                           accesskey="&storedEntriesCheckbox.accesskey;"
                           tooltiptext="&starredItemsKept.tooltip;"
                           preference="extensions.brief.database.limitStoredEntries"
-                          oncommand="gFeedsPane.updateStoredEntriesDisabledState();"/>
+                          oncommand="updateStoredEntriesDisabledState();"/>
                 <textbox id="stored-entries-textbox"
                          size="2"
                          type="number"
@@ -127,7 +127,7 @@
                 <button id="clear-all-entries"
                         label="&clearAllEntriesButton.label;"
                         accesskey="&clearAllEntriesButton.accesskey;"
-                        oncommand="gFeedsPane.onClearAllEntriesCmd(event);"/>
+                        oncommand="onClearAllEntriesCmd(event);"/>
             </hbox>
         </groupbox>
 
@@ -138,7 +138,7 @@
             <button id="edit-custom-style"
                     label="&editStyleButton.label;"
                     accesskey="&editStyleButton.accesskey;"
-                    oncommand="gDisplayPane.editCustomStyle();"/>
+                    oncommand="editCustomStyle();"/>
         </groupbox>
 
     </prefpane>
