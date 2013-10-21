@@ -117,7 +117,7 @@ let Commands = {
         }
 
         let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
-        let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
+        let features = 'chrome,titlebar,toolbar,centerscreen,';
         features += instantApply ? 'modal=no,dialog=no' : 'modal';
 
         window.openDialog(url, 'Brief options', features, aPaneID);
