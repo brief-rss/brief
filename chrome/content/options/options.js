@@ -6,8 +6,6 @@ IMPORT_COMMON(this);
 
 
 function init() {
-    gMainPane.setUpPlacesTree();
-
     gFeedsPane.initUpdateIntervalControls();
     gFeedsPane.updateExpirationDisabledState();
     gFeedsPane.updateStoredEntriesDisabledState();
@@ -15,33 +13,6 @@ function init() {
 
 function unload() {
     gFeedsPane.saveUpdateIntervalPref();
-}
-
-
-let gMainPane = {
-
-    setUpPlacesTree: function() {
-        let tree = document.getElementById('places-tree');
-        let pref = document.getElementById('extensions.brief.homeFolder');
-
-        // Populate the tree.
-        let query = PlacesUtils.history.getNewQuery();
-        let options = PlacesUtils.history.getNewQueryOptions();
-        query.setFolders([PlacesUIUtils.allBookmarksFolderId], 1);
-        options.excludeItems = true;
-        tree.load([query], options);
-
-        tree.selectItems([pref.value]);
-    },
-
-    onPlacesTreeSelect: function(aEvent) {
-        let placesTree = document.getElementById('places-tree');
-        let pref = document.getElementById('extensions.brief.homeFolder');
-
-        if (placesTree.currentIndex != -1)
-            pref.value = PlacesUtils.getConcreteItemId(placesTree.selectedNode);
-    }
-
 }
 
 
