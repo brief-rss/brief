@@ -5,7 +5,9 @@
 <!ENTITY briefCtxShowOptions.label "Options">
 
 <!-- Options panel -->
-<!ENTITY briefShowShortcutsMenuitem.label "Show Keyboard Shortcuts">
+<!ENTITY briefShowShortcutsMenuitem.label "Keyboard Shortcuts">
+<!ENTITY briefImportMenuitem.label "Import Feeds...">
+<!ENTITY briefExportMenuitem.label "Export Feeds...">
 <!ENTITY briefOpenOptionsMenuitem.label "Options">
 
 <!-- Context options panels -->
