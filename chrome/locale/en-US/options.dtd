@@ -24,10 +24,6 @@
 <!ENTITY clearAllEntriesButton.accesskey "a">
 <!ENTITY feedsPane.label "Feeds">
 <!ENTITY folderTree.label "Folder containing my Live Bookmarks:">
-<!ENTITY importOPML.label "Import...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Export...">
-<!ENTITY exportOPML.accesskey "E">
 <!ENTITY displayPane.label "Display">
 <!ENTITY showStatusbarIcon.label "Show statusbar icon">
 <!ENTITY showStatusbarIcon.accesskey "t">

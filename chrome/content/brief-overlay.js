@@ -48,6 +48,14 @@ const Brief = {
         return this.common = tempScope;
     },
 
+    get OPML() {
+        let tempScope = {};
+        Components.utils.import('resource://brief/opml.jsm', tempScope);
+
+        delete this.OPML;
+        return this.OPML = tempScope.OPML;
+    },
+
     open: function Brief_open(aInCurrentTab) {
         let loading = gBrowser.webProgress.isLoadingDocument;
         let blank = (gBrowser.currentURI.spec == 'about:blank');

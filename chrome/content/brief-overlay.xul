@@ -66,6 +66,15 @@
                       label="&briefShowShortcutsMenuitem.label;"
                       oncommand="if (Brief.win) Brief.win.Commands.displayShortcuts()"/>
             <menuseparator class="brief-panel-menuseparator"/>
+            <menuitem id="brief-import-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefImportMenuitem.label;"
+                      oncommand="Brief.OPML.importFile()"/>
+            <menuitem id="brief-export-menuitem"
+                      class="brief-panel-menuitem"
+                      label="&briefExportMenuitem.label;"
+                      oncommand="Brief.OPML.exportFeeds()"/>
+            <menuseparator class="brief-panel-menuseparator"/>
             <menuitem id="brief-options-menuitem"
                       class="brief-panel-menuitem"
                       label="&briefOpenOptionsMenuitem.label;"

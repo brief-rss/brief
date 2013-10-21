@@ -19,7 +19,6 @@
     <prefpane id="main-pane" label="&mainPane.label;">
 
         <script type="application/x-javascript" src="options.js"/>
-        <script type="application/x-javascript" src="opml.js"/>
 
         <stringbundleset id="string-bundles">
             <stringbundle id="options-bundle" src="chrome://brief/locale/options.properties"/>
@@ -171,17 +170,6 @@
             </treecols>
             <treechildren flex="1"/>
         </tree>
-
-        <hbox id="import-export-box" pack="end">
-            <button id="import-opml"
-                    label="&importOPML.label;"
-                    accesskey="&importOPML.accesskey;"
-                    oncommand="opml.importOPML()"/>
-            <button id="export-opml"
-                    label="&exportOPML.label;"
-                    accesskey="&exportOPML.accesskey;"
-                    oncommand="opml.exportOPML()"/>
-        </hbox>
 
     </prefpane>
 
