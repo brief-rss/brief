@@ -5,10 +5,10 @@
 
 <!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
 
-<prefwindow id="brief-options3"
+<prefwindow id="brief-options4"
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
             title="&optionsWindow.title;"
-            persist="screenX screenY width height"
+            persist="screenX screenY"
             onload="init();"
             onunload="unload();">
 

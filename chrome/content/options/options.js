@@ -6,6 +6,8 @@ IMPORT_COMMON(this);
 
 
 function init() {
+    window.sizeToContent();
+
     initUpdateIntervalControls();
     updateExpirationDisabledState();
     updateStoredEntriesDisabledState();
