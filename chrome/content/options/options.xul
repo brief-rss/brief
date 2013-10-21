@@ -2,10 +2,6 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://brief/skin/options.css" type="text/css"?>
-<?xml-stylesheet href="chrome://browser/skin/places/places.css"?>
-<?xml-stylesheet href="chrome://browser/content/places/places.css"?>
-
-<?xul-overlay href="chrome://browser/content/places/placesOverlay.xul"?>
 
 <!DOCTYPE prefwindow SYSTEM "chrome://brief/locale/options.dtd">
 
@@ -144,32 +140,6 @@
                     accesskey="&editStyleButton.accesskey;"
                     oncommand="gDisplayPane.editCustomStyle();"/>
         </groupbox>
-
-    </prefpane>
-
-    <prefpane id="feeds-pane" label="&feedsPane.label;">
-
-        <preferences>
-            <preference id="extensions.brief.homeFolder"
-                        name="extensions.brief.homeFolder"
-                        type="int"/>
-        </preferences>
-
-        <label id="places-tree-label" value="&folderTree.label;"/>
-        <separator class="thin"/>
-
-        <tree id="places-tree"
-              class="placesTree"
-              type="places"
-              hidecolumnpicker="true"
-              onselect="gMainPane.onPlacesTreeSelect(event)">
-            <treecols>
-                <treecol id="title" flex="1"
-                         primary="true"
-                         hideheader="true"/>
-            </treecols>
-            <treechildren flex="1"/>
-        </tree>
 
     </prefpane>
 

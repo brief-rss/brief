@@ -22,9 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Clear all items...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
-<!ENTITY feedsPane.label "Feeds">
-<!ENTITY folderTree.label "Folder containing my Live Bookmarks:">
-<!ENTITY displayPane.label "Display">
 <!ENTITY showStatusbarIcon.label "Show statusbar icon">
 <!ENTITY showStatusbarIcon.accesskey "t">
 <!ENTITY showUnreadCounter.label "Show the number of unread items next to Brief's icon">

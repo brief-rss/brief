@@ -34,18 +34,6 @@ function buildHeader() {
     let folderName = '<span id="home-folder">' + bookmarks.getItemTitle(folderID) + '</span>';
     let string = bundle.formatStringFromName('howToSubscribeHeader', [folderName], 1);
     document.getElementById('subscribe').innerHTML = string;
-
-    let homeFolderSpan = document.getElementById('home-folder');
-    homeFolderSpan.addEventListener('click', openOptions, false);
-}
-
-function openOptions() {
-    let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
-    let modality = instantApply ? 'modal=no,dialog=no' : 'modal';
-    let features = 'chrome,titlebar,toolbar,centerscreen,resizable,' + modality;
-
-    window.openDialog('chrome://brief/content/options/options.xul', 'Brief options',
-                      features, 'feeds-pane');
 }
 
 function openBrief() {

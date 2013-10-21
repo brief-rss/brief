@@ -60,11 +60,6 @@ div {
     border-bottom: 2px solid transparent;
     }
 
-#home-folder:hover {
-    border-bottom-color: #0082c6;
-    cursor: pointer;
-    }
-
 #guide {
     margin-top: 40px;
     }
