@@ -2,6 +2,8 @@
  * Original code by Christopher Finke, "OPML Support" extension. Used with permisson.
  */
 
+const EXPORTED_SYMBOLS = ['OPML'];
+
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
@@ -9,17 +11,33 @@ Components.utils.import('resource://gre/modules/Services.jsm');
 IMPORT_COMMON(this);
 
 
-let opml = {
+let OPML = Object.freeze({
+
+    importFile: function() {
+        OPMLInternal.importOPML();
+    },
+
+    exportFeeds: function() {
+        OPMLInternal.exportOPML();
+    }
+
+})
+
+
+let OPMLInternal = {
 
     importOPML: function() {
-        let bundle = document.getElementById('options-bundle');
+        let bundle = Services.strings.createBundle('chrome://brief/locale/options.properties');
 
         let fp = Cc['@mozilla.org/filepicker;1'].createInstance(Ci.nsIFilePicker);
-        fp.appendFilter(bundle.getString('OPMLFiles'),'*.opml');
-        fp.appendFilter(bundle.getString('XMLFiles'),'*.opml; *.xml; *.rdf; *.html; *.htm');
-        fp.appendFilter(bundle.getString('allFiles'),'*');
+        fp.appendFilter(bundle.GetStringFromName('OPMLFiles'),'*.opml');
+        fp.appendFilter(bundle.GetStringFromName('XMLFiles'),'*.opml; *.xml; *.rdf; *.html; *.htm');
+        fp.appendFilter(bundle.GetStringFromName('allFiles'),'*');
 
-        fp.init(window, bundle.getString('selectFile'), Ci.nsIFilePicker.modeOpen);
+        let win = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator)
+                                                               .getMostRecentWindow(null);
+
+        fp.init(win, bundle.GetStringFromName('selectFile'), Ci.nsIFilePicker.modeOpen);
 
         let res = fp.show();
 
@@ -29,15 +47,16 @@ let opml = {
             let fix = Cc['@mozilla.org/docshell/urifixup;1'].getService(Ci.nsIURIFixup);
             let url = fix.createFixupURI(fp.file.path, fix.FIXUP_FLAG_ALLOW_KEYWORD_LOOKUP);
 
-            let reader = new XMLHttpRequest();
+            let reader = Cc['@mozilla.org/xmlextras/xmlhttprequest;1']
+                         .createInstance(Ci.nsIXMLHttpRequest);
             reader.open('GET', url.spec, false);
             reader.overrideMimeType('application/xml');
             reader.send(null);
             let opmldoc = reader.responseXML;
 
             if (opmldoc.documentElement.localName == 'parsererror') {
-                Services.prompt.alert(window, bundle.getString('invalidFileAlertTitle'),
-                                      bundle.getString('invalidFileAlertText'));
+                Services.prompt.alert(win, bundle.GetStringFromName('invalidFileAlertTitle'),
+                                      bundle.GetStringFromName('invalidFileAlertText'));
                 return;
             }
 
@@ -57,7 +76,7 @@ let opml = {
 
             let transactions = [];
 
-            let homeFolder = document.getElementById('extensions.brief.homeFolder').value;
+            let homeFolder = Services.prefs.getIntPref('extensions.brief.homeFolder');
             this.importLevel(results, homeFolder, transactions);
 
             let aggregatedTrans = new PlacesAggregatedTransaction('Import feeds',
@@ -178,7 +197,7 @@ let opml = {
         let file = this.promptForFile(filePrefix);
 
         if (file) {
-            let folder = document.getElementById('extensions.brief.homeFolder').value;
+            let folder = Services.prefs.getIntPref('extensions.brief.homeFolder');
 
             let options = PlacesUtils.history.getNewQueryOptions();
             let query = PlacesUtils.history.getNewQuery();
@@ -275,14 +294,16 @@ let opml = {
     }.gen(),
 
     promptForFile: function (filePrefix) {
-        let bundle = document.getElementById('options-bundle');
+        let bundle = Services.strings.createBundle('chrome://brief/locale/options.properties');
+        let win = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator)
+                                                               .getMostRecentWindow(null);
 
         let fp = Cc['@mozilla.org/filepicker;1'].createInstance(Ci.nsIFilePicker);
-        fp.init(window, bundle.getString('saveAs'), Ci.nsIFilePicker.modeSave);
+        fp.init(win, bundle.GetStringFromName('saveAs'), Ci.nsIFilePicker.modeSave);
 
-        fp.appendFilter(bundle.getString('OPMLFiles'),'*.opml');
-        fp.appendFilter(bundle.getString('XMLFiles'),'*.opml; *.xml; *.rdf; *.html; *.htm');
-        fp.appendFilter(bundle.getString('allFiles'),'*');
+        fp.appendFilter(bundle.GetStringFromName('OPMLFiles'),'*.opml');
+        fp.appendFilter(bundle.GetStringFromName('XMLFiles'),'*.opml; *.xml; *.rdf; *.html; *.htm');
+        fp.appendFilter(bundle.GetStringFromName('allFiles'),'*');
 
         fp.defaultString = filePrefix + '.opml';
 
