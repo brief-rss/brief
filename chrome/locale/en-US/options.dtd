@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Brief options">
 <!ENTITY mainPane.label "Main">
-<!ENTITY updateGroup.caption "Updating">
+<!ENTITY refreshGroup.caption "Refreshing">
 <!ENTITY checkForUpdatesBefore.label "Check feeds for updates every">
 <!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "minutes">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "minutes">
 <!ENTITY showNotification.label "Show a notification when new items are found">
 <!ENTITY showNotification.accesskey "S">
-<!ENTITY behaviorGroup.caption "Behavior">
+<!ENTITY readingGroup.caption "Reading">
 <!ENTITY openInNewTab.label "Open Brief in a new tab">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Storing">
@@ -31,7 +31,7 @@
 <!ENTITY autoMarkRead.label "Automatically mark items as read after I see them">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "Appearance">
-<!ENTITY editStyleDescription.label "Customize the appearance of feeds">
+<!ENTITY editStyleDescription.label "Customize Brief's look">
 <!ENTITY editStyleButton.label "Customize">
 <!ENTITY editStyleButton.accesskey "u">
 <!ENTITY styleEditor.title "Edit custom style">

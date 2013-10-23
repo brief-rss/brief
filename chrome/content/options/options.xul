@@ -54,7 +54,7 @@
         </preferences>
 
         <groupbox>
-            <caption label="&updateGroup.caption;"/>
+            <caption label="&refreshGroup.caption;"/>
             <hbox align="center">
                 <checkbox id="checkForUpdates"
                           label="&checkForUpdatesBefore.label;"
@@ -79,6 +79,7 @@
         </groupbox>
 
         <groupbox align="stretch">
+            <caption label="&readingGroup.caption;"/>
             <checkbox id="show-unread-counter"
                       label="&showUnreadCounter.label;"
                       accesskey="&showUnreadCounter.accesskey;"
@@ -132,7 +133,6 @@
         </groupbox>
 
         <groupbox align="center" orient="horizontal">
-            <caption label="&customizeGroup.caption;"/>
             <label value="&editStyleDescription.label;"/>
             <spacer flex="1"/>
             <button id="edit-custom-style"
