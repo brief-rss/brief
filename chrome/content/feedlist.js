@@ -71,7 +71,7 @@ let ViewList = {
         FeedList.deselect();
 
         if (this.selectedItem.id == 'starred-folder') {
-            Storage.getAllTags(function(tags) {
+            Storage.getAllTags(tags => {
                 if (tags.length)
                     TagList.show();
             })
@@ -519,11 +519,9 @@ let FeedList = {
     },
 
     onEntriesMarkedRead: function FeedList_onEntriesMarkedRead(aEntryList, aNewState) {
-        async(function() {
-            FeedList.refreshFeedTreeitems(aEntryList.feedIDs);
-        }, 250)
+        async(() => FeedList.refreshFeedTreeitems(aEntryList.feedIDs), 250)
 
-        async(function() {
+        async(() => {
             ViewList.refreshItem('all-items-folder');
             ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
@@ -543,11 +541,9 @@ let FeedList = {
     },
 
     onEntriesDeleted: function FeedList_onEntriesDeleted(aEntryList, aNewState) {
-        async(function() {
-            FeedList.refreshFeedTreeitems(aEntryList.feedIDs);
-        }, 250)
+        async(() => FeedList.refreshFeedTreeitems(aEntryList.feedIDs), 250)
 
-        async(function() {
+        async(() => {
             ViewList.refreshItem('all-items-folder');
             ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');

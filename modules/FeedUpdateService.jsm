@@ -26,10 +26,10 @@ const TIMER_TYPE_PRECISE  = Ci.nsITimer.TYPE_REPEATING_PRECISE;
 const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
 
 
-XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
+XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
     return Services.prefs.getBranch('extensions.brief.');
 })
-XPCOMUtils.defineLazyGetter(this, 'Storage', function() {
+XPCOMUtils.defineLazyGetter(this, 'Storage', () => {
     let tempScope = {};
     Components.utils.import('resource://brief/Storage.jsm', tempScope);
     return tempScope.Storage;
@@ -130,11 +130,11 @@ let FeedUpdateServiceInternal = {
         Services.obs.addObserver(this, 'quit-application', false);
         Prefs.addObserver('', this, false);
 
-        XPCOMUtils.defineLazyGetter(this, 'updateTimer', function() {
+        XPCOMUtils.defineLazyGetter(this, 'updateTimer', () => {
             return Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
         })
 
-        XPCOMUtils.defineLazyGetter(this, 'fetchDelayTimer', function() {
+        XPCOMUtils.defineLazyGetter(this, 'fetchDelayTimer', () => {
             return Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
         })
 
@@ -152,12 +152,12 @@ let FeedUpdateServiceInternal = {
     // See FeedUpdateService.
     updateFeeds: function FeedUpdateServiceInternal_updateFeeds(aFeeds, aInBackground) {
         // Don't add the same feed be added twice.
-        let newFeeds = aFeeds.filter(function(f) this.updateQueue.indexOf(f) == -1, this);
+        let newFeeds = aFeeds.filter(feed => this.updateQueue.indexOf(feed) == -1);
 
         this.scheduledFeeds = this.scheduledFeeds.concat(newFeeds);
         this.updateQueue = this.updateQueue.concat(newFeeds);
 
-        if (Storage.getAllFeeds().every(function(f) this.scheduledFeeds.indexOf(f) != -1, this))
+        if (Storage.getAllFeeds().every(feed => this.scheduledFeeds.indexOf(feed) != -1))
             Prefs.setIntPref('update.lastUpdateTime', Math.round(Date.now() / 1000));
 
         // Start an update if it isn't in progress yet.
@@ -214,9 +214,10 @@ let FeedUpdateServiceInternal = {
 
             // Filter feeds which need to be updated, according to either the global
             // update interval or their own feed-specific interval.
-            function filter(f) (f.updateInterval == 0 && itsGlobalUpdateTime) ||
-                               (f.updateInterval > 0 && now - f.lastUpdated > f.updateInterval);
-            let feedsToUpdate = Storage.getAllFeeds().filter(filter);
+            let feedsToUpdate = Storage.getAllFeeds().filter(
+                f => f.updateInterval == 0 && itsGlobalUpdateTime ||
+                     f.updateInterval > 0 && now - f.lastUpdated > f.updateInterval
+            )
 
             if (feedsToUpdate.length)
                 this.updateFeeds(feedsToUpdate, feedsToUpdate.length, true);

@@ -275,7 +275,7 @@ FeedView.prototype = {
 
             let jump = Math.round(distance / jumpCount);
 
-            this._scrolling = setInterval(function() {
+            this._scrolling = setInterval(() => {
                 // If we are within epsilon smaller or equal to the jump,
                 // then scroll directly to the target position.
                 if (Math.abs(targetPosition - this.window.pageYOffset) <= Math.abs(jump)) {
@@ -290,7 +290,7 @@ FeedView.prototype = {
                 else {
                     this.window.scroll(this.window.pageXOffset, this.window.pageYOffset + jump);
                 }
-            }.bind(this), 10)
+            }, 10)
         }
         else {
             if (aSuppressSelection)
@@ -411,7 +411,9 @@ FeedView.prototype = {
                 }
                 else if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
-                    this._scrollSelectionTimeout = async(function() this.selectEntry(this.getEntryInScreenCenter()), 50, this);
+                    this._scrollSelectionTimeout = async(() => {
+                        this.selectEntry(this.getEntryInScreenCenter())
+                    }, 50);
                 }
 
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
@@ -599,7 +601,7 @@ FeedView.prototype = {
         let selectedEntryIndex = -1;
 
         let indices = containedEntries.map(this.getEntryIndex, this)
-                                      .sort(function(a, b) a - b);
+                                      .sort((a, b) => a - b);
 
         // Iterate starting from the last entry to avoid changing
         // positions of consecutive entries.
@@ -614,7 +616,7 @@ FeedView.prototype = {
 
             let entryView = this.getEntryView(entry);
 
-            entryView.remove(animate, this._getRefreshGuard(function() {
+            entryView.remove(animate, this._getRefreshGuard(() => {
                 let index = this.getEntryIndex(entry);
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
@@ -636,7 +638,7 @@ FeedView.prototype = {
                     else
                         afterEntriesRemoved.call(this);
                 }
-            }.bind(this)))
+            }))
         }
 
         function afterEntriesRemoved() {
@@ -694,7 +696,7 @@ FeedView.prototype = {
         // can trigger a resize event (!?).
         this.window.removeEventListener('resize', this, false);
 
-        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD, function() {
+        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD, () => {
             // Resize events can be dispatched asynchronously, so this listener shouldn't
             // be added earlier along with other ones, because then it could be triggered
             // before the initial refresh.
@@ -709,7 +711,7 @@ FeedView.prototype = {
                 this.selectEntry(lastSelectedEntry, true);
             else
                 this.selectEntry(this._loadedEntries[0], false);
-        }.bind(this))
+        })
     },
 
 
@@ -964,12 +966,12 @@ function EntryView(aFeedView, aEntryData) {
                                                                      : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
 
-        async(function() {
+        async(() => {
             this._getElement('content').innerHTML = aEntryData.content;
 
             if (this.feedView.query.searchString)
                 this._highlightSearchTerms(this._getElement('headline-title'));
-        }.bind(this))
+        })
     }
     else {
         let contentElement = this._getElement('content');
@@ -977,12 +979,12 @@ function EntryView(aFeedView, aEntryData) {
         contentElement.setAttribute('dir', this.textDirection);
 
         if (this.feedView.query.searchString) {
-            async(function() {
+            async(() => {
                 for (let elem of ['authors', 'tags', 'title', 'content'])
                     this._highlightSearchTerms(this._getElement(elem));
 
                 this._searchTermsHighlighted = true;
-            }.bind(this));
+            })
         }
     }
 }
@@ -1078,7 +1080,7 @@ EntryView.prototype = {
 
     remove: function EntryView_remove(aAnimate, aCallback) {
         if (aAnimate) {
-            this.container.addEventListener('transitionend', function() {
+            this.container.addEventListener('transitionend', () => {
                 // The element may have been removed in the meantime
                 // if the view had been refreshed.
                 if (this.container.parentNode == this.feedView.feedContent) {
@@ -1086,7 +1088,7 @@ EntryView.prototype = {
                     if (aCallback)
                         aCallback();
                 }
-            }.bind(this), true);
+            }, true);
 
             this.container.setAttribute('removing', true);
         }
@@ -1123,7 +1125,7 @@ EntryView.prototype = {
 
         hideElement(this._getElement('headline-container'));
 
-        showElement(this._getElement('full-container'), aAnimate, function() {
+        showElement(this._getElement('full-container'), aAnimate, () => {
             if (this.container.parentNode != this.feedView.feedContent)
                 return;
 
@@ -1137,7 +1139,7 @@ EntryView.prototype = {
                 if (entryBottom > screenBottom)
                     this.feedView.scrollToEntry(this.id, false, true, true);
             }
-        }.bind(this))
+        })
 
 
         if (this.feedView.query.searchString && !this._searchTermsHighlighted) {
@@ -1210,13 +1212,13 @@ EntryView.prototype = {
 
                     let oldViewID = this.feedView.viewID;
 
-                    query.getProperty('bookmarkID', false, function(ids) {
+                    query.getProperty('bookmarkID', false, ids => {
                         if (this.feedView.viewID != oldViewID)
                             return;
 
                         let anchor = this._getElement('bookmark-button');
                         getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
-                    }.bind(this))
+                    })
                 }
                 else {
                     Commands.starEntry(this.id, true);
@@ -1412,7 +1414,7 @@ function showElement(aElement, aAnimate, aCallback) {
 }
 
 
-__defineGetter__('Strings', function() {
+__defineGetter__('Strings', () => {
     let cachedStringsList = [
         'entryDate.justNow',
         'minute.pluralForms',
@@ -1437,7 +1439,7 @@ __defineGetter__('Strings', function() {
     return this.Strings = obj;
 })
 
-__defineGetter__('Finder', function() {
+__defineGetter__('Finder', () => {
     let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
     finder.caseSensitive = false;
 
@@ -1445,7 +1447,7 @@ __defineGetter__('Finder', function() {
     return this.Finder = finder;
 })
 
-__defineGetter__('gBriefPrincipal', function() {
+__defineGetter__('gBriefPrincipal', () => {
     let uri = NetUtil.newURI(document.documentURI);
     let resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1']
                       .getService(Ci.nsIChromeRegistry)
