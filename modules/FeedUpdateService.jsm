@@ -94,6 +94,17 @@ const FeedUpdateService = Object.freeze({
      */
     stopUpdating: function() {
         return FeedUpdateServiceInternal.stopUpdating();
+    },
+
+    /**
+     * Downloads and parses the feed under the given URL and creates a
+     * Live Bookmark for it in the home folder.
+     *
+     * @param aURL
+     *        The feed's URL.
+     */
+    addFeed: function(aURL) {
+        return FeedUpdateServiceInternal.addFeed(aURL);
     }
 })
 
@@ -244,7 +255,7 @@ let FeedUpdateServiceInternal = {
 
         Services.obs.notifyObservers(null, 'brief:feed-loading', feed.feedID);
 
-        let [status, document, parsedFeed] = yield new FeedFetcher(feed.feedURL, resume);
+        let [status, document, parsedFeed] = yield new FeedFetcher(feed.feedURL, false, resume);
 
         if (status == 'ok') {
             let newEntriesCount = yield Storage.processFeed(feed.feedID, parsedFeed,
@@ -326,6 +337,21 @@ let FeedUpdateServiceInternal = {
         Services.obs.notifyObservers(null, 'brief:feed-update-finished', aReason);
     },
 
+    // See FeedUpdateService.
+    addFeed: function(aURL) {
+        new FeedFetcher(aURL, false, function(status, document, parsedFeed) {
+            // Just add a livemark, the feed will be updated by the bookmark observer.
+            let livemarks = Cc['@mozilla.org/browser/livemark-service;2']
+                            .getService(Ci.mozIAsyncLivemarks);
+            livemarks.addLivemark({
+                title: parsedFeed.title.text,
+                feedURI: Services.io.newURI(aURL, null, null),
+                siteURI: parsedFeed.link,
+                parentId: Prefs.getIntPref('homeFolder'),
+                index: Ci.nsINavBookmarksService.DEFAULT_INDEX,
+            })
+        })
+    },
 
     // nsIObserver
     observe: function FeedUpdateServiceInternal_observe(aSubject, aTopic, aData) {
@@ -365,14 +391,18 @@ let FeedUpdateServiceInternal = {
  *
  * @param aURL [string]
  *        URL of the feed.
+ * @param aCancelable [boolean]
+ *        Indicates if the request can be canceled by brief:feed-update-finished
+ *        notification.
  * @param aCallback [function]
  *        Callback function that receives the following arguments:
  *        1) status [string] "ok", "error", "cancelled"
  *        2) document [DOM document] downloaded XML document, or null
  *        3) parsedFeed [nsIFeedContainer] parsed feed data, or null
  */
-function FeedFetcher(aURL, aCallback) {
+function FeedFetcher(aURL, aCancelable, aCallback) {
     this.url = aURL;
+    this.cancelable = aCancelable;
     this.callback = aCallback;
 
     this.parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
@@ -468,7 +498,7 @@ FeedFetcher.prototype = {
                 break;
 
             case 'brief:feed-update-finished':
-                if (aData == 'cancelled') {
+                if (aData == 'cancelled' && this.cancelable) {
                     this.request.abort();
                     this.finish('cancelled', null);
                 }

@@ -116,6 +116,17 @@ const Brief = {
     onWindowLoad: function Brief_onWindowLoad(aEvent) {
         window.removeEventListener('load', arguments.callee, false);
 
+        // Register Brief as a content handler for feeds. Can't do it in the
+        // service component because the registrar doesn't work yet.
+        const CONTENT_TYPE = 'application/vnd.mozilla.maybe.feed';
+        const SUBSCRIBE_URL = 'brief://subscribe/%s';
+
+        let wchr = Cc['@mozilla.org/embeddor.implemented/web-content-handler-registrar;1']
+                   .getService(Ci.nsIWebContentHandlerRegistrar);
+
+        if (!wchr.getWebContentHandlerByURI(CONTENT_TYPE, SUBSCRIBE_URL))
+            wchr.registerContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
+
         if (this.prefs.getBoolPref('firstRun')) {
             this.onFirstRun();
         }
