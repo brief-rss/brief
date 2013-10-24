@@ -1,7 +1,6 @@
 <!ENTITY pageTitle "Brief">
 <!ENTITY thankYou.header "Gracias por instalar Brief">
-<!ENTITY subscribingStep1.description "Haga clic en el icono en la barra de dirección para visualizar el canal.">
-<!ENTITY subscribingStep1firefox4.description "Abra el menú <strong>Marcadores</strong> y seleccione <strong>Suscribirse a esta página</strong>.">
+<!ENTITY subscribingStep1.description "Abra el menú <strong>Marcadores</strong> y seleccione <strong>Suscribirse a esta página</strong>.">
 <!ENTITY subscribingStep2.description "Seleccione <strong>Marcadores dinámicos</strong> y haga clic en <strong>Suscribirse ahora</strong>.">
 <!ENTITY subscribingStep3.description "Seleccione la carpeta <strong>Canales web suscritos</strong> bajo menú de marcadores.">
 <!ENTITY getStartedButton.label "Comenzar">

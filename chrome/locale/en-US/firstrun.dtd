@@ -1,7 +1,7 @@
 <!ENTITY pageTitle "Brief">
 <!ENTITY thankYou.header "Thanks for installing Brief">
-<!ENTITY subscribingStep1.description "Click on the icon in the Location Bar to preview the feed.">
-<!ENTITY subscribingStep1firefox4.description "Open the <strong>Bookmarks</strong> menu and select <strong>Subscribe to This Page</strong>.">
-<!ENTITY subscribingStep2.description "Select <strong>Live Bookmarks</strong> and click <strong>Subscribe Now</strong>.">
-<!ENTITY subscribingStep3.description "Choose <strong>Subscribed Feeds</strong> folder in the Bookmarks Menu.">
+<!ENTITY howToSubscribe.header "Feeds are the best way to follow your favorite websites!">
+<!ENTITY subscribingStep1.description "Open <strong>Bookmarks</strong> menu and click <strong>Subscribe to This Page</strong>...">
+<!ENTITY subscribingStep2.description "...or just click on a link to the feed.">
+<!ENTITY subscribingStep3.description "Select <strong>Brief</strong> and click <strong>Subscribe Now</strong>.">
 <!ENTITY getStartedButton.label "Get Started">

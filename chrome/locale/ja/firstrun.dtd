@@ -1,7 +1,6 @@
 <!ENTITY pageTitle "Brief">
 <!ENTITY thankYou.header "Brief のインストールありがとうございます">
-<!ENTITY subscribingStep1.description "フィードをプレビューするにはロケーションバーにあるアイコンをクリックしてください。">
-<!ENTITY subscribingStep1firefox4.description "<strong>ブックマーク</strong>メニューを開いて<strong>このページの購読</strong>を選択してください。">
+<!ENTITY subscribingStep1.description "<strong>ブックマーク</strong>メニューを開いて<strong>このページの購読</strong>を選択してください。">
 <!ENTITY subscribingStep2.description "<strong>ライブブックマーク</strong>を選択して<strong>購読</strong>をクリックしてください。">
 <!ENTITY subscribingStep3.description "ブックマークメニューにある<strong>購読済みフィード</strong>フォルダを選択してください。">
 <!ENTITY getStartedButton.label "始める">

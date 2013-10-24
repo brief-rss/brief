@@ -43,35 +43,28 @@ div {
     padding: 0 5px 2px 0;
     border-bottom: 1px solid #f1601a;
     margin-bottom: 8px;
-    color: #f1601a;
+    color: #ff712c;
     }
 
-#subscribe {
+#subheader {
     color: #2c566c;
     font-size: 18px;
     max-width: 930px;
     }
 
-#home-folder {
-    display: inline-block;
-    padding-left: 20px;
-    background: url(chrome://brief/skin/icons/folder.png) center left no-repeat;
-    color: #0082c6;
-    border-bottom: 2px solid transparent;
-    }
-
 #guide {
+    -moz-box-align: start;
     margin-top: 40px;
     }
 
 .step {
     -moz-box-orient: vertical;
-    width: 300px;
+    width: 275px;
     margin: 0 10px;
     color: #00344f;
     text-align: center;
     font-family: "Lucida Grande", Verdana, sans-serif;
-    font-size: 13px;
+    font-size: 15px;
     }
 
 .screenshot-container {
@@ -82,24 +75,28 @@ div {
     }
 
 .screenshot {
+    border: 1px solid #999999;
     box-shadow: 5px 5px 5px #97b4be;
     }
+
+.arrow-next {
+    margin-top: 60px;
+}
 
 #open-brief {
     display: -moz-box;
     cursor: pointer;
     margin-top: 70px;
     padding: 5px 20px 8px;
-    font-size: 24px;
+    font-size: 30px;
     font-weight: bold;
     text-decoration: none;
-    color: #FFFFFF;
-    text-shadow: -1px -1px 1px #7BAB29;
-    border: 1px solid #488F03;
+    color: #ff712c;
+    border: 1px solid #ff712c;
     border-radius: 10px;
-    background: url(chrome://brief/skin/get-started-button.png) repeat-x center;
     }
 
 #open-brief:hover {
-    background-image: url(chrome://brief/skin/get-started-button-hover.png);
+    text-shadow: 0px 0px 5px #ffad85;
+    box-shadow: 0px 0px 5px #ffa060, inset 0px 0px 3px #ffa060;
     }

@@ -1,7 +1,6 @@
 <!ENTITY pageTitle "Brief">
 <!ENTITY thankYou.header "Спасибо за установку Brief">
-<!ENTITY subscribingStep1.description "Нажмите на значке в строке адреса для предпросмотра ленты">
-<!ENTITY subscribingStep1firefox4.description "Откройте меню <strong>Закладки</strong> и выберите <strong>Подписаться на ленты новостей</strong>.">
+<!ENTITY subscribingStep1.description "Откройте меню <strong>Закладки</strong> и выберите <strong>Подписаться на ленты новостей</strong>.">
 <!ENTITY subscribingStep2.description "Выберите <strong>Ленты новостей</strong> и нажмите <strong>Подписаться</strong>.">
 <!ENTITY subscribingStep3.description "Выберите папку <strong>Ленты новостей</strong> в меню Закладок.">
 <!ENTITY getStartedButton.label "Краткое обучение">
