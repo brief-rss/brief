@@ -393,7 +393,6 @@ FeedFetcher.prototype = {
 
     finished: false,
 
-
     requestFeed: function FeedFetcher_requestFeed() {
         this.request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1']
                        .createInstance(Ci.nsIXMLHttpRequest);
@@ -401,36 +400,34 @@ FeedFetcher.prototype = {
         this.request.mozBackgroundRequest = Prefs.getBoolPref('update.suppressSecurityDialogs');
         this.request.open('GET', this.url, true);
         this.request.overrideMimeType('application/xml');
-        this.request.onload = onRequestLoad;
-        this.request.onerror = onRequestError;
+        this.request.onload = this.onRequestLoad.bind(this);
+        this.request.onerror = this.onRequestError.bind(this);
         this.request.send(null);
 
         this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
+    },
 
-        let self = this;
+    onRequestError: function() {
+        // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
+        const I_LOVE_NECKO_TOO = 2152398850;
 
-        function onRequestError() {
-            // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
-            const I_LOVE_NECKO_TOO = 2152398850;
-
-            if (self.request.channel.status == I_LOVE_NECKO_TOO) {
-                self.request.abort();
-                self.requestFeed();
-            }
-            else {
-                self.finish('error', null);
-            }
+        if (this.request.channel.status == I_LOVE_NECKO_TOO) {
+            this.request.abort();
+            this.requestFeed();
         }
+        else {
+            this.finish('error', null);
+        }
+    },
 
-        function onRequestLoad() {
-            self.timeoutTimer.cancel();
-            try {
-                let uri = Services.io.newURI(self.url, null, null);
-                self.parser.parseFromString(self.request.responseText, uri);
-            }
-            catch (ex) {
-                self.finish('error', null);
-            }
+    onRequestLoad: function() {
+        this.timeoutTimer.cancel();
+        try {
+            let uri = Services.io.newURI(this.url, null, null);
+            this.parser.parseFromString(this.request.responseText, uri);
+        }
+        catch (ex) {
+            this.finish('error', null);
         }
     },
 
