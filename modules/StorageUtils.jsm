@@ -276,7 +276,7 @@ StorageStatement.prototype = {
             columns.push(this._nativeStatement.getColumnName(i));
 
         return this._nativeStatement.executeAsync({
-            handleResult: function(aResultSet) {
+            handleResult: aResultSet => {
                 let row = aResultSet.getNextRow();
                 while (row) {
                     let obj = {};
@@ -289,18 +289,16 @@ StorageStatement.prototype = {
                     row = aResultSet.getNextRow();
                 }
             },
-            handleCompletion: function(aReason) {
-                aCallback(rowArray, aReason);
-            },
-            handleError: function(aError) {
+            handleCompletion: reason => aCallback(rowArray, reason),
+            handleError: error => {
                 if (aOnError) {
                     aOnError();
                 }
                 else {
                     throw new StorageError('Error when executing statement',
-                                           aError.message, this);
+                                           error.message, this);
                 }
-            }.bind(this)
+            }
         })
     },
 
@@ -499,15 +497,15 @@ WritingStatementsQueue.prototype = {
         let callback = this._queue[0].callback;
         let handleCompletion = callback.handleCompletion;
 
-        callback.handleCompletion = function(aReason) {
+        callback.handleCompletion = reason => {
             try {
                 if (handleCompletion)
-                    handleCompletion.call(callback, aReason);
+                    handleCompletion.call(callback, reason);
             }
             finally {
                 this._onStatementCompleted();
             }
-        }.bind(this);
+        }
 
         let nativeStatements = [stmt._nativeStatement for (stmt of statements)];
 

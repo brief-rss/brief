@@ -76,10 +76,10 @@ const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
 XPCOMUtils.defineLazyServiceGetter(this, 'Bookmarks', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
-XPCOMUtils.defineLazyGetter(this, 'Prefs', function() {
+XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
     return Services.prefs.getBranch('extensions.brief.');
 })
-XPCOMUtils.defineLazyGetter(this, 'Places', function() {
+XPCOMUtils.defineLazyGetter(this, 'Places', () => {
     Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
     return PlacesUtils;
 })
@@ -448,9 +448,9 @@ let StorageInternal = {
 
     // See Storage.
     getAllTags: function StorageInternal_getAllTags(aCallback) {
-        Stm.getAllTags.getResultsAsync(function(results) {
-            aCallback([row.tagName for (row of results)]);
-        })
+        Stm.getAllTags.getResultsAsync(
+            results => aCallback([row.tagName for (row of results)])
+        )
     },
 
 
@@ -538,8 +538,8 @@ let StorageInternal = {
 
         let feeds = aFeed ? [aFeed] : this.getAllFeeds();
 
-        let feedsWithAgeLimit = feeds.filter(function(f) f.entryAgeLimit);
-        let feedsWithoutAgeLimit = feeds.filter(function(f) !f.entryAgeLimit);
+        let feedsWithAgeLimit = feeds.filter(f => f.entryAgeLimit);
+        let feedsWithoutAgeLimit = feeds.filter(f => !f.entryAgeLimit);
 
         // Delete entries exceeding the global number limit.
         if (Prefs.getBoolPref('database.limitStoredEntries')) {
@@ -854,33 +854,32 @@ FeedProcessor.prototype = {
         }
 
         let storedID, storedPubDate, storedDateUpdated, isEntryRead;
-        let self = this;
 
         select.executeAsync({
-            handleResult: function(row) {
+            handleResult: row => {
                 storedID = row.id;
                 storedPubDate = row.date;
                 storedDateUpdated = row.updated;
                 isEntryRead = row.read;
             },
 
-            handleCompletion: function(aReason) {
-                if (aReason == REASON_FINISHED) {
+            handleCompletion: reason => {
+                if (reason == REASON_FINISHED) {
                     if (storedID) {
                         // XXX Comparing storedPubDate is temporary. Done to avoid suddenly
-                        // marking many entries as update for old user (before rev 1.72).
+                        // marking many entries as update for old users (before rev 1.72).
                         if (aEntry.updated && aEntry.updated > storedDateUpdated
                                            && aEntry.updated > storedPubDate) {
-                            self.addUpdateParams(aEntry, storedID, isEntryRead);
+                            this.addUpdateParams(aEntry, storedID, isEntryRead);
                         }
                     }
                     else {
-                        self.addInsertParams(aEntry, primaryHash, secondaryHash);
+                        this.addInsertParams(aEntry, primaryHash, secondaryHash);
                     }
                 }
 
-                if (!--self.remainingEntriesCount)
-                    self.executeAndNotify();
+                if (!--this.remainingEntriesCount)
+                    this.executeAndNotify();
             }
         })
     },
@@ -950,9 +949,7 @@ FeedProcessor.prototype = {
             let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
 
             let reason = yield Connection.executeAsync(statements, {
-                handleResult: function(row) {
-                    insertedEntries.push(row.id);
-                },
+                handleResult: row => insertedEntries.push(row.id),
                 handleCompletion: resume
             })
 
@@ -1105,7 +1102,7 @@ Query.prototype = {
         let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
 
         new Statement(sql).executeAsync({
-            handleResult: function(row) aCallback(row.found),
+            handleResult: row => aCallback(row.found),
             handleError: this._onDatabaseError
         })
     },
@@ -1119,9 +1116,10 @@ Query.prototype = {
      */
     getEntries: function Query_getEntries(aCallback) {
         let sql = 'SELECT entries.id ' + this._getQueryString(true);
-        new Statement(sql).getResultsAsync(function(results) {
-			aCallback([row.id for (row of results)])
-		}, this._onDatabaseError);
+        new Statement(sql).getResultsAsync(
+            results => aCallback([row.id for (row of results)]),
+		    this._onDatabaseError
+        )
     },
 
 
@@ -1138,21 +1136,26 @@ Query.prototype = {
                   '       entries_text.authors, entries_text.tags                       ';
         sql += this._getQueryString(true, true);
 
-        new Statement(sql).getResultsAsync(function(results) {
-            let entries = results.map(function(row) {
-                let entry = new Entry();
+        new Statement(sql).getResultsAsync(
+            results => {
+                let entries = [];
+                for (let row of results) {
+                    let entry = new Entry();
 
-                for (let column in row)
-                    entry[column] = row[column]
+                    for (let column in row)
+                        entry[column] = row[column]
 
-                entry.markedUnreadOnUpdate = row['read'] == 2;
-                entry.read = row['read'] == 1;
+                    entry.markedUnreadOnUpdate = row['read'] == 2;
+                    entry.read = row['read'] == 1;
 
-                return entry;
-            })
+                    entries.push(entry);
+                }
 
-            aCallback(entries);
-        }, this._onDatabaseError)
+                aCallback(entries);
+            },
+
+            this._onDatabaseError
+        )
     },
 
 
@@ -1185,16 +1188,12 @@ Query.prototype = {
         let values = [];
 
         new Statement(sql).executeAsync({
-            handleResult: function(row) {
+            handleResult: row => {
                 let value = row[aPropertyName];
                 if (!aDistinct || values.indexOf(value) == -1)
                     values.push(value);
             },
-
-            handleCompletion: function(aReason) {
-                aCallback(values);
-            },
-
+            handleCompletion: reason => aCallback(values),
             handleError: this._onDatabaseError
         })
     },
@@ -1213,7 +1212,7 @@ Query.prototype = {
         let sql = 'SELECT COUNT(1) AS count ' + this._getQueryString(true);
 
         new Statement(sql).executeAsync({
-            handleResult: function(row) aCallback(row.count),
+            handleResult: row => aCallback(row.count),
             handleError: this._onDatabaseError
         })
 
@@ -1236,7 +1235,7 @@ Query.prototype = {
         this.includeHiddenFeeds = tempHidden;
 
         new Statement(sql).executeAsync({
-            handleResult: function(row) {
+            handleResult: row => {
                 entryIDs.push(row.id);
 
                 if (feedIDs.indexOf(row.feedID) == -1)
@@ -1244,12 +1243,12 @@ Query.prototype = {
 
                 if (row.tags) {
                     let arr = row.tags.split(', ');
-                    let newTags = arr.filter(function(t) tags.indexOf(t) === -1);
+                    let newTags = arr.filter(t => tags.indexOf(t) === -1);
                     tags = tags.concat(newTags);
                 }
             },
 
-            handleCompletion: function(aReason) {
+            handleCompletion: reason => {
                 let list = new EntryList();
                 list.IDs = entryIDs;
                 list.feedIDs = feedIDs;
@@ -1394,9 +1393,9 @@ Query.prototype = {
 
             // Verify tags.
             let storedTags = yield Utils.getTagsForEntry(entry.id, resume);
-            let currentTags = allBookmarks.map(function(id) Bookmarks.getFolderIdForItem(id))
+            let currentTags = allBookmarks.map(id => Bookmarks.getFolderIdForItem(id))
                                           .filter(Utils.isTagFolder)
-                                          .map(function(id) Bookmarks.getItemTitle(id));
+                                          .map(id => Bookmarks.getItemTitle(id));
 
             for (let tag of storedTags) {
                 if (currentTags.indexOf(tag) === -1)
@@ -1761,13 +1760,13 @@ let BookmarkObserver = {
                 StorageInternal.tagEntry(true, entryID, aNewName);
 
                 let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
-                                           .map(function(id) Bookmarks.getFolderIdForItem(id))
+                                           .map(id => Bookmarks.getFolderIdForItem(id))
                                            .filter(Utils.isTagFolder)
-                                           .map(function(id) Bookmarks.getItemTitle(id));
+                                           .map(id => Bookmarks.getItemTitle(id));
 
                 let storedTags = yield Utils.getTagsForEntry(entryID, resume);
 
-                let removedTags = storedTags.filter(function(t) currentTags.indexOf(t) === -1);
+                let removedTags = storedTags.filter(t => currentTags.indexOf(t) === -1);
 
                 for (let tag of removedTags)
                     StorageInternal.tagEntry(false, entryID, tag);
@@ -1832,7 +1831,7 @@ let LivemarksSync = function LivemarksSync() {
 
             // Check if feed's properties are up to date.
             let properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
-            if (feed.hidden || properties.some(function(p) feed[p] != livemark[p])) {
+            if (feed.hidden || properties.some(p => feed[p] != livemark[p])) {
                 changedFeeds.push({
                     'feedID'    : feed.feedID,
                     'hidden'    : 0,
@@ -1860,7 +1859,7 @@ let LivemarksSync = function LivemarksSync() {
     }
 
     // Hide any feeds that are no longer found among the livemarks.
-    let missingFeeds = storedFeeds.filter(function(f) oldFeeds.indexOf(f) == -1 && !f.hidden);
+    let missingFeeds = storedFeeds.filter(f => oldFeeds.indexOf(f) == -1 && !f.hidden);
     for (let feed of missingFeeds) {
         changedFeeds.push({
             'feedID': feed.feedID,
@@ -2194,9 +2193,9 @@ let Utils = {
 
     getTagsForEntry: function getTagsForEntry(aEntryID, aCallback) {
         Stm.getTagsForEntry.params = { 'entryID': aEntryID };
-        Stm.getTagsForEntry.getResultsAsync(function(results) {
-            aCallback([row.tagName for (row of results)]);
-        })
+        Stm.getTagsForEntry.getResultsAsync(
+            results => aCallback([row.tagName for (row of results)])
+        )
     },
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
@@ -2214,23 +2213,23 @@ let Utils = {
 
     getEntriesByURL: function getEntriesByURL(aURL, aCallback) {
         Stm.selectEntriesByURL.params.url = aURL;
-        Stm.selectEntriesByURL.getResultsAsync(function(results) {
-            aCallback([row.id for (row of results)]);
-        })
+        Stm.selectEntriesByURL.getResultsAsync(
+            results => aCallback([row.id for (row of results)])
+        )
     },
 
     getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID, aCallback) {
         Stm.selectEntriesByBookmarkID.params.bookmarkID = aBookmarkID;
-        Stm.selectEntriesByBookmarkID.getResultsAsync(function(results) {
-            aCallback([{ id: row.id, url: row.entryURL } for (row of results)])
-        })
+        Stm.selectEntriesByBookmarkID.getResultsAsync(
+            results => aCallback([{ id: row.id, url: row.entryURL } for (row of results)])
+        )
     },
 
     getEntriesByTagName: function getEntriesByTagName(aTagName, aCallback) {
         Stm.selectEntriesByTagName.params.tagName = aTagName;
-        Stm.selectEntriesByTagName.getResultsAsync(function(results) {
-            aCallback([row.id for (row of results)]);
-        })
+        Stm.selectEntriesByTagName.getResultsAsync(
+            results => aCallback([row.id for (row of results)])
+        )
     },
 
     newURI: function(aSpec) {
@@ -2254,9 +2253,11 @@ let Utils = {
     }.gen(),
 
     isLivemark: function Utils_isLivemark(aItemID, aCallback) {
-        let resume = Utils_isLivemark.resume;
-        aCallback(Components.isSuccessCode(yield Places.livemarks.getLivemark({"id": aItemID}, function(status) resume(status))));
-    }.gen(),
+        Places.livemarks.getLivemark(
+            { 'id': aItemID },
+            status => aCallback(Components.isSuccessCode(status))
+        )
+    },
 
     isFolder: function(aItemID) {
         return (Bookmarks.getItemType(aItemID) === Bookmarks.TYPE_FOLDER);
