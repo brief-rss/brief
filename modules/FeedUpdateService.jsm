@@ -445,8 +445,7 @@ FeedFetcher.prototype = {
 
         let parsedFeed = aResult.doc.QueryInterface(Ci.nsIFeed);
         let newEntriesCount = yield Storage.processFeed(this.feed.feedID, parsedFeed,
-                                                        this.request.responseXML,
-                                                        FeedFetcher_handleResult.resume);
+                                                        this.request.responseXML);
         this.finish('ok', newEntriesCount);
     }.gen(),
 

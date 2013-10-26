@@ -225,7 +225,7 @@ const Brief = {
             read: false
         })
 
-        query.getEntryCount(unreadEntriesCount => {
+        query.getEntryCount().then(unreadEntriesCount => {
             Brief.statusCounter.value = unreadEntriesCount;
             Brief.statusCounter.hidden = (unreadEntriesCount == 0);
 
@@ -303,7 +303,7 @@ const Brief = {
             sortDirection: this.query.SORT_ASCENDING
         })
 
-        query.getProperty('feedID', true, unreadFeeds => {
+        query.getProperty('feedID', true).then(unreadFeeds => {
             let noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
             let value = bundle.GetStringFromName('noUnreadFeedsTooltip');
             noUnreadLabel.setAttribute('value', value);
@@ -327,7 +327,7 @@ const Brief = {
                     read: false
                 })
 
-                query.getEntryCount(unreadCount => {
+                query.getEntryCount.then(unreadCount => {
                     let label = document.createElement('label');
                     label.setAttribute('class', 'unread-entries-count');
                     label.setAttribute('value', unreadCount);

@@ -3,6 +3,8 @@ Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/NetUtil.jsm');
+Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
+Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
 
@@ -49,8 +51,8 @@ function init() {
     let startView = getElement('view-list').getAttribute('startview');
     ViewList.selectedItem = getElement(startView);
 
-    async(FeedList.rebuild, 0, FeedList);
-    async(Storage.syncWithLivemarks, 1000, Storage);
+    wait().then(() => FeedList.rebuild());
+    wait(1000).then(() => Storage.syncWithLivemarks());
 }
 
 
@@ -349,9 +351,9 @@ function refreshProgressmeter(aReason) {
             getElement('update-progress').removeAttribute('show');
         }
         else {
-            async(function() {
-                getElement('update-progress').removeAttribute('show');
-            }, 1000);
+            wait(1000).then(() =>
+                getElement('update-progress').removeAttribute('show')
+            )
         }
     }
 }
@@ -511,14 +513,3 @@ let PrefObserver = {
 // ------- Utility functions --------
 
 function getElement(aId) document.getElementById(aId);
-
-/**
- * Executes given function asynchronously. All arguments besides
- * the first one are optional.
- */
-function async(aFunction, aDelay, aObject, arg1, arg2) {
-    function asc() {
-        aFunction.call(aObject || this, arg1, arg2);
-    }
-    return setTimeout(asc, aDelay || 0);
-}
