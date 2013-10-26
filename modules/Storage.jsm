@@ -610,8 +610,6 @@ let StorageInternal = {
 
                 Services.obs.removeObserver(this, 'quit-application');
                 Services.obs.removeObserver(this, 'idle-daily');
-
-                BookmarkObserver.syncDelayTimer = null;
                 break;
 
             case 'idle-daily':
@@ -1578,7 +1576,6 @@ Query.prototype = {
 
 let BookmarkObserver = {
 
-    livemarksSyncPending: false,
     batching: false,
     homeFolderContentModified: false,
 
@@ -1705,22 +1702,19 @@ let BookmarkObserver = {
     // nsINavBookmarkObserver
     onItemVisited: function BookmarkObserver_aOnItemVisited(aItemID, aVisitID, aTime) { },
 
-    get syncDelayTimer() {
-        if (!this.__syncDelayTimer)
-            this.__syncDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        return this.__syncDelayTimer;
-    },
-
     delayedLivemarksSync: function BookmarkObserver_delayedLivemarksSync() {
         if (this.batching) {
             this.homeFolderContentModified = true;
         }
         else {
-            if (this.livemarksSyncPending)
-                this.syncDelayTimer.cancel();
+            if (this.syncDelay)
+                this.syncDelay.cancel();
 
-            this.syncDelayTimer.init(this, LIVEMARKS_SYNC_DELAY, Ci.nsITimer.TYPE_ONE_SHOT);
-            this.livemarksSyncPending = true;
+            this.syncDelay = wait(LIVEMARKS_SYNC_DELAY);
+            this.syncDelay.then(() => {
+                this.syncDelay = null;
+                Storage.syncWithLivemarks();
+            })
         }
     },
 
@@ -1765,14 +1759,7 @@ let BookmarkObserver = {
         result.root.containerOpen = false;
     }.gen(),
 
-    observe: function BookmarkObserver_observe(aSubject, aTopic, aData) {
-        if (aTopic == 'timer-callback') {
-            this.livemarksSyncPending = false;
-            Storage.syncWithLivemarks();
-        }
-    },
-
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsINavBookmarkObserver, Ci.nsIObserver])
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsINavBookmarkObserver])
 
 }
 
