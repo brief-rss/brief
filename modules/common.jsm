@@ -1,7 +1,8 @@
-const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'Task', 'log', 'extend',
+const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'log',
                           'getPluralForm', 'RelativeDate'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
+Components.utils.import('resource://gre/modules/Task.jsm');
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -30,9 +31,6 @@ Array.prototype.intersect = function intersect(aArr) {
 }
 
 
-function extend(aSubtype, aSupertype) {
-    aSubtype.prototype.__proto__ = aSupertype.prototype;
-}
 
 function log(aThing) {
     let str = aThing && typeof aThing == 'object' ? aThing.toSource() : aThing;
@@ -40,50 +38,14 @@ function log(aThing) {
 }
 
 
-const ThreadManager = Cc['@mozilla.org/thread-manager;1'].getService(Ci.nsIThreadManager);
-
-function defer(fn, ctx) {
-    if (ctx) {
-        fn = fn.bind(ctx);
-    }
-    ThreadManager.mainThread.dispatch(fn, 0);
-}
-
-
-function Task(aGeneratorFunction) {
-    let generatorInstance = aGeneratorFunction.call(this, resume);
-    resume();
-
-    function resume() {
-        try {
-            let arg = arguments.length <= 1 ? arguments[0] : arguments;
-            generatorInstance.send.call(generatorInstance, arg);
-        }
-        catch (ex if ex == StopIteration) {}
-    }
-}
-
 Function.prototype.gen = function() {
     let generatorFunction = this;
 
     return function generatorWrapper() {
-        let generatorInstance = generatorFunction.apply(this, arguments);
-        resume();
-
-        function resume() {
-            try {
-                generatorFunction.resume = resume;
-                let arg = arguments.length <= 1 ? arguments[0] : arguments;
-                generatorInstance.send.call(generatorInstance, arg);
-            }
-            catch (ex if ex == StopIteration) {}
-            catch (ex if ex.name == "TypeError" && // Not instanceof - it's an 'object'
-                   ex.message == "already executing generator") {
-                defer(function() resume.apply(arguments));
-            }
-        }
+        return Task.spawn(generatorFunction.apply(this, arguments));
     }
 }
+
 
 function RelativeDate(aAbsoluteTime) {
     let currentDate = new Date();
