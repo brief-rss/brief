@@ -615,7 +615,9 @@ FeedView.prototype = {
 
             let entryView = this.getEntryView(entry);
 
-            entryView.remove(animate, this._callbackRefreshGuard(() => {
+            let removed = entryView.remove(animate);
+
+            this._refreshGuard(removed).then(() => {
                 let index = this.getEntryIndex(entry);
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
@@ -633,11 +635,11 @@ FeedView.prototype = {
 
                 if (++removedCount == indices.length) {
                     if (aLoadNewEntries && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
-                        this._fillWindow(WINDOW_HEIGHTS_LOAD, afterEntriesRemoved.bind(this));
+                        this._fillWindow(WINDOW_HEIGHTS_LOAD).then(afterEntriesRemoved.bind(this));
                     else
                         afterEntriesRemoved.call(this);
                 }
-            }))
+            })
         }
 
         function afterEntriesRemoved() {
@@ -695,7 +697,7 @@ FeedView.prototype = {
         // can trigger a resize event (!?).
         this.window.removeEventListener('resize', this, false);
 
-        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD, () => {
+        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD).then(() => {
             // Resize events can be dispatched asynchronously, so this listener shouldn't
             // be added earlier along with other ones, because then it could be triggered
             // before the initial refresh.
@@ -721,18 +723,15 @@ FeedView.prototype = {
      * @param aWindowHeights
      *        The number of window heights to fill ahead of the current scroll
      *        position.
+     * @returns Promise<null>
      */
-    _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
+    _fillWindow: function FeedView__fillWindow(aWindowHeights) {
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = this.headlinesMode ? HEADLINES_LOAD_STEP_SIZE
                                               : LOAD_STEP_SIZE;
-
-            do var loadedCount = yield this._refreshGuard(this._loadEntries(stepSize));
+            do var loadedCount = yield this._refreshGuard(this._loadEntries(stepSize))
             while (loadedCount && !this.enoughEntriesPreloaded(aWindowHeights))
         }
-
-        if (aCallback)
-            aCallback();
     }.gen(),
 
     /**
@@ -1096,15 +1095,22 @@ EntryView.prototype = {
     },
 
 
-    remove: function EntryView_remove(aAnimate, aCallback) {
+    /**
+     * Removes the entry view.
+     *
+     * @param aAnimate <boolean> [optional] Whether to animate or remove instantly.
+     * @returns Promise<null> when finished.
+     */
+    remove: function EntryView_remove(aAnimate) {
+        let deferred =  Promise.defer();
+
         if (aAnimate) {
             this.container.addEventListener('transitionend', () => {
                 // The element may have been removed in the meantime
                 // if the view had been refreshed.
                 if (this.container.parentNode == this.feedView.feedContent) {
                     this.feedView.feedContent.removeChild(this.container);
-                    if (aCallback)
-                        aCallback();
+                    deferred.resolve();
                 }
             }, true);
 
@@ -1112,9 +1118,10 @@ EntryView.prototype = {
         }
         else {
             this.feedView.feedContent.removeChild(this.container);
-            if (aCallback)
-                aCallback();
+            deferred.resolve();
         }
+
+        return deferred.promise;
     },
 
     collapse: function EntryView_collapse(aAnimate) {
@@ -1143,7 +1150,7 @@ EntryView.prototype = {
 
         hideElement(this._getElement('headline-container'));
 
-        showElement(this._getElement('full-container'), aAnimate, () => {
+        showElement(this._getElement('full-container'), aAnimate).then(() => {
             if (this.container.parentNode != this.feedView.feedContent)
                 return;
 
@@ -1378,59 +1385,59 @@ EntryView.prototype = {
 }
 
 
-function hideElement(aElement, aAnimate, aCallback) {
+function hideElement(aElement, aAnimate) {
+    let deferred = Promise.defer();
+
     if (aAnimate) {
         aElement.style.opacity = '0';
-
         aElement.setAttribute('hiding', true);
-        aElement.addEventListener('transitionend', listener, false);
+
+        aElement.addEventListener('transitionend', event => {
+            aElement.removeEventListener('transitionend', arguments.callee, false);
+            aElement.removeAttribute('hiding');
+
+            aElement.style.display = 'none';
+            aElement.style.opacity = '';
+
+            deferred.resolve();
+        }, false);
     }
     else {
         aElement.style.display = 'none';
         aElement.style.opacity = '0';
 
-        if (aCallback)
-            aCallback();
+        deferred.resolve();
     }
 
-    function listener() {
-        aElement.removeEventListener('transitionend', listener, false);
-        aElement.removeAttribute('hiding');
-
-        aElement.style.display = 'none';
-        aElement.style.opacity = '';
-
-        if (aCallback)
-            aCallback();
-    }
+    return deferred.promise;
 }
 
-function showElement(aElement, aAnimate, aCallback) {
+function showElement(aElement, aAnimate) {
+    let deferred = Promise.defer();
+
     if (aAnimate) {
         aElement.style.display = '';
         aElement.style.opacity = '0';
         aElement.offsetHeight; // Force reflow.
 
         aElement.style.opacity = '';
-
         aElement.setAttribute('showing', true);
-        aElement.addEventListener('transitionend', listener, false);
+
+        aElement.addEventListener('transitionend', event => {
+            aElement.removeEventListener('transitionend', arguments.callee, false);
+            aElement.removeAttribute('showing');
+
+            deferred.resolve();
+        }, false);
     }
     else {
         aElement.style.display = '';
         aElement.style.opacity = '';
 
-        if (aCallback)
-            aCallback();
+        deferred.resolve();
     }
 
-    function listener() {
-        aElement.removeEventListener('transitionend', listener, false);
-        aElement.removeAttribute('showing');
-
-        if (aCallback)
-            aCallback();
-    }
+    return deferred.promise;
 }
 
 
