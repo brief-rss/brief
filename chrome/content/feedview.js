@@ -519,8 +519,6 @@ FeedView.prototype = {
      *        Array of IDs of entries.
      */
     _onEntriesAdded: function FeedView__onEntriesAdded(aAddedEntries) {
-        let resume = this._getRefreshGuard(FeedView__onEntriesAdded.resume);
-
         // The simplest way would be to query the current list of all entries in the view
         // and intersect it with the list of added ones. However, this is expansive for
         // large views and we try to avoid it.
@@ -541,7 +539,7 @@ FeedView.prototype = {
             else
                 query.endDate = edgeDate;
 
-            this._loadedEntries = yield query.getEntries(resume);
+            this._loadedEntries = yield this._refreshGuard(query.getEntries());
 
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
@@ -551,7 +549,7 @@ FeedView.prototype = {
                     entries: newEntries
                 })
 
-                for (let entry of yield query.getFullEntries(resume))
+                for (let entry of yield query.getFullEntries())
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
@@ -565,7 +563,7 @@ FeedView.prototype = {
         // Otherwise, just blow it all away and refresh from scratch.
         else {
             if (this._allEntriesLoaded) {
-                let currentEntryList = yield this.query.getEntries(resume);
+                let currentEntryList = yield this.query.getEntries();
                 if (currentEntryList.intersect(aAddedEntries).length)
                     this.refresh()
             }
@@ -616,7 +614,7 @@ FeedView.prototype = {
 
             let entryView = this.getEntryView(entry);
 
-            entryView.remove(animate, this._getRefreshGuard(() => {
+            entryView.remove(animate, this._callbackRefreshGuard(() => {
                 let index = this.getEntryIndex(entry);
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
@@ -724,13 +722,11 @@ FeedView.prototype = {
      *        position.
      */
     _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
-        let resume = FeedView__fillWindow.resume;
-
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = this.headlinesMode ? HEADLINES_LOAD_STEP_SIZE
                                               : LOAD_STEP_SIZE;
 
-            do var loadedCount = yield this._loadEntries(stepSize, resume);
+            do var loadedCount = yield this._refreshGuard(this._loadEntries(stepSize));
             while (loadedCount && !this.enoughEntriesPreloaded(aWindowHeights))
         }
 
@@ -756,13 +752,11 @@ FeedView.prototype = {
      * make sure to load all of them in a single batch, in order to avoid loading them
      * again later.
      *
-     * @param aCount
-     *        Requested number of entries.
-     * @return The actual number of entries that were loaded.
+     * @param aCount <integer> Requested number of entries.
+     * @returns Promise<integer> that resolves to the actual number
+     *          of entries that were loaded.
      */
-    _loadEntries: function FeedView__loadEntries(aCount, aCallback) {
-        let resume = this._getRefreshGuard(FeedView__loadEntries.resume);
-
+    _loadEntries: function FeedView__loadEntries(aCount) {
         this._loading = true;
 
         let dateQuery = this.getQueryCopy();
@@ -783,7 +777,7 @@ FeedView.prototype = {
 
         dateQuery.limit = aCount;
 
-        let dates = yield dateQuery.getProperty('date', false, resume);
+        let dates = yield this._refreshGuard(dateQuery.getProperty('date', false));
         if (dates.length) {
             let query = this.getQueryCopy();
             if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
@@ -795,19 +789,20 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            let loadedEntries = yield query.getFullEntries(resume);
+            let loadedEntries = yield this._refreshGuard(query.getFullEntries());
             for (let entry of loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
             }
 
             this._loading = false;
-            aCallback(loadedEntries.length);
+            throw new Task.Result(loadedEntries.length);
         }
         else {
             this._loading = false;
             this._allEntriesLoaded = true;
-            aCallback(0);
+
+            throw new Task.Result(0);
         }
     }.gen(),
 
@@ -869,13 +864,35 @@ FeedView.prototype = {
         messageBox.style.display = '';
     },
 
-    _getRefreshGuard: function FeedView__getRefreshGuard(aWrappedResumeFunction) {
+    /**
+     * Returns a new pomise that wraps the provided promise. The new promise will be
+     * resolved with the value of the wrapped promise only if the view isn't refreshed
+     * in the meantime. Otherwise, the new promise will be rejected.
+     *
+     * This function is used to make sure that if the view is refreshed while the
+     * caller is waiting for an asynchronous function to complete, the caller will
+     * stop execution.
+     */
+    _refreshGuard: function FeedView__refreshGuard(aWrappedPromise) {
         let oldViewID = this.viewID;
 
-        return function refreshGuard() {
+        return aWrappedPromise.then(
+            value => {
+                if (this.viewID == oldViewID && this == gCurrentView)
+                    return value;
+                else
+                    throw new Error('Feed view refreshed while waiting for an async call to complete');
+            }
+        )
+    },
+
+    _callbackRefreshGuard: function FeedView__callbackRefreshGuard(aWrappedFunction) {
+        let oldViewID = this.viewID;
+
+        return () => {
             if (this.viewID == oldViewID && this == gCurrentView)
-                aWrappedResumeFunction.apply(undefined, arguments);
-        }.bind(this);
+                aWrappedFunction.apply(undefined, arguments);
+        };
     }
 
 }
@@ -1212,13 +1229,15 @@ EntryView.prototype = {
 
                     let oldViewID = this.feedView.viewID;
 
-                    query.getProperty('bookmarkID', false, ids => {
-                        if (this.feedView.viewID != oldViewID)
-                            return;
+                    query.getProperty('bookmarkID', false).then(
+                        ids => {
+                            if (this.feedView.viewID != oldViewID)
+                                return;
 
-                        let anchor = this._getElement('bookmark-button');
-                        getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
-                    })
+                            let anchor = this._getElement('bookmark-button');
+                            getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
+                        }
+                    )
                 }
                 else {
                     Commands.starEntry(this.id, true);

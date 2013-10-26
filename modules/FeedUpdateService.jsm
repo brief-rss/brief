@@ -4,6 +4,8 @@ Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/FeedContainer.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
+Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
 
@@ -246,8 +248,6 @@ let FeedUpdateServiceInternal = {
 
 
     updateNextFeed: function FeedUpdateServiceInternal_updateNextFeed() {
-        let resume = FeedUpdateServiceInternal_updateNextFeed.resume;
-
         // All feeds in the update queue may have already been requested,
         // because we don't cancel the timer until after all feeds are completed.
         let feed = this.updateQueue.shift();
@@ -256,30 +256,37 @@ let FeedUpdateServiceInternal = {
 
         Services.obs.notifyObservers(null, 'brief:feed-loading', feed.feedID);
 
-        let [status, document, parsedFeed] = yield new FeedFetcher(feed.feedURL, false, resume);
+        let fetcher = new FeedFetcher(feed.feedURL, true);
 
-        if (status == 'ok') {
-            let newEntriesCount = yield Storage.processFeed(feed.feedID, parsedFeed,
-                                                            document, resume);
+        try {
+            let { document, parsedFeed } = yield fetcher.done;
+
+            let newEntriesCount = yield Storage.processFeed(feed.feedID, parsedFeed, document);
             if (newEntriesCount > 0) {
                 this.newEntriesCount += newEntriesCount;
                 this.latestChangedFeed = feed;
                 this.feedsWithNewEntriesCount++;
             }
         }
+        catch (ex if ex.message == 'error') {
+            var error = true;
+        }
+        catch (ex if ex.message == 'cancelled') {
+        }
+        finally {
+            let timeSinceRefresh = Date.now() - feed.lastFaviconRefresh;
+            if (!feed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL)
+                new FaviconFetcher(feed);
 
-        let timeSinceRefresh = Date.now() - feed.lastFaviconRefresh;
-        if (!feed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL)
-            new FaviconFetcher(feed);
+            this.completedFeeds.push(feed);
 
-        this.completedFeeds.push(feed);
+            Services.obs.notifyObservers(null, 'brief:feed-updated', feed.feedID);
+            if (error)
+                Services.obs.notifyObservers(null, 'brief:feed-error', feed.feedID);
 
-        Services.obs.notifyObservers(null, 'brief:feed-updated', feed.feedID);
-        if (status == 'error')
-            Services.obs.notifyObservers(null, 'brief:feed-error', feed.feedID);
-
-        if (this.completedFeeds.length == this.scheduledFeeds.length)
-            this.finishUpdate('completed');
+            if (this.completedFeeds.length == this.scheduledFeeds.length)
+                this.finishUpdate('completed');
+        }
     }.gen(),
 
 
@@ -340,19 +347,20 @@ let FeedUpdateServiceInternal = {
 
     // See FeedUpdateService.
     addFeed: function(aURL) {
-        new FeedFetcher(aURL, false, function(status, document, parsedFeed) {
-            // Just add a livemark, the feed will be updated by the bookmark observer.
-            let livemarks = Cc['@mozilla.org/browser/livemark-service;2']
-                            .getService(Ci.mozIAsyncLivemarks);
-            livemarks.addLivemark({
-                title: parsedFeed.title.text,
-                feedURI: Services.io.newURI(aURL, null, null),
-                siteURI: parsedFeed.link,
-                parentId: Prefs.getIntPref('homeFolder'),
-                index: Ci.nsINavBookmarksService.DEFAULT_INDEX,
-            })
+        let fetcher = new FeedFetcher(aURL, false);
+        let { document, parsedFeed } = yield fetcher.done;
+
+        // Just add a livemark, the feed will be updated by the bookmark observer.
+        let livemarks = Cc['@mozilla.org/browser/livemark-service;2']
+                        .getService(Ci.mozIAsyncLivemarks);
+        livemarks.addLivemark({
+            title: parsedFeed.title.text,
+            feedURI: Services.io.newURI(aURL, null, null),
+            siteURI: parsedFeed.link,
+            parentId: Prefs.getIntPref('homeFolder'),
+            index: Ci.nsINavBookmarksService.DEFAULT_INDEX,
         })
-    },
+    }.gen(),
 
     // nsIObserver
     observe: function FeedUpdateServiceInternal_observe(aSubject, aTopic, aData) {
@@ -388,23 +396,22 @@ let FeedUpdateServiceInternal = {
 
 
 /**
- * A worker object that downloads and parses a feed.
+ * A worker object that downloads and parses a feed. Its |done| property is
+ * a Promise that resolves to an object containing the following properties:
+ * document <DOM document>: downloaded XML document, or null
+ * parsedFeed <nsIFeedContainer>: parsed feed data, or null
  *
  * @param aURL [string]
  *        URL of the feed.
  * @param aCancelable [boolean]
  *        Indicates if the request can be canceled by brief:feed-update-finished
  *        notification.
- * @param aCallback [function]
- *        Callback function that receives the following arguments:
- *        1) status [string] "ok", "error", "cancelled"
- *        2) document [DOM document] downloaded XML document, or null
- *        3) parsedFeed [nsIFeedContainer] parsed feed data, or null
  */
-function FeedFetcher(aURL, aCancelable, aCallback) {
+function FeedFetcher(aURL, aCancelable) {
     this.url = aURL;
     this.cancelable = aCancelable;
-    this.callback = aCallback;
+    this.deferred = Promise.defer();
+    this.done = this.deferred.promise;
 
     this.parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
     this.parser.listener = this;
@@ -488,7 +495,10 @@ FeedFetcher.prototype = {
 
         this.finished = true;
 
-        this.callback(aStatus, document, aParsedFeed);
+        if (aStatus == 'ok')
+            this.deferred.resolve({ document: document, parsedFeed: aParsedFeed });
+        else
+            this.deferred.reject(new Error(aStatus));
     },
 
     observe: function FeedFetcher_observe(aSubject, aTopic, aData) {

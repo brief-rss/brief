@@ -7,6 +7,8 @@ Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/FileUtils.jsm');
+Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
+Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
 
@@ -125,11 +127,10 @@ const Storage = Object.freeze({
     /**
      * Gets a list of distinct tags for URLs of entries stored in the database.
      *
-     * @param aCallback
-     *        Receives an array of strings of tag names.
+     * @returns Promise<array> Array of tag names.
      */
-    getAllTags: function(aCallback) {
-        return StorageInternal.getAllTags(aCallback);
+    getAllTags: function() {
+        return StorageInternal.getAllTags();
     },
 
     /**
@@ -142,11 +143,10 @@ const Storage = Object.freeze({
      *        nsIFeed object returned by the parser.
      * @param aXMLDocument
      *        The feed's DOM document.
-     * @param aCallback
-     *        Callback that takes the number of newly inserted entries as an argument.
+     * @returns Promise<integer> Number of newly inserted entries.
      */
-    processFeed: function(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
-        return StorageInternal.processFeed(aFeedID, aParsedFeed, aFeedDocument, aCallback);
+    processFeed: function(aFeedID, aParsedFeed, aFeedDocument) {
+        return StorageInternal.processFeed(aFeedID, aParsedFeed, aFeedDocument);
     },
 
     /**
@@ -155,10 +155,10 @@ const Storage = Object.freeze({
      * @param aPropertyBags
      *        An object or an array of objects containing a feedID property and name-value
      *        pairs of properties to update. Invalid properties are ignored.
-     * @param aCallback [optional]
+     * @returns Promise<null>
      */
-    changeFeedProperties: function(aPropertyBags, aCallback) {
-        return StorageInternal.changeFeedProperties(aPropertyBags, aCallback);
+    changeFeedProperties: function(aPropertyBags) {
+        return StorageInternal.changeFeedProperties(aPropertyBags);
     },
 
     /**
@@ -395,31 +395,24 @@ let StorageInternal = {
             return this.activeFeedsCache;
     },
 
-    refreshFeedsCache: function StorageInternal_refreshFeedsCache(aSynchronous, aCallback) {
-        let resume = StorageInternal_refreshFeedsCache.resume;
-
+    /**
+     * Tears down feeds cache and builds it back from the database.
+     *
+     * @param aSynchronous <boolean>
+     *        Indicates that cache should be rebuilt immediately, with a synchronous
+     *        database query.
+     * @returns Promise<null>
+     */
+    refreshFeedsCache: function StorageInternal_refreshFeedsCache(aSynchronous) {
         this.allItemsCache = null;
         this.activeItemsCache = null;
         this.activeFeedsCache = null;
 
         let results, error;
-        if (aSynchronous) {
-            if (this.pendingRefreshCacheStatement) {
-                this.pendingRefreshCacheStatement.cancel();
-                this.pendingRefreshCacheStatement = null;
-            }
-
+        if (aSynchronous)
             results = Stm.getAllFeeds.results;
-        }
-        else {
-            this.pendingRefreshCacheStatement = Stm.getAllFeeds.getResultsAsync(resume);
-            [results, error] = yield undefined;
-            this.pendingRefreshCacheStatement = null;
-        }
-
-        // Do not blow the cache in the case results could not be fetched.
-        if (error || !results)
-            return;
+        else
+            results = yield Stm.getAllFeeds.getResultsAsync();
 
         this.allItemsCache = [];
         this.activeItemsCache = [];
@@ -441,28 +434,23 @@ let StorageInternal = {
         Object.freeze(this.allItemsCache);
         Object.freeze(this.activeItemsCache);
         Object.freeze(this.activeFeedsCache);
-
-        if (aCallback)
-            aCallback();
     }.gen(),
 
     // See Storage.
-    getAllTags: function StorageInternal_getAllTags(aCallback) {
-        Stm.getAllTags.getResultsAsync(
-            results => aCallback([row.tagName for (row of results)])
+    getAllTags: function StorageInternal_getAllTags() {
+        return Stm.getAllTags.getResultsAsync().then(
+            results => [row.tagName for (row of results)]
         )
     },
 
 
     // See Storage.
-    processFeed: function StorageInternal_processFeed(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
-        new FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aCallback);
+    processFeed: function StorageInternal_processFeed(aFeedID, aParsedFeed, aFeedDocument) {
+        new FeedProcessor(aFeedID, aParsedFeed, aFeedDocument);
     },
 
     // See Storage.
-    changeFeedProperties: function StorageInternal_changeFeedProperties(aPropertyBags, aCallback) {
-        let resume = StorageInternal_changeFeedProperties.resume;
-
+    changeFeedProperties: function StorageInternal_changeFeedProperties(aPropertyBags) {
         let propertyBags = Array.isArray(aPropertyBags) ? aPropertyBags : [aPropertyBags];
 
         let tearDownCache = false;
@@ -515,16 +503,13 @@ let StorageInternal = {
             Stm.changeFeedProperties.paramSets.push(params);
         }
 
-        yield Stm.changeFeedProperties.executeAsync(resume);
+        yield Stm.changeFeedProperties.executeAsync();
 
         if (tearDownCache)
-            yield StorageInternal.refreshFeedsCache(false, resume);
+            yield StorageInternal.refreshFeedsCache(false);
 
         if (invalidateFeedlist)
             Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
-
-        if (aCallback)
-            aCallback();
     }.gen(),
 
     /**
@@ -534,8 +519,6 @@ let StorageInternal = {
      *        The feed whose entries to expire. If not provided, all feeds are processed.
      */
     expireEntries: function StorageInternal_expireEntries(aFeed) {
-        let resume = StorageInternal_expireEntries.resume;
-
         let feeds = aFeed ? [aFeed] : this.getAllFeeds();
 
         let feedsWithAgeLimit = feeds.filter(f => f.entryAgeLimit);
@@ -552,7 +535,7 @@ let StorageInternal = {
                     offset: Prefs.getIntPref('database.maxStoredEntries')
                 })
 
-                yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, resume);
+                yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
             }
         }
 
@@ -567,7 +550,7 @@ let StorageInternal = {
                 endDate: Date.now() - expirationAge * 86400000
             })
 
-            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED, resume);
+            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
         }
 
         // Delete old entries based on per-feed limit.
@@ -606,7 +589,7 @@ let StorageInternal = {
 
         Connection.executeAsync([Stm.purgeDeletedEntriesText,
                                  Stm.purgeDeletedEntries,
-                                 Stm.purgeDeletedFeeds])
+                                 Stm.purgeDeletedFeeds]);
 
         // Prefs can only store longs while Date is a long long.
         let now = Math.round(Date.now() / 1000);
@@ -694,19 +677,17 @@ let StorageInternal = {
      *        Don't notify observers.
      */
     starEntry: function StorageInternal_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
-        let resume = StorageInternal_starEntry.resume;
-
         if (aState) {
             Stm.starEntry.params = { 'bookmarkID': aBookmarkID, 'entryID': aEntryID };
-            yield Stm.starEntry.executeAsync(resume);
+            yield Stm.starEntry.executeAsync();
         }
         else {
             Stm.unstarEntry.params = { 'id': aEntryID };
-            yield Stm.unstarEntry.executeAsync(resume);
+            yield Stm.unstarEntry.executeAsync();
         }
 
         if (!aDontNotify) {
-            let list = yield new Query(aEntryID).getEntryList(resume);
+            let list = yield new Query(aEntryID).getEntryList();
             for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesStarred)
                     observer.onEntriesStarred(list, aState);
@@ -725,33 +706,31 @@ let StorageInternal = {
      *        Name of the tag.
      */
     tagEntry: function StorageInternal_tagEntry(aState, aEntryID, aTagName) {
-        let resume = StorageInternal_tagEntry.resume;
-
         let params = { 'entryID': aEntryID, 'tagName': aTagName };
 
         if (aState) {
             Stm.checkTag.params = params;
-            let results = yield Stm.checkTag.getResultsAsync(resume);
+            let results = yield Stm.checkTag.getResultsAsync();
             if (results[0].alreadyTagged)
                 return;
 
             Stm.tagEntry.params = params;
-            yield Stm.tagEntry.executeAsync(resume);
+            yield Stm.tagEntry.executeAsync();
         }
         else {
             Stm.untagEntry.params = params;
-            yield Stm.untagEntry.executeAsync(resume);
+            yield Stm.untagEntry.executeAsync();
         }
 
         // Update the serialized list of tags stored in entries_text table.
-        let newTags = yield Utils.getTagsForEntry(aEntryID, resume);
+        let newTags = yield Utils.getTagsForEntry(aEntryID);
         Stm.setSerializedTagList.params = {
             'tags': newTags.join(', '),
             'entryID': aEntryID
         }
-        yield Stm.setSerializedTagList.executeAsync(resume);
+        yield Stm.setSerializedTagList.executeAsync();
 
-        let list = yield new Query(aEntryID).getEntryList(resume);
+        let list = yield new Query(aEntryID).getEntryList();
         for (let observer of StorageInternal.observers) {
             if (observer.onEntriesTagged)
                 observer.onEntriesTagged(list, aState, aTagName);
@@ -764,10 +743,10 @@ let StorageInternal = {
 
 
 // See Storage.processFeed().
-function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
+function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument) {
     this.feed = Storage.getFeed(aFeedID);
     this.parsedFeed = aParsedFeed;
-    this.callback = aCallback;
+    this.deferred = Promise.defer();
 
     let newDateModified = new Date(aParsedFeed.updated).getTime();
     let prevDateModified = this.feed.dateModified;
@@ -791,7 +770,7 @@ function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aCallback) {
         }
     }
     else {
-        aCallback(0);
+        this.deferred.resolve(0);
     }
 
     Storage.changeFeedProperties({
@@ -855,15 +834,15 @@ FeedProcessor.prototype = {
 
         let storedID, storedPubDate, storedDateUpdated, isEntryRead;
 
-        select.executeAsync({
-            handleResult: row => {
+        select.executeAsync(
+            row => {
                 storedID = row.id;
                 storedPubDate = row.date;
                 storedDateUpdated = row.updated;
                 isEntryRead = row.read;
-            },
-
-            handleCompletion: reason => {
+            }
+        ).then(
+            reason => {
                 if (reason == REASON_FINISHED) {
                     if (storedID) {
                         // XXX Comparing storedPubDate is temporary. Done to avoid suddenly
@@ -880,8 +859,10 @@ FeedProcessor.prototype = {
 
                 if (!--this.remainingEntriesCount)
                     this.executeAndNotify();
-            }
-        })
+            },
+
+            error => Cu.reportError(error)
+        )
     },
 
     addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
@@ -935,26 +916,24 @@ FeedProcessor.prototype = {
     },
 
     executeAndNotify: function FeedProcessor_executeAndNotify() {
-        let resume = FeedProcessor_executeAndNotify.resume;
-
         let insertedEntries = [];
 
         if (this.insertEntry.paramSets.length) {
             if (this.insertEntry.paramSets.length != this.insertEntryText.paramSets.length) {
-                this.callback(0);
+                this.deferred.resolve(0);
                 throw new Error('Mismatched parameteres between insertEntry and insertEntryText statements.');
             }
 
             Stm.getLastRowids.params.count = this.insertEntry.paramSets.length;
             let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
 
-            let reason = yield Connection.executeAsync(statements, {
-                handleResult: row => insertedEntries.push(row.id),
-                handleCompletion: resume
-            })
+            let reason = yield Connection.executeAsync(
+                statements,
+                row => insertedEntries.push(row.id)
+            )
 
             if (reason === REASON_FINISHED) {
-                let list = yield new Query(insertedEntries).getEntryList(resume);
+                let list = yield new Query(insertedEntries).getEntryList();
                 for (let observer of StorageInternal.observers) {
                     if (observer.onEntriesAdded)
                         observer.onEntriesAdded(list);
@@ -967,16 +946,16 @@ FeedProcessor.prototype = {
         if (this.updateEntry.paramSets.length) {
             let statements = [this.updateEntry, this.updateEntryText];
 
-            yield Connection.executeAsync(statements, resume);
+            yield Connection.executeAsync(statements);
 
-            let list = yield new Query(this.updatedEntries).getEntryList(resume);
+            let list = yield new Query(this.updatedEntries).getEntryList();
             for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesUpdated)
                     observer.onEntriesUpdated(list);
             }
         }
 
-        this.callback(insertedEntries.length);
+        this.deferred.resolve(insertedEntries.length);
     }.gen()
 
 }
@@ -1096,29 +1075,35 @@ Query.prototype = {
     /**
      * Indicates if there are any entries that match this query.
      *
-     * @param aCallback
+     * @returns Promise<boolean>
      */
-    hasMatches: function Query_hasMatches(aCallback) {
+    hasMatches: function Query_hasMatches() {
         let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
 
-        new Statement(sql).executeAsync({
-            handleResult: row => aCallback(row.found),
-            handleError: this._onDatabaseError
-        })
+        return new Statement(sql).getResultsAsync().then(
+            results => results[0].found,
+            error => {
+                this._maybeThrow(error);
+                return false;
+            }
+        )
     },
 
     /**
      * Get a simple list of entries.
      * XXX Check performance.
      *
-     * @param aCallback
-     *        Receives an array if IDs.
+     * @returns Promise<array> Array of entry IDs.
      */
-    getEntries: function Query_getEntries(aCallback) {
+    getEntries: function Query_getEntries() {
         let sql = 'SELECT entries.id ' + this._getQueryString(true);
-        new Statement(sql).getResultsAsync(
-            results => aCallback([row.id for (row of results)]),
-		    this._onDatabaseError
+
+        return new Statement(sql).getResultsAsync().then(
+            results => [row.id for (row of results)],
+		    error => {
+                this._maybeThrow(error);
+                return [];
+            }
         )
     },
 
@@ -1126,17 +1111,16 @@ Query.prototype = {
     /**
      * Get entries with all their properties.
      *
-     * @param aCallback
-     *        Receives an array of Entry objects.
+     * @returns Promise<array> Array of Entry objects.
      */
-    getFullEntries: function Query_getFullEntries(aCallback) {
+    getFullEntries: function Query_getFullEntries() {
         let sql = 'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,   '+
                   '       entries.read, entries.starred, entries.updated,               '+
                   '       entries.bookmarkID, entries_text.title, entries_text.content, '+
                   '       entries_text.authors, entries_text.tags                       ';
         sql += this._getQueryString(true, true);
 
-        new Statement(sql).getResultsAsync(
+        return new Statement(sql).getResultsAsync().then(
             results => {
                 let entries = [];
                 for (let row of results) {
@@ -1151,10 +1135,13 @@ Query.prototype = {
                     entries.push(entry);
                 }
 
-                aCallback(entries);
+                return entries;
             },
 
-            this._onDatabaseError
+            error => {
+                this._maybeThrow(error);
+                return [];
+            }
         )
     },
 
@@ -1166,10 +1153,9 @@ Query.prototype = {
      *        Name of the property.
      * @param aDistinct
      *        Don't include multiple entries with the same value.
-     * @param aCallback
-     *        Receives an array of values of the requested property.
+     * @returns Promise<array> Array of values of the requested property.
      */
-    getProperty: function Query_getProperty(aPropertyName, aDistinct, aCallback) {
+    getProperty: function Query_getProperty(aPropertyName, aDistinct) {
         switch (aPropertyName) {
             case 'content':
             case 'title':
@@ -1184,46 +1170,54 @@ Query.prototype = {
 
         let sql = 'SELECT entries.id, ' + table + aPropertyName +
                    this._getQueryString(true, getEntriesText);
-
         let values = [];
 
-        new Statement(sql).executeAsync({
-            handleResult: row => {
+        return new Statement(sql).executeAsync(
+            row => {
                 let value = row[aPropertyName];
                 if (!aDistinct || values.indexOf(value) == -1)
                     values.push(value);
-            },
-            handleCompletion: reason => aCallback(values),
-            handleError: this._onDatabaseError
-        })
+            }
+        ).then(
+            () => values,
+            error => {
+                this._maybeThrow(error);
+                return values;
+            }
+        )
     },
 
 
     /**
      * Get the number of selected entries.
      *
-     * @param aCallback
+     * @returns Promise<number>
      */
-    getEntryCount: function Query_getEntryCount(aCallback) {
+    getEntryCount: function Query_getEntryCount() {
         // Optimization: don't sort.
         let tempOrder = this.sortOrder;
         this.sortOrder = undefined;
 
         let sql = 'SELECT COUNT(1) AS count ' + this._getQueryString(true);
 
-        new Statement(sql).executeAsync({
-            handleResult: row => aCallback(row.count),
-            handleError: this._onDatabaseError
-        })
-
         this.sortOrder = tempOrder;
+
+        return new Statement(sql).getResultsAsync().then(
+            results => results[0].count,
+            error => {
+                this._maybeThrow(error);
+                return 0;
+            }
+        )
     },
 
 
     /**
-     * Get an EntryList of entries.
+     * Get a list of entries.
+     *
+     * @returns Promise<EntryList>
      */
-    getEntryList: function Query_getEntryList(aCallback) {
+    getEntryList: function Query_getEntryList() {
         let entryIDs = [];
         let feedIDs = [];
         let tags = [];
@@ -1234,8 +1228,8 @@ Query.prototype = {
                    + this._getQueryString(true, true);
         this.includeHiddenFeeds = tempHidden;
 
-        new Statement(sql).executeAsync({
-            handleResult: row => {
+        return new Statement(sql).executeAsync(
+            row => {
                 entryIDs.push(row.id);
 
                 if (feedIDs.indexOf(row.feedID) == -1)
@@ -1246,17 +1240,21 @@ Query.prototype = {
                     let newTags = arr.filter(t => tags.indexOf(t) === -1);
                     tags = tags.concat(newTags);
                 }
-            },
-
-            handleCompletion: reason => {
+            }
+        ).then(
+            reason => {
                 let list = new EntryList();
                 list.IDs = entryIDs;
                 list.feedIDs = feedIDs;
                 list.tags = tags;
 
-                aCallback(list);
+                return list;
+            },
+            error => {
+                this._maybeThrow(error);
+                return new EntryList();
             }
-        })
+        )
     },
 
 
@@ -1265,10 +1263,9 @@ Query.prototype = {
      *
      * @param aState
      *        New state of entries (TRUE for read, FALSE for unread).
+     * @returns Promise<null>
      */
     markEntriesRead: function Query_markEntriesRead(aState) {
-        let resume = Query_markEntriesRead.resume;
-
         // Try not to include entries which already have the desired state,
         // but we can't omit them if a specific range of the selected entries
         // is meant to be marked.
@@ -1276,14 +1273,14 @@ Query.prototype = {
         if (!this.limit && !this.offset)
             this.read = !aState;
 
-        let list = yield this.getEntryList(resume);
+        let list = yield this.getEntryList();
 
         if (list.length) {
             let sql = 'UPDATE entries SET read = :read ';
             let update = new Statement(sql + this._getQueryString());
 
             update.params.read = aState ? 1 : 0;
-            yield update.executeAsync(resume);
+            yield update.executeAsync();
 
             this.read = tempRead;
 
@@ -1302,42 +1299,37 @@ Query.prototype = {
      *
      * @param aState
      *        The new deleted state (as defined by constants in Storage).
-     * @param aCallback
+     * @returns Promise<null>
      */
-    deleteEntries: function Query_deleteEntries(aState, aCallback) {
-        let resume = Query_deleteEntries.resume;
-
-        let list = yield this.getEntryList(resume);
+    deleteEntries: function Query_deleteEntries(aState) {
+        let list = yield this.getEntryList();
         if (list.length) {
             let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
-            yield new Statement(sql).executeAsync(resume);
+            yield new Statement(sql).executeAsync();
 
             for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesDeleted)
                     observer.onEntriesDeleted(list, aState);
             }
         }
-
-        if (aCallback)
-            aCallback();
     }.gen(),
 
 
     /**
      * Bookmark/unbookmark URLs of the selected entries.
      *
-     * @param aState
-     *        New state of entries. TRUE to bookmark, FALSE to unbookmark.
-     *
      * This function bookmarks URIs of the selected entries. It doesn't star the entries
      * in the database or send notifications - that part is performed by the bookmark
      * observer.
+     *
+     * @param aState
+     *        New state of entries. TRUE to bookmark, FALSE to unbookmark.
+     * @returns Promise<null>
      */
     bookmarkEntries: function Query_bookmarkEntries(aState) {
-        let resume = Query_bookmarkEntries.resume;
         let transactions = [];
 
-        for (let entry of yield this.getFullEntries(resume)) {
+        for (let entry of yield this.getFullEntries()) {
             let uri = Utils.newURI(entry.entryURL);
             if (!uri)
                 continue;
@@ -1350,7 +1342,7 @@ Query.prototype = {
             }
             else {
                 let bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {}))
-                                 if (yield Utils.isNormalBookmark(b, resume))];
+                                 if (yield Utils.isNormalBookmark(b))];
                 if (bookmarks.length) {
                     for (let i = bookmarks.length - 1; i >= 0; i--)
                         transactions.push(new PlacesRemoveItemTransaction(bookmarks[i]));
@@ -1373,11 +1365,11 @@ Query.prototype = {
      *
      * This function syncs the entry status with user's bookmarks, in case it went
      * out of sync, for example if Brief was disabled or uninstalled.
+     *
+     * @returns Promise<null>
      */
     verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
-        let resume = Query_verifyBookmarksAndTags.resume;
-
-        for (let entry of yield this.getFullEntries(resume)) {
+        for (let entry of yield this.getFullEntries()) {
             let uri = Utils.newURI(entry.entryURL);
             if (!uri)
                 return;
@@ -1385,14 +1377,14 @@ Query.prototype = {
             let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
 
             // Verify bookmarks.
-            let normalBookmarks = [b for (b of allBookmarks) if (yield Utils.isNormalBookmark(b, resume))];
+            let normalBookmarks = [b for (b of allBookmarks) if (yield Utils.isNormalBookmark(b))];
             if (entry.starred && !normalBookmarks.length)
                 StorageInternal.starEntry(false, entry.id);
             else if (!entry.starred && normalBookmarks.length)
                 StorageInternal.starEntry(true, entry.id, normalBookmarks[0]);
 
             // Verify tags.
-            let storedTags = yield Utils.getTagsForEntry(entry.id, resume);
+            let storedTags = yield Utils.getTagsForEntry(entry.id);
             let currentTags = allBookmarks.map(id => Bookmarks.getFolderIdForItem(id))
                                           .filter(Utils.isTagFolder)
                                           .map(id => Bookmarks.getItemTitle(id));
@@ -1416,8 +1408,13 @@ Query.prototype = {
      */
     _effectiveFolders: null,
 
-
-    _onDatabaseError: function BriefQuery__onDatabaseError(aError) {
+    /**
+     * Check if the given error should be ignored. If so, resolves the provided promise
+     * to the default value, otherwise rejects the promise.
+     *
+     * XXX Is this still necessary?
+     */
+    _maybeThrow: function BriefQuery__maybeThrow(aError) {
         // Ignore "SQL logic error or missing database" error which full-text search
         // throws when the query doesn't contain at least one non-excluded term.
         if (aError.result != 1)
@@ -1601,19 +1598,17 @@ let BookmarkObserver = {
     // nsINavBookmarkObserver
     onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aParentID, aIndex, aItemType,
                                                        aURI, aTitle, aDateAdded) {
-        let resume = BookmarkObserver_onItemAdded.resume;
-
         if (aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aParentID)) {
             this.delayedLivemarksSync();
             return;
         }
 
         // Only care about plain bookmarks and tags.
-        if (aItemType != Bookmarks.TYPE_BOOKMARK || (yield Utils.isLivemark(aParentID, resume)))
+        if (aItemType != Bookmarks.TYPE_BOOKMARK || (yield Utils.isLivemark(aParentID)))
             return;
 
         // Find entries with the same URI as the added item and tag or star them.
-        for (let entry of yield Utils.getEntriesByURL(aURI.spec, resume)) {
+        for (let entry of yield Utils.getEntriesByURL(aURI.spec)) {
             if (Utils.isTagFolder(aParentID)) {
                 let tagName = Bookmarks.getItemTitle(aParentID);
                 StorageInternal.tagEntry(true, entry, tagName);
@@ -1627,8 +1622,6 @@ let BookmarkObserver = {
 
     // nsINavBookmarkObserver
     onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aParentID, aIndex, aItemType, aURI) {
-        let resume = BookmarkObserver_onItemRemoved.resume;
-
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
@@ -1640,16 +1633,16 @@ let BookmarkObserver = {
         let isTag = Utils.isTagFolder(aParentID);
 
         // Only care about plain bookmarks and tags.
-        if (aItemType != Bookmarks.TYPE_BOOKMARK || (yield Utils.isLivemark(aParentID, resume)))
+        if (aItemType != Bookmarks.TYPE_BOOKMARK || (yield Utils.isLivemark(aParentID)))
             return;
 
 
         if (isTag) {
-            for (let entry of yield Utils.getEntriesByURL(aURI.spec, resume))
+            for (let entry of yield Utils.getEntriesByURL(aURI.spec))
                 StorageInternal.tagEntry(false, entry, parentTitle);
         }
         else {
-            let entries = yield Utils.getEntriesByBookmarkID(aItemID, resume);
+            let entries = yield Utils.getEntriesByBookmarkID(aItemID);
 
             // Look for other bookmarks for this URI. If there is another
             // bookmark for this URI, don't unstar the entry, but update
@@ -1657,7 +1650,7 @@ let BookmarkObserver = {
             if (entries.length) {
                 let uri = Utils.newURI(aURI.spec);
                 var bookmarks = [b for (b of Bookmarks.getBookmarkIdsForURI(uri, {}))
-                                 if (yield Utils.isNormalBookmark(b, resume))];
+                                 if (yield Utils.isNormalBookmark(b))];
             }
 
             for (let entry of entries) {
@@ -1682,14 +1675,12 @@ let BookmarkObserver = {
     onItemChanged: function BookmarkObserver_onItemChanged(aItemID, aProperty,
                                                            aIsAnnotationProperty, aNewValue,
                                                            aLastModified, aItemType, aParentID) {
-        let resume = BookmarkObserver_onItemChanged.resume;
-
         switch (aProperty) {
             case 'title':
                 let feed = Utils.getFeedByBookmarkID(aItemID);
                 if (feed) {
                     Stm.setFeedTitle.params = { 'title': aNewValue, 'feedID': feed.feedID };
-                    yield Stm.setFeedTitle.executeAsync(resume);
+                    yield Stm.setFeedTitle.executeAsync();
                     feed.title = aNewValue; // Update cache.
                     Services.obs.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
                 }
@@ -1700,11 +1691,11 @@ let BookmarkObserver = {
 
             case 'uri':
                 // Unstar any entries with the old URI.
-                for (let entry of yield Utils.getEntriesByBookmarkID(aItemID, resume))
+                for (let entry of yield Utils.getEntriesByBookmarkID(aItemID))
                     StorageInternal.starEntry(false, entry.id);
 
                 // Star any entries with the new URI.
-                for (let entry of yield Utils.getEntriesByURL(aNewValue, resume))
+                for (let entry of yield Utils.getEntriesByURL(aNewValue))
                     StorageInternal.starEntry(true, entry, aItemID);
 
                 break;
@@ -1743,8 +1734,6 @@ let BookmarkObserver = {
      *        New name of the tag folder, i.e. new name of the tag.
      */
     renameTag: function BookmarkObserver_renameTag(aTagFolderID, aNewName) {
-        let resume = BookmarkObserver_renameTag.resume;
-
         // Get bookmarks in the renamed tag folder.
         let options = Places.history.getNewQueryOptions();
         let query = Places.history.getNewQuery();
@@ -1756,7 +1745,7 @@ let BookmarkObserver = {
             let tagID = result.root.getChild(i).itemId;
             let uri = Bookmarks.getBookmarkURI(tagID);
 
-            for (let entryID of yield Utils.getEntriesByURL(uri.spec, resume)) {
+            for (let entryID of yield Utils.getEntriesByURL(uri.spec)) {
                 StorageInternal.tagEntry(true, entryID, aNewName);
 
                 let currentTags = Bookmarks.getBookmarkIdsForURI(uri, {})
@@ -1764,7 +1753,7 @@ let BookmarkObserver = {
                                            .filter(Utils.isTagFolder)
                                            .map(id => Bookmarks.getItemTitle(id));
 
-                let storedTags = yield Utils.getTagsForEntry(entryID, resume);
+                let storedTags = yield Utils.getTagsForEntry(entryID);
 
                 let removedTags = storedTags.filter(t => currentTags.indexOf(t) === -1);
 
@@ -1793,8 +1782,6 @@ let BookmarkObserver = {
  * the livemarks available in the Brief's home folder.
  */
 let LivemarksSync = function LivemarksSync() {
-    let resume = LivemarksSync.resume;
-
     if (!this.checkHomeFolder())
         return;
 
@@ -1806,7 +1793,7 @@ let LivemarksSync = function LivemarksSync() {
     query.setFolders([StorageInternal.homeFolderID], 1);
     options.excludeItems = true;
     let result = Places.history.executeQuery(query, options);
-    yield this.traversePlacesQueryResults(result.root, livemarks, resume);
+    yield this.traversePlacesQueryResults(result.root, livemarks);
 
     let storedFeeds = Storage.getAllFeeds(true, true);
     let oldFeeds = [];
@@ -1868,14 +1855,14 @@ let LivemarksSync = function LivemarksSync() {
     }
 
     if (Stm.insertFeed.paramSets.length) {
-        yield Stm.insertFeed.executeAsync(resume);
+        yield Stm.insertFeed.executeAsync();
 
-        yield StorageInternal.refreshFeedsCache(false, resume);
+        yield StorageInternal.refreshFeedsCache(false);
         Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
     }
 
     if (changedFeeds.length) {
-        yield Storage.changeFeedProperties(changedFeeds, false, resume);
+        yield Storage.changeFeedProperties(changedFeeds, false);
     }
 
     // Update new and changed feeds. Changed feeds may need updating because
@@ -1917,9 +1904,17 @@ LivemarksSync.prototype = {
         return folderValid;
     },
 
-    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer, aLivemarks, aCallback) {
-        let resume = BookmarksSync_traversePlacesQueryResults.resume;
-
+    /**
+     * Recursivesly traverses a bookmark folder and builds a list of
+     * all livemarks and folders in it.
+     *
+     * @param aContainer <nsINavHistoryContainerResultNode>
+     *        The folder to traverse.
+     * @param aLivemarks <array>
+     *        Array to which to append found items.
+     * @returns Promise<null>
+     */
+    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer, aLivemarks) {
         aContainer.containerOpen = true;
 
         for (let i = 0; i < aContainer.childCount; i++) {
@@ -1937,7 +1932,12 @@ LivemarksSync.prototype = {
             item.bookmarkID = node.itemId.toString();
             item.parent = aContainer.itemId.toString();
 
-            let [status, placesItem] = yield Places.livemarks.getLivemark({'id': node.itemId }, resume);
+            let deferred = Promise.defer();
+            Places.livemarks.getLivemark(
+                { 'id': node.itemId },
+                (status, placesItem) => deferred.resolve([status, placesItem])
+            )
+            let [status, placesItem] = yield deferred.promise;
 
             if (Components.isSuccessCode(status)) {
                 item.feedURL = placesItem.feedURI.spec;
@@ -1954,13 +1954,11 @@ LivemarksSync.prototype = {
                 aLivemarks.push(item);
 
                 if (node instanceof Ci.nsINavHistoryContainerResultNode)
-                    yield this.traversePlacesQueryResults(node, aLivemarks, resume);
+                    yield this.traversePlacesQueryResults(node, aLivemarks);
             }
         }
 
         aContainer.containerOpen = false;
-
-        aCallback();
     }.gen()
 
 }
@@ -2191,10 +2189,10 @@ let Stm = {
 
 let Utils = {
 
-    getTagsForEntry: function getTagsForEntry(aEntryID, aCallback) {
+    getTagsForEntry: function getTagsForEntry(aEntryID) {
         Stm.getTagsForEntry.params = { 'entryID': aEntryID };
-        Stm.getTagsForEntry.getResultsAsync(
-            results => aCallback([row.tagName for (row of results)])
+        return Stm.getTagsForEntry.getResultsAsync().then(
+            results => [row.tagName for (row of results)]
         )
     },
 
@@ -2211,17 +2209,17 @@ let Utils = {
         return !!Utils.getFeedByBookmarkID(aItemID);
     },
 
-    getEntriesByURL: function getEntriesByURL(aURL, aCallback) {
+    getEntriesByURL: function getEntriesByURL(aURL) {
         Stm.selectEntriesByURL.params.url = aURL;
-        Stm.selectEntriesByURL.getResultsAsync(
-            results => aCallback([row.id for (row of results)])
+        return Stm.selectEntriesByURL.getResultsAsync().then(
+            results => [row.id for (row of results)]
         )
     },
 
-    getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID, aCallback) {
+    getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID) {
         Stm.selectEntriesByBookmarkID.params.bookmarkID = aBookmarkID;
-        Stm.selectEntriesByBookmarkID.getResultsAsync(
-            results => aCallback([{ id: row.id, url: row.entryURL } for (row of results)])
+        return Stm.selectEntriesByBookmarkID.getResultsAsync().then(
+            results => [{ id: row.id, url: row.entryURL } for (row of results)]
         )
     },
 
@@ -2246,17 +2244,20 @@ let Utils = {
         return (Bookmarks.getItemType(aItemID) === Bookmarks.TYPE_BOOKMARK);
     },
 
-    isNormalBookmark: function Utils_isNormalBookmark(aItemID, aCallback) {
-        let resume = Utils_isNormalBookmark.resume;
+    isNormalBookmark: function Utils_isNormalBookmark(aItemID) {
         let parent = Bookmarks.getFolderIdForItem(aItemID);
-        aCallback(!Utils.isTagFolder(parent) && !(yield Utils.isLivemark(parent, resume)));
+        throw new Task.Result(!Utils.isTagFolder(parent) && !(yield Utils.isLivemark(parent)));
     }.gen(),
 
-    isLivemark: function Utils_isLivemark(aItemID, aCallback) {
+    isLivemark: function Utils_isLivemark(aItemID) {
+        let deferred = Promise.defer();
+
         Places.livemarks.getLivemark(
             { 'id': aItemID },
-            status => aCallback(Components.isSuccessCode(status))
+            status => deferred.resolve(Components.isSuccessCode(status))
         )
+
+        return deferred.promise;
     },
 
     isFolder: function(aItemID) {
