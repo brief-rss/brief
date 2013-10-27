@@ -95,7 +95,7 @@ let ViewList = {
             element.classList.add('unread');
         else
             element.classList.remove('unread');
-    }.gen()
+    }.task()
 
 }
 
@@ -218,7 +218,7 @@ let TagList = {
         }
 
         this.ready = true;
-    }.gen(),
+    }.task(),
 
     _refreshLabel: function TagList__refreshLabel(aTagName) {
         let query = new Query({
@@ -236,7 +236,7 @@ let TagList = {
             listitem.classList.add('unread');
         else
             listitem.classList.remove('unread');
-    }.gen()
+    }.task()
 
 }
 
@@ -334,7 +334,7 @@ let FeedList = {
             treeitem.classList.add('unread');
         else
             treeitem.classList.remove('unread');
-    }.gen(),
+    }.task(),
 
     _refreshFavicon: function FeedList__refreshFavicon(aFeedID) {
         let feed = Storage.getFeed(aFeedID);
@@ -656,7 +656,7 @@ let TagListContextMenu = {
             }
             taggingService.untagURI(uri, [tag]);
         }
-    }.gen()
+    }.task()
 
 }
 

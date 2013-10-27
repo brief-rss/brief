@@ -434,7 +434,7 @@ let StorageInternal = {
         Object.freeze(this.allItemsCache);
         Object.freeze(this.activeItemsCache);
         Object.freeze(this.activeFeedsCache);
-    }.gen(),
+    }.task(),
 
     // See Storage.
     getAllTags: function StorageInternal_getAllTags() {
@@ -510,7 +510,7 @@ let StorageInternal = {
 
         if (invalidateFeedlist)
             Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
-    }.gen(),
+    }.task(),
 
     /**
      * Moves entries to Trash if they exceed the age limit or the number limit.
@@ -566,7 +566,7 @@ let StorageInternal = {
                 query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
             }
         }
-    }.gen(),
+    }.task(),
 
     // Permanently removes deleted items from database.
     purgeDeleted: function StorageInternal_purgeDeleted() {
@@ -691,7 +691,7 @@ let StorageInternal = {
                     observer.onEntriesStarred(list, aState);
             }
         }
-    }.gen(),
+    }.task(),
 
     /**
      * Adds or removes a tag for an entry.
@@ -733,7 +733,7 @@ let StorageInternal = {
             if (observer.onEntriesTagged)
                 observer.onEntriesTagged(list, aState, aTagName);
         }
-    }.gen(),
+    }.task(),
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
 
@@ -954,7 +954,7 @@ FeedProcessor.prototype = {
         }
 
         this.deferred.resolve(insertedEntries.length);
-    }.gen()
+    }.task()
 
 }
 
@@ -1290,7 +1290,7 @@ Query.prototype = {
         else {
             this.read = tempRead;
         }
-    }.gen(),
+    }.task(),
 
     /**
      * Set the deleted state of the selected entries or remove them from the database.
@@ -1310,7 +1310,7 @@ Query.prototype = {
                     observer.onEntriesDeleted(list, aState);
             }
         }
-    }.gen(),
+    }.task(),
 
 
     /**
@@ -1356,7 +1356,7 @@ Query.prototype = {
 
         let aggregatedTrans = new PlacesAggregatedTransaction('', transactions);
         Places.transactionManager.doTransaction(aggregatedTrans);
-    }.gen(),
+    }.task(),
 
     /**
      * Verifies entries' starred statuses and their tags.
@@ -1397,7 +1397,7 @@ Query.prototype = {
                     StorageInternal.tagEntry(true, entry.id, tag);
             }
         }
-    }.gen(),
+    }.task(),
 
 
     /**
@@ -1614,7 +1614,7 @@ let BookmarkObserver = {
                 StorageInternal.starEntry(true, entry, aItemID);
             }
         }
-    }.gen(),
+    }.task(),
 
 
     // nsINavBookmarkObserver
@@ -1657,7 +1657,7 @@ let BookmarkObserver = {
                     StorageInternal.starEntry(false, entry.id);
             }
         }
-    }.gen(),
+    }.task(),
 
     // nsINavBookmarkObserver
     onItemMoved: function BookmarkObserver_onItemMoved(aItemID, aOldParent, aOldIndex,
@@ -1697,7 +1697,7 @@ let BookmarkObserver = {
 
                 break;
         }
-    }.gen(),
+    }.task(),
 
     // nsINavBookmarkObserver
     onItemVisited: function BookmarkObserver_aOnItemVisited(aItemID, aVisitID, aTime) { },
@@ -1757,7 +1757,7 @@ let BookmarkObserver = {
         }
 
         result.root.containerOpen = false;
-    }.gen(),
+    }.task(),
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsINavBookmarkObserver])
 
@@ -1861,7 +1861,7 @@ let LivemarksSync = function LivemarksSync() {
             FeedUpdateService.updateFeeds(newFeeds);
         }
     }
-}.gen();
+}.task();
 
 LivemarksSync.prototype = {
 
@@ -1946,7 +1946,7 @@ LivemarksSync.prototype = {
         }
 
         aContainer.containerOpen = false;
-    }.gen()
+    }.task()
 
 }
 
@@ -2234,7 +2234,7 @@ let Utils = {
     isNormalBookmark: function Utils_isNormalBookmark(aItemID) {
         let parent = Bookmarks.getFolderIdForItem(aItemID);
         throw new Task.Result(!Utils.isTagFolder(parent) && !(yield Utils.isLivemark(parent)));
-    }.gen(),
+    }.task(),
 
     isLivemark: function Utils_isLivemark(aItemID) {
         let deferred = Promise.defer();

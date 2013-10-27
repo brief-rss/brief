@@ -287,7 +287,7 @@ let FeedUpdateServiceInternal = {
             if (this.completedFeeds.length == this.scheduledFeeds.length)
                 this.finishUpdate('completed');
         }
-    }.gen(),
+    }.task(),
 
 
     finishUpdate: function FeedUpdateServiceInternal_finishUpdate(aReason) {
@@ -360,7 +360,7 @@ let FeedUpdateServiceInternal = {
             parentId: Prefs.getIntPref('homeFolder'),
             index: Ci.nsINavBookmarksService.DEFAULT_INDEX,
         })
-    }.gen(),
+    }.task(),
 
     // nsIObserver
     observe: function FeedUpdateServiceInternal_observe(aSubject, aTopic, aData) {

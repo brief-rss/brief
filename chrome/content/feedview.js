@@ -572,7 +572,7 @@ FeedView.prototype = {
                 this.refresh();
             }
         }
-    }.gen(),
+    }.task(),
 
     /**
      * Checks if given entries are in the view and removes them.
@@ -732,7 +732,7 @@ FeedView.prototype = {
             do var loadedCount = yield this._refreshGuard(this._loadEntries(stepSize))
             while (loadedCount && !this.enoughEntriesPreloaded(aWindowHeights))
         }
-    }.gen(),
+    }.task(),
 
     /**
      * Checks if enough entries have been loaded.
@@ -804,7 +804,7 @@ FeedView.prototype = {
 
             throw new Task.Result(0);
         }
-    }.gen(),
+    }.task(),
 
     _insertEntry: function FeedView__insertEntry(aEntryData, aPosition) {
         let entryView = new EntryView(this, aEntryData);

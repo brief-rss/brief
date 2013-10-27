@@ -15,8 +15,8 @@ function IMPORT_COMMON(aScope) {
         enumerable: false
     })
 
-    Object.defineProperty(aScope.Function.prototype, 'gen', {
-        value: Function.prototype.gen,
+    Object.defineProperty(aScope.Function.prototype, 'task', {
+        value: Function.prototype.task,
         enumerable: false
     })
 }
@@ -62,10 +62,10 @@ function wait(aDelay) {
 }
 
 
-Function.prototype.gen = function() {
+Function.prototype.task = function() {
     let generatorFunction = this;
 
-    return function generatorWrapper() {
+    return function taskWrapper() {
         return Task.spawn(generatorFunction.apply(this, arguments));
     }
 }
