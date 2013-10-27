@@ -447,7 +447,7 @@ FeedFetcher.prototype = {
         let newEntriesCount = yield Storage.processFeed(this.feed.feedID, parsedFeed,
                                                         this.request.responseXML);
         this.finish('ok', newEntriesCount);
-    }.gen(),
+    }.task(),
 
     finish: function FeedFetcher_finish(aResult, aNewEntriesCount) {
         if (this.finished)

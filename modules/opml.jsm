@@ -233,7 +233,7 @@ let OPMLInternal = {
             outputStream.write(data, data.length);
             outputStream.close();
         }
-    }.gen(),
+    }.task(),
 
 
     addFolderToOPML: function addFolderToOPML(dataString, folder, level, isBase) {
@@ -297,7 +297,7 @@ let OPMLInternal = {
         }
 
         throw new Task.Result(dataString);
-    }.gen(),
+    }.task(),
 
     promptForFile: function (filePrefix) {
         let bundle = Services.strings.createBundle('chrome://brief/locale/options.properties');
