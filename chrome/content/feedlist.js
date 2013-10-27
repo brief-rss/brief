@@ -71,7 +71,7 @@ let ViewList = {
         FeedList.deselect();
 
         if (this.selectedItem.id == 'starred-folder') {
-            Storage.getAllTags(function(tags) {
+            Storage.getAllTags().then(tags => {
                 if (tags.length)
                     TagList.show();
             })
@@ -86,7 +86,7 @@ let ViewList = {
         let query = this.getQueryForView(aItemID);
         query.read = false;
 
-        let unreadCount = yield query.getEntryCount(ViewList_refreshItem.resume);
+        let unreadCount = yield query.getEntryCount();
 
         let element = getElement(aItemID);
         element.lastChild.value = unreadCount;
@@ -95,7 +95,7 @@ let ViewList = {
             element.classList.add('unread');
         else
             element.classList.remove('unread');
-    }.gen()
+    }.task()
 
 }
 
@@ -177,7 +177,7 @@ let TagList = {
                     tags: [tag]
                 })
 
-                query.hasMatches(function(hasMatches) {
+                query.hasMatches.then(hasMatches => {
                     if (hasMatches) {
                         this._refreshLabel(tag);
                     }
@@ -186,7 +186,7 @@ let TagList = {
                         if (gCurrentView.query.tags && gCurrentView.query.tags[0] === tag)
                             ViewList.selectedItem = getElement('starred-folder');
                     }
-                }.bind(this))
+                })
             }
             else {
                 this._refreshLabel(tag);
@@ -198,7 +198,7 @@ let TagList = {
         while (this._listbox.hasChildNodes())
             this._listbox.removeChild(this._listbox.lastChild);
 
-        this.tags = yield Storage.getAllTags(TagList__rebuild.resume);
+        this.tags = yield Storage.getAllTags();
 
         for (let tagName of this.tags) {
             let item = document.createElement('listitem');
@@ -218,7 +218,7 @@ let TagList = {
         }
 
         this.ready = true;
-    }.gen(),
+    }.task(),
 
     _refreshLabel: function TagList__refreshLabel(aTagName) {
         let query = new Query({
@@ -227,17 +227,16 @@ let TagList = {
             read: false
         })
 
-        query.getEntryCount(function(unreadCount) {
-            let listitem = getElement(aTagName);
+        let unreadCount = yield query.getEntryCount()
+        let listitem = getElement(aTagName);
 
-            listitem.unreadCountLabel.value = unreadCount;
+        listitem.unreadCountLabel.value = unreadCount;
 
-            if (unreadCount > 0)
-                listitem.classList.add('unread');
-            else
-                listitem.classList.remove('unread');
-        })
-    }
+        if (unreadCount > 0)
+            listitem.classList.add('unread');
+        else
+            listitem.classList.remove('unread');
+    }.task()
 
 }
 
@@ -325,18 +324,17 @@ let FeedList = {
             read: false
         })
 
-        query.getEntryCount(function(unreadCount) {
-            let treeitem = getElement(aFeed.feedID);
+        let unreadCount = yield query.getEntryCount()
+        let treeitem = getElement(aFeed.feedID);
 
-            treeitem.setAttribute('title', aFeed.title);
-            treeitem.setAttribute('unreadcount', unreadCount);
+        treeitem.setAttribute('title', aFeed.title);
+        treeitem.setAttribute('unreadcount', unreadCount);
 
-            if (unreadCount > 0)
-                treeitem.classList.add('unread');
-            else
-                treeitem.classList.remove('unread');
-        })
-    },
+        if (unreadCount > 0)
+            treeitem.classList.add('unread');
+        else
+            treeitem.classList.remove('unread');
+    }.task(),
 
     _refreshFavicon: function FeedList__refreshFavicon(aFeedID) {
         let feed = Storage.getFeed(aFeedID);
@@ -444,7 +442,8 @@ let FeedList = {
                     ViewList.refreshItem('all-items-folder');
                     ViewList.refreshItem('today-folder');
                     ViewList.refreshItem('starred-folder');
-                    async(gCurrentView.refresh, 0, gCurrentView);
+
+                    wait().then(() => gCurrentView.refresh());
                 }
                 break;
 
@@ -519,16 +518,16 @@ let FeedList = {
     },
 
     onEntriesMarkedRead: function FeedList_onEntriesMarkedRead(aEntryList, aNewState) {
-        async(function() {
-            FeedList.refreshFeedTreeitems(aEntryList.feedIDs);
-        }, 250)
+        wait(250).then(() =>
+            FeedList.refreshFeedTreeitems(aEntryList.feedIDs)
+        )
 
-        async(function() {
+        wait(500).then(() => {
             ViewList.refreshItem('all-items-folder');
             ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
             TagList.refreshTags(aEntryList.tags);
-        }, 500)
+        })
     },
 
     onEntriesStarred: function FeedList_onEntriesStarred(aEntryList, aNewState) {
@@ -543,15 +542,15 @@ let FeedList = {
     },
 
     onEntriesDeleted: function FeedList_onEntriesDeleted(aEntryList, aNewState) {
-        async(function() {
-            FeedList.refreshFeedTreeitems(aEntryList.feedIDs);
-        }, 250)
+        wait(250).then(() =>
+            FeedList.refreshFeedTreeitems(aEntryList.feedIDs)
+        )
 
-        async(function() {
+        wait(500).then(() => {
             ViewList.refreshItem('all-items-folder');
             ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
-        }, 500)
+        })
 
         let entriesRestored = (aNewState == Storage.ENTRY_STATE_NORMAL);
         TagList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);
@@ -647,22 +646,17 @@ let TagListContextMenu = {
         if (!Services.prompt.confirm(window, dialogTitle, dialogText))
             return;
 
-        let query = new Query({
-            tags: [tag]
-        })
-
-        query.getProperty('entryURL', true, function(urls) {
-            for (let url of urls) {
-                try {
-                    var uri = NetUtil.newURI(url, null, null);
-                }
-                catch (ex) {
-                    return;
-                }
-                taggingService.untagURI(uri, [tag]);
+        let urls = yield new Query({ tags: [tag] }).getProperty('entryURL', true);
+        for (let url of urls) {
+            try {
+                var uri = NetUtil.newURI(url, null, null);
             }
-        })
-    }
+            catch (ex) {
+                return;
+            }
+            taggingService.untagURI(uri, [tag]);
+        }
+    }.task()
 
 }
 

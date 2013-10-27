@@ -275,7 +275,7 @@ FeedView.prototype = {
 
             let jump = Math.round(distance / jumpCount);
 
-            this._scrolling = setInterval(function() {
+            this._scrolling = setInterval(() => {
                 // If we are within epsilon smaller or equal to the jump,
                 // then scroll directly to the target position.
                 if (Math.abs(targetPosition - this.window.pageYOffset) <= Math.abs(jump)) {
@@ -290,7 +290,7 @@ FeedView.prototype = {
                 else {
                     this.window.scroll(this.window.pageXOffset, this.window.pageYOffset + jump);
                 }
-            }.bind(this), 10)
+            }, 10)
         }
         else {
             if (aSuppressSelection)
@@ -326,8 +326,8 @@ FeedView.prototype = {
     _autoMarkRead: function FeedView__autoMarkRead() {
         if (PrefCache.autoMarkRead && !this.headlinesMode && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
-            let callback = this._getRefreshGuard(this.markVisibleEntriesRead.bind(this));
-            this._markVisibleTimeout = async(callback, 500, this);
+            let callback = this._callbackRefreshGuard(this.markVisibleEntriesRead.bind(this));
+            this._markVisibleTimeout = setTimeout(callback, 500);
         }
     },
 
@@ -411,7 +411,10 @@ FeedView.prototype = {
                 }
                 else if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
-                    this._scrollSelectionTimeout = async(function() this.selectEntry(this.getEntryInScreenCenter()), 50, this);
+                    let callback = this._callbackRefreshGuard(() =>
+                        this.selectEntry(this.getEntryInScreenCenter())
+                    )
+                    this._scrollSelectionTimeout = setTimeout(callback, 50);
                 }
 
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
@@ -517,8 +520,6 @@ FeedView.prototype = {
      *        Array of IDs of entries.
      */
     _onEntriesAdded: function FeedView__onEntriesAdded(aAddedEntries) {
-        let resume = this._getRefreshGuard(FeedView__onEntriesAdded.resume);
-
         // The simplest way would be to query the current list of all entries in the view
         // and intersect it with the list of added ones. However, this is expansive for
         // large views and we try to avoid it.
@@ -539,7 +540,7 @@ FeedView.prototype = {
             else
                 query.endDate = edgeDate;
 
-            this._loadedEntries = yield query.getEntries(resume);
+            this._loadedEntries = yield this._refreshGuard(query.getEntries());
 
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
@@ -549,7 +550,7 @@ FeedView.prototype = {
                     entries: newEntries
                 })
 
-                for (let entry of yield query.getFullEntries(resume))
+                for (let entry of yield query.getFullEntries())
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
@@ -563,7 +564,7 @@ FeedView.prototype = {
         // Otherwise, just blow it all away and refresh from scratch.
         else {
             if (this._allEntriesLoaded) {
-                let currentEntryList = yield this.query.getEntries(resume);
+                let currentEntryList = yield this.query.getEntries();
                 if (currentEntryList.intersect(aAddedEntries).length)
                     this.refresh()
             }
@@ -571,7 +572,7 @@ FeedView.prototype = {
                 this.refresh();
             }
         }
-    }.gen(),
+    }.task(),
 
     /**
      * Checks if given entries are in the view and removes them.
@@ -599,7 +600,7 @@ FeedView.prototype = {
         let selectedEntryIndex = -1;
 
         let indices = containedEntries.map(this.getEntryIndex, this)
-                                      .sort(function(a, b) a - b);
+                                      .sort((a, b) => a - b);
 
         // Iterate starting from the last entry to avoid changing
         // positions of consecutive entries.
@@ -614,7 +615,9 @@ FeedView.prototype = {
 
             let entryView = this.getEntryView(entry);
 
-            entryView.remove(animate, this._getRefreshGuard(function() {
+            let removed = entryView.remove(animate);
+
+            this._refreshGuard(removed).then(() => {
                 let index = this.getEntryIndex(entry);
                 this._loadedEntries.splice(index, 1);
                 this._entryViews.splice(index, 1);
@@ -632,11 +635,11 @@ FeedView.prototype = {
 
                 if (++removedCount == indices.length) {
                     if (aLoadNewEntries && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
-                        this._fillWindow(WINDOW_HEIGHTS_LOAD, afterEntriesRemoved.bind(this));
+                        this._fillWindow(WINDOW_HEIGHTS_LOAD).then(afterEntriesRemoved.bind(this));
                     else
                         afterEntriesRemoved.call(this);
                 }
-            }.bind(this)))
+            })
         }
 
         function afterEntriesRemoved() {
@@ -694,7 +697,7 @@ FeedView.prototype = {
         // can trigger a resize event (!?).
         this.window.removeEventListener('resize', this, false);
 
-        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD, function() {
+        this._fillWindow(INITIAL_WINDOW_HEIGHTS_LOAD).then(() => {
             // Resize events can be dispatched asynchronously, so this listener shouldn't
             // be added earlier along with other ones, because then it could be triggered
             // before the initial refresh.
@@ -709,7 +712,7 @@ FeedView.prototype = {
                 this.selectEntry(lastSelectedEntry, true);
             else
                 this.selectEntry(this._loadedEntries[0], false);
-        }.bind(this))
+        })
     },
 
 
@@ -720,21 +723,16 @@ FeedView.prototype = {
      * @param aWindowHeights
      *        The number of window heights to fill ahead of the current scroll
      *        position.
+     * @returns Promise<null>
      */
-    _fillWindow: function FeedView__fillWindow(aWindowHeights, aCallback) {
-        let resume = FeedView__fillWindow.resume;
-
+    _fillWindow: function FeedView__fillWindow(aWindowHeights) {
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = this.headlinesMode ? HEADLINES_LOAD_STEP_SIZE
                                               : LOAD_STEP_SIZE;
-
-            do var loadedCount = yield this._loadEntries(stepSize, resume);
+            do var loadedCount = yield this._refreshGuard(this._loadEntries(stepSize))
             while (loadedCount && !this.enoughEntriesPreloaded(aWindowHeights))
         }
-
-        if (aCallback)
-            aCallback();
-    }.gen(),
+    }.task(),
 
     /**
      * Checks if enough entries have been loaded.
@@ -754,13 +752,11 @@ FeedView.prototype = {
      * make sure to load all of them in a single batch, in order to avoid loading them
      * again later.
      *
-     * @param aCount
-     *        Requested number of entries.
-     * @return The actual number of entries that were loaded.
+     * @param aCount <integer> Requested number of entries.
+     * @returns Promise<integer> that resolves to the actual number
+     *          of entries that were loaded.
      */
-    _loadEntries: function FeedView__loadEntries(aCount, aCallback) {
-        let resume = this._getRefreshGuard(FeedView__loadEntries.resume);
-
+    _loadEntries: function FeedView__loadEntries(aCount) {
         this._loading = true;
 
         let dateQuery = this.getQueryCopy();
@@ -781,7 +777,7 @@ FeedView.prototype = {
 
         dateQuery.limit = aCount;
 
-        let dates = yield dateQuery.getProperty('date', false, resume);
+        let dates = yield this._refreshGuard(dateQuery.getProperty('date', false));
         if (dates.length) {
             let query = this.getQueryCopy();
             if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
@@ -793,21 +789,22 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            let loadedEntries = yield query.getFullEntries(resume);
+            let loadedEntries = yield this._refreshGuard(query.getFullEntries());
             for (let entry of loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
             }
 
             this._loading = false;
-            aCallback(loadedEntries.length);
+            throw new Task.Result(loadedEntries.length);
         }
         else {
             this._loading = false;
             this._allEntriesLoaded = true;
-            aCallback(0);
+
+            throw new Task.Result(0);
         }
-    }.gen(),
+    }.task(),
 
     _insertEntry: function FeedView__insertEntry(aEntryData, aPosition) {
         let entryView = new EntryView(this, aEntryData);
@@ -867,13 +864,35 @@ FeedView.prototype = {
         messageBox.style.display = '';
     },
 
-    _getRefreshGuard: function FeedView__getRefreshGuard(aWrappedResumeFunction) {
+    /**
+     * Returns a new pomise that wraps the provided promise. The new promise will be
+     * resolved with the value of the wrapped promise only if the view isn't refreshed
+     * in the meantime. Otherwise, the new promise will be rejected.
+     *
+     * This function is used to make sure that if the view is refreshed while the
+     * caller is waiting for an asynchronous function to complete, the caller will
+     * stop execution.
+     */
+    _refreshGuard: function FeedView__refreshGuard(aWrappedPromise) {
         let oldViewID = this.viewID;
 
-        return function refreshGuard() {
+        return aWrappedPromise.then(
+            value => {
+                if (this.viewID == oldViewID && this == gCurrentView)
+                    return value;
+                else
+                    throw new Error('Feed view refreshed while waiting for an async call to complete');
+            }
+        )
+    },
+
+    _callbackRefreshGuard: function FeedView__callbackRefreshGuard(aWrappedFunction) {
+        let oldViewID = this.viewID;
+
+        return () => {
             if (this.viewID == oldViewID && this == gCurrentView)
-                aWrappedResumeFunction.apply(undefined, arguments);
-        }.bind(this);
+                aWrappedFunction.apply(undefined, arguments);
+        };
     }
 
 }
@@ -964,12 +983,12 @@ function EntryView(aFeedView, aEntryData) {
                                                                      : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
 
-        async(function() {
+        wait().then(() => {
             this._getElement('content').innerHTML = aEntryData.content;
 
             if (this.feedView.query.searchString)
                 this._highlightSearchTerms(this._getElement('headline-title'));
-        }.bind(this))
+        })
     }
     else {
         let contentElement = this._getElement('content');
@@ -977,12 +996,12 @@ function EntryView(aFeedView, aEntryData) {
         contentElement.setAttribute('dir', this.textDirection);
 
         if (this.feedView.query.searchString) {
-            async(function() {
+            wait().then(() => {
                 for (let elem of ['authors', 'tags', 'title', 'content'])
                     this._highlightSearchTerms(this._getElement(elem));
 
                 this._searchTermsHighlighted = true;
-            }.bind(this));
+            })
         }
     }
 }
@@ -1076,25 +1095,33 @@ EntryView.prototype = {
     },
 
 
-    remove: function EntryView_remove(aAnimate, aCallback) {
+    /**
+     * Removes the entry view.
+     *
+     * @param aAnimate <boolean> [optional] Whether to animate or remove instantly.
+     * @returns Promise<null> when finished.
+     */
+    remove: function EntryView_remove(aAnimate) {
+        let deferred =  Promise.defer();
+
         if (aAnimate) {
-            this.container.addEventListener('transitionend', function() {
+            this.container.addEventListener('transitionend', () => {
                 // The element may have been removed in the meantime
                 // if the view had been refreshed.
                 if (this.container.parentNode == this.feedView.feedContent) {
                     this.feedView.feedContent.removeChild(this.container);
-                    if (aCallback)
-                        aCallback();
+                    deferred.resolve();
                 }
-            }.bind(this), true);
+            }, true);
 
             this.container.setAttribute('removing', true);
         }
         else {
             this.feedView.feedContent.removeChild(this.container);
-            if (aCallback)
-                aCallback();
+            deferred.resolve();
         }
+
+        return deferred.promise;
     },
 
     collapse: function EntryView_collapse(aAnimate) {
@@ -1123,7 +1150,7 @@ EntryView.prototype = {
 
         hideElement(this._getElement('headline-container'));
 
-        showElement(this._getElement('full-container'), aAnimate, function() {
+        showElement(this._getElement('full-container'), aAnimate).then(() => {
             if (this.container.parentNode != this.feedView.feedContent)
                 return;
 
@@ -1137,7 +1164,7 @@ EntryView.prototype = {
                 if (entryBottom > screenBottom)
                     this.feedView.scrollToEntry(this.id, false, true, true);
             }
-        }.bind(this))
+        })
 
 
         if (this.feedView.query.searchString && !this._searchTermsHighlighted) {
@@ -1210,13 +1237,15 @@ EntryView.prototype = {
 
                     let oldViewID = this.feedView.viewID;
 
-                    query.getProperty('bookmarkID', false, function(ids) {
-                        if (this.feedView.viewID != oldViewID)
-                            return;
+                    query.getProperty('bookmarkID', false).then(
+                        ids => {
+                            if (this.feedView.viewID != oldViewID)
+                                return;
 
-                        let anchor = this._getElement('bookmark-button');
-                        getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
-                    }.bind(this))
+                            let anchor = this._getElement('bookmark-button');
+                            getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
+                        }
+                    )
                 }
                 else {
                     Commands.starEntry(this.id, true);
@@ -1356,63 +1385,63 @@ EntryView.prototype = {
 }
 
 
-function hideElement(aElement, aAnimate, aCallback) {
+function hideElement(aElement, aAnimate) {
+    let deferred = Promise.defer();
+
     if (aAnimate) {
         aElement.style.opacity = '0';
-
         aElement.setAttribute('hiding', true);
-        aElement.addEventListener('transitionend', listener, false);
+
+        aElement.addEventListener('transitionend', event => {
+            aElement.removeEventListener('transitionend', arguments.callee, false);
+            aElement.removeAttribute('hiding');
+
+            aElement.style.display = 'none';
+            aElement.style.opacity = '';
+
+            deferred.resolve();
+        }, false);
     }
     else {
         aElement.style.display = 'none';
         aElement.style.opacity = '0';
 
-        if (aCallback)
-            aCallback();
+        deferred.resolve();
     }
 
-    function listener() {
-        aElement.removeEventListener('transitionend', listener, false);
-        aElement.removeAttribute('hiding');
-
-        aElement.style.display = 'none';
-        aElement.style.opacity = '';
-
-        if (aCallback)
-            aCallback();
-    }
+    return deferred.promise;
 }
 
-function showElement(aElement, aAnimate, aCallback) {
+function showElement(aElement, aAnimate) {
+    let deferred = Promise.defer();
+
     if (aAnimate) {
         aElement.style.display = '';
         aElement.style.opacity = '0';
         aElement.offsetHeight; // Force reflow.
 
         aElement.style.opacity = '';
-
         aElement.setAttribute('showing', true);
-        aElement.addEventListener('transitionend', listener, false);
+
+        aElement.addEventListener('transitionend', event => {
+            aElement.removeEventListener('transitionend', arguments.callee, false);
+            aElement.removeAttribute('showing');
+
+            deferred.resolve();
+        }, false);
     }
     else {
         aElement.style.display = '';
         aElement.style.opacity = '';
 
-        if (aCallback)
-            aCallback();
+        deferred.resolve();
     }
 
-    function listener() {
-        aElement.removeEventListener('transitionend', listener, false);
-        aElement.removeAttribute('showing');
-
-        if (aCallback)
-            aCallback();
-    }
+    return deferred.promise;
 }
 
 
-__defineGetter__('Strings', function() {
+__defineGetter__('Strings', () => {
     let cachedStringsList = [
         'entryDate.justNow',
         'minute.pluralForms',
@@ -1437,7 +1466,7 @@ __defineGetter__('Strings', function() {
     return this.Strings = obj;
 })
 
-__defineGetter__('Finder', function() {
+__defineGetter__('Finder', () => {
     let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
     finder.caseSensitive = false;
 
@@ -1445,7 +1474,7 @@ __defineGetter__('Finder', function() {
     return this.Finder = finder;
 })
 
-__defineGetter__('gBriefPrincipal', function() {
+__defineGetter__('gBriefPrincipal', () => {
     let uri = NetUtil.newURI(document.documentURI);
     let resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1']
                       .getService(Ci.nsIChromeRegistry)

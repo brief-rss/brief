@@ -7,6 +7,8 @@ const EXPORTED_SYMBOLS = ['OPML'];
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
+Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
+Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
 
@@ -214,7 +216,7 @@ let OPMLInternal = {
             data += '\t' + '</head>' + '\n';
             data += '\t' + '<body>' + '\n';
 
-            data = yield this.addFolderToOPML(data, result.root, 0, true, exportOPML.resume);
+            data = yield this.addFolderToOPML(data, result.root, 0, true);
 
             data += '\t' + '</body>' + '\n';
             data += '</opml>';
@@ -231,10 +233,10 @@ let OPMLInternal = {
             outputStream.write(data, data.length);
             outputStream.close();
         }
-    }.gen(),
+    }.task(),
 
 
-    addFolderToOPML: function addFolderToOPML(dataString, folder, level, isBase, aCallback) {
+    addFolderToOPML: function addFolderToOPML(dataString, folder, level, isBase) {
         level++;
 
         if (!isBase) {
@@ -255,7 +257,12 @@ let OPMLInternal = {
             if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
                 continue;
 
-            let [status, livemark] = yield PlacesUtils.livemarks.getLivemark({"id": node.itemId}, addFolderToOPML.resume);
+            let deferred = Promise.defer()
+            PlacesUtils.livemarks.getLivemark(
+                { 'id': node.itemId },
+                (status, livemark) => deferred.resolve([status, livemark])
+            )
+            let [status, livemark] = yield deferred.promise;
 
             if (Components.isSuccessCode(status)) {
                 dataString += '\t\t';
@@ -274,8 +281,7 @@ let OPMLInternal = {
                               '"/>' + "\n";
             }
             else if (node instanceof Ci.nsINavHistoryContainerResultNode) {
-                dataString = yield this.addFolderToOPML(dataString, node, level, false,
-                                                        addFolderToOPML.resume);
+                dataString = yield this.addFolderToOPML(dataString, node, level, false);
             }
         }
 
@@ -290,8 +296,8 @@ let OPMLInternal = {
             dataString += '</outline>' + '\n';
         }
 
-        aCallback(dataString);
-    }.gen(),
+        throw new Task.Result(dataString);
+    }.task(),
 
     promptForFile: function (filePrefix) {
         let bundle = Services.strings.createBundle('chrome://brief/locale/options.properties');

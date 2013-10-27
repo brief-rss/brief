@@ -225,7 +225,7 @@ const Brief = {
             read: false
         })
 
-        query.getEntryCount(function(unreadEntriesCount) {
+        query.getEntryCount().then(unreadEntriesCount => {
             Brief.statusCounter.value = unreadEntriesCount;
             Brief.statusCounter.hidden = (unreadEntriesCount == 0);
 
@@ -303,13 +303,13 @@ const Brief = {
             sortDirection: this.query.SORT_ASCENDING
         })
 
-        query.getProperty('feedID', true, function(unreadFeeds) {
+        query.getProperty('feedID', true).then(unreadFeeds => {
             let noUnreadLabel = document.getElementById('brief-tooltip-no-unread');
             let value = bundle.GetStringFromName('noUnreadFeedsTooltip');
             noUnreadLabel.setAttribute('value', value);
             noUnreadLabel.hidden = unreadFeeds.length;
 
-            unreadFeeds.forEach(function(feed) {
+            for (feed of unreadFeeds) {
                 let row = document.createElement('row');
                 row.setAttribute('class', 'unread-feed-row');
                 row = rows.appendChild(row);
@@ -327,14 +327,14 @@ const Brief = {
                     read: false
                 })
 
-                query.getEntryCount(function(unreadCount) {
+                query.getEntryCount.then(unreadCount => {
                     let label = document.createElement('label');
                     label.setAttribute('class', 'unread-entries-count');
                     label.setAttribute('value', unreadCount);
                     row.appendChild(label);
-                }.bind(this))
-            }.bind(this))
-        }.bind(this))
+                })
+            }
+        })
     },
 
     onFirstRun: function Brief_onFirstRun() {
@@ -357,12 +357,12 @@ const Brief = {
         this.prefs.setBoolPref('firstRun', false);
         this.prefs.setBoolPref('firefox4ToolbarbuttonMigrated', true);
 
-        AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
-            Brief.prefs.setCharPref('lastVersion', addon.version);
+        AddonManager.getAddonByID('brief@mozdev.org', addon => {
+            this.prefs.setCharPref('lastVersion', addon.version);
         })
 
         // Load the first run page.
-        setTimeout(function() {
+        setTimeout(() => {
             let parameters = { relatedToCurrent: false, inBackground: false };
             gBrowser.loadOneTab(Brief.FIRST_RUN_PAGE_URL, parameters)
         }, 0)

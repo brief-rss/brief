@@ -40,7 +40,7 @@ function onAccept() {
 
     let outputStream = FileUtils.openFileOutputStream(file);
 
-    NetUtil.asyncCopy(inputStream, outputStream, function(result) {
+    NetUtil.asyncCopy(inputStream, outputStream, result => {
         if (Components.isSuccessCode(result))
             Services.obs.notifyObservers(null, 'brief:custom-style-changed', '');
     })

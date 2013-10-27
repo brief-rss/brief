@@ -2,6 +2,8 @@ const EXPORTED_SYMBOLS = ['StorageConnection', 'StorageStatement', 'StorageError
 
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
+Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
+Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
 
@@ -109,19 +111,22 @@ StorageConnection.prototype = {
      *
      * @param aStatements
      *        Array of StorageStatement objects to execute.
-     * @param aCallback [optional]
-     *        An object implementing any of mozIStorageStatementCallback's methods,
-     *        or a single function treated as handleCompletion() method.
+     * @param aResultHandler <function> [optional]
+     *        Function called for each selected row.
+     * @returns Promise<integer> The reason the statement completed (see constants in
+     *          mozIStorageStatementCallback), or rejected with a StorageError.
      */
-    executeAsync: function Connection_executeAsync(aStatements, aCallback) {
+    executeAsync: function Connection_executeAsync(aStatements, aResultHandler) {
         if (!aStatements || !aStatements.length)
             throw new Error('No statements to execute');
 
         for (let statement of aStatements)
             statement._bindParams();
 
-        let callback = new StatementCallback(aStatements, aCallback);
+        let callback = new StatementCallback(aStatements, aResultHandler);
         this._writingStatementsQueue.add(aStatements, callback);
+
+        return callback.promise;
     },
 
     createFunction: function Connection_createFunction(aName, aNumArguments, aFunction) {
@@ -212,17 +217,22 @@ StorageStatement.prototype = {
      * Parameters bound in the paramSets array are favored over the ones
      * in the params property.
      *
-     * @param aCallback [optional]
-     *        An object implementing any of mozIStorageStatementCallback's methods,
-     *        or a single function treated as handleCompletion() method.
+     * @param aResultHandler <function> [optional]
+     *        Function called for each selected row.
+     * @returns Promise<integer> The reason the statement completed (see constants in
+     *          mozIStorageStatementCallback), or rejected with a StorageError.
      */
-    executeAsync: function Statement_executeAsync(aCallback) {
+    executeAsync: function Statement_executeAsync(aResultHandler) {
         this._bindParams();
-        let callback = new StatementCallback(this, aCallback);
+
+        let callback = new StatementCallback(this, aResultHandler);
+
         if (this.isWritingStatement)
             this.connection._writingStatementsQueue.add(this, callback);
         else
             this._nativeStatement.executeAsync(callback);
+
+        return callback.promise;
     },
 
     /**
@@ -254,13 +264,11 @@ StorageStatement.prototype = {
      * Asynchronously executes the statement and collects the result rows
      * into an array. To be used only with SELECT statements.
      *
-     * @param aCallback
-     *        Receives an array of all the results row.
-     * @param aOnError [optional]
-     *        Function called in case of an error, taking mozIStorageError as argument.
-     * @returns mozIStoragePendingStatement
+     * @returns Promise<array> Resulting rows, or rejected with a StorageError.
      */
-    getResultsAsync: function Statement_getResultsAsync(aCallback, aOnError) {
+    getResultsAsync: function Statement_getResultsAsync() {
+        let deferred = Promise.defer();
+
         if (this.isWritingStatement)
             throw new Error('StorageStatement.getResultsAsync() can be used only with SELECT statements');
 
@@ -275,8 +283,8 @@ StorageStatement.prototype = {
         for (let i = 0; i < columnCount; i++)
             columns.push(this._nativeStatement.getColumnName(i));
 
-        return this._nativeStatement.executeAsync({
-            handleResult: function(aResultSet) {
+        this._nativeStatement.executeAsync({
+            handleResult: aResultSet => {
                 let row = aResultSet.getNextRow();
                 while (row) {
                     let obj = {};
@@ -289,19 +297,14 @@ StorageStatement.prototype = {
                     row = aResultSet.getNextRow();
                 }
             },
-            handleCompletion: function(aReason) {
-                aCallback(rowArray, aReason);
-            },
-            handleError: function(aError) {
-                if (aOnError) {
-                    aOnError();
-                }
-                else {
-                    throw new StorageError('Error when executing statement',
-                                           aError.message, this);
-                }
-            }.bind(this)
+            handleCompletion: reason => deferred.resolve(rowArray),
+            handleError: error => {
+                deferred.reject(new StorageError('Error when executing statement',
+                                error.message, this));
+            }
         })
+
+        return deferred.promise;
     },
 
     /**
@@ -389,32 +392,35 @@ StorageStatement.prototype = {
  *
  * @param aStatements
  *        One or more StorageStatement's for which to create a callback.
- * @param aCallback [optional]
- *        Object implementing any of the mozIStorageStatementCallback methods.
+ * @param aResultHandler [optional]
+ *        Function called for each selected row.
  */
-function StatementCallback(aStatements, aCallback) {
+function StatementCallback(aStatements, aResultHandler) {
     this._statements = Array.isArray(aStatements) ? aStatements : [aStatements];
 
     let selects = this._statements.filter(function(s) !s.isWritingStatement);
     if (selects.length == 1)
         this._selectStatement = selects[0];
     else if (selects.length > 1)
-        throw new Error('mozIStorageStatementCallback is not designed to handle more than one SELECT');
+        throw new Error('mozIStorageStatementCallback cannot handle more than one SELECT');
 
-    if (typeof aCallback == 'function')
-        this._callback = { handleCompletion: aCallback };
-    else
-        this._callback = aCallback || {};
-
+    this._resultHandler = aResultHandler || null;
     this.connection = this._statements[0].connection;
+    this._deferred = Promise.defer();
 }
 
 StatementCallback.prototype = {
 
+    // Promise that will be resolved when the statement completes or rejected
+    // with a StorrageError.
+    get promise() this._deferred.promise,
+
+    _deferred: null,
+
     _selectStatement: null,
 
     handleResult: function StatementCallback_handleResult(aResultSet) {
-        if (!this._callback.handleResult)
+        if (!this._resultHandler)
             return;
 
         let nativeStatement = this._selectStatement._nativeStatement;
@@ -430,30 +436,26 @@ StatementCallback.prototype = {
 
         let row = aResultSet.getNextRow();
         while (row) {
-            let obj = {};
-
             // This is performance-critical so don't use for...of sugar.
+            let obj = {};
             for (let i = 0; i < columnCount; i++)
                 obj[columns[i]] = row.getResultByName(columns[i]);
 
-            this._callback.handleResult(obj);
+            this._resultHandler(obj);
+
             row = aResultSet.getNextRow();
         }
     },
 
     handleCompletion: function StatementCallback_handleCompletion(aReason) {
-        if (this._callback.handleCompletion)
-            this._callback.handleCompletion(aReason);
+        if (aReason == Ci.mozIStorageStatementCallback.REASON_FINISHED)
+            this._deferred.resolve(aReason);
     },
 
     handleError: function StatementCallback_handleError(aError) {
-        if (this._callback.handleError) {
-            this._callback.handleError(aError);
-        }
-        else {
-            let statement = this._statements.length == 1 ? this._statements[0] : null;
-            throw new StorageError('Error when executing statement', aError.message, statement);
-        }
+        let statement = this._statements.length == 1 ? this._statements[0] : null;
+        let error = new StorageError('Error when executing statement', aError.message, statement);
+        this._deferred.reject(error);
     }
 }
 
@@ -499,15 +501,15 @@ WritingStatementsQueue.prototype = {
         let callback = this._queue[0].callback;
         let handleCompletion = callback.handleCompletion;
 
-        callback.handleCompletion = function(aReason) {
+        callback.handleCompletion = reason => {
             try {
                 if (handleCompletion)
-                    handleCompletion.call(callback, aReason);
+                    handleCompletion.call(callback, reason);
             }
             finally {
                 this._onStatementCompleted();
             }
-        }.bind(this);
+        }
 
         let nativeStatements = [stmt._nativeStatement for (stmt of statements)];
 
