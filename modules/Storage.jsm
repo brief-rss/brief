@@ -150,12 +150,11 @@ const Storage = Object.freeze({
     },
 
     /**
-     * Updates feed properties and settings.
+     * Updates feed properties and settings. Cache is updated immediatelly.
      *
      * @param aPropertyBags
      *        An object or an array of objects containing a feedID property and name-value
      *        pairs of properties to update. Invalid properties are ignored.
-     * @returns Promise<null>
      */
     changeFeedProperties: function(aPropertyBags) {
         return StorageInternal.changeFeedProperties(aPropertyBags);
@@ -219,9 +218,7 @@ const Storage = Object.freeze({
 
 let StorageInternal = {
 
-    allItemsCache:    null,
-    activeItemsCache: null,
-    activeFeedsCache: null,
+    feedCache: null,
 
     init: function StorageInternal_init() {
         let databaseFile = FileUtils.getFile('ProfD', ['brief.sqlite']);
@@ -384,15 +381,12 @@ let StorageInternal = {
      * and hasn't been refreshed yet, we must fall back to a synchronous query.
      */
     getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders, aIncludeInactive) {
-        if (!this.allItemsCache)
+        if (!this.feedCache)
             this.refreshFeedsCache(true);
 
-        if (aIncludeFolders && aIncludeInactive)
-            return this.allItemsCache;
-        else if (aIncludeFolders)
-            return this.activeItemsCache;
-        else
-            return this.activeFeedsCache;
+        return this.feedCache.filter(
+            f => (!f.isFolder || aIncludeFolders) && (!f.hidden || aIncludeInactive)
+        )
     },
 
     /**
@@ -404,9 +398,7 @@ let StorageInternal = {
      * @returns Promise<null>
      */
     refreshFeedsCache: function StorageInternal_refreshFeedsCache(aSynchronous) {
-        this.allItemsCache = null;
-        this.activeItemsCache = null;
-        this.activeFeedsCache = null;
+        this.feedCache = null;
 
         let results, error;
         if (aSynchronous)
@@ -414,26 +406,15 @@ let StorageInternal = {
         else
             results = yield Stm.getAllFeeds.getResultsAsync();
 
-        this.allItemsCache = [];
-        this.activeItemsCache = [];
-        this.activeFeedsCache = [];
+        this.feedCache = [];
 
         for (let row of results) {
             let feed = new Feed();
             for (let column in row)
                 feed[column] = row[column];
 
-            this.allItemsCache.push(feed);
-            if (!feed.hidden) {
-                this.activeItemsCache.push(feed);
-                if (!feed.isFolder)
-                    this.activeFeedsCache.push(feed);
-            }
+            this.feedCache.push(feed);
         }
-
-        Object.freeze(this.allItemsCache);
-        Object.freeze(this.activeItemsCache);
-        Object.freeze(this.activeFeedsCache);
     }.task(),
 
     // See Storage.
@@ -453,7 +434,6 @@ let StorageInternal = {
     changeFeedProperties: function StorageInternal_changeFeedProperties(aPropertyBags) {
         let propertyBags = Array.isArray(aPropertyBags) ? aPropertyBags : [aPropertyBags];
 
-        let tearDownCache = false;
         let invalidateFeedlist = false;
 
         for (let propertyBag of propertyBags) {
@@ -469,14 +449,13 @@ let StorageInternal = {
                         cachedFeed[property] = propertyBag[property];
 
                         switch (property) {
-                            // It would be more complex to manually update cache when
-                            // the "hidden" property changes, because there are separate
-                            // arrays for active and inactive feeds.
-                            case 'hidden':
                             case 'rowIndex':
-                                tearDownCache = true;
+                                this.feedCache = this.feedCache.sort(
+                                    (a, b) => a.rowIndex - b.rowIndex
+                                )
                                 // Fall through...
 
+                            case 'hidden':
                             case 'parent':
                             case 'title':
                             case 'omitInUnread':
@@ -503,14 +482,11 @@ let StorageInternal = {
             Stm.changeFeedProperties.paramSets.push(params);
         }
 
-        yield Stm.changeFeedProperties.executeAsync();
-
-        if (tearDownCache)
-            yield StorageInternal.refreshFeedsCache(false);
-
         if (invalidateFeedlist)
             Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
-    }.task(),
+
+        Stm.changeFeedProperties.executeAsync();
+    },
 
     /**
      * Moves entries to Trash if they exceed the age limit or the number limit.
@@ -1849,7 +1825,7 @@ let LivemarksSync = function LivemarksSync() {
     }
 
     if (changedFeeds.length) {
-        yield Storage.changeFeedProperties(changedFeeds, false);
+        Storage.changeFeedProperties(changedFeeds);
     }
 
     // Update new and changed feeds. Changed feeds may need updating because
