@@ -94,6 +94,17 @@ const FeedUpdateService = Object.freeze({
      */
     stopUpdating: function() {
         return FeedUpdateServiceInternal.stopUpdating();
+    },
+
+    /**
+     * Downloads and parses the feed under the given URL and creates a
+     * Live Bookmark for it in the home folder.
+     *
+     * @param aURL
+     *        The feed's URL.
+     */
+    addFeed: function(aURL) {
+        return FeedUpdateServiceInternal.addFeed(aURL);
     }
 })
 
@@ -168,7 +179,7 @@ let FeedUpdateServiceInternal = {
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
             this.status = aInBackground ? this.BACKGROUND_UPDATING : this.NORMAL_UPDATING;
 
-            this.fetchNextFeed();
+            this.updateNextFeed();
         }
         else if (this.status == this.BACKGROUND_UPDATING && !aInBackground) {
             // Stop the background update and continue with a foreground one.
@@ -178,7 +189,7 @@ let FeedUpdateServiceInternal = {
             this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
             this.status = this.NORMAL_UPDATING;
 
-            this.fetchNextFeed();
+            this.updateNextFeed();
         }
 
         if (newFeeds.length)
@@ -227,36 +238,48 @@ let FeedUpdateServiceInternal = {
             break;
 
         case this.fetchDelayTimer:
-            this.fetchNextFeed();
+            this.updateNextFeed();
             break;
         }
     },
 
 
-    fetchNextFeed: function FeedUpdateServiceInternal_fetchNextFeed() {
+    updateNextFeed: function FeedUpdateServiceInternal_updateNextFeed() {
+        let resume = FeedUpdateServiceInternal_updateNextFeed.resume;
+
         // All feeds in the update queue may have already been requested,
         // because we don't cancel the timer until after all feeds are completed.
         let feed = this.updateQueue.shift();
-        if (feed)
-            new FeedFetcher(feed);
-    },
+        if (!feed)
+            return;
 
+        Services.obs.notifyObservers(null, 'brief:feed-loading', feed.feedID);
 
-    onFeedUpdated: function FeedUpdateServiceInternal_onFeedUpdated(aFeed, aResult, aNewEntriesCount) {
-        this.completedFeeds.push(aFeed);
-        this.newEntriesCount += aNewEntriesCount;
-        if (aNewEntriesCount > 0) {
-            this.latestChangedFeed = aFeed;
-            this.feedsWithNewEntriesCount++;
+        let [status, document, parsedFeed] = yield new FeedFetcher(feed.feedURL, false, resume);
+
+        if (status == 'ok') {
+            let newEntriesCount = yield Storage.processFeed(feed.feedID, parsedFeed,
+                                                            document, resume);
+            if (newEntriesCount > 0) {
+                this.newEntriesCount += newEntriesCount;
+                this.latestChangedFeed = feed;
+                this.feedsWithNewEntriesCount++;
+            }
         }
 
-        Services.obs.notifyObservers(null, 'brief:feed-updated', aFeed.feedID);
-        if (aResult == 'error')
-            Services.obs.notifyObservers(null, 'brief:feed-error', aFeed.feedID);
+        let timeSinceRefresh = Date.now() - feed.lastFaviconRefresh;
+        if (!feed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL)
+            new FaviconFetcher(feed);
+
+        this.completedFeeds.push(feed);
+
+        Services.obs.notifyObservers(null, 'brief:feed-updated', feed.feedID);
+        if (status == 'error')
+            Services.obs.notifyObservers(null, 'brief:feed-error', feed.feedID);
 
         if (this.completedFeeds.length == this.scheduledFeeds.length)
             this.finishUpdate('completed');
-    },
+    }.gen(),
 
 
     finishUpdate: function FeedUpdateServiceInternal_finishUpdate(aReason) {
@@ -314,6 +337,21 @@ let FeedUpdateServiceInternal = {
         Services.obs.notifyObservers(null, 'brief:feed-update-finished', aReason);
     },
 
+    // See FeedUpdateService.
+    addFeed: function(aURL) {
+        new FeedFetcher(aURL, false, function(status, document, parsedFeed) {
+            // Just add a livemark, the feed will be updated by the bookmark observer.
+            let livemarks = Cc['@mozilla.org/browser/livemark-service;2']
+                            .getService(Ci.mozIAsyncLivemarks);
+            livemarks.addLivemark({
+                title: parsedFeed.title.text,
+                feedURI: Services.io.newURI(aURL, null, null),
+                siteURI: parsedFeed.link,
+                parentId: Prefs.getIntPref('homeFolder'),
+                index: Ci.nsINavBookmarksService.DEFAULT_INDEX,
+            })
+        })
+    },
 
     // nsIObserver
     observe: function FeedUpdateServiceInternal_observe(aSubject, aTopic, aData) {
@@ -349,20 +387,29 @@ let FeedUpdateServiceInternal = {
 
 
 /**
- * This object downloads the feed, parses it and updates the database.
+ * A worker object that downloads and parses a feed.
  *
- * @param aFeed
- *        Feed object representing the feed to be downloaded.
+ * @param aURL [string]
+ *        URL of the feed.
+ * @param aCancelable [boolean]
+ *        Indicates if the request can be canceled by brief:feed-update-finished
+ *        notification.
+ * @param aCallback [function]
+ *        Callback function that receives the following arguments:
+ *        1) status [string] "ok", "error", "cancelled"
+ *        2) document [DOM document] downloaded XML document, or null
+ *        3) parsedFeed [nsIFeedContainer] parsed feed data, or null
  */
-function FeedFetcher(aFeed) {
-    this.feed = aFeed;
+function FeedFetcher(aURL, aCancelable, aCallback) {
+    this.url = aURL;
+    this.cancelable = aCancelable;
+    this.callback = aCallback;
 
     this.parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
     this.parser.listener = this;
 
     this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
 
-    Services.obs.notifyObservers(null, 'brief:feed-loading', this.feed.feedID);
     Services.obs.addObserver(this, 'brief:feed-update-finished', false);
 
     this.requestFeed();
@@ -370,58 +417,47 @@ function FeedFetcher(aFeed) {
 
 FeedFetcher.prototype = {
 
-    feed:           null, // The passed feed, as currently stored in the database.
-    downloadedFeed: null, // The downloaded feed.
-
     request: null,
     parser: null,
     timeoutTimer: null,
 
-    // The feed processor sets the bozo bit when a feed triggers a fatal error during XML
-    // parsing. There may still be feed metadata and entries that were parsed before the
-    // error occurred.
-    bozo: false,
-
     finished: false,
-
 
     requestFeed: function FeedFetcher_requestFeed() {
         this.request = Cc['@mozilla.org/xmlextras/xmlhttprequest;1']
                        .createInstance(Ci.nsIXMLHttpRequest);
 
         this.request.mozBackgroundRequest = Prefs.getBoolPref('update.suppressSecurityDialogs');
-        this.request.open('GET', this.feed.feedURL, true);
+        this.request.open('GET', this.url, true);
         this.request.overrideMimeType('application/xml');
-        this.request.onload = onRequestLoad;
-        this.request.onerror = onRequestError;
+        this.request.onload = this.onRequestLoad.bind(this);
+        this.request.onerror = this.onRequestError.bind(this);
         this.request.send(null);
 
         this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
+    },
 
-        let self = this;
+    onRequestError: function() {
+        // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
+        const I_LOVE_NECKO_TOO = 2152398850;
 
-        function onRequestError() {
-            // See /extensions/venkman/resources/content/venkman-jsdurl.js#983 et al.
-            const I_LOVE_NECKO_TOO = 2152398850;
-
-            if (self.request.channel.status == I_LOVE_NECKO_TOO) {
-                self.request.abort();
-                self.requestFeed();
-            }
-            else {
-                self.finish('error');
-            }
+        if (this.request.channel.status == I_LOVE_NECKO_TOO) {
+            this.request.abort();
+            this.requestFeed();
         }
+        else {
+            this.finish('error', null);
+        }
+    },
 
-        function onRequestLoad() {
-            self.timeoutTimer.cancel();
-            try {
-                let uri = Services.io.newURI(self.feed.feedURL, null, null);
-                self.parser.parseFromString(self.request.responseText, uri);
-            }
-            catch (ex) {
-                self.finish('error');
-            }
+    onRequestLoad: function() {
+        this.timeoutTimer.cancel();
+        try {
+            let uri = Services.io.newURI(this.url, null, null);
+            this.parser.parseFromString(this.request.responseText, uri);
+        }
+        catch (ex) {
+            this.finish('error', null);
         }
     },
 
@@ -431,30 +467,17 @@ FeedFetcher.prototype = {
         // sometimes happen with parsing errors.
         this.parser.listener = null;
 
-        if (!aResult || !aResult.doc) {
-            this.finish('error');
-            return;
-        }
+        if (aResult && aResult.doc)
+            this.finish('ok', aResult.doc.QueryInterface(Ci.nsIFeed));
+        else
+            this.finish('error', null);
+    },
 
-        this.bozo = aResult.bozo;
-
-        let timeSinceRefresh = Date.now() - this.feed.lastFaviconRefresh;
-        if (!this.feed.favicon || timeSinceRefresh > FAVICON_REFRESH_INTERVAL)
-            new FaviconFetcher(this.feed)
-
-        let parsedFeed = aResult.doc.QueryInterface(Ci.nsIFeed);
-        let newEntriesCount = yield Storage.processFeed(this.feed.feedID, parsedFeed,
-                                                        this.request.responseXML,
-                                                        FeedFetcher_handleResult.resume);
-        this.finish('ok', newEntriesCount);
-    }.gen(),
-
-    finish: function FeedFetcher_finish(aResult, aNewEntriesCount) {
+    finish: function FeedFetcher_finish(aStatus, aParsedFeed) {
         if (this.finished)
             return;
 
-        if (aResult == 'ok' || aResult == 'error')
-            FeedUpdateServiceInternal.onFeedUpdated(this.feed, aResult, aNewEntriesCount || 0);
+        let document = this.request.responseXML;
 
         Services.obs.removeObserver(this, 'brief:feed-update-finished');
         this.request = null;
@@ -463,19 +486,21 @@ FeedFetcher.prototype = {
         this.parser.listener = null;
 
         this.finished = true;
+
+        this.callback(aStatus, document, aParsedFeed);
     },
 
     observe: function FeedFetcher_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'timer-callback':
                 this.request.abort();
-                this.finish('error');
+                this.finish('error', null);
                 break;
 
             case 'brief:feed-update-finished':
-                if (aData == 'cancelled') {
+                if (aData == 'cancelled' && this.cancelable) {
                     this.request.abort();
-                    this.finish('cancelled');
+                    this.finish('cancelled', null);
                 }
                 break;
             }
