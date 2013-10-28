@@ -326,8 +326,8 @@ FeedView.prototype = {
     _autoMarkRead: function FeedView__autoMarkRead() {
         if (PrefCache.autoMarkRead && !this.headlinesMode && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
-            let callback = this._getRefreshGuard(this.markVisibleEntriesRead.bind(this));
-            this._markVisibleTimeout = async(callback, 500, this);
+            let callback = this._callbackRefreshGuard(this.markVisibleEntriesRead.bind(this));
+            this._markVisibleTimeout = setTimeout(callback, 500);
         }
     },
 
@@ -411,9 +411,10 @@ FeedView.prototype = {
                 }
                 else if (!this._scrolling) {
                     clearTimeout(this._scrollSelectionTimeout);
-                    this._scrollSelectionTimeout = async(() => {
+                    let callback = this._callbackRefreshGuard(() =>
                         this.selectEntry(this.getEntryInScreenCenter())
-                    }, 50);
+                    )
+                    this._scrollSelectionTimeout = setTimeout(callback, 50);
                 }
 
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
@@ -983,7 +984,7 @@ function EntryView(aFeedView, aEntryData) {
                                                                      : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
 
-        async(() => {
+        wait().then(() => {
             this._getElement('content').innerHTML = aEntryData.content;
 
             if (this.feedView.query.searchString)
@@ -996,7 +997,7 @@ function EntryView(aFeedView, aEntryData) {
         contentElement.setAttribute('dir', this.textDirection);
 
         if (this.feedView.query.searchString) {
-            async(() => {
+            wait().then(() => {
                 for (let elem of ['authors', 'tags', 'title', 'content'])
                     this._highlightSearchTerms(this._getElement(elem));
 

@@ -442,7 +442,8 @@ let FeedList = {
                     ViewList.refreshItem('all-items-folder');
                     ViewList.refreshItem('today-folder');
                     ViewList.refreshItem('starred-folder');
-                    async(gCurrentView.refresh, 0, gCurrentView);
+
+                    wait().then(() => gCurrentView.refresh());
                 }
                 break;
 
@@ -517,14 +518,16 @@ let FeedList = {
     },
 
     onEntriesMarkedRead: function FeedList_onEntriesMarkedRead(aEntryList, aNewState) {
-        async(() => FeedList.refreshFeedTreeitems(aEntryList.feedIDs), 250)
+        wait(250).then(() =>
+            FeedList.refreshFeedTreeitems(aEntryList.feedIDs)
+        )
 
-        async(() => {
+        wait(500).then(() => {
             ViewList.refreshItem('all-items-folder');
             ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
             TagList.refreshTags(aEntryList.tags);
-        }, 500)
+        })
     },
 
     onEntriesStarred: function FeedList_onEntriesStarred(aEntryList, aNewState) {
@@ -539,13 +542,15 @@ let FeedList = {
     },
 
     onEntriesDeleted: function FeedList_onEntriesDeleted(aEntryList, aNewState) {
-        async(() => FeedList.refreshFeedTreeitems(aEntryList.feedIDs), 250)
+        wait(250).then(() =>
+            FeedList.refreshFeedTreeitems(aEntryList.feedIDs)
+        )
 
-        async(() => {
+        wait(500).then(() => {
             ViewList.refreshItem('all-items-folder');
             ViewList.refreshItem('today-folder');
             ViewList.refreshItem('starred-folder');
-        }, 500)
+        })
 
         let entriesRestored = (aNewState == Storage.ENTRY_STATE_NORMAL);
         TagList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);

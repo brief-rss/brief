@@ -1,8 +1,9 @@
-const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'log',
+const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'log', 'wait',
                           'getPluralForm', 'RelativeDate'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/Task.jsm');
+Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -35,6 +36,29 @@ Array.prototype.intersect = function intersect(aArr) {
 function log(aThing) {
     let str = aThing && typeof aThing == 'object' ? aThing.toSource() : aThing;
     Services.console.logStringMessage(str);
+}
+
+
+/**
+ * Returns a promise that resolves after the given time. The promise may be rejected
+ * by calling its cancel() method.
+ *
+ * @param aDelay <integer>
+ *        Time in milliseconds to wait. Default is 0, which means the promise will
+ *        be resolved "as soon as possible" (but not synchronously).
+ */
+function wait(aDelay) {
+    let deferred = Promise.defer();
+
+    let timer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+    timer.initWithCallback(() => deferred.resolve(), aDelay || 0, Ci.nsITimer.TYPE_ONE_SHOT);
+
+    deferred.promise.cancel = () => {
+        timer.cancel();
+        deferred.reject('cancelled');
+    }
+
+    return deferred.promise;
 }
 
 
