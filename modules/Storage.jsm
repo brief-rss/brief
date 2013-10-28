@@ -430,6 +430,47 @@ let StorageInternal = {
         new FeedProcessor(aFeedID, aParsedFeed, aFeedDocument);
     },
 
+    /**
+     * Inserts one or more feeds into the database, updates cache,
+     * and sends notifications.
+     *
+     * @param aFeeds <object> or <array <object>>
+     *        An object or an array of objects containing the following properties:
+     *        feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID.
+     */
+    addFeeds: function StorageInternal_addFeeds(aItems) {
+        let items = Array.isArray(aItems) ? aItems : [aItems];
+
+        for (let feedData of items) {
+            Stm.insertFeed.paramSets.push({
+                'feedID'    : feedData.feedID,
+                'feedURL'   : feedData.feedURL || null,
+                'title'     : feedData.title,
+                'rowIndex'  : feedData.rowIndex,
+                'isFolder'  : feedData.isFolder ? 1 : 0,
+                'parent'    : feedData.parent,
+                'bookmarkID': feedData.bookmarkID
+            })
+
+            // Update cache.
+            let feed = new Feed();
+            for (let property in feedData)
+                feed[property] = feedData[property];
+
+            this.feedCache.push(feed);
+        }
+
+        this.feedCache = this.feedCache.sort((a, b) => a.rowIndex - b.rowIndex);
+
+        Stm.insertFeed.executeAsync().then(() => {
+            feeds = items.filter(item => !item.isFolder)
+                         .map(item => Storage.getFeed(item.feedID));
+            FeedUpdateService.updateFeeds(feeds);
+        })
+
+        Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
+    },
+
     // See Storage.
     changeFeedProperties: function StorageInternal_changeFeedProperties(aPropertyBags) {
         let propertyBags = Array.isArray(aPropertyBags) ? aPropertyBags : [aPropertyBags];
@@ -1794,16 +1835,6 @@ let LivemarksSync = function LivemarksSync() {
         }
         // Feed not found in the database. Insert new feed.
         else {
-            Stm.insertFeed.paramSets.push({
-                'feedID'    : livemark.feedID,
-                'feedURL'   : livemark.feedURL || null,
-                'title'     : livemark.title,
-                'rowIndex'  : livemark.rowIndex,
-                'isFolder'  : livemark.isFolder ? 1 : 0,
-                'parent'    : livemark.parent,
-                'bookmarkID': livemark.bookmarkID
-            })
-
             newFeeds.push(livemark);
         }
     }
@@ -1817,26 +1848,11 @@ let LivemarksSync = function LivemarksSync() {
         });
     }
 
-    if (Stm.insertFeed.paramSets.length) {
-        yield Stm.insertFeed.executeAsync();
+    if (newFeeds.length)
+        StorageInternal.addFeeds(newFeeds);
 
-        yield StorageInternal.refreshFeedsCache(false);
-        Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
-    }
-
-    if (changedFeeds.length) {
+    if (changedFeeds.length)
         Storage.changeFeedProperties(changedFeeds);
-    }
-
-    // Update new and changed feeds. Changed feeds may need updating because
-    // they may have been unhidden.
-    if (newFeeds.length || changedFeeds.length) {
-        newFeeds = newFeeds.filter(function(feed) !feed.isFolder);
-        if (newFeeds.length) {
-            newFeeds = newFeeds.map(function(f) Storage.getFeed(f.feedID));
-            FeedUpdateService.updateFeeds(newFeeds);
-        }
-    }
 }.task();
 
 LivemarksSync.prototype = {

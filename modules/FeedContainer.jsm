@@ -64,7 +64,7 @@ Feed.prototype = {
     entryAgeLimit:  0,
     maxEntries:     0,
     updateInterval: 0,
-    markModifiedEntriesUnread: false,
+    markModifiedEntriesUnread: true,
     omitInUnread: 0,
     viewMode: 0,
 
