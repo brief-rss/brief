@@ -9,14 +9,6 @@ Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
 
-// Can't use the Cc shorthand imported from common.jsm here. Components object
-// is different in each scope and because of this, testing equality of instances
-// of XPCOM objects may bizzarely return false.
-// Namely, couldn't check aTimer in nsITimerCallback.notify().
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-
-
 const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
 const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
 const FAVICON_REFRESH_INTERVAL = 14*24*60*60*1000; // 2 weeks
@@ -154,7 +146,11 @@ let FeedUpdateServiceInternal = {
         // Delay the initial autoupdate check in order not to slow down the startup.
         this.startupDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
         let startupDelay = Prefs.getIntPref('update.startupDelay');
-        this.startupDelayTimer.initWithCallback(this, startupDelay, TIMER_TYPE_ONE_SHOT);
+        this.startupDelayTimer.initWithCallback(() => {
+            this.updateTimer.initWithCallback(this.updateTimerBeat.bind(this),
+                                              UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
+            this.updateTimerBeat();
+        }, startupDelay, TIMER_TYPE_ONE_SHOT);
     },
 
     // See FeedUpdateService.
@@ -177,8 +173,9 @@ let FeedUpdateServiceInternal = {
         if (this.status == this.NOT_UPDATING) {
             let delay = aInBackground ? Prefs.getIntPref('update.backgroundFetchDelay')
                                       : Prefs.getIntPref('update.defaultFetchDelay');
+            this.fetchDelayTimer.initWithCallback(this.updateNextFeed.bind(this), delay,
+                                                  TIMER_TYPE_SLACK);
 
-            this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
             this.status = aInBackground ? this.BACKGROUND_UPDATING : this.NORMAL_UPDATING;
 
             this.updateNextFeed();
@@ -188,7 +185,8 @@ let FeedUpdateServiceInternal = {
             this.fetchDelayTimer.cancel();
 
             let delay = Prefs.getIntPref('update.defaultFetchDelay');
-            this.fetchDelayTimer.initWithCallback(this, delay, TIMER_TYPE_SLACK);
+            this.fetchDelayTimer.initWithCallback(this.updateNextFeed.bind(this), delay,
+                                                  TIMER_TYPE_SLACK);
             this.status = this.NORMAL_UPDATING;
 
             this.updateNextFeed();
@@ -204,46 +202,31 @@ let FeedUpdateServiceInternal = {
             this.finishUpdate('cancelled');
     },
 
-    // nsITimerCallback
-    notify: function FeedUpdateServiceInternal_notify(aTimer) {
-        switch (aTimer) {
+    updateTimerBeat: function FeedUpdateService_updateTimerBeat() {
+        if (this.status != this.NOT_UPDATING)
+            return;
 
-        case this.startupDelayTimer:
-            this.updateTimer.initWithCallback(this, UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
-            // Fall through...
+        let globalUpdatingEnabled = Prefs.getBoolPref('update.enableAutoUpdate');
+        // Preferencos are in seconds, because they can only store 32 bit integers.
+        let globalInterval = Prefs.getIntPref('update.interval') * 1000;
+        let lastGlobalUpdateTime = Prefs.getIntPref('update.lastUpdateTime') * 1000;
+        let now = Date.now();
 
-        case this.updateTimer:
-            if (this.status != this.NOT_UPDATING)
-                return;
+        let itsGlobalUpdateTime = globalUpdatingEnabled &&
+                                  now - lastGlobalUpdateTime > globalInterval;
 
-            let globalUpdatingEnabled = Prefs.getBoolPref('update.enableAutoUpdate');
-            // Preferencos are in seconds, because they can only store 32 bit integers.
-            let globalInterval = Prefs.getIntPref('update.interval') * 1000;
-            let lastGlobalUpdateTime = Prefs.getIntPref('update.lastUpdateTime') * 1000;
-            let now = Date.now();
+        // Filter feeds which need to be updated, according to either the global
+        // update interval or their own feed-specific interval.
+        let feedsToUpdate = Storage.getAllFeeds().filter(
+            f => f.updateInterval == 0 && itsGlobalUpdateTime ||
+                 f.updateInterval > 0 && now - f.lastUpdated > f.updateInterval
+        )
 
-            let itsGlobalUpdateTime = globalUpdatingEnabled &&
-                                      now - lastGlobalUpdateTime > globalInterval;
+        if (feedsToUpdate.length)
+            this.updateFeeds(feedsToUpdate, feedsToUpdate.length, true);
 
-            // Filter feeds which need to be updated, according to either the global
-            // update interval or their own feed-specific interval.
-            let feedsToUpdate = Storage.getAllFeeds().filter(
-                f => f.updateInterval == 0 && itsGlobalUpdateTime ||
-                     f.updateInterval > 0 && now - f.lastUpdated > f.updateInterval
-            )
-
-            if (feedsToUpdate.length)
-                this.updateFeeds(feedsToUpdate, feedsToUpdate.length, true);
-
-            if (itsGlobalUpdateTime)
-                Prefs.setIntPref('update.lastUpdateTime', Math.round(now / 1000));
-
-            break;
-
-        case this.fetchDelayTimer:
-            this.updateNextFeed();
-            break;
-        }
+        if (itsGlobalUpdateTime)
+            Prefs.setIntPref('update.lastUpdateTime', Math.round(now / 1000));
     },
 
 
@@ -378,7 +361,7 @@ let FeedUpdateServiceInternal = {
 
         case 'nsPref:changed':
             if (aData == 'update.enableAutoUpdate' || aData == 'update.interval')
-                this.notify(this.updateTimer);
+                this.updateTimerBeat();
             break;
 
         case 'quit-application':
@@ -390,7 +373,7 @@ let FeedUpdateServiceInternal = {
         }
     },
 
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsITimerCallback, Ci.nsIObserver])
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
 
 }
 
