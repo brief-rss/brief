@@ -105,6 +105,15 @@ const Storage = Object.freeze({
     ENTRY_STATE_DELETED: 2,
 
     /**
+     * A promise that resolves when storage is initiated.
+     *
+     * @returns Promise<null>
+     */
+    get ready() {
+        return StorageInternal.ready;
+    },
+
+    /**
      * Returns a feed or a folder with given ID.
      *
      * @param aFeedID
@@ -219,7 +228,13 @@ const Storage = Object.freeze({
 
 let StorageInternal = {
 
+    // See Storage.
+    get ready() this.deferredReady.promise,
+
+    deferredReady: Promise.defer(),
+
     feedCache: null,
+
 
     init: function StorageInternal_init() {
         let databaseFile = FileUtils.getFile('ProfD', ['brief.sqlite']);
@@ -277,8 +292,12 @@ let StorageInternal = {
         Services.obs.addObserver(this, 'quit-application', false);
         Services.obs.addObserver(this, 'idle-daily', false);
 
-        // This has to be on the end, in case getting bookmarks service throws.
-        Bookmarks.addObserver(BookmarkObserver, false);
+        try {
+            Bookmarks.addObserver(BookmarkObserver, false);
+        }
+        finally {
+            this.deferredReady.resolve();
+        }
     },
 
     setupDatabase: function Database_setupDatabase() {

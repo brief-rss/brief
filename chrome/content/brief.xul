@@ -11,7 +11,7 @@
       xmlns:html="http://www.w3.org/1999/xhtml"
       title="Brief"
       orient="horizontal"
-      onload="init()"
+      onload="Storage.ready.then(init)"
       onunload="unload()">
 
     <script type="application/x-javascript" src="brief.js"/>

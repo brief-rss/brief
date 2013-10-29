@@ -165,16 +165,18 @@ const Brief = {
 
         this.prefs.setBoolPref('firefox4ToolbarbuttonMigrated', true);
 
-        this.updateStatus();
-
         if (this.prefs.getBoolPref('hideChrome'))
             XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
 
         gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
-        this.storage.addObserver(this);
+        this.storage.ready.then(() => {
+            this.storage.addObserver(this);
+            this.updateStatus();
+            Services.obs.addObserver(this.refreshUI, 'brief:invalidate-feedlist', false);
+        })
+
         this.prefs.addObserver('', this.onPrefChanged, false);
-        Services.obs.addObserver(this.refreshUI, 'brief:invalidate-feedlist', false);
 
         window.addEventListener('unload', this.onWindowUnload.bind(this), false);
     },
@@ -195,7 +197,7 @@ const Brief = {
             menuitem.setAttribute('checked', newValue);
 
             if (newValue)
-                Brief.updateStatus();
+                Brief.storage.ready.then(Brief.updateStatus);
         }
     },
 

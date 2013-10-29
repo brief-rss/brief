@@ -106,7 +106,10 @@ function onClearAllEntriesCmd(aEvent) {
             starred: checked.value ? false : undefined,
             includeHiddenFeeds: true
         });
-        query.deleteEntries(Storage.ENTRY_STATE_DELETED);
+
+        Storage.ready.then(() =>
+            query.deleteEntries(Storage.ENTRY_STATE_DELETED)
+        )
 
         Services.prefs.setBoolPref('extensions.brief.database.keepStarredWhenClearing', checked.value)
     }

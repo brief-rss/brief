@@ -130,10 +130,12 @@ let FeedUpdateServiceInternal = {
         Services.obs.addObserver(this, 'brief:feed-updated', false);
         Services.obs.addObserver(this, 'quit-application', false);
 
-        // Delay the initial autoupdate check to avoid slowing down startup.
+        // Delay the initial update to avoid slowing down the startup.
         yield wait(Prefs.getIntPref('update.startupDelay'));
 
-        // Pref observer can trigger an update so add it after the delay.
+        yield Storage.ready;
+
+        // Pref observer can trigger an update so register it after the delay.
         Prefs.addObserver('', this, false);
 
         this.updateTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
@@ -144,11 +146,14 @@ let FeedUpdateServiceInternal = {
 
     // See FeedUpdateService.
     updateAllFeeds: function FeedUpdateServiceInternal_updateAllFeeds(aInBackground) {
+        yield Storage.ready;
         this.updateFeeds(Storage.getAllFeeds(), aInBackground);
-    },
+    }.task(),
 
     // See FeedUpdateService.
     updateFeeds: function FeedUpdateServiceInternal_updateFeeds(aFeeds, aInBackground) {
+        yield Storage.ready;
+
         // Don't add the same feed be added twice.
         let newFeeds = aFeeds.filter(feed => this.updateQueue.indexOf(feed) == -1);
 
@@ -183,7 +188,7 @@ let FeedUpdateServiceInternal = {
 
         if (newFeeds.length)
             Services.obs.notifyObservers(null, 'brief:feed-update-queued', '');
-    },
+    }.task(),
 
     // See FeedUpdateService.
     stopUpdating: function FeedUpdateServiceInternal_stopUpdating() {
