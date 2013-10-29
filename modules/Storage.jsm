@@ -255,10 +255,10 @@ let StorageInternal = {
             Connection.close();
             databaseFile.remove(false);
             Connection = new StorageConnection(databaseFile, false);
-            this.setupDatabase();
+            yield this.setupDatabase();
         }
         else if (databaseIsNew) {
-            this.setupDatabase();
+            yield this.setupDatabase();
         }
         else if (schemaVersion < DATABASE_VERSION) {
             // Remove the old backup file.
@@ -275,16 +275,24 @@ let StorageInternal = {
                 Connection.close();
                 databaseFile.remove(false);
                 Connection = new StorageConnection(databaseFile, false);
-                this.setupDatabase();
+                yield this.setupDatabase();
             }
             else {
-                this.upgradeDatabase();
+                yield this.upgradeDatabase();
             }
         }
 
-        Connection.executeSQL('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE);
+        yield new Statement('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE).executeAsync();
 
-        this.refreshFeedsCache();
+        // Build feed cache.
+        this.feedCache = [];
+        for (let row of yield Stm.getAllFeeds.getResultsAsync()) {
+            let feed = new Feed();
+            for (let column in row)
+                feed[column] = row[column];
+
+            this.feedCache.push(feed);
+        }
 
         this.homeFolderID = Prefs.getIntPref('homeFolder');
         Prefs.addObserver('', this, false);
@@ -298,10 +306,10 @@ let StorageInternal = {
         finally {
             this.deferredReady.resolve();
         }
-    },
+    }.task(),
 
     setupDatabase: function Database_setupDatabase() {
-        Connection.executeSQL(
+        let sqlStrings = [
             'CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA.join(',') + ') ',
             'CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA.join(',') + ') ',
             'CREATE TABLE IF NOT EXISTS entry_tags (' + ENTRY_TAGS_TABLE_SCHEMA.join(',') + ') ',
@@ -322,35 +330,40 @@ let StorageInternal = {
             'PRAGMA journal_mode=WAL',
 
             'ANALYZE'
-        )
+        ]
+
+        for (let sql of sqlStrings)
+            yield new Statement(sql).executeAsync();
 
         Connection.schemaVersion = DATABASE_VERSION;
-    },
+    }.task(),
 
     upgradeDatabase: function StorageInternal_upgradeDatabase() {
+        let sqlStrings = [];
+
         switch (Connection.schemaVersion) {
             // To 1.5b2
             case 9:
                 // Remove dead rows from entries_text.
-                Connection.executeSQL('DELETE FROM entries_text                       '+
-                                      'WHERE rowid IN (                               '+
-                                      '     SELECT entries_text.rowid                 '+
-                                      '     FROM entries_text LEFT JOIN entries       '+
-                                      '          ON entries_text.rowid = entries.id   '+
-                                      '     WHERE NOT EXISTS (                        '+
-                                      '         SELECT id                             '+
-                                      '         FROM entries                          '+
-                                      '         WHERE entries_text.rowid = entries.id '+
-                                      '     )                                         '+
-                                     ')  AND rowid <> (SELECT max(rowid) from entries_text)  ');
+                sqlStrings.push('DELETE FROM entries_text                       '+
+                                'WHERE rowid IN (                               '+
+                                '     SELECT entries_text.rowid                 '+
+                                '     FROM entries_text LEFT JOIN entries       '+
+                                '          ON entries_text.rowid = entries.id   '+
+                                '     WHERE NOT EXISTS (                        '+
+                                '         SELECT id                             '+
+                                '         FROM entries                          '+
+                                '         WHERE entries_text.rowid = entries.id '+
+                                '     )                                         '+
+                               ')  AND rowid <> (SELECT max(rowid) from entries_text)');
 
             // To 1.5b3
             case 10:
-                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN lastFaviconRefresh INTEGER DEFAULT 0');
+                sqlStrings.push('ALTER TABLE feeds ADD COLUMN lastFaviconRefresh INTEGER DEFAULT 0');
 
             // To 1.5
             case 11:
-                Connection.executeSQL('ANALYZE');
+                sqlStrings.push('ANALYZE');
 
             // These were for one-time fixes on 1.5 branch.
             case 12:
@@ -358,15 +371,15 @@ let StorageInternal = {
 
             // To 1.6.
             case 14:
-                Connection.executeSQL('PRAGMA journal_mode=WAL');
+                sqlStrings.push('PRAGMA journal_mode=WAL');
 
             // To 1.7b1
             case 15:
-                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN omitInUnread INTEGER DEFAULT 0');
+                sqlStrings.push('ALTER TABLE feeds ADD COLUMN omitInUnread INTEGER DEFAULT 0');
 
             // To 1.7. One-time fix for table corruption.
             case 16:
-                Connection.executeSQL(
+                sqlStrings.push(
                     'DELETE FROM entries WHERE rowid NOT IN (SELECT docid FROM entries_text)',
                     'DELETE FROM entries_text WHERE docid NOT IN (SELECT rowid FROM entries)',
                     'INSERT OR IGNORE INTO entries_text(rowid) SELECT seq FROM sqlite_sequence WHERE name=\'entries\''
@@ -374,12 +387,15 @@ let StorageInternal = {
 
             // To 2.0.
             case 17:
-                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN language TEXT');
-                Connection.executeSQL('ALTER TABLE feeds ADD COLUMN viewMode INTEGER DEFAULT 0');
+                sqlStrings.push('ALTER TABLE feeds ADD COLUMN language TEXT');
+                sqlStrings.push('ALTER TABLE feeds ADD COLUMN viewMode INTEGER DEFAULT 0');
         }
 
+        for (let sql of sqlStrings)
+            yield new Statement(sql).executeAsync();
+
         Connection.schemaVersion = DATABASE_VERSION;
-    },
+    }.task(),
 
 
     // See Storage.
@@ -392,50 +408,14 @@ let StorageInternal = {
         return null;
     },
 
-    /**
-     * See Storage.
-     *
-     * It's not worth the trouble to make this function asynchronous like the
-     * rest of the IO, as in-memory cache is practically always available.
-     * However, in the rare case when the cache has just been invalidated
-     * and hasn't been refreshed yet, we must fall back to a synchronous query.
-     */
-    getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders, aIncludeInactive) {
-        if (!this.feedCache)
-            this.refreshFeedsCache(true);
 
+    // See Storage.
+    getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders, aIncludeInactive) {
         return this.feedCache.filter(
             f => (!f.isFolder || aIncludeFolders) && (!f.hidden || aIncludeInactive)
         )
     },
 
-    /**
-     * Tears down feeds cache and builds it back from the database.
-     *
-     * @param aSynchronous <boolean>
-     *        Indicates that cache should be rebuilt immediately, with a synchronous
-     *        database query.
-     * @returns Promise<null>
-     */
-    refreshFeedsCache: function StorageInternal_refreshFeedsCache(aSynchronous) {
-        this.feedCache = null;
-
-        let results, error;
-        if (aSynchronous)
-            results = Stm.getAllFeeds.results;
-        else
-            results = yield Stm.getAllFeeds.getResultsAsync();
-
-        this.feedCache = [];
-
-        for (let row of results) {
-            let feed = new Feed();
-            for (let column in row)
-                feed[column] = row[column];
-
-            this.feedCache.push(feed);
-        }
-    }.task(),
 
     // See Storage.
     getAllTags: function StorageInternal_getAllTags() {

@@ -43,54 +43,6 @@ StorageConnection.prototype = {
         return this._nativeConnection.close()
     },
 
-    /**
-     * Begins a transaction, runs the given function, and commits the transaction.
-     * If an exception is thrown within the given function, the transaction is
-     * rolled back and all the active statements are rest.
-     *
-     * @param aFunction
-     *        Function to run in the transaction.
-     * @oaran aOnError [optional]
-     *        Function to be called in case of an error.
-     */
-    runTransaction: function Connection_runTransaction(aFunction, aOnError) {
-        this._nativeConnection.beginTransaction();
-        try {
-            aFunction();
-            this._nativeConnection.commitTransaction();
-        }
-        catch (ex) {
-            this._nativeConnection.rollbackTransaction();
-            if (aOnError)
-                aOnError();
-            else
-                throw ex;
-        }
-        finally {
-            for (let statement of this._transactionStatements)
-                statement.reset();
-            this._transactionStatements = [];
-        }
-    },
-
-    /**
-     * Takes one or more SQL strings as arguments and executes them as separate statements.
-     * Alternatively, you can pass a single argument of an array of strings.
-     */
-    executeSQL: function Connection_executeSQL() {
-        let statements = Array.isArray(arguments[0]) ? arguments[0] : arguments;
-
-        for (let i = 0; i < statements.length; i++) {
-            let sql = statements[i];
-            try {
-                this._nativeConnection.executeSimpleSQL(sql);
-            }
-            catch (ex) {
-                throw new StorageError('Error when executing simple SQL:\n' + sql,
-                                       this.lastErrorString);
-            }
-        }
-    },
 
     /**
      * Creates a new StorageStatement for this connection.
@@ -196,21 +148,6 @@ StorageStatement.prototype = {
         return this.__params;
     },
 
-    /**
-     * Synchronously executes the statement with the bound parameters.
-     * Parameters passed directly to this function are favored over
-     * the ones bound in the params property.
-     *
-     * @param aParams [optional]
-     *        Object whose properties are name-value pairs of parameters to bind.
-     */
-    execute: function Statement_execute(aParams) {
-        if (aParams)
-            this.params = aParams;
-
-        this._bindParams();
-        this._nativeStatement.execute();
-    },
 
     /**
      * Asynchronously executes the statement with the bound parameters.
@@ -235,30 +172,6 @@ StorageStatement.prototype = {
         return callback.promise;
     },
 
-    /**
-     * Returns a generator for the results. The statement is automatically reset
-     * after all rows are iterated, otherwise it must be reset manually.
-     *
-     * Note: the generator catches database errors when stepping the statement and resets
-     * the statement when they occur, so the consumer doesn't have to wrap everything
-     * in try...finally (as long it itself avoids doing anything that risks exceptions).
-     */
-    get results() {
-        if (!this._resultsGenerator)
-            this._resultsGenerator = this._createResultGenerator();
-
-        return this._resultsGenerator;
-    },
-
-    /**
-     * Returns the first row of the results and resets the statement.
-     */
-    getSingleResult: function Statement_getSingleResult() {
-        let row = this.results.next();
-        this.reset()
-
-        return row;
-    },
 
     /**
      * Asynchronously executes the statement and collects the result rows
@@ -313,9 +226,6 @@ StorageStatement.prototype = {
     reset: function Statement_reset() {
         this.paramSets = [];
         this.params = {};
-
-        if (this._resultsGenerator)
-            this._resultsGenerator.close();
     },
 
     _bindParams: function Statement__bindParams() {
@@ -347,36 +257,6 @@ StorageStatement.prototype = {
 
         this.paramSets = [];
         this.params = {};
-    },
-
-    _createResultGenerator: function Statement__createResultGenerator() {
-        this._bindParams();
-
-        // Avoid repeated XPCOM calls for performance.
-        let columnCount = this._nativeStatement.columnCount;
-        let columns = [];
-
-        // This is performance-critical so don't use for...of sugar.
-        for (let i = 0; i < columnCount; i++)
-            columns.push(this._nativeStatement.getColumnName(i));
-
-        if (this.connection.transactionInProgress)
-            this.connection._transactionStatements.push(this);
-
-        try {
-            while (this._nativeStatement.step()) {
-                // Copy row's properties to make them enumerable.
-                // This may be a significant performance hit...
-                let row = {};
-                for (let i = 0; i < columnCount; i++)
-                    row[columns[i]] = this._nativeStatement.row[columns[i]];
-                yield row;
-            }
-        }
-        finally {
-            this._nativeStatement.reset();
-            this._resultsGenerator = null;
-        }
     },
 
     clone: function Statement_clone() {
