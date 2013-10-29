@@ -14,10 +14,7 @@ const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
 const FAVICON_REFRESH_INTERVAL = 14*24*60*60*1000; // 2 weeks
 
 const FEED_ICON_URL = 'chrome://brief/skin/icon.png';
-
-const TIMER_TYPE_ONE_SHOT = Ci.nsITimer.TYPE_ONE_SHOT;
-const TIMER_TYPE_PRECISE  = Ci.nsITimer.TYPE_REPEATING_PRECISE;
-const TIMER_TYPE_SLACK    = Ci.nsITimer.TYPE_REPEATING_SLACK;
+const TIMER_TYPE_SLACK = Ci.nsITimer.TYPE_REPEATING_SLACK;
 
 
 XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
@@ -129,29 +126,26 @@ let FeedUpdateServiceInternal = {
     // Total number of new entries in the current batch
     newEntriesCount:          0,
 
+    get fetchDelayTimer() {
+        delete this.fetchDelayTimer;
+        return this.fetchDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+    },
 
     init: function FeedUpdateServiceInternal_init() {
         Services.obs.addObserver(this, 'brief:feed-updated', false);
         Services.obs.addObserver(this, 'quit-application', false);
+
+        // Delay the initial autoupdate check to avoid slowing down startup.
+        yield wait(Prefs.getIntPref('update.startupDelay'));
+
+        // Pref observer can trigger an update so add it after the delay.
         Prefs.addObserver('', this, false);
 
-        XPCOMUtils.defineLazyGetter(this, 'updateTimer', () => {
-            return Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        })
-
-        XPCOMUtils.defineLazyGetter(this, 'fetchDelayTimer', () => {
-            return Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        })
-
-        // Delay the initial autoupdate check in order not to slow down the startup.
-        this.startupDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-        let startupDelay = Prefs.getIntPref('update.startupDelay');
-        this.startupDelayTimer.initWithCallback(() => {
-            this.updateTimer.initWithCallback(this.updateTimerBeat.bind(this),
-                                              UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
-            this.updateTimerBeat();
-        }, startupDelay, TIMER_TYPE_ONE_SHOT);
-    },
+        this.updateTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
+        this.updateTimer.initWithCallback(this.updateTimerBeat.bind(this),
+                                          UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
+        this.updateTimerBeat();
+    }.task(),
 
     // See FeedUpdateService.
     updateAllFeeds: function FeedUpdateServiceInternal_updateAllFeeds(aInBackground) {
@@ -399,8 +393,6 @@ function FeedFetcher(aURL, aCancelable) {
     this.parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);
     this.parser.listener = this;
 
-    this.timeoutTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
-
     Services.obs.addObserver(this, 'brief:feed-update-finished', false);
 
     this.requestFeed();
@@ -410,7 +402,7 @@ FeedFetcher.prototype = {
 
     request: null,
     parser: null,
-    timeoutTimer: null,
+    timeout: null,
 
     finished: false,
 
@@ -425,7 +417,14 @@ FeedFetcher.prototype = {
         this.request.onerror = this.onRequestError.bind(this);
         this.request.send(null);
 
-        this.timeoutTimer.init(this, FEED_FETCHER_TIMEOUT, TIMER_TYPE_ONE_SHOT);
+        this.timeout = wait(FEED_FETCHER_TIMEOUT);
+        this.timeout.then(
+            () => {
+                this.request.abort();
+                this.finish('error');
+            },
+            reason => { if (reason != 'cancelled') throw reason }
+        )
     },
 
     onRequestError: function() {
@@ -442,7 +441,7 @@ FeedFetcher.prototype = {
     },
 
     onRequestLoad: function() {
-        this.timeoutTimer.cancel();
+        this.timeout.cancel();
         try {
             let uri = Services.io.newURI(this.url, null, null);
             this.parser.parseFromString(this.request.responseText, uri);
@@ -472,8 +471,7 @@ FeedFetcher.prototype = {
 
         Services.obs.removeObserver(this, 'brief:feed-update-finished');
         this.request = null;
-        this.timeoutTimer.cancel();
-        this.timeoutTimer = null;
+        this.timeout.cancel();
         this.parser.listener = null;
 
         this.finished = true;
@@ -485,19 +483,10 @@ FeedFetcher.prototype = {
     },
 
     observe: function FeedFetcher_observe(aSubject, aTopic, aData) {
-        switch (aTopic) {
-            case 'timer-callback':
-                this.request.abort();
-                this.finish('error', null);
-                break;
-
-            case 'brief:feed-update-finished':
-                if (aData == 'cancelled' && this.cancelable) {
-                    this.request.abort();
-                    this.finish('cancelled', null);
-                }
-                break;
-            }
+        if (aData == 'cancelled' && this.cancelable) {
+            this.request.abort();
+            this.finish('cancelled', null);
+        }
     },
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver, Ci.nsIFeedResultListener])
