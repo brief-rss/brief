@@ -3,7 +3,6 @@ const EXPORTED_SYMBOLS = ['Storage', 'Query'];
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/StorageUtils.jsm');
 Components.utils.import('resource://brief/FeedContainer.jsm');
-Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/FileUtils.jsm');
@@ -76,6 +75,8 @@ const ENTRY_TAGS_TABLE_SCHEMA = [
 const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
 const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
 
+
+XPCOMUtils.defineLazyModuleGetter(this, 'FeedUpdateService', 'resource://brief/FeedUpdateService.jsm');
 XPCOMUtils.defineLazyServiceGetter(this, 'Bookmarks', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
 XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {

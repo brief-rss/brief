@@ -6,8 +6,9 @@ Components.utils.import('resource://gre/modules/FileUtils.jsm');
 IMPORT_COMMON(this);
 
 function BriefService() {
-    // Initialize Storage module.
+    // Initialize modules.
     Components.utils.import('resource://brief/Storage.jsm');
+    Components.utils.import('resource://brief/FeedUpdateService.jsm');
 
     // Register the custom CSS file under a resource URI.
     let resourceProtocolHandler = Services.io.getProtocolHandler('resource')

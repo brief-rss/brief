@@ -2,6 +2,7 @@ const EXPORTED_SYMBOLS = ['FeedUpdateService'];
 
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/FeedContainer.jsm');
+Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
@@ -20,12 +21,6 @@ const TIMER_TYPE_SLACK = Ci.nsITimer.TYPE_REPEATING_SLACK;
 XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
     return Services.prefs.getBranch('extensions.brief.');
 })
-XPCOMUtils.defineLazyGetter(this, 'Storage', () => {
-    let tempScope = {};
-    Components.utils.import('resource://brief/Storage.jsm', tempScope);
-    return tempScope.Storage;
-})
-
 
 // Exported object exposing public properties.
 const FeedUpdateService = Object.freeze({
