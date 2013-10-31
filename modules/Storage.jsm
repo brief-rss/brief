@@ -1009,7 +1009,16 @@ Query.prototype = {
      * String that must be contained by title, content, authors or tags of the
      * selected entries.
      */
-    searchString: undefined,
+    __searchString: undefined,
+    get searchString() {
+        return this.__searchString;
+    },
+    set searchString(aValue) {
+        // FTS requires search string to contain at least one non-excluded
+        // (i.e. not starting with a minus) term.
+        let invalid = aValue && !aValue.match(/(\s|^)[^\-][^\s]*/g);
+        return this.__searchString = invalid ? null : aValue;
+    },
 
     /**
      * Date range for the selected entries.
@@ -1064,14 +1073,10 @@ Query.prototype = {
     hasMatches: function Query_hasMatches() {
         let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
 
-        return new Statement(sql).getResultsAsync().then(
-            results => results[0].found,
-            error => {
-                this._maybeThrow(error);
-                return false;
-            }
-        )
-    },
+        let results = yield new Statement(sql).getResultsAsync();
+
+        throw new Task.Result(results[0].found);
+    }.task(),
 
     /**
      * Get a simple list of entries.
@@ -1082,14 +1087,11 @@ Query.prototype = {
     getEntries: function Query_getEntries() {
         let sql = 'SELECT entries.id ' + this._getQueryString(true);
 
-        return new Statement(sql).getResultsAsync().then(
-            results => [row.id for (row of results)],
-		    error => {
-                this._maybeThrow(error);
-                return [];
-            }
-        )
-    },
+        let IDs = [];
+        yield new Statement(sql).executeAsync(row => IDs.push(row.id));
+
+        throw new Task.Result(IDs);
+    }.task(),
 
 
     /**
@@ -1104,30 +1106,21 @@ Query.prototype = {
                   '       entries_text.authors, entries_text.tags                       ';
         sql += this._getQueryString(true, true);
 
-        return new Statement(sql).getResultsAsync().then(
-            results => {
-                let entries = [];
-                for (let row of results) {
-                    let entry = new Entry();
+        let entries = [];
+        yield new Statement(sql).executeAsync(row => {
+            let entry = new Entry();
 
-                    for (let column in row)
-                        entry[column] = row[column]
+            for (let column in row)
+                entry[column] = row[column]
 
-                    entry.markedUnreadOnUpdate = row['read'] == 2;
-                    entry.read = row['read'] == 1;
+            entry.markedUnreadOnUpdate = row['read'] == 2;
+            entry.read = row['read'] == 1;
 
-                    entries.push(entry);
-                }
+            entries.push(entry);
+        })
 
-                return entries;
-            },
-
-            error => {
-                this._maybeThrow(error);
-                return [];
-            }
-        )
-    },
+        throw new Task.Result(entries);
+    }.task(),
 
 
     /**
@@ -1154,22 +1147,18 @@ Query.prototype = {
 
         let sql = 'SELECT entries.id, ' + table + aPropertyName +
                    this._getQueryString(true, getEntriesText);
-        let values = [];
 
-        return new Statement(sql).executeAsync(
+        let values = [];
+        yield new Statement(sql).executeAsync(
             row => {
                 let value = row[aPropertyName];
                 if (!aDistinct || values.indexOf(value) == -1)
                     values.push(value);
             }
-        ).then(
-            () => values,
-            error => {
-                this._maybeThrow(error);
-                return values;
-            }
         )
-    },
+
+        throw new Task.Result(values);
+    }.task(),
 
 
     /**
@@ -1186,14 +1175,10 @@ Query.prototype = {
 
         this.sortOrder = tempOrder;
 
-        return new Statement(sql).getResultsAsync().then(
-            results => results[0].count,
-            error => {
-                this._maybeThrow(error);
-                return 0;
-            }
-        )
-    },
+        let results = yield new Statement(sql).getResultsAsync();
+
+        throw new Task.Result(results[0].count);
+    }.task(),
 
 
     /**
@@ -1202,9 +1187,10 @@ Query.prototype = {
      * @returns Promise<EntryList>
      */
     getEntryList: function Query_getEntryList() {
-        let entryIDs = [];
-        let feedIDs = [];
-        let tags = [];
+        let list = new EntryList();
+        list.IDs = [];
+        list.feedIDs = [];
+        list.tags = [];
 
         let tempHidden = this.includeHiddenFeeds;
         this.includeHiddenFeeds = false;
@@ -1212,34 +1198,22 @@ Query.prototype = {
                    + this._getQueryString(true, true);
         this.includeHiddenFeeds = tempHidden;
 
-        return new Statement(sql).executeAsync(
-            row => {
-                entryIDs.push(row.id);
+        yield new Statement(sql).executeAsync(row => {
+            list.IDs.push(row.id);
 
-                if (feedIDs.indexOf(row.feedID) == -1)
-                    feedIDs.push(row.feedID);
+            if (list.feedIDs.indexOf(row.feedID) == -1)
+                list.feedIDs.push(row.feedID);
 
-                if (row.tags) {
-                    let arr = row.tags.split(', ');
-                    let newTags = arr.filter(t => tags.indexOf(t) === -1);
-                    tags = tags.concat(newTags);
-                }
+            if (row.tags) {
+                let arr = row.tags.split(', ');
+                let newTags = arr.filter(t => tags.indexOf(t) === -1);
+                list.tags = list.tags.concat(newTags);
             }
-        ).then(
-            reason => {
-                let list = new EntryList();
-                list.IDs = entryIDs;
-                list.feedIDs = feedIDs;
-                list.tags = tags;
+        })
 
-                return list;
-            },
-            error => {
-                this._maybeThrow(error);
-                return new EntryList();
-            }
-        )
-    },
+
+        throw new Task.Result(list);
+    }.task(),
 
 
     /**
@@ -1392,18 +1366,6 @@ Query.prototype = {
      */
     _effectiveFolders: null,
 
-    /**
-     * Check if the given error should be ignored. If so, resolves the provided promise
-     * to the default value, otherwise rejects the promise.
-     *
-     * XXX Is this still necessary?
-     */
-    _maybeThrow: function BriefQuery__maybeThrow(aError) {
-        // Ignore "SQL logic error or missing database" error which full-text search
-        // throws when the query doesn't contain at least one non-excluded term.
-        if (aError.result != 1)
-            throw new StorageError('Error when executing Query', aError.message);
-    },
 
     /**
      * Constructs SQL query constraints query's properties.
