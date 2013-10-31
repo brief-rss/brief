@@ -837,7 +837,6 @@ FeedProcessor.prototype = {
         let primaryHash = Utils.hashString(primarySet.join(''));
         let secondaryHash = Utils.hashString(secondarySet.join(''));
 
-        // Look up if the entry is already present in the database.
         if (providedID) {
             var select = Stm.getEntryByPrimaryHash;
             select.params.primaryHash = primaryHash;
@@ -847,38 +846,23 @@ FeedProcessor.prototype = {
             select.params.secondaryHash = secondaryHash;
         }
 
-        let storedID, storedPubDate, storedDateUpdated, isEntryRead;
+        let storedEntry = (yield select.getResultsAsync())[0];
 
-        select.executeAsync(
-            row => {
-                storedID = row.id;
-                storedPubDate = row.date;
-                storedDateUpdated = row.updated;
-                isEntryRead = row.read;
+        if (storedEntry && storedEntry.id) {
+            // XXX Comparing stored entry date is temporary. Done to avoid suddenly
+            // marking many entries as update for old users (before rev 1.72).
+            if (aEntry.updated && aEntry.updated > storedEntry.updated
+                               && aEntry.updated > storedEntry.date) {
+                this.addUpdateParams(aEntry, storedEntry.id, storedEntry.read);
             }
-        ).then(
-            reason => {
-                if (reason == REASON_FINISHED) {
-                    if (storedID) {
-                        // XXX Comparing storedPubDate is temporary. Done to avoid suddenly
-                        // marking many entries as update for old users (before rev 1.72).
-                        if (aEntry.updated && aEntry.updated > storedDateUpdated
-                                           && aEntry.updated > storedPubDate) {
-                            this.addUpdateParams(aEntry, storedID, isEntryRead);
-                        }
-                    }
-                    else {
-                        this.addInsertParams(aEntry, primaryHash, secondaryHash);
-                    }
-                }
+        }
+        else {
+            this.addInsertParams(aEntry, primaryHash, secondaryHash);
+        }
 
-                if (!--this.remainingEntriesCount)
-                    this.executeAndNotify();
-            },
-
-            error => Cu.reportError(error)
-        )
-    },
+        if (!--this.remainingEntriesCount)
+            this.executeAndNotify();
+    }.task(),
 
     addUpdateParams: function FeedProcessor_addUpdateParams(aEntry, aStoredEntryID, aIsRead) {
         let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
@@ -903,42 +887,27 @@ FeedProcessor.prototype = {
     addInsertParams: function FeedProcessor_addInsertParams(aEntry, aPrimaryHash, aSecondaryHash) {
         let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
-        try {
-            var insertEntryParamSet = {
-                'feedID': this.feed.feedID,
-                'primaryHash': aPrimaryHash,
-                'secondaryHash': aSecondaryHash,
-                'providedID': aEntry.wrappedEntry.id,
-                'entryURL': aEntry.entryURL,
-                'date': aEntry.date || Date.now(),
-                'updated': aEntry.updated || 0
-            }
+        this.insertEntry.paramSets.push({
+            'feedID': this.feed.feedID,
+            'primaryHash': aPrimaryHash,
+            'secondaryHash': aSecondaryHash,
+            'providedID': aEntry.wrappedEntry.id,
+            'entryURL': aEntry.entryURL,
+            'date': aEntry.date || Date.now(),
+            'updated': aEntry.updated || 0
+        })
 
-            var insertEntryTextParamSet = {
-                'title': title,
-                'content': aEntry.content || aEntry.summary,
-                'authors': aEntry.authors
-            }
-        }
-        catch (ex) {
-            Cu.reportError('Error updating feeds. Failed to bind parameters to insert statement.');
-            Cu.reportError(ex);
-            return;
-        }
-
-        this.insertEntry.paramSets.push(insertEntryParamSet);
-        this.insertEntryText.paramSets.push(insertEntryTextParamSet);
+        this.insertEntryText.paramSets.push({
+            'title': title,
+            'content': aEntry.content || aEntry.summary,
+            'authors': aEntry.authors
+        })
     },
 
     executeAndNotify: function FeedProcessor_executeAndNotify() {
         let insertedEntries = [];
 
         if (this.insertEntry.paramSets.length) {
-            if (this.insertEntry.paramSets.length != this.insertEntryText.paramSets.length) {
-                this.deferred.resolve(0);
-                throw new Error('Mismatched parameteres between insertEntry and insertEntryText statements.');
-            }
-
             Stm.getLastRowids.params.count = this.insertEntry.paramSets.length;
             let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
 
