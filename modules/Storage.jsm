@@ -3,6 +3,7 @@ const EXPORTED_SYMBOLS = ['Storage', 'Query'];
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/StorageUtils.jsm');
 Components.utils.import('resource://brief/FeedContainer.jsm');
+Components.utils.import('resource://brief/DatabaseSchema.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/FileUtils.jsm');
@@ -19,58 +20,11 @@ const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
 const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 
-const FEEDS_TABLE_SCHEMA = [
-    'feedID          TEXT UNIQUE',
-    'feedURL         TEXT',
-    'websiteURL      TEXT',
-    'title           TEXT',
-    'subtitle        TEXT',
-    'language        TEXT',
-    'favicon         TEXT',
-    'bookmarkID      TEXT',
-    'parent          TEXT',
-    'rowIndex        INTEGER',
-    'isFolder        INTEGER',
-    'hidden          INTEGER DEFAULT 0',
-    'lastUpdated     INTEGER DEFAULT 0',
-    'oldestEntryDate INTEGER',
-    'entryAgeLimit   INTEGER DEFAULT 0',
-    'maxEntries      INTEGER DEFAULT 0',
-    'updateInterval  INTEGER DEFAULT 0',
-    'dateModified    INTEGER DEFAULT 0',
-    'lastFaviconRefresh INTEGER DEFAULT 0',
-    'markModifiedEntriesUnread INTEGER DEFAULT 1',
-    'omitInUnread    INTEGER DEFAULT 0', /* This is a misnomer, should be called omitInGlobalViews */
-    'viewMode        INTEGER DEFAULT 0' /* 0 - full view, 1 - headlines view */
-]
 
-const ENTRIES_TABLE_SCHEMA = [
-    'id            INTEGER PRIMARY KEY AUTOINCREMENT',
-    'feedID        TEXT',
-    'primaryHash   TEXT',
-    'secondaryHash TEXT',
-    'providedID    TEXT',
-    'entryURL      TEXT',
-    'date          INTEGER', // Time.
-    'updated       INTEGER', // Time.
-    'read          INTEGER DEFAULT 0',  // Multi-state flag. 0 - unread, 1 - read,
-                                        // 2 - re-marked unread after entry was updated.
-    'starred       INTEGER DEFAULT 0',  // Boolean flag.
-    'deleted       INTEGER DEFAULT 0',  // Boolean flag.
-    'bookmarkID    INTEGER DEFAULT -1 ' // Numeric ID.
-]
+const FEEDS_COLUMNS = [col.name for (col of FEEDS_TABLE_SCHEMA)];
+const ENTRIES_COLUMNS = [col.name for (col of ENTRIES_TABLE_SCHEMA)].concat(
+                        [col.name for (col of ENTRIES_TEXT_TABLE_SCHEMA)]);
 
-const ENTRIES_TEXT_TABLE_SCHEMA = [
-    'title   TEXT ',
-    'content TEXT ',
-    'authors TEXT ',
-    'tags    TEXT '
-]
-
-const ENTRY_TAGS_TABLE_SCHEMA = [
-    'tagName  TEXT    ',
-    'entryID  INTEGER '
-]
 
 const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
 const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
@@ -309,26 +263,24 @@ let StorageInternal = {
     }.task(),
 
     setupDatabase: function Database_setupDatabase() {
+        makeCol = col => col['name'] + ' ' + col['type'] +
+                         ('default' in col ? ' DEFAULT ' + col['default'] : '');
+        schemaString = schema => [makeCol(col) for (col of schema)].join();
+
         let sqlStrings = [
-            'CREATE TABLE IF NOT EXISTS feeds (' + FEEDS_TABLE_SCHEMA.join(',') + ') ',
-            'CREATE TABLE IF NOT EXISTS entries (' + ENTRIES_TABLE_SCHEMA.join(',') + ') ',
-            'CREATE TABLE IF NOT EXISTS entry_tags (' + ENTRY_TAGS_TABLE_SCHEMA.join(',') + ') ',
-            'CREATE VIRTUAL TABLE entries_text USING fts3 (' + ENTRIES_TEXT_TABLE_SCHEMA.join(',') + ')',
+            'CREATE TABLE feeds (' + schemaString(FEEDS_TABLE_SCHEMA) + ') ',
+            'CREATE TABLE entries (' + schemaString(ENTRIES_TABLE_SCHEMA) + ') ',
+            'CREATE TABLE entry_tags (' + schemaString(ENTRY_TAGS_TABLE_SCHEMA) + ') ',
+            'CREATE VIRTUAL TABLE entries_text USING fts3 (' + schemaString(ENTRIES_TEXT_TABLE_SCHEMA) + ')',
 
-            'CREATE INDEX IF NOT EXISTS entries_date_index ON entries (date)                ',
-            'CREATE INDEX IF NOT EXISTS entries_feedID_date_index ON entries (feedID, date) ',
-
-            // Speed up lookup when checking for updates.
-            'CREATE INDEX IF NOT EXISTS entries_primaryHash_index ON entries (primaryHash) ',
-
-            // Speed up SELECTs in the bookmarks observer.
-            'CREATE INDEX IF NOT EXISTS entries_bookmarkID_index ON entries (bookmarkID) ',
-            'CREATE INDEX IF NOT EXISTS entries_entryURL_index ON entries (entryURL)     ',
-
-            'CREATE INDEX IF NOT EXISTS entry_tagName_index ON entry_tags (tagName)',
+            'CREATE INDEX entries_date_index ON entries (date)',
+            'CREATE INDEX entries_feedID_date_index ON entries (feedID, date)',
+            'CREATE INDEX entries_primaryHash_index ON entries (primaryHash)',
+            'CREATE INDEX entries_bookmarkID_index ON entries (bookmarkID)',
+            'CREATE INDEX entries_entryURL_index ON entries (entryURL)',
+            'CREATE INDEX entry_tagName_index ON entry_tags (tagName)',
 
             'PRAGMA journal_mode=WAL',
-
             'ANALYZE'
         ]
 
@@ -809,17 +761,7 @@ FeedProcessor.prototype = {
         // This function checks whether a downloaded entry is already in the database or
         // it is a new one. To do this we need a way to uniquely identify entries. Many
         // feeds don't provide unique identifiers for their entries, so we have to use
-        // hashes for this purpose. There are two hashes.
-        // The primary hash is used as a standard unique ID throughout the codebase.
-        // Ideally, we just compute it from the GUID provided by the feed. Otherwise, we
-        // use the entry's URL.
-        // There is a problem, though. Even when a feed does provide its own GUID, it
-        // seems to randomly get lost (maybe a bug in the parser?). This means that the
-        // same entry may sometimes be hashed using the GUID and other times using the
-        // URL. Different hashes lead to the entry being duplicated.
-        // This is why we need a secondary hash, which is always based on the URL. If the
-        // GUID is empty (either because it was lost or because it wasn't provided to
-        // begin with), we look up the entry using the secondary hash.
+        // hashes for this purpose. See entries table schema for details.
         let providedID = aEntry.wrappedEntry.id;
         let primarySet = providedID ? [this.feed.feedID, providedID]
                                     : [this.feed.feedID, aEntry.entryURL];
@@ -1878,13 +1820,7 @@ LivemarksSync.prototype = {
 let Stm = {
 
     get getAllFeeds() {
-        let sql = 'SELECT feedID, feedURL, websiteURL, title, subtitle, dateModified,   ' +
-                  '       favicon, lastUpdated, oldestEntryDate, rowIndex, parent,      ' +
-                  '       isFolder, bookmarkID, entryAgeLimit, maxEntries, hidden,      ' +
-                  '       updateInterval, markModifiedEntriesUnread, omitInUnread,      ' +
-                  '       lastFaviconRefresh, language, viewMode                        ' +
-                  'FROM feeds                                                           ' +
-                  'ORDER BY rowIndex ASC                                                ';
+        let sql = 'SELECT ' + FEEDS_COLUMNS.join() + ' FROM feeds ORDER BY rowIndex ASC';
         delete this.getAllFeeds;
         return this.getAllFeeds = new Statement(sql);
     },
