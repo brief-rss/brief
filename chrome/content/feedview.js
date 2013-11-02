@@ -441,15 +441,15 @@ FeedView.prototype = {
 
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
         if (getTopWindow().gBrowser.currentURI.spec == document.documentURI)
-            this._onEntriesAdded(aEntryList.IDs);
+            this._onEntriesAdded(aEntryList.entries);
         else
             this._refreshPending = true;
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
         if (getTopWindow().gBrowser.currentURI.spec == document.documentURI) {
-            this._onEntriesRemoved(aEntryList.IDs, false, false);
-            this._onEntriesAdded(aEntryList.IDs);
+            this._onEntriesRemoved(aEntryList.entries, false, false);
+            this._onEntriesAdded(aEntryList.entries);
         }
         else {
             this._refreshPending = true;
@@ -459,12 +459,12 @@ FeedView.prototype = {
     onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntryList, aNewState) {
         if (this.query.read === false) {
             if (aNewState)
-                this._onEntriesRemoved(aEntryList.IDs, true, true);
+                this._onEntriesRemoved(aEntryList.entries, true, true);
             else
-                this._onEntriesAdded(aEntryList.IDs);
+                this._onEntriesAdded(aEntryList.entries);
         }
 
-        for (let entry of this._loadedEntries.intersect(aEntryList.IDs)) {
+        for (let entry of this._loadedEntries.intersect(aEntryList.entries)) {
             this.getEntryView(entry).read = aNewState;
 
             if (PrefCache.autoMarkRead && !aNewState)
@@ -475,17 +475,17 @@ FeedView.prototype = {
     onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
         if (this.query.starred === true) {
             if (aNewState)
-                this._onEntriesAdded(aEntryList.IDs);
+                this._onEntriesAdded(aEntryList.entries);
             else
-                this._onEntriesRemoved(aEntryList.IDs, true, true);
+                this._onEntriesRemoved(aEntryList.entries, true, true);
         }
 
-        for (let entry of this._loadedEntries.intersect(aEntryList.IDs))
+        for (let entry of this._loadedEntries.intersect(aEntryList.entries))
             this.getEntryView(entry).starred = aNewState;
     },
 
     onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
-        for (let entry of this._loadedEntries.intersect(aEntryList.IDs)) {
+        for (let entry of this._loadedEntries.intersect(aEntryList.entries)) {
             let entryView = this.getEntryView(entry);
             let tags = entryView.tags;
 
@@ -499,17 +499,17 @@ FeedView.prototype = {
 
         if (this.query.tags && this.query.tags[0] === aTag) {
             if (aNewState)
-                this._onEntriesAdded(aEntryList.IDs);
+                this._onEntriesAdded(aEntryList.entries);
             else
-                this._onEntriesRemoved(aEntryList.IDs, true, true);
+                this._onEntriesRemoved(aEntryList.entries, true, true);
         }
     },
 
     onEntriesDeleted: function FeedView_onEntriesDeleted(aEntryList, aNewState) {
         if (aNewState === this.query.deleted)
-            this._onEntriesAdded(aEntryList.IDs);
+            this._onEntriesAdded(aEntryList.entries);
         else
-            this._onEntriesRemoved(aEntryList.IDs, true, true);
+            this._onEntriesRemoved(aEntryList.entries, true, true);
     },
 
 

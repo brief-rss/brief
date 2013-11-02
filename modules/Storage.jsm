@@ -2,7 +2,6 @@ const EXPORTED_SYMBOLS = ['Storage', 'Query'];
 
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/StorageUtils.jsm');
-Components.utils.import('resource://brief/FeedContainer.jsm');
 Components.utils.import('resource://brief/DatabaseSchema.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
@@ -68,21 +67,25 @@ const Storage = Object.freeze({
     },
 
     /**
-     * Returns a feed or a folder with given ID.
+     * Get an object containing properties of the feed (or folder) with the given ID.
+     * See feeds table schema for a description of the properties.
      *
-     * @param aFeedID
-     * @returns Feed object, without entries.
+     * @param aFeedID <string>
+     * @returns <object>
      */
     getFeed: function(aFeedID) {
         return StorageInternal.getFeed(aFeedID);
     },
 
     /**
-     * Gets all feeds, without entries.
+     * Get an array of objects containing properties of all the feeds.
+     * See feeds table schema for a description of the properties.
      *
-     * @param aIncludeFolders [optional]
-     * @param aIncludeInactive [optional]
-     * @returns array of Feed objects.
+     * @param aIncludeFolders <boolean> [optional]
+     *        Include folders.
+     * @param aIncludeInactive <boolean> [optional]
+     *        Include items that are marked as deleted but haven't been purged yet.
+     * @returns <array <object>>
      */
     getAllFeeds: function(aIncludeFolders, aIncludeInactive) {
         return StorageInternal.getAllFeeds(aIncludeFolders, aIncludeInactive);
@@ -241,7 +244,7 @@ let StorageInternal = {
         // Build feed cache.
         this.feedCache = [];
         for (let row of yield Stm.getAllFeeds.getResultsAsync()) {
-            let feed = new Feed();
+            let feed = {};
             for (let column in row)
                 feed[column] = row[column];
 
@@ -405,9 +408,9 @@ let StorageInternal = {
             })
 
             // Update cache.
-            let feed = new Feed();
-            for (let property in feedData)
-                feed[property] = feedData[property];
+            let feed = {};
+            for (let column of FEEDS_TABLE_SCHEMA)
+                feed[column.name] = feedData[column.name] || column['default'];
 
             this.feedCache.push(feed);
         }
@@ -733,7 +736,8 @@ function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument) {
         // Counting down, because the order of items is reversed after parsing.
         for (let i = aParsedFeed.items.length - 1; i >= 0; i--) {
             let parsedEntry = aParsedFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
-            this.processEntry(new Entry(parsedEntry));
+            let mappedEntry = this.mapEntryProperties(parsedEntry);
+            this.processEntry(mappedEntry);
         }
     }
     else {
@@ -753,6 +757,35 @@ function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument) {
 }
 
 FeedProcessor.prototype = {
+
+    mapEntryProperties: function FeedProcessor_mapEntryProperties(aEntry) {
+        let mappedEntry = {
+            title:    aEntry.title     ? aEntry.title.text   : '',
+            entryURL: aEntry.link      ? aEntry.link.spec    : '',
+            summary:  aEntry.summary   ? aEntry.summary.text : '',
+            content:  aEntry.content   ? aEntry.content.text : '',
+            date:     aEntry.published ? Utils.getRFC822Date(aEntry.published).getTime() : Date.now(),
+            updated:  aEntry.updated   ? Utils.getRFC822Date(aEntry.updated).getTime() : Date.now()
+        }
+
+        try {
+            if (aEntry.authors) {
+                let authors = [];
+                for (let i = 0; i < aEntry.authors.length; i++) {
+                    let author = aEntry.authors.queryElementAt(i, Ci.nsIFeedPerson).name;
+                    authors.push(author);
+                }
+                mappedEntry.authors = authors.join(', ');
+            }
+        }
+        catch (ex) {
+            // Accessing nsIFeedContainer.authors sometimes fails.
+        }
+
+        mappedEntry.wrappedEntry = aEntry;
+
+        return mappedEntry;
+    },
 
     processEntry: function FeedProcessor_processEntry(aEntry) {
         if (aEntry.date && aEntry.date < this.newOldestEntryDate)
@@ -1039,18 +1072,19 @@ Query.prototype = {
     /**
      * Get entries with all their properties.
      *
-     * @returns Promise<array> Array of Entry objects.
+     * @returns Promise<array <object>>
+     *          Array of objects containing entry properties. All the properties
+     *          match columns in the database table, with the exception of "read"
+     *          and "markedUnreadOnUpdate".
      */
     getFullEntries: function Query_getFullEntries() {
-        let sql = 'SELECT entries.id, entries.feedID, entries.entryURL, entries.date,   '+
-                  '       entries.read, entries.starred, entries.updated,               '+
-                  '       entries.bookmarkID, entries_text.title, entries_text.content, '+
-                  '       entries_text.authors, entries_text.tags                       ';
-        sql += this._getQueryString(true, true);
+        let entries = ['entries.' + col.name for (col of ENTRIES_TABLE_SCHEMA)];
+        let entries_text = ['entries_text.' + col.name for (col of ENTRIES_TEXT_TABLE_SCHEMA)];
+        let sql = 'SELECT ' + entries.concat(entries_text).join() + this._getQueryString(true, true);
 
         let entries = [];
         yield new Statement(sql).executeAsync(row => {
-            let entry = new Entry();
+            let entry = {};
 
             for (let column in row)
                 entry[column] = row[column]
@@ -1124,15 +1158,19 @@ Query.prototype = {
 
 
     /**
-     * Get a list of entries.
+     * Get a simple list of entries.
      *
-     * @returns Promise<EntryList>
+     * @returns Promise<object> An object containing three properties:
+     *          IDs <array <integer>>:  list of entry IDs
+     *          feeds <array <string>>: list of distinct feedIDs
+     *          tags <array <string>>:  list of distinct tags
      */
     getEntryList: function Query_getEntryList() {
-        let list = new EntryList();
-        list.IDs = [];
-        list.feedIDs = [];
-        list.tags = [];
+        let list = {
+            entries: [],
+            feeds: [],
+            tags: []
+        }
 
         let tempHidden = this.includeHiddenFeeds;
         this.includeHiddenFeeds = false;
@@ -1141,18 +1179,17 @@ Query.prototype = {
         this.includeHiddenFeeds = tempHidden;
 
         yield new Statement(sql).executeAsync(row => {
-            list.IDs.push(row.id);
+            list.entries.push(row.id);
 
-            if (list.feedIDs.indexOf(row.feedID) == -1)
-                list.feedIDs.push(row.feedID);
+            if (list.feeds.indexOf(row.feedID) == -1)
+                list.feeds.push(row.feedID);
 
             if (row.tags) {
                 let arr = row.tags.split(', ');
-                let newTags = arr.filter(t => tags.indexOf(t) === -1);
+                let newTags = arr.filter(t => list.tags.indexOf(t) === -1);
                 list.tags = list.tags.concat(newTags);
             }
         })
-
 
         throw new Task.Result(list);
     }.task(),
@@ -1175,7 +1212,7 @@ Query.prototype = {
 
         let list = yield this.getEntryList();
 
-        if (list.length) {
+        if (list.entries.length) {
             let sql = 'UPDATE entries SET read = :read ';
             let update = new Statement(sql + this._getQueryString());
 
@@ -1203,7 +1240,7 @@ Query.prototype = {
      */
     deleteEntries: function Query_deleteEntries(aState) {
         let list = yield this.getEntryList();
-        if (list.length) {
+        if (list.entries.length) {
             let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
             yield new Statement(sql).executeAsync();
 
@@ -2158,6 +2195,39 @@ let Utils = {
             hexrep[i * 2 + 1] = hexchars.charAt(hash.charCodeAt(i) & 15);
         }
         return hexrep.join('');
+    },
+
+    getRFC822Date: function(aDateString) {
+        let date = new Date(aDateString);
+
+        // If the date is invalid, it may be caused by the fact that the built-in date parser
+        // doesn't handle military timezone codes, even though they are part of RFC822.
+        // We can fix this by manually replacing the military timezone code with the actual
+        // timezone.
+        if (date.toString().match('invalid','i')) {
+            let timezoneCodes = aDateString.match(/\s[a-ik-zA-IK-Z]$/);
+            if (timezoneCodes) {
+                let timezoneCode = timezoneCodes[0];
+                // Strip whitespace and normalize to upper case.
+                timezoneCode = timezoneCode.replace(/^\s+/,'')[0].toUpperCase();
+                let timezone = this.milTimezoneCodesMap[timezoneCode];
+                let fixedDateString = aDateString.replace(/\s[a-ik-zA-IK-Z]$/, ' ' + timezone);
+                date = new Date(fixedDateString);
+            }
+
+            // If the date is still invalid, just use the current date.
+            if (date.toString().match('invalid','i'))
+                date = new Date();
+        }
+
+        return date;
+    },
+
+    // Conversion table for military coded timezones.
+    milTimezoneCodesMap: {
+        A: '-1',  B: '-2',  C: '-3',  D: '-4', E: '-5',  F: '-6',  G: '-7',  H: '-8', I: '-9',
+        K: '-10', L: '-11', M: '-12', N: '+1', O: '+2',  P: '+3',  Q: '+4',  R: '+5',
+        S: '+6',  T: '+7',  U: '+8',  V: '+9', W: '+10', X: '+11', Y: '+12', Z: 'UT',
     }
 
 }

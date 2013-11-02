@@ -505,13 +505,13 @@ let FeedList = {
 
 
     onEntriesAdded: function FeedList_onEntriesAdded(aEntryList) {
-        this.refreshFeedTreeitems(aEntryList.feedIDs);
+        this.refreshFeedTreeitems(aEntryList.feeds);
         ViewList.refreshItem('all-items-folder');
         ViewList.refreshItem('today-folder');
     },
 
     onEntriesUpdated: function FeedList_onEntriesUpdated(aEntryList) {
-        this.refreshFeedTreeitems(aEntryList.feedIDs);
+        this.refreshFeedTreeitems(aEntryList.feeds);
         ViewList.refreshItem('all-items-folder');
         ViewList.refreshItem('today-folder');
         TagList.refreshTags(aEntryList.tags);
@@ -519,7 +519,7 @@ let FeedList = {
 
     onEntriesMarkedRead: function FeedList_onEntriesMarkedRead(aEntryList, aNewState) {
         wait(250).then(() =>
-            FeedList.refreshFeedTreeitems(aEntryList.feedIDs)
+            FeedList.refreshFeedTreeitems(aEntryList.feeds)
         )
 
         wait(500).then(() => {
@@ -543,7 +543,7 @@ let FeedList = {
 
     onEntriesDeleted: function FeedList_onEntriesDeleted(aEntryList, aNewState) {
         wait(250).then(() =>
-            FeedList.refreshFeedTreeitems(aEntryList.feedIDs)
+            FeedList.refreshFeedTreeitems(aEntryList.feeds)
         )
 
         wait(500).then(() => {
