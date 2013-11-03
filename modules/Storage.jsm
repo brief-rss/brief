@@ -1,13 +1,13 @@
 const EXPORTED_SYMBOLS = ['Storage', 'Query'];
 
 Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/StorageUtils.jsm');
 Components.utils.import('resource://brief/DatabaseSchema.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-Components.utils.import('resource://gre/modules/FileUtils.jsm');
 Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
 Components.utils.import('resource://gre/modules/Task.jsm');
+Components.utils.import('resource://gre/modules/osfile.jsm');
+Components.utils.import('resource://gre/modules/Sqlite.jsm');
 
 IMPORT_COMMON(this);
 
@@ -25,10 +25,6 @@ const ENTRIES_COLUMNS = [col.name for (col of ENTRIES_TABLE_SCHEMA)].concat(
                         [col.name for (col of ENTRIES_TEXT_TABLE_SCHEMA)]);
 
 
-const REASON_FINISHED = Ci.mozIStorageStatementCallback.REASON_FINISHED;
-const REASON_ERROR = Ci.mozIStorageStatementCallback.REASON_ERROR;
-
-
 XPCOMUtils.defineLazyModuleGetter(this, 'FeedUpdateService', 'resource://brief/FeedUpdateService.jsm');
 XPCOMUtils.defineLazyServiceGetter(this, 'Bookmarks', '@mozilla.org/browser/nav-bookmarks-service;1', 'nsINavBookmarksService');
 
@@ -42,12 +38,6 @@ XPCOMUtils.defineLazyGetter(this, 'Places', () => {
 
 
 let Connection = null;
-
-function Statement(aStatement, aDefaultParams) {
-    StorageStatement.call(this, Connection, aStatement, aDefaultParams);
-}
-
-Statement.prototype = StorageStatement.prototype;
 
 
 // Exported object exposing public properties.
@@ -194,62 +184,35 @@ let StorageInternal = {
 
 
     init: function StorageInternal_init() {
-        let databaseFile = FileUtils.getFile('ProfD', ['brief.sqlite']);
-        let databaseIsNew = !databaseFile.exists();
-
-        Connection = new StorageConnection(databaseFile, false);
-        let schemaVersion = Connection.schemaVersion;
-
-        // Remove the backup file after certain amount of time.
-        let backupFilename = 'brief-backup-' + (schemaVersion - 1) + '.sqlite';
-        let backupFile = FileUtils.getFile('ProfD', [backupFilename]);
-        if (backupFile.exists() && Date.now() - backupFile.lastModifiedTime > BACKUP_FILE_EXPIRATION_AGE)
-            backupFile.remove(false);
-
-        if (!Connection.connectionReady) {
-            // The database was corrupted, back it up and create a new one.
-            Services.storage.backupDatabaseFile(databaseFile, 'brief-backup.sqlite');
-            Connection.close();
-            databaseFile.remove(false);
-            Connection = new StorageConnection(databaseFile, false);
-            yield this.setupDatabase();
+        try {
+            Connection = yield Sqlite.openConnection({ path: 'brief.sqlite',
+                                                       sharedMemoryCache: false });
         }
-        else if (databaseIsNew) {
+        catch (ex) {
+            // The database was corrupted, back it up and create a new one.
+            this.resetDatabase();
+        }
+
+        let schemaVersion = Number.parseInt((yield Connection.getSchemaVersion()), 10);
+
+        if (schemaVersion == 0) {
             yield this.setupDatabase();
         }
         else if (schemaVersion < DATABASE_VERSION) {
-            // Remove the old backup file.
-            if (backupFile.exists())
-                backupFile.remove(false);
-
-            // Backup the database before migration.
-            let filename = 'brief-backup-' + schemaVersion + '.sqlite';
-            Services.storage.backupDatabaseFile(databaseFile, filename);
-
-            // No support for migration from versions older than 1.2,
-            // create a new database.
-            if (schemaVersion < 9) {
-                Connection.close();
-                databaseFile.remove(false);
-                Connection = new StorageConnection(databaseFile, false);
-                yield this.setupDatabase();
-            }
-            else {
-                yield this.upgradeDatabase();
-            }
+            yield this.upgradeDatabase(schemaVersion);
         }
 
-        yield new Statement('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE).executeAsync();
+        yield Connection.execute('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE);
 
         // Build feed cache.
         this.feedCache = [];
-        for (let row of yield Stm.getAllFeeds.getResultsAsync()) {
+        yield Stm.getAllFeeds.execute(null, row => {
             let feed = {};
-            for (let column in row)
+            for (let column of FEEDS_COLUMNS)
                 feed[column] = row[column];
 
             this.feedCache.push(feed);
-        }
+        })
 
         this.homeFolderID = Prefs.getIntPref('homeFolder');
         Prefs.addObserver('', this, false);
@@ -288,15 +251,25 @@ let StorageInternal = {
         ]
 
         for (let sql of sqlStrings)
-            yield new Statement(sql).executeAsync();
+            yield Connection.execute(sql);
 
-        Connection.schemaVersion = DATABASE_VERSION;
+        yield Connection.setSchemaVersion(DATABASE_VERSION);
     }.task(),
 
-    upgradeDatabase: function StorageInternal_upgradeDatabase() {
+    upgradeDatabase: function StorageInternal_upgradeDatabase(aPrevVersion) {
+        // No support for migration from versions older than 1.2.
+        if (aPrevVersion < 9) {
+            this.resetDatabase();
+            return;
+        }
+
+        let dbPath = OS.Path.join(OS.Constants.Path.profileDir, 'brief.sqlite');
+        let backupPath = OS.Path.join(OS.Constants.Path.profileDir, 'brief-backup.sqlite');
+        yield OS.File.copy(dbPath, backupPath);
+
         let sqlStrings = [];
 
-        switch (Connection.schemaVersion) {
+        switch (aPrevVersion) {
             // To 1.5b2
             case 9:
                 // Remove dead rows from entries_text.
@@ -347,11 +320,23 @@ let StorageInternal = {
         }
 
         for (let sql of sqlStrings)
-            yield new Statement(sql).executeAsync();
+            yield Connection.execute(sql);
 
-        Connection.schemaVersion = DATABASE_VERSION;
+        yield Connection.setSchemaVersion(DATABASE_VERSION);
     }.task(),
 
+    // Renames the old database file as a backup and sets up a new one.
+    resetDatabase: function StorageInternal_resetDatabase() {
+        yield Connection.close();
+
+        let dbPath = OS.Path.join(OS.Constants.Path.profileDir, 'brief.sqlite');
+        let backupPath = OS.Path.join(OS.Constants.Path.profileDir, 'brief-backup.sqlite');
+        yield OS.File.rename(dbPath, backupPath);
+
+        Connection = yield Sqlite.openConnection({ path: 'brief.sqlite',
+                                                   sharedMemoryCache: false });
+        yield this.setupDatabase();
+    }.task(),
 
     // See Storage.
     getFeed: function StorageInternal_getFeed(aFeedID) {
@@ -374,10 +359,9 @@ let StorageInternal = {
 
     // See Storage.
     getAllTags: function StorageInternal_getAllTags() {
-        return Stm.getAllTags.getResultsAsync().then(
-            results => [row.tagName for (row of results)]
-        )
-    },
+        let results = yield Stm.getAllTags.executeCached();
+        throw new Task.Result([row.tagName for (row of results)]);
+    }.task(),
 
 
     // See Storage.
@@ -395,9 +379,10 @@ let StorageInternal = {
      */
     addFeeds: function StorageInternal_addFeeds(aItems) {
         let items = Array.isArray(aItems) ? aItems : [aItems];
+        let paramSets = [];
 
         for (let feedData of items) {
-            Stm.insertFeed.paramSets.push({
+            paramSets.push({
                 'feedID'    : feedData.feedID,
                 'feedURL'   : feedData.feedURL || null,
                 'title'     : feedData.title,
@@ -417,26 +402,26 @@ let StorageInternal = {
 
         this.feedCache = this.feedCache.sort((a, b) => a.rowIndex - b.rowIndex);
 
-        Stm.insertFeed.executeAsync().then(() => {
-            feeds = items.filter(item => !item.isFolder)
-                         .map(item => Storage.getFeed(item.feedID));
-            FeedUpdateService.updateFeeds(feeds);
-        })
-
         Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
-    },
+
+        yield Stm.insertFeed.executeCached(paramSets);
+
+        let feeds = [this.getFeed(item.feedID) for (item of items) if (!item.isFolder)];
+        FeedUpdateService.updateFeeds(feeds);
+    }.task(),
 
     // See Storage.
     changeFeedProperties: function StorageInternal_changeFeedProperties(aPropertyBags) {
         let propertyBags = Array.isArray(aPropertyBags) ? aPropertyBags : [aPropertyBags];
 
+        let paramSets = [];
         let invalidateFeedlist = false;
 
         for (let propertyBag of propertyBags) {
             let cachedFeed = Storage.getFeed(propertyBag.feedID);
             let params = {};
 
-            for (let property in Stm.changeFeedProperties.params) {
+            for (let property of FEEDS_COLUMNS) {
                 if (property in propertyBag) {
                     params[property] = propertyBag[property];
 
@@ -475,13 +460,13 @@ let StorageInternal = {
                 }
             }
 
-            Stm.changeFeedProperties.paramSets.push(params);
+            paramSets.push(params);
         }
 
         if (invalidateFeedlist)
             Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
 
-        Stm.changeFeedProperties.executeAsync();
+        Stm.changeFeedProperties.executeCached(paramSets);
     },
 
     /**
@@ -542,26 +527,22 @@ let StorageInternal = {
 
     // Permanently removes deleted items from database.
     purgeDeleted: function StorageInternal_purgeDeleted() {
-        Stm.purgeDeletedEntriesText.params = {
+        Stm.purgeDeletedEntriesText.execute({
             'deletedState': Storage.ENTRY_STATE_DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
-        }
+        })
 
-        Stm.purgeDeletedEntries.params = {
+        Stm.purgeDeletedEntries.execute({
             'deletedState': Storage.ENTRY_STATE_DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
-        }
+        })
 
-        Stm.purgeDeletedFeeds.params = {
+        Stm.purgeDeletedFeeds.execute({
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
-        }
-
-        Connection.executeAsync([Stm.purgeDeletedEntriesText,
-                                 Stm.purgeDeletedEntries,
-                                 Stm.purgeDeletedFeeds]);
+        })
 
         // Prefs can only store longs while Date is a long long.
         let now = Math.round(Date.now() / 1000);
@@ -572,10 +553,7 @@ let StorageInternal = {
     observe: function StorageInternal_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'quit-application':
-                for each (let statement in Stm)
-                    statement._nativeStatement.finalize();
-
-                Connection._nativeConnection.asyncClose();
+                Connection.close();
 
                 Bookmarks.removeObserver(BookmarkObserver);
                 Prefs.removeObserver('', this);
@@ -590,6 +568,15 @@ let StorageInternal = {
                 let lastPurgeTime = Prefs.getIntPref('database.lastPurgeTime');
                 if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
                     this.purgeDeleted();
+
+                // Remove the backup file after certain amount of time.
+                let path = OS.Path.join(OS.Constants.Path.profileDir, 'brief-backup.sqlite');
+                if (yield OS.File.exists(path)) {
+                    let file = yield OS.File.open(path);
+                    let modificationDate = (yield file.stat()).lastModificationDate;
+                    if (Date.now() - modificationDate.getTime() > BACKUP_FILE_EXPIRATION_AGE)
+                        OS.File.remove(path);
+                }
                 break;
 
             case 'nsPref:changed':
@@ -612,7 +599,7 @@ let StorageInternal = {
                 }
                 break;
         }
-    },
+    }.task(),
 
 
     // See Storage.
@@ -647,14 +634,10 @@ let StorageInternal = {
      *        Don't notify observers.
      */
     starEntry: function StorageInternal_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
-        if (aState) {
-            Stm.starEntry.params = { 'bookmarkID': aBookmarkID, 'entryID': aEntryID };
-            yield Stm.starEntry.executeAsync();
-        }
-        else {
-            Stm.unstarEntry.params = { 'id': aEntryID };
-            yield Stm.unstarEntry.executeAsync();
-        }
+        if (aState)
+            yield Stm.starEntry.executeCached({ 'bookmarkID': aBookmarkID, 'entryID': aEntryID });
+        else
+            yield Stm.unstarEntry.executeCached({ 'id': aEntryID });
 
         if (!aDontNotify) {
             let list = yield new Query(aEntryID).getEntryList();
@@ -679,26 +662,22 @@ let StorageInternal = {
         let params = { 'entryID': aEntryID, 'tagName': aTagName };
 
         if (aState) {
-            Stm.checkTag.params = params;
-            let results = yield Stm.checkTag.getResultsAsync();
+            let results = yield Stm.checkTag.executeCached(params);
             if (results[0].alreadyTagged)
                 return;
 
-            Stm.tagEntry.params = params;
-            yield Stm.tagEntry.executeAsync();
+            yield Stm.tagEntry.executeCached(params);
         }
         else {
-            Stm.untagEntry.params = params;
-            yield Stm.untagEntry.executeAsync();
+            yield Stm.untagEntry.executeCached(params);
         }
 
         // Update the serialized list of tags stored in entries_text table.
         let newTags = yield Utils.getTagsForEntry(aEntryID);
-        Stm.setSerializedTagList.params = {
+        yield Stm.setSerializedTagList.executeCached({
             'tags': newTags.join(', '),
             'entryID': aEntryID
-        }
-        yield Stm.setSerializedTagList.executeAsync();
+        })
 
         let list = yield new Query(aEntryID).getEntryList();
         for (let observer of StorageInternal.observers) {
@@ -728,10 +707,10 @@ function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument) {
 
         this.updatedEntries = [];
 
-        this.updateEntry = Stm.updateEntry.clone();
-        this.insertEntry = Stm.insertEntry.clone();
-        this.updateEntryText = Stm.updateEntryText.clone();
-        this.insertEntryText = Stm.insertEntryText.clone();
+        this.updateEntryParamSets = [];
+        this.insertEntryParamSets = [];
+        this.updateEntryTextParamSets = [];
+        this.insertEntryTextParamSets = [];
 
         // Counting down, because the order of items is reversed after parsing.
         for (let i = aParsedFeed.items.length - 1; i >= 0; i--) {
@@ -812,20 +791,14 @@ FeedProcessor.prototype = {
         let primaryHash = Utils.hashString(primarySet.join(''));
         let secondaryHash = Utils.hashString(secondarySet.join(''));
 
-        if (providedID) {
-            var select = Stm.getEntryByPrimaryHash;
-            select.params.primaryHash = primaryHash;
-        }
-        else {
-            select = Stm.getEntryBySecondaryHash;
-            select.params.secondaryHash = secondaryHash;
-        }
+        // Look up if the entry is already present in the database.
+        let select = providedID ? Stm.getEntryByPrimaryHash : Stm.getEntryBySecondaryHash;
+        let params = { hash: providedID ? primaryHash : secondaryHash };
+        let storedEntry = (yield select.executeCached(params))[0];
 
-        let storedEntry = (yield select.getResultsAsync())[0];
-
-        if (storedEntry && storedEntry.id) {
+        if (storedEntry) {
             // XXX Comparing stored entry date is temporary. Done to avoid suddenly
-            // marking many entries as update for old users (before rev 1.72).
+            // marking many entries as updated for old users (before rev 1.72).
             if (aEntry.updated && aEntry.updated > storedEntry.updated
                                && aEntry.updated > storedEntry.date) {
                 this.addUpdateParams(aEntry, storedEntry.id, storedEntry.read);
@@ -843,13 +816,13 @@ FeedProcessor.prototype = {
         let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
         let markUnread = Storage.getFeed(this.feed.feedID).markModifiedEntriesUnread;
 
-        this.updateEntry.paramSets.push({
+        this.updateEntryParamSets.push({
             'updated': aEntry.updated,
             'read': markUnread && aIsRead == 1 ? 2 : aIsRead,
             'id': aStoredEntryID
         })
 
-        this.updateEntryText.paramSets.push({
+        this.updateEntryTextParamSets.push({
             'title': title,
             'content': aEntry.content || aEntry.summary,
             'authors': aEntry.authors,
@@ -862,7 +835,7 @@ FeedProcessor.prototype = {
     addInsertParams: function FeedProcessor_addInsertParams(aEntry, aPrimaryHash, aSecondaryHash) {
         let title = aEntry.title ? aEntry.title.replace(/<[^>]+>/g, '') : ''; // Strip tags
 
-        this.insertEntry.paramSets.push({
+        this.insertEntryParamSets.push({
             'feedID': this.feed.feedID,
             'primaryHash': aPrimaryHash,
             'secondaryHash': aSecondaryHash,
@@ -872,7 +845,7 @@ FeedProcessor.prototype = {
             'updated': aEntry.updated || 0
         })
 
-        this.insertEntryText.paramSets.push({
+        this.insertEntryTextParamSets.push({
             'title': title,
             'content': aEntry.content || aEntry.summary,
             'authors': aEntry.authors
@@ -882,32 +855,34 @@ FeedProcessor.prototype = {
     executeAndNotify: function FeedProcessor_executeAndNotify() {
         let insertedEntries = [];
 
-        if (this.insertEntry.paramSets.length) {
-            Stm.getLastRowids.params.count = this.insertEntry.paramSets.length;
-            let statements = [this.insertEntry, this.insertEntryText, Stm.getLastRowids];
+        if (this.insertEntryParamSets.length) {
+            yield Connection.executeTransaction(() => {
+                Stm.insertEntry.executeCached(this.insertEntryParamSets);
+                Stm.insertEntryText.executeCached(this.insertEntryTextParamSets);
+                Stm.getLastRowids.executeCached(
+                    { count: this.insertEntryParamSets.length },
+                    row => insertedEntries.push(row.id)
+                )
+            })
 
-            let reason = yield Connection.executeAsync(
-                statements,
-                row => insertedEntries.push(row.id)
-            )
+            let list = yield new Query(insertedEntries).getEntryList();
 
-            if (reason === REASON_FINISHED) {
-                let list = yield new Query(insertedEntries).getEntryList();
-                for (let observer of StorageInternal.observers) {
-                    if (observer.onEntriesAdded)
-                        observer.onEntriesAdded(list);
-                }
-
-                StorageInternal.expireEntries(this.feed);
+            for (let observer of StorageInternal.observers) {
+                if (observer.onEntriesAdded)
+                    observer.onEntriesAdded(list);
             }
+
+            StorageInternal.expireEntries(this.feed);
         }
 
-        if (this.updateEntry.paramSets.length) {
-            let statements = [this.updateEntry, this.updateEntryText];
-
-            yield Connection.executeAsync(statements);
+        if (this.updateEntryParams.length) {
+            yield Connection.executeTransaction(() => {
+                Stm.updateEntry.executeCached(this.updateEntryParamSets);
+                Stm.updateEntryText.executeCached(this.updateEntryTextParamSets);
+            })
 
             let list = yield new Query(this.updatedEntries).getEntryList();
+
             for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesUpdated)
                     observer.onEntriesUpdated(list);
@@ -1048,9 +1023,9 @@ Query.prototype = {
     hasMatches: function Query_hasMatches() {
         let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
 
-        let results = yield new Statement(sql).getResultsAsync();
+        let results = yield Connection.execute(sql);
 
-        throw new Task.Result(results[0].found);
+        throw new Task.Result(results[0].getResultByName('found'));
     }.task(),
 
     /**
@@ -1063,7 +1038,9 @@ Query.prototype = {
         let sql = 'SELECT entries.id ' + this._getQueryString(true);
 
         let IDs = [];
-        yield new Statement(sql).executeAsync(row => IDs.push(row.id));
+        yield Connection.execute(sql, null,
+            row => IDs.push(row.getResultByName('id'))
+        )
 
         throw new Task.Result(IDs);
     }.task(),
@@ -1083,14 +1060,15 @@ Query.prototype = {
         let sql = 'SELECT ' + entries.concat(entries_text).join() + this._getQueryString(true, true);
 
         let entries = [];
-        yield new Statement(sql).executeAsync(row => {
+        yield Connection.execute(sql, null, row => {
             let entry = {};
 
-            for (let column in row)
-                entry[column] = row[column]
+            for (let col of ENTRIES_COLUMNS)
+                entry[col] = row.getResultByName(col);
 
-            entry.markedUnreadOnUpdate = row['read'] == 2;
-            entry.read = row['read'] == 1;
+            // Convert from multi-state to boolean.
+            entry.markedUnreadOnUpdate = entry.read == 2;
+            entry.read = entry.read == 1;
 
             entries.push(entry);
         })
@@ -1125,13 +1103,11 @@ Query.prototype = {
                    this._getQueryString(true, getEntriesText);
 
         let values = [];
-        yield new Statement(sql).executeAsync(
-            row => {
-                let value = row[aPropertyName];
-                if (!aDistinct || values.indexOf(value) == -1)
-                    values.push(value);
-            }
-        )
+        yield Connection.execute(sql, null, row => {
+            let value = row.getResultByName(aPropertyName);
+            if (!aDistinct || values.indexOf(value) == -1)
+                values.push(value);
+        })
 
         throw new Task.Result(values);
     }.task(),
@@ -1151,9 +1127,9 @@ Query.prototype = {
 
         this.sortOrder = tempOrder;
 
-        let results = yield new Statement(sql).getResultsAsync();
+        let results = yield Connection.execute(sql);
 
-        throw new Task.Result(results[0].count);
+        throw new Task.Result(results[0].getResultByName('count'));
     }.task(),
 
 
@@ -1178,7 +1154,7 @@ Query.prototype = {
                    + this._getQueryString(true, true);
         this.includeHiddenFeeds = tempHidden;
 
-        yield new Statement(sql).executeAsync(row => {
+        yield new Statement(sql, ['id', 'feedID', 'tags']).execute(null, row => {
             list.entries.push(row.id);
 
             if (list.feeds.indexOf(row.feedID) == -1)
@@ -1213,11 +1189,8 @@ Query.prototype = {
         let list = yield this.getEntryList();
 
         if (list.entries.length) {
-            let sql = 'UPDATE entries SET read = :read ';
-            let update = new Statement(sql + this._getQueryString());
-
-            update.params.read = aState ? 1 : 0;
-            yield update.executeAsync();
+            let sql = 'UPDATE entries SET read = ' + (aState ? 1 : 0) + this._getQueryString();
+            yield Connection.execute(sql);
 
             this.read = tempRead;
 
@@ -1242,7 +1215,7 @@ Query.prototype = {
         let list = yield this.getEntryList();
         if (list.entries.length) {
             let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
-            yield new Statement(sql).executeAsync();
+            yield Connection.execute(sql);
 
             for (let observer of StorageInternal.observers) {
                 if (observer.onEntriesDeleted)
@@ -1601,12 +1574,12 @@ let BookmarkObserver = {
                                                            aLastModified, aItemType, aParentID) {
         switch (aProperty) {
             case 'title':
-                let feed = Utils.getFeedByBookmarkID(aItemID);
-                if (feed) {
-                    Stm.setFeedTitle.params = { 'title': aNewValue, 'feedID': feed.feedID };
-                    yield Stm.setFeedTitle.executeAsync();
-                    feed.title = aNewValue; // Update cache.
-                    Services.obs.notifyObservers(null, 'brief:feed-title-changed', feed.feedID);
+                let cachedFeed = Utils.getFeedByBookmarkID(aItemID);
+                if (cachedFeed) {
+                    cachedFeed.title = aNewValue;
+                    Services.obs.notifyObservers(null, 'brief:feed-title-changed', cachedFeed.feedID);
+                    yield Stm.setFeedTitle.execute({ 'title': aNewValue,
+                                                     'feedID': cachedFeed.feedID });
                 }
                 else if (Utils.isTagFolder(aItemID)) {
                     this.renameTag(aItemID, aNewValue);
@@ -1853,88 +1826,112 @@ LivemarksSync.prototype = {
 }
 
 
-// Cached statements.
+
+/**
+ * A convenience wrapper for Sqlite.jsm. Provides the ability to map result rows of
+ * a statement to objects, in order to make them enumerable and just nicer to work with.
+ *
+ * @param aSQL <string>
+ *        SQL statement.
+ * @param aResultColumns <array <string>> [optional]
+ *        Result columns to map.
+ */
+function Statement(aSQL, aResultsColumns = null) {
+    this.sql = aSQL;
+    this.resultsColumns = aResultsColumns;
+}
+
+Statement.prototype = {
+
+    // See OpenedConnection.execute() in Sqlite.jsm.
+    execute: function(aParams, aOnRow) this._doExecute(false, aParams, aOnRow),
+
+    // See OpenedConnection.executeCached() in Sqlite.jsm.
+    executeCached: function(aParams, aOnRow) this._doExecute(true, aParams, aOnRow),
+
+    _doExecute: function Statement__doExecute(aCached, aParams, aOnRow) {
+        let onRow = aOnRow && this.resultsColumns ? row => aOnRow(this._mapRow(row))
+                                                  : aOnRow;
+
+        let promise = aCached ? Connection.executeCached(this.sql, aParams, onRow)
+                              : Connection.execute(this.sql, aParams, onRow);
+
+        return promise.then(results => {
+            if (results && this.resultsColumns)
+                return results.map(this._mapRow.bind(this));
+            else
+                return results;
+        })
+    },
+
+    _mapRow: function Statement__mapRow(row) {
+        let mappedRow = {};
+        for (column of this.resultsColumns)
+            mappedRow[column] = row.getResultByName(column);
+        return mappedRow;
+    }
+}
+
+
+
+// Predefined SQL statements.
 let Stm = {
 
     get getAllFeeds() {
         let sql = 'SELECT ' + FEEDS_COLUMNS.join() + ' FROM feeds ORDER BY rowIndex ASC';
-        delete this.getAllFeeds;
-        return this.getAllFeeds = new Statement(sql);
+        let resultColumns = FEEDS_COLUMNS;
+        return new Statement(sql, resultColumns);
     },
 
     get getAllTags() {
+
         let sql = 'SELECT DISTINCT entry_tags.tagName                                    '+
                   'FROM entry_tags INNER JOIN entries ON entry_tags.entryID = entries.id '+
-                  'WHERE entries.deleted = :deletedState                                 '+
+                  'WHERE entries.deleted = ' + Storage.ENTRY_STATE_NORMAL + '            '+
                   'ORDER BY entry_tags.tagName                                           ';
-        delete this.getAllTags;
-        return this.getAllTags = new Statement(sql, { 'deletedState': Storage.ENTRY_STATE_NORMAL });
+        let resultColumns = ['tagName'];
+        return new Statement(sql, resultColumns);
     },
 
     get changeFeedProperties() {
-        let sql = 'UPDATE feeds                                  ' +
-                  'SET title = :title,                           ' +
-                  '    subtitle = :subtitle,                     ' +
-                  '    websiteURL = :websiteURL,                 ' +
-                  '    language = :language,                     ' +
-                  '    hidden = :hidden,                         ' +
-                  '    rowIndex = :rowIndex,                     ' +
-                  '    parent = :parent,                         ' +
-                  '    bookmarkID = :bookmarkID,                 ' +
-                  '    favicon = :favicon,                       ' +
-                  '    lastUpdated = :lastUpdated,               ' +
-                  '    dateModified = :dateModified,             ' +
-                  '    oldestEntryDate = :oldestEntryDate,       ' +
-                  '    lastFaviconRefresh = :lastFaviconRefresh, ' +
-                  '    entryAgeLimit  = :entryAgeLimit,          ' +
-                  '    maxEntries =     :maxEntries,             ' +
-                  '    updateInterval = :updateInterval,         ' +
-                  '    markModifiedEntriesUnread = :markModifiedEntriesUnread, ' +
-                  '    omitInUnread = :omitInUnread,             ' +
-                  '    viewMode = :viewMode                      ' +
-                  'WHERE feedID = :feedID                        ';
-        delete this.changeFeedProperties;
-        return this.changeFeedProperties = new Statement(sql);
+        let cols = [col + ' = :' + col for (col of FEEDS_COLUMNS)].join();
+        let sql = 'UPDATE feeds SET ' + cols + 'WHERE feedID = :feedID';
+        return new Statement(sql);
     },
 
     get setFeedTitle() {
         let sql = 'UPDATE feeds SET title = :title WHERE feedID = :feedID';
-        delete this.setFeedTitle;
-        return this.setFeedTitle = new Statement(sql);
+        return new Statement(sql);
     },
 
     get insertEntry() {
         let sql = 'INSERT INTO entries (feedID, primaryHash, secondaryHash, providedID, entryURL, date, updated) ' +
                   'VALUES (:feedID, :primaryHash, :secondaryHash, :providedID, :entryURL, :date, :updated)        ';
-        delete this.insertEntry;
-        return this.insertEntry = new Statement(sql);
+        return new Statement(sql);
     },
 
     get insertEntryText() {
         let sql = 'INSERT INTO entries_text (title, content, authors) ' +
                   'VALUES(:title, :content, :authors)   ';
-        delete this.insertEntryText;
-        return this.insertEntryText = new Statement(sql);
+        return new Statement(sql);
     },
 
     get updateEntry() {
         let sql = 'UPDATE entries SET read = :read, updated = :updated '+
                   'WHERE id = :id                                             ';
-        delete this.updateEntry;
-        return this.updateEntry = new Statement(sql);
+        return new Statement(sql);
     },
 
     get updateEntryText() {
         let sql = 'UPDATE entries_text SET title = :title, content = :content, '+
                   'authors = :authors WHERE rowid = :id                        ';
-        delete this.updateEntryText;
-        return this.updateEntryText = new Statement(sql);
+        return new Statement(sql);
     },
 
     get getLastRowids() {
         let sql = 'SELECT rowid FROM entries ORDER BY rowid DESC LIMIT :count';
-        delete this.getLastRowids;
-        return this.getLastRowids = new Statement(sql);
+        let resultColumns = ['id'];
+        return new Statement(sql, resultColumns);
     },
 
     get purgeDeletedEntriesText() {
@@ -1946,8 +1943,7 @@ let Stm = {
                   '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
                   '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
                   ') AND rowid <> (SELECT max(rowid) from entries_text)                                ';
-        delete this.purgeDeletedEntriesText;
-        return this.purgeDeletedEntriesText = new Statement(sql);
+        return new Statement(sql);
     },
 
     get purgeDeletedEntries() {
@@ -1958,69 +1954,54 @@ let Stm = {
                   '   WHERE (entries.deleted = :deletedState AND feeds.oldestEntryDate > entries.date) '+
                   '         OR (:currentDate - feeds.hidden > :retentionTime AND feeds.hidden != 0)    '+
                   ')                                                                                   ';
-        delete this.purgeDeletedEntries;
-        return this.purgeDeletedEntries = new Statement(sql);
+        return new Statement(sql);
     },
 
     get purgeDeletedFeeds() {
         let sql = 'DELETE FROM feeds                                      '+
                   'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
                   '      feeds.hidden != 0                                ';
-        delete this.purgeDeletedFeeds;
-        return this.purgeDeletedFeeds = new Statement(sql);
-    },
-
-    get getDeletedEntriesCount() {
-        let sql = 'SELECT COUNT(1) AS entryCount FROM entries  ' +
-                  'WHERE feedID = :feedID AND                  ' +
-                  '      starred = 0 AND                       ' +
-                  '      deleted = :deletedState               ';
-        delete this.getDeletedEntriesCount;
-        return this.getDeletedEntriesCount = new Statement(sql);
+        return new Statement(sql);
     },
 
     get getEntryByPrimaryHash() {
-        let sql = 'SELECT id, date, updated, read FROM entries WHERE primaryHash = :primaryHash';
-        delete this.getEntryByPrimaryHash;
-        return this.getEntryByPrimaryHash = new Statement(sql);
+        let sql = 'SELECT id, date, updated, read FROM entries WHERE primaryHash = :hash';
+        return new Statement(sql);
     },
 
     get getEntryBySecondaryHash() {
-        let sql = 'SELECT id, date, updated, read FROM entries WHERE secondaryHash = :secondaryHash';
-        delete this.getEntryBySecondaryHash;
-        return this.getEntryBySecondaryHash = new Statement(sql);
+        let sql = 'SELECT id, date, updated, read FROM entries WHERE secondaryHash = :hash';
+        return new Statement(sql);
     },
 
     get selectEntriesByURL() {
         let sql = 'SELECT id FROM entries WHERE entryURL = :url';
-        delete this.selectEntriesByURL;
-        return this.selectEntriesByURL = new Statement(sql);
+        let resultColumns = ['id'];
+        return new Statement(sql, resultColumns);
     },
 
     get selectEntriesByBookmarkID() {
         let sql = 'SELECT id, entryURL FROM entries WHERE bookmarkID = :bookmarkID';
-        delete this.selectEntriesByBookmarkID;
-        return this.selectEntriesByBookmarkID = new Statement(sql);
+        let resultColumns = ['id', 'entryURL'];
+        return new Statement(sql, resultColumns);
     },
 
     get selectEntriesByTagName() {
         let sql = 'SELECT id, entryURL FROM entries WHERE id IN (          '+
                   '    SELECT entryID FROM entry_tags WHERE tagName = :tagName '+
                   ')                                                       ';
-        delete this.selectEntriesByTagName;
-        return this.selectEntriesByTagName = new Statement(sql);
+        let resultColumnds = ['id', 'entryURL'];
+        return new Statement(sql, resultColumns);
     },
 
     get starEntry() {
         let sql = 'UPDATE entries SET starred = 1, bookmarkID = :bookmarkID WHERE id = :entryID';
-        delete this.starEntry;
-        return this.starEntry = new Statement(sql);
+        return new Statement(sql);
     },
 
     get unstarEntry() {
         let sql = 'UPDATE entries SET starred = 0, bookmarkID = -1 WHERE id = :id';
-        delete this.unstarEntry;
-        return this.unstarEntry = new Statement(sql);
+        return new Statement(sql);
     },
 
     get checkTag() {
@@ -2030,41 +2011,37 @@ let Stm = {
                   '    WHERE tagName = :tagName AND '+
                   '          entryID = :entryID     '+
                   ') AS alreadyTagged               ';
-        delete this.checkTag;
-        return this.checkTag = new Statement(sql);
+        let resultColumns = ['alreadyTagged'];
+        return new Statement(sql, resultColumns);
     },
 
     get tagEntry() {
         let sql = 'INSERT INTO entry_tags (entryID, tagName) '+
                   'VALUES (:entryID, :tagName)               ';
-        delete this.tagEntry;
-        return this.tagEntry = new Statement(sql);
+        return new Statement(sql);
     },
 
     get untagEntry() {
         let sql = 'DELETE FROM entry_tags WHERE entryID = :entryID AND tagName = :tagName';
-        delete this.untagEntry;
-        return this.untagEntry = new Statement(sql);
+        return new Statement(sql);
     },
 
     get getTagsForEntry() {
         let sql = 'SELECT tagName FROM entry_tags WHERE entryID = :entryID';
-        delete this.getTagsForEntry;
-        return this.getTagsForEntry = new Statement(sql);
+        let resultColumns = ['tagName'];
+        return new Statement(sql, resultColumns);
     },
 
     get setSerializedTagList() {
         let sql = 'UPDATE entries_text SET tags = :tags WHERE rowid = :entryID';
-        delete this.setSerializedTagList;
-        return this.setSerializedTagList = new Statement(sql);
+        return new Statement(sql);
     },
 
     get insertFeed() {
         let sql = 'INSERT OR IGNORE INTO feeds                                                   ' +
                   '(feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID)              ' +
                   'VALUES (:feedID, :feedURL, :title, :rowIndex, :isFolder, :parent, :bookmarkID)';
-        delete this.insertFeed;
-        return this.insertFeed = new Statement(sql);
+        return new Statement(sql);
     }
 
 }
@@ -2073,11 +2050,9 @@ let Stm = {
 let Utils = {
 
     getTagsForEntry: function getTagsForEntry(aEntryID) {
-        Stm.getTagsForEntry.params = { 'entryID': aEntryID };
-        return Stm.getTagsForEntry.getResultsAsync().then(
-            results => [row.tagName for (row of results)]
-        )
-    },
+        let results = yield Stm.getTagsForEntry.executeCached({ entryID: aEntryID });
+        throw new Task.Result([row.tagName for (row of results)]);
+    }.task(),
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
         for (let feed of Storage.getAllFeeds(true)) {
@@ -2093,25 +2068,14 @@ let Utils = {
     },
 
     getEntriesByURL: function getEntriesByURL(aURL) {
-        Stm.selectEntriesByURL.params.url = aURL;
-        return Stm.selectEntriesByURL.getResultsAsync().then(
-            results => [row.id for (row of results)]
-        )
-    },
+        let results = yield Stm.selectEntriesByURL.executeCached({ url: aURL });
+        throw new Task.Result([row.id for (row of results)]);
+    }.task(),
 
-    getEntriesByBookmarkID: function getEntriesByBookmarkID(aBookmarkID) {
-        Stm.selectEntriesByBookmarkID.params.bookmarkID = aBookmarkID;
-        return Stm.selectEntriesByBookmarkID.getResultsAsync().then(
-            results => [{ id: row.id, url: row.entryURL } for (row of results)]
-        )
-    },
-
-    getEntriesByTagName: function getEntriesByTagName(aTagName, aCallback) {
-        Stm.selectEntriesByTagName.params.tagName = aTagName;
-        Stm.selectEntriesByTagName.getResultsAsync(
-            results => aCallback([row.id for (row of results)])
-        )
-    },
+    getEntriesByBookmarkID: function getEntriesByBookmarkID(aID) {
+        let results = yield Stm.selectEntriesByBookmarkID.executeCached({ bookmarkID: aID });
+        throw new Task.Result([row.id for (row of results)]);
+    }.task(),
 
     newURI: function(aSpec) {
         try {
