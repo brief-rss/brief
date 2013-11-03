@@ -237,7 +237,7 @@ let StorageInternal = {
             'CREATE TABLE feeds (' + schemaString(FEEDS_TABLE_SCHEMA) + ') ',
             'CREATE TABLE entries (' + schemaString(ENTRIES_TABLE_SCHEMA) + ') ',
             'CREATE TABLE entry_tags (' + schemaString(ENTRY_TAGS_TABLE_SCHEMA) + ') ',
-            'CREATE VIRTUAL TABLE entries_text USING fts3 (' + schemaString(ENTRIES_TEXT_TABLE_SCHEMA) + ')',
+            'CREATE VIRTUAL TABLE entries_text USING fts4 (' + schemaString(ENTRIES_TEXT_TABLE_SCHEMA) + ')',
 
             'CREATE INDEX entries_date_index ON entries (date)',
             'CREATE INDEX entries_feedID_date_index ON entries (feedID, date)',
