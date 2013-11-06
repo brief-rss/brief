@@ -6,13 +6,25 @@ body, h1, h2 {
 }
 
 body {
+    display: flex;
+    flex-direction: column;
     font-family: "Lucida Grande", Verdana, Arial, sans-serif;
     font-size: 10px;
     background: #fcfcfc;
 }
 
 #feed-content {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
     padding: 0 10px 10px;
+}
+
+article {
+    display: flex;
+    align-self: stretch;
+    flex-direction: row;
+    justify-content: center;
 }
 
 #message-box {
@@ -101,15 +113,15 @@ pre, code {
 /* ----------------------  Item controls ------------------- */
 
 .controls {
-    display: -moz-box;
-    -moz-box-align: center;
+    display: flex;
 }
 
 .button {
-    display: -moz-box;
+    flex-shrink: 0;
     width: 40px;
     height: 25px;
     background-repeat: no-repeat;
+    background-clip: padding-box;
     border: 1px solid transparent;
     border-radius: 3px;
     transition: border-color 170ms;
@@ -125,22 +137,22 @@ pre, code {
 
 .mark-read-button {
     background-image: url(chrome://brief/skin/icons/mark-item-read.png);
-    background-position: 10px -1px;
+    background-position: 11px -1px;
 }
 
 .mark-read-button:hover {
-    background-position: 10px -22px;
+    background-position: 11px -24px;
 }
 
 .delete-button,
 .restore-button {
     margin-left: 2px;
-    background-position: 10px 0;
+    background-position: 11px 2px;
 }
 
 .delete-button:hover,
 .restore-button:hover {
-    background-position: 10px -22px;
+    background-position: 11px -23px;
 }
 
 .delete-button {
@@ -155,15 +167,15 @@ pre, code {
 .bookmark-button {
     margin-left: 2px;
     background: url(chrome://brief/skin/icons/bookmark-item.png) no-repeat;
-    background-position: 10px -1px;
+    background-position: 11px 0px;
 }
 
 article:not(.starred) .bookmark-button:hover {
-    background-position: 10px -26px;
+    background-position: 11px -25px;
 }
 
 article.starred .bookmark-button {
-    background-position: 10px -51px;
+    background-position: 11px -50px;
 }
 
 

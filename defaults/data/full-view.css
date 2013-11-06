@@ -1,19 +1,23 @@
-article.full {
-    min-width: -moz-min-content;
-    max-width: 700px;
-    margin: 0 auto;
-}
-
-article.full > .headline-container {
+article.entry.full > .headline-container {
     display: none;
 }
 
+article.full {
+    margin: 10px 0;
+}
+
 .full-container {
-    margin: 20px 0 20px; /* The margins are collapsed in full view but are necessary if headlines view */
+    display: flex;
+    flex: 0 1 700px;
+    flex-direction: column;
+    min-width: -moz-min-content;
     transition: border-color 200ms;
 }
 
 .full-container-inner {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
     border: 1px solid #abbfc9;
     padding-left: 1px;
     background: linear-gradient(to bottom, rgba(229, 244, 255, 1), rgba(229, 244, 255, 0) 35px);
@@ -37,15 +41,13 @@ article.read .title-link {
 /* ----------------------  Article header  ---------------------- */
 
 .header {
-    display: -moz-box;
-    -moz-box-align: start;
-    width: -moz-available;
+    display: flex;
     margin-bottom: 5px;
     padding: 7px 5px 0 25px;
 }
 
 .title {
-    -moz-box-flex: 1;
+    flex-grow: 1;
 }
 
 .title-link {
@@ -71,11 +73,10 @@ article.read .title-link {
 
 .subheader, .subheader-left, .subheader-right,
 .feed-name, .tags, .date, .updated-label, .authors {
-    display: -moz-box;
+    display: flex;
 }
 
 .subheader {
-    width: -moz-available;
     margin: 5px 10px 5px 25px;
     font-size: 13px;
     font-family: Arial, sans-serif;
@@ -83,22 +84,20 @@ article.read .title-link {
     color: #7c7c7c;
 }
 
-.subheader-right {
-    -moz-box-flex: 1;
-    -moz-box-pack: end;
-}
-
 .subheader-left {
-    -moz-box-flex: 1;
-    -moz-box-orient: vertical;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: flex-start;
 }
 
-.date {
-    margin-left: 4px;
+.subheader-right {
+    flex-grow: 1;
+    justify-content: flex-end;
 }
 
 .authors:not(:empty):after {
     content: " •";
+    margin: 0 4px;
 }
 
 body:not(.multiple-feeds) .feed-name {
