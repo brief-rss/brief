@@ -875,7 +875,7 @@ FeedProcessor.prototype = {
             StorageInternal.expireEntries(this.feed);
         }
 
-        if (this.updateEntryParams.length) {
+        if (this.updateEntryParamSets.length) {
             yield Connection.executeTransaction(() => {
                 Stm.updateEntry.executeCached(this.updateEntryParamSets);
                 Stm.updateEntryText.executeCached(this.updateEntryTextParamSets);
@@ -1895,7 +1895,7 @@ let Stm = {
 
     get changeFeedProperties() {
         let cols = [col + ' = :' + col for (col of FEEDS_COLUMNS)].join();
-        let sql = 'UPDATE feeds SET ' + cols + 'WHERE feedID = :feedID';
+        let sql = 'UPDATE feeds SET ' + cols + ' WHERE feedID = :feedID';
         return new Statement(sql);
     },
 
