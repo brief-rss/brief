@@ -46,25 +46,22 @@ article.read .title-link {
     padding: 7px 5px 0 25px;
 }
 
-.title {
-    flex-grow: 1;
-}
-
 .title-link {
+    flex: 1 1 auto;
     color: #475059;
     font-family: Arial, sans-serif;
     font-size: 16px;
     font-weight: bold;
     text-decoration: none;
-    border-bottom: 2px solid transparent;
     transition: border-color 170ms;
 }
 
 .title-link:hover {
-    border-bottom-color: #475059;
+    text-decoration: underline;
 }
 
 .controls {
+    flex: 0 0 auto;
     margin: -2px 0 0 5px;
 }
 
