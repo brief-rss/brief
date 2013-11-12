@@ -236,7 +236,7 @@ let Commands = {
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
-        if (!gCurrentView.headlinesView || !gCurrentView.selectedEntry)
+        if (!gCurrentView.headlinesMode || !gCurrentView.selectedEntry)
             return;
 
         let entryView = gCurrentView.getEntryView(gCurrentView.selectedEntry);
