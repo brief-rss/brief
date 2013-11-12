@@ -841,7 +841,12 @@ FeedView.prototype = {
         let bundle = getElement('main-bundle');
         let mainMessage, secondaryMessage;
 
-        if (this.query.searchString) {
+        if (!Storage.getAllFeeds().length) {
+            mainMessage = bundle.getString('noFeeds');
+            secondaryMessage = '<a href="chrome://brief/content/firstrun.xhtml?tutorial" target="_blank">'
+                               + bundle.getString('noFeedsAdvice') + '</a>';
+        }
+        else if (this.query.searchString) {
             mainMessage = bundle.getString('noEntriesFound');
         }
         else if (this.query.read === false) {
@@ -849,7 +854,6 @@ FeedView.prototype = {
         }
         else if (this.query.starred === true) {
             mainMessage = bundle.getString('noStarredEntries');
-            secondaryMessage = bundle.getString('noStarredEntriesAdvice');
         }
         else if (this.query.deleted == Storage.ENTRY_STATE_TRASHED) {
             mainMessage = bundle.getString('trashIsEmpty');
@@ -859,7 +863,7 @@ FeedView.prototype = {
         }
 
         this.document.getElementById('main-message').textContent = mainMessage || '' ;
-        this.document.getElementById('secondary-message').textContent = secondaryMessage || '';
+        this.document.getElementById('secondary-message').innerHTML = secondaryMessage || '';
 
         messageBox.style.display = '';
     },

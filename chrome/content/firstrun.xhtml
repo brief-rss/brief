@@ -10,6 +10,13 @@
      //<![CDATA[
         let Ci = Components.interfaces;
 
+        window.addEventListener('DOMContentLoaded', event => {
+            if (document.documentURI.match('tutorial')) {
+                document.getElementById('header').style.display = 'none';
+                document.getElementById('open-brief').style.display = 'none';
+            }
+        }, false);
+
         function openBrief() {
             let topWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
                                   .getInterface(Ci.nsIWebNavigation)

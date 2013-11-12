@@ -36,16 +36,20 @@ article {
 #main-message {
     margin-top: 200px;
     text-align: center;
-    font-size: 24px;
+    font-size: 22px;
     color: #606b78;
 }
 
 #secondary-message {
-    margin: 75px auto 0;
+    margin: 25px auto 0;
     max-width: 500px;
     text-align: center;
-    font-size: 16px;
+    font-size: 22px;
     color: #606b78;
+}
+
+#secondary-message > a {
+    color: #108ce6;
 }
 
 
