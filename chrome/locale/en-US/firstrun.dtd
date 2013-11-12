@@ -1,7 +1,7 @@
-<!ENTITY pageTitle "Brief">
+<!ENTITY pageTitle "Brief introduction">
 <!ENTITY thankYou.header "Thanks for installing Brief">
-<!ENTITY howToSubscribe.header "Feeds are the best way to follow your favorite websites!">
-<!ENTITY subscribingStep1.description "Open <strong>Bookmarks</strong> menu and click <strong>Subscribe to This Page</strong>...">
-<!ENTITY subscribingStep2.description "...or just click on a link to the feed.">
-<!ENTITY subscribingStep3.description "Select <strong>Brief</strong> and click <strong>Subscribe Now</strong>.">
+<!ENTITY howToSubscribe.header "Feeds are the easiest way to follow your favorite websites!">
+<!ENTITY subscribingStep1.description "When you are on a website you want to follow, open <strong>Bookmarks</strong> menu and click <strong>Subscribe to This Page</strong>.">
+<!ENTITY subscribingStep2.description "Or you can find a link to the feed on the website itself.">
+<!ENTITY subscribingStep3.description "Select <strong>Brief</strong> and click <strong>Subscribe Now</strong>. That's it!">
 <!ENTITY getStartedButton.label "Get Started">
