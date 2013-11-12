@@ -29,12 +29,12 @@ page {
 menupopup {
     background-color: #f2f2f2 !important;
     border: 1px solid #bdbdbd !important;
-    padding: 7px !important;
+    padding: 10px !important;
 }
 
 menuitem {
     height: 25px !important;
-    padding: 0 10px !important;
+    padding: 0 15px !important;
     font-size: 13px !important;
     color: #454545 !important;
 }

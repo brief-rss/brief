@@ -51,7 +51,7 @@ toolbar[mode=full] #brief-status-counter {
 .brief-panel-menuitem {
     -moz-appearance: none;
     height: 25px;
-    padding: 0 10px;
+    padding: 0 15px;
     font-size: 13px;
     color: #454545;
     background: transparent; /* Necessary to avoid weird brief flashes of the
