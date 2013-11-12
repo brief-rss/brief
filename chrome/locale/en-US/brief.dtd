@@ -24,9 +24,7 @@
 <!ENTITY markViewRead.tooltip "Mark all items as read (Alt + N)">
 
 <!-- # Context menu -->
-<!ENTITY ctxMarkFeedRead.label "Mark Feed As Read">
-<!ENTITY ctxMarkFeedUnread.label "Mark Feed As Unread">
-<!ENTITY ctxMarkFolderRead.label "Mark Folder As Read">
+<!ENTITY ctxMarkRead.label "Mark As Read">
 <!ENTITY ctxMarkTagRead.label "Mark Tagged Items As Read">
 <!ENTITY ctxRefreshFeed.label "Refresh Now">
 <!ENTITY ctxRefreshFolder.label "Refresh Now">

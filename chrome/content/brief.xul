@@ -26,7 +26,7 @@
         <menupopup id="view-list-popup"
                    onpopupshowing="ViewListContextMenu.init()">
             <menuitem id="ctx-mark-special-folder-read"
-                      label="&ctxMarkFolderRead.label;"
+                      label="&ctxMarkRead.label;"
                       oncommand="ViewListContextMenu.markFolderRead()"/>
             <menuitem id="ctx-mark-tag-read"
                       label="&ctxMarkTagRead.label;"
@@ -57,7 +57,7 @@
         <menupopup id="feed-context-menu"
                    onpopupshowing="FeedContextMenu.init()">
             <menuitem id="ctx-mark-feed-read"
-                      label="&ctxMarkFeedRead.label;"
+                      label="&ctxMarkRead.label;"
                       oncommand="FeedContextMenu.markFeedRead()"/>
             <menuitem id="ctx-update-feed"
                       label="&ctxRefreshFeed.label;"
@@ -79,7 +79,7 @@
         </menupopup>
         <menupopup id="folder-context-menu">
             <menuitem id="ctx-mark-folder-read"
-                      label="&ctxMarkFolderRead.label;"
+                      label="&ctxMarkRead.label;"
                       oncommand="FolderContextMenu.markFolderRead()"/>
             <menuitem id="ctx-refresh-folder"
                       label="&ctxRefreshFolder.label;"
