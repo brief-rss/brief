@@ -9,37 +9,36 @@ html, body {
     }
 
 body {
-    display: -moz-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: Verdana, Helvetica, Arial, sans-serif;
     font-size: 13px;
     background: linear-gradient(to top, #c0e3f0, #eaf6fa 50%, #eaf6fa);
     }
 
 div {
-    display: -moz-box;
+    display: flex;
     }
 
 #page {
-    -moz-box-orient: vertical;
-    -moz-box-pack: center;
-    -moz-box-align: center;
-    -moz-box-flex: 1;
-    padding: 10px;
-    padding-bottom: 80px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 10px 80px 10px;
     }
 
 #header {
-    -moz-box-align: start;
+    align-items: flex-start;
 }
 
 #intro {
-    -moz-box-orient: vertical;
-    -moz-box-align: start;
+    flex-direction: column;
+    align-items: flex-start;
     margin-left: 15px;
     }
 
 #thank-you {
-    width: -moz-fit-content;
     padding: 0 5px 2px 0;
     border-bottom: 1px solid #f1601a;
     margin-bottom: 8px;
@@ -53,28 +52,25 @@ div {
     }
 
 #guide {
-    -moz-box-align: start;
+    align-items: flex-start;
+    justify-content: center;
     margin-top: 40px;
     }
 
 .step {
-    -moz-box-orient: vertical;
-    width: 275px;
-    margin: 0 10px;
+    flex: 0 1 275px;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 20px;
     color: #00344f;
-    text-align: center;
+    text-align: justify;
     font-family: "Lucida Grande", Verdana, sans-serif;
     font-size: 15px;
     }
 
-.screenshot-container {
-    -moz-box-align: center;
-    -moz-box-pack: center;
+.screenshot {
     height: 160px;
     margin-bottom: 15px;
-    }
-
-.screenshot {
     border: 1px solid #999999;
     box-shadow: 5px 5px 5px #97b4be;
     }
@@ -84,7 +80,6 @@ div {
 }
 
 #open-brief {
-    display: -moz-box;
     cursor: pointer;
     margin-top: 70px;
     padding: 5px 20px 8px;
