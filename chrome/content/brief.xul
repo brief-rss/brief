@@ -185,10 +185,9 @@
         <hbox id="feed-view-header">
             <button id="view-title-button"
                     class="brief-button"
-                    oncommand="showContextOptionsDropdown()">
-                <image id="view-title-button-image"/>
-                <label id="view-title-button-label"/>
-            </button>
+                    type="menu"
+                    onclick="showContextOptionsDropdown()"/>
+            <label id="view-title-label"/>
             <spacer flex="1"/>
             <button id="mark-view-read"
                     class="brief-button feed-header-button"

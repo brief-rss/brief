@@ -685,7 +685,7 @@ FeedView.prototype = {
         getElement('full-view-checkbox').checked = !this.headlinesMode;
         getElement('headlines-checkbox').checked = this.headlinesMode;
 
-        getElement('view-title-button-label').value = this.titleOverride || this.title;
+        getElement('view-title-label').value = this.titleOverride || this.title;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');

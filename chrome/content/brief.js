@@ -320,7 +320,7 @@ function showContextOptionsDropdown() {
     let panel = getTopWindow().document.getElementById(panelID);
 
     // Modify the position to horizontally center the arrow on the anchor.
-    panel.openPopup(getElement('view-title-button-image'), '', -20, 5);
+    panel.openPopup(getElement('view-title-button'), '', -26, 0);
 }
 
 function showOptionsDropdown() {
