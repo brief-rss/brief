@@ -6,8 +6,8 @@
 
 <!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Ver sólo los titulares (F)">
-<!ENTITY fullViewCheckbox.tooltip "View full items (G)">
-<!ENTITY showAllItems.tooltip "Show all items (A)">
+<!ENTITY fullViewCheckbox.tooltip "Ver elementos completos (G)">
+<!ENTITY showAllItems.tooltip "Mostrar todos los elementos (A)">
 <!ENTITY filterUnread.tooltip "Ver sólo los elementos no leídos (D)">
 <!ENTITY filterStarred.tooltip "Ver sólo los elementos en marcadores (S)">
 <!ENTITY updateButton.label "Actualizar">
