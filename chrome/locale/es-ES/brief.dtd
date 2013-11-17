@@ -1,35 +1,41 @@
 <!ENTITY searchBox.label "Buscar">
 <!ENTITY allItemsFolder.label "Todos los elementos">
-<!ENTITY unreadFolder.label "No leídos">
+<!ENTITY todayFolder.label "Hoy">
 <!ENTITY starredFolder.label "Marcadores">
 <!ENTITY trashFolder.label "Papelera">
-<!-- Button tooltips -->
+
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Ver sólo los titulares (F)">
+<!ENTITY fullViewCheckbox.tooltip "View full items (G)">
+<!ENTITY showAllItems.tooltip "Show all items (A)">
 <!ENTITY filterUnread.tooltip "Ver sólo los elementos no leídos (D)">
 <!ENTITY filterStarred.tooltip "Ver sólo los elementos en marcadores (S)">
+<!ENTITY updateButton.label "Actualizar">
 <!ENTITY updateButton.tooltip "Actualizar todos los canales web">
+<!ENTITY stopUpdatingButton.label "Detener">
 <!ENTITY stopUpdatingButton.tooltip "Detener el proceso de actualización">
-<!ENTITY showOptions.tooltip "Abrir el panel de preferencias de Brief">
+<!ENTITY optionsDropdownButton.label "Opciones">
+<!ENTITY optionsDropdownButton.tooltip "Configurar Brief">
+<!ENTITY organizeFeeds.label "Organizar">
+<!ENTITY organizeFeeds.tooltip "Organizar canales">
+
 <!ENTITY sidebarSplitter.tooltip "Doble clic ocultará el panel lateral">
 <!ENTITY revealSidebar.tooltip "Mostrar el panel lateral">
 <!ENTITY markViewRead.tooltip "Marcar todos los elementos como leídos (Alt+N)">
+
 <!-- # Context menu -->
 <!ENTITY ctxMarkFeedRead.label "Marcar el canal como leído">
 <!ENTITY ctxMarkFeedUnread.label "Marcar el canal como no leído">
 <!ENTITY ctxMarkFolderRead.label "Marcar la carpeta como leída">
 <!ENTITY ctxMarkTagRead.label "Marcar elementos etiquetados como leídos">
-<!ENTITY ctxUpdateFeed.label "Actualizar el canal">
-<!ENTITY ctxUpdateFolder.label "Actualizar la carpeta">
+<!ENTITY ctxRefreshFeed.label "Actualizar ahora">
+<!ENTITY ctxRefreshFolder.label "Actualizar ahora">
 <!ENTITY ctxOpenWebsite.label "Ir al sitio web">
-<!ENTITY ctxDeleteFeed.label "Eliminar el canal">
+<!ENTITY ctxUnsubscribeFeed.label "Desuscribir">
 <!ENTITY ctxDeleteFolder.label "Eliminar la carpeta">
 <!ENTITY ctxDeleteTag.label "Eliminar la etiqueta">
 <!ENTITY ctxEmptyFeed.label "Vaciar el canal">
 <!ENTITY ctxEmptyFolder.label "Vaciar la carpeta">
 <!ENTITY ctxRestoreTrashed.label "Restaurar todos los elementos">
 <!ENTITY ctxEmptyTrash.label "Vaciar la papelera">
-<!ENTITY ctxFeedProperties.label "Propiedades">
-<!ENTITY ctxUpdateFeeds.label "Actualizar los canales ahora">
-<!ENTITY ctxMarkFeedsAsRead.label "Marcar todos los canales como leídos">
-<!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos">
-<!ENTITY ctxShowOptions.label "Preferencias">
+<!ENTITY ctxFeedSettings.label "Opciones del canal">
