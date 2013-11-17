@@ -33,7 +33,7 @@
                       oncommand="ViewListContextMenu.markTagRead()"/>
             <menuitem id="ctx-restore-trashed"
                       label="&ctxRestoreTrashed.label;"
-                      oncommand="Brief.win.Commands.restoreTrashed()"/>
+                      oncommand="Commands.restoreTrashed()"/>
             <menuseparator id="ctx-view-list-separator"/>
             <menuitem id="ctx-empty-today-folder"
                       label="&ctxEmptyFolder.label;"
@@ -43,7 +43,7 @@
                       oncommand="ViewListContextMenu.deleteTag()"/>
             <menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
-                      oncommand="Brief.win.Commands.emptyTrash()"/>
+                      oncommand="Commands.emptyTrash()"/>
         </menupopup>
         <menupopup id="tag-list-popup">
             <menuitem id="ctx-mark-tag-read"
