@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Preferencias de Brief">
 <!ENTITY mainPane.label "Principal">
-<!ENTITY updateGroup.caption "Actualizaciones">
+<!ENTITY refreshGroup.caption "Actualizaciones">
 <!ENTITY checkForUpdatesBefore.label "Actualizar automáticamente los canales web cada">
 <!ENTITY checkForUpdates.accesskey "A">
 <!ENTITY updateIntervalMinutes.label "minutos">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "minutos">
 <!ENTITY showNotification.label "Mostrar una notificación cuando se encuentren nuevos elementos">
 <!ENTITY showNotification.accesskey "n">
-<!ENTITY behaviorGroup.caption "Comportamiento">
+<!ENTITY readingGroup.caption "Lectura">
 <!ENTITY openInNewTab.label "Abrir Brief en una pestaña nueva">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Almacenamiento">
@@ -22,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "c">
 <!ENTITY clearAllEntriesButton.label "Eliminar todos los elementos...">
 <!ENTITY clearAllEntriesButton.accesskey "t">
-<!ENTITY feedsPane.label "Canales web">
-<!ENTITY folderTree.label "Carpeta contenedora de mis marcadores dinámicos:">
-<!ENTITY importOPML.label "Importar...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportar...">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Presentación">
 <!ENTITY showStatusbarIcon.label "Mostrar un icono en la barra de estado">
 <!ENTITY showStatusbarIcon.accesskey "i">
 <!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos junto al icono de Brief">
@@ -38,7 +31,6 @@
 <!ENTITY autoMarkRead.label "Marcar los elementos automáticamente como leídos después de verlos">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "Apariencia">
-<!ENTITY shortcutsPane.label "Atajos de teclado">
 <!ENTITY editStyleDescription.label "Personalizar la apariencia de los canales web">
 <!ENTITY editStyleButton.label "Personalizar">
 <!ENTITY editStyleButton.accesskey "P">

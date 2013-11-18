@@ -1,5 +1,6 @@
 <!ENTITY shortcutsPage.title "Brief - atajos de teclado">
 <!ENTITY or "o">
+
 <!ENTITY navigation.header "Navegación">
 <!ENTITY space.key "Espacio">
 <!ENTITY shiftSpace.key "Mayús. + Espacio">
@@ -10,6 +11,7 @@
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Abrir el elemento actual">
 <!ENTITY showItem "Cambiar la visibilidad del elemento actual (en la vista de titulares)">
+
 <!ENTITY entries.header "Elementos">
 <!ENTITY markCurrentItemRead "Marcar el elemento actual como leído o no leído">
 <!ENTITY markVisibleRead "Marcar todos los elementos en pantalla como leídos">
@@ -17,11 +19,14 @@
 <!ENTITY markAllRead "Marcar todos los elementos como leídos">
 <!ENTITY starItem "Añadir el elemento actual a marcadores">
 <!ENTITY moveToTrash "Mover el elemento actual a la papelera">
+
 <!ENTITY view.header "Ver">
 <!ENTITY showAll "Mostrar todos los elementos">
 <!ENTITY showStarred "Mostrar todos los elementos en marcadores">
 <!ENTITY showUnread "Mostrar todos los elementos no leídos">
-<!ENTITY headlinesView "Conmutar la vista de titulares">
+<!ENTITY headlinesView "Vista de titulares">
+<!ENTITY fullView "Vista completa">
+
 <!ENTITY general.header "General">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">
