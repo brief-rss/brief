@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Preferencias de Brief">
 <!ENTITY mainPane.label "Principal">
-<!ENTITY refreshGroup.caption "Actualizando">
+<!ENTITY refreshGroup.caption "Actualizaciones">
 <!ENTITY checkForUpdatesBefore.label "Actualizar automáticamente los canales web cada">
 <!ENTITY checkForUpdates.accesskey "A">
 <!ENTITY updateIntervalMinutes.label "minutos">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "minutos">
 <!ENTITY showNotification.label "Mostrar una notificación cuando se encuentren nuevos elementos">
 <!ENTITY showNotification.accesskey "n">
-<!ENTITY readingGroup.caption "Leyendo">
+<!ENTITY readingGroup.caption "Lectura">
 <!ENTITY openInNewTab.label "Abrir Brief en una pestaña nueva">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Almacenamiento">
