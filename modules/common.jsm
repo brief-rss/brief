@@ -72,11 +72,11 @@ Function.prototype.task = function() {
 
 
 function RelativeDate(aAbsoluteTime) {
-    let currentDate = new Date();
-    this.currentTime = currentDate.getTime() - currentDate.getTimezoneOffset() * 60000;
+    this.currentDate = new Date();
+    this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;
 
-    let targetDate = new Date(aAbsoluteTime);
-    this.targetTime = targetDate.getTime() - targetDate.getTimezoneOffset() * 60000;
+    this.targetDate = new Date(aAbsoluteTime);
+    this.targetTime = this.targetDate.getTime() - this.targetDate.getTimezoneOffset() * 60000;
 }
 
 RelativeDate.prototype = {
@@ -88,10 +88,11 @@ RelativeDate.prototype = {
     get deltaHourSteps() this._getSteps(3600000),
 
     get deltaDays() this._getDelta(86400000),
-    get deltaDaySteps() this._getSteps(86400000),
+    get deltaDaySteps() this._getSteps(86400000), //Unexact due to timezones
 
     get deltaYears() this._getDelta(31536000000),
-    get deltaYearSteps() this._getSteps(31536000000),
+    get deltaYearSteps() (this.currentDate.getFullYear() -
+        this.targetDate.getFullYear()),
 
     _getSteps: function RelativeDate__getSteps(aDivisor) {
         let current = Math.ceil(this.currentTime / aDivisor);
