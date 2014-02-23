@@ -275,24 +275,24 @@ const Brief = {
                                     .replace('#number', relativeDate.deltaHours);
                 break;
 
-            case relativeDate.deltaDays === 0:
+            case relativeDate.deltaDaySteps === 0:
                 let time = date.toLocaleFormat('%X').replace(/:\d\d$/, ' ');
                 label.value = bundle.formatStringFromName('lastUpdated.today', [time], 1);
                 break;
 
-            case relativeDate.deltaDays === 1:
+            case relativeDate.deltaDaySteps === 1:
                 time = date.toLocaleFormat('%X').replace(/:\d\d$/, ' ');
                 label.value = bundle.formatStringFromName('lastUpdated.yesterday', [time], 1);
                 break;
 
-            case relativeDate.deltaDays < 7:
+            case relativeDate.deltaDaySteps < 7:
                 pluralForms = bundle.GetStringFromName('day.pluralForms');
                 form = this.common.getPluralForm(relativeDate.deltaDays, pluralForms);
                 label.value = bundle.formatStringFromName('lastUpdated.ago', [form], 1)
                                     .replace('#number', relativeDate.deltaDays);
                 break;
 
-            case relativeDate.deltaYears === 0:
+            case relativeDate.deltaYearSteps === 0:
                 time = date.toLocaleFormat('%d %B').replace(/^0/, '');
                 label.value = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
                 break;
