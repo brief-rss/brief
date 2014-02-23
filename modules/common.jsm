@@ -82,17 +82,25 @@ function RelativeDate(aAbsoluteTime) {
 RelativeDate.prototype = {
 
     get deltaMinutes() this._getDelta(60000),
+    get deltaMinuteSteps() this._getSteps(60000),
 
     get deltaHours() this._getDelta(3600000),
+    get deltaHourSteps() this._getSteps(3600000),
 
     get deltaDays() this._getDelta(86400000),
+    get deltaDaySteps() this._getSteps(86400000),
 
     get deltaYears() this._getDelta(31536000000),
+    get deltaYearSteps() this._getSteps(31536000000),
 
-    _getDelta: function RelativeDate__getDelta(aDivisor) {
+    _getSteps: function RelativeDate__getSteps(aDivisor) {
         let current = Math.ceil(this.currentTime / aDivisor);
         let target = Math.ceil(this.targetTime / aDivisor);
         return current - target;
+    },
+
+    _getDelta: function RelativeDate__getDelta(aDivisor) {
+        return Math.floor((this.currentTime - this.targetTime) / aDivisor);
     }
 
 }
