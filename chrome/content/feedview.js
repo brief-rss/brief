@@ -1298,7 +1298,7 @@ EntryView.prototype = {
                     string = this.date.toLocaleFormat('%A');
                     break;
 
-                case relatieDate.deltaYearSteps === 0:
+                case relativeDate.deltaYearSteps === 0:
                     string = this.date.toLocaleFormat('%d %B');
                     break;
 
