@@ -340,7 +340,7 @@ const Brief = {
                     read: false
                 })
 
-                query.getEntryCount.then(unreadCount => {
+                query.getEntryCount().then(unreadCount => {
                     let label = document.createElement('label');
                     label.setAttribute('class', 'unread-entries-count');
                     label.setAttribute('value', unreadCount);
