@@ -121,11 +121,11 @@ const Brief = {
         const CONTENT_TYPE = 'application/vnd.mozilla.maybe.feed';
         const SUBSCRIBE_URL = 'brief://subscribe/%s';
 
-        let wchr = Cc['@mozilla.org/embeddor.implemented/web-content-handler-registrar;1']
-                   .getService(Ci.nsIWebContentHandlerRegistrar);
+        let wccs = Cc['@mozilla.org/embeddor.implemented/web-content-handler-registrar;1']
+                   .getService(Ci.nsIWebContentConverterService);
 
-        if (!wchr.getWebContentHandlerByURI(CONTENT_TYPE, SUBSCRIBE_URL))
-            wchr.registerContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
+        if (!wccs.getWebContentHandlerByURI(CONTENT_TYPE, SUBSCRIBE_URL))
+            wccs.registerContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
 
         if (this.prefs.getBoolPref('firstRun')) {
             this.onFirstRun();
