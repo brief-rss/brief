@@ -53,12 +53,17 @@ function wait(aDelay) {
     let timer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
     timer.initWithCallback(() => deferred.resolve(), aDelay || 0, Ci.nsITimer.TYPE_ONE_SHOT);
 
-    deferred.promise.cancel = () => {
+    let cancel = () => {
         timer.cancel();
         deferred.reject('cancelled');
-    }
+    };
 
-    return deferred.promise;
+    // Promise objects are sealed, so we cannot just add a 'cancel' method
+    let promise = deferred.promise;
+    return {
+        'cancel': cancel,
+        'then': promise.then.bind(promise)
+    };
 }
 
 
