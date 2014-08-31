@@ -1281,25 +1281,24 @@ EntryView.prototype = {
 
     getDateString: function EntryView_getDateString(aOnlyDatePart) {
         let relativeDate = new RelativeDate(this.date.getTime());
-        let currentDate = new Date();
         let string;
         let bundle = getElement('main-bundle');
 
         if (aOnlyDatePart) {
             switch (true) {
-                case relativeDate.deltaDays === 0:
+                case relativeDate.deltaDaySteps === 0:
                     string = Strings['entryDate.today'];
                     break;
 
-                case relativeDate.deltaDays === 1:
+                case relativeDate.deltaDaySteps === 1:
                     string = Strings['entryDate.yesterday'];
                     break;
 
-                case relativeDate.deltaDays < 7:
+                case relativeDate.deltaDaySteps < 7:
                     string = this.date.toLocaleFormat('%A');
                     break;
 
-                case currentDate.getFullYear() === this.date.getFullYear():
+                case relativeDate.deltaYearSteps === 0:
                     string = this.date.toLocaleFormat('%d %B');
                     break;
 
@@ -1328,19 +1327,19 @@ EntryView.prototype = {
                                    .replace('#number', relativeDate.deltaHours);
                     break;
 
-                case relativeDate.deltaDays === 0:
+                case relativeDate.deltaDaySteps === 0:
                     string = Strings['entryDate.today'] + this.date.toLocaleFormat(', %X');
                     break;
 
-                case relativeDate.deltaDays === 1:
+                case relativeDate.deltaDaySteps === 1:
                     string = Strings['entryDate.yesterday'] + this.date.toLocaleFormat(', %X');
                     break;
 
-                case relativeDate.deltaDays < 5:
+                case relativeDate.deltaDaySteps < 5:
                     string = this.date.toLocaleFormat('%A, %X')
                     break;
 
-                case currentDate.getFullYear() === this.date.getFullYear():
+                case relativeDate.deltaYearSteps === 0:
                     string = this.date.toLocaleFormat('%d %b, %X')
                     break;
 
