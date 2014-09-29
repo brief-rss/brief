@@ -1055,9 +1055,9 @@ Query.prototype = {
      *          and "markedUnreadOnUpdate".
      */
     getFullEntries: function Query_getFullEntries() {
-        let entries = ['entries.' + col.name for (col of ENTRIES_TABLE_SCHEMA)];
-        let entries_text = ['entries_text.' + col.name for (col of ENTRIES_TEXT_TABLE_SCHEMA)];
-        let sql = 'SELECT ' + entries.concat(entries_text).join() + this._getQueryString(true, true);
+        let fields_entries = ['entries.' + col.name for (col of ENTRIES_TABLE_SCHEMA)];
+        let fields_entries_text = ['entries_text.' + col.name for (col of ENTRIES_TEXT_TABLE_SCHEMA)];
+        let sql = 'SELECT ' + fields_entries.concat(fields_entries_text).join() + this._getQueryString(true, true);
 
         let entries = [];
         yield Connection.execute(sql, null, row => {
