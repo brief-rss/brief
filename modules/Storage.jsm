@@ -1856,12 +1856,9 @@ Statement.prototype = {
         let promise = aCached ? Connection.executeCached(this.sql, aParams, onRow)
                               : Connection.execute(this.sql, aParams, onRow);
 
-        return promise.then(results => {
-            if (results && this.resultsColumns)
-                return results.map(this._mapRow.bind(this));
-            else
-                return results;
-        })
+        return promise.then(result => Array.isArray(result) && this.resultsColumns
+                                      ? result.map(this._mapRow.bind(this))
+                                      : result);
     },
 
     _mapRow: function Statement__mapRow(row) {
