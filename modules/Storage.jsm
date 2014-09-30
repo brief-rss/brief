@@ -1863,7 +1863,7 @@ Statement.prototype = {
 
     _mapRow: function Statement__mapRow(row) {
         let mappedRow = {};
-        for (column of this.resultsColumns)
+        for (let column of this.resultsColumns)
             mappedRow[column] = row.getResultByName(column);
         return mappedRow;
     }
