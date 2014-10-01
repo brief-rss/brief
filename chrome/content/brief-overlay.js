@@ -324,7 +324,7 @@ const Brief = {
             noUnreadLabel.setAttribute('value', value);
             noUnreadLabel.hidden = unreadFeeds.length;
 
-            for (feed of unreadFeeds) {
+            for (let feed of unreadFeeds) {
                 let row = document.createElement('row');
                 row.setAttribute('class', 'unread-feed-row');
                 row = rows.appendChild(row);
