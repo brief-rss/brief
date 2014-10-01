@@ -256,14 +256,16 @@ const Brief = {
         let date = new Date(lastUpdateTime);
         let relativeDate = new this.common.RelativeDate(lastUpdateTime);
 
+        let time, pluralForms, form;
+
         switch (true) {
             case relativeDate.deltaMinutes === 0:
                 label.value = bundle.GetStringFromName('lastUpdated.rightNow');
                 break;
 
             case relativeDate.deltaHours === 0:
-                let pluralForms = bundle.GetStringFromName('minute.pluralForms');
-                let form = this.common.getPluralForm(relativeDate.deltaMinutes, pluralForms);
+                pluralForms = bundle.GetStringFromName('minute.pluralForms');
+                form = this.common.getPluralForm(relativeDate.deltaMinutes, pluralForms);
                 label.value = bundle.formatStringFromName('lastUpdated.ago', [form], 1)
                                     .replace('#number', relativeDate.deltaMinutes);
                 break;
@@ -276,7 +278,7 @@ const Brief = {
                 break;
 
             case relativeDate.deltaDaySteps === 0:
-                let time = date.toLocaleFormat('%X').replace(/:\d\d$/, ' ');
+                time = date.toLocaleFormat('%X').replace(/:\d\d$/, ' ');
                 label.value = bundle.formatStringFromName('lastUpdated.today', [time], 1);
                 break;
 

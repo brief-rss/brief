@@ -99,7 +99,7 @@ let OPMLInternal = {
                 aTransactions.push(trans);
                 break;
 
-            case 'feed':
+            case 'feed': {
                 let siteURI = null, feedURI = null;
 
                 try {
@@ -118,10 +118,11 @@ let OPMLInternal = {
                     // We can live without siteURI.
                 }
 
-                trans = new PlacesCreateLivemarkTransaction(feedURI, siteURI,
+                let trans = new PlacesCreateLivemarkTransaction(feedURI, siteURI,
                                                             node.title, aCreateIn);
                 aTransactions.push(trans)
                 break;
+            }
 
             case 'link':
                 try {
