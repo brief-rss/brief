@@ -257,14 +257,9 @@ let OPMLInternal = {
             if (node.type != Ci.nsINavHistoryResultNode.RESULT_TYPE_FOLDER)
                 continue;
 
-            let deferred = Promise.defer()
-            PlacesUtils.livemarks.getLivemark(
-                { 'id': node.itemId },
-                (status, livemark) => deferred.resolve([status, livemark])
-            )
-            let [status, livemark] = yield deferred.promise;
+            try {
+                let livemark = yield PlacesUtils.livemarks.getLivemark({ 'id': node.itemId });
 
-            if (Components.isSuccessCode(status)) {
                 dataString += '\t\t';
 
                 for (let j = 1; j < level; j++)
@@ -280,8 +275,11 @@ let OPMLInternal = {
                               '" xmlUrl="'      + this.cleanXMLText(feedURL) +
                               '"/>' + "\n";
             }
-            else if (node instanceof Ci.nsINavHistoryContainerResultNode) {
-                dataString = yield this.addFolderToOPML(dataString, node, level, false);
+            // Since there's no livermarkExists() method, we have to differentiate
+            // between livermarks and folders by catching an exception.
+            catch (ex if "result" in ex && ex.result == Components.results.NS_ERROR_INVALID_ARG) {
+                if (node instanceof Ci.nsINavHistoryContainerResultNode)
+                    dataString = yield this.addFolderToOPML(dataString, node, level, false);
             }
         }
 

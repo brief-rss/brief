@@ -1794,21 +1794,18 @@ LivemarksSync.prototype = {
             item.bookmarkID = node.itemId.toString();
             item.parent = aContainer.itemId.toString();
 
-            let deferred = Promise.defer();
-            Places.livemarks.getLivemark(
-                { 'id': node.itemId },
-                (status, placesItem) => deferred.resolve([status, placesItem])
-            )
-            let [status, placesItem] = yield deferred.promise;
+            try {
+                let placesItem = yield Places.livemarks.getLivemark({ 'id': node.itemId });
 
-            if (Components.isSuccessCode(status)) {
                 item.feedURL = placesItem.feedURI.spec;
                 item.feedID = Utils.hashString(item.feedURL);
                 item.isFolder = false;
 
                 aLivemarks.push(item);
             }
-            else {
+            // Since there's no livermarkExists() method, we have to differentiate
+            // between livermarks and folders by catching an exception.
+            catch (ex if "result" in ex && ex.result == Components.results.NS_ERROR_INVALID_ARG) {
                 item.feedURL = null;
                 item.feedID = node.itemId.toFixed().toString();
                 item.isFolder = true;
@@ -2094,14 +2091,10 @@ let Utils = {
     }.task(),
 
     isLivemark: function Utils_isLivemark(aItemID) {
-        let deferred = Promise.defer();
-
-        Places.livemarks.getLivemark(
-            { 'id': aItemID },
-            status => deferred.resolve(Components.isSuccessCode(status))
-        )
-
-        return deferred.promise;
+        Places.livemarks.getLivemark({ 'id': aItemID }).then(
+            livemark => true,
+            ex => false
+        );
     },
 
     isFolder: function(aItemID) {
