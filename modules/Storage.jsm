@@ -797,6 +797,13 @@ FeedProcessor.prototype = {
         let storedEntry = (yield select.executeCached(params))[0];
 
         if (storedEntry) {
+            // Special case for YouTube feeds: Ignore the updated date because
+            // it seems to update whenever the video's likes change, which is
+            // usually way too frequent to be useful.
+            if (generator && generator.agent.match('YouTube')) {
+                aEntry.updated = aEntry.published;
+            }
+
             // XXX Comparing stored entry date is temporary. Done to avoid suddenly
             // marking many entries as updated for old users (before rev 1.72).
             if (aEntry.updated && aEntry.updated > storedEntry.updated
