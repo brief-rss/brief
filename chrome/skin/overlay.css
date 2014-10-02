@@ -1,12 +1,25 @@
 #brief-button {
-    list-style-image: url(chrome://brief/skin/toolbarbutton.png);
+    list-style-image: url(chrome://brief/skin/brief-icon-16.png);
     -moz-box-align: center;
     -moz-box-orient: horizontal;
 }
 
-toolbar[iconsize=small] #brief-button {
-    list-style-image: url(chrome://brief/skin/feed-icon-16x16.png);
+#brief-button[cui-areatype="menu-panel"],
+toolbarpaletteitem[place="palette"] > #brief-button {
+    list-style-image: url(chrome://brief/skin/brief-icon-32.png);
 }
+
+/* High-resolution displays */
+@media (min-resolution: 2dppx) {
+    #brief-button {
+        list-style-image: url(chrome://brief/skin/brief-icon-32.png);
+    }
+    #brief-button[cui-areatype="menu-panel"],
+    toolbarpaletteitem[place="palette"] > #brief-button {
+        list-style-image: url(chrome://brief/skin/brief-icon-64.png);
+    }
+}
+
 
 toolbar[mode=full] #brief-status-counter {
     display: none;
