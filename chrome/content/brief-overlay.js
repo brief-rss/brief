@@ -333,13 +333,7 @@ const Brief = {
     },
 
     onFirstRun: function Brief_onFirstRun() {
-        // Add the toolbar button at the end of the Navigation Bar.
-        let navbar = document.getElementById('nav-bar');
-        if (!navbar.currentSet.match('brief-button')) {
-            navbar.insertItem('brief-button', null, null, false);
-            navbar.setAttribute('currentset', navbar.currentSet);
-            document.persist('nav-bar', 'currentset');
-        }
+        CustomizableUI.addWidgetToArea('brief-button', CustomizableUI.AREA_NAVBAR);
 
         // Create the default feeds folder.
         let name = Services.strings.createBundle('chrome://brief/locale/brief.properties')
