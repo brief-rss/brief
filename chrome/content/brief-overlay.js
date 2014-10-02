@@ -5,7 +5,7 @@ const Brief = {
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
-    BRIEF_FAVICON_URL: 'chrome://brief/skin/feed-icon-16x16.png',
+    BRIEF_FAVICON_URL: 'chrome://brief/skin/brief-icon-16.png',
 
     get statusCounter() document.getElementById('brief-status-counter'),
 

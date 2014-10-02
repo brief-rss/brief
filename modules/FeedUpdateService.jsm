@@ -13,7 +13,7 @@ const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
 const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
 const FAVICON_REFRESH_INTERVAL = 14*24*60*60*1000; // 2 weeks
 
-const FEED_ICON_URL = 'chrome://brief/skin/icon.png';
+const FEED_ICON_URL = 'chrome://brief/skin/brief-icon-32.png';
 const TIMER_TYPE_SLACK = Ci.nsITimer.TYPE_REPEATING_SLACK;
 
 
