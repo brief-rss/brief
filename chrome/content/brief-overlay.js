@@ -156,14 +156,6 @@ const Brief = {
             let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
             label.value = this.toolbarbutton.label;
         }
-        else if (!this.prefs.getBoolPref('firefox4ToolbarbuttonMigrated')) {
-            let navbar = document.getElementById('nav-bar');
-            navbar.insertItem('brief-button', null, null, false);
-            navbar.setAttribute('currentset', navbar.currentSet);
-            document.persist('nav-bar', 'currentset');
-        }
-
-        this.prefs.setBoolPref('firefox4ToolbarbuttonMigrated', true);
 
         if (this.prefs.getBoolPref('hideChrome'))
             XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
@@ -364,7 +356,6 @@ const Brief = {
         this.prefs.setIntPref('homeFolder', folderID);
 
         this.prefs.setBoolPref('firstRun', false);
-        this.prefs.setBoolPref('firefox4ToolbarbuttonMigrated', true);
 
         AddonManager.getAddonByID('brief@mozdev.org', addon => {
             this.prefs.setCharPref('lastVersion', addon.version);
