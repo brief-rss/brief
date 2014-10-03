@@ -459,25 +459,28 @@ let FeedList = {
                 this._refreshFavicon(aData)
                 break;
 
-            case 'brief:feed-updated':
+            case 'brief:feed-updated': {
                 let item = getElement(aData);
                 item.removeAttribute('error');
                 item.removeAttribute('loading');
                 this._refreshFavicon(aData);
                 refreshProgressmeter();
                 break;
+            }
 
-            case 'brief:feed-loading':
-                item = getElement(aData);
+            case 'brief:feed-loading': {
+                let item = getElement(aData);
                 item.setAttribute('loading', true);
                 this._refreshFavicon(aData);
                 break;
+            }
 
-            case 'brief:feed-error':
-                item = getElement(aData);
+            case 'brief:feed-error': {
+                let item = getElement(aData);
                 item.setAttribute('error', true);
                 this._refreshFavicon(aData);
                 break;
+            }
 
             case 'brief:feed-update-queued':
                 refreshProgressmeter();
