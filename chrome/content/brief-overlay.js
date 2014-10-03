@@ -144,18 +144,20 @@ const Brief = {
             }.bind(this))
         }
 
-        if (this.toolbarbutton) {
-            let showCounter = this.prefs.getBoolPref('showUnreadCounter');
-            this.statusCounter.hidden = !showCounter;
-
-            let menuitem = document.getElementById('brief-show-unread-counter');
-            menuitem.setAttribute('checked', showCounter);
-        }
+        if (this.toolbarbutton)
+            this.initUnreadCounter();
 
         if (this.prefs.getBoolPref('hideChrome'))
             XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
 
         gBrowser.addEventListener('pageshow', this.onTabLoad, false);
+
+        CustomizableUI.addListener({
+            onCustomizeEnd: () => {
+                this.initUnreadCounter();
+                this.updateStatus();
+            }
+        });
 
         this.storage.ready.then(() => {
             this.storage.addObserver(this);
@@ -177,11 +179,8 @@ const Brief = {
 
     onPrefChanged: function Brief_onPrefChanged(aSubject, aTopic, aData) {
         if (aData == 'showUnreadCounter') {
-            let newValue = Brief.prefs.getBoolPref('showUnreadCounter');
-            Brief.statusCounter.hidden = !newValue;
-
-            let menuitem = document.getElementById('brief-show-unread-counter');
-            menuitem.setAttribute('checked', newValue);
+            if (Brief.toolbarbutton)
+                Brief.initUnreadCounter();
 
             if (newValue)
                 Brief.storage.ready.then(Brief.updateStatus);
@@ -203,6 +202,14 @@ const Brief = {
 
     onEntriesDeleted: function Brief_onEntriesDeleted(aEntryList, aState) {
         this.refreshUI();
+    },
+
+    initUnreadCounter: function() {
+        let showCounter = this.prefs.getBoolPref('showUnreadCounter');
+        this.statusCounter.hidden = !showCounter;
+
+        let menuitem = document.getElementById('brief-show-unread-counter');
+        menuitem.setAttribute('checked', showCounter);
     },
 
     refreshUI: function Brief_refreshUI() {
