@@ -366,7 +366,9 @@ let StorageInternal = {
 
     // See Storage.
     processFeed: function StorageInternal_processFeed(aFeedID, aParsedFeed, aFeedDocument) {
-        new FeedProcessor(aFeedID, aParsedFeed, aFeedDocument);
+        let deferred = Promise.defer();
+        new FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, deferred);
+        return deferred.promise;
     },
 
     /**
@@ -692,10 +694,10 @@ let StorageInternal = {
 
 
 // See Storage.processFeed().
-function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument) {
+function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aDeferred) {
     this.feed = Storage.getFeed(aFeedID);
     this.parsedFeed = aParsedFeed;
-    this.deferred = Promise.defer();
+    this.deferred = aDeferred;
 
     let newDateModified = new Date(aParsedFeed.updated).getTime();
     let prevDateModified = this.feed.dateModified;
