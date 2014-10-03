@@ -163,13 +163,16 @@
                        tooltip="brief-tooltip"
                        context="brief-status-context"
                        onclick="if (event.button == 0 || event.button == 1) Brief.open()">
-            <hbox id="brief-button-inner-box">
-                <vbox align="center">
-                    <image class="toolbarbutton-icon"/>
-                    <label class="toolbarbutton-text" crop="right" flex="1"/>
+            <hbox id="brief-button-inner-box" flex="1">
+                <vbox>
+                    <image id="brief-button-icon" class="toolbarbutton-icon"/>
+                    <label id="brief-button-label"
+                           class="toolbarbutton-text"
+                           crop="right"
+                           flex="1"
+                           value="Brief"/>
                 </vbox>
-                <label id="brief-status-counter"
-                       hidden="true"/>
+                <label id="brief-status-counter" hidden="true"/>
             </hbox>
         </toolbarbutton>
     </toolbarpalette>

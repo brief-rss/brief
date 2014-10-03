@@ -1,7 +1,5 @@
 #brief-button {
     list-style-image: url(chrome://brief/skin/brief-icon-16.png);
-    -moz-box-align: center;
-    -moz-box-orient: horizontal;
 }
 
 #brief-button[cui-areatype="menu-panel"],
@@ -20,10 +18,35 @@ toolbarpaletteitem[place="palette"] > #brief-button {
     }
 }
 
+.panelUI-grid #brief-button-icon,
+.customization-palette #brief-button-icon {
+    min-width: 32px;
+    min-height: 32px;
+    margin: 4px calc((22.35em / 3 - 0.1px) / 2 - 23px);
+}
 
-toolbar[mode=full] #brief-status-counter {
+toolbarpaletteitem #brief-button-icon {
+    transition: transform 0.3s cubic-bezier(0.6, 2, 0.75, 1.5) 0s !important;
+}
+
+.panelUI-grid #brief-button-label {
+    text-align: center;
+    line-height: 1.1;
+    height: 2.2em;
+    margin: 2px 0px 0px !important;
+}
+
+.panelUI-grid:not([customize-transitioning]) #brief-button-label {
+    position: absolute;
+    clip: rect(auto, auto, 2.3em, auto);
+}
+
+#PanelUI-mainView #brief-status-counter,
+#customization-palette #brief-status-counter {
     display: none;
 }
+
+
 
 #brief-tooltip-last-updated {
   margin-bottom: 0.75em;

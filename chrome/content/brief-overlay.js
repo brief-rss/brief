@@ -150,11 +150,6 @@ const Brief = {
 
             let menuitem = document.getElementById('brief-show-unread-counter');
             menuitem.setAttribute('checked', showCounter);
-
-            // Because Brief's toolbarbutton doesn't use toolbarbutton's binding content,
-            // we must manually set the label in "icons and text" toolbar mode.
-            let label = this.toolbarbutton.getElementsByClassName('toolbarbutton-text')[0];
-            label.value = this.toolbarbutton.label;
         }
 
         if (this.prefs.getBoolPref('hideChrome'))
