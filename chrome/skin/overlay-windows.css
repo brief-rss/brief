@@ -1,12 +1,10 @@
-#brief-button > .toolbarbutton-text {
-    display: -moz-box;
-}
+/*
+ * Style rules in this are copied and adapted from the default theme,
+ * because Brief's toolbar button don't use the default structure.
+ */
 
-
-/* Adopted :hover and :active effects from the default theme */
-
-#brief-button .toolbarbutton-icon {
-    margin-top: 3px;
+toolbar #brief-button-icon {
+    padding: 3px 0;
 }
 
 #nav-bar #brief-button-inner-box {

@@ -1,0 +1,46 @@
+/*
+ * Style rules in this are copied and adapted from the default theme,
+ * because Brief's toolbar button don't use the default structure.
+ */
+
+
+:-moz-any(#TabsToolbar, #nav-bar) #brief-button-inner-box {
+    -moz-margin-end: 0;
+    padding: 2px 6px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition-property: background-color, border-color;
+    transition-duration: 150ms;
+}
+
+:-moz-any(#TabsToolbar, #nav-bar) #brief-button-inner-box {
+    padding: 3px 7px;
+}
+
+:-moz-any(#TabsToolbar, #nav-bar) #brief-button:not([disabled=true]):hover > #brief-button-inner-box {
+    background-color: hsla(0,0%,100%,.3);
+    background-image: linear-gradient(hsla(0,0%,100%,.7), hsla(0,0%,100%,.2));
+    border: 1px solid rgb(154,154,154);
+    box-shadow: 0 1px 0 hsla(0,0%,100%,.3) inset,
+                0 0 0 1px hsla(0,0%,100%,.2) inset,
+                0 1px 0 hsla(0,0%,0%,.03);
+}
+
+:-moz-any(#TabsToolbar, #nav-bar) #brief-button:not([disabled=true]):-moz-any([open],[checked],:hover:active) > #brief-button-inner-box {
+    background-color: rgba(154,154,154,.5);
+    background-image: linear-gradient(hsla(0,0%,100%,.7), hsla(0,0%,100%,.4));
+    border: 1px solid rgb(154,154,154);
+    box-shadow: 0 1px 1px hsla(0,0%,0%,.1) inset,
+                0 0 1px hsla(0,0%,0%,.3) inset;
+    transition-duration: 10ms;
+}
+
+:-moz-any(#TabsToolbar, #nav-bar) #brief-button[checked]:not(:active):hover > #brief-button-inner-box {
+    background-color: rgba(90%,90%,90%,.4);
+    transition: background-color 150ms;
+}
+
+
+#main-window:not([customizing]) #brief-button[disabled=true] > #brief-button-inner-box {
+    opacity: 0.4;
+}
