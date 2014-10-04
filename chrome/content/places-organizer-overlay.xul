@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<!-- When Organize button is clicked, the Bookmarks window should be opened
+with Brief's home folder selected. This is done by passing the home folder
+ID as an argument when openning the window. However, the built-in code that
+handles window arguments only expands the target folder - it doesn't expand
+its parent folders. We need to do this ourselves. -->
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script type="application/x-javascript">
+    <![CDATA[
+        // Load event is fired multiple times, we use this flag
+        // to ignore subsequent events.
+        let gBriefFolderSelected = false;
+
+        document.addEventListener('load', event => {
+            if (gBriefFolderSelected || !window.arguments || !window.arguments[0])
+                return;
+
+            gBriefFolderSelected = true;
+
+            let folder = window.arguments[0];
+
+            let homeFolderID = Services.prefs.getIntPref('extensions.brief.homeFolder');
+            if (folder != homeFolderID)
+                return;
+
+            let parentChain = [folder];
+            let bookmarksMenuFolderID = PlacesUtils.bookmarksMenuFolderId;
+            while (folder != bookmarksMenuFolderID) {
+                folder = PlacesUtils.bookmarks.getFolderIdForItem(folder);
+                parentChain.push(folder);
+            }
+
+            // Wait until tree is ready before selecting.
+            setTimeout(() => {
+                PlacesOrganizer.selectLeftPaneQuery('AllBookmarks');
+
+                let tree = PlacesOrganizer._places;
+                for (let folder of parentChain.reverse()) {
+                    tree.selectItems([folder], false);
+                    PlacesUtils.asContainer(tree.selectedNode).containerOpen = true;
+                }
+            }, 150);
+        }, true);
+    ]]>
+    </script>
+</overlay>

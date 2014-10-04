@@ -5,6 +5,7 @@ resource brief-content  defaults/data/
 resource brief          modules/
 
 overlay  chrome://browser/content/browser.xul  chrome://brief/content/brief-overlay.xul
+overlay  chrome://browser/content/places/places.xul  chrome://brief/content/places-organizer-overlay.xul
 style  chrome://browser/content/browser.xul  chrome://brief/skin/overlay-windows.css os=WINNT
 style  chrome://browser/content/browser.xul  chrome://brief/skin/overlay-linux.css os=Linux
 
