@@ -629,7 +629,9 @@ FeedView.prototype = {
 
                 if (this.headlinesMode) {
                     let dayHeader = this.document.getElementById('day' + entryView.day);
-                    if (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1')
+
+                    // They day header may have been already removed by another callback.
+                    if (dayHeader && (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1'))
                         this.feedContent.removeChild(dayHeader);
                 }
 
