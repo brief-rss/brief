@@ -411,7 +411,7 @@ let StorageInternal = {
 
                 resume(aReason ? null : aResults);
             }.bind(this))
-            results = yield;
+            results = yield undefined;
         }
 
         // Do not blow the cache in the case results could not be fetched
