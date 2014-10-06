@@ -4,7 +4,7 @@ Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/DatabaseSchema.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
+Components.utils.import("resource://gre/modules/Promise.jsm");
 Components.utils.import('resource://gre/modules/Task.jsm');
 Components.utils.import('resource://gre/modules/osfile.jsm');
 Components.utils.import('resource://gre/modules/Sqlite.jsm');

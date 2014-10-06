@@ -3,7 +3,7 @@ const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'log', 'wait',
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/Task.jsm');
-Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
+Components.utils.import("resource://gre/modules/Promise.jsm");
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;

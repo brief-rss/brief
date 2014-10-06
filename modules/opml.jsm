@@ -7,7 +7,7 @@ const EXPORTED_SYMBOLS = ['OPML'];
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
-Components.utils.import('resource://gre/modules/commonjs/sdk/core/promise.js');
+Components.utils.import("resource://gre/modules/Promise.jsm");
 Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
