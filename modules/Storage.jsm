@@ -799,12 +799,8 @@ FeedProcessor.prototype = {
         let storedEntry = (yield select.executeCached(params))[0];
 
         if (storedEntry) {
-            // XXX Comparing stored entry date is temporary. Done to avoid suddenly
-            // marking many entries as updated for old users (before rev 1.72).
-            if (aEntry.updated && aEntry.updated > storedEntry.updated
-                               && aEntry.updated > storedEntry.date) {
+            if (aEntry.updated && aEntry.updated > storedEntry.updated)
                 this.addUpdateParams(aEntry, storedEntry.id, storedEntry.read);
-            }
         }
         else {
             this.addInsertParams(aEntry, primaryHash, secondaryHash);
