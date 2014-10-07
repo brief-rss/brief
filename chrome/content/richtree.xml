@@ -602,7 +602,7 @@
     <content>
       <xul:hbox class="folder-title-container" flex="1">
         <xul:label class="folder-title" crop="end" xbl:inherits="value=title" />
-        <xul:image class="folder-twisty" onmousedown="toggleOpen(); event.stopPropagation();" />
+        <xul:image class="folder-twisty" />
         <xul:spacer class="folder-title-spacer" flex="1"/>
         <xul:label class="unread-count" xbl:inherits="value=unreadcount" />
       </xul:hbox>
@@ -611,15 +611,16 @@
       </xul:vbox>
     </content>
 
-  <implementation>
+    <handlers>
+        <handler event="mousedown">
+            if (event.originalTarget.className == 'folder-twisty') {
+                this.setAttribute("open", !this.openState);
+                event.stopPropagation();
+            }
+        </handler>
+    </handlers>
 
-    <method name="toggleOpen">
-      <body>
-        <![CDATA[
-          this.setAttribute("open", !this.openState);
-        ]]>
-      </body>
-    </method>
+  <implementation>
 
     <property name="openState" readonly="true">
       <getter>
