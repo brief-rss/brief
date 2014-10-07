@@ -101,10 +101,7 @@ const Brief = {
             }
         }
 
-        let instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
-        let features = 'chrome,titlebar,toolbar,centerscreen,resizable,';
-        features += instantApply ? 'modal=no,dialog=no' : 'modal';
-
+        let features = 'chrome,titlebar,toolbar,centerscreen,';
         window.openDialog(Brief.BRIEF_OPTIONS_URL, 'Brief options', features);
     },
 
