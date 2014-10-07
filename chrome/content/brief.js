@@ -156,7 +156,8 @@ let Commands = {
     },
 
     openFeedWebsite: function cmd_openWebsite(aFeed) {
-        getTopWindow().gBrowser.loadOneTab(aFeed.websiteURL);
+        let url = aFeed.websiteURL || NetUtil.newURI(aFeed.feedURL).host;
+        getTopWindow().gBrowser.loadOneTab(url);
     },
 
     emptyFeed: function cmd_emptyFeed(aFeed) {
