@@ -762,21 +762,19 @@ FeedView.prototype = {
         this._loading = true;
 
         let dateQuery = this.getQueryCopy();
-        let edgeDate = undefined;
+        let rangeStartDate = dateQuery.startDate;
+        let rangeEndDate = dateQuery.endDate;
 
         if (this._loadedEntries.length) {
             let lastEntryDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
             if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
-                edgeDate = lastEntryDate - 1;
+                rangeEndDate = lastEntryDate - 1;
             else
-                edgeDate = lastEntryDate + 1;
+                rangeStartDate = lastEntryDate + 1;
         }
 
-        if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
-            dateQuery.endDate = edgeDate;
-        else
-            dateQuery.startDate = edgeDate;
-
+        dateQuery.endDate = rangeEndDate;
+        dateQuery.startDate = rangeStartDate;
         dateQuery.limit = aCount;
 
         let dates = yield this._refreshGuard(dateQuery.getProperty('date', false));
@@ -784,10 +782,10 @@ FeedView.prototype = {
             let query = this.getQueryCopy();
             if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
                 query.startDate = dates[dates.length - 1];
-                query.endDate = edgeDate;
+                query.endDate = rangeEndDate;
             }
             else {
-                query.startDate = edgeDate;
+                query.startDate = rangeStartDate;
                 query.endDate = dates[dates.length - 1];
             }
 
