@@ -1478,18 +1478,3 @@ __defineGetter__('Finder', () => {
     delete this.Finder;
     return this.Finder = finder;
 })
-
-__defineGetter__('gBriefPrincipal', () => {
-    let uri = NetUtil.newURI(document.documentURI);
-    let resolvedURI = Cc['@mozilla.org/chrome/chrome-registry;1']
-                      .getService(Ci.nsIChromeRegistry)
-                      .convertChromeURL(uri);
-
-    // Firefox 16 compatibility.
-    let ssm = Services.scriptSecurityManager;
-    let principal = ssm.getCodebasePrincipal ? ssm.getCodebasePrincipal(resolvedURI)
-                                             : ssm.getSimpleCodebasePrincipal(resolvedURI);
-
-    delete this.gBriefPrincipal;
-    return this.gBriefPrincipal = principal;
-})
