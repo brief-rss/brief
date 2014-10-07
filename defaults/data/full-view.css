@@ -4,13 +4,13 @@ article.entry.full > .headline-container {
 
 article.full {
     margin: 10px 0;
+    min-width: -moz-min-content
 }
 
 .full-container {
     display: flex;
     flex: 0 1 700px;
     flex-direction: column;
-    min-width: -moz-min-content;
     transition: border-color 200ms;
 }
 
