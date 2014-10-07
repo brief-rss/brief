@@ -8,6 +8,17 @@ Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
 
+const OBSERVER_TOPICS = [
+    'brief:feed-update-queued',
+    'brief:feed-update-finished',
+    'brief:feed-updated',
+    'brief:feed-loading',
+    'brief:feed-error',
+    'brief:invalidate-feedlist',
+    'brief:feed-title-changed',
+    'brief:feed-favicon-changed',
+    'brief:custom-style-changed',
+]
 
 let gCurrentView;
 
@@ -28,15 +39,8 @@ function init() {
 
     document.addEventListener('keypress', onKeyPress, true);
 
-    Services.obs.addObserver(FeedList, 'brief:feed-update-queued', false);
-    Services.obs.addObserver(FeedList, 'brief:feed-update-finished', false);
-    Services.obs.addObserver(FeedList, 'brief:feed-updated', false);
-    Services.obs.addObserver(FeedList, 'brief:feed-loading', false);
-    Services.obs.addObserver(FeedList, 'brief:feed-error', false);
-    Services.obs.addObserver(FeedList, 'brief:invalidate-feedlist', false);
-    Services.obs.addObserver(FeedList, 'brief:feed-title-changed', false);
-    Services.obs.addObserver(FeedList, 'brief:feed-favicon-changed', false);
-    Services.obs.addObserver(FeedList, 'brief:custom-style-changed', false);
+    for (let topic of OBSERVER_TOPICS)
+        Services.obs.addObserver(FeedList, topic, false);
 
     Storage.addObserver(FeedList);
 
@@ -64,15 +68,8 @@ function unload() {
 
     FeedList.persistFolderState();
 
-    Services.obs.removeObserver(FeedList, 'brief:feed-updated');
-    Services.obs.removeObserver(FeedList, 'brief:feed-loading');
-    Services.obs.removeObserver(FeedList, 'brief:feed-error');
-    Services.obs.removeObserver(FeedList, 'brief:feed-update-queued');
-    Services.obs.removeObserver(FeedList, 'brief:feed-update-finished');
-    Services.obs.removeObserver(FeedList, 'brief:invalidate-feedlist');
-    Services.obs.removeObserver(FeedList, 'brief:feed-title-changed');
-    Services.obs.removeObserver(FeedList, 'brief:feed-favicon-changed');
-    Services.obs.removeObserver(FeedList, 'brief:custom-style-changed');
+    for (let topic of OBSERVER_TOPICS)
+        Services.obs.removeObserver(FeedList, topic);
 
     PrefObserver.unregister();
     Storage.removeObserver(FeedList);

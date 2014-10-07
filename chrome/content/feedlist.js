@@ -279,8 +279,7 @@ let FeedList = {
      *        An array of feed IDs.
      */
     refreshFolderTreeitems: function FeedList_refreshFolderTreeitems(aFolders) {
-        aFolders.map(function(f) Storage.getFeed(f))
-                .forEach(this._refreshLabel, this);
+        aFolders.map(Storage.getFeed).forEach(this._refreshLabel, this);
     },
 
     /**
@@ -291,8 +290,7 @@ let FeedList = {
      *        An array of feed IDs.
      */
     refreshFeedTreeitems: function FeedList_refreshFeedTreeitems(aFeeds) {
-        let feeds = aFeeds.map(function(f) Storage.getFeed(f));
-        for (let feed of feeds) {
+        for (let feed of aFeeds.map(Storage.getFeed)) {
             this._refreshLabel(feed);
             this._refreshFavicon(feed.feedID);
 

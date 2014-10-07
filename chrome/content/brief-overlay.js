@@ -188,21 +188,13 @@ const Brief = {
     },
 
 
-    onEntriesAdded: function Brief_onEntriesAdded(aEntryList) {
-        this.refreshUI();
-    },
+    onEntriesAdded: function(aEntryList) this.refreshUI(),
 
-    onEntriesUpdated: function Brief_onEntriesUpdated(aEntryList) {
-        this.refreshUI();
-    },
+    onEntriesUpdated: function(aEntryList) this.refreshUI(),
 
-    onEntriesMarkedRead: function Brief_onEntriesMarkedRead(aEntryList, aState) {
-        this.refreshUI();
-    },
+    onEntriesMarkedRead: function(aEntryList, aState) this.refreshUI(),
 
-    onEntriesDeleted: function Brief_onEntriesDeleted(aEntryList, aState) {
-        this.refreshUI();
-    },
+    onEntriesDeleted: function(aEntryList, aState) this.refreshUI(),
 
     initUnreadCounter: function() {
         let showCounter = this.prefs.getBoolPref('showUnreadCounter');
@@ -213,9 +205,7 @@ const Brief = {
     },
 
     refreshUI: function Brief_refreshUI() {
-        setTimeout(function(){
-            Brief.updateStatus();
-        }, 500);
+        setTimeout(Brief.updateStatus.bind(Brief), 500);
 
         let tooltip = document.getElementById('brief-tooltip');
         if (tooltip.state == 'open' || tooltip.state == 'showing')

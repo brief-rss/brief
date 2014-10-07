@@ -497,7 +497,7 @@ let StorageInternal = {
             let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
 
             let query = new Query({
-                feeds: feedsWithoutAgeLimit.map(function(f) f.feedID),
+                feeds: [feed.feedID for (feed of feedsWithoutAgeLimit)],
                 deleted: Storage.ENTRY_STATE_NORMAL,
                 starred: false,
                 endDate: Date.now() - expirationAge * 86400000
@@ -709,6 +709,7 @@ function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aDeferred) {
         this.insertEntryTextParamSets = [];
 
         // Counting down, because the order of items is reversed after parsing.
+        // This is to ensure the original order of entries if they don't have dates.
         for (let i = aParsedFeed.items.length - 1; i >= 0; i--) {
             let parsedEntry = aParsedFeed.items.queryElementAt(i, Ci.nsIFeedEntry);
             let mappedEntry = this.mapEntryProperties(parsedEntry);
