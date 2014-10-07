@@ -173,26 +173,21 @@ let TagList = {
                     this._refreshLabel(tag);
             }
             else if (aPossiblyRemoved) {
-                let query = new Query({
-                    tags: [tag]
-                })
-
-                query.hasMatches.then(hasMatches => {
-                    if (hasMatches) {
-                        this._refreshLabel(tag);
-                    }
-                    else {
-                        this._rebuild();
-                        if (gCurrentView.query.tags && gCurrentView.query.tags[0] === tag)
-                            ViewList.selectedItem = getElement('starred-folder');
-                    }
-                })
+                let tagExists = yield new Query({ tags: [tag] }).hasMatches();
+                if (tagExists) {
+                    this._refreshLabel(tag);
+                }
+                else {
+                    this._rebuild();
+                    if (gCurrentView.query.tags && gCurrentView.query.tags[0] === tag)
+                        ViewList.selectedItem = getElement('starred-folder');
+                }
             }
             else {
                 this._refreshLabel(tag);
             }
         }
-    },
+    }.task(),
 
     _rebuild: function TagList__rebuild() {
         while (this._listbox.hasChildNodes())
