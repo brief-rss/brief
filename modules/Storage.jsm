@@ -424,42 +424,36 @@ let StorageInternal = {
             let params = {};
 
             for (let property of FEEDS_COLUMNS) {
-                if (property in propertyBag) {
-                    params[property] = propertyBag[property];
+                if (property in propertyBag && cachedFeed[property] != propertyBag[property]) {
+                    cachedFeed[property] = propertyBag[property];
 
-                    if (cachedFeed[property] != propertyBag[property]) {
-                        // Update cache manually to avoid tearing it down.
-                        cachedFeed[property] = propertyBag[property];
+                    switch (property) {
+                        case 'rowIndex':
+                            this.feedCache = this.feedCache.sort(
+                                (a, b) => a.rowIndex - b.rowIndex
+                            )
+                            // Fall through...
 
-                        switch (property) {
-                            case 'rowIndex':
-                                this.feedCache = this.feedCache.sort(
-                                    (a, b) => a.rowIndex - b.rowIndex
-                                )
-                                // Fall through...
+                        case 'hidden':
+                        case 'parent':
+                        case 'title':
+                        case 'omitInUnread':
+                        case 'language':
+                            invalidateFeedlist = true;
+                            break;
 
-                            case 'hidden':
-                            case 'parent':
-                            case 'title':
-                            case 'omitInUnread':
-                            case 'language':
-                                invalidateFeedlist = true;
-                                break;
+                        case 'entryAgeLimit':
+                            this.expireEntries(cachedFeed);
+                            break;
 
-                            case 'entryAgeLimit':
-                                this.expireEntries(cachedFeed);
-                                break;
-
-                            case 'favicon':
-                                Services.obs.notifyObservers(null, 'brief:feed-favicon-changed',
-                                                             cachedFeed.feedID);
-                                break;
-                        }
+                        case 'favicon':
+                            Services.obs.notifyObservers(null, 'brief:feed-favicon-changed',
+                                                         cachedFeed.feedID);
+                            break;
                     }
                 }
-                else {
-                    params[property] = cachedFeed[property];
-                }
+
+                params[property] = cachedFeed[property];
             }
 
             paramSets.push(params);
