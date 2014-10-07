@@ -348,15 +348,7 @@ function refreshProgressmeter(aReason) {
     }
     else {
         getElement('update-buttons-deck').selectedIndex = 0;
-
-        if (aReason == 'cancelled') {
-            getElement('update-progress').removeAttribute('show');
-        }
-        else {
-            wait(1000).then(() =>
-                getElement('update-progress').removeAttribute('show')
-            )
-        }
+        getElement('update-progress').removeAttribute('show');
     }
 }
 
