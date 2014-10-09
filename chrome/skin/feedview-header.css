@@ -31,12 +31,12 @@
 
 #view-title-button .button-menu-dropmarker {
     list-style-image: url(icons/view-title-dropmarker.png) !important;
-    -moz-image-region: rect(0, 7px, 4px, 0) !important;
+    -moz-image-region: rect(0, 11px, 6px, 0) !important;
     margin-left: 4px !important;
 }
 
 #view-title-button:hover .button-menu-dropmarker {
-    -moz-image-region: rect(4px, 7px, 8px, 0) !important;
+    -moz-image-region: rect(6px, 11px, 12px, 0) !important;
 }
 
 #view-title-button:not([contextOptions]) {
