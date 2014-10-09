@@ -29,25 +29,13 @@ let OPML = Object.freeze({
 let OPMLInternal = {
 
     importOPML: function() {
-        let bundle = Services.strings.createBundle('chrome://brief/locale/options.properties');
+        let file = this.promptForFile('open');
 
-        let fp = Cc['@mozilla.org/filepicker;1'].createInstance(Ci.nsIFilePicker);
-        fp.appendFilter(bundle.GetStringFromName('OPMLFiles'),'*.opml');
-        fp.appendFilter(bundle.GetStringFromName('XMLFiles'),'*.opml; *.xml; *.rdf; *.html; *.htm');
-        fp.appendFilter(bundle.GetStringFromName('allFiles'),'*');
-
-        let win = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator)
-                                                               .getMostRecentWindow(null);
-
-        fp.init(win, bundle.GetStringFromName('selectFile'), Ci.nsIFilePicker.modeOpen);
-
-        let res = fp.show();
-
-        if (res == Ci.nsIFilePicker.returnOK) {
+        if (file) {
             // Read any xml file by using XMLHttpRequest.
             // Any character code is converted to native unicode automatically.
             let fix = Cc['@mozilla.org/docshell/urifixup;1'].getService(Ci.nsIURIFixup);
-            let url = fix.createFixupURI(fp.file.path, fix.FIXUP_FLAG_ALLOW_KEYWORD_LOOKUP);
+            let url = fix.createFixupURI(file.path, fix.FIXUP_FLAG_ALLOW_KEYWORD_LOOKUP);
 
             let reader = Cc['@mozilla.org/xmlextras/xmlhttprequest;1']
                          .createInstance(Ci.nsIXMLHttpRequest);
@@ -194,10 +182,7 @@ let OPMLInternal = {
     },
 
     exportOPML: function exportOPML() {
-        let filePrefix = 'feeds';
-        let title = 'Feeds';
-
-        let file = this.promptForFile(filePrefix);
+        let file = this.promptForFile('save');
 
         if (file) {
             let folder = Services.prefs.getIntPref('extensions.brief.homeFolder');
@@ -212,7 +197,7 @@ let OPMLInternal = {
             data += '<?xml version="1.0" encoding="UTF-8"?>' + '\n';
             data += '<opml version="1.0">' + '\n';
             data += '\t' + '<head>' + '\n';
-            data += '\t\t' + '<title>' + title + ' OPML Export</title>' + '\n';
+            data += '\t\t' + '<title>' + 'Feeds OPML Export</title>' + '\n';
             data += '\t\t' + '<dateCreated>' + new Date().toString() + '</dateCreated>' + '\n';
             data += '\t' + '</head>' + '\n';
             data += '\t' + '<body>' + '\n';
@@ -298,19 +283,23 @@ let OPMLInternal = {
         throw new Task.Result(dataString);
     }.task(),
 
-    promptForFile: function (filePrefix) {
+    promptForFile: function(aMode) {
         let bundle = Services.strings.createBundle('chrome://brief/locale/options.properties');
         let win = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator)
                                                                .getMostRecentWindow(null);
-
         let fp = Cc['@mozilla.org/filepicker;1'].createInstance(Ci.nsIFilePicker);
-        fp.init(win, bundle.GetStringFromName('saveAs'), Ci.nsIFilePicker.modeSave);
 
         fp.appendFilter(bundle.GetStringFromName('OPMLFiles'),'*.opml');
         fp.appendFilter(bundle.GetStringFromName('XMLFiles'),'*.opml; *.xml; *.rdf; *.html; *.htm');
         fp.appendFilter(bundle.GetStringFromName('allFiles'),'*');
 
-        fp.defaultString = filePrefix + '.opml';
+        if (aMode == 'save') {
+            fp.defaultString = 'feeds.opml';
+            fp.init(win, bundle.GetStringFromName('saveAs'), Ci.nsIFilePicker.modeSave);
+        }
+        else {
+            fp.init(win, bundle.GetStringFromName('selectFile'), Ci.nsIFilePicker.modeOpen);
+        }
 
         let result = fp.show();
 
