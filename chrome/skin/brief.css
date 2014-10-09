@@ -120,6 +120,9 @@ menuseparator {
 .sidebar-button .button-icon {
     display: none;
 }
+.sidebar-button .button-text {
+    font-weight: bold !important;
+}
 
 
 #options-dropdown-button {
