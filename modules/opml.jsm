@@ -9,6 +9,7 @@ Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import("resource://gre/modules/Promise.jsm");
 Components.utils.import('resource://gre/modules/Task.jsm');
+Components.utils.import('resource://gre/modules/osfile.jsm');
 
 IMPORT_COMMON(this);
 
@@ -29,20 +30,13 @@ let OPML = Object.freeze({
 let OPMLInternal = {
 
     importOPML: function() {
-        let file = this.promptForFile('open');
+        let path = this.promptForFile('open');
 
-        if (file) {
-            // Read any xml file by using XMLHttpRequest.
-            // Any character code is converted to native unicode automatically.
-            let fix = Cc['@mozilla.org/docshell/urifixup;1'].getService(Ci.nsIURIFixup);
-            let url = fix.createFixupURI(file.path, fix.FIXUP_FLAG_ALLOW_KEYWORD_LOOKUP);
-
-            let reader = Cc['@mozilla.org/xmlextras/xmlhttprequest;1']
-                         .createInstance(Ci.nsIXMLHttpRequest);
-            reader.open('GET', url.spec, false);
-            reader.overrideMimeType('application/xml');
-            reader.send(null);
-            let opmldoc = reader.responseXML;
+        if (path) {
+            let dataArray = yield OS.File.read(path);
+            let string = new TextDecoder().decode(dataArray);
+            let parser = Cc['@mozilla.org/xmlextras/domparser;1'].createInstance(Ci.nsIDOMParser);
+            let opmldoc = parser.parseFromString(string, 'application/xml');
 
             if (opmldoc.documentElement.localName == 'parsererror') {
                 Services.prompt.alert(win, bundle.GetStringFromName('invalidFileAlertTitle'),
@@ -73,7 +67,7 @@ let OPMLInternal = {
                                                                   transactions);
             PlacesUtils.transactionManager.doTransaction(aggregatedTrans);
         }
-    },
+    }.task(),
 
     importLevel: function(aNodes, aCreateIn, aTransactions) {
         for (let node of aNodes) {
@@ -182,9 +176,9 @@ let OPMLInternal = {
     },
 
     exportOPML: function exportOPML() {
-        let file = this.promptForFile('save');
+        let path = this.promptForFile('save');
 
-        if (file) {
+        if (path) {
             let folder = Services.prefs.getIntPref('extensions.brief.homeFolder');
 
             let options = PlacesUtils.history.getNewQueryOptions();
@@ -207,17 +201,8 @@ let OPMLInternal = {
             data += '\t' + '</body>' + '\n';
             data += '</opml>';
 
-            // convert to utf-8 from native unicode
-            let converter = Cc['@mozilla.org/intl/scriptableunicodeconverter']
-                            .getService(Ci.nsIScriptableUnicodeConverter);
-            converter.charset = 'UTF-8';
-            data = converter.ConvertFromUnicode(data);
-
-            let outputStream = Cc['@mozilla.org/network/file-output-stream;1']
-                               .createInstance(Ci.nsIFileOutputStream);
-            outputStream.init(file, 0x04 | 0x08 | 0x20, 420, 0 );
-            outputStream.write(data, data.length);
-            outputStream.close();
+            let array = new TextEncoder().encode(data);
+            OS.File.writeAtomic(path, array);
         }
     }.task(),
 
@@ -303,10 +288,7 @@ let OPMLInternal = {
 
         let result = fp.show();
 
-        if (result == Ci.nsIFilePicker.returnCancel)
-            return false;
-        else
-            return fp.file;
+        return result == Ci.nsIFilePicker.returnCancel ? null : fp.file.path;
     },
 
     cleanXMLText: function(str) {
