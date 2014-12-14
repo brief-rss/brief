@@ -1346,7 +1346,7 @@ Query.prototype = {
              * Compute the actual list of folders to be selected, including subfolders
              * of folders specified by Query.folders.
              */
-            this._effectiveFolders = this.folders;
+            this._effectiveFolders = this.folders.slice();
             this._traverseFolderChildren(StorageInternal.homeFolderID);
 
             let con = '(feeds.parent = "';
