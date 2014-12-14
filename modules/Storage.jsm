@@ -459,10 +459,10 @@ let StorageInternal = {
             paramSets.push(params);
         }
 
-        if (invalidateFeedlist)
-            Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
+        let promise = Stm.changeFeedProperties.executeCached(paramSets);
 
-        Stm.changeFeedProperties.executeCached(paramSets);
+        if (invalidateFeedlist)
+            promise.then(() => Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', ''));
     },
 
     /**
