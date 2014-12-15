@@ -609,7 +609,7 @@
       <xul:hbox class="folder-title-container" flex="1">
         <xul:label class="folder-title" crop="end" xbl:inherits="value=title" />
         <xul:image class="folder-twisty" />
-        <xul:spacer class="folder-title-spacer" flex="1"/>
+        <xul:spacer class="folder-title-spacer"/>
         <xul:label class="unread-count" xbl:inherits="value=unreadcount" />
       </xul:hbox>
       <xul:vbox class="folder-container">

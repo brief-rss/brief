@@ -64,17 +64,23 @@ richtreefolder > .folder-title-container {
     padding: 2px 1px 2px 5px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
     -moz-box-align: center;
+    display: flex;
 }
 
 .folder-title {
     color: #454545;
     font-size: 13px !important;
     font-weight: bold !important;
+    flex-shrink: 1;
+}
+
+.folder-title-spacer {
+    flex-basis: 0;
+    flex-grow: 1;
 }
 
 .folder-twisty {
-    margin-right: 1em !important;
-    padding: 3px 7px 3px !important;
+    padding: 3px 5px 3px !important;
     list-style-image: url(icons/twisty.png);
     -moz-image-region: rect(0, 22px, 11px, 11px);
     opacity: 0;
@@ -92,7 +98,6 @@ richtreefolder > .folder-title-container {
 richtreefolder[open="true"] > .folder-title-container > .folder-twisty {
     -moz-image-region: rect(0px, 11px, 11px, 0px);
     padding: 5px 5px 1px !important;
-    margin-right: 15px !important;
 }
 
 richtreefolder[open="true"] > .folder-title-container > .folder-twisty:hover {
