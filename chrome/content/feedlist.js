@@ -424,17 +424,20 @@ let FeedList = {
 
     observe: function FeedList_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
-
             case 'brief:invalidate-feedlist':
-                if (this.ignoreInvalidateNotification) {
-                    FeedList.ignoreInvalidateNotification = false;
+                ViewList.refreshItem('all-items-folder');
+                ViewList.refreshItem('today-folder');
+                ViewList.refreshItem('starred-folder');
+                if (this.expectRemovalInvalidate) {
+                    /* Removal is performed manually to avoid full rebuild,
+                     * only unread counts need to be updated */
+                    FeedList.expectRemovalInvalidate = false;
+                    // TODO: avoid refreshing non-parent folders
+                    Storage.getAllFeeds(true).forEach(this._refreshLabel, this);
                 }
                 else {
                     this.persistFolderState();
                     this.rebuild();
-                    ViewList.refreshItem('all-items-folder');
-                    ViewList.refreshItem('today-folder');
-                    ViewList.refreshItem('starred-folder');
 
                     wait().then(() => gCurrentView.refresh());
                 }
@@ -712,7 +715,7 @@ let FolderContextMenu = {
 
         if (Services.prompt.confirm(window, title, text)) {
             FeedList.removeItem(item);
-            FeedList.ignoreInvalidateNotification = true;
+            FeedList.expectRemovalInvalidate = true;
 
             Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 

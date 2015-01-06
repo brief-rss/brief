@@ -170,7 +170,7 @@ let Commands = {
 
         if (Services.prompt.confirm(window, title, text)) {
             FeedList.removeItem(getElement(aFeed.feedID));
-            FeedList.ignoreInvalidateNotification = true;
+            FeedList.expectRemovalInvalidate = true;
 
             Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
