@@ -325,6 +325,7 @@ let FeedUpdateServiceInternal = {
     addFeed: function(aURL) {
         let fetcher = new FeedFetcher(aURL, false);
         let { document, parsedFeed } = yield fetcher.done;
+        Storage.ensureHomeFolder();
 
         // Just add a livemark, the feed will be updated by the bookmark observer.
         let livemarks = Cc['@mozilla.org/browser/livemark-service;2']

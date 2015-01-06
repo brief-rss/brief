@@ -8,6 +8,7 @@ Components.utils.import("resource://gre/modules/Promise.jsm");
 Components.utils.import('resource://gre/modules/Task.jsm');
 Components.utils.import('resource://gre/modules/osfile.jsm');
 Components.utils.import('resource://gre/modules/Sqlite.jsm');
+Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
 IMPORT_COMMON(this);
 
@@ -168,6 +169,10 @@ const Storage = Object.freeze({
      */
     removeObserver: function(aObserver) {
         return StorageInternal.removeObserver(aObserver);
+    },
+
+    ensureHomeFolder: function() {
+        return StorageInternal.ensureHomeFolder();
     }
 
 })
@@ -215,6 +220,8 @@ let StorageInternal = {
         })
 
         this.homeFolderID = Prefs.getIntPref('homeFolder');
+        this.ensureHomeFolder();
+
         Prefs.addObserver('', this, false);
 
         Services.obs.addObserver(this, 'quit-application', false);
@@ -681,6 +688,18 @@ let StorageInternal = {
                 observer.onEntriesTagged(list, aState, aTagName);
         }
     }.task(),
+
+    ensureHomeFolder: function StorageInternal_ensureHomeFolder() {
+        if (this.homeFolderID == -1) {
+            let name = Services.strings.createBundle('chrome://brief/locale/brief.properties')
+                                       .GetStringFromName('defaultFeedsFolderName');
+            let bookmarks = PlacesUtils.bookmarks;
+            let folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
+                                                  bookmarks.DEFAULT_INDEX);
+            Prefs.setIntPref('homeFolder', folderID);
+            this.homeFolderID = folderID;
+        }
+    },
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
 

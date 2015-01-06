@@ -336,14 +336,6 @@ const Brief = {
     onFirstRun: function Brief_onFirstRun() {
         CustomizableUI.addWidgetToArea('brief-button', CustomizableUI.AREA_NAVBAR);
 
-        // Create the default feeds folder.
-        let name = Services.strings.createBundle('chrome://brief/locale/brief.properties')
-                                   .GetStringFromName('defaultFeedsFolderName');
-        let bookmarks = PlacesUtils.bookmarks;
-        let folderID = bookmarks.createFolder(bookmarks.bookmarksMenuFolder, name,
-                                              bookmarks.DEFAULT_INDEX);
-        this.prefs.setIntPref('homeFolder', folderID);
-
         this.prefs.setBoolPref('firstRun', false);
 
         AddonManager.getAddonByID('brief@mozdev.org', addon => {

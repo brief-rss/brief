@@ -5,6 +5,7 @@
 const EXPORTED_SYMBOLS = ['OPML'];
 
 Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import("resource://gre/modules/Promise.jsm");
@@ -60,6 +61,7 @@ let OPMLInternal = {
 
             let transactions = [];
 
+            Storage.ensureHomeFolder();
             let homeFolder = Services.prefs.getIntPref('extensions.brief.homeFolder');
             this.importLevel(results, homeFolder, transactions);
 
