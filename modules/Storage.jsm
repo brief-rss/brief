@@ -1695,6 +1695,7 @@ let LivemarksSync = function LivemarksSync() {
     yield this.traversePlacesQueryResults(result.root, livemarks);
 
     let storedFeeds = Storage.getAllFeeds(true, true);
+    let storedFeedsByID = Map(storedFeeds.map(feed => [feed.feedID, feed]));
     let oldFeeds = [];
     let newFeeds = [];
     let changedFeeds = [];
@@ -1702,14 +1703,7 @@ let LivemarksSync = function LivemarksSync() {
     // Iterate through the found livemarks and compare them
     // with the feeds in the database.
     for (let livemark of livemarks) {
-        // Find the matching feed in the database.
-        let feed = null;
-        for (let storedFeed of storedFeeds) {
-            if (storedFeed.feedID == livemark.feedID) {
-                feed = storedFeed;
-                break;
-            }
-        }
+        let feed = storedFeedsByID.get(livemark.feedID);
 
         // Feed already in the database.
         if (feed) {
@@ -1733,9 +1727,9 @@ let LivemarksSync = function LivemarksSync() {
             newFeeds.push(livemark);
         }
     }
-
     // Hide any feeds that are no longer found among the livemarks.
-    let missingFeeds = storedFeeds.filter(f => oldFeeds.indexOf(f) == -1 && !f.hidden);
+    let knownFeeds = Set(oldFeeds);
+    let missingFeeds = storedFeeds.filter(f => !knownFeeds.has(f) && !f.hidden);
     for (let feed of missingFeeds) {
         changedFeeds.push({
             'feedID': feed.feedID,
