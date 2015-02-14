@@ -293,8 +293,17 @@ let Commands = {
     openLibrary: function cmd_openLibrary() {
         let organizer = Services.wm.getMostRecentWindow('Places:Organizer');
         if (!organizer) {
-            openDialog('chrome://browser/content/places/places.xul', '',
-                       'chrome,toolbar=yes,dialog=no,resizable', PrefCache.homeFolder);
+            var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+                                    .getService(Components.interfaces.nsIXULAppInfo);
+	        const FIREFOX_ID = "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
+            const SEAMONKEY_ID = "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}";
+            if (appInfo.ID == FIREFOX_ID) {
+                openDialog('chrome://browser/content/places/places.xul', '',
+                           'chrome,toolbar=yes,dialog=no,resizable', PrefCache.homeFolder);
+            } else if (appInfo.ID == SEAMONKEY_ID) {
+                openDialog('chrome://communicator/content/bookmarks/bookmarksManager.xul', '',
+                           'chrome,toolbar=yes,dialog=no,resizable', PrefCache.homeFolder);
+            } 
         }
         else {
             organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(PrefCache.homeFolder);
