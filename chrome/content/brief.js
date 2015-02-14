@@ -295,7 +295,7 @@ let Commands = {
         if (!organizer) {
             var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
                                     .getService(Components.interfaces.nsIXULAppInfo);
-	        const FIREFOX_ID = "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
+	    const FIREFOX_ID = "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
             const SEAMONKEY_ID = "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}";
             if (appInfo.ID == FIREFOX_ID) {
                 openDialog('chrome://browser/content/places/places.xul', '',
