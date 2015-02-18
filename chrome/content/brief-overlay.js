@@ -144,9 +144,6 @@ const Brief = {
         if (this.toolbarbutton)
             this.initUnreadCounter();
 
-        if (this.prefs.getBoolPref('hideChrome'))
-            XULBrowserWindow.inContentWhitelist.push(this.BRIEF_URL);
-
         gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
         CustomizableUI.addListener({
