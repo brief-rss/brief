@@ -58,7 +58,7 @@ const Brief = {
 
     open: function Brief_open(aInCurrentTab) {
         let loading = gBrowser.webProgress.isLoadingDocument;
-        let blank = (gBrowser.currentURI.spec == 'about:blank');
+        let blank = isBlankPageURL(gBrowser.currentURI.spec);
         let briefTab = this.getBriefTab();
 
         if (briefTab)
