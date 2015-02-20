@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "minutes">
 <!ENTITY updateIntervalHours.label "hours">
 <!ENTITY updateIntervalDays.label "days">
-<!ENTITY checkForUpdatesAfter.label "minutes">
 <!ENTITY showNotification.label "Show a notification when new items are found">
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY readingGroup.caption "Reading">
-<!ENTITY openInNewTab.label "Open Brief in a new tab">
-<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Storing">
 <!ENTITY expirationBefore.label "Remove downloaded items after">
 <!ENTITY expirationAfter.label "days">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Clear all items...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
-<!ENTITY showStatusbarIcon.label "Show statusbar icon">
-<!ENTITY showStatusbarIcon.accesskey "t">
 <!ENTITY showUnreadCounter.label "Show the number of unread items next to Brief's icon">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Sort oldest items first in unread view">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Automatically mark items as read after I see them">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY customizeGroup.caption "Appearance">
 <!ENTITY editStyleDescription.label "Customize Brief's look">
 <!ENTITY editStyleButton.label "Customize">
 <!ENTITY editStyleButton.accesskey "u">
