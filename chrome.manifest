@@ -39,3 +39,4 @@ locale  brief   en-US  chrome/locale/en-US/
 #locale  brief   tr     chrome/locale/tr/
 #locale  brief   uk-UA  chrome/locale/uk-UA/
 #locale  brief   zh-CN  chrome/locale/zh-CN/
+#locale  brief   zh-TW  chrome/locale/zh-TW/
