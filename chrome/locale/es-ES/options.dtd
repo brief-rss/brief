@@ -1,45 +1,37 @@
-<!ENTITY optionsWindow.title "Preferencias de Brief">
+<!ENTITY optionsWindow.title "Opciones de Brief">
 <!ENTITY mainPane.label "Principal">
-<!ENTITY updateGroup.caption "Actualizaciones">
+<!ENTITY refreshGroup.caption "Actualizaciones">
 <!ENTITY checkForUpdatesBefore.label "Actualizar automáticamente los canales web cada">
 <!ENTITY checkForUpdates.accesskey "A">
 <!ENTITY updateIntervalMinutes.label "minutos">
 <!ENTITY updateIntervalHours.label "horas">
 <!ENTITY updateIntervalDays.label "días">
 <!ENTITY checkForUpdatesAfter.label "minutos">
-<!ENTITY showNotification.label "Mostrar una notificación cuando se encuentren nuevos elementos">
+<!ENTITY showNotification.label "Mostrar una notificación cuando se encuentren nuevas entradas">
 <!ENTITY showNotification.accesskey "n">
-<!ENTITY behaviorGroup.caption "Comportamiento">
+<!ENTITY readingGroup.caption "Lectura">
 <!ENTITY openInNewTab.label "Abrir Brief en una pestaña nueva">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Almacenamiento">
-<!ENTITY expirationBefore.label "Eliminar los elementos descargados hace más de">
+<!ENTITY expirationBefore.label "Eliminar las entradas descargadas hace más de">
 <!ENTITY expirationAfter.label "días">
 <!ENTITY expirationCheckbox.accesskey "E">
-<!ENTITY starredItemsKept.tooltip "Los elementos en marcadores se conservarán">
+<!ENTITY starredItemsKept.tooltip "Las entradas en marcadores se conservarán">
 <!ENTITY storedEntriesBefore.label "Almacenar no más de">
-<!ENTITY storedEntriesAfter.label "elementos recientes para cada canal web">
+<!ENTITY storedEntriesAfter.label "entradas por cada canal web">
 <!ENTITY storedEntriesCheckbox.accesskey "c">
-<!ENTITY clearAllEntriesButton.label "Eliminar todos los elementos...">
+<!ENTITY clearAllEntriesButton.label "Eliminar todas las entradas…">
 <!ENTITY clearAllEntriesButton.accesskey "t">
-<!ENTITY feedsPane.label "Canales web">
-<!ENTITY folderTree.label "Carpeta contenedora de mis marcadores dinámicos:">
-<!ENTITY importOPML.label "Importar...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportar...">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Presentación">
 <!ENTITY showStatusbarIcon.label "Mostrar un icono en la barra de estado">
 <!ENTITY showStatusbarIcon.accesskey "i">
-<!ENTITY showUnreadCounter.label "Mostrar el número de elementos no leídos junto al icono de Brief">
+<!ENTITY showUnreadCounter.label "Mostrar el número de entradas no leídas junto al icono de Brief">
 <!ENTITY showUnreadCounter.accesskey "r">
-<!ENTITY sortUnreadViewOldestFirst.label "Ordenar los elementos comenzando por el más antiguo en la vista de no leídos">
+<!ENTITY sortUnreadViewOldestFirst.label "Ordenar las entradas comenzando por la más antigua en la vista de no leídas">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
-<!ENTITY autoMarkRead.label "Marcar los elementos automáticamente como leídos después de verlos">
+<!ENTITY autoMarkRead.label "Marcar las entradas automáticamente como leídas después de verlas">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "Apariencia">
-<!ENTITY shortcutsPane.label "Atajos de teclado">
-<!ENTITY editStyleDescription.label "Personalizar la apariencia de los canales web">
+<!ENTITY editStyleDescription.label "Personalizar la apariencia de Brief">
 <!ENTITY editStyleButton.label "Personalizar">
 <!ENTITY editStyleButton.accesskey "P">
 <!ENTITY styleEditor.title "Personalizar la apariencia">
@@ -47,15 +39,15 @@
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Nombre">
 <!ENTITY feedURL.label "Ubicación">
-<!ENTITY optionsGroupbox.caption "Preferencias del canal">
-<!ENTITY checkUpdatesPerFeedBefore.label "Buscar actualizaciones cada">
-<!ENTITY checkUpdatesPerFeed.accesskey "B">
-<!ENTITY expireEntriesPerFeedBefore.label "Eliminar los elementos descargados hace más de">
+<!ENTITY optionsGroupbox.caption "Opciones del canal">
+<!ENTITY checkUpdatesPerFeedBefore.label "Actualizar automáticamente cada">
+<!ENTITY checkUpdatesPerFeed.accesskey "c">
+<!ENTITY expireEntriesPerFeedBefore.label "Eliminar las entradas descargadas hace más de">
 <!ENTITY expireEntriesPerFeed.accesskey "E">
 <!ENTITY expireEntriesPerFeedAfter.label "días">
-<!ENTITY updatedEntries.label "No marcar los elementos modificados como no leídos">
+<!ENTITY updatedEntries.label "No marcar nuevamente como no leídas las entradas actualizadas">
 <!ENTITY updatedEntries.accesskey "m">
-<!ENTITY omitInUnread.label "Excluir los elementos de este canal de la cuenta global de elementos no leídos">
+<!ENTITY omitInUnread.label "Excluir de las vistas «Hoy» y «Todas las entradas»">
 <!ENTITY omitInUnread.accesskey "x">
 <!ENTITY previousFeed.label "« Anterior">
 <!ENTITY previousFeed.accesskey "A">

@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Настройки Brief">
 <!ENTITY mainPane.label "Основные">
-<!ENTITY updateGroup.caption "Обновление">
+<!ENTITY refreshGroup.caption "Обновление">
 <!ENTITY checkForUpdatesBefore.label "Проверять обновления лент каждые">
 <!ENTITY checkForUpdates.accesskey "о">
 <!ENTITY updateIntervalMinutes.label "минут(ы)">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "минут(ы)">
 <!ENTITY showNotification.label "Показывать оповещение при появлении новых записей">
 <!ENTITY showNotification.accesskey "П">
-<!ENTITY behaviorGroup.caption "Поведение">
+<!ENTITY readingGroup.caption "Чтение">
 <!ENTITY openInNewTab.label "Открывать Brief в новой вкладке">
 <!ENTITY openInNewTab.accesskey "в">
 <!ENTITY storingGroup.caption "Хранение">
@@ -17,32 +17,24 @@
 <!ENTITY expirationAfter.label "дней">
 <!ENTITY expirationCheckbox.accesskey "У">
 <!ENTITY starredItemsKept.tooltip "Отмеченные записи будут сохранены">
-<!ENTITY storedEntriesBefore.label "Хранить не больше чем">
+<!ENTITY storedEntriesBefore.label "Хранить не больше">
 <!ENTITY storedEntriesAfter.label "последних записей в каждой ленте">
 <!ENTITY storedEntriesCheckbox.accesskey "р">
 <!ENTITY clearAllEntriesButton.label "Удалить все записи…">
 <!ENTITY clearAllEntriesButton.accesskey "л">
-<!ENTITY feedsPane.label "Ленты">
-<!ENTITY folderTree.label "Папка, содержащая закладки на ленты новостей:">
-<!ENTITY importOPML.label "Импорт…">
-<!ENTITY importOPML.accesskey "И">
-<!ENTITY exportOPML.label "Экспорт…">
-<!ENTITY exportOPML.accesskey "Э">
-<!ENTITY displayPane.label "Отображение">
 <!ENTITY showStatusbarIcon.label "Показывать значок в строке состояния">
 <!ENTITY showStatusbarIcon.accesskey "з">
 <!ENTITY showUnreadCounter.label "Показывать число непрочитанных новостей возле значка">
 <!ENTITY showUnreadCounter.accesskey "ы">
-<!ENTITY sortUnreadViewOldestFirst.label "В списке непрочитанных новостей показывать старые записи в начале">
+<!ENTITY sortUnreadViewOldestFirst.label "В списке непрочитанных записей показывать старые в начале">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "о">
 <!ENTITY autoMarkRead.label "Отмечать записи прочитанными после просмотра">
 <!ENTITY autoMarkRead.accesskey "п">
 <!ENTITY customizeGroup.caption "Внешний вид">
-<!ENTITY shortcutsPane.label "Быстрый вызов">
-<!ENTITY editStyleDescription.label "Настройка внешнего вида лент">
+<!ENTITY editStyleDescription.label "Настройка внешнего вида Brief">
 <!ENTITY editStyleButton.label "Настроить">
 <!ENTITY editStyleButton.accesskey "Н">
-<!ENTITY styleEditor.title "Отредактировать пользовательский стиль">
+<!ENTITY styleEditor.title "Редактирование пользовательского стиля">
 <!ENTITY seeCustomizationTips.label "Информация о настройке внешнего вида с помощью CSS">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "Название">
@@ -50,12 +42,12 @@
 <!ENTITY optionsGroupbox.caption "Настройки лент">
 <!ENTITY checkUpdatesPerFeedBefore.label "Проверять обновления каждые">
 <!ENTITY checkUpdatesPerFeed.accesskey "о">
-<!ENTITY expireEntriesPerFeedBefore.label "Удалять загруженные записи после">
+<!ENTITY expireEntriesPerFeedBefore.label "Удалять загруженные записи через">
 <!ENTITY expireEntriesPerFeed.accesskey "У">
 <!ENTITY expireEntriesPerFeedAfter.label "дней">
-<!ENTITY updatedEntries.label "Не отмечать измененные записи прочитанными">
+<!ENTITY updatedEntries.label "Не отмечать измененные записи как непрочитанные">
 <!ENTITY updatedEntries.accesskey "Н">
-<!ENTITY omitInUnread.label "Не учитывать непрочитанные записи из этой ленты">
+<!ENTITY omitInUnread.label "Исключить эту ленту из представлений Все записи и Записи за сегодня">
 <!ENTITY omitInUnread.accesskey "ч">
 <!ENTITY previousFeed.label "« Предыдущая">
 <!ENTITY previousFeed.accesskey "П">

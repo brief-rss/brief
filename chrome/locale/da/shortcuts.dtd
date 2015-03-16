@@ -11,17 +11,18 @@
 <!ENTITY openEntry "Åbn nuværende emne">
 <!ENTITY showItem "Vis/skjul nuværende emne (i overskrift-visning)">
 <!ENTITY entries.header "Emner">
-<!ENTITY markCurrentItemRead "Marker det nuværende emne som læst/ulæst">
-<!ENTITY markVisibleRead "Marker alle emner på skærmen som læste">
+<!ENTITY markCurrentItemRead "Markér det nuværende emne som læst/ulæst">
+<!ENTITY markVisibleRead "Markér alle emner på skærmen som læste">
 <!ENTITY altN.key "Alt + N">
-<!ENTITY markAllRead "Marker alle emner som læste">
-<!ENTITY starItem "Bogmærk den nuværende emne">
+<!ENTITY markAllRead "Markér alle emner som læste">
+<!ENTITY starItem "Bogmærk det nuværende emne">
 <!ENTITY moveToTrash "Flyt nuværende emne til skraldespand">
 <!ENTITY view.header "Vis">
 <!ENTITY showAll "Vis alle emner">
 <!ENTITY showStarred "Vis bogmærkede emner">
 <!ENTITY showUnread "Vis ulæste emner">
-<!ENTITY headlinesView "Slå overskrift-visning til/fra">
+<!ENTITY headlinesView "Vis overskrifter">
+<!ENTITY fullView "Vis hele emnet">
 <!ENTITY general.header "Generelt">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

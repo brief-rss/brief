@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "今すぐフィードを更新する">
+<!ENTITY briefCtxMarkFeedsAsRead.label "全てのフィードを既読にする">
+<!ENTITY briefCtxShowUnreadCounter.label "未読の項目数を表示する">
+<!ENTITY briefCtxShowOptions.label "設定">
+<!ENTITY briefShowShortcutsMenuitem.label "キーボードショートカット">
+<!ENTITY briefImportMenuitem.label "フィードを読み込む…">
+<!ENTITY briefExportMenuitem.label "フィードを書き出す…">
+<!ENTITY briefOpenOptionsMenuitem.label "設定">
+<!ENTITY briefRefreshFeed.label "今すぐ更新する">
+<!ENTITY briefOpenWebsite.label "ウェブサイトを開く">
+<!ENTITY briefUnsubscribeFeed.label "購読を解除する">
+<!ENTITY briefEmptyFeed.label "フィードを空にする">
+<!ENTITY briefFeedSettings.label "フィードの設定">
+<!ENTITY briefRestoreTrashed.label "すべての項目を元に戻す">
+<!ENTITY briefEmptyTrash.label "ごみ箱を空にする">

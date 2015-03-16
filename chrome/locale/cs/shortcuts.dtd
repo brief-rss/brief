@@ -5,6 +5,8 @@
 <!ENTITY shiftSpace.key "Shift + Mezerník">
 <!ENTITY nextItem "Přejít na následující položku">
 <!ENTITY previousItem "Přejít na předchozí položku">
+<!ENTITY scrollDownByScreen "Posunout se dolů o šířku obrazovky">
+<!ENTITY scrollUpByScreen "Posunout se nahoru o šířku obrazovky">
 <!ENTITY enter.key "Enter">
 <!ENTITY openEntry "Otevřít aktuální položku">
 <!ENTITY showItem "Zobrazit/skrýt aktuální položku (v zobrazení záhlaví)">
@@ -20,6 +22,7 @@
 <!ENTITY showStarred "Zobrazit položky uložené do záložek">
 <!ENTITY showUnread "Zobrazit nepřečtené položky">
 <!ENTITY headlinesView "Přepnout zobrazení záhlaví">
+<!ENTITY fullView "Zobrazit úplné položky">
 <!ENTITY general.header "Obecné">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

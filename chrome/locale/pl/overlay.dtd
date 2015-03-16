@@ -1,0 +1,18 @@
+<!-- Toolbar button context menu -->
+<!ENTITY briefCtxRefreshFeeds.label "Aktualizuj kanały teraz">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Oznacz wszystkie kanały jako przeczytane">
+<!ENTITY briefCtxShowUnreadCounter.label "Wyświetlaj liczbę nieprzeczytanych wiadomości">
+<!ENTITY briefCtxShowOptions.label "Opcje">
+<!-- Options panel -->
+<!ENTITY briefShowShortcutsMenuitem.label "Pokaż skróty klawiszowe">
+<!ENTITY briefImportMenuitem.label "Importuj kanały…">
+<!ENTITY briefExportMenuitem.label "Eksportuj kanały…">
+<!ENTITY briefOpenOptionsMenuitem.label "Opcje">
+<!-- Context options panels -->
+<!ENTITY briefRefreshFeed.label "Aktualizuj teraz">
+<!ENTITY briefOpenWebsite.label "Otwórz witrynę">
+<!ENTITY briefUnsubscribeFeed.label "Usuń kanał">
+<!ENTITY briefEmptyFeed.label "Opróżnij kanał">
+<!ENTITY briefFeedSettings.label "Ustawienia kanału">
+<!ENTITY briefRestoreTrashed.label "Przywróć usunięte wiadomości">
+<!ENTITY briefEmptyTrash.label "Opróżnij kosz">

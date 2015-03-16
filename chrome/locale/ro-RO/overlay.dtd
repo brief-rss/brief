@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "Actualizează fluxurile acum">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Marchează toate fluxurile ca citite">
+<!ENTITY briefCtxShowUnreadCounter.label "Arată numărul elementelor necitite">
+<!ENTITY briefCtxShowOptions.label "Opțiuni">
+<!ENTITY briefShowShortcutsMenuitem.label "Scurtături de la tastatură">
+<!ENTITY briefImportMenuitem.label "Import fluxuri">
+<!ENTITY briefExportMenuitem.label "Export fluxuri">
+<!ENTITY briefOpenOptionsMenuitem.label "Opțiuni">
+<!ENTITY briefRefreshFeed.label "Actualizează acum">
+<!ENTITY briefOpenWebsite.label "Deschide site">
+<!ENTITY briefUnsubscribeFeed.label "Dezabonare">
+<!ENTITY briefEmptyFeed.label "Golește flux">
+<!ENTITY briefFeedSettings.label "Opțiunile fluxului">
+<!ENTITY briefRestoreTrashed.label "Restaurează toate elementele">
+<!ENTITY briefEmptyTrash.label "Golește gunoiul">

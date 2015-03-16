@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Brief seçenekleri">
 <!ENTITY mainPane.label "Genel">
-<!ENTITY updateGroup.caption "Güncelleme">
+<!ENTITY refreshGroup.caption "Tazeleniyor">
 <!ENTITY checkForUpdatesBefore.label "Beslemelerin güncellenme süresi:">
 <!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "dakika">
@@ -9,8 +9,8 @@
 <!ENTITY checkForUpdatesAfter.label "dakika">
 <!ENTITY showNotification.label "Yeni öğeler bulununca uyarı göster">
 <!ENTITY showNotification.accesskey "S">
-<!ENTITY behaviorGroup.caption "Davranış">
-<!ENTITY openInNewTab.label "Brief&apos;i yeni sekmede aç">
+<!ENTITY readingGroup.caption "Okuyor">
+<!ENTITY openInNewTab.label "Brief'i yeni sekmede aç">
 <!ENTITY openInNewTab.accesskey "A">
 <!ENTITY storingGroup.caption "Depolama">
 <!ENTITY expirationBefore.label "İndirilmiş öğeleri şu süreden sonra sil:">
@@ -22,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "N">
 <!ENTITY clearAllEntriesButton.label "Tüm öğeleri temizle...">
 <!ENTITY clearAllEntriesButton.accesskey "T">
-<!ENTITY feedsPane.label "Beslemeler">
-<!ENTITY folderTree.label "Canlı yer imlerini içeren klasör:">
-<!ENTITY importOPML.label "İçe aktar...">
-<!ENTITY importOPML.accesskey "İ">
-<!ENTITY exportOPML.label "Dışa aktar...">
-<!ENTITY exportOPML.accesskey "D">
-<!ENTITY displayPane.label "Görünüm">
 <!ENTITY showStatusbarIcon.label "Durum çubuğunda simge göster">
 <!ENTITY showStatusbarIcon.accesskey "R">
 <!ENTITY showUnreadCounter.label "Show the number of unread items next to Brief's icon">
@@ -38,12 +31,11 @@
 <!ENTITY autoMarkRead.label "Öğeleri gördükten sonra okundu olarak işaretle">
 <!ENTITY autoMarkRead.accesskey "S">
 <!ENTITY customizeGroup.caption "Dış Görünüm">
-<!ENTITY shortcutsPane.label "Shorcuts">
 <!ENTITY editStyleDescription.label "Beslemelerin görünümünü özelleştir">
 <!ENTITY editStyleButton.label "Özelleştir">
 <!ENTITY editStyleButton.accesskey "Z">
 <!ENTITY styleEditor.title "Özel stili düzenle">
-<!ENTITY seeCustomizationTips.label "CSS&apos;le görünümü özelleştirmeyi öğrenin">
+<!ENTITY seeCustomizationTips.label "CSS'le görünümü özelleştirmeyi öğrenin">
 <!ENTITY seeCustomizationTips.url "http://brief.mozdev.org/customize.html">
 <!ENTITY feedName.label "İsim">
 <!ENTITY feedURL.label "Konum">

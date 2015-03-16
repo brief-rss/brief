@@ -1,6 +1,7 @@
-<!ENTITY pageTitle "Brief">
+<!ENTITY pageTitle "Introductie van Brief">
 <!ENTITY thankYou.header "Bedankt voor het installeren van Brief">
-<!ENTITY subscribingStep1.description "Open het menu <strong>Bladwijzers</strong> en selecteer <strong>Abonneren op deze pagina</strong>.">
-<!ENTITY subscribingStep2.description "Selecteer <strong>Livebladwijzers</strong> en klik op <strong>Nu abonneren</strong>.">
-<!ENTITY subscribingStep3.description "Kies de map <strong>Feedabonnementen</strong> in het menu Bladwijzers.">
-<!ENTITY getStartedButton.label "Van start">
+<!ENTITY howToSubscribe.header "Feeds zijn de makkelijkste manier om uw favoriete websites te volgen!">
+<!ENTITY subscribingStep1.description "Open als u op de website die u wilt volgen bent het menu <strong>Bladwijzers</strong> en klik <strong>Abonneren op deze pagina</strong>.">
+<!ENTITY subscribingStep2.description "Of u kunt een koppeling naar de feed op de website zelf zoeken.">
+<!ENTITY subscribingStep3.description "Selecteer <strong>Brief</strong> en klik <strong>Nu abonneren</strong>. Dat is alles!">
+<!ENTITY getStartedButton.label "Beginnen">

@@ -21,7 +21,8 @@
 <!ENTITY showAll "Afficher tous les articles">
 <!ENTITY showStarred "Afficher seulement les articles marqués">
 <!ENTITY showUnread "Afficher seulement les articles non lus">
-<!ENTITY headlinesView "Activer / désactiver le mode d'affichage des titres">
+<!ENTITY headlinesView "Afficher les titres uniquement">
+<!ENTITY fullView "Afficher les articles en entier">
 <!ENTITY general.header "Général">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

@@ -1,15 +1,15 @@
 <!ENTITY optionsWindow.title "Brief indstillinger">
 <!ENTITY mainPane.label "Generelt">
-<!ENTITY updateGroup.caption "Opdatering">
-<!ENTITY checkForUpdatesBefore.label "Tjek feeds for opdateringer hver">
-<!ENTITY checkForUpdates.accesskey "T">
+<!ENTITY refreshGroup.caption "Genindlæsning">
+<!ENTITY checkForUpdatesBefore.label "Kontroller feeds for opdateringer hver">
+<!ENTITY checkForUpdates.accesskey "K">
 <!ENTITY updateIntervalMinutes.label "minut">
 <!ENTITY updateIntervalHours.label "time">
 <!ENTITY updateIntervalDays.label "dag">
 <!ENTITY checkForUpdatesAfter.label "minut">
 <!ENTITY showNotification.label "Vis notifikation når nye emner findes">
 <!ENTITY showNotification.accesskey "s">
-<!ENTITY behaviorGroup.caption "Opførsel">
+<!ENTITY readingGroup.caption "Læsning">
 <!ENTITY openInNewTab.label "Åbn Brief i et nyt faneblad">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Opbevaring">
@@ -22,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Ryd alle emner…">
 <!ENTITY clearAllEntriesButton.accesskey "a">
-<!ENTITY feedsPane.label "Feeds">
-<!ENTITY folderTree.label "Mappe der indeholder mine Live bogmærker:">
-<!ENTITY importOPML.label "Importer…">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Eksporter…">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Vis">
 <!ENTITY showStatusbarIcon.label "Vis statuslinjeikon">
 <!ENTITY showStatusbarIcon.accesskey "u">
 <!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner ved siden af Brief-ikonet">
@@ -38,7 +31,6 @@
 <!ENTITY autoMarkRead.label "Marker automatisk emner som læste efter jeg har set dem">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "Udseende">
-<!ENTITY shortcutsPane.label "Genveje">
 <!ENTITY editStyleDescription.label "Tilpas udseendet for feeds">
 <!ENTITY editStyleButton.label "Tilpas">
 <!ENTITY editStyleButton.accesskey "p">
@@ -48,8 +40,8 @@
 <!ENTITY feedName.label "Navn">
 <!ENTITY feedURL.label "Adresse">
 <!ENTITY optionsGroupbox.caption "Feed-indstillinger">
-<!ENTITY checkUpdatesPerFeedBefore.label "Tjek for opdateringer hver">
-<!ENTITY checkUpdatesPerFeed.accesskey "T">
+<!ENTITY checkUpdatesPerFeedBefore.label "Kontroller for opdateringer hver">
+<!ENTITY checkUpdatesPerFeed.accesskey "K">
 <!ENTITY expireEntriesPerFeedBefore.label "Fjern hentede emner efter">
 <!ENTITY expireEntriesPerFeed.accesskey "r">
 <!ENTITY expireEntriesPerFeedAfter.label "dage">

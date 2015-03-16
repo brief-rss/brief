@@ -22,6 +22,7 @@
 <!ENTITY showStarred "Mostra gli elementi associati ai segnalibri">
 <!ENTITY showUnread "Mostra gli elementi non letti">
 <!ENTITY headlinesView "Mostra/nasconde le anteprime di tutti gli elementi">
+<!ENTITY fullView "Mostra gli elementi completi">
 <!ENTITY general.header "Generali">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

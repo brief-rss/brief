@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "Genindlæs feeds nu">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Marker alle feeds som læste">
+<!ENTITY briefCtxShowUnreadCounter.label "Vis antallet af ulæste enmer">
+<!ENTITY briefCtxShowOptions.label "Indstillinger">
+<!ENTITY briefShowShortcutsMenuitem.label "Tastaturgenveje">
+<!ENTITY briefImportMenuitem.label "Importer feeds…">
+<!ENTITY briefExportMenuitem.label "Eksporter feeds…">
+<!ENTITY briefOpenOptionsMenuitem.label "Indstillinger">
+<!ENTITY briefRefreshFeed.label "Genindlæs nu">
+<!ENTITY briefOpenWebsite.label "Åbn websted">
+<!ENTITY briefUnsubscribeFeed.label "Stop abonnement">
+<!ENTITY briefEmptyFeed.label "Tøm feed">
+<!ENTITY briefFeedSettings.label "Feed-indstillinger">
+<!ENTITY briefRestoreTrashed.label "Gendan alle emner">
+<!ENTITY briefEmptyTrash.label "Tøm skraldespand">

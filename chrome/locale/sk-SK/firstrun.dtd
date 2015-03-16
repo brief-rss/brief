@@ -1,6 +1,7 @@
 <!ENTITY pageTitle "Brief">
 <!ENTITY thankYou.header "Ďakujeme za nainštalovanie Brief">
-<!ENTITY subscribingStep1.description "Otvoriť ponuku <strong>Záložky</strong> a vybrať <strong>Prihlásiť sa k odberu</strong>.">
+<!ENTITY howToSubscribe.header "Kanály sú najjednoduchší spôsob ako sledovať svoje obľúbené webové stránky!">
+<!ENTITY subscribingStep1.description "Kliknite na ikonku v paneli na zobrazenie kanála.">
 <!ENTITY subscribingStep2.description "Vyberte <strong>Aktívne záložky</strong> a kliknite na <strong>Odoberať</strong>.">
 <!ENTITY subscribingStep3.description "Vyberte priečinok <strong>Odoberané kanály</strong> v ponuke Záložky.">
 <!ENTITY getStartedButton.label "Začíname">

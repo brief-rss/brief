@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "Osveži vire zdaj">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Označi vse vire kot prebrane">
+<!ENTITY briefCtxShowUnreadCounter.label "Prikaži število neprebranih predmetov">
+<!ENTITY briefCtxShowOptions.label "Možnosti">
+<!ENTITY briefShowShortcutsMenuitem.label "Tipkovne bližnjice">
+<!ENTITY briefImportMenuitem.label "Uvozi vire …">
+<!ENTITY briefExportMenuitem.label "Izvozi vire …">
+<!ENTITY briefOpenOptionsMenuitem.label "Možnosti">
+<!ENTITY briefRefreshFeed.label "Osveži zdaj">
+<!ENTITY briefOpenWebsite.label "Odpri spletno stran">
+<!ENTITY briefUnsubscribeFeed.label "Odjavi naročnino">
+<!ENTITY briefEmptyFeed.label "Izprazni vir">
+<!ENTITY briefFeedSettings.label "Nastavitve vira">
+<!ENTITY briefRestoreTrashed.label "Obnovi vse predmete">
+<!ENTITY briefEmptyTrash.label "Izprazni koš">

@@ -1,6 +1,6 @@
-<!ENTITY optionsWindow.title "Brief – opcje">
+<!ENTITY optionsWindow.title "Brief – ustawienia">
 <!ENTITY mainPane.label "Ogólne">
-<!ENTITY updateGroup.caption "Aktualizacje">
+<!ENTITY refreshGroup.caption "Odświeżanie">
 <!ENTITY checkForUpdatesBefore.label "Sprawdzaj kanały co">
 <!ENTITY checkForUpdates.accesskey "R">
 <!ENTITY updateIntervalMinutes.label "min">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "min">
 <!ENTITY showNotification.label "Wyświetlaj powiadomienie o nowych wiadomościach">
 <!ENTITY showNotification.accesskey "M">
-<!ENTITY behaviorGroup.caption "Zachowanie">
+<!ENTITY readingGroup.caption "Czytanie">
 <!ENTITY openInNewTab.label "Otwieraj Brief w nowej karcie">
 <!ENTITY openInNewTab.accesskey "N">
 <!ENTITY storingGroup.caption "Przechowywanie">
@@ -22,14 +22,7 @@
 <!ENTITY storedEntriesCheckbox.accesskey "P">
 <!ENTITY clearAllEntriesButton.label "Usuń wszystkie wiadomości…">
 <!ENTITY clearAllEntriesButton.accesskey "U">
-<!ENTITY feedsPane.label "Kanały">
-<!ENTITY folderTree.label "Folder zawierający dynamiczne zakładki:">
-<!ENTITY importOPML.label "Importuj…">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Eksportuj…">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Widok">
-<!ENTITY showStatusbarIcon.label "Wyświetlaj ikonę rozszerzenia na pasku stanu">
+<!ENTITY showStatusbarIcon.label "Wyświetlaj ikonę rozszerzenia na pasku dodatków">
 <!ENTITY showStatusbarIcon.accesskey "A">
 <!ENTITY showUnreadCounter.label "Liczbę nieprzeczytanych wiadomości wyświetlaj za ikoną Briefa">
 <!ENTITY showUnreadCounter.accesskey "L">
@@ -38,8 +31,7 @@
 <!ENTITY autoMarkRead.label "Oznaczaj wyświetlone wiadomości jako przeczytane">
 <!ENTITY autoMarkRead.accesskey "C">
 <!ENTITY customizeGroup.caption "Wygląd">
-<!ENTITY shortcutsPane.label "Skróty">
-<!ENTITY editStyleDescription.label "Dostosuj wygląd kanałów">
+<!ENTITY editStyleDescription.label "Dostosuj wygląd Briefa">
 <!ENTITY editStyleButton.label "Dostosuj">
 <!ENTITY editStyleButton.accesskey "D">
 <!ENTITY styleEditor.title "Dostosowywanie wyglądu kanałów">
@@ -55,7 +47,7 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dniach">
 <!ENTITY updatedEntries.label "Nie oznaczaj zmienionych wiadomości jako nieprzeczytanych">
 <!ENTITY updatedEntries.accesskey "D">
-<!ENTITY omitInUnread.label "Nie dołączaj wiadomości z tego kanału do ogólnej liczby nieprzeczytanych">
+<!ENTITY omitInUnread.label "Nie dołączaj wiadomości z tego kanału do widoku „Wszystkie” i „Dzisiaj”">
 <!ENTITY omitInUnread.accesskey "Z">
 <!ENTITY previousFeed.label "« Poprzedni">
 <!ENTITY previousFeed.accesskey "P">

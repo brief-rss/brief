@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Options de Brief">
 <!ENTITY mainPane.label "Générales">
-<!ENTITY updateGroup.caption "Mises à jour">
+<!ENTITY refreshGroup.caption "Actualisation">
 <!ENTITY checkForUpdatesBefore.label "Mettre les flux à jour tou(te)s les">
 <!ENTITY checkForUpdates.accesskey "M">
 <!ENTITY updateIntervalMinutes.label "minutes">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "minutes">
 <!ENTITY showNotification.label "M'avertir si des mises à jour ont été trouvées">
 <!ENTITY showNotification.accesskey "a">
-<!ENTITY behaviorGroup.caption "Comportement">
+<!ENTITY readingGroup.caption "Lecture">
 <!ENTITY openInNewTab.label "Ouvrir Brief dans un nouvel onglet">
 <!ENTITY openInNewTab.accesskey "O">
 <!ENTITY storingGroup.caption "Enregistrement">
@@ -22,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "N">
 <!ENTITY clearAllEntriesButton.label "Supprimer tous les articles…">
 <!ENTITY clearAllEntriesButton.accesskey "t">
-<!ENTITY feedsPane.label "Flux">
-<!ENTITY folderTree.label "Dossier contenant vos marque-pages dynamiques :">
-<!ENTITY importOPML.label "Importer…">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exporter…">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Affichage">
 <!ENTITY showStatusbarIcon.label "Afficher l'icône dans la barre d'état">
 <!ENTITY showStatusbarIcon.accesskey "f">
 <!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus à côté de l'icône de Brief.">
@@ -38,8 +31,7 @@
 <!ENTITY autoMarkRead.label "Marquer les articles vus comme lus">
 <!ENTITY autoMarkRead.accesskey "v">
 <!ENTITY customizeGroup.caption "Apparence">
-<!ENTITY shortcutsPane.label "Raccourcis">
-<!ENTITY editStyleDescription.label "Personnaliser l'apparence des flux">
+<!ENTITY editStyleDescription.label "Personnaliser l'apparence de Brief">
 <!ENTITY editStyleButton.label "Personnaliser">
 <!ENTITY editStyleButton.accesskey "P">
 <!ENTITY styleEditor.title "Modifier le style personnel">

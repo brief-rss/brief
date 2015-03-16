@@ -21,7 +21,8 @@
 <!ENTITY showAll "Alle berichten weergeven">
 <!ENTITY showStarred "Bladwijzerberichten weergeven">
 <!ENTITY showUnread "Ongelezen berichten weergeven">
-<!ENTITY headlinesView "Kopteksten aan- of uitzetten">
+<!ENTITY headlinesView "Kopteksten bekijken">
+<!ENTITY fullView "Volledige berichten lezen">
 <!ENTITY general.header "Algemeen">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

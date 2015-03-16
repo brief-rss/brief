@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "立即刷新">
+<!ENTITY briefCtxMarkFeedsAsRead.label "标记所有为已读">
+<!ENTITY briefCtxShowUnreadCounter.label "显示未读项目数">
+<!ENTITY briefCtxShowOptions.label "选项">
+<!ENTITY briefShowShortcutsMenuitem.label "快捷键">
+<!ENTITY briefImportMenuitem.label "导入订阅...">
+<!ENTITY briefExportMenuitem.label "导出订阅...">
+<!ENTITY briefOpenOptionsMenuitem.label "选项">
+<!ENTITY briefRefreshFeed.label "立即刷新">
+<!ENTITY briefOpenWebsite.label "打开网站">
+<!ENTITY briefUnsubscribeFeed.label "取消订阅">
+<!ENTITY briefEmptyFeed.label "清空项目">
+<!ENTITY briefFeedSettings.label "订阅设置">
+<!ENTITY briefRestoreTrashed.label "恢复所有项目">
+<!ENTITY briefEmptyTrash.label "清空垃圾箱">

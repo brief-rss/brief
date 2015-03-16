@@ -22,6 +22,7 @@
 <!ENTITY showStarred "Amosar os elementos marcados">
 <!ENTITY showUnread "Amosar os elementos sen ler">
 <!ENTITY headlinesView "Mudar a vista de cabeceiras">
+<!ENTITY fullView "Ver todos os elementos">
 <!ENTITY general.header "Xeral">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt +D">

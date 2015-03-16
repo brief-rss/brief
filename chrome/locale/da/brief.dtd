@@ -1,33 +1,34 @@
 <!ENTITY searchBox.label "Søg">
 <!ENTITY allItemsFolder.label "Alle emner">
-<!ENTITY unreadFolder.label "Ulæste">
+<!ENTITY todayFolder.label "I dag">
 <!ENTITY starredFolder.label "Bogmærker">
 <!ENTITY trashFolder.label "Skraldespand">
-<!ENTITY headlinesCheckbox.tooltip "Brug overskrift-visning (F)">
+<!ENTITY headlinesCheckbox.tooltip "Vis overskrifter (F)">
+<!ENTITY fullViewCheckbox.tooltip "Vis hele indholdet (G)">
+<!ENTITY showAllItems.tooltip "Vis alle emner (A)">
 <!ENTITY filterUnread.tooltip "Vis kun ulæste emner (D)">
 <!ENTITY filterStarred.tooltip "Vis kun bogmærker (S)">
+<!ENTITY updateButton.label "Genindlæs">
 <!ENTITY updateButton.tooltip "Tjek alle feeds for opdateringer">
+<!ENTITY stopUpdatingButton.label "Stop">
 <!ENTITY stopUpdatingButton.tooltip "Stop tjek af feeds for opdateringer">
-<!ENTITY showOptions.tooltip "Andre Brief-indstillinger">
+<!ENTITY optionsDropdownButton.label "Indstillinger">
+<!ENTITY optionsDropdownButton.tooltip "Indstil Brief">
+<!ENTITY organizeFeeds.label "Organiser">
+<!ENTITY organizeFeeds.tooltip "Organiser feeds">
 <!ENTITY sidebarSplitter.tooltip "Dobbeltklik for at skjule sidebjælken">
 <!ENTITY revealSidebar.tooltip "Vis sidebjælken">
 <!ENTITY markViewRead.tooltip "Marker alle emner som læste (ALT + N)">
-<!ENTITY ctxMarkFeedRead.label "Marker feed som læst">
-<!ENTITY ctxMarkFeedUnread.label "Marker feed som ulæst">
-<!ENTITY ctxMarkFolderRead.label "Marker mappe som læst">
+<!ENTITY ctxMarkRead.label "Marker som læst">
 <!ENTITY ctxMarkTagRead.label "Marker mærkede emner som læste">
-<!ENTITY ctxUpdateFeed.label "Opdater feed">
-<!ENTITY ctxUpdateFolder.label "Opdater mappe">
+<!ENTITY ctxRefreshFeed.label "Genindlæs nu">
+<!ENTITY ctxRefreshFolder.label "Genindlæs nu">
 <!ENTITY ctxOpenWebsite.label "Åbn websted">
-<!ENTITY ctxDeleteFeed.label "Slet feed">
+<!ENTITY ctxUnsubscribeFeed.label "Stop abonnement">
 <!ENTITY ctxDeleteFolder.label "Slet mappe">
 <!ENTITY ctxDeleteTag.label "Slet mærke">
 <!ENTITY ctxEmptyFeed.label "Tøm feed">
 <!ENTITY ctxEmptyFolder.label "Tøm mappe">
 <!ENTITY ctxRestoreTrashed.label "Gendan alle emner">
 <!ENTITY ctxEmptyTrash.label "Tøm skraldespand">
-<!ENTITY ctxFeedProperties.label "Egenskaber">
-<!ENTITY ctxUpdateFeeds.label "Opdater feeds nu">
-<!ENTITY ctxMarkFeedsAsRead.label "Marker alle feeds som læste">
-<!ENTITY showUnreadCounter.label "Vis antallet af ulæste emner">
-<!ENTITY ctxShowOptions.label "Indstillinger">
+<!ENTITY ctxFeedSettings.label "Feed-indstillinger">

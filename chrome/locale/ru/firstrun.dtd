@@ -1,6 +1,7 @@
-<!ENTITY pageTitle "Brief">
+<!ENTITY pageTitle "Введение в Brief">
 <!ENTITY thankYou.header "Спасибо за установку Brief">
-<!ENTITY subscribingStep1.description "Откройте меню <strong>Закладки</strong> и выберите <strong>Подписаться на ленты новостей</strong>.">
-<!ENTITY subscribingStep2.description "Выберите <strong>Ленты новостей</strong> и нажмите <strong>Подписаться</strong>.">
-<!ENTITY subscribingStep3.description "Выберите папку <strong>Ленты новостей</strong> в меню Закладок.">
+<!ENTITY howToSubscribe.header "Ленты новостей - самый простой способ подписаться на любимые сайты!">
+<!ENTITY subscribingStep1.description "Находясь на сайте, на который хочется подписаться, откройте меню <strong>Закладки</strong> и нажмите <strong>Подписаться на ленты новостей</strong>.">
+<!ENTITY subscribingStep2.description "Или можно найти ссылку на ленту новостей прямо на сайте.">
+<!ENTITY subscribingStep3.description "Выберите <strong>Brief</strong> и нажмите <strong>Подписаться</strong>. Готово!">
 <!ENTITY getStartedButton.label "Краткое обучение">

@@ -22,6 +22,7 @@
 <!ENTITY showStarred "Zobraziť články pridané do záložiek">
 <!ENTITY showUnread "Zobraziť neprečítané položky">
 <!ENTITY headlinesView "Prepnúť náhľad tituliek">
+<!ENTITY fullView "Pozrieť úplné položky">
 <!ENTITY general.header "Všeobecné">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

@@ -1,33 +1,34 @@
 <!ENTITY searchBox.label "Поиск">
 <!ENTITY allItemsFolder.label "Все записи">
-<!ENTITY unreadFolder.label "Непрочитанные">
+<!ENTITY todayFolder.label "Записи за сегодня">
 <!ENTITY starredFolder.label "Отмеченные записи">
 <!ENTITY trashFolder.label "Корзина">
-<!ENTITY headlinesCheckbox.tooltip "Режим просмотра заголовков">
+<!ENTITY headlinesCheckbox.tooltip "Режим просмотра заголовков (F)">
+<!ENTITY fullViewCheckbox.tooltip "Режим просмотра полностью (G)">
+<!ENTITY showAllItems.tooltip "Показывать все записи (A)">
 <!ENTITY filterUnread.tooltip "Показывать только непрочитанное (D)">
 <!ENTITY filterStarred.tooltip "Показывать только закладки (S)">
+<!ENTITY updateButton.label "Обновить">
 <!ENTITY updateButton.tooltip "Проверить обновления для всех лент">
-<!ENTITY stopUpdatingButton.tooltip "Остановить проверку обновления">
-<!ENTITY showOptions.tooltip "Открыть настройки Brief">
+<!ENTITY stopUpdatingButton.label "Остановить">
+<!ENTITY stopUpdatingButton.tooltip "Прекратить проверку обновлений">
+<!ENTITY optionsDropdownButton.label "Настройки">
+<!ENTITY optionsDropdownButton.tooltip "Настройка параметров Brief">
+<!ENTITY organizeFeeds.label "Упорядочить">
+<!ENTITY organizeFeeds.tooltip "Упорядочить ленты">
 <!ENTITY sidebarSplitter.tooltip "Двойной клик для скрытия панели">
 <!ENTITY revealSidebar.tooltip "Показать панель">
 <!ENTITY markViewRead.tooltip "Отметить все записи как прочитанные (Alt+N)">
-<!ENTITY ctxMarkFeedRead.label "Отметить ленту как прочитанную">
-<!ENTITY ctxMarkFeedUnread.label "Отметить ленту как непрочитанную">
-<!ENTITY ctxMarkFolderRead.label "Отметить папку как прочитанную">
-<!ENTITY ctxMarkTagRead.label "Отметить закладки с метками как прочитанные">
-<!ENTITY ctxUpdateFeed.label "Обновить ленту">
-<!ENTITY ctxUpdateFolder.label "Обновить папку">
+<!ENTITY ctxMarkRead.label "Отметить как прочитанные">
+<!ENTITY ctxMarkTagRead.label "Отметить закладки с меткой как прочитанные">
+<!ENTITY ctxRefreshFeed.label "Обновить сейчас">
+<!ENTITY ctxRefreshFolder.label "Обновить сейчас">
 <!ENTITY ctxOpenWebsite.label "Открыть веб-сайт">
-<!ENTITY ctxDeleteFeed.label "Удалить ленту">
+<!ENTITY ctxUnsubscribeFeed.label "Отписаться">
 <!ENTITY ctxDeleteFolder.label "Удалить папку">
 <!ENTITY ctxDeleteTag.label "Удалить метку">
 <!ENTITY ctxEmptyFeed.label "Очистить ленту">
 <!ENTITY ctxEmptyFolder.label "Очистить папку">
-<!ENTITY ctxRestoreTrashed.label "Восстановить удалённые записи">
+<!ENTITY ctxRestoreTrashed.label "Восстановить все записи">
 <!ENTITY ctxEmptyTrash.label "Очистить Корзину">
-<!ENTITY ctxFeedProperties.label "Свойства">
-<!ENTITY ctxUpdateFeeds.label "Обновить ленты новостей">
-<!ENTITY ctxMarkFeedsAsRead.label "Отметить все ленты как прочитанные">
-<!ENTITY showUnreadCounter.label "Показывать количество непрочитанного">
-<!ENTITY ctxShowOptions.label "Настройки">
+<!ENTITY ctxFeedSettings.label "Настройки ленты">
