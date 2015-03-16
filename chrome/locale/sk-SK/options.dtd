@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Možnosti Brief">
 <!ENTITY mainPane.label "Hlavné">
-<!ENTITY updateGroup.caption "Aktualizácia">
+<!ENTITY refreshGroup.caption "Obnovovanie">
 <!ENTITY checkForUpdatesBefore.label "Kontrolovať aktualizáciu kanálov každých">
 <!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "minút">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "minút">
 <!ENTITY showNotification.label "Zobraziť upozornenie pri nájdení nového článku">
 <!ENTITY showNotification.accesskey "Z">
-<!ENTITY behaviorGroup.caption "Režim">
+<!ENTITY readingGroup.caption "Čítanie">
 <!ENTITY openInNewTab.label "Otvoriť Brief na novej karte">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Ukladanie">
@@ -22,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "p">
 <!ENTITY clearAllEntriesButton.label "Vyčistiť všetky položky...">
 <!ENTITY clearAllEntriesButton.accesskey "s">
-<!ENTITY feedsPane.label "Kanaly">
-<!ENTITY folderTree.label "Priečinok obsahujúci aktívne záložky:">
-<!ENTITY importOPML.label "Importovať...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportovať...">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Zobraziť">
 <!ENTITY showStatusbarIcon.label "Zobraziť ikonu v stavom riadku">
 <!ENTITY showStatusbarIcon.accesskey "i">
 <!ENTITY showUnreadCounter.label "Zobraziť počet neprečítaných položiek vedľa ikony Brief">
@@ -38,7 +31,6 @@
 <!ENTITY autoMarkRead.label "Pred zobrazením označiť články ako prečítané">
 <!ENTITY autoMarkRead.accesskey "z">
 <!ENTITY customizeGroup.caption "Vzhľad">
-<!ENTITY shortcutsPane.label "Klávesové skratky">
 <!ENTITY editStyleDescription.label "Prispôsobiť vzhľad kanálov">
 <!ENTITY editStyleButton.label "Prispôsobiť">
 <!ENTITY editStyleButton.accesskey "P">

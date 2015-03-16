@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Brief-opties">
 <!ENTITY mainPane.label "Hoofdvenster">
-<!ENTITY updateGroup.caption "Bijwerken">
+<!ENTITY refreshGroup.caption "Vernieuwing">
 <!ENTITY checkForUpdatesBefore.label "Elke">
 <!ENTITY checkForUpdates.accesskey "E">
 <!ENTITY updateIntervalMinutes.label "minuten">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "minuten controleren op updates voor feeds">
 <!ENTITY showNotification.label "Waarschuwing geven wanneer nieuwe berichten worden gevonden">
 <!ENTITY showNotification.accesskey "W">
-<!ENTITY behaviorGroup.caption "Gedrag">
+<!ENTITY readingGroup.caption "Lezen">
 <!ENTITY openInNewTab.label "Brief in een nieuw tabblad openen">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Opslaan">
@@ -22,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Alle berichten wissen…">
 <!ENTITY clearAllEntriesButton.accesskey "A">
-<!ENTITY feedsPane.label "Feeds">
-<!ENTITY folderTree.label "Map met mijn livebladwijzers:">
-<!ENTITY importOPML.label "Importeren…">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exporteren…">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Weergave">
 <!ENTITY showStatusbarIcon.label "Statusbalkpictogram weergeven">
 <!ENTITY showStatusbarIcon.accesskey "g">
 <!ENTITY showUnreadCounter.label "Aantal ongelezen berichten weergeven naast pictogram van Brief">
@@ -38,8 +31,7 @@
 <!ENTITY autoMarkRead.label "Berichten als gelezen markeren als ik ze heb gezien">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "Weergave">
-<!ENTITY shortcutsPane.label "Snelkoppelingen">
-<!ENTITY editStyleDescription.label "Weergave van feeds aanpassen">
+<!ENTITY editStyleDescription.label "Uiterlijk van Brief aanpassen">
 <!ENTITY editStyleButton.label "Aanpassen">
 <!ENTITY editStyleButton.accesskey "A">
 <!ENTITY styleEditor.title "Aangepaste stijl bewerken">
@@ -55,7 +47,7 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dagen">
 <!ENTITY updatedEntries.label "Gewijzigde berichten niet als ongelezen markeren">
 <!ENTITY updatedEntries.accesskey "O">
-<!ENTITY omitInUnread.label "De berichten in deze feed niet meetellen in het aantal ongelezen berichten">
+<!ENTITY omitInUnread.label "Deze feed uitsluiten van de weergaven Vandaag en Alle berichten">
 <!ENTITY omitInUnread.accesskey "m">
 <!ENTITY previousFeed.label "&lt; Vorige">
 <!ENTITY previousFeed.accesskey "V">

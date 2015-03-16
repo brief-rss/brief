@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "Beslemeleri Şimdi Tazele">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Tüm Beslemeleri Okundu Yap">
+<!ENTITY briefCtxShowUnreadCounter.label "Okunmamış Öğelerin Sayısını Göster">
+<!ENTITY briefCtxShowOptions.label "Seçenekler">
+<!ENTITY briefShowShortcutsMenuitem.label "Klavye Kısayolları">
+<!ENTITY briefImportMenuitem.label "Önemli Beslemeler...">
+<!ENTITY briefExportMenuitem.label "Beslemeleri Dışa Aktar...">
+<!ENTITY briefOpenOptionsMenuitem.label "Seçenekler">
+<!ENTITY briefRefreshFeed.label "Şimdi Tazele">
+<!ENTITY briefOpenWebsite.label "Ağ Sayfasını Aç">
+<!ENTITY briefUnsubscribeFeed.label "Üyelikten Ayrıl">
+<!ENTITY briefEmptyFeed.label "Beslemeyi Boşalt">
+<!ENTITY briefFeedSettings.label "Besleme Ayarları">
+<!ENTITY briefRestoreTrashed.label "Tüm Öğeleri Geri Al">
+<!ENTITY briefEmptyTrash.label "Çöpü Boşalt">

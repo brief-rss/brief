@@ -21,7 +21,8 @@
 <!ENTITY showAll "Arată toate elementele">
 <!ENTITY showStarred "Arată elementele marcate">
 <!ENTITY showUnread "Arată elementele necitite">
-<!ENTITY headlinesView "Comută vederea titlurilor">
+<!ENTITY headlinesView "Comută la vederea titlurilor">
+<!ENTITY fullView "Comută la vederea elementelor extinse">
 <!ENTITY general.header "General">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

@@ -1,0 +1,34 @@
+<!ENTITY searchBox.label "Išči">
+<!ENTITY allItemsFolder.label "Vsi predmeti">
+<!ENTITY todayFolder.label "Danes">
+<!ENTITY starredFolder.label "Zaznamki">
+<!ENTITY trashFolder.label "Koš">
+<!ENTITY headlinesCheckbox.tooltip "Prikaži naslove (F)">
+<!ENTITY fullViewCheckbox.tooltip "Prikaži cele predmete (G)">
+<!ENTITY showAllItems.tooltip "Prikaži vse predmete (A)">
+<!ENTITY filterUnread.tooltip "Prikaži samo neprebrane predmete (D)">
+<!ENTITY filterStarred.tooltip "Prikaži samo zaznamke (S)">
+<!ENTITY updateButton.label "Osveži">
+<!ENTITY updateButton.tooltip "Preveri vse vire za posodobitve">
+<!ENTITY stopUpdatingButton.label "Ustavi">
+<!ENTITY stopUpdatingButton.tooltip "Ustavi preverjanje virov za posodobitve">
+<!ENTITY optionsDropdownButton.label "Možnosti">
+<!ENTITY optionsDropdownButton.tooltip "Nastavi Brief">
+<!ENTITY organizeFeeds.label "Organiziraj">
+<!ENTITY organizeFeeds.tooltip "Organiziraj vire">
+<!ENTITY sidebarSplitter.tooltip "Dvokliknite za skritje stranske vrstice">
+<!ENTITY revealSidebar.tooltip "Odkrij stransko vrstico">
+<!ENTITY markViewRead.tooltip "Označi vse predmete kot prebrane (Alt+N)">
+<!ENTITY ctxMarkRead.label "Označi kot prebrano">
+<!ENTITY ctxMarkTagRead.label "Označi predmete z oznakami kot prebrane">
+<!ENTITY ctxRefreshFeed.label "Osveži zdaj">
+<!ENTITY ctxRefreshFolder.label "Osveži zdaj">
+<!ENTITY ctxOpenWebsite.label "Odpri spletno stran">
+<!ENTITY ctxUnsubscribeFeed.label "Odjavi naročnino">
+<!ENTITY ctxDeleteFolder.label "Izbriši mapo">
+<!ENTITY ctxDeleteTag.label "Izbriši oznako">
+<!ENTITY ctxEmptyFeed.label "Izprazni vir">
+<!ENTITY ctxEmptyFolder.label "Izprazni mapo">
+<!ENTITY ctxRestoreTrashed.label "Obnovi vse predmete">
+<!ENTITY ctxEmptyTrash.label "Izprazni Koš">
+<!ENTITY ctxFeedSettings.label "Nastavitve virov">

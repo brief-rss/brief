@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "Обновить ленты сейчас">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Пометить все ленты как прочитанные">
+<!ENTITY briefCtxShowUnreadCounter.label "Показывать количество непрочитанных записей">
+<!ENTITY briefCtxShowOptions.label "Настройки">
+<!ENTITY briefShowShortcutsMenuitem.label "Клавиатурные сокращения">
+<!ENTITY briefImportMenuitem.label "Импортировать ленты...">
+<!ENTITY briefExportMenuitem.label "Экспортировать ленты...">
+<!ENTITY briefOpenOptionsMenuitem.label "Настройки">
+<!ENTITY briefRefreshFeed.label "Обновить сейчас">
+<!ENTITY briefOpenWebsite.label "Открыть веб-сайт">
+<!ENTITY briefUnsubscribeFeed.label "Отписаться">
+<!ENTITY briefEmptyFeed.label "Очистить ленту">
+<!ENTITY briefFeedSettings.label "Настройки ленты">
+<!ENTITY briefRestoreTrashed.label "Восстановить все записи">
+<!ENTITY briefEmptyTrash.label "Очистить Корзину">

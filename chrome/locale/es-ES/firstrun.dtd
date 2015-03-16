@@ -1,6 +1,7 @@
-<!ENTITY pageTitle "Brief">
+<!ENTITY pageTitle "Introducción a Brief">
 <!ENTITY thankYou.header "Gracias por instalar Brief">
-<!ENTITY subscribingStep1.description "Abra el menú <strong>Marcadores</strong> y seleccione <strong>Suscribirse a esta página</strong>.">
-<!ENTITY subscribingStep2.description "Seleccione <strong>Marcadores dinámicos</strong> y haga clic en <strong>Suscribirse ahora</strong>.">
-<!ENTITY subscribingStep3.description "Seleccione la carpeta <strong>Canales web suscritos</strong> bajo menú de marcadores.">
+<!ENTITY howToSubscribe.header "Los canales web te permiten estar al día con las novedades de tus sitios web favoritos">
+<!ENTITY subscribingStep1.description "Cuando se encuentre en un sitio web que desee seguir, abra el menú <strong>Marcadores</strong> y pulse en <strong>Suscribirse a esta página</strong>.">
+<!ENTITY subscribingStep2.description "O puede buscar un enlace al canal web en el propio sitio.">
+<!ENTITY subscribingStep3.description "Seleccione <strong>Brief</strong> y entonces pulse en <strong>Suscribirse ahora</strong>. ¡Eso es todo!">
 <!ENTITY getStartedButton.label "Comenzar">

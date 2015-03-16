@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Brief オプション">
 <!ENTITY mainPane.label "メイン">
-<!ENTITY updateGroup.caption "更新中">
+<!ENTITY refreshGroup.caption "更新">
 <!ENTITY checkForUpdatesBefore.label "フィード更新の確認間隔">
 <!ENTITY checkForUpdates.accesskey "C">
 <!ENTITY updateIntervalMinutes.label "分">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "分毎に確認する">
 <!ENTITY showNotification.label "新着の項目が見つかったら通知を表示する">
 <!ENTITY showNotification.accesskey "S">
-<!ENTITY behaviorGroup.caption "動作">
+<!ENTITY readingGroup.caption "既読管理">
 <!ENTITY openInNewTab.label "Brief を新しいタブで開く">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "保管">
@@ -22,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "すべての項目を消去する...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
-<!ENTITY feedsPane.label "フィード">
-<!ENTITY folderTree.label "ライブブックマークを含むフォルダ:">
-<!ENTITY importOPML.label "取り込む...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "書き出す...">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "表示">
 <!ENTITY showStatusbarIcon.label "ステータスバーアイコンを表示する">
 <!ENTITY showStatusbarIcon.accesskey "h">
 <!ENTITY showUnreadCounter.label "未読数を Brief のアイコンに表示する">
@@ -38,7 +31,6 @@
 <!ENTITY autoMarkRead.label "項目を見たら既読にする">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "外観">
-<!ENTITY shortcutsPane.label "ショートカット">
 <!ENTITY editStyleDescription.label "フィードの外観をカスタマイズする">
 <!ENTITY editStyleButton.label "カスタマイズ">
 <!ENTITY editStyleButton.accesskey "C">

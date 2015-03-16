@@ -21,7 +21,8 @@
 <!ENTITY showAll "Wyświetl wszystkie wiadomości">
 <!ENTITY showStarred "Wyświetl wiadomości wyróżnione gwiazdką">
 <!ENTITY showUnread "Wyświetl nieprzeczytane wiadomości">
-<!ENTITY headlinesView "Przełącz widok nagłówków">
+<!ENTITY headlinesView "Widok nagłówków">
+<!ENTITY fullView "Pełny widok">
 <!ENTITY general.header "Ogólne">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

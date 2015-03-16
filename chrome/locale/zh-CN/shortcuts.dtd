@@ -1,27 +1,28 @@
 <!ENTITY shortcutsPage.title "Brief 快捷键">
 <!ENTITY or "或">
-<!ENTITY navigation.header "导航">
-<!ENTITY space.key "Space">
+<!ENTITY navigation.header "浏览">
+<!ENTITY space.key "空格">
 <!ENTITY shiftSpace.key "Shift + 空格">
 <!ENTITY nextItem "跳到下个项目">
 <!ENTITY previousItem "跳到上个项目">
-<!ENTITY scrollDownByScreen "下滚到窗口高度">
-<!ENTITY scrollUpByScreen "上滚到窗口高度">
+<!ENTITY scrollDownByScreen "下滚一屏">
+<!ENTITY scrollUpByScreen "上滚一屏">
 <!ENTITY enter.key "Enter">
-<!ENTITY openEntry "打开当前阅读的项目">
-<!ENTITY showItem "显示或隐藏当前项目（在头条阅读模式）">
+<!ENTITY openEntry "打开当前项目">
+<!ENTITY showItem "显示或隐藏当前项目内容(标题阅读模式)">
 <!ENTITY entries.header "项目">
 <!ENTITY markCurrentItemRead "标记当前项目为已读或未读">
-<!ENTITY markVisibleRead "标记所有项目为已读或未读">
+<!ENTITY markVisibleRead "标记当前显示的项目为已读">
 <!ENTITY altN.key "Alt + N">
 <!ENTITY markAllRead "标记所有项目为已读">
 <!ENTITY starItem "将当前项目加入书签">
-<!ENTITY moveToTrash "将当前阅读的项目移到垃圾箱">
+<!ENTITY moveToTrash "移除当前项目到垃圾箱">
 <!ENTITY view.header "查看">
 <!ENTITY showAll "显示所有项目">
 <!ENTITY showStarred "显示加入书签的项目">
 <!ENTITY showUnread "显示未读项目">
-<!ENTITY headlinesView "切换只显示标题">
+<!ENTITY headlinesView "标题模式">
+<!ENTITY fullView "完整模式">
 <!ENTITY general.header "常规">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

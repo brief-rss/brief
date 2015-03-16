@@ -1,6 +1,7 @@
-<!ENTITY pageTitle "Brief">
+<!ENTITY pageTitle "Présentation de Brief">
 <!ENTITY thankYou.header "Merci d'avoir installé Brief">
-<!ENTITY subscribingStep1.description "Ouvrez le menu <strong>Marque-pages</strong> et choisissez <strong>S'abonner à cette page</strong>.">
-<!ENTITY subscribingStep2.description "Choisissez <strong>Marque-pages dynamiques</strong> et cliquez sur <strong>S'abonner maintenant</strong>.">
-<!ENTITY subscribingStep3.description "Choisissez le dossier <strong>Flux</strong> dans le menu des marque-pages.">
+<!ENTITY howToSubscribe.header "Les flux vous permettent de suivre très facilement vos sites Web préférés !">
+<!ENTITY subscribingStep1.description "Lorsque vous êtes sur un site Web que vous souhaitez suivre, ouvrez le menu <strong>Marque-pages</strong> et cliquez sur <strong>S'abonner à cette page</strong>.">
+<!ENTITY subscribingStep2.description "Le site peut également fournir un lien direct vers le flux.">
+<!ENTITY subscribingStep3.description "Choisissez <strong>Brief</strong> puis cliquez sur <strong>S'abonner maintenant</strong>. C'est tout !">
 <!ENTITY getStartedButton.label "Commencer">

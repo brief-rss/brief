@@ -1,0 +1,31 @@
+<!ENTITY shortcutsPage.title "Brief - tipkovne bližnjice">
+<!ENTITY or "ali">
+<!ENTITY navigation.header "Krmarjenje">
+<!ENTITY space.key "Presledek">
+<!ENTITY shiftSpace.key "Shift + Presledek">
+<!ENTITY nextItem "Pojdi na naslednji predmet">
+<!ENTITY previousItem "Pojdi na prejšnji predmet">
+<!ENTITY scrollDownByScreen "Pomakni se dol za višino ekrana">
+<!ENTITY scrollUpByScreen "Pomakni se gor za višino ekrana">
+<!ENTITY enter.key "Enter">
+<!ENTITY openEntry "Odpri trenutni predmet">
+<!ENTITY showItem "Prikaži/Skrij trenutni predmet (v naslovnem pogledu)">
+<!ENTITY entries.header "Predmeti">
+<!ENTITY markCurrentItemRead "Označi trenutni predmet kot prebran/neprebran">
+<!ENTITY markVisibleRead "Označi vse predmete na zaslonu kot prebrane">
+<!ENTITY altN.key "Alt + N">
+<!ENTITY markAllRead "Označi vse predmete kot prebrane">
+<!ENTITY starItem "Dodaj trenutni predmet med zaznamke">
+<!ENTITY moveToTrash "Premakni trenutni predmet v Koš">
+<!ENTITY view.header "Pogled">
+<!ENTITY showAll "Prikaži vse predmete">
+<!ENTITY showStarred "Prikaži predmete dodane med zaznamke">
+<!ENTITY showUnread "Prikaži neprebrane predmete">
+<!ENTITY headlinesView "Preklopi naslovni pogled">
+<!ENTITY fullView "Pokaži cele predmete">
+<!ENTITY general.header "Splošno">
+<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
+<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY openBrief "Odpri Brief">
+<!ENTITY focusSearchbar "Osredotoči se na iskalno polje">
+<!ENTITY displayShortcuts "Prikaži seznam tipkovnih bližnjic">

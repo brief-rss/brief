@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Opțiunile Brief">
 <!ENTITY mainPane.label "General">
-<!ENTITY updateGroup.caption "Actualizare">
+<!ENTITY refreshGroup.caption "Actualizare">
 <!ENTITY checkForUpdatesBefore.label "Verifică fluxurile pentru actualizări fiecare">
 <!ENTITY checkForUpdates.accesskey "V">
 <!ENTITY updateIntervalMinutes.label "minute">
@@ -9,7 +9,7 @@
 <!ENTITY checkForUpdatesAfter.label "minute">
 <!ENTITY showNotification.label "Arată o notificare cînd elemente noi sunt găsite">
 <!ENTITY showNotification.accesskey "N">
-<!ENTITY behaviorGroup.caption "Comportament">
+<!ENTITY readingGroup.caption "Afișare">
 <!ENTITY openInNewTab.label "Deschide Brief într-o filă nouă">
 <!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Stocare">
@@ -22,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "T">
 <!ENTITY clearAllEntriesButton.label "Curăță toate elementele...">
 <!ENTITY clearAllEntriesButton.accesskey "C">
-<!ENTITY feedsPane.label "Fluxuri">
-<!ENTITY folderTree.label "Directoriu care conține Live Bookmarks:">
-<!ENTITY importOPML.label "Importă...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportă...">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Aspect">
 <!ENTITY showStatusbarIcon.label "Arată iconița în bara de stare">
 <!ENTITY showStatusbarIcon.accesskey "I">
 <!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite alături de iconița Brief">
@@ -38,7 +31,6 @@
 <!ENTITY autoMarkRead.label "Automat marchează elementele ca citite după ce le văd">
 <!ENTITY autoMarkRead.accesskey "M">
 <!ENTITY customizeGroup.caption "Aspect">
-<!ENTITY shortcutsPane.label "Scurtături">
 <!ENTITY editStyleDescription.label "Personalizează aspectul fluxurilor">
 <!ENTITY editStyleButton.label "Personalizare">
 <!ENTITY editStyleButton.accesskey "P">

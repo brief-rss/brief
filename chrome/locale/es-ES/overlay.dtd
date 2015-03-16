@@ -1,0 +1,18 @@
+<!-- Toolbar button context menu -->
+<!ENTITY briefCtxRefreshFeeds.label "Actualizar los canales web">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Marcar todas las entradas como leídas">
+<!ENTITY briefCtxShowUnreadCounter.label "Mostrar el número de entradas no leídas">
+<!ENTITY briefCtxShowOptions.label "Opciones">
+<!-- Options panel -->
+<!ENTITY briefShowShortcutsMenuitem.label "Atajos de teclado">
+<!ENTITY briefImportMenuitem.label "Importar canales web…">
+<!ENTITY briefExportMenuitem.label "Exportar canales web…">
+<!ENTITY briefOpenOptionsMenuitem.label "Opciones">
+<!-- Context options panels -->
+<!ENTITY briefRefreshFeed.label "Actualizar">
+<!ENTITY briefOpenWebsite.label "Ir al sitio web">
+<!ENTITY briefUnsubscribeFeed.label "Eliminar">
+<!ENTITY briefEmptyFeed.label "Vaciar el canal">
+<!ENTITY briefFeedSettings.label "Opciones del canal">
+<!ENTITY briefRestoreTrashed.label "Restaurar todas las entradas">
+<!ENTITY briefEmptyTrash.label "Vaciar la papelera">

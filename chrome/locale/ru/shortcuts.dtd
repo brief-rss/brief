@@ -3,8 +3,8 @@
 <!ENTITY navigation.header "Навигация">
 <!ENTITY space.key "Пробел">
 <!ENTITY shiftSpace.key "Shift + Пробел">
-<!ENTITY nextItem "Перейти к следующему">
-<!ENTITY previousItem "Вернуться к предыдущему">
+<!ENTITY nextItem "Перейти к следующей записи">
+<!ENTITY previousItem "Вернуться к предыдущей записи">
 <!ENTITY scrollDownByScreen "Прокрутить на экран вниз">
 <!ENTITY scrollUpByScreen "Прокрутить на экран вверх">
 <!ENTITY enter.key "Enter">
@@ -12,7 +12,7 @@
 <!ENTITY showItem "Показать/скрыть текущий элемент (в режиме заголовков)">
 <!ENTITY entries.header "Записи">
 <!ENTITY markCurrentItemRead "Пометить текущую запись как (не)прочитанную">
-<!ENTITY markVisibleRead "Отметить все записи на экране как прочитанные">
+<!ENTITY markVisibleRead "Пометить все записи на экране как прочитанные">
 <!ENTITY altN.key "Alt + N">
 <!ENTITY markAllRead "Отметить все записи как прочитанные">
 <!ENTITY starItem "Добавить текущую запись в закладки">
@@ -21,7 +21,8 @@
 <!ENTITY showAll "Показать все записи">
 <!ENTITY showStarred "Показать отмеченные записи">
 <!ENTITY showUnread "Показать непрочитанные записи">
-<!ENTITY headlinesView "Переключить режим просмотра заголовков">
+<!ENTITY headlinesView "Режим просмотра заголовков">
+<!ENTITY fullView "Режим просмотра полностью">
 <!ENTITY general.header "Основные">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

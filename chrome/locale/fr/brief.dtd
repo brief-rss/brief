@@ -1,33 +1,34 @@
 <!ENTITY searchBox.label "Rechercher">
 <!ENTITY allItemsFolder.label "Tous les articles">
-<!ENTITY unreadFolder.label "Non lus">
+<!ENTITY todayFolder.label "Aujourd'hui">
 <!ENTITY starredFolder.label "Marqués">
 <!ENTITY trashFolder.label "Corbeille">
-<!ENTITY headlinesCheckbox.tooltip "Afficher uniquement les titres des articles (F)">
+<!ENTITY headlinesCheckbox.tooltip "Afficher uniquement les titres (F)">
+<!ENTITY fullViewCheckbox.tooltip "Afficher les articles en entier (G)">
+<!ENTITY showAllItems.tooltip "Afficher tous les articles (A)">
 <!ENTITY filterUnread.tooltip "Afficher seulement les articles non lus (D)">
 <!ENTITY filterStarred.tooltip "Afficher seulement les articles marqués (S)">
+<!ENTITY updateButton.label "Actualiser">
 <!ENTITY updateButton.tooltip "Mettre à jour tous les flux">
+<!ENTITY stopUpdatingButton.label "Arrêter">
 <!ENTITY stopUpdatingButton.tooltip "Arrêter la mise à jour">
-<!ENTITY showOptions.tooltip "Ouvrir les options de Brief">
+<!ENTITY optionsDropdownButton.label "Options">
+<!ENTITY optionsDropdownButton.tooltip "Configurer Brief">
+<!ENTITY organizeFeeds.label "Ordonner">
+<!ENTITY organizeFeeds.tooltip "Ordonner les flux">
 <!ENTITY sidebarSplitter.tooltip "Double-cliquer pour masquer ce panneau latéral">
 <!ENTITY revealSidebar.tooltip "Afficher le panneau latéral">
 <!ENTITY markViewRead.tooltip "Marquer les articles courants comme lus (Alt + N)">
-<!ENTITY ctxMarkFeedRead.label "Marquer le flux comme lu">
-<!ENTITY ctxMarkFeedUnread.label "Marquer le flux comme non lu">
-<!ENTITY ctxMarkFolderRead.label "Marquer le dossier comme lu">
+<!ENTITY ctxMarkRead.label "Marquer comme lu">
 <!ENTITY ctxMarkTagRead.label "Marquer les articles étiquetés comme lus">
-<!ENTITY ctxUpdateFeed.label "Mettre le flux à jour">
-<!ENTITY ctxUpdateFolder.label "Mettre le dossier à jour">
+<!ENTITY ctxRefreshFeed.label "Mettre à jour maintenant">
+<!ENTITY ctxRefreshFolder.label "Mettre à jour maintenant">
 <!ENTITY ctxOpenWebsite.label "Afficher le site Web">
-<!ENTITY ctxDeleteFeed.label "Supprimer le flux">
+<!ENTITY ctxUnsubscribeFeed.label "Se désabonner">
 <!ENTITY ctxDeleteFolder.label "Supprimer le dossier">
 <!ENTITY ctxDeleteTag.label "Supprimer l'étiquette">
 <!ENTITY ctxEmptyFeed.label "Vider le flux dans la corbeille">
 <!ENTITY ctxEmptyFolder.label "Vider le dossier dans la corbeille">
 <!ENTITY ctxRestoreTrashed.label "Restaurer le contenu de la corbeille">
 <!ENTITY ctxEmptyTrash.label "Vider la corbeille">
-<!ENTITY ctxFeedProperties.label "Propriétés">
-<!ENTITY ctxUpdateFeeds.label "Mettre à jour les flux">
-<!ENTITY ctxMarkFeedsAsRead.label "Marquer tous les flux comme lus">
-<!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus">
-<!ENTITY ctxShowOptions.label "Options">
+<!ENTITY ctxFeedSettings.label "Paramètres du flux">

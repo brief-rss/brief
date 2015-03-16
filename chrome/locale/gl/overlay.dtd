@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "Actualizar agora">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Marcar todo como lido">
+<!ENTITY briefCtxShowUnreadCounter.label "Amosar o número de non lidos">
+<!ENTITY briefCtxShowOptions.label "Opcións">
+<!ENTITY briefShowShortcutsMenuitem.label "Atallos do teclado">
+<!ENTITY briefImportMenuitem.label "Importar fontes...">
+<!ENTITY briefExportMenuitem.label "Exportar fontes...">
+<!ENTITY briefOpenOptionsMenuitem.label "Opcións">
+<!ENTITY briefRefreshFeed.label "Actualizar agora">
+<!ENTITY briefOpenWebsite.label "Abrir web">
+<!ENTITY briefUnsubscribeFeed.label "Cancelar subscrición">
+<!ENTITY briefEmptyFeed.label "Baleirar a fonte">
+<!ENTITY briefFeedSettings.label "Axustes da fonte">
+<!ENTITY briefRestoreTrashed.label "Restabelecer todo">
+<!ENTITY briefEmptyTrash.label "Baleirar o lixo">

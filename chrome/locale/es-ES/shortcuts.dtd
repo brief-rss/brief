@@ -1,27 +1,28 @@
-<!ENTITY shortcutsPage.title "Brief - atajos de teclado">
+<!ENTITY shortcutsPage.title "Brief — atajos de teclado">
 <!ENTITY or "o">
 <!ENTITY navigation.header "Navegación">
 <!ENTITY space.key "Espacio">
 <!ENTITY shiftSpace.key "Mayús. + Espacio">
-<!ENTITY nextItem "Ir al elemento siguiente">
-<!ENTITY previousItem "Ir al elemento anterior">
+<!ENTITY nextItem "Ir a la entrada siguiente">
+<!ENTITY previousItem "Ir a la entrada anterior">
 <!ENTITY scrollDownByScreen "Desplazarse una pantalla hacia abajo">
 <!ENTITY scrollUpByScreen "Desplazarse una pantalla hacia arriba">
-<!ENTITY enter.key "Enter">
-<!ENTITY openEntry "Abrir el elemento actual">
-<!ENTITY showItem "Cambiar la visibilidad del elemento actual (en la vista de titulares)">
-<!ENTITY entries.header "Elementos">
-<!ENTITY markCurrentItemRead "Marcar el elemento actual como leído o no leído">
-<!ENTITY markVisibleRead "Marcar todos los elementos en pantalla como leídos">
+<!ENTITY enter.key "Intro">
+<!ENTITY openEntry "Abrir la entrada actual">
+<!ENTITY showItem "Expandir o contraer la entrada actual (sólo en la vista de titulares)">
+<!ENTITY entries.header "Entradas">
+<!ENTITY markCurrentItemRead "Cambiar el estado de leída o no leída de la entrada actual">
+<!ENTITY markVisibleRead "Marcar todas las entradas en pantalla como leídas">
 <!ENTITY altN.key "Alt + N">
-<!ENTITY markAllRead "Marcar todos los elementos como leídos">
-<!ENTITY starItem "Añadir el elemento actual a marcadores">
-<!ENTITY moveToTrash "Mover el elemento actual a la papelera">
-<!ENTITY view.header "Ver">
-<!ENTITY showAll "Mostrar todos los elementos">
-<!ENTITY showStarred "Mostrar todos los elementos en marcadores">
-<!ENTITY showUnread "Mostrar todos los elementos no leídos">
-<!ENTITY headlinesView "Conmutar la vista de titulares">
+<!ENTITY markAllRead "Marcar todas las entradas como leídas">
+<!ENTITY starItem "Añadir la entrada actual a marcadores">
+<!ENTITY moveToTrash "Mover la entrada actual a la papelera">
+<!ENTITY view.header "Visibilidad">
+<!ENTITY showAll "Mostrar todas las entradas">
+<!ENTITY showStarred "Mostrar sólo las entradas en marcadores">
+<!ENTITY showUnread "Mostrar sólo las entradas no leídas">
+<!ENTITY headlinesView "Ver sólo los titulares">
+<!ENTITY fullView "Ver las entradas completas">
 <!ENTITY general.header "General">
 <!ENTITY ctrlAltD.key "Ctrl + Alt + D">
 <!ENTITY cmdAltD.key "Cmd + Alt + D">

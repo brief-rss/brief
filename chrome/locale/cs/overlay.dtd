@@ -1,0 +1,15 @@
+<!ENTITY briefCtxRefreshFeeds.label "Obnovit kanály nyní">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Označit všechny kanály jako přečtené">
+<!ENTITY briefCtxShowUnreadCounter.label "Zobrazit počet nepřečtených položek">
+<!ENTITY briefCtxShowOptions.label "Možnosti">
+<!ENTITY briefShowShortcutsMenuitem.label "Klávesové zkratky">
+<!ENTITY briefImportMenuitem.label "Importovat kanály...">
+<!ENTITY briefExportMenuitem.label "Exportovat kanály...">
+<!ENTITY briefOpenOptionsMenuitem.label "Možnosti">
+<!ENTITY briefRefreshFeed.label "Obnovit nyní">
+<!ENTITY briefOpenWebsite.label "Otevřít webovou stránku">
+<!ENTITY briefUnsubscribeFeed.label "Odhlásit">
+<!ENTITY briefEmptyFeed.label "Vyprázdnit kanál">
+<!ENTITY briefFeedSettings.label "Nastavení kanálu">
+<!ENTITY briefRestoreTrashed.label "Obnovit všechny položky">
+<!ENTITY briefEmptyTrash.label "Vysypat koš">

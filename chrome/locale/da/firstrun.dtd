@@ -1,6 +1,7 @@
 <!ENTITY pageTitle "Brief">
 <!ENTITY thankYou.header "Tak fordi du installerede Brief">
-<!ENTITY subscribingStep1.description "Åbn menuen <strong>Bogmærker</strong> og vælg <strong>Abonner på denne side</strong>.">
-<!ENTITY subscribingStep2.description "Vælg <strong>Live bogmærker</strong> og klik <strong>Abonner nu</strong>.">
-<!ENTITY subscribingStep3.description "Vælg mappen <strong>Feeds du abonnerer på</strong> i Bogmærkemenuen.">
+<!ENTITY howToSubscribe.header "Feeds er den nemmeste måde at følge dine foretrukne websteder på!">
+<!ENTITY subscribingStep1.description "Når du er på et websted du vil følge, åbn menuen <strong>Bogmærker</strong>, og klik på <strong>Abonner på denne side</strong>.">
+<!ENTITY subscribingStep2.description "Eller du kan finde et link til feed'et på selve webstedet.">
+<!ENTITY subscribingStep3.description "Vælg <strong>Brief</strong>, og klik på <strong>Abonner nu</strong>.">
 <!ENTITY getStartedButton.label "Kom i gang">

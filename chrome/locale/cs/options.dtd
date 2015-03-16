@@ -1,6 +1,6 @@
 <!ENTITY optionsWindow.title "Možnosti rozšíření Brief">
 <!ENTITY mainPane.label "Hlavní">
-<!ENTITY updateGroup.caption "Aktualizace">
+<!ENTITY refreshGroup.caption "Obnovování">
 <!ENTITY checkForUpdatesBefore.label "Kontrolovat kanály každých">
 <!ENTITY checkForUpdates.accesskey "K">
 <!ENTITY updateIntervalMinutes.label "minut">
@@ -9,7 +9,9 @@
 <!ENTITY checkForUpdatesAfter.label "minut">
 <!ENTITY showNotification.label "Zobrazit oznámení, když jsou nalezeny nové položky">
 <!ENTITY showNotification.accesskey "Z">
-<!ENTITY behaviorGroup.caption "Chování">
+<!ENTITY readingGroup.caption "Čtení">
+<!ENTITY openInNewTab.label "Otevřít Brief v novém panelu">
+<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Ukládání">
 <!ENTITY expirationBefore.label "Odstranit stažené položky po">
 <!ENTITY expirationAfter.label "dnech">
@@ -20,13 +22,6 @@
 <!ENTITY storedEntriesCheckbox.accesskey "U">
 <!ENTITY clearAllEntriesButton.label "Smazat všechny položky...">
 <!ENTITY clearAllEntriesButton.accesskey "S">
-<!ENTITY feedsPane.label "Kanály">
-<!ENTITY folderTree.label "Složka obsahující mé Aktuální záložky:">
-<!ENTITY importOPML.label "Importovat...">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportovat...">
-<!ENTITY exportOPML.accesskey "E">
-<!ENTITY displayPane.label "Zobrazení">
 <!ENTITY showStatusbarIcon.label "Zobrazit ikonku ve stavovém řádku">
 <!ENTITY showStatusbarIcon.accesskey "s">
 <!ENTITY showUnreadCounter.label "Zobrazit počet nepřečtených položek vedle ikonky Briefu">
@@ -36,7 +31,6 @@
 <!ENTITY autoMarkRead.label "Označit položky za přečtené poté, co je uvidím">
 <!ENTITY autoMarkRead.accesskey "O">
 <!ENTITY customizeGroup.caption "Vzhled">
-<!ENTITY shortcutsPane.label "Zkratky">
 <!ENTITY editStyleDescription.label "Přizpůsobit vzhled kanálů">
 <!ENTITY editStyleButton.label "Přizpůsobit">
 <!ENTITY editStyleButton.accesskey "P">
@@ -53,6 +47,8 @@
 <!ENTITY expireEntriesPerFeedAfter.label "dnech">
 <!ENTITY updatedEntries.label "Neoznačovat změněné položky jako přečtené">
 <!ENTITY updatedEntries.accesskey "z">
+<!ENTITY omitInUnread.label "Nezahrnovat položky tohoto kanálu mezi celkový počet nepřečtených">
+<!ENTITY omitInUnread.accesskey "k">
 <!ENTITY previousFeed.label "&lt; Předchozí">
 <!ENTITY previousFeed.accesskey "P">
 <!ENTITY nextFeed.label "Následující &gt;">
