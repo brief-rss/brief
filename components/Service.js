@@ -3,6 +3,8 @@ Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/FileUtils.jsm');
 
+const Ci = Components.interfaces;
+
 IMPORT_COMMON(this);
 
 function BriefService() {
