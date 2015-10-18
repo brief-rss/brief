@@ -20,7 +20,7 @@ body {
     padding: 0 10px 10px;
 }
 
-article {
+#feed-content > article {
     display: flex;
     align-self: stretch;
     flex-direction: row;
