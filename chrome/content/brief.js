@@ -20,7 +20,7 @@ const OBSERVER_TOPICS = [
     'brief:custom-style-changed',
 ]
 
-let gCurrentView;
+var gCurrentView;
 
 
 function init() {
@@ -77,7 +77,7 @@ function unload() {
 }
 
 
-let Commands = {
+var Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
         getElement('sidebar').hidden = true;

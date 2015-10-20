@@ -1,4 +1,4 @@
-const Brief = {
+var Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
     RELEASE_NOTES_URL_PREFIX: 'http://brief.mozdev.org/versions/',
