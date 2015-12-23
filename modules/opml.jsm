@@ -30,7 +30,7 @@ let OPML = Object.freeze({
 
 let OPMLInternal = {
 
-    importOPML: function() {
+    importOPML: function*() {
         let path = this.promptForFile('open');
 
         if (path) {
@@ -177,7 +177,7 @@ let OPMLInternal = {
         return results;
     },
 
-    exportOPML: function exportOPML() {
+    exportOPML: function* exportOPML() {
         let path = this.promptForFile('save');
 
         if (path) {
@@ -209,7 +209,7 @@ let OPMLInternal = {
     }.task(),
 
 
-    addFolderToOPML: function addFolderToOPML(dataString, folder, level, isBase) {
+    addFolderToOPML: function* addFolderToOPML(dataString, folder, level, isBase) {
         level++;
 
         if (!isBase) {
@@ -267,7 +267,7 @@ let OPMLInternal = {
             dataString += '</outline>' + '\n';
         }
 
-        throw new Task.Result(dataString);
+        return dataString;
     }.task(),
 
     promptForFile: function(aMode) {

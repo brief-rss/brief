@@ -519,7 +519,7 @@ FeedView.prototype = {
      * @param aAddedEntries
      *        Array of IDs of entries.
      */
-    _onEntriesAdded: function FeedView__onEntriesAdded(aAddedEntries) {
+    _onEntriesAdded: function* FeedView__onEntriesAdded(aAddedEntries) {
         // The simplest way would be to query the current list of all entries in the view
         // and intersect it with the list of added ones. However, this is expansive for
         // large views and we try to avoid it.
@@ -727,7 +727,7 @@ FeedView.prototype = {
      *        position.
      * @returns Promise<null>
      */
-    _fillWindow: function FeedView__fillWindow(aWindowHeights) {
+    _fillWindow: function* FeedView__fillWindow(aWindowHeights) {
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = this.headlinesMode ? HEADLINES_LOAD_STEP_SIZE
                                               : LOAD_STEP_SIZE;
@@ -758,7 +758,7 @@ FeedView.prototype = {
      * @returns Promise<integer> that resolves to the actual number
      *          of entries that were loaded.
      */
-    _loadEntries: function FeedView__loadEntries(aCount) {
+    _loadEntries: function* FeedView__loadEntries(aCount) {
         this._loading = true;
 
         let dateQuery = this.getQueryCopy();
@@ -796,13 +796,13 @@ FeedView.prototype = {
             }
 
             this._loading = false;
-            throw new Task.Result(loadedEntries.length);
+            return loadedEntries.length;
         }
         else {
             this._loading = false;
             this._allEntriesLoaded = true;
 
-            throw new Task.Result(0);
+            return 0;
         }
     }.task(),
 

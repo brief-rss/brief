@@ -132,7 +132,7 @@ let FeedUpdateServiceInternal = {
         return this.fetchDelayTimer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
     },
 
-    init: function FeedUpdateServiceInternal_init() {
+    init: function* FeedUpdateServiceInternal_init() {
         Services.obs.addObserver(this, 'brief:feed-updated', false);
         Services.obs.addObserver(this, 'quit-application', false);
 
@@ -151,13 +151,13 @@ let FeedUpdateServiceInternal = {
     }.task(),
 
     // See FeedUpdateService.
-    updateAllFeeds: function FeedUpdateServiceInternal_updateAllFeeds(aInBackground) {
+    updateAllFeeds: function* FeedUpdateServiceInternal_updateAllFeeds(aInBackground) {
         yield Storage.ready;
         this.updateFeeds(Storage.getAllFeeds(), aInBackground);
     }.task(),
 
     // See FeedUpdateService.
-    updateFeeds: function FeedUpdateServiceInternal_updateFeeds(aFeeds, aInBackground) {
+    updateFeeds: function* FeedUpdateServiceInternal_updateFeeds(aFeeds, aInBackground) {
         yield Storage.ready;
 
         // Don't add the same feed be added twice.
@@ -230,7 +230,7 @@ let FeedUpdateServiceInternal = {
     },
 
 
-    updateNextFeed: function FeedUpdateServiceInternal_updateNextFeed() {
+    updateNextFeed: function* FeedUpdateServiceInternal_updateNextFeed() {
         // All feeds in the update queue may have already been requested,
         // because we don't cancel the timer until after all feeds are completed.
         let feed = this.updateQueue.shift();
@@ -329,7 +329,7 @@ let FeedUpdateServiceInternal = {
     },
 
     // See FeedUpdateService.
-    addFeed: function(aURL) {
+    addFeed: function*(aURL) {
         let fetcher = new FeedFetcher(aURL, false);
         let { document, parsedFeed } = yield fetcher.done;
         Storage.ensureHomeFolder();

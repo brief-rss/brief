@@ -195,7 +195,7 @@ let StorageInternal = {
     feedCache: null,
 
 
-    init: function StorageInternal_init() {
+    init: function* StorageInternal_init() {
         try {
             Connection = yield Sqlite.openConnection({ path: 'brief.sqlite',
                                                        sharedMemoryCache: false });
@@ -242,7 +242,7 @@ let StorageInternal = {
         }
     }.task(),
 
-    setupDatabase: function Database_setupDatabase() {
+    setupDatabase: function* Database_setupDatabase() {
         makeCol = col => col['name'] + ' ' + col['type'] +
                          ('default' in col ? ' DEFAULT ' + col['default'] : '');
         schemaString = schema => [makeCol(col) for (col of schema)].join();
@@ -270,7 +270,7 @@ let StorageInternal = {
         yield Connection.setSchemaVersion(DATABASE_VERSION);
     }.task(),
 
-    upgradeDatabase: function StorageInternal_upgradeDatabase(aPrevVersion) {
+    upgradeDatabase: function* StorageInternal_upgradeDatabase(aPrevVersion) {
         // No support for migration from versions older than 1.2.
         if (aPrevVersion < 9) {
             this.resetDatabase();
@@ -340,7 +340,7 @@ let StorageInternal = {
     }.task(),
 
     // Renames the old database file as a backup and sets up a new one.
-    resetDatabase: function StorageInternal_resetDatabase() {
+    resetDatabase: function* StorageInternal_resetDatabase() {
         yield Connection.close();
 
         let dbPath = OS.Path.join(OS.Constants.Path.profileDir, 'brief.sqlite');
@@ -372,9 +372,9 @@ let StorageInternal = {
 
 
     // See Storage.
-    getAllTags: function StorageInternal_getAllTags() {
+    getAllTags: function* StorageInternal_getAllTags() {
         let results = yield Stm.getAllTags.executeCached();
-        throw new Task.Result([row.tagName for (row of results)]);
+        return [row.tagName for (row of results)];
     }.task(),
 
 
@@ -393,7 +393,7 @@ let StorageInternal = {
      *        An object or an array of objects containing the following properties:
      *        feedID, feedURL, title, rowIndex, isFolder, parent, bookmarkID.
      */
-    addFeeds: function StorageInternal_addFeeds(aItems) {
+    addFeeds: function* StorageInternal_addFeeds(aItems) {
         let items = Array.isArray(aItems) ? aItems : [aItems];
         let paramSets = [];
 
@@ -485,7 +485,7 @@ let StorageInternal = {
      * @param aFeed [optional]
      *        The feed whose entries to expire. If not provided, all feeds are processed.
      */
-    expireEntries: function StorageInternal_expireEntries(aFeed) {
+    expireEntries: function* StorageInternal_expireEntries(aFeed) {
         let feeds = aFeed ? [aFeed] : this.getAllFeeds();
 
         let feedsWithAgeLimit = feeds.filter(f => f.entryAgeLimit);
@@ -560,7 +560,7 @@ let StorageInternal = {
     },
 
     // nsIObserver
-    observe: function StorageInternal_observe(aSubject, aTopic, aData) {
+    observe: function* StorageInternal_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'quit-application':
                 Connection.close();
@@ -643,7 +643,7 @@ let StorageInternal = {
      * @param aDontNotify
      *        Don't notify observers.
      */
-    starEntry: function StorageInternal_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
+    starEntry: function* StorageInternal_starEntry(aState, aEntryID, aBookmarkID, aDontNotify) {
         if (aState)
             yield Stm.starEntry.executeCached({ 'bookmarkID': aBookmarkID, 'entryID': aEntryID });
         else
@@ -668,7 +668,7 @@ let StorageInternal = {
      * @param aTagName
      *        Name of the tag.
      */
-    tagEntry: function StorageInternal_tagEntry(aState, aEntryID, aTagName) {
+    tagEntry: function* StorageInternal_tagEntry(aState, aEntryID, aTagName) {
         let params = { 'entryID': aEntryID, 'tagName': aTagName };
 
         if (aState) {
@@ -789,7 +789,7 @@ FeedProcessor.prototype = {
         return mappedEntry;
     },
 
-    processEntry: function FeedProcessor_processEntry(aEntry) {
+    processEntry: function* FeedProcessor_processEntry(aEntry) {
         if (aEntry.date && aEntry.date < this.newOldestEntryDate)
             this.newOldestEntryDate = aEntry.date;
 
@@ -871,7 +871,7 @@ FeedProcessor.prototype = {
         })
     },
 
-    executeAndNotify: function FeedProcessor_executeAndNotify() {
+    executeAndNotify: function* FeedProcessor_executeAndNotify() {
         let insertedEntries = [];
 
         if (this.insertEntryParamSets.length) {
@@ -1039,12 +1039,12 @@ Query.prototype = {
      *
      * @returns Promise<boolean>
      */
-    hasMatches: function Query_hasMatches() {
+    hasMatches: function* Query_hasMatches() {
         let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
 
         let results = yield Connection.execute(sql);
 
-        throw new Task.Result(results[0].getResultByName('found'));
+        return results[0].getResultByName('found');
     }.task(),
 
     /**
@@ -1053,7 +1053,7 @@ Query.prototype = {
      *
      * @returns Promise<array> Array of entry IDs.
      */
-    getEntries: function Query_getEntries() {
+    getEntries: function* Query_getEntries() {
         let sql = 'SELECT entries.id ' + this._getQueryString(true);
 
         let IDs = [];
@@ -1061,7 +1061,7 @@ Query.prototype = {
             row => IDs.push(row.getResultByName('id'))
         )
 
-        throw new Task.Result(IDs);
+        return IDs;
     }.task(),
 
 
@@ -1073,7 +1073,7 @@ Query.prototype = {
      *          match columns in the database table, with the exception of "read"
      *          and "markedUnreadOnUpdate".
      */
-    getFullEntries: function Query_getFullEntries() {
+    getFullEntries: function* Query_getFullEntries() {
         let fields_entries = ['entries.' + col.name for (col of ENTRIES_TABLE_SCHEMA)];
         let fields_entries_text = ['entries_text.' + col.name for (col of ENTRIES_TEXT_TABLE_SCHEMA)];
         let sql = 'SELECT ' + fields_entries.concat(fields_entries_text).join() + this._getQueryString(true, true);
@@ -1092,7 +1092,7 @@ Query.prototype = {
             entries.push(entry);
         })
 
-        throw new Task.Result(entries);
+        return entries;
     }.task(),
 
 
@@ -1105,7 +1105,7 @@ Query.prototype = {
      *        Don't include multiple entries with the same value.
      * @returns Promise<array> Array of values of the requested property.
      */
-    getProperty: function Query_getProperty(aPropertyName, aDistinct) {
+    getProperty: function* Query_getProperty(aPropertyName, aDistinct) {
         switch (aPropertyName) {
             case 'content':
             case 'title':
@@ -1128,7 +1128,7 @@ Query.prototype = {
                 values.push(value);
         })
 
-        throw new Task.Result(values);
+        return values;
     }.task(),
 
 
@@ -1137,7 +1137,7 @@ Query.prototype = {
      *
      * @returns Promise<number>
      */
-    getEntryCount: function Query_getEntryCount() {
+    getEntryCount: function* Query_getEntryCount() {
         // Optimization: don't sort.
         let tempOrder = this.sortOrder;
         this.sortOrder = undefined;
@@ -1148,7 +1148,7 @@ Query.prototype = {
 
         let results = yield Connection.execute(sql);
 
-        throw new Task.Result(results[0].getResultByName('count'));
+        return results[0].getResultByName('count');
     }.task(),
 
 
@@ -1160,7 +1160,7 @@ Query.prototype = {
      *          feeds <array <string>>: list of distinct feedIDs
      *          tags <array <string>>:  list of distinct tags
      */
-    getEntryList: function Query_getEntryList() {
+    getEntryList: function* Query_getEntryList() {
         let list = {
             entries: [],
             feeds: [],
@@ -1186,7 +1186,7 @@ Query.prototype = {
             }
         })
 
-        throw new Task.Result(list);
+        return list;
     }.task(),
 
 
@@ -1197,7 +1197,7 @@ Query.prototype = {
      *        New state of entries (TRUE for read, FALSE for unread).
      * @returns Promise<null>
      */
-    markEntriesRead: function Query_markEntriesRead(aState) {
+    markEntriesRead: function* Query_markEntriesRead(aState) {
         // Try not to include entries which already have the desired state,
         // but we can't omit them if a specific range of the selected entries
         // is meant to be marked.
@@ -1230,7 +1230,7 @@ Query.prototype = {
      *        The new deleted state (as defined by constants in Storage).
      * @returns Promise<null>
      */
-    deleteEntries: function Query_deleteEntries(aState) {
+    deleteEntries: function* Query_deleteEntries(aState) {
         let list = yield this.getEntryList();
         if (list.entries.length) {
             let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
@@ -1255,7 +1255,7 @@ Query.prototype = {
      *        New state of entries. TRUE to bookmark, FALSE to unbookmark.
      * @returns Promise<null>
      */
-    bookmarkEntries: function Query_bookmarkEntries(aState) {
+    bookmarkEntries: function* Query_bookmarkEntries(aState) {
         let transactions = [];
 
         for (let entry of yield this.getFullEntries()) {
@@ -1297,7 +1297,7 @@ Query.prototype = {
      *
      * @returns Promise<null>
      */
-    verifyBookmarksAndTags: function Query_verifyBookmarksAndTags() {
+    verifyBookmarksAndTags: function* Query_verifyBookmarksAndTags() {
         for (let entry of yield this.getFullEntries()) {
             let uri = Utils.newURI(entry.entryURL);
             if (!uri)
@@ -1512,7 +1512,7 @@ let BookmarkObserver = {
     },
 
     // nsINavBookmarkObserver
-    onItemAdded: function BookmarkObserver_onItemAdded(aItemID, aParentID, aIndex, aItemType,
+    onItemAdded: function* BookmarkObserver_onItemAdded(aItemID, aParentID, aIndex, aItemType,
                                                        aURI, aTitle, aDateAdded) {
         if (aItemType == Bookmarks.TYPE_FOLDER && Utils.isInHomeFolder(aParentID)) {
             this.delayedLivemarksSync();
@@ -1537,7 +1537,7 @@ let BookmarkObserver = {
 
 
     // nsINavBookmarkObserver
-    onItemRemoved: function BookmarkObserver_onItemRemoved(aItemID, aParentID, aIndex, aItemType, aURI) {
+    onItemRemoved: function* BookmarkObserver_onItemRemoved(aItemID, aParentID, aIndex, aItemType, aURI) {
         if (Utils.isLivemarkStored(aItemID) || aItemID == StorageInternal.homeFolderID) {
             this.delayedLivemarksSync();
             return;
@@ -1588,7 +1588,7 @@ let BookmarkObserver = {
     },
 
     // nsINavBookmarkObserver
-    onItemChanged: function BookmarkObserver_onItemChanged(aItemID, aProperty,
+    onItemChanged: function* BookmarkObserver_onItemChanged(aItemID, aProperty,
                                                            aIsAnnotationProperty, aNewValue,
                                                            aLastModified, aItemType, aParentID) {
         switch (aProperty) {
@@ -1646,7 +1646,7 @@ let BookmarkObserver = {
      * @param aNewName
      *        New name of the tag folder, i.e. new name of the tag.
      */
-    renameTag: function BookmarkObserver_renameTag(aTagFolderID, aNewName) {
+    renameTag: function* BookmarkObserver_renameTag(aTagFolderID, aNewName) {
         // Get bookmarks in the renamed tag folder.
         let options = Places.history.getNewQueryOptions();
         let query = Places.history.getNewQuery();
@@ -1687,7 +1687,7 @@ let BookmarkObserver = {
  * Synchronizes the list of feeds stored in the database with
  * the livemarks available in the Brief's home folder.
  */
-let LivemarksSync = function LivemarksSync() {
+let LivemarksSync = function* LivemarksSync() {
     if (!this.checkHomeFolder())
         return;
 
@@ -1789,7 +1789,7 @@ LivemarksSync.prototype = {
      *        Array to which to append found items.
      * @returns Promise<null>
      */
-    traversePlacesQueryResults: function BookmarksSync_traversePlacesQueryResults(aContainer, aLivemarks) {
+    traversePlacesQueryResults: function* BookmarksSync_traversePlacesQueryResults(aContainer, aLivemarks) {
         aContainer.containerOpen = true;
 
         for (let i = 0; i < aContainer.childCount; i++) {
@@ -2056,9 +2056,9 @@ let Stm = {
 
 let Utils = {
 
-    getTagsForEntry: function getTagsForEntry(aEntryID) {
+    getTagsForEntry: function* getTagsForEntry(aEntryID) {
         let results = yield Stm.getTagsForEntry.executeCached({ entryID: aEntryID });
-        throw new Task.Result([row.tagName for (row of results)]);
+        return [row.tagName for (row of results)];
     }.task(),
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
@@ -2074,14 +2074,14 @@ let Utils = {
         return !!Utils.getFeedByBookmarkID(aItemID);
     },
 
-    getEntriesByURL: function getEntriesByURL(aURL) {
+    getEntriesByURL: function* getEntriesByURL(aURL) {
         let results = yield Stm.selectEntriesByURL.executeCached({ url: aURL });
-        throw new Task.Result([row.id for (row of results)]);
+        return [row.id for (row of results)];
     }.task(),
 
-    getEntriesByBookmarkID: function getEntriesByBookmarkID(aID) {
+    getEntriesByBookmarkID: function* getEntriesByBookmarkID(aID) {
         let results = yield Stm.selectEntriesByBookmarkID.executeCached({ bookmarkID: aID });
-        throw new Task.Result([row.id for (row of results)]);
+        return [row.id for (row of results)];
     }.task(),
 
     newURI: function(aSpec) {
@@ -2098,9 +2098,9 @@ let Utils = {
         return (Bookmarks.getItemType(aItemID) === Bookmarks.TYPE_BOOKMARK);
     },
 
-    isNormalBookmark: function Utils_isNormalBookmark(aItemID) {
+    isNormalBookmark: function* Utils_isNormalBookmark(aItemID) {
         let parent = Bookmarks.getFolderIdForItem(aItemID);
-        throw new Task.Result(!Utils.isTagFolder(parent) && !(yield Utils.isLivemark(parent)));
+        return !Utils.isTagFolder(parent) && !(yield Utils.isLivemark(parent));
     }.task(),
 
     isLivemark: function Utils_isLivemark(aItemID) {

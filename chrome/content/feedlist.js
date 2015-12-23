@@ -82,7 +82,7 @@ let ViewList = {
         gCurrentView = new FeedView(title, query);
     },
 
-    refreshItem: function ViewList_refreshItem(aItemID) {
+    refreshItem: function* ViewList_refreshItem(aItemID) {
         let query = this.getQueryForView(aItemID);
         query.read = false;
 
@@ -161,7 +161,7 @@ let TagList = {
      * @param aPossiblyRemoved Indicates that there may be no remaining entries with
      *                         the tag.
      */
-    refreshTags: function TagList_refreshTags(aTags, aPossiblyAdded, aPossiblyRemoved) {
+    refreshTags: function* TagList_refreshTags(aTags, aPossiblyAdded, aPossiblyRemoved) {
         if (!this.ready)
             return;
 
@@ -189,7 +189,7 @@ let TagList = {
         }
     }.task(),
 
-    _rebuild: function TagList__rebuild() {
+    _rebuild: function* TagList__rebuild() {
         while (this._listbox.hasChildNodes())
             this._listbox.removeChild(this._listbox.lastChild);
 
@@ -215,7 +215,7 @@ let TagList = {
         this.ready = true;
     }.task(),
 
-    _refreshLabel: function TagList__refreshLabel(aTagName) {
+    _refreshLabel: function* TagList__refreshLabel(aTagName) {
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             tags: [aTagName],
@@ -309,7 +309,7 @@ let FeedList = {
         }
     },
 
-    _refreshLabel: function FeedList__refreshLabel(aFeed) {
+    _refreshLabel: function* FeedList__refreshLabel(aFeed) {
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             folders: aFeed.isFolder ? [aFeed.feedID] : undefined,
@@ -632,7 +632,7 @@ let TagListContextMenu = {
         query.markEntriesRead(true);
     },
 
-    deleteTag: function TagListContextMenu_deleteTag() {
+    deleteTag: function* TagListContextMenu_deleteTag() {
         let taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
                              getService(Ci.nsITaggingService);
 
