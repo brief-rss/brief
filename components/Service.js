@@ -8,7 +8,9 @@ IMPORT_COMMON(this);
 function BriefService() {
     // Initialize modules.
     Components.utils.import('resource://brief/Storage.jsm');
+    Storage.init();
     Components.utils.import('resource://brief/FeedUpdateService.jsm');
+    FeedUpdateService.init();
 
     // Register the custom CSS file under a resource URI.
     let resourceProtocolHandler = Services.io.getProtocolHandler('resource')

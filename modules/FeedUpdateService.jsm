@@ -90,6 +90,13 @@ const FeedUpdateService = Object.freeze({
      */
     addFeed: function(aURL) {
         return FeedUpdateServiceInternal.addFeed(aURL);
+    },
+
+    /**
+     * Initialize the feed update subsystem
+     */
+    init: function() {
+        return FeedUpdateServiceInternal.init();
     }
 })
 
@@ -594,6 +601,3 @@ FaviconFetcher.prototype = {
                                           [Ci.nsIProgressEventSink])
 
 }
-
-
-FeedUpdateServiceInternal.init();

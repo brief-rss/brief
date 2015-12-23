@@ -173,6 +173,13 @@ const Storage = Object.freeze({
 
     ensureHomeFolder: function() {
         return StorageInternal.ensureHomeFolder();
+    },
+
+    /**
+     * Initialize the storage subsystem
+     */
+    init: function() {
+        return StorageInternal.init();
     }
 
 })
@@ -2191,6 +2198,3 @@ let Utils = {
     }
 
 }
-
-
-StorageInternal.init();
