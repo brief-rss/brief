@@ -2171,7 +2171,7 @@ let Utils = {
         // doesn't handle military timezone codes, even though they are part of RFC822.
         // We can fix this by manually replacing the military timezone code with the actual
         // timezone.
-        if (date.toString().match('invalid','i')) {
+        if (date.toString().match(/invalid/i)) {
             let timezoneCodes = aDateString.match(/\s[a-ik-zA-IK-Z]$/);
             if (timezoneCodes) {
                 let timezoneCode = timezoneCodes[0];
@@ -2183,7 +2183,7 @@ let Utils = {
             }
 
             // If the date is still invalid, just use the current date.
-            if (date.toString().match('invalid','i'))
+            if (date.toString().match(/invalid/i))
                 date = new Date();
         }
 
