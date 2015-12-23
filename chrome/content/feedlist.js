@@ -586,10 +586,10 @@ let ViewListContextMenu = {
 
     targetItem: null,
 
-    get targetIsAllItemsFolder() this.targetItem.id == 'all-items-folder',
-    get targetIsTodayFolder()   this.targetItem.id == 'today-folder',
-    get targetIsStarredFolder()  this.targetItem.id == 'starred-folder',
-    get targetIsTrashFolder()    this.targetItem.id == 'trash-folder',
+    get targetIsAllItemsFolder() { return this.targetItem.id == 'all-items-folder' },
+    get targetIsTodayFolder()   { return this.targetItem.id == 'today-folder' },
+    get targetIsStarredFolder()  { return this.targetItem.id == 'starred-folder' },
+    get targetIsTrashFolder()    { return this.targetItem.id == 'trash-folder' },
 
     init: function ViewListContextMenu_init() {
         this.targetItem = ViewList.selectedItem;

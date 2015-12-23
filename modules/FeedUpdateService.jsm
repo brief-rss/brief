@@ -582,10 +582,10 @@ FaviconFetcher.prototype = {
         this._channel = aNewChannel;
     },
 
-    getInterface: function(aIID) this.QueryInterface(aIID),                 // nsIInterfaceRequestor
-    confirmUnknownIssuer: function(aSocketInfo, aCert, aCertAddType) false, // nsIBadCertListener
-    confirmMismatchDomain: function(aSocketInfo, aTargetURL, aCert) false,
-    confirmCertExpired: function(aSocketInfo, aCert) false,
+    getInterface: function(aIID) { return this.QueryInterface(aIID) },                 // nsIInterfaceRequestor
+    confirmUnknownIssuer: function(aSocketInfo, aCert, aCertAddType) { return false }, // nsIBadCertListener
+    confirmMismatchDomain: function(aSocketInfo, aTargetURL, aCert) { return false },
+    confirmCertExpired: function(aSocketInfo, aCert) { return false },
     notifyCrlNextupdate: function(aSocketInfo, aTargetURL, aCert) { },
     onRedirect: function(aChannel, aNewChannel) { },                        // nsIHttpEventSink
     onProgress: function(aRequest, aContext, aProgress, aProgressMax) { },  // nsIProgressEventSink

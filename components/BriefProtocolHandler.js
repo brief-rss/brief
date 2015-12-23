@@ -29,7 +29,7 @@ BriefProtocolHandler.prototype = {
                    Ci.nsIProtocolHandler.URI_DOES_NOT_RETURN_DATA,
 
     // nsIProtocolHandler
-    allowPort: function(aPort, aScheme) false,
+    allowPort: function(aPort, aScheme) { return false },
 
     // nsIProtocolHandler
     newChannel: function(aURI) {

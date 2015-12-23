@@ -188,7 +188,7 @@ const Storage = Object.freeze({
 let StorageInternal = {
 
     // See Storage.
-    get ready() this.deferredReady.promise,
+    get ready() { return this.deferredReady.promise },
 
     deferredReady: Promise.defer(),
 
@@ -1854,10 +1854,10 @@ function Statement(aSQL, aResultsColumns = null) {
 Statement.prototype = {
 
     // See OpenedConnection.execute() in Sqlite.jsm.
-    execute: function(aParams, aOnRow) this._doExecute(false, aParams, aOnRow),
+    execute: function(aParams, aOnRow) { return this._doExecute(false, aParams, aOnRow) },
 
     // See OpenedConnection.executeCached() in Sqlite.jsm.
-    executeCached: function(aParams, aOnRow) this._doExecute(true, aParams, aOnRow),
+    executeCached: function(aParams, aOnRow) { return this._doExecute(true, aParams, aOnRow) },
 
     _doExecute: function Statement__doExecute(aCached, aParams, aOnRow) {
         let onRow = aOnRow && this.resultsColumns ? row => aOnRow(this._mapRow(row))

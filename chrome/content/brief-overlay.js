@@ -7,9 +7,9 @@ var Brief = {
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/brief-icon-16.png',
 
-    get statusCounter() document.getElementById('brief-status-counter'),
+    get statusCounter() { return document.getElementById('brief-status-counter') },
 
-    get toolbarbutton() document.getElementById('brief-button'),
+    get toolbarbutton() { return document.getElementById('brief-button') },
 
     get prefs() {
         delete this.prefs;
@@ -182,13 +182,13 @@ var Brief = {
     },
 
 
-    onEntriesAdded: function(aEntryList) this.refreshUI(),
+    onEntriesAdded: function(aEntryList) { return this.refreshUI() },
 
-    onEntriesUpdated: function(aEntryList) this.refreshUI(),
+    onEntriesUpdated: function(aEntryList) { return this.refreshUI() },
 
-    onEntriesMarkedRead: function(aEntryList, aState) this.refreshUI(),
+    onEntriesMarkedRead: function(aEntryList, aState) { return this.refreshUI() },
 
-    onEntriesDeleted: function(aEntryList, aState) this.refreshUI(),
+    onEntriesDeleted: function(aEntryList, aState) { return this.refreshUI() },
 
     initUnreadCounter: function() {
         let showCounter = this.prefs.getBoolPref('showUnreadCounter');

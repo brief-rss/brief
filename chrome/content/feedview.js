@@ -78,7 +78,7 @@ FeedView.prototype = {
         return viewMode == 1;
     },
 
-    get selectedEntry() this.__selectedEntry || null,
+    get selectedEntry() { return this.__selectedEntry || null },
 
     // Ordered list of EntryView objects of entries that have been loaded.
     entryViews: [],
@@ -106,22 +106,22 @@ FeedView.prototype = {
     _fixedStarred: false,
 
 
-    get browser() getElement('feed-view'),
+    get browser() { return getElement('feed-view') },
 
-    get document() this.browser.contentDocument,
+    get document() { return this.browser.contentDocument },
 
-    get window() this.document.defaultView,
+    get window() { return this.document.defaultView },
 
-    get feedContent() this.document.getElementById('feed-content'),
+    get feedContent() { return this.document.getElementById('feed-content') },
 
 
-    getEntryIndex: function(aEntry) this._loadedEntries.indexOf(aEntry),
+    getEntryIndex: function(aEntry) { return this._loadedEntries.indexOf(aEntry) },
 
-    getEntryView:  function(aEntry) this._entryViews[this.getEntryIndex(aEntry)],
+    getEntryView:  function(aEntry) { return this._entryViews[this.getEntryIndex(aEntry)] },
 
-    isEntryLoaded: function(aEntry) this.getEntryIndex(aEntry) !== -1,
+    isEntryLoaded: function(aEntry) { return this.getEntryIndex(aEntry) !== -1 },
 
-    get lastLoadedEntry() this._loadedEntries[this._loadedEntries.length - 1],
+    get lastLoadedEntry() { return this._loadedEntries[this._loadedEntries.length - 1] },
 
 
     // Query that selects all entries contained by the view.
