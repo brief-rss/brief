@@ -710,6 +710,8 @@ FeedView.prototype = {
 
             let lastSelectedEntry = this.selectedEntry;
             this.__selectedEntry = null;
+            if (this._loadedEntries.length == 0)
+                return;
             if (lastSelectedEntry != this._loadedEntries[0] && this.isEntryLoaded(lastSelectedEntry))
                 this.selectEntry(lastSelectedEntry, true);
             else
@@ -743,8 +745,9 @@ FeedView.prototype = {
      *        See FeedView.fillWindow().
      */
     enoughEntriesPreloaded: function FeedView__enoughEntriesPreloaded(aWindowHeights) {
-        return this.window.scrollMaxY - this.window.pageYOffset >
-               this.window.innerHeight * aWindowHeights
+        return this._loadedEntries.length > 0 &&
+               (this.window.scrollMaxY - this.window.pageYOffset >
+                this.window.innerHeight * aWindowHeights)
                && this.getEntryInScreenCenter() != this.lastLoadedEntry;
     },
 
