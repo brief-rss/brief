@@ -21,9 +21,9 @@ const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 
 
-const FEEDS_COLUMNS = [for (col of FEEDS_TABLE_SCHEMA) col.name];
-const ENTRIES_COLUMNS = [for (col of ENTRIES_TABLE_SCHEMA) col.name].concat(
-                        [for (col of ENTRIES_TEXT_TABLE_SCHEMA) col.name]);
+const FEEDS_COLUMNS = FEEDS_TABLE_SCHEMA.map((col) => col.name);
+const ENTRIES_COLUMNS = ENTRIES_TABLE_SCHEMA.map((col) => col.name).concat(
+                        ENTRIES_TEXT_TABLE_SCHEMA.map((col) => col.name));
 
 
 XPCOMUtils.defineLazyModuleGetter(this, 'FeedUpdateService', 'resource://brief/FeedUpdateService.jsm');
@@ -238,7 +238,7 @@ let StorageInternal = {
     setupDatabase: function Database_setupDatabase() {
         makeCol = col => col['name'] + ' ' + col['type'] +
                          ('default' in col ? ' DEFAULT ' + col['default'] : '');
-        schemaString = schema => [for (col of schema) makeCol(col)].join();
+        schemaString = schema => schema.map((col) => makeCol(col)).join();
 
         let sqlStrings = [
             'CREATE TABLE feeds (' + schemaString(FEEDS_TABLE_SCHEMA) + ') ',
@@ -367,7 +367,7 @@ let StorageInternal = {
     // See Storage.
     getAllTags: function StorageInternal_getAllTags() {
         let results = yield Stm.getAllTags.executeCached();
-        throw new Task.Result([for (row of results) row.tagName]);
+        throw new Task.Result(results.map((row) => row.tagName));
     }.task(),
 
 
@@ -415,7 +415,8 @@ let StorageInternal = {
 
         yield Stm.insertFeed.executeCached(paramSets);
 
-        let feeds = [for (item of items) if (!item.isFolder) this.getFeed(item.feedID)];
+        let feeds = items.filter((item) => !item.isFolder)
+                .map((item) => this.getFeed(item.feedID));
         FeedUpdateService.updateFeeds(feeds);
     }.task(),
 
@@ -504,7 +505,7 @@ let StorageInternal = {
             let expirationAge = Prefs.getIntPref('database.entryExpirationAge');
 
             let query = new Query({
-                feeds: [for (feed of feedsWithoutAgeLimit) feed.feedID],
+                feeds: feedsWithoutAgeLimit.map((feed) => feed.feedID),
                 deleted: Storage.ENTRY_STATE_NORMAL,
                 starred: false,
                 endDate: Date.now() - expirationAge * 86400000
@@ -1067,8 +1068,8 @@ Query.prototype = {
      *          and "markedUnreadOnUpdate".
      */
     getFullEntries: function Query_getFullEntries() {
-        let fields_entries = [for (col of ENTRIES_TABLE_SCHEMA) 'entries.' + col.name];
-        let fields_entries_text = [for (col of ENTRIES_TEXT_TABLE_SCHEMA) 'entries_text.' + col.name];
+        let fields_entries = ENTRIES_TABLE_SCHEMA.map((col) => 'entries.' + col.name);
+        let fields_entries_text = ENTRIES_TEXT_TABLE_SCHEMA.map((col) => 'entries_text.' + col.name);
         let sql = 'SELECT ' + fields_entries.concat(fields_entries_text).join() + this._getQueryString(true, true);
 
         let entries = [];
@@ -1263,8 +1264,11 @@ Query.prototype = {
                 transactions.push(trans);
             }
             else {
-                let bookmarks = [for (b of Bookmarks.getBookmarkIdsForURI(uri, {}))
-                                 if (yield Utils.isNormalBookmark(b)) b];
+                let bookmarks = [];
+                for (let b of Bookmarks.getBookmarkIdsForURI(uri, {})) {
+                    if (yield Utils.isNormalBookmark(b))
+                        bookmarks.push(b);
+                }
                 if (bookmarks.length) {
                     for (let i = bookmarks.length - 1; i >= 0; i--)
                         transactions.push(new PlacesRemoveItemTransaction(bookmarks[i]));
@@ -1299,7 +1303,11 @@ Query.prototype = {
             let allBookmarks = Bookmarks.getBookmarkIdsForURI(uri, {});
 
             // Verify bookmarks.
-            let normalBookmarks = [for (b of allBookmarks) if (yield Utils.isNormalBookmark(b)) b];
+            let normalBookmarks = [];
+            for (let b of allBookmarks) {
+                if (yield Utils.isNormalBookmark(b))
+                    normalBookmarks.push(b);
+            }
             if (entry.starred && !normalBookmarks.length)
                 StorageInternal.starEntry(false, entry.id);
             else if (!entry.starred && normalBookmarks.length)
@@ -1558,8 +1566,11 @@ let BookmarkObserver = {
             // its bookmarkID to point to that bookmark.
             if (entries.length) {
                 let uri = Utils.newURI(aURI.spec);
-                var bookmarks = [for (b of Bookmarks.getBookmarkIdsForURI(uri, {}))
-                                 if (yield Utils.isNormalBookmark(b)) b];
+                var bookmarks = [];
+                for (let b of Bookmarks.getBookmarkIdsForURI(uri, {})) {
+                    if (yield Utils.isNormalBookmark(b))
+                        bookmarks.push(b);
+                }
             }
 
             for (let entry of entries) {
@@ -1894,7 +1905,7 @@ let Stm = {
     },
 
     get changeFeedProperties() {
-        let cols = [for (col of FEEDS_COLUMNS) col + ' = :' + col].join();
+        let cols = FEEDS_COLUMNS.map((col) => col + ' = :' + col).join();
         let sql = 'UPDATE feeds SET ' + cols + ' WHERE feedID = :feedID';
         return new Statement(sql);
     },
@@ -2051,7 +2062,7 @@ let Utils = {
 
     getTagsForEntry: function getTagsForEntry(aEntryID) {
         let results = yield Stm.getTagsForEntry.executeCached({ entryID: aEntryID });
-        throw new Task.Result([for (row of results) row.tagName]);
+        throw new Task.Result(results.map((row) => row.tagName));
     }.task(),
 
     getFeedByBookmarkID: function getFeedByBookmarkID(aBookmarkID) {
@@ -2069,12 +2080,12 @@ let Utils = {
 
     getEntriesByURL: function getEntriesByURL(aURL) {
         let results = yield Stm.selectEntriesByURL.executeCached({ url: aURL });
-        throw new Task.Result([for (row of results) row.id]);
+        throw new Task.Result(results.map((row) => row.id));
     }.task(),
 
     getEntriesByBookmarkID: function getEntriesByBookmarkID(aID) {
         let results = yield Stm.selectEntriesByBookmarkID.executeCached({ bookmarkID: aID });
-        throw new Task.Result([for (row of results) row.id]);
+        throw new Task.Result(results.map((row) => row.id));
     }.task(),
 
     newURI: function(aSpec) {
