@@ -7,8 +7,6 @@ var Brief = {
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
     BRIEF_FAVICON_URL: 'chrome://brief/skin/brief-icon-16.png',
 
-    get statusCounter() { return document.getElementById('brief-status-counter') },
-
     get toolbarbutton() { return document.getElementById('brief-button') },
 
     get prefs() {
@@ -192,7 +190,6 @@ var Brief = {
 
     initUnreadCounter: function() {
         let showCounter = this.prefs.getBoolPref('showUnreadCounter');
-        this.statusCounter.hidden = !showCounter;
 
         let menuitem = document.getElementById('brief-show-unread-counter');
         menuitem.setAttribute('checked', showCounter);
@@ -217,11 +214,11 @@ var Brief = {
         })
 
         query.getEntryCount().then(unreadEntriesCount => {
-            Brief.statusCounter.value = unreadEntriesCount;
-            Brief.statusCounter.hidden = (unreadEntriesCount == 0);
-
-            // Attribute to enable custom styling via userChrome.css.
-            Brief.toolbarbutton.setAttribute('unread-entries', unreadEntriesCount);
+            let text = '';
+            if (unreadEntriesCount > 0)
+                // text length should be limited to 4 characters according to addon sdk documentation
+                text = Math.min(9999, unreadEntriesCount);
+            Brief.toolbarbutton.setAttribute('badge', String(text));
         })
     },
 
