@@ -174,8 +174,7 @@ var Brief = {
             if (Brief.toolbarbutton)
                 Brief.initUnreadCounter();
 
-            if (newValue)
-                Brief.storage.ready.then(Brief.updateStatus);
+            Brief.storage.ready.then(Brief.updateStatus);
         }
     },
 
@@ -204,8 +203,13 @@ var Brief = {
     },
 
     updateStatus: function Brief_updateStatus() {
-        if (!Brief.toolbarbutton || !Brief.prefs.getBoolPref('showUnreadCounter'))
+        if (!Brief.toolbarbutton)
             return;
+
+        if (!Brief.prefs.getBoolPref('showUnreadCounter')) {
+            Brief.toolbarbutton.setAttribute('badge', '');
+            return;
+        }
 
         let query = new Brief.query({
             includeFeedsExcludedFromGlobalViews: false,
