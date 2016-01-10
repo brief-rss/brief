@@ -216,9 +216,12 @@ var Brief = {
         query.getEntryCount().then(unreadEntriesCount => {
             let text = '';
             if (unreadEntriesCount > 0)
-                // text length should be limited to 4 characters according to addon sdk documentation
-                text = Math.min(9999, unreadEntriesCount);
-            Brief.toolbarbutton.setAttribute('badge', String(text));
+                text = unreadEntriesCount.toString();
+            /* We crop the badge manually to hack around mozilla#1213895, support
+            Firefox 38 and leave the least-significant digits */
+            if (text.length > 4)
+                text = '…' + text.substring(text.length - 3);
+            Brief.toolbarbutton.setAttribute('badge', text);
         })
     },
 
