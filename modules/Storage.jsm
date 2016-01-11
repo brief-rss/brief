@@ -38,7 +38,7 @@ XPCOMUtils.defineLazyGetter(this, 'Places', () => {
 })
 
 
-let Connection = null;
+var Connection = null;
 
 
 // Exported object exposing public properties.
