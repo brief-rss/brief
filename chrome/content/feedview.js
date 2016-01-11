@@ -14,6 +14,9 @@ const LOAD_STEP_SIZE = 5;
 // Same as above, but applies to headlines view.
 const HEADLINES_LOAD_STEP_SIZE = 25;
 
+// Magic exception for aborting callbacks on refresh
+const REFRESH_ABORT = 'brief:refresh-abort-callbacks';
+
 /**
  * Manages the display of feed content.
  *
@@ -418,12 +421,14 @@ FeedView.prototype = {
                 }
 
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
-                    this._fillWindow(WINDOW_HEIGHTS_LOAD);
+                    this._fillWindow(WINDOW_HEIGHTS_LOAD)
+                        .catch(this._ignoreRefresh);
                 break;
 
             case 'resize':
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
-                    this._fillWindow(WINDOW_HEIGHTS_LOAD);
+                    this._fillWindow(WINDOW_HEIGHTS_LOAD)
+                        .catch(this._ignoreRefresh);
                 break;
 
             case 'keypress':
@@ -441,15 +446,18 @@ FeedView.prototype = {
 
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
         if (getTopWindow().gBrowser.currentURI.spec == document.documentURI)
-            this._onEntriesAdded(aEntryList.entries);
+            this._onEntriesAdded(aEntryList.entries)
+                .catch(this._ignoreRefresh);
         else
             this._refreshPending = true;
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
         if (getTopWindow().gBrowser.currentURI.spec == document.documentURI) {
-            this._onEntriesRemoved(aEntryList.entries, false, false);
-            this._onEntriesAdded(aEntryList.entries);
+            this._onEntriesRemoved(aEntryList.entries, false, false)
+                .catch(this._ignoreRefresh);
+            this._onEntriesAdded(aEntryList.entries)
+                .catch(this._ignoreRefresh);
         }
         else {
             this._refreshPending = true;
@@ -459,9 +467,11 @@ FeedView.prototype = {
     onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntryList, aNewState) {
         if (this.query.read === false) {
             if (aNewState)
-                this._onEntriesRemoved(aEntryList.entries, true, true);
+                this._onEntriesRemoved(aEntryList.entries, true, true)
+                    .catch(this._ignoreRefresh);
             else
-                this._onEntriesAdded(aEntryList.entries);
+                this._onEntriesAdded(aEntryList.entries)
+                    .catch(this._ignoreRefresh);
         }
 
         for (let entry of this._loadedEntries.intersect(aEntryList.entries)) {
@@ -475,9 +485,11 @@ FeedView.prototype = {
     onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
         if (this.query.starred === true) {
             if (aNewState)
-                this._onEntriesAdded(aEntryList.entries);
+                this._onEntriesAdded(aEntryList.entries)
+                    .catch(this._ignoreRefresh);
             else
-                this._onEntriesRemoved(aEntryList.entries, true, true);
+                this._onEntriesRemoved(aEntryList.entries, true, true)
+                    .catch(this._ignoreRefresh);
         }
 
         for (let entry of this._loadedEntries.intersect(aEntryList.entries))
@@ -499,17 +511,21 @@ FeedView.prototype = {
 
         if (this.query.tags && this.query.tags[0] === aTag) {
             if (aNewState)
-                this._onEntriesAdded(aEntryList.entries);
+                this._onEntriesAdded(aEntryList.entries)
+                    .catch(this._ignoreRefresh);
             else
-                this._onEntriesRemoved(aEntryList.entries, true, true);
+                this._onEntriesRemoved(aEntryList.entries, true, true)
+                    .catch(this._ignoreRefresh);
         }
     },
 
     onEntriesDeleted: function FeedView_onEntriesDeleted(aEntryList, aNewState) {
         if (aNewState === this.query.deleted)
-            this._onEntriesAdded(aEntryList.entries);
+            this._onEntriesAdded(aEntryList.entries)
+                .catch(this._ignoreRefresh);
         else
-            this._onEntriesRemoved(aEntryList.entries, true, true);
+            this._onEntriesRemoved(aEntryList.entries, true, true)
+                .catch(this._ignoreRefresh);
     },
 
 
@@ -716,7 +732,7 @@ FeedView.prototype = {
                 this.selectEntry(lastSelectedEntry, true);
             else
                 this.selectEntry(this._loadedEntries[0], false);
-        })
+        }).catch(this._ignoreRefresh)
     },
 
 
@@ -888,9 +904,16 @@ FeedView.prototype = {
                 if (this.viewID == oldViewID && this == gCurrentView)
                     return value;
                 else
-                    throw new Error('Feed view refreshed while waiting for an async call to complete');
+                    throw REFRESH_ABORT;
             }
         )
+    },
+
+    _ignoreRefresh: function FeedView__ignoreRefresh(error) {
+        if (error === REFRESH_ABORT)
+            console.log("Note: Brief - callbacks aborted due to refresh");
+        else
+            throw error;
     },
 
     _callbackRefreshGuard: function FeedView__callbackRefreshGuard(aWrappedFunction) {
