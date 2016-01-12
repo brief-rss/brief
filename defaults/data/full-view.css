@@ -4,7 +4,7 @@ article.entry.full > .headline-container {
 
 article.full {
     margin: 10px 0;
-    min-width: -moz-min-content
+    min-width: 300px;
 }
 
 .full-container {
@@ -12,6 +12,7 @@ article.full {
     flex: 0 1 700px;
     flex-direction: column;
     transition: border-color 200ms;
+    min-width: 0;
 }
 
 .full-container-inner {
