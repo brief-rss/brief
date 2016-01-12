@@ -202,13 +202,6 @@ let TagList = {
             item.setAttribute('label', tagName);
             this._listbox.appendChild(item);
 
-            let cell = document.getAnonymousElementByAttribute(item, 'class', 'listcell-iconic');
-
-            let unreadCountLabel = document.createElement('label');
-            unreadCountLabel.className = 'unread-count';
-            item.unreadCountLabel = unreadCountLabel;
-            cell.appendChild(unreadCountLabel);
-
             this._refreshLabel(tagName);
         }
 
@@ -225,7 +218,9 @@ let TagList = {
         let unreadCount = yield query.getEntryCount()
         let listitem = getElement(aTagName);
 
-        listitem.unreadCountLabel.value = unreadCount;
+        // This is a hack; ideally we should have set --unread-count: attr(...)
+        // However, as of Firefox 46 the attr() works in `content` only
+        listitem.setAttribute('style', '--unread-count: "' + unreadCount + '";');
 
         if (unreadCount > 0)
             listitem.classList.add('unread');

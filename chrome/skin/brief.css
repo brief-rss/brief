@@ -232,6 +232,10 @@ richtreefolder[open="true"] > .folder-title-container > .unread-count,
     list-style-image: url(chrome://brief/skin/icons/tag.png);
 }
 
-.tag-list-item:not(.unread) > .unread-count {
+.tag-list-item > .listcell-iconic::after {
+    content: var(--unread-count, "");
+}
+
+.tag-list-item:not(.unread) > .listcell-iconic::after {
     display: none;
 }

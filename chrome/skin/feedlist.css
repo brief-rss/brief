@@ -30,7 +30,8 @@ richtreeitem {
     color: #454545 !important;
 }
 
-.unread-count {
+.unread-count,
+.tag-list-item > .listcell-iconic::after {
     min-width: 2em !important;
     margin-left: 5px !important;
     text-align: center;
