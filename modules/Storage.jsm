@@ -762,13 +762,15 @@ function FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, aDeferred) {
 FeedProcessor.prototype = {
 
     mapEntryProperties: function FeedProcessor_mapEntryProperties(aEntry) {
+        let updatedTimestamp = (aEntry.updated ?
+            Utils.getRFC822Date(aEntry.updated).getTime() : Date.now());
         let mappedEntry = {
             title:    aEntry.title     ? aEntry.title.text   : '',
             entryURL: aEntry.link      ? aEntry.link.spec    : '',
             summary:  aEntry.summary   ? aEntry.summary.text : '',
             content:  aEntry.content   ? aEntry.content.text : '',
-            date:     aEntry.published ? Utils.getRFC822Date(aEntry.published).getTime() : Date.now(),
-            updated:  aEntry.updated   ? Utils.getRFC822Date(aEntry.updated).getTime() : Date.now()
+            date:     aEntry.published ? Utils.getRFC822Date(aEntry.published).getTime() : updatedTimestamp,
+            updated:  updatedTimestamp
         }
 
         try {
