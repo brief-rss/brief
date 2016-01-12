@@ -190,10 +190,10 @@ let TagList = {
     }.task(),
 
     _rebuild: function* TagList__rebuild() {
+        this.tags = yield Storage.getAllTags();
+
         while (this._listbox.hasChildNodes())
             this._listbox.removeChild(this._listbox.lastChild);
-
-        this.tags = yield Storage.getAllTags();
 
         for (let tagName of this.tags) {
             let item = document.createElement('listitem');
