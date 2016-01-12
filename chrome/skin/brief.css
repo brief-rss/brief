@@ -220,6 +220,7 @@ richtreefolder[open="true"] > .folder-title-container > .unread-count,
 
 #tag-list {
     background-color: #f2f2f2 !important;
+    min-width: 100px !important;
 }
 
 .tag-list-item {
@@ -230,6 +231,14 @@ richtreefolder[open="true"] > .folder-title-container > .unread-count,
     color: #454545 !important;
     border-radius: 0 !important;
     list-style-image: url(chrome://brief/skin/icons/tag.png);
+}
+
+.tag-list-item > .listcell-iconic {
+    display: flex;
+}
+
+.tag-list-item > .listcell-iconic > .listcell-label {
+    flex: 1;
 }
 
 .tag-list-item > .listcell-iconic::after {
