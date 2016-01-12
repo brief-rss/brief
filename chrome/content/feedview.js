@@ -388,7 +388,9 @@ FeedView.prototype = {
             // Click listener must be attached to the document, not the entry container,
             // in order to catch middle-clicks.
             case 'click':
-                let node = aEvent.target;
+                // Clicks inside the article but outside any child are ignored
+                // so that clicking in the wide margins does not cause actions
+                let node = aEvent.target.parentNode;
                 let target = null;
                 while (node) {
                     if (node.classList && node.classList.contains('entry'))
