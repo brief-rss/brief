@@ -150,31 +150,34 @@ var Commands = {
     },
 
     openFeedWebsite: function cmd_openWebsite(aFeed) {
-        let url = aFeed.websiteURL || NetUtil.newURI(aFeed.feedURL).host;
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
+        let url = feed.websiteURL || NetUtil.newURI(feed.feedURL).host;
         getTopWindow().gBrowser.loadOneTab(url);
     },
 
     emptyFeed: function cmd_emptyFeed(aFeed) {
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
             starred: false,
-            feeds: [aFeed.feedID]
+            feeds: [feed.feedID]
         })
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     },
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
         let bundle = getElement('main-bundle');
         let title = bundle.getString('confirmFeedDeletionTitle');
-        let text = bundle.getFormattedString('confirmFeedDeletionText', [aFeed.title]);
+        let text = bundle.getFormattedString('confirmFeedDeletionText', [feed.title]);
 
         if (Services.prompt.confirm(window, title, text)) {
-            FeedList.removeItem(getElement(aFeed.feedID));
+            FeedList.removeItem(getElement(feed.feedID));
             FeedList.expectRemovalInvalidate = true;
 
             Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
-            let txn = new PlacesRemoveItemTransaction(aFeed.bookmarkID);
+            let txn = new PlacesRemoveItemTransaction(feed.bookmarkID);
             PlacesUtils.transactionManager.doTransaction(txn);
         }
     },
@@ -268,8 +271,9 @@ var Commands = {
 
 
     showFeedProperties: function cmd_showFeedProperties(aFeed) {
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
         openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
-                   'chrome,titlebar,toolbar,centerscreen,modal', aFeed.feedID);
+                   'chrome,titlebar,toolbar,centerscreen,modal', feed.feedID);
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
@@ -300,6 +304,11 @@ var Commands = {
             organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(PrefCache.homeFolder);
             organizer.focus();
         }
+    },
+
+    updateFeed: function cmd_updateFeed(aFeed) {
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
+        FeedUpdateService.updateFeeds([feed]);
     },
 
 }
