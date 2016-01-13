@@ -456,8 +456,7 @@ FeedView.prototype = {
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
         if (getTopWindow().gBrowser.currentURI.spec == document.documentURI) {
-            this._onEntriesRemoved(aEntryList.entries, false, false)
-                .catch(this._ignoreRefresh);
+            this._onEntriesRemoved(aEntryList.entries, false, false);
             this._onEntriesAdded(aEntryList.entries)
                 .catch(this._ignoreRefresh);
         }
@@ -469,8 +468,7 @@ FeedView.prototype = {
     onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntryList, aNewState) {
         if (this.query.read === false) {
             if (aNewState)
-                this._onEntriesRemoved(aEntryList.entries, true, true)
-                    .catch(this._ignoreRefresh);
+                this._onEntriesRemoved(aEntryList.entries, true, true);
             else
                 this._onEntriesAdded(aEntryList.entries)
                     .catch(this._ignoreRefresh);
@@ -490,8 +488,7 @@ FeedView.prototype = {
                 this._onEntriesAdded(aEntryList.entries)
                     .catch(this._ignoreRefresh);
             else
-                this._onEntriesRemoved(aEntryList.entries, true, true)
-                    .catch(this._ignoreRefresh);
+                this._onEntriesRemoved(aEntryList.entries, true, true);
         }
 
         for (let entry of this._loadedEntries.intersect(aEntryList.entries))
@@ -516,8 +513,7 @@ FeedView.prototype = {
                 this._onEntriesAdded(aEntryList.entries)
                     .catch(this._ignoreRefresh);
             else
-                this._onEntriesRemoved(aEntryList.entries, true, true)
-                    .catch(this._ignoreRefresh);
+                this._onEntriesRemoved(aEntryList.entries, true, true);
         }
     },
 
@@ -526,8 +522,7 @@ FeedView.prototype = {
             this._onEntriesAdded(aEntryList.entries)
                 .catch(this._ignoreRefresh);
         else
-            this._onEntriesRemoved(aEntryList.entries, true, true)
-                .catch(this._ignoreRefresh);
+            this._onEntriesRemoved(aEntryList.entries, true, true);
     },
 
 
@@ -659,7 +654,7 @@ FeedView.prototype = {
                     else
                         afterEntriesRemoved.call(this);
                 }
-            })
+            }).catch(this._ignoreRefresh);
         }
 
         function afterEntriesRemoved() {
