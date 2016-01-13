@@ -714,7 +714,7 @@ let FolderContextMenu = {
 
             Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
-            let txn = new PlacesRemoveItemTransaction(feed.bookmarkID);
+            let txn = new PlacesRemoveItemTransaction(Number(feed.bookmarkID));
             PlacesUtils.transactionManager.doTransaction(txn);
         }
     }
