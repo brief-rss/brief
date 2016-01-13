@@ -1584,9 +1584,9 @@ let BookmarkObserver = {
 
             for (let entry of entries) {
                 if (bookmarks.length)
-                    StorageInternal.starEntry(true, entry.id, bookmarks[0], true);
+                    StorageInternal.starEntry(true, entry, bookmarks[0], true);
                 else
-                    StorageInternal.starEntry(false, entry.id);
+                    StorageInternal.starEntry(false, entry);
             }
         }
     }.task(),
@@ -1621,7 +1621,7 @@ let BookmarkObserver = {
             case 'uri':
                 // Unstar any entries with the old URI.
                 for (let entry of yield Utils.getEntriesByBookmarkID(aItemID))
-                    StorageInternal.starEntry(false, entry.id);
+                    StorageInternal.starEntry(false, entry);
 
                 // Star any entries with the new URI.
                 for (let entry of yield Utils.getEntriesByURL(aNewValue))
