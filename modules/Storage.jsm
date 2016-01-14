@@ -1716,7 +1716,7 @@ let LivemarksSync = function* LivemarksSync() {
 
     let storedFeeds = Storage.getAllFeeds(true, true);
     let storedFeedsByID = new Map(storedFeeds.map(feed => [feed.feedID, feed]));
-    let oldFeeds = [];
+    let oldFeeds = new Set();
     let newFeeds = [];
     let changedFeeds = [];
 
@@ -1724,10 +1724,12 @@ let LivemarksSync = function* LivemarksSync() {
     // with the feeds in the database.
     for (let livemark of livemarks) {
         let feed = storedFeedsByID.get(livemark.feedID);
+        if (oldFeeds.has(feed))
+            continue;
 
         // Feed already in the database.
         if (feed) {
-            oldFeeds.push(feed);
+            oldFeeds.add(feed);
 
             // Check if feed's properties are up to date.
             let properties = ['rowIndex', 'parent', 'title', 'bookmarkID'];
@@ -1748,8 +1750,7 @@ let LivemarksSync = function* LivemarksSync() {
         }
     }
     // Hide any feeds that are no longer found among the livemarks.
-    let knownFeeds = new Set(oldFeeds);
-    let missingFeeds = storedFeeds.filter(f => !knownFeeds.has(f) && !f.hidden);
+    let missingFeeds = storedFeeds.filter(f => !oldFeeds.has(f) && !f.hidden);
     for (let feed of missingFeeds) {
         changedFeeds.push({
             'feedID': feed.feedID,
