@@ -103,6 +103,8 @@ FeedView.prototype = {
 
     // ID of the animation interval if the view is being scrolled, or null otherwise.
     _scrolling: null,
+    // Autoselect timeout ID for clearTimeout
+    _scrollSelectionTimeout: null,
 
     // Indicates if a filter paramater is fixed and cannot be toggled by the user.
     _fixedUnread: false,
