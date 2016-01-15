@@ -649,6 +649,8 @@
       </getter>
     </property>
 
+    <property name="selType" onget="return this.parentNode.selType;"/>
+
   </implementation>
 
 </binding>
