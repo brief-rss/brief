@@ -1987,12 +1987,14 @@ let Stm = {
 
     get getEntryByPrimaryHash() {
         let sql = 'SELECT id, date, updated, read FROM entries WHERE primaryHash = :hash';
-        return new Statement(sql);
+        let resultColumns = ['id', 'date', 'updated', 'read'];
+        return new Statement(sql, resultColumns);
     },
 
     get getEntryBySecondaryHash() {
         let sql = 'SELECT id, date, updated, read FROM entries WHERE secondaryHash = :hash';
-        return new Statement(sql);
+        let resultColumns = ['id', 'date', 'updated', 'read'];
+        return new Statement(sql, resultColumns);
     },
 
     get selectEntriesByURL() {
