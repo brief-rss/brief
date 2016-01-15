@@ -52,13 +52,7 @@
 
         <constructor>
             <![CDATA[
-            try {
-                this.scrollBoxObject = this.mScrollBox.boxObject.QueryInterface(
-                        Components.interfaces.nsIScrollBoxObject);
-            } catch(ex if "result" in ex && ex.result == Components.results.NS_ERROR_NO_INTERFACE) {
-                // The interface does not exist since Firefox 36
-                this.scrollBoxObject = this.mScrollBox.boxObject;
-            }
+            this.scrollBoxObject = this.mScrollBox.boxObject;
             ]]>
         </constructor>
 
