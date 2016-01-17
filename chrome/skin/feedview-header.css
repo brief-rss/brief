@@ -1,5 +1,6 @@
 #feed-view-header {
-    -moz-box-align: center;
+    display: flex;
+    align-items: center;
     height: 36px !important;
     padding: 0 10px !important;
     border-bottom: 1px solid transparent !important;
@@ -48,6 +49,8 @@
     color: #606b78;
     font-size: 22px;
     font-weight: bold !important;
+    flex-shrink: 1;
+    min-width: 10em !important;
 }
 
 #view-title-button[contextOptions]:hover > #view-title-button-label {
@@ -132,6 +135,7 @@
 
 #searchbar {
     width: 150px;
+    flex: none;
     margin: 5px 0 5px 0 !important;
     padding: 0 3px 0 5px !important;
     border: 1px solid #9dabb8 !important;

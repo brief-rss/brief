@@ -49,9 +49,14 @@ menuseparator {
 }
 
 
+spacer[flex] {
+    flex-grow: 1;
+}
+
 
 .brief-button {
     -moz-box-flex: 0;
+    flex: none;
     -moz-user-focus: none;
 }
 
