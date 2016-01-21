@@ -8,7 +8,6 @@ Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
-Components.utils.import("resource://gre/modules/Promise.jsm");
 Components.utils.import('resource://gre/modules/Task.jsm');
 Components.utils.import('resource://gre/modules/osfile.jsm');
 

@@ -4,7 +4,7 @@ Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/DatabaseSchema.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-Components.utils.import("resource://gre/modules/Promise.jsm");
+Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
 Components.utils.import('resource://gre/modules/Task.jsm');
 Components.utils.import('resource://gre/modules/osfile.jsm');
 Components.utils.import('resource://gre/modules/Sqlite.jsm');
@@ -190,7 +190,7 @@ let StorageInternal = {
     // See Storage.
     get ready() { return this.deferredReady.promise },
 
-    deferredReady: Promise.defer(),
+    deferredReady: PromiseUtils.defer(),
 
     feedCache: null,
 
@@ -380,7 +380,7 @@ let StorageInternal = {
 
     // See Storage.
     processFeed: function StorageInternal_processFeed(aFeedID, aParsedFeed, aFeedDocument) {
-        let deferred = Promise.defer();
+        let deferred = PromiseUtils.defer();
         new FeedProcessor(aFeedID, aParsedFeed, aFeedDocument, deferred);
         return deferred.promise;
     },

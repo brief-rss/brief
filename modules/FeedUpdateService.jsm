@@ -4,7 +4,7 @@ Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
-Components.utils.import("resource://gre/modules/Promise.jsm");
+Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
 Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
@@ -394,7 +394,7 @@ let FeedUpdateServiceInternal = {
 function FeedFetcher(aURL, aCancelable) {
     this.url = aURL;
     this.cancelable = aCancelable;
-    this.deferred = Promise.defer();
+    this.deferred = PromiseUtils.defer();
     this.done = this.deferred.promise;
 
     this.parser = Cc['@mozilla.org/feed-processor;1'].createInstance(Ci.nsIFeedProcessor);

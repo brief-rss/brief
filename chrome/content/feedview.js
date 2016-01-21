@@ -1131,7 +1131,7 @@ EntryView.prototype = {
      * @returns Promise<null> when finished.
      */
     remove: function EntryView_remove(aAnimate) {
-        let deferred =  Promise.defer();
+        let deferred =  PromiseUtils.defer();
 
         if (aAnimate) {
             this.container.addEventListener('transitionend', () => {
@@ -1414,7 +1414,7 @@ EntryView.prototype = {
 
 
 function hideElement(aElement, aAnimate) {
-    let deferred = Promise.defer();
+    let deferred = PromiseUtils.defer();
 
     if (aAnimate) {
         aElement.style.opacity = '0';
@@ -1441,7 +1441,7 @@ function hideElement(aElement, aAnimate) {
 }
 
 function showElement(aElement, aAnimate) {
-    let deferred = Promise.defer();
+    let deferred = PromiseUtils.defer();
 
     if (aAnimate) {
         aElement.style.display = '';

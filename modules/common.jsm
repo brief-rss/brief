@@ -3,7 +3,7 @@ const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'log', 'wait',
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/Task.jsm');
-Components.utils.import("resource://gre/modules/Promise.jsm");
+Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -48,7 +48,7 @@ function log(aThing) {
  *        be resolved "as soon as possible" (but not synchronously).
  */
 function wait(aDelay) {
-    let deferred = Promise.defer();
+    let deferred = PromiseUtils.defer();
 
     let timer = Cc['@mozilla.org/timer;1'].createInstance(Ci.nsITimer);
     timer.initWithCallback(() => deferred.resolve(), aDelay || 0, Ci.nsITimer.TYPE_ONE_SHOT);
