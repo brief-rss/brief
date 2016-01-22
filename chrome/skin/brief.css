@@ -112,6 +112,8 @@ spacer[flex] {
 .sidebar-button-box {
     -moz-box-flex: 1;
     -moz-box-pack: center;
+    min-width: 5em !important;
+    overflow: hidden;
 }
 
 .sidebar-button {
