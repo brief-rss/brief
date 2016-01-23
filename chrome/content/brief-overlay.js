@@ -1,7 +1,6 @@
 var Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
-    RELEASE_NOTES_URL_PREFIX: 'http://brief.mozdev.org/versions/',
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
@@ -131,9 +130,6 @@ var Brief = {
                 let prevVersion = this.prefs.getCharPref('lastVersion');
 
                 if (Services.vc.compare(prevVersion, addon.version) < 0) {
-                    let url = this.RELEASE_NOTES_URL_PREFIX + addon.version + '.html';
-                    gBrowser.loadOneTab(url, { relatedToCurrent: false,
-                                               inBackground: false });
                     this.prefs.setCharPref('lastVersion', addon.version);
                 }
             }.bind(this))
