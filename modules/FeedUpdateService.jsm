@@ -419,6 +419,7 @@ FeedFetcher.prototype = {
 
         this.request.mozBackgroundRequest = Prefs.getBoolPref('update.suppressSecurityDialogs');
         this.request.open('GET', this.url, true);
+        this.request.channel.loadFlags |= Ci.nsIRequest.VALIDATE_ALWAYS;
         this.request.overrideMimeType('application/xml');
         this.request.onload = this.onRequestLoad.bind(this);
         this.request.onerror = this.onRequestError.bind(this);
