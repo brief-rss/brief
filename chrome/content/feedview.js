@@ -17,6 +17,8 @@ const HEADLINES_LOAD_STEP_SIZE = 25;
 // Magic exception for aborting callbacks on refresh
 const REFRESH_ABORT = 'brief:refresh-abort-callbacks';
 
+const TUTORIAL_URL = "chrome://brief/content/firstrun.xhtml?tutorial";
+
 /**
  * Manages the display of feed content.
  *
@@ -390,6 +392,12 @@ FeedView.prototype = {
             // Click listener must be attached to the document, not the entry container,
             // in order to catch middle-clicks.
             case 'click':
+                // The tutorial link needs to be opened from a privileged context
+                if (aEvent.target.getAttribute("href") == TUTORIAL_URL) {
+                    window.open(TUTORIAL_URL);
+                    aEvent.preventDefault();
+                    break;
+                }
                 // Clicks inside the article but outside any child are ignored
                 // so that clicking in the wide margins does not cause actions
                 let node = aEvent.target.parentNode;
@@ -861,7 +869,7 @@ FeedView.prototype = {
 
         if (!Storage.getAllFeeds().length) {
             mainMessage = bundle.getString('noFeeds');
-            secondaryMessage = '<a href="chrome://brief/content/firstrun.xhtml?tutorial" target="_blank">'
+            secondaryMessage = '<a href="' + TUTORIAL_URL + '" target="_blank">'
                                + bundle.getString('noFeedsAdvice') + '</a>';
         }
         else if (this.query.searchString) {
