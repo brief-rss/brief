@@ -20,22 +20,22 @@ contract  @mozilla.org/network/protocol;1?name=brief  {dd940a26-3ab1-11e3-b1c2-c
 # en-US is the only locale supported in dev versions
 locale  brief   en-US  chrome/locale/en-US/
 
-#locale  brief   cs     chrome/locale/cs/
-#locale  brief   da     chrome/locale/da/
-#locale  brief   es-ES  chrome/locale/es-ES/
-#locale  brief   fr     chrome/locale/fr/
-#locale  brief   gl     chrome/locale/gl/
-#locale  brief   it     chrome/locale/it/
-#locale  brief   ja     chrome/locale/ja/
-#locale  brief   nl     chrome/locale/nl/
-#locale  brief   pl     chrome/locale/pl/
-#locale  brief   ro-RO  chrome/locale/ro-RO/
-#locale  brief   ru     chrome/locale/ru/
-#locale  brief   sk-SK  chrome/locale/sk-SK/
-#locale  brief   sl-SI  chrome/locale/sl-SI/
-#locale  brief   tr     chrome/locale/tr/
-#locale  brief   uk-UA  chrome/locale/uk-UA/
-#locale  brief   zh-CN  chrome/locale/zh-CN/
+locale  brief   cs     chrome/locale/cs/
+locale  brief   da     chrome/locale/da/
+locale  brief   es-ES  chrome/locale/es-ES/
+locale  brief   fr     chrome/locale/fr/
+locale  brief   gl     chrome/locale/gl/
+locale  brief   it     chrome/locale/it/
+locale  brief   ja     chrome/locale/ja/
+locale  brief   nl     chrome/locale/nl/
+locale  brief   pl     chrome/locale/pl/
+locale  brief   ro-RO  chrome/locale/ro-RO/
+locale  brief   ru     chrome/locale/ru/
+locale  brief   sk-SK  chrome/locale/sk-SK/
+locale  brief   sl-SI  chrome/locale/sl-SI/
+locale  brief   tr     chrome/locale/tr/
+locale  brief   uk-UA  chrome/locale/uk-UA/
+locale  brief   zh-CN  chrome/locale/zh-CN/
 
 # Out-of-date locales
 #locale  brief   de     chrome/locale/de/
