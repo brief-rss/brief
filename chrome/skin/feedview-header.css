@@ -50,7 +50,7 @@
     font-size: 22px;
     font-weight: bold !important;
     flex-shrink: 1;
-    min-width: 10em !important;
+    min-width: 5em !important;
 }
 
 #view-title-button[contextOptions]:hover > #view-title-button-label {
@@ -134,8 +134,10 @@
 
 
 #searchbar {
-    width: 150px;
-    flex: none;
+    min-width: 75px !important;
+    width: 150px !important;
+    flex-grow: 0;
+    flex-shrink: 1;
     margin: 5px 0 5px 0 !important;
     padding: 0 3px 0 5px !important;
     border: 1px solid #9dabb8 !important;
