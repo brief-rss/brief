@@ -509,4 +509,4 @@ let PrefObserver = {
 
 // ------- Utility functions --------
 
-function getElement(aId) document.getElementById(aId);
+function getElement(aId) { return document.getElementById(aId); }
