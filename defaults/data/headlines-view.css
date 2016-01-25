@@ -1,9 +1,9 @@
 body.headlines-view .full-container {
-    margin-left: -50px;
+    margin-right: 100px;
 }
 
 body.headlines-view.multiple-feeds .full-container {
-    margin-left: -100px;
+    margin-right: 100px;
 }
 
 article.headline > .full-container {
