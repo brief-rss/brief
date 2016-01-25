@@ -988,6 +988,7 @@ function EntryView(aFeedView, aEntryData) {
 
     // Use innerHTML instead of textContent to resolve entities.
     titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
+    titleElem.setAttribute('dir', this.textDirection);
 
     this._getElement('feed-name').innerHTML = feed.title;
     this._getElement('authors').innerHTML = aEntryData.authors;
