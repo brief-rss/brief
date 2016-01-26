@@ -393,7 +393,9 @@ FeedView.prototype = {
             // in order to catch middle-clicks.
             case 'click':
                 // The tutorial link needs to be opened from a privileged context
-                if (aEvent.target.getAttribute("href") == TUTORIAL_URL) {
+                if (aEvent.target.getAttribute("href") == TUTORIAL_URL &&
+                    (aEvent.button == 0 || aEvent.button == 1)) {
+
                     window.open(TUTORIAL_URL);
                     aEvent.preventDefault();
                     break;
