@@ -55,6 +55,8 @@ article.read .title-link {
     font-weight: bold;
     text-decoration: none;
     transition: border-color 170ms;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .title-link:hover {
