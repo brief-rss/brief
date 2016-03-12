@@ -162,7 +162,8 @@
                        label="Brief"
                        tooltip="brief-tooltip"
                        context="brief-status-context"
-                       onclick="if (event.button == 0 || event.button == 1) Brief.open()" />
+                       onclick="if (event.button == 0 || event.button == 1) Brief.open()"
+                       onload="Brief.updateStatus()" />
     </toolbarpalette>
 
 </overlay>

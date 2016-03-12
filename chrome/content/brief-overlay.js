@@ -129,12 +129,9 @@ var Brief = {
             }.bind(this))
         }
 
-        if (this.toolbarbutton)
-            this.initUnreadCounter();
-
+        this.initUnreadCounterContextMenu();
         CustomizableUI.addListener({
             onCustomizeEnd: () => {
-                this.initUnreadCounter();
                 this.updateStatus();
             }
         });
@@ -159,9 +156,7 @@ var Brief = {
 
     onPrefChanged: function Brief_onPrefChanged(aSubject, aTopic, aData) {
         if (aData == 'showUnreadCounter') {
-            if (Brief.toolbarbutton)
-                Brief.initUnreadCounter();
-
+            Brief.initUnreadCounterContextMenu();
             Brief.storage.ready.then(Brief.updateStatus);
         }
     },
@@ -175,9 +170,8 @@ var Brief = {
 
     onEntriesDeleted: function(aEntryList, aState) { return this.refreshUI() },
 
-    initUnreadCounter: function() {
+    initUnreadCounterContextMenu: function() {
         let showCounter = this.prefs.getBoolPref('showUnreadCounter');
-
         let menuitem = document.getElementById('brief-show-unread-counter');
         menuitem.setAttribute('checked', showCounter);
     },
