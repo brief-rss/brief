@@ -1480,7 +1480,7 @@ function showElement(aElement, aAnimate) {
 }
 
 
-__defineGetter__('Strings', () => {
+this.__defineGetter__('Strings', () => {
     let cachedStringsList = [
         'entryDate.justNow',
         'minute.pluralForms',
@@ -1505,7 +1505,7 @@ __defineGetter__('Strings', () => {
     return this.Strings = obj;
 })
 
-__defineGetter__('Finder', () => {
+this.__defineGetter__('Finder', () => {
     let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
     finder.caseSensitive = false;
 

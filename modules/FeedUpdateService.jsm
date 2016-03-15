@@ -521,7 +521,17 @@ function FaviconFetcher(aFeed) {
     let websiteURI = Services.io.newURI(aFeed.websiteURL, null, null)
     let faviconURI = Services.io.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
-    let chan = Services.io.newChannelFromURI(faviconURI);
+    let chan;
+    if (Services.vc.compare(Services.appinfo.version, 47) > 0) {
+        chan = Services.io.newChannelFromURI2(faviconURI, null,
+                Services.scriptSecurityManager.getSystemPrincipal(),
+                null,
+                Components.interfaces.nsILoadInfo.SEC_NORMAL,
+                Components.interfaces.nsIContentPolicy.TYPE_OTHER
+            );
+    } else {
+        chan = Services.io.newChannelFromURI(faviconURI);
+    }
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
