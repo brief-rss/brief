@@ -14,6 +14,8 @@
       onload="Storage.ready.then(init)"
       onunload="unload()">
 
+    <html:link rel="icon" href="chrome://brief/skin/brief-icon-16.png" style="display:none" />
+
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>

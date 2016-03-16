@@ -4,7 +4,6 @@ var Brief = {
 
     BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
-    BRIEF_FAVICON_URL: 'chrome://brief/skin/brief-icon-16.png',
 
     get toolbarbutton() { return document.getElementById('brief-button') },
 
@@ -102,11 +101,6 @@ var Brief = {
         window.openDialog(Brief.BRIEF_OPTIONS_URL, 'Brief options', features);
     },
 
-    onTabLoad: function Brief_onTabLoad(aEvent) {
-        if (aEvent.target && aEvent.target.documentURI == Brief.BRIEF_URL)
-            gBrowser.setIcon(Brief.getBriefTab(), Brief.BRIEF_FAVICON_URL);
-    },
-
     onWindowLoad: function Brief_onWindowLoad(aEvent) {
         window.removeEventListener('load', arguments.callee, false);
 
@@ -137,8 +131,6 @@ var Brief = {
 
         if (this.toolbarbutton)
             this.initUnreadCounter();
-
-        gBrowser.addEventListener('pageshow', this.onTabLoad, false);
 
         CustomizableUI.addListener({
             onCustomizeEnd: () => {
