@@ -588,21 +588,11 @@ FaviconFetcher.prototype = {
     },
 
     getInterface: function(aIID) { return this.QueryInterface(aIID) },                 // nsIInterfaceRequestor
-    confirmUnknownIssuer: function(aSocketInfo, aCert, aCertAddType) { return false }, // nsIBadCertListener
-    confirmMismatchDomain: function(aSocketInfo, aTargetURL, aCert) { return false },
-    confirmCertExpired: function(aSocketInfo, aCert) { return false },
-    notifyCrlNextupdate: function(aSocketInfo, aTargetURL, aCert) { },
-    onRedirect: function(aChannel, aNewChannel) { },                        // nsIHttpEventSink
-    onProgress: function(aRequest, aContext, aProgress, aProgressMax) { },  // nsIProgressEventSink
-    onStatus: function(aRequest, aContext, aStatus, aStatusArg) { },
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIRequestObserver],
                                           [Ci.nsIStreamListener],
                                           [Ci.nsIChannelEventSink],
                                           [Ci.nsIInterfaceRequestor],
-                                          [Ci.nsIBadCertListener],
-                                          [Ci.nsIPrompt],
-                                          [Ci.nsIHttpEventSink],
-                                          [Ci.nsIProgressEventSink])
+                                          [Ci.nsIPrompt])
 
 }
