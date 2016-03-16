@@ -575,7 +575,7 @@ FeedView.prototype = {
                     entries: newEntries
                 })
 
-                for (let entry of yield query.getFullEntries())
+                for (let entry of yield this._refreshGuard(query.getFullEntries()))
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
