@@ -6,6 +6,7 @@ Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
 Components.utils.import('resource://gre/modules/Task.jsm');
+Components.utils.import('resource://gre/modules/NetUtil.jsm');
 
 IMPORT_COMMON(this);
 
@@ -521,7 +522,10 @@ function FaviconFetcher(aFeed) {
     let websiteURI = Services.io.newURI(aFeed.websiteURL, null, null)
     let faviconURI = Services.io.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
-    let chan = Services.io.newChannelFromURI(faviconURI);
+    let chan = NetUtil.newChannel({
+        uri: faviconURI,
+        loadUsingSystemPrincipal: true
+    });
     chan.notificationCallbacks = this;
     chan.asyncOpen(this, null);
 
