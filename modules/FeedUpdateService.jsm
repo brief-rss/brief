@@ -512,7 +512,7 @@ function FaviconFetcher(aFeed) {
     this.feed = aFeed;
 
     if (!aFeed.websiteURL) {
-        this.finish('no-favicon');
+        this.store('no-favicon');
         return;
     }
 
@@ -522,27 +522,15 @@ function FaviconFetcher(aFeed) {
     let websiteURI = Services.io.newURI(aFeed.websiteURL, null, null)
     let faviconURI = Services.io.newURI(websiteURI.prePath + '/favicon.ico', null, null);
 
-    let chan = NetUtil.newChannel({
-        uri: faviconURI,
-        loadUsingSystemPrincipal: true
-    });
-    chan.notificationCallbacks = this;
-    chan.asyncOpen(this, null);
-
-    this.websiteURI = websiteURI;
-    this._channel = chan;
-    this._bytes = [];
+    NetUtil.asyncFetch(
+        {uri: faviconURI, loadUsingSystemPrincipal: true},
+        (aStream, aStatusCode, aRequest) => this.finalize(aStream, aStatusCode, aRequest)
+    );
 }
 
 FaviconFetcher.prototype = {
 
-    websiteURI:  null,
-
-    _channel:   null,
-    _countRead: 0,
-    _stream:    null,
-
-    finish: function FaviconFetcher_finish(aFaviconString) {
+    store: function FaviconFetcher_finish(aFaviconString) {
         Storage.changeFeedProperties({
             feedID: this.feed.feedID,
             lastFaviconRefresh: Date.now(),
@@ -550,49 +538,17 @@ FaviconFetcher.prototype = {
         });
     },
 
-    // nsIRequestObserver
-    onStartRequest: function FaviconFetcher_lonStartRequest(aRequest, aContext) {
-        this._stream = Cc['@mozilla.org/binaryinputstream;1']
-                       .createInstance(Ci.nsIBinaryInputStream);
-    },
-
-    onStopRequest: function FaviconFetcher_onStopRequest(aRequest, aContext, aStatusCode) {
+    finalize: function FaviconFetcher_onStopRequest(aStream, aStatusCode, aRequest) {
         let requestFailed = !Components.isSuccessCode(aStatusCode);
         if (!requestFailed && (aRequest instanceof Ci.nsIHttpChannel))
             requestFailed = !aRequest.requestSucceeded;
 
-        if (!requestFailed && this._countRead != 0) {
-            let base64DataString =  btoa(String.fromCharCode.apply(null, this._bytes))
-            this.finish('data:image/x-icon;base64,' + base64DataString);
+        let data = NetUtil.readInputStreamToString(aStream, aStream.available());
+        if (!requestFailed && data.length > 0) {
+            this.store('data:image/x-icon;base64,' + btoa(data));
         }
         else {
-            this.finish('no-favicon');
+            this.store('no-favicon');
         }
-
-        this._channel = null;
-        this._element  = null;
-    },
-
-    // nsIStreamListener
-    onDataAvailable: function(aRequest, aContext, aInputStream, aOffset, aCount) {
-        this._stream.setInputStream(aInputStream);
-
-        // Get a byte array of the data
-        this._bytes = this._bytes.concat(this._stream.readByteArray(aCount));
-        this._countRead += aCount;
-    },
-
-    // nsIChannelEventSink
-    onChannelRedirect: function(aOldChannel, aNewChannel, aFlags) {
-        this._channel = aNewChannel;
-    },
-
-    getInterface: function(aIID) { return this.QueryInterface(aIID) },                 // nsIInterfaceRequestor
-
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIRequestObserver],
-                                          [Ci.nsIStreamListener],
-                                          [Ci.nsIChannelEventSink],
-                                          [Ci.nsIInterfaceRequestor],
-                                          [Ci.nsIPrompt])
-
+    }
 }
