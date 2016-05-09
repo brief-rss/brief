@@ -1465,34 +1465,40 @@ function showElement(aElement, aAnimate) {
 }
 
 
-this.__defineGetter__('Strings', () => {
-    let cachedStringsList = [
-        'entryDate.justNow',
-        'minute.pluralForms',
-        'hour.pluralForms',
-        'entryDate.today',
-        'entryDate.yesterday',
-        'entryWasUpdated',
-        'markEntryAsUnreadTooltip',
-        'markEntryAsReadTooltip',
-        'deleteEntryTooltip',
-        'restoreEntryTooltip',
-        'bookmarkEntryTooltip',
-        'editBookmarkTooltip',
-    ]
+Object.defineProperty(this, 'Strings', {
+    get: () => {
+        let cachedStringsList = [
+            'entryDate.justNow',
+            'minute.pluralForms',
+            'hour.pluralForms',
+            'entryDate.today',
+            'entryDate.yesterday',
+            'entryWasUpdated',
+            'markEntryAsUnreadTooltip',
+            'markEntryAsReadTooltip',
+            'deleteEntryTooltip',
+            'restoreEntryTooltip',
+            'bookmarkEntryTooltip',
+            'editBookmarkTooltip',
+        ]
 
-    let obj = {};
-    for (let stringName of cachedStringsList)
-        obj[stringName] = STRINGS.GetStringFromName(stringName);
+        let obj = {};
+        for (let stringName of cachedStringsList)
+            obj[stringName] = STRINGS.GetStringFromName(stringName);
 
-    delete this.Strings;
-    return this.Strings = obj;
-})
+        delete this.Strings;
+        return this.Strings = obj;
+    },
+    configurable: true
+});
 
-this.__defineGetter__('Finder', () => {
-    let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
-    finder.caseSensitive = false;
+Object.defineProperty(this, 'Finder', {
+    get: () => {
+        let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
+        finder.caseSensitive = false;
 
-    delete this.Finder;
-    return this.Finder = finder;
-})
+        delete this.Finder;
+        return this.Finder = finder;
+    },
+    configurable: true
+});
