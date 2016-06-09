@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "Danes">
 <!ENTITY starredFolder.label "Zaznamki">
 <!ENTITY trashFolder.label "Koš">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Prikaži naslove (F)">
 <!ENTITY fullViewCheckbox.tooltip "Prikaži cele predmete (G)">
 <!ENTITY showAllItems.tooltip "Prikaži vse predmete (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "Dvokliknite za skritje stranske vrstice">
 <!ENTITY revealSidebar.tooltip "Odkrij stransko vrstico">
 <!ENTITY markViewRead.tooltip "Označi vse predmete kot prebrane (Alt+N)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "Označi kot prebrano">
 <!ENTITY ctxMarkTagRead.label "Označi predmete z oznakami kot prebrane">
 <!ENTITY ctxRefreshFeed.label "Osveži zdaj">

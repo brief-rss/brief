@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "minutos">
 <!ENTITY updateIntervalHours.label "horas">
 <!ENTITY updateIntervalDays.label "días">
-<!ENTITY checkForUpdatesAfter.label "minutos">
 <!ENTITY showNotification.label "Mostrar una notificación cuando se encuentren nuevas entradas">
 <!ENTITY showNotification.accesskey "n">
 <!ENTITY readingGroup.caption "Lectura">
-<!ENTITY openInNewTab.label "Abrir Brief en una pestaña nueva">
-<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Almacenamiento">
 <!ENTITY expirationBefore.label "Eliminar las entradas descargadas hace más de">
 <!ENTITY expirationAfter.label "días">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "c">
 <!ENTITY clearAllEntriesButton.label "Eliminar todas las entradas…">
 <!ENTITY clearAllEntriesButton.accesskey "t">
-<!ENTITY showStatusbarIcon.label "Mostrar un icono en la barra de estado">
-<!ENTITY showStatusbarIcon.accesskey "i">
 <!ENTITY showUnreadCounter.label "Mostrar el número de entradas no leídas junto al icono de Brief">
 <!ENTITY showUnreadCounter.accesskey "r">
 <!ENTITY sortUnreadViewOldestFirst.label "Ordenar las entradas comenzando por la más antigua en la vista de no leídas">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Marcar las entradas automáticamente como leídas después de verlas">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY customizeGroup.caption "Apariencia">
 <!ENTITY editStyleDescription.label "Personalizar la apariencia de Brief">
 <!ENTITY editStyleButton.label "Personalizar">
 <!ENTITY editStyleButton.accesskey "P">

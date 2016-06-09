@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "minutos">
 <!ENTITY updateIntervalHours.label "horas">
 <!ENTITY updateIntervalDays.label "días">
-<!ENTITY checkForUpdatesAfter.label "minutos">
 <!ENTITY showNotification.label "Amosar un aviso cando se atopen novos elementos">
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY readingGroup.caption "Lendo">
-<!ENTITY openInNewTab.label "Abrir Brief nunha nova lapela">
-<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Gardando">
 <!ENTITY expirationBefore.label "Eliminar os elementos descargados despois de">
 <!ENTITY expirationAfter.label "días">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Limpar todos os elementos">
 <!ENTITY clearAllEntriesButton.accesskey "a">
-<!ENTITY showStatusbarIcon.label "Amosar unha icona na barra de estado">
-<!ENTITY showStatusbarIcon.accesskey "c">
 <!ENTITY showUnreadCounter.label "Amosar o número de elementos sen ler a carón da icona de Brief">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Na vista 'Sen ler' amosar primeiro os máis antigos">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "Marcar os elementos como lidos despois de os ver">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY customizeGroup.caption "Aparencia">
 <!ENTITY editStyleDescription.label "Personalizar a aparencia das fontes">
 <!ENTITY editStyleButton.label "Personalizar">
 <!ENTITY editStyleButton.accesskey "C">

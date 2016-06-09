@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "分钟">
 <!ENTITY updateIntervalHours.label "小时">
 <!ENTITY updateIntervalDays.label "天">
-<!ENTITY checkForUpdatesAfter.label "分钟">
 <!ENTITY showNotification.label "有新项目时通知我">
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY readingGroup.caption "阅读">
-<!ENTITY openInNewTab.label "在新标签页打开 Brief">
-<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "保存">
 <!ENTITY expirationBefore.label "清除">
 <!ENTITY expirationAfter.label "天前下载项目">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "清除所有项目...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
-<!ENTITY showStatusbarIcon.label "显示状态栏图标">
-<!ENTITY showStatusbarIcon.accesskey "t">
 <!ENTITY showUnreadCounter.label "在 Brief 图标旁显示未读项目数">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "只看未读时将旧的项目排列在前">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "自动将我浏览过的项目标记为已读">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY customizeGroup.caption "外观">
 <!ENTITY editStyleDescription.label "定制 Brief 的外观">
 <!ENTITY editStyleButton.label "自定义">
 <!ENTITY editStyleButton.accesskey "u">

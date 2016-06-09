@@ -1,11 +1,14 @@
+<!-- Toolbar button context menu -->
 <!ENTITY briefCtxRefreshFeeds.label "Beslemeleri Şimdi Tazele">
 <!ENTITY briefCtxMarkFeedsAsRead.label "Tüm Beslemeleri Okundu Yap">
 <!ENTITY briefCtxShowUnreadCounter.label "Okunmamış Öğelerin Sayısını Göster">
 <!ENTITY briefCtxShowOptions.label "Seçenekler">
+<!-- Options panel -->
 <!ENTITY briefShowShortcutsMenuitem.label "Klavye Kısayolları">
 <!ENTITY briefImportMenuitem.label "Önemli Beslemeler...">
 <!ENTITY briefExportMenuitem.label "Beslemeleri Dışa Aktar...">
 <!ENTITY briefOpenOptionsMenuitem.label "Seçenekler">
+<!-- Context options panels -->
 <!ENTITY briefRefreshFeed.label "Şimdi Tazele">
 <!ENTITY briefOpenWebsite.label "Ağ Sayfasını Aç">
 <!ENTITY briefUnsubscribeFeed.label "Üyelikten Ayrıl">

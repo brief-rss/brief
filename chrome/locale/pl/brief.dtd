@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "Dzisiaj">
 <!ENTITY starredFolder.label "Zakładki">
 <!ENTITY trashFolder.label "Kosz">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Widok nagłówków [F]">
 <!ENTITY fullViewCheckbox.tooltip "Pełny widok [G]">
 <!ENTITY showAllItems.tooltip "Wszystkie wiadomości [A]">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "Kliknij dwukrotnie, aby ukryć panel">
 <!ENTITY revealSidebar.tooltip "Przywróć panel">
 <!ENTITY markViewRead.tooltip "Oznacz wszystkie wiadomości jako przeczytane [Alt + N]">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "Oznacz jako przeczytany">
 <!ENTITY ctxMarkTagRead.label "Oznacz wiadomości z etykietami jako przeczytane">
 <!ENTITY ctxRefreshFeed.label "Aktualizuj teraz">

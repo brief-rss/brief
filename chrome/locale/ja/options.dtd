@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "分">
 <!ENTITY updateIntervalHours.label "時間">
 <!ENTITY updateIntervalDays.label "日">
-<!ENTITY checkForUpdatesAfter.label "分毎に確認する">
 <!ENTITY showNotification.label "新着の項目が見つかったら通知を表示する">
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY readingGroup.caption "既読管理">
-<!ENTITY openInNewTab.label "Brief を新しいタブで開く">
-<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "保管">
 <!ENTITY expirationBefore.label "ダウンロードした項目を">
 <!ENTITY expirationAfter.label "日後に削除する">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "すべての項目を消去する...">
 <!ENTITY clearAllEntriesButton.accesskey "a">
-<!ENTITY showStatusbarIcon.label "ステータスバーアイコンを表示する">
-<!ENTITY showStatusbarIcon.accesskey "h">
 <!ENTITY showUnreadCounter.label "未読数を Brief のアイコンに表示する">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "未読表示で古い項目から先に並び替える">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "o">
 <!ENTITY autoMarkRead.label "項目を見たら既読にする">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY customizeGroup.caption "外観">
 <!ENTITY editStyleDescription.label "フィードの外観をカスタマイズする">
 <!ENTITY editStyleButton.label "カスタマイズ">
 <!ENTITY editStyleButton.accesskey "C">

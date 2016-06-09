@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "minuten">
 <!ENTITY updateIntervalHours.label "uur">
 <!ENTITY updateIntervalDays.label "dagen">
-<!ENTITY checkForUpdatesAfter.label "minuten controleren op updates voor feeds">
 <!ENTITY showNotification.label "Waarschuwing geven wanneer nieuwe berichten worden gevonden">
 <!ENTITY showNotification.accesskey "W">
 <!ENTITY readingGroup.caption "Lezen">
-<!ENTITY openInNewTab.label "Brief in een nieuw tabblad openen">
-<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Opslaan">
 <!ENTITY expirationBefore.label "Gedownloade berichten verwijderen na">
 <!ENTITY expirationAfter.label "dagen">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Alle berichten wissen…">
 <!ENTITY clearAllEntriesButton.accesskey "A">
-<!ENTITY showStatusbarIcon.label "Statusbalkpictogram weergeven">
-<!ENTITY showStatusbarIcon.accesskey "g">
 <!ENTITY showUnreadCounter.label "Aantal ongelezen berichten weergeven naast pictogram van Brief">
 <!ENTITY showUnreadCounter.accesskey "t">
 <!ENTITY sortUnreadViewOldestFirst.label "Oudste berichten bovenaan zetten bij weergave ongelezen berichten">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Berichten als gelezen markeren als ik ze heb gezien">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY customizeGroup.caption "Weergave">
 <!ENTITY editStyleDescription.label "Uiterlijk van Brief aanpassen">
 <!ENTITY editStyleButton.label "Aanpassen">
 <!ENTITY editStyleButton.accesskey "A">

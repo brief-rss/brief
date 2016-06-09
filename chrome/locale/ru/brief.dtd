@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "Записи за сегодня">
 <!ENTITY starredFolder.label "Отмеченные записи">
 <!ENTITY trashFolder.label "Корзина">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Режим просмотра заголовков (F)">
 <!ENTITY fullViewCheckbox.tooltip "Режим просмотра полностью (G)">
 <!ENTITY showAllItems.tooltip "Показывать все записи (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "Двойной клик для скрытия панели">
 <!ENTITY revealSidebar.tooltip "Показать панель">
 <!ENTITY markViewRead.tooltip "Отметить все записи как прочитанные (Alt+N)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "Отметить как прочитанные">
 <!ENTITY ctxMarkTagRead.label "Отметить закладки с меткой как прочитанные">
 <!ENTITY ctxRefreshFeed.label "Обновить сейчас">

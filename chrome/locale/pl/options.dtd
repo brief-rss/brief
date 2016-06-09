@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "min">
 <!ENTITY updateIntervalHours.label "godz.">
 <!ENTITY updateIntervalDays.label "dni">
-<!ENTITY checkForUpdatesAfter.label "min">
 <!ENTITY showNotification.label "Wyświetlaj powiadomienie o nowych wiadomościach">
 <!ENTITY showNotification.accesskey "M">
 <!ENTITY readingGroup.caption "Czytanie">
-<!ENTITY openInNewTab.label "Otwieraj Brief w nowej karcie">
-<!ENTITY openInNewTab.accesskey "N">
 <!ENTITY storingGroup.caption "Przechowywanie">
 <!ENTITY expirationBefore.label "Usuń pobrane wiadomości po">
 <!ENTITY expirationAfter.label "dniach">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "P">
 <!ENTITY clearAllEntriesButton.label "Usuń wszystkie wiadomości…">
 <!ENTITY clearAllEntriesButton.accesskey "U">
-<!ENTITY showStatusbarIcon.label "Wyświetlaj ikonę rozszerzenia na pasku dodatków">
-<!ENTITY showStatusbarIcon.accesskey "A">
 <!ENTITY showUnreadCounter.label "Liczbę nieprzeczytanych wiadomości wyświetlaj za ikoną Briefa">
 <!ENTITY showUnreadCounter.accesskey "L">
 <!ENTITY sortUnreadViewOldestFirst.label "W nieprzeczytanych wyświetlaj najpierw najstarsze wiadomości">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "S">
 <!ENTITY autoMarkRead.label "Oznaczaj wyświetlone wiadomości jako przeczytane">
 <!ENTITY autoMarkRead.accesskey "C">
-<!ENTITY customizeGroup.caption "Wygląd">
 <!ENTITY editStyleDescription.label "Dostosuj wygląd Briefa">
 <!ENTITY editStyleButton.label "Dostosuj">
 <!ENTITY editStyleButton.accesskey "D">

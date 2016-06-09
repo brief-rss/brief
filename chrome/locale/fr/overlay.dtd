@@ -1,11 +1,14 @@
+<!-- Toolbar button context menu -->
 <!ENTITY briefCtxRefreshFeeds.label "Mettre tous les flux à jour">
 <!ENTITY briefCtxMarkFeedsAsRead.label "Marquer tous les flux comme lus">
 <!ENTITY briefCtxShowUnreadCounter.label "Afficher le nombre d'articles non lus">
 <!ENTITY briefCtxShowOptions.label "Options">
+<!-- Options panel -->
 <!ENTITY briefShowShortcutsMenuitem.label "Raccourcis clavier">
 <!ENTITY briefImportMenuitem.label "Importer des flux…">
 <!ENTITY briefExportMenuitem.label "Exporter les flux…">
 <!ENTITY briefOpenOptionsMenuitem.label "Options">
+<!-- Context options panels -->
 <!ENTITY briefRefreshFeed.label "Mettre à jour maintenant">
 <!ENTITY briefOpenWebsite.label "Afficher le site Web">
 <!ENTITY briefUnsubscribeFeed.label "Se désabonner">

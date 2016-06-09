@@ -1,11 +1,14 @@
+<!-- Toolbar button context menu -->
 <!ENTITY briefCtxRefreshFeeds.label "Osveži vire zdaj">
 <!ENTITY briefCtxMarkFeedsAsRead.label "Označi vse vire kot prebrane">
 <!ENTITY briefCtxShowUnreadCounter.label "Prikaži število neprebranih predmetov">
 <!ENTITY briefCtxShowOptions.label "Možnosti">
+<!-- Options panel -->
 <!ENTITY briefShowShortcutsMenuitem.label "Tipkovne bližnjice">
 <!ENTITY briefImportMenuitem.label "Uvozi vire …">
 <!ENTITY briefExportMenuitem.label "Izvozi vire …">
 <!ENTITY briefOpenOptionsMenuitem.label "Možnosti">
+<!-- Context options panels -->
 <!ENTITY briefRefreshFeed.label "Osveži zdaj">
 <!ENTITY briefOpenWebsite.label "Odpri spletno stran">
 <!ENTITY briefUnsubscribeFeed.label "Odjavi naročnino">

@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "minute">
 <!ENTITY updateIntervalHours.label "ore">
 <!ENTITY updateIntervalDays.label "zile">
-<!ENTITY checkForUpdatesAfter.label "minute">
 <!ENTITY showNotification.label "Arată o notificare cînd elemente noi sunt găsite">
 <!ENTITY showNotification.accesskey "N">
 <!ENTITY readingGroup.caption "Afișare">
-<!ENTITY openInNewTab.label "Deschide Brief într-o filă nouă">
-<!ENTITY openInNewTab.accesskey "B">
 <!ENTITY storingGroup.caption "Stocare">
 <!ENTITY expirationBefore.label "Elimină elementele descărcate după">
 <!ENTITY expirationAfter.label "zile">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "T">
 <!ENTITY clearAllEntriesButton.label "Curăță toate elementele...">
 <!ENTITY clearAllEntriesButton.accesskey "C">
-<!ENTITY showStatusbarIcon.label "Arată iconița în bara de stare">
-<!ENTITY showStatusbarIcon.accesskey "I">
 <!ENTITY showUnreadCounter.label "Arată numărul elementelor necitite alături de iconița Brief">
 <!ENTITY showUnreadCounter.accesskey "E">
 <!ENTITY sortUnreadViewOldestFirst.label "Sortează elementelor necitite începând cu cele mai vechi">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "S">
 <!ENTITY autoMarkRead.label "Automat marchează elementele ca citite după ce le văd">
 <!ENTITY autoMarkRead.accesskey "M">
-<!ENTITY customizeGroup.caption "Aspect">
 <!ENTITY editStyleDescription.label "Personalizează aspectul fluxurilor">
 <!ENTITY editStyleButton.label "Personalizare">
 <!ENTITY editStyleButton.accesskey "P">

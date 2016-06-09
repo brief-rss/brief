@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "dakika">
 <!ENTITY updateIntervalHours.label "saat">
 <!ENTITY updateIntervalDays.label "gün">
-<!ENTITY checkForUpdatesAfter.label "dakika">
 <!ENTITY showNotification.label "Yeni öğeler bulununca uyarı göster">
 <!ENTITY showNotification.accesskey "S">
 <!ENTITY readingGroup.caption "Okuyor">
-<!ENTITY openInNewTab.label "Brief'i yeni sekmede aç">
-<!ENTITY openInNewTab.accesskey "A">
 <!ENTITY storingGroup.caption "Depolama">
 <!ENTITY expirationBefore.label "İndirilmiş öğeleri şu süreden sonra sil:">
 <!ENTITY expirationAfter.label "gün">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "N">
 <!ENTITY clearAllEntriesButton.label "Tüm öğeleri temizle...">
 <!ENTITY clearAllEntriesButton.accesskey "T">
-<!ENTITY showStatusbarIcon.label "Durum çubuğunda simge göster">
-<!ENTITY showStatusbarIcon.accesskey "R">
 <!ENTITY showUnreadCounter.label "Show the number of unread items next to Brief's icon">
 <!ENTITY showUnreadCounter.accesskey "w">
 <!ENTITY sortUnreadViewOldestFirst.label "Okunmadı görünümünde önce en eski öğeleri göster">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "O">
 <!ENTITY autoMarkRead.label "Öğeleri gördükten sonra okundu olarak işaretle">
 <!ENTITY autoMarkRead.accesskey "S">
-<!ENTITY customizeGroup.caption "Dış Görünüm">
 <!ENTITY editStyleDescription.label "Beslemelerin görünümünü özelleştir">
 <!ENTITY editStyleButton.label "Özelleştir">
 <!ENTITY editStyleButton.accesskey "Z">

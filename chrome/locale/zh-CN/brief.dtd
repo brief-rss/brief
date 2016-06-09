@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "今天">
 <!ENTITY starredFolder.label "书签">
 <!ENTITY trashFolder.label "垃圾箱">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "标题模式 (F)">
 <!ENTITY fullViewCheckbox.tooltip "完整模式 (G)">
 <!ENTITY showAllItems.tooltip "显示所有项目 (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "双击隐藏侧栏">
 <!ENTITY revealSidebar.tooltip "打开侧栏">
 <!ENTITY markViewRead.tooltip "标记所有项目为已读 (Alt+N)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "标记为已读">
 <!ENTITY ctxMarkTagRead.label "标记此标签的项目为已读">
 <!ENTITY ctxRefreshFeed.label "立即刷新">

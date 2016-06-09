@@ -1,11 +1,14 @@
+<!-- Toolbar button context menu -->
 <!ENTITY briefCtxRefreshFeeds.label "立即刷新">
 <!ENTITY briefCtxMarkFeedsAsRead.label "标记所有为已读">
 <!ENTITY briefCtxShowUnreadCounter.label "显示未读项目数">
 <!ENTITY briefCtxShowOptions.label "选项">
+<!-- Options panel -->
 <!ENTITY briefShowShortcutsMenuitem.label "快捷键">
 <!ENTITY briefImportMenuitem.label "导入订阅...">
 <!ENTITY briefExportMenuitem.label "导出订阅...">
 <!ENTITY briefOpenOptionsMenuitem.label "选项">
+<!-- Context options panels -->
 <!ENTITY briefRefreshFeed.label "立即刷新">
 <!ENTITY briefOpenWebsite.label "打开网站">
 <!ENTITY briefUnsubscribeFeed.label "取消订阅">

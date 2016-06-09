@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "Aujourd'hui">
 <!ENTITY starredFolder.label "Marqués">
 <!ENTITY trashFolder.label "Corbeille">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Afficher uniquement les titres (F)">
 <!ENTITY fullViewCheckbox.tooltip "Afficher les articles en entier (G)">
 <!ENTITY showAllItems.tooltip "Afficher tous les articles (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "Double-cliquer pour masquer ce panneau latéral">
 <!ENTITY revealSidebar.tooltip "Afficher le panneau latéral">
 <!ENTITY markViewRead.tooltip "Marquer les articles courants comme lus (Alt + N)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "Marquer comme lu">
 <!ENTITY ctxMarkTagRead.label "Marquer les articles étiquetés comme lus">
 <!ENTITY ctxRefreshFeed.label "Mettre à jour maintenant">

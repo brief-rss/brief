@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "minutes">
 <!ENTITY updateIntervalHours.label "heures">
 <!ENTITY updateIntervalDays.label "jours">
-<!ENTITY checkForUpdatesAfter.label "minutes">
 <!ENTITY showNotification.label "M'avertir si des mises à jour ont été trouvées">
 <!ENTITY showNotification.accesskey "a">
 <!ENTITY readingGroup.caption "Lecture">
-<!ENTITY openInNewTab.label "Ouvrir Brief dans un nouvel onglet">
-<!ENTITY openInNewTab.accesskey "O">
 <!ENTITY storingGroup.caption "Enregistrement">
 <!ENTITY expirationBefore.label "Supprimer les articles téléchargés il y a plus de">
 <!ENTITY expirationAfter.label "jours">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "N">
 <!ENTITY clearAllEntriesButton.label "Supprimer tous les articles…">
 <!ENTITY clearAllEntriesButton.accesskey "t">
-<!ENTITY showStatusbarIcon.label "Afficher l'icône dans la barre d'état">
-<!ENTITY showStatusbarIcon.accesskey "f">
 <!ENTITY showUnreadCounter.label "Afficher le nombre d'articles non lus à côté de l'icône de Brief.">
 <!ENTITY showUnreadCounter.accesskey "l">
 <!ENTITY sortUnreadViewOldestFirst.label "Afficher les plus anciens en premier dans l'affichage des articles non lus">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "f">
 <!ENTITY autoMarkRead.label "Marquer les articles vus comme lus">
 <!ENTITY autoMarkRead.accesskey "v">
-<!ENTITY customizeGroup.caption "Apparence">
 <!ENTITY editStyleDescription.label "Personnaliser l'apparence de Brief">
 <!ENTITY editStyleButton.label "Personnaliser">
 <!ENTITY editStyleButton.accesskey "P">

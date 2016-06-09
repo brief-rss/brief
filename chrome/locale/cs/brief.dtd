@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "Dnes">
 <!ENTITY starredFolder.label "Záložky">
 <!ENTITY trashFolder.label "Koš">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Použít zobrazení záhlaví">
 <!ENTITY fullViewCheckbox.tooltip "Zobrazit úplné položky (G)">
 <!ENTITY showAllItems.tooltip "Zobrazit všechny položky (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "Dvojím klepnutím skryjete postranní lištu">
 <!ENTITY revealSidebar.tooltip "Znovu zobrazit postranní lištu">
 <!ENTITY markViewRead.tooltip "Označit všechny položky jako přečtené (Alt + N)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "Označit jako přečtené">
 <!ENTITY ctxMarkTagRead.label "Označit položky se štítkem jako přečtené">
 <!ENTITY ctxRefreshFeed.label "Obnovit nyní">

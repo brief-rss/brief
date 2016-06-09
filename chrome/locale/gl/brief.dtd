@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "Hoxe">
 <!ENTITY starredFolder.label "Marcadores">
 <!ENTITY trashFolder.label "Lixo">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Ver as cabeceiras">
 <!ENTITY fullViewCheckbox.tooltip "Ver todos os elementos (G)">
 <!ENTITY showAllItems.tooltip "Mostrar todos os elementos (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "Facer dobre clic para ocultar a barra lateral">
 <!ENTITY revealSidebar.tooltip "Amosar a barra lateral">
 <!ENTITY markViewRead.tooltip "Marcar todos os elementos como lidos (Alt + N)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "Marcar como lido">
 <!ENTITY ctxMarkTagRead.label "Marcar os elementos etiquetados como lidos">
 <!ENTITY ctxRefreshFeed.label "Actualizar agora">

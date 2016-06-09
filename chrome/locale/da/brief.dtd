@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "I dag">
 <!ENTITY starredFolder.label "Bogmærker">
 <!ENTITY trashFolder.label "Skraldespand">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Vis overskrifter (F)">
 <!ENTITY fullViewCheckbox.tooltip "Vis hele indholdet (G)">
 <!ENTITY showAllItems.tooltip "Vis alle emner (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "Dobbeltklik for at skjule sidebjælken">
 <!ENTITY revealSidebar.tooltip "Vis sidebjælken">
 <!ENTITY markViewRead.tooltip "Marker alle emner som læste (ALT + N)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "Marker som læst">
 <!ENTITY ctxMarkTagRead.label "Marker mærkede emner som læste">
 <!ENTITY ctxRefreshFeed.label "Genindlæs nu">

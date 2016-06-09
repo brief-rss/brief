@@ -1,11 +1,14 @@
+<!-- Toolbar button context menu -->
 <!ENTITY briefCtxRefreshFeeds.label "Genindlæs feeds nu">
 <!ENTITY briefCtxMarkFeedsAsRead.label "Marker alle feeds som læste">
 <!ENTITY briefCtxShowUnreadCounter.label "Vis antallet af ulæste enmer">
 <!ENTITY briefCtxShowOptions.label "Indstillinger">
+<!-- Options panel -->
 <!ENTITY briefShowShortcutsMenuitem.label "Tastaturgenveje">
 <!ENTITY briefImportMenuitem.label "Importer feeds…">
 <!ENTITY briefExportMenuitem.label "Eksporter feeds…">
 <!ENTITY briefOpenOptionsMenuitem.label "Indstillinger">
+<!-- Context options panels -->
 <!ENTITY briefRefreshFeed.label "Genindlæs nu">
 <!ENTITY briefOpenWebsite.label "Åbn websted">
 <!ENTITY briefUnsubscribeFeed.label "Stop abonnement">

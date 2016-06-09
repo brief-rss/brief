@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "Vandaag">
 <!ENTITY starredFolder.label "Bladwijzers">
 <!ENTITY trashFolder.label "Prullenbak">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "Kopteksten bekijken (F)">
 <!ENTITY fullViewCheckbox.tooltip "Volledige items bekijken (G)">
 <!ENTITY showAllItems.tooltip "Alle berichten bekijken (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "Dubbelklik om de zijbalk te verbergen">
 <!ENTITY revealSidebar.tooltip "Zijbalk weergeven">
 <!ENTITY markViewRead.tooltip "Alle berichten als gelezen markeren (houd Ctrl ingedrukt om alleen de huidige pagina te markeren)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "Als gelezen markeren">
 <!ENTITY ctxMarkTagRead.label "Gelabelde berichten als gelezen markeren">
 <!ENTITY ctxRefreshFeed.label "Nu vernieuwen">

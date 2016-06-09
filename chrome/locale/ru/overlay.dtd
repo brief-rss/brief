@@ -1,11 +1,14 @@
+<!-- Toolbar button context menu -->
 <!ENTITY briefCtxRefreshFeeds.label "Обновить ленты сейчас">
 <!ENTITY briefCtxMarkFeedsAsRead.label "Пометить все ленты как прочитанные">
 <!ENTITY briefCtxShowUnreadCounter.label "Показывать количество непрочитанных записей">
 <!ENTITY briefCtxShowOptions.label "Настройки">
+<!-- Options panel -->
 <!ENTITY briefShowShortcutsMenuitem.label "Клавиатурные сокращения">
 <!ENTITY briefImportMenuitem.label "Импортировать ленты...">
 <!ENTITY briefExportMenuitem.label "Экспортировать ленты...">
 <!ENTITY briefOpenOptionsMenuitem.label "Настройки">
+<!-- Context options panels -->
 <!ENTITY briefRefreshFeed.label "Обновить сейчас">
 <!ENTITY briefOpenWebsite.label "Открыть веб-сайт">
 <!ENTITY briefUnsubscribeFeed.label "Отписаться">

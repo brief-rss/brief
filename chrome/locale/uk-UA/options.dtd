@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "хв">
 <!ENTITY updateIntervalHours.label "год">
 <!ENTITY updateIntervalDays.label "дн">
-<!ENTITY checkForUpdatesAfter.label "хв">
 <!ENTITY showNotification.label "Відображати сповіщення, коли знайдено нові записи">
 <!ENTITY showNotification.accesskey "с">
 <!ENTITY readingGroup.caption "Читання">
-<!ENTITY openInNewTab.label "Відкривати Brief у новій вкладці">
-<!ENTITY openInNewTab.accesskey "н">
 <!ENTITY storingGroup.caption "Зберігання">
 <!ENTITY expirationBefore.label "Видаляти завантажені записи через">
 <!ENTITY expirationAfter.label "дн">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "З">
 <!ENTITY clearAllEntriesButton.label "Видалити всі записи...">
 <!ENTITY clearAllEntriesButton.accesskey "д">
-<!ENTITY showStatusbarIcon.label "Відображати піктограму у рядку стану">
-<!ENTITY showStatusbarIcon.accesskey "п">
 <!ENTITY showUnreadCounter.label "Відображати кількість непрочитаних записів поруч із піктограмою">
 <!ENTITY showUnreadCounter.accesskey "к">
 <!ENTITY sortUnreadViewOldestFirst.label "У поданні «Непрочитані» спочатку відображати найстаріші елементи">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "Н">
 <!ENTITY autoMarkRead.label "Автоматично позначати елементи як прочитані після того, як я їх побачу">
 <!ENTITY autoMarkRead.accesskey "п">
-<!ENTITY customizeGroup.caption "Вигляд">
 <!ENTITY editStyleDescription.label "Налаштування зовнішнього вигляду стрічок">
 <!ENTITY editStyleButton.label "Налаштувати">
 <!ENTITY editStyleButton.accesskey "ш">

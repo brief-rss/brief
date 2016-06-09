@@ -1,11 +1,14 @@
+<!-- Toolbar button context menu -->
 <!ENTITY briefCtxRefreshFeeds.label "Actualizează fluxurile acum">
 <!ENTITY briefCtxMarkFeedsAsRead.label "Marchează toate fluxurile ca citite">
 <!ENTITY briefCtxShowUnreadCounter.label "Arată numărul elementelor necitite">
 <!ENTITY briefCtxShowOptions.label "Opțiuni">
+<!-- Options panel -->
 <!ENTITY briefShowShortcutsMenuitem.label "Scurtături de la tastatură">
 <!ENTITY briefImportMenuitem.label "Import fluxuri">
 <!ENTITY briefExportMenuitem.label "Export fluxuri">
 <!ENTITY briefOpenOptionsMenuitem.label "Opțiuni">
+<!-- Context options panels -->
 <!ENTITY briefRefreshFeed.label "Actualizează acum">
 <!ENTITY briefOpenWebsite.label "Deschide site">
 <!ENTITY briefUnsubscribeFeed.label "Dezabonare">

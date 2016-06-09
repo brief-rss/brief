@@ -3,6 +3,7 @@
 <!ENTITY todayFolder.label "今日">
 <!ENTITY starredFolder.label "ブックマーク">
 <!ENTITY trashFolder.label "ごみ箱">
+<!-- Buttons -->
 <!ENTITY headlinesCheckbox.tooltip "ヘッドラインを表示します (F)">
 <!ENTITY fullViewCheckbox.tooltip "内容を全て表示します (G)">
 <!ENTITY showAllItems.tooltip "すべての項目を表示します (A)">
@@ -19,6 +20,7 @@
 <!ENTITY sidebarSplitter.tooltip "ダブルクリックするとサイドバーを非表示にします">
 <!ENTITY revealSidebar.tooltip "サイドバーを表示させます">
 <!ENTITY markViewRead.tooltip "すべての項目を既読にします (Alt + N)">
+<!-- # Context menu -->
 <!ENTITY ctxMarkRead.label "既読にする">
 <!ENTITY ctxMarkTagRead.label "タグ付けされた項目を既読にする">
 <!ENTITY ctxRefreshFeed.label "今すぐ更新する">

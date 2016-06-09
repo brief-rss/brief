@@ -6,12 +6,9 @@
 <!ENTITY updateIntervalMinutes.label "минут(ы)">
 <!ENTITY updateIntervalHours.label "час(ов)">
 <!ENTITY updateIntervalDays.label "дней">
-<!ENTITY checkForUpdatesAfter.label "минут(ы)">
 <!ENTITY showNotification.label "Показывать оповещение при появлении новых записей">
 <!ENTITY showNotification.accesskey "П">
 <!ENTITY readingGroup.caption "Чтение">
-<!ENTITY openInNewTab.label "Открывать Brief в новой вкладке">
-<!ENTITY openInNewTab.accesskey "в">
 <!ENTITY storingGroup.caption "Хранение">
 <!ENTITY expirationBefore.label "Удалять загруженные записи через">
 <!ENTITY expirationAfter.label "дней">
@@ -22,15 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "р">
 <!ENTITY clearAllEntriesButton.label "Удалить все записи…">
 <!ENTITY clearAllEntriesButton.accesskey "л">
-<!ENTITY showStatusbarIcon.label "Показывать значок в строке состояния">
-<!ENTITY showStatusbarIcon.accesskey "з">
 <!ENTITY showUnreadCounter.label "Показывать число непрочитанных новостей возле значка">
 <!ENTITY showUnreadCounter.accesskey "ы">
 <!ENTITY sortUnreadViewOldestFirst.label "В списке непрочитанных записей показывать старые в начале">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "о">
 <!ENTITY autoMarkRead.label "Отмечать записи прочитанными после просмотра">
 <!ENTITY autoMarkRead.accesskey "п">
-<!ENTITY customizeGroup.caption "Внешний вид">
 <!ENTITY editStyleDescription.label "Настройка внешнего вида Brief">
 <!ENTITY editStyleButton.label "Настроить">
 <!ENTITY editStyleButton.accesskey "Н">
