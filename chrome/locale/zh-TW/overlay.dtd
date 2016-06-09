@@ -1,0 +1,18 @@
+<!-- Toolbar button context menu -->
+<!ENTITY briefCtxRefreshFeeds.label "立即更新消息來源">
+<!ENTITY briefCtxMarkFeedsAsRead.label "標記所有消息來源為已讀">
+<!ENTITY briefCtxShowUnreadCounter.label "顯示未讀項目數">
+<!ENTITY briefCtxShowOptions.label "選項">
+<!-- Options panel -->
+<!ENTITY briefShowShortcutsMenuitem.label "鍵盤快速鍵">
+<!ENTITY briefImportMenuitem.label "匯入消息來源...">
+<!ENTITY briefExportMenuitem.label "匯出消息來源...">
+<!ENTITY briefOpenOptionsMenuitem.label "選項">
+<!-- Context options panels -->
+<!ENTITY briefRefreshFeed.label "立即更新">
+<!ENTITY briefOpenWebsite.label "開啟網站">
+<!ENTITY briefUnsubscribeFeed.label "取消訂閱">
+<!ENTITY briefEmptyFeed.label "清空消息來源">
+<!ENTITY briefFeedSettings.label "消息來源設定">
+<!ENTITY briefRestoreTrashed.label "還原所有項目">
+<!ENTITY briefEmptyTrash.label "清空垃圾筒">

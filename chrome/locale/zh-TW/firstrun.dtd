@@ -1,0 +1,7 @@
+<!ENTITY pageTitle "簡介 Brief">
+<!ENTITY thankYou.header "感謝安裝 Brief">
+<!ENTITY howToSubscribe.header "可以用最輕鬆的方式追蹤你最愛網站的更新動態！">
+<!ENTITY subscribingStep1.description "連到你想要追蹤的網站，開啟瀏覽器「<strong>書籤</strong>」選單並選「<strong>將本頁加入書籤</strong>」。">
+<!ENTITY subscribingStep2.description "或也可以直接點入網站上提供消息來源的連結。">
+<!ENTITY subscribingStep3.description "選擇 <strong>Brief</strong> 後點「<strong>立即訂閱</strong>」就可以了！">
+<!ENTITY getStartedButton.label "開始使用">
