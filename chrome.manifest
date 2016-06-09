@@ -36,6 +36,7 @@ locale  brief   sl-SI  chrome/locale/sl-SI/
 locale  brief   tr     chrome/locale/tr/
 locale  brief   uk-UA  chrome/locale/uk-UA/
 locale  brief   zh-CN  chrome/locale/zh-CN/
+locale  brief   zh-TW  chrome/locale/zh-TW/
 
 # Out-of-date locales
 #locale  brief   de     chrome/locale/de/
