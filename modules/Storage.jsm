@@ -545,6 +545,11 @@ let StorageInternal = {
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
         })
 
+        // Garbage collect the full text search index
+        Stm.entriesTextSpecialCommand.execute({
+            'specialCommand': 'merge=200,8',
+        })
+
         Stm.purgeDeletedEntries.execute({
             'deletedState': Storage.ENTRY_STATE_DELETED,
             'currentDate': Date.now(),
@@ -1983,6 +1988,12 @@ let Stm = {
         let sql = 'DELETE FROM feeds                                      '+
                   'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
                   '      feeds.hidden != 0                                ';
+        return new Statement(sql);
+    },
+
+    get entriesTextSpecialCommand() {
+        let sql = 'INSERT INTO entries_text(entries_text)                 '+
+                  'VALUES (:specialCommand)                               ';
         return new Statement(sql);
     },
 
