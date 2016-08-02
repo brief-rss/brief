@@ -13,10 +13,11 @@ Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 IMPORT_COMMON(this);
 
 
-const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
-const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
+// Time in milliseconds
+const PURGE_ENTRIES_INTERVAL = 3600*24*1000; // 1 day
+const DELETED_FEEDS_RETENTION_TIME = 3600*24*7*1000; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
-const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
+const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14*1000; // 2 weeks
 const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 
@@ -577,7 +578,7 @@ let StorageInternal = {
                 // Integer prefs are longs while Date is a long long.
                 let now = Math.round(Date.now() / 1000);
                 let lastPurgeTime = Prefs.getIntPref('database.lastPurgeTime');
-                if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
+                if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL/1000)
                     this.purgeDeleted();
 
                 // Remove the backup file after certain amount of time.
