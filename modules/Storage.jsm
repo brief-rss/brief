@@ -9,6 +9,7 @@ Components.utils.import('resource://gre/modules/Task.jsm');
 Components.utils.import('resource://gre/modules/osfile.jsm');
 Components.utils.import('resource://gre/modules/Sqlite.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
+Components.utils.import('resource://gre/modules/FileUtils.jsm');
 
 IMPORT_COMMON(this);
 
@@ -181,6 +182,13 @@ const Storage = Object.freeze({
      */
     init: function() {
         return StorageInternal.init();
+    },
+
+    /**
+     * Opens a raw database connection, only for use by the vacuum service
+     */
+    createRawDatabaseConnection: function() {
+        return StorageInternal.createRawDatabaseConnection();
     }
 
 })
@@ -242,6 +250,12 @@ let StorageInternal = {
             this.deferredReady.resolve();
         }
     }.task(),
+
+    createRawDatabaseConnection: function StorageInternal_createRawDBConnection() {
+        let path = OS.Path.join(OS.Constants.Path.profileDir, "brief.sqlite");
+        let databaseFile = FileUtils.File(path);
+        return Services.storage.openUnsharedDatabase(databaseFile);
+    },
 
     setupDatabase: function* Database_setupDatabase() {
         makeCol = col => col['name'] + ' ' + col['type'] +
