@@ -21,6 +21,7 @@ const LIVEMARKS_SYNC_DELAY = 100;
 const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14*1000; // 2 weeks
 const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
+const MAX_WAL_CHECKPOINT_SIZE = 16; // Checkpoint every 512KB for the default page size
 
 
 const FEEDS_COLUMNS = FEEDS_TABLE_SCHEMA.map(col => col.name);
@@ -213,6 +214,9 @@ let StorageInternal = {
         }
 
         yield Connection.execute('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE);
+        // limit the WAL size
+        yield Connection.execute('PRAGMA wal_autocheckpoint = ' + MAX_WAL_CHECKPOINT_SIZE);
+        yield Connection.execute('PRAGMA journal_size_limit = ' + (3*32768*MAX_WAL_CHECKPOINT_SIZE));
 
         // Build feed cache.
         this.feedCache = [];
