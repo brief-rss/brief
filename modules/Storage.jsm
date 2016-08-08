@@ -1646,7 +1646,8 @@ let BookmarkObserver = {
             this.syncDelay.then(() => {
                 this.syncDelay = null;
                 Storage.syncWithLivemarks();
-            })
+            },
+            reason => { if (reason != 'cancelled') throw reason })
         }
     },
 
