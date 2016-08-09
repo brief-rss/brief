@@ -55,10 +55,9 @@ function FeedView(aTitle, aQuery) {
     if (!this.query.searchString)
         getElement('searchbar').value = '';
 
-    getTopWindow().gBrowser.tabContainer.addEventListener('TabSelect', this, false);
-
     Storage.addObserver(this);
 
+    this.document.addEventListener('visibilitychange', this, false);
     this.document.addEventListener('click', this, true);
     this.document.addEventListener('scroll', this, true);
     this.document.addEventListener('keypress', this, true);
@@ -369,8 +368,8 @@ FeedView.prototype = {
 
 
     uninit: function FeedView_uninit() {
-        getTopWindow().gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
         this.window.removeEventListener('resize', this, false);
+        this.document.removeEventListener('visibilitychange', this, false);
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
         this.document.removeEventListener('keypress', this, true);
@@ -449,8 +448,8 @@ FeedView.prototype = {
                 onKeyPress(aEvent);
                 break;
 
-            case 'TabSelect':
-                if (this._refreshPending && aEvent.originalTarget == getTopWindow().Brief.getBriefTab()) {
+            case 'visibilitychange':
+                if (this._refreshPending && this._isActiveDocument()) {
                     this.refresh();
                     this._refreshPending = false;
                 }
@@ -458,8 +457,12 @@ FeedView.prototype = {
         }
     },
 
+    _isActiveDocument: function FeedView__isActiveDocument() {
+        return this.document.visibilityState === 'visible';
+    },
+
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
-        if (getTopWindow().gBrowser.currentURI.spec == document.documentURI)
+        if (this._isActiveDocument())
             this._onEntriesAdded(aEntryList.entries)
                 .catch(this._ignoreRefresh);
         else
@@ -467,7 +470,7 @@ FeedView.prototype = {
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
-        if (getTopWindow().gBrowser.currentURI.spec == document.documentURI) {
+        if (this._isActiveDocument()) {
             this._onEntriesRemoved(aEntryList.entries, false, false);
             this._onEntriesAdded(aEntryList.entries)
                 .catch(this._ignoreRefresh);

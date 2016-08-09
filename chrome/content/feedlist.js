@@ -492,7 +492,7 @@ let FeedList = {
                 break;
 
             case 'brief:custom-style-changed':
-                getTopWindow().gBrowser.getBrowserForDocument(document).reload();
+                document.location.reload();
                 break;
         }
     },
