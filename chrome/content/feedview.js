@@ -431,7 +431,8 @@ FeedView.prototype = {
                     this._scrollSelectionTimeout = setTimeout(callback, 50);
                 }
 
-                if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                if (!this._loading && !this._allEntriesLoaded
+                        && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
 
@@ -448,7 +449,8 @@ FeedView.prototype = {
                 break;
 
             case 'resize':
-                if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                if (!this._loading && !this._allEntriesLoaded
+                        && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
                 break;
