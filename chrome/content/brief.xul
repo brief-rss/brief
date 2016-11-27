@@ -163,7 +163,8 @@
                   contextmenu="feed-list-popup"
                   persist="closedFolders"
                   onselect="FeedList.onSelect(event)"
-                  onkeyup="FeedList.onKeyUp(event)">
+                  onkeyup="FeedList.onKeyUp(event)"
+                  onclick="FeedList.onClick(event)">
 
         </richtree>
     </vbox>

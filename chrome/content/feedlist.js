@@ -267,6 +267,19 @@ let FeedList = {
         gCurrentView = new FeedView(this.selectedFeed.title, query);
     },
 
+    onClick: function FeedList_onClick(e) {
+        if (e.button == 1) {
+            let feeds = [];
+            if (e.target.localName.indexOf('folder') >= 0) {
+                for (let item of e.target.getElementsByTagName('richtreeitem'))
+                    feeds.push(Storage.getFeed(item.id));
+            } else
+                feeds.push(Storage.getFeed(e.target.id));
+
+            FeedUpdateService.updateFeeds(feeds);
+        }
+    },
+
     /**
      * Refresh the folder's label.
      *
