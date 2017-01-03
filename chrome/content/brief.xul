@@ -6,247 +6,248 @@
 
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
-<page id="brief-window"
-      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+<xul:page id="brief-window"
+      xmlns="http://www.w3.org/1999/xhtml"
       xmlns:html="http://www.w3.org/1999/xhtml"
+      xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       title="Brief"
       orient="horizontal"
       onload="Storage.ready.then(init)"
       onunload="unload()">
 
-    <html:link rel="icon" href="chrome://brief/skin/brief-icon-16.png" style="display:none" />
+    <link rel="icon" href="chrome://brief/skin/brief-icon-16.png" style="display:none" />
 
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
 
-    <stringbundleset id="string-bundles">
-        <stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
-    </stringbundleset>
+    <xul:stringbundleset id="string-bundles">
+        <xul:stringbundle id="main-bundle" src="chrome://brief/locale/brief.properties"/>
+    </xul:stringbundleset>
 
-    <popupset id="main-popupset">
-        <menupopup id="view-list-popup"
+    <xul:popupset id="main-popupset">
+        <xul:menupopup id="view-list-popup"
                    onpopupshowing="ViewListContextMenu.init()">
-            <menuitem id="ctx-mark-special-folder-read"
+            <xul:menuitem id="ctx-mark-special-folder-read"
                       label="&ctxMarkRead.label;"
                       oncommand="ViewListContextMenu.markFolderRead()"/>
-            <menuitem id="ctx-mark-tag-read"
+            <xul:menuitem id="ctx-mark-tag-read"
                       label="&ctxMarkTagRead.label;"
                       oncommand="ViewListContextMenu.markTagRead()"/>
-            <menuitem id="ctx-restore-trashed"
+            <xul:menuitem id="ctx-restore-trashed"
                       label="&ctxRestoreTrashed.label;"
                       oncommand="Commands.restoreTrashed()"/>
-            <menuseparator id="ctx-view-list-separator"/>
-            <menuitem id="ctx-empty-today-folder"
+            <xul:menuseparator id="ctx-view-list-separator"/>
+            <xul:menuitem id="ctx-empty-today-folder"
                       label="&ctxEmptyFolder.label;"
                       oncommand="ViewListContextMenu.emptyUnreadFolder()"/>
-            <menuitem id="ctx-delete-tag"
+            <xul:menuitem id="ctx-delete-tag"
                       label="&ctxDeleteTag.label;"
                       oncommand="ViewListContextMenu.deleteTag()"/>
-            <menuitem id="ctx-empty-trash"
+            <xul:menuitem id="ctx-empty-trash"
                       label="&ctxEmptyTrash.label;"
                       oncommand="Commands.emptyTrash()"/>
-        </menupopup>
-        <menupopup id="tag-list-popup">
-            <menuitem id="ctx-mark-tag-read"
+        </xul:menupopup>
+        <xul:menupopup id="tag-list-popup">
+            <xul:menuitem id="ctx-mark-tag-read"
                       label="&ctxMarkTagRead.label;"
                       oncommand="TagListContextMenu.markTagRead()"/>
-            <menuseparator/>
-            <menuitem id="ctx-delete-tag"
+            <xul:menuseparator/>
+            <xul:menuitem id="ctx-delete-tag"
                       label="&ctxDeleteTag.label;"
                       oncommand="TagListContextMenu.deleteTag()"/>
-        </menupopup>
-        <menupopup id="feed-context-menu"
+        </xul:menupopup>
+        <xul:menupopup id="feed-context-menu"
                    onpopupshowing="FeedContextMenu.init()">
-            <menuitem id="ctx-mark-feed-read"
+            <xul:menuitem id="ctx-mark-feed-read"
                       label="&ctxMarkRead.label;"
                       oncommand="FeedContextMenu.markFeedRead()"/>
-            <menuitem id="ctx-update-feed"
+            <xul:menuitem id="ctx-update-feed"
                       label="&ctxRefreshFeed.label;"
                       oncommand="FeedUpdateService.updateFeeds([FeedContextMenu.targetFeed])"/>
-            <menuitem id="ctx-open-website"
+            <xul:menuitem id="ctx-open-website"
                       label="&ctxOpenWebsite.label;"
                       oncommand="Commands.openFeedWebsite(FeedContextMenu.targetFeed)"/>
-            <menuseparator/>
-            <menuitem id="ctx-unsubscribe-feed"
+            <xul:menuseparator/>
+            <xul:menuitem id="ctx-unsubscribe-feed"
                       label="&ctxUnsubscribeFeed.label;"
                       oncommand="Commands.deleteFeed(FeedContextMenu.targetFeed)"/>
-            <menuitem id="ctx-empty-feed"
+            <xul:menuitem id="ctx-empty-feed"
                       label="&ctxEmptyFeed.label;"
                       oncommand="Commands.emptyFeed(FeedContextMenu.targetFeed)"/>
-            <menuseparator/>
-            <menuitem id="ctx-feed-settomgs"
+            <xul:menuseparator/>
+            <xul:menuitem id="ctx-feed-settomgs"
                       label="&ctxFeedSettings.label;"
                       oncommand="Commands.showFeedProperties(FeedContextMenu.targetFeed)"/>
-        </menupopup>
-        <menupopup id="folder-context-menu">
-            <menuitem id="ctx-mark-folder-read"
+        </xul:menupopup>
+        <xul:menupopup id="folder-context-menu">
+            <xul:menuitem id="ctx-mark-folder-read"
                       label="&ctxMarkRead.label;"
                       oncommand="FolderContextMenu.markFolderRead()"/>
-            <menuitem id="ctx-refresh-folder"
+            <xul:menuitem id="ctx-refresh-folder"
                       label="&ctxRefreshFolder.label;"
                       oncommand="FolderContextMenu.updateFolder()"/>
-            <menuseparator/>
-            <menuitem id="ctx-delete-folder"
+            <xul:menuseparator/>
+            <xul:menuitem id="ctx-delete-folder"
                       label="&ctxDeleteFolder.label;"
                       oncommand="FolderContextMenu.deleteFolder()"/>
-            <menuitem id="ctx-empty-folder"
+            <xul:menuitem id="ctx-empty-folder"
                       label="&ctxEmptyFolder.label;"
                       oncommand="FolderContextMenu.emptyFolder()"/>
-        </menupopup>
-    </popupset>
+        </xul:menupopup>
+    </xul:popupset>
 
-    <vbox id="sidebar" width="250" persist="width hidden">
+    <xul:vbox id="sidebar" width="250" persist="width hidden">
 
-        <vbox id="sidebar-top">
-            <hbox id="sidebar-toolbar">
-                <deck id="update-buttons-deck"
+        <xul:vbox id="sidebar-top">
+            <xul:hbox id="sidebar-toolbar">
+                <xul:deck id="update-buttons-deck"
                       class="sidebar-button-box"
                       selectedIndex="1">
-                    <button id="update-button"
+                    <xul:button id="update-button"
                             class="brief-button sidebar-button"
                             label="&updateButton.label;"
                             tooltiptext="&updateButton.tooltip;"
                             oncommand="FeedUpdateService.updateAllFeeds()"/>
-                    <button id="stop-updating-button"
+                    <xul:button id="stop-updating-button"
                             class="brief-button sidebar-button"
                             label="&stopUpdatingButton.label;"
                             tooltiptext="&stopUpdatingButton.tooltip;"
                             oncommand="FeedUpdateService.stopUpdating()"/>
-                </deck>
-                <hbox id="organize-button-box" class="sidebar-button-box">
-                    <button id="organize-button"
+                </xul:deck>
+                <xul:hbox id="organize-button-box" class="sidebar-button-box">
+                    <xul:button id="organize-button"
                             class="brief-button sidebar-button"
                             label="&organizeFeeds.label;"
                             tooltiptext="&organizeFeeds.tooltip;"
                             oncommand="Commands.openLibrary()"/>
-                </hbox>
-                <hbox id="options-dropdown-button-box" class="sidebar-button-box">
-                    <button id="options-dropdown-button"
+                </xul:hbox>
+                <xul:hbox id="options-dropdown-button-box" class="sidebar-button-box">
+                    <xul:button id="options-dropdown-button"
                             class="brief-button sidebar-button"
                             type="menu"
                             label="&optionsDropdownButton.label;"
                             tooltiptext="&optionsDropdownButton.tooltip;"
                             onclick="showOptionsDropdown()"/>
-                </hbox>
-            </hbox>
-            <hbox id="update-progress-container">
-                <progressmeter id="update-progress"/>
-            </hbox>
-        </vbox>
+                </xul:hbox>
+            </xul:hbox>
+            <xul:hbox id="update-progress-container">
+                <xul:progressmeter id="update-progress"/>
+            </xul:hbox>
+        </xul:vbox>
 
-        <richlistbox id="view-list"
+        <xul:richlistbox id="view-list"
                      startview="all-items-folder"
                      persist="startview"
                      context="view-list-popup"
                      suppressonselect="true"
                      onselect="ViewList.onSelect(event)">
-            <richlistitem id="all-items-folder">
-                <label class="view-title" flex="1" value="&allItemsFolder.label;"/>
-                <label class="unread-count"/>
-            </richlistitem>
-            <richlistitem id="today-folder">
-                <label class="view-title" flex="1" value="&todayFolder.label;"/>
-                <label class="unread-count"/>
-            </richlistitem>
-            <richlistitem id="starred-folder">
-                <label class="view-title" flex="1" value="&starredFolder.label;"/>
-                <label class="unread-count"/>
-            </richlistitem>
-            <richlistitem id="trash-folder">
-                <label class="view-title" value="&trashFolder.label;"/>
-            </richlistitem>
-        </richlistbox>
+            <xul:richlistitem id="all-items-folder">
+                <xul:label class="view-title" flex="1" value="&allItemsFolder.label;"/>
+                <xul:label class="unread-count"/>
+            </xul:richlistitem>
+            <xul:richlistitem id="today-folder">
+                <xul:label class="view-title" flex="1" value="&todayFolder.label;"/>
+                <xul:label class="unread-count"/>
+            </xul:richlistitem>
+            <xul:richlistitem id="starred-folder">
+                <xul:label class="view-title" flex="1" value="&starredFolder.label;"/>
+                <xul:label class="unread-count"/>
+            </xul:richlistitem>
+            <xul:richlistitem id="trash-folder">
+                <xul:label class="view-title" value="&trashFolder.label;"/>
+            </xul:richlistitem>
+        </xul:richlistbox>
 
-        <richtree id="feed-list" flex="1"
+        <xul:richtree id="feed-list" flex="1"
                   seltype="single"
                   contextmenu="feed-list-popup"
                   persist="closedFolders"
                   onselect="FeedList.onSelect(event)"
                   onkeyup="FeedList.onKeyUp(event)">
 
-        </richtree>
-    </vbox>
+        </xul:richtree>
+    </xul:vbox>
 
-    <splitter id="sidebar-splitter"
+    <xul:splitter id="sidebar-splitter"
               resizeafter="farthest"
               tooltiptext="&sidebarSplitter.tooltip;"
               persist="hidden"
               ondblclick="Commands.hideSidebar()"/>
 
-    <listbox id="tag-list"
+    <xul:listbox id="tag-list"
              hidden="true"
              persist="width"
              context="tag-list-popup"
              onselect="TagList.onSelect(event)"/>
 
-    <splitter id="tag-list-splitter"
+    <xul:splitter id="tag-list-splitter"
               hidden="true"/>
 
-    <vbox flex="1">
-        <hbox id="feed-view-header">
-            <button id="view-title-button"
+    <xul:vbox flex="1">
+        <xul:hbox id="feed-view-header">
+            <xul:button id="view-title-button"
                     class="brief-button"
                     type="menu"
                     onclick="showContextOptionsDropdown()"/>
-            <label id="view-title-label"/>
-            <spacer flex="1"/>
-            <button id="mark-view-read"
+            <xul:label id="view-title-label"/>
+            <xul:spacer flex="1"/>
+            <xul:button id="mark-view-read"
                     class="brief-button feed-header-button"
                     tooltiptext="&markViewRead.tooltip;"
                     onclick="onMarkViewReadClick(event)"/>
-            <spacer class="button-spacer" flex="1"/>
-            <button id="headlines-checkbox"
+            <xul:spacer class="button-spacer" flex="1"/>
+            <xul:button id="headlines-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
                     autoCheck="false"
                     tooltiptext="&headlinesCheckbox.tooltip;"
                     oncommand="Commands.switchViewMode(1)"/>
-            <button id="full-view-checkbox"
+            <xul:button id="full-view-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
                     autoCheck="false"
                     tooltiptext="&fullViewCheckbox.tooltip;"
                     oncommand="Commands.switchViewMode(0)"/>
-            <spacer class="button-spacer" flex="1"/>
-            <button id="show-all-entries-checkbox"
+            <xul:spacer class="button-spacer" flex="1"/>
+            <xul:button id="show-all-entries-checkbox"
                     class="brief-button filter-button"
                     tooltiptext="&showAllItems.tooltip;"
                     type="checkbox"
                     autoCheck="false"
                     oncommand="Commands.switchViewFilter('all')"/>
-            <button id="filter-unread-checkbox"
+            <xul:button id="filter-unread-checkbox"
                     class="brief-button filter-button"
                     tooltiptext="&filterUnread.tooltip;"
                     type="checkbox"
                     autoCheck="false"
                     oncommand="Commands.switchViewFilter('unread')"/>
-            <button id="filter-starred-checkbox"
+            <xul:button id="filter-starred-checkbox"
                     class="brief-button filter-button"
                     tooltiptext="&filterStarred.tooltip;"
                     type="checkbox"
                     autoCheck="false"
                     oncommand="Commands.switchViewFilter('starred')"/>
-            <spacer class="button-spacer" flex="1"/>
-            <textbox id="searchbar"
+            <xul:spacer class="button-spacer" flex="1"/>
+            <xul:textbox id="searchbar"
                      spellcheck="false"
                      type="search"
                      emptytext="&searchBox.label;"
                      oncommand="onSearchbarCommand()"
                      onblur="onSearchbarBlur()"/>
-        </hbox>
+        </xul:hbox>
 
-        <hbox flex="1">
-            <button id="reveal-sidebar-button"
+        <xul:hbox flex="1">
+            <xul:button id="reveal-sidebar-button"
                     class="brief-button"
                     hidden="true"
                     tooltiptext="&revealSidebar.tooltip;"
                     oncommand="Commands.revealSidebar()"/>
-            <browser id="feed-view" flex="1"
+            <xul:browser id="feed-view" flex="1"
                      disablehistory="true"
                      type="content"
                      src="resource://brief-content/feedview.html"/>
-        </hbox>
-    </vbox>
+        </xul:hbox>
+    </xul:vbox>
 
-</page>
+</xul:page>
