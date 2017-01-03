@@ -31,10 +31,6 @@ function init() {
     getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
     getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
-    // Remove the hardcoded flex from .button-box, impossible to do with CSS.
-    let optionsButton = getElement('options-dropdown-button');
-    document.getAnonymousNodes(optionsButton)[0].removeAttribute('flex');
-
     refreshProgressmeter();
 
     document.addEventListener('keypress', onKeyPress, true);
@@ -341,16 +337,16 @@ function showOptionsDropdown() {
 
 function refreshProgressmeter(aReason) {
     if (FeedUpdateService.status != FeedUpdateService.NOT_UPDATING) {
-        getElement('update-buttons-deck').selectedIndex = 1;
+        getElement('sidebar-top').dataset.mode = "update";
 
         if (FeedUpdateService.scheduledFeedsCount > 1)
             getElement('update-progress').setAttribute('show', true);
 
-        getElement('update-progress').value = 100 * FeedUpdateService.completedFeedsCount /
+        getElement('update-progress').value = 1.0 * FeedUpdateService.completedFeedsCount /
                                                     FeedUpdateService.scheduledFeedsCount;
     }
     else {
-        getElement('update-buttons-deck').selectedIndex = 0;
+        getElement('sidebar-top').dataset.mode = "idle";
         getElement('update-progress').removeAttribute('show');
     }
 }

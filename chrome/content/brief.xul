@@ -99,42 +99,50 @@
 
     <xul:vbox id="sidebar" width="250" persist="width hidden">
 
-        <xul:vbox id="sidebar-top">
-            <xul:hbox id="sidebar-toolbar">
-                <xul:deck id="update-buttons-deck"
-                      class="sidebar-button-box"
-                      selectedIndex="1">
-                    <xul:button id="update-button"
-                            class="brief-button sidebar-button"
-                            label="&updateButton.label;"
-                            tooltiptext="&updateButton.tooltip;"
-                            oncommand="FeedUpdateService.updateAllFeeds()"/>
-                    <xul:button id="stop-updating-button"
-                            class="brief-button sidebar-button"
-                            label="&stopUpdatingButton.label;"
-                            tooltiptext="&stopUpdatingButton.tooltip;"
-                            oncommand="FeedUpdateService.stopUpdating()"/>
-                </xul:deck>
-                <xul:hbox id="organize-button-box" class="sidebar-button-box">
-                    <xul:button id="organize-button"
-                            class="brief-button sidebar-button"
-                            label="&organizeFeeds.label;"
-                            tooltiptext="&organizeFeeds.tooltip;"
-                            oncommand="Commands.openLibrary()"/>
-                </xul:hbox>
-                <xul:hbox id="options-dropdown-button-box" class="sidebar-button-box">
-                    <xul:button id="options-dropdown-button"
-                            class="brief-button sidebar-button"
+        <div class="flex vbox"
+             id="sidebar-top"
+             data-mode="idle">
+            <div class="flex hbox"
+                 id="sidebar-toolbar">
+                <div class="box sidebar-button-box"
+                     id="update-buttons-deck">
+                    <button id="update-button"
+                            class="centered brief-button sidebar-button"
+                            title="&updateButton.tooltip;"
+                            onclick="FeedUpdateService.updateAllFeeds()">
+                        &updateButton.label;
+                    </button>
+                    <button id="stop-updating-button"
+                            class="centered brief-button sidebar-button"
+                            title="&stopUpdatingButton.tooltip;"
+                            onclick="FeedUpdateService.stopUpdating()">
+                        &stopUpdatingButton.label;
+                    </button>
+                </div>
+                <div class="flex hbox sidebar-button-box"
+                     id="organize-button-box">
+                    <button id="organize-button"
+                            class="centered brief-button sidebar-button"
+                            title="&organizeFeeds.tooltip;"
+                            onclick="Commands.openLibrary()">
+                        &organizeFeeds.label;
+                    </button>
+                </div>
+                <div class="flex hbox sidebar-button-box"
+                     id="options-dropdown-button-box">
+                    <button id="options-dropdown-button"
+                            class="centered brief-button sidebar-button"
                             type="menu"
-                            label="&optionsDropdownButton.label;"
-                            tooltiptext="&optionsDropdownButton.tooltip;"
-                            onclick="showOptionsDropdown()"/>
-                </xul:hbox>
-            </xul:hbox>
-            <xul:hbox id="update-progress-container">
-                <xul:progressmeter id="update-progress"/>
-            </xul:hbox>
-        </xul:vbox>
+                            title="&optionsDropdownButton.tooltip;"
+                            onclick="showOptionsDropdown()">
+                        &optionsDropdownButton.label;
+                    </button>
+                </div>
+            </div>
+            <div class="flex hbox" id="update-progress-container">
+                <progress id="update-progress"/>
+            </div>
+        </div>
 
         <xul:richlistbox id="view-list"
                      startview="all-items-folder"

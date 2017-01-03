@@ -19,6 +19,24 @@
     -moz-border-top-colors: none !important;
 }
 
+/* Generic boxes */
+.flex.hbox {
+    display: flex;
+    justify-content: space-around;
+}
+
+.flex.vbox {
+    display: flex;
+    justify-content: space-around;
+    flex-flow: column;
+}
+
+.centered {
+    display: block;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
 
 
 page {
@@ -58,6 +76,7 @@ spacer[flex] {
     -moz-box-flex: 0;
     flex: none;
     -moz-user-focus: none;
+    font: inherit;
 }
 
 .brief-button > .button-box {
@@ -66,6 +85,10 @@ spacer[flex] {
 
 .brief-button .button-text {
     margin: 0 !important;
+}
+
+.brief-button::-moz-focus-inner {
+    border: 0 !important;
 }
 
 
@@ -110,8 +133,6 @@ spacer[flex] {
 }
 
 .sidebar-button-box {
-    -moz-box-flex: 1;
-    -moz-box-pack: center;
     min-width: 5em !important;
     overflow: hidden;
 }
@@ -119,41 +140,40 @@ spacer[flex] {
 .sidebar-button {
     padding: 10px 9px 6px !important;
     font-size: 13px;
+    font-weight: bold !important;
     color: #454545 !important;
 }
 .sidebar-button:hover {
     color: #ff6800 !important;
 }
-.sidebar-button .button-icon {
+
+#sidebar-top[data-mode="update"] #update-button,
+#sidebar-top[data-mode="idle"] #stop-updating-button {
     display: none;
 }
-.sidebar-button .button-text {
-    font-weight: bold !important;
-}
-
 
 #options-dropdown-button {
-    -moz-box-pack: center !important;
+    min-width: -moz-max-content !important;
 }
-
-#options-dropdown-button .button-menu-dropmarker {
-    list-style-image: url(icons/dropmarker.png) !important;
-    -moz-image-region: rect(0, 7px, 4px, 0) !important;
+#options-dropdown-button::after {
     margin-left: 5px !important;
+    vertical-align: middle;
+
+    display: inline-block;
+    content: "";
+    height: 4px;
+    width: 7px;
+    background: url(icons/dropmarker.png);
+    background-position: 0 0;
 }
 
-#options-dropdown-button:hover .button-menu-dropmarker {
-    -moz-image-region: rect(4px, 7px, 8px, 0) !important;
+#options-dropdown-button:hover::after {
+    background-position: 0 -4px;
 }
 
-
-
-#update-progress-container {
-    -moz-box-pack: center;
-}
 
 #update-progress {
-    -moz-box-flex: 1;
+    flex: 1;
     height: 4px !important;
     opacity: 0;
     transition: opacity 500ms;
@@ -163,7 +183,7 @@ spacer[flex] {
     opacity: 1;
 }
 
-#update-progress > .progress-bar {
+#update-progress::-moz-progress-bar {
     background: linear-gradient(to right, #3ede34, #88ff81) !important;
 }
 
