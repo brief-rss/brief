@@ -26,9 +26,9 @@ var gCurrentView;
 function init() {
     PrefObserver.register();
 
-    getElement('show-all-entries-checkbox').checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
-    getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
-    getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
+    getElement('show-all-entries-checkbox').dataset.checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
+    getElement('filter-unread-checkbox').dataset.checked = PrefCache.filterUnread;
+    getElement('filter-starred-checkbox').dataset.checked = PrefCache.filterStarred;
     getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
     refreshProgressmeter();
@@ -491,10 +491,10 @@ let PrefObserver = {
 
             case 'feedview.filterUnread':
             case 'feedview.filterStarred':
-                getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
-                getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
-                getElement('show-all-entries-checkbox').checked = !PrefCache.filterUnread &&
-                                                                  !PrefCache.filterStarred;
+                getElement('filter-unread-checkbox').dataset.checked = PrefCache.filterUnread;
+                getElement('filter-starred-checkbox').dataset.checked = PrefCache.filterStarred;
+                getElement('show-all-entries-checkbox').dataset.checked = !PrefCache.filterUnread &&
+                                                                          !PrefCache.filterStarred;
                 gCurrentView.refresh();
                 break;
         }

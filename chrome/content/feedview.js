@@ -709,10 +709,10 @@ FeedView.prototype = {
         // Prevent the message from briefly showing up before entries are loaded.
         this.document.getElementById('message-box').style.display = 'none';
 
-        getElement('full-view-checkbox').checked = !this.headlinesMode;
-        getElement('headlines-checkbox').checked = this.headlinesMode;
+        getElement('full-view-checkbox').dataset.checked = !this.headlinesMode;
+        getElement('headlines-checkbox').dataset.checked = this.headlinesMode;
 
-        getElement('view-title-label').value = this.titleOverride || this.title;
+        getElement('view-title-label').textContent = this.titleOverride || this.title;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');

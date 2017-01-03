@@ -37,6 +37,11 @@
     margin-right: auto !important;
 }
 
+.spacer,
+spacer[flex] {
+    flex-grow: 1;
+}
+
 
 
 page {
@@ -64,11 +69,6 @@ menuitem:hover {
 menuseparator {
     border-top: 1px solid #bdbdbd !important;
     margin: 6px 10px 6px !important;
-}
-
-
-spacer[flex] {
-    flex-grow: 1;
 }
 
 
