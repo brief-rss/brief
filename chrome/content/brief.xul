@@ -1,9 +1,4 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://brief/skin/brief.css" type="text/css"?>
-<?xml-stylesheet href="chrome://brief/skin/feedview-header.css"?>
-<?xml-stylesheet href="chrome://brief/skin/feedlist.css" type="text/css"?>
-<?xml-stylesheet href="resource://brief-custom-style.css"?>
-
 <!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
 
 <xul:page id="brief-window"
@@ -16,6 +11,11 @@
       onunload="unload()">
 
     <link rel="icon" href="chrome://brief/skin/brief-icon-16.png" style="display:none" />
+
+    <link rel="stylesheet" type="text/css" href="chrome://brief/skin/brief.css"/>
+    <link rel="stylesheet" type="text/css" href="chrome://brief/skin/feedview-header.css"/>
+    <link rel="stylesheet" type="text/css" href="chrome://brief/skin/feedlist.css"/>
+    <link rel="stylesheet" type="text/css" href="resource://brief-custom-style.css"/>
 
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
