@@ -20,12 +20,12 @@
 }
 
 /* Generic boxes */
-.flex.hbox {
+.hbox {
     display: flex;
     justify-content: space-around;
 }
 
-.flex.vbox {
+.vbox {
     display: flex;
     justify-content: space-around;
     flex-flow: column;

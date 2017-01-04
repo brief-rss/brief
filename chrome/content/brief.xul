@@ -99,10 +99,10 @@
 
     <xul:vbox id="sidebar" width="250" persist="width hidden">
 
-        <div class="flex vbox"
+        <div class="vbox"
              id="sidebar-top"
              data-mode="idle">
-            <div class="flex hbox"
+            <div class="hbox"
                  id="sidebar-toolbar">
                 <div class="box sidebar-button-box"
                      id="update-buttons-deck">
@@ -119,7 +119,7 @@
                         &stopUpdatingButton.label;
                     </button>
                 </div>
-                <div class="flex hbox sidebar-button-box"
+                <div class="hbox sidebar-button-box"
                      id="organize-button-box">
                     <button id="organize-button"
                             class="centered brief-button sidebar-button"
@@ -128,7 +128,7 @@
                         &organizeFeeds.label;
                     </button>
                 </div>
-                <div class="flex hbox sidebar-button-box"
+                <div class="hbox sidebar-button-box"
                      id="options-dropdown-button-box">
                     <button id="options-dropdown-button"
                             class="centered brief-button sidebar-button"
@@ -139,7 +139,7 @@
                     </button>
                 </div>
             </div>
-            <div class="flex hbox" id="update-progress-container">
+            <div class="hbox" id="update-progress-container">
                 <progress id="update-progress"/>
             </div>
         </div>
@@ -192,8 +192,8 @@
     <xul:splitter id="tag-list-splitter"
               hidden="true"/>
 
-    <xul:vbox flex="1">
-        <div class="flex hbox"
+    <xul:vbox flex="1" class="vbox">
+        <div class="hbox"
              id="feed-view-header">
             <button id="view-title-button"
                     class="brief-button"
