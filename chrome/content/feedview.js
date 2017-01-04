@@ -29,11 +29,10 @@ const TUTORIAL_URL = "chrome://brief/content/firstrun.xhtml?tutorial";
  */
 function FeedView(aTitle, aQuery) {
     this.title = aTitle;
-    this._fixedUnread = aQuery.read !== undefined;
     this._fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
 
     for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
-        getElement(id).hidden = this._fixedStarred || this._fixedUnread;
+        getElement(id).hidden = this._fixedStarred; //FIXME: move to CSS
 
     aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
     this.__query = aQuery;
@@ -109,7 +108,6 @@ FeedView.prototype = {
     _scrollSelectionTimeout: null,
 
     // Indicates if a filter paramater is fixed and cannot be toggled by the user.
-    _fixedUnread: false,
     _fixedStarred: false,
 
 
@@ -133,8 +131,7 @@ FeedView.prototype = {
 
     // Query that selects all entries contained by the view.
     get query() {
-        if (!this._fixedUnread)
-            this.__query.read = PrefCache.filterUnread ? false : undefined;
+        this.__query.read = PrefCache.filterUnread ? false : undefined;
         if (!this._fixedStarred)
             this.__query.starred = PrefCache.filterStarred ? true : undefined;
 
