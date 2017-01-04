@@ -252,6 +252,11 @@
                     hidden="true"
                     tooltiptext="&revealSidebar.tooltip;"
                     oncommand="Commands.revealSidebar()"/>
+            <!-- The following iframe contains untrusted HTML. The untrusted HTML should have no chrome-level access because:
+                    - it is contained in a content document (all these are displayed in a browser tab);
+                    - it has a non-privileged origin (resource://);
+                    - it is non-same-origin with the containing privileged (chrome://) document (this one).
+            -->
             <iframe id="feed-view"
                     class="flex"
                     src="resource://brief-content/feedview.html"/>
