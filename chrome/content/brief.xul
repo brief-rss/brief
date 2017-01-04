@@ -246,17 +246,16 @@
                    onblur="onSearchbarBlur()"/>
         </div>
 
-        <xul:hbox flex="1">
+        <div class="hbox flex">
             <xul:button id="reveal-sidebar-button"
                     class="brief-button"
                     hidden="true"
                     tooltiptext="&revealSidebar.tooltip;"
                     oncommand="Commands.revealSidebar()"/>
-            <xul:browser id="feed-view" flex="1"
-                     disablehistory="true"
-                     type="content"
-                     src="resource://brief-content/feedview.html"/>
-        </xul:hbox>
+            <iframe id="feed-view"
+                    class="flex"
+                    src="resource://brief-content/feedview.html"/>
+        </div>
     </xul:vbox>
 
 </xul:page>

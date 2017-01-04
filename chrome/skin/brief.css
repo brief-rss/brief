@@ -31,6 +31,10 @@
     flex-flow: column;
 }
 
+.flex {
+    flex: 1;
+}
+
 .centered {
     display: block;
     margin-left: auto !important;
