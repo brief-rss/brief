@@ -18,7 +18,10 @@ const OBSERVER_TOPICS = [
     'brief:feed-title-changed',
     'brief:feed-favicon-changed',
     'brief:custom-style-changed',
-]
+];
+
+// Randomize URI to work around mozilla bug 918033
+const STRINGS = Services.strings.createBundle('chrome://brief/locale/brief.properties?' + Math.random());
 
 var gCurrentView;
 
@@ -147,7 +150,7 @@ var Commands = {
 
     openFeedWebsite: function cmd_openWebsite(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let url = feed.websiteURL || NetUtil.newURI(feed.feedURL).host;
+        let url = feed.websiteURL || Services.io.newURI(feed.feedURL).host;
         getTopWindow().gBrowser.loadOneTab(url);
     },
 
@@ -163,9 +166,8 @@ var Commands = {
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let bundle = getElement('main-bundle');
-        let title = bundle.getString('confirmFeedDeletionTitle');
-        let text = bundle.getFormattedString('confirmFeedDeletionText', [feed.title]);
+        let title = STRINGS.GetStringFromName('confirmFeedDeletionTitle');
+        let text = STRINGS.formatStringFromName('confirmFeedDeletionText', [feed.title], 1);
 
         if (Services.prompt.confirm(window, title, text)) {
             FeedList.removeItem(getElement(feed.feedID));
@@ -251,8 +253,8 @@ var Commands = {
     openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
 
-        let baseURI = NetUtil.newURI(Storage.getFeed(entryView.feedID).feedURL);
-        let linkURI = NetUtil.newURI(entryView.entryURL, null, baseURI);
+        let baseURI = Services.io.newURI(Storage.getFeed(entryView.feedID).feedURL);
+        let linkURI = Services.io.newURI(entryView.entryURL, null, baseURI);
 
         Commands.openLink(linkURI.spec);
 
@@ -261,7 +263,7 @@ var Commands = {
     },
 
     openLink: function cmd_openLink(aURL) {
-        let docURI = NetUtil.newURI(document.documentURI);
+        let docURI = Services.io.newURI(document.documentURI);
         getTopWindow().gBrowser.loadOneTab(aURL, docURI);
     },
 
@@ -354,10 +356,9 @@ function refreshProgressmeter(aReason) {
 
 function onSearchbarCommand() {
     let searchbar = getElement('searchbar');
-    let bundle = getElement('main-bundle');
 
     if (searchbar.value)
-        gCurrentView.titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
+        gCurrentView.titleOverride = STRINGS.formatStringFromName('searchResults', [searchbar.value], 1);
     else
         gCurrentView.titleOverride = '';
 

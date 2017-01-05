@@ -633,9 +633,8 @@ let TagListContextMenu = {
 
         let tag = TagList.selectedItem.id;
 
-        let bundle = getElement('main-bundle');
-        let dialogTitle = bundle.getString('confirmTagDeletionTitle');
-        let dialogText = bundle.getFormattedString('confirmTagDeletionText', [tag]);
+        let dialogTitle = STRINGS.GetStringFromName('confirmTagDeletionTitle');
+        let dialogText = STRINGS.formatStringFromName('confirmTagDeletionText', [tag], 1);
 
         if (!Services.prompt.confirm(window, dialogTitle, dialogText))
             return;
@@ -704,9 +703,8 @@ let FolderContextMenu = {
         let item = FeedList.selectedItem;
         let feed = FeedList.selectedFeed;
 
-        let bundle = getElement('main-bundle');
-        let title = bundle.getString('confirmFolderDeletionTitle');
-        let text = bundle.getFormattedString('confirmFolderDeletionText', [feed.title]);
+        let title = STRINGS.GetStringFromName('confirmFolderDeletionTitle');
+        let text = STRINGS.formatStringFromName('confirmFolderDeletionText', [feed.title], 1);
 
         if (Services.prompt.confirm(window, title, text)) {
             FeedList.removeItem(item);

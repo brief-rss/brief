@@ -863,28 +863,27 @@ FeedView.prototype = {
             return;
         }
 
-        let bundle = getElement('main-bundle');
         let mainMessage, secondaryMessage;
 
         if (!Storage.getAllFeeds().length) {
-            mainMessage = bundle.getString('noFeeds');
+            mainMessage = STRINGS.GetStringFromName('noFeeds');
             secondaryMessage = '<a href="' + TUTORIAL_URL + '" target="_blank">'
-                               + bundle.getString('noFeedsAdvice') + '</a>';
+                               + STRINGS.GetStringFromName('noFeedsAdvice') + '</a>';
         }
         else if (this.query.searchString) {
-            mainMessage = bundle.getString('noEntriesFound');
+            mainMessage = STRINGS.GetStringFromName('noEntriesFound');
         }
         else if (this.query.read === false) {
-            mainMessage = bundle.getString('noUnreadEntries');
+            mainMessage = STRINGS.GetStringFromName('noUnreadEntries');
         }
         else if (this.query.starred === true) {
-            mainMessage = bundle.getString('noStarredEntries');
+            mainMessage = STRINGS.GetStringFromName('noStarredEntries');
         }
         else if (this.query.deleted == Storage.ENTRY_STATE_TRASHED) {
-            mainMessage = bundle.getString('trashIsEmpty');
+            mainMessage = STRINGS.GetStringFromName('trashIsEmpty');
         }
         else {
-            mainMessage = bundle.getString('noEntries');
+            mainMessage = STRINGS.GetStringFromName('noEntries');
         }
 
         this.document.getElementById('main-message').textContent = mainMessage || '' ;
@@ -1315,7 +1314,6 @@ EntryView.prototype = {
     getDateString: function EntryView_getDateString(aOnlyDatePart) {
         let relativeDate = new RelativeDate(this.date.getTime());
         let string;
-        let bundle = getElement('main-bundle');
 
         if (aOnlyDatePart) {
             switch (true) {
@@ -1349,14 +1347,14 @@ EntryView.prototype = {
                 case relativeDate.deltaHours === 0:
                     let minuteForm = getPluralForm(relativeDate.deltaMinutes,
                                                    Strings['minute.pluralForms']);
-                    string = bundle.getFormattedString('entryDate.ago', [minuteForm], 1)
+                    string = STRINGS.formatStringFromName('entryDate.ago', [minuteForm], 1)
                                    .replace('#number', relativeDate.deltaMinutes);
                     break;
 
                 case relativeDate.deltaHours <= 12:
                     let hourForm = getPluralForm(relativeDate.deltaHours,
                                                  Strings['hour.pluralForms']);
-                    string = bundle.getFormattedString('entryDate.ago', [hourForm], 1)
+                    string = STRINGS.formatStringFromName('entryDate.ago', [hourForm], 1)
                                    .replace('#number', relativeDate.deltaHours);
                     break;
 
@@ -1493,10 +1491,9 @@ this.__defineGetter__('Strings', () => {
         'editBookmarkTooltip',
     ]
 
-    let bundle = getElement('main-bundle');
     let obj = {};
     for (let stringName of cachedStringsList)
-        obj[stringName] = bundle.getString(stringName);
+        obj[stringName] = STRINGS.GetStringFromName(stringName);
 
     delete this.Strings;
     return this.Strings = obj;
