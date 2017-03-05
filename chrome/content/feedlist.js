@@ -20,13 +20,16 @@ TreeView.prototype = {
         return this._selectedElement;
     },
     set selectedItem(aElementOrId) {
+        let element = (aElementOrId !== null) ? this._resolveElement(aElementOrId) : null;
+        if(this._selectedElement === element)
+            return;
         if(this._selectedElement !== null) {
             this._selectedElement.classList.remove('selected');
             this._selectedElement = null;
         }
-        if(aElementOrId !== null) {
-            this._selectedElement = this._resolveElement(aElementOrId);
-            this._selectedElement.classList.add('selected');
+        if(element !== null) {
+            element.classList.add('selected');
+            this._selectedElement = element;
         }
         let event = new Event("change", {bubbles: true, cancelable: false});
         this.root.dispatchEvent(event);
