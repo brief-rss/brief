@@ -238,11 +238,11 @@
         </div>
 
         <div class="hbox flex">
-            <xul:button id="reveal-sidebar-button"
+            <button id="reveal-sidebar-button"
                     class="brief-button"
                     hidden="true"
-                    tooltiptext="&revealSidebar.tooltip;"
-                    oncommand="Commands.revealSidebar()"/>
+                    title="&revealSidebar.tooltip;"
+                    onclick="Commands.revealSidebar()"/>
             <!-- The following iframe contains untrusted HTML. The untrusted HTML should have no chrome-level access because:
                     - it is contained in a content document (all these are displayed in a browser tab);
                     - it has a non-privileged origin (resource://);

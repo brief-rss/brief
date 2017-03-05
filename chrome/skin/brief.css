@@ -116,16 +116,26 @@ menuseparator {
 }
 
 #reveal-sidebar-button {
-    list-style-image: url(reveal-sidebar.png);
-    -moz-image-region: rect(0px, 12px, 20px, 0px);
     padding: 0 2px 0 2px !important;
     border-right: 1px solid #d6d6d6 !important;
-    background: #fcfcfc !important;
+    background-color: #fcfcfc !important;
+}
+#reveal-sidebar-button::after {
+    content: "";
+    display: block;
+    width: 12px !important;
+    height: 20px !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    background-image: url(reveal-sidebar.png);
 }
 
 #reveal-sidebar-button:hover {
-    -moz-image-region: rect(20px, 12px, 40px, 0px);
+    background-position: 0 -20px;
     border-right-color: #ffb754 !important;
+}
+#reveal-sidebar-button:hover::after {
+    background-position: 0 -20px;
 }
 
 
