@@ -1,27 +1,106 @@
 const THROBBER_URL = 'chrome://brief/skin/throbber.gif';
 const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 
-let ViewList = {
 
-    get richlistbox() {
-        delete this.richlistbox;
-        return this.richlistbox = getElement('view-list');
+
+function TreeView(aElementOrId) {
+    this.root = this._resolveElement(aElementOrId, "");
+    this.prefix = this.root.classList.contains('unprefixed') ? "" : this.root.id + "__";
+    this.folderTemplate = this.root.querySelector('template.tree-folder');
+    this.itemTemplate = this.root.querySelector('template.tree-item');
+    this._selectedElement = null;
+    this.root.childNodes.forEach(node => {
+        if(node.nodeName !== 'tree-folder' && node.nodeName !== 'tree-item')
+            return;
+        node.addEventListener('click', this);
+    })
+}
+
+TreeView.prototype = {
+    get selectedItem() {
+        return this._selectedElement;
+    },
+    set selectedItem(aElementOrId) {
+        if(this._selectedElement !== null) {
+            this._selectedElement.classList.remove('selected');
+            this._selectedElement = null;
+        }
+        if(aElementOrId !== null) {
+            this._selectedElement = this._resolveElement(aElementOrId);
+            this._selectedElement.classList.add('selected');
+        }
+        let event = new Event("change", {bubbles: true, cancelable: false});
+        this.root.dispatchEvent(event);
+
+        return aElementOrId;
+    },
+
+    update: function TreeView_update(aModel) {
+    },
+    updateFolder: function TreeView_updateFolder(aFolder, aModel) {
+        let {id, self, children} = aModel;
+    },
+    updateElement: function TreeView_updateElement(aElement, aModel) {
+        const {id, name, icon, unreadCount, children} = aModel;
+        const isFolder = children !== undefined;
+        let element = this._resolveElement(aElement);
+        if(isFolder !== (element.tagName === "tree-folder")) {
+            let template = isFolder ? this.folderTemplate : this.itemTemplate;
+            let newElement = document.importNode(template.content, true);
+            element.replaceWith(newElement);
+            element = newElement;
+        }
+        let row = isFolder ? element.querySelector('tree-folder-header') : element;
+        if(id !== undefined) {
+            row.id = this.root.id + '__' + id;
+            row.dataset.id = id;
+        }
+        if(name !== undefined)
+            row.querySelector('.title').textContent = name;
+        if(icon !== undefined)
+            row.querySelector('.icon').src = icon;
+        if(unreadCount !== undefined)
+            row.querySelector('.unread-count').textContent = unreadCount;
+        if(unreadCount > 0) {
+            row.classList.add('unread');
+        } else {
+            row.classList.remove('unread');
+        }
+    },
+
+    _resolveElement: function TreeView__resolveElement(aElementOrId, aPrefix) {
+        let prefix = (aPrefix === undefined) ? this.prefix : aPrefix;
+        if(typeof aElementOrId === "string") {
+            return document.getElementById(prefix + aElementOrId);
+        } else {
+            return aElementOrId;
+        }
+    },
+
+    handleEvent: function TreeView__handleEvent(aEvent) {
+        if(aEvent.type !== 'click')
+            return;
+        this.selectedItem = aEvent.currentTarget;
+    },
+};
+
+let ViewList = {
+    get tree() {
+        delete this.tree;
+        return this.tree = new TreeView('view-list');
     },
 
     get selectedItem() {
-        return this.richlistbox.selectedItem;
+        return this.tree.selectedItem;
     },
 
     set selectedItem(aItem) {
-        this.richlistbox.selectedItem = aItem;
+        this.tree.selectedItem = aItem;
         return aItem;
     },
 
     init: function ViewList_init() {
-        // The select event was suppressed because richlistbox initiates selection
-        // during document load, before the feed view browser is ready.
-        this.richlistbox.suppressOnSelect = false;
-        this.deselect()
+        this.deselect();
 
         this.refreshItem('all-items-folder');
         this.refreshItem('today-folder');
@@ -60,7 +139,7 @@ let ViewList = {
     },
 
     deselect: function ViewList_deselect() {
-        this.richlistbox.selectedIndex = -1;
+        this.tree.selectedItem = null;
     },
 
     onSelect: function ViewList_onSelect(aEvent) {
@@ -77,7 +156,7 @@ let ViewList = {
             })
         }
 
-        let title = this.selectedItem.getElementsByClassName('view-title')[0].value;
+        let title = this.selectedItem.getElementsByClassName('title')[0].textContent;
         let query = this.getQueryForView(this.selectedItem.id);
         gCurrentView = new FeedView(title, query);
     },
@@ -88,15 +167,8 @@ let ViewList = {
 
         let unreadCount = yield query.getEntryCount();
 
-        let element = getElement(aItemID);
-        element.lastChild.value = unreadCount;
-
-        if (unreadCount > 0)
-            element.classList.add('unread');
-        else
-            element.classList.remove('unread');
+        this.tree.updateElement(aItemID, {unreadCount});
     }.task()
-
 }
 
 

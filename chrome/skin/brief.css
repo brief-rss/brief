@@ -195,8 +195,12 @@ menuseparator {
 
 /* =========== Rules applicable to all lists =========== */
 
-#view-list > richlistitem[selected="true"],
-#view-list:focus > richlistitem[selected="true"],
+tree-item {
+    display: flex;
+}
+
+#view-list > tree-item.selected,
+#view-list:focus > tree-item.selected,
 .tag-list-item[selected="true"],
 richtreefolder[selected="true"] > .folder-title-container,
 richtreeitem[selected="true"] {
@@ -204,8 +208,8 @@ richtreeitem[selected="true"] {
     background-color: #fcd7bd !important;
 }
 
-#view-list > richlistitem:hover:not([selected="true"]),
-#view-list:focus > richlistitem:hover:not([selected="true"]),
+#view-list > tree-item:hover:not(.selected),
+#view-list:focus > tree-item:hover:not(.selected),
 .tag-list-item:hover:not([selected="true"]),
 richtreefolder:not([selected="true"]) > .folder-title-container:hover,
 richtreeitem:hover:not([selected="true"]) {
@@ -224,24 +228,29 @@ richtreefolder[open="true"] > .folder-title-container > .unread-count,
 
 /* =========== View list richlistbox =========== */
 
+tree-box {
+    display: flex;
+    flex-direction: column;
+}
+
 #view-list {
     margin: 7px 0 0 5px !important;
 }
 
-#view-list > richlistitem {
+#view-list > tree-item {
     padding: 3px 1px 2px 20px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
     -moz-box-align: center !important;
 }
 
-#view-list > richlistitem > .view-title {
+#view-list > tree-item > .title {
     margin: 0 4px 0 0 !important;
     font-size: 13px !important;
     font-weight: bold !important;
     color: #454545 !important;
 }
 
-#view-list > richlistitem:not(.unread) > .unread-count {
+#view-list > tree-item:not(.unread) > .unread-count {
     display: none;
 }
 

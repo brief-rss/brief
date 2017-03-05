@@ -33,7 +33,7 @@ richtreeitem {
 .unread-count,
 .tag-list-item > .listcell-iconic::after {
     min-width: 2em !important;
-    margin-left: 5px !important;
+    margin-left: auto !important;
     text-align: center;
     font-size: 13px !important;
     font-weight: bold !important;

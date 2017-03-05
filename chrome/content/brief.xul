@@ -140,29 +140,24 @@
             </div>
         </div>
 
-        <xul:richlistbox id="view-list"
-                     startview="all-items-folder"
-                     persist="startview"
-                     context="view-list-popup"
-                     suppressonselect="true"
-                     onselect="ViewList.onSelect(event)">
-            <xul:richlistitem id="all-items-folder">
-                <xul:label class="view-title" flex="1" value="&allItemsFolder.label;"/>
-                <xul:label class="unread-count"/>
-            </xul:richlistitem>
-            <xul:richlistitem id="today-folder">
-                <xul:label class="view-title" flex="1" value="&todayFolder.label;"/>
-                <xul:label class="unread-count"/>
-            </xul:richlistitem>
-            <xul:richlistitem id="starred-folder">
-                <xul:label class="view-title" flex="1" value="&starredFolder.label;"/>
-                <xul:label class="unread-count"/>
-            </xul:richlistitem>
-            <xul:richlistitem id="trash-folder">
-                <xul:label class="view-title" value="&trashFolder.label;"/>
-            </xul:richlistitem>
-        </xul:richlistbox>
-
+        <tree-box id="view-list" class="unprefixed" onchange="ViewList.onSelect(event)"><!-- context="view-list-popup" -->
+            <tree-item id="all-items-folder">
+                <label class="title">&allItemsFolder.label;</label>
+                <label class="unread-count"/>
+            </tree-item>
+            <tree-item id="today-folder">
+                <label class="title">&todayFolder.label;</label>
+                <label class="unread-count"/>
+            </tree-item>
+            <tree-item id="starred-folder">
+                <label class="title">&starredFolder.label;</label>
+                <label class="unread-count"/>
+            </tree-item>
+            <tree-item id="trash-folder">
+                <label class="title">&trashFolder.label;</label>
+                <label class="unread-count"/>
+            </tree-item>
+        </tree-box>
         <xul:richtree id="feed-list" flex="1"
                   seltype="single"
                   contextmenu="feed-list-popup"
