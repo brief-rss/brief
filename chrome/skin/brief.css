@@ -205,22 +205,23 @@ menuseparator {
 
 /* =========== Rules applicable to all lists =========== */
 
+tree-box {
+    display: flex;
+    flex-direction: column;
+}
+
 tree-item {
     display: flex;
 }
 
-#view-list > tree-item.selected,
-#view-list:focus > tree-item.selected,
-.tag-list-item[selected="true"],
+tree-item.selected,
 richtreefolder[selected="true"] > .folder-title-container,
 richtreeitem[selected="true"] {
     border-color: #ffc9a6 !important;
     background-color: #fcd7bd !important;
 }
 
-#view-list > tree-item:hover:not(.selected),
-#view-list:focus > tree-item:hover:not(.selected),
-.tag-list-item:hover:not([selected="true"]),
+tree-item:hover:not(.selected),
 richtreefolder:not([selected="true"]) > .folder-title-container:hover,
 richtreeitem:hover:not([selected="true"]) {
     border-color: #e5e5e5 !important;
@@ -230,18 +231,13 @@ richtreeitem:hover:not([selected="true"]) {
 richtreeitem:not(.unread) > .unread-count,
 richtreefolder:not(.unread) > .folder-title-container > .unread-count,
 richtreefolder[open="true"] > .folder-title-container > .unread-count,
-.tag-list-item:not(.unread) .unread-count {
+tree-item:not(.unread) > .unread-count {
     visibility: hidden;
 }
 
 
 
 /* =========== View list richlistbox =========== */
-
-tree-box {
-    display: flex;
-    flex-direction: column;
-}
 
 #view-list {
     margin: 7px 0 0 5px !important;
@@ -260,11 +256,6 @@ tree-box {
     color: #454545 !important;
 }
 
-#view-list > tree-item:not(.unread) > .unread-count {
-    display: none;
-}
-
-
 
 /* =========== Tag listbox =========== */
 
@@ -273,28 +264,11 @@ tree-box {
     min-width: 100px !important;
 }
 
-.tag-list-item {
+#tag-list > tree-item {
     width: 150px !important;
     padding: 2px 1px 2px 5px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
     font-size: 13px !important;
     color: #454545 !important;
     border-radius: 0 !important;
-    list-style-image: url(chrome://brief/skin/icons/tag.png);
-}
-
-.tag-list-item > .listcell-iconic {
-    display: flex;
-}
-
-.tag-list-item > .listcell-iconic > .listcell-label {
-    flex: 1;
-}
-
-.tag-list-item > .listcell-iconic::after {
-    content: var(--unread-count, "");
-}
-
-.tag-list-item:not(.unread) > .listcell-iconic::after {
-    display: none;
 }

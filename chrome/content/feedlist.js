@@ -9,10 +9,9 @@ function TreeView(aElementOrId) {
     this.folderTemplate = this.root.querySelector('template.tree-folder');
     this.itemTemplate = this.root.querySelector('template.tree-item');
     this._selectedElement = null;
-    this.root.childNodes.forEach(node => {
-        if(node.nodeName !== 'tree-folder' && node.nodeName !== 'tree-item')
-            return;
-        node.addEventListener('click', this);
+    Array.forEach(this.root.children, node => {
+        if(node.nodeName !== 'template')
+            node.addEventListener('click', this);
     })
 }
 
@@ -36,15 +35,41 @@ TreeView.prototype = {
     },
 
     update: function TreeView_update(aModel) {
-    },
-    updateFolder: function TreeView_updateFolder(aFolder, aModel) {
-        let {id, self, children} = aModel;
+        let knownIds = new Set(aModel.map(node => node.id));
+        let next = this.root.children.item(0);
+        for (let node of aModel) {
+            // Skip or delete everything that's not to stay
+            while(next !== null && (!next.hasOwnProperty('id') || !knownIds.has(next.id))) {
+                let current = next;
+                next = next.nextSibling;
+                if(current.nodeName !== 'template')
+                    current.parentNode.removeChild(current);
+            }
+            // Find or create the element
+            let element = this._resolveElement(this._mangleId(node.id));
+            if(element === null) {
+                let template = this.itemTemplate.content;
+                if(!template.hasChildNodes()) // XXX: hack for <template> not working in XUL
+                    template = this.itemTemplate;
+                template = template.querySelector('tree-item');
+                element = document.importNode(template, true);
+                element.addEventListener('click', this);
+            }
+            this.updateElement(element, node);
+            if(next === null) {
+                this.root.appendChild(element);
+            } else if(element !== next) {
+                next.before(element);
+            } else {
+                next = next.nextSibling;
+            }
+        }
     },
     updateElement: function TreeView_updateElement(aElement, aModel) {
-        const {id, name, icon, unreadCount, children} = aModel;
+        const {id, title, icon, unreadCount, children} = aModel;
         const isFolder = children !== undefined;
         let element = this._resolveElement(aElement);
-        if(isFolder !== (element.tagName === "tree-folder")) {
+        if(isFolder !== (element.nodeName === "tree-folder")) {
             let template = isFolder ? this.folderTemplate : this.itemTemplate;
             let newElement = document.importNode(template.content, true);
             element.replaceWith(newElement);
@@ -52,11 +77,11 @@ TreeView.prototype = {
         }
         let row = isFolder ? element.querySelector('tree-folder-header') : element;
         if(id !== undefined) {
-            row.id = this.root.id + '__' + id;
+            row.id = this.root.id + '__' + this._mangleId(id);
             row.dataset.id = id;
         }
-        if(name !== undefined)
-            row.querySelector('.title').textContent = name;
+        if(title !== undefined)
+            row.querySelector('.title').textContent = title;
         if(icon !== undefined)
             row.querySelector('.icon').src = icon;
         if(unreadCount !== undefined)
@@ -68,13 +93,25 @@ TreeView.prototype = {
         }
     },
 
+    get hidden() {
+        return this.root.hidden;
+    },
+    set hidden(aHidden) {
+        return this.root.hidden = aHidden;
+    },
+
     _resolveElement: function TreeView__resolveElement(aElementOrId, aPrefix) {
         let prefix = (aPrefix === undefined) ? this.prefix : aPrefix;
         if(typeof aElementOrId === "string") {
-            return document.getElementById(prefix + aElementOrId);
+            return document.getElementById(prefix + this._mangleId(aElementOrId));
         } else {
             return aElementOrId;
         }
+    },
+    // HTML5 id must not contain spaces
+    // XXX: XHTML5?!!
+    _mangleId: function(aId) {
+        return aId.replace('_', '__').replace(' ', '_');
     },
 
     handleEvent: function TreeView__handleEvent(aEvent) {
@@ -179,33 +216,33 @@ let TagList = {
     tags: null,
 
     get selectedItem() {
-        return this._listbox.selectedItem;
+        return this.tree.selectedItem;
     },
 
-    get _listbox() {
-        delete this._listbox;
-        return this._listbox = getElement('tag-list');
+    get tree() {
+        delete this.tree;
+        return this.tree = new TreeView('tag-list');
     },
 
     show: function TagList_show() {
         if (!this.ready)
             this._rebuild();
 
-        if (this._listbox.hidden) {
-            this._listbox.hidden = false;
+        if (this.tree.hidden) {
+            this.tree.hidden = false;
             getElement('tag-list-splitter').hidden = false;
         }
     },
 
     hide: function TagList_hide() {
-        if (!this._listbox.hidden) {
-            this._listbox.hidden = true;
+        if (!this.tree.hidden) {
+            this.tree.hidden = true;
             getElement('tag-list-splitter').hidden = true;
         }
     },
 
     deselect: function TagList_deselect() {
-        this._listbox.selectedIndex = -1;
+        this.tree.selectedItem = null;
     },
 
     onSelect: function TagList_onSelect(aEvent) {
@@ -219,10 +256,10 @@ let TagList = {
 
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
-            tags: [this.selectedItem.id]
+            tags: [this.selectedItem.dataset.id]
         })
 
-        gCurrentView = new FeedView(this.selectedItem.id, query);
+        gCurrentView = new FeedView(this.selectedItem.dataset.id, query);
     },
 
     /**
@@ -264,17 +301,12 @@ let TagList = {
     _rebuild: function* TagList__rebuild() {
         this.tags = yield Storage.getAllTags();
 
-        while (this._listbox.hasChildNodes())
-            this._listbox.removeChild(this._listbox.lastChild);
+        let model = this.tags.map(tag => ( {id: tag, title: tag, unreadCount: 0} ));
+
+        this.tree.update(model);
 
         for (let tagName of this.tags) {
-            let item = document.createElement('listitem');
-            item.id = tagName;
-            item.className = 'listitem-iconic tag-list-item';
-            item.setAttribute('label', tagName);
-            this._listbox.appendChild(item);
-
-            this._refreshLabel(tagName);
+            yield this._refreshLabel(tagName);
         }
 
         this.ready = true;
@@ -286,18 +318,8 @@ let TagList = {
             tags: [aTagName],
             read: false
         })
-
-        let unreadCount = yield query.getEntryCount()
-        let listitem = getElement(aTagName);
-
-        // This is a hack; ideally we should have set --unread-count: attr(...)
-        // However, as of Firefox 46 the attr() works in `content` only
-        listitem.setAttribute('style', '--unread-count: "' + unreadCount + '";');
-
-        if (unreadCount > 0)
-            listitem.classList.add('unread');
-        else
-            listitem.classList.remove('unread');
+        let unreadCount = yield query.getEntryCount();
+        this.tree.updateElement(aTagName, {unreadCount});
     }.task()
 
 }

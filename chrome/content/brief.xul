@@ -174,11 +174,15 @@
               persist="hidden"
               ondblclick="Commands.hideSidebar()"/>
 
-    <xul:listbox id="tag-list"
-             hidden="true"
-             persist="width"
-             context="tag-list-popup"
-             onselect="TagList.onSelect(event)"/>
+    <tree-box id="tag-list" hidden="true" onchange="TagList.onSelect(event)"> <!-- context="tag-list-popup" -->
+        <template class="tree-item">
+            <tree-item>
+                <img class="icon" src="chrome://brief/skin/icons/tag.png"/>
+                <label class="title"/>
+                <label class="unread-count"/>
+            </tree-item>
+        </template>
+    </tree-box>
 
     <xul:splitter id="tag-list-splitter"
               hidden="true"/>
