@@ -27,8 +27,11 @@
 
 .vbox {
     display: flex;
-    justify-content: space-around;
     flex-flow: column;
+}
+
+*[hidden] {
+    display: none;
 }
 
 .flex {
@@ -215,29 +218,26 @@ tree-item {
 }
 
 tree-item.selected,
-richtreefolder[selected="true"] > .folder-title-container,
-richtreeitem[selected="true"] {
+tree-folder.selected > tree-folder-header {
     border-color: #ffc9a6 !important;
     background-color: #fcd7bd !important;
 }
 
 tree-item:hover:not(.selected),
-richtreefolder:not([selected="true"]) > .folder-title-container:hover,
-richtreeitem:hover:not([selected="true"]) {
+tree-folder:not(.selected) > tree-folder-header:hover {
     border-color: #e5e5e5 !important;
     background-color: #e5e5e5 !important;
 }
 
-richtreeitem:not(.unread) > .unread-count,
-richtreefolder:not(.unread) > .folder-title-container > .unread-count,
-richtreefolder[open="true"] > .folder-title-container > .unread-count,
+tree-folder:not(.unread) > tree-folder-header > .unread-count,
+tree-folder:not(.collapsed) > tree-folder-header > .unread-count,
 tree-item:not(.unread) > .unread-count {
     visibility: hidden;
 }
 
 
 
-/* =========== View list richlistbox =========== */
+/* =========== View list tree =========== */
 
 #view-list {
     margin: 7px 0 0 5px !important;

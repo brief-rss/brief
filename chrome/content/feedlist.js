@@ -6,8 +6,7 @@ const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
 function TreeView(aElementOrId) {
     this.root = this._resolveElement(aElementOrId, "");
     this.prefix = this.root.classList.contains('unprefixed') ? "" : this.root.id + "__";
-    this.folderTemplate = this.root.querySelector('template.tree-folder');
-    this.itemTemplate = this.root.querySelector('template.tree-item');
+    this.template = this.root.querySelector('template');
     this._selectedElement = null;
     Array.forEach(this.root.children, node => {
         if(node.nodeName !== 'template')
@@ -38,29 +37,44 @@ TreeView.prototype = {
     },
 
     update: function TreeView_update(aModel) {
+        this._updateChildren(this.root, aModel);
+        this._purgeDeleted();
+    },
+    _updateChildren: function TreeView__updateChildren(aElement, aModel) {
         let knownIds = new Set(aModel.map(node => node.id));
-        let next = this.root.children.item(0);
+        let next = aElement.children.item(0);
         for (let node of aModel) {
             // Skip or delete everything that's not to stay
             while(next !== null && (!next.hasOwnProperty('id') || !knownIds.has(next.id))) {
+                if(next.nodeName !== 'template' && next.nodeName !== 'tree-folder-header') {
+                    if(next.nodeType !== Node.ELEMENT_NODE) {
+                        next.parentNode.removeChild(next);
+                    } else {
+                        next.classList.add('deleted');
+                    }
+                }
                 let current = next;
                 next = next.nextSibling;
-                if(current.nodeName !== 'template')
-                    current.parentNode.removeChild(current);
             }
             // Find or create the element
             let element = this._resolveElement(this._mangleId(node.id));
             if(element === null) {
-                let template = this.itemTemplate.content;
-                if(!template.hasChildNodes()) // XXX: hack for <template> not working in XUL
-                    template = this.itemTemplate;
-                template = template.querySelector('tree-item');
+                let template = this.template;
+                // XXX: hack for <template> not working in XUL
+                if(template.content.hasChildNodes())
+                    template = template.content;
+                let selector = (node.children !== undefined) ? 'tree-folder' : 'tree-item';
+                template = template.querySelector(selector);
                 element = document.importNode(template, true);
                 element.addEventListener('click', this);
+                if(element.nodeName === 'tree-folder') {
+                    element.querySelector('.toggle-collapsed').addEventListener('click', this);
+                }
             }
+            element.classList.remove('deleted');
             this.updateElement(element, node);
             if(next === null) {
-                this.root.appendChild(element);
+                aElement.appendChild(element);
             } else if(element !== next) {
                 next.before(element);
             } else {
@@ -69,31 +83,46 @@ TreeView.prototype = {
         }
     },
     updateElement: function TreeView_updateElement(aElement, aModel) {
-        const {id, title, icon, unreadCount, children} = aModel;
-        const isFolder = children !== undefined;
+        const {id, title, icon, unreadCount, loading, error, children} = aModel;
         let element = this._resolveElement(aElement);
-        if(isFolder !== (element.nodeName === "tree-folder")) {
-            let template = isFolder ? this.folderTemplate : this.itemTemplate;
-            let newElement = document.importNode(template.content, true);
-            element.replaceWith(newElement);
-            element = newElement;
-        }
+
+        const isFolder = (element.nodeName === "tree-folder");
+        console.assert(element.nodeName === 'tree-folder' || children === undefined,
+            "item->folder conversion not supported");
         let row = isFolder ? element.querySelector('tree-folder-header') : element;
+
         if(id !== undefined) {
-            row.id = this.root.id + '__' + this._mangleId(id);
-            row.dataset.id = id;
+            element.id = this.root.id + '__' + this._mangleId(id);
+            element.dataset.id = id;
         }
         if(title !== undefined)
             row.querySelector('.title').textContent = title;
         if(icon !== undefined)
             row.querySelector('.icon').src = icon;
-        if(unreadCount !== undefined)
+        if(unreadCount !== undefined) {
             row.querySelector('.unread-count').textContent = unreadCount;
-        if(unreadCount > 0) {
-            row.classList.add('unread');
-        } else {
-            row.classList.remove('unread');
+            element.classList.toggle('unread', (unreadCount > 0));
         }
+        if(loading !== undefined)
+            element.dataset.loading = loading;
+        if(error !== undefined)
+            element.dataset.error = error;
+        if(children !== undefined)
+            this._updateChildren(element, children);
+    },
+    _purgeDeleted: function TreeView__purgeDeleted() {
+        // Move the selection
+        let selection = this.selectedItem;
+        if(selection) {
+            while(selection.classList.contains('deleted'))
+                selection = selection.parentNode;
+            if(selection === this.root)
+                selection = null;
+            this.selectedItem = selection;
+        }
+        //And then purge
+        Array.forEach(this.root.querySelectorAll('tree-item.deleted, tree-folder.deleted'),
+            node => node.parentNode.removeChild(node));
     },
 
     get hidden() {
@@ -120,7 +149,18 @@ TreeView.prototype = {
     handleEvent: function TreeView__handleEvent(aEvent) {
         if(aEvent.type !== 'click')
             return;
-        this.selectedItem = aEvent.currentTarget;
+        aEvent.stopPropagation();
+        if(aEvent.currentTarget.classList.contains('toggle-collapsed')) {
+            // (un)collapse
+            let element = aEvent.currentTarget;
+            while(element.nodeName !== 'tree-folder') {
+                element = element.parentNode;
+            }
+            element.classList.toggle('collapsed');
+        } else {
+            // select
+            this.selectedItem = aEvent.currentTarget;
+        }
     },
 };
 
@@ -194,6 +234,8 @@ let ViewList = {
                 if (tags.length)
                     TagList.show();
             })
+        } else {
+            TagList.hide();
         }
 
         let title = this.selectedItem.getElementsByClassName('title')[0].textContent;
@@ -250,7 +292,8 @@ let TagList = {
 
     onSelect: function TagList_onSelect(aEvent) {
         if (!this.selectedItem) {
-            this.hide();
+            if(!FeedList.selectedItem && !ViewList.selectedItem)
+                ViewList.selectedItem = getElement('all-items-folder')
             return;
         }
 
@@ -332,7 +375,7 @@ let FeedList = {
 
     get tree() {
         delete this.tree;
-        return this.tree = getElement('feed-list');
+        return this.tree = new TreeView('feed-list');
     },
 
     get selectedItem() {
@@ -340,7 +383,7 @@ let FeedList = {
     },
 
     get selectedFeed() {
-        return this.selectedItem ? Storage.getFeed(this.selectedItem.id) : null;
+        return this.selectedItem ? Storage.getFeed(this.selectedItem.dataset.id) : null;
     },
 
     deselect: function FeedList_deselect() {
@@ -348,11 +391,15 @@ let FeedList = {
     },
 
     onSelect: function FeedList_onSelect(aEvent) {
-        if (!this.selectedItem)
+        if (!this.selectedItem) {
+            if(!TagList.selectedItem && !ViewList.selectedItem)
+                ViewList.selectedItem = getElement('all-items-folder')
             return;
+        }
 
         ViewList.deselect();
         TagList.deselect();
+        TagList.hide();
 
         let query = new Query({ deleted: Storage.ENTRY_STATE_NORMAL });
 
@@ -365,17 +412,7 @@ let FeedList = {
     },
 
     /**
-     * Refresh the folder's label.
-     *
-     * @param aFolders
-     *        An array of feed IDs.
-     */
-    refreshFolderTreeitems: function FeedList_refreshFolderTreeitems(aFolders) {
-        aFolders.map(Storage.getFeed).forEach(this._refreshLabel, this);
-    },
-
-    /**
-     * Refresh the feed treeitem's label and favicon. Also refreshes folders
+     * Refresh the feed treeitem's label and unread counts. Also refreshes folders
      * in the feed's parent chain.
      *
      * @param aFeeds
@@ -384,7 +421,6 @@ let FeedList = {
     refreshFeedTreeitems: function FeedList_refreshFeedTreeitems(aFeeds) {
         for (let feed of aFeeds.map(Storage.getFeed)) {
             this._refreshLabel(feed);
-            this._refreshFavicon(feed.feedID);
 
             // Build an array of IDs of folders in the the parent chains of
             // the given feeds.
@@ -397,7 +433,7 @@ let FeedList = {
                 parentID = Storage.getFeed(parentID).parent;
             }
 
-            this.refreshFolderTreeitems(folders);
+            folders.map(Storage.getFeed).forEach(this._refreshLabel, this); // start async
         }
     },
 
@@ -410,107 +446,56 @@ let FeedList = {
         })
 
         let unreadCount = yield query.getEntryCount()
-        let treeitem = getElement(aFeed.feedID);
-
-        treeitem.setAttribute('title', aFeed.title);
-        treeitem.setAttribute('unreadcount', unreadCount);
-
-        if (unreadCount > 0)
-            treeitem.classList.add('unread');
-        else
-            treeitem.classList.remove('unread');
+        this.tree.updateElement(aFeed.feedID, {title: aFeed.title, unreadCount});
     }.task(),
 
-    _refreshFavicon: function FeedList__refreshFavicon(aFeedID) {
-        let feed = Storage.getFeed(aFeedID);
-        let treeitem = getElement(aFeedID);
-
-        let icon = '';
-        if (treeitem.hasAttribute('loading'))
-            icon = THROBBER_URL;
-        else if (treeitem.hasAttribute('error'))
-            icon = ERROR_ICON_URL;
-        else if (PrefCache.showFavicons && feed.favicon && feed.favicon != 'no-favicon')
-            icon = feed.favicon;
-
-        treeitem.setAttribute('icon', icon);
+    _faviconUrl: function FeedList__faviconUrl(aFeed) {
+        if (PrefCache.showFavicons && aFeed.favicon && aFeed.favicon != 'no-favicon')
+            return aFeed.favicon;
+        return "chrome://brief/skin/icons/default-feed-favicon.png";
     },
 
     rebuild: function FeedList_rebuild() {
-        this.lastSelectedID = this.selectedItem ? this.selectedItem.id : '';
-
-        // Clear the existing tree.
-        while (this.tree.hasChildNodes())
-            this.tree.removeChild(this.tree.lastChild);
-
         this.feeds = Storage.getAllFeeds(true);
 
-        // This a helper array used by _buildFolderChildren. As the function recurses,
-        // the array stores folders in the parent chain of the currently processed folder.
-        // This is how it tracks where to append the items.
-        this._folderParentChain = [this.tree];
+        let model = this._buildFolderChildren(PrefCache.homeFolder);
+        this.tree.update(model);
 
-        this._buildFolderChildren(PrefCache.homeFolder);
-
-        if (this.lastSelectedID) {
-            let prevSelectedItem = getElement(this.lastSelectedID);
-            if (prevSelectedItem) {
-                this.tree.suppressOnSelect = true;
-                this.tree.selectedItem = prevSelectedItem;
-                this.tree.suppressOnSelect = false;
-            }
-            else {
-                ViewList.selectedItem = getElement('all-items-folder');
-            }
-
-            this.lastSelectedID = '';
-        }
+        if(this.tree.selectedItem === null)
+            ViewList.selectedItem = getElement('starred-folder'); // tmp for debug
     },
 
     /**
-     * Recursively reads feeds from the database and builds the tree, starting from the
-     * given folder.
+     * Recursively reads feeds from the database and builds the JSON model of the feed tree,
+     * starting from the given folder.
      *
      * @param aParentFolder feedID of the folder.
      */
     _buildFolderChildren: function FeedList__buildFolderChildren(aParentFolder) {
+        let nodes = [];
         for (let feed of this.feeds) {
             if (feed.parent != aParentFolder)
                 continue;
 
-            let parent = this._folderParentChain[this._folderParentChain.length - 1];
+            let item = {
+                id: feed.feedID,
+                title: feed.title,
+            };
+
 
             if (feed.isFolder) {
-                let closedFolders = this.tree.getAttribute('closedFolders');
-                let isOpen = !closedFolders.match(escape(feed.feedID));
+                let closedFolders = this.tree.root.getAttribute('closedFolders');
+                item.collapsed = closedFolders.match(escape(feed.feedID));
 
-                let folder = document.createElement('richtreefolder');
-                folder.id = feed.feedID;
-                folder.className = 'feed-folder';
-                folder.contextMenu = 'folder-context-menu';
-                folder.setAttribute('open', isOpen);
-
-                parent.appendChild(folder);
-
-                this.refreshFolderTreeitems([feed.feedID]);
-
-                this._folderParentChain.push(folder);
-
-                this._buildFolderChildren(feed.feedID);
+                item.children = this._buildFolderChildren(feed.feedID);
             }
             else {
-                let treeitem = document.createElement('richtreeitem');
-                treeitem.id = feed.feedID;
-                treeitem.className = 'feed-treeitem';
-                treeitem.contextMenu = 'feed-context-menu';
-                parent.appendChild(treeitem);
-
-                this._refreshLabel(feed);
-                this._refreshFavicon(feed.feedID);
+                item.icon = this._faviconUrl(feed);
             }
+            this._refreshLabel(feed); // start async
+            nodes.push(item);
         }
-
-        this._folderParentChain.pop();
+        return nodes;
     },
 
 
@@ -520,53 +505,31 @@ let FeedList = {
                 ViewList.refreshItem('all-items-folder');
                 ViewList.refreshItem('today-folder');
                 ViewList.refreshItem('starred-folder');
-                if (this.expectRemovalInvalidate) {
-                    /* Removal is performed manually to avoid full rebuild,
-                     * only unread counts need to be updated */
-                    FeedList.expectRemovalInvalidate = false;
-                    // TODO: avoid refreshing non-parent folders
-                    Storage.getAllFeeds(true).forEach(this._refreshLabel, this);
-                }
-                else {
-                    this.persistFolderState();
-                    this.rebuild();
-
-                    wait().then(() => gCurrentView.refresh());
-                }
+                this.persistFolderState();
+                this.rebuild();
                 break;
 
             case 'brief:feed-title-changed':
-                let feed = Storage.getFeed(aData);
-                if (feed.isFolder)
-                    this.refreshFolderTreeitems([aData]);
-                else
-                    this.refreshFeedTreeitems([aData]);
-                break;
-
             case 'brief:feed-favicon-changed':
-                this._refreshFavicon(aData)
+                let feed = Storage.getFeed(aData);
+                this.tree.updateElement(feed.feedID,
+                    {title: feed.title, icon: this._faviconUrl(feed)});
+                // TODO: should update FeedView and feed view title too(?)
                 break;
 
             case 'brief:feed-updated': {
-                let item = getElement(aData);
-                item.removeAttribute('error');
-                item.removeAttribute('loading');
-                this._refreshFavicon(aData);
+                this.tree.updateElement(aData, {loading: false, error: false});
                 refreshProgressmeter();
                 break;
             }
 
             case 'brief:feed-loading': {
-                let item = getElement(aData);
-                item.setAttribute('loading', true);
-                this._refreshFavicon(aData);
+                this.tree.updateElement(aData, {loading: true});
                 break;
             }
 
             case 'brief:feed-error': {
-                let item = getElement(aData);
-                item.setAttribute('error', true);
-                this._refreshFavicon(aData);
+                this.tree.updateElement(aData, {error: true});
                 break;
             }
 
@@ -579,11 +542,7 @@ let FeedList = {
 
                 if (aData == 'cancelled') {
                     for (let feed of Storage.getAllFeeds()) {
-                        let item = getElement(feed.feedID);
-                        if (item.hasAttribute('loading')) {
-                            item.removeAttribute('loading');
-                            this._refreshFavicon(feed.feedID);
-                        }
+                        this.tree.updateElement(feed.feedID, {loading: false});
                     }
                 }
                 break;
@@ -650,26 +609,13 @@ let FeedList = {
 
     persistFolderState: function FeedList_persistFolderState() {
         let closedFolders = '';
-        for (let folder of this.tree.getElementsByTagName('richtreefolder')) {
-            if (folder.getAttribute('open') == 'false')
-                closedFolders += folder.id;
+        for (let folder of this.tree.root.getElementsByTagName('tree-folder')) {
+            if (folder.classList.contains('collapsed'))
+                closedFolders += folder.dataset.id;
         }
 
-        FeedList.tree.setAttribute('closedFolders', escape(closedFolders));
-    },
-
-    removeItem: function FeedList_removeItem(aElement) {
-        let itemToSelect = null;
-
-        if (this.selectedItem == aElement)
-            itemToSelect = aElement.nextSibling || aElement.previousSibling || aElement.parentNode;
-
-        aElement.parentNode.removeChild(aElement);
-
-        if (itemToSelect)
-            this.tree.selectedItem = itemToSelect;
+        FeedList.tree.root.setAttribute('closedFolders', escape(closedFolders));
     }
-
 }
 
 
@@ -804,9 +750,6 @@ let FolderContextMenu = {
         let text = STRINGS.formatStringFromName('confirmFolderDeletionText', [feed.title], 1);
 
         if (Services.prompt.confirm(window, title, text)) {
-            FeedList.removeItem(item);
-            FeedList.expectRemovalInvalidate = true;
-
             Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
             let txn = new PlacesRemoveItemTransaction(Number(feed.bookmarkID));

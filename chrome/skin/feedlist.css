@@ -1,7 +1,3 @@
-richtree {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtree);
-}
-
 #feed-list {
     margin-top: 15px !important;
     padding-left: 5px !important;
@@ -11,27 +7,39 @@ richtree {
 
 /* =========== Feeds =========== */
 
-richtreeitem {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtreeitem);
-    -moz-box-align: center;
+tree-item {
     border: 1px solid transparent !important; /* Placeholder for selection border */
     padding: 2px 1px 2px 5px !important;
 }
 
-.feed-icon {
+tree-item > .icon,
+tree-item > .system-icon {
     width: 16px !important;
     height: 16px !important;
     margin-right: 6px !important;
-    list-style-image: url(icons/default-feed-favicon.png);
 }
 
-.feed-title {
+tree-item[data-loading="true"] > .icon,
+tree-item[data-error="true"] > .icon,
+tree-item:not([data-error="true"]):not([data-loading="true"]) > .system-icon {
+    display: none;
+}
+
+tree-item[data-loading="true"] > .system-icon {
+    background-image: url("chrome://brief/skin/throbber.gif") !important;
+}
+
+tree-item[data-error="true"]:not([data-loading="true"]) > .system-icon {
+    background-image: url("chrome://brief/skin/icons/error.png") !important;
+}
+
+
+tree-item > .title {
     font-size: 13px !important;
     color: #454545 !important;
 }
 
-.unread-count,
-.tag-list-item > .listcell-iconic::after {
+.unread-count {
     min-width: 2em !important;
     margin-left: auto !important;
     text-align: center;
@@ -44,92 +52,92 @@ richtreeitem {
 
 /* =========== Folders =========== */
 
-richtreefolder {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtreefolder);
-    -moz-box-orient: vertical;
+tree-folder {
     margin: 10px 0 13px !important;
+    display: flex;
+    flex-direction: column;
 }
 
-richtreefolder + richtreefolder,
-richtreefolder:first-child {
+tree-folder + tree-folder,
+tree-folder:first-child {
     margin-top: 0 !important;
 }
 
-richtreefolder:last-child {
+tree-folder:last-child {
     margin-bottom: 0 !important;
 }
 
-
-
-richtreefolder > .folder-title-container {
+tree-folder-header {
     padding: 2px 1px 2px 5px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
-    -moz-box-align: center;
     display: flex;
 }
 
-.folder-title {
+tree-folder-header > .title {
     color: #454545;
     font-size: 13px !important;
     font-weight: bold !important;
     flex-shrink: 1;
 }
 
-.folder-title-spacer {
-    flex-basis: 0;
-    flex-grow: 1;
-}
+tree-folder-header > .toggle-collapsed {
+    padding: 5px 5px 1px !important;
 
-.folder-twisty {
-    padding: 3px 5px 3px !important;
-    list-style-image: url(icons/twisty.png);
-    -moz-image-region: rect(0, 22px, 11px, 11px);
+    width: 11px !important;
+    height: 11px !important;
+    box-sizing: content-box !important;
+
+    background-image: url(icons/twisty.png) !important;
+    background-position: 0 0 !important;
+    background-origin: content-box !important;
+    background-clip: content-box !important;
+
     opacity: 0;
     transition: opacity 200ms;
 }
 
-.folder-twisty:hover {
-    -moz-image-region: rect(11px, 22px, 22px, 11px);
+tree-folder-header > .toggle-collapsed::-moz-focus-inner {
+    border:0;
 }
 
-.folder-title-container:hover > .folder-twisty {
+tree-folder-header > .toggle-collapsed:hover {
+    background-position: 0 -11px !important;
+}
+
+tree-folder-header:hover > .toggle-collapsed {
     opacity: 1;
 }
 
-richtreefolder[open="true"] > .folder-title-container > .folder-twisty {
-    -moz-image-region: rect(0px, 11px, 11px, 0px);
-    padding: 5px 5px 1px !important;
+tree-folder.collapsed > tree-folder-header > .toggle-collapsed {
+    padding: 3px 5px 3px !important;
+    background-position: -11px 0 !important;
 }
 
-richtreefolder[open="true"] > .folder-title-container > .folder-twisty:hover {
-    -moz-image-region: rect(11px, 11px, 22px, 0px);
+tree-folder.collapsed > tree-folder-header > .toggle-collapsed:hover {
+    background-position: -11px -11px !important;
 }
 
 
 
-.folder-container {
+tree-folder.collapsed > tree-item,
+tree-folder.collapsed > tree-folder {
     display: none;
-    padding-top: 2px !important;
-}
-
-richtreefolder[open="true"] > .folder-container {
-    display: -moz-box;
 }
 
 /* Indentation for first level nesting */
-richtreefolder[open="true"] > .feed-treeitem,
-richtreefolder[open="true"] > richtreefolder > .folder-title-container {
+tree-folder > tree-item,
+tree-folder > tree-folder > tree-folder-header {
     padding-left: 20px !important;
 }
 
 /* Indentation for second level nesting */
-richtreefolder[open="true"] > richtreefolder[open="true"] > .feed-treeitem,
-richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder > .folder-title-container {
+tree-folder > tree-folder > tree-item,
+tree-folder > tree-folder > tree-folder > tree-folder-header {
     padding-left: 40px !important;
 }
 
 /* Indentation for third level nesting */
-richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder[open="true"] > .feed-treeitem,
-richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder > .folder-title-container {
+tree-folder > tree-folder > tree-folder > tree-item,
+tree-folder > tree-folder > tree-folder > tree-folder > tree-folder-header {
     padding-left: 60px !important;
 }

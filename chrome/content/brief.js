@@ -170,9 +170,6 @@ var Commands = {
         let text = STRINGS.formatStringFromName('confirmFeedDeletionText', [feed.title], 1);
 
         if (Services.prompt.confirm(window, title, text)) {
-            FeedList.removeItem(getElement(feed.feedID));
-            FeedList.expectRemovalInvalidate = true;
-
             Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 
             let txn = new PlacesRemoveItemTransaction(Number(feed.bookmarkID));

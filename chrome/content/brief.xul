@@ -93,8 +93,7 @@
         </xul:menupopup>
     </xul:popupset>
 
-    <xul:vbox id="sidebar" width="250" persist="width hidden">
-
+    <div id="sidebar" width="250" class="vbox">
         <div class="vbox"
              id="sidebar-top"
              data-mode="idle">
@@ -158,15 +157,25 @@
                 <label class="unread-count"/>
             </tree-item>
         </tree-box>
-        <xul:richtree id="feed-list" flex="1"
-                  seltype="single"
-                  contextmenu="feed-list-popup"
-                  persist="closedFolders"
-                  onselect="FeedList.onSelect(event)"
-                  onkeyup="FeedList.onKeyUp(event)">
 
-        </xul:richtree>
-    </xul:vbox>
+        <tree-box id="feed-list" onchange="FeedList.onSelect(event)"><!-- contextmenu="feed-list-popup" -->
+            <template>
+                <tree-item>
+                    <span class="system-icon"/>
+                    <img class="icon"/>
+                    <label class="title"/>
+                    <label class="unread-count"/>
+                </tree-item>
+                <tree-folder>
+                    <tree-folder-header>
+                        <label class="title"/>
+                        <button class="toggle-collapsed" type="checkbox" autocomplete="off"/>
+                        <label class="unread-count"/>
+                    </tree-folder-header>
+                </tree-folder>
+            </template>
+        </tree-box>
+    </div>
 
     <xul:splitter id="sidebar-splitter"
               resizeafter="farthest"
@@ -175,7 +184,7 @@
               ondblclick="Commands.hideSidebar()"/>
 
     <tree-box id="tag-list" hidden="true" onchange="TagList.onSelect(event)"> <!-- context="tag-list-popup" -->
-        <template class="tree-item">
+        <template>
             <tree-item>
                 <img class="icon" src="chrome://brief/skin/icons/tag.png"/>
                 <label class="title"/>
