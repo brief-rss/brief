@@ -110,9 +110,6 @@ var Commands = {
         }
 
         getElement('reveal-sidebar-button').hidden = true;
-
-        if (!FeedList.treeReady)
-            FeedList.rebuild();
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
