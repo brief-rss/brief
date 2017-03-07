@@ -89,7 +89,6 @@ menuseparator {
 
 
 .brief-button {
-    -moz-box-flex: 0;
     flex: none;
     -moz-user-focus: none;
     font: inherit;
@@ -211,73 +210,4 @@ menuseparator {
 
 #update-progress::-moz-progress-bar {
     background: linear-gradient(to right, #3ede34, #88ff81) !important;
-}
-
-
-
-/* =========== Rules applicable to all lists =========== */
-
-tree-box {
-    display: flex;
-    flex-direction: column;
-}
-
-tree-item {
-    display: flex;
-}
-
-tree-item.selected,
-tree-folder.selected > tree-folder-header {
-    border-color: #ffc9a6 !important;
-    background-color: #fcd7bd !important;
-}
-
-tree-item:hover:not(.selected),
-tree-folder:not(.selected) > tree-folder-header:hover {
-    border-color: #e5e5e5 !important;
-    background-color: #e5e5e5 !important;
-}
-
-tree-folder:not(.unread) > tree-folder-header > .unread-count,
-tree-folder:not(.collapsed) > tree-folder-header > .unread-count,
-tree-item:not(.unread) > .unread-count {
-    visibility: hidden;
-}
-
-
-
-/* =========== View list tree =========== */
-
-#view-list {
-    margin: 7px 0 0 5px !important;
-}
-
-#view-list > tree-item {
-    padding: 3px 1px 2px 20px !important;
-    border: 1px solid transparent !important; /* Placeholder for selection border */
-    -moz-box-align: center !important;
-}
-
-#view-list > tree-item > .title {
-    margin: 0 4px 0 0 !important;
-    font-size: 13px !important;
-    font-weight: bold !important;
-    color: #454545 !important;
-}
-
-
-/* =========== Tag listbox =========== */
-
-#tag-list {
-    background-color: #f2f2f2 !important;
-    min-width: 100px !important;
-}
-
-#tag-list > tree-item {
-    width: 150px !important;
-    padding: 2px 1px 2px 5px !important;
-    border: 1px solid transparent !important; /* Placeholder for selection border */
-    font-size: 13px !important;
-    color: #454545 !important;
-    border-radius: 0 !important;
 }

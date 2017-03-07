@@ -1,15 +1,69 @@
-#feed-list {
-    margin-top: 15px !important;
-    padding-left: 5px !important;
+/* =========== Rules applicable to all trees =========== */
+
+tree-box {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+tree-item,
+tree-folder-header {
+    flex-shrink: 0;
+    display: flex;
+}
+
+tree-folder {
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: column;
+}
+
+tree-folder.collapsed > tree-item,
+tree-folder.collapsed > tree-folder {
+    display: none;
+}
+
+tree-folder-header > .toggle-collapsed::-moz-focus-inner {
+    border:0;
 }
 
 
+/* =========== Brief DOM =========== */
 
-/* =========== Feeds =========== */
+tree-folder:not(.unread) > tree-folder-header > .unread-count,
+tree-folder:not(.collapsed) > tree-folder-header > .unread-count,
+tree-item:not(.unread) > .unread-count {
+    visibility: hidden;
+}
+
+tree-item[data-loading="true"] > .icon,
+tree-item[data-error="true"] > .icon,
+tree-item:not([data-error="true"]):not([data-loading="true"]) > .system-icon {
+    display: none;
+}
+
+tree-folder-header > .title {
+    flex-shrink: 1;
+}
+
+
+/* =========== Brief theming =========== */
 
 tree-item {
     border: 1px solid transparent !important; /* Placeholder for selection border */
     padding: 2px 1px 2px 5px !important;
+}
+
+tree-item.selected,
+tree-folder.selected > tree-folder-header {
+    border-color: #ffc9a6 !important;
+    background-color: #fcd7bd !important;
+}
+
+tree-item:hover:not(.selected),
+tree-folder:not(.selected) > tree-folder-header:hover {
+    border-color: #e5e5e5 !important;
+    background-color: #e5e5e5 !important;
 }
 
 tree-item > .icon,
@@ -19,12 +73,6 @@ tree-item > .system-icon {
     margin-right: 6px !important;
 }
 
-tree-item[data-loading="true"] > .icon,
-tree-item[data-error="true"] > .icon,
-tree-item:not([data-error="true"]):not([data-loading="true"]) > .system-icon {
-    display: none;
-}
-
 tree-item[data-loading="true"] > .system-icon {
     background-image: url("chrome://brief/skin/throbber.gif") !important;
 }
@@ -32,7 +80,6 @@ tree-item[data-loading="true"] > .system-icon {
 tree-item[data-error="true"]:not([data-loading="true"]) > .system-icon {
     background-image: url("chrome://brief/skin/icons/error.png") !important;
 }
-
 
 tree-item > .title {
     font-size: 13px !important;
@@ -49,13 +96,10 @@ tree-item > .title {
 }
 
 
-
 /* =========== Folders =========== */
 
 tree-folder {
     margin: 10px 0 13px !important;
-    display: flex;
-    flex-direction: column;
 }
 
 tree-folder + tree-folder,
@@ -70,14 +114,12 @@ tree-folder:last-child {
 tree-folder-header {
     padding: 2px 1px 2px 5px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
-    display: flex;
 }
 
 tree-folder-header > .title {
     color: #454545;
     font-size: 13px !important;
     font-weight: bold !important;
-    flex-shrink: 1;
 }
 
 tree-folder-header > .toggle-collapsed {
@@ -94,10 +136,6 @@ tree-folder-header > .toggle-collapsed {
 
     opacity: 0;
     transition: opacity 200ms;
-}
-
-tree-folder-header > .toggle-collapsed::-moz-focus-inner {
-    border:0;
 }
 
 tree-folder-header > .toggle-collapsed:hover {
@@ -119,11 +157,6 @@ tree-folder.collapsed > tree-folder-header > .toggle-collapsed:hover {
 
 
 
-tree-folder.collapsed > tree-item,
-tree-folder.collapsed > tree-folder {
-    display: none;
-}
-
 /* Indentation for first level nesting */
 tree-folder > tree-item,
 tree-folder > tree-folder > tree-folder-header {
@@ -140,4 +173,54 @@ tree-folder > tree-folder > tree-folder > tree-folder-header {
 tree-folder > tree-folder > tree-folder > tree-item,
 tree-folder > tree-folder > tree-folder > tree-folder > tree-folder-header {
     padding-left: 60px !important;
+}
+
+
+/* =========== Tree instances =========== */
+
+#feed-list {
+    margin-top: 15px !important;
+    padding-left: 5px !important;
+}
+
+
+
+#feed-list {
+    flex: 1 1 auto;
+}
+
+/* =========== View list tree =========== */
+
+#view-list {
+    margin: 7px 0 0 5px !important;
+    flex: 0 0 auto;
+}
+
+#view-list > tree-item {
+    padding: 3px 1px 2px 20px !important;
+    border: 1px solid transparent !important; /* Placeholder for selection border */
+}
+
+#view-list > tree-item > .title {
+    margin: 0 4px 0 0 !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    color: #454545 !important;
+}
+
+
+/* =========== Tag listbox =========== */
+
+#tag-list {
+    background-color: #f2f2f2 !important;
+    min-width: 100px !important;
+}
+
+#tag-list > tree-item {
+    width: 150px !important;
+    padding: 2px 1px 2px 5px !important;
+    border: 1px solid transparent !important; /* Placeholder for selection border */
+    font-size: 13px !important;
+    color: #454545 !important;
+    border-radius: 0 !important;
 }
