@@ -1,15 +1,12 @@
 <?xml version="1.0"?>
-<!DOCTYPE window SYSTEM "chrome://brief/locale/brief.dtd">
+<!DOCTYPE html [
+  <!ENTITY % BriefLocaleDTD SYSTEM "chrome://brief/locale/brief.dtd">
+  %BriefLocaleDTD;
+]>
 
-<xul:page id="brief-window"
-      xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:html="http://www.w3.org/1999/xhtml"
-      xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-      title="Brief"
-      orient="horizontal"
-      onload="Storage.ready.then(init)"
-      onunload="unload()">
-
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Brief</title>
     <link rel="icon" href="chrome://brief/skin/brief-icon-16.png" style="display:none" />
 
     <link rel="stylesheet" type="text/css" href="chrome://brief/skin/brief.css"/>
@@ -20,7 +17,9 @@
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
-
+</head>
+<body onload="Storage.ready.then(init)" onunload="unload()">
+    <!--
     <xul:popupset id="main-popupset">
         <xul:menupopup id="view-list-popup"
                    onpopupshowing="ViewListContextMenu.init()">
@@ -92,6 +91,7 @@
                       oncommand="FolderContextMenu.emptyFolder()"/>
         </xul:menupopup>
     </xul:popupset>
+    -->
 
     <div id="sidebar" width="250" class="vbox">
         <div class="vbox"
@@ -177,11 +177,7 @@
         </tree-box>
     </div>
 
-    <xul:splitter id="sidebar-splitter"
-              resizeafter="farthest"
-              tooltiptext="&sidebarSplitter.tooltip;"
-              persist="hidden"
-              ondblclick="Commands.hideSidebar()"/>
+    <div class="splitter" id="sidebar-splitter" ondblclick="Commands.hideSidebar()"/> <!-- resizeafter="farthest" tooltiptext="&sidebarSplitter.tooltip;" -->
 
     <tree-box id="tag-list" hidden="true" onchange="TagList.onSelect(event)"> <!-- context="tag-list-popup" -->
         <template>
@@ -193,10 +189,10 @@
         </template>
     </tree-box>
 
-    <xul:splitter id="tag-list-splitter"
+    <div class="splitter" id="tag-list-splitter"
               hidden="true"/>
 
-    <xul:vbox flex="1" class="vbox">
+    <div class="vbox flex">
         <div class="hbox"
              id="feed-view-header">
             <button id="view-title-button"
@@ -265,6 +261,7 @@
                     class="flex"
                     src="resource://brief-content/feedview.html"/>
         </div>
-    </xul:vbox>
+    </div>
 
-</xul:page>
+</body>
+</html>

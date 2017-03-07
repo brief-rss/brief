@@ -2,7 +2,7 @@ var Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
-    BRIEF_URL: 'chrome://brief/content/brief.xul',
+    BRIEF_URL: 'chrome://brief/content/brief.xhtml',
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
 
     get toolbarbutton() { return document.getElementById('brief-button') },

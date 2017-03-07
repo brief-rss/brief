@@ -32,7 +32,6 @@ function init() {
     getElement('show-all-entries-checkbox').dataset.checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
     getElement('filter-unread-checkbox').dataset.checked = PrefCache.filterUnread;
     getElement('filter-starred-checkbox').dataset.checked = PrefCache.filterStarred;
-    getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
 
     refreshProgressmeter();
 
@@ -51,9 +50,16 @@ function init() {
 
     ViewList.init();
 
-    let startView = getElement('view-list').getAttribute('startview');
-    ViewList.selectedItem = getElement(startView);
-
+    // Restore local persistence
+    /*ViewList.selectedItem = getElement(localStorage.getItem('brief.startview') || 'all-items-folder');
+    getElement('feed-list').closedFolders = localStorage.getItem('brief.closed_folders');
+    getElement('tag-list').width = localStorage.getItem('brief.tag_list.width');
+    getElement('sidebar').width = localStorage.getItem('brief.sidebar.width');
+    let sidebar_hidden = localStorage.getItem('brief.sidebar.hidden');
+    getElement('sidebar').hidden = sidebar_hidden;
+    getElement('sidebar-splitter').hidden = sidebar_hidden;
+    getElement('reveal-sidebar-button').hidden = !sidebar_hidden;
+    */
     wait().then(() => FeedList.rebuild());
     wait(1000).then(() => Storage.syncWithLivemarks());
 }
@@ -63,9 +69,16 @@ function unload() {
     let viewList = getElement('view-list');
     let id = viewList.selectedItem && viewList.selectedItem.id;
     let startView = (id == 'today-folder') ? 'today-folder' : 'all-items-folder';
-    viewList.setAttribute('startview', startView);
+    try {
+        // Note: this does not work for chrome://, but seems to work for web-extension://
+        localStorage.setItem('brief.startview', startView);
 
-    FeedList.persistFolderState();
+        FeedList.persistFolderState();
+        localStorage.setItem('brief.closed_folders', getElement('feed-list').closedFolders);
+        localStorage.setItem('brief.sidebar.hidden', getElement('sidebar').hidden);
+        localStorage.setItem('brief.sidebar.width', getElement('sidebar').width);
+        localStorage.setItem('brief.tag_list.width', getElement('tag-list').width);
+    } catch(_) {}
 
     for (let topic of OBSERVER_TOPICS)
         Services.obs.removeObserver(FeedList, topic);

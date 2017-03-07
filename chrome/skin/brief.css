@@ -51,9 +51,18 @@ spacer[flex] {
 
 
 
-page {
+html {
     font-family: Arial, Helvetica, sans-serif;
     background: #ffffff !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+body {
+    display: flex;
+    flex-direction: row;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 menupopup {

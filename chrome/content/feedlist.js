@@ -83,7 +83,7 @@ TreeView.prototype = {
         }
     },
     updateElement: function TreeView_updateElement(aElement, aModel) {
-        const {id, title, icon, unreadCount, loading, error, children} = aModel;
+        const {id, title, icon, unreadCount, loading, error, collapsed, children} = aModel;
         let element = this._resolveElement(aElement);
 
         const isFolder = (element.nodeName === "tree-folder");
@@ -107,6 +107,8 @@ TreeView.prototype = {
             element.dataset.loading = loading;
         if(error !== undefined)
             element.dataset.error = error;
+        if(collapsed !== undefined)
+            element.classList.toggle('collapsed', collapsed);
         if(children !== undefined)
             this._updateChildren(element, children);
     },
@@ -484,7 +486,7 @@ let FeedList = {
 
 
             if (feed.isFolder) {
-                let closedFolders = this.tree.root.getAttribute('closedFolders');
+                let closedFolders = this.tree.root.getAttribute('closedFolders') || "";
                 item.collapsed = closedFolders.match(escape(feed.feedID));
 
                 item.children = this._buildFolderChildren(feed.feedID);
