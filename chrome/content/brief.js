@@ -4,6 +4,7 @@ Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/NetUtil.jsm');
 Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
+Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
@@ -300,13 +301,22 @@ var Commands = {
     },
 
     openLibrary: function cmd_openLibrary() {
+        // The library view needs the complete ancestor list to the home folder
+        let current = PrefCache.homeFolder;
+        let homePath = [current];
+        while(!PlacesUtils.isRootItem(current)) {
+            current = PlacesUtils.bookmarks.getFolderIdForItem(current);
+            homePath.push(current);
+        }
+        homePath = homePath.reverse();
         let organizer = Services.wm.getMostRecentWindow('Places:Organizer');
         if (!organizer) {
+            console.log("open", homePath);
             openDialog('chrome://browser/content/places/places.xul', '',
-                       'chrome,toolbar=yes,dialog=no,resizable', PrefCache.homeFolder);
+                       'chrome,toolbar=yes,dialog=no,resizable', homePath);
         }
         else {
-            organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(PrefCache.homeFolder);
+            organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(homePath);
             organizer.focus();
         }
     },
