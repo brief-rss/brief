@@ -18,7 +18,7 @@
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
 </head>
-<body onload="Storage.ready.then(init)" onunload="unload()">
+<body class="sidebar" onload="Storage.ready.then(init)" onunload="unload()">
     <div id="sidebar" class="shrinkable vbox">
         <div class="vbox"
              id="sidebar-top"
@@ -107,7 +107,7 @@
 
     <draggable-splitter id="sidebar-splitter" ondblclick="Commands.hideSidebar()"/> <!-- resizeafter="farthest" tooltiptext="&sidebarSplitter.tooltip;" -->
 
-    <tree-box id="tag-list" class="shrinkable" hidden="true"
+    <tree-box id="tag-list" class="shrinkable"
               onchange="TagList.onSelect(event)"
               contextmenu="tag-list-context-menu">
         <template>
@@ -119,8 +119,7 @@
         </template>
     </tree-box>
 
-    <draggable-splitter id="tag-list-splitter"
-              hidden="true"/>
+    <draggable-splitter id="tag-list-splitter"/>
 
     <div id="main-pane" class="growable vbox">
         <div class="hbox"
@@ -179,7 +178,6 @@
         <div class="growable hbox">
             <button id="reveal-sidebar-button"
                     class="brief-button"
-                    hidden="true"
                     title="&revealSidebar.tooltip;"
                     onclick="Commands.revealSidebar()"/>
             <!-- The following iframe contains untrusted HTML. The untrusted HTML should have no chrome-level access because:

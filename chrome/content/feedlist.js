@@ -134,13 +134,6 @@ TreeView.prototype = {
             node => node.parentNode.removeChild(node));
     },
 
-    get hidden() {
-        return this.root.hidden;
-    },
-    set hidden(aHidden) {
-        return this.root.hidden = aHidden;
-    },
-
     _resolveElement: function TreeView__resolveElement(aElementOrId, aPrefix) {
         let prefix = (aPrefix === undefined) ? this.prefix : aPrefix;
         if(typeof aElementOrId === "string") {
@@ -280,17 +273,11 @@ let TagList = {
         if (!this.ready)
             this._rebuild();
 
-        if (this.tree.hidden) {
-            this.tree.hidden = false;
-            getElement('tag-list-splitter').hidden = false;
-        }
+        document.body.classList.add('tag-list');
     },
 
     hide: function TagList_hide() {
-        if (!this.tree.hidden) {
-            this.tree.hidden = true;
-            getElement('tag-list-splitter').hidden = true;
-        }
+        document.body.classList.remove('tag-list');
     },
 
     deselect: function TagList_deselect() {
@@ -463,13 +450,14 @@ let FeedList = {
     },
 
     rebuild: function FeedList_rebuild() {
+        let active = (this.tree.selectedItem !== null);
         this.feeds = Storage.getAllFeeds(true);
 
         let model = this._buildFolderChildren(PrefCache.homeFolder);
         this.tree.update(model);
 
-        if(this.tree.selectedItem === null)
-            ViewList.selectedItem = getElement('starred-folder'); // tmp for debug
+        if(active && this.tree.selectedItem === null)
+            ViewList.selectedItem = getElement('all-items-folder');
     },
 
     /**

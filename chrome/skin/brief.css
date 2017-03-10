@@ -97,7 +97,19 @@ body {
     border: 0 !important;
 }
 
+/* =========== Sidebar hiding =========== */
+body:not(.sidebar) #sidebar,
+body:not(.sidebar) #sidebar-splitter,
+body:not(.sidebar) #tag-list,
+body:not(.tag-list) #tag-list,
+body:not(.sidebar) #tag-list-splitter,
+body:not(.tag-list) #tag-list-splitter {
+    display: none;
+}
 
+body.sidebar #reveal-sidebar-button {
+    display: none;
+}
 
 /* =========== Sidebar =========== */
 

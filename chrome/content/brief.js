@@ -55,34 +55,30 @@ function init() {
     ContextMenuModule.init();
 
     // Restore local persistence
-    /*ViewList.selectedItem = getElement(localStorage.getItem('brief.startview') || 'all-items-folder');
-    getElement('feed-list').closedFolders = localStorage.getItem('brief.closed_folders');
-    getElement('tag-list').width = localStorage.getItem('brief.tag_list.width');
-    getElement('sidebar').width = localStorage.getItem('brief.sidebar.width');
-    let sidebar_hidden = localStorage.getItem('brief.sidebar.hidden');
-    getElement('sidebar').hidden = sidebar_hidden;
-    getElement('sidebar-splitter').hidden = sidebar_hidden;
-    getElement('reveal-sidebar-button').hidden = !sidebar_hidden;
-    */
+    Persistence.init();
+    ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+    getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);
+    getElement('tag-list').style.width = Persistence.data.tagList.width;
+    getElement('sidebar').style.width = Persistence.data.sidebar.width;
+    document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
+
     wait().then(() => FeedList.rebuild());
     wait(1000).then(() => Storage.syncWithLivemarks());
 }
 
 
 function unload() {
-    let viewList = getElement('view-list');
-    let id = viewList.selectedItem && viewList.selectedItem.id;
+    let id = ViewList.selectedItem && ViewList.selectedItem.id;
     let startView = (id == 'today-folder') ? 'today-folder' : 'all-items-folder';
-    try {
-        // Note: this does not work for chrome://, but seems to work for web-extension://
-        localStorage.setItem('brief.startview', startView);
+    FeedList.persistFolderState();
 
-        FeedList.persistFolderState();
-        localStorage.setItem('brief.closed_folders', getElement('feed-list').closedFolders);
-        localStorage.setItem('brief.sidebar.hidden', getElement('sidebar').hidden);
-        localStorage.setItem('brief.sidebar.width', getElement('sidebar').width);
-        localStorage.setItem('brief.tag_list.width', getElement('tag-list').width);
-    } catch(_) {}
+    Persistence.data.startView = startView;
+    Persistence.data.closedFolders = getElement('feed-list').getAttribute('closedFolders');
+    Persistence.data.tagList.width = getElement('tag-list').style.width;
+    Persistence.data.sidebar.width = getElement('sidebar').style.width;
+    Persistence.data.sidebar.hidden = !document.body.classList.contains('sidebar');
+
+    Persistence.save();
 
     for (let topic of OBSERVER_TOPICS)
         Services.obs.removeObserver(FeedList, topic);
@@ -96,24 +92,11 @@ function unload() {
 var Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
-        getElement('sidebar').hidden = true;
-        getElement('sidebar-splitter').hidden = true;
-        getElement('tag-list').hidden = true;
-        getElement('tag-list-splitter').hidden = true;
-
-        getElement('reveal-sidebar-button').hidden = false;
+        document.body.classList.remove('sidebar');
     },
 
     revealSidebar: function cmd_revealSidebar() {
-        getElement('sidebar').hidden = false;
-        getElement('sidebar-splitter').hidden = false;
-
-        if (ViewList.selectedItem == getElement('starred-folder') || TagList.selectedItem) {
-            getElement('tag-list').hidden = false;
-            getElement('tag-list-splitter').hidden = false;
-        }
-
-        getElement('reveal-sidebar-button').hidden = true;
+        document.body.classList.add('sidebar');
     },
 
     openOptions: function cmd_openOptions(aPaneID) {
@@ -472,7 +455,8 @@ let PrefObserver = {
         filterStarred:             'feedview.filterStarred',
         sortUnreadViewOldestFirst: 'feedview.sortUnreadViewOldestFirst',
         showFavicons:              'showFavicons',
-        homeFolder:                'homeFolder'
+        homeFolder:                'homeFolder',
+        pagePersist:               'pagePersist'
     },
 
     _updateCachedPref: function PrefObserver__updateCachedPref(aKey) {
@@ -566,6 +550,42 @@ let SplitterModule = {
         this._update(event);
         splitter.parentNode.classList.remove('resize-in-progress');
         this._active = null;
+    },
+};
+
+let Persistence = {
+    BRIEF_XUL_URL: 'chrome://brief/content/brief.xul',
+
+    data: null,
+
+    init: function Persistence_init() {
+        let data = PrefCache.pagePersist;
+        if(data !== "") {
+            this.data = JSON.parse(data);
+        } else {
+            this.data = this._import();
+            this.save();
+        }
+    },
+
+    save: function Persistence_save() {
+        console.log(this.data);
+        Prefs.setCharPref("pagePersist", JSON.stringify(this.data));
+    },
+
+    _import: function Persistence__import() {
+        let store = Cc["@mozilla.org/xul/xulstore;1"].getService(Ci.nsIXULStore);
+        return {
+            startView: store.getValue(this.BRIEF_XUL_URL, "view-list", "startview"),
+            closedFolders: store.getValue(this.BRIEF_XUL_URL, "feed-list", "closedFolders"),
+            tagList: {
+                width: store.getValue(this.BRIEF_XUL_URL, "tag-list", "width") + 'px'
+            },
+            sidebar: {
+                width: store.getValue(this.BRIEF_XUL_URL, "sidebar", "width") + 'px',
+                hidden: store.getValue(this.BRIEF_XUL_URL, "sidebar", "hidden")
+            }
+        }
     },
 };
 
