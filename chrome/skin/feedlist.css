@@ -81,9 +81,14 @@ tree-item[data-error="true"]:not([data-loading="true"]) > .system-icon {
     background-image: url("chrome://brief/skin/icons/error.png") !important;
 }
 
-tree-item > .title {
+tree-item > .title,
+tree-folder-header > .title {
     font-size: 13px !important;
     color: #454545 !important;
+}
+
+tree-folder-header > .title {
+    font-weight: bold !important;
 }
 
 .unread-count {
@@ -94,9 +99,6 @@ tree-item > .title {
     font-weight: bold !important;
     color: #539bcf !important;
 }
-
-
-/* =========== Folders =========== */
 
 tree-folder {
     margin: 10px 0 13px !important;
@@ -114,12 +116,6 @@ tree-folder:last-child {
 tree-folder-header {
     padding: 2px 1px 2px 5px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
-}
-
-tree-folder-header > .title {
-    color: #454545;
-    font-size: 13px !important;
-    font-weight: bold !important;
 }
 
 tree-folder-header > .toggle-collapsed {
