@@ -65,6 +65,9 @@
     font-weight: bold !important;
     flex-shrink: 1;
     min-width: 5em !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 
