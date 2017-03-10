@@ -42,8 +42,20 @@ tree-item:not([data-error="true"]):not([data-loading="true"]) > .system-icon {
     display: none;
 }
 
+tree-item > .icon,
+tree-item > .system-icon,
+tree-folder-header > .icon,
+tree-folder-header > .system-icon {
+    flex-shrink: 0;
+}
+
+tree-item > .title,
 tree-folder-header > .title {
     flex-shrink: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 3em !important;
 }
 
 
@@ -213,7 +225,6 @@ tree-folder > tree-folder > tree-folder > tree-folder > tree-folder-header {
 }
 
 #tag-list > tree-item {
-    width: 150px !important;
     padding: 2px 1px 2px 5px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
     font-size: 13px !important;
