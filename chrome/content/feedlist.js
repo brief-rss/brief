@@ -480,7 +480,8 @@ let FeedList = {
 
             if (feed.isFolder) {
                 let closedFolders = this.tree.root.getAttribute('closedFolders') || "";
-                item.collapsed = closedFolders.match(escape(feed.feedID));
+                let sep = closedFolders.match("_") ? "_" : ""; // compat with old no-separator
+                item.collapsed = closedFolders.match(sep + escape(feed.feedID) + sep);
 
                 item.children = this._buildFolderChildren(feed.feedID);
             }
@@ -603,10 +604,10 @@ let FeedList = {
 
 
     persistFolderState: function FeedList_persistFolderState() {
-        let closedFolders = '';
+        let closedFolders = '_';
         for (let folder of this.tree.root.getElementsByTagName('tree-folder')) {
             if (folder.classList.contains('collapsed'))
-                closedFolders += folder.dataset.id;
+                closedFolders += folder.dataset.id + '_';
         }
 
         FeedList.tree.root.setAttribute('closedFolders', escape(closedFolders));
