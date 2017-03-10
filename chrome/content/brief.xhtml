@@ -19,79 +19,6 @@
     <script type="application/x-javascript" src="feedview.js"/>
 </head>
 <body onload="Storage.ready.then(init)" onunload="unload()">
-    <!--
-    <xul:popupset id="main-popupset">
-        <xul:menupopup id="view-list-popup"
-                   onpopupshowing="ViewListContextMenu.init()">
-            <xul:menuitem id="ctx-mark-special-folder-read"
-                      label="&ctxMarkRead.label;"
-                      oncommand="ViewListContextMenu.markFolderRead()"/>
-            <xul:menuitem id="ctx-mark-tag-read"
-                      label="&ctxMarkTagRead.label;"
-                      oncommand="ViewListContextMenu.markTagRead()"/>
-            <xul:menuitem id="ctx-restore-trashed"
-                      label="&ctxRestoreTrashed.label;"
-                      oncommand="Commands.restoreTrashed()"/>
-            <xul:menuseparator id="ctx-view-list-separator"/>
-            <xul:menuitem id="ctx-empty-today-folder"
-                      label="&ctxEmptyFolder.label;"
-                      oncommand="ViewListContextMenu.emptyUnreadFolder()"/>
-            <xul:menuitem id="ctx-delete-tag"
-                      label="&ctxDeleteTag.label;"
-                      oncommand="ViewListContextMenu.deleteTag()"/>
-            <xul:menuitem id="ctx-empty-trash"
-                      label="&ctxEmptyTrash.label;"
-                      oncommand="Commands.emptyTrash()"/>
-        </xul:menupopup>
-        <xul:menupopup id="tag-list-popup">
-            <xul:menuitem id="ctx-mark-tag-read"
-                      label="&ctxMarkTagRead.label;"
-                      oncommand="TagListContextMenu.markTagRead()"/>
-            <xul:menuseparator/>
-            <xul:menuitem id="ctx-delete-tag"
-                      label="&ctxDeleteTag.label;"
-                      oncommand="TagListContextMenu.deleteTag()"/>
-        </xul:menupopup>
-        <xul:menupopup id="feed-context-menu"
-                   onpopupshowing="FeedContextMenu.init()">
-            <xul:menuitem id="ctx-mark-feed-read"
-                      label="&ctxMarkRead.label;"
-                      oncommand="FeedContextMenu.markFeedRead()"/>
-            <xul:menuitem id="ctx-update-feed"
-                      label="&ctxRefreshFeed.label;"
-                      oncommand="FeedUpdateService.updateFeeds([FeedContextMenu.targetFeed])"/>
-            <xul:menuitem id="ctx-open-website"
-                      label="&ctxOpenWebsite.label;"
-                      oncommand="Commands.openFeedWebsite(FeedContextMenu.targetFeed)"/>
-            <xul:menuseparator/>
-            <xul:menuitem id="ctx-unsubscribe-feed"
-                      label="&ctxUnsubscribeFeed.label;"
-                      oncommand="Commands.deleteFeed(FeedContextMenu.targetFeed)"/>
-            <xul:menuitem id="ctx-empty-feed"
-                      label="&ctxEmptyFeed.label;"
-                      oncommand="Commands.emptyFeed(FeedContextMenu.targetFeed)"/>
-            <xul:menuseparator/>
-            <xul:menuitem id="ctx-feed-settomgs"
-                      label="&ctxFeedSettings.label;"
-                      oncommand="Commands.showFeedProperties(FeedContextMenu.targetFeed)"/>
-        </xul:menupopup>
-        <xul:menupopup id="folder-context-menu">
-            <xul:menuitem id="ctx-mark-folder-read"
-                      label="&ctxMarkRead.label;"
-                      oncommand="FolderContextMenu.markFolderRead()"/>
-            <xul:menuitem id="ctx-refresh-folder"
-                      label="&ctxRefreshFolder.label;"
-                      oncommand="FolderContextMenu.updateFolder()"/>
-            <xul:menuseparator/>
-            <xul:menuitem id="ctx-delete-folder"
-                      label="&ctxDeleteFolder.label;"
-                      oncommand="FolderContextMenu.deleteFolder()"/>
-            <xul:menuitem id="ctx-empty-folder"
-                      label="&ctxEmptyFolder.label;"
-                      oncommand="FolderContextMenu.emptyFolder()"/>
-        </xul:menupopup>
-    </xul:popupset>
-    -->
 
     <div id="sidebar" width="250" class="vbox">
         <div class="vbox"
@@ -139,7 +66,9 @@
             </div>
         </div>
 
-        <tree-box id="view-list" class="unprefixed" onchange="ViewList.onSelect(event)"><!-- context="view-list-popup" -->
+        <tree-box id="view-list" class="unprefixed"
+                  onchange="ViewList.onSelect(event)"
+                  contextmenu="view-list-context-menu">
             <tree-item id="all-items-folder">
                 <label class="title">&allItemsFolder.label;</label>
                 <label class="unread-count"/>
@@ -158,7 +87,7 @@
             </tree-item>
         </tree-box>
 
-        <tree-box id="feed-list" onchange="FeedList.onSelect(event)"><!-- contextmenu="feed-list-popup" -->
+        <tree-box id="feed-list" onchange="FeedList.onSelect(event)" contextmenu="feed-list-context-menu">
             <template>
                 <tree-item>
                     <span class="system-icon"/>
@@ -179,7 +108,9 @@
 
     <div class="splitter" id="sidebar-splitter" ondblclick="Commands.hideSidebar()"/> <!-- resizeafter="farthest" tooltiptext="&sidebarSplitter.tooltip;" -->
 
-    <tree-box id="tag-list" hidden="true" onchange="TagList.onSelect(event)"> <!-- context="tag-list-popup" -->
+    <tree-box id="tag-list" class="resizeable" hidden="true"
+              onchange="TagList.onSelect(event)"
+              contextmenu="tag-list-context-menu">
         <template>
             <tree-item>
                 <img class="icon" src="chrome://brief/skin/icons/tag.png"/>
@@ -262,6 +193,71 @@
                     src="resource://brief-content/feedview.html"/>
         </div>
     </div>
+    <context-menu-set>
+        <context-menu id="view-list-context-menu" onshow="ViewListContextMenu.init()">
+            <menu-item id="ctx-mark-special-folder-read" onclick="ViewListContextMenu.markFolderRead()">
+                      &ctxMarkRead.label;
+            </menu-item>
+            <menu-item id="ctx-restore-trashed" onclick="Commands.restoreTrashed()">
+                      &ctxRestoreTrashed.label;
+            </menu-item>
+            <hr id="ctx-view-list-separator-empty"/>
+            <menu-item id="ctx-empty-today-folder" onclick="ViewListContextMenu.emptyUnreadFolder()">
+                      &ctxEmptyFolder.label;
+            </menu-item>
+            <menu-item id="ctx-empty-trash" onclick="Commands.emptyTrash()">
+                      &ctxEmptyTrash.label;
+            </menu-item>
+        </context-menu>
+        <context-menu id="tag-list-context-menu">
+            <menu-item id="ctx-mark-tag-read" onclick="TagListContextMenu.markTagRead()">
+                &ctxMarkTagRead.label;
+            </menu-item>
+            <hr/>
+            <menu-item id="ctx-delete-tag" onclick="TagListContextMenu.deleteTag()">
+                &ctxDeleteTag.label;
+            </menu-item>
+        </context-menu>
+        <context-menu id="feed-list-context-menu" onshow="FeedListContextMenu.init()">
+            <div id='feed-context-menu'>
+                <menu-item id="ctx-mark-feed-read" onclick="FeedListContextMenu.markFeedRead()">
+                    &ctxMarkRead.label;
+                </menu-item>
+                <menu-item id="ctx-update-feed" onclick="FeedUpdateService.updateFeeds([FeedListContextMenu.targetFeed])">
+                    &ctxRefreshFeed.label;
+                </menu-item>
+                <menu-item id="ctx-open-website" onclick="Commands.openFeedWebsite(FeedListContextMenu.targetFeed)">
+                    &ctxOpenWebsite.label;
+                </menu-item>
+                <hr/>
+                <menu-item id="ctx-unsubscribe-feed" onclick="Commands.deleteFeed(FeedListContextMenu.targetFeed)">
+                    &ctxUnsubscribeFeed.label;
+                </menu-item>
+                <menu-item id="ctx-empty-feed" onclick="Commands.emptyFeed(FeedListContextMenu.targetFeed)">
+                    &ctxEmptyFeed.label;
+                </menu-item>
+                <hr/>
+                <menu-item id="ctx-feed-settomgs" onclick="Commands.showFeedProperties(FeedListContextMenu.targetFeed)">
+                    &ctxFeedSettings.label;
+                </menu-item>
+            </div>
+            <div id='folder-context-menu'>
+                <menu-item id="ctx-mark-folder-read" onclick="FeedListContextMenu.markFolderRead()">
+                        &ctxMarkRead.label;
+                </menu-item>
+                <menu-item id="ctx-refresh-folder" onclick="FeedListContextMenu.updateFolder()">
+                        &ctxRefreshFolder.label;
+                </menu-item>
+                <hr/>
+                <menu-item id="ctx-delete-folder" onclick="FeedListContextMenu.deleteFolder()">
+                        &ctxDeleteFolder.label;
+                </menu-item>
+                <menu-item id="ctx-empty-folder" onclick="FeedListContextMenu.emptyFolder()">
+                        &ctxEmptyFolder.label;
+                </menu-item>
+            </div>
+        </context-menu>
+    </context-menu-set>
 
 </body>
 </html>

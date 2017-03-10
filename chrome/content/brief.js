@@ -51,6 +51,8 @@ function init() {
 
     ViewList.init();
 
+    ContextMenuModule.init();
+
     // Restore local persistence
     /*ViewList.selectedItem = getElement(localStorage.getItem('brief.startview') || 'all-items-folder');
     getElement('feed-list').closedFolders = localStorage.getItem('brief.closed_folders');

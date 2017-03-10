@@ -80,6 +80,7 @@ TreeView.prototype = {
     },
     _initElement: function TreeView__initElement(element) {
         element.addEventListener('click', this);
+        element.addEventListener('contextmenu', this); // Select before opening the context menu
         if(element.nodeName === 'tree-folder') {
             element.querySelector('.toggle-collapsed').addEventListener('click', this);
         }
@@ -155,16 +156,14 @@ TreeView.prototype = {
     },
 
     handleEvent: function TreeView__handleEvent(aEvent) {
-        if(aEvent.type !== 'click')
-            return;
-        aEvent.stopPropagation();
-        if(aEvent.currentTarget.classList.contains('toggle-collapsed')) {
+        if(aEvent.type === 'click' && aEvent.currentTarget.classList.contains('toggle-collapsed')) {
             // (un)collapse
             let element = aEvent.currentTarget;
             while(element.nodeName !== 'tree-folder') {
                 element = element.parentNode;
             }
             element.classList.toggle('collapsed');
+            aEvent.stopPropagation();
         } else {
             // select
             this.selectedItem = aEvent.currentTarget;
@@ -627,31 +626,65 @@ let FeedList = {
 }
 
 
+// Custom menu handler to avoid Firefox default items on the Brief context menu
+let ContextMenuModule = {
+    init: function ContextMenu_init() {
+        Array.forEach(document.querySelectorAll('[contextmenu]'), node => {
+            node.addEventListener('contextmenu', event => this.show(event));
+        });
+        Array.forEach(document.querySelectorAll('[data-dropdown]'), node => {
+            node.addEventListener('click', event => this.show(event));
+        });
+        Array.forEach(document.querySelectorAll('context-menu-set'), node => {
+            node.addEventListener('click', event => this._hide(event));
+        });
+        document.addEventListener('blur', event => this._hide(event));
+    },
+
+    show: function ContextMenu__show(event) {
+        event.preventDefault();
+        let target = event.currentTarget;
+        let menu = target.getAttribute('contextmenu');
+        if(!menu)
+            return;
+        menu = document.getElementById(menu);
+        menu.dispatchEvent(new Event('show'));
+        // Positioning
+        console.log(event, menu, window);
+        let left = event.clientX;
+        let top = event.clientY;
+        if(top + menu.scrollHeight > window.innerHeight)
+            top = window.innerHeight - menu.scrollHeight;
+        if(left + menu.scrollWidth > window.innerWidth)
+            left = window.innerWidth - menu.scrollWidth;
+        menu.style.left = left + 'px';
+        menu.style.top = top + 'px';
+        menu.classList.add('visible');
+        menu.parentNode.classList.add('menu-visible');
+    },
+
+    _hide: function ContextMenu__hide(event) {
+        event.preventDefault();
+        Array.forEach(document.querySelectorAll('context-menu.visible'), node => {
+            node.classList.remove('visible');
+            node.parentNode.classList.remove('menu-visible');
+        });
+    },
+};
+
 
 let ViewListContextMenu = {
 
-    targetItem: null,
+    get menu() {
+        delete this.menu;
+        return this.menu = document.getElementById('view-list-context-menu');
+    },
 
-    get targetIsAllItemsFolder() { return this.targetItem.id == 'all-items-folder' },
-    get targetIsTodayFolder()   { return this.targetItem.id == 'today-folder' },
-    get targetIsStarredFolder()  { return this.targetItem.id == 'starred-folder' },
-    get targetIsTrashFolder()    { return this.targetItem.id == 'trash-folder' },
+    targetItem: null,
 
     init: function ViewListContextMenu_init() {
         this.targetItem = ViewList.selectedItem;
-
-        getElement('ctx-mark-special-folder-read').hidden = !this.targetIsTodayFolder &&
-                                                            !this.targetIsTrashFolder &&
-                                                            !this.targetIsStarredFolder &&
-                                                            !this.targetIsAllItemsFolder;
-        getElement('ctx-mark-tag-read').hidden = !this.targetIsTag;
-        getElement('ctx-restore-trashed').hidden = !this.targetIsTrashFolder;
-        getElement('ctx-view-list-separator').hidden = !this.targetIsTag &&
-                                                       !this.targetIsTrashFolder &&
-                                                       !this.targetIsTodayFolder;
-        getElement('ctx-delete-tag').hidden = !this.targetIsTag;
-        getElement('ctx-empty-today-folder').hidden = !this.targetIsTodayFolder;
-        getElement('ctx-empty-trash').hidden = !this.targetIsTrashFolder;
+        this.menu.dataset.target = this.targetItem.id;
     },
 
     markFolderRead: function ViewListContextMenu_markFolderRead() {
@@ -673,7 +706,7 @@ let TagListContextMenu = {
     markTagRead: function TagListContextMenu_markTagRead() {
         let query = new Query({
             deleted: Storage.ENTRY_STATE_NORMAL,
-            tags: [TagList.selectedItem.id]
+            tags: [TagList.selectedItem.dataset.id]
         })
         query.markEntriesRead(true);
     },
@@ -682,7 +715,7 @@ let TagListContextMenu = {
         let taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
                              getService(Ci.nsITaggingService);
 
-        let tag = TagList.selectedItem.id;
+        let tag = TagList.selectedItem.dataset.id;
 
         let dialogTitle = STRINGS.GetStringFromName('confirmTagDeletionTitle');
         let dialogText = STRINGS.formatStringFromName('confirmTagDeletionText', [tag], 1);
@@ -705,12 +738,22 @@ let TagListContextMenu = {
 }
 
 
-let FeedContextMenu = {
+let FeedListContextMenu = {
+
+    get menu() {
+        delete this.menu;
+        console.log("get", document.getElementById('feed-list-context-menu'));
+        return this.menu = document.getElementById('feed-list-context-menu');
+    },
 
     init: function FeedContextMenu_init() {
-        this.targetFeed = Storage.getFeed(FeedList.selectedItem.id);
+        let folder = FeedList.selectedItem.nodeName === 'tree-folder';
+        this.menu.classList.toggle('folder', folder);
 
-        getElement('ctx-open-website').disabled = !this.targetFeed.websiteURL;
+        if(!folder) {
+            this.targetFeed = Storage.getFeed(FeedList.selectedItem.dataset.id);
+            document.getElementById('ctx-open-website').disabled = !this.targetFeed.websiteURL;
+        }
     },
 
     markFeedRead: function FeedContextMenu_markFeedRead() {
@@ -719,11 +762,7 @@ let FeedContextMenu = {
             deleted: Storage.ENTRY_STATE_NORMAL
         })
         query.markEntriesRead(true);
-    }
-
-}
-
-let FolderContextMenu = {
+    },
 
     markFolderRead: function FolderContextMenu_markFolderRead() {
         let query = new Query({
@@ -735,8 +774,8 @@ let FolderContextMenu = {
 
     updateFolder: function FolderContextMenu_updateFolder() {
         let feeds = [];
-        for (let item of FeedList.selectedItem.getElementsByTagName('richtreeitem'))
-            feeds.push(Storage.getFeed(item.id));
+        for (let item of FeedList.selectedItem.getElementsByTagName('tree-item'))
+            feeds.push(Storage.getFeed(item.dataset.id));
 
         FeedUpdateService.updateFeeds(feeds);
     },

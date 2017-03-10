@@ -65,28 +65,6 @@ body {
     height: 100% !important;
 }
 
-menupopup {
-    background-color: #f2f2f2 !important;
-    border: 1px solid #bdbdbd !important;
-    padding: 10px !important;
-}
-
-menuitem {
-    height: 25px !important;
-    padding: 0 15px !important;
-    font-size: 13px !important;
-    color: #454545 !important;
-}
-
-menuitem:hover {
-    background-color: #e5e5e5 !important;
-}
-
-menuseparator {
-    border-top: 1px solid #bdbdbd !important;
-    margin: 6px 10px 6px !important;
-}
-
 
 .brief-button {
     flex: none;
