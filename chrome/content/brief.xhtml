@@ -19,8 +19,7 @@
     <script type="application/x-javascript" src="feedview.js"/>
 </head>
 <body onload="Storage.ready.then(init)" onunload="unload()">
-
-    <div id="sidebar" width="250" class="vbox">
+    <div id="sidebar" class="shrinkable vbox">
         <div class="vbox"
              id="sidebar-top"
              data-mode="idle">
@@ -106,9 +105,9 @@
         </tree-box>
     </div>
 
-    <div class="splitter" id="sidebar-splitter" ondblclick="Commands.hideSidebar()"/> <!-- resizeafter="farthest" tooltiptext="&sidebarSplitter.tooltip;" -->
+    <draggable-splitter id="sidebar-splitter" ondblclick="Commands.hideSidebar()"/> <!-- resizeafter="farthest" tooltiptext="&sidebarSplitter.tooltip;" -->
 
-    <tree-box id="tag-list" class="resizeable" hidden="true"
+    <tree-box id="tag-list" class="shrinkable" hidden="true"
               onchange="TagList.onSelect(event)"
               contextmenu="tag-list-context-menu">
         <template>
@@ -120,10 +119,10 @@
         </template>
     </tree-box>
 
-    <div class="splitter" id="tag-list-splitter"
+    <draggable-splitter id="tag-list-splitter"
               hidden="true"/>
 
-    <div class="vbox flex">
+    <div id="main-pane" class="growable vbox">
         <div class="hbox"
              id="feed-view-header">
             <button id="view-title-button"
@@ -177,7 +176,7 @@
                    onblur="onSearchbarBlur()"/>
         </div>
 
-        <div class="hbox flex">
+        <div class="growable hbox">
             <button id="reveal-sidebar-button"
                     class="brief-button"
                     hidden="true"
@@ -189,7 +188,7 @@
                     - it is non-same-origin with the containing privileged (chrome://) document (this one).
             -->
             <iframe id="feed-view"
-                    class="flex"
+                    class="growable"
                     src="resource://brief-content/feedview.html"/>
         </div>
     </div>

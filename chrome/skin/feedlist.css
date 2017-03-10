@@ -222,6 +222,7 @@ tree-folder > tree-folder > tree-folder > tree-folder > tree-folder-header {
 #tag-list {
     background-color: #f2f2f2 !important;
     min-width: 100px !important;
+    flex-shrink: 1000000; /* Shrink this all the way first, if not enough, shrink the other one */
 }
 
 #tag-list > tree-item {

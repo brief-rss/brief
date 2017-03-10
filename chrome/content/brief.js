@@ -51,6 +51,7 @@ function init() {
 
     ViewList.init();
 
+    SplitterModule.init();
     ContextMenuModule.init();
 
     // Restore local persistence
@@ -520,7 +521,49 @@ let PrefObserver = {
         }
     }
 
-}
+};
+
+/* Supports draggable splitters */
+let SplitterModule = {
+    _active: null,
+
+    init: function Splitter_init() {
+        document.body.addEventListener('mousedown', event => this._trigger(event), {capture: true});
+        document.body.addEventListener('mousemove', event => this._update(event), {capture: true});
+        document.body.addEventListener('mouseup', event => this._finish(event), {capture: true});
+    },
+
+    _trigger: function Splitter__trigger(event) {
+        let splitter = event.target;
+        if(splitter.nodeName !== 'draggable-splitter')
+            return;
+        if(event.button !== 0)
+            return;
+        splitter.parentNode.classList.add('resize-in-progress');
+        let target = splitter.previousElementSibling;
+        let offset = event.screenX - target.getBoundingClientRect().right;
+        this._active = {splitter, target, offset};
+        event.preventDefault();
+    },
+
+    _update: function Splitter__update(event) {
+        if(this._active === null)
+            return;
+        let {splitter, target, offset} = this._active;
+        let current_offset = event.screenX - target.getBoundingClientRect().right;
+        target.style.width = (target.offsetWidth + (current_offset - offset)) + 'px';
+        event.preventDefault();
+    },
+
+    _finish: function Splitter__finish(event) {
+        if(this._active === null)
+            return;
+        let {splitter} = this._active;
+        this._update(event);
+        splitter.parentNode.classList.remove('resize-in-progress');
+        this._active = null;
+    },
+};
 
 
 // ------- Utility functions --------
