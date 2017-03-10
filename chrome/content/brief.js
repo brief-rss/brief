@@ -539,6 +539,10 @@ let SplitterModule = {
             return;
         if(event.button !== 0)
             return;
+        if(event.detail === 2) {
+            event.target.dispatchEvent(new MouseEvent('dblclick', {bubbles: true}));
+            // Looks like a double-click which are not handled automatically
+        }
         splitter.parentNode.classList.add('resize-in-progress');
         let target = splitter.previousElementSibling;
         let offset = event.screenX - target.getBoundingClientRect().right;
