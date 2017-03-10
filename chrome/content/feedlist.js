@@ -68,7 +68,7 @@ TreeView.prototype = {
                 this._initElement(element);
             }
             element.classList.remove('deleted');
-            this.updateElement(element, node);
+            this._updateElement(element, node);
             if(next === null) {
                 aElement.appendChild(element);
             } else if(element !== next) {
@@ -85,6 +85,10 @@ TreeView.prototype = {
         }
     },
     updateElement: function TreeView_updateElement(aElement, aModel) {
+        this._updateElement(aElement, aModel);
+        this._purgeDeleted();
+    },
+    _updateElement: function TreeView__updateElement(aElement, aModel) {
         const {id, title, icon, unreadCount, loading, error, collapsed, children} = aModel;
         let element = this._resolveElement(aElement);
 
