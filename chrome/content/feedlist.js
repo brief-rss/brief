@@ -9,8 +9,7 @@ function TreeView(aElementOrId) {
     this.template = this.root.querySelector('template');
     this._selectedElement = null;
     Array.forEach(this.root.children, node => {
-        if(node.nodeName !== 'template')
-            node.addEventListener('click', this);
+        this._initElement(node);
     })
 }
 
@@ -66,10 +65,7 @@ TreeView.prototype = {
                 let selector = (node.children !== undefined) ? 'tree-folder' : 'tree-item';
                 template = template.querySelector(selector);
                 element = document.importNode(template, true);
-                element.addEventListener('click', this);
-                if(element.nodeName === 'tree-folder') {
-                    element.querySelector('.toggle-collapsed').addEventListener('click', this);
-                }
+                this._initElement(element);
             }
             element.classList.remove('deleted');
             this.updateElement(element, node);
@@ -80,6 +76,12 @@ TreeView.prototype = {
             } else {
                 next = next.nextSibling;
             }
+        }
+    },
+    _initElement: function TreeView__initElement(element) {
+        element.addEventListener('click', this);
+        if(element.nodeName === 'tree-folder') {
+            element.querySelector('.toggle-collapsed').addEventListener('click', this);
         }
     },
     updateElement: function TreeView_updateElement(aElement, aModel) {
