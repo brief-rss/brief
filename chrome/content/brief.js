@@ -314,32 +314,6 @@ var Commands = {
 
 }
 
-function showContextOptionsDropdown() {
-    if (ViewList.selectedItem && ViewList.selectedItem.id == 'trash-folder')
-        var panelID = 'brief-trash-actions-panel';
-    else if (FeedList.selectedFeed && !FeedList.selectedFeed.isFolder)
-        panelID = 'brief-feed-settings-panel';
-    else
-        return;
-
-    let panel = getTopWindow().document.getElementById(panelID);
-
-    // Modify the position to horizontally center the arrow on the anchor.
-    let anchor = getElement('view-title-button');
-    panel.openPopup(anchor, 'after_start', -11, 0);
-}
-
-function showOptionsDropdown() {
-    let panel = getTopWindow().document.getElementById('brief-options-panel')
-
-    let button = getElement('options-dropdown-button');
-    let rect = button.getBoundingClientRect();
-
-    // Modify the position to horizontally center the arrow on the text.
-    // We must account for widths of the panel arrow and the button dropmarker.
-    panel.openPopup(button, 'after_start', (rect.width - 10) / 2 - 18, 0);
-}
-
 function refreshProgressmeter(aReason) {
     if (FeedUpdateService.status != FeedUpdateService.NOT_UPDATING) {
         getElement('sidebar-top').dataset.mode = "update";

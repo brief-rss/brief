@@ -54,7 +54,7 @@
     background-position: 0 -6px;
 }
 
-#view-title-button:not([contextOptions]) {
+#view-title-button[data-dropdown=""] {
     display: none;
 }
 

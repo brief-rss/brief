@@ -42,12 +42,14 @@ function FeedView(aTitle, aQuery) {
     if (gCurrentView)
         gCurrentView.uninit();
 
-    let singleFeed = this.query.feeds && this.query.feeds.length == 1;
-    let trash = this.query.deleted == Storage.ENTRY_STATE_TRASHED;
-    if (singleFeed || trash)
-        getElement('view-title-button').setAttribute('contextOptions', true);
-    else
-        getElement('view-title-button').removeAttribute('contextOptions');
+    let button = getElement('view-title-button');
+    if(this.query.feeds && this.query.feeds.length == 1) {
+        button.dataset.dropdown = 'dropdown-menu-feed-actions';
+    } else if(this.query.deleted == Storage.ENTRY_STATE_TRASHED) {
+        button.dataset.dropdown = 'dropdown-menu-trash-actions';
+    } else {
+        button.dataset.dropdown = "";
+    }
 
     getElement('feed-view-header').removeAttribute('border');
 

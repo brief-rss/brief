@@ -2,6 +2,8 @@
 <!DOCTYPE html [
   <!ENTITY % BriefLocaleDTD SYSTEM "chrome://brief/locale/brief.dtd">
   %BriefLocaleDTD;
+  <!ENTITY % BriefOverlayLocaleDTD SYSTEM "chrome://brief/locale/overlay.dtd">
+  %BriefOverlayLocaleDTD;
 ]>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -55,7 +57,7 @@
                             class="centered brief-button sidebar-button"
                             type="menu"
                             title="&optionsDropdownButton.tooltip;"
-                            onclick="showOptionsDropdown()">
+                            data-dropdown="dropdown-menu-options">
                         &optionsDropdownButton.label;
                     </button>
                 </div>
@@ -127,7 +129,7 @@
             <button id="view-title-button"
                     class="brief-button"
                     type="menu"
-                    onclick="showContextOptionsDropdown()"/>
+                    data-dropdown=""/>
             <label id="view-title-label"/>
             <div class="spacer"/>
             <button id="mark-view-read"
@@ -254,6 +256,52 @@
                 </menu-item>
             </div>
         </context-menu>
+
+        <context-menu id="dropdown-menu-options" class="dropdown-menu" data-align="center">
+            <menu-item id="dropdown-shortcuts" onclick="Commands.displayShortcuts()">
+                &briefShowShortcutsMenuitem.label;
+            </menu-item>
+            <hr/>
+            <menu-item id="dropdown-import" onclick="Brief.OPML.importFile()">
+                &briefImportMenuitem.label;
+            </menu-item>
+            <menu-item id="dropdown-export" onclick="Brief.OPML.exportFeeds()">
+                &briefExportMenuitem.label;
+            </menu-item>
+            <hr/>
+            <menu-item id="dropdown-options" onclick="Commands.openOptions()">
+                &briefOpenOptionsMenuitem.label;
+            </menu-item>
+        </context-menu>
+        <context-menu id="dropdown-menu-feed-actions" class="dropdown-menu">
+            <menu-item id="dropdown-update-feed" onclick="Commands.updateFeed()">
+                &briefRefreshFeed.label;
+            </menu-item>
+            <menu-item id="brief-open-website" onclick="Commands.openFeedWebsite()">
+                &briefOpenWebsite.label;
+            </menu-item>
+            <hr/>
+            <menu-item id="dropdown-empty-feed" onclick="Commands.emptyFeed()">
+                &briefEmptyFeed.label;
+            </menu-item>
+            <menu-item id="dropdown-unsubscribe-feed" onclick="Commands.deleteFeed()">
+                &briefUnsubscribeFeed.label;
+            </menu-item>
+            <hr/>
+            <menu-item id="dropdown-feed-settings" onclick="Commands.showFeedProperties()">
+                &briefFeedSettings.label;
+            </menu-item>
+        </context-menu>
+        <context-menu id="dropdown-menu-trash-actions" class="dropdown-menu">
+            <menu-item id="dropdown-restore-trashed" onclick="Commands.restoreTrashed()">
+                &briefRestoreTrashed.label;
+            </menu-item>
+            <hr/>
+            <menu-item id="dropdown-empty-trash" onclick="Commands.emptyTrash()">
+                &briefEmptyTrash.label;
+            </menu-item>
+        </context-menu>
+
     </context-menu-set>
 
 </body>

@@ -314,3 +314,12 @@ context-menu.dropdown-menu {
     margin: 10px 4px 4px !important;
 }
 
+#dropdown-menu-feed-actions,
+#dropdown-menu-trash-actions {
+    margin-left: -3px !important; /* Align with the icon */
+}
+
+#dropdown-menu-options {
+    margin-left: -22px !important; /* Align (more or less) with the center of the text */
+    margin-top: 4px !important;
+}
