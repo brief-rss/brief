@@ -62,7 +62,6 @@ function FeedView(aTitle, aQuery) {
 
     this.document.addEventListener('click', this, true);
     this.document.addEventListener('scroll', this, true);
-    this.document.addEventListener('keypress', this, true);
 
     this.refresh();
 }
@@ -372,7 +371,6 @@ FeedView.prototype = {
         this.window.removeEventListener('resize', this, false);
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
-        this.document.removeEventListener('keypress', this, true);
 
         Storage.removeObserver(this);
 
@@ -442,10 +440,6 @@ FeedView.prototype = {
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
-                break;
-
-            case 'keypress':
-                onKeyPress(aEvent);
                 break;
 
             case 'TabSelect':

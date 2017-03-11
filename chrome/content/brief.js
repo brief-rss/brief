@@ -36,8 +36,6 @@ function init() {
 
     refreshProgressmeter();
 
-    document.addEventListener('keypress', onKeyPress, true);
-
     for (let topic of OBSERVER_TOPICS)
         Services.obs.addObserver(FeedList, topic, false);
 
@@ -53,6 +51,8 @@ function init() {
 
     SplitterModule.init();
     ContextMenuModule.init();
+
+    Shortcuts.init();
 
     // Restore local persistence
     Persistence.init();
@@ -353,37 +353,6 @@ function onSearchbarBlur() {
 }
 
 
-/**
- * Space can't be captured using the <key/> XUL element so we handle
- * it manually using a listener. Also, unlike other keys it must be default-prevented.
- */
-function onKeyPress(aEvent) {
-    // Don't do anything if the user is typing in an input field.
-    if (aEvent.originalTarget.localName.toUpperCase() == 'INPUT')
-        return;
-
-    // Stop propagation of character keys in order to disable Find-As-You-Type.
-    if (aEvent.charCode)
-        aEvent.stopPropagation();
-
-    if (Prefs.getBoolPref('assumeStandardKeys') && aEvent.charCode == aEvent.DOM_VK_SPACE) {
-        if (aEvent.shiftKey) {
-            if (gCurrentView.headlinesView)
-                gCurrentView.scrollUpByScreen();
-            else
-                gCurrentView.selectPrevEntry();
-        }
-        else {
-            if (gCurrentView.headlinesView)
-                gCurrentView.scrollDownByScreen();
-            else
-                gCurrentView.selectNextEntry();
-        }
-
-        aEvent.preventDefault();
-    }
-}
-
 function onMarkViewReadClick(aEvent) {
     if (aEvent.ctrlKey)
         Commands.markVisibleEntriesRead();
@@ -562,6 +531,63 @@ let Persistence = {
         }
     },
 };
+
+let Shortcuts = {
+    init: function Shortcuts_init() {
+        document.addEventListener('keypress', this, {capture: true});
+        getElement('feed-view').contentDocument.addEventListener('keypress', this, {capture: true});
+    },
+
+    handleEvent: function Shortcuts_handleEvents(event) {
+        let target = event.target;
+        if(target.nodeName === 'input' || target.nodeName === 'textarea')
+            return;
+        let description = (
+            (event.ctrlKey ? 'Ctrl+' : '') +
+            (event.metaKey ? 'Meta+' : '') +
+            (event.altKey ? 'Alt+' : '') +
+            (event.shiftKey ? 'Shift+' : '') +
+            event.key
+        );
+        switch(description) {
+            case 'j': gCurrentView.selectNextEntry(); break;
+            case 'k': gCurrentView.selectPrevEntry(); break;
+            case 'u': gCurrentView.scrollDownByScreen(); break;
+            case 'i': gCurrentView.scrollUpByScreen(); break;
+
+            case 'm': Commands.toggleSelectedEntryRead(); break;
+            case 'n': Commands.markVisibleEntriesRead(); break;
+            case 'Alt+n': Commands.markViewRead(); break;
+            case 't': Commands.deleteOrRestoreSelectedEntry(); break;
+            case 'b': Commands.toggleSelectedEntryStarred(); break;
+            case 'h': Commands.toggleSelectedEntryCollapsed(); break;
+            case 'Enter': Commands.openSelectedEntryLink(); break;
+
+            case 'f': Commands.switchViewMode(1); break;
+            case 'g': Commands.switchViewMode(0); break;
+            case 'a': Commands.switchViewFilter('all'); break;
+            case 's': Commands.switchViewFilter('starred'); break;
+            case 'd': Commands.switchViewFilter('unread'); break;
+            case '/': getElement('searchbar').focus(); break;
+
+            case 'Shift+?': Commands.displayShortcuts(); break;
+
+            // Space and Shift+Space behave differently only in full view
+            case ' ':
+            case 'Shift+ ':
+                if(!Prefs.getBoolPref('assumeStandardKeys') || gCurrentView.headlinesView)
+                    return;
+                if(event.shiftKey)
+                    gCurrentView.selectPrevEntry();
+                else
+                    gCurrentView.selectNextEntry();
+                break;
+            default: return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+    },
+}
 
 
 // ------- Utility functions --------
