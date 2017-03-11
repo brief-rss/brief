@@ -636,19 +636,29 @@ let ContextMenuModule = {
     show: function ContextMenu__show(event) {
         event.preventDefault();
         let target = event.currentTarget;
-        let menu = target.getAttribute('contextmenu');
+        let show_dropdown = (event.type !== 'contextmenu');
+        let attribute = show_dropdown ? 'data-dropdown' : 'contextmenu';
+        let menu = target.getAttribute(attribute);
         if(!menu)
             return;
         menu = document.getElementById(menu);
         menu.dispatchEvent(new Event('show'));
         // Positioning
-        console.log(event, menu, window);
         let left = event.clientX;
         let top = event.clientY;
         if(top + menu.scrollHeight > window.innerHeight)
             top = window.innerHeight - menu.scrollHeight;
         if(left + menu.scrollWidth > window.innerWidth)
             left = window.innerWidth - menu.scrollWidth;
+        if(show_dropdown) {
+            let rect = target.getBoundingClientRect();
+            if(menu.dataset.align === 'center') {
+                left = rect.left + rect.width / 2;
+            } else {
+                left = rect.left;
+            }
+            top = rect.top + rect.height;
+        }
         menu.style.left = left + 'px';
         menu.style.top = top + 'px';
         menu.classList.add('visible');

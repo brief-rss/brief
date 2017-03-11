@@ -299,3 +299,18 @@ context-menu > hr {
 #feed-list-context-menu:not(.folder) > #folder-context-menu {
     display: none;
 }
+
+/* ========== Dropdown menus ============ */
+context-menu.dropdown-menu::before {
+    position: absolute;
+    top: -14px;
+    left: 4px;
+    content: url(panel-arrow.svg);
+}
+
+context-menu.dropdown-menu {
+    border-radius: 4px;
+    background-clip: padding-box !important;
+    margin: 10px 4px 4px !important;
+}
+
