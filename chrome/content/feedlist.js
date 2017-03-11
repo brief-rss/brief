@@ -627,6 +627,9 @@ let ContextMenuModule = {
         Array.forEach(document.querySelectorAll('context-menu-set'), node => {
             node.addEventListener('click', event => this._hide(event));
         });
+        Array.forEach(document.querySelectorAll('context-menu-set'), node => {
+            node.addEventListener('contextmenu', event => this._hide(event));
+        });
         document.addEventListener('blur', event => this._hide(event));
     },
 
