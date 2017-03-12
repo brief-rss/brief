@@ -74,13 +74,6 @@ var Brief = {
         return null;
     },
 
-    // Returns Brief's content window if the tab is selected.
-    get win() {
-        return gBrowser.currentURI.spec == this.BRIEF_URL
-               ? gBrowser.contentDocument.defaultView.wrappedJSObject
-               : null;
-    },
-
     toggleUnreadCounter: function Brief_toggleUnreadCounter() {
         let menuitem = document.getElementById('brief-show-unread-counter');
         let checked = menuitem.getAttribute('checked') == 'true';
