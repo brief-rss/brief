@@ -127,7 +127,7 @@ var Commands = {
 
     switchViewMode: function cmd_switchViewMode(aMode) {
         if (FeedList.selectedFeed) {
-            Storage.changeFeedProperties({
+            BriefClient.modifyFeed({
                 feedID: FeedList.selectedFeed.feedID,
                 viewMode: aMode
             });
@@ -249,7 +249,7 @@ var Commands = {
     openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
 
-        let baseURI = Services.io.newURI(Storage.getFeed(entryView.feedID).feedURL);
+        let baseURI = Services.io.newURI(BriefClient.getFeed(entryView.feedID).feedURL);
         let linkURI = Services.io.newURI(entryView.entryURL, null, baseURI);
 
         Commands.openLink(linkURI.spec);
@@ -619,6 +619,20 @@ let BriefClient = {
         this.mm.sendAsyncMessage('brief:stop-updating', {});
     },
 
+    // Storage
+    getAllFeeds: function(includeFolders, includeHidden) {
+        let reply = this.mm.sendSyncMessage('brief:get-feed-list', {includeFolders, includeHidden})[0];
+        return reply;
+    },
+
+    getFeed: function(feedID) {
+        let reply = this.mm.sendSyncMessage('brief:get-feed', {feedID})[0];
+        return reply;
+    },
+
+    modifyFeed: function(feed) {
+        this.mm.sendSyncMessage('brief:modify-feed', feed);
+    },
 };
 
 

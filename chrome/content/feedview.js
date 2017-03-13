@@ -76,7 +76,7 @@ FeedView.prototype = {
     get headlinesMode() {
         let feedIDs = this.query.feeds || this.query.folders;
         if (feedIDs && feedIDs.length == 1)
-            var viewMode = Storage.getFeed(feedIDs[0]).viewMode;
+            var viewMode = BriefClient.getFeed(feedIDs[0]).viewMode;
         else
             viewMode = PrefCache.viewMode;
 
@@ -861,7 +861,7 @@ FeedView.prototype = {
 
         let mainMessage, secondaryMessage;
 
-        if (!Storage.getAllFeeds().length) {
+        if (!BriefClient.getAllFeeds().length) {
             mainMessage = STRINGS.GetStringFromName('noFeeds');
             secondaryMessage = '<a href="' + TUTORIAL_URL + '" target="_blank">'
                                + STRINGS.GetStringFromName('noFeedsAdvice') + '</a>';
@@ -964,7 +964,7 @@ function EntryView(aFeedView, aEntryData) {
         deleteButton.setAttribute('title', Strings.deleteEntryTooltip);
     }
 
-    let feed = Storage.getFeed(aEntryData.feedID);
+    let feed = BriefClient.getFeed(aEntryData.feedID);
 
     // Set xml:base attribute to resolve relative URIs against the feed's URI.
     this.container.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'base', feed.feedURL);
@@ -1242,7 +1242,7 @@ EntryView.prototype = {
                 return;
             }
             else if (anchor.hasAttribute('href')) {
-                let feedURL = Storage.getFeed(this.feedID).feedURL;
+                let feedURL = BriefClient.getFeed(this.feedID).feedURL;
                 let baseURI = NetUtil.newURI(feedURL);
                 let linkURI = NetUtil.newURI(anchor.getAttribute('href'), null, baseURI);
                 Commands.openLink(linkURI.spec);

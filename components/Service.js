@@ -25,6 +25,10 @@ function BriefService() {
         ['brief:update-feeds', msg => FeedUpdateService.updateFeeds(msg.data.feeds)],
         ['brief:update-all-feeds', msg => FeedUpdateService.updateAllFeeds()],
         ['brief:stop-updating', msg => FeedUpdateService.stopUpdating()],
+
+        ['brief:get-feed-list', msg => Storage.getAllFeeds(msg.data.includeFolders, msg.data.includeHidden)],
+        ['brief:get-feed', msg => Storage.getFeed(msg.data.feedID)],
+        ['brief:modify-feed', msg => Storage.changeFeedProperties(msg.data)],
     ]);
     for(let name of this.handlers.keys()) {
         Services.mm.addMessageListener(name, this, false);

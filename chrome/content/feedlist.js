@@ -373,7 +373,7 @@ let FeedList = {
     },
 
     get selectedFeed() {
-        return this.selectedItem ? Storage.getFeed(this.selectedItem.dataset.id) : null;
+        return this.selectedItem ? BriefClient.getFeed(this.selectedItem.dataset.id) : null;
     },
 
     deselect: function FeedList_deselect() {
@@ -409,7 +409,7 @@ let FeedList = {
      *        An array of feed IDs.
      */
     refreshFeedTreeitems: function FeedList_refreshFeedTreeitems(aFeeds) {
-        for (let feed of aFeeds.map(Storage.getFeed)) {
+        for (let feed of aFeeds.map(id => BriefClient.getFeed(id))) {
             this._refreshLabel(feed);
 
             // Build an array of IDs of folders in the the parent chains of
@@ -420,10 +420,10 @@ let FeedList = {
             while (parentID != PrefCache.homeFolder) {
                 if (folders.indexOf(parentID) == -1)
                     folders.push(parentID);
-                parentID = Storage.getFeed(parentID).parent;
+                parentID = BriefClient.getFeed(parentID).parent;
             }
 
-            folders.map(Storage.getFeed).forEach(this._refreshLabel, this); // start async
+            folders.map(id => BriefClient.getFeed(id)).forEach(this._refreshLabel, this); // start async
         }
     },
 
@@ -447,7 +447,7 @@ let FeedList = {
 
     rebuild: function FeedList_rebuild() {
         let active = (this.tree.selectedItem !== null);
-        this.feeds = Storage.getAllFeeds(true);
+        this.feeds = BriefClient.getAllFeeds(true);
 
         let model = this._buildFolderChildren(PrefCache.homeFolder);
         this.tree.update(model);
@@ -503,7 +503,7 @@ let FeedList = {
 
             case 'brief:feed-title-changed':
             case 'brief:feed-favicon-changed':
-                let feed = Storage.getFeed(aData);
+                let feed = BriefClient.getFeed(aData);
                 this.tree.updateElement(feed.feedID,
                     {title: feed.title, icon: this._faviconUrl(feed)});
                 // TODO: should update FeedView and feed view title too(?)
@@ -533,7 +533,7 @@ let FeedList = {
                 refreshProgressmeter();
 
                 if (aData == 'cancelled') {
-                    for (let feed of Storage.getAllFeeds()) {
+                    for (let feed of BriefClient.getAllFeeds()) {
                         this.tree.updateElement(feed.feedID, {loading: false});
                     }
                 }
@@ -749,7 +749,7 @@ let FeedListContextMenu = {
         this.menu.classList.toggle('folder', folder);
 
         if(!folder) {
-            this.targetFeed = Storage.getFeed(FeedList.selectedItem.dataset.id);
+            this.targetFeed = BriefClient.getFeed(FeedList.selectedItem.dataset.id);
             document.getElementById('ctx-open-website').disabled = !this.targetFeed.websiteURL;
         }
     },
