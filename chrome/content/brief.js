@@ -34,6 +34,8 @@ function init() {
     getElement('filter-unread-checkbox').dataset.checked = PrefCache.filterUnread;
     getElement('filter-starred-checkbox').dataset.checked = PrefCache.filterStarred;
 
+    BriefClient.init();
+
     refreshProgressmeter();
 
     for (let topic of OBSERVER_TOPICS)
@@ -587,7 +589,21 @@ let Shortcuts = {
         event.preventDefault();
         event.stopPropagation();
     },
-}
+};
+
+// The main API endpoint
+let BriefClient = {
+    mm: null,
+
+    init: function Brief_init() {
+        this.mm = window.QueryInterface(Ci.nsIInterfaceRequestor)
+                        .getInterface(Ci.nsIDocShell)
+                        .QueryInterface(Ci.nsIInterfaceRequestor)
+                        .getInterface(Ci.nsIContentFrameMessageManager);
+    },
+
+
+};
 
 
 // ------- Utility functions --------

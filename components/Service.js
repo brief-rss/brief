@@ -18,6 +18,13 @@ function BriefService() {
     let file = FileUtils.getFile('ProfD', ['chrome', 'brief-custom-style.css']);
     let uri = Services.io.newFileURI(file);
     resourceProtocolHandler.setSubstitution('brief-custom-style.css', uri);
+
+    // Register API handlers
+    this.handlers = new Map([
+    ]);
+    for(let name of this.handlers.keys()) {
+        Services.mm.addMessageListener(name, this, false);
+    }
 }
 
 BriefService.prototype = {
@@ -46,6 +53,16 @@ BriefService.prototype = {
     // nsIObserver
     observe: function() {
 
+    },
+
+    receiveMessage: function BriefService_receiveMessage(message) {
+        let {name, data} = message;
+        let handler = this.handlers.get(name);
+        if(handler === undefined) {
+            log("BriefService: no handler for " + name);
+            return;
+        }
+        return handler(message);
     },
 
     classDescription: 'Service of Brief extension',
