@@ -21,6 +21,10 @@ function BriefService() {
 
     // Register API handlers
     this.handlers = new Map([
+        ['brief:get-update-status', msg => FeedUpdateService.getStatus()],
+        ['brief:update-feeds', msg => FeedUpdateService.updateFeeds(msg.data.feeds)],
+        ['brief:update-all-feeds', msg => FeedUpdateService.updateAllFeeds()],
+        ['brief:stop-updating', msg => FeedUpdateService.stopUpdating()],
     ]);
     for(let name of this.handlers.keys()) {
         Services.mm.addMessageListener(name, this, false);

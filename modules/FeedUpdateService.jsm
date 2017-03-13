@@ -66,7 +66,7 @@ const FeedUpdateService = Object.freeze({
      * Downloads feeds and check them for updates.
      *
      * @param aFeeds
-     *        Array of Feed objects representing feeds to be downloaded.
+     *        Array of Feed objects or feedID representing feeds to be downloaded.
      * @param aInBackground [optional]
      *        Use longer delay between requesting subsequent feeds in order to
      *        reduce the CPU load.
@@ -98,7 +98,18 @@ const FeedUpdateService = Object.freeze({
      */
     init: function() {
         return FeedUpdateServiceInternal.init();
-    }
+    },
+
+    /**
+     * Get the full status for clients
+     */
+    getStatus: function() {
+        return {
+            status: this.status,
+            scheduled: this.scheduledFeedsCount,
+            completed: this.completedFeedsCount,
+        }
+    },
 })
 
 
@@ -161,8 +172,10 @@ let FeedUpdateServiceInternal = {
     updateFeeds: function* FeedUpdateServiceInternal_updateFeeds(aFeeds, aInBackground) {
         yield Storage.ready;
 
+        let feeds = aFeeds.map(feed => (typeof feed !== 'string') ? feed : Storage.getFeed(feed));
+
         // Don't add the same feed be added twice.
-        let newFeeds = aFeeds.filter(feed => this.updateQueue.indexOf(feed) == -1);
+        let newFeeds = feeds.filter(feed => this.updateQueue.indexOf(feed) == -1);
 
         this.scheduledFeeds = this.scheduledFeeds.concat(newFeeds);
         this.updateQueue = this.updateQueue.concat(newFeeds);

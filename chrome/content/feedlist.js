@@ -534,7 +534,7 @@ let FeedList = {
                 break;
 
             case 'brief:feed-update-finished':
-                refreshProgressmeter(aData);
+                refreshProgressmeter();
 
                 if (aData == 'cancelled') {
                     for (let feed of Storage.getAllFeeds()) {
@@ -777,9 +777,9 @@ let FeedListContextMenu = {
     updateFolder: function FolderContextMenu_updateFolder() {
         let feeds = [];
         for (let item of FeedList.selectedItem.getElementsByTagName('tree-item'))
-            feeds.push(Storage.getFeed(item.dataset.id));
+            feeds.push(item.dataset.id);
 
-        FeedUpdateService.updateFeeds(feeds);
+        BriefClient.updateFeeds(feeds);
     },
 
     emptyFolder: function FolderContextMenu_emptyFolder() {

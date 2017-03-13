@@ -311,20 +311,20 @@ var Commands = {
 
     updateFeed: function cmd_updateFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        FeedUpdateService.updateFeeds([feed]);
+        BriefClient.updateFeeds([feed.feedID]);
     },
 
 }
 
-function refreshProgressmeter(aReason) {
-    if (FeedUpdateService.status != FeedUpdateService.NOT_UPDATING) {
+function refreshProgressmeter() {
+    let {status, scheduled, completed} = BriefClient.getUpdateServiceStatus();
+    if (status != /* FeedUpdateService.NOT_UPDATING */ 0) { // XXX
         getElement('sidebar-top').dataset.mode = "update";
 
-        if (FeedUpdateService.scheduledFeedsCount > 1)
+        if (scheduled > 1)
             getElement('update-progress').setAttribute('show', true);
 
-        getElement('update-progress').value = 1.0 * FeedUpdateService.completedFeedsCount /
-                                                    FeedUpdateService.scheduledFeedsCount;
+        getElement('update-progress').value = 1.0 * completed / scheduled;
     }
     else {
         getElement('sidebar-top').dataset.mode = "idle";
@@ -602,6 +602,23 @@ let BriefClient = {
                         .getInterface(Ci.nsIContentFrameMessageManager);
     },
 
+    // FeedUpdateService
+    getUpdateServiceStatus: function() {
+        let reply = this.mm.sendSyncMessage('brief:get-update-status', {})[0];
+        return reply;
+    },
+
+    updateFeeds: function(feeds) {
+        this.mm.sendAsyncMessage('brief:update-feeds', {feeds});
+    },
+
+    updateAllFeeds: function() {
+        this.mm.sendAsyncMessage('brief:update-all-feeds', {});
+    },
+
+    stopUpdating: function() {
+        this.mm.sendAsyncMessage('brief:stop-updating', {});
+    },
 
 };
 
