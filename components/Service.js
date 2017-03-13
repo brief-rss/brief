@@ -21,6 +21,9 @@ function BriefService() {
 
     // Register API handlers
     this.handlers = new Map([
+        ['brief:get-locale', msg => Cc['@mozilla.org/chrome/chrome-registry;1']
+                .getService(Ci.nsIXULChromeRegistry).getSelectedLocale('brief')],
+
         ['brief:get-update-status', msg => FeedUpdateService.getStatus()],
         ['brief:update-feeds', msg => FeedUpdateService.updateFeeds(msg.data.feeds)],
         ['brief:update-all-feeds', msg => FeedUpdateService.updateAllFeeds()],

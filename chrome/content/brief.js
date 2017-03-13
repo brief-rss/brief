@@ -43,9 +43,7 @@ function init() {
 
     Storage.addObserver(FeedList);
 
-    let chromeRegService = Cc['@mozilla.org/chrome/chrome-registry;1'].getService();
-    let selectedLocale = chromeRegService.QueryInterface(Ci.nsIXULChromeRegistry)
-                                         .getSelectedLocale('brief');
+    let selectedLocale = BriefClient.getLocale();
     let doc = getElement('feed-view').contentDocument;
     doc.documentElement.setAttribute('lang', selectedLocale);
 
@@ -599,6 +597,12 @@ let BriefClient = {
                         .getInterface(Ci.nsIDocShell)
                         .QueryInterface(Ci.nsIInterfaceRequestor)
                         .getInterface(Ci.nsIContentFrameMessageManager);
+    },
+
+    // Misc util
+    getLocale: function() {
+        let reply = this.mm.sendSyncMessage('brief:get-locale', {})[0];
+        return reply;
     },
 
     // FeedUpdateService
