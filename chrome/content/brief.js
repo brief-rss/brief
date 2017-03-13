@@ -514,7 +514,6 @@ let Persistence = {
     },
 
     save: function Persistence_save() {
-        console.log(this.data);
         Prefs.setCharPref("pagePersist", JSON.stringify(this.data));
     },
 

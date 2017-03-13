@@ -1,8 +1,4 @@
-const THROBBER_URL = 'chrome://brief/skin/throbber.gif';
-const ERROR_ICON_URL = 'chrome://brief/skin/icons/error.png';
-
-
-
+// An almost generic TreeView component. Some custom structure is inlined in _updateElement
 function TreeView(aElementOrId) {
     this.root = this._resolveElement(aElementOrId, "");
     this.prefix = this.root.classList.contains('unprefixed') ? "" : this.root.id + "__";
