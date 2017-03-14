@@ -9,18 +9,6 @@ Components.utils.import('resource://gre/modules/Task.jsm');
 
 IMPORT_COMMON(this);
 
-const OBSERVER_TOPICS = [
-    'brief:feed-update-queued',
-    'brief:feed-update-finished',
-    'brief:feed-updated',
-    'brief:feed-loading',
-    'brief:feed-error',
-    'brief:invalidate-feedlist',
-    'brief:feed-title-changed',
-    'brief:feed-favicon-changed',
-    'brief:custom-style-changed',
-];
-
 // Randomize URI to work around mozilla bug 918033
 const STRINGS = Services.strings.createBundle('chrome://brief/locale/brief.properties?' + Math.random());
 
