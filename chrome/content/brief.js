@@ -296,7 +296,6 @@ var Commands = {
         homePath = homePath.reverse();
         let organizer = Services.wm.getMostRecentWindow('Places:Organizer');
         if (!organizer) {
-            console.log("open", homePath);
             openDialog('chrome://browser/content/places/places.xul', '',
                        'chrome,toolbar=yes,dialog=no,resizable', homePath);
         }
@@ -618,29 +617,27 @@ let BriefClient = {
         }
     },
 
+    // Messaging-related
     receiveMessage: function BriefService_receiveMessage(message) {
         let {name, data} = message;
         let handler = this._handlers.get(name);
         if(handler === undefined) {
-            log("BriefClient: no handler for " + name);
+            console.warn("BriefClient: no handler for " + name);
             return;
         }
         return handler(message);
     },
-
     _asyncRequest: function BriefService__asyncRequest(id, data) {
         let reply_id = this.mm.sendSyncMessage(id, data)[0];
         let deferred = PromiseUtils.defer();
-        console.log("expecting reply", reply_id);
         this._expectedReplies.set(reply_id, deferred);
         return deferred.promise;
     },
     _receiveAsyncReply: function BriefService__receiveAsyncReply(msg) {
         let {id, payload} = msg.data;
-        console.log("received reply", id);
         let deferred = this._expectedReplies.get(id);
         if(deferred === undefined) {
-            console.log("BriefClient: unexpected reply" + id);
+            console.warn("BriefClient: unexpected reply" + id);
             return;
         }
         this._expectedReplies.delete(id);

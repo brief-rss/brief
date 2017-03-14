@@ -740,7 +740,6 @@ let FeedListContextMenu = {
 
     get menu() {
         delete this.menu;
-        console.log("get", document.getElementById('feed-list-context-menu'));
         return this.menu = document.getElementById('feed-list-context-menu');
     },
 
