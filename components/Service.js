@@ -19,8 +19,11 @@ function BriefService() {
     let uri = Services.io.newFileURI(file);
     resourceProtocolHandler.setSubstitution('brief-custom-style.css', uri);
 
+    this._observers = new Set();
     // Register API handlers
     this.handlers = new Map([
+        ['brief:add-observer', msg => this._observers.add(msg.target.messageManager)],
+        ['brief:remove-observer', msg => this._observers.delete(msg.target.messageManager)],
         ['brief:get-locale', msg => Cc['@mozilla.org/chrome/chrome-registry;1']
                 .getService(Ci.nsIXULChromeRegistry).getSelectedLocale('brief')],
 
@@ -36,6 +39,21 @@ function BriefService() {
     ]);
     for(let name of this.handlers.keys()) {
         Services.mm.addMessageListener(name, this, false);
+    }
+
+    const OBSERVER_TOPICS = [
+        'brief:feed-update-queued',
+        'brief:feed-update-finished',
+        'brief:feed-updated',
+        'brief:feed-loading',
+        'brief:feed-error',
+        'brief:invalidate-feedlist',
+        'brief:feed-title-changed',
+        'brief:feed-favicon-changed',
+        'brief:custom-style-changed',
+    ];
+    for(let topic of OBSERVER_TOPICS) {
+        Services.obs.addObserver(this, topic, false);
     }
 }
 
@@ -62,9 +80,17 @@ BriefService.prototype = {
 
     },
 
-    // nsIObserver
-    observe: function() {
-
+    // nsIObserver for proxying notifications to content process
+    observe: function(subject, topic, data) {
+        // Just forward everything downstream
+        for(let obs of this._observers) {
+            try {
+                obs.sendAsyncMessage('brief:notify-observer', {topic, data});
+            } catch(e) {
+                // Looks like the receiver is gone
+                this._observers.delete(obs);
+            }
+        }
     },
 
     // nsIMessageListener for content process communication

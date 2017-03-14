@@ -38,8 +38,7 @@ function init() {
 
     refreshProgressmeter();
 
-    for (let topic of OBSERVER_TOPICS)
-        Services.obs.addObserver(FeedList, topic, false);
+    BriefClient.addObserver(FeedList);
 
     Storage.addObserver(FeedList);
 
@@ -595,6 +594,7 @@ let BriefClient = {
     _handlers: [],
     _expectedReplies: new Map(),
 
+    // Init/deinit
     init: function Brief_init() {
         this.mm = window.QueryInterface(Ci.nsIInterfaceRequestor)
                         .getInterface(Ci.nsIDocShell)
@@ -603,13 +603,16 @@ let BriefClient = {
         // Register API handlers
         this._handlers = new Map([
             ['brief:async-reply', msg => this._receiveAsyncReply(msg)],
+            ['brief:notify-observer', msg => this.notifyObservers(null, msg.data.topic, msg.data.data)],
         ]);
         for(let name of this._handlers.keys()) {
             this.mm.addMessageListener(name, this);
         }
+        this.mm.sendAsyncMessage('brief:add-observer');
     },
     deinit: function Brief_deinit() {
-        // Register API handlers
+        // Unregister API handlers
+        this.mm.sendAsyncMessage('brief:remove-observer');
         for(let name of this._handlers.keys()) {
             this.mm.removeMessageListener(name, this);
         }
@@ -642,6 +645,20 @@ let BriefClient = {
         }
         this._expectedReplies.delete(id);
         deferred.resolve(payload);
+    },
+
+    // Observer management
+    _observers: new Set(),
+    addObserver: function BriefService_addObserver(target) {
+        this._observers.add(target);
+    },
+    removeObserver: function BriefService_removeObserver(target) {
+        this._observers.delete(target);
+    },
+    notifyObservers: function BriefClient_notifyObservers(subject, topic, data) {
+        for(let obs of this._observers) {
+            obs.observe(subject, topic, data);
+        }
     },
 
     // Misc util
