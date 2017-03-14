@@ -226,7 +226,7 @@ let ViewList = {
         FeedList.deselect();
 
         if (this.selectedItem.id == 'starred-folder') {
-            Storage.getAllTags().then(tags => {
+            BriefClient.getAllTags().then(tags => {
                 if (tags.length)
                     TagList.show();
             })
@@ -335,7 +335,7 @@ let TagList = {
     }.task(),
 
     _rebuild: function* TagList__rebuild() {
-        this.tags = yield Storage.getAllTags();
+        this.tags = yield BriefClient.getAllTags();
 
         let model = this.tags.map(tag => ( {id: tag, title: tag, unreadCount: 0} ));
 

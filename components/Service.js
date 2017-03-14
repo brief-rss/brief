@@ -32,6 +32,7 @@ function BriefService() {
         ['brief:get-feed-list', msg => Storage.getAllFeeds(msg.data.includeFolders, msg.data.includeHidden)],
         ['brief:get-feed', msg => Storage.getFeed(msg.data.feedID)],
         ['brief:modify-feed', msg => Storage.changeFeedProperties(msg.data)],
+        ['brief:get-tag-list', msg => Storage.getAllTags()],
     ]);
     for(let name of this.handlers.keys()) {
         Services.mm.addMessageListener(name, this, false);

@@ -682,6 +682,12 @@ let BriefClient = {
     modifyFeed: function(feed) {
         this.mm.sendSyncMessage('brief:modify-feed', feed);
     },
+
+    getAllTags: function() {
+        return this._asyncRequest('brief:get-tag-list');
+    },
+
+
 };
 
 
