@@ -102,6 +102,8 @@ BriefService.prototype = {
             return;
         }
         let reply = handler(message);
+        if(!message.sync)
+            return;
         if(reply.then !== undefined) {
             return this._asyncReply(message, reply);
         } else {
