@@ -66,6 +66,7 @@ BriefService.prototype = {
 
     },
 
+    // nsIMessageListener for content process communication
     receiveMessage: function BriefService_receiveMessage(message) {
         let {name, data} = message;
         let handler = this.handlers.get(name);
@@ -73,8 +74,22 @@ BriefService.prototype = {
             log("BriefService: no handler for " + name);
             return;
         }
-        return handler(message);
+        let reply = handler(message);
+        if(reply.then !== undefined) {
+            return this._asyncReply(message, reply);
+        } else {
+            return reply;
+        }
     },
+    _asyncReply: function BriefService__asyncReply(message, reply) {
+        let index = this._replyCounter;
+        this._replyCounter += 1;
+        let reply_to = message.target.messageManager;
+        reply.then(value => reply_to.sendAsyncMessage('brief:async-reply',
+                {id: index, payload: value}));
+        return index;
+    },
+    _replyCounter: 0,
 
     classDescription: 'Service of Brief extension',
     classID: Components.ID('{943b2280-6457-11df-a08a-0800200c9a66}'),

@@ -590,13 +590,58 @@ let Shortcuts = {
 
 // The main API endpoint
 let BriefClient = {
+    // Internal use data and functions
     mm: null,
+    _handlers: [],
+    _expectedReplies: new Map(),
 
     init: function Brief_init() {
         this.mm = window.QueryInterface(Ci.nsIInterfaceRequestor)
                         .getInterface(Ci.nsIDocShell)
                         .QueryInterface(Ci.nsIInterfaceRequestor)
                         .getInterface(Ci.nsIContentFrameMessageManager);
+        // Register API handlers
+        this._handlers = new Map([
+            ['brief:async-reply', msg => this._receiveAsyncReply(msg)],
+        ]);
+        for(let name of this._handlers.keys()) {
+            this.mm.addMessageListener(name, this);
+        }
+    },
+    deinit: function Brief_deinit() {
+        // Register API handlers
+        for(let name of this._handlers.keys()) {
+            this.mm.removeMessageListener(name, this);
+        }
+    },
+
+    receiveMessage: function BriefService_receiveMessage(message) {
+        let {name, data} = message;
+        let handler = this._handlers.get(name);
+        if(handler === undefined) {
+            log("BriefClient: no handler for " + name);
+            return;
+        }
+        return handler(message);
+    },
+
+    _asyncRequest: function BriefService__asyncRequest(id, data) {
+        let reply_id = this.mm.sendSyncMessage(id, data)[0];
+        let deferred = PromiseUtils.defer();
+        console.log("expecting reply", reply_id);
+        this._expectedReplies.set(reply_id, deferred);
+        return deferred.promise;
+    },
+    _receiveAsyncReply: function BriefService__receiveAsyncReply(msg) {
+        let {id, payload} = msg.data;
+        console.log("received reply", id);
+        let deferred = this._expectedReplies.get(id);
+        if(deferred === undefined) {
+            console.log("BriefClient: unexpected reply" + id);
+            return;
+        }
+        this._expectedReplies.delete(id);
+        deferred.resolve(payload);
     },
 
     // Misc util
