@@ -67,8 +67,8 @@ function unload() {
 
     Persistence.save();
 
-    for (let topic of OBSERVER_TOPICS)
-        Services.obs.removeObserver(FeedList, topic);
+    BriefClient.removeObserver(FeedList);
+    BriefClient.deinit();
 
     PrefObserver.unregister();
     Storage.removeObserver(FeedList);
