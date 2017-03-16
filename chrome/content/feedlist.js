@@ -154,6 +154,11 @@ TreeView.prototype = {
             element.classList.toggle('collapsed');
             aEvent.stopPropagation();
         } else {
+            // Avoid selecting folders instead of children
+            // Can't stopPropagation due to the possible context menu handlers above
+            if(aEvent.tree_selection_done === this.prefix)
+                return;
+            aEvent.tree_selection_done = this.prefix;
             // select
             this.selectedItem = aEvent.currentTarget;
         }
