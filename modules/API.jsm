@@ -223,6 +223,7 @@ BriefServer.prototype = {
     _asyncReply: function BriefService__asyncReply(message, reply) {
         let {args, id} = message.data;
         let reply_to = message.target.messageManager;
-        reply.then(value => reply_to.sendAsyncMessage('brief:async-reply', {id, payload: value}));
+        Promise.resolve(reply).then(
+            value => reply_to.sendAsyncMessage('brief:async-reply', {id, payload: value}));
     },
 };
