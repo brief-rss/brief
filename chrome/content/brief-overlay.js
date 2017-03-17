@@ -194,7 +194,7 @@ var Brief = {
 
         let query = new Brief.query({
             includeFeedsExcludedFromGlobalViews: false,
-            deleted: Brief.storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             read: false
         })
 
@@ -275,7 +275,7 @@ var Brief = {
             rows.removeChild(rows.lastChild);
 
         let query = new this.query({
-            deleted: this.storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             read: false,
             sortOrder: this.query.SORT_BY_FEED_ROW_INDEX,
             sortDirection: this.query.SORT_ASCENDING
@@ -300,7 +300,7 @@ var Brief = {
                 row.appendChild(label);
 
                 let query = new this.query({
-                    deleted: this.storage.ENTRY_STATE_NORMAL,
+                    deleted: false,
                     feeds: [feed],
                     read: false
                 })

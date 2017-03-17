@@ -193,22 +193,22 @@ let ViewList = {
             case 'all-items-folder':
                 return {
                     includeFeedsExcludedFromGlobalViews: false,
-                    deleted: Storage.ENTRY_STATE_NORMAL
+                    deleted: false
                 };
             case 'today-folder':
                 return {
                     startDate: new Date().setHours(0, 0, 0, 0),
                     includeFeedsExcludedFromGlobalViews: false,
-                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    deleted: false
                 };
             case 'starred-folder':
                 return {
-                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    deleted: false,
                     starred: true
                 };
             case 'trash-folder':
                 return {
-                    deleted: Storage.ENTRY_STATE_TRASHED
+                    deleted: 'trashed'
                 };
         }
     },
@@ -294,7 +294,7 @@ let TagList = {
         FeedList.deselect();
 
         let query = new Query({
-            deleted: Storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             tags: [this.selectedItem.dataset.id]
         })
 
@@ -343,7 +343,7 @@ let TagList = {
 
     _refreshLabel: function* TagList__refreshLabel(aTagName) {
         let query = {
-            deleted: Storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             tags: [aTagName],
             read: false
         };
@@ -384,7 +384,7 @@ let FeedList = {
         TagList.deselect();
         TagList.hide();
 
-        let query = new Query({ deleted: Storage.ENTRY_STATE_NORMAL });
+        let query = new Query({ deleted: false });
 
         if (this.selectedFeed.isFolder)
             query.folders = [this.selectedFeed.feedID];
@@ -422,7 +422,7 @@ let FeedList = {
 
     _refreshLabel: function* FeedList__refreshLabel(aFeed) {
         let query = {
-            deleted: Storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             folders: aFeed.isFolder ? [aFeed.feedID] : undefined,
             feeds: aFeed.isFolder ? undefined : [aFeed.feedID],
             read: false
@@ -587,7 +587,7 @@ let FeedList = {
             ViewList.refreshItem('starred-folder');
         })
 
-        let entriesRestored = (aNewState == Storage.ENTRY_STATE_NORMAL);
+        let entriesRestored = (aNewState === false);
         TagList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);
     },
 
@@ -685,7 +685,7 @@ let ViewListContextMenu = {
     emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
         let query = ViewList.getQueryObjectForView('today-folder');
         query.starred = false;
-        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+        query.deleteEntries('trashed');
     }
 
 }
@@ -695,7 +695,7 @@ let TagListContextMenu = {
 
     markTagRead: function TagListContextMenu_markTagRead() {
         let query = {
-            deleted: Storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             tags: [TagList.selectedItem.dataset.id]
         };
         API.query.markEntriesRead(query, true);
@@ -739,14 +739,14 @@ let FeedListContextMenu = {
     markFeedRead: function FeedContextMenu_markFeedRead() {
         let query = {
             feeds: [this.targetFeed.feedID],
-            deleted: Storage.ENTRY_STATE_NORMAL
+            deleted: false
         };
         API.query.markEntriesRead(query, true);
     },
 
     markFolderRead: function FolderContextMenu_markFolderRead() {
         let query = {
-            deleted: Storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             folders: [FeedList.selectedFeed.feedID]
         };
         API.query.markEntriesRead(query, true);
@@ -762,11 +762,11 @@ let FeedListContextMenu = {
 
     emptyFolder: function FolderContextMenu_emptyFolder() {
         let query = new Query({
-            deleted: Storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             starred: false,
             folders: [FeedList.selectedFeed.feedID]
         })
-        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+        query.deleteEntries('trashed');
     },
 
     deleteFolder: function FolderContextMenu_deleteFolder() {

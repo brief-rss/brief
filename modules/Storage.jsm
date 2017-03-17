@@ -45,10 +45,6 @@ var Connection = null;
 // Exported object exposing public properties.
 const Storage = Object.freeze({
 
-    ENTRY_STATE_NORMAL: 0,
-    ENTRY_STATE_TRASHED: 1,
-    ENTRY_STATE_DELETED: 2,
-
     /**
      * A promise that resolves when storage is initiated.
      *
@@ -502,13 +498,13 @@ let StorageInternal = {
             for (let feed of feeds) {
                 let query = new Query({
                     feeds: [feed.feedID],
-                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    deleted: false,
                     starred: false,
                     sortOrder: Query.prototype.SORT_BY_DATE,
                     offset: Prefs.getIntPref('database.maxStoredEntries')
                 })
 
-                yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+                yield query.deleteEntries('trashed');
             }
         }
 
@@ -518,12 +514,12 @@ let StorageInternal = {
 
             let query = new Query({
                 feeds: feedsWithoutAgeLimit.map(feed => feed.feedID),
-                deleted: Storage.ENTRY_STATE_NORMAL,
+                deleted: false,
                 starred: false,
                 endDate: Date.now() - expirationAge * 86400000
             })
 
-            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+            yield query.deleteEntries('trashed');
         }
 
         // Delete old entries based on per-feed limit.
@@ -531,12 +527,12 @@ let StorageInternal = {
             for (let feed of feedsWithAgeLimit) {
                 let query = new Query({
                     feeds: [feed.feedID],
-                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    deleted: false,
                     starred: false,
                     endDate: Date.now() - feed.entryAgeLimit * 86400000
                 })
 
-                query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+                query.deleteEntries('trashed');
             }
         }
     }.task(),
@@ -544,13 +540,13 @@ let StorageInternal = {
     // Permanently removes deleted items from database.
     purgeDeleted: function StorageInternal_purgeDeleted() {
         Stm.purgeDeletedEntriesText.execute({
-            'deletedState': Storage.ENTRY_STATE_DELETED,
+            'deletedState': EntryState.DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
         })
 
         Stm.purgeDeletedEntries.execute({
-            'deletedState': Storage.ENTRY_STATE_DELETED,
+            'deletedState': EntryState.DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
         })
@@ -935,6 +931,25 @@ FeedProcessor.prototype = {
 }
 
 
+let EntryState = {
+    NORMAL: 0,
+    TRASHED: 1,
+    DELETED: 2,
+
+    parse(smth) {
+        switch(smth) {
+            case false:
+                return EntryState.NORMAL;
+            case 'trashed':
+                return EntryState.TRASHED;
+            case 'deleted':
+                return EntryState.DELETED;
+            default: throw 'unknown entry state';
+        }
+    },
+};
+
+
 /**
  * A query to the Brief's database. Constraints are AND-ed.
  *
@@ -1240,8 +1255,9 @@ Query.prototype = {
      */
     deleteEntries: function* Query_deleteEntries(aState) {
         let list = yield this.getEntryList();
+        let state = EntryState.parse(aState);
         if (list.entries.length) {
-            let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
+            let sql = 'UPDATE entries SET deleted = ' + state + this._getQueryString();
             yield Connection.execute(sql);
 
             for (let observer of StorageInternal.observers) {
@@ -1442,7 +1458,7 @@ Query.prototype = {
             constraints.push('entries.starred = 0');
 
         if (this.deleted !== undefined)
-            constraints.push('entries.deleted = ' + this.deleted);
+            constraints.push('entries.deleted = ' + EntryState.parse(this.deleted));
 
         if (this.startDate !== undefined)
             constraints.push('entries.date >= ' + this.startDate);
@@ -1913,7 +1929,7 @@ let Stm = {
 
         let sql = 'SELECT DISTINCT entry_tags.tagName                                    '+
                   'FROM entry_tags INNER JOIN entries ON entry_tags.entryID = entries.id '+
-                  'WHERE entries.deleted = ' + Storage.ENTRY_STATE_NORMAL + '            '+
+                  'WHERE entries.deleted = ' + EntryState.NORMAL + '                     '+
                   'ORDER BY entry_tags.tagName                                           ';
         let resultColumns = ['tagName'];
         return new Statement(sql, resultColumns);

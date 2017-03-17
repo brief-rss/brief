@@ -45,7 +45,7 @@ function FeedView(aTitle, aQuery) {
     let button = getElement('view-title-button');
     if(this.query.feeds && this.query.feeds.length == 1) {
         button.dataset.dropdown = 'dropdown-menu-feed-actions';
-    } else if(this.query.deleted == Storage.ENTRY_STATE_TRASHED) {
+    } else if(this.query.deleted === 'trashed') {
         button.dataset.dropdown = 'dropdown-menu-trash-actions';
     } else {
         button.dataset.dropdown = "";
@@ -875,7 +875,7 @@ FeedView.prototype = {
         else if (this.query.starred === true) {
             mainMessage = STRINGS.GetStringFromName('noStarredEntries');
         }
-        else if (this.query.deleted == Storage.ENTRY_STATE_TRASHED) {
+        else if (this.query.deleted === 'trashed') {
             mainMessage = STRINGS.GetStringFromName('trashIsEmpty');
         }
         else {
@@ -955,7 +955,7 @@ function EntryView(aFeedView, aEntryData) {
 
     let deleteButton = this._getElement('delete-button');
     let restoreButton = this._getElement('restore-button');
-    if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED) {
+    if (this.feedView.query.deleted === 'trashed') {
         deleteButton.parentNode.removeChild(deleteButton);
         restoreButton.setAttribute('title', Strings.restoreEntryTooltip);
     }

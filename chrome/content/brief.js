@@ -136,11 +136,11 @@ var Commands = {
     emptyFeed: function cmd_emptyFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
         let query = new Query({
-            deleted: Storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             starred: false,
             feeds: [feed.feedID]
         })
-        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+        query.deleteEntries('trashed');
     },
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
@@ -158,12 +158,12 @@ var Commands = {
 
     restoreTrashed: function cmd_restoreTrashed() {
         ViewList.getQueryObjectForView('trash-folder')
-                .deleteEntries(Storage.ENTRY_STATE_NORMAL);
+                .deleteEntries(false);
     },
 
     emptyTrash: function cmd_emptyTrash() {
         ViewList.getQueryObjectForView('trash-folder')
-                .deleteEntries(Storage.ENTRY_STATE_DELETED);
+                .deleteEntries('deleted');
     },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
@@ -180,7 +180,7 @@ var Commands = {
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
         if (gCurrentView.selectedEntry) {
-            if (gCurrentView.query.deleted == Storage.ENTRY_STATE_TRASHED)
+            if (gCurrentView.query.deleted === 'trashed')
                 Commands.restoreEntry(gCurrentView.selectedEntry);
             else
                 Commands.deleteEntry(gCurrentView.selectedEntry);
@@ -188,11 +188,11 @@ var Commands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        new Query(aEntry).deleteEntries(Storage.ENTRY_STATE_TRASHED);
+        new Query(aEntry).deleteEntries('trashed');
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        new Query(aEntry).deleteEntries(Storage.ENTRY_STATE_NORMAL);
+        new Query(aEntry).deleteEntries(false);
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
