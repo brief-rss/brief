@@ -387,7 +387,8 @@ let PrefObserver = {
         sortUnreadViewOldestFirst: 'feedview.sortUnreadViewOldestFirst',
         showFavicons:              'showFavicons',
         homeFolder:                'homeFolder',
-        pagePersist:               'pagePersist'
+        pagePersist:               'pagePersist',
+        assumeStandardKeys:        'assumeStandardKeys',
     },
 
     _updateCachedPref: function PrefObserver__updateCachedPref(aKey) {
@@ -558,7 +559,7 @@ let Shortcuts = {
             // Space and Shift+Space behave differently only in full view
             case ' ':
             case 'Shift+ ':
-                if(!Prefs.getBoolPref('assumeStandardKeys') || gCurrentView.headlinesView)
+                if(!PrefCache.assumeStandardKeys || gCurrentView.headlinesView)
                     return;
                 if(event.shiftKey)
                     gCurrentView.selectPrevEntry();
