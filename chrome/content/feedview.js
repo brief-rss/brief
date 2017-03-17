@@ -34,7 +34,7 @@ function FeedView(aTitle, aQuery) {
     for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
         getElement(id).hidden = this._fixedStarred; //FIXME: move to CSS
 
-    aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
+    aQuery.sortOrder = 'date';
     this.__query = aQuery;
 
     this._entriesMarkedUnread = [];
@@ -137,9 +137,9 @@ FeedView.prototype = {
             this.__query.starred = (Persistence.data.view.filter === 'starred') ? true : undefined;
 
         if (this.__query.read === false && PrefCache.sortUnreadViewOldestFirst)
-            this.__query.sortDirection = Query.prototype.SORT_ASCENDING;
+            this.__query.sortDirection = 'asc';
         else
-            this.__query.sortDirection = Query.prototype.SORT_DESCENDING;
+            this.__query.sortDirection = 'desc';
 
         return this.__query;
     },
@@ -553,7 +553,7 @@ FeedView.prototype = {
             let query = this.getQueryCopy();
             let edgeDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
 
-            if (query.sortDirection == Query.prototype.SORT_DESCENDING)
+            if (query.sortDirection == 'desc')
                 query.startDate = edgeDate;
             else
                 query.endDate = edgeDate;
@@ -788,7 +788,7 @@ FeedView.prototype = {
 
         if (this._loadedEntries.length) {
             let lastEntryDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
-            if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
+            if (dateQuery.sortDirection == 'desc')
                 rangeEndDate = lastEntryDate - 1;
             else
                 rangeStartDate = lastEntryDate + 1;
@@ -801,7 +801,7 @@ FeedView.prototype = {
         let dates = yield this._refreshGuard(dateQuery.getProperty('date', false));
         if (dates.length) {
             let query = this.getQueryCopy();
-            if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
+            if (query.sortDirection == 'desc') {
                 query.startDate = dates[dates.length - 1];
                 query.endDate = rangeEndDate;
             }

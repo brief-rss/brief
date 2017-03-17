@@ -500,7 +500,7 @@ let StorageInternal = {
                     feeds: [feed.feedID],
                     deleted: false,
                     starred: false,
-                    sortOrder: Query.prototype.SORT_BY_DATE,
+                    sortOrder: 'date',
                     offset: Prefs.getIntPref('database.maxStoredEntries')
                 })
 
@@ -1044,19 +1044,12 @@ Query.prototype = {
     /**
      * By which column to sort the results.
      */
-    SORT_BY_DATE: 1,
-    SORT_BY_TITLE: 2,
-    SORT_BY_FEED_ROW_INDEX: 3,
-
     sortOrder: undefined,
 
     /**
      * Direction in which to sort the results.
      */
-    SORT_DESCENDING: 0,
-    SORT_ASCENDING: 1,
-
-    sortDirection: 0,
+    sortDirection: 'desc',
 
     /**
      * Include hidden feeds i.e. the ones whose Live Bookmarks are no longer
@@ -1384,7 +1377,7 @@ Query.prototype = {
         if (!this.feeds && !this.includeHiddenFeeds)
             text += ' INNER JOIN feeds ON entries.feedID = feeds.feedID ';
 
-        if (aGetFullEntries || this.searchString || this.sortOrder == this.SORT_BY_TITLE)
+        if (aGetFullEntries || this.searchString)
             text += ' INNER JOIN entries_text ON entries.id = entries_text.rowid ';
 
         if (this.tags)
@@ -1473,26 +1466,22 @@ Query.prototype = {
 
         if (this.sortOrder !== undefined) {
             switch (this.sortOrder) {
-                case this.SORT_BY_FEED_ROW_INDEX:
+                case 'library':
                     var sortOrder = 'feeds.rowIndex ';
                     break;
-                case this.SORT_BY_DATE:
+                case 'date':
                     sortOrder = 'entries.date ';
-                    break;
-                case this.SORT_BY_TITLE:
-                    sortOrder = 'entries_text.title ';
                     break;
                 default:
                     throw Components.results.NS_ERROR_ILLEGAL_VALUE;
             }
 
-            let sortDir = (this.sortDirection == this.SORT_ASCENDING) ? 'ASC' : 'DESC';
-            text += 'ORDER BY ' + sortOrder + sortDir;
+            text += 'ORDER BY ' + sortOrder + this.sortDirection;
 
             // Sort by rowid, so that entries that are equal in respect of primary
             // sorting criteria are always returned in the same (as opposed to
             // undefined) order.
-            text += ', entries.rowid ' + sortDir;
+            text += ', entries.rowid ' + this.sortDirection;
         }
 
         if (this.limit !== undefined)

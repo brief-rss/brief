@@ -279,8 +279,8 @@ var Brief = {
         let query = new this.query({
             deleted: false,
             read: false,
-            sortOrder: this.query.SORT_BY_FEED_ROW_INDEX,
-            sortDirection: this.query.SORT_ASCENDING
+            sortOrder: 'library',
+            sortDirection: 'asc'
         })
 
         query.getProperty('feedID', true).then(unreadFeeds => {
