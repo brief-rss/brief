@@ -5,6 +5,12 @@ Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+
+
+XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
+    return Services.prefs.getBranch('extensions.brief.');
+})
 
 // The table of all API calls used by both BriefClient and BriefServer
 // name: [topic, type, handler]
@@ -42,6 +48,10 @@ const API_CALLS = {
         () => Cc['@mozilla.org/chrome/chrome-registry;1']
             .getService(Ci.nsIXULChromeRegistry).getSelectedLocale('brief')
     ],
+    savePersistence: ['brief:save-persistence', 'noreply',
+        (data) => Prefs.setCharPref("pagePersist", JSON.stringify(data))
+    ],
+
 };
 
 // The list of observer notifications to be forwarded to clients

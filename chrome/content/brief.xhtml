@@ -20,7 +20,7 @@
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
 </head>
-<body class="sidebar" onload="Storage.ready.then(init)" onunload="unload()">
+<body class="sidebar" onload="Storage.ready.then(init)" onbeforeunload="Persistence.save()" onunload="unload()">
     <div id="sidebar" class="shrinkable vbox">
         <div class="vbox"
              id="sidebar-top"

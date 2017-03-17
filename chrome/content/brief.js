@@ -57,16 +57,6 @@ function init() {
 
 
 function unload() {
-    let id = ViewList.selectedItem && ViewList.selectedItem.id;
-    let startView = (id == 'today-folder') ? 'today-folder' : 'all-items-folder';
-    FeedList.persistFolderState();
-
-    Persistence.data.startView = startView;
-    Persistence.data.closedFolders = getElement('feed-list').getAttribute('closedFolders');
-    Persistence.data.tagList.width = getElement('tag-list').style.width;
-    Persistence.data.sidebar.width = getElement('sidebar').style.width;
-    Persistence.data.sidebar.hidden = !document.body.classList.contains('sidebar');
-
     Persistence.save();
 
     API.removeObserver(FeedList);
@@ -492,7 +482,21 @@ let Persistence = {
     },
 
     save: function Persistence_save() {
-        Prefs.setCharPref("pagePersist", JSON.stringify(this.data));
+        this._collect();
+        API.savePersistence(this.data);
+    },
+
+    _collect: function Persistence__collect() {
+        let id = ViewList.selectedItem && ViewList.selectedItem.id;
+        if(id === 'today-folder' || id === 'all-items-folder')
+            this.data.startView = id;
+
+        FeedList.persistFolderState();
+        this.data.closedFolders = getElement('feed-list').getAttribute('closedFolders');
+
+        this.data.tagList.width = getElement('tag-list').style.width;
+        this.data.sidebar.width = getElement('sidebar').style.width;
+        this.data.sidebar.hidden = !document.body.classList.contains('sidebar');
     },
 
     _import: function Persistence__import() {
