@@ -288,7 +288,7 @@ let TagList = {
     onSelect: function TagList_onSelect(aEvent) {
         if (!this.selectedItem) {
             if(!FeedList.selectedItem && !ViewList.selectedItem)
-                ViewList.selectedItem = getElement('all-items-folder')
+                ViewList.selectedItem = getElement('starred-folder')
             return;
         }
 
@@ -311,43 +311,33 @@ let TagList = {
      * @param aPossiblyRemoved Indicates that there may be no remaining entries with
      *                         the tag.
      */
-    refreshTags: function* TagList_refreshTags(aTags, aPossiblyAdded, aPossiblyRemoved) {
+    refreshTags: function TagList_refreshTags(aTags, aPossiblyAdded, aPossiblyRemoved) {
         if (!this.ready)
             return;
 
-        for (let tag of aTags) {
-            if (aPossiblyAdded) {
-                if (this.tags.indexOf(tag) == -1)
-                    this._rebuild();
-                else
-                    this._refreshLabel(tag);
-            }
-            else if (aPossiblyRemoved) {
-                let tagExists = yield new Query({ tags: [tag] }).hasMatches();
-                if (tagExists) {
-                    this._refreshLabel(tag);
-                }
-                else {
-                    this._rebuild();
-                    if (gCurrentView.query.tags && gCurrentView.query.tags[0] === tag)
-                        ViewList.selectedItem = getElement('starred-folder');
-                }
-            }
-            else {
-                this._refreshLabel(tag);
+        let unknownTags = aTags.filter(t => !this.tags.includes(t));
+
+        if(aPossiblyRemoved || unknownTags.length) {
+            this._rebuild(); // spawn async
+        } else {
+            for(let tag of aTags) {
+                this._refreshLabel(tag); // spawn async
             }
         }
-    }.task(),
+    },
 
     _rebuild: function* TagList__rebuild() {
-        this.tags = yield API.getAllTags();
+        let tagList = yield API.getAllTags();
 
-        let model = this.tags.map(tag => ( {id: tag, title: tag, unreadCount: 0} ));
+        if(this.tags !== tagList) {
+            this.tags = tagList;
 
-        this.tree.update(model);
+            let model = this.tags.map(tag => ( {id: tag, title: tag} ));
+            this.tree.update(model);
+        }
 
         for (let tagName of this.tags) {
-            yield this._refreshLabel(tagName);
+            this._refreshLabel(tagName); // spawn async
         }
 
         this.ready = true;

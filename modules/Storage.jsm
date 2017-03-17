@@ -1038,19 +1038,6 @@ Query.prototype = {
     includeFeedsExcludedFromGlobalViews: true,
 
     /**
-     * Indicates if there are any entries that match this query.
-     *
-     * @returns Promise<boolean>
-     */
-    hasMatches: function* Query_hasMatches() {
-        let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
-
-        let results = yield Connection.execute(sql);
-
-        return results[0].getResultByName('found');
-    }.task(),
-
-    /**
      * Get a simple list of entries.
      * XXX Check performance.
      *
