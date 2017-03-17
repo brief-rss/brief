@@ -88,20 +88,7 @@ function BriefClient(window) {
     this._mm.sendAsyncMessage('brief:add-observer');
 
     // Initialize the API functions
-    for(let name in API_CALLS) {
-        let [topic, type, handler] = API_CALLS[name];
-        switch(type) {
-            case 'noreply':
-                this[name] = ((...args) => this._mm.sendAsyncMessage(topic, args));
-                break;
-            case 'sync':
-                this[name] = ((...args) => this._mm.sendRpcMessage(topic, args)[0]);
-                break;
-            case 'async':
-                this[name] = ((...args) => this._asyncRequest(topic, args));
-                break;
-        }
-    }
+    this._installEndpoints(API_CALLS);
 };
 
 BriefClient.prototype = {
@@ -155,6 +142,32 @@ BriefClient.prototype = {
         this._expectedReplies.delete(id);
         deferred.resolve(payload);
     },
+
+    // Constructor helpers
+    _installEndpoints: function BriefClient__installEndpoints(endpoints, target) {
+        if(target === undefined)
+            target = this;
+        for(let name in endpoints) {
+            let value = endpoints[name];
+            if(value instanceof Array) {
+                let [topic, type, handler] = value;
+                switch(type) {
+                    case 'noreply':
+                        target[name] = ((...args) => this._mm.sendAsyncMessage(topic, args));
+                        break;
+                    case 'sync':
+                        target[name] = ((...args) => this._mm.sendRpcMessage(topic, args)[0]);
+                        break;
+                    case 'async':
+                        target[name] = ((...args) => this._asyncRequest(topic, args));
+                        break;
+                }
+            } else {
+                target[name] = {};
+                this._installEndpoints(value, target[name]);
+            }
+        }
+    },
 };
 
 
@@ -162,18 +175,15 @@ BriefClient.prototype = {
 function BriefServer() {
     // Initialize internal state
     this._observers = new Set();
-    this._handlers = new Map();
+    this._handlers = new Map([
+        ['brief:add-observer', {type: 'noreply', raw: true,
+            handler: msg => this._observers.add(msg.target.messageManager)}],
+        ['brief:remove-observer', {type: 'noreply', raw: true,
+            handler: msg => this._observers.delete(msg.target.messageManager)}],
+    ]);
 
     // Subscribe to the services
-    for(let name in API_CALLS) {
-        let [topic, type, handler] = API_CALLS[name];
-        this._handlers.set(topic, {type, handler});
-    }
-    // Add internal handlers for observers
-    this._handlers.set('brief:add-observer', {type: 'noreply', raw: true,
-        handler: msg => this._observers.add(msg.target.messageManager)});
-    this._handlers.set('brief:remove-observer', {type: 'noreply', raw: true,
-        handler: msg => this._observers.delete(msg.target.messageManager)});
+    this._installHandlers(API_CALLS);
     for(let topic of this._handlers.keys()) {
         Services.mm.addMessageListener(topic, this, false);
     }
@@ -235,5 +245,18 @@ BriefServer.prototype = {
         let reply_to = message.target.messageManager;
         Promise.resolve(reply).then(
             value => reply_to.sendAsyncMessage('brief:async-reply', {id, payload: value}));
+    },
+
+    // Constructor helpers
+    _installHandlers: function BriefService__installHandlers(handlers) {
+        for(let name in handlers) {
+            let value = handlers[name]
+            if(value instanceof Array) {
+                let [topic, type, handler] = value;
+                this._handlers.set(topic, {type, handler});
+            } else {
+                this._installHandlers(value);
+            }
+        }
     },
 };
