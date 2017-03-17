@@ -140,6 +140,8 @@ var Brief = {
 
         this.prefs.addObserver('', this.onPrefChanged, false);
 
+        setTimeout(() => this.storage.syncWithLivemarks(), 1000);
+
         window.addEventListener('unload', this.onWindowUnload.bind(this), false);
     },
 

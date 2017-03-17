@@ -52,7 +52,6 @@ function init() {
     document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
 
     wait().then(() => FeedList.rebuild());
-    wait(1000).then(() => Storage.syncWithLivemarks());
 }
 
 
