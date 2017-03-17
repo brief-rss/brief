@@ -56,7 +56,7 @@ function FeedView(aTitle, aQuery) {
     if (!this.query.searchString)
         getElement('searchbar').value = '';
 
-    getTopWindow().gBrowser.tabContainer.addEventListener('TabSelect', this, false);
+    document.addEventListener('visibilitychange', this, false);
 
     Storage.addObserver(this);
 
@@ -367,7 +367,7 @@ FeedView.prototype = {
 
 
     uninit: function FeedView_uninit() {
-        getTopWindow().gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
+        document.removeEventListener('visibilitychange', this, false);
         this.window.removeEventListener('resize', this, false);
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
@@ -442,8 +442,8 @@ FeedView.prototype = {
                         .catch(this._ignoreRefresh);
                 break;
 
-            case 'TabSelect':
-                if (this._refreshPending && aEvent.originalTarget == getTopWindow().Brief.getBriefTab()) {
+            case 'visibilitychange':
+                if (this._refreshPending && !document.hidden) {
                     this.refresh();
                     this._refreshPending = false;
                 }
@@ -452,7 +452,7 @@ FeedView.prototype = {
     },
 
     onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
-        if (getTopWindow().gBrowser.currentURI.spec == document.documentURI)
+        if (!document.hidden)
             this._onEntriesAdded(aEntryList.entries)
                 .catch(this._ignoreRefresh);
         else
@@ -460,7 +460,7 @@ FeedView.prototype = {
     },
 
     onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
-        if (getTopWindow().gBrowser.currentURI.spec == document.documentURI) {
+        if (!document.hidden) {
             this._onEntriesRemoved(aEntryList.entries, false, false);
             this._onEntriesAdded(aEntryList.entries)
                 .catch(this._ignoreRefresh);
