@@ -18,8 +18,9 @@ var gCurrentView;
 var API = null;
 
 
-function init() {
+var init = function* init() {
     API = new BriefClient(window);
+    yield API.ready();
 
     PrefObserver.register();
 
@@ -45,14 +46,16 @@ function init() {
 
     Shortcuts.init();
 
-    ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+    //ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+    ViewList.selectedItem = getElement('starred-folder'); // tmp for debug
     getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);
     getElement('tag-list').style.width = Persistence.data.tagList.width;
     getElement('sidebar').style.width = Persistence.data.sidebar.width;
     document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
 
-    wait().then(() => FeedList.rebuild());
-}
+    yield wait();
+    FeedList.rebuild();
+}.task()
 
 
 function unload() {

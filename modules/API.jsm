@@ -30,6 +30,9 @@ const API_CALLS = {
     ],
 
     // Storage
+    ready: ['brief:storage-ready', 'async',
+        () => Storage.ready
+    ],
     getAllFeeds: ['brief:get-feed-list', 'sync',
         (includeFolders, includeHidden) => Storage.getAllFeeds(includeFolders, includeHidden)
     ],
