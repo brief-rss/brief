@@ -65,6 +65,7 @@ function BriefClient(window) {
         .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIContentFrameMessageManager);
     this._observers = new Set();
     this._expectedReplies = new Map();
+    this._requestId = 0;
 
     // Subscribe for the server
     this._handlers = new Map([
@@ -126,10 +127,12 @@ BriefClient.prototype = {
         }
         return handler(data);
     },
-    _asyncRequest: function BriefClient__asyncRequest(id, data) {
-        let reply_id = this._mm.sendSyncMessage(id, data)[0];
+    _asyncRequest: function BriefClient__asyncRequest(topic, args) {
+        let id = this._requestId;
+        this._requestId += 1;
         let deferred = PromiseUtils.defer();
-        this._expectedReplies.set(reply_id, deferred);
+        this._expectedReplies.set(id, deferred);
+        this._mm.sendAsyncMessage(topic, {args, id});
         return deferred.promise;
     },
     _receiveAsyncReply: function BriefClient__receiveAsyncReply(data) {
@@ -148,7 +151,6 @@ BriefClient.prototype = {
 // BriefServer
 function BriefServer() {
     // Initialize internal state
-    this._replyCounter = 0;
     this._observers = new Set();
     this._handlers = new Map();
 
@@ -166,7 +168,6 @@ function BriefServer() {
         Services.mm.addMessageListener(topic, this, false);
     }
     for(let topic of OBSERVER_TOPICS) {
-        log("subscribe " + topic);
         Services.obs.addObserver(this, topic, false);
     }
 };
@@ -185,14 +186,12 @@ BriefServer.prototype = {
 
     // nsIObserver for proxying notifications to content process
     observe: function(subject, topic, data) {
-        log("API: observe " + topic);
-        log("API observers: " + this._observers.size);
         // Just forward everything downstream
         for(let obs of this._observers) {
             try {
                 obs.sendAsyncMessage('brief:notify-observer', {topic, data});
             } catch(e) {
-                log("API: dropping observer");
+                log("API: dropping dead observer");
                 // Looks like the receiver is gone
                 this._observers.delete(obs);
             }
@@ -208,6 +207,8 @@ BriefServer.prototype = {
             return;
         }
         let {type, handler, raw} = handler_data;
+        if(type === 'async')
+            data = data['args'];
         let reply = (raw === true) ? handler.call(this, message) : handler.apply(this, data);
         switch(type) {
             case 'noreply':
@@ -215,15 +216,13 @@ BriefServer.prototype = {
             case 'sync':
                 return reply;
             case 'async':
-                return this._asyncReply(message, reply);
+                this._asyncReply(message, reply);
+                return;
         }
     },
     _asyncReply: function BriefService__asyncReply(message, reply) {
-        let index = this._replyCounter;
-        this._replyCounter += 1;
+        let {args, id} = message.data;
         let reply_to = message.target.messageManager;
-        reply.then(value => reply_to.sendAsyncMessage('brief:async-reply',
-                {id: index, payload: value}));
-        return index;
+        reply.then(value => reply_to.sendAsyncMessage('brief:async-reply', {id, payload: value}));
     },
 };
