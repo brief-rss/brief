@@ -135,12 +135,12 @@ var Commands = {
 
     emptyFeed: function cmd_emptyFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let query = new Query({
+        let query = {
             deleted: false,
             starred: false,
             feeds: [feed.feedID]
-        })
-        query.deleteEntries('trashed');
+        };
+        API.query.deleteEntries(query, 'trashed');
     },
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
@@ -157,13 +157,12 @@ var Commands = {
     },
 
     restoreTrashed: function cmd_restoreTrashed() {
-        ViewList.getQueryObjectForView('trash-folder')
-                .deleteEntries(false);
+        ViewList.getQueryForView('trash-folder')
+        API.query.deleteEntries(ViewList.getQueryForView('trash-folder'), false);
     },
 
     emptyTrash: function cmd_emptyTrash() {
-        ViewList.getQueryObjectForView('trash-folder')
-                .deleteEntries('deleted');
+        API.query.deleteEntries(ViewList.getQueryForView('trash-folder'), 'deleted');
     },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
@@ -188,11 +187,11 @@ var Commands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        new Query(aEntry).deleteEntries('trashed');
+        API.query.deleteEntries(aEntry, 'trashed');
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        new Query(aEntry).deleteEntries(false);
+        API.query.deleteEntries(aEntry, false);
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {

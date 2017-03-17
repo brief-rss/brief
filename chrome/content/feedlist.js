@@ -683,9 +683,9 @@ let ViewListContextMenu = {
     },
 
     emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
-        let query = ViewList.getQueryObjectForView('today-folder');
+        let query = ViewList.getQueryForView('today-folder');
         query.starred = false;
-        query.deleteEntries('trashed');
+        API.query.deleteEntries(query, 'trashed');
     }
 
 }
@@ -761,12 +761,12 @@ let FeedListContextMenu = {
     },
 
     emptyFolder: function FolderContextMenu_emptyFolder() {
-        let query = new Query({
+        let query = {
             deleted: false,
             starred: false,
             folders: [FeedList.selectedFeed.feedID]
-        })
-        query.deleteEntries('trashed');
+        };
+        API.query.deleteEntries(query, 'trashed');
     },
 
     deleteFolder: function FolderContextMenu_deleteFolder() {

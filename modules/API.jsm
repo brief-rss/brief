@@ -66,7 +66,9 @@ const API_CALLS = {
         markEntriesRead: ['brief:query:mark-read', 'async',
             (query, state) => new Query(query).markEntriesRead(state)
         ],
-        /* deleteEntries */
+        deleteEntries: ['brief:query:delete', 'async',
+            (query, state) => new Query(query).deleteEntries(state)
+        ],
         bookmarkEntries: ['brief:query:bookmark', 'async',
             (query, state) => new Query(query).bookmarkEntries(state)
         ],
