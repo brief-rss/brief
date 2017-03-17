@@ -23,9 +23,10 @@ function init() {
 
     PrefObserver.register();
 
-    getElement('show-all-entries-checkbox').dataset.checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
-    getElement('filter-unread-checkbox').dataset.checked = PrefCache.filterUnread;
-    getElement('filter-starred-checkbox').dataset.checked = PrefCache.filterStarred;
+    // Restore local persistence
+    Persistence.init();
+
+    Commands.switchViewFilter(Persistence.data.view.filter);
 
     refreshProgressmeter();
 
@@ -44,8 +45,6 @@ function init() {
 
     Shortcuts.init();
 
-    // Restore local persistence
-    Persistence.init();
     ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
     getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);
     getElement('tag-list').style.width = Persistence.data.tagList.width;
@@ -117,22 +116,25 @@ var Commands = {
         if (FeedList.selectedFeed) {
             API.modifyFeed({
                 feedID: FeedList.selectedFeed.feedID,
-                viewMode: aMode
+                viewMode: (aMode === 'headlines')
             });
         }
         else {
-            Prefs.setIntPref('feedview.mode', aMode);
+            Persistence.data.view.mode = aMode;
         }
 
         gCurrentView.refresh();
     },
 
     switchViewFilter: function cmd_switchViewFilter(aFilter) {
-        let filterUnread = aFilter == 'unread';
-        let filterStarred = aFilter == 'starred';
+        Persistence.data.view.filter = aFilter;
 
-        Prefs.setBoolPref('feedview.filterUnread', filterUnread);
-        Prefs.setBoolPref('feedview.filterStarred', filterStarred);
+        getElement('show-all-entries-checkbox').dataset.checked = (aFilter === 'all');
+        getElement('filter-unread-checkbox').dataset.checked = (aFilter === 'unread');
+        getElement('filter-starred-checkbox').dataset.checked = (aFilter === 'starred');
+
+        if(gCurrentView !== undefined)
+            gCurrentView.refresh();
     },
 
     openFeedWebsite: function cmd_openWebsite(aFeed) {
@@ -381,10 +383,7 @@ let PrefObserver = {
     // of PrefCache.
     _cachedPrefs: {
         doubleClickMarks:          'feedview.doubleClickMarks',
-        viewMode:                  'feedview.mode',
         autoMarkRead:              'feedview.autoMarkRead',
-        filterUnread:              'feedview.filterUnread',
-        filterStarred:             'feedview.filterStarred',
         sortUnreadViewOldestFirst: 'feedview.sortUnreadViewOldestFirst',
         showFavicons:              'showFavicons',
         homeFolder:                'homeFolder',
@@ -424,15 +423,6 @@ let PrefObserver = {
             case 'feedview.sortUnreadViewOldestFirst':
                 if (gCurrentView.query.read === false)
                     gCurrentView.refresh();
-                break;
-
-            case 'feedview.filterUnread':
-            case 'feedview.filterStarred':
-                getElement('filter-unread-checkbox').dataset.checked = PrefCache.filterUnread;
-                getElement('filter-starred-checkbox').dataset.checked = PrefCache.filterStarred;
-                getElement('show-all-entries-checkbox').dataset.checked = !PrefCache.filterUnread &&
-                                                                          !PrefCache.filterStarred;
-                gCurrentView.refresh();
                 break;
         }
     }
@@ -515,7 +505,12 @@ let Persistence = {
             sidebar: {
                 width: store.getValue(this.BRIEF_XUL_URL, "sidebar", "width") + 'px',
                 hidden: store.getValue(this.BRIEF_XUL_URL, "sidebar", "hidden")
-            }
+            },
+            view: {
+                filter: Prefs.getBoolPref('feedview.filterUnread') ? 'unread' :
+                    (Prefs.getBoolPref('feedview.filterStarred') ? 'starred' : 'all'),
+                mode: Prefs.getIntPref('feedview.mode') ? 'headlines' : 'full',
+            },
         }
     },
 };

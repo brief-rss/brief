@@ -78,7 +78,7 @@ FeedView.prototype = {
         if (feedIDs && feedIDs.length == 1)
             var viewMode = API.getFeed(feedIDs[0]).viewMode;
         else
-            viewMode = PrefCache.viewMode;
+            viewMode = (Persistence.data.view.mode === 'headlines');
 
         return viewMode == 1;
     },
@@ -132,9 +132,9 @@ FeedView.prototype = {
 
     // Query that selects all entries contained by the view.
     get query() {
-        this.__query.read = PrefCache.filterUnread ? false : undefined;
+        this.__query.read = (Persistence.data.view.filter === 'unread') ? false : undefined;
         if (!this._fixedStarred)
-            this.__query.starred = PrefCache.filterStarred ? true : undefined;
+            this.__query.starred = (Persistence.data.view.filter === 'starred') ? true : undefined;
 
         if (this.__query.read === false && PrefCache.sortUnreadViewOldestFirst)
             this.__query.sortDirection = Query.prototype.SORT_ASCENDING;
