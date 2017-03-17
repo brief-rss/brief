@@ -95,7 +95,7 @@ var Commands = {
     },
 
     markViewRead: function cmd_markViewRead() {
-        gCurrentView.query.markEntriesRead(true);
+        API.query.markEntriesRead(gCurrentView.query, true);
     },
 
     markVisibleEntriesRead: function cmd_markVisibleEntriesRead() {
@@ -157,12 +157,12 @@ var Commands = {
     },
 
     restoreTrashed: function cmd_restoreTrashed() {
-        ViewList.getQueryForView('trash-folder')
+        ViewList.getQueryObjectForView('trash-folder')
                 .deleteEntries(Storage.ENTRY_STATE_NORMAL);
     },
 
     emptyTrash: function cmd_emptyTrash() {
-        ViewList.getQueryForView('trash-folder')
+        ViewList.getQueryObjectForView('trash-folder')
                 .deleteEntries(Storage.ENTRY_STATE_DELETED);
     },
 
@@ -175,7 +175,7 @@ var Commands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        new Query(aEntry).markEntriesRead(aNewState);
+        API.query.markEntriesRead(aEntry, aNewState);
     },
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
@@ -204,7 +204,7 @@ var Commands = {
     },
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
-        new Query(aEntry).bookmarkEntries(aNewState);
+        API.query.bookmarkEntries(aEntry, aNewState);
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
@@ -235,7 +235,7 @@ var Commands = {
         Commands.openLink(linkURI.spec);
 
         if (!entryView.read)
-            new Query(aEntry).markEntriesRead(true);
+            API.query.markEntriesRead(aEntry, true);
     },
 
     openLink: function cmd_openLink(aURL) {

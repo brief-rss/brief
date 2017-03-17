@@ -52,6 +52,26 @@ const API_CALLS = {
         (data) => Prefs.setCharPref("pagePersist", JSON.stringify(data))
     ],
 
+    // Mirrors the Query actions
+    query: {
+        /* getEntries */
+        /* getFullEntries */
+        /* getProperty */
+        getEntryCount: ['brief:query:count-entries', 'async',
+            (query) => new Query(query).getEntryCount()
+        ],
+        markEntriesRead: ['brief:query:mark-read', 'async',
+            (query, state) => new Query(query).markEntriesRead(state)
+        ],
+        /* deleteEntries */
+        bookmarkEntries: ['brief:query:bookmark', 'async',
+            (query, state) => new Query(query).bookmarkEntries(state)
+        ],
+        verifyBookmarksAndTags: ['brief:query:verify-bookmarks', 'async',
+            (query) => new Query(query).verifyBookmarksAndTags()
+        ],
+    },
+
 };
 
 // The list of observer notifications to be forwarded to clients

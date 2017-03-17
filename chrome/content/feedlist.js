@@ -191,32 +191,30 @@ let ViewList = {
     getQueryForView: function(aViewID) {
         switch (aViewID) {
             case 'all-items-folder':
-                var constraints = {
+                return {
                     includeFeedsExcludedFromGlobalViews: false,
                     deleted: Storage.ENTRY_STATE_NORMAL
                 };
-                break;
-
             case 'today-folder':
-                constraints = {
+                return {
                     startDate: new Date().setHours(0, 0, 0, 0),
                     includeFeedsExcludedFromGlobalViews: false,
                     deleted: Storage.ENTRY_STATE_NORMAL,
-                }
-                break;
-
+                };
             case 'starred-folder':
-                constraints = {
+                return {
                     deleted: Storage.ENTRY_STATE_NORMAL,
                     starred: true
-                }
-                break;
-
+                };
             case 'trash-folder':
-                constraints = { deleted: Storage.ENTRY_STATE_TRASHED };
+                return {
+                    deleted: Storage.ENTRY_STATE_TRASHED
+                };
         }
+    },
 
-        return new Query(constraints);
+    getQueryObjectForView: function(aViewID) {
+        return new Query(this.getQueryForView(aViewID));
     },
 
     deselect: function ViewList_deselect() {
@@ -240,7 +238,7 @@ let ViewList = {
         }
 
         let title = this.selectedItem.getElementsByClassName('title')[0].textContent;
-        let query = this.getQueryForView(this.selectedItem.id);
+        let query = this.getQueryObjectForView(this.selectedItem.id);
         gCurrentView = new FeedView(title, query);
     },
 
@@ -248,7 +246,7 @@ let ViewList = {
         let query = this.getQueryForView(aItemID);
         query.read = false;
 
-        let unreadCount = yield query.getEntryCount();
+        let unreadCount = yield API.query.getEntryCount(query);
 
         this.tree.updateElement(aItemID, {unreadCount});
     }.task()
@@ -344,12 +342,12 @@ let TagList = {
     }.task(),
 
     _refreshLabel: function* TagList__refreshLabel(aTagName) {
-        let query = new Query({
+        let query = {
             deleted: Storage.ENTRY_STATE_NORMAL,
             tags: [aTagName],
             read: false
-        })
-        let unreadCount = yield query.getEntryCount();
+        };
+        let unreadCount = yield API.query.getEntryCount(query);
         this.tree.updateElement(aTagName, {unreadCount});
     }.task()
 
@@ -423,14 +421,14 @@ let FeedList = {
     },
 
     _refreshLabel: function* FeedList__refreshLabel(aFeed) {
-        let query = new Query({
+        let query = {
             deleted: Storage.ENTRY_STATE_NORMAL,
             folders: aFeed.isFolder ? [aFeed.feedID] : undefined,
             feeds: aFeed.isFolder ? undefined : [aFeed.feedID],
             read: false
-        })
+        };
 
-        let unreadCount = yield query.getEntryCount()
+        let unreadCount = yield API.query.getEntryCount(query);
         this.tree.updateElement(aFeed.feedID, {title: aFeed.title, unreadCount});
     }.task(),
 
@@ -681,12 +679,11 @@ let ViewListContextMenu = {
     },
 
     markFolderRead: function ViewListContextMenu_markFolderRead() {
-        ViewList.getQueryForView(this.targetItem.id)
-                .markEntriesRead(true);
+        API.query.markEntriesRead(ViewList.getQueryForView(this.targetItem.id), true);
     },
 
     emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
-        let query = ViewList.getQueryForView('today-folder');
+        let query = ViewList.getQueryObjectForView('today-folder');
         query.starred = false;
         query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
     }
@@ -697,11 +694,11 @@ let ViewListContextMenu = {
 let TagListContextMenu = {
 
     markTagRead: function TagListContextMenu_markTagRead() {
-        let query = new Query({
+        let query = {
             deleted: Storage.ENTRY_STATE_NORMAL,
             tags: [TagList.selectedItem.dataset.id]
-        })
-        query.markEntriesRead(true);
+        };
+        API.query.markEntriesRead(query, true);
     },
 
     deleteTag: function* TagListContextMenu_deleteTag() {
@@ -749,19 +746,19 @@ let FeedListContextMenu = {
     },
 
     markFeedRead: function FeedContextMenu_markFeedRead() {
-        let query = new Query({
+        let query = {
             feeds: [this.targetFeed.feedID],
             deleted: Storage.ENTRY_STATE_NORMAL
-        })
-        query.markEntriesRead(true);
+        };
+        API.query.markEntriesRead(query, true);
     },
 
     markFolderRead: function FolderContextMenu_markFolderRead() {
-        let query = new Query({
+        let query = {
             deleted: Storage.ENTRY_STATE_NORMAL,
             folders: [FeedList.selectedFeed.feedID]
-        })
-        query.markEntriesRead(true);
+        };
+        API.query.markEntriesRead(query, true);
     },
 
     updateFolder: function FolderContextMenu_updateFolder() {

@@ -362,7 +362,7 @@ FeedView.prototype = {
         }
 
         if (entriesToMark.length)
-            new Query(entriesToMark).markEntriesRead(true);
+            API.query.markEntriesRead(entriesToMark, true);
     },
 
 
@@ -1265,7 +1265,7 @@ EntryView.prototype = {
                 if (this.starred) {
                     let query = new Query(this.id);
 
-                    query.verifyBookmarksAndTags();
+                    API.query.verifyBookmarksAndTags(this.id);
 
                     let oldViewID = this.feedView.viewID;
 
