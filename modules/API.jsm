@@ -95,7 +95,7 @@ function BriefClient(window) {
                 this[name] = ((...args) => this._mm.sendAsyncMessage(topic, args));
                 break;
             case 'sync':
-                this[name] = ((...args) => this._mm.sendSyncMessage(topic, args)[0]);
+                this[name] = ((...args) => this._mm.sendRpcMessage(topic, args)[0]);
                 break;
             case 'async':
                 this[name] = ((...args) => this._asyncRequest(topic, args));
