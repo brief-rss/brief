@@ -231,7 +231,7 @@ let ViewList = {
         FeedList.deselect();
 
         if (this.selectedItem.id == 'starred-folder') {
-            BriefClient.getAllTags().then(tags => {
+            API.getAllTags().then(tags => {
                 if (tags.length)
                     TagList.show();
             })
@@ -340,7 +340,7 @@ let TagList = {
     }.task(),
 
     _rebuild: function* TagList__rebuild() {
-        this.tags = yield BriefClient.getAllTags();
+        this.tags = yield API.getAllTags();
 
         let model = this.tags.map(tag => ( {id: tag, title: tag, unreadCount: 0} ));
 
@@ -378,7 +378,7 @@ let FeedList = {
     },
 
     get selectedFeed() {
-        return this.selectedItem ? BriefClient.getFeed(this.selectedItem.dataset.id) : null;
+        return this.selectedItem ? API.getFeed(this.selectedItem.dataset.id) : null;
     },
 
     deselect: function FeedList_deselect() {
@@ -414,7 +414,7 @@ let FeedList = {
      *        An array of feed IDs.
      */
     refreshFeedTreeitems: function FeedList_refreshFeedTreeitems(aFeeds) {
-        for (let feed of aFeeds.map(id => BriefClient.getFeed(id))) {
+        for (let feed of aFeeds.map(id => API.getFeed(id))) {
             this._refreshLabel(feed);
 
             // Build an array of IDs of folders in the the parent chains of
@@ -425,10 +425,10 @@ let FeedList = {
             while (parentID != PrefCache.homeFolder) {
                 if (folders.indexOf(parentID) == -1)
                     folders.push(parentID);
-                parentID = BriefClient.getFeed(parentID).parent;
+                parentID = API.getFeed(parentID).parent;
             }
 
-            folders.map(id => BriefClient.getFeed(id)).forEach(this._refreshLabel, this); // start async
+            folders.map(id => API.getFeed(id)).forEach(this._refreshLabel, this); // start async
         }
     },
 
@@ -452,7 +452,7 @@ let FeedList = {
 
     rebuild: function FeedList_rebuild() {
         let active = (this.tree.selectedItem !== null);
-        this.feeds = BriefClient.getAllFeeds(true);
+        this.feeds = API.getAllFeeds(true);
 
         let model = this._buildFolderChildren(PrefCache.homeFolder);
         this.tree.update(model);
@@ -508,7 +508,7 @@ let FeedList = {
 
             case 'brief:feed-title-changed':
             case 'brief:feed-favicon-changed':
-                let feed = BriefClient.getFeed(aData);
+                let feed = API.getFeed(aData);
                 this.tree.updateElement(feed.feedID,
                     {title: feed.title, icon: this._faviconUrl(feed)});
                 // TODO: should update FeedView and feed view title too(?)
@@ -538,7 +538,7 @@ let FeedList = {
                 refreshProgressmeter();
 
                 if (aData == 'cancelled') {
-                    for (let feed of BriefClient.getAllFeeds()) {
+                    for (let feed of API.getAllFeeds()) {
                         this.tree.updateElement(feed.feedID, {loading: false});
                     }
                 }
@@ -753,7 +753,7 @@ let FeedListContextMenu = {
         this.menu.classList.toggle('folder', folder);
 
         if(!folder) {
-            this.targetFeed = BriefClient.getFeed(FeedList.selectedItem.dataset.id);
+            this.targetFeed = API.getFeed(FeedList.selectedItem.dataset.id);
             document.getElementById('ctx-open-website').disabled = !this.targetFeed.websiteURL;
         }
     },
@@ -779,7 +779,7 @@ let FeedListContextMenu = {
         for (let item of FeedList.selectedItem.getElementsByTagName('tree-item'))
             feeds.push(item.dataset.id);
 
-        BriefClient.updateFeeds(feeds);
+        API.updateFeeds(feeds);
     },
 
     emptyFolder: function FolderContextMenu_emptyFolder() {

@@ -32,13 +32,13 @@
                     <button id="update-button"
                             class="centered brief-button sidebar-button"
                             title="&updateButton.tooltip;"
-                            onclick="BriefClient.updateAllFeeds()">
+                            onclick="API.updateAllFeeds()">
                         &updateButton.label;
                     </button>
                     <button id="stop-updating-button"
                             class="centered brief-button sidebar-button"
                             title="&stopUpdatingButton.tooltip;"
-                            onclick="BriefClient.stopUpdating()">
+                            onclick="API.stopUpdating()">
                         &stopUpdatingButton.label;
                     </button>
                 </div>
@@ -222,7 +222,7 @@
                 <menu-item id="ctx-mark-feed-read" onclick="FeedListContextMenu.markFeedRead()">
                     &ctxMarkRead.label;
                 </menu-item>
-                <menu-item id="ctx-update-feed" onclick="BriefClient.updateFeeds([FeedListContextMenu.targetFeed.feedID])">
+                <menu-item id="ctx-update-feed" onclick="API.updateFeeds([FeedListContextMenu.targetFeed.feedID])">
                     &ctxRefreshFeed.label;
                 </menu-item>
                 <menu-item id="ctx-open-website" onclick="Commands.openFeedWebsite(FeedListContextMenu.targetFeed)">

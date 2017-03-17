@@ -1,6 +1,7 @@
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
+Components.utils.import('resource://brief/API.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/NetUtil.jsm');
 Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
@@ -14,23 +15,25 @@ const STRINGS = Services.strings.createBundle('chrome://brief/locale/brief.prope
 
 var gCurrentView;
 
+var API = null;
+
 
 function init() {
+    API = new BriefClient(window);
+
     PrefObserver.register();
 
     getElement('show-all-entries-checkbox').dataset.checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
     getElement('filter-unread-checkbox').dataset.checked = PrefCache.filterUnread;
     getElement('filter-starred-checkbox').dataset.checked = PrefCache.filterStarred;
 
-    BriefClient.init();
-
     refreshProgressmeter();
 
-    BriefClient.addObserver(FeedList);
+    API.addObserver(FeedList);
 
     Storage.addObserver(FeedList);
 
-    let selectedLocale = BriefClient.getLocale();
+    let selectedLocale = API.getLocale();
     let doc = getElement('feed-view').contentDocument;
     doc.documentElement.setAttribute('lang', selectedLocale);
 
@@ -67,12 +70,12 @@ function unload() {
 
     Persistence.save();
 
-    BriefClient.removeObserver(FeedList);
-    BriefClient.deinit();
+    API.removeObserver(FeedList);
 
     PrefObserver.unregister();
     Storage.removeObserver(FeedList);
     gCurrentView.uninit();
+    API.finalize();
 }
 
 
@@ -112,7 +115,7 @@ var Commands = {
 
     switchViewMode: function cmd_switchViewMode(aMode) {
         if (FeedList.selectedFeed) {
-            BriefClient.modifyFeed({
+            API.modifyFeed({
                 feedID: FeedList.selectedFeed.feedID,
                 viewMode: aMode
             });
@@ -234,7 +237,7 @@ var Commands = {
     openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
 
-        let baseURI = Services.io.newURI(BriefClient.getFeed(entryView.feedID).feedURL);
+        let baseURI = Services.io.newURI(API.getFeed(entryView.feedID).feedURL);
         let linkURI = Services.io.newURI(entryView.entryURL, null, baseURI);
 
         Commands.openLink(linkURI.spec);
@@ -295,13 +298,13 @@ var Commands = {
 
     updateFeed: function cmd_updateFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        BriefClient.updateFeeds([feed.feedID]);
+        API.updateFeeds([feed.feedID]);
     },
 
 }
 
 function refreshProgressmeter() {
-    let {status, scheduled, completed} = BriefClient.getUpdateServiceStatus();
+    let {status, scheduled, completed} = API.getUpdateServiceStatus();
     if (status != /* FeedUpdateService.NOT_UPDATING */ 0) { // XXX
         getElement('sidebar-top').dataset.mode = "update";
 
@@ -572,124 +575,6 @@ let Shortcuts = {
         event.preventDefault();
         event.stopPropagation();
     },
-};
-
-// The main API endpoint
-let BriefClient = {
-    // Internal use data and functions
-    mm: null,
-    _handlers: [],
-    _expectedReplies: new Map(),
-
-    // Init/deinit
-    init: function Brief_init() {
-        this.mm = window.QueryInterface(Ci.nsIInterfaceRequestor)
-                        .getInterface(Ci.nsIDocShell)
-                        .QueryInterface(Ci.nsIInterfaceRequestor)
-                        .getInterface(Ci.nsIContentFrameMessageManager);
-        // Register API handlers
-        this._handlers = new Map([
-            ['brief:async-reply', msg => this._receiveAsyncReply(msg)],
-            ['brief:notify-observer', msg => this.notifyObservers(null, msg.data.topic, msg.data.data)],
-        ]);
-        for(let name of this._handlers.keys()) {
-            this.mm.addMessageListener(name, this);
-        }
-        this.mm.sendAsyncMessage('brief:add-observer');
-    },
-    deinit: function Brief_deinit() {
-        // Unregister API handlers
-        this.mm.sendAsyncMessage('brief:remove-observer');
-        for(let name of this._handlers.keys()) {
-            this.mm.removeMessageListener(name, this);
-        }
-    },
-
-    // Messaging-related
-    receiveMessage: function BriefService_receiveMessage(message) {
-        let {name, data} = message;
-        let handler = this._handlers.get(name);
-        if(handler === undefined) {
-            console.warn("BriefClient: no handler for " + name);
-            return;
-        }
-        return handler(message);
-    },
-    _asyncRequest: function BriefService__asyncRequest(id, data) {
-        let reply_id = this.mm.sendSyncMessage(id, data)[0];
-        let deferred = PromiseUtils.defer();
-        this._expectedReplies.set(reply_id, deferred);
-        return deferred.promise;
-    },
-    _receiveAsyncReply: function BriefService__receiveAsyncReply(msg) {
-        let {id, payload} = msg.data;
-        let deferred = this._expectedReplies.get(id);
-        if(deferred === undefined) {
-            console.warn("BriefClient: unexpected reply" + id);
-            return;
-        }
-        this._expectedReplies.delete(id);
-        deferred.resolve(payload);
-    },
-
-    // Observer management
-    _observers: new Set(),
-    addObserver: function BriefService_addObserver(target) {
-        this._observers.add(target);
-    },
-    removeObserver: function BriefService_removeObserver(target) {
-        this._observers.delete(target);
-    },
-    notifyObservers: function BriefClient_notifyObservers(subject, topic, data) {
-        for(let obs of this._observers) {
-            obs.observe(subject, topic, data);
-        }
-    },
-
-    // Misc util
-    getLocale: function() {
-        let reply = this.mm.sendSyncMessage('brief:get-locale', {})[0];
-        return reply;
-    },
-
-    // FeedUpdateService
-    getUpdateServiceStatus: function() {
-        let reply = this.mm.sendSyncMessage('brief:get-update-status', {})[0];
-        return reply;
-    },
-
-    updateFeeds: function(feeds) {
-        this.mm.sendAsyncMessage('brief:update-feeds', {feeds});
-    },
-
-    updateAllFeeds: function() {
-        this.mm.sendAsyncMessage('brief:update-all-feeds', {});
-    },
-
-    stopUpdating: function() {
-        this.mm.sendAsyncMessage('brief:stop-updating', {});
-    },
-
-    // Storage
-    getAllFeeds: function(includeFolders, includeHidden) {
-        let reply = this.mm.sendSyncMessage('brief:get-feed-list', {includeFolders, includeHidden})[0];
-        return reply;
-    },
-
-    getFeed: function(feedID) {
-        let reply = this.mm.sendSyncMessage('brief:get-feed', {feedID})[0];
-        return reply;
-    },
-
-    modifyFeed: function(feed) {
-        this.mm.sendSyncMessage('brief:modify-feed', feed);
-    },
-
-    getAllTags: function() {
-        return this._asyncRequest('brief:get-tag-list');
-    },
-
-
 };
 
 
