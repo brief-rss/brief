@@ -545,7 +545,7 @@ let FeedList = {
                 break;
 
             case 'brief:custom-style-changed':
-                getTopWindow().gBrowser.getBrowserForDocument(document).reload();
+                window.location.reload(/* bypassCache: */ true);
                 break;
         }
     },
