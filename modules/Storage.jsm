@@ -9,6 +9,7 @@ Components.utils.import('resource://gre/modules/Task.jsm');
 Components.utils.import('resource://gre/modules/osfile.jsm');
 Components.utils.import('resource://gre/modules/Sqlite.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
+Components.utils.import('resource://gre/modules/NetUtil.jsm');
 
 IMPORT_COMMON(this);
 
@@ -173,6 +174,10 @@ const Storage = Object.freeze({
 
     ensureHomeFolder: function() {
         return StorageInternal.ensureHomeFolder();
+    },
+
+    deleteTag: function(tag) {
+        return StorageInternal.deleteTag(tag);
     },
 
     /**
@@ -708,6 +713,19 @@ let StorageInternal = {
             this.homeFolderID = folderID;
         }
     },
+
+    deleteTag: function* StorageInternal_deleteTag(tag) {
+        let urls = yield new Query({ tags: [tag] }).getProperty('entryURL', true);
+        for (let url of urls) {
+            try {
+                var uri = NetUtil.newURI(url, null, null);
+            }
+            catch (ex) {
+                return;
+            }
+            PlacesUtils.tagging.untagURI(uri, [tag]);
+        }
+    }.task(),
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
 

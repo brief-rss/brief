@@ -42,6 +42,9 @@ const API_CALLS = {
     getAllTags: ['brief:get-tag-list', 'async',
         () => Storage.getAllTags()
     ],
+    deleteTag: ['brief:delete-tag', 'async',
+        (tag) => Storage.deleteTag(tag)
+    ],
 
     // Misc helpers
     getLocale: ['brief:get-locale', 'sync',

@@ -713,16 +713,7 @@ let TagListContextMenu = {
         if (!Services.prompt.confirm(window, dialogTitle, dialogText))
             return;
 
-        let urls = yield new Query({ tags: [tag] }).getProperty('entryURL', true);
-        for (let url of urls) {
-            try {
-                var uri = NetUtil.newURI(url, null, null);
-            }
-            catch (ex) {
-                return;
-            }
-            taggingService.untagURI(uri, [tag]);
-        }
+        yield API.deleteTag(tag);
     }.task()
 
 }
