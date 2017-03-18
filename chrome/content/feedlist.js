@@ -268,7 +268,7 @@ let TagList = {
         if (!this.ready)
             this._rebuild();
 
-        document.body.classList.add('tag-list');
+        document.body.classList.toggle('tag-list', this.tags !== null && this.tags.length > 0);
     },
 
     hide: function TagList_hide() {
