@@ -1,4 +1,4 @@
-const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'Cu', 'log', 'wait',
+const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'log', 'wait',
                           'getPluralForm', 'RelativeDate'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
@@ -7,7 +7,6 @@ Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const Cu = Components.utils;
 
 function IMPORT_COMMON(aScope) {
     Object.defineProperty(aScope.Array.prototype, 'intersect', {

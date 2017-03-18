@@ -686,9 +686,6 @@ let TagListContextMenu = {
     },
 
     deleteTag: function* TagListContextMenu_deleteTag() {
-        let taggingService = Cc['@mozilla.org/browser/tagging-service;1'].
-                             getService(Ci.nsITaggingService);
-
         let tag = TagList.selectedItem.dataset.id;
 
         let dialogTitle = STRINGS.GetStringFromName('confirmTagDeletionTitle');
