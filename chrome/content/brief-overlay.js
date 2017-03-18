@@ -162,13 +162,15 @@ var Brief = {
     },
 
 
-    onEntriesAdded: function(aEntryList) { return this.refreshUI() },
-
-    onEntriesUpdated: function(aEntryList) { return this.refreshUI() },
-
-    onEntriesMarkedRead: function(aEntryList, aState) { return this.refreshUI() },
-
-    onEntriesDeleted: function(aEntryList, aState) { return this.refreshUI() },
+    observeStorage: function(event, args) {
+        switch(event) {
+            case 'entriesAdded':
+            case 'entriesUpdated':
+            case 'entriesMarkedRead':
+            case 'entriesDeleted':
+                this.refreshUI();
+        }
+    },
 
     initUnreadCounter: function() {
         let showCounter = this.prefs.getBoolPref('showUnreadCounter');

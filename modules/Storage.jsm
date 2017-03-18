@@ -130,32 +130,19 @@ const Storage = Object.freeze({
      * is held to this object, so all observers have to be removed using
      * Storage.removeObserver().
      *
-     * An observer may implement any of the following functions:
+     * An observer implements a single handler
      *
-     *     function onEntriesAdded(aEntryList)
+     *     function observeStorage(event, args);
      *
-     * Called when new entries are added to the database.
-     *
-     *     function onEntriesUpdated(aEntryList);
-     *
-     * Called when properties of existing entries - such as title, content, authors
-     * and date - are changed. When entries are updated, they can also be marked as unread.
-     *
-     *     function onEntriesMarkedRead(aEntryList, aNewState);
-     *
-     * Called when the read/unread state of entries changes.
-     *
-     *     function onEntriesStarred(aEntryList, aNewState);
-     *
-     * Called when URLs of entries are bookmarked/unbookmarked.
-     *
-     *     function onEntriesTagged(aEntryList, aNewState, aTagName);
-     *
-     * Called when a tag is added or removed from entries.
-     *
-     *     function onEntriesDeleted(aEntryList, aNewState);
-     *
-     * Called when the deleted state of entries changes.
+     * which receives event name and an event arguments object.
+     * The following events and arguments are supported:
+     *     entriesAdded: {entryList}  when added to the database
+     *     entriesUpdated: {entryList}  when modified (and possibly marked unread)
+     *     entriesMarkedRead: {entryList, newState}  when marked read/unread
+     *     entriesStarred: {entryList, newState}  when starred/unstarred
+     *     entriesTagged: {entryList, newState, tagName}  when tagged/untagged with a specific tag
+     *     entriesDeleted: {entryList, newState}  when trashed/deleted/restored
+     * where entryList is {entries, feeds, tags}
      */
     addObserver: function(aObserver) {
         return StorageInternal.addObserver(aObserver);
@@ -633,6 +620,13 @@ let StorageInternal = {
             this.observers.splice(index, 1);
     },
 
+    // Notify observers
+    notifyObservers: function StorageInternal_notifyObservers(event, args) {
+        for (let observer of this.observers) {
+            observer.observeStorage(event, args);
+        }
+    },
+
     /**
      * Sets starred status of an entry.
      *
@@ -652,11 +646,8 @@ let StorageInternal = {
             yield Stm.unstarEntry.executeCached({ 'id': aEntryID });
 
         if (!aDontNotify) {
-            let list = yield new Query(aEntryID).getEntryList();
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesStarred)
-                    observer.onEntriesStarred(list, aState);
-            }
+            let entryList = yield new Query(aEntryID).getEntryList();
+            this.notifyObservers('entriesStarred', {entryList, newState: aState});
         }
     }.task(),
 
@@ -691,11 +682,8 @@ let StorageInternal = {
             'entryID': aEntryID
         })
 
-        let list = yield new Query(aEntryID).getEntryList();
-        for (let observer of StorageInternal.observers) {
-            if (observer.onEntriesTagged)
-                observer.onEntriesTagged(list, aState, aTagName);
-        }
+        let entryList = yield new Query(aEntryID).getEntryList();
+        this.notifyObservers('entriesTagged', {entryList, newState: aState, tagName: aTagName});
     }.task(),
 
     ensureHomeFolder: function StorageInternal_ensureHomeFolder() {
@@ -901,12 +889,9 @@ FeedProcessor.prototype = {
                 )
             })
 
-            let list = yield new Query(insertedEntries).getEntryList();
+            let entryList = yield new Query(insertedEntries).getEntryList();
 
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesAdded)
-                    observer.onEntriesAdded(list);
-            }
+            StorageInternal.notifyObservers('entriesAdded', {entryList});
 
             StorageInternal.expireEntries(this.feed);
         }
@@ -917,12 +902,9 @@ FeedProcessor.prototype = {
                 Stm.updateEntryText.executeCached(this.updateEntryTextParamSets);
             })
 
-            let list = yield new Query(this.updatedEntries).getEntryList();
+            let entryList = yield new Query(this.updatedEntries).getEntryList();
 
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesUpdated)
-                    observer.onEntriesUpdated(list);
-            }
+            StorageInternal.notifyObservers('entriesUpdated', {entryList});
         }
 
         this.deferred.resolve(insertedEntries.length);
@@ -1212,18 +1194,15 @@ Query.prototype = {
         if (!this.limit && !this.offset)
             this.read = !aState;
 
-        let list = yield this.getEntryList();
+        let entryList = yield this.getEntryList();
 
-        if (list.entries.length) {
+        if (entryList.entries.length) {
             let sql = 'UPDATE entries SET read = ' + (aState ? 1 : 0) + this._getQueryString();
             yield Connection.execute(sql);
 
             this.read = tempRead;
 
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesMarkedRead)
-                    observer.onEntriesMarkedRead(list, aState);
-            }
+            StorageInternal.notifyObservers('entriesMarkedRead', {entryList, newState: aState});
         }
         else {
             this.read = tempRead;
@@ -1238,16 +1217,13 @@ Query.prototype = {
      * @returns Promise<null>
      */
     deleteEntries: function* Query_deleteEntries(aState) {
-        let list = yield this.getEntryList();
+        let entryList = yield this.getEntryList();
         let state = EntryState.parse(aState);
-        if (list.entries.length) {
+        if (entryList.entries.length) {
             let sql = 'UPDATE entries SET deleted = ' + state + this._getQueryString();
             yield Connection.execute(sql);
 
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesDeleted)
-                    observer.onEntriesDeleted(list, aState);
-            }
+            StorageInternal.notifyObservers('entriesDeleted', {entryList, newState: aState});
         }
     }.task(),
 

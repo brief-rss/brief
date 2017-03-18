@@ -451,83 +451,79 @@ FeedView.prototype = {
         }
     },
 
-    onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
-        if (!document.hidden)
-            this._onEntriesAdded(aEntryList.entries)
-                .catch(this._ignoreRefresh);
-        else
+    observeStorage: function FeedList_observeStorage(event, args) {
+        if(document.hidden) {
             this._refreshPending = true;
-    },
-
-    onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
-        if (!document.hidden) {
-            this._onEntriesRemoved(aEntryList.entries, false, false);
-            this._onEntriesAdded(aEntryList.entries)
-                .catch(this._ignoreRefresh);
+            return;
         }
-        else {
-            this._refreshPending = true;
-        }
-    },
-
-    onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntryList, aNewState) {
-        if (this.query.read === false) {
-            if (aNewState)
-                this._onEntriesRemoved(aEntryList.entries, true, true);
-            else
-                this._onEntriesAdded(aEntryList.entries)
+        let {entryList, newState, tagName} = args;
+        switch(event) {
+            case 'entriesAdded':
+                this._onEntriesAdded(entryList.entries)
                     .catch(this._ignoreRefresh);
-        }
-
-        for (let entry of this._loadedEntries.intersect(aEntryList.entries)) {
-            this.getEntryView(entry).read = aNewState;
-
-            if (PrefCache.autoMarkRead && !aNewState)
-                this._entriesMarkedUnread.push(entry);
-        }
-    },
-
-    onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
-        if (this.query.starred === true) {
-            if (aNewState)
-                this._onEntriesAdded(aEntryList.entries)
+                break;
+            case 'entriesUpdated':
+                this._onEntriesRemoved(entryList.entries, false, false);
+                this._onEntriesAdded(entryList.entries)
                     .catch(this._ignoreRefresh);
-            else
-                this._onEntriesRemoved(aEntryList.entries, true, true);
+                break;
+            case 'entriesDeleted':
+                if (newState === this.query.deleted)
+                    this._onEntriesAdded(entryList.entries)
+                        .catch(this._ignoreRefresh);
+                else
+                    this._onEntriesRemoved(entryList.entries, true, true);
+                break;
+            case 'entriesMarkedRead':
+                if (this.query.read === false) {
+                    if (newState)
+                        this._onEntriesRemoved(entryList.entries, true, true);
+                    else
+                        this._onEntriesAdded(entryList.entries)
+                            .catch(this._ignoreRefresh);
+                }
+
+                for (let entry of this._loadedEntries.intersect(entryList.entries)) {
+                    this.getEntryView(entry).read = newState;
+
+                    if (PrefCache.autoMarkRead && !newState)
+                        this._entriesMarkedUnread.push(entry);
+                }
+                break;
+            case 'entriesStarred':
+                if (this.query.starred === true) {
+                    if (newState)
+                        this._onEntriesAdded(entryList.entries)
+                            .catch(this._ignoreRefresh);
+                    else
+                        this._onEntriesRemoved(entryList.entries, true, true);
+                }
+
+                for (let entry of this._loadedEntries.intersect(entryList.entries))
+                    this.getEntryView(entry).starred = newState;
+                break;
+            case 'entriesTagged':
+                for (let entry of this._loadedEntries.intersect(entryList.entries)) {
+                    let entryView = this.getEntryView(entry);
+                    let tags = entryView.tags;
+
+                    if (newState)
+                        tags.push(tagName);
+                    else
+                        tags.splice(tags.indexOf(tagName), 1);
+
+                    entryView.tags = tags;
+                }
+
+                if (this.query.tags && this.query.tags[0] === tagName) {
+                    if (newState)
+                        this._onEntriesAdded(entryList.entries)
+                            .catch(this._ignoreRefresh);
+                    else
+                        this._onEntriesRemoved(entryList.entries, true, true);
+                }
+                break;
         }
-
-        for (let entry of this._loadedEntries.intersect(aEntryList.entries))
-            this.getEntryView(entry).starred = aNewState;
-    },
-
-    onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
-        for (let entry of this._loadedEntries.intersect(aEntryList.entries)) {
-            let entryView = this.getEntryView(entry);
-            let tags = entryView.tags;
-
-            if (aNewState)
-                tags.push(aTag);
-            else
-                tags.splice(tags.indexOf(aTag), 1);
-
-            entryView.tags = tags;
-        }
-
-        if (this.query.tags && this.query.tags[0] === aTag) {
-            if (aNewState)
-                this._onEntriesAdded(aEntryList.entries)
-                    .catch(this._ignoreRefresh);
-            else
-                this._onEntriesRemoved(aEntryList.entries, true, true);
-        }
-    },
-
-    onEntriesDeleted: function FeedView_onEntriesDeleted(aEntryList, aNewState) {
-        if (aNewState === this.query.deleted)
-            this._onEntriesAdded(aEntryList.entries)
-                .catch(this._ignoreRefresh);
-        else
-            this._onEntriesRemoved(aEntryList.entries, true, true);
     },
 
 

@@ -535,56 +535,44 @@ let FeedList = {
     },
 
 
-    onEntriesAdded: function FeedList_onEntriesAdded(aEntryList) {
-        this.refreshFeedTreeitems(aEntryList.feeds);
-        ViewList.refreshItem('all-items-folder');
-        ViewList.refreshItem('today-folder');
-    },
+    observeStorage: function FeedList_observeStorage(event, args) {
+        let {entryList, tagName, newState} = args;
+        switch(event) {
+            case 'entriesAdded':
+            case 'entriesUpdated':
+                this.refreshFeedTreeitems(entryList.feeds);
+                ViewList.refreshItem('all-items-folder');
+                ViewList.refreshItem('starred-folder');
+                ViewList.refreshItem('today-folder');
+                TagList.refreshTags(entryList.tags);
+                break;
+            case 'entriesDeleted':
+                let entriesRestored = (newState === false);
+                // First handle new/deleted tags
+                TagList.refreshTags(entryList.tags, entriesRestored, !entriesRestored);
+                // fallthrough
+            case 'entriesMarkedRead':
+                wait(250).then(() =>
+                    FeedList.refreshFeedTreeitems(entryList.feeds)
+                )
 
-    onEntriesUpdated: function FeedList_onEntriesUpdated(aEntryList) {
-        this.refreshFeedTreeitems(aEntryList.feeds);
-        ViewList.refreshItem('all-items-folder');
-        ViewList.refreshItem('today-folder');
-        TagList.refreshTags(aEntryList.tags);
-    },
+                wait(500).then(() => {
+                    ViewList.refreshItem('all-items-folder');
+                    ViewList.refreshItem('today-folder');
+                    ViewList.refreshItem('starred-folder');
+                    TagList.refreshTags(entryList.tags);
+                })
+                break;
+            case 'entriesStarred':
+                ViewList.refreshItem('starred-folder');
+                break;
+            case 'entriesTagged':
+                if (ViewList.selectedItem && ViewList.selectedItem.id == 'starred-folder')
+                    TagList.show();
 
-    onEntriesMarkedRead: function FeedList_onEntriesMarkedRead(aEntryList, aNewState) {
-        wait(250).then(() =>
-            FeedList.refreshFeedTreeitems(aEntryList.feeds)
-        )
-
-        wait(500).then(() => {
-            ViewList.refreshItem('all-items-folder');
-            ViewList.refreshItem('today-folder');
-            ViewList.refreshItem('starred-folder');
-            TagList.refreshTags(aEntryList.tags);
-        })
-    },
-
-    onEntriesStarred: function FeedList_onEntriesStarred(aEntryList, aNewState) {
-        ViewList.refreshItem('starred-folder');
-    },
-
-    onEntriesTagged: function FeedList_onEntriesTagged(aEntryList, aNewState, aTag) {
-        if (ViewList.selectedItem && ViewList.selectedItem.id == 'starred-folder')
-            TagList.show();
-
-        TagList.refreshTags([aTag], aNewState, !aNewState);
-    },
-
-    onEntriesDeleted: function FeedList_onEntriesDeleted(aEntryList, aNewState) {
-        wait(250).then(() =>
-            FeedList.refreshFeedTreeitems(aEntryList.feeds)
-        )
-
-        wait(500).then(() => {
-            ViewList.refreshItem('all-items-folder');
-            ViewList.refreshItem('today-folder');
-            ViewList.refreshItem('starred-folder');
-        })
-
-        let entriesRestored = (aNewState === false);
-        TagList.refreshTags(aEntryList.tags, entriesRestored, !entriesRestored);
+                TagList.refreshTags([tagName], newState, !newState);
+                break;
+        }
     },
 
 
