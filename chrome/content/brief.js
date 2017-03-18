@@ -33,7 +33,7 @@ var init = function* init() {
 
     API.addObserver(FeedList);
 
-    Storage.addObserver(FeedList);
+    API.addStorageObserver(FeedList);
 
     let selectedLocale = API.getLocale();
     let doc = getElement('feed-view').contentDocument;
@@ -64,7 +64,7 @@ function unload() {
     API.removeObserver(FeedList);
 
     PrefObserver.unregister();
-    Storage.removeObserver(FeedList);
+    API.removeStorageObserver(FeedList);
     gCurrentView.uninit();
     API.finalize();
 }

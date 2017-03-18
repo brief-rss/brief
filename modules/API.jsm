@@ -108,6 +108,7 @@ function BriefClient(window) {
     this._mm = window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDocShell)
         .QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIContentFrameMessageManager);
     this._observers = new Set();
+    this._storageObservers = new Set();
     this._expectedReplies = new Map();
     this._requestId = 0;
 
@@ -115,6 +116,7 @@ function BriefClient(window) {
     this._handlers = new Map([
         ['brief:async-reply', data => this._receiveAsyncReply(data)],
         ['brief:notify-observer', data => this.notifyObservers(null, data.topic, data.data)],
+        ['brief:notify-storage-observer', ({event, args}) => this.notifyStorageObservers(event, args)],
     ]);
     for(let name of this._handlers.keys()) {
         this._mm.addMessageListener(name, this);
@@ -145,6 +147,19 @@ BriefClient.prototype = {
     notifyObservers: function BriefClient_notifyObservers(subject, topic, data) {
         for(let obs of this._observers) {
             obs.observe(subject, topic, data);
+        }
+    },
+
+    // Manage storage observers
+    addStorageObserver: function BriefClient_addStorageObserver(target) {
+        this._storageObservers.add(target);
+    },
+    removeStorageObserver: function BriefClient_removeStorageObserver(target) {
+        this._storageObservers.delete(target);
+    },
+    notifyStorageObservers: function BriefClient_notifyStorageObservers(event, args) {
+        for(let obs of this._storageObservers) {
+            obs.observeStorage(event, args);
         }
     },
 
@@ -224,6 +239,7 @@ function BriefServer() {
     for(let topic of OBSERVER_TOPICS) {
         Services.obs.addObserver(this, topic, false);
     }
+    Storage.addObserver(this);
 };
 
 BriefServer.prototype = {
@@ -236,6 +252,7 @@ BriefServer.prototype = {
         for(let topic of OBSERVER_TOPICS) {
             Services.obs.removeObserver(this, topic);
         }
+        Storage.removeObserver(this);
     },
 
     // nsIObserver for proxying notifications to content process
@@ -244,6 +261,18 @@ BriefServer.prototype = {
         for(let obs of this._observers) {
             try {
                 obs.sendAsyncMessage('brief:notify-observer', {topic, data});
+            } catch(e) {
+                log("API: dropping dead observer");
+                // Looks like the receiver is gone
+                this._observers.delete(obs);
+            }
+        }
+    },
+
+    observeStorage: function(event, args) {
+        for(let obs of this._observers) {
+            try {
+                obs.sendAsyncMessage('brief:notify-storage-observer', {event, args});
             } catch(e) {
                 log("API: dropping dead observer");
                 // Looks like the receiver is gone

@@ -58,7 +58,7 @@ function FeedView(aTitle, aQuery) {
 
     document.addEventListener('visibilitychange', this, false);
 
-    Storage.addObserver(this);
+    API.addStorageObserver(this);
 
     this.document.addEventListener('click', this, true);
     this.document.addEventListener('scroll', this, true);
@@ -372,7 +372,7 @@ FeedView.prototype = {
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
 
-        Storage.removeObserver(this);
+        API.removeStorageObserver(this);
 
         this._stopSmoothScrolling();
     },
@@ -579,7 +579,8 @@ FeedView.prototype = {
         else {
             if (this._allEntriesLoaded) {
                 let currentEntryList = yield API.query.getEntries(this.query);
-                if (currentEntryList.intersect(aAddedEntries).length)
+                // currentEntryList is a foreign Array with a clean prototype
+                if (Array.from(currentEntryList).intersect(aAddedEntries).length)
                     this.refresh()
             }
             else {
