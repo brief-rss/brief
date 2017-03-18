@@ -213,10 +213,6 @@ let ViewList = {
         }
     },
 
-    getQueryObjectForView: function(aViewID) {
-        return new Query(this.getQueryForView(aViewID));
-    },
-
     deselect: function ViewList_deselect() {
         this.tree.selectedItem = null;
     },
@@ -238,7 +234,7 @@ let ViewList = {
         }
 
         let title = this.selectedItem.getElementsByClassName('title')[0].textContent;
-        let query = this.getQueryObjectForView(this.selectedItem.id);
+        let query = this.getQueryForView(this.selectedItem.id);
         gCurrentView = new FeedView(title, query);
     },
 
@@ -293,10 +289,10 @@ let TagList = {
         ViewList.deselect();
         FeedList.deselect();
 
-        let query = new Query({
+        let query = {
             deleted: false,
             tags: [this.selectedItem.dataset.id]
-        })
+        }
 
         gCurrentView = new FeedView(this.selectedItem.dataset.id, query);
     },
@@ -384,7 +380,7 @@ let FeedList = {
         TagList.deselect();
         TagList.hide();
 
-        let query = new Query({ deleted: false });
+        let query = { deleted: false };
 
         if (this.selectedFeed.isFolder)
             query.folders = [this.selectedFeed.feedID];

@@ -1014,16 +1014,7 @@ Query.prototype = {
      * String that must be contained by title, content, authors or tags of the
      * selected entries.
      */
-    __searchString: undefined,
-    get searchString() {
-        return this.__searchString;
-    },
-    set searchString(aValue) {
-        // FTS requires search string to contain at least one non-excluded
-        // (i.e. not starting with a minus) term.
-        let invalid = aValue && !aValue.match(/(\s|^)[^\-][^\s]*/g);
-        return this.__searchString = invalid ? null : aValue;
-    },
+    searchString: undefined,
 
     /**
      * Date range for the selected entries.
@@ -1377,7 +1368,11 @@ Query.prototype = {
         if (!this.feeds && !this.includeHiddenFeeds)
             text += ' INNER JOIN feeds ON entries.feedID = feeds.feedID ';
 
-        if (aGetFullEntries || this.searchString)
+        // Sqlite needs at least one term for searching
+        let searchString = (this.searchString && this.searchString.match(/(\s|^)[^\s\-][^\s]*/g)
+            ? this.searchString : null);
+
+        if (aGetFullEntries || searchString)
             text += ' INNER JOIN entries_text ON entries.id = entries_text.rowid ';
 
         if (this.tags)
@@ -1435,8 +1430,8 @@ Query.prototype = {
             constraints.push(con);
         }
 
-        if (this.searchString) {
-            let con = 'entries_text MATCH \'' + this.searchString.replace("'",' ') + '\'';
+        if (searchString) {
+            let con = 'entries_text MATCH \'' + searchString.replace("'",' ') + '\'';
             constraints.push(con);
         }
 

@@ -60,9 +60,15 @@ const API_CALLS = {
 
     // Mirrors the Query actions
     query: {
-        /* getEntries */
-        /* getFullEntries */
-        /* getProperty */
+        getEntries: ['brief:query:get-entries', 'async',
+            (query) => new Query(query).getEntries()
+        ],
+        getFullEntries: ['brief:query:get-full-entries', 'async',
+            (query) => new Query(query).getFullEntries()
+        ],
+        getProperty: ['brief:query:get-property', 'async',
+            (query, name, distinct) => new Query(query).getProperty(name, distinct)
+        ],
         getEntryCount: ['brief:query:count-entries', 'async',
             (query) => new Query(query).getEntryCount()
         ],

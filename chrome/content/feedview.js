@@ -151,7 +151,7 @@ FeedView.prototype = {
      */
     getQueryCopy: function FeedView_getQueryCopy() {
         let query = this.query;
-        let copy = new Query();
+        let copy = {};
         for (let property in query)
             copy[property] = query[property];
         return copy;
@@ -558,17 +558,17 @@ FeedView.prototype = {
             else
                 query.endDate = edgeDate;
 
-            this._loadedEntries = yield this._refreshGuard(query.getEntries());
+            this._loadedEntries = yield this._refreshGuard(API.query.getEntries(query));
 
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
-                let query = new Query({
+                let query = {
                     sortOrder: this.query.sortOrder,
                     sortDirection: this.query.sortDirection,
                     entries: newEntries
-                })
+                };
 
-                for (let entry of yield this._refreshGuard(query.getFullEntries()))
+                for (let entry of yield this._refreshGuard(API.query.getFullEntries(query)))
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
@@ -582,7 +582,7 @@ FeedView.prototype = {
         // Otherwise, just blow it all away and refresh from scratch.
         else {
             if (this._allEntriesLoaded) {
-                let currentEntryList = yield this.query.getEntries();
+                let currentEntryList = yield API.query.getEntries(this.query);
                 if (currentEntryList.intersect(aAddedEntries).length)
                     this.refresh()
             }
@@ -798,7 +798,7 @@ FeedView.prototype = {
         dateQuery.startDate = rangeStartDate;
         dateQuery.limit = aCount;
 
-        let dates = yield this._refreshGuard(dateQuery.getProperty('date', false));
+        let dates = yield this._refreshGuard(API.query.getProperty(dateQuery, 'date', false));
         if (dates.length) {
             let query = this.getQueryCopy();
             if (query.sortDirection == 'desc') {
@@ -810,7 +810,7 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            let loadedEntries = yield this._refreshGuard(query.getFullEntries());
+            let loadedEntries = yield this._refreshGuard(API.query.getFullEntries(query));
             for (let entry of loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
@@ -1263,13 +1263,11 @@ EntryView.prototype = {
 
             case 'star':
                 if (this.starred) {
-                    let query = new Query(this.id);
-
                     API.query.verifyBookmarksAndTags(this.id);
 
                     let oldViewID = this.feedView.viewID;
 
-                    query.getProperty('bookmarkID', false).then(
+                    API.query.getProperty(this.id, 'bookmarkID', false).then(
                         ids => {
                             if (this.feedView.viewID != oldViewID)
                                 return;
