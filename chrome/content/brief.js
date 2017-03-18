@@ -269,26 +269,6 @@ var Commands = {
         window.openDialog(url, 'Brief shortcuts', features);
     },
 
-    openLibrary: function cmd_openLibrary() {
-        // The library view needs the complete ancestor list to the home folder
-        let current = PrefCache.homeFolder;
-        let homePath = [current];
-        while(!PlacesUtils.isRootItem(current)) {
-            current = PlacesUtils.bookmarks.getFolderIdForItem(current);
-            homePath.push(current);
-        }
-        homePath = homePath.reverse();
-        let organizer = Services.wm.getMostRecentWindow('Places:Organizer');
-        if (!organizer) {
-            openDialog('chrome://browser/content/places/places.xul', '',
-                       'chrome,toolbar=yes,dialog=no,resizable', homePath);
-        }
-        else {
-            organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(homePath);
-            organizer.focus();
-        }
-    },
-
     updateFeed: function cmd_updateFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
         API.updateFeeds([feed.feedID]);

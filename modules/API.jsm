@@ -5,7 +5,9 @@ Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
+Components.utils.import("resource://gre/modules/PlacesUtils.jsm");
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+XPCOMUtils.defineLazyModuleGetter(this, 'RecentWindow', 'resource:///modules/RecentWindow.jsm');
 
 
 XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
@@ -57,6 +59,9 @@ const API_CALLS = {
     savePersistence: ['brief:save-persistence', 'noreply',
         (data) => Prefs.setCharPref("pagePersist", JSON.stringify(data))
     ],
+    openLibrary: ['brief:open-library', 'noreply',
+        () => Utils.openLibrary()
+    ],
 
     // Mirrors the Query actions
     query: {
@@ -100,6 +105,22 @@ const OBSERVER_TOPICS = [
     'brief:feed-favicon-changed',
     'brief:custom-style-changed',
 ];
+
+const Utils = {
+    openLibrary: function() {
+        // The library view needs the complete ancestor list to the home folder
+        let current = Prefs.getIntPref('homeFolder');
+        let homePath = [current];
+        while(!PlacesUtils.isRootItem(current)) {
+            current = PlacesUtils.bookmarks.getFolderIdForItem(current);
+            homePath.push(current);
+        }
+        homePath = homePath.reverse();
+
+        let topWindow = RecentWindow.getMostRecentBrowserWindow();
+        topWindow.PlacesCommandHook.showPlacesOrganizer(homePath);
+    },
+};
 
 
 // BriefClient is the client API manager
