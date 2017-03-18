@@ -50,6 +50,12 @@ const API_CALLS = {
     deleteTag: ['brief:delete-tag', 'async',
         (tag) => Storage.deleteTag(tag)
     ],
+    deleteFeed: ['brief:delete-feed', 'async',
+        (feed) => Storage.deleteFeed(feed)
+    ],
+    deleteFolder: ['brief:delete-folder', 'async',
+        (folder) => Storage.deleteFolder(folder)
+    ],
 
     // Misc helpers
     getLocale: ['brief:get-locale', 'sync',

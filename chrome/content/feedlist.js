@@ -760,12 +760,8 @@ let FeedListContextMenu = {
         let title = STRINGS.GetStringFromName('confirmFolderDeletionTitle');
         let text = STRINGS.formatStringFromName('confirmFolderDeletionText', [feed.title], 1);
 
-        if (Services.prompt.confirm(window, title, text)) {
-            Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
-
-            let txn = new PlacesRemoveItemTransaction(Number(feed.bookmarkID));
-            PlacesUtils.transactionManager.doTransaction(txn);
-        }
+        if (Services.prompt.confirm(window, title, text))
+            API.deleteFolder(Number(feed.bookmarkID));
     }
 
 }

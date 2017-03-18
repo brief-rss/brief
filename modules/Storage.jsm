@@ -163,6 +163,15 @@ const Storage = Object.freeze({
         return StorageInternal.deleteTag(tag);
     },
 
+    deleteFeed: function(feed) {
+        return StorageInternal.deleteFeed(feed);
+    },
+
+    deleteFolder: function(folder) {
+        // Actually it's universal
+        return StorageInternal.deleteFeed(folder);
+    },
+
     /**
      * Initialize the storage subsystem
      */
@@ -710,6 +719,11 @@ let StorageInternal = {
             PlacesUtils.tagging.untagURI(uri, [tag]);
         }
     }.task(),
+
+    deleteFeed: function StorageInternal_deleteFeed(feed) {
+        let txn = new PlacesRemoveItemTransaction(feed);
+        PlacesUtils.transactionManager.doTransaction(txn);
+    },
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
 

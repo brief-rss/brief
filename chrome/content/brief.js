@@ -150,12 +150,8 @@ var Commands = {
         let title = STRINGS.GetStringFromName('confirmFeedDeletionTitle');
         let text = STRINGS.formatStringFromName('confirmFeedDeletionText', [feed.title], 1);
 
-        if (Services.prompt.confirm(window, title, text)) {
-            Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
-
-            let txn = new PlacesRemoveItemTransaction(Number(feed.bookmarkID));
-            PlacesUtils.transactionManager.doTransaction(txn);
-        }
+        if (Services.prompt.confirm(window, title, text))
+            API.deleteFeed(Number(feed.bookmarkID));
     },
 
     restoreTrashed: function cmd_restoreTrashed() {
