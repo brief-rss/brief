@@ -84,20 +84,8 @@ var Commands = {
         document.body.classList.add('sidebar');
     },
 
-    openOptions: function cmd_openOptions(aPaneID) {
-        let url = 'chrome://brief/content/options/options.xul';
-
-        let windows = Services.wm.getEnumerator(null);
-        while (windows.hasMoreElements()) {
-            let win = windows.getNext();
-            if (win.document.documentURI == url) {
-                win.focus();
-                return;
-            }
-        }
-
-        let features = 'chrome,titlebar,toolbar,centerscreen,';
-        window.openDialog(url, 'Brief options', features, aPaneID);
+    openOptions: function cmd_openOptions() {
+        API.openOptions();
     },
 
     markViewRead: function cmd_markViewRead() {
@@ -247,26 +235,11 @@ var Commands = {
 
     showFeedProperties: function cmd_showFeedProperties(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
-                   'chrome,titlebar,toolbar,centerscreen,modal', feed.feedID);
+        API.openFeedProperties(feed.feedID);
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
-
-        let windows = Services.wm.getEnumerator(null);
-        while (windows.hasMoreElements()) {
-            let win = windows.getNext();
-            if (win.document.documentURI == url) {
-                win.focus();
-                return;
-            }
-        }
-
-        let height = Math.min(window.screen.availHeight, 650);
-        let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
-
-        window.openDialog(url, 'Brief shortcuts', features);
+        API.openShortcuts();
     },
 
     updateFeed: function cmd_updateFeed(aFeed) {

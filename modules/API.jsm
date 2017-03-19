@@ -71,6 +71,16 @@ const API_CALLS = {
     openLibrary: ['brief:open-library', 'noreply',
         () => Utils.openLibrary()
     ],
+    openShortcuts: ['brief:open-shortcuts', 'noreply',
+        () => Utils.openShortcuts()
+    ],
+    openOptions: ['brief:open-options', 'noreply',
+        () => Utils.openOptions()
+    ],
+    openFeedProperties: ['brief:open-feed-properties', 'noreply',
+        feedID => Utils.window.openDialog('chrome://brief/content/options/feed-properties.xul',
+            'FeedProperties', 'chrome,titlebar,toolbar,centerscreen,modal', feedID)
+    ],
     getXulPersist: ['brief:get-xul-persist', 'async',
         () => Utils.getXulPersist()
     ],
@@ -119,6 +129,8 @@ const OBSERVER_TOPICS = [
 ];
 
 const Utils = {
+    get window() { return RecentWindow.getMostRecentBrowserWindow() },
+
     openLibrary: function() {
         // The library view needs the complete ancestor list to the home folder
         let current = Prefs.getIntPref('homeFolder');
@@ -129,8 +141,41 @@ const Utils = {
         }
         homePath = homePath.reverse();
 
-        let topWindow = RecentWindow.getMostRecentBrowserWindow();
-        topWindow.PlacesCommandHook.showPlacesOrganizer(homePath);
+        this.window.PlacesCommandHook.showPlacesOrganizer(homePath);
+    },
+
+    openShortcuts: function() {
+        let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
+
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == url) {
+                win.focus();
+                return;
+            }
+        }
+
+        let height = Math.min(this.window.screen.availHeight, 650);
+        let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
+
+        this.window.openDialog(url, 'Brief shortcuts', features);
+    },
+
+    openOptions: function() {
+        let url = 'chrome://brief/content/options/options.xul';
+
+        let windows = Services.wm.getEnumerator(null);
+        while (windows.hasMoreElements()) {
+            let win = windows.getNext();
+            if (win.document.documentURI == url) {
+                win.focus();
+                return;
+            }
+        }
+
+        let features = 'chrome,titlebar,toolbar,centerscreen,';
+        this.window.openDialog(url, 'Brief options', features);
     },
 
     getXulPersist: function() {
