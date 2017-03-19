@@ -344,6 +344,11 @@ let PrefObserver = {
             this._updateCachedPref(key);
 
         Prefs.addObserver('', this, false);
+
+        // Special case: not Brief-specific
+        this._general = Services.prefs.getBranch('general.');
+        PrefCache.smoothScroll = this._general.getBoolPref('smoothScroll');
+        this._general.addObserver('general', this, false);
     },
 
     unregister: function PrefObserver_unregister() {
@@ -386,6 +391,8 @@ let PrefObserver = {
             if (aData == this._cachedPrefs[key])
                 this._updateCachedPref(key);
         }
+        if(aData === 'smoothScroll')
+            PrefCache.smoothScroll = this._general.getBoolPref('general.smoothScroll');
 
         switch (aData) {
             case 'feedview.autoMarkRead':
