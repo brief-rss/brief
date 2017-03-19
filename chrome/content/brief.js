@@ -21,7 +21,7 @@ var init = function* init() {
     PrefObserver.register();
 
     // Restore local persistence
-    Persistence.init();
+    yield Persistence.init();
 
     Commands.switchViewFilter(Persistence.data.view.filter);
 
@@ -459,15 +459,15 @@ let Persistence = {
 
     data: null,
 
-    init: function Persistence_init() {
+    init: function* Persistence_init() {
         let data = PrefCache.pagePersist;
         if(data !== "") {
             this.data = JSON.parse(data);
         } else {
-            this.data = this._import();
+            this.data = yield this._import();
             this.save();
         }
-    },
+    }.task(),
 
     save: function Persistence_save() {
         this._collect();
@@ -487,25 +487,15 @@ let Persistence = {
         this.data.sidebar.hidden = !document.body.classList.contains('sidebar');
     },
 
-    _import: function Persistence__import() {
-        let store = Cc["@mozilla.org/xul/xulstore;1"].getService(Ci.nsIXULStore);
-        return {
-            startView: store.getValue(this.BRIEF_XUL_URL, "view-list", "startview"),
-            closedFolders: store.getValue(this.BRIEF_XUL_URL, "feed-list", "closedFolders"),
-            tagList: {
-                width: store.getValue(this.BRIEF_XUL_URL, "tag-list", "width") + 'px'
-            },
-            sidebar: {
-                width: store.getValue(this.BRIEF_XUL_URL, "sidebar", "width") + 'px',
-                hidden: store.getValue(this.BRIEF_XUL_URL, "sidebar", "hidden")
-            },
-            view: {
-                filter: Prefs.getBoolPref('feedview.filterUnread') ? 'unread' :
-                    (Prefs.getBoolPref('feedview.filterStarred') ? 'starred' : 'all'),
-                mode: Prefs.getIntPref('feedview.mode') ? 'headlines' : 'full',
-            },
-        }
-    },
+    _import: function* Persistence__import() {
+        let data = yield API.getXulPersist();
+        data.view = {
+            filter: Prefs.getBoolPref('feedview.filterUnread') ? 'unread' :
+                (Prefs.getBoolPref('feedview.filterStarred') ? 'starred' : 'all'),
+            mode: Prefs.getIntPref('feedview.mode') ? 'headlines' : 'full',
+        };
+        return data;
+    }.task(),
 };
 
 let Shortcuts = {

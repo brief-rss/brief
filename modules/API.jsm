@@ -71,6 +71,9 @@ const API_CALLS = {
     openLibrary: ['brief:open-library', 'noreply',
         () => Utils.openLibrary()
     ],
+    getXulPersist: ['brief:get-xul-persist', 'async',
+        () => Utils.getXulPersist()
+    ],
 
     // Mirrors the Query actions
     query: {
@@ -128,6 +131,21 @@ const Utils = {
 
         let topWindow = RecentWindow.getMostRecentBrowserWindow();
         topWindow.PlacesCommandHook.showPlacesOrganizer(homePath);
+    },
+
+    getXulPersist: function() {
+        let store = Cc["@mozilla.org/xul/xulstore;1"].getService(Ci.nsIXULStore);
+        return {
+            startView: store.getValue(this.BRIEF_XUL_URL, "view-list", "startview"),
+            closedFolders: store.getValue(this.BRIEF_XUL_URL, "feed-list", "closedFolders"),
+            tagList: {
+                width: store.getValue(this.BRIEF_XUL_URL, "tag-list", "width") + 'px'
+            },
+            sidebar: {
+                width: store.getValue(this.BRIEF_XUL_URL, "sidebar", "width") + 'px',
+                hidden: store.getValue(this.BRIEF_XUL_URL, "sidebar", "hidden")
+            },
+        }
     },
 };
 
