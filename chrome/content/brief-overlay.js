@@ -99,11 +99,30 @@ var Brief = {
         // Register Brief as a content handler for feeds. Can't do it in the
         // service component because the registrar doesn't work yet.
         const CONTENT_TYPE = 'application/vnd.mozilla.maybe.feed';
-        const SUBSCRIBE_URL = 'brief://subscribe/%s';
+        const OLD_SUBSCRIBE_URL = 'brief://subscribe/%s';
+        const SUBSCRIBE_URL = this.common.BRIEF_URL + '?subscribe=%s';
 
         let wccs = Cc['@mozilla.org/embeddor.implemented/web-content-handler-registrar;1']
                    .getService(Ci.nsIWebContentConverterService);
 
+        // Temporary for migration from older versions
+        if (wccs.getWebContentHandlerByURI(CONTENT_TYPE, OLD_SUBSCRIBE_URL)) {
+            wccs.removeContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
+            // Sorry, removing the handler with removeContentHandler is
+            // incomplete (Mozilla bug 1145832), so we finish removing it manually
+            try {
+                let branch = Services.prefs.getBranch("browser.contentHandlers.types.");
+                branch.getChildList("")
+                    .filter(child => !!(/^(\d+)\.uri$/.exec(child)))
+                    .filter(child => (branch.getCharPref(child, null) === OLD_SUBSCRIBE_URL))
+                    .map(child => /^(\d+)\.uri$/.exec(child)[1])
+                    .forEach(child => {
+                        branch.getChildList(child).forEach(item => branch.clearUserPref(item));
+                    });
+            } catch(e) {
+                console.error("could not remove old handler:", e);
+            }
+        }
         if (!wccs.getWebContentHandlerByURI(CONTENT_TYPE, SUBSCRIBE_URL))
             wccs.registerContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
 

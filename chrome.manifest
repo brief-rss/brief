@@ -13,9 +13,6 @@ contract  @brief.mozdev.org/briefservice;1  {943b2280-6457-11df-a08a-0800200c9a6
 category  profile-after-change  BriefService  @brief.mozdev.org/briefservice;1
 category  vacuum-participant    BriefService  @brief.mozdev.org/briefservice;1
 
-component  {dd940a26-3ab1-11e3-b1c2-ce3f5508acd9}  components/BriefProtocolHandler.js
-contract  @mozilla.org/network/protocol;1?name=brief  {dd940a26-3ab1-11e3-b1c2-ce3f5508acd9}
-
 # en-US is the only locale supported in dev versions
 locale  brief   en-US  chrome/locale/en-US/
 
