@@ -434,15 +434,22 @@ let FeedList = {
         return "chrome://brief/skin/icons/default-feed-favicon.png";
     },
 
-    rebuild: function FeedList_rebuild() {
+    rebuild: function FeedList_rebuild(urlToSelect) {
         let active = (this.tree.selectedItem !== null);
         this.feeds = API.getAllFeeds(true);
 
         let model = this._buildFolderChildren(PrefCache.homeFolder);
         this.tree.update(model);
 
-        if(active && this.tree.selectedItem === null)
+        if(urlToSelect !== undefined && urlToSelect !== null) {
+            let targetFeed = this.feeds.filter(({feedURL}) => feedURL === urlToSelect)[0];
+            if(targetFeed !== undefined) {
+                this.tree.selectedItem = targetFeed.feedID;
+                this.tree.selectedItem.scrollIntoView();
+            }
+        } else if(active && this.tree.selectedItem === null) {
             ViewList.selectedItem = getElement('all-items-folder');
+        }
     },
 
     /**

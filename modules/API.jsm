@@ -18,6 +18,9 @@ XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
 // name: [topic, type, handler]
 const API_CALLS = {
     // FeedUpdateService
+    addFeed: ['brief:add-feed', 'async',
+        url => FeedUpdateService.addFeed(url)
+    ],
     getUpdateServiceStatus: ['brief:get-update-status', 'sync',
         () => FeedUpdateService.getStatus()
     ],

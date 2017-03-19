@@ -1,5 +1,6 @@
 const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'log', 'wait',
-                          'getPluralForm', 'RelativeDate'];
+                          'getPluralForm', 'RelativeDate',
+                          'BRIEF_URL'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/Task.jsm');
@@ -19,6 +20,10 @@ function IMPORT_COMMON(aScope) {
         enumerable: false
     })
 }
+
+
+const BRIEF_URL = 'chrome://brief/content/brief.xhtml';
+
 
 
 Array.prototype.intersect = function intersect(aArr) {

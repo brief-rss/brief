@@ -42,15 +42,23 @@ var init = function* init() {
 
     Shortcuts.init();
 
-    //ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
-    ViewList.selectedItem = getElement('starred-folder'); // tmp for debug
     getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);
     getElement('tag-list').style.width = Persistence.data.tagList.width;
     getElement('sidebar').style.width = Persistence.data.sidebar.width;
     document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
 
-    yield wait();
-    FeedList.rebuild();
+    // Are we called to subscribe for a feed?
+    let url = (new URLSearchParams(document.location.search)).get('subscribe');
+    if(url !== null) {
+        window.history.replaceState({}, "", BRIEF_URL);
+        FeedList.rebuild(); // Adding a feed may take some time, so show the other feeds for now.
+        yield API.addFeed(url);
+    } else {
+        ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+        yield wait();
+    }
+
+    FeedList.rebuild(url);
 }.task()
 
 

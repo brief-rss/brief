@@ -2,7 +2,6 @@ var Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
-    BRIEF_URL: 'chrome://brief/content/brief.xhtml',
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
 
     get toolbarbutton() { return document.getElementById('brief-button') },
@@ -60,14 +59,14 @@ var Brief = {
         if (briefTab)
             gBrowser.selectedTab = briefTab;
         else if (blank && !loading || aInCurrentTab)
-            gBrowser.loadURI(this.BRIEF_URL, null, null);
+            gBrowser.loadURI(this.common.BRIEF_URL, null, null);
         else
-            gBrowser.loadOneTab(this.BRIEF_URL, { inBackground: false });
+            gBrowser.loadOneTab(this.common.BRIEF_URL, { inBackground: false });
     },
 
     getBriefTab: function Brief_getBriefTab() {
         for (let tab of gBrowser.tabs) {
-            if (gBrowser.getBrowserForTab(tab).currentURI.spec == this.BRIEF_URL)
+            if (gBrowser.getBrowserForTab(tab).currentURI.spec == this.common.BRIEF_URL)
                 return tab;
         }
 

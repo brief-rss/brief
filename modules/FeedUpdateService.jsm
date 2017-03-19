@@ -351,13 +351,14 @@ let FeedUpdateServiceInternal = {
         // Just add a livemark, the feed will be updated by the bookmark observer.
         let livemarks = Cc['@mozilla.org/browser/livemark-service;2']
                         .getService(Ci.mozIAsyncLivemarks);
-        livemarks.addLivemark({
+        yield livemarks.addLivemark({
             title: parsedFeed.title.text,
             feedURI: Services.io.newURI(aURL, null, null),
             siteURI: parsedFeed.link,
             parentId: Prefs.getIntPref('homeFolder'),
             index: Ci.nsINavBookmarksService.DEFAULT_INDEX,
-        })
+        });
+        yield Storage.syncWithLivemarks();
     }.task(),
 
     // nsIObserver
