@@ -1242,7 +1242,7 @@ EntryView.prototype = {
                 let feedURL = API.getFeed(this.feedID).feedURL;
                 let baseURI = NetUtil.newURI(feedURL);
                 let linkURI = NetUtil.newURI(anchor.getAttribute('href'), null, baseURI);
-                Commands.openLink(linkURI.spec);
+                API.openBackgroundTab(linkURI.spec);
 
                 return;
             }

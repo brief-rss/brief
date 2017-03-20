@@ -84,6 +84,9 @@ const API_CALLS = {
     getXulPersist: ['brief:get-xul-persist', 'async',
         () => Utils.getXulPersist()
     ],
+    openBackgroundTab: ['brief:open-background-tab', 'async',
+        url => Utils.window.gBrowser.loadOneTab(url, {relatedToCurrent: true})
+    ],
 
     // Mirrors the Query actions
     query: {

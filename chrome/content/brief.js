@@ -124,7 +124,7 @@ var Commands = {
     openFeedWebsite: function cmd_openWebsite(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
         let url = feed.websiteURL || Services.io.newURI(feed.feedURL).host;
-        getTopWindow().gBrowser.loadOneTab(url);
+        API.openBackgroundTab(url);
     },
 
     emptyFeed: function cmd_emptyFeed(aFeed) {
@@ -221,17 +221,11 @@ var Commands = {
         let baseURI = Services.io.newURI(API.getFeed(entryView.feedID).feedURL);
         let linkURI = Services.io.newURI(entryView.entryURL, null, baseURI);
 
-        Commands.openLink(linkURI.spec);
+        API.openBackgroundTab(linkURI.spec);
 
         if (!entryView.read)
             API.query.markEntriesRead(aEntry, true);
     },
-
-    openLink: function cmd_openLink(aURL) {
-        let docURI = Services.io.newURI(document.documentURI);
-        getTopWindow().gBrowser.loadOneTab(aURL, docURI);
-    },
-
 
     showFeedProperties: function cmd_showFeedProperties(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
