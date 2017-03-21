@@ -352,6 +352,28 @@ let TagList = {
 
 let FeedList = {
 
+    _allFeeds: null,
+
+    getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
+        if(this._allFeeds === null)
+            this._allFeeds = API.getAllFeeds(true, true);
+        return this._allFeeds.filter(
+            f => (!f.isFolder || includeFolders) && (!f.hidden || includeHidden)
+        )
+    },
+
+    getFeed: function FeedList_getFeed(feedID) {
+        if(this._allFeeds === null)
+            this._allFeeds = API.getAllFeeds(true, true);
+
+        for (let feed of this._allFeeds) {
+            if (feed.feedID == feedID)
+                return feed;
+        }
+
+        return null;
+    },
+
     get tree() {
         delete this.tree;
         return this.tree = new TreeView('feed-list');
@@ -362,7 +384,7 @@ let FeedList = {
     },
 
     get selectedFeed() {
-        return this.selectedItem ? API.getFeed(this.selectedItem.dataset.id) : null;
+        return this.selectedItem ? this.getFeed(this.selectedItem.dataset.id) : null;
     },
 
     deselect: function FeedList_deselect() {
@@ -398,7 +420,7 @@ let FeedList = {
      *        An array of feed IDs.
      */
     refreshFeedTreeitems: function FeedList_refreshFeedTreeitems(aFeeds) {
-        for (let feed of aFeeds.map(id => API.getFeed(id))) {
+        for (let feed of aFeeds.map(id => this.getFeed(id))) {
             this._refreshLabel(feed);
 
             // Build an array of IDs of folders in the the parent chains of
@@ -409,10 +431,10 @@ let FeedList = {
             while (parentID != PrefCache.homeFolder) {
                 if (folders.indexOf(parentID) == -1)
                     folders.push(parentID);
-                parentID = API.getFeed(parentID).parent;
+                parentID = this.getFeed(parentID).parent;
             }
 
-            folders.map(id => API.getFeed(id)).forEach(this._refreshLabel, this); // start async
+            folders.map(id => this.getFeed(id)).forEach(this._refreshLabel, this); // start async
         }
     },
 
@@ -436,7 +458,7 @@ let FeedList = {
 
     rebuild: function FeedList_rebuild(urlToSelect) {
         let active = (this.tree.selectedItem !== null);
-        this.feeds = API.getAllFeeds(true);
+        this.feeds = this.getAllFeeds(true);
 
         let model = this._buildFolderChildren(PrefCache.homeFolder);
         this.tree.update(model);
@@ -490,6 +512,7 @@ let FeedList = {
     observe: function FeedList_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'brief:invalidate-feedlist':
+                this._allFeeds = null;
                 ViewList.refreshItem('all-items-folder');
                 ViewList.refreshItem('today-folder');
                 ViewList.refreshItem('starred-folder');
@@ -499,7 +522,8 @@ let FeedList = {
 
             case 'brief:feed-title-changed':
             case 'brief:feed-favicon-changed':
-                let feed = API.getFeed(aData);
+                this._allFeeds = null;
+                let feed = this.getFeed(aData);
                 this.tree.updateElement(feed.feedID,
                     {title: feed.title, icon: this._faviconUrl(feed)});
                 // TODO: should update FeedView and feed view title too(?)
@@ -529,7 +553,7 @@ let FeedList = {
                 refreshProgressmeter();
 
                 if (aData == 'cancelled') {
-                    for (let feed of API.getAllFeeds()) {
+                    for (let feed of this.getAllFeeds()) {
                         this.tree.updateElement(feed.feedID, {loading: false});
                     }
                 }
@@ -719,7 +743,7 @@ let FeedListContextMenu = {
         this.menu.classList.toggle('folder', folder);
 
         if(!folder) {
-            this.targetFeed = API.getFeed(FeedList.selectedItem.dataset.id);
+            this.targetFeed = FeedList.getFeed(FeedList.selectedItem.dataset.id);
             document.getElementById('ctx-open-website').disabled = !this.targetFeed.websiteURL;
         }
     },

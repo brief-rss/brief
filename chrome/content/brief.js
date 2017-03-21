@@ -219,7 +219,7 @@ var Commands = {
     openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
 
-        let baseURI = Services.io.newURI(API.getFeed(entryView.feedID).feedURL);
+        let baseURI = Services.io.newURI(FeedList.getFeed(entryView.feedID).feedURL);
         let linkURI = Services.io.newURI(entryView.entryURL, null, baseURI);
 
         API.openBackgroundTab(linkURI.spec);

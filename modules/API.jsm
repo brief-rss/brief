@@ -41,9 +41,6 @@ const API_CALLS = {
     getAllFeeds: ['brief:get-feed-list', 'sync',
         (includeFolders, includeHidden) => Storage.getAllFeeds(includeFolders, includeHidden)
     ],
-    getFeed: ['brief:get-feed', 'sync',
-        (feedID) => Storage.getFeed(feedID)
-    ],
     modifyFeed: ['brief:modify-feed', 'sync',
         (properties) => Storage.changeFeedProperties(properties)
     ],
