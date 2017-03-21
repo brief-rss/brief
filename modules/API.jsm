@@ -21,7 +21,7 @@ const API_CALLS = {
     addFeed: ['brief:add-feed', 'async',
         url => FeedUpdateService.addFeed(url)
     ],
-    getUpdateServiceStatus: ['brief:get-update-status', 'sync',
+    getUpdateServiceStatus: ['brief:get-update-status', 'async',
         () => FeedUpdateService.getStatus()
     ],
     updateFeeds: ['brief:update-feeds', 'noreply',

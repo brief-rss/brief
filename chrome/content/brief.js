@@ -244,8 +244,8 @@ var Commands = {
 
 }
 
-function refreshProgressmeter() {
-    let {status, scheduled, completed} = API.getUpdateServiceStatus();
+let refreshProgressmeter = function* refreshProgressmeter() {
+    let {status, scheduled, completed} = yield API.getUpdateServiceStatus();
     if (status != /* FeedUpdateService.NOT_UPDATING */ 0) { // XXX
         getElement('sidebar-top').dataset.mode = "update";
 
@@ -258,7 +258,7 @@ function refreshProgressmeter() {
         getElement('sidebar-top').dataset.mode = "idle";
         getElement('update-progress').removeAttribute('show');
     }
-}
+}.task();
 
 
 function onSearchbarCommand() {
