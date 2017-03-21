@@ -1,4 +1,4 @@
-content  brief  chrome/content/
+content  brief  chrome/content/ remoteenabled=yes remoterequired=yes
 skin  brief  classic  chrome/skin/
 
 resource brief-content  defaults/data/

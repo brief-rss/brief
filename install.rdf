@@ -14,6 +14,7 @@
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
     <iconURL>chrome://brief/skin/brief-icon-32.png</iconURL>
     <icon64URL>chrome://brief/skin/brief-icon-64.png</icon64URL>
+    <multiprocessCompatible>true</multiprocessCompatible>
 
     <targetApplication>
       <rdf:Description>
