@@ -87,6 +87,12 @@ const API_CALLS = {
     openBackgroundTab: ['brief:open-background-tab', 'async',
         url => Utils.window.gBrowser.loadOneTab(url, {relatedToCurrent: true})
     ],
+    hideStarUI: ['brief:hide-star-ui', 'async',
+        () => Utils.window.StarUI.panel.hidePopup()
+    ],
+    showStarUI: ['brief:show-star-ui', 'async',
+        ({id, rect}) => Utils.showStarUI({id, rect})
+    ],
 
     // Mirrors the Query actions
     query: {
@@ -194,6 +200,16 @@ const Utils = {
                 hidden: store.getValue(this.BRIEF_XUL_URL, "sidebar", "hidden")
             },
         }
+    },
+
+    showStarUI: function Utils_showStarUI({id, rect}) {
+        let StarUI = this.window.StarUI;
+        StarUI.panel.addEventListener('popupshown', () => {
+            let x = rect.left + rect.width / 2 - this.window.mozInnerScreenX;
+            let y = rect.top + rect.height - this.window.mozInnerScreenY;
+            this.window.StarUI.panel.moveToAnchor(null, '', x, y, false, false, null);
+        });
+        StarUI.showEditBookmarkPopup(id, this.window.gBrowser, "after_start", false);
     },
 };
 

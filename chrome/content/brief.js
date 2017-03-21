@@ -3,6 +3,7 @@ Components.utils.import('resource://brief/API.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/NetUtil.jsm');
 Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
+Components.utils.import("resource://gre/modules/BrowserUtils.jsm");
 
 IMPORT_COMMON(this);
 

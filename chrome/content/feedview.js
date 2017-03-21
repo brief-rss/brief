@@ -610,7 +610,7 @@ FeedView.prototype = {
         // Removing content may cause a scroll event that should be ignored.
         this._suppressSelectionOnNextScroll = true;
 
-        getTopWindow().StarUI.panel.hidePopup();
+        API.hideStarUI();
 
         let selectedEntryIndex = -1;
 
@@ -685,7 +685,7 @@ FeedView.prototype = {
         this.document.body.classList.remove('multiple-feeds');
 
         this._stopSmoothScrolling();
-        getTopWindow().StarUI.panel.hidePopup();
+        API.hideStarUI();
 
         // Manually reset the scroll position, otherwise weird stuff happens.
         this.scroll(0, false, true);
@@ -1270,7 +1270,8 @@ EntryView.prototype = {
                                 return;
 
                             let anchor = this._getElement('bookmark-button');
-                            getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
+                            let rect = BrowserUtils.getElementBoundingScreenRect(anchor);
+                            API.showStarUI({id: ids[0], rect});
                         }
                     )
                 }
