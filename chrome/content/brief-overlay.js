@@ -2,7 +2,6 @@ var Brief = {
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
-    BRIEF_URL: 'chrome://brief/content/brief.xul',
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
 
     get toolbarbutton() { return document.getElementById('brief-button') },
@@ -60,25 +59,18 @@ var Brief = {
         if (briefTab)
             gBrowser.selectedTab = briefTab;
         else if (blank && !loading || aInCurrentTab)
-            gBrowser.loadURI(this.BRIEF_URL, null, null);
+            gBrowser.loadURI(this.common.BRIEF_URL, null, null);
         else
-            gBrowser.loadOneTab(this.BRIEF_URL, { inBackground: false });
+            gBrowser.loadOneTab(this.common.BRIEF_URL, { inBackground: false });
     },
 
     getBriefTab: function Brief_getBriefTab() {
         for (let tab of gBrowser.tabs) {
-            if (gBrowser.getBrowserForTab(tab).currentURI.spec == this.BRIEF_URL)
+            if (gBrowser.getBrowserForTab(tab).currentURI.spec == this.common.BRIEF_URL)
                 return tab;
         }
 
         return null;
-    },
-
-    // Returns Brief's content window if the tab is selected.
-    get win() {
-        return gBrowser.currentURI.spec == this.BRIEF_URL
-               ? gBrowser.contentDocument.defaultView.wrappedJSObject
-               : null;
     },
 
     toggleUnreadCounter: function Brief_toggleUnreadCounter() {
@@ -107,11 +99,30 @@ var Brief = {
         // Register Brief as a content handler for feeds. Can't do it in the
         // service component because the registrar doesn't work yet.
         const CONTENT_TYPE = 'application/vnd.mozilla.maybe.feed';
-        const SUBSCRIBE_URL = 'brief://subscribe/%s';
+        const OLD_SUBSCRIBE_URL = 'brief://subscribe/%s';
+        const SUBSCRIBE_URL = this.common.BRIEF_URL + '?subscribe=%s';
 
         let wccs = Cc['@mozilla.org/embeddor.implemented/web-content-handler-registrar;1']
                    .getService(Ci.nsIWebContentConverterService);
 
+        // Temporary for migration from older versions
+        if (wccs.getWebContentHandlerByURI(CONTENT_TYPE, OLD_SUBSCRIBE_URL)) {
+            wccs.removeContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
+            // Sorry, removing the handler with removeContentHandler is
+            // incomplete (Mozilla bug 1145832), so we finish removing it manually
+            try {
+                let branch = Services.prefs.getBranch("browser.contentHandlers.types.");
+                branch.getChildList("")
+                    .filter(child => !!(/^(\d+)\.uri$/.exec(child)))
+                    .filter(child => (branch.getCharPref(child, null) === OLD_SUBSCRIBE_URL))
+                    .map(child => /^(\d+)\.uri$/.exec(child)[1])
+                    .forEach(child => {
+                        branch.getChildList(child).forEach(item => branch.clearUserPref(item));
+                    });
+            } catch(e) {
+                console.error("could not remove old handler:", e);
+            }
+        }
         if (!wccs.getWebContentHandlerByURI(CONTENT_TYPE, SUBSCRIBE_URL))
             wccs.registerContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
 
@@ -147,6 +158,8 @@ var Brief = {
 
         this.prefs.addObserver('', this.onPrefChanged, false);
 
+        setTimeout(() => this.storage.syncWithLivemarks(), 1000);
+
         window.addEventListener('unload', this.onWindowUnload.bind(this), false);
     },
 
@@ -167,13 +180,15 @@ var Brief = {
     },
 
 
-    onEntriesAdded: function(aEntryList) { return this.refreshUI() },
-
-    onEntriesUpdated: function(aEntryList) { return this.refreshUI() },
-
-    onEntriesMarkedRead: function(aEntryList, aState) { return this.refreshUI() },
-
-    onEntriesDeleted: function(aEntryList, aState) { return this.refreshUI() },
+    observeStorage: function(event, args) {
+        switch(event) {
+            case 'entriesAdded':
+            case 'entriesUpdated':
+            case 'entriesMarkedRead':
+            case 'entriesDeleted':
+                this.refreshUI();
+        }
+    },
 
     initUnreadCounter: function() {
         let showCounter = this.prefs.getBoolPref('showUnreadCounter');
@@ -201,7 +216,7 @@ var Brief = {
 
         let query = new Brief.query({
             includeFeedsExcludedFromGlobalViews: false,
-            deleted: Brief.storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             read: false
         })
 
@@ -282,10 +297,10 @@ var Brief = {
             rows.removeChild(rows.lastChild);
 
         let query = new this.query({
-            deleted: this.storage.ENTRY_STATE_NORMAL,
+            deleted: false,
             read: false,
-            sortOrder: this.query.SORT_BY_FEED_ROW_INDEX,
-            sortDirection: this.query.SORT_ASCENDING
+            sortOrder: 'library',
+            sortDirection: 'asc'
         })
 
         query.getProperty('feedID', true).then(unreadFeeds => {
@@ -307,7 +322,7 @@ var Brief = {
                 row.appendChild(label);
 
                 let query = new this.query({
-                    deleted: this.storage.ENTRY_STATE_NORMAL,
+                    deleted: false,
                     feeds: [feed],
                     read: false
                 })

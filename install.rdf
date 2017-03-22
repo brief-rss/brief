@@ -14,12 +14,13 @@
     <optionsURL>chrome://brief/content/options/options.xul</optionsURL>
     <iconURL>chrome://brief/skin/brief-icon-32.png</iconURL>
     <icon64URL>chrome://brief/skin/brief-icon-64.png</icon64URL>
+    <multiprocessCompatible>true</multiprocessCompatible>
 
     <targetApplication>
       <rdf:Description>
         <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-        <minVersion>38.0</minVersion>
-        <maxVersion>49.*</maxVersion>
+        <minVersion>51.0</minVersion>
+        <maxVersion>53.*</maxVersion>
       </rdf:Description>
     </targetApplication>
 

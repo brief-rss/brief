@@ -29,13 +29,12 @@ const TUTORIAL_URL = "chrome://brief/content/firstrun.xhtml?tutorial";
  */
 function FeedView(aTitle, aQuery) {
     this.title = aTitle;
-    this._fixedUnread = aQuery.read !== undefined;
     this._fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
 
     for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
-        getElement(id).hidden = this._fixedStarred || this._fixedUnread;
+        getElement(id).hidden = this._fixedStarred; //FIXME: move to CSS
 
-    aQuery.sortOrder = Query.prototype.SORT_BY_DATE;
+    aQuery.sortOrder = 'date';
     this.__query = aQuery;
 
     this._entriesMarkedUnread = [];
@@ -43,25 +42,26 @@ function FeedView(aTitle, aQuery) {
     if (gCurrentView)
         gCurrentView.uninit();
 
-    let singleFeed = this.query.feeds && this.query.feeds.length == 1;
-    let trash = this.query.deleted == Storage.ENTRY_STATE_TRASHED;
-    if (singleFeed || trash)
-        getElement('view-title-button').setAttribute('contextOptions', true);
-    else
-        getElement('view-title-button').removeAttribute('contextOptions');
+    let button = getElement('view-title-button');
+    if(this.query.feeds && this.query.feeds.length == 1) {
+        button.dataset.dropdown = 'dropdown-menu-feed-actions';
+    } else if(this.query.deleted === 'trashed') {
+        button.dataset.dropdown = 'dropdown-menu-trash-actions';
+    } else {
+        button.dataset.dropdown = "";
+    }
 
     getElement('feed-view-header').removeAttribute('border');
 
     if (!this.query.searchString)
         getElement('searchbar').value = '';
 
-    getTopWindow().gBrowser.tabContainer.addEventListener('TabSelect', this, false);
+    document.addEventListener('visibilitychange', this, false);
 
-    Storage.addObserver(this);
+    API.addStorageObserver(this);
 
     this.document.addEventListener('click', this, true);
     this.document.addEventListener('scroll', this, true);
-    this.document.addEventListener('keypress', this, true);
 
     this.refresh();
 }
@@ -76,9 +76,9 @@ FeedView.prototype = {
     get headlinesMode() {
         let feedIDs = this.query.feeds || this.query.folders;
         if (feedIDs && feedIDs.length == 1)
-            var viewMode = Storage.getFeed(feedIDs[0]).viewMode;
+            var viewMode = FeedList.getFeed(feedIDs[0]).viewMode;
         else
-            viewMode = PrefCache.viewMode;
+            viewMode = (Persistence.data.view.mode === 'headlines');
 
         return viewMode == 1;
     },
@@ -109,7 +109,6 @@ FeedView.prototype = {
     _scrollSelectionTimeout: null,
 
     // Indicates if a filter paramater is fixed and cannot be toggled by the user.
-    _fixedUnread: false,
     _fixedStarred: false,
 
 
@@ -133,15 +132,14 @@ FeedView.prototype = {
 
     // Query that selects all entries contained by the view.
     get query() {
-        if (!this._fixedUnread)
-            this.__query.read = PrefCache.filterUnread ? false : undefined;
+        this.__query.read = (Persistence.data.view.filter === 'unread') ? false : undefined;
         if (!this._fixedStarred)
-            this.__query.starred = PrefCache.filterStarred ? true : undefined;
+            this.__query.starred = (Persistence.data.view.filter === 'starred') ? true : undefined;
 
         if (this.__query.read === false && PrefCache.sortUnreadViewOldestFirst)
-            this.__query.sortDirection = Query.prototype.SORT_ASCENDING;
+            this.__query.sortDirection = 'asc';
         else
-            this.__query.sortDirection = Query.prototype.SORT_DESCENDING;
+            this.__query.sortDirection = 'desc';
 
         return this.__query;
     },
@@ -153,7 +151,7 @@ FeedView.prototype = {
      */
     getQueryCopy: function FeedView_getQueryCopy() {
         let query = this.query;
-        let copy = new Query();
+        let copy = {};
         for (let property in query)
             copy[property] = query[property];
         return copy;
@@ -274,7 +272,7 @@ FeedView.prototype = {
         if (targetPosition == this.window.pageYOffset)
             return;
 
-        if (aSmooth && Services.prefs.getBoolPref('general.smoothScroll')) {
+        if (aSmooth && PrefCache.smoothScroll) {
             let distance = targetPosition - this.window.pageYOffset;
             let jumpCount = Math.exp(Math.abs(distance) / 400) + 6;
             jumpCount = Math.max(jumpCount, 7);
@@ -364,18 +362,17 @@ FeedView.prototype = {
         }
 
         if (entriesToMark.length)
-            new Query(entriesToMark).markEntriesRead(true);
+            API.query.markEntriesRead(entriesToMark, true);
     },
 
 
     uninit: function FeedView_uninit() {
-        getTopWindow().gBrowser.tabContainer.removeEventListener('TabSelect', this, false);
+        document.removeEventListener('visibilitychange', this, false);
         this.window.removeEventListener('resize', this, false);
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
-        this.document.removeEventListener('keypress', this, true);
 
-        Storage.removeObserver(this);
+        API.removeStorageObserver(this);
 
         this._stopSmoothScrolling();
     },
@@ -445,12 +442,8 @@ FeedView.prototype = {
                         .catch(this._ignoreRefresh);
                 break;
 
-            case 'keypress':
-                onKeyPress(aEvent);
-                break;
-
-            case 'TabSelect':
-                if (this._refreshPending && aEvent.originalTarget == getTopWindow().Brief.getBriefTab()) {
+            case 'visibilitychange':
+                if (this._refreshPending && !document.hidden) {
                     this.refresh();
                     this._refreshPending = false;
                 }
@@ -458,83 +451,79 @@ FeedView.prototype = {
         }
     },
 
-    onEntriesAdded: function FeedView_onEntriesAdded(aEntryList) {
-        if (getTopWindow().gBrowser.currentURI.spec == document.documentURI)
-            this._onEntriesAdded(aEntryList.entries)
-                .catch(this._ignoreRefresh);
-        else
+    observeStorage: function FeedList_observeStorage(event, args) {
+        if(document.hidden) {
             this._refreshPending = true;
-    },
-
-    onEntriesUpdated: function FeedView_onEntriesUpdated(aEntryList) {
-        if (getTopWindow().gBrowser.currentURI.spec == document.documentURI) {
-            this._onEntriesRemoved(aEntryList.entries, false, false);
-            this._onEntriesAdded(aEntryList.entries)
-                .catch(this._ignoreRefresh);
+            return;
         }
-        else {
-            this._refreshPending = true;
-        }
-    },
-
-    onEntriesMarkedRead: function FeedView_onEntriesMarkedRead(aEntryList, aNewState) {
-        if (this.query.read === false) {
-            if (aNewState)
-                this._onEntriesRemoved(aEntryList.entries, true, true);
-            else
-                this._onEntriesAdded(aEntryList.entries)
+        let {entryList, newState, tagName} = args;
+        switch(event) {
+            case 'entriesAdded':
+                this._onEntriesAdded(entryList.entries)
                     .catch(this._ignoreRefresh);
-        }
-
-        for (let entry of this._loadedEntries.intersect(aEntryList.entries)) {
-            this.getEntryView(entry).read = aNewState;
-
-            if (PrefCache.autoMarkRead && !aNewState)
-                this._entriesMarkedUnread.push(entry);
-        }
-    },
-
-    onEntriesStarred: function FeedView_onEntriesStarred(aEntryList, aNewState) {
-        if (this.query.starred === true) {
-            if (aNewState)
-                this._onEntriesAdded(aEntryList.entries)
+                break;
+            case 'entriesUpdated':
+                this._onEntriesRemoved(entryList.entries, false, false);
+                this._onEntriesAdded(entryList.entries)
                     .catch(this._ignoreRefresh);
-            else
-                this._onEntriesRemoved(aEntryList.entries, true, true);
+                break;
+            case 'entriesDeleted':
+                if (newState === this.query.deleted)
+                    this._onEntriesAdded(entryList.entries)
+                        .catch(this._ignoreRefresh);
+                else
+                    this._onEntriesRemoved(entryList.entries, true, true);
+                break;
+            case 'entriesMarkedRead':
+                if (this.query.read === false) {
+                    if (newState)
+                        this._onEntriesRemoved(entryList.entries, true, true);
+                    else
+                        this._onEntriesAdded(entryList.entries)
+                            .catch(this._ignoreRefresh);
+                }
+
+                for (let entry of this._loadedEntries.intersect(entryList.entries)) {
+                    this.getEntryView(entry).read = newState;
+
+                    if (PrefCache.autoMarkRead && !newState)
+                        this._entriesMarkedUnread.push(entry);
+                }
+                break;
+            case 'entriesStarred':
+                if (this.query.starred === true) {
+                    if (newState)
+                        this._onEntriesAdded(entryList.entries)
+                            .catch(this._ignoreRefresh);
+                    else
+                        this._onEntriesRemoved(entryList.entries, true, true);
+                }
+
+                for (let entry of this._loadedEntries.intersect(entryList.entries))
+                    this.getEntryView(entry).starred = newState;
+                break;
+            case 'entriesTagged':
+                for (let entry of this._loadedEntries.intersect(entryList.entries)) {
+                    let entryView = this.getEntryView(entry);
+                    let tags = entryView.tags;
+
+                    if (newState)
+                        tags.push(tagName);
+                    else
+                        tags.splice(tags.indexOf(tagName), 1);
+
+                    entryView.tags = tags;
+                }
+
+                if (this.query.tags && this.query.tags[0] === tagName) {
+                    if (newState)
+                        this._onEntriesAdded(entryList.entries)
+                            .catch(this._ignoreRefresh);
+                    else
+                        this._onEntriesRemoved(entryList.entries, true, true);
+                }
+                break;
         }
-
-        for (let entry of this._loadedEntries.intersect(aEntryList.entries))
-            this.getEntryView(entry).starred = aNewState;
-    },
-
-    onEntriesTagged: function FeedView_onEntriesTagged(aEntryList, aNewState, aTag) {
-        for (let entry of this._loadedEntries.intersect(aEntryList.entries)) {
-            let entryView = this.getEntryView(entry);
-            let tags = entryView.tags;
-
-            if (aNewState)
-                tags.push(aTag);
-            else
-                tags.splice(tags.indexOf(aTag), 1);
-
-            entryView.tags = tags;
-        }
-
-        if (this.query.tags && this.query.tags[0] === aTag) {
-            if (aNewState)
-                this._onEntriesAdded(aEntryList.entries)
-                    .catch(this._ignoreRefresh);
-            else
-                this._onEntriesRemoved(aEntryList.entries, true, true);
-        }
-    },
-
-    onEntriesDeleted: function FeedView_onEntriesDeleted(aEntryList, aNewState) {
-        if (aNewState === this.query.deleted)
-            this._onEntriesAdded(aEntryList.entries)
-                .catch(this._ignoreRefresh);
-        else
-            this._onEntriesRemoved(aEntryList.entries, true, true);
     },
 
 
@@ -560,22 +549,22 @@ FeedView.prototype = {
             let query = this.getQueryCopy();
             let edgeDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
 
-            if (query.sortDirection == Query.prototype.SORT_DESCENDING)
+            if (query.sortDirection == 'desc')
                 query.startDate = edgeDate;
             else
                 query.endDate = edgeDate;
 
-            this._loadedEntries = yield this._refreshGuard(query.getEntries());
+            this._loadedEntries = yield this._refreshGuard(API.query.getEntries(query));
 
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
-                let query = new Query({
+                let query = {
                     sortOrder: this.query.sortOrder,
                     sortDirection: this.query.sortDirection,
                     entries: newEntries
-                })
+                };
 
-                for (let entry of yield this._refreshGuard(query.getFullEntries()))
+                for (let entry of yield this._refreshGuard(API.query.getFullEntries(query)))
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
@@ -589,8 +578,9 @@ FeedView.prototype = {
         // Otherwise, just blow it all away and refresh from scratch.
         else {
             if (this._allEntriesLoaded) {
-                let currentEntryList = yield this.query.getEntries();
-                if (currentEntryList.intersect(aAddedEntries).length)
+                let currentEntryList = yield API.query.getEntries(this.query);
+                // currentEntryList is a foreign Array with a clean prototype
+                if (Array.from(currentEntryList).intersect(aAddedEntries).length)
                     this.refresh()
             }
             else {
@@ -620,7 +610,7 @@ FeedView.prototype = {
         // Removing content may cause a scroll event that should be ignored.
         this._suppressSelectionOnNextScroll = true;
 
-        getTopWindow().StarUI.panel.hidePopup();
+        API.hideStarUI();
 
         let selectedEntryIndex = -1;
 
@@ -695,7 +685,7 @@ FeedView.prototype = {
         this.document.body.classList.remove('multiple-feeds');
 
         this._stopSmoothScrolling();
-        getTopWindow().StarUI.panel.hidePopup();
+        API.hideStarUI();
 
         // Manually reset the scroll position, otherwise weird stuff happens.
         this.scroll(0, false, true);
@@ -709,10 +699,10 @@ FeedView.prototype = {
         // Prevent the message from briefly showing up before entries are loaded.
         this.document.getElementById('message-box').style.display = 'none';
 
-        getElement('full-view-checkbox').checked = !this.headlinesMode;
-        getElement('headlines-checkbox').checked = this.headlinesMode;
+        getElement('full-view-checkbox').dataset.checked = !this.headlinesMode;
+        getElement('headlines-checkbox').dataset.checked = this.headlinesMode;
 
-        getElement('view-title-label').value = this.titleOverride || this.title;
+        getElement('view-title-label').textContent = this.titleOverride || this.title;
 
         if (!this.query.feeds || this.query.feeds.length > 1)
             this.document.body.classList.add('multiple-feeds');
@@ -795,7 +785,7 @@ FeedView.prototype = {
 
         if (this._loadedEntries.length) {
             let lastEntryDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
-            if (dateQuery.sortDirection == Query.prototype.SORT_DESCENDING)
+            if (dateQuery.sortDirection == 'desc')
                 rangeEndDate = lastEntryDate - 1;
             else
                 rangeStartDate = lastEntryDate + 1;
@@ -805,10 +795,10 @@ FeedView.prototype = {
         dateQuery.startDate = rangeStartDate;
         dateQuery.limit = aCount;
 
-        let dates = yield this._refreshGuard(dateQuery.getProperty('date', false));
+        let dates = yield this._refreshGuard(API.query.getProperty(dateQuery, 'date', false));
         if (dates.length) {
             let query = this.getQueryCopy();
-            if (query.sortDirection == Query.prototype.SORT_DESCENDING) {
+            if (query.sortDirection == 'desc') {
                 query.startDate = dates[dates.length - 1];
                 query.endDate = rangeEndDate;
             }
@@ -817,7 +807,7 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            let loadedEntries = yield this._refreshGuard(query.getFullEntries());
+            let loadedEntries = yield this._refreshGuard(API.query.getFullEntries(query));
             for (let entry of loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
@@ -866,28 +856,27 @@ FeedView.prototype = {
             return;
         }
 
-        let bundle = getElement('main-bundle');
         let mainMessage, secondaryMessage;
 
-        if (!Storage.getAllFeeds().length) {
-            mainMessage = bundle.getString('noFeeds');
+        if (!FeedList.getAllFeeds().length) {
+            mainMessage = STRINGS.GetStringFromName('noFeeds');
             secondaryMessage = '<a href="' + TUTORIAL_URL + '" target="_blank">'
-                               + bundle.getString('noFeedsAdvice') + '</a>';
+                               + STRINGS.GetStringFromName('noFeedsAdvice') + '</a>';
         }
         else if (this.query.searchString) {
-            mainMessage = bundle.getString('noEntriesFound');
+            mainMessage = STRINGS.GetStringFromName('noEntriesFound');
         }
         else if (this.query.read === false) {
-            mainMessage = bundle.getString('noUnreadEntries');
+            mainMessage = STRINGS.GetStringFromName('noUnreadEntries');
         }
         else if (this.query.starred === true) {
-            mainMessage = bundle.getString('noStarredEntries');
+            mainMessage = STRINGS.GetStringFromName('noStarredEntries');
         }
-        else if (this.query.deleted == Storage.ENTRY_STATE_TRASHED) {
-            mainMessage = bundle.getString('trashIsEmpty');
+        else if (this.query.deleted === 'trashed') {
+            mainMessage = STRINGS.GetStringFromName('trashIsEmpty');
         }
         else {
-            mainMessage = bundle.getString('noEntries');
+            mainMessage = STRINGS.GetStringFromName('noEntries');
         }
 
         this.document.getElementById('main-message').textContent = mainMessage || '' ;
@@ -963,7 +952,7 @@ function EntryView(aFeedView, aEntryData) {
 
     let deleteButton = this._getElement('delete-button');
     let restoreButton = this._getElement('restore-button');
-    if (this.feedView.query.deleted == Storage.ENTRY_STATE_TRASHED) {
+    if (this.feedView.query.deleted === 'trashed') {
         deleteButton.parentNode.removeChild(deleteButton);
         restoreButton.setAttribute('title', Strings.restoreEntryTooltip);
     }
@@ -972,7 +961,7 @@ function EntryView(aFeedView, aEntryData) {
         deleteButton.setAttribute('title', Strings.deleteEntryTooltip);
     }
 
-    let feed = Storage.getFeed(aEntryData.feedID);
+    let feed = FeedList.getFeed(aEntryData.feedID);
 
     // Set xml:base attribute to resolve relative URIs against the feed's URI.
     this.container.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'base', feed.feedURL);
@@ -1250,10 +1239,10 @@ EntryView.prototype = {
                 return;
             }
             else if (anchor.hasAttribute('href')) {
-                let feedURL = Storage.getFeed(this.feedID).feedURL;
+                let feedURL = FeedList.getFeed(this.feedID).feedURL;
                 let baseURI = NetUtil.newURI(feedURL);
                 let linkURI = NetUtil.newURI(anchor.getAttribute('href'), null, baseURI);
-                Commands.openLink(linkURI.spec);
+                API.openBackgroundTab(linkURI.spec);
 
                 return;
             }
@@ -1271,19 +1260,18 @@ EntryView.prototype = {
 
             case 'star':
                 if (this.starred) {
-                    let query = new Query(this.id);
-
-                    query.verifyBookmarksAndTags();
+                    API.query.verifyBookmarksAndTags(this.id);
 
                     let oldViewID = this.feedView.viewID;
 
-                    query.getProperty('bookmarkID', false).then(
+                    API.query.getProperty(this.id, 'bookmarkID', false).then(
                         ids => {
                             if (this.feedView.viewID != oldViewID)
                                 return;
 
                             let anchor = this._getElement('bookmark-button');
-                            getTopWindow().StarUI.showEditBookmarkPopup(ids[0], anchor);
+                            let rect = BrowserUtils.getElementBoundingScreenRect(anchor);
+                            API.showStarUI({id: ids[0], rect});
                         }
                     )
                 }
@@ -1318,7 +1306,6 @@ EntryView.prototype = {
     getDateString: function EntryView_getDateString(aOnlyDatePart) {
         let relativeDate = new RelativeDate(this.date.getTime());
         let string;
-        let bundle = getElement('main-bundle');
 
         if (aOnlyDatePart) {
             switch (true) {
@@ -1352,14 +1339,14 @@ EntryView.prototype = {
                 case relativeDate.deltaHours === 0:
                     let minuteForm = getPluralForm(relativeDate.deltaMinutes,
                                                    Strings['minute.pluralForms']);
-                    string = bundle.getFormattedString('entryDate.ago', [minuteForm], 1)
+                    string = STRINGS.formatStringFromName('entryDate.ago', [minuteForm], 1)
                                    .replace('#number', relativeDate.deltaMinutes);
                     break;
 
                 case relativeDate.deltaHours <= 12:
                     let hourForm = getPluralForm(relativeDate.deltaHours,
                                                  Strings['hour.pluralForms']);
-                    string = bundle.getFormattedString('entryDate.ago', [hourForm], 1)
+                    string = STRINGS.formatStringFromName('entryDate.ago', [hourForm], 1)
                                    .replace('#number', relativeDate.deltaHours);
                     break;
 
@@ -1496,10 +1483,9 @@ this.__defineGetter__('Strings', () => {
         'editBookmarkTooltip',
     ]
 
-    let bundle = getElement('main-bundle');
     let obj = {};
     for (let stringName of cachedStringsList)
-        obj[stringName] = bundle.getString(stringName);
+        obj[stringName] = STRINGS.GetStringFromName(stringName);
 
     delete this.Strings;
     return this.Strings = obj;

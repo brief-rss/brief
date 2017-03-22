@@ -1,5 +1,4 @@
 #feed-view-header {
-    display: flex;
     align-items: center;
     height: 36px !important;
     padding: 0 10px !important;
@@ -18,29 +17,44 @@
 
 #view-title-button {
     margin-top: 5px !important;
-    list-style-image: url(icons/feed-settings.png);
-    -moz-image-region: rect(0, 18px, 18px, 0);
 }
 
-#view-title-button:hover {
-    -moz-image-region: rect(18px, 18px, 36px, 0);
+#view-title-button::before {
+    vertical-align: middle;
+
+    display: inline-block;
+    content: "";
+    height: 18px;
+    width: 18px;
+    background-image: url(icons/feed-settings.png);
+    background-position: 0 0;
 }
 
-#view-title-button:hover:active {
-    -moz-image-region: rect(36px, 18px, 54px, 0);
+#view-title-button:hover::before {
+    background-position: 0 -18px;
 }
 
-#view-title-button .button-menu-dropmarker {
-    list-style-image: url(icons/view-title-dropmarker.png) !important;
-    -moz-image-region: rect(0, 11px, 6px, 0) !important;
+#view-title-button:hover:active::before {
+    background-position: 0 -36px;
+}
+
+#view-title-button::after {
     margin-left: 4px !important;
+    vertical-align: middle;
+
+    display: inline-block;
+    content: "";
+    height: 6px;
+    width: 11px;
+    background-image: url(icons/view-title-dropmarker.png);
+    background-position: 0 0;
 }
 
-#view-title-button:hover .button-menu-dropmarker {
-    -moz-image-region: rect(6px, 11px, 12px, 0) !important;
+#view-title-button:hover::after {
+    background-position: 0 -6px;
 }
 
-#view-title-button:not([contextOptions]) {
+#view-title-button[data-dropdown=""] {
     display: none;
 }
 
@@ -51,14 +65,9 @@
     font-weight: bold !important;
     flex-shrink: 1;
     min-width: 5em !important;
-}
-
-#view-title-button[contextOptions]:hover > #view-title-button-label {
-    color: #ff8a39 !important;
-}
-
-#view-title-button[contextOptions]:hover:active > #view-title-button-label {
-    text-shadow: #ffa060 0px 0px 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 
@@ -70,28 +79,34 @@
     min-width: 20px !important;
 }
 
+#mark-view-read {
+    background-image: url(icons/mark-view-read.png) !important;
+}
+
 .view-button,
 #mark-view-read {
-    -moz-image-region: rect(0px, 22px, 22px, 0px);
+    height: 22px !important;
+    width: 22px !important;
+    background-position: 0 0 !important;
 }
 
 .view-button:hover,
 #mark-view-read:hover {
-    -moz-image-region: rect(22px, 22px, 44px, 0px);
+    background-position: 0 -22px !important;
 }
 
 .view-button:hover:active,
 #mark-view-read:hover:active,
-.view-button[checked] {
-    -moz-image-region: rect(44px, 22px, 66px, 0px);
+.view-button[data-checked=true] {
+    background-position: 0 -44px !important;
 }
 
 #headlines-checkbox {
-    list-style-image: url(icons/view-headlines.png);
+    background-image: url(icons/view-headlines.png) !important;
 }
 
 #full-view-checkbox {
-    list-style-image: url(icons/view-full-items.png);
+    background-image: url(icons/view-full-items.png) !important;
     margin-left: 11px !important;
 }
 
@@ -100,35 +115,33 @@
 /* =========== View filter buttons =========== */
 
 .filter-button {
-    -moz-image-region: rect(0px, 23px, 23px, 0px);
+    height: 23px !important;
+    width: 23px !important;
+    background-position: 0 0 !important;
 }
 
 .filter-button:hover {
-    -moz-image-region: rect(23px, 23px, 46px, 0px);
+    background-position: 0 -23px !important;
 }
 
 .filter-button:hover:active,
-.filter-button[checked] {
-    -moz-image-region: rect(46px, 23px, 69px, 0px);
+.filter-button[data-checked=true] {
+    background-position: 0 -46px !important;
 }
 
 
 #show-all-entries-checkbox {
-    list-style-image: url(icons/show-all-items.png);
+    background-image: url(icons/show-all-items.png) !important;
 }
 
 #filter-unread-checkbox {
-    list-style-image: url(icons/show-unread-items.png);
+    background-image: url(icons/show-unread-items.png) !important;
     margin-left: 11px !important;
 }
 
 #filter-starred-checkbox {
-    list-style-image: url(icons/show-starred-items.png);
+    background-image: url(icons/show-starred-items.png) !important;
     margin-left: 11px !important;
-}
-
-#mark-view-read {
-    list-style-image: url(icons/mark-view-read.png);
 }
 
 
@@ -144,10 +157,6 @@
     border-radius: 4px;
     font-size: 12px;
     font-family: Verdana, Helvetica, Arial, sans-serif;
-}
-
-
-#searchbar .textbox-input {
     color: #4a6278 !important;
     font-style: normal !important;
 }

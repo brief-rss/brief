@@ -9,6 +9,7 @@ Components.utils.import('resource://gre/modules/Task.jsm');
 Components.utils.import('resource://gre/modules/osfile.jsm');
 Components.utils.import('resource://gre/modules/Sqlite.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
+Components.utils.import('resource://gre/modules/NetUtil.jsm');
 
 IMPORT_COMMON(this);
 
@@ -43,10 +44,6 @@ var Connection = null;
 
 // Exported object exposing public properties.
 const Storage = Object.freeze({
-
-    ENTRY_STATE_NORMAL: 0,
-    ENTRY_STATE_TRASHED: 1,
-    ENTRY_STATE_DELETED: 2,
 
     /**
      * A promise that resolves when storage is initiated.
@@ -133,32 +130,19 @@ const Storage = Object.freeze({
      * is held to this object, so all observers have to be removed using
      * Storage.removeObserver().
      *
-     * An observer may implement any of the following functions:
+     * An observer implements a single handler
      *
-     *     function onEntriesAdded(aEntryList)
+     *     function observeStorage(event, args);
      *
-     * Called when new entries are added to the database.
-     *
-     *     function onEntriesUpdated(aEntryList);
-     *
-     * Called when properties of existing entries - such as title, content, authors
-     * and date - are changed. When entries are updated, they can also be marked as unread.
-     *
-     *     function onEntriesMarkedRead(aEntryList, aNewState);
-     *
-     * Called when the read/unread state of entries changes.
-     *
-     *     function onEntriesStarred(aEntryList, aNewState);
-     *
-     * Called when URLs of entries are bookmarked/unbookmarked.
-     *
-     *     function onEntriesTagged(aEntryList, aNewState, aTagName);
-     *
-     * Called when a tag is added or removed from entries.
-     *
-     *     function onEntriesDeleted(aEntryList, aNewState);
-     *
-     * Called when the deleted state of entries changes.
+     * which receives event name and an event arguments object.
+     * The following events and arguments are supported:
+     *     entriesAdded: {entryList}  when added to the database
+     *     entriesUpdated: {entryList}  when modified (and possibly marked unread)
+     *     entriesMarkedRead: {entryList, newState}  when marked read/unread
+     *     entriesStarred: {entryList, newState}  when starred/unstarred
+     *     entriesTagged: {entryList, newState, tagName}  when tagged/untagged with a specific tag
+     *     entriesDeleted: {entryList, newState}  when trashed/deleted/restored
+     * where entryList is {entries, feeds, tags}
      */
     addObserver: function(aObserver) {
         return StorageInternal.addObserver(aObserver);
@@ -173,6 +157,19 @@ const Storage = Object.freeze({
 
     ensureHomeFolder: function() {
         return StorageInternal.ensureHomeFolder();
+    },
+
+    deleteTag: function(tag) {
+        return StorageInternal.deleteTag(tag);
+    },
+
+    deleteFeed: function(feed) {
+        return StorageInternal.deleteFeed(feed);
+    },
+
+    deleteFolder: function(folder) {
+        // Actually it's universal
+        return StorageInternal.deleteFeed(folder);
     },
 
     /**
@@ -497,13 +494,13 @@ let StorageInternal = {
             for (let feed of feeds) {
                 let query = new Query({
                     feeds: [feed.feedID],
-                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    deleted: false,
                     starred: false,
-                    sortOrder: Query.prototype.SORT_BY_DATE,
+                    sortOrder: 'date',
                     offset: Prefs.getIntPref('database.maxStoredEntries')
                 })
 
-                yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+                yield query.deleteEntries('trashed');
             }
         }
 
@@ -513,12 +510,12 @@ let StorageInternal = {
 
             let query = new Query({
                 feeds: feedsWithoutAgeLimit.map(feed => feed.feedID),
-                deleted: Storage.ENTRY_STATE_NORMAL,
+                deleted: false,
                 starred: false,
                 endDate: Date.now() - expirationAge * 86400000
             })
 
-            yield query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+            yield query.deleteEntries('trashed');
         }
 
         // Delete old entries based on per-feed limit.
@@ -526,12 +523,12 @@ let StorageInternal = {
             for (let feed of feedsWithAgeLimit) {
                 let query = new Query({
                     feeds: [feed.feedID],
-                    deleted: Storage.ENTRY_STATE_NORMAL,
+                    deleted: false,
                     starred: false,
                     endDate: Date.now() - feed.entryAgeLimit * 86400000
                 })
 
-                query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+                query.deleteEntries('trashed');
             }
         }
     }.task(),
@@ -539,13 +536,13 @@ let StorageInternal = {
     // Permanently removes deleted items from database.
     purgeDeleted: function StorageInternal_purgeDeleted() {
         Stm.purgeDeletedEntriesText.execute({
-            'deletedState': Storage.ENTRY_STATE_DELETED,
+            'deletedState': EntryState.DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
         })
 
         Stm.purgeDeletedEntries.execute({
-            'deletedState': Storage.ENTRY_STATE_DELETED,
+            'deletedState': EntryState.DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
         })
@@ -632,6 +629,13 @@ let StorageInternal = {
             this.observers.splice(index, 1);
     },
 
+    // Notify observers
+    notifyObservers: function StorageInternal_notifyObservers(event, args) {
+        for (let observer of this.observers) {
+            observer.observeStorage(event, args);
+        }
+    },
+
     /**
      * Sets starred status of an entry.
      *
@@ -651,11 +655,8 @@ let StorageInternal = {
             yield Stm.unstarEntry.executeCached({ 'id': aEntryID });
 
         if (!aDontNotify) {
-            let list = yield new Query(aEntryID).getEntryList();
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesStarred)
-                    observer.onEntriesStarred(list, aState);
-            }
+            let entryList = yield new Query(aEntryID).getEntryList();
+            this.notifyObservers('entriesStarred', {entryList, newState: aState});
         }
     }.task(),
 
@@ -690,11 +691,8 @@ let StorageInternal = {
             'entryID': aEntryID
         })
 
-        let list = yield new Query(aEntryID).getEntryList();
-        for (let observer of StorageInternal.observers) {
-            if (observer.onEntriesTagged)
-                observer.onEntriesTagged(list, aState, aTagName);
-        }
+        let entryList = yield new Query(aEntryID).getEntryList();
+        this.notifyObservers('entriesTagged', {entryList, newState: aState, tagName: aTagName});
     }.task(),
 
     ensureHomeFolder: function StorageInternal_ensureHomeFolder() {
@@ -707,6 +705,24 @@ let StorageInternal = {
             Prefs.setIntPref('homeFolder', folderID);
             this.homeFolderID = folderID;
         }
+    },
+
+    deleteTag: function* StorageInternal_deleteTag(tag) {
+        let urls = yield new Query({ tags: [tag] }).getProperty('entryURL', true);
+        for (let url of urls) {
+            try {
+                var uri = NetUtil.newURI(url, null, null);
+            }
+            catch (ex) {
+                return;
+            }
+            PlacesUtils.tagging.untagURI(uri, [tag]);
+        }
+    }.task(),
+
+    deleteFeed: function StorageInternal_deleteFeed(feed) {
+        let txn = new PlacesRemoveItemTransaction(feed);
+        PlacesUtils.transactionManager.doTransaction(txn);
     },
 
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver])
@@ -887,12 +903,9 @@ FeedProcessor.prototype = {
                 )
             })
 
-            let list = yield new Query(insertedEntries).getEntryList();
+            let entryList = yield new Query(insertedEntries).getEntryList();
 
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesAdded)
-                    observer.onEntriesAdded(list);
-            }
+            StorageInternal.notifyObservers('entriesAdded', {entryList});
 
             StorageInternal.expireEntries(this.feed);
         }
@@ -903,18 +916,34 @@ FeedProcessor.prototype = {
                 Stm.updateEntryText.executeCached(this.updateEntryTextParamSets);
             })
 
-            let list = yield new Query(this.updatedEntries).getEntryList();
+            let entryList = yield new Query(this.updatedEntries).getEntryList();
 
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesUpdated)
-                    observer.onEntriesUpdated(list);
-            }
+            StorageInternal.notifyObservers('entriesUpdated', {entryList});
         }
 
         this.deferred.resolve(insertedEntries.length);
     }.task()
 
 }
+
+
+let EntryState = {
+    NORMAL: 0,
+    TRASHED: 1,
+    DELETED: 2,
+
+    parse(smth) {
+        switch(smth) {
+            case false:
+                return EntryState.NORMAL;
+            case 'trashed':
+                return EntryState.TRASHED;
+            case 'deleted':
+                return EntryState.DELETED;
+            default: throw 'unknown entry state';
+        }
+    },
+};
 
 
 /**
@@ -981,16 +1010,7 @@ Query.prototype = {
      * String that must be contained by title, content, authors or tags of the
      * selected entries.
      */
-    __searchString: undefined,
-    get searchString() {
-        return this.__searchString;
-    },
-    set searchString(aValue) {
-        // FTS requires search string to contain at least one non-excluded
-        // (i.e. not starting with a minus) term.
-        let invalid = aValue && !aValue.match(/(\s|^)[^\-][^\s]*/g);
-        return this.__searchString = invalid ? null : aValue;
-    },
+    searchString: undefined,
 
     /**
      * Date range for the selected entries.
@@ -1011,19 +1031,12 @@ Query.prototype = {
     /**
      * By which column to sort the results.
      */
-    SORT_BY_DATE: 1,
-    SORT_BY_TITLE: 2,
-    SORT_BY_FEED_ROW_INDEX: 3,
-
     sortOrder: undefined,
 
     /**
      * Direction in which to sort the results.
      */
-    SORT_DESCENDING: 0,
-    SORT_ASCENDING: 1,
-
-    sortDirection: 0,
+    sortDirection: 'desc',
 
     /**
      * Include hidden feeds i.e. the ones whose Live Bookmarks are no longer
@@ -1036,19 +1049,6 @@ Query.prototype = {
      * Include feeds that the user marked as excluded from global views.
      */
     includeFeedsExcludedFromGlobalViews: true,
-
-    /**
-     * Indicates if there are any entries that match this query.
-     *
-     * @returns Promise<boolean>
-     */
-    hasMatches: function* Query_hasMatches() {
-        let sql = 'SELECT EXISTS (SELECT entries.id ' + this._getQueryString(true) + ') AS found';
-
-        let results = yield Connection.execute(sql);
-
-        return results[0].getResultByName('found');
-    }.task(),
 
     /**
      * Get a simple list of entries.
@@ -1208,18 +1208,15 @@ Query.prototype = {
         if (!this.limit && !this.offset)
             this.read = !aState;
 
-        let list = yield this.getEntryList();
+        let entryList = yield this.getEntryList();
 
-        if (list.entries.length) {
+        if (entryList.entries.length) {
             let sql = 'UPDATE entries SET read = ' + (aState ? 1 : 0) + this._getQueryString();
             yield Connection.execute(sql);
 
             this.read = tempRead;
 
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesMarkedRead)
-                    observer.onEntriesMarkedRead(list, aState);
-            }
+            StorageInternal.notifyObservers('entriesMarkedRead', {entryList, newState: aState});
         }
         else {
             this.read = tempRead;
@@ -1234,15 +1231,13 @@ Query.prototype = {
      * @returns Promise<null>
      */
     deleteEntries: function* Query_deleteEntries(aState) {
-        let list = yield this.getEntryList();
-        if (list.entries.length) {
-            let sql = 'UPDATE entries SET deleted = ' + aState + this._getQueryString();
+        let entryList = yield this.getEntryList();
+        let state = EntryState.parse(aState);
+        if (entryList.entries.length) {
+            let sql = 'UPDATE entries SET deleted = ' + state + this._getQueryString();
             yield Connection.execute(sql);
 
-            for (let observer of StorageInternal.observers) {
-                if (observer.onEntriesDeleted)
-                    observer.onEntriesDeleted(list, aState);
-            }
+            StorageInternal.notifyObservers('entriesDeleted', {entryList, newState: aState});
         }
     }.task(),
 
@@ -1363,7 +1358,11 @@ Query.prototype = {
         if (!this.feeds && !this.includeHiddenFeeds)
             text += ' INNER JOIN feeds ON entries.feedID = feeds.feedID ';
 
-        if (aGetFullEntries || this.searchString || this.sortOrder == this.SORT_BY_TITLE)
+        // Sqlite needs at least one term for searching
+        let searchString = (this.searchString && this.searchString.match(/(\s|^)[^\s\-][^\s]*/g)
+            ? this.searchString : null);
+
+        if (aGetFullEntries || searchString)
             text += ' INNER JOIN entries_text ON entries.id = entries_text.rowid ';
 
         if (this.tags)
@@ -1421,8 +1420,8 @@ Query.prototype = {
             constraints.push(con);
         }
 
-        if (this.searchString) {
-            let con = 'entries_text MATCH \'' + this.searchString.replace("'",' ') + '\'';
+        if (searchString) {
+            let con = 'entries_text MATCH \'' + searchString.replace("'",' ') + '\'';
             constraints.push(con);
         }
 
@@ -1437,7 +1436,7 @@ Query.prototype = {
             constraints.push('entries.starred = 0');
 
         if (this.deleted !== undefined)
-            constraints.push('entries.deleted = ' + this.deleted);
+            constraints.push('entries.deleted = ' + EntryState.parse(this.deleted));
 
         if (this.startDate !== undefined)
             constraints.push('entries.date >= ' + this.startDate);
@@ -1452,26 +1451,22 @@ Query.prototype = {
 
         if (this.sortOrder !== undefined) {
             switch (this.sortOrder) {
-                case this.SORT_BY_FEED_ROW_INDEX:
+                case 'library':
                     var sortOrder = 'feeds.rowIndex ';
                     break;
-                case this.SORT_BY_DATE:
+                case 'date':
                     sortOrder = 'entries.date ';
-                    break;
-                case this.SORT_BY_TITLE:
-                    sortOrder = 'entries_text.title ';
                     break;
                 default:
                     throw Components.results.NS_ERROR_ILLEGAL_VALUE;
             }
 
-            let sortDir = (this.sortDirection == this.SORT_ASCENDING) ? 'ASC' : 'DESC';
-            text += 'ORDER BY ' + sortOrder + sortDir;
+            text += 'ORDER BY ' + sortOrder + this.sortDirection;
 
             // Sort by rowid, so that entries that are equal in respect of primary
             // sorting criteria are always returned in the same (as opposed to
             // undefined) order.
-            text += ', entries.rowid ' + sortDir;
+            text += ', entries.rowid ' + this.sortDirection;
         }
 
         if (this.limit !== undefined)
@@ -1908,7 +1903,7 @@ let Stm = {
 
         let sql = 'SELECT DISTINCT entry_tags.tagName                                    '+
                   'FROM entry_tags INNER JOIN entries ON entry_tags.entryID = entries.id '+
-                  'WHERE entries.deleted = ' + Storage.ENTRY_STATE_NORMAL + '            '+
+                  'WHERE entries.deleted = ' + EntryState.NORMAL + '                     '+
                   'ORDER BY entry_tags.tagName                                           ';
         let resultColumns = ['tagName'];
         return new Statement(sql, resultColumns);

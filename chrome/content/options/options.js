@@ -108,7 +108,7 @@ function onClearAllEntriesCmd(aEvent) {
         });
 
         Storage.ready.then(() =>
-            query.deleteEntries(Storage.ENTRY_STATE_DELETED)
+            query.deleteEntries('deleted')
         )
 
         Services.prefs.setBoolPref('extensions.brief.database.keepStarredWhenClearing', checked.value)

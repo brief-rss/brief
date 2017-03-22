@@ -1,126 +1,96 @@
 Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/Storage.jsm');
-Components.utils.import('resource://brief/FeedUpdateService.jsm');
+Components.utils.import('resource://brief/API.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/NetUtil.jsm');
 Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
-Components.utils.import('resource://gre/modules/Task.jsm');
+Components.utils.import("resource://gre/modules/BrowserUtils.jsm");
 
 IMPORT_COMMON(this);
 
-const OBSERVER_TOPICS = [
-    'brief:feed-update-queued',
-    'brief:feed-update-finished',
-    'brief:feed-updated',
-    'brief:feed-loading',
-    'brief:feed-error',
-    'brief:invalidate-feedlist',
-    'brief:feed-title-changed',
-    'brief:feed-favicon-changed',
-    'brief:custom-style-changed',
-]
+// Randomize URI to work around mozilla bug 918033
+const STRINGS = Services.strings.createBundle('chrome://brief/locale/brief.properties?' + Math.random());
 
 var gCurrentView;
 
+var API = null;
 
-function init() {
+
+var init = function* init() {
+    API = new BriefClient(window);
+    yield API.ready();
+
     PrefObserver.register();
 
-    getElement('show-all-entries-checkbox').checked = !PrefCache.filterUnread && !PrefCache.filterStarred;
-    getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
-    getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
-    getElement('reveal-sidebar-button').hidden = !getElement('sidebar').hidden;
+    // Restore local persistence
+    yield Persistence.init();
 
-    // Remove the hardcoded flex from .button-box, impossible to do with CSS.
-    let optionsButton = getElement('options-dropdown-button');
-    document.getAnonymousNodes(optionsButton)[0].removeAttribute('flex');
+    Commands.switchViewFilter(Persistence.data.view.filter);
 
     refreshProgressmeter();
 
-    document.addEventListener('keypress', onKeyPress, true);
+    API.addObserver(FeedList);
 
-    for (let topic of OBSERVER_TOPICS)
-        Services.obs.addObserver(FeedList, topic, false);
+    API.addStorageObserver(FeedList);
 
-    Storage.addObserver(FeedList);
-
-    let chromeRegService = Cc['@mozilla.org/chrome/chrome-registry;1'].getService();
-    let selectedLocale = chromeRegService.QueryInterface(Ci.nsIXULChromeRegistry)
-                                         .getSelectedLocale('brief');
+    let selectedLocale = API.getLocale();
     let doc = getElement('feed-view').contentDocument;
     doc.documentElement.setAttribute('lang', selectedLocale);
 
     ViewList.init();
 
-    let startView = getElement('view-list').getAttribute('startview');
-    ViewList.selectedItem = getElement(startView);
+    SplitterModule.init();
+    ContextMenuModule.init();
 
-    wait().then(() => FeedList.rebuild());
-    wait(1000).then(() => Storage.syncWithLivemarks());
-}
+    Shortcuts.init();
+
+    getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);
+    getElement('tag-list').style.width = Persistence.data.tagList.width;
+    getElement('sidebar').style.width = Persistence.data.sidebar.width;
+    document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
+
+    // Are we called to subscribe for a feed?
+    let url = (new URLSearchParams(document.location.search)).get('subscribe');
+    if(url !== null) {
+        window.history.replaceState({}, "", BRIEF_URL);
+        FeedList.rebuild(); // Adding a feed may take some time, so show the other feeds for now.
+        yield API.addFeed(url);
+    } else {
+        ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+        yield wait();
+    }
+
+    FeedList.rebuild(url);
+}.task()
 
 
 function unload() {
-    let viewList = getElement('view-list');
-    let id = viewList.selectedItem && viewList.selectedItem.id;
-    let startView = (id == 'today-folder') ? 'today-folder' : 'all-items-folder';
-    viewList.setAttribute('startview', startView);
+    Persistence.save();
 
-    FeedList.persistFolderState();
-
-    for (let topic of OBSERVER_TOPICS)
-        Services.obs.removeObserver(FeedList, topic);
+    API.removeObserver(FeedList);
 
     PrefObserver.unregister();
-    Storage.removeObserver(FeedList);
+    API.removeStorageObserver(FeedList);
     gCurrentView.uninit();
+    API.finalize();
 }
 
 
 var Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
-        getElement('sidebar').hidden = true;
-        getElement('sidebar-splitter').hidden = true;
-        getElement('tag-list').hidden = true;
-        getElement('tag-list-splitter').hidden = true;
-
-        getElement('reveal-sidebar-button').hidden = false;
+        document.body.classList.remove('sidebar');
     },
 
     revealSidebar: function cmd_revealSidebar() {
-        getElement('sidebar').hidden = false;
-        getElement('sidebar-splitter').hidden = false;
-
-        if (ViewList.selectedItem == getElement('starred-folder') || TagList.selectedItem) {
-            getElement('tag-list').hidden = false;
-            getElement('tag-list-splitter').hidden = false;
-        }
-
-        getElement('reveal-sidebar-button').hidden = true;
-
-        if (!FeedList.treeReady)
-            FeedList.rebuild();
+        document.body.classList.add('sidebar');
     },
 
-    openOptions: function cmd_openOptions(aPaneID) {
-        let url = 'chrome://brief/content/options/options.xul';
-
-        let windows = Services.wm.getEnumerator(null);
-        while (windows.hasMoreElements()) {
-            let win = windows.getNext();
-            if (win.document.documentURI == url) {
-                win.focus();
-                return;
-            }
-        }
-
-        let features = 'chrome,titlebar,toolbar,centerscreen,';
-        window.openDialog(url, 'Brief options', features, aPaneID);
+    openOptions: function cmd_openOptions() {
+        API.openOptions();
     },
 
     markViewRead: function cmd_markViewRead() {
-        gCurrentView.query.markEntriesRead(true);
+        API.query.markEntriesRead(gCurrentView.query, true);
     },
 
     markVisibleEntriesRead: function cmd_markVisibleEntriesRead() {
@@ -129,67 +99,61 @@ var Commands = {
 
     switchViewMode: function cmd_switchViewMode(aMode) {
         if (FeedList.selectedFeed) {
-            Storage.changeFeedProperties({
+            API.modifyFeed({
                 feedID: FeedList.selectedFeed.feedID,
-                viewMode: aMode
+                viewMode: (aMode === 'headlines')
             });
         }
         else {
-            Prefs.setIntPref('feedview.mode', aMode);
+            Persistence.data.view.mode = aMode;
         }
 
         gCurrentView.refresh();
     },
 
     switchViewFilter: function cmd_switchViewFilter(aFilter) {
-        let filterUnread = aFilter == 'unread';
-        let filterStarred = aFilter == 'starred';
+        Persistence.data.view.filter = aFilter;
 
-        Prefs.setBoolPref('feedview.filterUnread', filterUnread);
-        Prefs.setBoolPref('feedview.filterStarred', filterStarred);
+        getElement('show-all-entries-checkbox').dataset.checked = (aFilter === 'all');
+        getElement('filter-unread-checkbox').dataset.checked = (aFilter === 'unread');
+        getElement('filter-starred-checkbox').dataset.checked = (aFilter === 'starred');
+
+        if(gCurrentView !== undefined)
+            gCurrentView.refresh();
     },
 
     openFeedWebsite: function cmd_openWebsite(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let url = feed.websiteURL || NetUtil.newURI(feed.feedURL).host;
-        getTopWindow().gBrowser.loadOneTab(url);
+        let url = feed.websiteURL || Services.io.newURI(feed.feedURL).host;
+        API.openBackgroundTab(url);
     },
 
     emptyFeed: function cmd_emptyFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let query = new Query({
-            deleted: Storage.ENTRY_STATE_NORMAL,
+        let query = {
+            deleted: false,
             starred: false,
             feeds: [feed.feedID]
-        })
-        query.deleteEntries(Storage.ENTRY_STATE_TRASHED);
+        };
+        API.query.deleteEntries(query, 'trashed');
     },
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let bundle = getElement('main-bundle');
-        let title = bundle.getString('confirmFeedDeletionTitle');
-        let text = bundle.getFormattedString('confirmFeedDeletionText', [feed.title]);
+        let title = STRINGS.GetStringFromName('confirmFeedDeletionTitle');
+        let text = STRINGS.formatStringFromName('confirmFeedDeletionText', [feed.title], 1);
 
-        if (Services.prompt.confirm(window, title, text)) {
-            FeedList.removeItem(getElement(feed.feedID));
-            FeedList.expectRemovalInvalidate = true;
-
-            Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
-
-            let txn = new PlacesRemoveItemTransaction(Number(feed.bookmarkID));
-            PlacesUtils.transactionManager.doTransaction(txn);
-        }
+        if (Services.prompt.confirm(window, title, text))
+            API.deleteFeed(Number(feed.bookmarkID));
     },
 
     restoreTrashed: function cmd_restoreTrashed() {
         ViewList.getQueryForView('trash-folder')
-                .deleteEntries(Storage.ENTRY_STATE_NORMAL);
+        API.query.deleteEntries(ViewList.getQueryForView('trash-folder'), false);
     },
 
     emptyTrash: function cmd_emptyTrash() {
-        ViewList.getQueryForView('trash-folder')
-                .deleteEntries(Storage.ENTRY_STATE_DELETED);
+        API.query.deleteEntries(ViewList.getQueryForView('trash-folder'), 'deleted');
     },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
@@ -201,12 +165,12 @@ var Commands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        new Query(aEntry).markEntriesRead(aNewState);
+        API.query.markEntriesRead(aEntry, aNewState);
     },
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
         if (gCurrentView.selectedEntry) {
-            if (gCurrentView.query.deleted == Storage.ENTRY_STATE_TRASHED)
+            if (gCurrentView.query.deleted === 'trashed')
                 Commands.restoreEntry(gCurrentView.selectedEntry);
             else
                 Commands.deleteEntry(gCurrentView.selectedEntry);
@@ -214,11 +178,11 @@ var Commands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        new Query(aEntry).deleteEntries(Storage.ENTRY_STATE_TRASHED);
+        API.query.deleteEntries(aEntry, 'trashed');
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        new Query(aEntry).deleteEntries(Storage.ENTRY_STATE_NORMAL);
+        API.query.deleteEntries(aEntry, false);
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
@@ -230,7 +194,7 @@ var Commands = {
     },
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
-        new Query(aEntry).bookmarkEntries(aNewState);
+        API.query.bookmarkEntries(aEntry, aNewState);
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
@@ -255,113 +219,53 @@ var Commands = {
     openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
 
-        let baseURI = NetUtil.newURI(Storage.getFeed(entryView.feedID).feedURL);
-        let linkURI = NetUtil.newURI(entryView.entryURL, null, baseURI);
+        let baseURI = Services.io.newURI(FeedList.getFeed(entryView.feedID).feedURL);
+        let linkURI = Services.io.newURI(entryView.entryURL, null, baseURI);
 
-        Commands.openLink(linkURI.spec);
+        API.openBackgroundTab(linkURI.spec);
 
         if (!entryView.read)
-            new Query(aEntry).markEntriesRead(true);
+            API.query.markEntriesRead(aEntry, true);
     },
-
-    openLink: function cmd_openLink(aURL) {
-        let docURI = NetUtil.newURI(document.documentURI);
-        getTopWindow().gBrowser.loadOneTab(aURL, docURI);
-    },
-
 
     showFeedProperties: function cmd_showFeedProperties(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        openDialog('chrome://brief/content/options/feed-properties.xul', 'FeedProperties',
-                   'chrome,titlebar,toolbar,centerscreen,modal', feed.feedID);
+        API.openFeedProperties(feed.feedID);
     },
 
     displayShortcuts: function cmd_displayShortcuts() {
-        let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
-
-        let windows = Services.wm.getEnumerator(null);
-        while (windows.hasMoreElements()) {
-            let win = windows.getNext();
-            if (win.document.documentURI == url) {
-                win.focus();
-                return;
-            }
-        }
-
-        let height = Math.min(window.screen.availHeight, 650);
-        let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
-
-        window.openDialog(url, 'Brief shortcuts', features);
-    },
-
-    openLibrary: function cmd_openLibrary() {
-        let organizer = Services.wm.getMostRecentWindow('Places:Organizer');
-        if (!organizer) {
-            openDialog('chrome://browser/content/places/places.xul', '',
-                       'chrome,toolbar=yes,dialog=no,resizable', PrefCache.homeFolder);
-        }
-        else {
-            organizer.PlacesOrganizer.selectLeftPaneContainerByHierarchy(PrefCache.homeFolder);
-            organizer.focus();
-        }
+        API.openShortcuts();
     },
 
     updateFeed: function cmd_updateFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        FeedUpdateService.updateFeeds([feed]);
+        API.updateFeeds([feed.feedID]);
     },
 
 }
 
-function showContextOptionsDropdown() {
-    if (ViewList.selectedItem && ViewList.selectedItem.id == 'trash-folder')
-        var panelID = 'brief-trash-actions-panel';
-    else if (FeedList.selectedFeed && !FeedList.selectedFeed.isFolder)
-        panelID = 'brief-feed-settings-panel';
-    else
-        return;
+let refreshProgressmeter = function* refreshProgressmeter() {
+    let {status, scheduled, completed} = yield API.getUpdateServiceStatus();
+    if (status != /* FeedUpdateService.NOT_UPDATING */ 0) { // XXX
+        getElement('sidebar-top').dataset.mode = "update";
 
-    let panel = getTopWindow().document.getElementById(panelID);
-
-    // Modify the position to horizontally center the arrow on the anchor.
-    let anchor = getElement('view-title-button');
-    panel.openPopup(anchor, 'after_start', -11, 0);
-}
-
-function showOptionsDropdown() {
-    let panel = getTopWindow().document.getElementById('brief-options-panel')
-
-    let button = getElement('options-dropdown-button');
-    let rect = button.getBoundingClientRect();
-
-    // Modify the position to horizontally center the arrow on the text.
-    // We must account for widths of the panel arrow and the button dropmarker.
-    panel.openPopup(button, 'after_start', (rect.width - 10) / 2 - 18, 0);
-}
-
-function refreshProgressmeter(aReason) {
-    if (FeedUpdateService.status != FeedUpdateService.NOT_UPDATING) {
-        getElement('update-buttons-deck').selectedIndex = 1;
-
-        if (FeedUpdateService.scheduledFeedsCount > 1)
+        if (scheduled > 1)
             getElement('update-progress').setAttribute('show', true);
 
-        getElement('update-progress').value = 100 * FeedUpdateService.completedFeedsCount /
-                                                    FeedUpdateService.scheduledFeedsCount;
+        getElement('update-progress').value = 1.0 * completed / scheduled;
     }
     else {
-        getElement('update-buttons-deck').selectedIndex = 0;
+        getElement('sidebar-top').dataset.mode = "idle";
         getElement('update-progress').removeAttribute('show');
     }
-}
+}.task();
 
 
 function onSearchbarCommand() {
     let searchbar = getElement('searchbar');
-    let bundle = getElement('main-bundle');
 
     if (searchbar.value)
-        gCurrentView.titleOverride = bundle.getFormattedString('searchResults', [searchbar.value]);
+        gCurrentView.titleOverride = STRINGS.formatStringFromName('searchResults', [searchbar.value], 1);
     else
         gCurrentView.titleOverride = '';
 
@@ -378,37 +282,6 @@ function onSearchbarBlur() {
     }
 }
 
-
-/**
- * Space can't be captured using the <key/> XUL element so we handle
- * it manually using a listener. Also, unlike other keys it must be default-prevented.
- */
-function onKeyPress(aEvent) {
-    // Don't do anything if the user is typing in an input field.
-    if (aEvent.originalTarget.localName.toUpperCase() == 'INPUT')
-        return;
-
-    // Stop propagation of character keys in order to disable Find-As-You-Type.
-    if (aEvent.charCode)
-        aEvent.stopPropagation();
-
-    if (Prefs.getBoolPref('assumeStandardKeys') && aEvent.charCode == aEvent.DOM_VK_SPACE) {
-        if (aEvent.shiftKey) {
-            if (gCurrentView.headlinesView)
-                gCurrentView.scrollUpByScreen();
-            else
-                gCurrentView.selectPrevEntry();
-        }
-        else {
-            if (gCurrentView.headlinesView)
-                gCurrentView.scrollDownByScreen();
-            else
-                gCurrentView.selectNextEntry();
-        }
-
-        aEvent.preventDefault();
-    }
-}
 
 function onMarkViewReadClick(aEvent) {
     if (aEvent.ctrlKey)
@@ -439,6 +312,11 @@ let PrefObserver = {
             this._updateCachedPref(key);
 
         Prefs.addObserver('', this, false);
+
+        // Special case: not Brief-specific
+        this._general = Services.prefs.getBranch('general.');
+        PrefCache.smoothScroll = this._general.getBoolPref('smoothScroll');
+        this._general.addObserver('general', this, false);
     },
 
     unregister: function PrefObserver_unregister() {
@@ -449,13 +327,12 @@ let PrefObserver = {
     // of PrefCache.
     _cachedPrefs: {
         doubleClickMarks:          'feedview.doubleClickMarks',
-        viewMode:                  'feedview.mode',
         autoMarkRead:              'feedview.autoMarkRead',
-        filterUnread:              'feedview.filterUnread',
-        filterStarred:             'feedview.filterStarred',
         sortUnreadViewOldestFirst: 'feedview.sortUnreadViewOldestFirst',
         showFavicons:              'showFavicons',
-        homeFolder:                'homeFolder'
+        homeFolder:                'homeFolder',
+        pagePersist:               'pagePersist',
+        assumeStandardKeys:        'assumeStandardKeys',
     },
 
     _updateCachedPref: function PrefObserver__updateCachedPref(aKey) {
@@ -482,6 +359,8 @@ let PrefObserver = {
             if (aData == this._cachedPrefs[key])
                 this._updateCachedPref(key);
         }
+        if(aData === 'smoothScroll')
+            PrefCache.smoothScroll = this._general.getBoolPref('general.smoothScroll');
 
         switch (aData) {
             case 'feedview.autoMarkRead':
@@ -492,19 +371,157 @@ let PrefObserver = {
                 if (gCurrentView.query.read === false)
                     gCurrentView.refresh();
                 break;
-
-            case 'feedview.filterUnread':
-            case 'feedview.filterStarred':
-                getElement('filter-unread-checkbox').checked = PrefCache.filterUnread;
-                getElement('filter-starred-checkbox').checked = PrefCache.filterStarred;
-                getElement('show-all-entries-checkbox').checked = !PrefCache.filterUnread &&
-                                                                  !PrefCache.filterStarred;
-                gCurrentView.refresh();
-                break;
         }
     }
 
-}
+};
+
+/* Supports draggable splitters */
+let SplitterModule = {
+    _active: null,
+
+    init: function Splitter_init() {
+        document.body.addEventListener('mousedown', event => this._trigger(event), {capture: true});
+        document.body.addEventListener('mousemove', event => this._update(event), {capture: true});
+        document.body.addEventListener('mouseup', event => this._finish(event), {capture: true});
+    },
+
+    _trigger: function Splitter__trigger(event) {
+        let splitter = event.target;
+        if(splitter.nodeName !== 'draggable-splitter')
+            return;
+        if(event.button !== 0)
+            return;
+        if(event.detail === 2) {
+            event.target.dispatchEvent(new MouseEvent('dblclick', {bubbles: true}));
+            // Looks like a double-click which are not handled automatically
+        }
+        splitter.parentNode.classList.add('resize-in-progress');
+        let target = splitter.previousElementSibling;
+        let offset = event.screenX - target.getBoundingClientRect().right;
+        this._active = {splitter, target, offset};
+        event.preventDefault();
+    },
+
+    _update: function Splitter__update(event) {
+        if(this._active === null)
+            return;
+        let {splitter, target, offset} = this._active;
+        let current_offset = event.screenX - target.getBoundingClientRect().right;
+        target.style.width = (target.offsetWidth + (current_offset - offset)) + 'px';
+        event.preventDefault();
+    },
+
+    _finish: function Splitter__finish(event) {
+        if(this._active === null)
+            return;
+        let {splitter} = this._active;
+        this._update(event);
+        splitter.parentNode.classList.remove('resize-in-progress');
+        this._active = null;
+    },
+};
+
+let Persistence = {
+    BRIEF_XUL_URL: 'chrome://brief/content/brief.xul',
+
+    data: null,
+
+    init: function* Persistence_init() {
+        let data = PrefCache.pagePersist;
+        if(data !== "") {
+            this.data = JSON.parse(data);
+        } else {
+            this.data = yield this._import();
+            this.save();
+        }
+    }.task(),
+
+    save: function Persistence_save() {
+        this._collect();
+        API.savePersistence(this.data);
+    },
+
+    _collect: function Persistence__collect() {
+        let id = ViewList.selectedItem && ViewList.selectedItem.id;
+        if(id === 'today-folder' || id === 'all-items-folder')
+            this.data.startView = id;
+
+        FeedList.persistFolderState();
+        this.data.closedFolders = getElement('feed-list').getAttribute('closedFolders');
+
+        this.data.tagList.width = getElement('tag-list').style.width;
+        this.data.sidebar.width = getElement('sidebar').style.width;
+        this.data.sidebar.hidden = !document.body.classList.contains('sidebar');
+    },
+
+    _import: function* Persistence__import() {
+        let data = yield API.getXulPersist();
+        data.view = {
+            filter: Prefs.getBoolPref('feedview.filterUnread') ? 'unread' :
+                (Prefs.getBoolPref('feedview.filterStarred') ? 'starred' : 'all'),
+            mode: Prefs.getIntPref('feedview.mode') ? 'headlines' : 'full',
+        };
+        return data;
+    }.task(),
+};
+
+let Shortcuts = {
+    init: function Shortcuts_init() {
+        document.addEventListener('keypress', this, {capture: true});
+        getElement('feed-view').contentDocument.addEventListener('keypress', this, {capture: true});
+    },
+
+    handleEvent: function Shortcuts_handleEvents(event) {
+        let target = event.target;
+        if(target.nodeName === 'input' || target.nodeName === 'textarea')
+            return;
+        let description = (
+            (event.ctrlKey ? 'Ctrl+' : '') +
+            (event.metaKey ? 'Meta+' : '') +
+            (event.altKey ? 'Alt+' : '') +
+            (event.shiftKey ? 'Shift+' : '') +
+            event.key
+        );
+        switch(description) {
+            case 'j': gCurrentView.selectNextEntry(); break;
+            case 'k': gCurrentView.selectPrevEntry(); break;
+            case 'u': gCurrentView.scrollDownByScreen(); break;
+            case 'i': gCurrentView.scrollUpByScreen(); break;
+
+            case 'm': Commands.toggleSelectedEntryRead(); break;
+            case 'n': Commands.markVisibleEntriesRead(); break;
+            case 'Alt+n': Commands.markViewRead(); break;
+            case 't': Commands.deleteOrRestoreSelectedEntry(); break;
+            case 'b': Commands.toggleSelectedEntryStarred(); break;
+            case 'h': Commands.toggleSelectedEntryCollapsed(); break;
+            case 'Enter': Commands.openSelectedEntryLink(); break;
+
+            case 'f': Commands.switchViewMode(1); break;
+            case 'g': Commands.switchViewMode(0); break;
+            case 'a': Commands.switchViewFilter('all'); break;
+            case 's': Commands.switchViewFilter('starred'); break;
+            case 'd': Commands.switchViewFilter('unread'); break;
+            case '/': getElement('searchbar').focus(); break;
+
+            case 'Shift+?': Commands.displayShortcuts(); break;
+
+            // Space and Shift+Space behave differently only in full view
+            case ' ':
+            case 'Shift+ ':
+                if(!PrefCache.assumeStandardKeys || gCurrentView.headlinesView)
+                    return;
+                if(event.shiftKey)
+                    gCurrentView.selectPrevEntry();
+                else
+                    gCurrentView.selectNextEntry();
+                break;
+            default: return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+    },
+};
 
 
 // ------- Utility functions --------

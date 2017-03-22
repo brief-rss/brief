@@ -1,6 +1,190 @@
-richtree {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtree);
+/* =========== Rules applicable to all trees =========== */
+
+tree-box {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
+
+tree-item,
+tree-folder-header {
+    flex-shrink: 0;
+    display: flex;
+}
+
+tree-folder {
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: column;
+}
+
+tree-folder.collapsed > tree-item,
+tree-folder.collapsed > tree-folder {
+    display: none;
+}
+
+tree-folder-header > .toggle-collapsed::-moz-focus-inner {
+    border:0;
+}
+
+
+/* =========== Brief DOM =========== */
+
+tree-folder:not(.unread) > tree-folder-header > .unread-count,
+tree-folder:not(.collapsed) > tree-folder-header > .unread-count,
+tree-item:not(.unread) > .unread-count {
+    visibility: hidden;
+}
+
+tree-item[data-loading="true"] > .icon,
+tree-item[data-error="true"] > .icon,
+tree-item:not([data-error="true"]):not([data-loading="true"]) > .system-icon {
+    display: none;
+}
+
+tree-item > .icon,
+tree-item > .system-icon,
+tree-folder-header > .icon,
+tree-folder-header > .system-icon {
+    flex-shrink: 0;
+}
+
+tree-item > .title,
+tree-folder-header > .title {
+    flex-shrink: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 3em !important;
+}
+
+
+/* =========== Brief theming =========== */
+
+tree-item {
+    border: 1px solid transparent !important; /* Placeholder for selection border */
+    padding: 2px 1px 2px 5px !important;
+}
+
+tree-item.selected,
+tree-folder.selected > tree-folder-header {
+    border-color: #ffc9a6 !important;
+    background-color: #fcd7bd !important;
+}
+
+tree-item:hover:not(.selected),
+tree-folder:not(.selected) > tree-folder-header:hover {
+    border-color: #e5e5e5 !important;
+    background-color: #e5e5e5 !important;
+}
+
+tree-item > .icon,
+tree-item > .system-icon {
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 6px !important;
+}
+
+tree-item[data-loading="true"] > .system-icon {
+    background-image: url("chrome://brief/skin/throbber.gif") !important;
+}
+
+tree-item[data-error="true"]:not([data-loading="true"]) > .system-icon {
+    background-image: url("chrome://brief/skin/icons/error.png") !important;
+}
+
+tree-item > .title,
+tree-folder-header > .title {
+    font-size: 13px !important;
+    color: #454545 !important;
+}
+
+tree-folder-header > .title {
+    font-weight: bold !important;
+}
+
+.unread-count {
+    min-width: 2em !important;
+    margin-left: auto !important;
+    text-align: center;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    color: #539bcf !important;
+}
+
+tree-folder {
+    margin: 10px 0 13px !important;
+}
+
+tree-folder + tree-folder,
+tree-folder:first-child {
+    margin-top: 0 !important;
+}
+
+tree-folder:last-child {
+    margin-bottom: 0 !important;
+}
+
+tree-folder-header {
+    padding: 2px 1px 2px 5px !important;
+    border: 1px solid transparent !important; /* Placeholder for selection border */
+}
+
+tree-folder-header > .toggle-collapsed {
+    padding: 5px 5px 1px !important;
+
+    width: 11px !important;
+    height: 11px !important;
+    box-sizing: content-box !important;
+
+    background-image: url(icons/twisty.png) !important;
+    background-position: 0 0 !important;
+    background-origin: content-box !important;
+    background-clip: content-box !important;
+
+    opacity: 0;
+    transition: opacity 200ms;
+}
+
+tree-folder-header > .toggle-collapsed:hover {
+    background-position: 0 -11px !important;
+}
+
+tree-folder-header:hover > .toggle-collapsed {
+    opacity: 1;
+}
+
+tree-folder.collapsed > tree-folder-header > .toggle-collapsed {
+    padding: 3px 5px 3px !important;
+    background-position: -11px 0 !important;
+}
+
+tree-folder.collapsed > tree-folder-header > .toggle-collapsed:hover {
+    background-position: -11px -11px !important;
+}
+
+
+
+/* Indentation for first level nesting */
+tree-folder > tree-item,
+tree-folder > tree-folder > tree-folder-header {
+    padding-left: 20px !important;
+}
+
+/* Indentation for second level nesting */
+tree-folder > tree-folder > tree-item,
+tree-folder > tree-folder > tree-folder > tree-folder-header {
+    padding-left: 40px !important;
+}
+
+/* Indentation for third level nesting */
+tree-folder > tree-folder > tree-folder > tree-item,
+tree-folder > tree-folder > tree-folder > tree-folder > tree-folder-header {
+    padding-left: 60px !important;
+}
+
+
+/* =========== Tree instances =========== */
 
 #feed-list {
     margin-top: 15px !important;
@@ -9,127 +193,133 @@ richtree {
 
 
 
-/* =========== Feeds =========== */
+#feed-list {
+    flex: 1 1 auto;
+}
 
-richtreeitem {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtreeitem);
-    -moz-box-align: center;
+/* =========== View list tree =========== */
+
+#view-list {
+    margin: 7px 0 0 5px !important;
+    flex: 0 0 auto;
+}
+
+#view-list > tree-item {
+    padding: 3px 1px 2px 20px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
+}
+
+#view-list > tree-item > .title {
+    margin: 0 4px 0 0 !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    color: #454545 !important;
+}
+
+
+/* =========== Tag listbox =========== */
+
+#tag-list {
+    background-color: #f2f2f2 !important;
+    min-width: 100px !important;
+    flex-shrink: 1000000; /* Shrink this all the way first, if not enough, shrink the other one */
+}
+
+#tag-list > tree-item {
     padding: 2px 1px 2px 5px !important;
+    border: 1px solid transparent !important; /* Placeholder for selection border */
+    font-size: 13px !important;
+    color: #454545 !important;
+    border-radius: 0 !important;
 }
 
-.feed-icon {
-    width: 16px !important;
-    height: 16px !important;
-    margin-right: 6px !important;
-    list-style-image: url(icons/default-feed-favicon.png);
+/* =========== Context menus =========== */
+context-menu-set {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    /*background-color: rgba(0, 0, 0, 0.2) !important;*/
+    display: block;
+    visibility: hidden;
 }
 
-.feed-title {
+context-menu-set.menu-visible {
+    visibility: visible;
+}
+
+context-menu {
+    position: absolute;
+
+    display: flex;
+    flex-direction: column;
+    width: -moz-min-content;
+
+    visibility: hidden;
+
+    background-color: #f2f2f2 !important;
+    border: 1px solid #bdbdbd !important;
+    padding: 10px !important;
+    cursor: default;
+}
+
+context-menu.visible {
+    visibility: visible;
+}
+
+menu-item {
+    display: flex;
+    white-space: nowrap;
+    align-items: center;
+    height: 25px !important;
+    padding: 0 15px !important;
     font-size: 13px !important;
     color: #454545 !important;
 }
 
-.unread-count,
-.tag-list-item > .listcell-iconic::after {
-    min-width: 2em !important;
-    margin-left: 5px !important;
-    text-align: center;
-    font-size: 13px !important;
-    font-weight: bold !important;
-    color: #539bcf !important;
+menu-item:hover {
+    background-color: #e5e5e5 !important;
 }
 
-
-
-/* =========== Folders =========== */
-
-richtreefolder {
-    -moz-binding: url(chrome://brief/content/richtree.xml#richtreefolder);
-    -moz-box-orient: vertical;
-    margin: 10px 0 13px !important;
+context-menu > hr {
+    border-top: 1px solid #bdbdbd !important;
+    margin: 6px 10px 6px !important;
 }
 
-richtreefolder + richtreefolder,
-richtreefolder:first-child {
-    margin-top: 0 !important;
-}
-
-richtreefolder:last-child {
-    margin-bottom: 0 !important;
-}
-
-
-
-richtreefolder > .folder-title-container {
-    padding: 2px 1px 2px 5px !important;
-    border: 1px solid transparent !important; /* Placeholder for selection border */
-    -moz-box-align: center;
-    display: flex;
-}
-
-.folder-title {
-    color: #454545;
-    font-size: 13px !important;
-    font-weight: bold !important;
-    flex-shrink: 1;
-}
-
-.folder-title-spacer {
-    flex-basis: 0;
-    flex-grow: 1;
-}
-
-.folder-twisty {
-    padding: 3px 5px 3px !important;
-    list-style-image: url(icons/twisty.png);
-    -moz-image-region: rect(0, 22px, 11px, 11px);
-    opacity: 0;
-    transition: opacity 200ms;
-}
-
-.folder-twisty:hover {
-    -moz-image-region: rect(11px, 22px, 22px, 11px);
-}
-
-.folder-title-container:hover > .folder-twisty {
-    opacity: 1;
-}
-
-richtreefolder[open="true"] > .folder-title-container > .folder-twisty {
-    -moz-image-region: rect(0px, 11px, 11px, 0px);
-    padding: 5px 5px 1px !important;
-}
-
-richtreefolder[open="true"] > .folder-title-container > .folder-twisty:hover {
-    -moz-image-region: rect(11px, 11px, 22px, 0px);
-}
-
-
-
-.folder-container {
+#view-list-context-menu:not([data-target="today-folder"]) > #ctx-empty-today-folder,
+#view-list-context-menu:not([data-target="trash-folder"]) > #ctx-restore-trashed,
+#view-list-context-menu:not([data-target="trash-folder"]) > #ctx-empty-trash,
+#view-list-context-menu:not([data-target="today-folder"]):not([data-target="trash-folder"]) > #ctx-view-list-separator-empty {
     display: none;
-    padding-top: 2px !important;
 }
 
-richtreefolder[open="true"] > .folder-container {
-    display: -moz-box;
+#feed-list-context-menu.folder > #feed-context-menu,
+#feed-list-context-menu:not(.folder) > #folder-context-menu {
+    display: none;
 }
 
-/* Indentation for first level nesting */
-richtreefolder[open="true"] > .feed-treeitem,
-richtreefolder[open="true"] > richtreefolder > .folder-title-container {
-    padding-left: 20px !important;
+/* ========== Dropdown menus ============ */
+context-menu.dropdown-menu::before {
+    position: absolute;
+    top: -14px;
+    left: 4px;
+    content: url(panel-arrow.svg);
 }
 
-/* Indentation for second level nesting */
-richtreefolder[open="true"] > richtreefolder[open="true"] > .feed-treeitem,
-richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder > .folder-title-container {
-    padding-left: 40px !important;
+context-menu.dropdown-menu {
+    border-radius: 4px;
+    background-clip: padding-box !important;
+    margin: 10px 4px 4px !important;
 }
 
-/* Indentation for third level nesting */
-richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder[open="true"] > .feed-treeitem,
-richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder[open="true"] > richtreefolder > .folder-title-container {
-    padding-left: 60px !important;
+#dropdown-menu-feed-actions,
+#dropdown-menu-trash-actions {
+    margin-left: -3px !important; /* Align with the icon */
+}
+
+#dropdown-menu-options {
+    margin-left: -22px !important; /* Align (more or less) with the center of the text */
+    margin-top: 4px !important;
 }

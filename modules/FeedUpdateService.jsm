@@ -66,7 +66,7 @@ const FeedUpdateService = Object.freeze({
      * Downloads feeds and check them for updates.
      *
      * @param aFeeds
-     *        Array of Feed objects representing feeds to be downloaded.
+     *        Array of Feed objects or feedID representing feeds to be downloaded.
      * @param aInBackground [optional]
      *        Use longer delay between requesting subsequent feeds in order to
      *        reduce the CPU load.
@@ -98,7 +98,18 @@ const FeedUpdateService = Object.freeze({
      */
     init: function() {
         return FeedUpdateServiceInternal.init();
-    }
+    },
+
+    /**
+     * Get the full status for clients
+     */
+    getStatus: function() {
+        return {
+            status: this.status,
+            scheduled: this.scheduledFeedsCount,
+            completed: this.completedFeedsCount,
+        }
+    },
 })
 
 
@@ -161,8 +172,10 @@ let FeedUpdateServiceInternal = {
     updateFeeds: function* FeedUpdateServiceInternal_updateFeeds(aFeeds, aInBackground) {
         yield Storage.ready;
 
+        let feeds = aFeeds.map(feed => (typeof feed !== 'string') ? feed : Storage.getFeed(feed));
+
         // Don't add the same feed be added twice.
-        let newFeeds = aFeeds.filter(feed => this.updateQueue.indexOf(feed) == -1);
+        let newFeeds = feeds.filter(feed => this.updateQueue.indexOf(feed) == -1);
 
         this.scheduledFeeds = this.scheduledFeeds.concat(newFeeds);
         this.updateQueue = this.updateQueue.concat(newFeeds);
@@ -338,13 +351,14 @@ let FeedUpdateServiceInternal = {
         // Just add a livemark, the feed will be updated by the bookmark observer.
         let livemarks = Cc['@mozilla.org/browser/livemark-service;2']
                         .getService(Ci.mozIAsyncLivemarks);
-        livemarks.addLivemark({
+        yield livemarks.addLivemark({
             title: parsedFeed.title.text,
             feedURI: Services.io.newURI(aURL, null, null),
             siteURI: parsedFeed.link,
             parentId: Prefs.getIntPref('homeFolder'),
             index: Ci.nsINavBookmarksService.DEFAULT_INDEX,
-        })
+        });
+        yield Storage.syncWithLivemarks();
     }.task(),
 
     // nsIObserver

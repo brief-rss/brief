@@ -6,27 +6,13 @@
     <title>&pageTitle;</title>
     <link rel="stylesheet" href="chrome://brief/skin/firstrun.css"/>
     <link rel="icon" href="chrome://brief/skin/feed-icon-16x16.png" type="image/png"/>
-    <script type="text/javascript;version=1.8">
-     //<![CDATA[
-        let Ci = Components.interfaces;
-
+    <script type="text/javascript">
         window.addEventListener('DOMContentLoaded', event => {
             if (document.documentURI.match('tutorial')) {
                 document.getElementById('header').style.display = 'none';
                 document.getElementById('open-brief').style.display = 'none';
             }
         }, false);
-
-        function openBrief() {
-            let topWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
-                                  .getInterface(Ci.nsIWebNavigation)
-                                  .QueryInterface(Ci.nsIDocShellTreeItem)
-                                  .rootTreeItem
-                                  .QueryInterface(Ci.nsIInterfaceRequestor)
-                                  .getInterface(Ci.nsIDOMWindow);
-            topWindow.Brief.open(true);
-        }
-    //]]>
     </script>
 </head>
 
@@ -72,9 +58,9 @@
 
     </div>
 
-    <div id="open-brief" onclick="openBrief()">
+    <a id="open-brief" href="chrome://brief/content/brief.xhtml">
         &getStartedButton.label;
-    </div>
+    </a>
 
 </div>
 </body>

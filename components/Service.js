@@ -1,4 +1,5 @@
 Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://brief/API.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 Components.utils.import('resource://gre/modules/FileUtils.jsm');
@@ -11,6 +12,8 @@ function BriefService() {
     Storage.init();
     Components.utils.import('resource://brief/FeedUpdateService.jsm');
     FeedUpdateService.init();
+    // Initialize the client API
+    this.API = new BriefServer();
 
     // Register the custom CSS file under a resource URI.
     let resourceProtocolHandler = Services.io.getProtocolHandler('resource')
@@ -43,10 +46,6 @@ BriefService.prototype = {
 
     },
 
-    // nsIObserver
-    observe: function() {
-
-    },
 
     classDescription: 'Service of Brief extension',
     classID: Components.ID('{943b2280-6457-11df-a08a-0800200c9a66}'),
