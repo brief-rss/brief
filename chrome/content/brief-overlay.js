@@ -4,8 +4,6 @@ var Brief = {
 
     BRIEF_OPTIONS_URL: 'chrome://brief/content/options/options.xul',
 
-    get toolbarbutton() { return document.getElementById('brief-button') },
-
     get prefs() {
         delete this.prefs;
         return this.prefs = Services.prefs.getBranch('extensions.brief.');
@@ -49,6 +47,14 @@ var Brief = {
 
         delete this.OPML;
         return this.OPML = tempScope.OPML;
+    },
+
+    get toolbarbutton() {
+        let tempScope = {};
+        Components.utils.import('chrome://brief/content/brief-overlay-button.jsm', tempScope);
+
+        delete this.toolbarbutton;
+        return this.toolbarbutton = tempScope.briefButton;
     },
 
     open: function Brief_open(aInCurrentTab) {
@@ -126,6 +132,7 @@ var Brief = {
         if (!wccs.getWebContentHandlerByURI(CONTENT_TYPE, SUBSCRIBE_URL))
             wccs.registerContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
 
+        Brief.toolbarbutton.create(Brief.updateStatus);
         if (this.prefs.getBoolPref('firstRun')) {
             this.onFirstRun();
         }
@@ -140,15 +147,7 @@ var Brief = {
             }.bind(this))
         }
 
-        if (this.toolbarbutton)
-            this.initUnreadCounter();
-
-        CustomizableUI.addListener({
-            onCustomizeEnd: () => {
-                this.initUnreadCounter();
-                this.updateStatus();
-            }
-        });
+        this.initUnreadCounterContextMenu();
 
         this.storage.ready.then(() => {
             this.storage.addObserver(this);
@@ -172,9 +171,7 @@ var Brief = {
 
     onPrefChanged: function Brief_onPrefChanged(aSubject, aTopic, aData) {
         if (aData == 'showUnreadCounter') {
-            if (Brief.toolbarbutton)
-                Brief.initUnreadCounter();
-
+            Brief.initUnreadCounterContextMenu();
             Brief.storage.ready.then(Brief.updateStatus);
         }
     },
@@ -190,9 +187,8 @@ var Brief = {
         }
     },
 
-    initUnreadCounter: function() {
+    initUnreadCounterContextMenu: function() {
         let showCounter = this.prefs.getBoolPref('showUnreadCounter');
-
         let menuitem = document.getElementById('brief-show-unread-counter');
         menuitem.setAttribute('checked', showCounter);
     },
@@ -205,12 +201,14 @@ var Brief = {
             Brief.constructTooltip();
     },
 
-    updateStatus: function Brief_updateStatus() {
-        if (!Brief.toolbarbutton)
+    updateStatus: function Brief_updateStatus(toolbarbutton) {
+        if (toolbarbutton == undefined)
+            toolbarbutton = Brief.toolbarbutton.forWindow(window);
+        if (!toolbarbutton)
             return;
 
         if (!Brief.prefs.getBoolPref('showUnreadCounter')) {
-            Brief.toolbarbutton.setAttribute('badge', '');
+            toolbarbutton.setAttribute('badge', '');
             return;
         }
 
@@ -228,7 +226,7 @@ var Brief = {
             Firefox 38 and leave the least-significant digits */
             if (text.length > 4)
                 text = '…' + text.substring(text.length - 3);
-            Brief.toolbarbutton.setAttribute('badge', text);
+            toolbarbutton.setAttribute('badge', text);
         })
     },
 
@@ -338,7 +336,7 @@ var Brief = {
     },
 
     onFirstRun: function Brief_onFirstRun() {
-        CustomizableUI.addWidgetToArea('brief-button', CustomizableUI.AREA_NAVBAR);
+        this.toolbarbutton.addToToolbar();
 
         this.prefs.setBoolPref('firstRun', false);
 
