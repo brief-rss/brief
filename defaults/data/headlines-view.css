@@ -88,6 +88,8 @@ article.selected .headline-header {
     overflow: hidden;
     font-size: 10px;
     color: #606b78;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 body:not(.multiple-feeds) .feed-icon,
