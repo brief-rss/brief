@@ -8,6 +8,8 @@ Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
 Components.utils.import("resource://gre/modules/PlacesUtils.jsm");
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 XPCOMUtils.defineLazyModuleGetter(this, 'RecentWindow', 'resource:///modules/RecentWindow.jsm');
+XPCOMUtils.defineLazyModuleGetter(this, 'OPML', 'resource://brief/opml.jsm');
+
 
 
 XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
@@ -119,6 +121,14 @@ const API_CALLS = {
         ],
     },
 
+    opml: {
+        importFeeds: ['brief:opml:import-feeds', 'async',
+            () => OPML.importFile()
+        ],
+        exportFeeds: ['brief:opml:export-feeds', 'async',
+            () => OPML.exportFeeds()
+        ],
+    },
 };
 
 // The list of observer notifications to be forwarded to clients
