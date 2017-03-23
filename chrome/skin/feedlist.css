@@ -55,7 +55,6 @@ tree-folder-header > .title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 3em !important;
 }
 
 
