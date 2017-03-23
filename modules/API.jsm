@@ -135,6 +135,8 @@ const OBSERVER_TOPICS = [
 ];
 
 const Utils = {
+    BRIEF_XUL_URL: 'chrome://brief/content/brief.xul',
+
     get window() { return RecentWindow.getMostRecentBrowserWindow() },
 
     openLibrary: function() {

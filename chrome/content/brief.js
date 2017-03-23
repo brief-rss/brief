@@ -423,8 +423,6 @@ let SplitterModule = {
 };
 
 let Persistence = {
-    BRIEF_XUL_URL: 'chrome://brief/content/brief.xul',
-
     data: null,
 
     init: function* Persistence_init() {
