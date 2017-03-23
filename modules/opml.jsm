@@ -49,20 +49,12 @@ let OPMLInternal = {
             // At this point, we have an XML doc in opmldoc
             for (let node of opmldoc.getElementsByTagName('body')[0].childNodes) {
                 if (node.nodeName == 'outline')
-                    results = this.importNode(results, node);
+                    results.push(this.importNode(node));
             }
-
-            // Now we have the structure of the file in an array.
-            let carr = {folders : 0, links : 0, feeds : 0};
-
-            for (let result of results)
-                carr = this.countItems(result, carr);
-
-            let transactions = [];
 
             Storage.ensureHomeFolder();
             let homeFolder = Services.prefs.getIntPref('extensions.brief.homeFolder');
-            this.importLevel(results, homeFolder, transactions);
+            let transactions = this.importLevel(results, homeFolder);
 
             let aggregatedTrans = new PlacesAggregatedTransaction('Import feeds',
                                                                   transactions);
@@ -70,12 +62,12 @@ let OPMLInternal = {
         }
     }.task(),
 
-    importLevel: function(aNodes, aCreateIn, aTransactions) {
+    importLevel: function(aNodes, aCreateIn) {
+        let aTransactions = [];
         for (let node of aNodes) {
             switch (node.type) {
             case 'folder':
-                let childItemsTransactions = [];
-                this.importLevel(node.children, null, childItemsTransactions);
+                let childItemsTransactions = this.importLevel(node.children, null);
 
                 let trans = new PlacesCreateFolderTransaction(node.title, aCreateIn, -1,
                                                               null, childItemsTransactions);
@@ -119,26 +111,10 @@ let OPMLInternal = {
                 break;
             }
         }
+        return aTransactions;
     },
 
-    countItems: function (arr, carr) {
-        if (arr.type == 'folder') {
-            carr.folders++;
-
-            for (let child of arr.children)
-                carr = this.countItems(child, carr);
-        }
-        else if (arr.type == 'link') {
-            carr.links++;
-        }
-        else if (arr.type == 'feed') {
-            carr.feeds++;
-        }
-
-        return carr;
-    },
-
-    importNode: function(results, node) {
+    importNode: function(node) {
         let hash = {};
         hash.title = node.getAttribute('text');
         hash.keyword = '';
@@ -151,10 +127,8 @@ let OPMLInternal = {
 
             for (let child of node.childNodes) {
                 if (child.nodeName == 'outline')
-                    hash.children = this.importNode(hash.children, child);
+                    hash.children.push(this.importNode(child));
             }
-
-            results.push(hash);
         }
         else {
             if (node.getAttribute('type') == 'link') {
@@ -169,11 +143,9 @@ let OPMLInternal = {
             }
 
             hash.desc = node.getAttribute('description');
-
-            results.push(hash);
         }
 
-        return results;
+        return hash;
     },
 
     exportOPML: function* exportOPML() {
@@ -212,11 +184,7 @@ let OPMLInternal = {
         level++;
 
         if (!isBase) {
-            dataString += '\t';
-
-            for (let i = 1; i < level; i++)
-                dataString += '\t';
-
+            dataString += '\t'.repeat(level);
             let name = PlacesUtils.bookmarks.getItemTitle(folder.itemId);
             dataString += '<outline text="' + this.cleanXMLText(name) + '">' + '\n';
         }
@@ -231,16 +199,11 @@ let OPMLInternal = {
 
             try {
                 let livemark = yield PlacesUtils.livemarks.getLivemark({ 'id': node.itemId });
-
-                dataString += '\t\t';
-
-                for (let j = 1; j < level; j++)
-                    dataString += '\t';
-
                 let name = PlacesUtils.bookmarks.getItemTitle(node.itemId);
                 let feedURL = livemark.feedURI.spec;
                 let siteURL = livemark.siteURI ? livemark.siteURI.spec : '';
 
+                dataString += '\t'.repeat(level + 1);
                 dataString += '<outline type="rss" version="RSS" '           +
                               'text="'          + this.cleanXMLText(name)    +
                               '" htmlUrl="'     + this.cleanXMLText(siteURL) +
@@ -258,11 +221,7 @@ let OPMLInternal = {
         folder.containerOpen = false;
 
         if (!isBase) {
-            dataString += '\t';
-
-            for (let i = 1; i < level; i++)
-                dataString += '\t';
-
+            dataString += '\t'.repeat(level);
             dataString += '</outline>' + '\n';
         }
 
