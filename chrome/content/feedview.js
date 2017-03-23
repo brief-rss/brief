@@ -1208,8 +1208,12 @@ EntryView.prototype = {
 
     onClick: function EntryView_onClick(aEvent) {
         // If the item is already being removed, no action should be taken
-        if(this.container.getAttribute("removing"))
+        if(this.container.getAttribute("removing")) {
+            // Prevent the default action, without this
+            // clicking on removing feeds opens them in the brief tab
+            aEvent.preventDefault();
             return;
+        }
 
         this.feedView.selectEntry(this.id);
 
