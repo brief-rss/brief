@@ -103,12 +103,13 @@ var Commands = {
                 feedID: FeedList.selectedFeed.feedID,
                 viewMode: (aMode === 'headlines')
             });
+            // Refresh will happen from the observer
         }
         else {
             Persistence.data.view.mode = aMode;
+            gCurrentView.refresh();
         }
 
-        gCurrentView.refresh();
     },
 
     switchViewFilter: function cmd_switchViewFilter(aFilter) {

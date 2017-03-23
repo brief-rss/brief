@@ -141,6 +141,7 @@ const OBSERVER_TOPICS = [
     'brief:invalidate-feedlist',
     'brief:feed-title-changed',
     'brief:feed-favicon-changed',
+    'brief:feed-view-mode-changed',
     'brief:custom-style-changed',
 ];
 

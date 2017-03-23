@@ -462,6 +462,10 @@ let StorageInternal = {
                             Services.obs.notifyObservers(null, 'brief:feed-favicon-changed',
                                                          cachedFeed.feedID);
                             break;
+                        case 'viewMode':
+                            Services.obs.notifyObservers(null, 'brief:feed-view-mode-changed',
+                                                         cachedFeed.feedID);
+                            break;
                     }
                 }
 

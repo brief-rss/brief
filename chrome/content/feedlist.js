@@ -529,6 +529,12 @@ let FeedList = {
                 // TODO: should update FeedView and feed view title too(?)
                 break;
 
+            case 'brief:feed-view-mode-changed':
+                this._allFeeds = null;
+                if(this.selectedFeed && this.selectedFeed.feedID === aData)
+                    gCurrentView.refresh();
+                break;
+
             case 'brief:feed-updated': {
                 this.tree.updateElement(aData, {loading: false, error: false});
                 refreshProgressmeter();
