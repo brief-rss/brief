@@ -107,6 +107,8 @@ FeedView.prototype = {
     _scrolling: null,
     // Autoselect timeout ID for clearTimeout
     _scrollSelectionTimeout: null,
+    // Partially delay processing a scroll event to the next animationFrame
+    _scrollAnimationFrame: null,
 
     // Indicates if a filter paramater is fixed and cannot be toggled by the user.
     _fixedStarred: false,
@@ -415,11 +417,6 @@ FeedView.prototype = {
             case 'scroll':
                 this._autoMarkRead();
 
-                if (this.window.pageYOffset > 0)
-                    getElement('feed-view-header').setAttribute('border', true);
-                else
-                    getElement('feed-view-header').removeAttribute('border');
-
                 if (this._suppressSelectionOnNextScroll) {
                     this._suppressSelectionOnNextScroll = false;
                 }
@@ -431,13 +428,26 @@ FeedView.prototype = {
                     this._scrollSelectionTimeout = setTimeout(callback, 50);
                 }
 
-                if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                if (!this._loading && !this._allEntriesLoaded
+                        && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
+
+                if (this._scrollAnimationFrame === null) {
+                    this._scrollAnimationFrame = requestAnimationFrame(() => {
+                        if (this.window.pageYOffset > 0)
+                            getElement('feed-view-header').setAttribute('border', true);
+                        else
+                            getElement('feed-view-header').removeAttribute('border');
+
+                        this._scrollAnimationFrame = null;
+                    });
+                }
                 break;
 
             case 'resize':
-                if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                if (!this._loading && !this._allEntriesLoaded
+                        && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
                 break;
