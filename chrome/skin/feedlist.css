@@ -282,7 +282,7 @@ menu-item:hover {
     background-color: #e5e5e5 !important;
 }
 
-context-menu > hr {
+context-menu hr {
     border-top: 1px solid #bdbdbd !important;
     margin: 6px 10px 6px !important;
 }
