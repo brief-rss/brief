@@ -952,13 +952,10 @@ function EntryView(aFeedView, aEntryData) {
 
     let deleteButton = this._getElement('delete-button');
     let restoreButton = this._getElement('restore-button');
-    if (this.feedView.query.deleted === 'trashed') {
-        deleteButton.parentNode.removeChild(deleteButton);
-        restoreButton.setAttribute('title', Strings.restoreEntryTooltip);
-    }
-    else {
-        restoreButton.parentNode.removeChild(restoreButton);
-        deleteButton.setAttribute('title', Strings.deleteEntryTooltip);
+    deleteButton.setAttribute('title', Strings.deleteEntryTooltip);
+    restoreButton.setAttribute('title', Strings.restoreEntryTooltip);
+    if (this.feedView.query.deleted == 'trashed') {
+        this.container.classList.add('trashed');
     }
 
     let feed = FeedList.getFeed(aEntryData.feedID);

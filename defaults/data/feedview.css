@@ -169,6 +169,10 @@ pre, code {
     background-image: url(chrome://brief/skin/icons/restore-item.png);
 }
 
+article.trashed .delete-button,
+article:not(.trashed) .restore-button {
+    display: none;
+}
 
 .bookmark-button {
     margin-left: 2px;
