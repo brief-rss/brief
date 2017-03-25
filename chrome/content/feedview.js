@@ -415,10 +415,8 @@ FeedView.prototype = {
             case 'scroll':
                 this._autoMarkRead();
 
-                if (this.window.pageYOffset > 0)
-                    getElement('feed-view-header').setAttribute('border', true);
-                else
-                    getElement('feed-view-header').removeAttribute('border');
+                getElement('feed-view-header').classList.toggle(
+                    'border', this.window.pageYOffset > 0)
 
                 if (this._suppressSelectionOnNextScroll) {
                     this._suppressSelectionOnNextScroll = false;
