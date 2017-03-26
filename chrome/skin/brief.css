@@ -55,13 +55,8 @@ spacer[flex] {
     flex-grow: 1;
 }
 
-draggable-splitter,
-.resize-in-progress {
+draggable-splitter {
     cursor: ew-resize;
-}
-
-.resize-in-progress > * {
-    pointer-events: none;
 }
 
 html {

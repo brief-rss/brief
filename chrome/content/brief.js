@@ -391,17 +391,14 @@ let SplitterModule = {
             return;
         if(event.button !== 0)
             return;
-        if(event.detail === 2) {
-            event.target.dispatchEvent(new MouseEvent('dblclick', {bubbles: true}));
-            // Looks like a double-click which are not handled automatically
-        }
-        splitter.parentNode.classList.add('resize-in-progress');
-        document.body.addEventListener('mousemove', this, {capture: true});
-        document.body.addEventListener('mouseup', this, {capture: true});
+        splitter.addEventListener('mousemove', this);
+        splitter.addEventListener('mouseup', this);
+        splitter.setCapture(); // Auto-released on mouseup
         let target = splitter.previousElementSibling;
         let offset = event.screenX - target.getBoundingClientRect().right;
         this._active = {splitter, target, offset};
         event.preventDefault();
+        event.stopPropagation();
     },
 
     handleEvent: function Splitter_handleEvent(event) {
@@ -410,17 +407,16 @@ let SplitterModule = {
         let {splitter, target, offset} = this._active;
         switch (event.type) {
             case 'mouseup':
-                splitter.parentNode.classList.remove('resize-in-progress');
-                document.body.removeEventListener('mousemove', this, {capture: true});
-                document.body.removeEventListener('mouseup', this, {capture: true});
+                splitter.removeEventListener('mousemove', this);
+                splitter.removeEventListener('mouseup', this);
                 this._active = null;
                 // Fallthrough for the final update
             case 'mousemove':
                 let current_offset = event.screenX - target.getBoundingClientRect().right;
                 target.style.width = (target.offsetWidth + (current_offset - offset)) + 'px';
-                event.preventDefault();
                 break;
         }
+        event.stopPropagation();
     },
 };
 
