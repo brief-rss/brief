@@ -383,8 +383,6 @@ let SplitterModule = {
 
     init: function Splitter_init() {
         document.body.addEventListener('mousedown', event => this._trigger(event), {capture: true});
-        document.body.addEventListener('mousemove', event => this._update(event), {capture: true});
-        document.body.addEventListener('mouseup', event => this._finish(event), {capture: true});
     },
 
     _trigger: function Splitter__trigger(event) {
@@ -398,28 +396,31 @@ let SplitterModule = {
             // Looks like a double-click which are not handled automatically
         }
         splitter.parentNode.classList.add('resize-in-progress');
+        document.body.addEventListener('mousemove', this, {capture: true});
+        document.body.addEventListener('mouseup', this, {capture: true});
         let target = splitter.previousElementSibling;
         let offset = event.screenX - target.getBoundingClientRect().right;
         this._active = {splitter, target, offset};
         event.preventDefault();
     },
 
-    _update: function Splitter__update(event) {
+    handleEvent: function Splitter_handleEvent(event) {
         if(this._active === null)
             return;
         let {splitter, target, offset} = this._active;
-        let current_offset = event.screenX - target.getBoundingClientRect().right;
-        target.style.width = (target.offsetWidth + (current_offset - offset)) + 'px';
-        event.preventDefault();
-    },
-
-    _finish: function Splitter__finish(event) {
-        if(this._active === null)
-            return;
-        let {splitter} = this._active;
-        this._update(event);
-        splitter.parentNode.classList.remove('resize-in-progress');
-        this._active = null;
+        switch (event.type) {
+            case 'mouseup':
+                splitter.parentNode.classList.remove('resize-in-progress');
+                document.body.removeEventListener('mousemove', this, {capture: true});
+                document.body.removeEventListener('mouseup', this, {capture: true});
+                this._active = null;
+                // Fallthrough for the final update
+            case 'mousemove':
+                let current_offset = event.screenX - target.getBoundingClientRect().right;
+                target.style.width = (target.offsetWidth + (current_offset - offset)) + 'px';
+                event.preventDefault();
+                break;
+        }
     },
 };
 
