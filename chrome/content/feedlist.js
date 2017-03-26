@@ -225,10 +225,7 @@ let ViewList = {
         FeedList.deselect();
 
         if (this.selectedItem.id == 'starred-folder') {
-            API.getAllTags().then(tags => {
-                if (tags.length)
-                    TagList.show();
-            })
+            TagList.show();
         } else {
             TagList.hide();
         }
@@ -264,12 +261,12 @@ let TagList = {
         return this.tree = new TreeView('tag-list');
     },
 
-    show: function TagList_show() {
+    show: function* TagList_show() {
         if (!this.ready)
-            this._rebuild();
+            yield this._rebuild();
 
         document.body.classList.toggle('tag-list', this.tags !== null && this.tags.length > 0);
-    },
+    }.task(),
 
     hide: function TagList_hide() {
         document.body.classList.remove('tag-list');
