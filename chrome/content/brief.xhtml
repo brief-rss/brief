@@ -107,7 +107,9 @@
         </tree-box>
     </div>
 
-    <draggable-splitter id="sidebar-splitter" ondblclick="Commands.hideSidebar()"/> <!-- resizeafter="farthest" tooltiptext="&sidebarSplitter.tooltip;" -->
+    <draggable-splitter id="sidebar-splitter"
+                        title="&sidebarSplitter.tooltip;"
+                        ondblclick="Commands.hideSidebar()"/>
 
     <tree-box id="tag-list" class="shrinkable"
               onchange="TagList.onSelect(event)"
