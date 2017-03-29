@@ -54,10 +54,7 @@ TreeView.prototype = {
             // Find or create the element
             let element = this._resolveElement(this._mangleId(node.id));
             if(element === null) {
-                let template = this.template;
-                // XXX: hack for <template> not working in XUL
-                if(template.content.hasChildNodes())
-                    template = template.content;
+                let template = this.template.content;
                 let selector = (node.children !== undefined) ? 'tree-folder' : 'tree-item';
                 template = template.querySelector(selector);
                 element = document.importNode(template, true);
