@@ -493,8 +493,8 @@ let Shortcuts = {
             case 'h': Commands.toggleSelectedEntryCollapsed(); break;
             case 'Enter': Commands.openSelectedEntryLink(); break;
 
-            case 'f': Commands.switchViewMode(1); break;
-            case 'g': Commands.switchViewMode(0); break;
+            case 'f': Commands.switchViewMode('full'); break;
+            case 'g': Commands.switchViewMode('headlines'); break;
             case 'a': Commands.switchViewFilter('all'); break;
             case 's': Commands.switchViewFilter('starred'); break;
             case 'd': Commands.switchViewFilter('unread'); break;
