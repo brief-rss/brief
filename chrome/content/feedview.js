@@ -1239,9 +1239,8 @@ EntryView.prototype = {
             }
             else if (anchor.hasAttribute('href')) {
                 let feedURL = FeedList.getFeed(this.feedID).feedURL;
-                let baseURI = NetUtil.newURI(feedURL);
-                let linkURI = NetUtil.newURI(anchor.getAttribute('href'), null, baseURI);
-                API.openBackgroundTab(linkURI.spec);
+                let linkURI = new URL(anchor.getAttribute('href'), feedURL);
+                API.openBackgroundTab(linkURI.href);
 
                 return;
             }
