@@ -346,21 +346,26 @@ let TagList = {
 
 let FeedList = {
 
-    _allFeeds: null,
+    _feedsCache: null,
+
+    updateFeedsCache: function* FeedList_updateFeedsCache() {
+        this._feedsCache = yield API.getAllFeeds(true, true);
+    }.task(),
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
-        if(this._allFeeds === null)
-            this._allFeeds = API.getAllFeeds(true, true);
-        return this._allFeeds.filter(
+        if(this._feedsCache === null)
+            throw "FeedList: getAllFeeds called while cache is not ready"
+
+        return this._feedsCache.filter(
             f => (!f.isFolder || includeFolders) && (!f.hidden || includeHidden)
         )
     },
 
     getFeed: function FeedList_getFeed(feedID) {
-        if(this._allFeeds === null)
-            this._allFeeds = API.getAllFeeds(true, true);
+        if(this._feedsCache === null)
+            throw "FeedList: getFeed called while cache is not ready"
 
-        for (let feed of this._allFeeds) {
+        for (let feed of this._feedsCache) {
             if (feed.feedID == feedID)
                 return feed;
         }
@@ -503,10 +508,10 @@ let FeedList = {
     },
 
 
-    observe: function FeedList_observe(aSubject, aTopic, aData) {
+    observe: function* FeedList_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'brief:invalidate-feedlist':
-                this._allFeeds = null;
+                yield this.updateFeedsCache();
                 ViewList.refreshItem('all-items-folder');
                 ViewList.refreshItem('today-folder');
                 ViewList.refreshItem('starred-folder');
@@ -516,7 +521,7 @@ let FeedList = {
 
             case 'brief:feed-title-changed':
             case 'brief:feed-favicon-changed':
-                this._allFeeds = null;
+                yield this.updateFeedsCache();
                 let feed = this.getFeed(aData);
                 this.tree.updateElement(feed.feedID,
                     {title: feed.title, icon: this._faviconUrl(feed)});
@@ -524,7 +529,7 @@ let FeedList = {
                 break;
 
             case 'brief:feed-view-mode-changed':
-                this._allFeeds = null;
+                yield this.updateFeedsCache();
                 if(this.selectedFeed && this.selectedFeed.feedID === aData)
                     gCurrentView.refresh();
                 break;
@@ -563,7 +568,7 @@ let FeedList = {
                 window.location.reload(/* bypassCache: */ true);
                 break;
         }
-    },
+    }.task(),
 
 
     observeStorage: function FeedList_observeStorage(event, args) {

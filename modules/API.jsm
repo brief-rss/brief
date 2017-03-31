@@ -40,7 +40,7 @@ const API_CALLS = {
     ready: ['brief:storage-ready', 'async',
         () => Storage.ready
     ],
-    getAllFeeds: ['brief:get-feed-list', 'sync',
+    getAllFeeds: ['brief:get-feed-list', 'async',
         (includeFolders, includeHidden) => Storage.getAllFeeds(includeFolders, includeHidden)
     ],
     modifyFeed: ['brief:modify-feed', 'async',
