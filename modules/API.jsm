@@ -43,7 +43,7 @@ const API_CALLS = {
     getAllFeeds: ['brief:get-feed-list', 'sync',
         (includeFolders, includeHidden) => Storage.getAllFeeds(includeFolders, includeHidden)
     ],
-    modifyFeed: ['brief:modify-feed', 'sync',
+    modifyFeed: ['brief:modify-feed', 'async',
         (properties) => Storage.changeFeedProperties(properties)
     ],
     getAllTags: ['brief:get-tag-list', 'async',
@@ -60,7 +60,7 @@ const API_CALLS = {
     ],
 
     // Misc helpers
-    getLocale: ['brief:get-locale', 'sync',
+    getLocale: ['brief:get-locale', 'async',
         () => Cc['@mozilla.org/chrome/chrome-registry;1']
             .getService(Ci.nsIXULChromeRegistry).getSelectedLocale('brief')
     ],

@@ -31,7 +31,7 @@ var init = function* init() {
 
     API.addStorageObserver(FeedList);
 
-    let selectedLocale = API.getLocale();
+    let selectedLocale = yield API.getLocale();
     let doc = getElement('feed-view').contentDocument;
     doc.documentElement.setAttribute('lang', selectedLocale);
 
