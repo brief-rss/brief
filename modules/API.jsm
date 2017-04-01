@@ -324,10 +324,7 @@ BriefClient.prototype = {
                 let [topic, type, handler] = value;
                 switch(type) {
                     case 'noreply':
-                        target[name] = ((...args) => this._mm.sendAsyncMessage(topic, args));
-                        break;
-                    case 'sync':
-                        target[name] = ((...args) => this._mm.sendRpcMessage(topic, args)[0]);
+                        target[name] = ((...args) => this._mm.sendAsyncMessage(topic, {args}));
                         break;
                     case 'async':
                         target[name] = ((...args) => this._asyncRequest(topic, args));
@@ -405,31 +402,19 @@ BriefServer.prototype = {
 
     // nsIMessageListener for content process communication
     receiveMessage: function BriefService_receiveMessage(message) {
-        let {name, data} = message;
+        let {name, data, target: {messageManager}} = message;
+        let {args, id} = data || {};
         let handler_data = this._handlers.get(name);
         if(handler_data === undefined) {
             log("BriefService: no handler for " + name);
             return;
         }
         let {type, handler, raw} = handler_data;
-        if(type === 'async')
-            data = data['args'];
-        let reply = (raw === true) ? handler.call(this, message) : handler.apply(this, data);
-        switch(type) {
-            case 'noreply':
-                return;
-            case 'sync':
-                return reply;
-            case 'async':
-                this._asyncReply(message, reply);
-                return;
+        let reply = (raw === true) ? handler.call(this, message) : handler.apply(this, args);
+        if(type === 'async') {
+            Promise.resolve(reply).then(
+                payload => messageManager.sendAsyncMessage('brief:async-reply', {id, payload}));
         }
-    },
-    _asyncReply: function BriefService__asyncReply(message, reply) {
-        let {args, id} = message.data;
-        let reply_to = message.target.messageManager;
-        Promise.resolve(reply).then(
-            value => reply_to.sendAsyncMessage('brief:async-reply', {id, payload: value}));
     },
 
     // Constructor helpers
