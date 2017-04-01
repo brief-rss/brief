@@ -33,7 +33,7 @@ TreeView.prototype = {
 
     update: function TreeView_update(aModel) {
         this._updateChildren(this.root, aModel);
-        this._purgeDeleted();
+        this._cleanup();
     },
     _updateChildren: function TreeView__updateChildren(aElement, aModel) {
         let knownIds = new Set(aModel.map(node => node.id));
@@ -82,7 +82,7 @@ TreeView.prototype = {
     },
     updateElement: function TreeView_updateElement(aElement, aModel) {
         this._updateElement(aElement, aModel);
-        this._purgeDeleted();
+        this._cleanup();
     },
     _updateElement: function TreeView__updateElement(aElement, aModel) {
         const {id, title, icon, unreadCount, loading, error, collapsed, children} = aModel;
@@ -114,16 +114,23 @@ TreeView.prototype = {
         if(children !== undefined)
             this._updateChildren(element, children);
     },
-    _purgeDeleted: function TreeView__purgeDeleted() {
+    _cleanup: function TreeView__cleanup() {
         // Move the selection
         let selection = this.selectedItem;
-        if(selection) {
-            while(selection.classList.contains('deleted'))
-                selection = selection.parentNode;
+        let next_selection = this.selectedItem;
+        while(selection) {
+            if(selection.classList.contains('collapsed'))
+                next_selection = selection;
+            if(selection.classList.contains('deleted'))
+                next_selection = selection.parentNode;
+            selection = selection.parentNode;
             if(selection === this.root)
                 selection = null;
-            this.selectedItem = selection;
         }
+        if(next_selection === this.root)
+            next_selection = null;
+        if(this.selectedItem !== next_selection)
+            this.selectedItem = next_selection;
         //And then purge
         Array.forEach(this.root.querySelectorAll('tree-item.deleted, tree-folder.deleted'),
             node => node.parentNode.removeChild(node));
@@ -152,6 +159,7 @@ TreeView.prototype = {
             }
             element.classList.toggle('collapsed');
             aEvent.stopPropagation();
+            this._cleanup(); // Move selection
         } else {
             let target = aEvent.currentTarget;
             if(target.nodeName === 'tree-folder-header')
