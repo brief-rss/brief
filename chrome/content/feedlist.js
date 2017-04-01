@@ -626,25 +626,26 @@ let FeedList = {
 
 // Custom menu handler to avoid Firefox default items on the Brief context menu
 let ContextMenuModule = {
+    _observer: null,
+    _currentTarget: null,
+
     init: function ContextMenu_init() {
-        Array.forEach(document.querySelectorAll('[contextmenu]'), node => {
-            node.addEventListener('contextmenu', event => this.show(event));
-        });
-        Array.forEach(document.querySelectorAll('[data-dropdown]'), node => {
-            node.addEventListener('click', event => this.show(event));
-        });
-        Array.forEach(document.querySelectorAll('context-menu-set'), node => {
-            node.addEventListener('click', event => this._hide(event));
-        });
-        Array.forEach(document.querySelectorAll('context-menu-set'), node => {
-            node.addEventListener('contextmenu', event => this._hide(event));
-        });
+        this._observer = new MutationObserver((records, observer) => this._observeMutations(records));
+        this._observer.observe(document, {subtree: true,
+            childList: true, attributes: true, attributeFilter: ['contextmenu', 'data-dropdown']});
+
+        this._initSubtrees([document.documentElement]);
+
         document.addEventListener('blur', event => this._hide(event));
+        document.addEventListener('contextmenu', event => this.show(event));
+        document.addEventListener('click', event => this.show(event));
     },
 
     show: function ContextMenu__show(event) {
+        if(this._currentTarget === null || event.defaultPrevented)
+            return;
         event.preventDefault();
-        let target = event.currentTarget;
+        let target = this._currentTarget;
         let show_dropdown = (event.type !== 'contextmenu');
         let attribute = show_dropdown ? 'data-dropdown' : 'contextmenu';
         let menu = target.getAttribute(attribute);
@@ -674,12 +675,54 @@ let ContextMenuModule = {
         menu.parentNode.classList.add('menu-visible');
     },
 
+    _target: function ContextMenu__target({type, currentTarget}) {
+        if(this._currentTarget !== null)
+            return;
+        let attribute_name = (type === 'click') ? 'data-dropdown' : 'contextmenu';
+        if(currentTarget.hasAttribute(attribute_name))
+            this._currentTarget = currentTarget;
+    },
+
     _hide: function ContextMenu__hide(event) {
+        this._currentTarget = null;
         event.preventDefault();
         Array.forEach(document.querySelectorAll('context-menu.visible'), node => {
             node.classList.remove('visible');
             node.parentNode.classList.remove('menu-visible');
         });
+    },
+
+    _observeMutations: function ContextMenu__observeMutations(records) {
+        let targets = new Set();
+        for(let {target, addedNodes} of records) {
+            let nodes = addedNodes || [target];
+            for(let node of nodes) {
+                if(node.nodeType === Node.ELEMENT_NODE)
+                    targets.add(node);
+            }
+        }
+        if(targets.size > 0)
+            this._initSubtrees(targets);
+    },
+
+    HANDLERS: [
+        ['[contextmenu]', 'contextmenu', event => ContextMenuModule._target(event)],
+        ['[data-dropdown]', 'click', event => ContextMenuModule._target(event)],
+        ['context-menu-set', 'contextmenu', event => ContextMenuModule._hide(event)],
+        ['context-menu-set', 'click', event => ContextMenuModule._hide(event)],
+    ],
+
+    _initSubtrees: function ContextMenu__initSubtrees(nodes) {
+        for(let [selector, event, handler] of this.HANDLERS) {
+            for(let node of nodes) {
+                test_node = node;
+                if(node.matches(selector))
+                    node.addEventListener(event, handler);
+                node.querySelectorAll(selector).forEach(node => {
+                    node.addEventListener(event, handler);
+                });
+            }
+        }
     },
 };
 
