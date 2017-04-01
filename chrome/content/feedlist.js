@@ -72,8 +72,10 @@ TreeView.prototype = {
         }
     },
     _initElement: function TreeView__initElement(element) {
-        element.addEventListener('click', this);
-        element.addEventListener('contextmenu', this); // Select before opening the context menu
+        let target = element.nodeName !== 'tree-folder' ?
+                element : element.querySelector('tree-folder-header');
+        target.addEventListener('click', this);
+        target.addEventListener('contextmenu', this); // Select before opening the context menu
         if(element.nodeName === 'tree-folder') {
             element.querySelector('.toggle-collapsed').addEventListener('click', this);
         }
@@ -151,13 +153,10 @@ TreeView.prototype = {
             element.classList.toggle('collapsed');
             aEvent.stopPropagation();
         } else {
-            // Avoid selecting folders instead of children
-            // Can't stopPropagation due to the possible context menu handlers above
-            if(aEvent.tree_selection_done === this.prefix)
-                return;
-            aEvent.tree_selection_done = this.prefix;
-            // select
-            this.selectedItem = aEvent.currentTarget;
+            let target = aEvent.currentTarget;
+            if(target.nodeName === 'tree-folder-header')
+                target = target.parentNode;
+            this.selectedItem = target;
         }
     },
 };

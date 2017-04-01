@@ -88,16 +88,16 @@
             </tree-item>
         </tree-box>
 
-        <tree-box id="feed-list" onchange="FeedList.onSelect(event)" contextmenu="feed-list-context-menu">
+        <tree-box id="feed-list" onchange="FeedList.onSelect(event)" contextmenu="">
             <template>
-                <tree-item>
+                <tree-item contextmenu="feed-list-context-menu">
                     <span class="system-icon"/>
                     <img class="icon"/>
                     <label class="title"/>
                     <label class="unread-count"/>
                 </tree-item>
                 <tree-folder>
-                    <tree-folder-header>
+                    <tree-folder-header contextmenu="feed-list-context-menu">
                         <label class="title"/>
                         <button class="toggle-collapsed" type="checkbox" autocomplete="off"/>
                         <label class="unread-count"/>
