@@ -548,7 +548,10 @@ let StorageInternal = {
             'deletedState': EntryState.DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
-        })
+        }).then(result => {
+            // Partially merge the FTS trees
+            Stm.entriesTextCompact.execute({options: 'merge=200,8'});
+        });
 
         Stm.purgeDeletedEntries.execute({
             'deletedState': EntryState.DELETED,
@@ -1986,6 +1989,12 @@ let Stm = {
         let sql = 'DELETE FROM feeds                                      '+
                   'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
                   '      feeds.hidden != 0                                ';
+        return new Statement(sql);
+    },
+
+    get entriesTextCompact() {
+        let sql = 'INSERT INTO entries_text(entries_text)                 '+
+                  'VALUES (:options)                                      ';
         return new Statement(sql);
     },
 
