@@ -1,20 +1,22 @@
 const EXPORTED_SYMBOLS = ['BriefClient', 'BriefServer'];
 
 Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/Storage.jsm');
-Components.utils.import('resource://brief/FeedUpdateService.jsm');
-Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
-Components.utils.import("resource://gre/modules/PlacesUtils.jsm");
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
+
+// The following sections should not get imported in a content process
+XPCOMUtils.defineLazyModuleGetter(this, 'Services', 'resource://gre/modules/Services.jsm');
+XPCOMUtils.defineLazyModuleGetter(this, 'PlacesUtils', 'resource://gre/modules/PlacesUtils.jsm');
 XPCOMUtils.defineLazyModuleGetter(this, 'RecentWindow', 'resource:///modules/RecentWindow.jsm');
+
+XPCOMUtils.defineLazyModuleGetter(this, 'Storage', 'resource://brief/Storage.jsm');
+XPCOMUtils.defineLazyModuleGetter(this, 'Query', 'resource://brief/Storage.jsm');
+XPCOMUtils.defineLazyModuleGetter(this, 'FeedUpdateService', 'resource://brief/FeedUpdateService.jsm');
 XPCOMUtils.defineLazyModuleGetter(this, 'OPML', 'resource://brief/opml.jsm');
 
+XPCOMUtils.defineLazyGetter(this, 'Prefs', () => Services.prefs.getBranch('extensions.brief.'));
 
 
-XPCOMUtils.defineLazyGetter(this, 'Prefs', () => {
-    return Services.prefs.getBranch('extensions.brief.');
-})
 
 // The table of all API calls used by both BriefClient and BriefServer
 // name: [topic, type, handler]
