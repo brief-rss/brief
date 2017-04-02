@@ -6,10 +6,12 @@ Components.utils.import('resource://gre/modules/FileUtils.jsm');
 
 IMPORT_COMMON(this);
 
+// Test using: Cc["@mozilla.org/storage/vacuum;1"].getService(Ci.nsIObserver)
+//     .observe(null, "idle-daily", null);
 function BriefService() {
     // Initialize modules.
     Components.utils.import('resource://brief/Storage.jsm');
-    Storage.init();
+    let storagePromise = Storage.init();
     Components.utils.import('resource://brief/FeedUpdateService.jsm');
     FeedUpdateService.init();
     // Initialize the client API
@@ -21,17 +23,24 @@ function BriefService() {
     let file = FileUtils.getFile('ProfD', ['chrome', 'brief-custom-style.css']);
     let uri = Services.io.newFileURI(file);
     resourceProtocolHandler.setSubstitution('brief-custom-style.css', uri);
+
+    this._dbConn = null;
+    storagePromise.then(() => {
+        this._dbConn = Storage.createRawDatabaseConnection();
+        Services.obs.addObserver(this, 'quit-application', false);
+    }).catch(Components.utils.reportError);
 }
 
 BriefService.prototype = {
-
     // mozIStorageVacuumParticipant
     get databaseConnection() {
-        return Components.utils.getGlobalForObject(Storage).Connection._nativeConnection;
+        return this._dbConn;
     },
 
     // mozIStorageVacuumParticipant
-    expectedDatabasePageSize: Ci.mozIStorageConnection.DEFAULT_PAGE_SIZE,
+    get expectedDatabasePageSize() {
+        return this._dbConn.defaultPageSize;
+    },
 
     // mozIStorageVacuumParticipant
     onBeginVacuum: function onBeginVacuum() {
@@ -46,6 +55,15 @@ BriefService.prototype = {
 
     },
 
+    // nsIObserver
+    observe: function observe(aSubject, aTopic, aData) {
+        switch (aTopic) {
+            case 'quit-application':
+                Services.obs.removeObserver(this, 'quit-application');
+                this._dbConn.close();
+                break;
+        }
+    },
 
     classDescription: 'Service of Brief extension',
     classID: Components.ID('{943b2280-6457-11df-a08a-0800200c9a66}'),

@@ -10,16 +10,19 @@ Components.utils.import('resource://gre/modules/osfile.jsm');
 Components.utils.import('resource://gre/modules/Sqlite.jsm');
 Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
 Components.utils.import('resource://gre/modules/NetUtil.jsm');
+Components.utils.import('resource://gre/modules/FileUtils.jsm');
 
 IMPORT_COMMON(this);
 
 
-const PURGE_ENTRIES_INTERVAL = 3600*24; // 1 day
-const DELETED_FEEDS_RETENTION_TIME = 3600*24*7; // 1 week
+// Time in milliseconds
+const PURGE_ENTRIES_INTERVAL = 3600*24*1000; // 1 day
+const DELETED_FEEDS_RETENTION_TIME = 3600*24*7*1000; // 1 week
 const LIVEMARKS_SYNC_DELAY = 100;
-const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14; // 2 weeks
+const BACKUP_FILE_EXPIRATION_AGE = 3600*24*14*1000; // 2 weeks
 const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
+const MAX_WAL_CHECKPOINT_SIZE = 16; // Checkpoint every 512KB for the default page size
 
 
 const FEEDS_COLUMNS = FEEDS_TABLE_SCHEMA.map(col => col.name);
@@ -177,6 +180,13 @@ const Storage = Object.freeze({
      */
     init: function() {
         return StorageInternal.init();
+    },
+
+    /**
+     * Opens a raw database connection, only for use by the vacuum service
+     */
+    createRawDatabaseConnection: function() {
+        return StorageInternal.createRawDatabaseConnection();
     }
 
 })
@@ -212,6 +222,9 @@ let StorageInternal = {
         }
 
         yield Connection.execute('PRAGMA cache_size = ' + DATABASE_CACHE_SIZE);
+        // limit the WAL size
+        yield Connection.execute('PRAGMA wal_autocheckpoint = ' + MAX_WAL_CHECKPOINT_SIZE);
+        yield Connection.execute('PRAGMA journal_size_limit = ' + (3*32768*MAX_WAL_CHECKPOINT_SIZE));
 
         // Build feed cache.
         this.feedCache = [];
@@ -238,6 +251,12 @@ let StorageInternal = {
             this.deferredReady.resolve();
         }
     }.task(),
+
+    createRawDatabaseConnection: function StorageInternal_createRawDBConnection() {
+        let path = OS.Path.join(OS.Constants.Path.profileDir, "brief.sqlite");
+        let databaseFile = FileUtils.File(path);
+        return Services.storage.openUnsharedDatabase(databaseFile);
+    },
 
     setupDatabase: function* Database_setupDatabase() {
         makeCol = col => col['name'] + ' ' + col['type'] +
@@ -543,7 +562,10 @@ let StorageInternal = {
             'deletedState': EntryState.DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
-        })
+        }).then(result => {
+            // Partially merge the FTS trees
+            Stm.entriesTextCompact.execute({options: 'merge=200,8'});
+        });
 
         Stm.purgeDeletedEntries.execute({
             'deletedState': EntryState.DELETED,
@@ -578,7 +600,7 @@ let StorageInternal = {
                 // Integer prefs are longs while Date is a long long.
                 let now = Math.round(Date.now() / 1000);
                 let lastPurgeTime = Prefs.getIntPref('database.lastPurgeTime');
-                if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL)
+                if (now - lastPurgeTime > PURGE_ENTRIES_INTERVAL/1000)
                     this.purgeDeleted();
 
                 // Remove the backup file after certain amount of time.
@@ -1981,6 +2003,12 @@ let Stm = {
         let sql = 'DELETE FROM feeds                                      '+
                   'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
                   '      feeds.hidden != 0                                ';
+        return new Statement(sql);
+    },
+
+    get entriesTextCompact() {
+        let sql = 'INSERT INTO entries_text(entries_text)                 '+
+                  'VALUES (:options)                                      ';
         return new Statement(sql);
     },
 
