@@ -1,3 +1,5 @@
+'use strict';
+
 const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'log', 'wait',
                           'getPluralForm', 'RelativeDate',
                           'BRIEF_URL'];

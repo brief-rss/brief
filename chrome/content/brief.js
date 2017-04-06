@@ -1,3 +1,5 @@
+'use strict';
+
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/API.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');

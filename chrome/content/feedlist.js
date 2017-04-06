@@ -1,3 +1,5 @@
+'use strict';
+
 // An almost generic TreeView component. Some custom structure is inlined in _updateElement
 function TreeView(aElementOrId) {
     this.root = this._resolveElement(aElementOrId, "");
@@ -722,7 +724,6 @@ let ContextMenuModule = {
     _initSubtrees: function ContextMenu__initSubtrees(nodes) {
         for(let [selector, event, handler] of this.HANDLERS) {
             for(let node of nodes) {
-                test_node = node;
                 if(node.matches(selector))
                     node.addEventListener(event, handler);
                 node.querySelectorAll(selector).forEach(node => {

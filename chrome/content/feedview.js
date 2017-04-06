@@ -1,3 +1,4 @@
+'use strict';
 // Minimal number of window heights worth of entries loaded ahead of the
 // current scrolling position at any given time.
 const MIN_LOADED_WINDOW_HEIGHTS = 1;
@@ -1416,15 +1417,17 @@ function hideElement(aElement, aAnimate) {
         aElement.style.opacity = '0';
         aElement.setAttribute('hiding', true);
 
-        aElement.addEventListener('transitionend', event => {
-            aElement.removeEventListener('transitionend', arguments.callee, false);
+        let callback = event => {
+            aElement.removeEventListener('transitionend', callback, false);
             aElement.removeAttribute('hiding');
 
             aElement.style.display = 'none';
             aElement.style.opacity = '';
 
             deferred.resolve();
-        }, false);
+        };
+
+        aElement.addEventListener('transitionend', callback, false);
     }
     else {
         aElement.style.display = 'none';
@@ -1447,12 +1450,14 @@ function showElement(aElement, aAnimate) {
         aElement.style.opacity = '';
         aElement.setAttribute('showing', true);
 
-        aElement.addEventListener('transitionend', event => {
-            aElement.removeEventListener('transitionend', arguments.callee, false);
+        let callback = event => {
+            aElement.removeEventListener('transitionend', callback, false);
             aElement.removeAttribute('showing');
 
             deferred.resolve();
-        }, false);
+        };
+
+        aElement.addEventListener('transitionend', callback, false);
     }
     else {
         aElement.style.display = '';

@@ -1,3 +1,5 @@
+'use strict';
+
 const EXPORTED_SYMBOLS = ['BriefClient', 'BriefServer'];
 
 Components.utils.import('resource://brief/common.jsm');
