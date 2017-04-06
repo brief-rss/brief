@@ -216,11 +216,12 @@ const Utils = {
 
     showStarUI: function Utils_showStarUI({id, rect}) {
         let StarUI = this.window.StarUI;
-        StarUI.panel.addEventListener('popupshown', () => {
+        let handler = () => {
+            StarUI.panel.removeEventListener('popupshown', handler);
             let x = rect.left + rect.width / 2 - this.window.mozInnerScreenX;
             let y = rect.top + rect.height - this.window.mozInnerScreenY;
             this.window.StarUI.panel.moveToAnchor(null, '', x, y, false, false, null);
-        });
+        StarUI.panel.addEventListener('popupshown', handler);
         StarUI.showEditBookmarkPopup(id, this.window.gBrowser, "after_start", false);
     },
 };
