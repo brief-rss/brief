@@ -552,7 +552,7 @@ FeedView.prototype = {
             else
                 query.endDate = edgeDate;
 
-            this._loadedEntries = yield this._refreshGuard(API.query.getEntries(query));
+            this._loadedEntries = Array.from(yield this._refreshGuard(API.query.getEntries(query)));
 
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
