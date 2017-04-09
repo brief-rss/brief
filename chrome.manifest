@@ -18,6 +18,7 @@ locale  brief   en-US  chrome/locale/en-US/
 
 #locale  brief   cs     chrome/locale/cs/
 #locale  brief   da     chrome/locale/da/
+#locale  brief   de     chrome/locale/de/
 #locale  brief   es-ES  chrome/locale/es-ES/
 #locale  brief   fr     chrome/locale/fr/
 #locale  brief   gl     chrome/locale/gl/
@@ -35,7 +36,6 @@ locale  brief   en-US  chrome/locale/en-US/
 #locale  brief   zh-TW  chrome/locale/zh-TW/
 
 # Out-of-date locales
-#locale  brief   de     chrome/locale/de/
 #locale  brief   el     chrome/locale/el/
 #locale  brief   nb-NO  chrome/locale/nb-NO/
 #locale  brief   pt-BR  chrome/locale/pt-BR/

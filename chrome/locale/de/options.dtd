@@ -1,17 +1,14 @@
 <!ENTITY optionsWindow.title "Brief - Einstellungen">
 <!ENTITY mainPane.label "Allgemein">
-<!ENTITY updateGroup.caption "Aktualisierung">
+<!ENTITY refreshGroup.caption "Aktualisieren">
 <!ENTITY checkForUpdatesBefore.label "Feeds überprüfen alle">
 <!ENTITY checkForUpdates.accesskey "F">
 <!ENTITY updateIntervalMinutes.label "Minuten">
 <!ENTITY updateIntervalHours.label "Stunden">
 <!ENTITY updateIntervalDays.label "Tage">
-<!ENTITY checkForUpdatesAfter.label "Minuten aktualisieren">
 <!ENTITY showNotification.label "Benachrichtigen, wenn neue Beiträge gefunden wurden">
 <!ENTITY showNotification.accesskey "B">
-<!ENTITY behaviorGroup.caption "Verhalten">
-<!ENTITY openInNewTab.label "Brief in einem neuem Tab öffnen">
-<!ENTITY openInNewTab.accesskey "B">
+<!ENTITY readingGroup.caption "Lesen">
 <!ENTITY storingGroup.caption "Speicherung">
 <!ENTITY expirationBefore.label "Heruntergeladene Beiträge für">
 <!ENTITY expirationAfter.label "Tage speichern">
@@ -22,23 +19,12 @@
 <!ENTITY storedEntriesCheckbox.accesskey "n">
 <!ENTITY clearAllEntriesButton.label "Alle Beiträge löschen…">
 <!ENTITY clearAllEntriesButton.accesskey "A">
-<!ENTITY feedsPane.label "Feeds">
-<!ENTITY folderTree.label "Ordner wählen, der die dynamischen Lesezeichen enthält:">
-<!ENTITY importOPML.label "Importieren…">
-<!ENTITY importOPML.accesskey "I">
-<!ENTITY exportOPML.label "Exportieren…">
-<!ENTITY exportOPML.accesskey "x">
-<!ENTITY displayPane.label "Ansicht">
-<!ENTITY showStatusbarIcon.label "Symbol in der Statusleiste anzeigen">
-<!ENTITY showStatusbarIcon.accesskey "S">
 <!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Beiträge neben dem Brief-Symbol anzeigen">
 <!ENTITY showUnreadCounter.accesskey "A">
 <!ENTITY sortUnreadViewOldestFirst.label "Bei Anzeige ungelesener Beiträge älteste zuerst anzeigen">
 <!ENTITY sortUnreadViewOldestFirst.accesskey "u">
 <!ENTITY autoMarkRead.label "Beiträge nach Anzeige in der Liste als gelesen markieren">
 <!ENTITY autoMarkRead.accesskey "A">
-<!ENTITY customizeGroup.caption "Aussehen">
-<!ENTITY shortcutsPane.label "Tastaturkürzel">
 <!ENTITY editStyleDescription.label "Darstellung der Feeds anpassen">
 <!ENTITY editStyleButton.label "Anpassen…">
 <!ENTITY editStyleButton.accesskey "A">

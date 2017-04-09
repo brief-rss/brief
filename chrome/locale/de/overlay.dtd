@@ -1,0 +1,18 @@
+<!-- Toolbar button context menu -->
+<!ENTITY briefCtxRefreshFeeds.label "RSS-Feeds jetzt aktualisieren">
+<!ENTITY briefCtxMarkFeedsAsRead.label "Alles RSS-Feeds als gelesen markieren">
+<!ENTITY briefCtxShowUnreadCounter.label "Anzahl der ungelesenen Beiträge anzeigen">
+<!ENTITY briefCtxShowOptions.label "Optionen">
+<!-- Options panel -->
+<!ENTITY briefShowShortcutsMenuitem.label "Tastaturkürzel">
+<!ENTITY briefImportMenuitem.label "RSS-Feeds importieren">
+<!ENTITY briefExportMenuitem.label "RSS-Feeds exportieren">
+<!ENTITY briefOpenOptionsMenuitem.label "Optionen">
+<!-- Context options panels -->
+<!ENTITY briefRefreshFeed.label "Jetzt aktualisieren">
+<!ENTITY briefOpenWebsite.label "Website öffnen">
+<!ENTITY briefUnsubscribeFeed.label "Abbestellen">
+<!ENTITY briefEmptyFeed.label "RSS-Feed löschen">
+<!ENTITY briefFeedSettings.label "RSS-Feed Einstellungen">
+<!ENTITY briefRestoreTrashed.label "Alle Elemente wiederherstellen">
+<!ENTITY briefEmptyTrash.label "Papierkorb leeren">
