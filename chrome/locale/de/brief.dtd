@@ -1,35 +1,36 @@
 <!ENTITY searchBox.label "Suchen">
 <!ENTITY allItemsFolder.label "Alle Beiträge">
-<!ENTITY unreadFolder.label "Ungelesen">
+<!ENTITY todayFolder.label "Heutige">
 <!ENTITY starredFolder.label "Lesezeichen">
 <!ENTITY trashFolder.label "Papierkorb">
 <!-- Button tooltips -->
 <!ENTITY headlinesCheckbox.tooltip "Überschriftenmodus verwenden(F)">
+<!ENTITY fullViewCheckbox.tooltip "Ganzen Beitrag anzeigen (G)">
+<!ENTITY showAllItems.tooltip "Alle Beiträge anzeigen (A)">
 <!ENTITY filterUnread.tooltip "Nur ungelesene Beiträge anzeigen (D)">
 <!ENTITY filterStarred.tooltip "Nur Lesezeichen anzeigen (S)">
+<!ENTITY updateButton.label "Aktualisieren">
 <!ENTITY updateButton.tooltip "Alle Feeds auf Aktualisierungen prüfen">
+<!ENTITY stopUpdatingButton.label "Abbrechen">
 <!ENTITY stopUpdatingButton.tooltip "Überprüfung abbrechen">
-<!ENTITY showOptions.tooltip "Einstellungen öffnen">
+<!ENTITY optionsDropdownButton.label "Einstellungen">
+<!ENTITY optionsDropdownButton.tooltip "Brief konfigurieren">
+<!ENTITY organizeFeeds.label "Organisieren">
+<!ENTITY organizeFeeds.tooltip "RSS-Feeds organisieren">
 <!ENTITY sidebarSplitter.tooltip "Doppelklick zum Ausblenden der Sidebar">
 <!ENTITY revealSidebar.tooltip "Sidebar einblenden">
 <!ENTITY markViewRead.tooltip "Alle Beiträge als gelesen markieren (Alt + N)">
 <!-- # Context menu -->
-<!ENTITY ctxMarkFeedRead.label "Feed als gelesen markieren">
-<!ENTITY ctxMarkFeedUnread.label "Feed als ungelesen markieren">
-<!ENTITY ctxMarkFolderRead.label "Ordner als gelesen markieren">
+<!ENTITY ctxMarkRead.label "Als gelesen markieren">
 <!ENTITY ctxMarkTagRead.label "Mit Schlagwörtern versehene Beiträge als gelesen markieren">
-<!ENTITY ctxUpdateFeed.label "Feed aktualisieren">
-<!ENTITY ctxUpdateFolder.label "Ordner aktualisieren">
+<!ENTITY ctxRefreshFeed.label "RSS-Feeds aktualisieren">
+<!ENTITY ctxRefreshFolder.label "Ordner aktualisieren">
 <!ENTITY ctxOpenWebsite.label "Homepage öffnen">
-<!ENTITY ctxDeleteFeed.label "Feed löschen">
+<!ENTITY ctxUnsubscribeFeed.label "RSS-Feed Abbestellen">
 <!ENTITY ctxDeleteFolder.label "Ordner löschen">
 <!ENTITY ctxDeleteTag.label "Schlagwort löschen">
 <!ENTITY ctxEmptyFeed.label "Feed-Beiträge löschen">
 <!ENTITY ctxEmptyFolder.label "Beiträge des Feed-Ordners löschen">
 <!ENTITY ctxRestoreTrashed.label "Beiträge aus dem Papierkorb wiederherstellen">
 <!ENTITY ctxEmptyTrash.label "Papierkorb leeren">
-<!ENTITY ctxFeedProperties.label "Eigenschaften">
-<!ENTITY ctxUpdateFeeds.label "Feeds jetzt aktualisieren">
-<!ENTITY ctxMarkFeedsAsRead.label "Alle Feeds als gelesen markieren">
-<!ENTITY showUnreadCounter.label "Anzahl der ungelesenen Beiträge anzeigen">
-<!ENTITY ctxShowOptions.label "Einstellungen">
+<!ENTITY ctxFeedSettings.label "Eigenschaften">

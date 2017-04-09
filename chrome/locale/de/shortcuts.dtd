@@ -22,6 +22,7 @@
 <!ENTITY showStarred "Als Lesezeichen markierte Beiträge anzeigen">
 <!ENTITY showUnread "Ungelesene Beiträge anzeigen">
 <!ENTITY headlinesView "Überschriftenmodus umschalten">
+<!ENTITY fullView "Vollständigen Beitrag anzeigen">
 <!ENTITY general.header "Allgemein">
 <!ENTITY ctrlAltD.key "Strg + Alt + D">
 <!ENTITY cmdAltD.key "Befehlstaste + Alt + D">
