@@ -98,6 +98,10 @@ body {
     color: #79b0d8;
 }
 
+.content > article{
+	display:block;
+}
+
 img {
     margin: 0.75em;
     max-width: -moz-available;
