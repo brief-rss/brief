@@ -378,6 +378,7 @@ BriefServer.prototype = {
             Services.obs.removeObserver(this, topic);
         }
         Storage.removeObserver(this);
+        log("Brief: finalized BriefServer");
     },
 
     // nsIObserver for proxying notifications to content process
