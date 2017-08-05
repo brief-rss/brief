@@ -101,6 +101,13 @@ const FeedUpdateService = Object.freeze({
     },
 
     /**
+     * Deinitialize the feed update subsystem
+     */
+    finalize: function() {
+        return FeedUpdateServiceInternal.finalize();
+    },
+
+    /**
      * Get the full status for clients
      */
     getStatus: function() {
@@ -161,6 +168,16 @@ let FeedUpdateServiceInternal = {
                                           UPDATE_TIMER_INTERVAL, TIMER_TYPE_SLACK);
         this.updateTimerBeat();
     }.task(),
+
+    finalize: function FeedUpdateServiceInternal_init() {
+        if(this.updateTimer !== undefined)
+            this.updateTimer.cancel();
+
+        Services.obs.removeObserver(this, 'brief:feed-updated');
+        Services.obs.removeObserver(this, 'quit-application'); // TODO: remove when bootstrapped
+        Prefs.removeObserver('', this);
+        log("Brief: finalized FeedUpdateService");
+    },
 
     // See FeedUpdateService.
     updateAllFeeds: function* FeedUpdateServiceInternal_updateAllFeeds(aInBackground) {
@@ -381,9 +398,7 @@ let FeedUpdateServiceInternal = {
             break;
 
         case 'quit-application':
-            Services.obs.removeObserver(this, 'brief:feed-updated');
-            Services.obs.removeObserver(this, 'quit-application');
-            Prefs.removeObserver('', this);
+            this.finalize();
             break;
 
         }

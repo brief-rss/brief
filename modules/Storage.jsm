@@ -183,6 +183,13 @@ const Storage = Object.freeze({
     },
 
     /**
+     * Deinitialize the storage subsystem
+     */
+    finalize: function() {
+        return StorageInternal.finalize();
+    },
+
+    /**
      * Opens a raw database connection, only for use by the vacuum service
      */
     createRawDatabaseConnection: function() {
@@ -251,6 +258,16 @@ let StorageInternal = {
             this.deferredReady.resolve();
         }
     }.task(),
+
+    finalize: function StorageInternal_finalize() {
+        Connection.close();
+
+        Bookmarks.removeObserver(BookmarkObserver);
+        Prefs.removeObserver('', this);
+
+        Services.obs.removeObserver(this, 'quit-application');
+        Services.obs.removeObserver(this, 'idle-daily');
+    },
 
     createRawDatabaseConnection: function StorageInternal_createRawDBConnection() {
         let path = OS.Path.join(OS.Constants.Path.profileDir, "brief.sqlite");
@@ -587,13 +604,7 @@ let StorageInternal = {
     observe: function* StorageInternal_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'quit-application':
-                Connection.close();
-
-                Bookmarks.removeObserver(BookmarkObserver);
-                Prefs.removeObserver('', this);
-
-                Services.obs.removeObserver(this, 'quit-application');
-                Services.obs.removeObserver(this, 'idle-daily');
+                this.finalize();
                 break;
 
             case 'idle-daily':
