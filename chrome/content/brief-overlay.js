@@ -121,16 +121,6 @@ var Brief = {
         if (this.prefs.getBoolPref('firstRun')) {
             this.onFirstRun();
         }
-        else {
-            // If Brief has been updated, load the new version info page.
-            AddonManager.getAddonByID('brief@mozdev.org', function(addon) {
-                let prevVersion = this.prefs.getCharPref('lastVersion');
-
-                if (Services.vc.compare(prevVersion, addon.version) < 0) {
-                    this.prefs.setCharPref('lastVersion', addon.version);
-                }
-            }.bind(this))
-        }
 
         if (this.toolbarbutton)
             this.initUnreadCounter();
@@ -333,10 +323,6 @@ var Brief = {
         CustomizableUI.addWidgetToArea('brief-button', CustomizableUI.AREA_NAVBAR);
 
         this.prefs.setBoolPref('firstRun', false);
-
-        AddonManager.getAddonByID('brief@mozdev.org', addon => {
-            this.prefs.setCharPref('lastVersion', addon.version);
-        })
 
         // Load the first run page.
         setTimeout(() => {
