@@ -219,10 +219,8 @@ FeedView.prototype = {
      * @param aSmooth
      *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
      *        target position.
-     * @param aSuppressSelection
-     *        Set to TRUE to prevent scrolling from altering selection.
      */
-    scrollToEntry: function FeedView_scrollToEntry(aEntry, aCentre, aSmooth, aSuppressSelection) {
+    scrollToEntry: function FeedView_scrollToEntry(aEntry, aCentre, aSmooth) {
         let win = this.window;
         let entryView = this.getEntryView(aEntry);
         let targetPosition;
@@ -238,7 +236,7 @@ FeedView.prototype = {
             targetPosition = (entryView.offsetTop + entryView.height) - win.innerHeight;
         }
 
-        this.scroll(targetPosition, aSmooth, aSuppressSelection);
+        this.scroll(targetPosition, aSmooth, true);
     },
 
     // Scroll down by the height of the viewport.
