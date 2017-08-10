@@ -1,3 +1,51 @@
+'use strict';
+
+const EXPORTED_SYMBOLS = ['PrefLoader'];
+
+Components.utils.import('resource://gre/modules/Services.jsm');
+
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+// The boilerplate required to set and clear default prefs
+const PrefLoader = {
+    _prefs: new Map(),
+
+    setDefaultPrefs: function() {
+        let prefs = Services.prefs.getDefaultBranch("");
+        for(let [name, value] of this._prefs) {
+            switch (typeof value) {
+                case "boolean":
+                    prefs.setBoolPref(name, value);
+                    break;
+
+                case "number":
+                    prefs.setIntPref(name, value);
+                    break;
+
+                case "string":
+                    var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+                    str.data = value;
+                    prefs.setComplexValue(name, Ci.nsISupportsString, str);
+                    break;
+            }
+        }
+    },
+
+    clearDefaultPrefs: function() {
+        let prefs = Services.prefs.getDefaultBranch("");
+        for(let [name, value] of this._prefs) {
+            if(!prefs.prefHasUserValue(name))
+                prefs.deleteBranch(name);
+        }
+    },
+}
+
+function pref(name, value) {
+    PrefLoader._prefs.set(name, value);
+}
+
+// The actual prefs
 pref("extensions.brief.homeFolder", -1);
 pref("extensions.brief.showUnreadCounter", true);
 pref("extensions.brief.firstRun", true);

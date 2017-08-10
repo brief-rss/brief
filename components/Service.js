@@ -1,4 +1,5 @@
 Components.utils.import('resource://brief/common.jsm');
+Components.utils.import('resource://brief/Prefs.jsm');
 Components.utils.import('resource://brief/API.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
@@ -9,6 +10,7 @@ IMPORT_COMMON(this);
 // Test using: Cc["@mozilla.org/storage/vacuum;1"].getService(Ci.nsIObserver)
 //     .observe(null, "idle-daily", null);
 function BriefService() {
+    PrefLoader.setDefaultPrefs(); // No clear needed, shutdown is enough
     // Initialize modules.
     Components.utils.import('resource://brief/Storage.jsm');
     let storagePromise = Storage.init();
