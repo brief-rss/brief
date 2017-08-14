@@ -33,8 +33,3 @@ locale  brief   en-US  chrome/locale/en-US/
 #locale  brief   uk-UA  chrome/locale/uk-UA/
 #locale  brief   zh-CN  chrome/locale/zh-CN/
 #locale  brief   zh-TW  chrome/locale/zh-TW/
-
-# Out-of-date locales
-#locale  brief   el     chrome/locale/el/
-#locale  brief   nb-NO  chrome/locale/nb-NO/
-#locale  brief   pt-BR  chrome/locale/pt-BR/
