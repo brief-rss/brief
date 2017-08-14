@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Osveži vire zdaj"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Označi vse vire kot prebrane"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Prikaži število neprebranih predmetov"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Možnosti"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Tipkovne bližnjice"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Uvozi vire …"
+    },
+    "briefExportMenuitem_label": {
+        "message": "Izvozi vire …"
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Možnosti"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Osveži zdaj"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Odpri spletno stran"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Odjavi naročnino"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Izprazni vir"
+    },
+    "briefFeedSettings_label": {
+        "message": "Nastavitve vira"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Obnovi vse predmete"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Izprazni koš"
+    }
+}

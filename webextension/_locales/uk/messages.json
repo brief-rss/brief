@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Оновити стрічки зараз"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Позначити всі стрічки прочитаними"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Показати кількість непрочитаних записів"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Налаштування"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Сполучення клавіш"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Імпорт стрічок..."
+    },
+    "briefExportMenuitem_label": {
+        "message": "Експорт стрічок..."
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Налаштування"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Оновити зараз"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Відкрити веб-сайт"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Відписатися"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Очистити стрічку"
+    },
+    "briefFeedSettings_label": {
+        "message": "Налаштування стрічки"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Відновити всі записи"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Очистити кошик"
+    }
+}

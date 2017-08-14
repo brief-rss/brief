@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Actualizează fluxurile acum"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Marchează toate fluxurile ca citite"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Arată numărul elementelor necitite"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Opțiuni"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Scurtături de la tastatură"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Import fluxuri"
+    },
+    "briefExportMenuitem_label": {
+        "message": "Export fluxuri"
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Opțiuni"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Actualizează acum"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Deschide site"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Dezabonare"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Golește flux"
+    },
+    "briefFeedSettings_label": {
+        "message": "Opțiunile fluxului"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Restaurează toate elementele"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Golește gunoiul"
+    }
+}

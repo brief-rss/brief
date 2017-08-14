@@ -245,6 +245,7 @@ function BriefClient(window) {
         ['brief:async-reply', data => this._receiveAsyncReply(data)],
         ['brief:notify-observer', data => this.notifyObservers(null, data.topic, data.data)],
         ['brief:notify-storage-observer', ({event, args}) => this.notifyStorageObservers(event, args)],
+        ['brief:connect-observers', (smth) => this._mm.sendAsyncMessage('brief:add-observer')],
     ]);
     for(let name of this._handlers.keys()) {
         this._mm.addMessageListener(name, this);
@@ -365,6 +366,7 @@ function BriefServer() {
         Services.obs.addObserver(this, topic, false);
     }
     Storage.addObserver(this);
+    Services.mm.broadcastAsyncMessage('brief:connect-observers');
 };
 
 BriefServer.prototype = {
@@ -378,6 +380,7 @@ BriefServer.prototype = {
             Services.obs.removeObserver(this, topic);
         }
         Storage.removeObserver(this);
+        log("Brief: finalized BriefServer");
     },
 
     // nsIObserver for proxying notifications to content process

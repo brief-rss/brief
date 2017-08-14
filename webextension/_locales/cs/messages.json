@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Obnovit kanály nyní"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Označit všechny kanály jako přečtené"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Zobrazit počet nepřečtených položek"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Možnosti"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Klávesové zkratky"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Importovat kanály..."
+    },
+    "briefExportMenuitem_label": {
+        "message": "Exportovat kanály..."
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Možnosti"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Obnovit nyní"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Otevřít webovou stránku"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Odhlásit"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Vyprázdnit kanál"
+    },
+    "briefFeedSettings_label": {
+        "message": "Nastavení kanálu"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Obnovit všechny položky"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Vysypat koš"
+    }
+}

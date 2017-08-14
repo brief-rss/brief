@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Feeds nu vernieuwen"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Alle feeds als gelezen markeren"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Aantal ongelezen berichten weergeven"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Opties"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Sneltoetsen"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Feeds importeren…"
+    },
+    "briefExportMenuitem_label": {
+        "message": "Feeds exporteren…"
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Opties"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Nu vernieuwen"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Website openen"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Afmelden"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Lege feed"
+    },
+    "briefFeedSettings_label": {
+        "message": "Feedinstellingen"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Alle berichten herstellen"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Prullenbak legen"
+    }
+}

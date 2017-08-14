@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Aktualizuj kanały teraz"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Oznacz wszystkie kanały jako przeczytane"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Wyświetlaj liczbę nieprzeczytanych wiadomości"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Opcje"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Pokaż skróty klawiszowe"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Importuj kanały…"
+    },
+    "briefExportMenuitem_label": {
+        "message": "Eksportuj kanały…"
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Opcje"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Aktualizuj teraz"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Otwórz witrynę"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Usuń kanał"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Opróżnij kanał"
+    },
+    "briefFeedSettings_label": {
+        "message": "Ustawienia kanału"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Przywróć usunięte wiadomości"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Opróżnij kosz"
+    }
+}

@@ -24,6 +24,10 @@ const DATABASE_VERSION = 18;
 const DATABASE_CACHE_SIZE = 256; // With the default page size of 32KB, it gives us 8MB of cache memory.
 const MAX_WAL_CHECKPOINT_SIZE = 16; // Checkpoint every 512KB for the default page size
 
+// Reuse the same pref for transition period
+const PREF_LAST_VACUUM = 'storage.vacuum.last.brief.sqlite';
+const VACUUM_PERIOD = 3600*24*30*1000; // 1 month
+
 
 const FEEDS_COLUMNS = FEEDS_TABLE_SCHEMA.map(col => col.name);
 const ENTRIES_COLUMNS = ENTRIES_TABLE_SCHEMA.map(col => col.name).concat(
@@ -183,6 +187,13 @@ const Storage = Object.freeze({
     },
 
     /**
+     * Deinitialize the storage subsystem
+     */
+    finalize: function() {
+        return StorageInternal.finalize();
+    },
+
+    /**
      * Opens a raw database connection, only for use by the vacuum service
      */
     createRawDatabaseConnection: function() {
@@ -252,6 +263,16 @@ let StorageInternal = {
         }
     }.task(),
 
+    finalize: function StorageInternal_finalize() {
+        Connection.close();
+
+        Bookmarks.removeObserver(BookmarkObserver);
+        Prefs.removeObserver('', this);
+
+        Services.obs.removeObserver(this, 'quit-application');
+        Services.obs.removeObserver(this, 'idle-daily');
+    },
+
     createRawDatabaseConnection: function StorageInternal_createRawDBConnection() {
         let path = OS.Path.join(OS.Constants.Path.profileDir, "brief.sqlite");
         let databaseFile = FileUtils.File(path);
@@ -259,6 +280,7 @@ let StorageInternal = {
     },
 
     setupDatabase: function* Database_setupDatabase() {
+        Services.prefs.setIntPref(PREF_LAST_VACUUM, Math.round(Date.now() / 1000));
         makeCol = col => col['name'] + ' ' + col['type'] +
                          ('default' in col ? ' DEFAULT ' + col['default'] : '');
         schemaString = schema => schema.map(col => makeCol(col)).join();
@@ -557,43 +579,45 @@ let StorageInternal = {
     }.task(),
 
     // Permanently removes deleted items from database.
-    purgeDeleted: function StorageInternal_purgeDeleted() {
-        Stm.purgeDeletedEntriesText.execute({
+    purgeDeleted: async function StorageInternal_purgeDeleted() {
+        let text = Stm.purgeDeletedEntriesText.execute({
             'deletedState': EntryState.DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
         }).then(result => {
             // Partially merge the FTS trees
-            Stm.entriesTextCompact.execute({options: 'merge=200,8'});
+            return Stm.entriesTextCompact.execute({options: 'merge=200,8'});
         });
 
-        Stm.purgeDeletedEntries.execute({
+        let entries = Stm.purgeDeletedEntries.execute({
             'deletedState': EntryState.DELETED,
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
-        })
+        });
 
-        Stm.purgeDeletedFeeds.execute({
+        let feeds = Stm.purgeDeletedFeeds.execute({
             'currentDate': Date.now(),
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
-        })
+        });
 
         // Prefs can only store longs while Date is a long long.
         let now = Math.round(Date.now() / 1000);
         Prefs.setIntPref('database.lastPurgeTime', now);
+        let last_vacuum = Services.prefs.getIntPref(PREF_LAST_VACUUM);
+        if((now - last_vacuum) * 1000 > VACUUM_PERIOD) {
+            await Promise.all([text, entries, feeds]);
+            await wait(15000); // Avoid colliding with another vacuum, if possible
+            FeedUpdateService.stopUpdating();
+            await Stm.vacuum.execute();
+            Services.prefs.setIntPref(PREF_LAST_VACUUM, Math.round(Date.now() / 1000));
+        }
     },
 
     // nsIObserver
     observe: function* StorageInternal_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'quit-application':
-                Connection.close();
-
-                Bookmarks.removeObserver(BookmarkObserver);
-                Prefs.removeObserver('', this);
-
-                Services.obs.removeObserver(this, 'quit-application');
-                Services.obs.removeObserver(this, 'idle-daily');
+                this.finalize();
                 break;
 
             case 'idle-daily':
@@ -2003,6 +2027,11 @@ let Stm = {
         let sql = 'DELETE FROM feeds                                      '+
                   'WHERE :currentDate - feeds.hidden > :retentionTime AND '+
                   '      feeds.hidden != 0                                ';
+        return new Statement(sql);
+    },
+
+    get vacuum() {
+        let sql = 'VACUUM';
         return new Statement(sql);
     },
 

@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "立即更新消息來源"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "標記所有消息來源為已讀"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "顯示未讀項目數"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "選項"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "鍵盤快速鍵"
+    },
+    "briefImportMenuitem_label": {
+        "message": "匯入消息來源..."
+    },
+    "briefExportMenuitem_label": {
+        "message": "匯出消息來源..."
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "選項"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "立即更新"
+    },
+    "briefOpenWebsite_label": {
+        "message": "開啟網站"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "取消訂閱"
+    },
+    "briefEmptyFeed_label": {
+        "message": "清空消息來源"
+    },
+    "briefFeedSettings_label": {
+        "message": "消息來源設定"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "還原所有項目"
+    },
+    "briefEmptyTrash_label": {
+        "message": "清空垃圾筒"
+    }
+}

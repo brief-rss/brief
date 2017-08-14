@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Actualizar los canales web"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Marcar todas las entradas como leídas"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Mostrar el número de entradas no leídas"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Opciones"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Atajos de teclado"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Importar canales web…"
+    },
+    "briefExportMenuitem_label": {
+        "message": "Exportar canales web…"
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Opciones"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Actualizar"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Ir al sitio web"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Eliminar"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Vaciar el canal"
+    },
+    "briefFeedSettings_label": {
+        "message": "Opciones del canal"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Restaurar todas las entradas"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Vaciar la papelera"
+    }
+}

@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Actualizar agora"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Marcar todo como lido"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Amosar o número de non lidos"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Opcións"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Atallos do teclado"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Importar fontes..."
+    },
+    "briefExportMenuitem_label": {
+        "message": "Exportar fontes..."
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Opcións"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Actualizar agora"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Abrir web"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Cancelar subscrición"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Baleirar a fonte"
+    },
+    "briefFeedSettings_label": {
+        "message": "Axustes da fonte"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Restabelecer todo"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Baleirar o lixo"
+    }
+}

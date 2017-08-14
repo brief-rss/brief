@@ -1,0 +1,51 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Genindlæs feeds nu"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Marker alle feeds som læste"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Vis antallet af ulæste enmer"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Indstillinger"
+    },
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Tastaturgenveje"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Importer feeds…"
+    },
+    "briefExportMenuitem_label": {
+        "message": "Eksporter feeds…"
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Indstillinger"
+    },
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Genindlæs nu"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Åbn websted"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Stop abonnement"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Tøm feed"
+    },
+    "briefFeedSettings_label": {
+        "message": "Feed-indstillinger"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Gendan alle emner"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Tøm skraldespand"
+    }
+}
