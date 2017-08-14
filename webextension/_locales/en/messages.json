@@ -1,0 +1,18 @@
+{
+    "briefCtxRefreshFeeds_label": {
+        "message": "Refresh Feeds Now",
+        "description": "Refresh item in the Brief button context menu"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Mark All Feeds As Read",
+        "description": "Mark as read item in the Brief button context menu"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Show Number Of Unread Items",
+        "description": "Show unread count checkbox in the Brief button context menu"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Options",
+        "description": "Open settings item in the Brief button context menu"
+    }
+}
