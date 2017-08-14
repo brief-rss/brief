@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Überschriftenmodus umschalten">
 <!ENTITY fullView "Vollständigen Beitrag anzeigen">
 <!ENTITY general.header "Allgemein">
-<!ENTITY ctrlAltD.key "Strg + Alt + D">
-<!ENTITY cmdAltD.key "Befehlstaste + Alt + D">
+<!ENTITY ctrlAltD.key "Strg + Umschalt + D">
+<!ENTITY cmdAltD.key "Befehlstaste + Umschalt + D">
 <!ENTITY openBrief "Brief anzeigen">
 <!ENTITY focusSearchbar "Brief-Suchleiste fokussieren">
 <!ENTITY displayShortcuts "Liste der Tastaturkürzel anzeigen">

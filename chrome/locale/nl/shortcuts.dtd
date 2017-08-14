@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Kopteksten bekijken">
 <!ENTITY fullView "Volledige berichten lezen">
 <!ENTITY general.header "Algemeen">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "Brief openen">
 <!ENTITY focusSearchbar "Zoekbalk focus geven">
 <!ENTITY displayShortcuts "Lijst met sneltoetsen weergeven">

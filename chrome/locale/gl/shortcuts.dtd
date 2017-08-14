@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Mudar a vista de cabeceiras">
 <!ENTITY fullView "Ver todos os elementos">
 <!ENTITY general.header "Xeral">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt +D">
+<!ENTITY ctrlAltD.key "Ctrl + Maiús + D">
+<!ENTITY cmdAltD.key "Cmd + Maiús + D">
 <!ENTITY openBrief "Abrir o Brief">
 <!ENTITY focusSearchbar "Foco na caixa de procuras">
 <!ENTITY displayShortcuts "Amosar a listaxe de atallos">

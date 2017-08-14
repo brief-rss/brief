@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Preklopi naslovni pogled">
 <!ENTITY fullView "Pokaži cele predmete">
 <!ENTITY general.header "Splošno">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "Odpri Brief">
 <!ENTITY focusSearchbar "Osredotoči se na iskalno polje">
 <!ENTITY displayShortcuts "Prikaži seznam tipkovnih bližnjic">

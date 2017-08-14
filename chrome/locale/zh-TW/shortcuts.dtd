@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "只顯示標題">
 <!ENTITY fullView "顯示標題與內文">
 <!ENTITY general.header "一般">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "開啟 Brief">
 <!ENTITY focusSearchbar "游標移到搜尋欄">
 <!ENTITY displayShortcuts "顯示鍵盤快速鍵列表">

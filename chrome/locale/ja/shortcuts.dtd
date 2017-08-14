@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "ヘッドライン表示を切り替える">
 <!ENTITY fullView "内容を全て表示する">
 <!ENTITY general.header "全般">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "Brief を開く">
 <!ENTITY focusSearchbar "検索バーにフォーカスを移す">
 <!ENTITY displayShortcuts "ショートカットキーの一覧を表示する">

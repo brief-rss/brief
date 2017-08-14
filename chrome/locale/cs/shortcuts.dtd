@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Přepnout zobrazení záhlaví">
 <!ENTITY fullView "Zobrazit úplné položky">
 <!ENTITY general.header "Obecné">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "Otevřít Brief">
 <!ENTITY focusSearchbar "Přenést zaměření na vyhledávání">
 <!ENTITY displayShortcuts "Zobrazit seznam klávesových zkratek">

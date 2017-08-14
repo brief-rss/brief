@@ -28,8 +28,8 @@
 <!ENTITY fullView "View full items">
 
 <!ENTITY general.header "General">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "Open Brief">
 <!ENTITY focusSearchbar "Focus the search box">
 <!ENTITY displayShortcuts "Display the list of keyboard shortcuts">

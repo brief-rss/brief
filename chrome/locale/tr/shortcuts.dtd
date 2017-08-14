@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Başlık görünümünü değiştir">
 <!ENTITY fullView "Dolu öğeleri göster">
 <!ENTITY general.header "General">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "Brief'i aç">
 <!ENTITY focusSearchbar "Arama çubuğuna odaklan">
 <!ENTITY displayShortcuts "Kısayol tuşlarının listesini göster">

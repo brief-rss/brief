@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Vis overskrifter">
 <!ENTITY fullView "Vis hele emnet">
 <!ENTITY general.header "Generelt">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "Åbn Brief">
 <!ENTITY focusSearchbar "Fokuser søgelinje">
 <!ENTITY displayShortcuts "Vis liste over genvejstaster">

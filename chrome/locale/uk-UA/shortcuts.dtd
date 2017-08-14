@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Перегляд заголовків">
 <!ENTITY fullView "Перегляд повних записів">
 <!ENTITY general.header "Загальні">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "Відкрити Brief">
 <!ENTITY focusSearchbar "Перемістити фокус на поле пошуку">
 <!ENTITY displayShortcuts "Показати список сполучень клавіш">

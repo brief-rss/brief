@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "Ver sólo los titulares">
 <!ENTITY fullView "Ver las entradas completas">
 <!ENTITY general.header "General">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Mayús. + D">
+<!ENTITY cmdAltD.key "Cmd + Mayús. + D">
 <!ENTITY openBrief "Abrir Brief">
 <!ENTITY focusSearchbar "Activar la casilla de búsqueda">
 <!ENTITY displayShortcuts "Mostrar esta lista de atajos de teclado">

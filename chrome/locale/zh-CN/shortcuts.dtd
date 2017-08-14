@@ -24,8 +24,8 @@
 <!ENTITY headlinesView "标题模式">
 <!ENTITY fullView "完整模式">
 <!ENTITY general.header "常规">
-<!ENTITY ctrlAltD.key "Ctrl + Alt + D">
-<!ENTITY cmdAltD.key "Cmd + Alt + D">
+<!ENTITY ctrlAltD.key "Ctrl + Shift + D">
+<!ENTITY cmdAltD.key "Cmd + Shift + D">
 <!ENTITY openBrief "打开 Brief">
 <!ENTITY focusSearchbar "切换焦点到搜索栏">
 <!ENTITY displayShortcuts "显示快捷键列表">
