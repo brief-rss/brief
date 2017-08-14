@@ -7,6 +7,7 @@
     <id>brief@mozdev.org</id>
     <version>2.3+git</version>
     <type>2</type>
+    <bootstrap>true</bootstrap>
     <name>Brief</name>
     <description>A feed reading extension.</description>
     <creator>Adam Kowalczyk</creator>
@@ -15,6 +16,7 @@
     <iconURL>chrome://brief/skin/brief-icon-32.png</iconURL>
     <icon64URL>chrome://brief/skin/brief-icon-64.png</icon64URL>
     <multiprocessCompatible>true</multiprocessCompatible>
+    <hasEmbeddedWebExtension>true</hasEmbeddedWebExtension>
 
     <targetApplication>
       <rdf:Description>
