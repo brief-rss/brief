@@ -2,52 +2,50 @@
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
-        "message": "Refresh Feeds Now"
+        "message": "立即刷新"
     },
     "briefCtxMarkFeedsAsRead_label": {
-        "message": "Mark All Feeds As Read"
+        "message": "标记所有为已读"
     },
     "briefCtxShowUnreadCounter_label": {
-        "message": "Show Number Of Unread Items"
+        "message": "显示未读项目数"
     },
     "briefCtxShowOptions_label": {
-        "message": "Options"
+        "message": "选项"
     },
-
     // Options panel
     "briefShowShortcutsMenuitem_label": {
-        "message": "Keyboard Shortcuts"
+        "message": "快捷键"
     },
     "briefImportMenuitem_label": {
-        "message": "Import Feeds..."
+        "message": "导入订阅..."
     },
     "briefExportMenuitem_label": {
-        "message": "Export Feeds..."
+        "message": "导出订阅..."
     },
     "briefOpenOptionsMenuitem_label": {
-        "message": "Options"
+        "message": "选项"
     },
-
     // Context options panels
     "briefRefreshFeed_label": {
-        "message": "Refresh Now"
+        "message": "立即刷新"
     },
     "briefOpenWebsite_label": {
-        "message": "Open Website"
+        "message": "打开网站"
     },
     "briefUnsubscribeFeed_label": {
-        "message": "Unsubscribe"
+        "message": "取消订阅"
     },
     "briefEmptyFeed_label": {
-        "message": "Empty Feed"
+        "message": "清空项目"
     },
     "briefFeedSettings_label": {
-        "message": "Feed Settings"
+        "message": "订阅设置"
     },
     "briefRestoreTrashed_label": {
-        "message": "Restore All Items"
+        "message": "恢复所有项目"
     },
     "briefEmptyTrash_label": {
-        "message": "Empty Trash"
+        "message": "清空垃圾箱"
     }
 }

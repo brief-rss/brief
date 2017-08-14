@@ -2,52 +2,50 @@
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
-        "message": "Refresh Feeds Now"
+        "message": "Actualizează fluxurile acum"
     },
     "briefCtxMarkFeedsAsRead_label": {
-        "message": "Mark All Feeds As Read"
+        "message": "Marchează toate fluxurile ca citite"
     },
     "briefCtxShowUnreadCounter_label": {
-        "message": "Show Number Of Unread Items"
+        "message": "Arată numărul elementelor necitite"
     },
     "briefCtxShowOptions_label": {
-        "message": "Options"
+        "message": "Opțiuni"
     },
-
     // Options panel
     "briefShowShortcutsMenuitem_label": {
-        "message": "Keyboard Shortcuts"
+        "message": "Scurtături de la tastatură"
     },
     "briefImportMenuitem_label": {
-        "message": "Import Feeds..."
+        "message": "Import fluxuri"
     },
     "briefExportMenuitem_label": {
-        "message": "Export Feeds..."
+        "message": "Export fluxuri"
     },
     "briefOpenOptionsMenuitem_label": {
-        "message": "Options"
+        "message": "Opțiuni"
     },
-
     // Context options panels
     "briefRefreshFeed_label": {
-        "message": "Refresh Now"
+        "message": "Actualizează acum"
     },
     "briefOpenWebsite_label": {
-        "message": "Open Website"
+        "message": "Deschide site"
     },
     "briefUnsubscribeFeed_label": {
-        "message": "Unsubscribe"
+        "message": "Dezabonare"
     },
     "briefEmptyFeed_label": {
-        "message": "Empty Feed"
+        "message": "Golește flux"
     },
     "briefFeedSettings_label": {
-        "message": "Feed Settings"
+        "message": "Opțiunile fluxului"
     },
     "briefRestoreTrashed_label": {
-        "message": "Restore All Items"
+        "message": "Restaurează toate elementele"
     },
     "briefEmptyTrash_label": {
-        "message": "Empty Trash"
+        "message": "Golește gunoiul"
     }
 }

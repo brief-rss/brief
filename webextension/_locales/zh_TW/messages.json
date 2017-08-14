@@ -2,52 +2,50 @@
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
-        "message": "Refresh Feeds Now"
+        "message": "立即更新消息來源"
     },
     "briefCtxMarkFeedsAsRead_label": {
-        "message": "Mark All Feeds As Read"
+        "message": "標記所有消息來源為已讀"
     },
     "briefCtxShowUnreadCounter_label": {
-        "message": "Show Number Of Unread Items"
+        "message": "顯示未讀項目數"
     },
     "briefCtxShowOptions_label": {
-        "message": "Options"
+        "message": "選項"
     },
-
     // Options panel
     "briefShowShortcutsMenuitem_label": {
-        "message": "Keyboard Shortcuts"
+        "message": "鍵盤快速鍵"
     },
     "briefImportMenuitem_label": {
-        "message": "Import Feeds..."
+        "message": "匯入消息來源..."
     },
     "briefExportMenuitem_label": {
-        "message": "Export Feeds..."
+        "message": "匯出消息來源..."
     },
     "briefOpenOptionsMenuitem_label": {
-        "message": "Options"
+        "message": "選項"
     },
-
     // Context options panels
     "briefRefreshFeed_label": {
-        "message": "Refresh Now"
+        "message": "立即更新"
     },
     "briefOpenWebsite_label": {
-        "message": "Open Website"
+        "message": "開啟網站"
     },
     "briefUnsubscribeFeed_label": {
-        "message": "Unsubscribe"
+        "message": "取消訂閱"
     },
     "briefEmptyFeed_label": {
-        "message": "Empty Feed"
+        "message": "清空消息來源"
     },
     "briefFeedSettings_label": {
-        "message": "Feed Settings"
+        "message": "消息來源設定"
     },
     "briefRestoreTrashed_label": {
-        "message": "Restore All Items"
+        "message": "還原所有項目"
     },
     "briefEmptyTrash_label": {
-        "message": "Empty Trash"
+        "message": "清空垃圾筒"
     }
 }

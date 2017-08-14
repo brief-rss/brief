@@ -2,52 +2,50 @@
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
-        "message": "Refresh Feeds Now"
+        "message": "Actualizar agora"
     },
     "briefCtxMarkFeedsAsRead_label": {
-        "message": "Mark All Feeds As Read"
+        "message": "Marcar todo como lido"
     },
     "briefCtxShowUnreadCounter_label": {
-        "message": "Show Number Of Unread Items"
+        "message": "Amosar o número de non lidos"
     },
     "briefCtxShowOptions_label": {
-        "message": "Options"
+        "message": "Opcións"
     },
-
     // Options panel
     "briefShowShortcutsMenuitem_label": {
-        "message": "Keyboard Shortcuts"
+        "message": "Atallos do teclado"
     },
     "briefImportMenuitem_label": {
-        "message": "Import Feeds..."
+        "message": "Importar fontes..."
     },
     "briefExportMenuitem_label": {
-        "message": "Export Feeds..."
+        "message": "Exportar fontes..."
     },
     "briefOpenOptionsMenuitem_label": {
-        "message": "Options"
+        "message": "Opcións"
     },
-
     // Context options panels
     "briefRefreshFeed_label": {
-        "message": "Refresh Now"
+        "message": "Actualizar agora"
     },
     "briefOpenWebsite_label": {
-        "message": "Open Website"
+        "message": "Abrir web"
     },
     "briefUnsubscribeFeed_label": {
-        "message": "Unsubscribe"
+        "message": "Cancelar subscrición"
     },
     "briefEmptyFeed_label": {
-        "message": "Empty Feed"
+        "message": "Baleirar a fonte"
     },
     "briefFeedSettings_label": {
-        "message": "Feed Settings"
+        "message": "Axustes da fonte"
     },
     "briefRestoreTrashed_label": {
-        "message": "Restore All Items"
+        "message": "Restabelecer todo"
     },
     "briefEmptyTrash_label": {
-        "message": "Empty Trash"
+        "message": "Baleirar o lixo"
     }
 }

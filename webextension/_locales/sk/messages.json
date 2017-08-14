@@ -2,52 +2,50 @@
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
-        "message": "Refresh Feeds Now"
+        "message": "Obnoviť kanály teraz"
     },
     "briefCtxMarkFeedsAsRead_label": {
-        "message": "Mark All Feeds As Read"
+        "message": "Označiť všetky kanály ako prečítané"
     },
     "briefCtxShowUnreadCounter_label": {
-        "message": "Show Number Of Unread Items"
+        "message": "Zobraziť počet neprečítaných položiek"
     },
     "briefCtxShowOptions_label": {
-        "message": "Options"
+        "message": "Možnosti"
     },
-
     // Options panel
     "briefShowShortcutsMenuitem_label": {
-        "message": "Keyboard Shortcuts"
+        "message": "Klávesové skratky"
     },
     "briefImportMenuitem_label": {
-        "message": "Import Feeds..."
+        "message": "Importovať kanály"
     },
     "briefExportMenuitem_label": {
-        "message": "Export Feeds..."
+        "message": "Exportovať kanály"
     },
     "briefOpenOptionsMenuitem_label": {
-        "message": "Options"
+        "message": "Možnosti"
     },
-
     // Context options panels
     "briefRefreshFeed_label": {
-        "message": "Refresh Now"
+        "message": "Obnoviť teraz"
     },
     "briefOpenWebsite_label": {
-        "message": "Open Website"
+        "message": "Otvoriť webovú stránku"
     },
     "briefUnsubscribeFeed_label": {
-        "message": "Unsubscribe"
+        "message": "Odhlásiť odber"
     },
     "briefEmptyFeed_label": {
-        "message": "Empty Feed"
+        "message": "Prázdny kanál"
     },
     "briefFeedSettings_label": {
-        "message": "Feed Settings"
+        "message": "Nastavenia kanála"
     },
     "briefRestoreTrashed_label": {
-        "message": "Restore All Items"
+        "message": "Obnoviť všetky položky"
     },
     "briefEmptyTrash_label": {
-        "message": "Empty Trash"
+        "message": "Prázdny kôš"
     }
 }

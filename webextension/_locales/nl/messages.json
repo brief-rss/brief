@@ -2,52 +2,50 @@
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
-        "message": "Refresh Feeds Now"
+        "message": "Feeds nu vernieuwen"
     },
     "briefCtxMarkFeedsAsRead_label": {
-        "message": "Mark All Feeds As Read"
+        "message": "Alle feeds als gelezen markeren"
     },
     "briefCtxShowUnreadCounter_label": {
-        "message": "Show Number Of Unread Items"
+        "message": "Aantal ongelezen berichten weergeven"
     },
     "briefCtxShowOptions_label": {
-        "message": "Options"
+        "message": "Opties"
     },
-
     // Options panel
     "briefShowShortcutsMenuitem_label": {
-        "message": "Keyboard Shortcuts"
+        "message": "Sneltoetsen"
     },
     "briefImportMenuitem_label": {
-        "message": "Import Feeds..."
+        "message": "Feeds importeren…"
     },
     "briefExportMenuitem_label": {
-        "message": "Export Feeds..."
+        "message": "Feeds exporteren…"
     },
     "briefOpenOptionsMenuitem_label": {
-        "message": "Options"
+        "message": "Opties"
     },
-
     // Context options panels
     "briefRefreshFeed_label": {
-        "message": "Refresh Now"
+        "message": "Nu vernieuwen"
     },
     "briefOpenWebsite_label": {
-        "message": "Open Website"
+        "message": "Website openen"
     },
     "briefUnsubscribeFeed_label": {
-        "message": "Unsubscribe"
+        "message": "Afmelden"
     },
     "briefEmptyFeed_label": {
-        "message": "Empty Feed"
+        "message": "Lege feed"
     },
     "briefFeedSettings_label": {
-        "message": "Feed Settings"
+        "message": "Feedinstellingen"
     },
     "briefRestoreTrashed_label": {
-        "message": "Restore All Items"
+        "message": "Alle berichten herstellen"
     },
     "briefEmptyTrash_label": {
-        "message": "Empty Trash"
+        "message": "Prullenbak legen"
     }
 }

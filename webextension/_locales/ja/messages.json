@@ -2,52 +2,50 @@
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
-        "message": "Refresh Feeds Now"
+        "message": "今すぐフィードを更新する"
     },
     "briefCtxMarkFeedsAsRead_label": {
-        "message": "Mark All Feeds As Read"
+        "message": "全てのフィードを既読にする"
     },
     "briefCtxShowUnreadCounter_label": {
-        "message": "Show Number Of Unread Items"
+        "message": "未読の項目数を表示する"
     },
     "briefCtxShowOptions_label": {
-        "message": "Options"
+        "message": "設定"
     },
-
     // Options panel
     "briefShowShortcutsMenuitem_label": {
-        "message": "Keyboard Shortcuts"
+        "message": "キーボードショートカット"
     },
     "briefImportMenuitem_label": {
-        "message": "Import Feeds..."
+        "message": "フィードを読み込む…"
     },
     "briefExportMenuitem_label": {
-        "message": "Export Feeds..."
+        "message": "フィードを書き出す…"
     },
     "briefOpenOptionsMenuitem_label": {
-        "message": "Options"
+        "message": "設定"
     },
-
     // Context options panels
     "briefRefreshFeed_label": {
-        "message": "Refresh Now"
+        "message": "今すぐ更新する"
     },
     "briefOpenWebsite_label": {
-        "message": "Open Website"
+        "message": "ウェブサイトを開く"
     },
     "briefUnsubscribeFeed_label": {
-        "message": "Unsubscribe"
+        "message": "購読を解除する"
     },
     "briefEmptyFeed_label": {
-        "message": "Empty Feed"
+        "message": "フィードを空にする"
     },
     "briefFeedSettings_label": {
-        "message": "Feed Settings"
+        "message": "フィードの設定"
     },
     "briefRestoreTrashed_label": {
-        "message": "Restore All Items"
+        "message": "すべての項目を元に戻す"
     },
     "briefEmptyTrash_label": {
-        "message": "Empty Trash"
+        "message": "ごみ箱を空にする"
     }
 }
