@@ -108,6 +108,7 @@ FeedView.prototype = {
     _scrolling: null,
     // Autoselect timeout ID for clearTimeout
     _scrollSelectionTimeout: null,
+    _prevPosition: 0,
 
     // Indicates if a filter paramater is fixed and cannot be toggled by the user.
     _fixedStarred: false,
@@ -236,7 +237,7 @@ FeedView.prototype = {
             targetPosition = (entryView.offsetTop + entryView.height) - win.innerHeight;
         }
 
-        this.scroll(targetPosition, aSmooth, true);
+        this.scroll(targetPosition, aSmooth);
     },
 
     // Scroll down by the height of the viewport.
@@ -257,10 +258,8 @@ FeedView.prototype = {
      * @param aSmooth
      *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
      *        target position.
-     * @param aSuppressSelection
-     *        Set to TRUE to prevent scrolling from altering selection.
      */
-    scroll: function FeedView_scroll(aTargetPosition, aSmooth, aSuppressSelection) {
+    scroll: function FeedView_scroll(aTargetPosition, aSmooth) {
         if (this._scrolling)
             return;
 
@@ -285,11 +284,6 @@ FeedView.prototype = {
                 if (Math.abs(targetPosition - this.window.pageYOffset) <= Math.abs(jump)) {
                     this.window.scroll(this.window.pageXOffset, targetPosition)
                     this._stopSmoothScrolling();
-
-                    // One more scroll event will be sent but _scrolling is already null,
-                    // so the event handler will try to automatically select the central entry.
-                    if (aSuppressSelection)
-                        this._suppressSelectionOnNextScroll = true;
                 }
                 else {
                     this.window.scroll(this.window.pageXOffset, this.window.pageYOffset + jump);
@@ -297,11 +291,30 @@ FeedView.prototype = {
             }, 10)
         }
         else {
-            if (aSuppressSelection)
-                this._suppressSelectionOnNextScroll = true;
-
             this.window.scroll(this.window.pageXOffset, targetPosition);
         }
+    },
+
+    /**
+     * Keep the selected item iff the last scroll was towards it and it's visible.
+     */
+    clampSelection: function FeedView_clampSelection({lastDelta}) {
+        let dir = Math.sign(lastDelta);
+
+        let current = this.getEntryView(this.selectedEntry);
+        if(current) {
+            let start = current.offsetTop + ((dir < 0) ? current.height : 0);
+            let end = current.offsetTop + ((dir < 0) ? 0 : current.height);
+
+            let center = this.window.pageYOffset + this.window.innerHeight / 2;
+            let forward_end = this.window.pageYOffset + ((dir < 0) ? 0 : this.window.innerHeight);
+
+            if((end - center) * dir > 0 && (forward_end - start) * dir > 0)
+                return;
+        }
+
+        // The current selection is not acceptable
+        this.selectEntry(this.getEntryInScreenCenter())
     },
 
     _stopSmoothScrolling: function FeedView__stopSmoothScrolling() {
@@ -414,19 +427,21 @@ FeedView.prototype = {
             case 'scroll':
                 this._autoMarkRead();
 
-                getElement('feed-view-header').classList.toggle(
-                    'border', this.window.pageYOffset > 0)
+                let position = this.window.pageYOffset;
+                let prevPosition = this._prevPosition;
+                if(position === prevPosition)
+                    return;
 
-                if (this._suppressSelectionOnNextScroll) {
-                    this._suppressSelectionOnNextScroll = false;
-                }
-                else if (!this._scrolling) {
-                    clearTimeout(this._scrollSelectionTimeout);
-                    let callback = this._callbackRefreshGuard(() =>
-                        this.selectEntry(this.getEntryInScreenCenter())
-                    )
-                    this._scrollSelectionTimeout = setTimeout(callback, 50);
-                }
+                getElement('feed-view-header').classList.toggle(
+                    'border', position > 0)
+
+                clearTimeout(this._scrollSelectionTimeout);
+                let callback = this._callbackRefreshGuard(() =>
+                    this.clampSelection({lastDelta: position - prevPosition})
+                )
+                this._scrollSelectionTimeout = setTimeout(callback, 50);
+
+                this._prevPosition = position;
 
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
@@ -604,9 +619,6 @@ FeedView.prototype = {
 
         let animate = aAnimate && containedEntries.length < 30;
 
-        // Removing content may cause a scroll event that should be ignored.
-        this._suppressSelectionOnNextScroll = true;
-
         API.hideStarUI();
 
         let selectedEntryIndex = -1;
@@ -685,7 +697,8 @@ FeedView.prototype = {
         API.hideStarUI();
 
         // Manually reset the scroll position, otherwise weird stuff happens.
-        this.scroll(0, false, true);
+        this.scroll(0, false);
+        this._prevPosition = 0;
 
         // Clear DOM content.
         this.document.body.removeChild(this.feedContent);
