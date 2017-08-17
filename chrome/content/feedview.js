@@ -202,7 +202,7 @@ FeedView.prototype = {
             this.getEntryView(aEntry).selected = true;
 
             if (aScroll)
-                this.scrollToEntry(aEntry, true, aScrollSmoothly, true);
+                this.scrollToEntry(aEntry, true, aScrollSmoothly);
         }
     },
 
@@ -1198,7 +1198,7 @@ EntryView.prototype = {
                 let screenBottom = this.feedView.window.pageYOffset +
                                    this.feedView.window.innerHeight;
                 if (entryBottom > screenBottom)
-                    this.feedView.scrollToEntry(this.id, false, true, true);
+                    this.feedView.scrollToEntry(this.id, false, true);
             }
         })
 
