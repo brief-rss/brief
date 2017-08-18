@@ -104,10 +104,9 @@ FeedView.prototype = {
     // have been loaded, but it is false if there *could* be more.
     _allEntriesLoaded: false,
 
-    // ID of the animation interval if the view is being scrolled, or null otherwise.
-    _scrolling: null,
     // Autoselect timeout ID for clearTimeout
     _scrollSelectionTimeout: null,
+    // Position before the next scroll event to determine its direction
     _prevPosition: 0,
 
     // Indicates if a filter paramater is fixed and cannot be toggled by the user.
@@ -161,9 +160,6 @@ FeedView.prototype = {
 
 
     selectNextEntry: function FeedView_selectNextEntry() {
-        if (this._scrolling)
-            return;
-
         let selectedIndex = this.getEntryIndex(this.selectedEntry);
         let nextEntry = this._loadedEntries[selectedIndex + 1];
         if (nextEntry)
@@ -171,9 +167,6 @@ FeedView.prototype = {
     },
 
     selectPrevEntry: function FeedView_selectPrevEntry() {
-        if (this._scrolling)
-            return;
-
         let selectedIndex = this.getEntryIndex(this.selectedEntry);
         let prevEntry = this._loadedEntries[selectedIndex - 1];
         if (prevEntry)
@@ -260,9 +253,6 @@ FeedView.prototype = {
      *        target position.
      */
     scroll: function FeedView_scroll(aTargetPosition, aSmooth) {
-        if (this._scrolling)
-            return;
-
         // Clamp the target position.
         let targetPosition = Math.max(aTargetPosition, 0);
         targetPosition = Math.min(targetPosition, this.window.scrollMaxY);
@@ -270,29 +260,9 @@ FeedView.prototype = {
         if (targetPosition == this.window.pageYOffset)
             return;
 
-        if (aSmooth && PrefCache.smoothScroll) {
-            let distance = targetPosition - this.window.pageYOffset;
-            let jumpCount = Math.exp(Math.abs(distance) / 400) + 6;
-            jumpCount = Math.max(jumpCount, 7);
-            jumpCount = Math.min(jumpCount, 15);
+        let behavior = (aSmooth && PrefCache.smoothScroll) ? 'smooth' : 'instant';
 
-            let jump = Math.round(distance / jumpCount);
-
-            this._scrolling = setInterval(() => {
-                // If we are within epsilon smaller or equal to the jump,
-                // then scroll directly to the target position.
-                if (Math.abs(targetPosition - this.window.pageYOffset) <= Math.abs(jump)) {
-                    this.window.scroll(this.window.pageXOffset, targetPosition)
-                    this._stopSmoothScrolling();
-                }
-                else {
-                    this.window.scroll(this.window.pageXOffset, this.window.pageYOffset + jump);
-                }
-            }, 10)
-        }
-        else {
-            this.window.scroll(this.window.pageXOffset, targetPosition);
-        }
+        this.window.scrollTo({top: targetPosition, behavior});
     },
 
     /**
@@ -315,11 +285,6 @@ FeedView.prototype = {
 
         // The current selection is not acceptable
         this.selectEntry(this.getEntryInScreenCenter())
-    },
-
-    _stopSmoothScrolling: function FeedView__stopSmoothScrolling() {
-        clearInterval(this._scrolling);
-        this._scrolling = null;
     },
 
     // Return the entry element closest to the middle of the screen.
@@ -385,8 +350,6 @@ FeedView.prototype = {
         this.document.removeEventListener('scroll', this, true);
 
         API.removeStorageObserver(this);
-
-        this._stopSmoothScrolling();
     },
 
 
@@ -693,7 +656,6 @@ FeedView.prototype = {
         this.document.body.classList.remove('headlines-view');
         this.document.body.classList.remove('multiple-feeds');
 
-        this._stopSmoothScrolling();
         API.hideStarUI();
 
         // Manually reset the scroll position, otherwise weird stuff happens.
