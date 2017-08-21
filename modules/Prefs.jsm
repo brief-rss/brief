@@ -1,48 +1,91 @@
 'use strict';
 
-const EXPORTED_SYMBOLS = ['PrefLoader'];
+const EXPORTED_SYMBOLS = ['LocalPrefs'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-// The boilerplate required to set and clear default prefs
-const PrefLoader = {
-    _prefs: new Map(),
+const PREFIX = 'extensions.brief.'; // We'll register just one observer for this branch
 
-    setDefaultPrefs: function() {
+// The prefs manager responsible for default prefs and sync down with WE
+const LocalPrefs = {
+    // Default values configured with `pref` below
+    _defaults: new Map(),
+    // Current values (from observers)
+    _values: new Map(),
+    // Registered upstream pref observers
+    _upstream: new Set(),
+
+    init: function() {
         let prefs = Services.prefs.getDefaultBranch("");
-        for(let [name, value] of this._prefs) {
-            switch (typeof value) {
-                case "boolean":
-                    prefs.setBoolPref(name, value);
-                    break;
-
-                case "number":
-                    prefs.setIntPref(name, value);
-                    break;
-
-                case "string":
-                    var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-                    str.data = value;
-                    prefs.setComplexValue(name, Ci.nsISupportsString, str);
-                    break;
+        for(let [name, value] of this._defaults) {
+            if(value !== undefined) {
+                switch (typeof value) {
+                    case "boolean":
+                        prefs.setBoolPref(name, value);
+                        break;
+                    case "number":
+                        prefs.setIntPref(name, value);
+                        break;
+                    case "string":
+                        var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+                        str.data = value;
+                        prefs.setComplexValue(name, Ci.nsISupportsString, str);
+                        break;
+                }
+            }
+            this._update(name);
+            if(!name.startsWith(PREFIX)) {
+                this._registerUpdater(name);
             }
         }
+        this._registerUpdater(PREFIX);
     },
 
-    clearDefaultPrefs: function() {
+    finalize: function() {
         let prefs = Services.prefs.getDefaultBranch("");
-        for(let [name, value] of this._prefs) {
+        for(let [name, value] of this._defaults) {
+            if(value === undefined)
+                continue;
             if(!prefs.prefHasUserValue(name))
                 prefs.deleteBranch(name);
         }
+        for(let {branch, handler} of this._upstream) {
+            branch.removeObserver('', handler);
+        }
+    },
+
+    // Read the current pref value
+    _get: function(name) {
+        let type = Services.prefs.getPrefType(name);
+        switch(type) {
+            case Services.prefs.PREF_INT:
+                return Services.prefs.getIntPref(name);
+            case Services.prefs.PREF_BOOL:
+                return Services.prefs.getBoolPref(name);
+            case Services.prefs.PREF_STRING:
+                return Services.prefs.getCharPref(name);
+        }
+    },
+
+    // Update pref value in our cache
+    _update: function(name) {
+        this._values.set(name, this._get(name));
+    },
+
+    // Register an upstream observer
+    _registerUpdater: function(prefix) {
+        let handler = (branch, _, name) => this._update(prefix + name);
+        let branch = Services.prefs.getBranch(prefix);
+        branch.addObserver('', handler);
+        this._upstream.add({branch, handler})
     },
 }
 
 function pref(name, value) {
-    PrefLoader._prefs.set(name, value);
+    LocalPrefs._defaults.set(name, value);
 }
 
 // The actual prefs
@@ -79,3 +122,6 @@ pref("extensions.brief.database.limitStoredEntries", false);
 pref("extensions.brief.database.maxStoredEntries", 100);
 pref("extensions.brief.database.lastPurgeTime", 0);
 pref("extensions.brief.database.keepStarredWhenClearing", true);
+
+// This one will not be modified, only watched
+pref("general.smoothScroll", undefined);

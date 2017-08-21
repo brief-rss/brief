@@ -282,7 +282,7 @@ var Brief = {
         console.log("Brief: extension startup");
 
         // Load default prefs
-        PrefLoader.setDefaultPrefs();
+        LocalPrefs.init();
 
         Services.obs.addObserver(this.refreshUI, 'brief:invalidate-feedlist', false);
 
@@ -348,7 +348,7 @@ var Brief = {
         Storage = null; // Stop async callback from registering after this point
 
         // Clear default prefs
-        PrefLoader.clearDefaultPrefs();
+        LocalPrefs.finalize();
 
         console.log("Brief: JSM unload"); // Unload all of our JSMs
         Components.utils.unload('resource://brief/API.jsm');
