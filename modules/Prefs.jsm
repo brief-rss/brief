@@ -17,26 +17,13 @@ const LocalPrefs = {
     _values: new Map(),
     // Registered upstream pref observers
     _upstream: new Set(),
+    // Registered observers
+    _observers: new Set(),
 
     init: function() {
         let prefs = Services.prefs.getDefaultBranch("");
         for(let [name, value] of this._defaults) {
-            if(value !== undefined) {
-                switch (typeof value) {
-                    case "boolean":
-                        prefs.setBoolPref(name, value);
-                        break;
-                    case "number":
-                        prefs.setIntPref(name, value);
-                        break;
-                    case "string":
-                        var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-                        str.data = value;
-                        prefs.setComplexValue(name, Ci.nsISupportsString, str);
-                        break;
-                }
-            }
-            this._update(name);
+            this._set({name, value, branch: prefs});
             if(!name.startsWith(PREFIX)) {
                 this._registerUpdater(name);
             }
@@ -57,6 +44,18 @@ const LocalPrefs = {
         }
     },
 
+    get: function(name) {
+        return this._values[name];
+    },
+
+    getAll: function() {
+        return this._values;
+    },
+
+    set: function(name, value) {
+        this._set({name, value});
+    },
+
     // Read the current pref value
     _get: function(name) {
         let type = Services.prefs.getPrefType(name);
@@ -70,9 +69,40 @@ const LocalPrefs = {
         }
     },
 
+    _set: function({name, value, branch}) {
+        let prefs = Services.prefs;
+        if(branch !== undefined)
+            prefs = branch;
+        switch (typeof value) {
+            case "boolean":
+                prefs.setBoolPref(name, value);
+                break;
+            case "number":
+                prefs.setIntPref(name, value);
+                break;
+            case "string":
+                var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+                str.data = value;
+                prefs.setComplexValue(name, Ci.nsISupportsString, str);
+                break;
+        }
+        this._update(name);
+    },
+
+    addObserver: function(observer) {
+        this._observers.add(observer);
+    },
+
+    removeObserver: function(observer) {
+        this._observers.delete(observer);
+    },
+
     // Update pref value in our cache
     _update: function(name) {
         this._values.set(name, this._get(name));
+        for(let observer of this._observers) {
+            observer();
+        }
     },
 
     // Register an upstream observer
