@@ -16,7 +16,7 @@ XPCOMUtils.defineLazyModuleGetter(this, 'RecentWindow', 'resource:///modules/Rec
 var Brief = {
 
     content_server: null,
-    webext_port: null,
+    _statusObservers: new Set(),
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
@@ -109,35 +109,31 @@ var Brief = {
             wccs.registerContentHandler(CONTENT_TYPE, SUBSCRIBE_URL, 'Brief', null);
     },
 
-    onPrefChanged: function Brief_onPrefChanged(aSubject, aTopic, aData) {
-        if (aData == 'showUnreadCounter') {
-            Brief.initUnreadCounter();
-        }
-    },
-
-
     observeStorage: function(event, args) {
         switch(event) {
             case 'entriesAdded':
             case 'entriesUpdated':
             case 'entriesMarkedRead':
             case 'entriesDeleted':
-                this.refreshUI();
+                this.notifyStatusObservers();
         }
     },
 
-    initUnreadCounter: function() {
-        let showCounter = this.prefs.getBoolPref('showUnreadCounter');
-
-        if(this.webext_port !== null)
-            this.webext_port.postMessage({id: 'set-show-unread-counter', state: showCounter});
+    addStatusObserver: function(observer) {
+        this._statusObservers.add(observer);
     },
 
-    refreshUI: function Brief_refreshUI() {
-        wait(500).then(() => Brief.updateStatus());
+    removeStatusObserver: function(observer) {
+        this._statusObservers.delete(observer);
     },
 
-    updateStatus: async function Brief_updateStatus() {
+    notifyStatusObservers: function Brief_notifyStatusObservers() {
+        for(let observer of this._statusObservers) {
+            observer();
+        }
+    },
+
+    getStatus: async function Brief_getStatus() {
         let count_query = new Query({
             includeFeedsExcludedFromGlobalViews: false,
             deleted: false,
@@ -145,8 +141,6 @@ var Brief = {
         });
 
         let count = await count_query.getEntryCount();
-        if(this.webext_port !== null)
-            this.webext_port.postMessage({id: 'set-unread-count', count});
 
         let updated = "";
         let bundle = Services.strings.createBundle('chrome://brief/locale/brief.properties');
@@ -234,8 +228,7 @@ var Brief = {
         }
         rows = await Promise.all(rows);
         let tooltip = `${updated}\n\n${noUnreadText}${rows.join('\n')}`;
-        if(this.webext_port !== null)
-            this.webext_port.postMessage({id: 'set-tooltip', text: tooltip});
+        return {count, tooltip};
     },
 
     onFirstRun: function Brief_onFirstRun() {
@@ -248,35 +241,6 @@ var Brief = {
         })
     },
 
-    onWebextMessage: function Brief_onWebextMessage(message) {
-        // Processing messages from the WebExtension component
-        switch(message.id) {
-            case 'open-brief':
-                this.open();
-                break;
-            case 'open-options':
-                this.showOptions();
-                break;
-            case 'refresh':
-                FeedUpdateService.updateAllFeeds();
-                break;
-            case 'mark-all-read':
-                (new Query()).markEntriesRead(true);
-                break;
-            case 'set-show-unread-counter':
-                Brief.prefs.setBoolPref('showUnreadCounter', message.state);
-                break;
-            case 'get-show-unread-counter':
-                this.initUnreadCounter();
-                break;
-            case 'get-summary':
-                this.updateStatus();
-                break;
-            default:
-                console.log("Unknown command " + message.id);
-        }
-    },
-
     startup: function({webExtension}) {
         // Start the embedded webextension.
         console.log("Brief: extension startup");
@@ -284,14 +248,12 @@ var Brief = {
         // Load default prefs
         LocalPrefs.init();
 
-        Services.obs.addObserver(this.refreshUI, 'brief:invalidate-feedlist', false);
+        Services.obs.addObserver(this.notifyStatusObservers, 'brief:invalidate-feedlist', false);
 
         // Initialize storage and API
         Storage.init();
         FeedUpdateService.init();
         this.content_server = new BriefServer();
-
-        this.prefs.addObserver('', this.onPrefChanged, false);
 
         // Register the custom CSS file under a resource URI.
         let resourceProtocolHandler = Services.io.getProtocolHandler('resource')
@@ -309,17 +271,10 @@ var Brief = {
         // Async startup after Storage is ready
         Storage.ready.then(() => {
             Storage.addObserver(this);
-            this.updateStatus();
+            this.notifyStatusObservers();
         });
 
-        // Start the WebExtension component
-        webExtension.startup().then(({browser}) => {
-            browser.runtime.onConnect.addListener(port => {
-                this.webext_port = port;
-                // Won't need to remove this one, the WebExtension will be down first
-                this.webext_port.onMessage.addListener(message => this.onWebextMessage(message));
-            });
-        });
+        WebExt.init({webExtension});
 
         if (this.prefs.getBoolPref('firstRun')) {
             this.onFirstRun();
@@ -337,15 +292,15 @@ var Brief = {
                                                 .QueryInterface(Ci.nsIResProtocolHandler);
         resourceProtocolHandler.setSubstitution('brief-custom-style.css', null);
 
-        this.prefs.removeObserver('', this.onPrefChanged);
-
         this.content_server.finalize();
         FeedUpdateService.finalize();
         Storage.finalize();
 
-        Services.obs.removeObserver(this.refreshUI, 'brief:invalidate-feedlist');
+        Services.obs.removeObserver(this.notifyStatusObservers, 'brief:invalidate-feedlist');
         Storage.removeObserver(this); // Nop if not registered yet
         Storage = null; // Stop async callback from registering after this point
+
+        WebExt.finalize();
 
         // Clear default prefs
         LocalPrefs.finalize();
@@ -360,6 +315,46 @@ var Brief = {
         Components.utils.unload('resource://brief/Prefs.jsm');
     }
 
+}
+
+let WebExt = {
+    init: async function({webExtension: {startup}}) {
+        let {browser} = await startup();
+
+        // Won't need to remove any handlers, the WebExtension will be down first
+        browser.runtime.onMessage.addListener((message, sender) => {
+            if(this._messageHandlers[message.id] !== undefined)
+                this._messageHandlers[message.id](message, sender);
+        });
+        browser.runtime.onConnect.addListener(port => {
+            if(this._connectHandlers[port.name] !== undefined)
+                this._connectHandlers[port.name](port);
+        });
+    },
+
+    finalize: function() {
+    },
+
+    _messageHandlers: {
+        'open-brief': () => Brief.open(),
+        'open-options': () => Brief.showOptions(),
+        'refresh': () => FeedUpdateService.updateAllFeeds(),
+        'mark-all-read': () => (new Query()).markEntriesRead(true),
+        'set-pref': ({name, value}) => LocalPrefs.set(name, value),
+    },
+
+    _connectHandlers: {
+        'watch-prefs': port => {
+            let observer = () => port.postMessage({prefs: LocalPrefs.getAll()});
+            LocalPrefs.addObserver(observer);
+            observer();
+        },
+        'watch-status': port => {
+            let observer = async () => port.postMessage(await Brief.getStatus());
+            Brief.addStatusObserver(observer);
+            observer();
+        },
+    },
 }
 
 function startup(data) {

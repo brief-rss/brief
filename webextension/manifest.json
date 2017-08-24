@@ -10,9 +10,9 @@
         }
     },
     "default_locale": "en",
-    "permissions": ["contextMenus"],
+    "permissions": ["contextMenus", "storage"],
     "background": {
-        "scripts": ["background.js"]
+        "scripts": ["scripts/prefs.js", "background.js"]
     },
     "browser_action": {
         "browser_style": true,

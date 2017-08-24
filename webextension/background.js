@@ -1,17 +1,15 @@
 'use strict';
 
 const Brief = {
-    port: null,
-    prefs: {
-        showUnreadCount: false,
-    },
+    // Port for receiving status updates
+    _statusPort: null,
+    // Latest status
+    _status: null,
 
     // No deinit required, we'll be forcefully unloaded anyway
-    init: function() {
-        this.port = browser.runtime.connect({name: 'we-to-legacy'});
-        this.port.onMessage.addListener(message => this.onMessage(message));
-
-        browser.browserAction.onClicked.addListener(() => this.openBrief());
+    init: async function() {
+        browser.browserAction.onClicked.addListener(
+            () => browser.runtime.sendMessage({id: 'open-brief'}));
         browser.browserAction.setBadgeBackgroundColor({color: 'grey'});
 
         browser.contextMenus.create({
@@ -37,62 +35,50 @@ const Brief = {
         });
         browser.contextMenus.onClicked.addListener(info => this.onContext(info));
 
-        this.port.postMessage({id: 'get-show-unread-counter'});
+        await Prefs.init();
+
+        Prefs.addObserver('showUnreadCounter', () => this._updateUI());
+        this._statusPort = browser.runtime.connect({name: 'watch-status'});
+        this._statusPort.onMessage.addListener(msg => this._updateUI(msg));
     },
 
     onContext: function({menuItemId, checked}) {
         switch(menuItemId) {
             case 'brief-button-refresh':
-                this.port.postMessage({id: 'refresh'});
+                browser.runtime.sendMessage({id: 'refresh'});
                 break;
             case 'brief-button-mark-read':
-                this.port.postMessage({id: 'mark-all-read'});
+                browser.runtime.sendMessage({id: 'mark-all-read'});
                 break;
             case 'brief-button-show-unread':
-                this.port.postMessage({id: 'set-show-unread-counter', state: checked});
+                Prefs.set('showUnreadCounter', checked);
                 break;
             case 'brief-button-options':
-                this.port.postMessage({id: 'open-options'});
+                browser.runtime.sendMessage({id: 'open-options'});
                 break;
         }
     },
 
-    onMessage: function(message) {
-        switch(message.id) {
-            case 'set-show-unread-counter':
-                let {state} = message;
-                this.prefs.showUnreadCounter = state;
-                browser.contextMenus.update('brief-button-show-unread', {checked: state});
-                if(state) {
-                    this.port.postMessage({id: 'get-summary'});
-                } else {
-                    browser.browserAction.setBadgeText({text: ""});
-                }
-                break;
-            case 'set-unread-count': {
-                let {count} = message;
-                let text = "";
-                if(this.prefs.showUnreadCounter && count > 0) {
-                    text = count.toString();
-                    // We crop the badge manually to leave the least-significant digits
-                    if (text.length > 4)
-                        text = '..' + text.substring(text.length - 3);
-                }
-                browser.browserAction.setBadgeText({text});
-                break;
-            }
-            case 'set-tooltip': {
-                let {text} = message;
-                browser.browserAction.setTitle({title: text});
-                break;
-            }
-            default:
-                console.log("Unknown command " + message.id);
-        }
-    },
+    _updateUI: async function(msg) {
+        if(msg !== undefined)
+            this._status = msg;
+        let {count, tooltip} = this._status;
 
-    openBrief: function() {
-        this.port.postMessage({id: 'open-brief'});
+        let enabled = Prefs.get('showUnreadCounter');
+        browser.contextMenus.update('brief-button-show-unread', {checked: enabled});
+        if(enabled) {
+            let text = "";
+            if(count > 0) {
+                text = count.toString();
+                // We crop the badge manually to leave the least-significant digits
+                if (text.length > 4)
+                    text = '..' + text.substring(text.length - 3);
+            }
+            browser.browserAction.setBadgeText({text});
+        } else {
+            browser.browserAction.setBadgeText({text: ""});
+        }
+        browser.browserAction.setTitle({title: tooltip});
     },
 };
 
