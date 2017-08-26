@@ -17,7 +17,7 @@ let Prefs = {
             this._signalReady = resolve;
         });
         this._port = browser.runtime.connect({name: 'watch-prefs'});
-        this._port.onMessage.addListener(msg => this._merge(msg.prefs));
+        this._port.onMessage.addListener(prefs => this._merge(prefs));
 
         await ready;
     },

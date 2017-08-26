@@ -16,7 +16,7 @@ XPCOMUtils.defineLazyModuleGetter(this, 'RecentWindow', 'resource:///modules/Rec
 var Brief = {
 
     content_server: null,
-    _statusObservers: new Set(),
+    status: new DataSource({}),
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
@@ -115,25 +115,16 @@ var Brief = {
             case 'entriesUpdated':
             case 'entriesMarkedRead':
             case 'entriesDeleted':
-                this.notifyStatusObservers();
+                this.updateStatus();
         }
     },
 
-    addStatusObserver: function(observer) {
-        this._statusObservers.add(observer);
+    // May be called without correct `this`
+    updateStatus: async function() {
+        await Brief._updateStatus();
     },
 
-    removeStatusObserver: function(observer) {
-        this._statusObservers.delete(observer);
-    },
-
-    notifyStatusObservers: function Brief_notifyStatusObservers() {
-        for(let observer of this._statusObservers) {
-            observer();
-        }
-    },
-
-    getStatus: async function Brief_getStatus() {
+    _updateStatus: async function Brief__updateStatus() {
         let count_query = new Query({
             includeFeedsExcludedFromGlobalViews: false,
             deleted: false,
@@ -228,7 +219,8 @@ var Brief = {
         }
         rows = await Promise.all(rows);
         let tooltip = `${updated}\n\n${noUnreadText}${rows.join('\n')}`;
-        return {count, tooltip};
+
+        this.status.set({count, tooltip});
     },
 
     onFirstRun: function Brief_onFirstRun() {
@@ -248,7 +240,7 @@ var Brief = {
         // Load default prefs
         LocalPrefs.init();
 
-        Services.obs.addObserver(this.notifyStatusObservers, 'brief:invalidate-feedlist', false);
+        Services.obs.addObserver(this.updateStatus, 'brief:invalidate-feedlist', false);
 
         // Initialize storage and API
         Storage.init();
@@ -271,7 +263,7 @@ var Brief = {
         // Async startup after Storage is ready
         Storage.ready.then(() => {
             Storage.addObserver(this);
-            this.notifyStatusObservers();
+            this.updateStatus();
         });
 
         WebExt.init({webExtension});
@@ -296,7 +288,7 @@ var Brief = {
         FeedUpdateService.finalize();
         Storage.finalize();
 
-        Services.obs.removeObserver(this.notifyStatusObservers, 'brief:invalidate-feedlist');
+        Services.obs.removeObserver(this.updateStatus, 'brief:invalidate-feedlist');
         Storage.removeObserver(this); // Nop if not registered yet
         Storage = null; // Stop async callback from registering after this point
 
@@ -344,16 +336,8 @@ let WebExt = {
     },
 
     _connectHandlers: {
-        'watch-prefs': port => {
-            let observer = () => port.postMessage({prefs: LocalPrefs.getAll()});
-            LocalPrefs.addObserver(observer);
-            observer();
-        },
-        'watch-status': port => {
-            let observer = async () => port.postMessage(await Brief.getStatus());
-            Brief.addStatusObserver(observer);
-            observer();
-        },
+        'watch-prefs': port => LocalPrefs.cache.attach(port),
+        'watch-status': port => Brief.status.attach(port),
     },
 }
 

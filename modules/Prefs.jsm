@@ -2,6 +2,7 @@
 
 const EXPORTED_SYMBOLS = ['LocalPrefs'];
 
+Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
 
 const Cc = Components.classes;
@@ -14,11 +15,9 @@ const LocalPrefs = {
     // Default values configured with `pref` below
     _defaults: new Map(),
     // Current values (from observers)
-    _values: new Map(),
+    cache: new DataSource(new Map()),
     // Registered upstream pref observers
     _upstream: new Set(),
-    // Registered observers
-    _observers: new Set(),
 
     init: function() {
         let prefs = Services.prefs.getDefaultBranch("");
@@ -45,11 +44,7 @@ const LocalPrefs = {
     },
 
     get: function(name) {
-        return this._values[name];
-    },
-
-    getAll: function() {
-        return this._values;
+        return this.cache[name];
     },
 
     set: function(name, value) {
@@ -89,20 +84,11 @@ const LocalPrefs = {
         this._update(name);
     },
 
-    addObserver: function(observer) {
-        this._observers.add(observer);
-    },
-
-    removeObserver: function(observer) {
-        this._observers.delete(observer);
-    },
-
     // Update pref value in our cache
     _update: function(name) {
-        this._values.set(name, this._get(name));
-        for(let observer of this._observers) {
-            observer();
-        }
+        let prefs = this.cache.get();
+        prefs.set(name, this._get(name))
+        this.cache.set(prefs);
     },
 
     // Register an upstream observer

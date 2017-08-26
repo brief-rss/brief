@@ -1,7 +1,7 @@
 'use strict';
 
 const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'log', 'wait',
-                          'getPluralForm', 'RelativeDate',
+                          'getPluralForm', 'RelativeDate', 'DataSource',
                           'BRIEF_URL'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
@@ -117,6 +117,34 @@ RelativeDate.prototype = {
         return Math.floor((this.currentTime - this.targetTime) / aDivisor);
     }
 
+}
+
+
+function DataSource(initial) {
+    this._data = initial;
+    this._ports = new Set();
+}
+
+DataSource.prototype = {
+    get: function() {
+        return this._data;
+    },
+
+    set: function(value) {
+        this._data = value;
+        for(let port of this._ports) {
+            port.postMessage(this._data);
+        }
+    },
+
+    attach: function(port) {
+        this._ports.add(port);
+        port.postMessage(this._data);
+    },
+
+    detach: function(port) {
+        this._ports.delete(port);
+    },
 }
 
 
