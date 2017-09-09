@@ -9,6 +9,7 @@ Components.utils.import('resource://brief/Prefs.jsm');
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://brief/FeedUpdateService.jsm');
 Components.utils.import('resource://brief/API.jsm');
+Components.utils.import('resource://brief/StyleFile.jsm');
 
 XPCOMUtils.defineLazyModuleGetter(this, 'RecentWindow', 'resource:///modules/RecentWindow.jsm');
 
@@ -272,6 +273,7 @@ var Brief = {
         }
 
         // Main async init
+        await StyleFile.init();
         WebExt.init({webExtension});
     },
 
@@ -340,6 +342,7 @@ let WebExt = {
     _connectHandlers: {
         'watch-prefs': port => LocalPrefs.cache.attach(port),
         'watch-status': port => Brief.status.attach(port),
+        'watch-custom-css': port => StyleFile.text.attach(port),
     },
 }
 

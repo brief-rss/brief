@@ -40,6 +40,9 @@ const Brief = {
         Prefs.addObserver('showUnreadCounter', () => this._updateUI());
         this._statusPort = browser.runtime.connect({name: 'watch-status'});
         this._statusPort.onMessage.addListener(msg => this._updateUI(msg));
+
+        this._stylePort = browser.runtime.connect({name: 'watch-custom-css'});
+        this._stylePort.onMessage.addListener(msg => browser.storage.local.set({custom_css: msg}));
     },
 
     onContext: function({menuItemId, checked}) {
