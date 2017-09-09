@@ -243,8 +243,6 @@ var Brief = {
         Services.obs.addObserver(this.updateStatus, 'brief:invalidate-feedlist', false);
 
         // Initialize storage and API
-        Storage.init();
-        FeedUpdateService.init();
         this.content_server = new BriefServer();
 
         // Register the custom CSS file under a resource URI.
@@ -257,20 +255,24 @@ var Brief = {
         // Register the content handler for feeds
         this.registerContentHandler();
 
-        // Trigger async livemarks sync
-        wait(1000).then(() => Storage.syncWithLivemarks());
+        this.startupAsync({webExtension});
+    },
 
-        // Async startup after Storage is ready
-        Storage.ready.then(() => {
+    async startupAsync({webExtension}) {
+        // Trigger separate async tasks
+        Storage.init().then(() => {
             Storage.addObserver(this);
             this.updateStatus();
         });
-
-        WebExt.init({webExtension});
+        FeedUpdateService.init();
+        wait(1000).then(() => Storage.syncWithLivemarks());
 
         if (this.prefs.getBoolPref('firstRun')) {
             this.onFirstRun();
         }
+
+        // Main async init
+        WebExt.init({webExtension});
     },
 
     shutdown: function() {
