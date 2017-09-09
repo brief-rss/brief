@@ -30,7 +30,7 @@ let OPML = Object.freeze({
 let OPMLInternal = {
 
     importOPML: function*() {
-        let path = this.promptForFile('open');
+        let path = yield this.promptForFile('open');
 
         if (path) {
             let dataArray = yield OS.File.read(path);
@@ -149,7 +149,7 @@ let OPMLInternal = {
     },
 
     exportOPML: function* exportOPML() {
-        let path = this.promptForFile('save');
+        let path = yield this.promptForFile('save');
 
         if (path) {
             let folder = Services.prefs.getIntPref('extensions.brief.homeFolder');
@@ -228,7 +228,7 @@ let OPMLInternal = {
         return dataString;
     }.task(),
 
-    promptForFile: function(aMode) {
+    promptForFile: async function(aMode) {
         let bundle = Services.strings.createBundle('chrome://brief/locale/options.properties');
         let win = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator)
                                                                .getMostRecentWindow(null);
@@ -246,7 +246,7 @@ let OPMLInternal = {
             fp.init(win, bundle.GetStringFromName('selectFile'), Ci.nsIFilePicker.modeOpen);
         }
 
-        let result = fp.show();
+        let result =  await new Promise(resolve => fp.open(resolve));
 
         return result == Ci.nsIFilePicker.returnCancel ? null : fp.file.path;
     },
