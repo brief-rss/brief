@@ -1,6 +1,6 @@
 {
     "name": "Brief",
-    "version": "2.4.0a0+git",
+    "version": "2.4.0a1",
     "manifest_version": 2,
     "applications": {
         "gecko": {
