@@ -277,10 +277,7 @@ var Brief = {
         WebExt.init({webExtension});
     },
 
-    shutdown: function() {
-        Services.obs.notifyObservers(null, "startupcache-invalidate", null); //XXX: dirty hack for quicker development to avoid bootstrap.js caching
-        Services.obs.notifyObservers(null, "chrome-flush-caches", null); // Hack taken from MDN
-        Services.strings.flushBundles();
+    shutdown: function(data, reason) {
         console.log("Brief: extension shutdown");
 
         // Unregister the custom CSS file
@@ -310,6 +307,13 @@ var Brief = {
         Components.utils.unload('resource://brief/opml.jsm');
         Components.utils.unload('resource://brief/Prefs.jsm');
         Components.utils.unload('resource://brief/StyleFile.jsm');
+
+        if(reason !== 2 /* APP_SHUTDOWN */) {
+            // On disable/uninstall/upgrade we want to drop caches with stale code
+            Services.obs.notifyObservers(null, "startupcache-invalidate", null);
+            // Several more caches, including string bundle cache
+            Services.obs.notifyObservers(null, "chrome-flush-caches", null);
+        }
     }
 
 }
@@ -352,6 +356,6 @@ function startup(data) {
     Brief.startup(data);
 }
 
-function shutdown(data) {
-    Brief.shutdown(data);
+function shutdown(data, reason) {
+    Brief.shutdown(data, reason);
 }
