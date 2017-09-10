@@ -344,6 +344,7 @@ let WebExt = {
         'watch-prefs': port => LocalPrefs.cache.attach(port),
         'watch-status': port => Brief.status.attach(port),
         'watch-custom-css': port => StyleFile.text.attach(port),
+        'watch-feed-list': port => Storage.feeds.attach(port),
     },
 }
 
