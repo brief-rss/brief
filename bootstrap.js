@@ -17,7 +17,7 @@ XPCOMUtils.defineLazyModuleGetter(this, 'RecentWindow', 'resource:///modules/Rec
 var Brief = {
 
     content_server: null,
-    status: new DataSource({}),
+    status: new DataSource({count: 0, tooltip: ""}),
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
