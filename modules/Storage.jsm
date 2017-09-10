@@ -62,6 +62,13 @@ const Storage = Object.freeze({
     },
 
     /**
+     * A list of all known feeds and folders
+     */
+    get feeds() {
+        return StorageInternal.feedCache;
+    },
+
+    /**
      * Get an object containing properties of the feed (or folder) with the given ID.
      * See feeds table schema for a description of the properties.
      *
@@ -238,14 +245,16 @@ let StorageInternal = {
         yield Connection.execute('PRAGMA journal_size_limit = ' + (3*32768*MAX_WAL_CHECKPOINT_SIZE));
 
         // Build feed cache.
-        this.feedCache = [];
+        let feedCache = [];
         yield Stm.getAllFeeds.execute(null, row => {
             let feed = {};
             for (let column of FEEDS_COLUMNS)
                 feed[column] = row[column];
 
-            this.feedCache.push(feed);
-        })
+            feedCache.push(feed);
+        });
+
+        this.feedCache = new DataSource(feedCache);
 
         this.homeFolderID = Prefs.getIntPref('homeFolder');
         this.ensureHomeFolder();
@@ -403,7 +412,7 @@ let StorageInternal = {
 
     // See Storage.
     getAllFeeds: function StorageInternal_getAllFeeds(aIncludeFolders, aIncludeInactive) {
-        return this.feedCache.filter(
+        return this.feedCache.get().filter(
             f => (!f.isFolder || aIncludeFolders) && (!f.hidden || aIncludeInactive)
         )
     },
@@ -435,6 +444,7 @@ let StorageInternal = {
         let items = Array.isArray(aItems) ? aItems : [aItems];
         let paramSets = [];
 
+        let feedCache = this.feedCache.get();
         for (let feedData of items) {
             paramSets.push({
                 'feedID'    : feedData.feedID,
@@ -451,10 +461,10 @@ let StorageInternal = {
             for (let column of FEEDS_TABLE_SCHEMA)
                 feed[column.name] = feedData[column.name] || column['default'];
 
-            this.feedCache.push(feed);
+            feedCache.push(feed);
         }
 
-        this.feedCache = this.feedCache.sort((a, b) => a.rowIndex - b.rowIndex);
+        this.feedCache.set(feedCache.sort((a, b) => a.rowIndex - b.rowIndex));
 
         Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '');
 
@@ -482,9 +492,9 @@ let StorageInternal = {
 
                     switch (property) {
                         case 'rowIndex':
-                            this.feedCache = this.feedCache.sort(
+                            this.feedCache.get().sort(
                                 (a, b) => a.rowIndex - b.rowIndex
-                            )
+                            );
                             // Fall through...
 
                         case 'hidden':
@@ -518,8 +528,11 @@ let StorageInternal = {
 
         let promise = Stm.changeFeedProperties.executeCached(paramSets);
 
-        if (invalidateFeedlist)
-            promise.then(() => Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', ''));
+        promise.then(() => {
+            this.feedCache.notify();
+            if (invalidateFeedlist)
+                Services.obs.notifyObservers(null, 'brief:invalidate-feedlist', '')
+        });
     },
 
     /**

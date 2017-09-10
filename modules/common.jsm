@@ -132,6 +132,10 @@ DataSource.prototype = {
 
     set: function(value) {
         this._data = value;
+        this.notify();
+    },
+
+    notify: function() {
         for(let port of this._ports) {
             port.postMessage(this._data);
         }
