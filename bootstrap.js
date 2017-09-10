@@ -309,6 +309,7 @@ var Brief = {
         Components.utils.unload('resource://brief/DatabaseSchema.jsm');
         Components.utils.unload('resource://brief/opml.jsm');
         Components.utils.unload('resource://brief/Prefs.jsm');
+        Components.utils.unload('resource://brief/StyleFile.jsm');
     }
 
 }
