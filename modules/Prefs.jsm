@@ -95,7 +95,7 @@ const LocalPrefs = {
     _registerUpdater: function(prefix) {
         let handler = (branch, _, name) => this._update(prefix + name);
         let branch = Services.prefs.getBranch(prefix);
-        branch.addObserver('', handler);
+        branch.addObserver('', handler, false);
         this._upstream.add({branch, handler})
     },
 }
