@@ -18,7 +18,7 @@ let Database = {
             }
         }
         browser.storage.local.set({feeds});
-        browser.storage.sync.set({feeds});
+        browser.storage.sync.set({feeds}); // Fx53+, fails with console error on 52
         console.log(feeds.length);
     },
 };
