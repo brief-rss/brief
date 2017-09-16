@@ -5,7 +5,7 @@
 
   <rdf:Description about="urn:mozilla:install-manifest">
     <id>brief@mozdev.org</id>
-    <version>2.4.0a2+git</version>
+    <version>2.4.0a3</version>
     <type>2</type>
     <bootstrap>true</bootstrap>
     <name>Brief</name>
