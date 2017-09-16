@@ -4,20 +4,13 @@ Components.utils.import('resource://gre/modules/Services.jsm');
 Components.utils.import('resource://gre/modules/FileUtils.jsm');
 Components.utils.import('resource://gre/modules/XPCOMUtils.jsm');
 
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/Prefs.jsm');
-Components.utils.import('resource://brief/Storage.jsm');
-Components.utils.import('resource://brief/FeedUpdateService.jsm');
-Components.utils.import('resource://brief/API.jsm');
-Components.utils.import('resource://brief/StyleFile.jsm');
-
 XPCOMUtils.defineLazyModuleGetter(this, 'RecentWindow', 'resource:///modules/RecentWindow.jsm');
 
 
 var Brief = {
 
     content_server: null,
-    status: new DataSource({count: 0, tooltip: ""}),
+    status: null,
 
     FIRST_RUN_PAGE_URL: 'chrome://brief/content/firstrun.xhtml',
 
@@ -235,6 +228,13 @@ var Brief = {
     },
 
     startup: function({webExtension}) {
+        Components.utils.import('resource://brief/common.jsm');
+        Components.utils.import('resource://brief/Prefs.jsm');
+        Components.utils.import('resource://brief/Storage.jsm');
+        Components.utils.import('resource://brief/FeedUpdateService.jsm');
+        Components.utils.import('resource://brief/API.jsm');
+        Components.utils.import('resource://brief/StyleFile.jsm');
+
         // Start the embedded webextension.
         console.log("Brief: extension startup");
 
@@ -245,6 +245,7 @@ var Brief = {
 
         // Initialize storage and API
         this.content_server = new BriefServer();
+        this.status = new DataSource({count: 0, tooltip: ""});
 
         // Register the custom CSS file under a resource URI.
         let resourceProtocolHandler = Services.io.getProtocolHandler('resource')
