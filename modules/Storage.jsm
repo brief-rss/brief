@@ -1760,7 +1760,8 @@ let BookmarkObserver = {
  * the livemarks available in the Brief's home folder.
  */
 let LivemarksSync = function* LivemarksSync() {
-    if (!this.checkHomeFolder())
+    let haveRoot = yield this.checkHomeFolder();
+    if (!haveRoot)
         return;
 
     let livemarks = [];
@@ -1825,9 +1826,7 @@ let LivemarksSync = function* LivemarksSync() {
 
 LivemarksSync.prototype = {
 
-    checkHomeFolder: function BookmarksSync_checkHomeFolder() {
-        let folderValid = true;
-
+    checkHomeFolder: function* BookmarksSync_checkHomeFolder() {
         if (StorageInternal.homeFolderID == -1) {
             let allFeeds = Storage.getAllFeeds(true);
             for (let feed of allFeeds)
@@ -1835,21 +1834,26 @@ LivemarksSync.prototype = {
 
             Storage.changeFeedProperties(allFeeds);
 
-            folderValid = false;
+            return false;
         }
         else {
-            try {
-                // This will throw if the home folder was deleted.
-                Bookmarks.getItemTitle(StorageInternal.homeFolderID);
+            for(let i = 0; i < 20; i++) {
+                try {
+                    // This will throw if the home folder was deleted.
+                    // Unfortunately, it can also throw for some other unknown reasons
+                    Bookmarks.getItemTitle(StorageInternal.homeFolderID);
+                }
+                catch (e) {
+                    log(e);
+                    yield wait(100);
+                    continue;
+                }
+                return true;
             }
-            catch (e) {
-                Prefs.clearUserPref('homeFolder');
-                folderValid = false;
-            }
+            Prefs.clearUserPref('homeFolder');
+            return false;
         }
-
-        return folderValid;
-    },
+    }.task(),
 
     /**
      * Recursivesly traverses a bookmark folder and builds a list of
