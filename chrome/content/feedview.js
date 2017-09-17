@@ -306,10 +306,10 @@ FeedView.prototype = {
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
-        if (PrefCache.autoMarkRead && !this.headlinesMode && this.query.read !== false) {
+        if (PrefCache.autoMarkRead && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
             let callback = this._callbackRefreshGuard(this.markVisibleEntriesRead.bind(this));
-            this._markVisibleTimeout = setTimeout(callback, 500);
+            this._markVisibleTimeout = setTimeout(callback, 0);
         }
     },
 
@@ -334,7 +334,7 @@ FeedView.prototype = {
             let entryTop = entries[i].offsetTop;
             let entryBottom = entryTop + entries[i].height;
 
-            if (entryTop >= winTop && (entryBottom < winBottom || entryTop < winBottom - 200))
+            if (entryTop < winTop)
                 entriesToMark.push(entries[i].id);
         }
 
@@ -412,6 +412,7 @@ FeedView.prototype = {
                 break;
 
             case 'resize':
+                this.document.getElementById('feed-padding').setAttribute("style","height:" + this.window.innerHeight + "px");
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
@@ -666,6 +667,10 @@ FeedView.prototype = {
         this.document.body.removeChild(this.feedContent);
         let content = this.document.createElement('div');
         content.id = 'feed-content';
+        let padding = this.document.createElement('div');
+        padding.id = 'feed-padding';
+        padding.setAttribute("style","height:" + this.window.innerHeight + "px")
+        content.appendChild(padding);
         this.document.body.appendChild(content);
 
         // Prevent the message from briefly showing up before entries are loaded.
@@ -800,7 +805,7 @@ FeedView.prototype = {
         let entryView = new EntryView(this, aEntryData);
 
         let nextEntryView = this._entryViews[aPosition];
-        let nextElem = nextEntryView ? nextEntryView.container : null;
+        let nextElem = nextEntryView ? nextEntryView.container : this.document.getElementById('feed-padding');
 
         if (this.headlinesMode) {
             if (nextEntryView && entryView.day > nextEntryView.day)
