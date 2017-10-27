@@ -1277,74 +1277,77 @@ EntryView.prototype = {
 
     getDateString: function EntryView_getDateString(aOnlyDatePart) {
         let relativeDate = new RelativeDate(this.date.getTime());
-        let string;
+        let lang = navigator.language;
 
         if (aOnlyDatePart) {
             switch (true) {
                 case relativeDate.deltaDaySteps === 0:
-                    string = Strings['entryDate.today'];
+                    return Strings['entryDate.today'];
                     break;
 
                 case relativeDate.deltaDaySteps === 1:
-                    string = Strings['entryDate.yesterday'];
+                    return Strings['entryDate.yesterday'];
                     break;
 
                 case relativeDate.deltaDaySteps < 7:
-                    string = this.date.toLocaleFormat('%A');
+                    return this.date.toLocaleDateString(lang, {weekday: 'long'});
                     break;
 
                 case relativeDate.deltaYearSteps === 0:
-                    string = this.date.toLocaleFormat('%d %B');
+                    return date.toLocaleDateString(lang, {month: 'long', day: 'numeric'});
                     break;
 
                 default:
-                    string = this.date.toLocaleFormat('%d %B %Y');
+                    return date.toLocaleDateString(lang, {
+                        year: 'numeric', month: 'long', day: 'numeric'});
                     break;
             }
         }
         else {
             switch (true) {
                 case relativeDate.deltaMinutes === 0:
-                    string = Strings['entryDate.justNow'];
-                    break;
+                    return Strings['entryDate.justNow'];
 
                 case relativeDate.deltaHours === 0:
                     let minuteForm = getPluralForm(relativeDate.deltaMinutes,
                                                    Strings['minute.pluralForms']);
-                    string = STRINGS.formatStringFromName('entryDate.ago', [minuteForm], 1)
+                    return STRINGS.formatStringFromName('entryDate.ago', [minuteForm], 1)
                                    .replace('#number', relativeDate.deltaMinutes);
-                    break;
 
                 case relativeDate.deltaHours <= 12:
                     let hourForm = getPluralForm(relativeDate.deltaHours,
                                                  Strings['hour.pluralForms']);
-                    string = STRINGS.formatStringFromName('entryDate.ago', [hourForm], 1)
+                    return STRINGS.formatStringFromName('entryDate.ago', [hourForm], 1)
                                    .replace('#number', relativeDate.deltaHours);
-                    break;
 
                 case relativeDate.deltaDaySteps === 0:
-                    string = Strings['entryDate.today'] + this.date.toLocaleFormat(', %X');
-                    break;
+                    return Strings['entryDate.today'] + ', ' +
+                        this.date.toLocaleTimeString(lang,
+                            {hour: 'numeric', minute: 'numeric'});
 
                 case relativeDate.deltaDaySteps === 1:
-                    string = Strings['entryDate.yesterday'] + this.date.toLocaleFormat(', %X');
-                    break;
+                    return Strings['entryDate.yesterday'] + ', ' +
+                        this.date.toLocaleTimeString(lang,
+                            {hour: 'numeric', minute: 'numeric'});
 
                 case relativeDate.deltaDaySteps < 5:
-                    string = this.date.toLocaleFormat('%A, %X')
-                    break;
+                    return this.date.toLocaleDateString(lang, {weekday: 'long'}) + ', ' +
+                        this.date.toLocaleTimeString(lang,
+                            {hour: 'numeric', minute: 'numeric'});
 
                 case relativeDate.deltaYearSteps === 0:
-                    string = this.date.toLocaleFormat('%d %b, %X')
-                    break;
+                    return this.date.toLocaleDateString(lang,
+                            {month: 'short', day: 'numeric'}) + ', ' +
+                        this.date.toLocaleTimeString(lang,
+                            {hour: 'numeric', minute: 'numeric'});
 
                 default:
-                    string = this.date.toLocaleFormat('%d %b %Y, %X')
-                    break;
+                    return this.date.toLocaleDateString(lang,
+                            {year: 'numeric', month: 'short', day: 'numeric'}) + ', ' +
+                        this.date.toLocaleTimeString(lang,
+                            {hour: 'numeric', minute: 'numeric'});
             }
         }
-
-        return string.replace(/:\d\d$/, ' ').replace(/^0/, '');
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {

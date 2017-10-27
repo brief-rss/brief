@@ -135,6 +135,7 @@ var Brief = {
         let relativeDate = new this.common.RelativeDate(lastUpdateTime);
 
         let time, pluralForms, form;
+        let lang = navigator.language;
 
         switch (true) {
             case relativeDate.deltaMinutes === 0:
@@ -156,12 +157,12 @@ var Brief = {
                 break;
 
             case relativeDate.deltaDaySteps === 0:
-                time = date.toLocaleFormat('%X').replace(/:\d\d$/, ' ');
+                time = date.toLocaleTimeString(lang, {hour: 'numeric', minute: 'numeric'});
                 updated = bundle.formatStringFromName('lastUpdated.today', [time], 1);
                 break;
 
             case relativeDate.deltaDaySteps === 1:
-                time = date.toLocaleFormat('%X').replace(/:\d\d$/, ' ');
+                time = date.toLocaleTimeString(lang, {hour: 'numeric', minute: 'numeric'});
                 updated = bundle.formatStringFromName('lastUpdated.yesterday', [time], 1);
                 break;
 
@@ -173,13 +174,14 @@ var Brief = {
                 break;
 
             case relativeDate.deltaYearSteps === 0:
-                time = date.toLocaleFormat('%d %B').replace(/^0/, '');
-                updated = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
+                date = date.toLocaleDateString(lang, {month: 'long', day: 'numeric'});
+                updated = bundle.formatStringFromName('lastUpdated.fullDate', [date], 1);
                 break;
 
             default:
-                time = date.toLocaleFormat('%d %B %Y').replace(/^0/, '');
-                updated = bundle.formatStringFromName('lastUpdated.fullDate', [time], 1);
+                date = date.toLocaleDateString(lang, {
+                    year: 'numeric', month: 'long', day: 'numeric'});
+                updated = bundle.formatStringFromName('lastUpdated.fullDate', [date], 1);
                 break;
         }
 
