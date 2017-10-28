@@ -953,14 +953,15 @@ function EntryView(aFeedView, aEntryData) {
     this._getElement('feed-name').innerHTML = feed.title;
     this._getElement('authors').innerHTML = aEntryData.authors;
 
+    let lang = navigator.language;
     this._getElement('date').textContent = this.getDateString();
-    this._getElement('date').setAttribute('title', this.date.toLocaleString());
+    this._getElement('date').setAttribute('title', this.date.toLocaleString(lang));
 
     if (aEntryData.markedUnreadOnUpdate) {
         this.container.classList.add('updated');
         this._getElement('updated-label').textContent = Strings.entryWasUpdated;
 
-        let dateString = new Date(aEntryData.updated).toLocaleString();
+        let dateString = new Date(aEntryData.updated).toLocaleString(lang);
         this._getElement('updated-label').setAttribute('title', dateString);
     }
 
