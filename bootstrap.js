@@ -326,9 +326,16 @@ let WebExt = {
         let {browser} = await startup();
 
         // Won't need to remove any handlers, the WebExtension will be down first
-        browser.runtime.onMessage.addListener((message, sender) => {
-            if(this._messageHandlers[message.id] !== undefined)
-                this._messageHandlers[message.id](message, sender);
+        browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+            let handler = this._messageHandlers[message.id];
+            if(handler === undefined) {
+                console.warn(`unknown message id: ${message.id}`);
+                return;
+            }
+            let reply = handler(message, sender);
+            // Seems that we can't send a Promise directly
+            // It may be from a different scope - however, `sendResponse` wraps it for us
+            sendResponse(reply);
         });
         browser.runtime.onConnect.addListener(port => {
             if(this._connectHandlers[port.name] !== undefined)
@@ -345,6 +352,7 @@ let WebExt = {
         'refresh': () => FeedUpdateService.updateAllFeeds(),
         'mark-all-read': () => (new Query()).markEntriesRead(true),
         'set-pref': ({name, value}) => LocalPrefs.set(name, value),
+        'query-entries': ({query}) => (new Query(query)).getFullEntries(),
     },
 
     _connectHandlers: {
