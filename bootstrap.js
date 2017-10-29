@@ -135,7 +135,7 @@ var Brief = {
         let relativeDate = new this.common.RelativeDate(lastUpdateTime);
 
         let time, pluralForms, form;
-        let lang = navigator.language;
+        let lang = Brief.window.navigator.language;
 
         switch (true) {
             case relativeDate.deltaMinutes === 0:
