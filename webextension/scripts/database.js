@@ -1,11 +1,11 @@
 'use strict';
 
 let Database = {
-    _port: null,
+    _watchFeedList: null,
 
     async init() {
-        this._port = browser.runtime.connect({name: 'watch-feed-list'});
-        this._port.onMessage.addListener(feeds => this._updateFeeds(feeds));
+        this._watchFeedList = browser.runtime.connect({name: 'watch-feed-list'});
+        this._watchFeedList.onMessage.addListener(feeds => this._updateFeeds(feeds));
     },
 
     _updateFeeds(feeds) {
@@ -19,6 +19,6 @@ let Database = {
         }
         browser.storage.local.set({feeds});
         browser.storage.sync.set({feeds}); // Fx53+, fails with console error on 52
-        console.log(feeds.length);
+        console.debug(`updated ${feeds.length} feeds`);
     },
 };
