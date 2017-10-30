@@ -352,7 +352,17 @@ let WebExt = {
         'refresh': () => FeedUpdateService.updateAllFeeds(),
         'mark-all-read': () => (new Query()).markEntriesRead(true),
         'set-pref': ({name, value}) => LocalPrefs.set(name, value),
-        'query-entries': ({query}) => (new Query(query)).getFullEntries(),
+        'query-entries': ({query, mode}) => {
+            if(mode === undefined) {
+                mode = 'full';
+            }
+            query = new Query(query);
+            if(mode === 'id') {
+                return query.getEntries();
+            } else if(mode === 'full') {
+                return query.getFullEntries();
+            }
+        },
     },
 
     _connectHandlers: {
