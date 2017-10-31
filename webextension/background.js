@@ -45,6 +45,7 @@ const Brief = {
         this._stylePort.onMessage.addListener(msg => browser.storage.local.set({custom_css: msg}));
 
         await Feeds.init();
+        await Entries.init();
     },
 
     onContext: function({menuItemId, checked}) {
