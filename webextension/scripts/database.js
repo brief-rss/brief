@@ -1,6 +1,6 @@
 'use strict';
 
-let Database = {
+let Feeds = {
     _watchFeedList: null,
 
     async init() {

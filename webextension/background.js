@@ -44,7 +44,7 @@ const Brief = {
         this._stylePort = browser.runtime.connect({name: 'watch-custom-css'});
         this._stylePort.onMessage.addListener(msg => browser.storage.local.set({custom_css: msg}));
 
-        await Database.init();
+        await Feeds.init();
     },
 
     onContext: function({menuItemId, checked}) {
