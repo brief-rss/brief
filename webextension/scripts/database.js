@@ -41,9 +41,12 @@ let Feeds = {
 // mb1193394, worked on around Fx58 nightly
 let Entries = {
     _db: null,
+    _watchChanges: null,
 
     init() {
         browser.tabs.create({url: 'test.html'});
+        this._watchChanges = browser.runtime.connect({name: 'watch-entry-changes'});
+        this._watchChanges.onMessage.addListener(change => this._applyChange(change));
         let opener = indexedDB.open("brief", {version: 10, storage: "temporary"});
         opener.onupgradeneeded = (event) => this.upgrade(event);
         opener.onsuccess = (event) => {
@@ -160,5 +163,9 @@ let Entries = {
             await this.storeEntries(entries);
         }
         console.log("done.");
+    },
+
+    _applyChange(change) {
+        console.log("received change: ", change);
     },
 };

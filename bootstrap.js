@@ -370,6 +370,7 @@ let WebExt = {
         'watch-status': port => Brief.status.attach(port),
         'watch-custom-css': port => StyleFile.text.attach(port),
         'watch-feed-list': port => Storage.feeds.attach(port),
+        'watch-entry-changes': port => Storage.entryChanges.attach(port),
     },
 }
 
