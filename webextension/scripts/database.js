@@ -21,7 +21,7 @@ let Database = {
     _db: null,
 
     async init() {
-        let opener = indexedDB.open("brief", {version: 10, storage: "persistent"});
+        let opener = indexedDB.open("brief", {version: 20, storage: "persistent"});
         opener.onupgradeneeded = (event) => this.upgrade(event);
         let request = await this._requestPromise(opener);
         this._db = request.result;
@@ -44,6 +44,10 @@ let Database = {
                 entries.createIndex("entryURL", "entryURL");
                 entries.createIndex("tagName", "tags", {multiEntry: true});
             // fallthrough
+            case 10:
+                let feeds = db.createObjectStore("feeds", {
+                    keyPath: "feedID", autoIncrement: true});
+                // No indices needed - the feed list is always loaded to memory
         }
     },
 
@@ -109,6 +113,14 @@ let Database = {
         return (await this._requestPromise(request)).result;
     },
 
+    async saveFeeds(feeds) {
+        let tx = this._db.transaction(['feeds'], 'readwrite');
+        for(let feed of feeds) {
+            tx.objectStore('feeds').put(feed);
+        }
+        await this._transactionPromise(tx);
+    },
+
     // Note: this is resolved after the transaction is finished(!!!) mb1193394
     _requestPromise(req) {
         return new Promise((resolve, reject) => {
@@ -140,7 +152,7 @@ let LegacySyncer = {
         this._initialSync(); // Don't wait for it, however
     },
 
-    _saveFeeds(feeds) {
+    async _saveFeeds(feeds) {
         for(let feed of feeds) {
             for(let key of Object.getOwnPropertyNames(feed)) {
                 if(key === 'favicon')
@@ -149,8 +161,10 @@ let LegacySyncer = {
                     delete feed[key];
             }
         }
-        browser.storage.local.set({feeds});
-        browser.storage.sync.set({feeds}); // Fx53+, fails with console error on 52
+        let store_local = browser.storage.local.set({feeds});
+        let store_sync = browser.storage.sync.set({feeds}); // Fx53+, fails with console error on 52
+        let store_db = Database.saveFeeds(feeds);
+        await Promise.all([store_local, store_sync, store_db]);
         console.debug(`Saved feed list with ${feeds.length} feeds`);
     },
 
