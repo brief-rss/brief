@@ -1,27 +1,5 @@
 'use strict';
 
-let Feeds = {
-    _watchFeedList: null,
-
-    async init() {
-        this._watchFeedList = browser.runtime.connect({name: 'watch-feed-list'});
-        this._watchFeedList.onMessage.addListener(feeds => this._updateFeeds(feeds));
-    },
-
-    _updateFeeds(feeds) {
-        for(let feed of feeds) {
-            for(let key of Object.getOwnPropertyNames(feed)) {
-                if(key === 'favicon')
-                    delete feed.favicon;
-                if(feed[key] === null)
-                    delete feed[key];
-            }
-        }
-        browser.storage.local.set({feeds});
-        browser.storage.sync.set({feeds}); // Fx53+, fails with console error on 52
-        console.debug(`updated ${feeds.length} feeds`);
-    },
-};
 
 /**
  * Database design and considerations
@@ -39,20 +17,14 @@ let Feeds = {
 // IndexedDB does not play nice with `async` (transaction ends before execution restarts)
 // and the same problem with native Promise
 // mb1193394, worked on around Fx58 nightly
-let Entries = {
+let Database = {
     _db: null,
-    _watchChanges: null,
 
-    init() {
-        browser.tabs.create({url: 'test.html'});
-        this._watchChanges = browser.runtime.connect({name: 'watch-entry-changes'});
-        this._watchChanges.onMessage.addListener(change => this._applyChange(change));
+    async init() {
         let opener = indexedDB.open("brief", {version: 10, storage: "temporary"});
         opener.onupgradeneeded = (event) => this.upgrade(event);
-        opener.onsuccess = (event) => {
-            this._db = event.target.result;
-            this.fetchAllEntries();
-        };
+        let request = await this._requestPromise(opener);
+        this._db = request.result;
     },
 
     upgrade(event) {
@@ -83,12 +55,7 @@ let Entries = {
     ],
     REVISION_FIELDS: ['id', 'authors', 'title', 'content', 'updated'],
 
-    storeEntry(origEntry, transaction) {
-        let resolve, reject;
-        let promise = new Promise((resolve_, reject_) => {
-            resolve = resolve_;
-            reject = reject_;
-        });
+    _putEntry(origEntry, tx) {
         let entry = {};
         let revision = {};
 
@@ -102,57 +69,143 @@ let Entries = {
         entry.bookmarked = (origEntry.bookmarkID !== -1);
         entry.tags = (entry.tags || '').split(', ');
 
-        if(this._db === null) {
-            return;
-        }
-
-        let tx;
-        if(transaction !== undefined) {
-            tx = transaction;
-        } else {
-            tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
-        }
         tx.objectStore('revisions').put(revision);
         tx.objectStore('entries').put(entry);
-        if(transaction === undefined) {
-            tx.oncomplete = resolve;
-        } else {
-            resolve();
-        }
-        return promise;
     },
 
-    storeEntries(entries) {
+    async putEntries(entries) {
+        console.log(`Inserting ${entries.length} entries`);
+        let tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
+        for(let entry of entries) {
+            this._putEntry(entry, tx);
+        }
+        await this._transactionPromise(tx);
+        console.log('Done inserting');
+    },
+
+    async deleteEntries(entries) {
+        console.log(`Deleting ${entries.length} entries`);
+        let tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
+        for(let entry of entries) {
+            tx.objectStore('revisions').delete(entry);
+            tx.objectStore('entries').delete(entry);
+        }
+        await this._transactionPromise(tx);
+        console.log(`${entries.length} entries deleted`);
+    },
+
+    async listEntries() {
+        let tx = this._db.transaction(['entries']);
+        let request = tx.objectStore('entries').getAllKeys();
+        return (await this._requestPromise(request)).result;
+    },
+
+    // Note: this is resolved after the transaction is finished(!!!) mb1193394
+    _requestPromise(req) {
         return new Promise((resolve, reject) => {
-            console.log(`inserting ${entries.length} entries...`);
-            let tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
-            let last = undefined;
-            for(let entry of entries) {
-                last = this.storeEntry(entry, tx);
-            }
-            tx.oncomplete = () => {
-                console.log('inserting done');
-                resolve();
-            };
+            req.onsuccess = (event) => resolve(event.target);
+            req.onerror = (event) => reject(event.target);
         });
     },
 
-    async fetchAllEntries() {
-        console.log("fetching ALL entry IDs...");
-        let ids = await browser.runtime.sendMessage({
+    // Note: this is resolved after the transaction is finished(!)
+    _transactionPromise(tx) {
+        return new Promise((resolve, reject) => {
+            tx.oncomplete = resolve;
+            tx.onerror = reject;
+        });
+    },
+};
+
+
+let LegacySyncer = {
+    _watchFeedList: null,
+    _watchChanges: null,
+
+    async init() {
+        this._watchFeedList = browser.runtime.connect({name: 'watch-feed-list'});
+        this._watchFeedList.onMessage.addListener(feeds => this._saveFeeds(feeds));
+        this._watchChanges = browser.runtime.connect({name: 'watch-entry-changes'});
+        this._watchChanges.onMessage.addListener(change => this._applyChange(change));
+
+        this._initialSync(); // Don't wait for it, however
+    },
+
+    _saveFeeds(feeds) {
+        for(let feed of feeds) {
+            for(let key of Object.getOwnPropertyNames(feed)) {
+                if(key === 'favicon')
+                    delete feed.favicon;
+                if(feed[key] === null)
+                    delete feed[key];
+            }
+        }
+        browser.storage.local.set({feeds});
+        browser.storage.sync.set({feeds}); // Fx53+, fails with console error on 52
+        console.debug(`Saved feed list with ${feeds.length} feeds`);
+    },
+
+    async _initialSync() {
+        console.log("Starting initial sync");
+        let legacy_ids = await this._listLegacyEntries();
+        let idb_ids = await Database.listEntries();
+        await this._purgeStaleEntries(legacy_ids, idb_ids);
+        await this._syncMissingEntries(legacy_ids, idb_ids);
+    },
+
+
+    async _purgeStaleEntries(legacy_ids, idb_ids) {
+        console.log("Purge triggered");
+        if(legacy_ids === undefined) {
+            legacy_ids = await this._listLegacyEntries();
+        }
+        if(idb_ids === undefined) {
+            idb_ids = await Database.listEntries();
+        }
+
+        legacy_ids = new Set(legacy_ids);
+        let purge_ids = idb_ids.filter(id => !legacy_ids.has(id));
+
+        console.log(`Found ${purge_ids.length} stale entries`);
+
+        await Database.deleteEntries(purge_ids);
+    },
+
+    async _syncMissingEntries(legacy_ids, idb_ids) {
+        console.log("Sync missing triggered");
+        if(legacy_ids === undefined) {
+            legacy_ids = await this._listLegacyEntries();
+        }
+        if(idb_ids === undefined) {
+            idb_ids = await Database.listEntries();
+        }
+
+        legacy_ids.reverse();
+        idb_ids = new Set(idb_ids);
+        let missing_ids = legacy_ids.filter(id => !idb_ids.has(id));
+
+        console.log(`Found ${missing_ids.length} missing entries`);
+
+        await this._fetchAndStore(missing_ids);
+    },
+
+    async _listLegacyEntries() {
+        console.log("Listing legacy IDs...");
+        let legacy_ids = await browser.runtime.sendMessage({
             id: 'query-entries',
             query: {
                 includeHiddenFeeds: true,
             },
             mode: 'id',
         });
-        console.log(`fetched ${ids.length} entry IDs...`);
+        console.log(`Found ${legacy_ids.length} entry IDs in legacy`);
+        return legacy_ids;
+    },
 
-        // TODO: remove already existing IDs
-
+    async _fetchAndStore(ids) {
         while(ids.length > 0) {
             let current_ids = ids.splice(0, 900);
-            console.log(`fetching ${current_ids.length} entries...`);
+            console.log(`Fetching ${current_ids.length} entries`);
             let entries = await browser.runtime.sendMessage({
                 id: 'query-entries',
                 query: {
@@ -160,12 +213,18 @@ let Entries = {
                     entries: current_ids,
                 },
             });
-            await this.storeEntries(entries);
+            await Database.putEntries(entries);
         }
-        console.log("done.");
+        console.log("Done syncing down entries");
     },
 
     _applyChange(change) {
+        let {action, entries} = change;
         console.log("received change: ", change);
+        if(action === 'update') {
+            this._fetchAndStore(entries);
+        } else if(action === 'purge') {
+            this._purgeStaleEntries();
+        }
     },
 };
