@@ -21,7 +21,7 @@ let Database = {
     _db: null,
 
     async init() {
-        let opener = indexedDB.open("brief", {version: 10, storage: "temporary"});
+        let opener = indexedDB.open("brief", {version: 10, storage: "persistent"});
         opener.onupgradeneeded = (event) => this.upgrade(event);
         let request = await this._requestPromise(opener);
         this._db = request.result;
