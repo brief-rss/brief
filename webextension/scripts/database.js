@@ -94,6 +94,15 @@ let Database = {
         console.log(`${entries.length} entries deleted`);
     },
 
+    async clearEntries() {
+        console.log(`Clearing the entries database`);
+        let tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
+        tx.objectStore('revisions').clear();
+        tx.objectStore('entries').clear();
+        await this._transactionPromise(tx);
+        console.log(`Databases cleared`);
+    },
+
     async listEntries() {
         let tx = this._db.transaction(['entries']);
         let request = tx.objectStore('entries').getAllKeys();
@@ -146,6 +155,14 @@ let LegacySyncer = {
     },
 
     async _initialSync() {
+        let lastVersion = Prefs.get('lastVersion');
+        const MIGRATED = 'webextension-migration-done';
+        if(lastVersion !== MIGRATED) {
+            console.warn(`Downgrade to ${lastVersion} detected, IndexedDB may be wrong!`);
+            await Database.clearEntries();
+            await Prefs.set('lastVersion', MIGRATED);
+            console.log("IndexedDB cleared, re-syncing from scratch");
+        }
         console.log("Starting initial sync");
         let legacy_ids = await this._listLegacyEntries();
         let idb_ids = await Database.listEntries();
