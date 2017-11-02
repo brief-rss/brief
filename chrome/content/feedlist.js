@@ -241,14 +241,14 @@ let ViewList = {
         gCurrentView = new FeedView(title, query);
     },
 
-    refreshItem: function* ViewList_refreshItem(aItemID) {
+    refreshItem: async function ViewList_refreshItem(aItemID) {
         let query = this.getQueryForView(aItemID);
         query.read = false;
 
-        let unreadCount = yield API.query.getEntryCount(query);
+        let unreadCount = await API.query.getEntryCount(query);
 
         this.tree.updateElement(aItemID, {unreadCount});
-    }.task()
+    }
 }
 
 
@@ -267,12 +267,12 @@ let TagList = {
         return this.tree = new TreeView('tag-list');
     },
 
-    show: function* TagList_show() {
+    show: async function TagList_show() {
         if (!this.ready)
-            yield this._rebuild();
+            await this._rebuild();
 
         document.body.classList.toggle('tag-list', this.tags !== null && this.tags.length > 0);
-    }.task(),
+    },
 
     hide: function TagList_hide() {
         document.body.classList.remove('tag-list');
@@ -323,8 +323,8 @@ let TagList = {
         }
     },
 
-    _rebuild: function* TagList__rebuild() {
-        let tagList = yield API.getAllTags();
+    _rebuild: async function TagList__rebuild() {
+        let tagList = await API.getAllTags();
 
         if(this.tags !== tagList) {
             this.tags = tagList;
@@ -338,17 +338,17 @@ let TagList = {
         }
 
         this.ready = true;
-    }.task(),
+    },
 
-    _refreshLabel: function* TagList__refreshLabel(aTagName) {
+    _refreshLabel: async function TagList__refreshLabel(aTagName) {
         let query = {
             deleted: false,
             tags: [aTagName],
             read: false
         };
-        let unreadCount = yield API.query.getEntryCount(query);
+        let unreadCount = await API.query.getEntryCount(query);
         this.tree.updateElement(aTagName, {unreadCount});
-    }.task()
+    }
 
 }
 
@@ -357,9 +357,9 @@ let FeedList = {
 
     _feedsCache: null,
 
-    updateFeedsCache: function* FeedList_updateFeedsCache() {
-        this._feedsCache = yield API.getAllFeeds(true, true);
-    }.task(),
+    updateFeedsCache: async function FeedList_updateFeedsCache() {
+        this._feedsCache = await API.getAllFeeds(true, true);
+    },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
         if(this._feedsCache === null)
@@ -446,7 +446,7 @@ let FeedList = {
         }
     },
 
-    _refreshLabel: function* FeedList__refreshLabel(aFeed) {
+    _refreshLabel: async function FeedList__refreshLabel(aFeed) {
         let query = {
             deleted: false,
             folders: aFeed.isFolder ? [aFeed.feedID] : undefined,
@@ -454,9 +454,9 @@ let FeedList = {
             read: false
         };
 
-        let unreadCount = yield API.query.getEntryCount(query);
+        let unreadCount = await API.query.getEntryCount(query);
         this.tree.updateElement(aFeed.feedID, {title: aFeed.title, unreadCount});
-    }.task(),
+    },
 
     _faviconUrl: function FeedList__faviconUrl(aFeed) {
         if (PrefCache.showFavicons && aFeed.favicon && aFeed.favicon != 'no-favicon')
@@ -517,10 +517,10 @@ let FeedList = {
     },
 
 
-    observe: function* FeedList_observe(aSubject, aTopic, aData) {
+    observe: async function FeedList_observe(aSubject, aTopic, aData) {
         switch (aTopic) {
             case 'brief:invalidate-feedlist':
-                yield this.updateFeedsCache();
+                await this.updateFeedsCache();
                 ViewList.refreshItem('all-items-folder');
                 ViewList.refreshItem('today-folder');
                 ViewList.refreshItem('starred-folder');
@@ -530,7 +530,7 @@ let FeedList = {
 
             case 'brief:feed-title-changed':
             case 'brief:feed-favicon-changed':
-                yield this.updateFeedsCache();
+                await this.updateFeedsCache();
                 let feed = this.getFeed(aData);
                 this.tree.updateElement(feed.feedID,
                     {title: feed.title, icon: this._faviconUrl(feed)});
@@ -538,7 +538,7 @@ let FeedList = {
                 break;
 
             case 'brief:feed-view-mode-changed':
-                yield this.updateFeedsCache();
+                await this.updateFeedsCache();
                 if(this.selectedFeed && this.selectedFeed.feedID === aData)
                     gCurrentView.refresh();
                 break;
@@ -577,7 +577,7 @@ let FeedList = {
                 window.location.reload(/* bypassCache: */ true);
                 break;
         }
-    }.task(),
+    },
 
 
     observeStorage: function FeedList_observeStorage(event, args) {
@@ -772,7 +772,7 @@ let TagListContextMenu = {
         API.query.markEntriesRead(query, true);
     },
 
-    deleteTag: function* TagListContextMenu_deleteTag() {
+    deleteTag: async function TagListContextMenu_deleteTag() {
         let tag = TagList.selectedItem.dataset.id;
 
         let text = STRINGS.formatStringFromName('confirmTagDeletionText', [tag], 1);
@@ -780,8 +780,8 @@ let TagListContextMenu = {
         if (!window.confirm(text))
             return;
 
-        yield API.deleteTag(tag);
-    }.task()
+        await API.deleteTag(tag);
+    }
 
 }
 

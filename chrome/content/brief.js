@@ -15,14 +15,14 @@ var gCurrentView;
 var API = null;
 
 
-var init = function* init() {
+var init = async function init() {
     API = new BriefClient(window);
-    yield API.ready();
+    await API.ready();
 
     PrefObserver.register();
 
     // Restore local persistence
-    yield Persistence.init();
+    await Persistence.init();
 
     Commands.switchViewFilter(Persistence.data.view.filter);
 
@@ -32,7 +32,7 @@ var init = function* init() {
 
     API.addStorageObserver(FeedList);
 
-    yield FeedList.updateFeedsCache();
+    await FeedList.updateFeedsCache();
 
     let doc = getElement('feed-view').contentDocument;
     doc.documentElement.setAttribute('lang', navigator.language);
@@ -55,14 +55,14 @@ var init = function* init() {
         window.history.replaceState({}, "",
             document.location.origin + document.location.pathname);
         FeedList.rebuild(); // Adding a feed may take some time, so show the other feeds for now.
-        yield API.addFeed(url);
+        await API.addFeed(url);
     } else {
         ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
-        yield wait();
+        await wait();
     }
 
     FeedList.rebuild(url);
-}.task()
+}
 
 
 function unload() {
@@ -246,8 +246,8 @@ var Commands = {
 
 }
 
-let refreshProgressmeter = function* refreshProgressmeter() {
-    let {status, scheduled, completed} = yield API.getUpdateServiceStatus();
+async function refreshProgressmeter() {
+    let {status, scheduled, completed} = await API.getUpdateServiceStatus();
     if (status != /* FeedUpdateService.NOT_UPDATING */ 0) { // XXX
         getElement('sidebar-top').dataset.mode = "update";
 
@@ -260,7 +260,7 @@ let refreshProgressmeter = function* refreshProgressmeter() {
         getElement('sidebar-top').dataset.mode = "idle";
         getElement('update-progress').removeAttribute('show');
     }
-}.task();
+}
 
 
 function onSearchbarCommand() {
@@ -425,15 +425,15 @@ let SplitterModule = {
 let Persistence = {
     data: null,
 
-    init: function* Persistence_init() {
+    init: async function Persistence_init() {
         let data = PrefCache.pagePersist;
         if(data !== "") {
             this.data = JSON.parse(data);
         } else {
-            this.data = yield this._import();
+            this.data = await this._import();
             this.save();
         }
-    }.task(),
+    },
 
     save: function Persistence_save() {
         this._collect();
@@ -453,15 +453,15 @@ let Persistence = {
         this.data.sidebar.hidden = !document.body.classList.contains('sidebar');
     },
 
-    _import: function* Persistence__import() {
-        let data = yield API.getXulPersist();
+    _import: async function Persistence__import() {
+        let data = await API.getXulPersist();
         data.view = {
             filter: Prefs.getBoolPref('feedview.filterUnread') ? 'unread' :
                 (Prefs.getBoolPref('feedview.filterStarred') ? 'starred' : 'all'),
             mode: Prefs.getIntPref('feedview.mode') ? 'headlines' : 'full',
         };
         return data;
-    }.task(),
+    },
 };
 
 let Shortcuts = {

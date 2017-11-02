@@ -508,7 +508,7 @@ FeedView.prototype = {
      * @param aAddedEntries
      *        Array of IDs of entries.
      */
-    _onEntriesAdded: function* FeedView__onEntriesAdded(aAddedEntries) {
+    _onEntriesAdded: async function FeedView__onEntriesAdded(aAddedEntries) {
         // The simplest way would be to query the current list of all entries in the view
         // and intersect it with the list of added ones. However, this is expansive for
         // large views and we try to avoid it.
@@ -529,7 +529,7 @@ FeedView.prototype = {
             else
                 query.endDate = edgeDate;
 
-            this._loadedEntries = Array.from(yield this._refreshGuard(API.query.getEntries(query)));
+            this._loadedEntries = Array.from(await this._refreshGuard(API.query.getEntries(query)));
 
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
@@ -539,7 +539,7 @@ FeedView.prototype = {
                     entries: newEntries
                 };
 
-                for (let entry of yield this._refreshGuard(API.query.getFullEntries(query)))
+                for (let entry of await this._refreshGuard(API.query.getFullEntries(query)))
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
@@ -553,7 +553,7 @@ FeedView.prototype = {
         // Otherwise, just blow it all away and refresh from scratch.
         else {
             if (this._allEntriesLoaded) {
-                let currentEntryList = yield API.query.getEntries(this.query);
+                let currentEntryList = await API.query.getEntries(this.query);
                 // currentEntryList is a foreign Array with a clean prototype
                 if (Array.from(currentEntryList).intersect(aAddedEntries).length)
                     this.refresh()
@@ -562,7 +562,7 @@ FeedView.prototype = {
                 this.refresh();
             }
         }
-    }.task(),
+    },
 
     /**
      * Checks if given entries are in the view and removes them.
@@ -716,14 +716,14 @@ FeedView.prototype = {
      *        position.
      * @returns Promise<null>
      */
-    _fillWindow: function* FeedView__fillWindow(aWindowHeights) {
+    _fillWindow: async function FeedView__fillWindow(aWindowHeights) {
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = this.headlinesMode ? HEADLINES_LOAD_STEP_SIZE
                                               : LOAD_STEP_SIZE;
-            do var loadedCount = yield this._refreshGuard(this._loadEntries(stepSize))
+            do var loadedCount = await this._refreshGuard(this._loadEntries(stepSize))
             while (loadedCount && !this.enoughEntriesPreloaded(aWindowHeights))
         }
-    }.task(),
+    },
 
     /**
      * Checks if enough entries have been loaded.
@@ -748,7 +748,7 @@ FeedView.prototype = {
      * @returns Promise<integer> that resolves to the actual number
      *          of entries that were loaded.
      */
-    _loadEntries: function* FeedView__loadEntries(aCount) {
+    _loadEntries: async function FeedView__loadEntries(aCount) {
         this._loading = true;
 
         let dateQuery = this.getQueryCopy();
@@ -767,7 +767,7 @@ FeedView.prototype = {
         dateQuery.startDate = rangeStartDate;
         dateQuery.limit = aCount;
 
-        let dates = yield this._refreshGuard(API.query.getProperty(dateQuery, 'date', false));
+        let dates = await this._refreshGuard(API.query.getProperty(dateQuery, 'date', false));
         if (dates.length) {
             let query = this.getQueryCopy();
             if (query.sortDirection == 'desc') {
@@ -779,7 +779,7 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            let loadedEntries = yield this._refreshGuard(API.query.getFullEntries(query));
+            let loadedEntries = await this._refreshGuard(API.query.getFullEntries(query));
             for (let entry of loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
@@ -794,7 +794,7 @@ FeedView.prototype = {
 
             return 0;
         }
-    }.task(),
+    },
 
     _insertEntry: function FeedView__insertEntry(aEntryData, aPosition) {
         let entryView = new EntryView(this, aEntryData);
