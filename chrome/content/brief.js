@@ -127,7 +127,7 @@ var Commands = {
 
     openFeedWebsite: function cmd_openWebsite(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let url = feed.websiteURL || Services.io.newURI(feed.feedURL).host;
+        let url = feed.websiteURL || (new URL(feed.feedURL).origin);
         API.openBackgroundTab(url);
     },
 
@@ -221,10 +221,10 @@ var Commands = {
     openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
 
-        let baseURI = Services.io.newURI(FeedList.getFeed(entryView.feedID).feedURL);
-        let linkURI = Services.io.newURI(entryView.entryURL, null, baseURI);
+        let baseURI = new URL(FeedList.getFeed(entryView.feedID).feedURL);
+        let linkURI = new URL(entryView.entryURL, baseURI);
 
-        API.openBackgroundTab(linkURI.spec);
+        API.openBackgroundTab(linkURI.href);
 
         if (!entryView.read)
             API.query.markEntriesRead(aEntry, true);
