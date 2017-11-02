@@ -346,12 +346,33 @@ let WebExt = {
     finalize: function() {
     },
 
+    // This should normally be done by Firefox itself if the WebExtension
+    // has the `unlimitedStorage` permission. However, Brief will support
+    // migration from Firefox 52 ESR directly to Firefox 57+, and this
+    // permission is not available in Firefox 52. Thus Brief does not
+    // specify it in the manifest, but performs the same configuration
+    // manually.
+    _initUnlimitedStorage: function(url) {
+        let uri = Services.io.newURI(url, null, null);
+        let principal = Services.scriptSecurityManager.createCodebasePrincipal(uri, {});
+
+        // Add this marker to be equivalent to `unlimitedStorage`
+        Services.perms.addFromPrincipal(
+            principal, "WebExtensions-unlimitedStorage", Services.perms.ALLOW_ACTION);
+        Services.perms.addFromPrincipal(
+            principal, "indexedDB", Services.perms.ALLOW_ACTION);
+        Services.perms.addFromPrincipal(
+            principal, "persistent-storage", Services.perms.ALLOW_ACTION);
+        console.log("unlimitedStorage enabled");
+    },
+
     _messageHandlers: {
         'open-brief': () => Brief.open(),
         'open-options': () => Brief.showOptions(),
         'refresh': () => FeedUpdateService.updateAllFeeds(),
         'mark-all-read': () => (new Query()).markEntriesRead(true),
         'set-pref': ({name, value}) => LocalPrefs.set(name, value),
+        'allow-unlimited-storage': ({url}) => WebExt._initUnlimitedStorage(url),
         'query-entries': ({query, mode}) => {
             if(mode === undefined) {
                 mode = 'full';

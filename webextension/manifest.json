@@ -10,7 +10,7 @@
         }
     },
     "default_locale": "en",
-    "permissions": ["contextMenus", "storage", "unlimitedStorage"],
+    "permissions": ["contextMenus", "storage"],
     "background": {
         "scripts": ["scripts/prefs.js", "scripts/database.js", "background.js"]
     },
