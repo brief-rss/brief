@@ -290,15 +290,6 @@ function onMarkViewReadClick(aEvent) {
         Commands.markViewRead();
 }
 
-function getTopWindow() {
-    return window.QueryInterface(Ci.nsIInterfaceRequestor)
-                 .getInterface(Ci.nsIWebNavigation)
-                 .QueryInterface(Ci.nsIDocShellTreeItem)
-                 .rootTreeItem
-                 .QueryInterface(Ci.nsIInterfaceRequestor)
-                 .getInterface(Ci.nsIDOMWindow);
-}
-
 
 let Prefs = Services.prefs.getBranch('extensions.brief.');
 
