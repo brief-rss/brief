@@ -53,7 +53,8 @@ var init = function* init() {
     // Are we called to subscribe for a feed?
     let url = (new URLSearchParams(document.location.search)).get('subscribe');
     if(url !== null) {
-        window.history.replaceState({}, "", BRIEF_URL);
+        window.history.replaceState({}, "",
+            document.location.origin + document.location.pathname);
         FeedList.rebuild(); // Adding a feed may take some time, so show the other feeds for now.
         yield API.addFeed(url);
     } else {
