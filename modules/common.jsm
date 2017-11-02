@@ -12,11 +12,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 function IMPORT_COMMON(aScope) {
-    Object.defineProperty(aScope.Array.prototype, 'intersect', {
-        value: Array.prototype.intersect,
-        enumerable: false
-    })
-
     Object.defineProperty(aScope.Function.prototype, 'task', {
         value: Function.prototype.task,
         enumerable: false
@@ -25,17 +20,6 @@ function IMPORT_COMMON(aScope) {
 
 
 const BRIEF_URL = 'chrome://brief/content/brief.xhtml';
-
-
-
-Array.prototype.intersect = function intersect(aArr) {
-    let commonItems = [];
-    for (let i = 0; i < this.length; i++) {
-        if (aArr.indexOf(this[i]) != -1)
-            commonItems.push(this[i]);
-    }
-    return commonItems;
-}
 
 
 

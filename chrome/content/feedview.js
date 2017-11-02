@@ -458,7 +458,9 @@ FeedView.prototype = {
                             .catch(this._ignoreRefresh);
                 }
 
-                for (let entry of this._loadedEntries.intersect(entryList.entries)) {
+                for (let entry of entryList.entries.filter(
+                    id => this._loadedEntries.includes(id)))
+                {
                     this.getEntryView(entry).read = newState;
 
                     if (PrefCache.autoMarkRead && !newState)
@@ -474,11 +476,16 @@ FeedView.prototype = {
                         this._onEntriesRemoved(entryList.entries, true, true);
                 }
 
-                for (let entry of this._loadedEntries.intersect(entryList.entries))
+                for (let entry of entryList.entries.filter(
+                    id => this._loadedEntries.includes(id)))
+                {
                     this.getEntryView(entry).starred = newState;
+                }
                 break;
             case 'entriesTagged':
-                for (let entry of this._loadedEntries.intersect(entryList.entries)) {
+                for (let entry of entryList.entries.filter(
+                    id => this._loadedEntries.includes(id)))
+                {
                     let entryView = this.getEntryView(entry);
                     let tags = entryView.tags;
 
@@ -553,9 +560,8 @@ FeedView.prototype = {
         // Otherwise, just blow it all away and refresh from scratch.
         else {
             if (this._allEntriesLoaded) {
-                let currentEntryList = await API.query.getEntries(this.query);
-                // currentEntryList is a foreign Array with a clean prototype
-                if (Array.from(currentEntryList).intersect(aAddedEntries).length)
+                let entryList = await API.query.getEntries(this.query);
+                if(aAddedEntries.some(id => entryList.includes(id)))
                     this.refresh()
             }
             else {
