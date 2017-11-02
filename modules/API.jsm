@@ -64,10 +64,6 @@ const API_CALLS = {
     ],
 
     // Misc helpers
-    getLocale: ['brief:get-locale', 'async',
-        () => Cc['@mozilla.org/chrome/chrome-registry;1']
-            .getService(Ci.nsIXULChromeRegistry).getSelectedLocale('brief')
-    ],
     savePersistence: ['brief:save-persistence', 'noreply',
         (data) => Prefs.setCharPref("pagePersist", JSON.stringify(data))
     ],

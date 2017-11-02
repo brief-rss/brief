@@ -34,9 +34,8 @@ var init = function* init() {
 
     yield FeedList.updateFeedsCache();
 
-    let selectedLocale = yield API.getLocale();
     let doc = getElement('feed-view').contentDocument;
-    doc.documentElement.setAttribute('lang', selectedLocale);
+    doc.documentElement.setAttribute('lang', navigator.language);
 
     ViewList.init();
 
