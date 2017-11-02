@@ -720,8 +720,12 @@ FeedView.prototype = {
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = this.headlinesMode ? HEADLINES_LOAD_STEP_SIZE
                                               : LOAD_STEP_SIZE;
-            do var loadedCount = await this._refreshGuard(this._loadEntries(stepSize))
-            while (loadedCount && !this.enoughEntriesPreloaded(aWindowHeights))
+            do {
+                let loaded = await this._refreshGuard(this._loadEntries(stepSize));
+                if(!loaded) {
+                    break;
+                }
+            } while(!this.enoughEntriesPreloaded(aWindowHeights));
         }
     },
 
