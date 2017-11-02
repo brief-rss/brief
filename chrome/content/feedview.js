@@ -1100,27 +1100,21 @@ EntryView.prototype = {
      * @param aAnimate <boolean> [optional] Whether to animate or remove instantly.
      * @returns Promise<null> when finished.
      */
-    remove: function EntryView_remove(aAnimate) {
-        let deferred =  PromiseUtils.defer();
-
+    remove: async function EntryView_remove(aAnimate) {
         if (aAnimate) {
-            this.container.addEventListener('transitionend', () => {
-                // The element may have been removed in the meantime
-                // if the view had been refreshed.
-                if (this.container.parentNode == this.feedView.feedContent) {
-                    this.feedView.feedContent.removeChild(this.container);
-                    deferred.resolve();
-                }
-            }, true);
-
             this.container.setAttribute('removing', true);
+
+            await expectedEvent(this.container, 'transitionend');
+
+            // The element may have been removed in the meantime
+            // if the view had been refreshed.
+            if (this.container.parentNode == this.feedView.feedContent) {
+                this.feedView.feedContent.removeChild(this.container);
+            }
         }
         else {
             this.feedView.feedContent.removeChild(this.container);
-            deferred.resolve();
         }
-
-        return deferred.promise;
     },
 
     collapse: function EntryView_collapse(aAnimate) {
@@ -1387,38 +1381,25 @@ EntryView.prototype = {
 }
 
 
-function hideElement(aElement, aAnimate) {
-    let deferred = PromiseUtils.defer();
-
+async function hideElement(aElement, aAnimate) {
     if (aAnimate) {
         aElement.style.opacity = '0';
         aElement.setAttribute('hiding', true);
 
-        let callback = event => {
-            aElement.removeEventListener('transitionend', callback, false);
-            aElement.removeAttribute('hiding');
+        await expectedEvent(aElement, 'transitionend');
 
-            aElement.style.display = 'none';
-            aElement.style.opacity = '';
+        aElement.removeAttribute('hiding');
 
-            deferred.resolve();
-        };
-
-        aElement.addEventListener('transitionend', callback, false);
+        aElement.style.display = 'none';
+        aElement.style.opacity = '';
     }
     else {
         aElement.style.display = 'none';
         aElement.style.opacity = '0';
-
-        deferred.resolve();
     }
-
-    return deferred.promise;
 }
 
-function showElement(aElement, aAnimate) {
-    let deferred = PromiseUtils.defer();
-
+async function showElement(aElement, aAnimate) {
     if (aAnimate) {
         aElement.style.display = '';
         aElement.style.opacity = '0';
@@ -1427,23 +1408,14 @@ function showElement(aElement, aAnimate) {
         aElement.style.opacity = '';
         aElement.setAttribute('showing', true);
 
-        let callback = event => {
-            aElement.removeEventListener('transitionend', callback, false);
-            aElement.removeAttribute('showing');
+        await expectedEvent(aElement, 'transitionend');
 
-            deferred.resolve();
-        };
-
-        aElement.addEventListener('transitionend', callback, false);
+        aElement.removeAttribute('showing');
     }
     else {
         aElement.style.display = '';
         aElement.style.opacity = '';
-
-        deferred.resolve();
     }
-
-    return deferred.promise;
 }
 
 

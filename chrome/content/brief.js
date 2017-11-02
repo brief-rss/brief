@@ -3,7 +3,6 @@
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/API.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
-Components.utils.import("resource://gre/modules/PromiseUtils.jsm");
 Components.utils.import("resource://gre/modules/BrowserUtils.jsm");
 
 IMPORT_COMMON(this);
@@ -527,3 +526,9 @@ let Shortcuts = {
 // ------- Utility functions --------
 
 function getElement(aId) { return document.getElementById(aId); }
+
+function expectedEvent(element, event) {
+    return new Promise((resolve, reject) => {
+        element.addEventListener(resolve, {once: true, passive: true});
+    });
+}
