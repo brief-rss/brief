@@ -526,8 +526,14 @@ let Shortcuts = {
 
 function getElement(aId) { return document.getElementById(aId); }
 
+// Wait for a specific event (for example, 'transitionend')
 function expectedEvent(element, event) {
     return new Promise((resolve, reject) => {
         element.addEventListener(resolve, {once: true, passive: true});
     });
+}
+
+// Adapt setTimeout for Promises
+function wait(delay) {
+    return new Promise(resolve => setTimeout(() => resolve(), delay));
 }

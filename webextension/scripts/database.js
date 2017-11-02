@@ -1,8 +1,8 @@
 'use strict';
 
 // Adapt setTimeout for Promises
-function timeout(delay) {
-    return new Promise(resolve => setTimeout(resolve, delay));
+function wait(delay) {
+    return new Promise(resolve => setTimeout(() => resolve(), delay));
 }
 
 
@@ -32,7 +32,7 @@ let Database = {
         opener.onupgradeneeded = (event) => this.upgrade(event);
         let request = await Promise.race([
             this._requestPromise(opener),
-            timeout(15000),
+            wait(15000),
         ]);
         let storage;
         if(request === undefined) {
