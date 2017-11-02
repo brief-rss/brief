@@ -1,5 +1,10 @@
 'use strict';
 
+// Adapt setTimeout for Promises
+function timeout(delay) {
+    return new Promise(resolve => setTimeout(resolve, delay));
+}
+
 
 /**
  * Database design and considerations
@@ -25,7 +30,21 @@ let Database = {
             {id: 'allow-unlimited-storage', url: browser.runtime.getURL('/')});
         let opener = indexedDB.open("brief", {version: 20, storage: "persistent"});
         opener.onupgradeneeded = (event) => this.upgrade(event);
-        let request = await this._requestPromise(opener);
+        let request = await Promise.race([
+            this._requestPromise(opener),
+            timeout(15000),
+        ]);
+        let storage;
+        if(request === undefined) {
+            console.warn("Failed to open the persistent DB, opening default one");
+            opener = indexedDB.open("brief", {version: 20});
+            opener.onupgradeneeded = (event) => this.upgrade(event);
+            request = await this._requestPromise(opener);
+            storage = "default";
+        } else {
+            storage = "persistent";
+        }
+        await browser.storage.local.set({storage});
         this._db = request.result;
     },
 
@@ -116,6 +135,9 @@ let Database = {
     },
 
     async saveFeeds(feeds) {
+        if(this._db === null) {
+            return;
+        }
         let tx = this._db.transaction(['feeds'], 'readwrite');
         for(let feed of feeds) {
             tx.objectStore('feeds').put(feed);
@@ -141,17 +163,12 @@ let Database = {
 };
 
 
-let LegacySyncer = {
+let FeedSyncer = {
     _watchFeedList: null,
-    _watchChanges: null,
 
     async init() {
         this._watchFeedList = browser.runtime.connect({name: 'watch-feed-list'});
         this._watchFeedList.onMessage.addListener(feeds => this._saveFeeds(feeds));
-        this._watchChanges = browser.runtime.connect({name: 'watch-entry-changes'});
-        this._watchChanges.onMessage.addListener(change => this._applyChange(change));
-
-        this._initialSync(); // Don't wait for it, however
     },
 
     async _saveFeeds(feeds) {
@@ -165,9 +182,21 @@ let LegacySyncer = {
         }
         let store_local = browser.storage.local.set({feeds});
         let store_sync = browser.storage.sync.set({feeds}); // Fx53+, fails with console error on 52
-        let store_db = Database.saveFeeds(feeds);
+        let store_db = Database.saveFeeds(feeds); // May be a nop if not ready
         await Promise.all([store_local, store_sync, store_db]);
         console.debug(`Saved feed list with ${feeds.length} feeds`);
+    },
+};
+
+
+let EntrySyncer = {
+    _watchChanges: null,
+
+    async init() {
+        this._watchChanges = browser.runtime.connect({name: 'watch-entry-changes'});
+        this._watchChanges.onMessage.addListener(change => this._applyChange(change));
+
+        this._initialSync(); // Don't wait for it, however
     },
 
     async _initialSync() {
