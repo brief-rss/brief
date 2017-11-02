@@ -143,10 +143,9 @@ var Commands = {
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let title = STRINGS.GetStringFromName('confirmFeedDeletionTitle');
         let text = STRINGS.formatStringFromName('confirmFeedDeletionText', [feed.title], 1);
 
-        if (Services.prompt.confirm(window, title, text))
+        if (window.confirm(text))
             API.deleteFeed(Number(feed.bookmarkID));
     },
 

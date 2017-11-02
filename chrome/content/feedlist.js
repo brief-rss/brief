@@ -775,10 +775,9 @@ let TagListContextMenu = {
     deleteTag: function* TagListContextMenu_deleteTag() {
         let tag = TagList.selectedItem.dataset.id;
 
-        let dialogTitle = STRINGS.GetStringFromName('confirmTagDeletionTitle');
-        let dialogText = STRINGS.formatStringFromName('confirmTagDeletionText', [tag], 1);
+        let text = STRINGS.formatStringFromName('confirmTagDeletionText', [tag], 1);
 
-        if (!Services.prompt.confirm(window, dialogTitle, dialogText))
+        if (!window.confirm(text))
             return;
 
         yield API.deleteTag(tag);
@@ -841,10 +840,9 @@ let FeedListContextMenu = {
         let item = FeedList.selectedItem;
         let feed = FeedList.selectedFeed;
 
-        let title = STRINGS.GetStringFromName('confirmFolderDeletionTitle');
         let text = STRINGS.formatStringFromName('confirmFolderDeletionText', [feed.title], 1);
 
-        if (Services.prompt.confirm(window, title, text))
+        if (window.confirm(text))
             API.deleteFolder(Number(feed.bookmarkID));
     }
 
