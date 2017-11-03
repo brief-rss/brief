@@ -1357,33 +1357,27 @@ EntryView.prototype = {
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
         for (let term of this.feedView.query.searchString.match(/[^\s:\*"-]+/g)) {
-            let searchRange = this.feedView.document.createRange();
-            searchRange.setStart(aElement, 0);
-            searchRange.setEnd(aElement, aElement.childNodes.length);
-
-            let startPoint = this.feedView.document.createRange();
-            startPoint.setStart(aElement, 0);
-            startPoint.setEnd(aElement, 0);
-
-            let endPoint = this.feedView.document.createRange();
-            endPoint.setStart(aElement, aElement.childNodes.length);
-            endPoint.setEnd(aElement, aElement.childNodes.length);
-
             let baseNode = this.feedView.document.createElement('span');
             baseNode.className = 'search-highlight';
+            baseNode.textContent = term;
 
-            let retRange = Finder.Find(term, searchRange, startPoint, endPoint);
-            while (retRange) {
-                let surroundingNode = baseNode.cloneNode(false);
-                surroundingNode.appendChild(retRange.extractContents());
-
-                let before = retRange.startContainer.splitText(retRange.startOffset);
-                before.parentNode.insertBefore(surroundingNode, before);
-
-                startPoint.setStart(surroundingNode, surroundingNode.childNodes.length);
-                startPoint.setEnd(surroundingNode, surroundingNode.childNodes.length);
-
-                retRange = Finder.Find(term, searchRange, startPoint, endPoint)
+            let nodes = aElement.ownerDocument.evaluate(
+                `.//text()[contains(.,'${term}')]`,
+                aElement,
+                null, /* namespace resolver, can be null for HTML */
+                XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
+                null /* result to reuse */
+            );
+            for(let node of iterSnapshot(nodes)) {
+                let substrings = node.textContent.split(term);
+                let output = [];
+                for(let substring of substrings) {
+                    if(output.length > 0) {
+                        output.push(baseNode.cloneNode(true));
+                    }
+                    output.push(substring);
+                }
+                node.replaceWith(...output);
             }
         }
     }
@@ -1452,17 +1446,6 @@ Object.defineProperty(this, 'Strings', {
 
         delete this.Strings;
         return this.Strings = obj;
-    },
-    configurable: true
-});
-
-Object.defineProperty(this, 'Finder', {
-    get: () => {
-        let finder = Cc['@mozilla.org/embedcomp/rangefind;1'].createInstance(Ci.nsIFind);
-        finder.caseSensitive = false;
-
-        delete this.Finder;
-        return this.Finder = finder;
     },
     configurable: true
 });

@@ -526,3 +526,14 @@ function expectedEvent(element, event) {
 function wait(delay) {
     return new Promise(resolve => setTimeout(() => resolve(), delay));
 }
+
+// Iterate nodes in a XPathResult
+function iterSnapshot(result) {
+    return {
+        [Symbol.iterator]: function*() {
+            for(let i = 0; i < result.snapshotLength; i++){
+                yield result.snapshotItem(i);
+            }
+        }
+    }
+}
