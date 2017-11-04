@@ -10,7 +10,7 @@ function wait(delay) {
 // Wait for a specific event (for example, 'transitionend')
 function expectedEvent(element, event) {
     return new Promise((resolve, reject) => {
-        element.addEventListener(resolve, {once: true, passive: true});
+        element.addEventListener(event, resolve, {once: true, passive: true});
     });
 }
 
