@@ -1,5 +1,5 @@
-content  brief  chrome/content/ remoteenabled=yes remoterequired=yes
-skin  brief  classic  chrome/skin/
+content  brief  webextension/ui/ remoteenabled=yes remoterequired=yes
+skin  brief  classic  webextension/skin/
 
 resource brief-content  defaults/data/
 resource brief          modules/
