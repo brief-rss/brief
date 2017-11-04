@@ -80,9 +80,6 @@ const API_CALLS = {
         feedID => Utils.window.openDialog('chrome://brief/content/options/feed-properties.xul',
             'FeedProperties', 'chrome,titlebar,toolbar,centerscreen,modal', feedID)
     ],
-    getXulPersist: ['brief:get-xul-persist', 'async',
-        () => Utils.getXulPersist()
-    ],
     openBackgroundTab: ['brief:open-background-tab', 'async',
         url => Utils.window.gBrowser.loadOneTab(url, {relatedToCurrent: true})
     ],
@@ -146,8 +143,6 @@ const OBSERVER_TOPICS = [
 ];
 
 const Utils = {
-    BRIEF_XUL_URL: 'chrome://brief/content/brief.xul',
-
     get window() { return RecentWindow.getMostRecentBrowserWindow() },
 
     openLibrary: function() {
@@ -195,21 +190,6 @@ const Utils = {
 
         let features = 'chrome,titlebar,toolbar,centerscreen,';
         this.window.openDialog(url, 'Brief options', features);
-    },
-
-    getXulPersist: function() {
-        let store = Cc["@mozilla.org/xul/xulstore;1"].getService(Ci.nsIXULStore);
-        return {
-            startView: store.getValue(this.BRIEF_XUL_URL, "view-list", "startview"),
-            closedFolders: store.getValue(this.BRIEF_XUL_URL, "feed-list", "closedFolders"),
-            tagList: {
-                width: store.getValue(this.BRIEF_XUL_URL, "tag-list", "width") + 'px'
-            },
-            sidebar: {
-                width: store.getValue(this.BRIEF_XUL_URL, "sidebar", "width") + 'px',
-                hidden: store.getValue(this.BRIEF_XUL_URL, "sidebar", "hidden")
-            },
-        }
     },
 
     showStarUI: function Utils_showStarUI({id, rect}) {

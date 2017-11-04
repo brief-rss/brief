@@ -419,7 +419,13 @@ let Persistence = {
         if(data !== "") {
             this.data = JSON.parse(data);
         } else {
-            this.data = await this._import();
+            this.data = {
+                startView: 'today-folder',
+                closedFolders: '_',
+                tagList: {width: '200px'},
+                sidebar: {width: '400px', hidden: false},
+                view: {mode: 'full', filter: 'all'},
+            };
             this.save();
         }
     },
@@ -440,16 +446,6 @@ let Persistence = {
         this.data.tagList.width = getElement('tag-list').style.width;
         this.data.sidebar.width = getElement('sidebar').style.width;
         this.data.sidebar.hidden = !document.body.classList.contains('sidebar');
-    },
-
-    _import: async function Persistence__import() {
-        let data = await API.getXulPersist();
-        data.view = {
-            filter: Prefs.getBoolPref('feedview.filterUnread') ? 'unread' :
-                (Prefs.getBoolPref('feedview.filterStarred') ? 'starred' : 'all'),
-            mode: Prefs.getIntPref('feedview.mode') ? 'headlines' : 'full',
-        };
-        return data;
     },
 };
 
