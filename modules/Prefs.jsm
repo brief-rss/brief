@@ -114,11 +114,6 @@ pref("extensions.brief.assumeStandardKeys", true);
 pref("extensions.brief.showFavicons", true);
 pref("extensions.brief.pagePersist", ""); // Temporary storage for ex-XUL-persist attributes
 
-// Deprecated, moved to persistence
-pref("extensions.brief.feedview.mode", 0);
-pref("extensions.brief.feedview.filterUnread", false);
-pref("extensions.brief.feedview.filterStarred", false);
-
 pref("extensions.brief.feedview.doubleClickMarks", true);
 pref("extensions.brief.feedview.autoMarkRead", false);
 pref("extensions.brief.feedview.sortUnreadViewOldestFirst", false);
