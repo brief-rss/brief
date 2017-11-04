@@ -12,7 +12,7 @@
     "default_locale": "en",
     "permissions": ["contextMenus", "storage"],
     "background": {
-        "scripts": ["scripts/prefs.js", "scripts/database.js", "background.js"]
+        "scripts": ["ui/utils.js", "scripts/prefs.js", "scripts/database.js", "background.js"]
     },
     "browser_action": {
         "browser_style": true,

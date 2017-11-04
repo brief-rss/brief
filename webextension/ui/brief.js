@@ -514,26 +514,3 @@ let Shortcuts = {
 // ------- Utility functions --------
 
 function getElement(aId) { return document.getElementById(aId); }
-
-// Wait for a specific event (for example, 'transitionend')
-function expectedEvent(element, event) {
-    return new Promise((resolve, reject) => {
-        element.addEventListener(resolve, {once: true, passive: true});
-    });
-}
-
-// Adapt setTimeout for Promises
-function wait(delay) {
-    return new Promise(resolve => setTimeout(() => resolve(), delay));
-}
-
-// Iterate nodes in a XPathResult
-function iterSnapshot(result) {
-    return {
-        [Symbol.iterator]: function*() {
-            for(let i = 0; i < result.snapshotLength; i++){
-                yield result.snapshotItem(i);
-            }
-        }
-    }
-}

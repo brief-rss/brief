@@ -1,10 +1,5 @@
 'use strict';
 
-// Adapt setTimeout for Promises
-function wait(delay) {
-    return new Promise(resolve => setTimeout(() => resolve(), delay));
-}
-
 
 /**
  * Database design and considerations
