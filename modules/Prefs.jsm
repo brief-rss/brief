@@ -138,6 +138,3 @@ pref("extensions.brief.database.limitStoredEntries", false);
 pref("extensions.brief.database.maxStoredEntries", 100);
 pref("extensions.brief.database.lastPurgeTime", 0);
 pref("extensions.brief.database.keepStarredWhenClearing", true);
-
-// This one will not be modified, only watched
-pref("general.smoothScroll", undefined);

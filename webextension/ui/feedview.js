@@ -260,7 +260,7 @@ FeedView.prototype = {
         if (targetPosition == this.window.pageYOffset)
             return;
 
-        let behavior = (aSmooth && PrefCache.smoothScroll) ? 'smooth' : 'instant';
+        let behavior = aSmooth ? 'smooth' : 'instant';
 
         this.window.scrollTo({top: targetPosition, behavior});
     },

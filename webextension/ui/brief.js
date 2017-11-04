@@ -303,16 +303,10 @@ let PrefObserver = {
             this._updateCachedPref(key);
 
         Prefs.addObserver('', this, false);
-
-        // Special case: not Brief-specific
-        this._general = Services.prefs.getBranch('general.');
-        PrefCache.smoothScroll = this._general.getBoolPref('smoothScroll');
-        this._general.addObserver('smoothScroll', this, false);
     },
 
     unregister: function PrefObserver_unregister() {
         Prefs.removeObserver('', this);
-        this._general.removeObserver('smoothScroll', this);
     },
 
     // Hash table of prefs which are cached and available as properties
@@ -351,8 +345,6 @@ let PrefObserver = {
             if (aData == this._cachedPrefs[key])
                 this._updateCachedPref(key);
         }
-        if(aData === 'smoothScroll')
-            PrefCache.smoothScroll = this._general.getBoolPref('smoothScroll');
 
         switch (aData) {
             case 'feedview.autoMarkRead':
