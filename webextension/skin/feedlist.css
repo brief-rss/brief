@@ -85,11 +85,11 @@ tree-item > .system-icon {
 }
 
 tree-item[data-loading="true"] > .system-icon {
-    background-image: url("chrome://brief/skin/throbber.gif") !important;
+    background-image: url("/skin/throbber.gif") !important;
 }
 
 tree-item[data-error="true"]:not([data-loading="true"]) > .system-icon {
-    background-image: url("chrome://brief/skin/icons/error.png") !important;
+    background-image: url("/skin/icons/error.png") !important;
 }
 
 tree-item > .title,
