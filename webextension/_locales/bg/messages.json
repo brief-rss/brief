@@ -1,0 +1,53 @@
+{
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Обновяване на емисиите сега"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Отбелязване на всички емисии като прочетени"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Показване на броят на непрочетените"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Настройки"
+    },
+
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Клавишни комбинации"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Внасяне на емисии…"
+    },
+    "briefExportMenuitem_label": {
+        "message": "Изнасяне на емисии…"
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Настройки"
+    },
+
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Обновяване сега"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Отваряне на страница"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Отписване"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Изпразване на емисията"
+    },
+    "briefFeedSettings_label": {
+        "message": "Настройки на емисия"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Възстановяване на всички"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Изпразване на кошчето"
+    }
+}
