@@ -69,6 +69,13 @@ const Storage = Object.freeze({
     },
 
     /**
+     * A stream of entry changes
+     */
+    get entryChanges() {
+        return StorageInternal.entryChanges;
+    },
+
+    /**
      * Get an object containing properties of the feed (or folder) with the given ID.
      * See feeds table schema for a description of the properties.
      *
@@ -218,6 +225,8 @@ let StorageInternal = {
     deferredReady: PromiseUtils.defer(),
 
     feedCache: null,
+
+    entryChanges: new DataStream(),
 
 
     init: function* StorageInternal_init() {
@@ -613,12 +622,13 @@ let StorageInternal = {
             'retentionTime': DELETED_FEEDS_RETENTION_TIME
         });
 
+        await Promise.all([text, entries, feeds]);
+        this.entryChanges.push({action: 'purge'});
         // Prefs can only store longs while Date is a long long.
         let now = Math.round(Date.now() / 1000);
         Prefs.setIntPref('database.lastPurgeTime', now);
         let last_vacuum = Services.prefs.getIntPref(PREF_LAST_VACUUM);
         if((now - last_vacuum) * 1000 > VACUUM_PERIOD) {
-            await Promise.all([text, entries, feeds]);
             await wait(15000); // Avoid colliding with another vacuum, if possible
             FeedUpdateService.stopUpdating();
             await Stm.vacuum.execute();
@@ -697,6 +707,7 @@ let StorageInternal = {
         for (let observer of this.observers) {
             observer.observeStorage(event, args);
         }
+        Storage.entryChanges.push({action: 'update', entries: args.entryList.entries});
     },
 
     /**

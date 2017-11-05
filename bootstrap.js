@@ -326,9 +326,16 @@ let WebExt = {
         let {browser} = await startup();
 
         // Won't need to remove any handlers, the WebExtension will be down first
-        browser.runtime.onMessage.addListener((message, sender) => {
-            if(this._messageHandlers[message.id] !== undefined)
-                this._messageHandlers[message.id](message, sender);
+        browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+            let handler = this._messageHandlers[message.id];
+            if(handler === undefined) {
+                console.warn(`unknown message id: ${message.id}`);
+                return;
+            }
+            let reply = handler(message, sender);
+            // Seems that we can't send a Promise directly
+            // It may be from a different scope - however, `sendResponse` wraps it for us
+            sendResponse(reply);
         });
         browser.runtime.onConnect.addListener(port => {
             if(this._connectHandlers[port.name] !== undefined)
@@ -339,12 +346,44 @@ let WebExt = {
     finalize: function() {
     },
 
+    // This should normally be done by Firefox itself if the WebExtension
+    // has the `unlimitedStorage` permission. However, Brief will support
+    // migration from Firefox 52 ESR directly to Firefox 57+, and this
+    // permission is not available in Firefox 52. Thus Brief does not
+    // specify it in the manifest, but performs the same configuration
+    // manually.
+    _initUnlimitedStorage: function(url) {
+        let uri = Services.io.newURI(url, null, null);
+        let principal = Services.scriptSecurityManager.createCodebasePrincipal(uri, {});
+
+        // Add this marker to be equivalent to `unlimitedStorage`
+        Services.perms.addFromPrincipal(
+            principal, "WebExtensions-unlimitedStorage", Services.perms.ALLOW_ACTION);
+        Services.perms.addFromPrincipal(
+            principal, "indexedDB", Services.perms.ALLOW_ACTION);
+        Services.perms.addFromPrincipal(
+            principal, "persistent-storage", Services.perms.ALLOW_ACTION);
+        console.log("unlimitedStorage enabled");
+    },
+
     _messageHandlers: {
         'open-brief': () => Brief.open(),
         'open-options': () => Brief.showOptions(),
         'refresh': () => FeedUpdateService.updateAllFeeds(),
         'mark-all-read': () => (new Query()).markEntriesRead(true),
         'set-pref': ({name, value}) => LocalPrefs.set(name, value),
+        'allow-unlimited-storage': ({url}) => WebExt._initUnlimitedStorage(url),
+        'query-entries': ({query, mode}) => {
+            if(mode === undefined) {
+                mode = 'full';
+            }
+            query = new Query(query);
+            if(mode === 'id') {
+                return query.getEntries();
+            } else if(mode === 'full') {
+                return query.getFullEntries();
+            }
+        },
     },
 
     _connectHandlers: {
@@ -352,6 +391,7 @@ let WebExt = {
         'watch-status': port => Brief.status.attach(port),
         'watch-custom-css': port => StyleFile.text.attach(port),
         'watch-feed-list': port => Storage.feeds.attach(port),
+        'watch-entry-changes': port => Storage.entryChanges.attach(port),
     },
 }
 

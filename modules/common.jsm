@@ -1,7 +1,7 @@
 'use strict';
 
 const EXPORTED_SYMBOLS = ['IMPORT_COMMON', 'Cc', 'Ci', 'log', 'wait',
-                          'getPluralForm', 'RelativeDate', 'DataSource',
+                          'getPluralForm', 'RelativeDate', 'DataSource', 'DataStream',
                           'BRIEF_URL'];
 
 Components.utils.import('resource://gre/modules/Services.jsm');
@@ -144,6 +144,44 @@ DataSource.prototype = {
     attach: function(port) {
         this._ports.add(port);
         port.postMessage(this._data);
+    },
+
+    detach: function(port) {
+        this._ports.delete(port);
+    },
+}
+
+
+function DataStream(limit) {
+    if(limit === undefined) {
+        limit = 1000;
+    }
+    this._limit = limit;
+    this._data = [];
+    this._ports = new Set();
+}
+
+DataStream.prototype = {
+    push: function(value) {
+        this.notify(value);
+        this._data.push(value);
+        let over = this._data.length - this._limit + 1;
+        if(over > 0) {
+            this._data.splice(0, over);
+        }
+    },
+
+    notify: function(value) {
+        for(let port of this._ports) {
+            port.postMessage(value);
+        }
+    },
+
+    attach: function(port) {
+        this._ports.add(port);
+        for(let value of this._data) {
+            port.postMessage(value);
+        }
     },
 
     detach: function(port) {

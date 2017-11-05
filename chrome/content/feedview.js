@@ -1295,11 +1295,11 @@ EntryView.prototype = {
                     break;
 
                 case relativeDate.deltaYearSteps === 0:
-                    return date.toLocaleDateString(lang, {month: 'long', day: 'numeric'});
+                    return this.date.toLocaleDateString(lang, {month: 'long', day: 'numeric'});
                     break;
 
                 default:
-                    return date.toLocaleDateString(lang, {
+                    return this.date.toLocaleDateString(lang, {
                         year: 'numeric', month: 'long', day: 'numeric'});
                     break;
             }
