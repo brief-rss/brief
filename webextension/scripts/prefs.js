@@ -57,7 +57,7 @@ let Prefs = {
             if(k === 'extensions.brief@mozdev.org.description')
                 continue;
 
-            if(this._values[k] === v)
+            if(this._values[k] !== undefined && this._values[k] === v)
                 continue;
             this._values[k] = v;
 
