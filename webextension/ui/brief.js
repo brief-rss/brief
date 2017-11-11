@@ -42,12 +42,19 @@ var init = async function init() {
     TagList.init();
 
     SplitterModule.init();
+    document.getElementById('sidebar-splitter').addEventListener(
+        'dblclick', () => Commands.hideSidebar());
+    document.getElementById('reveal-sidebar-button').addEventListener(
+        'click', () => Commands.revealSidebar());
+
     ContextMenuModule.init();
 
     ViewListContextMenu.build();
     TagListContextMenu.build();
     FeedListContextMenu.build();
     DropdownMenus.build();
+
+    FeedViewHeader.init();
 
     Shortcuts.init();
 
@@ -277,35 +284,60 @@ async function refreshProgressmeter() {
     }
 }
 
+let Searchbar = {
+    init() {
+        let searchbar = getElement('searchbar');
+        searchbar.addEventListener('input', () => this.onInput());
+        searchbar.addEventListener('blur', () => this.onBlur());
+    },
 
-function onSearchbarCommand() {
-    let searchbar = getElement('searchbar');
+    onInput() {
+        let searchbar = getElement('searchbar');
 
-    if (searchbar.value)
-        gCurrentView.titleOverride = STRINGS.formatStringFromName('searchResults', [searchbar.value], 1);
-    else
-        gCurrentView.titleOverride = '';
+        if (searchbar.value)
+            gCurrentView.titleOverride = STRINGS.formatStringFromName(
+                'searchResults', [searchbar.value], 1);
+        else
+            gCurrentView.titleOverride = '';
 
-    gCurrentView.query.searchString = searchbar.value;
-    gCurrentView.refresh();
-}
-
-function onSearchbarBlur() {
-    let searchbar = getElement('searchbar');
-    if (!searchbar.value && gCurrentView.query.searchString) {
-        gCurrentView.titleOverride = '';
         gCurrentView.query.searchString = searchbar.value;
         gCurrentView.refresh();
-    }
-}
+    },
 
+    onBlur() {
+        let searchbar = getElement('searchbar');
+        if (!searchbar.value && gCurrentView.query.searchString) {
+            gCurrentView.titleOverride = '';
+            gCurrentView.query.searchString = searchbar.value;
+            gCurrentView.refresh();
+        }
+    },
+};
 
-function onMarkViewReadClick(aEvent) {
-    if (aEvent.ctrlKey)
-        Commands.markVisibleEntriesRead();
-    else
-        Commands.markViewRead();
-}
+let FeedViewHeader = {
+    init() {
+        Searchbar.init();
+        const handlers = {
+            'mark-view-read': event => this.markRead(event),
+            'headlines-checkbox': () => Commands.switchViewMode('headlines'),
+            'full-view-checkbox': () => Commands.switchViewMode('full'),
+            'show-all-entries-checkbox': () => Commands.switchViewFilter('all'),
+            'filter-unread-checkbox': () => Commands.switchViewFilter('unread'),
+            'filter-starred-checkbox': () => Commands.switchViewFilter('starred'),
+        };
+
+        for(let id in handlers) {
+            document.getElementById(id).addEventListener('click', handlers[id]);
+        }
+    },
+
+    markRead(event) {
+        if (event.ctrlKey)
+            Commands.markVisibleEntriesRead();
+        else
+            Commands.markViewRead();
+    },
+};
 
 
 let Prefs = Services.prefs.getBranch('extensions.brief.');

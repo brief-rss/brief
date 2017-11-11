@@ -104,9 +104,7 @@
         </tree-box>
     </div>
 
-    <draggable-splitter id="sidebar-splitter"
-                        title="&sidebarSplitter.tooltip;"
-                        ondblclick="Commands.hideSidebar()"/>
+    <draggable-splitter id="sidebar-splitter" title="&sidebarSplitter.tooltip;"/>
 
     <tree-box id="tag-list" class="shrinkable"
               contextmenu="tag-list-context-menu">
@@ -132,54 +130,45 @@
             <div class="spacer"/>
             <button id="mark-view-read"
                     class="brief-button feed-header-button"
-                    title="&markViewRead.tooltip;"
-                    onclick="onMarkViewReadClick(event)"/>
+                    title="&markViewRead.tooltip;"/>
             <div class="spacer button-spacer"/>
             <button id="headlines-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
                     autocomplete="off"
-                    title="&headlinesCheckbox.tooltip;"
-                    onclick="Commands.switchViewMode('headlines')"/>
+                    title="&headlinesCheckbox.tooltip;"/>
             <button id="full-view-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
                     autocomplete="off"
-                    title="&fullViewCheckbox.tooltip;"
-                    onclick="Commands.switchViewMode('full')"/>
+                    title="&fullViewCheckbox.tooltip;"/>
             <div class="spacer button-spacer"/>
             <button id="show-all-entries-checkbox"
                     class="brief-button filter-button"
                     title="&showAllItems.tooltip;"
                     type="checkbox"
-                    autocomplete="off"
-                    onclick="Commands.switchViewFilter('all')"/>
+                    autocomplete="off"/>
             <button id="filter-unread-checkbox"
                     class="brief-button filter-button"
                     title="&filterUnread.tooltip;"
                     type="checkbox"
-                    autocomplete="off"
-                    onclick="Commands.switchViewFilter('unread')"/>
+                    autocomplete="off"/>
             <button id="filter-starred-checkbox"
                     class="brief-button filter-button"
                     title="&filterStarred.tooltip;"
                     type="checkbox"
-                    autocomplete="off"
-                    onclick="Commands.switchViewFilter('starred')"/>
+                    autocomplete="off"/>
             <div class="spacer button-spacer"/>
             <input type="search"
                    id="searchbar"
                    spellcheck="false"
-                   placeholder="&searchBox.label;"
-                   oninput="onSearchbarCommand()"
-                   onblur="onSearchbarBlur()"/>
+                   placeholder="&searchBox.label;"/>
         </div>
 
         <div class="growable hbox">
             <button id="reveal-sidebar-button"
                     class="brief-button"
-                    title="&revealSidebar.tooltip;"
-                    onclick="Commands.revealSidebar()"/>
+                    title="&revealSidebar.tooltip;"/>
             <!-- The following iframe contains untrusted HTML. The untrusted HTML should have no chrome-level access because:
                     - it is contained in a content document (all these are displayed in a browser tab);
                     - it has a non-privileged origin (resource://);
