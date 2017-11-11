@@ -8,6 +8,9 @@ var API = null;
 var init = async function init() {
     window.addEventListener('unload', () => unload(), {once: true, passive: true});
 
+    let feedview_doc = await fetch('feedview.html');
+    getElement('feed-view').setAttribute('srcdoc', await feedview_doc.text());
+
     await Prefs.init();
     PrefObserver.init();
 

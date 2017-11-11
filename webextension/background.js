@@ -9,7 +9,7 @@ const Brief = {
     // No deinit required, we'll be forcefully unloaded anyway
     init: async function() {
         browser.browserAction.onClicked.addListener(
-            () => browser.runtime.sendMessage({id: 'open-brief'}));
+            () => browser.tabs.create({url: '/ui/brief.xhtml'}));
         browser.browserAction.setBadgeBackgroundColor({color: 'grey'});
 
         browser.contextMenus.create({

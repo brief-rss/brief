@@ -9,7 +9,7 @@
         }
     },
     "default_locale": "en",
-    "permissions": ["contextMenus", "storage"],
+    "permissions": ["<all_urls>", "contextMenus", "storage"],
     "background": {
         "scripts": ["ui/utils.js", "scripts/prefs.js", "scripts/database.js", "background.js"]
     },

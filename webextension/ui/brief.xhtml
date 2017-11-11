@@ -170,14 +170,11 @@
             <button id="reveal-sidebar-button"
                     class="brief-button"
                     title="&revealSidebar.tooltip;"/>
-            <!-- The following iframe contains untrusted HTML. The untrusted HTML should have no chrome-level access because:
-                    - it is contained in a content document (all these are displayed in a browser tab);
-                    - it has a non-privileged origin (resource://);
-                    - it is non-same-origin with the containing privileged (chrome://) document (this one).
-            -->
+            <!-- The following iframe contains untrusted HTML, but without scripts -->
             <iframe id="feed-view"
                     class="growable"
-                    src="resource://brief-content/feedview.html"/>
+                    src="about:srcdoc"
+                    sandbox="allow-forms allow-popups allow-same-origin"/>
         </div>
     </div>
     <context-menu-set>
