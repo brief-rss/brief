@@ -93,6 +93,13 @@ let Database = {
         tx.objectStore('entries').put(entry);
     },
 
+    query(filters) {
+        if(filters === undefined) {
+            filters = {};
+        }
+        return new Query(filters);
+    },
+
     async putEntries(entries) {
         console.log(`Inserting ${entries.length} entries`);
         let tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
@@ -154,6 +161,17 @@ let Database = {
             tx.oncomplete = resolve;
             tx.onerror = reject;
         });
+    },
+};
+
+
+function Query(filters) {
+    for(let name in filters)
+        this[name] = filters[name];
+};
+
+Query.prototype = {
+    async count() {
     },
 };
 
