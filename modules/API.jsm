@@ -83,12 +83,6 @@ const API_CALLS = {
     openBackgroundTab: ['brief:open-background-tab', 'async',
         url => Utils.window.gBrowser.loadOneTab(url, {relatedToCurrent: true})
     ],
-    hideStarUI: ['brief:hide-star-ui', 'async',
-        () => Utils.window.StarUI.panel.hidePopup()
-    ],
-    showStarUI: ['brief:show-star-ui', 'async',
-        ({id, rect}) => Utils.showStarUI({id, rect})
-    ],
 
     // Mirrors the Query actions
     query: {
@@ -190,18 +184,6 @@ const Utils = {
 
         let features = 'chrome,titlebar,toolbar,centerscreen,';
         this.window.openDialog(url, 'Brief options', features);
-    },
-
-    showStarUI: function Utils_showStarUI({id, rect}) {
-        let StarUI = this.window.StarUI;
-        let handler = () => {
-            StarUI.panel.removeEventListener('popupshown', handler);
-            let x = rect.left + rect.width / 2 - this.window.mozInnerScreenX;
-            let y = rect.top + rect.height - this.window.mozInnerScreenY;
-            this.window.StarUI.panel.moveToAnchor(null, '', x, y, false, false, null);
-        };
-        StarUI.panel.addEventListener('popupshown', handler);
-        StarUI.showEditBookmarkPopup(id, this.window.gBrowser, "after_start", false);
     },
 };
 

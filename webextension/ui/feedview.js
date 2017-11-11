@@ -589,7 +589,7 @@ FeedView.prototype = {
 
         let animate = aAnimate && containedEntries.length < 30;
 
-        API.hideStarUI();
+        console.log("TODO: hide bookmark edit UI");
 
         let selectedEntryIndex = -1;
 
@@ -663,7 +663,7 @@ FeedView.prototype = {
         this.document.body.classList.remove('headlines-view');
         this.document.body.classList.remove('multiple-feeds');
 
-        API.hideStarUI();
+        console.log("TODO: hide bookmark edit UI");
 
         // Manually reset the scroll position, otherwise weird stuff happens.
         this.scroll(0, false);
@@ -1240,18 +1240,7 @@ EntryView.prototype = {
                 if (this.starred) {
                     API.query.verifyBookmarksAndTags(this.id);
 
-                    let oldViewID = this.feedView.viewID;
-
-                    API.query.getProperty(this.id, 'bookmarkID', false).then(
-                        ids => {
-                            if (this.feedView.viewID != oldViewID)
-                                return;
-
-                            let anchor = this._getElement('bookmark-button');
-                            let rect = BrowserUtils.getElementBoundingScreenRect(anchor);
-                            API.showStarUI({id: ids[0], rect});
-                        }
-                    )
+                    console.log('TODO: bookmark editing not implemented');
                 }
                 else {
                     Commands.starEntry(this.id, true);
