@@ -35,7 +35,7 @@ const Brief = {
         });
         browser.contextMenus.onClicked.addListener(info => this.onContext(info));
 
-        await Prefs.init();
+        await Prefs.init({master: true});
 
         Prefs.addObserver('showUnreadCounter', () => this._updateUI());
         this._statusPort = browser.runtime.connect({name: 'watch-status'});

@@ -137,7 +137,7 @@ FeedView.prototype = {
         if (!this._fixedStarred)
             this.__query.starred = (Persistence.data.view.filter === 'starred') ? true : undefined;
 
-        if (this.__query.read === false && PrefCache.sortUnreadViewOldestFirst)
+        if (this.__query.read === false && Prefs.get('feedview.sortUnreadViewOldestFirst'))
             this.__query.sortDirection = 'asc';
         else
             this.__query.sortDirection = 'desc';
@@ -306,7 +306,8 @@ FeedView.prototype = {
     },
 
     _autoMarkRead: function FeedView__autoMarkRead() {
-        if (PrefCache.autoMarkRead && !this.headlinesMode && this.query.read !== false) {
+        if (Prefs.get('feedview.autoMarkRead')
+                && !this.headlinesMode && this.query.read !== false) {
             clearTimeout(this._markVisibleTimeout);
             let callback = this._callbackRefreshGuard(this.markVisibleEntriesRead.bind(this));
             this._markVisibleTimeout = setTimeout(callback, 500);
@@ -463,7 +464,7 @@ FeedView.prototype = {
                 {
                     this.getEntryView(entry).read = newState;
 
-                    if (PrefCache.autoMarkRead && !newState)
+                    if (Prefs.get('feedview.autoMarkRead') && !newState)
                         this._entriesMarkedUnread.push(entry);
                 }
                 break;
@@ -1157,7 +1158,7 @@ EntryView.prototype = {
             if (this.container.parentNode != this.feedView.feedContent)
                 return;
 
-            if (PrefCache.autoMarkRead && this.feedView.query.read !== false)
+            if (Prefs.get('feedview.autoMarkRead') && this.feedView.query.read !== false)
                 Commands.markEntryRead(this.id, true);
 
             if (this.selected) {
@@ -1227,7 +1228,7 @@ EntryView.prototype = {
 
         let command = aEvent.target.getAttribute('command');
 
-        if (aEvent.detail == 2 && PrefCache.doubleClickMarks && !command)
+        if (aEvent.detail == 2 && Prefs.get('feedview.doubleClickMarks') && !command)
             Commands.markEntryRead(this.id, !this.read);
 
         switch (command) {

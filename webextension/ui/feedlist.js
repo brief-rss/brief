@@ -449,7 +449,7 @@ let FeedList = {
             let folders = [];
             let parentID = feed.parent;
 
-            while (parentID != PrefCache.homeFolder) {
+            while (parentID != Prefs.get('homeFolder')) {
                 if (folders.indexOf(parentID) == -1)
                     folders.push(parentID);
                 parentID = this.getFeed(parentID).parent;
@@ -472,7 +472,7 @@ let FeedList = {
     },
 
     _faviconUrl: function FeedList__faviconUrl(aFeed) {
-        if (PrefCache.showFavicons && aFeed.favicon && aFeed.favicon != 'no-favicon')
+        if (Prefs.get('showFavicons') && aFeed.favicon && aFeed.favicon != 'no-favicon')
             return aFeed.favicon;
         return "chrome://brief/skin/icons/default-feed-favicon.png";
     },
@@ -481,7 +481,7 @@ let FeedList = {
         let active = (this.tree.selectedItem !== null);
         this.feeds = this.getAllFeeds(true);
 
-        let model = this._buildFolderChildren(PrefCache.homeFolder);
+        let model = this._buildFolderChildren(Prefs.get('homeFolder'));
         this.tree.update(model);
 
         if(urlToSelect !== undefined && urlToSelect !== null) {

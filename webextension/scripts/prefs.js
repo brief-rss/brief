@@ -11,13 +11,16 @@ let Prefs = {
     _observers: new Set(),
     // Reverse pref name mapping
     _externNames: new Map(),
+    // Is this page responsible for saving prefs to storage?
+    _master: false,
 
-    init: async function() {
+    init: async function(options) {
         let ready = new Promise((resolve, reject) => {
             this._signalReady = resolve;
         });
         this._port = browser.runtime.connect({name: 'watch-prefs'});
         this._port.onMessage.addListener(prefs => this._merge(prefs));
+        this._master = options ? (options.master || false) : false;
 
         await ready;
     },
@@ -64,7 +67,9 @@ let Prefs = {
                     observer({name: k, value: v});
             }
         }
-        browser.storage.local.set({prefs: this._values});
+        if(this._master) {
+            browser.storage.local.set({prefs: this._values});
+        }
         if(this._signalReady !== null)
             this._signalReady();
         this._signalReady = null;

@@ -16,10 +16,11 @@ var API = null;
 var init = async function init() {
     window.addEventListener('unload', () => unload(), {once: true, passive: true});
 
+    await Prefs.init();
+    PrefObserver.init();
+
     API = new BriefClient(window);
     await API.ready();
-
-    PrefObserver.register();
 
     // Restore local persistence
     await Persistence.init();
@@ -92,7 +93,6 @@ function unload() {
 
     API.removeObserver(FeedList);
 
-    PrefObserver.unregister();
     API.removeStorageObserver(FeedList);
     gCurrentView.uninit();
     API.finalize();
@@ -340,73 +340,15 @@ let FeedViewHeader = {
 };
 
 
-let Prefs = Services.prefs.getBranch('extensions.brief.');
-
-let PrefCache = {};
-
-// Preferences cache and observer.
+// Preferences observer.
 let PrefObserver = {
-
-    register: function PrefObserver_register() {
-        for (let key in this._cachedPrefs)
-            this._updateCachedPref(key);
-
-        Prefs.addObserver('', this, false);
-    },
-
-    unregister: function PrefObserver_unregister() {
-        Prefs.removeObserver('', this);
-    },
-
-    // Hash table of prefs which are cached and available as properties
-    // of PrefCache.
-    _cachedPrefs: {
-        doubleClickMarks:          'feedview.doubleClickMarks',
-        autoMarkRead:              'feedview.autoMarkRead',
-        sortUnreadViewOldestFirst: 'feedview.sortUnreadViewOldestFirst',
-        showFavicons:              'showFavicons',
-        homeFolder:                'homeFolder',
-        pagePersist:               'pagePersist',
-        assumeStandardKeys:        'assumeStandardKeys',
-    },
-
-    _updateCachedPref: function PrefObserver__updateCachedPref(aKey) {
-        let prefName = this._cachedPrefs[aKey];
-
-        switch (Prefs.getPrefType(prefName)) {
-            case Ci.nsIPrefBranch.PREF_STRING:
-                PrefCache[aKey] = Prefs.getCharPref(prefName);
-                break;
-            case Ci.nsIPrefBranch.PREF_INT:
-                PrefCache[aKey] = Prefs.getIntPref(prefName);
-                break;
-            case Ci.nsIPrefBranch.PREF_BOOL:
-                PrefCache[aKey] = Prefs.getBoolPref(prefName);
-                break;
-        }
-    },
-
-    observe: function PrefObserver_observe(aSubject, aTopic, aData) {
-        if (aTopic != 'nsPref:changed')
-            return;
-
-        for (let key in this._cachedPrefs) {
-            if (aData == this._cachedPrefs[key])
-                this._updateCachedPref(key);
-        }
-
-        switch (aData) {
-            case 'feedview.autoMarkRead':
-                gCurrentView._autoMarkRead();
-                break;
-
-            case 'feedview.sortUnreadViewOldestFirst':
+    init() {
+        Prefs.addObserver('feedview.autoMarkRead', () => gCurrentView._autoMarkRead());
+        Prefs.addObserver('feedview.sortUnreadViewOldestFirst', () => {
                 if (gCurrentView.query.read === false)
                     gCurrentView.refresh();
-                break;
-        }
-    }
-
+        });
+    },
 };
 
 /* Supports draggable splitters */
@@ -456,7 +398,7 @@ let Persistence = {
     data: null,
 
     init: async function Persistence_init() {
-        let data = PrefCache.pagePersist;
+        let data = Prefs.get('pagePersist');
         if(data !== "") {
             this.data = JSON.parse(data);
         } else {
@@ -534,7 +476,7 @@ let Shortcuts = {
             // Space and Shift+Space behave differently only in full view
             case ' ':
             case 'Shift+ ':
-                if(!PrefCache.assumeStandardKeys || gCurrentView.headlinesView)
+                if(!Prefs.get('assumeStandardKeys') || gCurrentView.headlinesView)
                     return;
                 if(event.shiftKey)
                     gCurrentView.selectPrevEntry();
