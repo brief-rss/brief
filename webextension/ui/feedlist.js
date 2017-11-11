@@ -749,6 +749,20 @@ let ContextMenuModule = {
 
 
 let ViewListContextMenu = {
+    build() {
+        const handlers = {
+            'ctx-mark-special-folder-read': () => this.markFolderRead(),
+            'ctx-restore-trashed': () => Commands.restoreTrashed(),
+            'ctx-empty-today-folder': () => this.emptyUnreadFolder(),
+            'ctx-empty-trash': () => Commands.emptyTrash(),
+        };
+
+        for(let id in handlers) {
+            document.getElementById(id).addEventListener('click', handlers[id]);
+        }
+        document.getElementById('view-list-context-menu')
+            .addEventListener('show', () => this.init());
+    },
 
     get menu() {
         delete this.menu;
@@ -776,6 +790,16 @@ let ViewListContextMenu = {
 
 
 let TagListContextMenu = {
+    build() {
+        const handlers = {
+            'ctx-mark-tag-read': () => this.markTagRead(),
+            'ctx-delete-tag': () => this.deleteTag(),
+        };
+
+        for(let id in handlers) {
+            document.getElementById(id).addEventListener('click', handlers[id]);
+        }
+    },
 
     markTagRead: function TagListContextMenu_markTagRead() {
         let query = {
@@ -800,6 +824,27 @@ let TagListContextMenu = {
 
 
 let FeedListContextMenu = {
+    build() {
+        const handlers = {
+            'ctx-mark-feed-read': () => this.markFeedRead(),
+            'ctx-update-feed': () => API.updateFeeds([this.targetFeed.feedID]),
+            'ctx-open-website': () => Commands.openFeedWebsite(this.targetFeed),
+            'ctx-unsubscribe-feed': () => Commands.deleteFeed(this.targetFeed),
+            'ctx-empty-feed': () => Commands.emptyFeed(this.targetFeed),
+            'ctx-feed-settomgs': () => Commands.showFeedProperties(this.targetFeed),
+
+            'ctx-mark-folder-read': () => this.markFolderRead(),
+            'ctx-refresh-folder': () => this.updateFolder(),
+            'ctx-delete-folder': () => this.deleteFolder(),
+            'ctx-empty-folder': () => this.emptyFolder(),
+        };
+
+        for(let id in handlers) {
+            document.getElementById(id).addEventListener('click', handlers[id]);
+        }
+        document.getElementById('feed-list-context-menu')
+            .addEventListener('show', () => this.init());
+    },
 
     get menu() {
         delete this.menu;
@@ -859,4 +904,26 @@ let FeedListContextMenu = {
             API.deleteFolder(Number(feed.bookmarkID));
     }
 
+}
+
+let DropdownMenus = {
+    build() {
+        const handlers = {
+            'dropdown-shortcuts': () => Commands.displayShortcuts(),
+            'dropdown-import': () => API.opml.importFeeds(),
+            'dropdown-export': () => API.opml.exportFeeds(),
+            'dropdown-options': () => Commands.openOptions(),
+            'dropdown-update-feed': () => Commands.updateFeed(),
+            'brief-open-website': () => Commands.openFeedWebsite(),
+            'dropdown-empty-feed': () => Commands.emptyFeed(),
+            'dropdown-unsubscribe-feed': () => Commands.deleteFeed(),
+            'dropdown-feed-settings': () => Commands.showFeedProperties(),
+            'dropdown-restore-trashed': () => Commands.restoreTrashed(),
+            'dropdown-empty-trash': () => Commands.emptyTrash(),
+        };
+
+        for(let id in handlers) {
+            document.getElementById(id).addEventListener('click', handlers[id]);
+        }
+    },
 }

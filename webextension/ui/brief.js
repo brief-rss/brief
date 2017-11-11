@@ -44,6 +44,11 @@ var init = async function init() {
     SplitterModule.init();
     ContextMenuModule.init();
 
+    ViewListContextMenu.build();
+    TagListContextMenu.build();
+    FeedListContextMenu.build();
+    DropdownMenus.build();
+
     Shortcuts.init();
 
     getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);

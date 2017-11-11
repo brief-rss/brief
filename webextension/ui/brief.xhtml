@@ -191,111 +191,111 @@
         </div>
     </div>
     <context-menu-set>
-        <context-menu id="view-list-context-menu" onshow="ViewListContextMenu.init()">
-            <menu-item id="ctx-mark-special-folder-read" onclick="ViewListContextMenu.markFolderRead()">
+        <context-menu id="view-list-context-menu">
+            <menu-item id="ctx-mark-special-folder-read">
                       &ctxMarkRead.label;
             </menu-item>
-            <menu-item id="ctx-restore-trashed" onclick="Commands.restoreTrashed()">
+            <menu-item id="ctx-restore-trashed">
                       &ctxRestoreTrashed.label;
             </menu-item>
             <hr id="ctx-view-list-separator-empty"/>
-            <menu-item id="ctx-empty-today-folder" onclick="ViewListContextMenu.emptyUnreadFolder()">
+            <menu-item id="ctx-empty-today-folder">
                       &ctxEmptyFolder.label;
             </menu-item>
-            <menu-item id="ctx-empty-trash" onclick="Commands.emptyTrash()">
+            <menu-item id="ctx-empty-trash">
                       &ctxEmptyTrash.label;
             </menu-item>
         </context-menu>
         <context-menu id="tag-list-context-menu">
-            <menu-item id="ctx-mark-tag-read" onclick="TagListContextMenu.markTagRead()">
+            <menu-item id="ctx-mark-tag-read">
                 &ctxMarkTagRead.label;
             </menu-item>
             <hr/>
-            <menu-item id="ctx-delete-tag" onclick="TagListContextMenu.deleteTag()">
+            <menu-item id="ctx-delete-tag">
                 &ctxDeleteTag.label;
             </menu-item>
         </context-menu>
-        <context-menu id="feed-list-context-menu" onshow="FeedListContextMenu.init()">
+        <context-menu id="feed-list-context-menu">
             <div id='feed-context-menu'>
-                <menu-item id="ctx-mark-feed-read" onclick="FeedListContextMenu.markFeedRead()">
+                <menu-item id="ctx-mark-feed-read">
                     &ctxMarkRead.label;
                 </menu-item>
-                <menu-item id="ctx-update-feed" onclick="API.updateFeeds([FeedListContextMenu.targetFeed.feedID])">
+                <menu-item id="ctx-update-feed">
                     &ctxRefreshFeed.label;
                 </menu-item>
-                <menu-item id="ctx-open-website" onclick="Commands.openFeedWebsite(FeedListContextMenu.targetFeed)">
+                <menu-item id="ctx-open-website">
                     &ctxOpenWebsite.label;
                 </menu-item>
                 <hr/>
-                <menu-item id="ctx-unsubscribe-feed" onclick="Commands.deleteFeed(FeedListContextMenu.targetFeed)">
+                <menu-item id="ctx-unsubscribe-feed">
                     &ctxUnsubscribeFeed.label;
                 </menu-item>
-                <menu-item id="ctx-empty-feed" onclick="Commands.emptyFeed(FeedListContextMenu.targetFeed)">
+                <menu-item id="ctx-empty-feed">
                     &ctxEmptyFeed.label;
                 </menu-item>
                 <hr/>
-                <menu-item id="ctx-feed-settomgs" onclick="Commands.showFeedProperties(FeedListContextMenu.targetFeed)">
+                <menu-item id="ctx-feed-settomgs">
                     &ctxFeedSettings.label;
                 </menu-item>
             </div>
             <div id='folder-context-menu'>
-                <menu-item id="ctx-mark-folder-read" onclick="FeedListContextMenu.markFolderRead()">
+                <menu-item id="ctx-mark-folder-read">
                         &ctxMarkRead.label;
                 </menu-item>
-                <menu-item id="ctx-refresh-folder" onclick="FeedListContextMenu.updateFolder()">
+                <menu-item id="ctx-refresh-folder">
                         &ctxRefreshFolder.label;
                 </menu-item>
                 <hr/>
-                <menu-item id="ctx-delete-folder" onclick="FeedListContextMenu.deleteFolder()">
+                <menu-item id="ctx-delete-folder">
                         &ctxDeleteFolder.label;
                 </menu-item>
-                <menu-item id="ctx-empty-folder" onclick="FeedListContextMenu.emptyFolder()">
+                <menu-item id="ctx-empty-folder">
                         &ctxEmptyFolder.label;
                 </menu-item>
             </div>
         </context-menu>
 
         <context-menu id="dropdown-menu-options" class="dropdown-menu" data-align="center">
-            <menu-item id="dropdown-shortcuts" onclick="Commands.displayShortcuts()">
+            <menu-item id="dropdown-shortcuts">
                 &briefShowShortcutsMenuitem.label;
             </menu-item>
             <hr/>
-            <menu-item id="dropdown-import" onclick="API.opml.importFeeds()">
+            <menu-item id="dropdown-import">
                 &briefImportMenuitem.label;
             </menu-item>
-            <menu-item id="dropdown-export" onclick="API.opml.exportFeeds()">
+            <menu-item id="dropdown-export">
                 &briefExportMenuitem.label;
             </menu-item>
             <hr/>
-            <menu-item id="dropdown-options" onclick="Commands.openOptions()">
+            <menu-item id="dropdown-options">
                 &briefOpenOptionsMenuitem.label;
             </menu-item>
         </context-menu>
         <context-menu id="dropdown-menu-feed-actions" class="dropdown-menu">
-            <menu-item id="dropdown-update-feed" onclick="Commands.updateFeed()">
+            <menu-item id="dropdown-update-feed">
                 &briefRefreshFeed.label;
             </menu-item>
-            <menu-item id="brief-open-website" onclick="Commands.openFeedWebsite()">
+            <menu-item id="brief-open-website">
                 &briefOpenWebsite.label;
             </menu-item>
             <hr/>
-            <menu-item id="dropdown-empty-feed" onclick="Commands.emptyFeed()">
+            <menu-item id="dropdown-empty-feed">
                 &briefEmptyFeed.label;
             </menu-item>
-            <menu-item id="dropdown-unsubscribe-feed" onclick="Commands.deleteFeed()">
+            <menu-item id="dropdown-unsubscribe-feed">
                 &briefUnsubscribeFeed.label;
             </menu-item>
             <hr/>
-            <menu-item id="dropdown-feed-settings" onclick="Commands.showFeedProperties()">
+            <menu-item id="dropdown-feed-settings">
                 &briefFeedSettings.label;
             </menu-item>
         </context-menu>
         <context-menu id="dropdown-menu-trash-actions" class="dropdown-menu">
-            <menu-item id="dropdown-restore-trashed" onclick="Commands.restoreTrashed()">
+            <menu-item id="dropdown-restore-trashed">
                 &briefRestoreTrashed.label;
             </menu-item>
             <hr/>
-            <menu-item id="dropdown-empty-trash" onclick="Commands.emptyTrash()">
+            <menu-item id="dropdown-empty-trash">
                 &briefEmptyTrash.label;
             </menu-item>
         </context-menu>
