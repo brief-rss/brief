@@ -60,7 +60,7 @@ const LocalPrefs = {
             case Services.prefs.PREF_BOOL:
                 return Services.prefs.getBoolPref(name);
             case Services.prefs.PREF_STRING:
-                return Services.prefs.getCharPref(name);
+                return Services.prefs.getStringPref(name);
         }
     },
 
@@ -76,9 +76,7 @@ const LocalPrefs = {
                 prefs.setIntPref(name, value);
                 break;
             case "string":
-                var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-                str.data = value;
-                prefs.setComplexValue(name, Ci.nsISupportsString, str);
+                prefs.setStringPref(name, value);
                 break;
         }
         this._update(name);
