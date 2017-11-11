@@ -7,6 +7,7 @@ var API = null;
 
 var init = async function init() {
     window.addEventListener('unload', () => unload(), {once: true, passive: true});
+    apply_i18n(document);
 
     let feedview_doc = await fetch('feedview.html');
     getElement('feed-view').setAttribute('srcdoc', await feedview_doc.text());

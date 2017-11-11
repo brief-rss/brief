@@ -1,10 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE html [
-  <!ENTITY % BriefLocaleDTD SYSTEM "chrome://brief/locale/brief.dtd">
-  %BriefLocaleDTD;
-  <!ENTITY % BriefOverlayLocaleDTD SYSTEM "chrome://brief/locale/overlay.dtd">
-  %BriefOverlayLocaleDTD;
-]>
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -18,6 +13,7 @@
 
     <script type="application/x-javascript" src="/scripts/prefs.js"/>
     <script type="application/x-javascript" src="utils.js"/>
+    <script type="application/x-javascript" src="/scripts/i18n.js"/>
     <script type="application/x-javascript" src="brief.js"/>
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
@@ -33,32 +29,24 @@
                      id="update-buttons-deck">
                     <button id="update-button"
                             class="centered brief-button sidebar-button"
-                            title="&updateButton.tooltip;">
-                        &updateButton.label;
-                    </button>
+                            data-i18n-attrs="title:updateButton_tooltip" data-i18n="updateButton_label"/>
                     <button id="stop-updating-button"
                             class="centered brief-button sidebar-button"
-                            title="&stopUpdatingButton.tooltip;">
-                        &stopUpdatingButton.label;
-                    </button>
+                            data-i18n-attrs="title:stopUpdatingButton_tooltip" data-i18n="stopUpdatingButton_label"/>
                 </div>
                 <div class="hbox sidebar-button-box"
                      id="organize-button-box">
                     <button id="organize-button"
                             class="centered brief-button sidebar-button"
-                            title="&organizeFeeds.tooltip;">
-                        &organizeFeeds.label;
-                    </button>
+                            data-i18n-attrs="title:organizeFeeds_tooltip" data-i18n="organizeFeeds_label"/>
                 </div>
                 <div class="hbox sidebar-button-box"
                      id="options-dropdown-button-box">
                     <button id="options-dropdown-button"
                             class="centered brief-button sidebar-button"
                             type="menu"
-                            title="&optionsDropdownButton.tooltip;"
-                            data-dropdown="dropdown-menu-options">
-                        &optionsDropdownButton.label;
-                    </button>
+                            data-i18n-attrs="title:optionsDropdownButton_tooltip"
+                            data-dropdown="dropdown-menu-options" data-i18n="optionsDropdownButton_label"/>
                 </div>
             </div>
             <div class="hbox" id="update-progress-container">
@@ -69,19 +57,19 @@
         <tree-box id="view-list" class="unprefixed"
                   contextmenu="view-list-context-menu">
             <tree-item id="all-items-folder">
-                <label class="title">&allItemsFolder.label;</label>
+                <label class="title" data-i18n="allItemsFolder_label"/>
                 <label class="unread-count"/>
             </tree-item>
             <tree-item id="today-folder">
-                <label class="title">&todayFolder.label;</label>
+                <label class="title" data-i18n="todayFolder_label"/>
                 <label class="unread-count"/>
             </tree-item>
             <tree-item id="starred-folder">
-                <label class="title">&starredFolder.label;</label>
+                <label class="title" data-i18n="starredFolder_label"/>
                 <label class="unread-count"/>
             </tree-item>
             <tree-item id="trash-folder">
-                <label class="title">&trashFolder.label;</label>
+                <label class="title" data-i18n="trashFolder_label"/>
                 <label class="unread-count"/>
             </tree-item>
         </tree-box>
@@ -105,7 +93,7 @@
         </tree-box>
     </div>
 
-    <draggable-splitter id="sidebar-splitter" title="&sidebarSplitter.tooltip;"/>
+    <draggable-splitter id="sidebar-splitter" data-i18n-attrs="title:sidebarSplitter_tooltip"/>
 
     <tree-box id="tag-list" class="shrinkable"
               contextmenu="tag-list-context-menu">
@@ -131,45 +119,45 @@
             <div class="spacer"/>
             <button id="mark-view-read"
                     class="brief-button feed-header-button"
-                    title="&markViewRead.tooltip;"/>
+                    data-i18n-attrs="title:markViewRead_tooltip"/>
             <div class="spacer button-spacer"/>
             <button id="headlines-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
                     autocomplete="off"
-                    title="&headlinesCheckbox.tooltip;"/>
+                    data-i18n-attrs="title:headlinesCheckbox_tooltip"/>
             <button id="full-view-checkbox"
                     class="brief-button view-button"
                     type="checkbox"
                     autocomplete="off"
-                    title="&fullViewCheckbox.tooltip;"/>
+                    data-i18n-attrs="title:fullViewCheckbox_tooltip"/>
             <div class="spacer button-spacer"/>
             <button id="show-all-entries-checkbox"
                     class="brief-button filter-button"
-                    title="&showAllItems.tooltip;"
+                    data-i18n-attrs="title:showAllItems_tooltip"
                     type="checkbox"
                     autocomplete="off"/>
             <button id="filter-unread-checkbox"
                     class="brief-button filter-button"
-                    title="&filterUnread.tooltip;"
+                    data-i18n-attrs="title:filterUnread_tooltip"
                     type="checkbox"
                     autocomplete="off"/>
             <button id="filter-starred-checkbox"
                     class="brief-button filter-button"
-                    title="&filterStarred.tooltip;"
+                    data-i18n-attrs="title:filterStarred_tooltip"
                     type="checkbox"
                     autocomplete="off"/>
             <div class="spacer button-spacer"/>
             <input type="search"
                    id="searchbar"
                    spellcheck="false"
-                   placeholder="&searchBox.label;"/>
+                   placeholder="__MSG_searchBox_label__"/>
         </div>
 
         <div class="growable hbox">
             <button id="reveal-sidebar-button"
                     class="brief-button"
-                    title="&revealSidebar.tooltip;"/>
+                    data-i18n-attrs="title:revealSidebar_tooltip"/>
             <!-- The following iframe contains untrusted HTML, but without scripts -->
             <iframe id="feed-view"
                     class="growable"
@@ -179,112 +167,58 @@
     </div>
     <context-menu-set>
         <context-menu id="view-list-context-menu">
-            <menu-item id="ctx-mark-special-folder-read">
-                      &ctxMarkRead.label;
-            </menu-item>
-            <menu-item id="ctx-restore-trashed">
-                      &ctxRestoreTrashed.label;
-            </menu-item>
+            <menu-item id="ctx-mark-special-folder-read" data-i18n="ctxMarkRead_label"/>
+            <menu-item id="ctx-restore-trashed" data-i18n="ctxRestoreTrashed_label"/>
             <hr id="ctx-view-list-separator-empty"/>
-            <menu-item id="ctx-empty-today-folder">
-                      &ctxEmptyFolder.label;
-            </menu-item>
-            <menu-item id="ctx-empty-trash">
-                      &ctxEmptyTrash.label;
-            </menu-item>
+            <menu-item id="ctx-empty-today-folder" data-i18n="ctxEmptyFolder_label"/>
+            <menu-item id="ctx-empty-trash" data-i18n="ctxEmptyTrash_label"/>
         </context-menu>
         <context-menu id="tag-list-context-menu">
-            <menu-item id="ctx-mark-tag-read">
-                &ctxMarkTagRead.label;
-            </menu-item>
+            <menu-item id="ctx-mark-tag-read" data-i18n="ctxMarkTagRead_label"/>
             <hr/>
-            <menu-item id="ctx-delete-tag">
-                &ctxDeleteTag.label;
-            </menu-item>
+            <menu-item id="ctx-delete-tag" data-i18n="ctxDeleteTag_label"/>
         </context-menu>
         <context-menu id="feed-list-context-menu">
             <div id='feed-context-menu'>
-                <menu-item id="ctx-mark-feed-read">
-                    &ctxMarkRead.label;
-                </menu-item>
-                <menu-item id="ctx-update-feed">
-                    &ctxRefreshFeed.label;
-                </menu-item>
-                <menu-item id="ctx-open-website">
-                    &ctxOpenWebsite.label;
-                </menu-item>
+                <menu-item id="ctx-mark-feed-read" data-i18n="ctxMarkRead_label"/>
+                <menu-item id="ctx-update-feed" data-i18n="ctxRefreshFeed_label"/>
+                <menu-item id="ctx-open-website" data-i18n="ctxOpenWebsite_label"/>
                 <hr/>
-                <menu-item id="ctx-unsubscribe-feed">
-                    &ctxUnsubscribeFeed.label;
-                </menu-item>
-                <menu-item id="ctx-empty-feed">
-                    &ctxEmptyFeed.label;
-                </menu-item>
+                <menu-item id="ctx-unsubscribe-feed" data-i18n="ctxUnsubscribeFeed_label"/>
+                <menu-item id="ctx-empty-feed" data-i18n="ctxEmptyFeed_label"/>
                 <hr/>
-                <menu-item id="ctx-feed-settomgs">
-                    &ctxFeedSettings.label;
-                </menu-item>
+                <menu-item id="ctx-feed-settomgs" data-i18n="ctxFeedSettings_label"/>
             </div>
             <div id='folder-context-menu'>
-                <menu-item id="ctx-mark-folder-read">
-                        &ctxMarkRead.label;
-                </menu-item>
-                <menu-item id="ctx-refresh-folder">
-                        &ctxRefreshFolder.label;
-                </menu-item>
+                <menu-item id="ctx-mark-folder-read" data-i18n="ctxMarkRead_label"/>
+                <menu-item id="ctx-refresh-folder" data-i18n="ctxRefreshFolder_label"/>
                 <hr/>
-                <menu-item id="ctx-delete-folder">
-                        &ctxDeleteFolder.label;
-                </menu-item>
-                <menu-item id="ctx-empty-folder">
-                        &ctxEmptyFolder.label;
-                </menu-item>
+                <menu-item id="ctx-delete-folder" data-i18n="ctxDeleteFolder_label"/>
+                <menu-item id="ctx-empty-folder" data-i18n="ctxEmptyFolder_label"/>
             </div>
         </context-menu>
 
         <context-menu id="dropdown-menu-options" class="dropdown-menu" data-align="center">
-            <menu-item id="dropdown-shortcuts">
-                &briefShowShortcutsMenuitem.label;
-            </menu-item>
+            <menu-item id="dropdown-shortcuts" data-i18n="briefShowShortcutsMenuitem_label"/>
             <hr/>
-            <menu-item id="dropdown-import">
-                &briefImportMenuitem.label;
-            </menu-item>
-            <menu-item id="dropdown-export">
-                &briefExportMenuitem.label;
-            </menu-item>
+            <menu-item id="dropdown-import" data-i18n="briefImportMenuitem_label"/>
+            <menu-item id="dropdown-export" data-i18n="briefExportMenuitem_label"/>
             <hr/>
-            <menu-item id="dropdown-options">
-                &briefOpenOptionsMenuitem.label;
-            </menu-item>
+            <menu-item id="dropdown-options" data-i18n="briefOpenOptionsMenuitem_label"/>
         </context-menu>
         <context-menu id="dropdown-menu-feed-actions" class="dropdown-menu">
-            <menu-item id="dropdown-update-feed">
-                &briefRefreshFeed.label;
-            </menu-item>
-            <menu-item id="brief-open-website">
-                &briefOpenWebsite.label;
-            </menu-item>
+            <menu-item id="dropdown-update-feed" data-i18n="briefRefreshFeed_label"/>
+            <menu-item id="brief-open-website" data-i18n="briefOpenWebsite_label"/>
             <hr/>
-            <menu-item id="dropdown-empty-feed">
-                &briefEmptyFeed.label;
-            </menu-item>
-            <menu-item id="dropdown-unsubscribe-feed">
-                &briefUnsubscribeFeed.label;
-            </menu-item>
+            <menu-item id="dropdown-empty-feed" data-i18n="briefEmptyFeed_label"/>
+            <menu-item id="dropdown-unsubscribe-feed" data-i18n="briefUnsubscribeFeed_label"/>
             <hr/>
-            <menu-item id="dropdown-feed-settings">
-                &briefFeedSettings.label;
-            </menu-item>
+            <menu-item id="dropdown-feed-settings" data-i18n="briefFeedSettings_label"/>
         </context-menu>
         <context-menu id="dropdown-menu-trash-actions" class="dropdown-menu">
-            <menu-item id="dropdown-restore-trashed">
-                &briefRestoreTrashed.label;
-            </menu-item>
+            <menu-item id="dropdown-restore-trashed" data-i18n="briefRestoreTrashed_label"/>
             <hr/>
-            <menu-item id="dropdown-empty-trash">
-                &briefEmptyTrash.label;
-            </menu-item>
+            <menu-item id="dropdown-empty-trash" data-i18n="briefEmptyTrash_label"/>
         </context-menu>
 
     </context-menu-set>
