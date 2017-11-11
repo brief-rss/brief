@@ -1,13 +1,5 @@
 'use strict';
 
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/API.jsm');
-Components.utils.import('resource://gre/modules/Services.jsm');
-Components.utils.import("resource://gre/modules/BrowserUtils.jsm");
-
-// Randomize URI to work around mozilla bug 918033
-const STRINGS = Services.strings.createBundle('chrome://brief/locale/brief.properties?' + Math.random());
-
 var gCurrentView;
 
 var API = null;
