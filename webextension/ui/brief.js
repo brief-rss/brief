@@ -14,6 +14,8 @@ var API = null;
 
 
 var init = async function init() {
+    window.addEventListener('unload', () => unload(), {once: true, passive: true});
+
     API = new BriefClient(window);
     await API.ready();
 
@@ -36,6 +38,8 @@ var init = async function init() {
     doc.documentElement.setAttribute('lang', navigator.language);
 
     ViewList.init();
+    FeedList.init();
+    TagList.init();
 
     SplitterModule.init();
     ContextMenuModule.init();
@@ -46,6 +50,14 @@ var init = async function init() {
     getElement('tag-list').style.width = Persistence.data.tagList.width;
     getElement('sidebar').style.width = Persistence.data.sidebar.width;
     document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
+
+    // Initialize event handlers
+    document.getElementById('update-button').addEventListener(
+        'click', () => API.updateAllFeeds(), {passive: true});
+    document.getElementById('stop-updating-button').addEventListener(
+        'click', () => API.stopUpdating(), {passive: true});
+    document.getElementById('organize-button').addEventListener(
+        'click', () => API.openLibrary(), {passive: true});
 
     // Are we called to subscribe for a feed?
     let url = (new URLSearchParams(document.location.search)).get('subscribe');
@@ -420,6 +432,7 @@ let Persistence = {
             };
             this.save();
         }
+        window.addEventListener('beforeunload', () => this.save(), {once: true, passive: true});
     },
 
     save: function Persistence_save() {
@@ -502,3 +515,6 @@ let Shortcuts = {
 // ------- Utility functions --------
 
 function getElement(aId) { return document.getElementById(aId); }
+
+// ===== Init =====
+window.addEventListener('load', () => init(), {once: true, passive: true});

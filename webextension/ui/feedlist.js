@@ -187,6 +187,9 @@ let ViewList = {
     },
 
     init: function ViewList_init() {
+        this.tree.root.addEventListener(
+            'change', event => this.onSelect(event), {passive: true});
+
         this.deselect();
 
         this.refreshItem('all-items-folder');
@@ -257,6 +260,11 @@ let TagList = {
     ready: false,
 
     tags: null,
+
+    init() {
+        this.tree.root.addEventListener(
+            'change', event => this.onSelect(event), {passive: true});
+    },
 
     get selectedItem() {
         return this.tree.selectedItem;
@@ -356,6 +364,11 @@ let TagList = {
 let FeedList = {
 
     _feedsCache: null,
+
+    init() {
+        this.tree.root.addEventListener(
+            'change', event => this.onSelect(event), {passive: true});
+    },
 
     updateFeedsCache: async function FeedList_updateFeedsCache() {
         this._feedsCache = await API.getAllFeeds(true, true);

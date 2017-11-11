@@ -21,7 +21,7 @@
     <script type="application/x-javascript" src="feedlist.js"/>
     <script type="application/x-javascript" src="feedview.js"/>
 </head>
-<body class="sidebar" onload="init()" onbeforeunload="Persistence.save()" onunload="unload()">
+<body class="sidebar">
     <div id="sidebar" class="shrinkable vbox">
         <div class="vbox"
              id="sidebar-top"
@@ -32,14 +32,12 @@
                      id="update-buttons-deck">
                     <button id="update-button"
                             class="centered brief-button sidebar-button"
-                            title="&updateButton.tooltip;"
-                            onclick="API.updateAllFeeds()">
+                            title="&updateButton.tooltip;">
                         &updateButton.label;
                     </button>
                     <button id="stop-updating-button"
                             class="centered brief-button sidebar-button"
-                            title="&stopUpdatingButton.tooltip;"
-                            onclick="API.stopUpdating()">
+                            title="&stopUpdatingButton.tooltip;">
                         &stopUpdatingButton.label;
                     </button>
                 </div>
@@ -47,8 +45,7 @@
                      id="organize-button-box">
                     <button id="organize-button"
                             class="centered brief-button sidebar-button"
-                            title="&organizeFeeds.tooltip;"
-                            onclick="API.openLibrary()">
+                            title="&organizeFeeds.tooltip;">
                         &organizeFeeds.label;
                     </button>
                 </div>
@@ -69,7 +66,6 @@
         </div>
 
         <tree-box id="view-list" class="unprefixed"
-                  onchange="ViewList.onSelect(event)"
                   contextmenu="view-list-context-menu">
             <tree-item id="all-items-folder">
                 <label class="title">&allItemsFolder.label;</label>
@@ -89,7 +85,7 @@
             </tree-item>
         </tree-box>
 
-        <tree-box id="feed-list" onchange="FeedList.onSelect(event)" contextmenu="">
+        <tree-box id="feed-list" contextmenu="">
             <template>
                 <tree-item contextmenu="feed-list-context-menu">
                     <span class="system-icon"/>
@@ -113,7 +109,6 @@
                         ondblclick="Commands.hideSidebar()"/>
 
     <tree-box id="tag-list" class="shrinkable"
-              onchange="TagList.onSelect(event)"
               contextmenu="tag-list-context-menu">
         <template>
             <tree-item>
