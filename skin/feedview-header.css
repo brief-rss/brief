@@ -26,7 +26,7 @@
     content: "";
     height: 18px;
     width: 18px;
-    background-image: url(icons/feed-settings.png);
+    background-image: url(/icons/feed-settings.png);
     background-position: 0 0;
 }
 
@@ -46,7 +46,7 @@
     content: "";
     height: 6px;
     width: 11px;
-    background-image: url(icons/view-title-dropmarker.png);
+    background-image: url(/icons/view-title-dropmarker.png);
     background-position: 0 0;
 }
 
@@ -80,7 +80,7 @@
 }
 
 #mark-view-read {
-    background-image: url(icons/mark-view-read.png) !important;
+    background-image: url(/icons/mark-view-read.png) !important;
 }
 
 .view-button,
@@ -102,11 +102,11 @@
 }
 
 #headlines-checkbox {
-    background-image: url(icons/view-headlines.png) !important;
+    background-image: url(/icons/view-headlines.png) !important;
 }
 
 #full-view-checkbox {
-    background-image: url(icons/view-full-items.png) !important;
+    background-image: url(/icons/view-full-items.png) !important;
     margin-left: 11px !important;
 }
 
@@ -131,16 +131,16 @@
 
 
 #show-all-entries-checkbox {
-    background-image: url(icons/show-all-items.png) !important;
+    background-image: url(/icons/show-all-items.png) !important;
 }
 
 #filter-unread-checkbox {
-    background-image: url(icons/show-unread-items.png) !important;
+    background-image: url(/icons/show-unread-items.png) !important;
     margin-left: 11px !important;
 }
 
 #filter-starred-checkbox {
-    background-image: url(icons/show-starred-items.png) !important;
+    background-image: url(/icons/show-starred-items.png) !important;
     margin-left: 11px !important;
 }
 

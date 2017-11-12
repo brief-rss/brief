@@ -186,7 +186,7 @@ body.sidebar #reveal-sidebar-button {
     content: "";
     height: 4px;
     width: 7px;
-    background: url(icons/dropmarker.png);
+    background: url(/icons/dropmarker.png);
     background-position: 0 0;
 }
 

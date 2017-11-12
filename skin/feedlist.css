@@ -136,7 +136,7 @@ tree-folder-header > .toggle-collapsed {
     height: 11px !important;
     box-sizing: content-box !important;
 
-    background-image: url(icons/twisty.png) !important;
+    background-image: url(/icons/twisty.png) !important;
     background-position: 0 0 !important;
     background-origin: content-box !important;
     background-clip: content-box !important;
