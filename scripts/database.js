@@ -350,9 +350,48 @@ Query.prototype = {
         return answer;
     },
 
-    _mergeAndCollect({cursors, filterFunction, sortKey, offset, limit}) {
-        let queue = [];
-
+    /*async*/ _mergeAndCollect({cursors, filterFunction, sortKey, offset, limit, extractor}) {
+        let totalCallbacks = 0;
+        extractor = extractor || (v => v);
+        let queue = Array(cursors.length);
+        let pending = cursors.length;
+        let result = [];
+        if(cursors.length === 0) {
+            return result;
+        }
+        let inf = Number('Infinity');
+        for(let [idx, cur] of Array.entries(cursors)) {
+            cur.onsuccess = ({target}) => {
+                totalCallbacks += 1;
+                let cursor = target.result;
+                if(cursor) {
+                    cursors[idx] = cursor;
+                } else {
+                    cursors[idx] = null;
+                }
+                pending -= 1;
+                if(pending === 0) {
+                    let keys = cursors.map(c => c !== null ? sortKey(c.value) : inf);
+                    let next = keys.reduce(((min, cur, i, arr) => cur < arr[min] ? i : min), 0);
+                    if(keys[next] !== inf) {
+                        let value = cursors[next].value;
+                        if(filterFunction(value)) {
+                            if(offset > 0) {
+                                offset -= 1;
+                            } else if(limit <= 0) {
+                                return;
+                            } else {
+                                limit -= 1;
+                                result.push(extractor(value));
+                            }
+                        }
+                        pending += 1;
+                        cursors[next].continue();
+                    }
+                }
+            };
+        }
+        return result; // This will be ready by the end of transaction
     },
 
     _filters() {
