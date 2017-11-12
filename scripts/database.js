@@ -37,8 +37,7 @@ let Database = {
         }
         let opener = indexedDB.open("brief", openOptions);
         opener.onupgradeneeded = (event) => this.upgrade(event);
-        let request = await this._requestPromise(opener);
-        this._db = request.result;
+        this._db = await this._requestPromise(opener);
         this.loadFeeds();
         let entryCount = (await this.listEntries()).length;//FIXME
         console.log(`Brief: opened database with ${entryCount} entries`);
@@ -73,8 +72,8 @@ let Database = {
                 entries = tx.objectStore('entries');
                 // Enables quick unread filtering
                 entries.createIndex(
-                    'deleted_read_feedID_date',
-                    ['deleted', 'read', 'feedID', 'date']);
+                    'deleted_starred_read_feedID_date',
+                    ['deleted', 'starred', 'read', 'feedID', 'date']);
                 // Sorry, will have to rewrite everything as boolean keys can't be indexed
                 let cursor = entries.openCursor();
                 cursor.onsuccess = ({target}) => {
@@ -82,6 +81,10 @@ let Database = {
                     if(cursor) {
                         let value = cursor.value;
                         value.read = value.read ? 1 : 0;
+                        if(value.deleted > 0) {
+                            value.deletedAt = value.deleted;
+                            value.deleted = 1;
+                        }
                         cursor.update(value);
                         cursor.continue();
                     }
@@ -156,13 +159,13 @@ let Database = {
     async listEntries() {
         let tx = this._db.transaction(['entries']);
         let request = tx.objectStore('entries').getAllKeys();
-        return (await this._requestPromise(request)).result;
+        return await this._requestPromise(request);
     },
 
     async loadFeeds() {
         let tx = this._db.transaction(['feeds']);
         let request = tx.objectStore('feeds').getAll();
-        let feeds = (await this._requestPromise(request)).result;
+        let feeds = await this._requestPromise(request);
         console.log(`Brief: ${feeds.length} feeds in database`);
 
         if(feeds.length === 0) {
@@ -214,8 +217,8 @@ let Database = {
     // Note: this is resolved after the transaction is finished(!!!) mb1193394
     _requestPromise(req) {
         return new Promise((resolve, reject) => {
-            req.onsuccess = (event) => resolve(event.target);
-            req.onerror = (event) => reject(event.target);
+            req.onsuccess = (event) => resolve(event.target.result);
+            req.onerror = (event) => reject(event.target.error);
         });
     },
 
@@ -321,30 +324,41 @@ Query.prototype = {
         let answer = 0;
         let tx = Database.db().transaction(['entries'], 'readonly');
         let store = tx.objectStore('entries');
-        let req = store.index(indexName).openCursor(ranges[0]);
         let totalCallbacks = 0;
-        req.onsuccess = ({target}) => {
-            let cursor = target.result;
-            if(cursor) {
-                totalCallbacks += 1;
-                if(limit <= 0) {
-                    return;
-                }
-                let cmp = filterFunction(cursor.value);
-                if(cmp === true) {
-                    if(offset > 0) {
-                        offset -= 1;
-                    } else {
-                        answer += 1;
-                        limit -= 1;
+        if(filterFunction) {
+            let promises = [];
+            for(let r of ranges) {
+                let req = store.index(indexName).openCursor(r);
+                req.onsuccess = ({target}) => {
+                    let cursor = target.result;
+                    if(cursor) {
+                        totalCallbacks += 1;
+                        if(answer >= offset + limit) {
+                            return;
+                        }
+                        if(filterFunction(cursor.value)) {
+                            answer += 1;
+                        }
+                        cursor.continue();
                     }
-                }
-                cursor.continue();
+                };
             }
-        };
-        await Database._transactionPromise(tx);
-        console.log(`Brief: done count query in ${totalCallbacks} callbacks`, filters);
+            await Database._transactionPromise(tx);
+        } else {
+            let requests = ranges.map(r => store.index(indexName).count(r));
+            let promises = requests.map(r => Database._requestPromise(r));
+            let counts = await Promise.all(promises);
+            answer = counts.reduce((a, b) => a + b, 0);
+        }
+        answer -= offset;
+        answer = Math.min(answer, limit);
+        console.log(`Brief: count is ${answer} with ${totalCallbacks} callbacks`, filters);
         return answer;
+    },
+
+    _mergeAndCollect({cursors, filterFunction, sortKey, offset, limit}) {
+        let queue = [];
+
     },
 
     _filters() {
@@ -417,33 +431,66 @@ Query.prototype = {
 
         return filters;
     },
+
     _searchEngine(filters) {
         // And now
-        let indexName = 'deleted_read_feedID_date'; // FIXME: hardcoded
+        let indexName = 'deleted_starred_read_feedID_date'; // FIXME: hardcoded
         if(filters.sort.direction !== 'desc')
             throw "asc not supported yet"; //FIXME
 
         let filterFunction = entry => {
             return (true
-                && (!filters.feeds || filters.feeds.includes(entry.feedID))
-                && (filters.entry.read === undefined || filters.entry.read === entry.read)
-                && (filters.entry.starred === undefined || filters.entry.starred === entry.starred)
-                && (filters.entry.deleted === undefined || filters.entry.deleted === entry.deleted)
                 && (filters.entry.tags === undefined || filters.entry.tags.some(tag => entry.tags.includes(tag)))
                 // FIXME: no FTS support at all, even slow one
-                && (filters.sort.start === undefined || entry.date >= filters.sort.start)
-                && (filters.sort.end === undefined || entry.date <= filters.sort.end)
             );
         };
 
-        let ranges = [undefined];
-        if(filters.entry.deleted !== undefined && filters.entry.deleted === 0) {
-            ranges = [IDBKeyRange.bound([0], [1], false, true)];
-            if(filters.entry.read !== undefined && filters.entry.read === 0) {
-                ranges = [IDBKeyRange.bound([0, 0], [0, 1], false, true)];
-            }
+        let prefixes = [[]];
+        // Extract the common prefixes
+        prefixes = this._expandPrefixes(prefixes, filters.entry.deleted, [0, 1]);
+        prefixes = this._expandPrefixes(prefixes, filters.entry.starred, [0, 1]);
+        prefixes = this._expandPrefixes(prefixes, filters.entry.read, [0, 1]);
+        prefixes = this._expandPrefixes(prefixes, filters.feeds); // Always present
+
+        let ranges = this._prefixesToRanges(prefixes,
+            {min: filters.sort.start, max: filters.sort.end});
+
+        if(filters.entry.tags === undefined &&
+            filters.fullTextSearch === undefined) {
+            filterFunction = undefined;
         }
 
         return {indexName, filterFunction, ranges};
+    },
+
+    _expandPrefixes(prefixes, requirement, possibleValues) {
+        if(requirement === undefined) {
+            requirement = possibleValues;
+        }
+        if(!Array.isArray(requirement)) {
+            requirement = [requirement];
+        }
+        let newPrefixes = [];
+        for(let old of prefixes) {
+            for(let value of requirement) {
+                newPrefixes.push(Array.concat(old, [value]));
+            }
+        }
+        return newPrefixes;
+    },
+
+    _prefixesToRanges(prefixes, {min, max}) {
+        return prefixes.map(prefix => {
+            let lower = prefix;
+            if(min !== undefined) {
+                lower = Array.concat(prefix, [min])
+            }
+            let bound = [];
+            if(max !== undefined) {
+                bound = max;
+            }
+            let upper = Array.concat(prefix, [bound])
+            return IDBKeyRange.bound(lower, upper);
+        });
     },
 };
