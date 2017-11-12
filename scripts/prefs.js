@@ -5,24 +5,21 @@ let Prefs = {
     _port: null,
     // Current pref values
     _values: {},
-    // Signal that prefs have been received
-    _signalReady: null,
     // Set of our observers
     _observers: new Set(),
-    // Reverse pref name mapping
-    _externNames: new Map(),
-    // Is this page responsible for saving prefs to storage?
-    _master: false,
+    // Defaults
+    _defaults: {},
 
-    init: async function(options) {
-        let ready = new Promise((resolve, reject) => {
-            this._signalReady = resolve;
+    init: async function() {
+        browser.storage.onChanged.addListener((changes, area) => {
+            let pref_changes = changes.prefs;
+            if(area !== 'local' || pref_changes === undefined)
+                return;
+            this._merge(pref_changes.newValue);
         });
-        this._port = browser.runtime.connect({name: 'watch-prefs'});
-        this._port.onMessage.addListener(prefs => this._merge(prefs));
-        this._master = options ? (options.master || false) : false;
 
-        await ready;
+        let {prefs} = await browser.storage.local.get({prefs: this._defaults});
+        this._values = prefs;
     },
 
     get: function(name) {
@@ -30,8 +27,9 @@ let Prefs = {
     },
 
     set: async function(name, value) {
-        await browser.runtime.sendMessage(
-            {id: 'set-pref', name: this._externNames.get(name), value});
+        let prefs = Object.assign({}, this._values);
+        prefs[name] = value;
+        await browser.storage.local.set({prefs});
     },
 
     addObserver: function(name, observer) {
@@ -43,20 +41,8 @@ let Prefs = {
     },
 
     _merge: function(prefs) {
-        for(let [k,v] of prefs) {
-            // Slightly rearrange prefs on this migration
-            // Remove redundant prefixes
-            for(let prefix of [/^extensions.brief\./, /^general\./]) {
-                if(!k.match(prefix))
-                    continue;
-                let name = k.replace(prefix, '');
-                this._externNames.set(name, k);
-                k = name;
-            }
-            // Drop this pref we never use anyway
-            if(k === 'extensions.brief@mozdev.org.description')
-                continue;
-
+        for(let k in prefs) {
+            let v = prefs[k];
             if(this._values[k] !== undefined && this._values[k] === v)
                 continue;
             this._values[k] = v;
@@ -67,11 +53,39 @@ let Prefs = {
                     observer({name: k, value: v});
             }
         }
-        if(this._master) {
-            browser.storage.local.set({prefs: this._values});
-        }
-        if(this._signalReady !== null)
-            this._signalReady();
-        this._signalReady = null;
     },
 };
+
+
+function pref(name, value) {
+    Prefs._defaults[name] = value;
+}
+
+// The actual prefs
+pref("homeFolder", -1);
+pref("showUnreadCounter", true);
+pref("firstRun", true);
+pref("lastVersion", "0");
+pref("assumeStandardKeys", true);
+pref("showFavicons", true);
+pref("pagePersist", ""); // Temporary storage for ex-XUL-persist attributes
+
+pref("feedview.doubleClickMarks", true);
+pref("feedview.autoMarkRead", false);
+pref("feedview.sortUnreadViewOldestFirst", false);
+
+pref("update.interval", 3600);
+pref("update.lastUpdateTime", 0);
+pref("update.enableAutoUpdate", true);
+pref("update.showNotification", true);
+pref("update.defaultFetchDelay", 2000);
+pref("update.backgroundFetchDelay", 4000);
+pref("update.startupDelay", 35000);
+pref("update.suppressSecurityDialogs", true);
+
+pref("database.expireEntries", false);
+pref("database.entryExpirationAge", 60);
+pref("database.limitStoredEntries", false);
+pref("database.maxStoredEntries", 100);
+pref("database.lastPurgeTime", 0);
+pref("database.keepStarredWhenClearing", true);
