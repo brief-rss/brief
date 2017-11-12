@@ -59,7 +59,7 @@ function FeedView(aTitle, aQuery) {
 
     document.addEventListener('visibilitychange', this, false);
 
-    API.addStorageObserver(this);
+    //FIXME API.addStorageObserver(this);
 
     this.document.addEventListener('click', this, true);
     this.document.addEventListener('scroll', this, true);
@@ -350,7 +350,7 @@ FeedView.prototype = {
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
 
-        API.removeStorageObserver(this);
+        //FIXME API.removeStorageObserver(this);
     },
 
 

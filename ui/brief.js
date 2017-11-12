@@ -24,9 +24,9 @@ var init = async function init() {
 
     refreshProgressmeter();
 
-    API.addObserver(FeedList);
-
-    API.addStorageObserver(FeedList);
+    //FIXME: observers
+    //.addObserver(FeedList);
+    //API.addStorageObserver(FeedList);
 
     await FeedList.updateFeedsCache();
 
@@ -86,11 +86,10 @@ var init = async function init() {
 function unload() {
     Persistence.save();
 
-    API.removeObserver(FeedList);
-
-    API.removeStorageObserver(FeedList);
+    //FIXME: remove observers
+    //API.removeObserver(FeedList);
+    //API.removeStorageObserver(FeedList);
     gCurrentView.uninit();
-    API.finalize();
 }
 
 
