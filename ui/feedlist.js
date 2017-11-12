@@ -371,7 +371,7 @@ let FeedList = {
     },
 
     updateFeedsCache: async function FeedList_updateFeedsCache() {
-        this._feedsCache = await API.getAllFeeds(true, true);
+        this._feedsCache = Database.feeds;
     },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
