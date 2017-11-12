@@ -350,6 +350,38 @@ Query.prototype = {
         return answer;
     },
 
+    async getIds() {
+        return await this._getMap(e => e.id);
+    },
+
+    async getValuesOf(name) {
+        return await this._getMap(e => e[name]);
+    },
+
+    async getEntries() {
+        return await this._getMap(e => e);
+    },
+
+    async _getMap(extractor) {
+        let filters = this._filters();
+        let {indexName, filterFunction, ranges} = this._searchEngine(filters);
+        let offset = filters.sort.offset || 0;
+        let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
+
+        let answer = [];
+        let totalCallbacks = 0;
+        let tx = Database.db().transaction(['entries'], 'readonly');
+        let index = tx.objectStore('entries').index(indexName);
+
+        let cursors = ranges.map(r => index.openCursor(r));
+        let result = this._mergeAndCollect(
+            {cursors, filterFunction, sortKey: (e => -e.date), offset, limit, extractor});
+
+        await Database._transactionPromise(tx);
+
+        return result;
+    },
+
     /*async*/ _mergeAndCollect({cursors, filterFunction, sortKey, offset, limit, extractor}) {
         let totalCallbacks = 0;
         extractor = extractor || (v => v);
@@ -360,7 +392,7 @@ Query.prototype = {
             return result;
         }
         let inf = Number('Infinity');
-        for(let [idx, cur] of Array.entries(cursors)) {
+        for(let [idx, cur] of cursors.entries()) {
             cur.onsuccess = ({target}) => {
                 totalCallbacks += 1;
                 let cursor = target.result;
@@ -373,13 +405,11 @@ Query.prototype = {
                 if(pending === 0) {
                     let keys = cursors.map(c => c !== null ? sortKey(c.value) : inf);
                     let next = keys.reduce(((min, cur, i, arr) => cur < arr[min] ? i : min), 0);
-                    if(keys[next] !== inf) {
+                    if(keys[next] !== inf && limit > 0) {
                         let value = cursors[next].value;
-                        if(filterFunction(value)) {
+                        if(filterFunction === undefined || filterFunction(value)) {
                             if(offset > 0) {
                                 offset -= 1;
-                            } else if(limit <= 0) {
-                                return;
                             } else {
                                 limit -= 1;
                                 result.push(extractor(value));
@@ -387,6 +417,8 @@ Query.prototype = {
                         }
                         pending += 1;
                         cursors[next].continue();
+                    } else {
+                        console.log(`Brief: merge with ${totalCallbacks} callbacks`);
                     }
                 }
             };
@@ -442,9 +474,9 @@ Query.prototype = {
 
         // Entry-based filters
         filters.entry = {
-            read: +this.read,
+            read: this.read !== undefined ? +this.read : undefined,
             starred: this.starred,
-            deleted: +this.deleted,
+            deleted: this.deleted !== undefined ? +this.deleted : undefined,
             tags: this.tags,
         };
         filters.fullTextSearch = this.searchString;

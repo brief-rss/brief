@@ -537,7 +537,8 @@ FeedView.prototype = {
             else
                 query.endDate = edgeDate;
 
-            this._loadedEntries = Array.from(await this._refreshGuard(API.query.getEntries(query)));
+            this._loadedEntries = Array.from(await this._refreshGuard(
+                Database.query(query).getIds()));
 
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
@@ -547,7 +548,7 @@ FeedView.prototype = {
                     entries: newEntries
                 };
 
-                for (let entry of await this._refreshGuard(API.query.getFullEntries(query)))
+                for (let entry of await this._refreshGuard(Database.query(query).getEntries()))
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
@@ -561,7 +562,7 @@ FeedView.prototype = {
         // Otherwise, just blow it all away and refresh from scratch.
         else {
             if (this._allEntriesLoaded) {
-                let entryList = await API.query.getEntries(this.query);
+                let entryList = await Database.query(this.query).getIds();
                 if(aAddedEntries.some(id => entryList.includes(id)))
                     this.refresh()
             }
@@ -778,7 +779,7 @@ FeedView.prototype = {
         dateQuery.startDate = rangeStartDate;
         dateQuery.limit = aCount;
 
-        let dates = await this._refreshGuard(API.query.getProperty(dateQuery, 'date', false));
+        let dates = await this._refreshGuard(Database.query(dateQuery).getValuesOf('date'));
         if (dates.length) {
             let query = this.getQueryCopy();
             if (query.sortDirection == 'desc') {
@@ -790,7 +791,7 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            let loadedEntries = await this._refreshGuard(API.query.getFullEntries(query));
+            let loadedEntries = await this._refreshGuard(Database.query(query).getEntries());
             for (let entry of loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
