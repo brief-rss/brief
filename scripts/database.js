@@ -7,12 +7,10 @@
  * 1. Revision table.
  * Item content, as fetched from the server, is stored as a `revision`.
  * Revisions are immutable. For now there's only one revision per entry,
- * but this may change in the future. For the migration period their IDs
- * match the sqlite entry IDs.
+ * but this may change in the future.
  *
  * 2. Entry table.
- * An entry is an item from a feed. For the migration period their IDs
- * match the sqlite entry IDs.
+ * An entry is an item from a feed.
  */
 // IndexedDB does not play nice with `async` (transaction ends before execution restarts)
 // and the same problem with native Promise
@@ -20,25 +18,25 @@
 let Database = {
     _db: null,
 
+    _feeds: [],
+    get feeds() {
+        return this._feeds;
+    },
+
     async init() {
-        let opener = indexedDB.open("brief", {version: 20, storage: "persistent"});
-        opener.onupgradeneeded = (event) => this.upgrade(event);
-        let request = await Promise.race([
-            this._requestPromise(opener),
-            wait(15000),
-        ]);
-        let storage;
-        if(request === undefined) {
-            console.warn("Failed to open the persistent DB, opening default one");
-            opener = indexedDB.open("brief", {version: 20});
-            opener.onupgradeneeded = (event) => this.upgrade(event);
-            request = await this._requestPromise(opener);
-            storage = "default";
-        } else {
-            storage = "persistent";
+        let {storage} = await browser.storage.local.get({storage: 'persistent'});
+        console.log(`Brief: opening database in ${storage} storage`);
+        let openOptions = {version: 20};
+        if(storage === 'persistent') {
+            openOptions.storage = 'persistent';
         }
-        await browser.storage.local.set({storage});
+        let opener = indexedDB.open("brief", openOptions);
+        opener.onupgradeneeded = (event) => this.upgrade(event);
+        let request = await this._requestPromise(opener);
         this._db = request.result;
+        this.loadFeeds();
+        let entryCount = (await this.listEntries()).length;//FIXME
+        console.log(`Brief: opened database with ${entryCount} entries`);
     },
 
     upgrade(event) {
@@ -134,15 +132,56 @@ let Database = {
         return (await this._requestPromise(request)).result;
     },
 
+    async loadFeeds() {
+        let tx = this._db.transaction(['feeds']);
+        let request = tx.objectStore('feeds').getAll();
+        let feeds = (await this._requestPromise(request)).result;
+        console.log(`Brief: ${feeds.length} feeds in database`);
+
+        if(feeds.length === 0) {
+            console.log(`Brief: the database looks empty, testing backups`);
+            ({feeds} = await browser.storage.local.get({feeds}));
+            console.log(`Brief: ${feeds.length} feeds found in local storage`);
+            if(feeds.length === 0) {
+                ({feeds} = await browser.storage.sync.get({feeds}));
+                console.log(`Brief: ${feeds.length} feeds found in sync storage`);
+            }
+            this.saveFeeds(feeds);
+        }
+
+        this._feeds = feeds;
+    },
+
     async saveFeeds(feeds) {
         if(this._db === null) {
             return;
         }
         let tx = this._db.transaction(['feeds'], 'readwrite');
+        tx.objectStore('feeds').clear();
         for(let feed of feeds) {
             tx.objectStore('feeds').put(feed);
         }
         await this._transactionPromise(tx);
+        await this._saveFeedBackups(feeds);
+        console.log(`Brief: saved feed list with ${feeds.length} feeds`);
+    },
+
+    async _saveFeedBackups(feeds) {
+        let minimizedFeeds = [];
+        for(let feed of feeds) {
+            let minimized = Object.assign({}, feed);
+            for(let key of Object.getOwnPropertyNames(minimized)) {
+                if(key === 'favicon')
+                    delete minimized.favicon;
+                if(minimized[key] === null)
+                    delete minimized[key];
+            }
+            minimizedFeeds.push(minimized);
+        }
+        feeds = minimizedFeeds;
+        let store_local = browser.storage.local.set({feeds});
+        let store_sync = browser.storage.sync.set({feeds});
+        await Promise.all([store_local, store_sync]);
     },
 
     // Note: this is resolved after the transaction is finished(!!!) mb1193394
