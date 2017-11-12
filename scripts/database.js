@@ -313,46 +313,40 @@ Query.prototype = {
     includeFeedsExcludedFromGlobalViews: true,
 
     async count() {
-        await Database.init();
         let filters = this._filters();
-        console.log("Brief: count query", filters);
+
+        if(filters.sort.offset || filters.sort.limit) {
+            throw "offset/limit are not supported for count queries";
+        }
+
         let {indexName, filterFunction, ranges} = this._searchEngine(filters);
 
-        let offset = filters.sort.offset || 0;
-        let limit = (filters.sort.limit === undefined) ? Number('Infinity') : filters.sort.limit;
-
         let answer = 0;
-        let tx = Database.db().transaction(['entries'], 'readonly');
-        let store = tx.objectStore('entries');
         let totalCallbacks = 0;
+        let tx = Database.db().transaction(['entries'], 'readonly');
+        let index = tx.objectStore('entries').index(indexName);
         if(filterFunction) {
-            let promises = [];
-            for(let r of ranges) {
-                let req = store.index(indexName).openCursor(r);
-                req.onsuccess = ({target}) => {
+            let cursors = ranges.map(r => index.openCursor(r));
+            cursors.forEach(c => {
+                c.onsuccess = ({target}) => {
                     let cursor = target.result;
                     if(cursor) {
                         totalCallbacks += 1;
-                        if(answer >= offset + limit) {
-                            return;
-                        }
                         if(filterFunction(cursor.value)) {
                             answer += 1;
                         }
                         cursor.continue();
                     }
                 };
-            }
+            });
             await Database._transactionPromise(tx);
+            console.log(`Brief: count with ${totalCallbacks} callbacks due to`, filters);
         } else {
-            let requests = ranges.map(r => store.index(indexName).count(r));
+            let requests = ranges.map(r => index.count(r));
             let promises = requests.map(r => Database._requestPromise(r));
             let counts = await Promise.all(promises);
             answer = counts.reduce((a, b) => a + b, 0);
         }
-        answer -= offset;
-        answer = Math.min(answer, limit);
-        console.log(`Brief: count is ${answer} with ${totalCallbacks} callbacks`, filters);
         return answer;
     },
 
@@ -381,7 +375,6 @@ Query.prototype = {
                 children.push(node.feedID);
                 childrenMap.set(parent, children);
             }
-            console.log(childrenMap);
             let nodes = [];
             let new_nodes = folders;
             while(new_nodes.length > 0) {
