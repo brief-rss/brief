@@ -21,8 +21,6 @@ let Database = {
     _db: null,
 
     async init() {
-        await browser.runtime.sendMessage(
-            {id: 'allow-unlimited-storage', url: browser.runtime.getURL('/')});
         let opener = indexedDB.open("brief", {version: 20, storage: "persistent"});
         opener.onupgradeneeded = (event) => this.upgrade(event);
         let request = await Promise.race([
