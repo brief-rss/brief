@@ -26,3 +26,59 @@ function iterSnapshot(result) {
         }
     }
 }
+
+function RelativeDate(aAbsoluteTime) {
+    this.currentDate = new Date();
+    this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;
+
+    this.targetDate = new Date(aAbsoluteTime);
+    this.targetTime = this.targetDate.getTime() - this.targetDate.getTimezoneOffset() * 60000;
+}
+
+RelativeDate.prototype = {
+
+    get deltaMinutes() { return this._getDelta(60000) },
+    get deltaMinuteSteps() { return this._getSteps(60000) },
+
+    get deltaHours() { return this._getDelta(3600000) },
+    get deltaHourSteps() { return this._getSteps(3600000) },
+
+    get deltaDays() { return this._getDelta(86400000) },
+    get deltaDaySteps() { return this._getSteps(86400000) }, //Unexact due to timezones
+
+    get deltaYears() { return this._getDelta(31536000000) },
+    get deltaYearSteps() {
+        return (this.currentDate.getFullYear() -
+                this.targetDate.getFullYear());
+     },
+
+    _getSteps: function RelativeDate__getSteps(aDivisor) {
+        let current = Math.ceil(this.currentTime / aDivisor);
+        let target = Math.ceil(this.targetTime / aDivisor);
+        return current - target;
+    },
+
+    _getDelta: function RelativeDate__getDelta(aDivisor) {
+        return Math.floor((this.currentTime - this.targetTime) / aDivisor);
+    }
+
+}
+
+
+function getPluralForm(number, forms) {
+    /*
+    let pluralRule = Services.strings.createBundle('chrome://brief/locale/brief.properties')
+                                 .GetStringFromName('pluralRule');
+    let getPluralForm = PluralForm.makeGetter(pluralRule)[0];
+    */
+    let knownForms = browser.i18n.getMessage('pluralRule').split(';');
+    let form;
+    if(Intl.PluralRules !== undefined) {
+        let rules = new Intl.PluralRules();
+        form = rules.select(number);
+    } else {
+        let lang = browser.i18n.getUILanguage().replace(/-.*/, '');
+        form = pluralRulesDb.cardinal[lang](number);
+    }
+    return forms.split(';')[knownForms.indexOf(form)];
+}
