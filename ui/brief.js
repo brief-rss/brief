@@ -411,7 +411,7 @@ let Persistence = {
 
     save: function Persistence_save() {
         this._collect();
-        API.savePersistence(this.data);
+        Prefs.set('pagePersist', JSON.stringify(this.data));
     },
 
     _collect: function Persistence__collect() {
