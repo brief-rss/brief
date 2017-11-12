@@ -595,21 +595,21 @@
         "message": "Unsubscribe Feed"
     },
     "confirmFeedDeletionText": {
-        "message": "Are you sure you want to unsubscribe \\"$1\\"?"
+        "message": "Are you sure you want to unsubscribe \"$1\"?"
     },
     // FIXME: Unused
     "confirmFolderDeletionTitle": {
         "message": "Delete Folder"
     },
     "confirmFolderDeletionText": {
-        "message": "Are you sure you want to delete the folder \\"$1\\" and all the feeds it contains?"
+        "message": "Are you sure you want to delete the folder \"$1\" and all the feeds it contains?"
     },
     // FIXME: Unused
     "confirmTagDeletionTitle": {
         "message": "Delete Tag"
     },
     "confirmTagDeletionText": {
-        "message": "Are you sure you want to delete the tag \\"$1\\"?"
+        "message": "Are you sure you want to delete the tag \"$1\"?"
     },
 
   // Messages from options.properties
@@ -623,7 +623,7 @@
         "message": "Keep bookmarked items"
     },
     "feedSettingsDialogTitle": {
-        "message": "Settings for \\"$1\\""
+        "message": "Settings for \"$1\""
     },
     "selectFile": {
         "message": "Select an OPML file to import"

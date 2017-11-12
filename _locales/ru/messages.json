@@ -568,19 +568,19 @@
         "message": "Удалить ленту"
     },
     "confirmFeedDeletionText": {
-        "message": "Вы уверены, что хотите удалить \\"$1\\"?"
+        "message": "Вы уверены, что хотите удалить \"$1\"?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Удалить папку"
     },
     "confirmFolderDeletionText": {
-        "message": "Вы уверены, что хотите удалить папку \\"$1\\" и все находящиеся в ней ленты?"
+        "message": "Вы уверены, что хотите удалить папку \"$1\" и все находящиеся в ней ленты?"
     },
     "confirmTagDeletionTitle": {
         "message": "Удалить метку"
     },
     "confirmTagDeletionText": {
-        "message": "Вы уверены, что хотите удалить метку \\"$1\\"?"
+        "message": "Вы уверены, что хотите удалить метку \"$1\"?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "Оставить отмеченные записи"
     },
     "feedSettingsDialogTitle": {
-        "message": "Настройки ленты \\"$1\\""
+        "message": "Настройки ленты \"$1\""
     },
     "selectFile": {
         "message": "Выберите OPML-файл для импорта"

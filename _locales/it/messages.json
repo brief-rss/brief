@@ -568,19 +568,19 @@
         "message": "Eliminazione feed"
     },
     "confirmFeedDeletionText": {
-        "message": "Eliminare \\"$1\\"?"
+        "message": "Eliminare \"$1\"?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Eliminazione cartella"
     },
     "confirmFolderDeletionText": {
-        "message": "Eliminare la cartella \\"$1\\" e tutti i feed in essa contenuti?"
+        "message": "Eliminare la cartella \"$1\" e tutti i feed in essa contenuti?"
     },
     "confirmTagDeletionTitle": {
         "message": "Eliminazione etichetta"
     },
     "confirmTagDeletionText": {
-        "message": "Eliminare l'etichetta \\"$1\\"?"
+        "message": "Eliminare l'etichetta \"$1\"?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "Mantieni gli elementi associati ai segnalibri"
     },
     "feedSettingsDialogTitle": {
-        "message": "Impostazioni per \\"$1\\""
+        "message": "Impostazioni per \"$1\""
     },
     "selectFile": {
         "message": "Selezione del file dei feed da importare"

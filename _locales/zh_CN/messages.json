@@ -594,7 +594,7 @@
         "message": "保留加入书签的项目"
     },
     "feedSettingsDialogTitle": {
-        "message": "\\"$1\\" 设置"
+        "message": "\"$1\" 设置"
     },
     "selectFile": {
         "message": "选择要导入的 OPML 文件"

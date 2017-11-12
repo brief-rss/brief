@@ -568,19 +568,19 @@
         "message": "Se désabonner du flux"
     },
     "confirmFeedDeletionText": {
-        "message": "Souhaitez-vous vraiment vous désabonner de \\"$1\\" ?"
+        "message": "Souhaitez-vous vraiment vous désabonner de \"$1\" ?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Supprimer le dossier"
     },
     "confirmFolderDeletionText": {
-        "message": "Souhaitez-vous vraiment supprimer le dossier \\"$1\\" et tous les flux qu'il contient ?"
+        "message": "Souhaitez-vous vraiment supprimer le dossier \"$1\" et tous les flux qu'il contient ?"
     },
     "confirmTagDeletionTitle": {
         "message": "Effacer l'étiquette"
     },
     "confirmTagDeletionText": {
-        "message": "Souhaitez-vous vraiment supprimer l'étiquette \\"$1\\" ?"
+        "message": "Souhaitez-vous vraiment supprimer l'étiquette \"$1\" ?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "Conserver les articles marqués"
     },
     "feedSettingsDialogTitle": {
-        "message": "Paramètres pour \\"$1\\""
+        "message": "Paramètres pour \"$1\""
     },
     "selectFile": {
         "message": "Choisissez le fichier OPML à importer"

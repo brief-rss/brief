@@ -445,7 +445,7 @@
         "message": "Abonnierte Feeds"
     },
     "searchResults": {
-        "message": "Suchergebnis für \\"$1\\""
+        "message": "Suchergebnis für \"$1\""
     },
     "entryWasUpdated": {
         "message": "(aktualisiert)"
@@ -568,19 +568,19 @@
         "message": "Feed löschen"
     },
     "confirmFeedDeletionText": {
-        "message": "Sind Sie sicher, dass \\"$1\\" gelöscht werden soll?"
+        "message": "Sind Sie sicher, dass \"$1\" gelöscht werden soll?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Ordner löschen"
     },
     "confirmFolderDeletionText": {
-        "message": "Sind Sie sicher, dass der Ordner \\"$1\\" und alle Feeds darin gelöscht werden soll?"
+        "message": "Sind Sie sicher, dass der Ordner \"$1\" und alle Feeds darin gelöscht werden soll?"
     },
     "confirmTagDeletionTitle": {
         "message": "Schlagwort entfernen"
     },
     "confirmTagDeletionText": {
-        "message": "Sind Sie sicher, dass das Schlagwort \\"$1\\" gelöscht werden soll?"
+        "message": "Sind Sie sicher, dass das Schlagwort \"$1\" gelöscht werden soll?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "Als Lesezeichen markierte Beiträge behalten"
     },
     "feedSettingsDialogTitle": {
-        "message": "\\"$1\\" Einstellungen"
+        "message": "\"$1\" Einstellungen"
     },
     "selectFile": {
         "message": "OPML-Datei importieren"

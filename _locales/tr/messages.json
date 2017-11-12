@@ -568,19 +568,19 @@
         "message": "Beslemeyi Sil"
     },
     "confirmFeedDeletionText": {
-        "message": "\\"$1\\" beslemesini silmek istediğinizden emin misiniz?"
+        "message": "\"$1\" beslemesini silmek istediğinizden emin misiniz?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Klasörü Sil"
     },
     "confirmFolderDeletionText": {
-        "message": "\\"$1\\" klasörünü ve tüm içeriğini silmek istediğinizden emin misiniz?"
+        "message": "\"$1\" klasörünü ve tüm içeriğini silmek istediğinizden emin misiniz?"
     },
     "confirmTagDeletionTitle": {
         "message": "Etiketi Sil"
     },
     "confirmTagDeletionText": {
-        "message": "\\"$1\\" etiketini silmek istediğinizden emin misiniz?"
+        "message": "\"$1\" etiketini silmek istediğinizden emin misiniz?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "İşaretlenmiş öğeleri sakla"
     },
     "feedSettingsDialogTitle": {
-        "message": "\\"$1\\" için ayarlar"
+        "message": "\"$1\" için ayarlar"
     },
     "selectFile": {
         "message": "İçe aktarmak için bir OPML dosyası seçin"

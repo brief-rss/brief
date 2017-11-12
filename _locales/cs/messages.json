@@ -568,19 +568,19 @@
         "message": "Smazat kanál"
     },
     "confirmFeedDeletionText": {
-        "message": "Jste si jistí, že chcete smazat \\"$1\\"?"
+        "message": "Jste si jistí, že chcete smazat \"$1\"?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Smazat složku"
     },
     "confirmFolderDeletionText": {
-        "message": "Jste si jistí, že chcete smazat \\"$1\\" a všechny kanály, které obsahuje?"
+        "message": "Jste si jistí, že chcete smazat \"$1\" a všechny kanály, které obsahuje?"
     },
     "confirmTagDeletionTitle": {
         "message": "Smazat štítek"
     },
     "confirmTagDeletionText": {
-        "message": "Jste si jistí, že chcete smazat štítek \\"$1\\"?"
+        "message": "Jste si jistí, že chcete smazat štítek \"$1\"?"
     },
 
   // Messages from options.properties

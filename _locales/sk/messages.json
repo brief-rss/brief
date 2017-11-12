@@ -568,19 +568,19 @@
         "message": "Zmazať kanál"
     },
     "confirmFeedDeletionText": {
-        "message": "Ste si istý, že chcete zmazať \\"$1\\"?"
+        "message": "Ste si istý, že chcete zmazať \"$1\"?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Zmazať priečinok"
     },
     "confirmFolderDeletionText": {
-        "message": "Ste si istý, že chcete zmazať priečinok \\"$1\\" a všetky kanály, ktoré obsahuje?"
+        "message": "Ste si istý, že chcete zmazať priečinok \"$1\" a všetky kanály, ktoré obsahuje?"
     },
     "confirmTagDeletionTitle": {
         "message": "Zmazať označenie"
     },
     "confirmTagDeletionText": {
-        "message": "Ste si istý, že chcete zmazať označenie \\"$1\\"?"
+        "message": "Ste si istý, že chcete zmazať označenie \"$1\"?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "Ponechať články v záložkách"
     },
     "feedSettingsDialogTitle": {
-        "message": "Nastavenia pre \\"$1\\""
+        "message": "Nastavenia pre \"$1\""
     },
     "selectFile": {
         "message": "Vybrať súbor OPML na exportovanie"

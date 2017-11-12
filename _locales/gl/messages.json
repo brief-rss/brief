@@ -568,19 +568,19 @@
         "message": "Borrar a fonte"
     },
     "confirmFeedDeletionText": {
-        "message": "Está certo de borrar \\"$1\\"?"
+        "message": "Está certo de borrar \"$1\"?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Borrar o cartafol"
     },
     "confirmFolderDeletionText": {
-        "message": "Está certo de borrar o cartafol \\"$1\\" e todas as fontes que contén?"
+        "message": "Está certo de borrar o cartafol \"$1\" e todas as fontes que contén?"
     },
     "confirmTagDeletionTitle": {
         "message": "Borrar a etiqueta"
     },
     "confirmTagDeletionText": {
-        "message": "Está certo de borrar a etiqueta \\"$1\\"?"
+        "message": "Está certo de borrar a etiqueta \"$1\"?"
     },
 
   // Messages from options.properties

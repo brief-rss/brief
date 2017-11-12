@@ -568,19 +568,19 @@
         "message": "Slet feed"
     },
     "confirmFeedDeletionText": {
-        "message": "Er du sikker på, at du vil slette \\"$1\\"?"
+        "message": "Er du sikker på, at du vil slette \"$1\"?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Slet mappe"
     },
     "confirmFolderDeletionText": {
-        "message": "Er du sikker på, at du vil slette mappen \\"$1\\" og alle feeds deri?"
+        "message": "Er du sikker på, at du vil slette mappen \"$1\" og alle feeds deri?"
     },
     "confirmTagDeletionTitle": {
         "message": "Slet markering"
     },
     "confirmTagDeletionText": {
-        "message": "Er du sikker på, at du vil slette markeringen \\"$1\\"?"
+        "message": "Er du sikker på, at du vil slette markeringen \"$1\"?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "Behold bogmærkede emner"
     },
     "feedSettingsDialogTitle": {
-        "message": "Indstillinger til \\"$1\\""
+        "message": "Indstillinger til \"$1\""
     },
     "selectFile": {
         "message": "Vælg en OPML-fil der skal importeres"

@@ -568,19 +568,19 @@
         "message": "Șterge flux"
     },
     "confirmFeedDeletionText": {
-        "message": "Sunteți sigur de a șterge fluxul \\"$1\\"?"
+        "message": "Sunteți sigur de a șterge fluxul \"$1\"?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Șterge directoriu"
     },
     "confirmFolderDeletionText": {
-        "message": "Sunteți sigur că doriți să ștergeți directoriul \\"$1\\" și toate fluxurile pe care le conține?"
+        "message": "Sunteți sigur că doriți să ștergeți directoriul \"$1\" și toate fluxurile pe care le conține?"
     },
     "confirmTagDeletionTitle": {
         "message": "Șterge marcaj"
     },
     "confirmTagDeletionText": {
-        "message": "Sunteți sigur că doriți să ștergeți marcajul \\"$1\\"?"
+        "message": "Sunteți sigur că doriți să ștergeți marcajul \"$1\"?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "Păstrează elementele marcate"
     },
     "feedSettingsDialogTitle": {
-        "message": "Opțiuni pentru \\"$1\\""
+        "message": "Opțiuni pentru \"$1\""
     },
     "selectFile": {
         "message": "Selectați un fișier OPML pentru importare"

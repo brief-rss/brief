@@ -568,19 +568,19 @@
         "message": "Izbriši vir"
     },
     "confirmFeedDeletionText": {
-        "message": "Ali res želite izbrisati \\"$1\\"?"
+        "message": "Ali res želite izbrisati \"$1\"?"
     },
     "confirmFolderDeletionTitle": {
         "message": "Izbriši mapo"
     },
     "confirmFolderDeletionText": {
-        "message": "Ali res želite izbrisati mapo \\"$1\\" in vse vsebujoče vire?"
+        "message": "Ali res želite izbrisati mapo \"$1\" in vse vsebujoče vire?"
     },
     "confirmTagDeletionTitle": {
         "message": "Izbriši oznako"
     },
     "confirmTagDeletionText": {
-        "message": "Ali res želite izbrisati oznako \\"$1\\"?"
+        "message": "Ali res želite izbrisati oznako \"$1\"?"
     },
 
   // Messages from options.properties
@@ -594,7 +594,7 @@
         "message": "Ohrani predmete dodane med zaznamke"
     },
     "feedSettingsDialogTitle": {
-        "message": "Nastavitve za \\"$1\\""
+        "message": "Nastavitve za \"$1\""
     },
     "selectFile": {
         "message": "Izberite datoteko OPML za uvoz"
