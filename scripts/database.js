@@ -359,10 +359,21 @@ Query.prototype = {
     },
 
     async getEntries() {
-        return await this._getMap(e => e);
+        return await this._getMap((e, tx) => {
+            for(let r of e.revisions) {
+                let query = tx.objectStore('revisions').get(r.id);
+                query.onsuccess = ({target}) => {
+                    Object.assign(r, target.result);
+                };
+            }
+            return e;
+        }, ['entries', 'revisions']);
     },
 
-    async _getMap(extractor) {
+    async _getMap(extractor, stores) {
+        if(stores === undefined) {
+            stores = ['entries'];
+        }
         let filters = this._filters();
         let {indexName, filterFunction, ranges} = this._searchEngine(filters);
         let offset = filters.sort.offset || 0;
@@ -370,19 +381,19 @@ Query.prototype = {
 
         let answer = [];
         let totalCallbacks = 0;
-        let tx = Database.db().transaction(['entries'], 'readonly');
+        let tx = Database.db().transaction(stores, 'readonly');
         let index = tx.objectStore('entries').index(indexName);
 
         let cursors = ranges.map(r => index.openCursor(r));
         let result = this._mergeAndCollect(
-            {cursors, filterFunction, sortKey: (e => -e.date), offset, limit, extractor});
+            {cursors, filterFunction, sortKey: (e => -e.date), offset, limit, extractor, tx});
 
         await Database._transactionPromise(tx);
 
         return result;
     },
 
-    /*async*/ _mergeAndCollect({cursors, filterFunction, sortKey, offset, limit, extractor}) {
+    /*async*/ _mergeAndCollect({cursors, filterFunction, sortKey, offset, limit, extractor, tx}) {
         let totalCallbacks = 0;
         extractor = extractor || (v => v);
         let queue = Array(cursors.length);
@@ -412,7 +423,7 @@ Query.prototype = {
                                 offset -= 1;
                             } else {
                                 limit -= 1;
-                                result.push(extractor(value));
+                                result.push(extractor(value, tx));
                             }
                         }
                         pending += 1;

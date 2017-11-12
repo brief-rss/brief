@@ -918,6 +918,7 @@ const RTL_LANGUAGE_CODES = ['ar', 'arc', 'dv', 'fa', 'ha', 'he', 'khw',
 
 function EntryView(aFeedView, aEntryData) {
     this.feedView = aFeedView;
+    this.revision = aEntryData.revisions[aEntryData.revisions.length - 1];
 
     this.id = aEntryData.id;
     this.date = new Date(aEntryData.date);
@@ -959,11 +960,11 @@ function EntryView(aFeedView, aEntryData) {
         titleElem.setAttribute('href', aEntryData.entryURL);
 
     // Use innerHTML instead of textContent to resolve entities.
-    titleElem.innerHTML = aEntryData.title || aEntryData.entryURL;
+    titleElem.innerHTML = this.revision.title || aEntryData.entryURL;
     titleElem.setAttribute('dir', this.textDirection);
 
     this._getElement('feed-name').innerHTML = feed.title;
-    this._getElement('authors').innerHTML = aEntryData.authors;
+    this._getElement('authors').innerHTML = this.revision.authors;
 
     let lang = navigator.language;
     this._getElement('date').textContent = this.getDateString();
@@ -973,7 +974,7 @@ function EntryView(aFeedView, aEntryData) {
         this.container.classList.add('updated');
         this._getElement('updated-label').textContent = Strings.entryWasUpdated;
 
-        let dateString = new Date(aEntryData.updated).toLocaleString(lang);
+        let dateString = new Date(this.revision.updated).toLocaleString(lang);
         this._getElement('updated-label').setAttribute('title', dateString);
     }
 
@@ -984,8 +985,8 @@ function EntryView(aFeedView, aEntryData) {
             this._getElement('headline-link').setAttribute('href', aEntryData.entryURL);
 
         let headlineTitle = this._getElement('headline-title');
-        headlineTitle.innerHTML = aEntryData.title || aEntryData.entryURL;
-        headlineTitle.setAttribute('title', aEntryData.title);
+        headlineTitle.innerHTML = this.revision.title || aEntryData.entryURL;
+        headlineTitle.setAttribute('title', this.revision.title);
         headlineTitle.setAttribute('dir', this.textDirection);
 
         this._getElement('headline-feed-name').textContent = feed.title;
@@ -995,7 +996,7 @@ function EntryView(aFeedView, aEntryData) {
         this._getElement('feed-icon').src = favicon;
 
         wait().then(() => {
-            this._getElement('content').innerHTML = aEntryData.content;
+            this._getElement('content').innerHTML = this.revision.content;
 
             if (this.feedView.query.searchString)
                 this._highlightSearchTerms(this._getElement('headline-title'));
@@ -1003,7 +1004,7 @@ function EntryView(aFeedView, aEntryData) {
     }
     else {
         let contentElement = this._getElement('content');
-        contentElement.innerHTML = aEntryData.content;
+        contentElement.innerHTML = this.revision.content;
         contentElement.setAttribute('dir', this.textDirection);
 
         if (this.feedView.query.searchString) {
