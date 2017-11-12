@@ -1,7 +1,0 @@
-<!ENTITY pageTitle "Brief 简介">
-<!ENTITY thankYou.header "感谢安装 Brief">
-<!ENTITY howToSubscribe.header "通过订阅方便的关注你喜欢的网站!">
-<!ENTITY subscribingStep1.description "当访问一个你想关注的网站时, 打开<strong>书签</strong>菜单, 点击<strong>订阅此页</strong>.">
-<!ENTITY subscribingStep2.description "你还可以在网站上找到订阅的链接, 点击它们.">
-<!ENTITY subscribingStep3.description "选择 <strong>Brief</strong>, 点击<strong>立即订阅</strong>即可.">
-<!ENTITY getStartedButton.label "开始">

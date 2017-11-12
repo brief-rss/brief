@@ -1,7 +1,0 @@
-<!ENTITY pageTitle "Brief">
-<!ENTITY thankYou.header "Danke für die Installation von Brief">
-<!ENTITY howToSubscribe.header "RSS-Feeds sind der einfachste Weg, Ihre Lieblings-Websites zu verfolgen!">
-<!ENTITY subscribingStep1.description "Öffnen Sie das Menü <strong>Lesezeichen</strong> und wählen Sie den Eintrag <strong>Diese Seite abonnieren…</strong> aus.">
-<!ENTITY subscribingStep2.description "Wählen Sie <strong>Dynamische Lesezeichen</strong> aus und klicken Sie die Schaltfläche <strong>Jetzt abonnieren</strong> an.">
-<!ENTITY subscribingStep3.description "Wählen Sie den Ordner <strong>Abonnierte Feeds</strong> im Lesezeichen-Menü aus.">
-<!ENTITY getStartedButton.label "Erste Schritte">

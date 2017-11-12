@@ -1,7 +1,0 @@
-<!ENTITY pageTitle "Uvod v Brief">
-<!ENTITY thankYou.header "Hvala, da ste namestili Brief">
-<!ENTITY howToSubscribe.header "Viri so najenostavnejši način, kako slediti svojim priljubljenim spletnim stranem!">
-<!ENTITY subscribingStep1.description "Ko ste na spletni strani, ki ji želite slediti, odprite meni <strong>Zaznamki</strong> in kliknite <strong>Naroči se na to stran</strong>.">
-<!ENTITY subscribingStep2.description "Ali pa lahko najdete povezavo na vir na sami spletni strani.">
-<!ENTITY subscribingStep3.description "Izberite <strong>Brief</strong> in kliknite <strong>Naroči se</strong>. Končali ste!">
-<!ENTITY getStartedButton.label "Začnite">

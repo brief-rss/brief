@@ -1,7 +1,0 @@
-<!ENTITY pageTitle "Ознайомлення з Brief">
-<!ENTITY thankYou.header "Дякуємо за встановлення Brief">
-<!ENTITY howToSubscribe.header "Стрічки новин - це найпростіший спосіб слідувати за вашими улюбленими веб-сайтами!">
-<!ENTITY subscribingStep1.description "Коли ви перебуваєте на веб-сайті, який ви хочете відслідковувати, відкрийте меню <strong>Закладки</strong> і виберіть <strong>Підписатися на цю сторінку</strong>.">
-<!ENTITY subscribingStep2.description "Або ви можете знайти посилання на стрічку новин на самому сайті.">
-<!ENTITY subscribingStep3.description "Виберіть <strong>Brief</strong> та клацніть <strong>Підписатися зараз</strong>. Ось і все!.">
-<!ENTITY getStartedButton.label "Початок роботи">
