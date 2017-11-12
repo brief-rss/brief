@@ -932,7 +932,7 @@ function EntryView(aFeedView, aEntryData) {
 
     this.read = aEntryData.read;
     this.starred = aEntryData.starred;
-    this.tags = aEntryData.tags ? aEntryData.tags.split(', ') : [];
+    this.tags = aEntryData.tags;
 
     let deleteButton = this._getElement('delete-button');
     let restoreButton = this._getElement('restore-button');
