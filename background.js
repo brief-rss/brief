@@ -38,13 +38,11 @@ const Brief = {
         await Prefs.init({master: true});
 
         Prefs.addObserver('showUnreadCounter', () => this._updateUI());
-        this._statusPort = browser.runtime.connect({name: 'watch-status'});
-        this._statusPort.onMessage.addListener(msg => this._updateUI(msg));
-
-        this._stylePort = browser.runtime.connect({name: 'watch-custom-css'});
-        this._stylePort.onMessage.addListener(msg => browser.storage.local.set({custom_css: msg}));
+        //FIXME: update UI on db changes
 
         await Database.init();
+
+        this._updateUI();
     },
 
     onContext: function({menuItemId, checked}) {
@@ -64,15 +62,13 @@ const Brief = {
         }
     },
 
-    _updateUI: async function(msg) {
-        if(msg !== undefined)
-            this._status = msg;
-        let {count, tooltip} = this._status;
+    _updateUI: async function() {
 
         let enabled = Prefs.get('showUnreadCounter');
         browser.contextMenus.update('brief-button-show-unread', {checked: enabled});
         if(enabled) {
-            let text = "";
+            let count = await Database.query({read: 0}).count();
+            let text = "test";
             if(count > 0) {
                 text = count.toString();
                 // We crop the badge manually to leave the least-significant digits
@@ -83,7 +79,8 @@ const Brief = {
         } else {
             browser.browserAction.setBadgeText({text: ""});
         }
-        browser.browserAction.setTitle({title: tooltip});
+        //FIXME: return tooltip
+        //browser.browserAction.setTitle({title: tooltip});
     },
 };
 
