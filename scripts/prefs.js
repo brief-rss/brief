@@ -41,8 +41,7 @@ let Prefs = {
     },
 
     _merge: function(prefs) {
-        for(let k in prefs) {
-            let v = prefs[k];
+        for(let [k, v] in Object.entries(prefs)) {
             if(this._values[k] !== undefined && this._values[k] === v)
                 continue;
             this._values[k] = v;
