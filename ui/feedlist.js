@@ -248,7 +248,7 @@ let ViewList = {
         let query = this.getQueryForView(aItemID);
         query.read = false;
 
-        let unreadCount = await API.query.getEntryCount(query);
+        let unreadCount = await Database.query(query).count();
 
         this.tree.updateElement(aItemID, {unreadCount});
     }
@@ -354,7 +354,7 @@ let TagList = {
             tags: [aTagName],
             read: false
         };
-        let unreadCount = await API.query.getEntryCount(query);
+        let unreadCount = await Database.query(query).count();
         this.tree.updateElement(aTagName, {unreadCount});
     }
 
