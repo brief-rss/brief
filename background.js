@@ -67,7 +67,7 @@ const Brief = {
         let enabled = Prefs.get('showUnreadCounter');
         browser.contextMenus.update('brief-button-show-unread', {checked: enabled});
         if(enabled) {
-            let count = await Database.query({read: 0}).count();
+            let count = await Database.query({deleted: 0, read: 0}).count();
             let text = "test";
             if(count > 0) {
                 text = count.toString();
