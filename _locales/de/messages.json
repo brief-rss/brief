@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Liste der Tastaturkürzel anzeigen"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Ein einfach zu bedienender Feed-Betrachter"
+    },
+    "defaultFeedsFolderName": {
+        "message": "Abonnierte Feeds"
+    },
+    "searchResults": {
+        "message": "Suchergebnis für \\"$1\\""
+    },
+    "entryWasUpdated": {
+        "message": "(aktualisiert)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Beitrag als ungelesen markieren"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Beitrag als gelesen markieren"
+    },
+    "deleteEntryTooltip": {
+        "message": "Beitrag in den Papierkorb verschieben"
+    },
+    "restoreEntryTooltip": {
+        "message": "Beitrag aus dem Papierkorb wiederherstellen"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Lesezeicheneintrag"
+    },
+    "editBookmarkTooltip": {
+        "message": "Lesezeichen bearbeiten"
+    },
+    "noFeeds": {
+        "message": "Sie haben noch keine Feeds abonniert."
+    },
+    "noFeedsAdvice": {
+        "message": "So wird das gemacht!"
+    },
+    "noUnreadEntries": {
+        "message": "Keine ungelesenen Beiträge vorhanden"
+    },
+    "noStarredEntries": {
+        "message": "Keine als Lesezeichen markierten Beiträge vorhanden"
+    },
+    "trashIsEmpty": {
+        "message": "Der Papierkorb ist leer"
+    },
+    "noEntriesFound": {
+        "message": "Keine Beiträge gefunden"
+    },
+    "noEntries": {
+        "message": "Keine Beiträge"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "Minute;Minuten"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "Stunde;Stunden"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "Tag;Tage"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "vor #number $1"
+    },
+    "entryDate_justNow": {
+        "message": "Gerade eben"
+    },
+    "entryDate_today": {
+        "message": "Heute"
+    },
+    "entryDate_yesterday": {
+        "message": "Gestern"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Feeds wurden gerade aktualisiert."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Feeds wurden zuletzt vor #number $1 aktualisiert"
+    },
+    "lastUpdated_today": {
+        "message": "Feeds wurden zuletzt heute um $1 aktualisiert"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Feeds wurden zuletzt gestern um $1 aktualisiert"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Feeds wurden zuletzt am $1 aktualisiert"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Keine ungelesenen Feeds"
+    },
+    "updateAlertTitle": {
+        "message": "Feeds aktualisiert"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 in #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "neuer;neue"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "Beitrag;Beiträge"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "Feed;Feeds"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Feed löschen"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Sind Sie sicher, dass \\"$1\\" gelöscht werden soll?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Ordner löschen"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Sind Sie sicher, dass der Ordner \\"$1\\" und alle Feeds darin gelöscht werden soll?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Schlagwort entfernen"
+    },
+    "confirmTagDeletionText": {
+        "message": "Sind Sie sicher, dass das Schlagwort \\"$1\\" gelöscht werden soll?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Beiträge entfernen"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Sind Sie sicher, dass Sie alle Beiträge entfernen möchten?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Als Lesezeichen markierte Beiträge behalten"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "\\"$1\\" Einstellungen"
+    },
+    "selectFile": {
+        "message": "OPML-Datei importieren"
+    },
+    "saveAs": {
+        "message": "Speichern unter…"
+    },
+    "allFiles": {
+        "message": "Alle Dateien"
+    },
+    "OPMLFiles": {
+        "message": "OPML-Dateien"
+    },
+    "XMLFiles": {
+        "message": "XML-Dateien"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Fehler beim Importieren der Feeds"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief konnte die Feeds nicht importieren, da ein ungültiges Dateiformat vorliegt. Die XML-Datei entspricht nicht dem Standard."
     }
 }

@@ -1,7 +1,7 @@
 {
   // Messages from amo.dtd
     "addonSummary": {
-        "message": "Brief makes reading RSS feeds as easy and intuitive as it gets. Designed to have exactly the right set of features, it is powerful and simple at the same time. Feeds are presented on a seamless, interactive page which let&apos;s you bookmark and tag items with a single click. "
+        "message": "Brief makes reading RSS feeds as easy and intuitive as it gets. Designed to have exactly the right set of features, it is powerful and simple at the same time. Feeds are presented on a seamless, interactive page which let&apos;s you bookmark and tag items with a single click."
     },
     "addonDescription": {
         "message": "Easily bookmark and tag interesting items. Browse your feeds in a couple of useful ways - view only unread or bookmarked entries, display a single feed or a whole folder, show full items or only headlines. Quickly find a piece of news using the search bar. Let yourself be notified when new items are available and track their number using the status bar. Customize the look of feeds. Use keyboard shortcuts to faster navigate through the pile of news. Above all, do everything simply and intuitively."
@@ -437,5 +437,213 @@
     },
     "displayShortcuts": {
         "message": "Display the list of keyboard shortcuts"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+
+    "extensions_brief@mozdev_org_description": {
+        "message": "A feed reading extension."
+    },
+
+    "defaultFeedsFolderName": {
+        "message": "Subscribed Feeds"
+    },
+    "searchResults": {
+        "message": "Search results for: $1"
+    },
+
+    "entryWasUpdated": {
+        "message": "(updated)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Mark item as unread"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Mark item as read"
+    },
+    "deleteEntryTooltip": {
+        "message": "Move item to Trash"
+    },
+    "restoreEntryTooltip": {
+        "message": "Restore item from Trash"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Bookmark item"
+    },
+    "editBookmarkTooltip": {
+        "message": "Edit bookmark"
+    },
+
+    "noFeeds": {
+        "message": "You haven't added any feeds yet."
+    },
+    "noFeedsAdvice": {
+        "message": "See how to do it!"
+    },
+    "noUnreadEntries": {
+        "message": "No unread items"
+    },
+    "noStarredEntries": {
+        "message": "No bookmarked items"
+    },
+    "trashIsEmpty": {
+        "message": "Trash is empty"
+    },
+    "noEntriesFound": {
+        "message": "No items found"
+    },
+    "noEntries": {
+        "message": "No items"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minute;minutes"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "hour;hours"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "day;days"
+    },
+
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 ago"
+    },
+
+    "entryDate_justNow": {
+        "message": "Just now"
+    },
+    "entryDate_today": {
+        "message": "Today"
+    },
+    "entryDate_yesterday": {
+        "message": "Yesterday"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Feeds have just been updated."
+    },
+
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Feeds were last updated #number $1 ago"
+    },
+
+    "lastUpdated_today": {
+        "message": "Feeds were last updated today at $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Feeds were last updated yesterday at $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Feeds were last updated $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "No unread feeds."
+    },
+    "updateAlertTitle": {
+        "message": "Feeds updated"
+    },
+
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 in #numFeeds $3"
+    },
+
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "new;new"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "item;items"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "feed;feeds"
+    },
+
+    // FIXME: Unused
+    "confirmFeedDeletionTitle": {
+        "message": "Unsubscribe Feed"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Are you sure you want to unsubscribe \\"$1\\"?"
+    },
+    // FIXME: Unused
+    "confirmFolderDeletionTitle": {
+        "message": "Delete Folder"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Are you sure you want to delete the folder \\"$1\\" and all the feeds it contains?"
+    },
+    // FIXME: Unused
+    "confirmTagDeletionTitle": {
+        "message": "Delete Tag"
+    },
+    "confirmTagDeletionText": {
+        "message": "Are you sure you want to delete the tag \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Clear items"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Are you sure you want to clear all items?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Keep bookmarked items"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Settings for \\"$1\\""
+    },
+    "selectFile": {
+        "message": "Select an OPML file to import"
+    },
+    "saveAs": {
+        "message": "Save as..."
+    },
+    "allFiles": {
+        "message": "All Files"
+    },
+    "OPMLFiles": {
+        "message": "OPML Files"
+    },
+    "XMLFiles": {
+        "message": "XML Files"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Failed to import feeds"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief cannot import feeds because of an invalid file format. The XML file isn't well-formed."
     }
 }

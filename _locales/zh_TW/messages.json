@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "顯示鍵盤快速鍵列表"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "用來閱讀消息來源的擴充套件。"
+    },
+    "defaultFeedsFolderName": {
+        "message": "訂閱消息來源"
+    },
+    "searchResults": {
+        "message": "搜尋 $1 的結果："
+    },
+    "entryWasUpdated": {
+        "message": "(已更新)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "將此項目標記為未讀"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "將此項目標記為已讀"
+    },
+    "deleteEntryTooltip": {
+        "message": "將此項目移到垃圾筒"
+    },
+    "restoreEntryTooltip": {
+        "message": "將此項目從垃圾筒移回原位"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "將此項目加上星號"
+    },
+    "editBookmarkTooltip": {
+        "message": "編輯有星號的項目"
+    },
+    "noFeeds": {
+        "message": "你還沒加入任何消息來源。"
+    },
+    "noFeedsAdvice": {
+        "message": "來看看該怎麼做吧！"
+    },
+    "noUnreadEntries": {
+        "message": "沒有未讀的項目"
+    },
+    "noStarredEntries": {
+        "message": "沒有加上星號的項目"
+    },
+    "trashIsEmpty": {
+        "message": "垃圾筒是空的"
+    },
+    "noEntriesFound": {
+        "message": "沒有找到任何項目"
+    },
+    "noEntries": {
+        "message": "沒有任何項目"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "分鐘"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "小時"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "天"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 前"
+    },
+    "entryDate_justNow": {
+        "message": "剛才"
+    },
+    "entryDate_today": {
+        "message": "今天"
+    },
+    "entryDate_yesterday": {
+        "message": "昨天"
+    },
+    "lastUpdated_rightNow": {
+        "message": "消息來源在剛才更新過。"
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "消息來源在 #number $1 前更新過"
+    },
+    "lastUpdated_today": {
+        "message": "消息來源在今天 $1 更新過"
+    },
+    "lastUpdated_yesterday": {
+        "message": "消息來源在昨天 $1 更新過"
+    },
+    "lastUpdated_fullDate": {
+        "message": "消息來源在今天 $1 更新過"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "沒有未讀的消息來源。"
+    },
+    "updateAlertTitle": {
+        "message": "已更新消息來源。"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numFeeds 個$3共 #numItems 個$1$2"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "「$1」\n\n#numItems 個$2$3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "新"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "項目"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "消息來源"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "取消訂閱消息來源"
+    },
+    "confirmFeedDeletionText": {
+        "message": "確定要取消訂閱「$1」？"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "刪除資料夾"
+    },
+    "confirmFolderDeletionText": {
+        "message": "確定要刪除「$1」資料夾，並刪除裏面所有消息來源和資料？"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "刪除標籤"
+    },
+    "confirmTagDeletionText": {
+        "message": "確定要刪除「$1」標籤？"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "清除項目"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "確定要清除所有項目嗎？"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "保留標星號項目"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "設定「$1」"
+    },
+    "selectFile": {
+        "message": "選取要匯入的 OPML 檔案"
+    },
+    "saveAs": {
+        "message": "另存為..."
+    },
+    "allFiles": {
+        "message": "所有檔案"
+    },
+    "OPMLFiles": {
+        "message": "OPML 檔案"
+    },
+    "XMLFiles": {
+        "message": "XML 檔案"
+    },
+    "invalidFileAlertTitle": {
+        "message": "消息來源匯入失敗"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief 無法匯入消息來源：檔案格式不合規定，該 XML 檔內容的格式有誤。"
     }
 }

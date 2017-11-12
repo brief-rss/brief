@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Afficher la liste des raccourcis clavier"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Une extension de lecture de flux."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Flux"
+    },
+    "searchResults": {
+        "message": "Résultats de recherche pour : $1"
+    },
+    "entryWasUpdated": {
+        "message": "(mis à jour)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Marquer l'article comme non lu"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Marquer l'article comme lu"
+    },
+    "deleteEntryTooltip": {
+        "message": "Déplacer l'article vers la corbeille"
+    },
+    "restoreEntryTooltip": {
+        "message": "Restaurer l'article depuis la corbeille"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Marquer l'article"
+    },
+    "editBookmarkTooltip": {
+        "message": "Modifier le marque-page"
+    },
+    "noFeeds": {
+        "message": "Vous n'avez pas encore ajouté de flux."
+    },
+    "noFeedsAdvice": {
+        "message": "Découvrir comment le faire !"
+    },
+    "noUnreadEntries": {
+        "message": "Tous les articles ont été lus"
+    },
+    "noStarredEntries": {
+        "message": "Vous n'avez marqué aucun article"
+    },
+    "trashIsEmpty": {
+        "message": "La corbeille est vide"
+    },
+    "noEntriesFound": {
+        "message": "Aucun article trouvé"
+    },
+    "noEntries": {
+        "message": "Aucun article"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minute;minutes"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "heure;heures"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "jour;jours"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "il y a #number $1"
+    },
+    "entryDate_justNow": {
+        "message": "À l'instant"
+    },
+    "entryDate_today": {
+        "message": "Aujourd'hui"
+    },
+    "entryDate_yesterday": {
+        "message": "Hier"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Les flux viennent d'être mis à jour."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Les flux ont été mis à jour il y a #number $1"
+    },
+    "lastUpdated_today": {
+        "message": "Les flux ont été mis à jour aujourd'hui à $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Les flux ont été mis à jour hier à $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Les flux ont été mis à jour le $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Aucun flux non lu."
+    },
+    "updateAlertTitle": {
+        "message": "Flux mis à jour"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 dans #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "nouvel;nouveaux"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "article;articles"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "flux;flux"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Se désabonner du flux"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Souhaitez-vous vraiment vous désabonner de \\"$1\\" ?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Supprimer le dossier"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Souhaitez-vous vraiment supprimer le dossier \\"$1\\" et tous les flux qu'il contient ?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Effacer l'étiquette"
+    },
+    "confirmTagDeletionText": {
+        "message": "Souhaitez-vous vraiment supprimer l'étiquette \\"$1\\" ?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Supprimer tous les articles"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Souhaitez-vous vraiment supprimer tous les articles ?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Conserver les articles marqués"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Paramètres pour \\"$1\\""
+    },
+    "selectFile": {
+        "message": "Choisissez le fichier OPML à importer"
+    },
+    "saveAs": {
+        "message": "Enregistrer sous…"
+    },
+    "allFiles": {
+        "message": "Tous les fichiers"
+    },
+    "OPMLFiles": {
+        "message": "Fichiers OPML"
+    },
+    "XMLFiles": {
+        "message": "Fichiers XML"
+    },
+    "invalidFileAlertTitle": {
+        "message": "L'import des flux a échoué"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief n'a pas pu importer les flux en raison d'un format de fichier invalide. Le fichier XML n'est pas correctement formé."
     }
 }

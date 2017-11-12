@@ -1,7 +1,7 @@
 {
   // Messages from amo.dtd
     "addonSummary": {
-        "message": "Brief umožňuje čítanie RSS kanálov ľahšie a intuitívnejšie ako to je. Je navrhnutý presne s tými správnymi vlastnosťami, je silný a zároveň jednoduchý. Kanály sú zobrazené na jednoduchých, interaktívnych stránkach, ktoré vám umožňujú pridávať ich do záložiek jednoduchým kliknutím. "
+        "message": "Brief umožňuje čítanie RSS kanálov ľahšie a intuitívnejšie ako to je. Je navrhnutý presne s tými správnymi vlastnosťami, je silný a zároveň jednoduchý. Kanály sú zobrazené na jednoduchých, interaktívnych stránkach, ktoré vám umožňujú pridávať ich do záložiek jednoduchým kliknutím."
     },
     "addonDescription": {
         "message": "Jednoduché pridávanie zaujímavých článkov do záložiek. Vyhľadávajte svoje kanály pomocou niekoľkých jednoduchých ciest - zobrazte len neprečítané články, alebo články pridané do záložiek, zobrazte jeden kanál alebo celý priečinok, zobrazte celé články alebo len titulky. Rýchle vyhľadanie časti správ použitím vyhľadávacieho panela. Upozornenie ak sú dostupné nové články a zobrazte ich počet v stavovom riadku. Prispôsobte si vzhľad kanálov. Použite klávesové skratky pre rýchlajšiu navigáciu v článkoch. Robte všetko jednoducho a intuitívne."
@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Zobraziť zoznam klávesových skratiek"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;few;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Rozšírenie na čítane kanálov."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Odoberané kanály"
+    },
+    "searchResults": {
+        "message": "Výsledky vyhľadávania pre: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(aktualizované)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Označiť ako neprečítané"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Označiť ako prečítané"
+    },
+    "deleteEntryTooltip": {
+        "message": "Presunúť do Koša"
+    },
+    "restoreEntryTooltip": {
+        "message": "Obnoviť z Koša"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Pridať do záložiek"
+    },
+    "editBookmarkTooltip": {
+        "message": "Upraviť záložku"
+    },
+    "noFeeds": {
+        "message": "Zatiaľ ste nepridal žiadny kanál."
+    },
+    "noFeedsAdvice": {
+        "message": "Pozri ako na to!"
+    },
+    "noUnreadEntries": {
+        "message": "Žiadne neprečítané"
+    },
+    "noStarredEntries": {
+        "message": "Žiadne články nepridané do záložiek"
+    },
+    "trashIsEmpty": {
+        "message": "Kôš je prázdny"
+    },
+    "noEntriesFound": {
+        "message": "Položky nenájdené"
+    },
+    "noEntries": {
+        "message": "Žiadne položky"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minúta;minúty;minút"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "hodina;hodiny;hodín"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "deň;dni;dní"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "Pred #number $1"
+    },
+    "entryDate_justNow": {
+        "message": "Práve teraz"
+    },
+    "entryDate_today": {
+        "message": "Dnes"
+    },
+    "entryDate_yesterday": {
+        "message": "Včera"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Kanál bol aktualizovaný."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Kanály boli aktualizované pred #number $1"
+    },
+    "lastUpdated_today": {
+        "message": "Kanály boli aktualizované dnes o $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Kanály boli aktualizované včera o $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Kanály boli naposledy aktualizované $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Žiadne neprečítané kanály."
+    },
+    "updateAlertTitle": {
+        "message": "Kanály aktualizované"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 v #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "nový;nové;nových"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "položka;položky;položiek"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "kanál;kanály;kanálov"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Zmazať kanál"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Ste si istý, že chcete zmazať \\"$1\\"?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Zmazať priečinok"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Ste si istý, že chcete zmazať priečinok \\"$1\\" a všetky kanály, ktoré obsahuje?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Zmazať označenie"
+    },
+    "confirmTagDeletionText": {
+        "message": "Ste si istý, že chcete zmazať označenie \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Vyčistiť položky"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Ste si istý, že chcete vyčistiť všetky položky?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Ponechať články v záložkách"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Nastavenia pre \\"$1\\""
+    },
+    "selectFile": {
+        "message": "Vybrať súbor OPML na exportovanie"
+    },
+    "saveAs": {
+        "message": "Uložiť ako..."
+    },
+    "allFiles": {
+        "message": "Všetky súbory"
+    },
+    "OPMLFiles": {
+        "message": "OPML súbory"
+    },
+    "XMLFiles": {
+        "message": "XML súbory"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Importovanie kanálov zlyhalo"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief nemôže importovať kanály kvôli chybnému formátu súboru. Súbor XML je nesprávne formátovaný."
     }
 }

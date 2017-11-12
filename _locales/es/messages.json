@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Mostrar esta lista de atajos de teclado"
+    },
+
+  // Messages from brief.properties
+    // LOCALIZATION NOTE (pluralRule)
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Una extensión para leer canales web"
+    },
+    "defaultFeedsFolderName": {
+        "message": "Canales web suscritos"
+    },
+    "searchResults": {
+        "message": "Resultados de la búsqueda para: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(modificado)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Marcar la entrada como no leída"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Marcar la entrada como leída"
+    },
+    "deleteEntryTooltip": {
+        "message": "Mover la entrada a la papelera"
+    },
+    "restoreEntryTooltip": {
+        "message": "Restaurar la entrada"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Añadir la entrada a marcadores"
+    },
+    "editBookmarkTooltip": {
+        "message": "Editar este marcador"
+    },
+    "noFeeds": {
+        "message": "Aún no cuenta con suscripciones a canales web"
+    },
+    "noFeedsAdvice": {
+        "message": "Ver cómo comenzar"
+    },
+    "noUnreadEntries": {
+        "message": "No hay entradas no leídas"
+    },
+    "noStarredEntries": {
+        "message": "No hay entradas en marcadores"
+    },
+    "trashIsEmpty": {
+        "message": "La papelera está vacía"
+    },
+    "noEntriesFound": {
+        "message": "No se encontraron entradas"
+    },
+    "noEntries": {
+        "message": "No hay entradas"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minuto;minutos"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "hora;horas"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "día;días"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "hace #number $1"
+    },
+    "entryDate_justNow": {
+        "message": "ahora"
+    },
+    "entryDate_today": {
+        "message": "hoy"
+    },
+    "entryDate_yesterday": {
+        "message": "ayer"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Los canales web fueron recién actualizados"
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Los canales web fueron actualizados por última vez hace #number $1"
+    },
+    "lastUpdated_today": {
+        "message": "Los canales web fueron actualizados por última vez hoy a las $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Los canales web fueron actualizados por última vez ayer a las $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Los canales web fueron actualizados por última vez el $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "No hay entradas no leídas"
+    },
+    "updateAlertTitle": {
+        "message": "Canales web actualizados"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $2 $1 en #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $3 $2"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "nueva;nuevas"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "entrada;entradas"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "canal web;canales web"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Eliminar el canal web"
+    },
+    "confirmFeedDeletionText": {
+        "message": "¿Desea realmente eliminar «$1»?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Eliminar la carpeta"
+    },
+    "confirmFolderDeletionText": {
+        "message": "¿Desea realmente eliminar la carpeta «$1» y todos los canales web que contiene?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Eliminar la etiqueta"
+    },
+    "confirmTagDeletionText": {
+        "message": "¿Desea realmente eliminar la etiqueta «$1»?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Eliminar todas las entradas"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "¿Desea realmente eliminar todas las entradas?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Conservar las entradas en marcadores"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Opciones de «$1»"
+    },
+    "selectFile": {
+        "message": "Seleccione un archivo OPML para importar"
+    },
+    "saveAs": {
+        "message": "Guardar como…"
+    },
+    "allFiles": {
+        "message": "Todos los archivos"
+    },
+    "OPMLFiles": {
+        "message": "Archivos OPML"
+    },
+    "XMLFiles": {
+        "message": "Archivos XML"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Falló la importación de los canales web"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief no pudo importar los canales web porque están en un formato de archivo inválido. El archivo XML no está bien formado."
     }
 }

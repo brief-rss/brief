@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Mostra la lista delle scorciatoie da tastiera"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Permette di integrare nella barra laterale del browser un lettore di feed."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Feed sottoscritti"
+    },
+    "searchResults": {
+        "message": "Risultati di ricerca per: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(Aggiornamento effettuato)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Segna elemento come non letto"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Segna elemento come letto"
+    },
+    "deleteEntryTooltip": {
+        "message": "Sposta elemento nel cestino"
+    },
+    "restoreEntryTooltip": {
+        "message": "Ripristina elemento dal cestino"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Inserisci questo elemento tra i segnalibri"
+    },
+    "editBookmarkTooltip": {
+        "message": "Modifica il segnalibro"
+    },
+    "noFeeds": {
+        "message": "Non hai ancora aggiunto nessun feed."
+    },
+    "noFeedsAdvice": {
+        "message": "Guarda come farlo!"
+    },
+    "noUnreadEntries": {
+        "message": "Nessun elemento non letto"
+    },
+    "noStarredEntries": {
+        "message": "Nessun elemento presente fra quelli associati ai segnalibri"
+    },
+    "trashIsEmpty": {
+        "message": "Il cestino è vuoto"
+    },
+    "noEntriesFound": {
+        "message": "Nessun elemento trovato"
+    },
+    "noEntries": {
+        "message": "Nessun elemento"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minuto;minuti"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "ora;ore"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "giorno;giorni"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 fa"
+    },
+    "entryDate_justNow": {
+        "message": "Adesso"
+    },
+    "entryDate_today": {
+        "message": "Oggi"
+    },
+    "entryDate_yesterday": {
+        "message": "Ieri"
+    },
+    "lastUpdated_rightNow": {
+        "message": "I feed sono stati appena aggiornati."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "I feed sono stati aggiornati #number $1 fa"
+    },
+    "lastUpdated_today": {
+        "message": "I feed sono stati aggiornati oggi alle $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "I feed sono stati aggiornati ieri alle $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "I feed sono stati aggiornati in data $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Nessun feed non letto"
+    },
+    "updateAlertTitle": {
+        "message": "Feed aggiornati"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 in #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "nuovo;nuovi"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "elemento;elementi"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "feed;feed"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Eliminazione feed"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Eliminare \\"$1\\"?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Eliminazione cartella"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Eliminare la cartella \\"$1\\" e tutti i feed in essa contenuti?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Eliminazione etichetta"
+    },
+    "confirmTagDeletionText": {
+        "message": "Eliminare l'etichetta \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Eliminazione elementi"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Eliminare tutti gli elementi?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Mantieni gli elementi associati ai segnalibri"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Impostazioni per \\"$1\\""
+    },
+    "selectFile": {
+        "message": "Selezione del file dei feed da importare"
+    },
+    "saveAs": {
+        "message": "Salvataggio del file dei feed da esportare"
+    },
+    "allFiles": {
+        "message": "Tutti i file"
+    },
+    "OPMLFiles": {
+        "message": "File OPML"
+    },
+    "XMLFiles": {
+        "message": "File XML"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Importazione non riuscita"
+    },
+    "invalidFileAlertText": {
+        "message": "Impossibile effettuare l'importazione dei feed di Brief a causa del formato non valido del file: il file XML dei feed è malformato."
     }
 }

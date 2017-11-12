@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Lijst met sneltoetsen weergeven"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Een extensie om feeds te lezen."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Feedabonnementen"
+    },
+    "searchResults": {
+        "message": "Zoekresultaten voor: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(bijgewerkt)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Markeren als ongelezen"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Markeren als gelezen"
+    },
+    "deleteEntryTooltip": {
+        "message": "Naar Prullenbak verplaatsen"
+    },
+    "restoreEntryTooltip": {
+        "message": "Verwijdering ongedaan maken"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Bladwijzer maken"
+    },
+    "editBookmarkTooltip": {
+        "message": "Bladwijzer bewerken"
+    },
+    "noFeeds": {
+        "message": "U hebt nog geen feeds toegevoegd."
+    },
+    "noFeedsAdvice": {
+        "message": "Zie hoe u dit doet!"
+    },
+    "noUnreadEntries": {
+        "message": "Geen ongelezen berichten"
+    },
+    "noStarredEntries": {
+        "message": "Geen berichten als bladwijzer"
+    },
+    "trashIsEmpty": {
+        "message": "Prullenbak is leeg"
+    },
+    "noEntriesFound": {
+        "message": "Geen berichten gevonden"
+    },
+    "noEntries": {
+        "message": "Geen berichten"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minuut;minuten"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "uur;uur"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "dag;dagen"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 geleden"
+    },
+    "entryDate_justNow": {
+        "message": "Zojuist"
+    },
+    "entryDate_today": {
+        "message": "Vandaag"
+    },
+    "entryDate_yesterday": {
+        "message": "Gisteren"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Feeds zijn zojuist bijgewerkt."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Feeds zijn #number $1 geleden bijgewerkt"
+    },
+    "lastUpdated_today": {
+        "message": "Feeds zijn vandaag om $1 bijgewerkt"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Feeds zijn gisteren om $1 bijgewerkt"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Feeds zijn op $1 bijgewerkt"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Geen ongelezen feeds."
+    },
+    "updateAlertTitle": {
+        "message": "Feeds bijgewerkt"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 in #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "nieuw;nieuwe"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "bericht;berichten"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "feed;feeds"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Feed opzeggen"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Weet u zeker dat u “$1” wilt opzeggen?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Map verwijderen"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Weet u zeker dat u de map “$1” en alle feeds die zich daarin bevinden wilt verwijderen?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Label verwijderen"
+    },
+    "confirmTagDeletionText": {
+        "message": "Weet u zeker dat u het label “$1” wilt verwijderen?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Berichten wissen"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Weet u zeker dat u alle berichten wilt wissen?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Bladwijzerberichten bewaren"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Instellingen voor “$1”"
+    },
+    "selectFile": {
+        "message": "Selecteer een te importeren OPML-bestand"
+    },
+    "saveAs": {
+        "message": "Opslaan als…"
+    },
+    "allFiles": {
+        "message": "Alle bestanden"
+    },
+    "OPMLFiles": {
+        "message": "OPML-bestanden"
+    },
+    "XMLFiles": {
+        "message": "XML-bestanden"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Importeren van feeds mislukt"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief kan de feeds niet importeren omdat de opmaak ongeldig is. Het XML-bestand is niet juist gevormd."
     }
 }

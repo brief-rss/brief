@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "ショートカットキーの一覧を表示する"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "フィードを読む拡張機能。"
+    },
+    "defaultFeedsFolderName": {
+        "message": "購読済みフィード"
+    },
+    "searchResults": {
+        "message": "検索結果: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(更新あり)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "項目を未読にします"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "項目を既読にします"
+    },
+    "deleteEntryTooltip": {
+        "message": "項目をゴミ箱に入れます"
+    },
+    "restoreEntryTooltip": {
+        "message": "項目をゴミ箱から元の場所に戻します"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "項目をブックマークします"
+    },
+    "editBookmarkTooltip": {
+        "message": "ブックマークを編集します"
+    },
+    "noFeeds": {
+        "message": "まだフィードを追加していません。"
+    },
+    "noFeedsAdvice": {
+        "message": "追加する方法を確認しましょう！"
+    },
+    "noUnreadEntries": {
+        "message": "未読項目はありません"
+    },
+    "noStarredEntries": {
+        "message": "ブックマーク済み項目はありません"
+    },
+    "trashIsEmpty": {
+        "message": "ごみ箱は空です"
+    },
+    "noEntriesFound": {
+        "message": "項目が見つかりませんでした"
+    },
+    "noEntries": {
+        "message": "項目はありません"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "分"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "時間"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "日"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1前"
+    },
+    "entryDate_justNow": {
+        "message": "今"
+    },
+    "entryDate_today": {
+        "message": "今日"
+    },
+    "entryDate_yesterday": {
+        "message": "昨日"
+    },
+    "lastUpdated_rightNow": {
+        "message": "フィードが更新されました。"
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "#number $1前にフィードが更新されました"
+    },
+    "lastUpdated_today": {
+        "message": "今日の $1 にフィードが更新されました"
+    },
+    "lastUpdated_yesterday": {
+        "message": "昨日の $1 にフィードが更新されました"
+    },
+    "lastUpdated_fullDate": {
+        "message": "$1 にフィードが更新されました"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "未読フィードはありません。"
+    },
+    "updateAlertTitle": {
+        "message": "フィードが更新されました"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numFeeds 個の$3で #numItems 個の$1$2があります"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems 個の$2$3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "新しい"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "項目"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "フィード"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "フィードの削除"
+    },
+    "confirmFeedDeletionText": {
+        "message": "本当に「$1」を削除しますか？"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "フォルダの削除"
+    },
+    "confirmFolderDeletionText": {
+        "message": "本当に「$1」とそこに含まれるすべてのフィードを削除しますか？"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "タグの削除"
+    },
+    "confirmTagDeletionText": {
+        "message": "本当にタグ「$1」を削除しますか？"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "すべての項目を消去"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "本当にすべての項目を消去しますか？"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "ブックマーク済み項目は保持する"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "「$1」の設定"
+    },
+    "selectFile": {
+        "message": "取り込む OPML ファイルを選択"
+    },
+    "saveAs": {
+        "message": "名前を付けて保存"
+    },
+    "allFiles": {
+        "message": "すべてのファイル"
+    },
+    "OPMLFiles": {
+        "message": "OPML ファイル"
+    },
+    "XMLFiles": {
+        "message": "XML ファイル"
+    },
+    "invalidFileAlertTitle": {
+        "message": "フィード取り込みに失敗しました"
+    },
+    "invalidFileAlertText": {
+        "message": "無効なファイル形式のため Brief はフィードを取り込むことができませんでした。XML ファイルは整形式ではありません。"
     }
 }

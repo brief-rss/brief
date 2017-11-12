@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Amosar a listaxe de atallos"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Unha extensión para a lectura de fontes"
+    },
+    "defaultFeedsFolderName": {
+        "message": "Fontes subscritas"
+    },
+    "searchResults": {
+        "message": "Procurar resultados para: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(actualizado)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Marcar a entrada como non lida"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Marcar a entrada como lida"
+    },
+    "deleteEntryTooltip": {
+        "message": "Mover a entrada ao lixo"
+    },
+    "restoreEntryTooltip": {
+        "message": "Restaurar a entrada desde o lixo"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Marcador"
+    },
+    "editBookmarkTooltip": {
+        "message": "Editar marcador"
+    },
+    "noFeeds": {
+        "message": "Non engadiu ningunha fonte."
+    },
+    "noFeedsAdvice": {
+        "message": "Vexa como facelo."
+    },
+    "noUnreadEntries": {
+        "message": "Non hai elementos sen ler"
+    },
+    "noStarredEntries": {
+        "message": "Non hai elementos marcados"
+    },
+    "trashIsEmpty": {
+        "message": "O lixo está baleiro"
+    },
+    "noEntriesFound": {
+        "message": "Non se atoparon elementos"
+    },
+    "noEntries": {
+        "message": "Non hai elementos"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minuto;minutos"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "hora;horas"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "día;días"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "Hai #number $1"
+    },
+    "entryDate_justNow": {
+        "message": "Agora"
+    },
+    "entryDate_today": {
+        "message": "Hoxe"
+    },
+    "entryDate_yesterday": {
+        "message": "Onte"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Acaban de actualizarse as fontes."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "As fontes actualizáronse hai #number $1"
+    },
+    "lastUpdated_today": {
+        "message": "A última actualización das fontes foi hoxe ás $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "A última actualización das fontes foi onte ás $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "A última actualización das fontes foi o $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Non hai fontes sen ler."
+    },
+    "updateAlertTitle": {
+        "message": "Fontes actualizadas"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 en #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "novo;novos"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "elemento;elementos"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "fonte;fontes"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Borrar a fonte"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Está certo de borrar \\"$1\\"?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Borrar o cartafol"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Está certo de borrar o cartafol \\"$1\\" e todas as fontes que contén?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Borrar a etiqueta"
+    },
+    "confirmTagDeletionText": {
+        "message": "Está certo de borrar a etiqueta \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Limpar os elementos"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Está certo de querer limpar todos os elementos?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Manter os elementos marcados"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Axustes de «$1»"
+    },
+    "selectFile": {
+        "message": "Seleccionar un ficheiro OPML para importar"
+    },
+    "saveAs": {
+        "message": "Gardar como..."
+    },
+    "allFiles": {
+        "message": "Todos os ficheiros"
+    },
+    "OPMLFiles": {
+        "message": "Ficheiros OPML"
+    },
+    "XMLFiles": {
+        "message": "Ficheiros XML"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Fallou a importación de ficheiros"
+    },
+    "invalidFileAlertText": {
+        "message": "Non foi posible importar as fontes porque están nun formato incorrecto. O ficheiro XML está mal construído."
     }
 }

@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Показать список клавиатурных сокращений"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;few;many"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Расширение для чтения RSS-лент."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Подписки"
+    },
+    "searchResults": {
+        "message": "Результаты поиска: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(обновлено)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Пометить запись как непрочитанную"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Пометить запись как прочитанную"
+    },
+    "deleteEntryTooltip": {
+        "message": "Переместить запись в Корзину"
+    },
+    "restoreEntryTooltip": {
+        "message": "Восстановить запись из Корзины"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Добавить запись в закладки"
+    },
+    "editBookmarkTooltip": {
+        "message": "Изменить закладку"
+    },
+    "noFeeds": {
+        "message": "Не добавлено ни одной ленты новостей"
+    },
+    "noFeedsAdvice": {
+        "message": "Посмотреть, как это делать!"
+    },
+    "noUnreadEntries": {
+        "message": "Нет непрочитанных записей"
+    },
+    "noStarredEntries": {
+        "message": "Нет отмеченных записей"
+    },
+    "trashIsEmpty": {
+        "message": "Корзина пуста"
+    },
+    "noEntriesFound": {
+        "message": "Записи не найдены"
+    },
+    "noEntries": {
+        "message": "Нет записей"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "минута;минуты;минут"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "час;часа;часов"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "день;дня;дней"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 назад"
+    },
+    "entryDate_justNow": {
+        "message": "Только что"
+    },
+    "entryDate_today": {
+        "message": "Сегодня"
+    },
+    "entryDate_yesterday": {
+        "message": "Вчера"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Ленты только что обновлены"
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Ленты были обновлены #number $1 назад"
+    },
+    "lastUpdated_today": {
+        "message": "Ленты были обновлены сегодня в $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Ленты были обновлены вчера в $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Ленты были обновлены $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Нет непрочитанных лент"
+    },
+    "updateAlertTitle": {
+        "message": "Ленты новостей обновлены"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 в #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "новая;новых;новых"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "запись;записи;записей"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "лента;ленты;лент"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Удалить ленту"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Вы уверены, что хотите удалить \\"$1\\"?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Удалить папку"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Вы уверены, что хотите удалить папку \\"$1\\" и все находящиеся в ней ленты?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Удалить метку"
+    },
+    "confirmTagDeletionText": {
+        "message": "Вы уверены, что хотите удалить метку \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Удалить записи"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Вы уверены, что хотите удалить все записи?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Оставить отмеченные записи"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Настройки ленты \\"$1\\""
+    },
+    "selectFile": {
+        "message": "Выберите OPML-файл для импорта"
+    },
+    "saveAs": {
+        "message": "Сохранить как…"
+    },
+    "allFiles": {
+        "message": "Все файлы"
+    },
+    "OPMLFiles": {
+        "message": "OPML-файлы"
+    },
+    "XMLFiles": {
+        "message": "XML-файлы"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Ошибка импорта лент"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief не может импортировать ленты из-за неверного формата файла. Данный XML-файл некорректен."
     }
 }

@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Показати список сполучень клавіш"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;few;many"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Розширення для читання стрічок новин."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Живі закладки"
+    },
+    "searchResults": {
+        "message": "Результати пошуку для: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(оновлено)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Позначити запис як непрочитаний"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Позначити запис як прочитаний"
+    },
+    "deleteEntryTooltip": {
+        "message": "Перемістити запис до кошика"
+    },
+    "restoreEntryTooltip": {
+        "message": "Відновити запис із кошика"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Закласти запис"
+    },
+    "editBookmarkTooltip": {
+        "message": "Редагувати закладку"
+    },
+    "noFeeds": {
+        "message": "Ви ще не додали жодної стрічки."
+    },
+    "noFeedsAdvice": {
+        "message": "Подивіться, як це зробити!"
+    },
+    "noUnreadEntries": {
+        "message": "Немає непрочитаних записів"
+    },
+    "noStarredEntries": {
+        "message": "Немає записів зі створеними закладками"
+    },
+    "trashIsEmpty": {
+        "message": "Кошик пустий"
+    },
+    "noEntriesFound": {
+        "message": "Не знайдено жодного запису"
+    },
+    "noEntries": {
+        "message": "Немає записів"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "хвилину;хвилини;хвилин"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "годину;години;годин"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "день;дні;днів"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 тому"
+    },
+    "entryDate_justNow": {
+        "message": "Щойно"
+    },
+    "entryDate_today": {
+        "message": "Сьогодні"
+    },
+    "entryDate_yesterday": {
+        "message": "Вчора"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Стрічки тільки що оновлено."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Стрічки востаннє оновлено #number $1 тому"
+    },
+    "lastUpdated_today": {
+        "message": "Стрічки востаннє оновлено сьогодні о $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Стрічки востаннє оновлено вчора о $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Стрічки востаннє оновлено $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Немає непрочитаних стрічок"
+    },
+    "updateAlertTitle": {
+        "message": "Стрічки оновлено"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 у #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "нова;нові;нових"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "запис;записи;записів"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "стрічці;стрічках;стрічках"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Видалення стрічки"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Ви дійсно бажаєте видалити «$1»?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Видалення теки"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Ви дійсно бажаєте видалити теку «$1» та всі стрічи, що містяться в ній?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Видалення мітки"
+    },
+    "confirmTagDeletionText": {
+        "message": "Ви дійсно бажаєте видалити мітку «$1»?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Видалення записів"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Ви дійсно бажаєте видалити всі записи?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Залишити записи зі створеними закладками"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Налаштування стрічки «$1»"
+    },
+    "selectFile": {
+        "message": "Виберіть OPML-файл для імпорту"
+    },
+    "saveAs": {
+        "message": "Зберегти як..."
+    },
+    "allFiles": {
+        "message": "Усі файли"
+    },
+    "OPMLFiles": {
+        "message": "OPML-файли"
+    },
+    "XMLFiles": {
+        "message": "XML-файли"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Не вдалося імпортувати стрічки"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief не вдалося імпортувати стрічки через неприпустимий формат файлу. Формат XML-файлу неправильний."
     }
 }

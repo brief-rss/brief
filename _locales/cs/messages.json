@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Zobrazit seznam klávesových zkratek"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;few;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Rozšíření na čtení kanálů."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Odebírané kanály"
+    },
+    "searchResults": {
+        "message": "Výsledky hledání pro: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(aktualizováno)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Označit položku jako nepřečtenou"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Označit položku jako přečtenou"
+    },
+    "deleteEntryTooltip": {
+        "message": "Přesunout položku do koše"
+    },
+    "restoreEntryTooltip": {
+        "message": "Obnovit položku z koše"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Položka uložená do záložek"
+    },
+    "editBookmarkTooltip": {
+        "message": "Upravit záložku"
+    },
+    "noFeeds": {
+        "message": "Doposud jste nepřidali žádné kanály."
+    },
+    "noFeedsAdvice": {
+        "message": "Zjistěte, jak to udělat!"
+    },
+    "noUnreadEntries": {
+        "message": "Žádné nepřečtené položky"
+    },
+    "noStarredEntries": {
+        "message": "Žádné položky uložené do záložek"
+    },
+    "trashIsEmpty": {
+        "message": "Koš je prázdný"
+    },
+    "noEntriesFound": {
+        "message": "Nebyly nalezeny žádné položky"
+    },
+    "noEntries": {
+        "message": "Žádné položky"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minutou;minutami;minutami"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "hodinou;hodinami;hodinami"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "dnem;dny;dny"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "před #number $1"
+    },
+    "entryDate_justNow": {
+        "message": "Právě teď"
+    },
+    "entryDate_today": {
+        "message": "Dnes"
+    },
+    "entryDate_yesterday": {
+        "message": "Včera"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Kanály byly právě aktualizovány."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Kanály byly naposledy aktualizovány před #number $1"
+    },
+    "lastUpdated_today": {
+        "message": "Kanály byly naposledy aktualizovány dnes v $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Kanály byly naposledy aktualizovány včera v $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Kanály byly naposledy aktualizovány $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Žádné nepřečtené kanály."
+    },
+    "updateAlertTitle": {
+        "message": "Kanály aktualizovány"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 v #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "nová;nové;nových"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "položka;položky;položek"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "kanálu;kanálech;kanálech"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Smazat kanál"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Jste si jistí, že chcete smazat \\"$1\\"?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Smazat složku"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Jste si jistí, že chcete smazat \\"$1\\" a všechny kanály, které obsahuje?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Smazat štítek"
+    },
+    "confirmTagDeletionText": {
+        "message": "Jste si jistí, že chcete smazat štítek \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Smazat položky"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Jste si jistí, že chcete smazat všechny položky?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Zachovat položky uložené do záložek"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Nastavení kanálu „$1“"
+    },
+    "selectFile": {
+        "message": "Vyberte OPML soubor, který chcete importovat"
+    },
+    "saveAs": {
+        "message": "Uložit jako..."
+    },
+    "allFiles": {
+        "message": "Všechny soubory"
+    },
+    "OPMLFiles": {
+        "message": "OPML soubory"
+    },
+    "XMLFiles": {
+        "message": "XML soubory"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Nepovedlo se importovat kanály"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief nemohl naimportovat kanály, protože soubor má nesprávný formát. XML není správně strukturované."
     }
 }

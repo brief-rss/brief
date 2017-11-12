@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Kısayol tuşlarının listesini göster"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Besleme okuma eklentisi."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Üye olunan Beslemeler"
+    },
+    "searchResults": {
+        "message": "$1 için arama sonuçları"
+    },
+    "entryWasUpdated": {
+        "message": "(güncellendi)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Girdiyi okunmamış yap"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Girdiyi okunmuş yap"
+    },
+    "deleteEntryTooltip": {
+        "message": "Girdiyi Çöpe gönder"
+    },
+    "restoreEntryTooltip": {
+        "message": "Girdiyi çöpten geri çağır"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Yer imi öğesi"
+    },
+    "editBookmarkTooltip": {
+        "message": "Yer imini düzenle"
+    },
+    "noFeeds": {
+        "message": "Henüz hiç besleme eklemediniz."
+    },
+    "noFeedsAdvice": {
+        "message": "Nasıl yapılacağını gör"
+    },
+    "noUnreadEntries": {
+        "message": "Okunmamış öğe yok"
+    },
+    "noStarredEntries": {
+        "message": "İşaretlenmiş öğe yok"
+    },
+    "trashIsEmpty": {
+        "message": "Çöp kutusu boş"
+    },
+    "noEntriesFound": {
+        "message": "Öğe bulunamadı"
+    },
+    "noEntries": {
+        "message": "Öğe yok"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "dakika"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "saat"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "gün"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 önce"
+    },
+    "entryDate_justNow": {
+        "message": "Hemen şimdi"
+    },
+    "entryDate_today": {
+        "message": "Bugün"
+    },
+    "entryDate_yesterday": {
+        "message": "Dün"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Beslemeler şu anda güncellendi."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Beslemeler #number $1 önce güncellendi"
+    },
+    "lastUpdated_today": {
+        "message": "Beslemeler bugün en son $1 de güncellendi"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Beslemeler dün en son $1 de güncellendi"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Beslemeler en son $1 de güncellendi"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Okunmamış besleme yok."
+    },
+    "updateAlertTitle": {
+        "message": "Beslemeler güncellendi"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numFeeds $3de #numItems $1 $2"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "yeni"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "öğe"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "besleme"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Beslemeyi Sil"
+    },
+    "confirmFeedDeletionText": {
+        "message": "\\"$1\\" beslemesini silmek istediğinizden emin misiniz?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Klasörü Sil"
+    },
+    "confirmFolderDeletionText": {
+        "message": "\\"$1\\" klasörünü ve tüm içeriğini silmek istediğinizden emin misiniz?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Etiketi Sil"
+    },
+    "confirmTagDeletionText": {
+        "message": "\\"$1\\" etiketini silmek istediğinizden emin misiniz?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Öğeleri sil"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Tüm öğeleri silmek istediğinizden emin misiniz?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "İşaretlenmiş öğeleri sakla"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "\\"$1\\" için ayarlar"
+    },
+    "selectFile": {
+        "message": "İçe aktarmak için bir OPML dosyası seçin"
+    },
+    "saveAs": {
+        "message": "Farklı Kaydet..."
+    },
+    "allFiles": {
+        "message": "Tüm Dosyalar"
+    },
+    "OPMLFiles": {
+        "message": "OPML Dosyaları"
+    },
+    "XMLFiles": {
+        "message": "XML Dosyaları"
+    },
+    "invalidFileAlertTitle": {
+        "message": "İçeri aktarma başarısız oldu"
+    },
+    "invalidFileAlertText": {
+        "message": "Geçersiz dosya biçimi nedeniyle, Brief beslemeleri içeri aktaramadı. XML dosyası düzgün biçimlendirilmemiş."
     }
 }

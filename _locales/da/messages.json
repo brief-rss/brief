@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Vis liste over genvejstaster"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "En feed-læser-udvidelse."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Feeds du abonnerer på"
+    },
+    "searchResults": {
+        "message": "Søgeresultater for: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(opdateret)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Marker element som ulæst"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Marker element som læst"
+    },
+    "deleteEntryTooltip": {
+        "message": "Flyt element til skraldespand"
+    },
+    "restoreEntryTooltip": {
+        "message": "Gendan element fra skraldespand"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Bogmærk emne"
+    },
+    "editBookmarkTooltip": {
+        "message": "Rediger bogmærke"
+    },
+    "noFeeds": {
+        "message": "Du har ikke tilføjet nogle feeds endnu."
+    },
+    "noFeedsAdvice": {
+        "message": "Se, hvordan du gør det!"
+    },
+    "noUnreadEntries": {
+        "message": "Ingen ulæste emner"
+    },
+    "noStarredEntries": {
+        "message": "Ingen bogmærkede emner"
+    },
+    "trashIsEmpty": {
+        "message": "Skraldespanden er tom"
+    },
+    "noEntriesFound": {
+        "message": "Ingen emner fundet"
+    },
+    "noEntries": {
+        "message": "Ingen emner"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minut;minutter"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "time;timer"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "dag;dage"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "For #number $1 siden"
+    },
+    "entryDate_justNow": {
+        "message": "Lige nu"
+    },
+    "entryDate_today": {
+        "message": "I dag"
+    },
+    "entryDate_yesterday": {
+        "message": "I går"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Feeds er lige blevet opdateret."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Feeds blev senest opdateret for #number $1 siden"
+    },
+    "lastUpdated_today": {
+        "message": "Feeds blev senest opdateret i dag kl. $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Feeds blev senest opdateret i går kl. $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Feeds blev senest opdateret $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Ingen ulæste feeds."
+    },
+    "updateAlertTitle": {
+        "message": "Feeds opdateret"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 i #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "ny;nye"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "emne;emner"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "feed;feeds"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Slet feed"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Er du sikker på, at du vil slette \\"$1\\"?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Slet mappe"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Er du sikker på, at du vil slette mappen \\"$1\\" og alle feeds deri?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Slet markering"
+    },
+    "confirmTagDeletionText": {
+        "message": "Er du sikker på, at du vil slette markeringen \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Ryd emner"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Er du sikker på, at du vil rydde alle emner?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Behold bogmærkede emner"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Indstillinger til \\"$1\\""
+    },
+    "selectFile": {
+        "message": "Vælg en OPML-fil der skal importeres"
+    },
+    "saveAs": {
+        "message": "Gem som…"
+    },
+    "allFiles": {
+        "message": "Alle filer"
+    },
+    "OPMLFiles": {
+        "message": "OPML-filer"
+    },
+    "XMLFiles": {
+        "message": "XML-filer"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Import af feeds mislykkedes"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief kan ikke importere feeds på grund af et ugyldigt filformat. XML-filen er ikke korrekt udformet."
     }
 }

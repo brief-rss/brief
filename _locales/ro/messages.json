@@ -1,7 +1,7 @@
 {
   // Messages from amo.dtd
     "addonSummary": {
-        "message": "Brief face citirea fluxurilor RSS cât mai facilă și intuitivă. Proiectat pentru a avea setul exact de caracteristici, e puternic și simplu în același timp. Fluxurile sunt prezentate pe o pagină continuă și interactivă care vă permite să marcați și să etichetați cu un singur click. "
+        "message": "Brief face citirea fluxurilor RSS cât mai facilă și intuitivă. Proiectat pentru a avea setul exact de caracteristici, e puternic și simplu în același timp. Fluxurile sunt prezentate pe o pagină continuă și interactivă care vă permite să marcați și să etichetați cu un singur click."
     },
     "addonDescription": {
         "message": "Facil marcați și etichetați elementele care doriți. Parcurgeți fluxurile dumneavoastră prin câteva căi - privește doar paragrafele necitite sau marcate, vizualizează un singur flux sau o mapă întreagă, arată alineatele întregi sau doar titlurile. Rapid găsește o parte din noutate folosind bara de căutare. Îți permite să fii notificat când sunt disponibile noi elemente și indică numărul lor în bara de stare. Personalizează aspectul fluxurilor. Pentru a naviga rapid prin toată mulțimea de noutăți puteți folosi scurtături ale tastaturii. Faceti orice simplu și intuitiv."
@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Arată lista scurtăturilor de la tastatură"
+    },
+
+  // Messages from brief.properties
+    // LOCALIZATION NOTE (pluralRule)
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "O extensie pentru citirea fluxurilor RSS."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Fluxuri subscrise"
+    },
+    "searchResults": {
+        "message": "Rezultatele căutării pentru: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(actualizat)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Marchează ca necitit"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Marchează ca citit"
+    },
+    "deleteEntryTooltip": {
+        "message": "Mută în gunoi"
+    },
+    "restoreEntryTooltip": {
+        "message": "Restaurează din gunoi"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Adaugă semn de carte"
+    },
+    "editBookmarkTooltip": {
+        "message": "Editează semn de carte"
+    },
+    "noFeeds": {
+        "message": "Nu ai adăugat niciun flux."
+    },
+    "noFeedsAdvice": {
+        "message": "Vezi cum să faci asta!"
+    },
+    "noUnreadEntries": {
+        "message": "Niciun element necitit"
+    },
+    "noStarredEntries": {
+        "message": "Niciun element marcat"
+    },
+    "trashIsEmpty": {
+        "message": "Gunoiul este gol"
+    },
+    "noEntriesFound": {
+        "message": "Niciun element găsit"
+    },
+    "noEntries": {
+        "message": "Niciun element"
+    },
+    // LOCALIZATION NOTE e.g. "5 new items in 2 feeds", "2 new items in 1 feed"
+    "minute_pluralForms": {
+        "message": "minută;minute"
+    },
+    // LOCALIZATION NOTE e.g. "5 new items in "Feed name""
+    "hour_pluralForms": {
+        "message": "oră;ore"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "zi;zile"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 în urmă"
+    },
+    "entryDate_justNow": {
+        "message": "Chiar acum"
+    },
+    "entryDate_today": {
+        "message": "Azi"
+    },
+    "entryDate_yesterday": {
+        "message": "Ieri"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Fluxurile sunt actualizate."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Fluxurile au fost actualizate #number $1 în urmă"
+    },
+    "lastUpdated_today": {
+        "message": "Fluxurile au fost actualizate azi la $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Fluxurile au fost actualizate ieri la $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Fluxurile au fost actualizate la $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Niciun flux necitit."
+    },
+    "updateAlertTitle": {
+        "message": "Fluxuri actualizate"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 în #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "nou;noi"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "element;elemente"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "flux;fluxuri"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Șterge flux"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Sunteți sigur de a șterge fluxul \\"$1\\"?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Șterge directoriu"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Sunteți sigur că doriți să ștergeți directoriul \\"$1\\" și toate fluxurile pe care le conține?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Șterge marcaj"
+    },
+    "confirmTagDeletionText": {
+        "message": "Sunteți sigur că doriți să ștergeți marcajul \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Elimină elementele"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Sunteți sigur să eliminați toate elementele?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Păstrează elementele marcate"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Opțiuni pentru \\"$1\\""
+    },
+    "selectFile": {
+        "message": "Selectați un fișier OPML pentru importare"
+    },
+    "saveAs": {
+        "message": "Salvează ca..."
+    },
+    "allFiles": {
+        "message": "Toate fișierele"
+    },
+    "OPMLFiles": {
+        "message": "Fișierele OPML"
+    },
+    "XMLFiles": {
+        "message": "Fișierele XML"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Imposibil de importat fluxurile"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief nu poate importa fluxurile din cauza formatului invalid al fișierului."
     }
 }

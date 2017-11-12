@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "显示快捷键列表"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "好用的订阅阅读工具."
+    },
+    "defaultFeedsFolderName": {
+        "message": "已订阅的"
+    },
+    "searchResults": {
+        "message": "搜索 $1 的结果"
+    },
+    "entryWasUpdated": {
+        "message": "(已更新)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "标记项目为未读"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "标记项目为已读"
+    },
+    "deleteEntryTooltip": {
+        "message": "清除项目到垃圾箱"
+    },
+    "restoreEntryTooltip": {
+        "message": "从垃圾箱还原项目"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "加入书签"
+    },
+    "editBookmarkTooltip": {
+        "message": "编辑书签"
+    },
+    "noFeeds": {
+        "message": "你还没有添加任何订阅."
+    },
+    "noFeedsAdvice": {
+        "message": "看看如何添加"
+    },
+    "noUnreadEntries": {
+        "message": "没有未读项目"
+    },
+    "noStarredEntries": {
+        "message": "没有加入书签的项目"
+    },
+    "trashIsEmpty": {
+        "message": "垃圾箱是空的"
+    },
+    "noEntriesFound": {
+        "message": "未找到任何项目"
+    },
+    "noEntries": {
+        "message": "没有项目"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "分"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "时"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "天"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "#number $1 前"
+    },
+    "entryDate_justNow": {
+        "message": "刚才"
+    },
+    "entryDate_today": {
+        "message": "今天"
+    },
+    "entryDate_yesterday": {
+        "message": "昨天"
+    },
+    "lastUpdated_rightNow": {
+        "message": "订阅刚刚已更新."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "最后更新于 #number $1 前"
+    },
+    "lastUpdated_today": {
+        "message": "最后更新于今天 $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "最后更新于昨天 $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "最后更新于 $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "没有未读订阅."
+    },
+    "updateAlertTitle": {
+        "message": "订阅已更新"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "来自 #numFeeds 个%3%$S的 #numItems 个$1$2"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems 个$2$3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "新"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "项目"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "订阅"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "取消订阅"
+    },
+    "confirmFeedDeletionText": {
+        "message": "你确定要取消订阅 “$1” 吗?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "删除文件夹"
+    },
+    "confirmFolderDeletionText": {
+        "message": "你确定要删除 “$1” 文件夹以及所有在该文件夹的订阅吗?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "删除标签"
+    },
+    "confirmTagDeletionText": {
+        "message": "你确定要删除 “$1” 标签吗?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "清除项目"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "你确定要清除所有项目吗?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "保留加入书签的项目"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "\\"$1\\" 设置"
+    },
+    "selectFile": {
+        "message": "选择要导入的 OPML 文件"
+    },
+    "saveAs": {
+        "message": "另存为..."
+    },
+    "allFiles": {
+        "message": "所有文件"
+    },
+    "OPMLFiles": {
+        "message": "OPML 文件"
+    },
+    "XMLFiles": {
+        "message": "XML 文件"
+    },
+    "invalidFileAlertTitle": {
+        "message": "导入订阅失败"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief 未能导入订阅因其文件格式不正确, 该 XML 文件格式无效."
     }
 }

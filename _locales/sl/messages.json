@@ -428,5 +428,193 @@
     },
     "displayShortcuts": {
         "message": "Prikaži seznam tipkovnih bližnjic"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;two;few;other"
+    },
+    "extensions_brief@mozdev_org_description": {
+        "message": "Razširitev za branje virov."
+    },
+    "defaultFeedsFolderName": {
+        "message": "Naročeni viri"
+    },
+    "searchResults": {
+        "message": "Rezultati iskanja za: $1"
+    },
+    "entryWasUpdated": {
+        "message": "(posodobljeno)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Označi vnos kot neprebran"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Označi vnos kot prebran"
+    },
+    "deleteEntryTooltip": {
+        "message": "Premakni vnos v Koš"
+    },
+    "restoreEntryTooltip": {
+        "message": "Obnovi vnos iz Koša"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Dodaj predmet med zaznamke"
+    },
+    "editBookmarkTooltip": {
+        "message": "Uredi zaznamek"
+    },
+    "noFeeds": {
+        "message": "Niste dodali še nobenega vira."
+    },
+    "noFeedsAdvice": {
+        "message": "Oglejte si, kako to narediti!"
+    },
+    "noUnreadEntries": {
+        "message": "Ni neprebranih predmetov"
+    },
+    "noStarredEntries": {
+        "message": "Nobenih premetov ni dodano med zaznamke"
+    },
+    "trashIsEmpty": {
+        "message": "Koš je prazen"
+    },
+    "noEntriesFound": {
+        "message": "Ni najdenih predmetov"
+    },
+    "noEntries": {
+        "message": "Ni predmetov"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "minuto;minutami;minutami;minutami"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "uro;urama;urami;urami"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "dnevom;dnevoma;dnevi;dnevi"
+    },
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "pred #number $1"
+    },
+    "entryDate_justNow": {
+        "message": "Pravkar"
+    },
+    "entryDate_today": {
+        "message": "Danes"
+    },
+    "entryDate_yesterday": {
+        "message": "Včeraj"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Viri so bili pravkar posodobljeni."
+    },
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Viri so bili nazadnje posodobljeni pred #number $1"
+    },
+    "lastUpdated_today": {
+        "message": "Viri so bili nazadnje posodobljeni danes ob $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Viri so bili nazadnje posodobljeni včeraj ob $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Viri so bili nazadnje posodobljeni $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Ni neprebranih virov."
+    },
+    "updateAlertTitle": {
+        "message": "Viri so bili posodobljeni"
+    },
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 v #numFeeds $3"
+    },
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "nov;nova,novi;novih"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "predmet;predmeta,predmeti;premetov"
+    },
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "vir;vira;viri;virov"
+    },
+    "confirmFeedDeletionTitle": {
+        "message": "Izbriši vir"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Ali res želite izbrisati \\"$1\\"?"
+    },
+    "confirmFolderDeletionTitle": {
+        "message": "Izbriši mapo"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Ali res želite izbrisati mapo \\"$1\\" in vse vsebujoče vire?"
+    },
+    "confirmTagDeletionTitle": {
+        "message": "Izbriši oznako"
+    },
+    "confirmTagDeletionText": {
+        "message": "Ali res želite izbrisati oznako \\"$1\\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Počisti predmete"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Ali res želite počistiti vse predmete?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Ohrani predmete dodane med zaznamke"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Nastavitve za \\"$1\\""
+    },
+    "selectFile": {
+        "message": "Izberite datoteko OPML za uvoz"
+    },
+    "saveAs": {
+        "message": "Shrani kot …"
+    },
+    "allFiles": {
+        "message": "Vse datoteke"
+    },
+    "OPMLFiles": {
+        "message": "Datoteke OPML"
+    },
+    "XMLFiles": {
+        "message": "Datoteke XML"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Uvoz virov je spodletel"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief ne more uvoziti virov zaradi neveljavne oblike datoteke. Datoteka XML ni pravilno oblikovana."
     }
 }
