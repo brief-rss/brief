@@ -15,9 +15,6 @@ var init = async function init() {
     await Prefs.init();
     PrefObserver.init();
 
-    API = new BriefClient(window);
-    await API.ready();
-
     // Restore local persistence
     await Persistence.init();
 
