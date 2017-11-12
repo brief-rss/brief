@@ -11,7 +11,7 @@
     "default_locale": "en",
     "permissions": ["<all_urls>", "contextMenus", "storage"],
     "background": {
-        "scripts": ["ui/utils.js", "scripts/prefs.js", "scripts/database.js", "background.js"]
+        "scripts": ["/scripts/utils.js", "/scripts/prefs.js", "/scripts/database.js", "background.js"]
     },
     "browser_action": {
         "browser_style": true,
