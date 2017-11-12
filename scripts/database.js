@@ -322,9 +322,11 @@ Query.prototype = {
         let tx = Database.db().transaction(['entries'], 'readonly');
         let store = tx.objectStore('entries');
         let req = store.index(indexName).openCursor(ranges[0]);
+        let totalCallbacks = 0;
         req.onsuccess = ({target}) => {
             let cursor = target.result;
             if(cursor) {
+                totalCallbacks += 1;
                 if(limit <= 0) {
                     return;
                 }
@@ -341,7 +343,7 @@ Query.prototype = {
             }
         };
         await Database._transactionPromise(tx);
-        console.log("Brief: done count query", filters);
+        console.log(`Brief: done count query in ${totalCallbacks} callbacks`, filters);
         return answer;
     },
 
