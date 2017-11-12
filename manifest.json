@@ -5,11 +5,11 @@
     "applications": {
         "gecko": {
             "id": "brief@mozdev.org",
-            "strict_min_version": "55.0"
+            "strict_min_version": "57.0"
         }
     },
     "default_locale": "en",
-    "permissions": ["<all_urls>", "contextMenus", "storage"],
+    "permissions": ["<all_urls>", "contextMenus", "storage", "unlimitedStorage"],
     "background": {
         "scripts": ["/scripts/utils.js", "/scripts/prefs.js", "/scripts/database.js", "background.js"]
     },
@@ -18,13 +18,14 @@
         "default_icon": {
             "16": "icons/brief-icon-16.png",
             "32": "icons/brief-icon-32.png",
-            "64": "icons/brief-icon-64.png"},
+            "64": "icons/brief-icon-64.png"
+        },
         "default_title": "Brief"
     },
     "commands": {
         "_execute_browser_action": {
             "suggested_key": {
-                "default": "Ctrl+Shift+D" //XXX: Temporary changed from Ctrl+Alt+D, mozilla bug 1364784 (Ctrl+Alt+... not allowed)
+                "default": "Ctrl+Shift+D"
             }
         }
     }
