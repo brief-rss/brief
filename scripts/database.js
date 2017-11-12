@@ -396,9 +396,9 @@ Query.prototype = {
 
         // Entry-based filters
         filters.entry = {
-            read: this.read,
+            read: +this.read,
             starred: this.starred,
-            deleted: this.deleted,
+            deleted: +this.deleted,
             tags: this.tags,
         };
         filters.fullTextSearch = this.searchString;
