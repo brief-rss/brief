@@ -263,6 +263,8 @@ var Commands = {
 }
 
 async function refreshProgressmeter() {
+    //FIXME: refreshProgressmeter
+    return;
     let {status, scheduled, completed} = await API.getUpdateServiceStatus();
     if (status != /* FeedUpdateService.NOT_UPDATING */ 0) { // XXX
         getElement('sidebar-top').dataset.mode = "update";
