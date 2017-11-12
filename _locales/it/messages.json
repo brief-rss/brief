@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief rende la lettura dei feed RSS facile ed intuitiva! Creata per avere esattamente il giusto set di caratteristiche,  potente e semplice allo stesso tempo. I feed vengono presentati in maniera continua ed interattiva cos permettendo di mettere feed fra i segnalibri oppure aggiungere etichette con semplici clic"
+    },
+    "addonDescription": {
+        "message": "Brief permette di integrare nella barra laterale del browser un lettore di feed. Semplice da utilizzare, permette con estrema facilit di mettere feed fra i segnalibri ed aggiungere etichette.  possibile visualizzare sia i feed non ancora letti che quelli messi fra i segnalibri, visualizzare un singolo feed oppure un&apos;intera cartella, cos come un elemento per intero o la sola intestazione!  possibile trovare rapidamente una parte di news tramite la relativa barra di ricerca, ricevere una notifica per ogni nuovo elemento disponibile e tracciare il relativo numero tramite la barra di stato. È infine possibile personalizzare la visualizzazione dei feed e utilizzare scorciatoie da tastiera per navigare pi rapidamente attraverso le varie news"
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Cerca"
+    },
+    "allItemsFolder_label": {
+        "message": "Tutti gli elementi"
+    },
+    "todayFolder_label": {
+        "message": "Oggi"
+    },
+    "starredFolder_label": {
+        "message": "Elementi nei segnalibri"
+    },
+    "trashFolder_label": {
+        "message": "Cestino"
+    },
+    // Button tooltips
+    "headlinesCheckbox_tooltip": {
+        "message": "Mostra le anteprime di tutti gli elementi"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Mostra articoli completi"
+    },
+    "showAllItems_tooltip": {
+        "message": "Mostra tutti gli elementi"
+    },
+    "filterUnread_tooltip": {
+        "message": "Mostra gli elementi letti/non letti"
+    },
+    "filterStarred_tooltip": {
+        "message": "Mostra gli elementi associati ai segnalibri"
+    },
+    "updateButton_label": {
+        "message": "Aggiorna"
+    },
+    "updateButton_tooltip": {
+        "message": "Controlla gli aggiornamenti di tutti i feed"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Interrompi"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Interrompi il controllo degli aggiornamenti"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Opzioni"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Configura Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Organizza"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Organizza feed"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Fare doppio clic per nascondere la barra laterale"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Mostra la barra laterale"
+    },
+    "markViewRead_tooltip": {
+        "message": "Segna tutti gli elementi come letti (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Segna come letto"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Segna gli elementi con etichetta come letti"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Aggiorna ora"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Aggiorna ora"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Apri il sito web"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Disiscrivi"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Elimina la cartella"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Elimina l'etichetta"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Svuota il feed"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Svuota la cartella"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Ripristina gli elementi eliminati"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Svuota il cestino"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Impostazioni feed"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Grazie per aver installato Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "I feeds sono il modo più semplice per seguire il tuo sito web preferito!"
+    },
+    "subscribingStep1_description": {
+        "message": "Fare clic sull'icona nella barra degli indirizzi per visualizzare l'anteprima del feed ed effettuare la sottoscrizione."
+    },
+    "subscribingStep2_description": {
+        "message": "Selezionare <strong>Segnalibri Live </strong> e fare clic sul pulsante <strong>Abbonati adesso</strong>"
+    },
+    "subscribingStep3_description": {
+        "message": "Selezionare la cartella <strong>Sottoscrizioni di feed</strong> nel menu principale Segnalibri."
+    },
+    "getStartedButton_label": {
+        "message": "Avvia Brief"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Impostazioni di Brief"
+    },
+    "mainPane_label": {
+        "message": "Generali"
+    },
+    "refreshGroup_caption": {
+        "message": "Aggiornando"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Periodo di tempo prima del controllo successivo:"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "c"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minuto/i"
+    },
+    "updateIntervalHours_label": {
+        "message": "ora/e"
+    },
+    "updateIntervalDays_label": {
+        "message": "giorno/i"
+    },
+    "showNotification_label": {
+        "message": "Mostra la finestra di notifica quando ci sono aggiornamenti"
+    },
+    "showNotification_accesskey": {
+        "message": "f"
+    },
+    "readingGroup_caption": {
+        "message": "Leggendo"
+    },
+    "storingGroup_caption": {
+        "message": "Memorizzazione"
+    },
+    "expirationBefore_label": {
+        "message": "Giorni dopo i quali eliminare gli elementi scaricati:"
+    },
+    "expirationAfter_label": {
+        "message": "giorno/i"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "G"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Gli elementi associati ai segnalibri verranno mantenuti"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Numero massimo di elementi per feed da memorizzare:"
+    },
+    "storedEntriesAfter_label": {
+        "message": "elemento/i"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "u"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Elimina tutti gli elementi…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "t"
+    },
+    "showUnreadCounter_label": {
+        "message": "Mostra il numero degli elementi non letti accanto all'icona di Brief"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "n"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Ordina prima gli elementi più vecchi fra quelli non letti"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "O"
+    },
+    "autoMarkRead_label": {
+        "message": "Segna come letti gli elementi che vengono visualizzati"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "l"
+    },
+    "editStyleDescription_label": {
+        "message": "Personalizza lo stile di visualizzazione dei feed"
+    },
+    "editStyleButton_label": {
+        "message": "Personalizza…"
+    },
+    "editStyleButton_accesskey": {
+        "message": "P"
+    },
+    "styleEditor_title": {
+        "message": "Personalizzazione dello stile"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Informazioni circa la personalizzazione dello stile tramite CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Nome:"
+    },
+    "feedURL_label": {
+        "message": "Indirizzo:"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Impostazioni dei feed"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Controlla gli aggiornamenti ogni:"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Giorni dopo i quali eliminare gli elementi scaricati:"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "G"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "giorno/i"
+    },
+    "updatedEntries_label": {
+        "message": "Non segnare gli elementi modificati come non letti"
+    },
+    "updatedEntries_accesskey": {
+        "message": "N"
+    },
+    "omitInUnread_label": {
+        "message": "Non includere gli elementi di questo feed nel conteggio totale dei non letti"
+    },
+    "omitInUnread_accesskey": {
+        "message": "d"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Precedente"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "Successivo &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "u"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Svuota il cestino"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Scorciatoie da tastiera di Brief"
+    },
+    "or": {
+        "message": "o"
+    },
+    "navigation_header": {
+        "message": "Navigazione"
+    },
+    "space_key": {
+        "message": "Spazio"
+    },
+    "shiftSpace_key": {
+        "message": "Maiusc + spazio"
+    },
+    "nextItem": {
+        "message": "Mostra l'elemento successivo"
+    },
+    "previousItem": {
+        "message": "Mostra l'elemento precedente"
+    },
+    "scrollDownByScreen": {
+        "message": "Mostra gli elementi successivi"
+    },
+    "scrollUpByScreen": {
+        "message": "Mostra gli elementi precedenti"
+    },
+    "enter_key": {
+        "message": "Invio"
+    },
+    "openEntry": {
+        "message": "Apre l'elemento selezionato"
+    },
+    "showItem": {
+        "message": "Mostra/nasconde l'anteprima dell'elemento selezionato"
+    },
+    "entries_header": {
+        "message": "Elementi"
+    },
+    "markCurrentItemRead": {
+        "message": "Segna l'elemento selezionato come letto/non letto"
+    },
+    "markVisibleRead": {
+        "message": "Segna gli elementi visibili sullo schermo come letti"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Segna tutti gli elementi come letti"
+    },
+    "starItem": {
+        "message": "Associa l'elemento selezionato ai segnalibri"
+    },
+    "moveToTrash": {
+        "message": "Sposta l'elemento selezionato nel cestino"
+    },
+    "view_header": {
+        "message": "Visualizzazione"
+    },
+    "showAll": {
+        "message": "Mostra tutti gli elementi"
+    },
+    "showStarred": {
+        "message": "Mostra gli elementi associati ai segnalibri"
+    },
+    "showUnread": {
+        "message": "Mostra gli elementi non letti"
+    },
+    "headlinesView": {
+        "message": "Mostra/nasconde le anteprime di tutti gli elementi"
+    },
+    "fullView": {
+        "message": "Mostra gli elementi completi"
+    },
+    "general_header": {
+        "message": "Generali"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Maiusc + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Maiusc + D"
+    },
+    "openBrief": {
+        "message": "Apre Brief"
+    },
+    "focusSearchbar": {
+        "message": "Seleziona la barra di ricerca"
+    },
+    "displayShortcuts": {
+        "message": "Mostra la lista delle scorciatoie da tastiera"
     }
 }

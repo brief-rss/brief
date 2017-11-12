@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief 讓人簡單又直觀地閱讀 RSS。它有完善功能、又兼顧良好操作。消息來源全會收在單一頁裏，只要點一點，馬上就能在各項目上標記星號、加進書籤。"
+    },
+    "addonDescription": {
+        "message": "要標記有興趣的項目或上標籤只要點一點。瀏覽消息來源時，除了預設畫面，還提供了幾種顯示方式：只顯示未讀的、或顯示有標星號的，只顯示單一消息來源、或顯示你建立的資料夾底下的，只顯示各項目標題、或顯示完整內容。想要找出某則新聞時，只要在 Brief 搜尋欄中打打字就好。看一下瀏覽器狀態列，馬上就能得知有幾則新聞進來。消息來源欄位的外觀也隨你設計。善用快速鍵還能讓你在成堆的新聞中瀏覽得更快。而且以上介紹的這些功能，操作起來都簡單又直觀。"
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "搜尋"
+    },
+    "allItemsFolder_label": {
+        "message": "所有項目"
+    },
+    "todayFolder_label": {
+        "message": "今天"
+    },
+    "starredFolder_label": {
+        "message": "有標星號"
+    },
+    "trashFolder_label": {
+        "message": "垃圾筒"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "只顯示標題(F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "顯示標題與內文(G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "顯示所有項目(A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "只顯示未讀項目(D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "只顯示有標星號項目(S)"
+    },
+    "updateButton_label": {
+        "message": "更新"
+    },
+    "updateButton_tooltip": {
+        "message": "逐一檢查消息來源是否有更新"
+    },
+    "stopUpdatingButton_label": {
+        "message": "停止"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "停止檢查消息來源是否有更新"
+    },
+    "optionsDropdownButton_label": {
+        "message": "選項"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "設定 Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "整理"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "整理消息來源"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "點兩下隱藏側邊攔"
+    },
+    "revealSidebar_tooltip": {
+        "message": "顯示側邊攔"
+    },
+    "markViewRead_tooltip": {
+        "message": "標記所有項目為已讀 (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "標記為已讀"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "有加標籤的項目標記為已讀"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "立即更新"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "立即更新"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "開啟網站"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "取消訂閱"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "刪除資料夾"
+    },
+    "ctxDeleteTag_label": {
+        "message": "刪除標籤"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "清空消息來源"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "清空資料夾裏各消息來源"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "還原所有項目"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "清空垃圾筒"
+    },
+    "ctxFeedSettings_label": {
+        "message": "消息來源設定"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "簡介 Brief"
+    },
+    "thankYou_header": {
+        "message": "感謝安裝 Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "可以用最輕鬆的方式追蹤你最愛網站的更新動態！"
+    },
+    "subscribingStep1_description": {
+        "message": "連到你想要追蹤的網站，開啟瀏覽器「<strong>書籤</strong>」選單並選「<strong>將本頁加入書籤</strong>」。"
+    },
+    "subscribingStep2_description": {
+        "message": "或也可以直接點入網站上提供消息來源的連結。"
+    },
+    "subscribingStep3_description": {
+        "message": "選擇 <strong>Brief</strong> 後點「<strong>立即訂閱</strong>」就可以了！"
+    },
+    "getStartedButton_label": {
+        "message": "開始使用"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief 選項"
+    },
+    "mainPane_label": {
+        "message": "主要"
+    },
+    "refreshGroup_caption": {
+        "message": "更新"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "自動檢查更新：每"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "C"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "分鐘"
+    },
+    "updateIntervalHours_label": {
+        "message": "小時"
+    },
+    "updateIntervalDays_label": {
+        "message": "天"
+    },
+    "showNotification_label": {
+        "message": "有找到新項目時跳出提醒"
+    },
+    "showNotification_accesskey": {
+        "message": "S"
+    },
+    "readingGroup_caption": {
+        "message": "閱讀"
+    },
+    "storingGroup_caption": {
+        "message": "保存"
+    },
+    "expirationBefore_label": {
+        "message": "移除已下載的項目：每"
+    },
+    "expirationAfter_label": {
+        "message": "天"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "R"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "有加星號的項目會被保留"
+    },
+    "storedEntriesBefore_label": {
+        "message": "最多只保存"
+    },
+    "storedEntriesAfter_label": {
+        "message": "個項目"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "清除所有項目..."
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "a"
+    },
+    "showUnreadCounter_label": {
+        "message": "在 Brief 圖示旁顯示未讀項目數"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "w"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "檢視未讀項目時，最舊的排在前面"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "o"
+    },
+    "autoMarkRead_label": {
+        "message": "將我看過內容的項目標記為已讀"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "自訂 Brief 的外觀"
+    },
+    "editStyleButton_label": {
+        "message": "自訂"
+    },
+    "editStyleButton_accesskey": {
+        "message": "u"
+    },
+    "styleEditor_title": {
+        "message": "編輯自訂樣式"
+    },
+    "seeCustomizationTips_label": {
+        "message": "學習如何利用 CSS 來自訂外觀"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "名稱"
+    },
+    "feedURL_label": {
+        "message": "網址"
+    },
+    "optionsGroupbox_caption": {
+        "message": "消息來源設定"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "檢查更新：每"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "移除已下載項目：每"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "R"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "天"
+    },
+    "updatedEntries_label": {
+        "message": "不將有修改的項目再標記為未讀"
+    },
+    "updatedEntries_accesskey": {
+        "message": "D"
+    },
+    "omitInUnread_label": {
+        "message": "將這個消息來源排除在「今天」與「所有項目」檢視模式"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "&lt; 上一個"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "下一個 &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "清空垃圾筒"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - 鍵盤快速鍵"
+    },
+    "or": {
+        "message": "或"
+    },
+    "navigation_header": {
+        "message": "瀏覽"
+    },
+    "space_key": {
+        "message": "空白鍵"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + 空白鍵"
+    },
+    "nextItem": {
+        "message": "跳到下一個項目"
+    },
+    "previousItem": {
+        "message": "跳到上一個項目"
+    },
+    "scrollDownByScreen": {
+        "message": "向下捲動一個畫面"
+    },
+    "scrollUpByScreen": {
+        "message": "向上捲動一個畫面"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "開啟目前項目"
+    },
+    "showItem": {
+        "message": "顯示/隱藏 目前項目 (標題模式)"
+    },
+    "entries_header": {
+        "message": "項目"
+    },
+    "markCurrentItemRead": {
+        "message": "將目前項目標記為 已讀/未讀"
+    },
+    "markVisibleRead": {
+        "message": "將畫面中的所有項目標記為已讀"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "將所有項目標記為已讀"
+    },
+    "starItem": {
+        "message": "目前項目標記星號"
+    },
+    "moveToTrash": {
+        "message": "將目前項目移至垃圾桶中"
+    },
+    "view_header": {
+        "message": "檢視"
+    },
+    "showAll": {
+        "message": "顯示所有項目"
+    },
+    "showStarred": {
+        "message": "顯示星號項目"
+    },
+    "showUnread": {
+        "message": "顯示未讀項目"
+    },
+    "headlinesView": {
+        "message": "只顯示標題"
+    },
+    "fullView": {
+        "message": "顯示標題與內文"
+    },
+    "general_header": {
+        "message": "一般"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "開啟 Brief"
+    },
+    "focusSearchbar": {
+        "message": "游標移到搜尋欄"
+    },
+    "displayShortcuts": {
+        "message": "顯示鍵盤快速鍵列表"
     }
 }

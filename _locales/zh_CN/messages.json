@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief 使阅读订阅更加简单和直观, 它拥有所需的必要而强大的功能, 同时保持简洁. 订阅内容无缝展现, 只需鼠标一点就可以加入书签或进行标记."
+    },
+    "addonDescription": {
+        "message": "轻松的把感兴趣的项目加入书签或进行标记. 支持多种显示方式: 只查看未读项目或加入书签的项目, 只查看单一订阅或某个文件夹, 显示标题或完整内容. 使用搜索栏可以快速查找某个项目. 订阅更新时会有通知提醒, 通过状态栏图标可以看到更新数量. 支持自定义外观. 支持快捷键使阅读更便捷. 一句话: Brief 小而精."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "搜索"
+    },
+    "allItemsFolder_label": {
+        "message": "全部项目"
+    },
+    "todayFolder_label": {
+        "message": "今天"
+    },
+    "starredFolder_label": {
+        "message": "书签"
+    },
+    "trashFolder_label": {
+        "message": "垃圾箱"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "标题模式 (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "完整模式 (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "显示所有项目 (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "只看未读项目 (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "只看加入书签的项目 (S)"
+    },
+    "updateButton_label": {
+        "message": "刷新"
+    },
+    "updateButton_tooltip": {
+        "message": "更新所有订阅"
+    },
+    "stopUpdatingButton_label": {
+        "message": "停止"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "停止更新订阅"
+    },
+    "optionsDropdownButton_label": {
+        "message": "选项"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "设置 Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "管理"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "管理订阅"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "双击隐藏侧栏"
+    },
+    "revealSidebar_tooltip": {
+        "message": "打开侧栏"
+    },
+    "markViewRead_tooltip": {
+        "message": "标记所有项目为已读 (Alt+N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "标记为已读"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "标记此标签的项目为已读"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "立即刷新"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "立即刷新"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "打开网站"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "取消订阅"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "删除文件夹"
+    },
+    "ctxDeleteTag_label": {
+        "message": "删除标签"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "清除项目"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "清除文件夹中项目"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "还原垃圾箱的项目"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "清空垃圾箱"
+    },
+    "ctxFeedSettings_label": {
+        "message": "订阅设置"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief 简介"
+    },
+    "thankYou_header": {
+        "message": "感谢安装 Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "通过订阅方便的关注你喜欢的网站!"
+    },
+    "subscribingStep1_description": {
+        "message": "当访问一个你想关注的网站时, 打开<strong>书签</strong>菜单, 点击<strong>订阅此页</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "你还可以在网站上找到订阅的链接, 点击它们."
+    },
+    "subscribingStep3_description": {
+        "message": "选择 <strong>Brief</strong>, 点击<strong>立即订阅</strong>即可."
+    },
+    "getStartedButton_label": {
+        "message": "开始"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief 选项"
+    },
+    "mainPane_label": {
+        "message": "主要"
+    },
+    "refreshGroup_caption": {
+        "message": "更新"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "每隔"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "C"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "分钟"
+    },
+    "updateIntervalHours_label": {
+        "message": "小时"
+    },
+    "updateIntervalDays_label": {
+        "message": "天"
+    },
+    "showNotification_label": {
+        "message": "有新项目时通知我"
+    },
+    "showNotification_accesskey": {
+        "message": "S"
+    },
+    "readingGroup_caption": {
+        "message": "阅读"
+    },
+    "storingGroup_caption": {
+        "message": "保存"
+    },
+    "expirationBefore_label": {
+        "message": "清除"
+    },
+    "expirationAfter_label": {
+        "message": "天前下载项目"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "R"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "加入书签的项目将被保留"
+    },
+    "storedEntriesBefore_label": {
+        "message": "每个订阅只保存最新的"
+    },
+    "storedEntriesAfter_label": {
+        "message": "个项目"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "清除所有项目..."
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "a"
+    },
+    "showUnreadCounter_label": {
+        "message": "在 Brief 图标旁显示未读项目数"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "w"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "只看未读时将旧的项目排列在前"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "o"
+    },
+    "autoMarkRead_label": {
+        "message": "自动将我浏览过的项目标记为已读"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "定制 Brief 的外观"
+    },
+    "editStyleButton_label": {
+        "message": "自定义"
+    },
+    "editStyleButton_accesskey": {
+        "message": "u"
+    },
+    "styleEditor_title": {
+        "message": "编辑样式"
+    },
+    "seeCustomizationTips_label": {
+        "message": "学习使用 CSS 定制外观"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "名称"
+    },
+    "feedURL_label": {
+        "message": "地址"
+    },
+    "optionsGroupbox_caption": {
+        "message": "订阅设置"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "每隔多久检查更新:"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "清除"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "R"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "天前下载的项目"
+    },
+    "updatedEntries_label": {
+        "message": "不要标记更改的项目为未读"
+    },
+    "updatedEntries_accesskey": {
+        "message": "D"
+    },
+    "omitInUnread_label": {
+        "message": "从今天和全部项目视图中排除此订阅"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "上一个"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "下一个"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "清空垃圾箱"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief 快捷键"
+    },
+    "or": {
+        "message": "或"
+    },
+    "navigation_header": {
+        "message": "浏览"
+    },
+    "space_key": {
+        "message": "空格"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + 空格"
+    },
+    "nextItem": {
+        "message": "跳到下个项目"
+    },
+    "previousItem": {
+        "message": "跳到上个项目"
+    },
+    "scrollDownByScreen": {
+        "message": "下滚一屏"
+    },
+    "scrollUpByScreen": {
+        "message": "上滚一屏"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "打开当前项目"
+    },
+    "showItem": {
+        "message": "显示或隐藏当前项目内容(标题阅读模式)"
+    },
+    "entries_header": {
+        "message": "项目"
+    },
+    "markCurrentItemRead": {
+        "message": "标记当前项目为已读或未读"
+    },
+    "markVisibleRead": {
+        "message": "标记当前显示的项目为已读"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "标记所有项目为已读"
+    },
+    "starItem": {
+        "message": "将当前项目加入书签"
+    },
+    "moveToTrash": {
+        "message": "移除当前项目到垃圾箱"
+    },
+    "view_header": {
+        "message": "查看"
+    },
+    "showAll": {
+        "message": "显示所有项目"
+    },
+    "showStarred": {
+        "message": "显示加入书签的项目"
+    },
+    "showUnread": {
+        "message": "显示未读项目"
+    },
+    "headlinesView": {
+        "message": "标题模式"
+    },
+    "fullView": {
+        "message": "完整模式"
+    },
+    "general_header": {
+        "message": "常规"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "打开 Brief"
+    },
+    "focusSearchbar": {
+        "message": "切换焦点到搜索栏"
+    },
+    "displayShortcuts": {
+        "message": "显示快捷键列表"
     }
 }

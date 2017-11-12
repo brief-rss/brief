@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief, RSS beslemelerini okumayı olabileceği kadar kolay ve sezgisel yapar. Tam ihtiyacınız olan özellikler için dizayn edilmiştir, aynı zamanda çok güçlü ve bir o kadar da basittir. Beslemeler, tek bir tıkta onları etiketleyebileceğiniz ya da yer imi olarak kaydedebileceğiniz bağımsız ve etkileşimli bir sayfada sunulur."
+    },
+    "addonDescription": {
+        "message": "İlginizi çeken öğeleri kolaylıkla imleyin ve etiketleyin. Beslemelerinize birkaç kullanışlı yolla gözatın - sadece okunmamış ya da imlenmiş öğeleri görüntüleyin, tek bir beslemeyi ya da tüm dizini görüntüleyin, öğelerin tamamını ya da sadece başlıklarını görüntüleyin. Arama barını kullanarak, aradığınız habere ulaşın. Durum çubuğunu kullanarak yeni öğelerden haberdar olun, sayılarını takip edin. Beslemelerin görünümünü özelleştirin. Klavye kısayollarını kullanarak birçok haberin arasında hızla gezinin. En önemlisi, herşeyi kolayca ve sezgisel yapın."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Ara"
+    },
+    "allItemsFolder_label": {
+        "message": "Tüm öğeler"
+    },
+    "todayFolder_label": {
+        "message": "Bugün"
+    },
+    "starredFolder_label": {
+        "message": "İşaretlenmiş"
+    },
+    "trashFolder_label": {
+        "message": "Çöp Kutusu"
+    },
+    // Button tooltips
+    "headlinesCheckbox_tooltip": {
+        "message": "Başlık görünümünü kullan"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Dolu öğeleri göster (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Tüm öğeleri göster (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Yalnızca okunmamış öğeleri göster (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Yalnızca yer imlerini göster (S)"
+    },
+    "updateButton_label": {
+        "message": "Tazele"
+    },
+    "updateButton_tooltip": {
+        "message": "Tüm beslemeleri güncellemeler için denetle"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Dur"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Beslemelerin güncellenmesini durdur"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Seçenekler"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Brief'İ Yapılandır"
+    },
+    "organizeFeeds_label": {
+        "message": "Düzenle"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Beslemeleri Düzenle"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Yan çubuğu saklamak için çift tıklayın"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Yan çubuğu belirginleştir"
+    },
+    "markViewRead_tooltip": {
+        "message": "Tüm öğeleri okundu olarak işaretle (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Okundu İşaretle"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Etiketlenmiş Öğeleri Okundu Olarak İşaretle"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Şimdi Tazele"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Şimdi Tazele"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Ağ sayfasını Aç"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Üyelikten çık"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Klasörü Sil"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Etiketi Sil"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Beslemeyi Temizle"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Klasörü Temizle"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Tüm Öğeleri Geri Yükle"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Çöp Kutusu'nu Boşalt"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Besleme Ayarları"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Brief'i kurduğunuz için teşekkürler"
+    },
+    "howToSubscribe_header": {
+        "message": "Favori ağ sayfalarınızı izlemenin en kolay yolu beslemelerdir!"
+    },
+    "subscribingStep1_description": {
+        "message": "İzlemek istediğiniz ağ sayfasındayken <strong>Yer İmleri</strong> menüsünü açıp <strong>Bu Sayfaya Üye Ol</strong>'a tıklayın."
+    },
+    "subscribingStep2_description": {
+        "message": "Ya da ağ sayfasında beslemenin bağlantısını da bulabilirsiniz."
+    },
+    "subscribingStep3_description": {
+        "message": "<strong>Brief</strong>'i seçin ve <strong>Şimdi Üye Ol</strong>'s tıklayın. Bu kadar!"
+    },
+    "getStartedButton_label": {
+        "message": "Başlayın"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief seçenekleri"
+    },
+    "mainPane_label": {
+        "message": "Genel"
+    },
+    "refreshGroup_caption": {
+        "message": "Tazeleniyor"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Beslemelerin güncellenme süresi:"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "C"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "dakika"
+    },
+    "updateIntervalHours_label": {
+        "message": "saat"
+    },
+    "updateIntervalDays_label": {
+        "message": "gün"
+    },
+    "showNotification_label": {
+        "message": "Yeni öğeler bulununca uyarı göster"
+    },
+    "showNotification_accesskey": {
+        "message": "S"
+    },
+    "readingGroup_caption": {
+        "message": "Okuyor"
+    },
+    "storingGroup_caption": {
+        "message": "Depolama"
+    },
+    "expirationBefore_label": {
+        "message": "İndirilmiş öğeleri şu süreden sonra sil:"
+    },
+    "expirationAfter_label": {
+        "message": "gün"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "R"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "İşaretlenmiş öğeler saklanacak"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Her canlı yer imi için en fazla"
+    },
+    "storedEntriesAfter_label": {
+        "message": "öğe sakla"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "N"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Tüm öğeleri temizle..."
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "T"
+    },
+    "showUnreadCounter_label": {
+        "message": "Show the number of unread items next to Brief's icon"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "w"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Okunmadı görünümünde önce en eski öğeleri göster"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "O"
+    },
+    "autoMarkRead_label": {
+        "message": "Öğeleri gördükten sonra okundu olarak işaretle"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "S"
+    },
+    "editStyleDescription_label": {
+        "message": "Beslemelerin görünümünü özelleştir"
+    },
+    "editStyleButton_label": {
+        "message": "Özelleştir"
+    },
+    "editStyleButton_accesskey": {
+        "message": "Z"
+    },
+    "styleEditor_title": {
+        "message": "Özel stili düzenle"
+    },
+    "seeCustomizationTips_label": {
+        "message": "CSS'le görünümü özelleştirmeyi öğrenin"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "İsim"
+    },
+    "feedURL_label": {
+        "message": "Konum"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Canlı yer imi ayarları"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Güncellenmeler için kontrol etme süresi:"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "İndirilmiş öğeleri şu süreden sonra sil:"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "R"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "gün"
+    },
+    "updatedEntries_label": {
+        "message": "Değiştirilmiş öğeleri yeniden okunmadı olarak işaretleme"
+    },
+    "updatedEntries_accesskey": {
+        "message": "D"
+    },
+    "omitInUnread_label": {
+        "message": "Genel okunmamışlar sayımında bu beslemenin tüm öğelerini kullanma"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Önceki"
+    },
+    "previousFeed_accesskey": {
+        "message": "Ö"
+    },
+    "nextFeed_label": {
+        "message": "Sonraki &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "S"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Çöpü Boşalt"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - klavye kısayolları"
+    },
+    "or": {
+        "message": "ya da"
+    },
+    "navigation_header": {
+        "message": "Navigasyon"
+    },
+    "space_key": {
+        "message": "Space"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Space"
+    },
+    "nextItem": {
+        "message": "Sonraki öğe"
+    },
+    "previousItem": {
+        "message": "Önceki öğe"
+    },
+    "scrollDownByScreen": {
+        "message": "Ekran boyu kadar aşağı kaydır"
+    },
+    "scrollUpByScreen": {
+        "message": "Ekran boyu kadar yukarı kaydır"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Geçerli öğeyi aç"
+    },
+    "showItem": {
+        "message": "Güncel öğeyi göster/sakla (başlık görünümünde)"
+    },
+    "entries_header": {
+        "message": "Öğeler"
+    },
+    "markCurrentItemRead": {
+        "message": "Güncel öğeyi okundu/okunmadı işaretle"
+    },
+    "markVisibleRead": {
+        "message": "Ekrandaki tüm öğeleri okundu işaretle"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Tüm öğeleri okundu işaretle"
+    },
+    "starItem": {
+        "message": "Güncel öğeyi yer imle"
+    },
+    "moveToTrash": {
+        "message": "Seçili öğeyi çöp kutusuna taşı"
+    },
+    "view_header": {
+        "message": "Göster"
+    },
+    "showAll": {
+        "message": "Tüm öğeleri göster"
+    },
+    "showStarred": {
+        "message": "İşaretlenmiş öğeleri göster"
+    },
+    "showUnread": {
+        "message": "Okunmamış öğeleri göster"
+    },
+    "headlinesView": {
+        "message": "Başlık görünümünü değiştir"
+    },
+    "fullView": {
+        "message": "Dolu öğeleri göster"
+    },
+    "general_header": {
+        "message": "General"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Brief'i aç"
+    },
+    "focusSearchbar": {
+        "message": "Arama çubuğuna odaklan"
+    },
+    "displayShortcuts": {
+        "message": "Kısayol tuşlarının listesini göster"
     }
 }

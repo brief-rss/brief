@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief は RSS フィードの閲覧をとても簡単で直観的にします。強力であると同時にシンプルであり、まさに最適な機能の一式を持つように設計されています。フィードは継ぎ目ない対話式のページで表示され、クリック一つで項目のブックマークとタグ付けを行うことができます。"
+    },
+    "addonDescription": {
+        "message": "興味のある項目を手軽にブックマークやタグ付け。未読だけ、あるいはブックマーク済みだけ、単一のフィードまたはフォルダ全体、全文またはヘッドラインのみ等、便利な方法でフィードを閲覧。検索バーを利用してニュースを素早く発見。新着項目の通知と、ステータスバーによるそれらの数の追跡。フィードの見た目をカスタマイズ。キーボードショートカットを利用して大量のニュースをより高速にナビゲート。これらすべてを、シンプルに、直観的に行います。"
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "検索"
+    },
+    "allItemsFolder_label": {
+        "message": "すべての項目"
+    },
+    "todayFolder_label": {
+        "message": "今日"
+    },
+    "starredFolder_label": {
+        "message": "ブックマーク"
+    },
+    "trashFolder_label": {
+        "message": "ごみ箱"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "ヘッドラインを表示します (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "内容を全て表示します (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "すべての項目を表示します (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "未読の項目のみを表示します (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "ブックマークのみを表示します (S)"
+    },
+    "updateButton_label": {
+        "message": "更新"
+    },
+    "updateButton_tooltip": {
+        "message": "すべてのフィードの更新を確認します"
+    },
+    "stopUpdatingButton_label": {
+        "message": "中止"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "フィード更新の確認を中止します"
+    },
+    "optionsDropdownButton_label": {
+        "message": "設定"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Brief の設定をします"
+    },
+    "organizeFeeds_label": {
+        "message": "管理"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "フィードの管理をします"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "ダブルクリックするとサイドバーを非表示にします"
+    },
+    "revealSidebar_tooltip": {
+        "message": "サイドバーを表示させます"
+    },
+    "markViewRead_tooltip": {
+        "message": "すべての項目を既読にします (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "既読にする"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "タグ付けされた項目を既読にする"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "今すぐ更新する"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "今すぐ更新する"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "ウェブサイトを開く"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "購読を解除する"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "フォルダを削除する"
+    },
+    "ctxDeleteTag_label": {
+        "message": "タグを削除する"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "フィードを空にする"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "フォルダを空にする"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "すべての項目を元に戻す"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "ごみ箱を空にする"
+    },
+    "ctxFeedSettings_label": {
+        "message": "フィードの設定"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Brief のインストールありがとうございます"
+    },
+    "howToSubscribe_header": {
+        "message": "フィードはあなたのお気に入りのウェブサイトの更新を追いかける最も簡単な方法です！"
+    },
+    "subscribingStep1_description": {
+        "message": "フィードをプレビューするにはロケーションバーにあるアイコンをクリックしてください。"
+    },
+    "subscribingStep2_description": {
+        "message": "<strong>ライブブックマーク</strong>を選択して<strong>購読</strong>をクリックしてください。"
+    },
+    "subscribingStep3_description": {
+        "message": "ブックマークメニューにある<strong>購読済みフィード</strong>フォルダを選択してください。"
+    },
+    "getStartedButton_label": {
+        "message": "始める"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief オプション"
+    },
+    "mainPane_label": {
+        "message": "メイン"
+    },
+    "refreshGroup_caption": {
+        "message": "更新"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "フィード更新の確認間隔"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "C"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "分"
+    },
+    "updateIntervalHours_label": {
+        "message": "時間"
+    },
+    "updateIntervalDays_label": {
+        "message": "日"
+    },
+    "showNotification_label": {
+        "message": "新着の項目が見つかったら通知を表示する"
+    },
+    "showNotification_accesskey": {
+        "message": "S"
+    },
+    "readingGroup_caption": {
+        "message": "既読管理"
+    },
+    "storingGroup_caption": {
+        "message": "保管"
+    },
+    "expirationBefore_label": {
+        "message": "ダウンロードした項目を"
+    },
+    "expirationAfter_label": {
+        "message": "日後に削除する"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "R"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "ブックマークした項目は保持されます"
+    },
+    "storedEntriesBefore_label": {
+        "message": "フィードごとに最新"
+    },
+    "storedEntriesAfter_label": {
+        "message": "項目以上は保管しない"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "すべての項目を消去する..."
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "a"
+    },
+    "showUnreadCounter_label": {
+        "message": "未読数を Brief のアイコンに表示する"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "w"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "未読表示で古い項目から先に並び替える"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "o"
+    },
+    "autoMarkRead_label": {
+        "message": "項目を見たら既読にする"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "フィードの外観をカスタマイズする"
+    },
+    "editStyleButton_label": {
+        "message": "カスタマイズ"
+    },
+    "editStyleButton_accesskey": {
+        "message": "C"
+    },
+    "styleEditor_title": {
+        "message": "カスタムスタイルの編集"
+    },
+    "seeCustomizationTips_label": {
+        "message": "CSS を用いた外観のカスタマイズについて確認する"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "名前"
+    },
+    "feedURL_label": {
+        "message": "URL"
+    },
+    "optionsGroupbox_caption": {
+        "message": "フィード設定"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "更新の確認間隔"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "ダウンロードした項目を"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "R"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "日後に削除する"
+    },
+    "updatedEntries_label": {
+        "message": "更新されている項目を未読にしない"
+    },
+    "updatedEntries_accesskey": {
+        "message": "D"
+    },
+    "omitInUnread_label": {
+        "message": "このフィードの項目を全体の未読数に含めない"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "&lt; 前"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "次 &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "ごみ箱を空にする"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - キーボードショートカット"
+    },
+    "or": {
+        "message": "または"
+    },
+    "navigation_header": {
+        "message": "ナビゲーション"
+    },
+    "space_key": {
+        "message": "Space"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + スペース"
+    },
+    "nextItem": {
+        "message": "次の項目へ移動"
+    },
+    "previousItem": {
+        "message": "以前の項目へ移動"
+    },
+    "scrollDownByScreen": {
+        "message": "画面の高さ分だけ下にスクロールする"
+    },
+    "scrollUpByScreen": {
+        "message": "画面の高さ分だけ上にスクロールする"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "現在の項目を開く"
+    },
+    "showItem": {
+        "message": "現在の項目の表示・非表示 (ヘッドライン表示中)"
+    },
+    "entries_header": {
+        "message": "項目"
+    },
+    "markCurrentItemRead": {
+        "message": "現在の項目を既読・未読にする"
+    },
+    "markVisibleRead": {
+        "message": "画面上のすべての項目を既読にする"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "すべての項目を既読にする"
+    },
+    "starItem": {
+        "message": "現在の項目をブックマーク"
+    },
+    "moveToTrash": {
+        "message": "現在の項目をごみ箱へ移動する"
+    },
+    "view_header": {
+        "message": "表示"
+    },
+    "showAll": {
+        "message": "すべての項目を表示する"
+    },
+    "showStarred": {
+        "message": "ブックマーク済み項目を表示する"
+    },
+    "showUnread": {
+        "message": "未読項目を表示する"
+    },
+    "headlinesView": {
+        "message": "ヘッドライン表示を切り替える"
+    },
+    "fullView": {
+        "message": "内容を全て表示する"
+    },
+    "general_header": {
+        "message": "全般"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Brief を開く"
+    },
+    "focusSearchbar": {
+        "message": "検索バーにフォーカスを移す"
+    },
+    "displayShortcuts": {
+        "message": "ショートカットキーの一覧を表示する"
     }
 }

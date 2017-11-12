@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief gør RSS-læsning så nemt og intuitivt som det kan gøres. Simpelt og samtidigt kraftfuldt, er denne læser designet til at have præcis de rette muligheder. Feeds præsenteres på en sammenhængende, interaktiv side som lader dig bogmærke og markere emner med et enkelt klik."
+    },
+    "addonDescription": {
+        "message": "Markér og bogmærk interessante emner. Gennemse dine feeds på flere nyttige måder - vis kun ulæste eller bogmærkede emner, vis en enkelt feed eller en hel mappe, vis hele emner eller kun overskrifter. Find hurtigt en nyhed med søgelinjen. Få notifikationer når der er nye emner og hold styr på deres nummer via statuslinjen. Tilret udseendet på feeds. Brug tastaturgenveje for hurtig navigation gennem bunken af nyheder. Og først og fremmest, gør det på en simpel og intuitiv måde."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Søg"
+    },
+    "allItemsFolder_label": {
+        "message": "Alle emner"
+    },
+    "todayFolder_label": {
+        "message": "I dag"
+    },
+    "starredFolder_label": {
+        "message": "Bogmærker"
+    },
+    "trashFolder_label": {
+        "message": "Skraldespand"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Vis overskrifter (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Vis hele indholdet (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Vis alle emner (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Vis kun ulæste emner (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Vis kun bogmærker (S)"
+    },
+    "updateButton_label": {
+        "message": "Genindlæs"
+    },
+    "updateButton_tooltip": {
+        "message": "Tjek alle feeds for opdateringer"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Stop"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Stop tjek af feeds for opdateringer"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Indstillinger"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Indstil Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Organiser"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Organiser feeds"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Dobbeltklik for at skjule sidebjælken"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Vis sidebjælken"
+    },
+    "markViewRead_tooltip": {
+        "message": "Marker alle emner som læste (ALT + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Marker som læst"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Marker mærkede emner som læste"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Genindlæs nu"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Genindlæs nu"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Åbn websted"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Stop abonnement"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Slet mappe"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Slet mærke"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Tøm feed"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Tøm mappe"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Gendan alle emner"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Tøm skraldespand"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Feed-indstillinger"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Tak fordi du installerede Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Feeds er den nemmeste måde at følge dine foretrukne websteder på!"
+    },
+    "subscribingStep1_description": {
+        "message": "Når du er på et websted du vil følge, åbn menuen <strong>Bogmærker</strong>, og klik på <strong>Abonner på denne side</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "Eller du kan finde et link til feed'et på selve webstedet."
+    },
+    "subscribingStep3_description": {
+        "message": "Vælg <strong>Brief</strong>, og klik på <strong>Abonner nu</strong>."
+    },
+    "getStartedButton_label": {
+        "message": "Kom i gang"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief indstillinger"
+    },
+    "mainPane_label": {
+        "message": "Generelt"
+    },
+    "refreshGroup_caption": {
+        "message": "Genindlæsning"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Kontroller feeds for opdateringer hver"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "K"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minut"
+    },
+    "updateIntervalHours_label": {
+        "message": "time"
+    },
+    "updateIntervalDays_label": {
+        "message": "dag"
+    },
+    "showNotification_label": {
+        "message": "Vis notifikation når nye emner findes"
+    },
+    "showNotification_accesskey": {
+        "message": "s"
+    },
+    "readingGroup_caption": {
+        "message": "Læsning"
+    },
+    "storingGroup_caption": {
+        "message": "Opbevaring"
+    },
+    "expirationBefore_label": {
+        "message": "Fjern hentede emner efter"
+    },
+    "expirationAfter_label": {
+        "message": "dage"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "j"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Bogmærkede emner bevares"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Gem ikke flere end de"
+    },
+    "storedEntriesAfter_label": {
+        "message": "seneste emner af hvert feed"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Ryd alle emner…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "a"
+    },
+    "showUnreadCounter_label": {
+        "message": "Vis antallet af ulæste emner ved siden af Brief-ikonet"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "V"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Sorter ældste emner først i ulæste-visning"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "o"
+    },
+    "autoMarkRead_label": {
+        "message": "Marker automatisk emner som læste efter jeg har set dem"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "Tilpas udseendet for feeds"
+    },
+    "editStyleButton_label": {
+        "message": "Tilpas"
+    },
+    "editStyleButton_accesskey": {
+        "message": "p"
+    },
+    "styleEditor_title": {
+        "message": "Rediger brugertilpasset stilark"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Lær mere om at tilpasse udseendet med CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Navn"
+    },
+    "feedURL_label": {
+        "message": "Adresse"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Feed-indstillinger"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Kontroller for opdateringer hver"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "K"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Fjern hentede emner efter"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "r"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "dage"
+    },
+    "updatedEntries_label": {
+        "message": "Marker ikke ændrede emner som ulæste"
+    },
+    "updatedEntries_accesskey": {
+        "message": "M"
+    },
+    "omitInUnread_label": {
+        "message": "Medtag ikke dette feeds emner i det samlede antal ulæste"
+    },
+    "omitInUnread_accesskey": {
+        "message": "e"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Foregående"
+    },
+    "previousFeed_accesskey": {
+        "message": "F"
+    },
+    "nextFeed_label": {
+        "message": "Næste &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Tøm skraldespand"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - tastaturgenveje"
+    },
+    "or": {
+        "message": "eller"
+    },
+    "navigation_header": {
+        "message": "Navigation"
+    },
+    "space_key": {
+        "message": "Mellemrum"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Mellemrum"
+    },
+    "nextItem": {
+        "message": "Gå til næste emne"
+    },
+    "previousItem": {
+        "message": "Gå til forrige emne"
+    },
+    "scrollDownByScreen": {
+        "message": "Rul ned med højden af skærmen"
+    },
+    "scrollUpByScreen": {
+        "message": "Rul op med højden af skærmen"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Åbn nuværende emne"
+    },
+    "showItem": {
+        "message": "Vis/skjul nuværende emne (i overskrift-visning)"
+    },
+    "entries_header": {
+        "message": "Emner"
+    },
+    "markCurrentItemRead": {
+        "message": "Markér det nuværende emne som læst/ulæst"
+    },
+    "markVisibleRead": {
+        "message": "Markér alle emner på skærmen som læste"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Markér alle emner som læste"
+    },
+    "starItem": {
+        "message": "Bogmærk det nuværende emne"
+    },
+    "moveToTrash": {
+        "message": "Flyt nuværende emne til skraldespand"
+    },
+    "view_header": {
+        "message": "Vis"
+    },
+    "showAll": {
+        "message": "Vis alle emner"
+    },
+    "showStarred": {
+        "message": "Vis bogmærkede emner"
+    },
+    "showUnread": {
+        "message": "Vis ulæste emner"
+    },
+    "headlinesView": {
+        "message": "Vis overskrifter"
+    },
+    "fullView": {
+        "message": "Vis hele emnet"
+    },
+    "general_header": {
+        "message": "Generelt"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Åbn Brief"
+    },
+    "focusSearchbar": {
+        "message": "Fokuser søgelinje"
+    },
+    "displayShortcuts": {
+        "message": "Vis liste over genvejstaster"
     }
 }

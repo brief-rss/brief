@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief hace que leer canales web (feeds) sea algo fácil e intuitivo. Diseñado con el conjunto preciso de funciones que necesitas, es potente y sencillo a la vez. Los canales son presentados en una completa e interactiva página, que te permite añadir artículos a marcadores y etiquetarlos con un solo clic."
+    },
+    "addonDescription": {
+        "message": "Fácilmente etiqueta y añade a marcadores artículos de tu interés. Explora tus canales web de distintas formas: revisa sólo los artículos en tus marcadores o aquellos pendientes por leer, explora un único canal o toda una carpeta, visualiza los artículos completos o sólo los titulares. Encuentra rápidamente un fragmento de cualquier noticia utilizando la casilla de búsqueda. Recibe notificaciones ante nuevos artículos disponibles y monitorea su número desde la barra de estado. Personaliza a tu gusto la apariencia de los artículos. Utiliza atajos de teclado para navegar más rápido a través de montañas de artículos. Y lo más importante, realiza todo esto de una manera sencilla e intuitiva."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Buscar"
+    },
+    "allItemsFolder_label": {
+        "message": "Todas las entradas"
+    },
+    "todayFolder_label": {
+        "message": "Hoy"
+    },
+    "starredFolder_label": {
+        "message": "Marcadores"
+    },
+    "trashFolder_label": {
+        "message": "Papelera"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Ver sólo los titulares (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Ver las entradas completas (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Mostrar todas las entradas (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Mostrar sólo las entradas no leídas (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Mostrar sólo las entradas en marcadores (S)"
+    },
+    "updateButton_label": {
+        "message": "Actualizar"
+    },
+    "updateButton_tooltip": {
+        "message": "Actualizar todos los canales web"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Detener"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Detener el proceso de actualización"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Opciones"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Personalizar Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Organizar"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Organizar los canales web"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Doble clic ocultará el panel lateral"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Mostrar el panel lateral"
+    },
+    "markViewRead_tooltip": {
+        "message": "Marcar todas las entradas como leídas (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Marcar como leída"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Marcar las entradas etiquetadas como leídas"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Actualizar"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Actualizar"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Ir al sitio web"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Eliminar"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Eliminar la carpeta"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Eliminar la etiqueta"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Vaciar el canal"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Vaciar la carpeta"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Restaurar todas las entradas"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Vaciar la papelera"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Opciones del canal"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Introducción a Brief"
+    },
+    "thankYou_header": {
+        "message": "Gracias por instalar Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Los canales web te permiten estar al día con las novedades de tus sitios web favoritos"
+    },
+    "subscribingStep1_description": {
+        "message": "Cuando se encuentre en un sitio web que desee seguir, abra el menú <strong>Marcadores</strong> y pulse en <strong>Suscribirse a esta página</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "O puede buscar un enlace al canal web en el propio sitio."
+    },
+    "subscribingStep3_description": {
+        "message": "Seleccione <strong>Brief</strong> y entonces pulse en <strong>Suscribirse ahora</strong>. ¡Eso es todo!"
+    },
+    "getStartedButton_label": {
+        "message": "Comenzar"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Opciones de Brief"
+    },
+    "mainPane_label": {
+        "message": "Principal"
+    },
+    "refreshGroup_caption": {
+        "message": "Actualizaciones"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Actualizar automáticamente los canales web cada"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "A"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minutos"
+    },
+    "updateIntervalHours_label": {
+        "message": "horas"
+    },
+    "updateIntervalDays_label": {
+        "message": "días"
+    },
+    "showNotification_label": {
+        "message": "Mostrar una notificación cuando se encuentren nuevas entradas"
+    },
+    "showNotification_accesskey": {
+        "message": "n"
+    },
+    "readingGroup_caption": {
+        "message": "Lectura"
+    },
+    "storingGroup_caption": {
+        "message": "Almacenamiento"
+    },
+    "expirationBefore_label": {
+        "message": "Eliminar las entradas descargadas hace más de"
+    },
+    "expirationAfter_label": {
+        "message": "días"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "E"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Las entradas en marcadores se conservarán"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Almacenar no más de"
+    },
+    "storedEntriesAfter_label": {
+        "message": "entradas por cada canal web"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "c"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Eliminar todas las entradas…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "t"
+    },
+    "showUnreadCounter_label": {
+        "message": "Mostrar el número de entradas no leídas junto al icono de Brief"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "r"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Ordenar las entradas comenzando por la más antigua en la vista de no leídas"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "O"
+    },
+    "autoMarkRead_label": {
+        "message": "Marcar las entradas automáticamente como leídas después de verlas"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "Personalizar la apariencia de Brief"
+    },
+    "editStyleButton_label": {
+        "message": "Personalizar"
+    },
+    "editStyleButton_accesskey": {
+        "message": "P"
+    },
+    "styleEditor_title": {
+        "message": "Personalizar la apariencia"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Aprenda a personalizar la apariencia usando CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Nombre"
+    },
+    "feedURL_label": {
+        "message": "Ubicación"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Opciones del canal"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Actualizar automáticamente cada"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "c"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Eliminar las entradas descargadas hace más de"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "E"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "días"
+    },
+    "updatedEntries_label": {
+        "message": "No marcar nuevamente como no leídas las entradas actualizadas"
+    },
+    "updatedEntries_accesskey": {
+        "message": "m"
+    },
+    "omitInUnread_label": {
+        "message": "Excluir de las vistas «Hoy» y «Todas las entradas»"
+    },
+    "omitInUnread_accesskey": {
+        "message": "x"
+    },
+    "previousFeed_label": {
+        "message": "« Anterior"
+    },
+    "previousFeed_accesskey": {
+        "message": "A"
+    },
+    "nextFeed_label": {
+        "message": "Siguiente »"
+    },
+    "nextFeed_accesskey": {
+        "message": "S"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Vaciar la papelera"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief — atajos de teclado"
+    },
+    "or": {
+        "message": "o"
+    },
+    "navigation_header": {
+        "message": "Navegación"
+    },
+    "space_key": {
+        "message": "Espacio"
+    },
+    "shiftSpace_key": {
+        "message": "Mayús. + Espacio"
+    },
+    "nextItem": {
+        "message": "Ir a la entrada siguiente"
+    },
+    "previousItem": {
+        "message": "Ir a la entrada anterior"
+    },
+    "scrollDownByScreen": {
+        "message": "Desplazarse una pantalla hacia abajo"
+    },
+    "scrollUpByScreen": {
+        "message": "Desplazarse una pantalla hacia arriba"
+    },
+    "enter_key": {
+        "message": "Intro"
+    },
+    "openEntry": {
+        "message": "Abrir la entrada actual"
+    },
+    "showItem": {
+        "message": "Expandir o contraer la entrada actual (sólo en la vista de titulares)"
+    },
+    "entries_header": {
+        "message": "Entradas"
+    },
+    "markCurrentItemRead": {
+        "message": "Cambiar el estado de leída o no leída de la entrada actual"
+    },
+    "markVisibleRead": {
+        "message": "Marcar todas las entradas en pantalla como leídas"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Marcar todas las entradas como leídas"
+    },
+    "starItem": {
+        "message": "Añadir la entrada actual a marcadores"
+    },
+    "moveToTrash": {
+        "message": "Mover la entrada actual a la papelera"
+    },
+    "view_header": {
+        "message": "Visibilidad"
+    },
+    "showAll": {
+        "message": "Mostrar todas las entradas"
+    },
+    "showStarred": {
+        "message": "Mostrar sólo las entradas en marcadores"
+    },
+    "showUnread": {
+        "message": "Mostrar sólo las entradas no leídas"
+    },
+    "headlinesView": {
+        "message": "Ver sólo los titulares"
+    },
+    "fullView": {
+        "message": "Ver las entradas completas"
+    },
+    "general_header": {
+        "message": "General"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Mayús. + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Mayús. + D"
+    },
+    "openBrief": {
+        "message": "Abrir Brief"
+    },
+    "focusSearchbar": {
+        "message": "Activar la casilla de búsqueda"
+    },
+    "displayShortcuts": {
+        "message": "Mostrar esta lista de atajos de teclado"
     }
 }

@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief face citirea fluxurilor RSS cât mai facilă și intuitivă. Proiectat pentru a avea setul exact de caracteristici, e puternic și simplu în același timp. Fluxurile sunt prezentate pe o pagină continuă și interactivă care vă permite să marcați și să etichetați cu un singur click. "
+    },
+    "addonDescription": {
+        "message": "Facil marcați și etichetați elementele care doriți. Parcurgeți fluxurile dumneavoastră prin câteva căi - privește doar paragrafele necitite sau marcate, vizualizează un singur flux sau o mapă întreagă, arată alineatele întregi sau doar titlurile. Rapid găsește o parte din noutate folosind bara de căutare. Îți permite să fii notificat când sunt disponibile noi elemente și indică numărul lor în bara de stare. Personalizează aspectul fluxurilor. Pentru a naviga rapid prin toată mulțimea de noutăți puteți folosi scurtături ale tastaturii. Faceti orice simplu și intuitiv."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Căutare"
+    },
+    "allItemsFolder_label": {
+        "message": "Toate fluxurile"
+    },
+    "todayFolder_label": {
+        "message": "Azi"
+    },
+    "starredFolder_label": {
+        "message": "Marcate"
+    },
+    "trashFolder_label": {
+        "message": "Gunoi"
+    },
+    // Button tooltips
+    "headlinesCheckbox_tooltip": {
+        "message": "Arată doar titlurile (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Arată elementele extinse (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Arată toate elementele"
+    },
+    "filterUnread_tooltip": {
+        "message": "Arată doar elementele necitite (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Arată doar elementele marcate (S)"
+    },
+    "updateButton_label": {
+        "message": "Actualizare"
+    },
+    "updateButton_tooltip": {
+        "message": "Actualizează fluxurile"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Oprire"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Oprește actualizarea"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Opțiuni"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Configurare Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Organizare"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Organizare fluxuri"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Dublu-clic pentru a ascunde bara laterală"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Arată bara laterală"
+    },
+    "markViewRead_tooltip": {
+        "message": "Marchează toate elementele ca citite (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Marcare ca citit"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Marchează elementele etichetate ca citite"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Actualizează acum"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Actualizează acum"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Deschide site"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Dezabonare"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Șterge mapă"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Șterge etichetă"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Golește flux"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Golește mapă"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Restabilește toate elementele"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Golește gunoiul"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Setările fluxului"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Vă mulțumim pentru instalarea extensiei Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Fluxurile sunt cea mai simplă metodă de a urmări site-urile favorite!"
+    },
+    "subscribingStep1_description": {
+        "message": "Clic pe iconița din bara de navigare pentru a vizualiza fluxurile."
+    },
+    "subscribingStep2_description": {
+        "message": "Selectați <strong>Live Bookmarks</strong> și faceți clic pe <strong>Abonarea acum</strong>."
+    },
+    "subscribingStep3_description": {
+        "message": "Alegeți mapa <strong>Fluxuri subscrise</strong> în meniul marcajelor."
+    },
+    "getStartedButton_label": {
+        "message": "Începeți"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Opțiunile Brief"
+    },
+    "mainPane_label": {
+        "message": "General"
+    },
+    "refreshGroup_caption": {
+        "message": "Actualizare"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Verifică fluxurile pentru actualizări fiecare"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "V"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minute"
+    },
+    "updateIntervalHours_label": {
+        "message": "ore"
+    },
+    "updateIntervalDays_label": {
+        "message": "zile"
+    },
+    "showNotification_label": {
+        "message": "Arată o notificare cînd elemente noi sunt găsite"
+    },
+    "showNotification_accesskey": {
+        "message": "N"
+    },
+    "readingGroup_caption": {
+        "message": "Afișare"
+    },
+    "storingGroup_caption": {
+        "message": "Stocare"
+    },
+    "expirationBefore_label": {
+        "message": "Elimină elementele descărcate după"
+    },
+    "expirationAfter_label": {
+        "message": "zile"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "E"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Elementele marcate vor fi păstrate"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Păstrează nu mai mult ca"
+    },
+    "storedEntriesAfter_label": {
+        "message": "ultimele elemente ale fiecărui flux"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "T"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Curăță toate elementele..."
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "C"
+    },
+    "showUnreadCounter_label": {
+        "message": "Arată numărul elementelor necitite alături de iconița Brief"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "E"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Sortează elementelor necitite începând cu cele mai vechi"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "S"
+    },
+    "autoMarkRead_label": {
+        "message": "Automat marchează elementele ca citite după ce le văd"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "Personalizează aspectul fluxurilor"
+    },
+    "editStyleButton_label": {
+        "message": "Personalizare"
+    },
+    "editStyleButton_accesskey": {
+        "message": "P"
+    },
+    "styleEditor_title": {
+        "message": "Editează stilul personalizat"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Află despre personalizarea aspectului prin CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Nume"
+    },
+    "feedURL_label": {
+        "message": "Locație"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Setările fluxului"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Verifică pentru actualizări fiecare"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "V"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Elimină elementele descărcate după"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "E"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "zile"
+    },
+    "updatedEntries_label": {
+        "message": "Nu marchează elementele înapoi ca necitite"
+    },
+    "updatedEntries_accesskey": {
+        "message": "N"
+    },
+    "omitInUnread_label": {
+        "message": "Nu include elementele acestui flux în numărul elementelor necitite"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Precedent"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "Următor &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "U"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Golește gunoiul"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - scurtăturile pentru tastatură"
+    },
+    "or": {
+        "message": "sau"
+    },
+    "navigation_header": {
+        "message": "Navigare"
+    },
+    "space_key": {
+        "message": "Spațiu"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Spațiu"
+    },
+    "nextItem": {
+        "message": "Mergi la elementul următor"
+    },
+    "previousItem": {
+        "message": "Mergi la elementul precedent"
+    },
+    "scrollDownByScreen": {
+        "message": "Derulează în jos cu o înălțimea de ecran"
+    },
+    "scrollUpByScreen": {
+        "message": "Derulează în sus cu o înălțimea de ecran"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Deschide elementul curent"
+    },
+    "showItem": {
+        "message": "Arată/ascunde elementul curent (în vederea titlurilor)"
+    },
+    "entries_header": {
+        "message": "Elemente"
+    },
+    "markCurrentItemRead": {
+        "message": "Marchează elementul curent ca citit/necitit"
+    },
+    "markVisibleRead": {
+        "message": "Marchează toate elementele de pe ecran ca citite"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Marchează toate elementele ca citite"
+    },
+    "starItem": {
+        "message": "Marchează elementul curent"
+    },
+    "moveToTrash": {
+        "message": "Mută elementul curent în gunoi"
+    },
+    "view_header": {
+        "message": "Vedere"
+    },
+    "showAll": {
+        "message": "Arată toate elementele"
+    },
+    "showStarred": {
+        "message": "Arată elementele marcate"
+    },
+    "showUnread": {
+        "message": "Arată elementele necitite"
+    },
+    "headlinesView": {
+        "message": "Comută la vederea titlurilor"
+    },
+    "fullView": {
+        "message": "Comută la vederea elementelor extinse"
+    },
+    "general_header": {
+        "message": "General"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Deschide Brief"
+    },
+    "focusSearchbar": {
+        "message": "Focusează câmpul pentru căutare"
+    },
+    "displayShortcuts": {
+        "message": "Arată lista scurtăturilor de la tastatură"
     }
 }

@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief делает чтение RSS-лент таким простым и интуитивно понятным, насколько это возможно. Brief создавался с целью предоставить пользователю полный набор необходимых функций, сохраняя при всей своей мощи простоту и понятность. Ленты новостей представлены на одной интерактивной странице, что позволяет отмечать новости и ставить на них метки всего лишь одним нажатием мышки."
+    },
+    "addonDescription": {
+        "message": "С легкостью отмечайте закладки и назначайте им метки. Просматривайте ленты различными удобными способами — Вы можете просмотреть только непрочитанные новости или только отмеченные, можете просмотреть одну ленту или целую папку, можете посмотреть новости полностью или только заголовки. Используйте поиск из поисковой строки для быстрого нахождения необходимой новости. Используйте оповещение о появлении новых записей и отслеживайте количество новостей в строке состояния. Настройте внешний вид лент так, как вам угодно. Используйте клавиатурные сочетания для навигации и управления новостями... И все это все это можно сделать, практически не задумываясь."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Поиск"
+    },
+    "allItemsFolder_label": {
+        "message": "Все записи"
+    },
+    "todayFolder_label": {
+        "message": "Записи за сегодня"
+    },
+    "starredFolder_label": {
+        "message": "Отмеченные записи"
+    },
+    "trashFolder_label": {
+        "message": "Корзина"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Режим просмотра заголовков (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Режим просмотра полностью (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Показывать все записи (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Показывать только непрочитанное (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Показывать только закладки (S)"
+    },
+    "updateButton_label": {
+        "message": "Обновить"
+    },
+    "updateButton_tooltip": {
+        "message": "Проверить обновления для всех лент"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Остановить"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Прекратить проверку обновлений"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Настройки"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Настройка параметров Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Упорядочить"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Упорядочить ленты"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Двойной клик для скрытия панели"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Показать панель"
+    },
+    "markViewRead_tooltip": {
+        "message": "Отметить все записи как прочитанные (Alt+N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Отметить как прочитанные"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Отметить закладки с меткой как прочитанные"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Обновить сейчас"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Обновить сейчас"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Открыть веб-сайт"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Отписаться"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Удалить папку"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Удалить метку"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Очистить ленту"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Очистить папку"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Восстановить все записи"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Очистить Корзину"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Настройки ленты"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Введение в Brief"
+    },
+    "thankYou_header": {
+        "message": "Спасибо за установку Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Ленты новостей - самый простой способ подписаться на любимые сайты!"
+    },
+    "subscribingStep1_description": {
+        "message": "Находясь на сайте, на который хочется подписаться, откройте меню <strong>Закладки</strong> и нажмите <strong>Подписаться на ленты новостей</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "Или можно найти ссылку на ленту новостей прямо на сайте."
+    },
+    "subscribingStep3_description": {
+        "message": "Выберите <strong>Brief</strong> и нажмите <strong>Подписаться</strong>. Готово!"
+    },
+    "getStartedButton_label": {
+        "message": "Краткое обучение"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Настройки Brief"
+    },
+    "mainPane_label": {
+        "message": "Основные"
+    },
+    "refreshGroup_caption": {
+        "message": "Обновление"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Проверять обновления лент каждые"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "о"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "минут(ы)"
+    },
+    "updateIntervalHours_label": {
+        "message": "час(ов)"
+    },
+    "updateIntervalDays_label": {
+        "message": "дней"
+    },
+    "showNotification_label": {
+        "message": "Показывать оповещение при появлении новых записей"
+    },
+    "showNotification_accesskey": {
+        "message": "П"
+    },
+    "readingGroup_caption": {
+        "message": "Чтение"
+    },
+    "storingGroup_caption": {
+        "message": "Хранение"
+    },
+    "expirationBefore_label": {
+        "message": "Удалять загруженные записи через"
+    },
+    "expirationAfter_label": {
+        "message": "дней"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "У"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Отмеченные записи будут сохранены"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Хранить не больше"
+    },
+    "storedEntriesAfter_label": {
+        "message": "последних записей в каждой ленте"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "р"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Удалить все записи…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "л"
+    },
+    "showUnreadCounter_label": {
+        "message": "Показывать число непрочитанных новостей возле значка"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "ы"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "В списке непрочитанных записей показывать старые в начале"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "о"
+    },
+    "autoMarkRead_label": {
+        "message": "Отмечать записи прочитанными после просмотра"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "п"
+    },
+    "editStyleDescription_label": {
+        "message": "Настройка внешнего вида Brief"
+    },
+    "editStyleButton_label": {
+        "message": "Настроить"
+    },
+    "editStyleButton_accesskey": {
+        "message": "Н"
+    },
+    "styleEditor_title": {
+        "message": "Редактирование пользовательского стиля"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Информация о настройке внешнего вида с помощью CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Название"
+    },
+    "feedURL_label": {
+        "message": "Адрес"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Настройки лент"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Проверять обновления каждые"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "о"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Удалять загруженные записи через"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "У"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "дней"
+    },
+    "updatedEntries_label": {
+        "message": "Не отмечать измененные записи как непрочитанные"
+    },
+    "updatedEntries_accesskey": {
+        "message": "Н"
+    },
+    "omitInUnread_label": {
+        "message": "Исключить эту ленту из представлений Все записи и Записи за сегодня"
+    },
+    "omitInUnread_accesskey": {
+        "message": "ч"
+    },
+    "previousFeed_label": {
+        "message": "« Предыдущая"
+    },
+    "previousFeed_accesskey": {
+        "message": "П"
+    },
+    "nextFeed_label": {
+        "message": "Следующая »"
+    },
+    "nextFeed_accesskey": {
+        "message": "С"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Очистить Корзину"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief — клавиатурные сокращения"
+    },
+    "or": {
+        "message": "или"
+    },
+    "navigation_header": {
+        "message": "Навигация"
+    },
+    "space_key": {
+        "message": "Пробел"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Пробел"
+    },
+    "nextItem": {
+        "message": "Перейти к следующей записи"
+    },
+    "previousItem": {
+        "message": "Вернуться к предыдущей записи"
+    },
+    "scrollDownByScreen": {
+        "message": "Прокрутить на экран вниз"
+    },
+    "scrollUpByScreen": {
+        "message": "Прокрутить на экран вверх"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Открыть текущую запись"
+    },
+    "showItem": {
+        "message": "Показать/скрыть текущий элемент (в режиме заголовков)"
+    },
+    "entries_header": {
+        "message": "Записи"
+    },
+    "markCurrentItemRead": {
+        "message": "Пометить текущую запись как (не)прочитанную"
+    },
+    "markVisibleRead": {
+        "message": "Пометить все записи на экране как прочитанные"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Отметить все записи как прочитанные"
+    },
+    "starItem": {
+        "message": "Добавить текущую запись в закладки"
+    },
+    "moveToTrash": {
+        "message": "Удалить текущую запись"
+    },
+    "view_header": {
+        "message": "Вид"
+    },
+    "showAll": {
+        "message": "Показать все записи"
+    },
+    "showStarred": {
+        "message": "Показать отмеченные записи"
+    },
+    "showUnread": {
+        "message": "Показать непрочитанные записи"
+    },
+    "headlinesView": {
+        "message": "Режим просмотра заголовков"
+    },
+    "fullView": {
+        "message": "Режим просмотра полностью"
+    },
+    "general_header": {
+        "message": "Основные"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Открыть Brief"
+    },
+    "focusSearchbar": {
+        "message": "Переместить фокус в строку поиска"
+    },
+    "displayShortcuts": {
+        "message": "Показать список клавиатурных сокращений"
     }
 }

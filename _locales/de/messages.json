@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief macht das Lesen von RSS-Feeds einfach und intuitiv. Es zielt darauf ab, die richtigen Funktionen bereitzustellen und dabei aber leicht verständlich zu bleiben. Die Feeds werden auf einer praktischen, interaktiven Seite dargestellt, wo sie sich auch mittels eines Klick zu den Lesezeichen hinzufügen und mit Schlagwörtern versehen lassen."
+    },
+    "addonDescription": {
+        "message": "Fügen Sie interessante Beiträge schnell zu Ihren Lesezeichen hinzu und versehen Sie sie mit Schlagwörtern. Stellen Sie Ihre Feeds auf verschiedene Weise dar - nur die ungelesenen oder als Lesezeichen markierten Beiträge, nur einen Feed oder einen ganzen Ordner voll Feeds, die Beiträge mit Beschreibung oder nur die Überschriften. Über die Suche finden Sie gewünschte Beiträge schnell wieder. Lassen Sie sich über neue Beiträge benachrichtigen und haben Sie stets die Anzahl der ungelesenen Beiträge in der Statusleiste im Blick. Des Weiteren kann auch die Darstellung der Feeds angepasst werden. Mittels der Tastaturkürzel können Sie schnell zwischen den Beiträgen navigieren. Insgesamt lässt sich damit alles schnell und einfach erledigen."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Suchen"
+    },
+    "allItemsFolder_label": {
+        "message": "Alle Beiträge"
+    },
+    "todayFolder_label": {
+        "message": "Heutige"
+    },
+    "starredFolder_label": {
+        "message": "Lesezeichen"
+    },
+    "trashFolder_label": {
+        "message": "Papierkorb"
+    },
+    // Button tooltips
+    "headlinesCheckbox_tooltip": {
+        "message": "Überschriftenmodus verwenden(F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Ganzen Beitrag anzeigen (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Alle Beiträge anzeigen (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Nur ungelesene Beiträge anzeigen (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Nur Lesezeichen anzeigen (S)"
+    },
+    "updateButton_label": {
+        "message": "Aktualisieren"
+    },
+    "updateButton_tooltip": {
+        "message": "Alle Feeds auf Aktualisierungen prüfen"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Abbrechen"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Überprüfung abbrechen"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Einstellungen"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Brief konfigurieren"
+    },
+    "organizeFeeds_label": {
+        "message": "Organisieren"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "RSS-Feeds organisieren"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Doppelklick zum Ausblenden der Sidebar"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Sidebar einblenden"
+    },
+    "markViewRead_tooltip": {
+        "message": "Alle Beiträge als gelesen markieren (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Als gelesen markieren"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Mit Schlagwörtern versehene Beiträge als gelesen markieren"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "RSS-Feeds aktualisieren"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Ordner aktualisieren"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Homepage öffnen"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "RSS-Feed Abbestellen"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Ordner löschen"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Schlagwort löschen"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Feed-Beiträge löschen"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Beiträge des Feed-Ordners löschen"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Beiträge aus dem Papierkorb wiederherstellen"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Papierkorb leeren"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Eigenschaften"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Danke für die Installation von Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "RSS-Feeds sind der einfachste Weg, Ihre Lieblings-Websites zu verfolgen!"
+    },
+    "subscribingStep1_description": {
+        "message": "Öffnen Sie das Menü <strong>Lesezeichen</strong> und wählen Sie den Eintrag <strong>Diese Seite abonnieren…</strong> aus."
+    },
+    "subscribingStep2_description": {
+        "message": "Wählen Sie <strong>Dynamische Lesezeichen</strong> aus und klicken Sie die Schaltfläche <strong>Jetzt abonnieren</strong> an."
+    },
+    "subscribingStep3_description": {
+        "message": "Wählen Sie den Ordner <strong>Abonnierte Feeds</strong> im Lesezeichen-Menü aus."
+    },
+    "getStartedButton_label": {
+        "message": "Erste Schritte"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief - Einstellungen"
+    },
+    "mainPane_label": {
+        "message": "Allgemein"
+    },
+    "refreshGroup_caption": {
+        "message": "Aktualisieren"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Feeds überprüfen alle"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "F"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "Minuten"
+    },
+    "updateIntervalHours_label": {
+        "message": "Stunden"
+    },
+    "updateIntervalDays_label": {
+        "message": "Tage"
+    },
+    "showNotification_label": {
+        "message": "Benachrichtigen, wenn neue Beiträge gefunden wurden"
+    },
+    "showNotification_accesskey": {
+        "message": "B"
+    },
+    "readingGroup_caption": {
+        "message": "Lesen"
+    },
+    "storingGroup_caption": {
+        "message": "Speicherung"
+    },
+    "expirationBefore_label": {
+        "message": "Heruntergeladene Beiträge für"
+    },
+    "expirationAfter_label": {
+        "message": "Tage speichern"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "H"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Als Lesezeichen markierte Beiträge werden gespeichert"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Nicht mehr als"
+    },
+    "storedEntriesAfter_label": {
+        "message": "Beiträge pro Feed speichern"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Alle Beiträge löschen…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "A"
+    },
+    "showUnreadCounter_label": {
+        "message": "Anzahl der ungelesenen Beiträge neben dem Brief-Symbol anzeigen"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "A"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Bei Anzeige ungelesener Beiträge älteste zuerst anzeigen"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "u"
+    },
+    "autoMarkRead_label": {
+        "message": "Beiträge nach Anzeige in der Liste als gelesen markieren"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "A"
+    },
+    "editStyleDescription_label": {
+        "message": "Darstellung der Feeds anpassen"
+    },
+    "editStyleButton_label": {
+        "message": "Anpassen…"
+    },
+    "editStyleButton_accesskey": {
+        "message": "A"
+    },
+    "styleEditor_title": {
+        "message": "Benutzerdefinierten Stil bearbeiten"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Mehr über benutzerdefinierte Stile mit CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Name:"
+    },
+    "feedURL_label": {
+        "message": "Feed-Adresse:"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Feed-Einstellungen"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Auf Aktualisierung überprüfen alle"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "A"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Heruntergeladene Beiträge für"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "H"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "Tage speichern"
+    },
+    "updatedEntries_label": {
+        "message": "Aktualisierte Beiträge nicht als ungelesen markieren"
+    },
+    "updatedEntries_accesskey": {
+        "message": "u"
+    },
+    "omitInUnread_label": {
+        "message": "Beiträge aus diesem Feed nicht in den ungelesen Beiträgen mitzählen"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Vorheriger"
+    },
+    "previousFeed_accesskey": {
+        "message": "V"
+    },
+    "nextFeed_label": {
+        "message": "Nächster &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Papierkorb leeren"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - Tastaturkürzel"
+    },
+    "or": {
+        "message": "oder"
+    },
+    "navigation_header": {
+        "message": "Navigation"
+    },
+    "space_key": {
+        "message": "Leertaste"
+    },
+    "shiftSpace_key": {
+        "message": "Umschalt + Leertaste"
+    },
+    "nextItem": {
+        "message": "Zum nächsten Beitrag springen"
+    },
+    "previousItem": {
+        "message": "Zum vorherigen Beitrag springen"
+    },
+    "scrollDownByScreen": {
+        "message": "Eine Bildschirmseite nach unten scrollen"
+    },
+    "scrollUpByScreen": {
+        "message": "Eine Bildschirmseite nach oben scrollen"
+    },
+    "enter_key": {
+        "message": "Eingabetaste"
+    },
+    "openEntry": {
+        "message": "Beitrag öffnen"
+    },
+    "showItem": {
+        "message": "Ein-/Ausblenden des aktuellen Beitrags (im Überschriftenmodus)"
+    },
+    "entries_header": {
+        "message": "Beiträge"
+    },
+    "markCurrentItemRead": {
+        "message": "Den aktuellen Beitrag als gelesen/ungelesen markieren"
+    },
+    "markVisibleRead": {
+        "message": "Alle Beiträge auf dem Bildschirm als gelesen markieren"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Alle Beiträge als gelesen markieren"
+    },
+    "starItem": {
+        "message": "Lesezeichen für den aktuellen Beitrag setzen"
+    },
+    "moveToTrash": {
+        "message": "Ausgewählten Beitrag in den Papierkorb verschieben"
+    },
+    "view_header": {
+        "message": "Ansicht"
+    },
+    "showAll": {
+        "message": "Alle Beiträge anzeigen"
+    },
+    "showStarred": {
+        "message": "Als Lesezeichen markierte Beiträge anzeigen"
+    },
+    "showUnread": {
+        "message": "Ungelesene Beiträge anzeigen"
+    },
+    "headlinesView": {
+        "message": "Überschriftenmodus umschalten"
+    },
+    "fullView": {
+        "message": "Vollständigen Beitrag anzeigen"
+    },
+    "general_header": {
+        "message": "Allgemein"
+    },
+    "ctrlAltD_key": {
+        "message": "Strg + Umschalt + D"
+    },
+    "cmdAltD_key": {
+        "message": "Befehlstaste + Umschalt + D"
+    },
+    "openBrief": {
+        "message": "Brief anzeigen"
+    },
+    "focusSearchbar": {
+        "message": "Brief-Suchleiste fokussieren"
+    },
+    "displayShortcuts": {
+        "message": "Liste der Tastaturkürzel anzeigen"
     }
 }

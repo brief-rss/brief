@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief maakt het lezen van RSS-feeds zo makkelijk en intuïtief mogelijk. Ontworpen met het juiste aantal functies is het zowel krachtig als eenvoudig. Feeds worden gepresenteerd op een naadloze interactieve pagina waarmee u bladwijzers en labels kunt aanbrengen met één klik op de knop."
+    },
+    "addonDescription": {
+        "message": "Maak van interessante berichten eenvoudig bladwijzers en hang er labels aan. Blader door uw feeds op een paar handige manieren - weergave van alleen ongelezen berichten of bladwijzers, weergave van een enkele feed of een hele map, volledige berichten weergeven of alleen de kopteksten. Vind snel een nieuwsbericht met behulp van de zoekbalk. Laat u waarschuwen wanneer nieuwe berichten beschikbaar zijn en volg het aantal nieuwe berichten in de statusbalk. Pas de weergave van feeds aan. Gebruik sneltoetsen om sneller door de berg nieuwsberichten te navigeren. En daarbovenop: doe alles op een makkelijke en intuïtieve wijze."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Zoeken"
+    },
+    "allItemsFolder_label": {
+        "message": "Alle berichten"
+    },
+    "todayFolder_label": {
+        "message": "Vandaag"
+    },
+    "starredFolder_label": {
+        "message": "Bladwijzers"
+    },
+    "trashFolder_label": {
+        "message": "Prullenbak"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Kopteksten bekijken (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Volledige items bekijken (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Alle berichten bekijken (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Alleen ongelezen berichten bekijken (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Alleen bladwijzers bekijken (S)"
+    },
+    "updateButton_label": {
+        "message": "Vernieuwen"
+    },
+    "updateButton_tooltip": {
+        "message": "Alle feeds controleren op updates"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Stoppen"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Feeds niet meer op updates controleren"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Opties"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Brief instellen"
+    },
+    "organizeFeeds_label": {
+        "message": "Organiseren"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Feeds organiseren"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Dubbelklik om de zijbalk te verbergen"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Zijbalk weergeven"
+    },
+    "markViewRead_tooltip": {
+        "message": "Alle berichten als gelezen markeren (houd Ctrl ingedrukt om alleen de huidige pagina te markeren)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Als gelezen markeren"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Gelabelde berichten als gelezen markeren"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Nu vernieuwen"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Nu vernieuwen"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Website openen"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Afmelden"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Map verwijderen"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Label verwijderen"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Lege feed"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Lege map"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Weggegooide berichten herstellen"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Prullenbak leegmaken"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Feedinstellingen"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Introductie van Brief"
+    },
+    "thankYou_header": {
+        "message": "Bedankt voor het installeren van Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Feeds zijn de makkelijkste manier om uw favoriete websites te volgen!"
+    },
+    "subscribingStep1_description": {
+        "message": "Open als u op de website die u wilt volgen bent het menu <strong>Bladwijzers</strong> en klik <strong>Abonneren op deze pagina</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "Of u kunt een koppeling naar de feed op de website zelf zoeken."
+    },
+    "subscribingStep3_description": {
+        "message": "Selecteer <strong>Brief</strong> en klik <strong>Nu abonneren</strong>. Dat is alles!"
+    },
+    "getStartedButton_label": {
+        "message": "Beginnen"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief-opties"
+    },
+    "mainPane_label": {
+        "message": "Hoofdvenster"
+    },
+    "refreshGroup_caption": {
+        "message": "Vernieuwing"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Elke"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "E"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minuten"
+    },
+    "updateIntervalHours_label": {
+        "message": "uur"
+    },
+    "updateIntervalDays_label": {
+        "message": "dagen"
+    },
+    "showNotification_label": {
+        "message": "Waarschuwing geven wanneer nieuwe berichten worden gevonden"
+    },
+    "showNotification_accesskey": {
+        "message": "W"
+    },
+    "readingGroup_caption": {
+        "message": "Lezen"
+    },
+    "storingGroup_caption": {
+        "message": "Opslaan"
+    },
+    "expirationBefore_label": {
+        "message": "Gedownloade berichten verwijderen na"
+    },
+    "expirationAfter_label": {
+        "message": "dagen"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "V"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Berichten waarvan een bladwijzer is gemaakt zullen worden bewaard"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Niet meer dan"
+    },
+    "storedEntriesAfter_label": {
+        "message": "meest recente berichten in elke feed opslaan"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Alle berichten wissen…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "A"
+    },
+    "showUnreadCounter_label": {
+        "message": "Aantal ongelezen berichten weergeven naast pictogram van Brief"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "t"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Oudste berichten bovenaan zetten bij weergave ongelezen berichten"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "O"
+    },
+    "autoMarkRead_label": {
+        "message": "Berichten als gelezen markeren als ik ze heb gezien"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "Uiterlijk van Brief aanpassen"
+    },
+    "editStyleButton_label": {
+        "message": "Aanpassen"
+    },
+    "editStyleButton_accesskey": {
+        "message": "A"
+    },
+    "styleEditor_title": {
+        "message": "Aangepaste stijl bewerken"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Lees meer over het aanpassen van de weergave met CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Naam"
+    },
+    "feedURL_label": {
+        "message": "Locatie"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Feedinstellingen"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Op updates controleren om de"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Gedownloade berichten verwijderen na"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "w"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "dagen"
+    },
+    "updatedEntries_label": {
+        "message": "Gewijzigde berichten niet als ongelezen markeren"
+    },
+    "updatedEntries_accesskey": {
+        "message": "O"
+    },
+    "omitInUnread_label": {
+        "message": "Deze feed uitsluiten van de weergaven Vandaag en Alle berichten"
+    },
+    "omitInUnread_accesskey": {
+        "message": "m"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Vorige"
+    },
+    "previousFeed_accesskey": {
+        "message": "V"
+    },
+    "nextFeed_label": {
+        "message": "Volgende &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "o"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Prullenbak legen"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - sneltoetsen"
+    },
+    "or": {
+        "message": "of"
+    },
+    "navigation_header": {
+        "message": "Navigatie"
+    },
+    "space_key": {
+        "message": "Spatie"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Spatie"
+    },
+    "nextItem": {
+        "message": "Volgende bericht"
+    },
+    "previousItem": {
+        "message": "Vorige bericht"
+    },
+    "scrollDownByScreen": {
+        "message": "Omlaag scrollen met de schermhoogte"
+    },
+    "scrollUpByScreen": {
+        "message": "Omhoog scrollen met de schermhoogte"
+    },
+    "enter_key": {
+        "message": "Invoeren"
+    },
+    "openEntry": {
+        "message": "Huidige bericht openen"
+    },
+    "showItem": {
+        "message": "Huidige bericht weergeven/verbergen (in beeld kopteksten)"
+    },
+    "entries_header": {
+        "message": "Berichten"
+    },
+    "markCurrentItemRead": {
+        "message": "Huidige bericht als gelezen/ongelezen markeren"
+    },
+    "markVisibleRead": {
+        "message": "Alle berichten op scherm als gelezen markeren"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Alle berichten als gelezen markeren"
+    },
+    "starItem": {
+        "message": "Bladwijzer van huidig bericht maken"
+    },
+    "moveToTrash": {
+        "message": "Huidig bericht naar Prullenbak verplaatsen"
+    },
+    "view_header": {
+        "message": "Beeld"
+    },
+    "showAll": {
+        "message": "Alle berichten weergeven"
+    },
+    "showStarred": {
+        "message": "Bladwijzerberichten weergeven"
+    },
+    "showUnread": {
+        "message": "Ongelezen berichten weergeven"
+    },
+    "headlinesView": {
+        "message": "Kopteksten bekijken"
+    },
+    "fullView": {
+        "message": "Volledige berichten lezen"
+    },
+    "general_header": {
+        "message": "Algemeen"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Brief openen"
+    },
+    "focusSearchbar": {
+        "message": "Zoekbalk focus geven"
+    },
+    "displayShortcuts": {
+        "message": "Lijst met sneltoetsen weergeven"
     }
 }

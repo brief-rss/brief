@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief naredi branje virov RSS kar najbolj enostavno in intuitivno. Zasnovan je, da ima ravno pravšnji nabor značilnosti, je odziven in obenem preprost. Viri so predstavljeni na celoviti, interaktivni strani, ki vam omogoča označevanje in dajanje predmetov med zaznamke z enim klikom."
+    },
+    "addonDescription": {
+        "message": "Enostavno označujte in dodajajte predmete med zaznamke. Brskajte po svojih virih na nekaj uporabnih načinov - oglejte si samo neprebrane vnose ali vnose dodane med zaznamke, prikažite posamezen vir ali celotno mapo, cele predmete ali samo naslove. Hitro najdite del novice z uporabo iskalne vrstice. Omogočite si obvestila o novih predmetih in sledite njihovemu številu v vrstici stanja. Prilagodite si videz virov. Uporabite tipkovne bližnjice za hitrejše krmarjenje po kupu novic. Nadvsem opravite to preprosto in intuitivno."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Išči"
+    },
+    "allItemsFolder_label": {
+        "message": "Vsi predmeti"
+    },
+    "todayFolder_label": {
+        "message": "Danes"
+    },
+    "starredFolder_label": {
+        "message": "Zaznamki"
+    },
+    "trashFolder_label": {
+        "message": "Koš"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Prikaži naslove (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Prikaži cele predmete (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Prikaži vse predmete (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Prikaži samo neprebrane predmete (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Prikaži samo zaznamke (S)"
+    },
+    "updateButton_label": {
+        "message": "Osveži"
+    },
+    "updateButton_tooltip": {
+        "message": "Preveri vse vire za posodobitve"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Ustavi"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Ustavi preverjanje virov za posodobitve"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Možnosti"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Nastavi Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Organiziraj"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Organiziraj vire"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Dvokliknite za skritje stranske vrstice"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Odkrij stransko vrstico"
+    },
+    "markViewRead_tooltip": {
+        "message": "Označi vse predmete kot prebrane (Alt+N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Označi kot prebrano"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Označi predmete z oznakami kot prebrane"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Osveži zdaj"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Osveži zdaj"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Odpri spletno stran"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Odjavi naročnino"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Izbriši mapo"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Izbriši oznako"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Izprazni vir"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Izprazni mapo"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Obnovi vse predmete"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Izprazni Koš"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Nastavitve virov"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Uvod v Brief"
+    },
+    "thankYou_header": {
+        "message": "Hvala, da ste namestili Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Viri so najenostavnejši način, kako slediti svojim priljubljenim spletnim stranem!"
+    },
+    "subscribingStep1_description": {
+        "message": "Ko ste na spletni strani, ki ji želite slediti, odprite meni <strong>Zaznamki</strong> in kliknite <strong>Naroči se na to stran</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "Ali pa lahko najdete povezavo na vir na sami spletni strani."
+    },
+    "subscribingStep3_description": {
+        "message": "Izberite <strong>Brief</strong> in kliknite <strong>Naroči se</strong>. Končali ste!"
+    },
+    "getStartedButton_label": {
+        "message": "Začnite"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Možnosti Brief"
+    },
+    "mainPane_label": {
+        "message": "Glavno"
+    },
+    "refreshGroup_caption": {
+        "message": "Osveževanje"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Preveri vire za posodobitve vsakih"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "e"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minut"
+    },
+    "updateIntervalHours_label": {
+        "message": "ur"
+    },
+    "updateIntervalDays_label": {
+        "message": "dni"
+    },
+    "showNotification_label": {
+        "message": "Prikaži obvestilo ob najdbi novih predmetov"
+    },
+    "showNotification_accesskey": {
+        "message": "b"
+    },
+    "readingGroup_caption": {
+        "message": "Branje"
+    },
+    "storingGroup_caption": {
+        "message": "Shranjevanje"
+    },
+    "expirationBefore_label": {
+        "message": "Odstrani prenesene predmete po"
+    },
+    "expirationAfter_label": {
+        "message": "dneh"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "O"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Predmeti dodani med zaznamke bodo ohranjeni"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Ne shrani več kot"
+    },
+    "storedEntriesAfter_label": {
+        "message": "najnovejših predmetov vsakega vira"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "N"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Počisti vse predmete …"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "č"
+    },
+    "showUnreadCounter_label": {
+        "message": "Prikaži število neprebranih predmetov poleg ikone Brief"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "š"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "V neprebranem pogledu razvrsti najprej najstarejše predmete"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "V"
+    },
+    "autoMarkRead_label": {
+        "message": "Ob prikazu samodejno označi predmete kot prebrane"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "k"
+    },
+    "editStyleDescription_label": {
+        "message": "Prilagodi videz virov"
+    },
+    "editStyleButton_label": {
+        "message": "Prilagodi"
+    },
+    "editStyleButton_accesskey": {
+        "message": "P"
+    },
+    "styleEditor_title": {
+        "message": "Uredi slog po meri"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Več o prilagajanju videza s kodo CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Ime"
+    },
+    "feedURL_label": {
+        "message": "Mesto"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Nastavitve vira"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Preveri za posodobitve vsakih"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "P"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Odstrani prenesene predmete po"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "O"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "dnevih"
+    },
+    "updatedEntries_label": {
+        "message": "Ne označi spremenjene predmete spet kot neprebrane"
+    },
+    "updatedEntries_accesskey": {
+        "message": "z"
+    },
+    "omitInUnread_label": {
+        "message": "Ne vključi predmete tega vira v skupno število neprebranih"
+    },
+    "omitInUnread_accesskey": {
+        "message": "v"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Nazaj"
+    },
+    "previousFeed_accesskey": {
+        "message": "z"
+    },
+    "nextFeed_label": {
+        "message": "Naprej &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "r"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Izprazni koš"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - tipkovne bližnjice"
+    },
+    "or": {
+        "message": "ali"
+    },
+    "navigation_header": {
+        "message": "Krmarjenje"
+    },
+    "space_key": {
+        "message": "Presledek"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Presledek"
+    },
+    "nextItem": {
+        "message": "Pojdi na naslednji predmet"
+    },
+    "previousItem": {
+        "message": "Pojdi na prejšnji predmet"
+    },
+    "scrollDownByScreen": {
+        "message": "Pomakni se dol za višino ekrana"
+    },
+    "scrollUpByScreen": {
+        "message": "Pomakni se gor za višino ekrana"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Odpri trenutni predmet"
+    },
+    "showItem": {
+        "message": "Prikaži/Skrij trenutni predmet (v naslovnem pogledu)"
+    },
+    "entries_header": {
+        "message": "Predmeti"
+    },
+    "markCurrentItemRead": {
+        "message": "Označi trenutni predmet kot prebran/neprebran"
+    },
+    "markVisibleRead": {
+        "message": "Označi vse predmete na zaslonu kot prebrane"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Označi vse predmete kot prebrane"
+    },
+    "starItem": {
+        "message": "Dodaj trenutni predmet med zaznamke"
+    },
+    "moveToTrash": {
+        "message": "Premakni trenutni predmet v Koš"
+    },
+    "view_header": {
+        "message": "Pogled"
+    },
+    "showAll": {
+        "message": "Prikaži vse predmete"
+    },
+    "showStarred": {
+        "message": "Prikaži predmete dodane med zaznamke"
+    },
+    "showUnread": {
+        "message": "Prikaži neprebrane predmete"
+    },
+    "headlinesView": {
+        "message": "Preklopi naslovni pogled"
+    },
+    "fullView": {
+        "message": "Pokaži cele predmete"
+    },
+    "general_header": {
+        "message": "Splošno"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Odpri Brief"
+    },
+    "focusSearchbar": {
+        "message": "Osredotoči se na iskalno polje"
+    },
+    "displayShortcuts": {
+        "message": "Prikaži seznam tipkovnih bližnjic"
     }
 }

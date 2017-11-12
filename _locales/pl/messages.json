@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief umożliwia przeglądanie kanałów RSS w łatwy i intuicyjny sposób. Jest funkcjonalny i prosty w użyciu. Kanały są wyświetlane na interaktywnej stronie - za pomocą pojedynczego kliknięcia można dodać zakładkę lub etykietę do wiadomości."
+    },
+    "addonDescription": {
+        "message": "W Briefie można łatwo dodawać zakładki i etykiety do interesujących wiadomości; przeglądać kanały na kilka wygodnych sposobów - wyświetlając wszystkie wiadomości albo tylko nieprzeczytane, pojedynczy kanał albo cały folder, całą treść albo nagłówki; szybko znajdować wiadomości korzystając z pola wyszukiwania. Użytkownik może korzystać z powiadamiania o nowych wiadomościach oraz wyświetlania ich liczby na pasku stanu; dostosować do własnych upodobań wygląd kanałów; używać skrótów klawiszowych do szybszego przeglądania i przede wszystkim, może to wszystko robić łatwo i intuicyjnie."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Szukaj"
+    },
+    "allItemsFolder_label": {
+        "message": "Wszystkie"
+    },
+    "todayFolder_label": {
+        "message": "Dzisiaj"
+    },
+    "starredFolder_label": {
+        "message": "Zakładki"
+    },
+    "trashFolder_label": {
+        "message": "Kosz"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Widok nagłówków [F]"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Pełny widok [G]"
+    },
+    "showAllItems_tooltip": {
+        "message": "Wszystkie wiadomości [A]"
+    },
+    "filterUnread_tooltip": {
+        "message": "Nieprzeczytane [D]"
+    },
+    "filterStarred_tooltip": {
+        "message": "Zakładki [S]"
+    },
+    "updateButton_label": {
+        "message": "Aktualizuj"
+    },
+    "updateButton_tooltip": {
+        "message": "Sprawdź czy są nowe wiadomości"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Przerwij"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Przerwij aktualizowanie"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Opcje"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Ustawienia Briefa"
+    },
+    "organizeFeeds_label": {
+        "message": "Organizuj"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Organizowanie kanałów"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Kliknij dwukrotnie, aby ukryć panel"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Przywróć panel"
+    },
+    "markViewRead_tooltip": {
+        "message": "Oznacz wszystkie wiadomości jako przeczytane [Alt + N]"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Oznacz jako przeczytany"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Oznacz wiadomości z etykietami jako przeczytane"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Aktualizuj teraz"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Aktualizuj teraz"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Otwórz witrynę"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Usuń"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Usuń folder"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Usuń etykietę"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Opróżnij kosz"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Opróżnij folder"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Przywróć usunięte wiadomości"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Opróżnij kosz"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Ustawienia kanału"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Dziękuję za zainstalowanie Briefa"
+    },
+    "howToSubscribe_header": {
+        "message": "Kanały są najlepszym sposobem, aby śledzić zmiany na ulubionych stronach internetowych!"
+    },
+    "subscribingStep1_description": {
+        "message": "Z menu <strong>Zakładki</strong> wybierz <strong>Subskrybuj tę stronę…</strong>"
+    },
+    "subscribingStep2_description": {
+        "message": "Lub znajdź odnośnik do kanału na witrynie."
+    },
+    "subscribingStep3_description": {
+        "message": "Wybierz <strong>Brief</strong> i kliknij <strong>Subskrybuj teraz</strong>. To wszystko!"
+    },
+    "getStartedButton_label": {
+        "message": "Zaczynamy"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief – ustawienia"
+    },
+    "mainPane_label": {
+        "message": "Ogólne"
+    },
+    "refreshGroup_caption": {
+        "message": "Odświeżanie"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Sprawdzaj kanały co"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "R"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "min"
+    },
+    "updateIntervalHours_label": {
+        "message": "godz."
+    },
+    "updateIntervalDays_label": {
+        "message": "dni"
+    },
+    "showNotification_label": {
+        "message": "Wyświetlaj powiadomienie o nowych wiadomościach"
+    },
+    "showNotification_accesskey": {
+        "message": "M"
+    },
+    "readingGroup_caption": {
+        "message": "Czytanie"
+    },
+    "storingGroup_caption": {
+        "message": "Przechowywanie"
+    },
+    "expirationBefore_label": {
+        "message": "Usuń pobrane wiadomości po"
+    },
+    "expirationAfter_label": {
+        "message": "dniach"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "B"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Wiadomości mające zakładki zostaną zachowane"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Przechowuj do"
+    },
+    "storedEntriesAfter_label": {
+        "message": "ostatnich wiadomości w kanale"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "P"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Usuń wszystkie wiadomości…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "U"
+    },
+    "showUnreadCounter_label": {
+        "message": "Liczbę nieprzeczytanych wiadomości wyświetlaj za ikoną Briefa"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "L"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "W nieprzeczytanych wyświetlaj najpierw najstarsze wiadomości"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "S"
+    },
+    "autoMarkRead_label": {
+        "message": "Oznaczaj wyświetlone wiadomości jako przeczytane"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "C"
+    },
+    "editStyleDescription_label": {
+        "message": "Dostosuj wygląd Briefa"
+    },
+    "editStyleButton_label": {
+        "message": "Dostosuj"
+    },
+    "editStyleButton_accesskey": {
+        "message": "D"
+    },
+    "styleEditor_title": {
+        "message": "Dostosowywanie wyglądu kanałów"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Informacje o dostosowywaniu wyglądu za pomocą CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Nazwa"
+    },
+    "feedURL_label": {
+        "message": "Lokalizacja"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Ustawienia kanału"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Sprawdzaj kanał co"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "S"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Usuń pobrane wiadomości po"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "U"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "dniach"
+    },
+    "updatedEntries_label": {
+        "message": "Nie oznaczaj zmienionych wiadomości jako nieprzeczytanych"
+    },
+    "updatedEntries_accesskey": {
+        "message": "D"
+    },
+    "omitInUnread_label": {
+        "message": "Nie dołączaj wiadomości z tego kanału do widoku „Wszystkie” i „Dzisiaj”"
+    },
+    "omitInUnread_accesskey": {
+        "message": "Z"
+    },
+    "previousFeed_label": {
+        "message": "« Poprzedni"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "Następny »"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Opróżnij kosz"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief – skróty klawiszowe"
+    },
+    "or": {
+        "message": "lub"
+    },
+    "navigation_header": {
+        "message": "Nawigacja"
+    },
+    "space_key": {
+        "message": "Spacja"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Spacja"
+    },
+    "nextItem": {
+        "message": "Wyświetl następną wiadomość"
+    },
+    "previousItem": {
+        "message": "Wyświetl poprzednią wiadomość"
+    },
+    "scrollDownByScreen": {
+        "message": "Przewiń w dół ekranu"
+    },
+    "scrollUpByScreen": {
+        "message": "Przewiń w górę ekranu"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Otwórz wybraną wiadomość"
+    },
+    "showItem": {
+        "message": "Rozwiń lub zwiń wybraną wiadomość (w trybie widoku nagłówków)"
+    },
+    "entries_header": {
+        "message": "Wiadomości"
+    },
+    "markCurrentItemRead": {
+        "message": "Oznacz wybraną wiadomość jako przeczytaną/nieprzeczytaną"
+    },
+    "markVisibleRead": {
+        "message": "Oznacz wszystkie widoczne wiadomości jako przeczytane"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Oznacz wszystkie wiadomości jako przeczytane"
+    },
+    "starItem": {
+        "message": "Dodaj zakładkę do wybranej wiadomości"
+    },
+    "moveToTrash": {
+        "message": "Przenieś wybraną wiadomość do kosza"
+    },
+    "view_header": {
+        "message": "Podgląd"
+    },
+    "showAll": {
+        "message": "Wyświetl wszystkie wiadomości"
+    },
+    "showStarred": {
+        "message": "Wyświetl wiadomości wyróżnione gwiazdką"
+    },
+    "showUnread": {
+        "message": "Wyświetl nieprzeczytane wiadomości"
+    },
+    "headlinesView": {
+        "message": "Widok nagłówków"
+    },
+    "fullView": {
+        "message": "Pełny widok"
+    },
+    "general_header": {
+        "message": "Ogólne"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Otwórz Briefa"
+    },
+    "focusSearchbar": {
+        "message": "Uaktywnij pasek szukania"
+    },
+    "displayShortcuts": {
+        "message": "Wyświetl listę skrótów klawiszowych"
     }
 }

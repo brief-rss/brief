@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief fai a lectura de fontes RSS doada e intuitiva. Deseñado para ter exactamente as características necesarias, é poderoso e sinxelo ao mesmo tempo. As fontes son presentadas nunha páxina fluída e interactiva que lle permite marcar e etiquetar os elementos cun sinxelo clic."
+    },
+    "addonDescription": {
+        "message": "Marcar e etiquetar de xeito doado elementos interesantes. Explorar as súas fontes cunhas presentacións útiles - ver unicamente as entradas non lidas ou marcadas, amosar unha única fonte ou todo un cartafol, amosar elementos completos ou só as cabeceiras. Atopar rapidamente unha nova empregando a barra de procuras. Reciba un aviso cando estean dispoñibles novos elementos e seguir o número deles na barra de estado. Personalizar o aspecto das fontes. Usar atallos do teclado para facer a navegación entre as novas máis rápida. E sobre todo, facer todo doado e intuitivo."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Procurar"
+    },
+    "allItemsFolder_label": {
+        "message": "Todos os elementos"
+    },
+    "todayFolder_label": {
+        "message": "Hoxe"
+    },
+    "starredFolder_label": {
+        "message": "Marcadores"
+    },
+    "trashFolder_label": {
+        "message": "Lixo"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Ver as cabeceiras"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Ver todos os elementos (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Mostrar todos os elementos (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Visualizar só os elementos sen ler (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Visualizar só os marcadores(S)"
+    },
+    "updateButton_label": {
+        "message": "Actualizar"
+    },
+    "updateButton_tooltip": {
+        "message": "Actualizar todas as fontes"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Parar"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Deter a actualización das fontes"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Opcións"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Configurar Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Organizar"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Organizar fontes"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Facer dobre clic para ocultar a barra lateral"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Amosar a barra lateral"
+    },
+    "markViewRead_tooltip": {
+        "message": "Marcar todos os elementos como lidos (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Marcar como lido"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Marcar os elementos etiquetados como lidos"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Actualizar agora"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Actualizar agora"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Abrir a páxina web"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Cancelar subscrición"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Borrar o cartafol"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Borrar a etiqueta"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Baleirar a fonte"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Baleirar o cartafol"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Restaurar todos os elementos"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Baleirar o lixo"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Axustes da conta"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Grazas por instalar Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "As fontes son o xeito máis sinxelo de seguir as súas webs favoritas."
+    },
+    "subscribingStep1_description": {
+        "message": "Prema na icona da barra de localización para previsualizar a fonte."
+    },
+    "subscribingStep2_description": {
+        "message": "Seleccionar os <strong>Marcadores dinámicos</strong> e prema en <strong>Subscribirse agora</strong>."
+    },
+    "subscribingStep3_description": {
+        "message": "Escoller o cartafol das <strong>fontes subscritas</strong> no menús dos marcadores."
+    },
+    "getStartedButton_label": {
+        "message": "Comezar"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Opcións de Brief"
+    },
+    "mainPane_label": {
+        "message": "Principal"
+    },
+    "refreshGroup_caption": {
+        "message": "Actualizando"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Procurar novas actualizacións cada"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "C"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minutos"
+    },
+    "updateIntervalHours_label": {
+        "message": "horas"
+    },
+    "updateIntervalDays_label": {
+        "message": "días"
+    },
+    "showNotification_label": {
+        "message": "Amosar un aviso cando se atopen novos elementos"
+    },
+    "showNotification_accesskey": {
+        "message": "S"
+    },
+    "readingGroup_caption": {
+        "message": "Lendo"
+    },
+    "storingGroup_caption": {
+        "message": "Gardando"
+    },
+    "expirationBefore_label": {
+        "message": "Eliminar os elementos descargados despois de"
+    },
+    "expirationAfter_label": {
+        "message": "días"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "R"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Os elementos marcados manteranse"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Non gardar máis de"
+    },
+    "storedEntriesAfter_label": {
+        "message": "elementos recentes por fonte"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Limpar todos os elementos"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "a"
+    },
+    "showUnreadCounter_label": {
+        "message": "Amosar o número de elementos sen ler a carón da icona de Brief"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "w"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Na vista 'Sen ler' amosar primeiro os máis antigos"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "o"
+    },
+    "autoMarkRead_label": {
+        "message": "Marcar os elementos como lidos despois de os ver"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "Personalizar a aparencia das fontes"
+    },
+    "editStyleButton_label": {
+        "message": "Personalizar"
+    },
+    "editStyleButton_accesskey": {
+        "message": "C"
+    },
+    "styleEditor_title": {
+        "message": "Editar o estilo personalizado"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Aprender a personalizar a aparencia con CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Nome"
+    },
+    "feedURL_label": {
+        "message": "Localización"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Axustes da fonte"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Procurar actualizacións cada"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Eliminar elementos descargados despois de"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "R"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "días"
+    },
+    "updatedEntries_label": {
+        "message": "Non marcar elementos cambiados como non lidos"
+    },
+    "updatedEntries_accesskey": {
+        "message": "D"
+    },
+    "omitInUnread_label": {
+        "message": "Non incluír estes elementos na conta xeral de non lidos"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "&lt;Anterior"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "Seguinte&gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Baleirar o lixo"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - Atallos do teclado"
+    },
+    "or": {
+        "message": "ou"
+    },
+    "navigation_header": {
+        "message": "Navegación"
+    },
+    "space_key": {
+        "message": "Espazo"
+    },
+    "shiftSpace_key": {
+        "message": "Maiús + Espazo"
+    },
+    "nextItem": {
+        "message": "Ir ao seguinte elemento"
+    },
+    "previousItem": {
+        "message": "Ir ao elemento anterior"
+    },
+    "scrollDownByScreen": {
+        "message": "Desprazarse cara a abaixo pola pantalla"
+    },
+    "scrollUpByScreen": {
+        "message": "Desprazarse cara a arriba pola pantalla"
+    },
+    "enter_key": {
+        "message": "Intro"
+    },
+    "openEntry": {
+        "message": "Abrir o elemento actual"
+    },
+    "showItem": {
+        "message": "Amosar/Ocultar o elemento acutal(na vista de cabeceiras)"
+    },
+    "entries_header": {
+        "message": "Elementos"
+    },
+    "markCurrentItemRead": {
+        "message": "Marcar o elemento actual como lido/sen ler"
+    },
+    "markVisibleRead": {
+        "message": "Marcar todos os elemento visibles como lidos"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Marcar todos os elementos como lidos"
+    },
+    "starItem": {
+        "message": "Marcar o elemento actual"
+    },
+    "moveToTrash": {
+        "message": "Mover o elemento actual para o lixo"
+    },
+    "view_header": {
+        "message": "Vista"
+    },
+    "showAll": {
+        "message": "Amosar todos os elementos"
+    },
+    "showStarred": {
+        "message": "Amosar os elementos marcados"
+    },
+    "showUnread": {
+        "message": "Amosar os elementos sen ler"
+    },
+    "headlinesView": {
+        "message": "Mudar a vista de cabeceiras"
+    },
+    "fullView": {
+        "message": "Ver todos os elementos"
+    },
+    "general_header": {
+        "message": "Xeral"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Maiús + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Maiús + D"
+    },
+    "openBrief": {
+        "message": "Abrir o Brief"
+    },
+    "focusSearchbar": {
+        "message": "Foco na caixa de procuras"
+    },
+    "displayShortcuts": {
+        "message": "Amosar a listaxe de atallos"
     }
 }

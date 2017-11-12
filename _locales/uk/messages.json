@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief робить читання RSS-стрічок простим і інтуїтивно зрозумілим настільки, наскільки це можливо. Розроблений, щоб мати повний набір потрібних функцій, він потужний і в той же час простий. Стрічки новин подаються на суцільній інтерактивній сторінці, що дає вам змогу робити закладки на записи та помічати їх одним натисканням миші."
+    },
+    "addonDescription": {
+        "message": "Легко створюйте закладки на цікаві записи та помічайте їх. Переглядайте стрічки кількома зручними способами - переглядаючи тільки непрочитані записи або тільки записи із закладкою, відображаючи одну стрічку чи цілу папку, переглядаючи записи повністю або тільки заголовки. Швидко знаходьте потрібну новину, використовуючи панель пошуку. Отримуйте сповіщення, коли доступні нові записи і відстежуйте їх кількість у рядку стану. Налаштуйте зовнішній вигляд стрічок на свій смак. Використовувати сполучення клавіш для швидкого переміщення по базлічі новин. І все це робиться просто й інтуїтивно."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Пошук"
+    },
+    "allItemsFolder_label": {
+        "message": "Усі записи"
+    },
+    "todayFolder_label": {
+        "message": "Сьогодні"
+    },
+    "starredFolder_label": {
+        "message": "Закладки"
+    },
+    "trashFolder_label": {
+        "message": "Кошик"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Перегляд заголовків (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Перегляд повних записів (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Відображати всі записи (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Відображати лише непрочитані записи (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Відображати лише записи зі створеними закладками (S)"
+    },
+    "updateButton_label": {
+        "message": "Оновити"
+    },
+    "updateButton_tooltip": {
+        "message": "Перевірити наявність оновлень усіх стрічок"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Зупинити"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Зупинити перевірку наявності оновлень стрічок"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Налаштування"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Налаштувати Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Упорядкувати"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Упорядкувати стрічки"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Двічі клацніть, щоб приховати бічну панель"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Відкрити бічну панель"
+    },
+    "markViewRead_tooltip": {
+        "message": "Позначити всі записи як прочитані (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Позначити як прочитане"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Позначити записи з міткою як прочитані"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Оновити стрічку"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Оновити теку"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Відкрити веб-сайт"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Відписатися від стрічки"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Видалити теку"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Видалити мітку"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Очистити стрічку"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Очистити теку"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Відновити всі записи"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Очистити кошик"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Налаштування стрічки"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Ознайомлення з Brief"
+    },
+    "thankYou_header": {
+        "message": "Дякуємо за встановлення Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Стрічки новин - це найпростіший спосіб слідувати за вашими улюбленими веб-сайтами!"
+    },
+    "subscribingStep1_description": {
+        "message": "Коли ви перебуваєте на веб-сайті, який ви хочете відслідковувати, відкрийте меню <strong>Закладки</strong> і виберіть <strong>Підписатися на цю сторінку</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "Або ви можете знайти посилання на стрічку новин на самому сайті."
+    },
+    "subscribingStep3_description": {
+        "message": "Виберіть <strong>Brief</strong> та клацніть <strong>Підписатися зараз</strong>. Ось і все!."
+    },
+    "getStartedButton_label": {
+        "message": "Початок роботи"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Налаштування Brief"
+    },
+    "mainPane_label": {
+        "message": "Головне"
+    },
+    "refreshGroup_caption": {
+        "message": "Оновлення"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Перевіряти оновлення стрічок кожні"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "о"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "хв"
+    },
+    "updateIntervalHours_label": {
+        "message": "год"
+    },
+    "updateIntervalDays_label": {
+        "message": "дн"
+    },
+    "showNotification_label": {
+        "message": "Відображати сповіщення, коли знайдено нові записи"
+    },
+    "showNotification_accesskey": {
+        "message": "с"
+    },
+    "readingGroup_caption": {
+        "message": "Читання"
+    },
+    "storingGroup_caption": {
+        "message": "Зберігання"
+    },
+    "expirationBefore_label": {
+        "message": "Видаляти завантажені записи через"
+    },
+    "expirationAfter_label": {
+        "message": "дн"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "В"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Записи з міткою будуть зберігатися"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Зберігати не більше"
+    },
+    "storedEntriesAfter_label": {
+        "message": "останніх записів кожноі стрічки"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "З"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Видалити всі записи..."
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "д"
+    },
+    "showUnreadCounter_label": {
+        "message": "Відображати кількість непрочитаних записів поруч із піктограмою"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "к"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "У поданні «Непрочитані» спочатку відображати найстаріші елементи"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "Н"
+    },
+    "autoMarkRead_label": {
+        "message": "Автоматично позначати елементи як прочитані після того, як я їх побачу"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "п"
+    },
+    "editStyleDescription_label": {
+        "message": "Налаштування зовнішнього вигляду стрічок"
+    },
+    "editStyleButton_label": {
+        "message": "Налаштувати"
+    },
+    "editStyleButton_accesskey": {
+        "message": "ш"
+    },
+    "styleEditor_title": {
+        "message": "Редагування власного стилю"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Дізнайтеся про налаштування зовнішнього вигляду за допомогою CSS (анг.)"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Назва"
+    },
+    "feedURL_label": {
+        "message": "Адреса"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Налаштування стрічки"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Перевіряти наявність оновлень кожні"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "о"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Видаляти завантажені записи через"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "В"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "дн"
+    },
+    "updatedEntries_label": {
+        "message": "Не позначати змінені записи знову непрочитаними"
+    },
+    "updatedEntries_accesskey": {
+        "message": "з"
+    },
+    "omitInUnread_label": {
+        "message": "Не враховувати записи цієї стрічки у сьогоднішній та загальній кількості непрочитаних"
+    },
+    "omitInUnread_accesskey": {
+        "message": "х"
+    },
+    "previousFeed_label": {
+        "message": "« Попередня"
+    },
+    "previousFeed_accesskey": {
+        "message": "П"
+    },
+    "nextFeed_label": {
+        "message": "Наступна »"
+    },
+    "nextFeed_accesskey": {
+        "message": "Н"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Очистити кошик"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief — сполучення клавіш"
+    },
+    "or": {
+        "message": "або"
+    },
+    "navigation_header": {
+        "message": "Навігація"
+    },
+    "space_key": {
+        "message": "Пробіл"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Пробіл"
+    },
+    "nextItem": {
+        "message": "Перейти до наступного запису"
+    },
+    "previousItem": {
+        "message": "Повернутися до попереднього запису"
+    },
+    "scrollDownByScreen": {
+        "message": "Прокрутити вниз на висоту екрану"
+    },
+    "scrollUpByScreen": {
+        "message": "Прокрутити вгору на висоту екрану"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Відкрити поточний запис"
+    },
+    "showItem": {
+        "message": "Показати/приховати поточний запис (у поданні «Перегляд заголовків»)"
+    },
+    "entries_header": {
+        "message": "Записи"
+    },
+    "markCurrentItemRead": {
+        "message": "Позначити поточний запис як прочитаний/непрочитаний"
+    },
+    "markVisibleRead": {
+        "message": "Позначити всі записи на екрані як прочитані"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Позначити всі записи як прочитані"
+    },
+    "starItem": {
+        "message": "Закласти поточний запис"
+    },
+    "moveToTrash": {
+        "message": "Видалити поточний запис до кошика"
+    },
+    "view_header": {
+        "message": "Вигляд"
+    },
+    "showAll": {
+        "message": "Відображати всі записи"
+    },
+    "showStarred": {
+        "message": "Відображати записи зі створеними закладками"
+    },
+    "showUnread": {
+        "message": "Відображати непрочитані записи"
+    },
+    "headlinesView": {
+        "message": "Перегляд заголовків"
+    },
+    "fullView": {
+        "message": "Перегляд повних записів"
+    },
+    "general_header": {
+        "message": "Загальні"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Відкрити Brief"
+    },
+    "focusSearchbar": {
+        "message": "Перемістити фокус на поле пошуку"
+    },
+    "displayShortcuts": {
+        "message": "Показати список сполучень клавіш"
     }
 }

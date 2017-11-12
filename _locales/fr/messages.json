@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief rend la lecture de flux RSS aussi facile et intuitive que possible. Elle a été conçue de manière à inclure juste ce qu'il faut de fonctionnalités pour être à la fois simple et puissante. Les flux sont présentés sur une page fluide et interactive vous permettant de marquer et d'étiqueter les articles en un clic."
+    },
+    "addonDescription": {
+        "message": "Marquez et étiquetez facilement les articles intéressants. Naviguez dans vos flux de diverses manières utiles - en affichant seulement les articles non lus ou marqués, un seul flux ou un dossier entier, les articles entiers ou juste les titres. Trouvez rapidement un article avec la barre de recherche. Soyez averti des nouveaux articles et de leur nombre dans la barre d'état. Personnalisez l'apparence des flux. Utilisez des raccourcis clavier pour naviguer plus vite dans les montagnes d'informations. Enfin, faites tout de manière simple et intuitive."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Rechercher"
+    },
+    "allItemsFolder_label": {
+        "message": "Tous les articles"
+    },
+    "todayFolder_label": {
+        "message": "Aujourd'hui"
+    },
+    "starredFolder_label": {
+        "message": "Marqués"
+    },
+    "trashFolder_label": {
+        "message": "Corbeille"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Afficher uniquement les titres (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Afficher les articles en entier (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Afficher tous les articles (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Afficher seulement les articles non lus (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Afficher seulement les articles marqués (S)"
+    },
+    "updateButton_label": {
+        "message": "Actualiser"
+    },
+    "updateButton_tooltip": {
+        "message": "Mettre à jour tous les flux"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Arrêter"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Arrêter la mise à jour"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Options"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Configurer Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Ordonner"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Ordonner les flux"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Double-cliquer pour masquer ce panneau latéral"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Afficher le panneau latéral"
+    },
+    "markViewRead_tooltip": {
+        "message": "Marquer les articles courants comme lus (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Marquer comme lu"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Marquer les articles étiquetés comme lus"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Mettre à jour maintenant"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Mettre à jour maintenant"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Afficher le site Web"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Se désabonner"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Supprimer le dossier"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Supprimer l'étiquette"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Vider le flux dans la corbeille"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Vider le dossier dans la corbeille"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Restaurer le contenu de la corbeille"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Vider la corbeille"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Paramètres du flux"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Présentation de Brief"
+    },
+    "thankYou_header": {
+        "message": "Merci d'avoir installé Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Les flux vous permettent de suivre très facilement vos sites Web préférés !"
+    },
+    "subscribingStep1_description": {
+        "message": "Lorsque vous êtes sur un site Web que vous souhaitez suivre, ouvrez le menu <strong>Marque-pages</strong> et cliquez sur <strong>S'abonner à cette page</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "Le site peut également fournir un lien direct vers le flux."
+    },
+    "subscribingStep3_description": {
+        "message": "Choisissez <strong>Brief</strong> puis cliquez sur <strong>S'abonner maintenant</strong>. C'est tout !"
+    },
+    "getStartedButton_label": {
+        "message": "Commencer"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Options de Brief"
+    },
+    "mainPane_label": {
+        "message": "Générales"
+    },
+    "refreshGroup_caption": {
+        "message": "Actualisation"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Mettre les flux à jour tou(te)s les"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "M"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minutes"
+    },
+    "updateIntervalHours_label": {
+        "message": "heures"
+    },
+    "updateIntervalDays_label": {
+        "message": "jours"
+    },
+    "showNotification_label": {
+        "message": "M'avertir si des mises à jour ont été trouvées"
+    },
+    "showNotification_accesskey": {
+        "message": "a"
+    },
+    "readingGroup_caption": {
+        "message": "Lecture"
+    },
+    "storingGroup_caption": {
+        "message": "Enregistrement"
+    },
+    "expirationBefore_label": {
+        "message": "Supprimer les articles téléchargés il y a plus de"
+    },
+    "expirationAfter_label": {
+        "message": "jours"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "S"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Conserver les articles marqués"
+    },
+    "storedEntriesBefore_label": {
+        "message": "N'enregistrer que les"
+    },
+    "storedEntriesAfter_label": {
+        "message": "derniers articles de chaque flux"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "N"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Supprimer tous les articles…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "t"
+    },
+    "showUnreadCounter_label": {
+        "message": "Afficher le nombre d'articles non lus à côté de l'icône de Brief."
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "l"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Afficher les plus anciens en premier dans l'affichage des articles non lus"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "f"
+    },
+    "autoMarkRead_label": {
+        "message": "Marquer les articles vus comme lus"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "v"
+    },
+    "editStyleDescription_label": {
+        "message": "Personnaliser l'apparence de Brief"
+    },
+    "editStyleButton_label": {
+        "message": "Personnaliser"
+    },
+    "editStyleButton_accesskey": {
+        "message": "P"
+    },
+    "styleEditor_title": {
+        "message": "Modifier le style personnel"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Informations sur la personnalisation de l'apparence avec les CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Nom :"
+    },
+    "feedURL_label": {
+        "message": "Adresse :"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Réglages du flux"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Mettre ce flux à jour tou(te)s les"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "M"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Supprimer les articles de plus de"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "S"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "jours"
+    },
+    "updatedEntries_label": {
+        "message": "Ne pas marquer les articles mis à jour comme non lus"
+    },
+    "updatedEntries_accesskey": {
+        "message": "N"
+    },
+    "omitInUnread_label": {
+        "message": "Ne pas inclure les articles de ce flux dans le nombre total d'articles non lus"
+    },
+    "omitInUnread_accesskey": {
+        "message": "i"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Précédent"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "Suivant &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "u"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Vider la corbeille"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - raccourcis clavier"
+    },
+    "or": {
+        "message": "ou"
+    },
+    "navigation_header": {
+        "message": "Navigation"
+    },
+    "space_key": {
+        "message": "Espace"
+    },
+    "shiftSpace_key": {
+        "message": "Maj + Espace"
+    },
+    "nextItem": {
+        "message": "Aller à l'article suivant"
+    },
+    "previousItem": {
+        "message": "Aller à l'article précédent"
+    },
+    "scrollDownByScreen": {
+        "message": "Faire défiler vers le bas de la hauteur de l'écran"
+    },
+    "scrollUpByScreen": {
+        "message": "Faire défiler vers le haut de la hauteur de l'écran"
+    },
+    "enter_key": {
+        "message": "Entrée"
+    },
+    "openEntry": {
+        "message": "Ouvrir l'article courant"
+    },
+    "showItem": {
+        "message": "Afficher / masquer l'article courant (en mode d'affichage des titres)"
+    },
+    "entries_header": {
+        "message": "Articles"
+    },
+    "markCurrentItemRead": {
+        "message": "Marquer l'article courant comme lu / non lu"
+    },
+    "markVisibleRead": {
+        "message": "Marquer tous les article de l'écran comme lus"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Marquer tous les articles comme lus"
+    },
+    "starItem": {
+        "message": "Marquer l'article courant"
+    },
+    "moveToTrash": {
+        "message": "Déplacer l'article courant dans la corbeille"
+    },
+    "view_header": {
+        "message": "Affichage"
+    },
+    "showAll": {
+        "message": "Afficher tous les articles"
+    },
+    "showStarred": {
+        "message": "Afficher seulement les articles marqués"
+    },
+    "showUnread": {
+        "message": "Afficher seulement les articles non lus"
+    },
+    "headlinesView": {
+        "message": "Afficher les titres uniquement"
+    },
+    "fullView": {
+        "message": "Afficher les articles en entier"
+    },
+    "general_header": {
+        "message": "Général"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Maj + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Maj + D"
+    },
+    "openBrief": {
+        "message": "Ouvrir Brief"
+    },
+    "focusSearchbar": {
+        "message": "Placer le curseur dans la barre de recherche"
+    },
+    "displayShortcuts": {
+        "message": "Afficher la liste des raccourcis clavier"
     }
 }

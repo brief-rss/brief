@@ -1,4 +1,293 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief makes reading RSS feeds as easy and intuitive as it gets. Designed to have exactly the right set of features, it is powerful and simple at the same time. Feeds are presented on a seamless, interactive page which let&apos;s you bookmark and tag items with a single click. "
+    },
+    "addonDescription": {
+        "message": "Easily bookmark and tag interesting items. Browse your feeds in a couple of useful ways - view only unread or bookmarked entries, display a single feed or a whole folder, show full items or only headlines. Quickly find a piece of news using the search bar. Let yourself be notified when new items are available and track their number using the status bar. Customize the look of feeds. Use keyboard shortcuts to faster navigate through the pile of news. Above all, do everything simply and intuitively."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Search"
+    },
+    "allItemsFolder_label": {
+        "message": "All Items"
+    },
+    "todayFolder_label": {
+        "message": "Today"
+    },
+    "starredFolder_label": {
+        "message": "Bookmarks"
+    },
+    "trashFolder_label": {
+        "message": "Trash"
+    },
+
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "View headlines (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "View full items (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Show all items (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Show only unread items (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Show only bookmarks (S)"
+    },
+    "updateButton_label": {
+        "message": "Refresh"
+    },
+    "updateButton_tooltip": {
+        "message": "Check all feeds for updates"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Stop"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Stop checking feeds for updates"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Options"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Configure Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Organize"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Organize feeds"
+    },
+
+    "sidebarSplitter_tooltip": {
+        "message": "Double-click to hide the sidebar"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Reveal the sidebar"
+    },
+    "markViewRead_tooltip": {
+        "message": "Mark all items as read (Alt + N)"
+    },
+
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Mark As Read"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Mark Tagged Items As Read"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Refresh Now"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Refresh Now"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Open Website"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Unsubscribe"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Delete Folder"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Delete Tag"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Empty Feed"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Empty Folder"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Restore All Items"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Empty Trash"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Feed Settings"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief introduction"
+    },
+    "thankYou_header": {
+        "message": "Thanks for installing Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Feeds are the easiest way to follow your favorite websites!"
+    },
+    "subscribingStep1_description": {
+        "message": "When you are on a website you want to follow, open <strong>Bookmarks</strong> menu and click <strong>Subscribe to This Page</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "Or you can find a link to the feed on the website itself."
+    },
+    "subscribingStep3_description": {
+        "message": "Select <strong>Brief</strong> and click <strong>Subscribe Now</strong>. That's it!"
+    },
+    "getStartedButton_label": {
+        "message": "Get Started"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Brief options"
+    },
+    "mainPane_label": {
+        "message": "Main"
+    },
+    "refreshGroup_caption": {
+        "message": "Refreshing"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Check feeds for updates every"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "C"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minutes"
+    },
+    "updateIntervalHours_label": {
+        "message": "hours"
+    },
+    "updateIntervalDays_label": {
+        "message": "days"
+    },
+    "showNotification_label": {
+        "message": "Show a notification when new items are found"
+    },
+    "showNotification_accesskey": {
+        "message": "S"
+    },
+    "readingGroup_caption": {
+        "message": "Reading"
+    },
+    "storingGroup_caption": {
+        "message": "Storing"
+    },
+    "expirationBefore_label": {
+        "message": "Remove downloaded items after"
+    },
+    "expirationAfter_label": {
+        "message": "days"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "R"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Bookmarked items will be kept"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Store no more than"
+    },
+    "storedEntriesAfter_label": {
+        "message": "latest items of each feed"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Clear all items..."
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "a"
+    },
+    "showUnreadCounter_label": {
+        "message": "Show the number of unread items next to Brief's icon"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "w"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Sort oldest items first in unread view"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "o"
+    },
+    "autoMarkRead_label": {
+        "message": "Automatically mark items as read after I see them"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "Customize Brief's look"
+    },
+    "editStyleButton_label": {
+        "message": "Customize"
+    },
+    "editStyleButton_accesskey": {
+        "message": "u"
+    },
+    "styleEditor_title": {
+        "message": "Edit custom style"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Learn about customizing appearance with CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Name"
+    },
+    "feedURL_label": {
+        "message": "Location"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Feed settings"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Check for updates every"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Remove downloaded items after"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "R"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "days"
+    },
+    "updatedEntries_label": {
+        "message": "Don&apos;t mark changed items back as unread"
+    },
+    "updatedEntries_accesskey": {
+        "message": "D"
+    },
+    "omitInUnread_label": {
+        "message": "Exclude this feed from Today and All Items views"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Previous"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "Next &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -49,5 +338,104 @@
     },
     "briefEmptyTrash_label": {
         "message": "Empty Trash"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - keyboard shortcuts"
+    },
+    "or": {
+        "message": "or"
+    },
+
+    "navigation_header": {
+        "message": "Navigation"
+    },
+    "space_key": {
+        "message": "Space"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Space"
+    },
+    "nextItem": {
+        "message": "Go to the next item"
+    },
+    "previousItem": {
+        "message": "Go to the previous item"
+    },
+    "scrollDownByScreen": {
+        "message": "Scroll down by the height of the screen"
+    },
+    "scrollUpByScreen": {
+        "message": "Scroll up by the height of the screen"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Open the current item"
+    },
+    "showItem": {
+        "message": "Show/hide the current item (in headlines view)"
+    },
+
+    "entries_header": {
+        "message": "Items"
+    },
+    "markCurrentItemRead": {
+        "message": "Mark the current item as read/unread"
+    },
+    "markVisibleRead": {
+        "message": "Mark all items on the screen as read"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Mark all items as read"
+    },
+    "starItem": {
+        "message": "Bookmark the current item"
+    },
+    "moveToTrash": {
+        "message": "Move the current item to Trash"
+    },
+
+    "view_header": {
+        "message": "View"
+    },
+    "showAll": {
+        "message": "Show all items"
+    },
+    "showStarred": {
+        "message": "Show bookmarked items"
+    },
+    "showUnread": {
+        "message": "Show unread items"
+    },
+    "headlinesView": {
+        "message": "View headlines"
+    },
+    "fullView": {
+        "message": "View full items"
+    },
+
+    "general_header": {
+        "message": "General"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Open Brief"
+    },
+    "focusSearchbar": {
+        "message": "Focus the search box"
+    },
+    "displayShortcuts": {
+        "message": "Display the list of keyboard shortcuts"
     }
 }

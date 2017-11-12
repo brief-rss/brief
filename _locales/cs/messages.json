@@ -1,4 +1,290 @@
 {
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief dělá čtení RSS kanálů tak jednoduchým a intuitivním, jak jen to jde. Obsahuje ideální kombinaci funkcí a jeho používání je efektivní a jednoduché zároveň. Kanály jsou zobrazeny na přehledné interaktivní stránce, kde je můžete jedním klepnutím přidat do záložek nebo označit štítkem."
+    },
+    "addonDescription": {
+        "message": "Můžete jednoduše přidávat zajímavé články do záložek a označovat je štítky, procházet odebíranými kanály několika vhodnými způsoby - můžete zobrazit pouze nepřečtené položky nebo třeba články uložené v záložkách, prohlížet konkrétní kanál nebo celou složku, z článků můžete vidět detaily nebo jen záhlaví. Rychle najdete hledaný článek. Na aktualizace kanálů vás upozorní ikonka ve stavovém řádku obsahující i počet nepřečtených položek. Stránku s přehledem kanálů si lze přizpůsobit dle vlastních představ. Klávesové zkratky vám umožní rychlejší navigaci hromadou novinek. A to vše v jednoduchém a intuitivním rozhraní."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Hledat"
+    },
+    "allItemsFolder_label": {
+        "message": "Všechny položky"
+    },
+    "todayFolder_label": {
+        "message": "Dnes"
+    },
+    "starredFolder_label": {
+        "message": "Záložky"
+    },
+    "trashFolder_label": {
+        "message": "Koš"
+    },
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Použít zobrazení záhlaví"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Zobrazit úplné položky (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Zobrazit všechny položky (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Zobrazit pouze nepřečtené položky (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Zobrazit pouze záložky (S)"
+    },
+    "updateButton_label": {
+        "message": "Obnovit"
+    },
+    "updateButton_tooltip": {
+        "message": "Zkontrolovat všechny kanály pro novinky"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Zastavit"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Zastavit kontrolu kanálů pro novinky"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Možnosti"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Nastavit Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Spravovat"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Spravovat kanály"
+    },
+    "sidebarSplitter_tooltip": {
+        "message": "Dvojím klepnutím skryjete postranní lištu"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Znovu zobrazit postranní lištu"
+    },
+    "markViewRead_tooltip": {
+        "message": "Označit všechny položky jako přečtené (Alt + N)"
+    },
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Označit jako přečtené"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Označit položky se štítkem jako přečtené"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Obnovit nyní"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Obnovit nyní"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Otevřít webovou stránku"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Odhlásit"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Smazat složku"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Smazat štítek"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Vyprázdnit kanál"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Vyprázdnit složku"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Obnovit všechny položky"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Vysypat Koš"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Nastavení kanálu"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Brief"
+    },
+    "thankYou_header": {
+        "message": "Děkujeme, že jste nainstalovali Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Kanály jsou nejsnazším způsobem jak sledovat oblíbené stránky!"
+    },
+    "subscribingStep1_description": {
+        "message": "Klepněte na ikonku v adresní liště pro zobrazení náhledu kanálu."
+    },
+    "subscribingStep2_description": {
+        "message": "Vyberte <strong>Aktuální záložky</strong> a klepněte na <strong>Odebírat</strong>."
+    },
+    "subscribingStep3_description": {
+        "message": "Vyberte složku <strong>Odebírané kanály</strong> v nabídky Záložky."
+    },
+    "getStartedButton_label": {
+        "message": "Začít"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Možnosti rozšíření Brief"
+    },
+    "mainPane_label": {
+        "message": "Hlavní"
+    },
+    "refreshGroup_caption": {
+        "message": "Obnovování"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Kontrolovat kanály každých"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "K"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "minut"
+    },
+    "updateIntervalHours_label": {
+        "message": "hodin"
+    },
+    "updateIntervalDays_label": {
+        "message": "dnů"
+    },
+    "showNotification_label": {
+        "message": "Zobrazit oznámení, když jsou nalezeny nové položky"
+    },
+    "showNotification_accesskey": {
+        "message": "Z"
+    },
+    "readingGroup_caption": {
+        "message": "Čtení"
+    },
+    "storingGroup_caption": {
+        "message": "Ukládání"
+    },
+    "expirationBefore_label": {
+        "message": "Odstranit stažené položky po"
+    },
+    "expirationAfter_label": {
+        "message": "dnech"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "d"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Položky uložené do záložen budou zachovány"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Ukládat ne více než"
+    },
+    "storedEntriesAfter_label": {
+        "message": "posledních položek každého kanálu"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "U"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Smazat všechny položky..."
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "S"
+    },
+    "showUnreadCounter_label": {
+        "message": "Zobrazit počet nepřečtených položek vedle ikonky Briefu"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "i"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Seřadit od nejstarší při zobrazení nepřečtených položek"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "n"
+    },
+    "autoMarkRead_label": {
+        "message": "Označit položky za přečtené poté, co je uvidím"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "O"
+    },
+    "editStyleDescription_label": {
+        "message": "Přizpůsobit vzhled kanálů"
+    },
+    "editStyleButton_label": {
+        "message": "Přizpůsobit"
+    },
+    "editStyleButton_accesskey": {
+        "message": "P"
+    },
+    "styleEditor_title": {
+        "message": "Upravit vlastní styl"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Zjistit více o přizpůsobování vzhledu pomocí CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Jméno"
+    },
+    "feedURL_label": {
+        "message": "Adresa"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Nastavení kanálu"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Kontrolovat změny každých"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "K"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Odstranit stažené položky po"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "O"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "dnech"
+    },
+    "updatedEntries_label": {
+        "message": "Neoznačovat změněné položky jako přečtené"
+    },
+    "updatedEntries_accesskey": {
+        "message": "z"
+    },
+    "omitInUnread_label": {
+        "message": "Nezahrnovat položky tohoto kanálu mezi celkový počet nepřečtených"
+    },
+    "omitInUnread_accesskey": {
+        "message": "k"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Předchozí"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "Následující &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
   // Messages from overlay.dtd
     // Toolbar button context menu
     "briefCtxRefreshFeeds_label": {
@@ -47,5 +333,100 @@
     },
     "briefEmptyTrash_label": {
         "message": "Vysypat koš"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - klávesové zkratky"
+    },
+    "or": {
+        "message": "nebo"
+    },
+    "navigation_header": {
+        "message": "Navigace"
+    },
+    "space_key": {
+        "message": "Mezerník"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Mezerník"
+    },
+    "nextItem": {
+        "message": "Přejít na následující položku"
+    },
+    "previousItem": {
+        "message": "Přejít na předchozí položku"
+    },
+    "scrollDownByScreen": {
+        "message": "Posunout se dolů o šířku obrazovky"
+    },
+    "scrollUpByScreen": {
+        "message": "Posunout se nahoru o šířku obrazovky"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Otevřít aktuální položku"
+    },
+    "showItem": {
+        "message": "Zobrazit/skrýt aktuální položku (v zobrazení záhlaví)"
+    },
+    "entries_header": {
+        "message": "Položky"
+    },
+    "markCurrentItemRead": {
+        "message": "Označit aktuální položku za přečtenou/nepřečtenou"
+    },
+    "markVisibleRead": {
+        "message": "Označit všechny položky v okně za přečtené"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Označit všechny položky za přečtené"
+    },
+    "starItem": {
+        "message": "Přidat aktuální položku do záložek"
+    },
+    "moveToTrash": {
+        "message": "Přesunout aktuální položku do Koše"
+    },
+    "view_header": {
+        "message": "Zobrazit"
+    },
+    "showAll": {
+        "message": "Zobrazit všechny položky"
+    },
+    "showStarred": {
+        "message": "Zobrazit položky uložené do záložek"
+    },
+    "showUnread": {
+        "message": "Zobrazit nepřečtené položky"
+    },
+    "headlinesView": {
+        "message": "Přepnout zobrazení záhlaví"
+    },
+    "fullView": {
+        "message": "Zobrazit úplné položky"
+    },
+    "general_header": {
+        "message": "Obecné"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Otevřít Brief"
+    },
+    "focusSearchbar": {
+        "message": "Přenést zaměření na vyhledávání"
+    },
+    "displayShortcuts": {
+        "message": "Zobrazit seznam klávesových zkratek"
     }
 }
