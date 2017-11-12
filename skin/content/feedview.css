@@ -1,0 +1,205 @@
+body, h1, h2 {
+    margin: 0;
+    padding: 0;
+    font-weight: inherit;
+    font-size: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+    font-size: 10px;
+    background: #fcfcfc;
+}
+
+#feed-content {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    padding: 0 10px 10px;
+}
+
+#feed-content > article {
+    display: flex;
+    align-self: stretch;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#message-box {
+    -moz-user-select: none;
+    padding: 0 15px;
+    font-family: Arial, sans-serif;
+}
+
+#main-message {
+    margin-top: 200px;
+    text-align: center;
+    font-size: 22px;
+    color: #606b78;
+}
+
+#secondary-message {
+    margin: 25px auto 0;
+    max-width: 500px;
+    text-align: center;
+    font-size: 19px;
+    color: #606b78;
+}
+
+#secondary-message > a {
+    color: #108ce6;
+}
+
+
+#article-template {
+    display: none;
+}
+
+.search-highlight {
+    border: 1px solid #45e500;
+    border-radius: 3px;
+    color: black;
+    background-color: #adff89;
+}
+
+/* ----------------------  Entry content  ---------------------- */
+
+.content {
+    padding: 10px 25px 25px;
+    overflow: auto;
+    color: #404040;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: justify;
+}
+
+.content:empty {
+    padding: 0 0 10px !important;
+}
+
+/* Reset the top margin, so that the gap between
+   header and content is always the same */
+.content > *:first-child {
+    margin-top: 0 !important;
+}
+
+.content > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+.content a {
+    color: #108ce6;
+    text-decoration: none;
+}
+
+.content a:visited {
+    color: #79b0d8;
+}
+
+img {
+    margin: 0.75em;
+    max-width: -moz-available;
+    height: auto;
+}
+
+blockquote {
+    font-style: italic;
+}
+
+pre, code {
+    font-family: "Courier New", monospace;
+    font-size: 1em;
+    white-space: pre-wrap;
+    width: -moz-available;
+}
+
+
+/* ----------------------  Item controls ------------------- */
+
+.controls {
+    display: flex;
+}
+
+.button {
+    flex-shrink: 0;
+    width: 40px;
+    height: 25px;
+    background-repeat: no-repeat;
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    transition: border-color 170ms;
+}
+
+.button:hover {
+    border-color: #ff8e42;
+}
+
+.button:active {
+    box-shadow: 0px 0px 3px #ffa060, inset 0px 0px 3px #ffa060;
+}
+
+.mark-read-button {
+    background-image: url(/skin/content/mark-item-read.png);
+    background-position: 11px -1px;
+}
+
+.mark-read-button:hover {
+    background-position: 11px -24px;
+}
+
+.delete-button,
+.restore-button {
+    margin-left: 2px;
+    background-position: 11px 2px;
+}
+
+.delete-button:hover,
+.restore-button:hover {
+    background-position: 11px -23px;
+}
+
+.delete-button {
+    background-image: url(/skin/content/delete-item.png);
+}
+
+.restore-button {
+    background-image: url(/skin/content/restore-item.png);
+}
+
+article.trashed .delete-button,
+article:not(.trashed) .restore-button {
+    display: none;
+}
+
+.bookmark-button {
+    margin-left: 2px;
+    background: url(/skin/content/bookmark-item.png) no-repeat;
+    background-position: 11px 0px;
+}
+
+article:not(.starred) .bookmark-button:hover {
+    background-position: 11px -25px;
+}
+
+article.starred .bookmark-button {
+    background-position: 11px -50px;
+}
+
+
+/* --------- Transitions ------------ */
+
+article[removing] {
+    transition: opacity 170ms;
+    opacity: 0;
+}
+
+*[hiding] {
+    transition-property: opacity;
+}
+
+*[showing] {
+    transition-property: opacity;
+}
