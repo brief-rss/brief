@@ -312,6 +312,7 @@ Query.prototype = {
     async count() {
         await Database.init();
         let filters = this._filters();
+        console.log("Brief: count query", filters);
         let {indexName, filterFunction, ranges} = this._searchEngine(filters);
 
         let offset = filters.sort.offset || 0;
@@ -340,6 +341,7 @@ Query.prototype = {
             }
         };
         await Database._transactionPromise(tx);
+        console.log("Brief: done count query", filters);
         return answer;
     },
 
