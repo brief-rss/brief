@@ -467,7 +467,7 @@ let FeedList = {
             read: false
         };
 
-        let unreadCount = await API.query.getEntryCount(query);
+        let unreadCount = await Database.query(query).count();
         this.tree.updateElement(aFeed.feedID, {title: aFeed.title, unreadCount});
     },
 
