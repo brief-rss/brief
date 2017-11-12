@@ -142,7 +142,7 @@ pre, code {
 }
 
 .mark-read-button {
-    background-image: url(chrome://brief/skin/icons/mark-item-read.png);
+    background-image: url(/icons/mark-item-read.png);
     background-position: 11px -1px;
 }
 
@@ -162,11 +162,11 @@ pre, code {
 }
 
 .delete-button {
-    background-image: url(chrome://brief/skin/icons/delete-item.png);
+    background-image: url(/icons/delete-item.png);
 }
 
 .restore-button {
-    background-image: url(chrome://brief/skin/icons/restore-item.png);
+    background-image: url(/icons/restore-item.png);
 }
 
 article.trashed .delete-button,
@@ -176,7 +176,7 @@ article:not(.trashed) .restore-button {
 
 .bookmark-button {
     margin-left: 2px;
-    background: url(chrome://brief/skin/icons/bookmark-item.png) no-repeat;
+    background: url(/icons/bookmark-item.png) no-repeat;
     background-position: 11px 0px;
 }
 

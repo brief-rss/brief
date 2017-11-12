@@ -474,7 +474,7 @@ let FeedList = {
     _faviconUrl: function FeedList__faviconUrl(aFeed) {
         if (Prefs.get('showFavicons') && aFeed.favicon && aFeed.favicon != 'no-favicon')
             return aFeed.favicon;
-        return "chrome://brief/skin/icons/default-feed-favicon.png";
+        return "/icons/default-feed-favicon.png";
     },
 
     rebuild: function FeedList_rebuild(urlToSelect) {

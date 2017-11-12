@@ -910,7 +910,7 @@ FeedView.prototype = {
 
 
 
-const DEFAULT_FAVICON_URL = 'chrome://brief/skin/icons/default-feed-favicon.png';
+const DEFAULT_FAVICON_URL = '/icons/default-feed-favicon.png';
 const RTL_LANGUAGE_CODES = ['ar', 'arc', 'dv', 'fa', 'ha', 'he', 'khw',
                             'ks', 'ku', 'ps', 'syr', 'ur', 'yi' ]
 
