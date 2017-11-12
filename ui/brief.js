@@ -15,6 +15,8 @@ var init = async function init() {
     await Prefs.init();
     PrefObserver.init();
 
+    Database.init();
+
     // Restore local persistence
     await Persistence.init();
 
