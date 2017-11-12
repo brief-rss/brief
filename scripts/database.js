@@ -437,6 +437,12 @@ Query.prototype = {
         };
 
         let ranges = [undefined];
+        if(filters.entry.deleted !== undefined && filters.entry.deleted === 0) {
+            ranges = [IDBKeyRange.bound([0], [1], false, true)];
+            if(filters.entry.read !== undefined && filters.entry.read === 0) {
+                ranges = [IDBKeyRange.bound([0, 0], [0, 1], false, true)];
+            }
+        }
 
         return {indexName, filterFunction, ranges};
     },
