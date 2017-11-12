@@ -159,7 +159,7 @@ var Commands = {
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        let text = STRINGS.formatStringFromName('confirmFeedDeletionText', [feed.title], 1);
+        let text = browser.i18n.getMessage('confirmFeedDeletionText', feed.title);
 
         if (window.confirm(text))
             API.deleteFeed(Number(feed.bookmarkID));
@@ -291,8 +291,7 @@ let Searchbar = {
         let searchbar = getElement('searchbar');
 
         if (searchbar.value)
-            gCurrentView.titleOverride = STRINGS.formatStringFromName(
-                'searchResults', [searchbar.value], 1);
+            gCurrentView.titleOverride = browser.i18n.getMessage('searchResults', searchbar.value);
         else
             gCurrentView.titleOverride = '';
 

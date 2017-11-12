@@ -843,24 +843,24 @@ FeedView.prototype = {
         let mainMessage, secondaryMessage;
 
         if (!FeedList.getAllFeeds().length) {
-            mainMessage = STRINGS.GetStringFromName('noFeeds');
+            mainMessage = browser.i18n.getMessage('noFeeds');
             secondaryMessage = '<a href="' + TUTORIAL_URL + '" target="_blank">'
-                               + STRINGS.GetStringFromName('noFeedsAdvice') + '</a>';
+                               + browser.i18n.getMessage('noFeedsAdvice') + '</a>';
         }
         else if (this.query.searchString) {
-            mainMessage = STRINGS.GetStringFromName('noEntriesFound');
+            mainMessage = browser.i18n.getMessage('noEntriesFound');
         }
         else if (this.query.read === false) {
-            mainMessage = STRINGS.GetStringFromName('noUnreadEntries');
+            mainMessage = browser.i18n.getMessage('noUnreadEntries');
         }
         else if (this.query.starred === true) {
-            mainMessage = STRINGS.GetStringFromName('noStarredEntries');
+            mainMessage = browser.i18n.getMessage('noStarredEntries');
         }
         else if (this.query.deleted === 'trashed') {
-            mainMessage = STRINGS.GetStringFromName('trashIsEmpty');
+            mainMessage = browser.i18n.getMessage('trashIsEmpty');
         }
         else {
-            mainMessage = STRINGS.GetStringFromName('noEntries');
+            mainMessage = browser.i18n.getMessage('noEntries');
         }
 
         this.document.getElementById('main-message').textContent = mainMessage || '' ;
@@ -1306,14 +1306,14 @@ EntryView.prototype = {
 
                 case relativeDate.deltaHours === 0:
                     let minuteForm = getPluralForm(relativeDate.deltaMinutes,
-                                                   Strings['minute.pluralForms']);
-                    return STRINGS.formatStringFromName('entryDate.ago', [minuteForm], 1)
+                                                   Strings['minute_pluralForms']);
+                    return browser.i18n.getMessage('entryDate.ago', minuteForm)
                                    .replace('#number', relativeDate.deltaMinutes);
 
                 case relativeDate.deltaHours <= 12:
                     let hourForm = getPluralForm(relativeDate.deltaHours,
-                                                 Strings['hour.pluralForms']);
-                    return STRINGS.formatStringFromName('entryDate.ago', [hourForm], 1)
+                                                 Strings['hour_pluralForms']);
+                    return browser.i18n.getMessage('entryDate.ago', hourForm)
                                    .replace('#number', relativeDate.deltaHours);
 
                 case relativeDate.deltaDaySteps === 0:
@@ -1417,11 +1417,11 @@ async function showElement(aElement, aAnimate) {
 Object.defineProperty(this, 'Strings', {
     get: () => {
         let cachedStringsList = [
-            'entryDate.justNow',
-            'minute.pluralForms',
-            'hour.pluralForms',
-            'entryDate.today',
-            'entryDate.yesterday',
+            'entryDate_justNow',
+            'minute_pluralForms',
+            'hour_pluralForms',
+            'entryDate_today',
+            'entryDate_yesterday',
             'entryWasUpdated',
             'markEntryAsUnreadTooltip',
             'markEntryAsReadTooltip',
@@ -1433,7 +1433,7 @@ Object.defineProperty(this, 'Strings', {
 
         let obj = {};
         for (let stringName of cachedStringsList)
-            obj[stringName] = STRINGS.GetStringFromName(stringName);
+            obj[stringName] = browser.i18n.getMessage(stringName);
 
         delete this.Strings;
         return this.Strings = obj;
