@@ -1278,11 +1278,11 @@ EntryView.prototype = {
         if (aOnlyDatePart) {
             switch (true) {
                 case relativeDate.deltaDaySteps === 0:
-                    return Strings['entryDate.today'];
+                    return Strings['entryDate_today'];
                     break;
 
                 case relativeDate.deltaDaySteps === 1:
-                    return Strings['entryDate.yesterday'];
+                    return Strings['entryDate_yesterday'];
                     break;
 
                 case relativeDate.deltaDaySteps < 7:
@@ -1302,27 +1302,27 @@ EntryView.prototype = {
         else {
             switch (true) {
                 case relativeDate.deltaMinutes === 0:
-                    return Strings['entryDate.justNow'];
+                    return Strings['entryDate_justNow'];
 
                 case relativeDate.deltaHours === 0:
                     let minuteForm = getPluralForm(relativeDate.deltaMinutes,
                                                    Strings['minute_pluralForms']);
-                    return browser.i18n.getMessage('entryDate.ago', minuteForm)
+                    return browser.i18n.getMessage('entryDate_ago', minuteForm)
                                    .replace('#number', relativeDate.deltaMinutes);
 
                 case relativeDate.deltaHours <= 12:
                     let hourForm = getPluralForm(relativeDate.deltaHours,
                                                  Strings['hour_pluralForms']);
-                    return browser.i18n.getMessage('entryDate.ago', hourForm)
+                    return browser.i18n.getMessage('entryDate_ago', hourForm)
                                    .replace('#number', relativeDate.deltaHours);
 
                 case relativeDate.deltaDaySteps === 0:
-                    return Strings['entryDate.today'] + ', ' +
+                    return Strings['entryDate_today'] + ', ' +
                         this.date.toLocaleTimeString(lang,
                             {hour: 'numeric', minute: 'numeric'});
 
                 case relativeDate.deltaDaySteps === 1:
-                    return Strings['entryDate.yesterday'] + ', ' +
+                    return Strings['entryDate_yesterday'] + ', ' +
                         this.date.toLocaleTimeString(lang,
                             {hour: 'numeric', minute: 'numeric'});
 
