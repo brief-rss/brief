@@ -336,7 +336,7 @@ FeedView.prototype = {
         }
 
         if (entriesToMark.length)
-            API.query.markEntriesRead(entriesToMark, true);
+            Database.query(entriesToMark).markRead(true);
     },
 
 

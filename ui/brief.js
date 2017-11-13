@@ -108,7 +108,7 @@ var Commands = {
     },
 
     markViewRead: function cmd_markViewRead() {
-        API.query.markEntriesRead(gCurrentView.query, true);
+        Database.query(gCurrentView.query).markRead(true);
     },
 
     markVisibleEntriesRead: function cmd_markVisibleEntriesRead() {
@@ -183,7 +183,7 @@ var Commands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        API.query.markEntriesRead(aEntry, aNewState);
+        Database.query(aEntry).markRead(aNewState);
     },
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
@@ -243,7 +243,7 @@ var Commands = {
         API.openBackgroundTab(linkURI.href);
 
         if (!entryView.read)
-            API.query.markEntriesRead(aEntry, true);
+            Database.query(aEntry).markRead(true);
     },
 
     showFeedProperties: function cmd_showFeedProperties(aFeed) {

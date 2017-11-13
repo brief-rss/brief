@@ -120,9 +120,16 @@ let Database = {
     },
 
     query(filters) {
-        if(filters === undefined) {
-            filters = {};
+        if(!filters)
+            return;
+
+        if(typeof filters == 'number') {
+            filters = {entries: [filters]};
         }
+        else if (Array.isArray(filters)) {
+            filters = {entries: filters};
+        }
+
         return new Query(filters);
     },
 
@@ -324,7 +331,8 @@ Query.prototype = {
         let answer = 0;
         let totalCallbacks = 0;
         let tx = Database.db().transaction(['entries'], 'readonly');
-        let index = tx.objectStore('entries').index(indexName);
+        let store = tx.objectStore('entries');
+        let index = indexName ? store.index(indexName) : store;
         if(filterFunction) {
             let cursors = ranges.map(r => index.openCursor(r));
             cursors.forEach(c => {
@@ -379,10 +387,9 @@ Query.prototype = {
         let offset = filters.sort.offset || 0;
         let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
 
-        let answer = [];
-        let totalCallbacks = 0;
         let tx = Database.db().transaction(stores, 'readonly');
-        let index = tx.objectStore('entries').index(indexName);
+        let store = tx.objectStore('entries');
+        let index = indexName ? store.index(indexName) : store;
 
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         let result = this._mergeAndCollect(
@@ -435,6 +442,41 @@ Query.prototype = {
         return result; // This will be ready by the end of transaction
     },
 
+    async markRead(state) {
+        return await this._update(e => {
+            e.read = state ? 1 : 0;
+        });
+    },
+
+    async _update(func, stores) {
+        if(stores === undefined) {
+            stores = ['entries'];
+        }
+        let filters = this._filters();
+        let {indexName, filterFunction, ranges} = this._searchEngine(filters);
+        let offset = filters.sort.offset || 0;
+        let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
+
+        let tx = Database.db().transaction(stores, 'readwrite');
+        let store = tx.objectStore('entries');
+        let index = indexName ? store.index(indexName) : store;
+
+        let cursors = ranges.map(r => index.openCursor(r, "prev"));
+        cursors.forEach(c => {
+            c.onsuccess = ({target}) => {
+                let cursor = target.result;
+                if(cursor) {
+                    let value = cursor.value;
+                    func(value);
+                    cursor.update(value);
+                    cursor.continue();
+                }
+            };
+        });
+
+        await Database._transactionPromise(tx);
+    },
+
     _filters() {
         let filters = {};
 
@@ -483,6 +525,7 @@ Query.prototype = {
 
         // Entry-based filters
         filters.entry = {
+            id: this.entries,
             read: this.read !== undefined ? +this.read : undefined,
             starred: this.starred,
             deleted: this.deleted !== undefined ? +this.deleted : undefined,
@@ -527,6 +570,12 @@ Query.prototype = {
 
         let ranges = this._prefixesToRanges(prefixes,
             {min: filters.sort.start, max: filters.sort.end});
+
+        if(filters.entry.id !== undefined) {
+            indexName = null;
+            filterFunction = undefined;
+            ranges = filters.entry.id;
+        }
 
         if(filters.entry.tags === undefined &&
             filters.fullTextSearch === undefined) {

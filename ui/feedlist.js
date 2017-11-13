@@ -777,7 +777,7 @@ let ViewListContextMenu = {
     },
 
     markFolderRead: function ViewListContextMenu_markFolderRead() {
-        API.query.markEntriesRead(ViewList.getQueryForView(this.targetItem.id), true);
+        Database.query(ViewList.getQueryForView(this.targetItem.id)).markRead(true);
     },
 
     emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
@@ -806,7 +806,7 @@ let TagListContextMenu = {
             deleted: false,
             tags: [TagList.selectedItem.dataset.id]
         };
-        API.query.markEntriesRead(query, true);
+        Database.query(query).markRead(true);
     },
 
     deleteTag: async function TagListContextMenu_deleteTag() {
@@ -866,7 +866,7 @@ let FeedListContextMenu = {
             feeds: [this.targetFeed.feedID],
             deleted: false
         };
-        API.query.markEntriesRead(query, true);
+        Database.query(query).markRead(true);
     },
 
     markFolderRead: function FolderContextMenu_markFolderRead() {
@@ -874,7 +874,7 @@ let FeedListContextMenu = {
             deleted: false,
             folders: [FeedList.selectedFeed.feedID]
         };
-        API.query.markEntriesRead(query, true);
+        Database.query(query).markRead(true);
     },
 
     updateFolder: function FolderContextMenu_updateFolder() {
