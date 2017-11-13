@@ -1,7 +1,5 @@
 'use strict';
 
-// This file should be in /scripts, but chrome:// has no access to that directory
-
 // ===== Promise utilities =====
 
 // Adapt setTimeout for Promises
