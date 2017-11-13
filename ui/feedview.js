@@ -1194,7 +1194,7 @@ EntryView.prototype = {
         let anchor = null;
         let element = aEvent.target;
         while (element != this.container) {
-            if (element.className.toUpperCase() == 'A') {
+            if (element.localName.toUpperCase() == 'A') {
                 anchor = element;
                 break;
             }
