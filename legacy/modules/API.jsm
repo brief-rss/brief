@@ -59,9 +59,6 @@ const API_CALLS = {
         feedID => Utils.window.openDialog('chrome://brief/content/options/feed-properties.xul',
             'FeedProperties', 'chrome,titlebar,toolbar,centerscreen,modal', feedID)
     ],
-    openBackgroundTab: ['brief:open-background-tab', 'async',
-        url => Utils.window.gBrowser.loadOneTab(url, {relatedToCurrent: true})
-    ],
 
     opml: {
         importFeeds: ['brief:opml:import-feeds', 'async',
