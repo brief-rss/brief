@@ -384,7 +384,7 @@ Query.prototype = {
         let tx = Database.db().transaction(stores, 'readonly');
         let index = tx.objectStore('entries').index(indexName);
 
-        let cursors = ranges.map(r => index.openCursor(r));
+        let cursors = ranges.map(r => index.openCursor(r, "prev"));
         let result = this._mergeAndCollect(
             {cursors, filterFunction, sortKey: (e => -e.date), offset, limit, extractor, tx});
 
