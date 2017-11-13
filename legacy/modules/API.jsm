@@ -41,20 +41,8 @@ const API_CALLS = {
     ],
 
     // Storage
-    ready: ['brief:storage-ready', 'async',
-        () => Storage.ready
-    ],
-    getAllFeeds: ['brief:get-feed-list', 'async',
-        (includeFolders, includeHidden) => Storage.getAllFeeds(includeFolders, includeHidden)
-    ],
     modifyFeed: ['brief:modify-feed', 'async',
         (properties) => Storage.changeFeedProperties(properties)
-    ],
-    getAllTags: ['brief:get-tag-list', 'async',
-        () => Storage.getAllTags()
-    ],
-    deleteTag: ['brief:delete-tag', 'async',
-        (tag) => Storage.deleteTag(tag)
     ],
     deleteFeed: ['brief:delete-feed', 'async',
         (feed) => Storage.deleteFeed(feed)
@@ -64,9 +52,6 @@ const API_CALLS = {
     ],
 
     // Misc helpers
-    savePersistence: ['brief:save-persistence', 'noreply',
-        (data) => Prefs.setCharPref("pagePersist", JSON.stringify(data))
-    ],
     openLibrary: ['brief:open-library', 'noreply',
         () => Utils.openLibrary()
     ],
@@ -83,34 +68,6 @@ const API_CALLS = {
     openBackgroundTab: ['brief:open-background-tab', 'async',
         url => Utils.window.gBrowser.loadOneTab(url, {relatedToCurrent: true})
     ],
-
-    // Mirrors the Query actions
-    query: {
-        getEntries: ['brief:query:get-entries', 'async',
-            (query) => new Query(query).getEntries()
-        ],
-        getFullEntries: ['brief:query:get-full-entries', 'async',
-            (query) => new Query(query).getFullEntries()
-        ],
-        getProperty: ['brief:query:get-property', 'async',
-            (query, name, distinct) => new Query(query).getProperty(name, distinct)
-        ],
-        getEntryCount: ['brief:query:count-entries', 'async',
-            (query) => new Query(query).getEntryCount()
-        ],
-        markEntriesRead: ['brief:query:mark-read', 'async',
-            (query, state) => new Query(query).markEntriesRead(state)
-        ],
-        deleteEntries: ['brief:query:delete', 'async',
-            (query, state) => new Query(query).deleteEntries(state)
-        ],
-        bookmarkEntries: ['brief:query:bookmark', 'async',
-            (query, state) => new Query(query).bookmarkEntries(state)
-        ],
-        verifyBookmarksAndTags: ['brief:query:verify-bookmarks', 'async',
-            (query) => new Query(query).verifyBookmarksAndTags()
-        ],
-    },
 
     opml: {
         importFeeds: ['brief:opml:import-feeds', 'async',
