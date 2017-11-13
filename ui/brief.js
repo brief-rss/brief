@@ -144,7 +144,7 @@ var Commands = {
     openFeedWebsite: function cmd_openWebsite(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
         let url = feed.websiteURL || (new URL(feed.feedURL).origin);
-        API.openBackgroundTab(url);
+        openBackgroundTab(url);
     },
 
     emptyFeed: function cmd_emptyFeed(aFeed) {
@@ -240,7 +240,7 @@ var Commands = {
         let baseURI = new URL(FeedList.getFeed(entryView.feedID).feedURL);
         let linkURI = new URL(entryView.entryURL, baseURI);
 
-        API.openBackgroundTab(linkURI.href);
+        openBackgroundTab(linkURI.href);
 
         if (!entryView.read)
             Database.query(aEntry).markRead(true);

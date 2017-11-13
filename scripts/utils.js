@@ -82,3 +82,18 @@ function getPluralForm(number, forms) {
     }
     return forms.split(';')[knownForms.indexOf(form)];
 }
+
+
+async function openBackgroundTab(url) {
+    let tab = await browser.tabs.getCurrent();
+    try {
+        await browser.tabs.create({active: false, url: url, openerTabId: tab.id})
+    }
+    catch(e) {
+        if(e.message.includes("openerTabId")) {
+            await browser.tabs.create({active: false, url: url})
+        } else {
+            throw e;
+        }
+    }
+}
