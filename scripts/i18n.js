@@ -12,3 +12,5 @@ function apply_i18n(doc) {
         }
     }
 }
+
+// TODO: access key highlighting
