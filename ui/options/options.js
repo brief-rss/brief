@@ -8,7 +8,7 @@ async function init() {
     initUpdateIntervalControls();
 
     await Database.init();
-    //TODO: custom style
+    //TODO: custom style init/events
 }
 
 function initUpdateIntervalControls() {
