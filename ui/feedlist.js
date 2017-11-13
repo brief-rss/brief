@@ -332,7 +332,7 @@ let TagList = {
     },
 
     _rebuild: async function TagList__rebuild() {
-        let tagList = await API.getAllTags();
+        let tagList = []; //FIXME: tag list disabled
 
         if(this.tags !== tagList) {
             this.tags = tagList;
@@ -817,7 +817,7 @@ let TagListContextMenu = {
         if (!window.confirm(text))
             return;
 
-        await API.deleteTag(tag);
+        //FIXME: delete tag
     }
 
 }
