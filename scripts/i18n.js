@@ -8,7 +8,7 @@ function apply_i18n(doc) {
         for(let substitution of node.dataset.i18nAttrs.split(/\s+/g)) {
             let [attr, text] = substitution.split(':');
             text = browser.i18n.getMessage(text) || text;
-            node[attr] = text;
+            node.setAttribute(attr, text);
         }
     }
 }

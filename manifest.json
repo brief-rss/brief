@@ -28,5 +28,9 @@
                 "default": "Ctrl+Shift+D"
             }
         }
+    },
+    "options_ui": {
+        "page": "/ui/options/options.xhtml",
+        "browser_style": true
     }
 }

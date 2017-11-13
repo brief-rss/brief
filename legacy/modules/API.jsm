@@ -55,9 +55,6 @@ const API_CALLS = {
     openLibrary: ['brief:open-library', 'noreply',
         () => Utils.openLibrary()
     ],
-    openOptions: ['brief:open-options', 'noreply',
-        () => Utils.openOptions()
-    ],
     openFeedProperties: ['brief:open-feed-properties', 'noreply',
         feedID => Utils.window.openDialog('chrome://brief/content/options/feed-properties.xul',
             'FeedProperties', 'chrome,titlebar,toolbar,centerscreen,modal', feedID)
@@ -106,21 +103,6 @@ const Utils = {
         this.window.PlacesCommandHook.showPlacesOrganizer(homePath);
     },
 
-    openOptions: function() {
-        let url = 'chrome://brief/content/options/options.xul';
-
-        let windows = Services.wm.getEnumerator(null);
-        while (windows.hasMoreElements()) {
-            let win = windows.getNext();
-            if (win.document.documentURI == url) {
-                win.focus();
-                return;
-            }
-        }
-
-        let features = 'chrome,titlebar,toolbar,centerscreen,';
-        this.window.openDialog(url, 'Brief options', features);
-    },
 };
 
 

@@ -1,13 +1,41 @@
-textbox[type="number"] > spinbuttons {
-  margin-left: 4px;
+input[type="number"] {
+    width: 5em;
 }
 
 #custom-style-textbox {
-  margin: 0;
-  font-family: monospace;
+    display: block;
+    margin: 0;
+    font-family: monospace;
+    width: 100%;
+    height: 6ex;
 }
 
 #learn-more-link {
-  margin: 5px 0;
-  color: #0049de;
+    margin: 5px 0;
+    color: #0049de;
+}
+
+h2 {
+    font-size: 1.2em;
+}
+
+label {
+    display: block;
+}
+
+hbox.line {
+    display: flex;
+    align-items: baseline;
+}
+
+hbox.line > * {
+    margin-right: 0.5em;
+}
+
+body {
+    width: -moz-max-content;
+}
+
+.right-justified {
+    justify-content: flex-end;
 }

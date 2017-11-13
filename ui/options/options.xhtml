@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title data-i18n="optionsWindow_title"/>
+
+    <link rel="stylesheet" type="text/css" href="/skin/options.css"/>
+
+    <script type="application/x-javascript" src="/scripts/prefs.js"/>
+    <script type="application/x-javascript" src="/scripts/i18n.js"/>
+    <script type="application/x-javascript" src="/ui/options/options.js"/>
+</head>
+<body>
+    <div>
+        <h2 data-i18n="refreshGroup_caption"/>
+        <hbox class="line">
+            <label data-i18n="checkForUpdatesBefore_label"
+                   data-i18n-attrs="accesskey:checkForUpdates_accesskey">
+                <input id="checkForUpdates" type="checkbox" data-pref="update.enableAutoUpdate"/>
+            </label>
+            <input type="number" min="1" id="updateInterval"
+                   data-pref="update.interval"
+                   data-pref-scale="60"
+                   data-requires="checkForUpdates"/>
+            <select id="update-time-menulist"
+                    data-requires="checkForUpdates">
+                <option data-i18n="updateIntervalMinutes_label"/>
+                <option data-i18n="updateIntervalHours_label"/>
+                <option data-i18n="updateIntervalDays_label"/>
+            </select>
+        </hbox>
+        <label data-i18n="showNotification_label"
+               data-i18n-attrs="accesskey:showNotification_accesskey">
+            <input type="checkbox" data-pref="update.showNotification"/>
+        </label>
+    </div>
+    <div align="stretch">
+        <h2 data-i18n="readingGroup_caption"/>
+        <label data-i18n="showUnreadCounter_label"
+               data-i18n-attrs="accesskey:showUnreadCounter_accesskey">
+            <input type="checkbox" data-pref="showUnreadCounter"/>
+        </label>
+        <label data-i18n="autoMarkRead_label"
+               data-i18n-attrs="accesskey:autoMarkRead_accesskey">
+            <input type="checkbox" data-pref="feedview.autoMarkRead"/>
+        </label>
+        <label data-i18n="sortUnreadViewOldestFirst_label"
+               data-i18n-attrs="accesskey:sortUnreadViewOldestFirst_accesskey">
+            <input type="checkbox" data-pref="feedview.sortUnreadViewOldestFirst"/>
+        </label>
+    </div>
+
+    <div>
+        <h2 data-i18n="storingGroup_caption"/>
+        <hbox class="line">
+            <label data-i18n="expirationBefore_label"
+                   data-i18n-attrs="accesskey:expirationCheckbox_accesskey
+                                    title:starredItemsKept_tooltip">
+                <input id="expirationCheckbox" type="checkbox" data-pref="database.expireEntries"/>
+            </label>
+            <input type="number" min="1" id="expirationInterval"
+                   data-pref="database.entryExpirationAge"
+                   data-requires="expirationCheckbox"/>
+            <label data-i18n="expirationAfter_label"/>
+        </hbox>
+        <hbox class="line">
+            <label data-i18n="storedEntriesBefore_label"
+                   data-i18n-attrs="accesskey:storedEntriesCheckbox_accesskey
+                                    title:starredItemsKept_tooltip">
+                <input id="countLimitCheckbox" type="checkbox"
+                       data-pref="database.limitStoredEntries"/>
+            </label>
+            <input type="number" min="1" id="maxStoredEntries"
+                   data-pref="database.maxStoredEntries"
+                   data-requires="countLimitCheckbox"/>
+            <label data-i18n="storedEntriesAfter_label"/>
+        </hbox>
+        <hbox class="line right-justified">
+            <button id="clear-all-entries"
+                    data-i18n="clearAllEntriesButton_label"
+                    data-i18n-attrs="accesskey:clearAllEntriesButton_accesskey"/>
+        </hbox>
+    </div>
+    <div>
+        <h2 data-i18n="editStyleDescription_label"/>
+        <textarea id="custom-style-textbox"/>
+        <a id="learn-more-link"
+           data-i18n="seeCustomizationTips_label"
+           data-i18n-attrs="href:seeCustomizationTips_url"/>
+    </div>
+</body>
+
+</html>

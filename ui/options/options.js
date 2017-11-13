@@ -1,96 +1,52 @@
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/Storage.jsm');
-Components.utils.import('resource://gre/modules/Services.jsm');
+async function init() {
+    window.addEventListener('unload', () => unload(), {once: true, passive: true});
 
-IMPORT_COMMON(this);
+    apply_i18n(document);
 
-
-function init() {
-    window.sizeToContent();
+    await Prefs.init();
+    PrefBinder.init();
+    Enabler.init();
 
     initUpdateIntervalControls();
-    updateExpirationDisabledState();
-    updateStoredEntriesDisabledState();
-}
-
-function unload() {
-    saveUpdateIntervalPref();
-}
-
-
-function updateIntervalDisabledState() {
-    let textbox = document.getElementById('updateInterval');
-    let checkbox = document.getElementById('checkForUpdates');
-    let menulist = document.getElementById('update-time-menulist');
-
-    textbox.disabled = menulist.disabled = !checkbox.checked;
+    //TODO: custom style
 }
 
 function initUpdateIntervalControls() {
-    let pref = document.getElementById('extensions.brief.update.interval').value;
-    let menulist = document.getElementById('update-time-menulist');
-    let textbox = document.getElementById('updateInterval');
+    let scaleMenu = document.getElementById('update-time-menulist');
+    let interval = document.getElementById('updateInterval');
 
-    let toDays = pref / (60*60*24);
-    let toHours = pref / (60*60);
-    let toMinutes = pref / 60;
+    scaleMenu.addEventListener('change', () => {
+        let scale = 1;
+        switch (scaleMenu.selectedIndex) {
+            // Fallthrough everywhere: from days
+            case 2: scale *= 24; // to hours
+            case 1: scale *= 60; // to minutes
+            case 0: scale *= 60; // to seconds
+        }
+        PrefBinder.updateScale(interval, scale);
+    });
 
+    let value = Prefs.get(interval.dataset.pref);
+    let asDays = value / (60*60*24);
+    let asHours = value / (60*60);
+    let toMinutes = value / 60;
+
+    // Select the largest scale that has an exact value
     switch (true) {
-        // The pref value is in seconds. If it is dividable by days then use the
-        // number of days as the textbox value and select Days in the menulist.
-        case Math.ceil(toDays) == toDays:
-            menulist.selectedIndex = 2;
-            textbox.value = toDays;
+        case Math.ceil(asDays) == asDays:
+            scaleMenu.selectedIndex = 2;
             break;
-        // Analogically for hours...
-        case Math.ceil(toHours) == toHours:
-            menulist.selectedIndex = 1;
-            textbox.value = toHours;
+        case Math.ceil(asHours) == asHours:
+            scaleMenu.selectedIndex = 1;
             break;
-        // Otherwise use minutes, ceiling to the nearest integer if necessary.
         default:
-            menulist.selectedIndex = 0;
-            textbox.value = Math.ceil(toMinutes);
+            scaleMenu.selectedIndex = 0;
             break;
     }
-
-    this.updateIntervalDisabledState();
+    let event = new Event("change", {bubbles: true, cancelable: false});
+    scaleMenu.dispatchEvent(event);
 }
 
-function saveUpdateIntervalPref() {
-    let pref = document.getElementById('extensions.brief.update.interval');
-    let textbox = document.getElementById('updateInterval');
-    let menulist = document.getElementById('update-time-menulist');
-
-    let intervalInSeconds;
-    switch (menulist.selectedIndex) {
-        case 0:
-            intervalInSeconds = textbox.value * 60; // textbox.value is in minutes
-            break;
-        case 1:
-            intervalInSeconds = textbox.value * 60*60; // textbox.value is in hours
-            break;
-        case 2:
-            intervalInSeconds = textbox.value * 60*60*24; // textbox.value is in days
-            break;
-    }
-
-    pref.valueFromPreferences = intervalInSeconds;
-}
-
-function updateExpirationDisabledState() {
-    let textbox = document.getElementById('expiration-textbox');
-    let checkbox = document.getElementById('expiration-checkbox');
-
-    textbox.disabled = !checkbox.checked;
-}
-
-function updateStoredEntriesDisabledState() {
-    let textbox = document.getElementById('stored-entries-textbox');
-    let checkbox = document.getElementById('stored-entries-checkbox');
-
-    textbox.disabled = !checkbox.checked;
-}
 
 function onClearAllEntriesCmd(aEvent) {
     let keepStarred = Services.prefs.getBoolPref('extensions.brief.database.keepStarredWhenClearing');
@@ -115,7 +71,59 @@ function onClearAllEntriesCmd(aEvent) {
     }
 }
 
-function editCustomStyle() {
-    window.openDialog('chrome://brief/content/options/style-editor.xul',
-                      'Style editor', 'chrome,centerscreen,titlebar,resizable');
-}
+let PrefBinder = {
+    init() {
+        for(let node of document.querySelectorAll('[data-pref]')) {
+            let name = node.dataset.pref;
+            let scale = () => (node.dataset.prefScale || 1);
+            let value = Prefs.get(name);
+            this._setValue(node, value / scale());
+            node.addEventListener('change', e => {
+                let value = this._getValue(node);
+                if(value !== Prefs.get(name)) {
+                    Prefs.set(name, value * scale());
+                }
+            });
+        }
+
+    },
+
+    updateScale(node, scale) {
+        node.dataset.prefScale = scale;
+        let value = Prefs.get(node.dataset.pref);
+        this._setValue(node, value / scale);
+    },
+
+    _setValue(node, value) {
+        switch(node.type) {
+            case "checkbox":
+                node.checked = value;
+            case "number":
+                node.value = value;
+        }
+    },
+
+    _getValue(node) {
+        switch(node.type) {
+            case "checkbox":
+                return node.checked;
+            case "number":
+                return Number(node.value);
+        }
+    },
+};
+
+let Enabler = {
+    init() {
+        for(let node of document.querySelectorAll('[data-requires]')) {
+            let master = document.getElementById(node.dataset.requires);
+            node.disabled = !master.checked;
+            master.addEventListener('change', e => {
+                node.disabled = !master.checked;
+            });
+        }
+    },
+};
+
+
+window.addEventListener('load', () => init(), {once: true, passive: true});

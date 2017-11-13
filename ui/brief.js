@@ -103,10 +103,6 @@ var Commands = {
         document.body.classList.add('sidebar');
     },
 
-    openOptions: function cmd_openOptions() {
-        API.openOptions();
-    },
-
     markViewRead: function cmd_markViewRead() {
         Database.query(gCurrentView.query).markRead(true);
     },
