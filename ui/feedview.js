@@ -1236,12 +1236,11 @@ EntryView.prototype = {
 
             case 'star':
                 if (this.starred) {
-                    API.query.verifyBookmarksAndTags(this.id);
-
-                    console.log('TODO: bookmark editing not implemented');
+                    Database.query(this.id).bookmark(false);
+                    // TODO: restore bookmark editing
                 }
                 else {
-                    Commands.starEntry(this.id, true);
+                    Database.query(this.id).bookmark(true);
                 }
                 break;
 

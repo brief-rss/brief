@@ -71,6 +71,7 @@ let Database = {
             case 20:
                 entries = tx.objectStore('entries');
                 // Enables quick unread filtering
+                entries.deleteIndex("bookmarkID"); // Unused
                 entries.createIndex(
                     'deleted_starred_read_feedID_date',
                     ['deleted', 'starred', 'read', 'feedID', 'date']);
@@ -86,6 +87,7 @@ let Database = {
                         } else if(value.deleted === 2) {
                             value.deleted = 'deleted';
                         }
+                        delete value.bookmarked; // Use entry.starred
                         cursor.update(value);
                         cursor.continue();
                     }
@@ -113,7 +115,7 @@ let Database = {
         for(let name of this.REVISION_FIELDS) {
             revision[name] = origEntry[name];
         }
-        entry.bookmarked = (origEntry.bookmarkID !== -1);
+        delete entry.bookmarkID;
         entry.tags = (entry.tags || '').split(', ');
 
         tx.objectStore('revisions').put(revision);
@@ -455,6 +457,25 @@ Query.prototype = {
         });
     },
 
+    async bookmark(state) {
+        let entries = await this.getEntries();
+        let actions = [];
+        for(let entry of entries) {
+            let promise = browser.bookmarks.search({url: entry.entryURL}).then(bookmarks => {
+                if(state && bookmarks.length == 0) {
+                    let revision = entry.revisions[entry.revisions.length - 1];
+                    return browser.bookmarks.create({url: entry.entryURL, title: revision.title});
+                }
+                if(!state && bookmarks.length > 0) {
+                    return Promise.all(bookmarks.map(b =>
+                        browser.bookmarks.remove(b.id)));
+                }
+            });
+            actions.push(promise);
+        }
+        await Promise.all(actions);
+    },
+
     async _update(func, stores) {
         if(stores === undefined) {
             stores = ['entries'];
@@ -582,6 +603,7 @@ Query.prototype = {
             indexName = null;
             filterFunction = undefined;
             ranges = filters.entry.id;
+            // FIXME: entries should not ignore other filters; not critical (not used with both)
         }
 
         if(filters.entry.tags === undefined &&
