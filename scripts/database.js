@@ -386,7 +386,13 @@ Query.prototype = {
             stores = ['entries'];
         }
         let filters = this._filters();
-        let {indexName, filterFunction, ranges} = this._searchEngine(filters);
+        let {indexName, filterFunction, ranges, direction} = this._searchEngine(filters);
+        let sortKey;
+        if(direction === "prev") {
+            sortKey = (e => -e.date);
+        } else {
+            sortKey = (e => e.date);
+        }
         let offset = filters.sort.offset || 0;
         let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
 
@@ -394,9 +400,9 @@ Query.prototype = {
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
 
-        let cursors = ranges.map(r => index.openCursor(r, "prev"));
+        let cursors = ranges.map(r => index.openCursor(r, direction));
         let result = this._mergeAndCollect(
-            {cursors, filterFunction, sortKey: (e => -e.date), offset, limit, extractor, tx});
+            {cursors, filterFunction, sortKey, offset, limit, extractor, tx});
 
         await Database._transactionPromise(tx);
 
@@ -579,8 +585,10 @@ Query.prototype = {
     _searchEngine(filters) {
         // And now
         let indexName = 'deleted_starred_read_feedID_date'; // FIXME: hardcoded
-        if(filters.sort.direction !== 'desc')
-            throw "asc not supported yet"; //FIXME
+        let direction = "prev";
+        if(filters.sort.direction === 'asc') {
+            direction = "next";
+        }
 
         let filterFunction = entry => {
             return (true
@@ -611,7 +619,7 @@ Query.prototype = {
             filterFunction = undefined;
         }
 
-        return {indexName, filterFunction, ranges};
+        return {indexName, filterFunction, ranges, direction};
     },
 
     _expandPrefixes(prefixes, requirement, possibleValues) {
