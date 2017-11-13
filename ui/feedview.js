@@ -151,11 +151,7 @@ FeedView.prototype = {
      * permanently changing the view parameters.
      */
     getQueryCopy: function FeedView_getQueryCopy() {
-        let query = this.query;
-        let copy = {};
-        for (let property in query)
-            copy[property] = query[property];
-        return copy;
+        return Object.assign({}, this.query);
     },
 
 

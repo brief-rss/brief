@@ -428,8 +428,6 @@ Query.prototype = {
                         }
                         pending += 1;
                         cursors[next].continue();
-                    } else {
-                        console.log(`Brief: merge with ${totalCallbacks} callbacks`);
                     }
                 }
             };
@@ -458,7 +456,7 @@ Query.prototype = {
                 childrenMap.set(parent, children);
             }
             let nodes = [];
-            let new_nodes = folders;
+            let new_nodes = folders.slice();
             while(new_nodes.length > 0) {
                 let node = new_nodes.pop();
                 nodes.push(node);
