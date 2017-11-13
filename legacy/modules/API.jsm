@@ -55,9 +55,6 @@ const API_CALLS = {
     openLibrary: ['brief:open-library', 'noreply',
         () => Utils.openLibrary()
     ],
-    openShortcuts: ['brief:open-shortcuts', 'noreply',
-        () => Utils.openShortcuts()
-    ],
     openOptions: ['brief:open-options', 'noreply',
         () => Utils.openOptions()
     ],
@@ -107,24 +104,6 @@ const Utils = {
         homePath = homePath.reverse();
 
         this.window.PlacesCommandHook.showPlacesOrganizer(homePath);
-    },
-
-    openShortcuts: function() {
-        let url = 'chrome://brief/content/keyboard-shortcuts.xhtml';
-
-        let windows = Services.wm.getEnumerator(null);
-        while (windows.hasMoreElements()) {
-            let win = windows.getNext();
-            if (win.document.documentURI == url) {
-                win.focus();
-                return;
-            }
-        }
-
-        let height = Math.min(this.window.screen.availHeight, 650);
-        let features = 'chrome,centerscreen,titlebar,resizable,width=500,height=' + height;
-
-        this.window.openDialog(url, 'Brief shortcuts', features);
     },
 
     openOptions: function() {

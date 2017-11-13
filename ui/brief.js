@@ -251,8 +251,21 @@ var Commands = {
         API.openFeedProperties(feed.feedID);
     },
 
-    displayShortcuts: function cmd_displayShortcuts() {
-        API.openShortcuts();
+    displayShortcuts: async function cmd_displayShortcuts() {
+        let windows = await browser.windows.getAll({windowTypes: ['popup']});
+        // Compat: fixed in Firefox 58
+        console.log(windows);
+        windows = windows.filter(w => w.type === 'popup' && w.title.includes("Brief"));
+        if(windows.length > 0) {
+            browser.windows.update(windows[0].id, {focused: true});
+        } else {
+            browser.windows.create({
+                url: '/ui/keyboard-shortcuts.xhtml',
+                type: 'popup',
+                width: 500,
+                height: Math.min(window.screen.availHeight, 650),
+            });
+        }
     },
 
     updateFeed: function cmd_updateFeed(aFeed) {
