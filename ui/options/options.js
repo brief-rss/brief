@@ -1,6 +1,4 @@
 async function init() {
-    window.addEventListener('unload', () => unload(), {once: true, passive: true});
-
     apply_i18n(document);
 
     await Prefs.init();
@@ -8,6 +6,8 @@ async function init() {
     Enabler.init();
 
     initUpdateIntervalControls();
+
+    await Database.init();
     //TODO: custom style
 }
 
@@ -45,31 +45,17 @@ function initUpdateIntervalControls() {
     }
     let event = new Event("change", {bubbles: true, cancelable: false});
     scaleMenu.dispatchEvent(event);
+
+    document.getElementById('clear-all-entries').addEventListener('click', async () => {
+        if (window.confirm(browser.i18n.getMessage('confirmClearAllEntriesText'))) {
+            await Database.query({
+                starred: Prefs.get('database.keepStarredWhenClearing') ? 0 : undefined,
+                includeHiddenFeeds: true
+            }).markDeleted('deleted').catch(console.error);
+        }
+    });
 }
 
-
-function onClearAllEntriesCmd(aEvent) {
-    let keepStarred = Services.prefs.getBoolPref('extensions.brief.database.keepStarredWhenClearing');
-
-    let stringbundle = document.getElementById('options-bundle');
-    let title = stringbundle.getString('confirmClearAllEntriesTitle');
-    let text = stringbundle.getString('confirmClearAllEntriesText');
-    let checkboxLabel = stringbundle.getString('confirmClearAllEntriesCheckbox');
-    let checked = { value: keepStarred };
-
-    if (Services.prompt.confirmCheck(window, title, text, checkboxLabel, checked)) {
-        let query = new Query({
-            starred: checked.value ? false : undefined,
-            includeHiddenFeeds: true
-        });
-
-        Storage.ready.then(() =>
-            query.deleteEntries('deleted')
-        )
-
-        Services.prefs.setBoolPref('extensions.brief.database.keepStarredWhenClearing', checked.value)
-    }
-}
 
 let PrefBinder = {
     init() {

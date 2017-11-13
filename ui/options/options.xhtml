@@ -8,7 +8,9 @@
     <link rel="stylesheet" type="text/css" href="/skin/options.css"/>
 
     <script type="application/x-javascript" src="/scripts/prefs.js"/>
+    <script type="application/x-javascript" src="/scripts/utils.js"/>
     <script type="application/x-javascript" src="/scripts/i18n.js"/>
+    <script type="application/x-javascript" src="/scripts/database.js"/>
     <script type="application/x-javascript" src="/ui/options/options.js"/>
 </head>
 <body>
@@ -76,7 +78,11 @@
                    data-requires="countLimitCheckbox"/>
             <label data-i18n="storedEntriesAfter_label"/>
         </hbox>
-        <hbox class="line right-justified">
+        <hbox class="line spaced">
+            <label data-i18n="confirmClearAllEntriesCheckbox">
+                <input type="checkbox"
+                       data-pref="database.keepStarredWhenClearing"/>
+            </label>
             <button id="clear-all-entries"
                     data-i18n="clearAllEntriesButton_label"
                     data-i18n-attrs="accesskey:clearAllEntriesButton_accesskey"/>

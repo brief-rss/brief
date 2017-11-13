@@ -36,6 +36,6 @@ body {
     width: -moz-max-content;
 }
 
-.right-justified {
-    justify-content: flex-end;
+.spaced {
+    justify-content: space-between;
 }
