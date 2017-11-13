@@ -783,7 +783,7 @@ let ViewListContextMenu = {
     emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
         let query = ViewList.getQueryForView('today-folder');
         query.starred = false;
-        API.query.deleteEntries(query, 'trashed');
+        Database.query(query).markDeleted('trashed');
     }
 
 }
@@ -891,7 +891,7 @@ let FeedListContextMenu = {
             starred: false,
             folders: [FeedList.selectedFeed.feedID]
         };
-        API.query.deleteEntries(query, 'trashed');
+        Database.query(query).markDeleted('trashed');
     },
 
     deleteFolder: function FolderContextMenu_deleteFolder() {

@@ -81,9 +81,10 @@ let Database = {
                     if(cursor) {
                         let value = cursor.value;
                         value.read = value.read ? 1 : 0;
-                        if(value.deleted > 0) {
-                            value.deletedAt = value.deleted;
-                            value.deleted = 1;
+                        if(value.deleted === 1) {
+                            value.deleted = 'trashed';
+                        } else if(value.deleted === 2) {
+                            value.deleted = 'deleted';
                         }
                         cursor.update(value);
                         cursor.continue();
@@ -448,6 +449,12 @@ Query.prototype = {
         });
     },
 
+    async markDeleted(state) {
+        return await this._update(e => {
+            e.deleted = state || 0;
+        });
+    },
+
     async _update(func, stores) {
         if(stores === undefined) {
             stores = ['entries'];
@@ -528,7 +535,7 @@ Query.prototype = {
             id: this.entries,
             read: this.read !== undefined ? +this.read : undefined,
             starred: this.starred,
-            deleted: this.deleted !== undefined ? +this.deleted : undefined,
+            deleted: this.deleted === false ? 0 : this.deleted,
             tags: this.tags,
         };
         filters.fullTextSearch = this.searchString;
@@ -563,7 +570,7 @@ Query.prototype = {
 
         let prefixes = [[]];
         // Extract the common prefixes
-        prefixes = this._expandPrefixes(prefixes, filters.entry.deleted, [0, 1]);
+        prefixes = this._expandPrefixes(prefixes, filters.entry.deleted, [0, 'trashed', 'deleted']);
         prefixes = this._expandPrefixes(prefixes, filters.entry.starred, [0, 1]);
         prefixes = this._expandPrefixes(prefixes, filters.entry.read, [0, 1]);
         prefixes = this._expandPrefixes(prefixes, filters.feeds); // Always present
@@ -611,7 +618,7 @@ Query.prototype = {
             if(max !== undefined) {
                 bound = max;
             }
-            let upper = Array.concat(prefix, [bound])
+            let upper = Array.concat(prefix, [bound]);
             return IDBKeyRange.bound(lower, upper);
         });
     },

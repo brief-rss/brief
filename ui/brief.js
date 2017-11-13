@@ -154,7 +154,7 @@ var Commands = {
             starred: false,
             feeds: [feed.feedID]
         };
-        API.query.deleteEntries(query, 'trashed');
+        Database.query(query).markDeleted('trashed');
     },
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
@@ -167,11 +167,11 @@ var Commands = {
 
     restoreTrashed: function cmd_restoreTrashed() {
         ViewList.getQueryForView('trash-folder')
-        API.query.deleteEntries(ViewList.getQueryForView('trash-folder'), false);
+        Database.query(ViewList.getQueryForView('trash-folder')).markDeleted(false);
     },
 
     emptyTrash: function cmd_emptyTrash() {
-        API.query.deleteEntries(ViewList.getQueryForView('trash-folder'), 'deleted');
+        Database.query(ViewList.getQueryForView('trash-folder')).markDeleted('deleted');
     },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
@@ -196,11 +196,11 @@ var Commands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        API.query.deleteEntries(aEntry, 'trashed');
+        Database.query(aEntry).markDeleted('trashed');
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        API.query.deleteEntries(aEntry, false);
+        Database.query(aEntry).markDeleted(false);
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
