@@ -482,6 +482,24 @@ Query.prototype = {
         await Promise.all(actions);
     },
 
+    async syncStarredFromBookmarks() {
+        let entries = await this.getEntries();
+        let groups = await Promise.all(entries.map(
+                entry => browser.bookmarks.search({url: entry.entryURL})
+                    .then(bookmarks => {entry, bookmarks})
+        ));
+        let actions = new Map();
+        for(let {entry, bookmarks} of groups) {
+            let starred = (bookmarks.length > 0) ? 1 : 0;
+            if(starred !== entry.starred) {
+                actions.set(entry.id, starred);
+            }
+            Database.query(Array.from(actions.keys()))._update(entry => {
+                entry.starred = actions.get(entry.id);
+            });
+        }
+    },
+
     async _update(func, stores) {
         if(stores === undefined) {
             stores = ['entries'];
