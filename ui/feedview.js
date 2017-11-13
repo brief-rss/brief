@@ -586,8 +586,6 @@ FeedView.prototype = {
 
         let animate = aAnimate && containedEntries.length < 30;
 
-        console.log("TODO: hide bookmark edit UI");
-
         let selectedEntryIndex = -1;
 
         let indices = containedEntries.map(this.getEntryIndex, this)
@@ -659,8 +657,6 @@ FeedView.prototype = {
 
         this.document.body.classList.remove('headlines-view');
         this.document.body.classList.remove('multiple-feeds');
-
-        console.log("TODO: hide bookmark edit UI");
 
         // Manually reset the scroll position, otherwise weird stuff happens.
         this.scroll(0, false);
