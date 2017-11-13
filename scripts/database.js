@@ -180,10 +180,10 @@ let Database = {
 
         if(feeds.length === 0) {
             console.log(`Brief: the database looks empty, testing backups`);
-            ({feeds} = await browser.storage.local.get({feeds}));
+            ({feeds} = await browser.storage.local.get({feeds: []}));
             console.log(`Brief: ${feeds.length} feeds found in local storage`);
             if(feeds.length === 0) {
-                ({feeds} = await browser.storage.sync.get({feeds}));
+                ({feeds} = await browser.storage.sync.get({feeds: []}));
                 console.log(`Brief: ${feeds.length} feeds found in sync storage`);
             }
             this.saveFeeds(feeds);
@@ -593,7 +593,7 @@ Query.prototype = {
         let filterFunction = entry => {
             return (true
                 && (filters.entry.tags === undefined || filters.entry.tags.some(tag => entry.tags.includes(tag)))
-                // FIXME: no FTS support at all, even slow one
+                && (filters.fullTextSearch === undefined || this._ftsMatches(entry, filters.fullTextSearch))
             );
         };
 
@@ -626,6 +626,11 @@ Query.prototype = {
         if(requirement === undefined) {
             requirement = possibleValues;
         }
+        if(requirement === false) {
+            requirement = 0;
+        } else if(requirement === true) {
+            requirement = 1;
+        }
         if(!Array.isArray(requirement)) {
             requirement = [requirement];
         }
@@ -651,5 +656,9 @@ Query.prototype = {
             let upper = Array.concat(prefix, [bound]);
             return IDBKeyRange.bound(lower, upper);
         });
+    },
+
+    _ftsMatches(entry, string) {
+        return true;//FIXME
     },
 };
