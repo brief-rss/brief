@@ -1,3 +1,5 @@
+'use strict';
+
 // Generated from the https://github.com/eemeli/IntlPluralRules/ outdated polyfill
 const pluralRulesDb = (function() {
 

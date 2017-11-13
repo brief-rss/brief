@@ -1,3 +1,5 @@
+'use strict';
+
 async function init() {
     apply_i18n(document);
 

@@ -1,3 +1,5 @@
+'use strict';
+
 // Perform substitutions for i18n in text and attributes
 function apply_i18n(doc) {
     for(let node of document.querySelectorAll('[data-i18n]')) {

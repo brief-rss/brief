@@ -1,3 +1,5 @@
+'use strict';
+
 function onload(aEvent) {
     apply_i18n(document);
     var elems = window.navigator.platform.match('Mac')
