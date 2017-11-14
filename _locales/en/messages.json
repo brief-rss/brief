@@ -590,21 +590,21 @@
         "message": "feed;feeds"
     },
 
-    // FIXME: Unused
+    // TODO: Unused
     "confirmFeedDeletionTitle": {
         "message": "Unsubscribe Feed"
     },
     "confirmFeedDeletionText": {
         "message": "Are you sure you want to unsubscribe \"$1\"?"
     },
-    // FIXME: Unused
+    // TODO: Unused
     "confirmFolderDeletionTitle": {
         "message": "Delete Folder"
     },
     "confirmFolderDeletionText": {
         "message": "Are you sure you want to delete the folder \"$1\" and all the feeds it contains?"
     },
-    // FIXME: Unused
+    // TODO: Unused
     "confirmTagDeletionTitle": {
         "message": "Delete Tag"
     },

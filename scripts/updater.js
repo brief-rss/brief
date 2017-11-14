@@ -240,7 +240,6 @@ let FeedFetcher = {
         ['id', 'id', ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]],
         ['authors[]', 'author', ["author", "rss1:author", "dc:creator", "dc:author",
                                   "atom03:author", "atom:author"]],
-        //FIXME: _atomLinksToURI
         ['summary', 'text', ["description", "rss1:description", "dc:description",
                              "atom03:summary", "atom:summary"]],
         ['content', 'html', ["content:encoded", "atom03:content", "atom:content"]],

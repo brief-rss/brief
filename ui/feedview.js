@@ -33,7 +33,7 @@ function FeedView(aTitle, aQuery) {
     this._fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
 
     for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
-        getElement(id).hidden = this._fixedStarred; //FIXME: move to CSS
+        getElement(id).hidden = this._fixedStarred; //TODO: move to CSS
 
     aQuery.sortOrder = 'date';
     this.__query = aQuery;

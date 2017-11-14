@@ -79,7 +79,7 @@ const Brief = {
         } else {
             browser.browserAction.setBadgeText({text: ""});
         }
-        //FIXME: return tooltip
+        //TODO: return tooltip
         //browser.browserAction.setTitle({title: tooltip});
     },
 };

@@ -39,7 +39,7 @@ let Database = {
         opener.onupgradeneeded = (event) => this.upgrade(event);
         this._db = await this._requestPromise(opener);
         this.loadFeeds();
-        let entryCount = (await this.listEntries()).length;//FIXME
+        let entryCount = await this.countEntries();
         console.log(`Brief: opened database with ${entryCount} entries`);
         //TODO watch feed list changes
     },
@@ -166,9 +166,9 @@ let Database = {
         console.log(`Databases cleared`);
     },
 
-    async listEntries() {
+    async countEntries() {
         let tx = this._db.transaction(['entries']);
-        let request = tx.objectStore('entries').getAllKeys();
+        let request = tx.objectStore('entries').count();
         return await this._requestPromise(request);
     },
 
@@ -562,7 +562,7 @@ Query.prototype = {
         // Feed list
         if(feeds !== undefined) {
             active_feeds = active_feeds.filter(feed => feeds.includes(feed.feedID));
-            includeHiddenFeeds = true; //FIXME: query magic
+            includeHiddenFeeds = true; //TODO: nonorthogonality
         }
         // Include hidden feeds
         if(!includeHiddenFeeds) {
@@ -602,7 +602,7 @@ Query.prototype = {
 
     _searchEngine(filters) {
         // And now
-        let indexName = 'deleted_starred_read_feedID_date'; // FIXME: hardcoded
+        let indexName = 'deleted_starred_read_feedID_date'; // TODO: hardcoded
         let direction = "prev";
         if(filters.sort.direction === 'asc') {
             direction = "next";
@@ -629,7 +629,7 @@ Query.prototype = {
             indexName = null;
             filterFunction = undefined;
             ranges = filters.entry.id;
-            // FIXME: entries should not ignore other filters; not critical (not used with both)
+            // TODO: entries should not ignore other filters; not critical (not used with both)
         }
 
         if(filters.entry.tags === undefined &&
@@ -677,6 +677,6 @@ Query.prototype = {
     },
 
     _ftsMatches(entry, string) {
-        return true;//FIXME
+        return true;//TODO: restore FTS
     },
 };

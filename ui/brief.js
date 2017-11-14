@@ -86,9 +86,6 @@ var init = async function init() {
 function unload() {
     Persistence.save();
 
-    //FIXME: remove observers
-    //API.removeObserver(FeedList);
-    //API.removeStorageObserver(FeedList);
     gCurrentView.uninit();
 }
 
