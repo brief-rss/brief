@@ -110,8 +110,9 @@ let FaviconFetcher = {
 
 let FeedFetcher = {
     async fetchFeed(feed) {
+        let url = feed.feedURL;
         let request = new XMLHttpRequest();
-        request.open('GET', feed.feedURL);
+        request.open('GET', url);
         request.overrideMimeType('application/xml');
         //request.setRequestHeader('Cache-control', 'no-cache'); // FIXME: enable when done testing
         request.responseType = 'document';
@@ -120,8 +121,13 @@ let FeedFetcher = {
             xhrPromise(request),
             wait(FEED_FETCHER_TIMEOUT),
         ]);
+        if(!doc) {
+            console.error("failed to fetch", url);
+            return;
+        }
 
         if(doc.documentElement.localName === 'parseerror') {
+            console.error("failed to parse as XML", url);
             return;
         }
 
@@ -145,7 +151,8 @@ let FeedFetcher = {
             let nodeKey = nsPrefix + child.localName;
             let destinations = keyMap.get(nodeKey);
             if(destinations === undefined) {
-                console.log('unknown key', nodeKey);
+                let parent = this._nsPrefix(node.namespaceURI) + node.localName;
+                console.log('unknown key', nodeKey, 'in', parent);
                 continue;
             }
             for(let {name, type, array} of destinations) {
@@ -210,7 +217,8 @@ let FeedFetcher = {
         //and others Brief does not use anyway...
         //FIXME: test on RSS1 / Atom1 / Atom03
         //TODO: enclosures
-        ['IGNORE', '', ["atom:id", "atom03:id", "atom:author", "atom03:author"]],
+        ['IGNORE', '', ["atom:id", "atom03:id", "atom:author", "atom03:author",
+                        "category", "atom:category"]],
     ],
     ENTRY_PROPERTIES: [
         ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
@@ -228,7 +236,9 @@ let FeedFetcher = {
         ['updated', 'date', ["pubDate", "atom03:modified", "dc:date", "dcterms:modified",
                              "atom:updated"]],
         //and others Brief does not use anyway...
-        ['IGNORE', '', ["atom:category", "atom03:category"]],
+        ['IGNORE', '', ["atom:category", "atom03:category", "category",
+                        "comments", "wfw:commentRss", "dc:language", "dc:format"]],
+        // TODO: should these really be all ignored?
     ],
     AUTHOR_PROPERTIES: [
         ['name', 'text', ["name", "atom:name", "atom03:name"]],
@@ -246,15 +256,25 @@ let FeedFetcher = {
         },
 
         text(node) {
+            for(let child of node.children) {
+                switch(child.nodeType) {
+                    case Node.TEXT_NODE:
+                    case Node.CDATA_SECTION_NODE:
+                        continue;
+                    default:
+                        console.warn('possibly raw html in', node);
+                        break;
+                }
+            }
             return node.textContent;
         },
 
         html(node) {
-            return node.textContent;
+            return this.handlers.text.call(this, node);
         },
 
         lang(node) {
-            return node.textContent;
+            return this.handlers.text.call(this, node);
         },
 
         author(node) {
@@ -264,7 +284,9 @@ let FeedFetcher = {
         url(node) {
             try {
                 return new URL(node.textContent);
-            } catch(e) { /* just ignore it */ }
+            } catch(e) {
+                console.warn('failed to parse URL', text)
+            }
         },
 
         date(node) {
@@ -279,7 +301,7 @@ let FeedFetcher = {
         },
 
         id(node) {
-            return node.textContent;
+            return this.handlers.text.call(this, node);
         },
 
         atomLinkAlternate(node) {
