@@ -106,3 +106,61 @@ async function openBackgroundTab(url) {
         }
     }
 }
+
+// ===== Messaging helpers =====
+let NotificationCenter = {
+    master: false,
+    observers: new Set(),
+
+    init() {
+        this.master = true;
+        browser.runtime.onMessage.addListener(message => {
+            if(message._notify === 'send') {
+                this._notify(message);
+            }
+        });
+    },
+
+    async _notify(message) {
+        await wait();
+        delete message._notify;
+        message._notify = 'broadcast';
+
+        browser.runtime.sendMessage(message).catch(() => undefined);
+        for(let listener of this.observers) {
+            listener(message);
+        }
+    },
+
+    _send(message) {
+        if(this.master) {
+            this._notify(message);
+        } else {
+            message._notify = 'send';
+            browser.runtime.sendMessage(message);
+        }
+    },
+};
+
+function registerObservers(handlers) {
+    let listener = message => {
+        let {id} = message;
+        let handler = handlers[id];
+        if(handler) {
+            return handler(message);
+        }
+    };
+    if(NotificationCenter.master) {
+        NotificationCenter.observers.add(listener);
+    } else {
+        browser.runtime.onMessage.addListener(listener);
+    }
+    return listener;
+}
+
+function broadcast(topic, payload) {
+    let message = Object.assign({}, payload);
+    message.id = topic;
+    console.log('broadcast', message);
+    NotificationCenter._send(message);
+}
