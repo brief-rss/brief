@@ -131,18 +131,24 @@ let FeedFetcher = {
             return;
         }
 
-        let root = doc.documentElement.querySelector(this.ROOTS) || doc.documentElement;
+        let root = doc.querySelector(this.ROOTS);
         let result = this._parseNode(root, this.FEED_PROPERTIES);
+        if(!result || !result.items || !result.items.length > 0) {
+            console.warn("failed to find any items in", url);
+        }
         result.language = result.language || doc.documentElement.getAttribute('xml:lang');
         return result;
     },
 
-    ROOTS: ['channel, *|feed'],
+    ROOTS: ['RDF, channel, *|feed'],
 
     _parseNode(node, properties) {
         let props = {};
         let keyMap = this._buildKeyMap(properties);
-        for(let child of node.children) {
+        //TODO: handle attributes
+        let children = Array.from(node.children);
+        children.push(...node.attributes);
+        for(let child of children) {
             let nsPrefix = this._nsPrefix(child.namespaceURI);
             if(nsPrefix[0] === '[') {
                 console.log('unknown namespace', nsPrefix);
@@ -163,6 +169,10 @@ let FeedFetcher = {
                 if(handler) {
                     let value = handler.call(this, child);
                     if(value === undefined || value === null) {
+                        continue;
+                    }
+                    if(name === '{merge}') {
+                        Object.assign(props, value);
                         continue;
                     }
                     if(array) {
@@ -210,38 +220,44 @@ let FeedFetcher = {
         ['link', 'url', ["link", "rss1:link"]],
         ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
         ['items[]', 'entry', ["item", "rss1:item", "atom:entry", "atom03:entry"]],
-        ['generator', 'text', ["generator", "atom03:generator", "atom:generator"]],
-        ['updated', 'date', ["pubDate", "lastBuildDate", "atom03:modified", "dc:date",
+        ['generator', 'text', ["generator", "rss1:generator", "atom03:generator", "atom:generator"]],
+        ['updated', 'date', ["pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date",
                              "dcterms:modified", "atom:updated"]],
-        ['language', 'lang', ["language"]],
+        ['language', 'lang', ["language", "rss1:language", "xml:lang"]],
+
+        ['{merge}', 'feed', ["rss1:channel"]],
         //and others Brief does not use anyway...
-        //FIXME: test on RSS1 / Atom1 / Atom03
         //TODO: enclosures
         ['IGNORE', '', ["atom:id", "atom03:id", "atom:author", "atom03:author",
-                        "category", "atom:category"]],
+                        "category", "atom:category", "rss1:items"]],
     ],
     ENTRY_PROPERTIES: [
         ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
         ['link', 'url', ["link", "rss1:link"]],
         ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
-        ['id', 'id', ["guid", "rdf:about", "atom03:id", "atom:id"]],
-        ['authors[]', 'author', ["author", "dc:creator", "dc:author",
+        ['id', 'id', ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]],
+        ['authors[]', 'author', ["author", "rss1:author", "dc:creator", "dc:author",
                                   "atom03:author", "atom:author"]],
         //FIXME: _atomLinksToURI
         ['summary', 'text', ["description", "rss1:description", "dc:description",
                              "atom03:summary", "atom:summary"]],
         ['content', 'html', ["content:encoded", "atom03:content", "atom:content"]],
 
-        ['published', 'date', ["pubDate", "atom03:issued", "dcterms:issued", "atom:published"]],
-        ['updated', 'date', ["pubDate", "atom03:modified", "dc:date", "dcterms:modified",
-                             "atom:updated"]],
+        ['published', 'date', ["pubDate", "rss1:pubDate",
+                               "atom03:issued", "dcterms:issued", "atom:published"]],
+        ['updated', 'date', ["pubDate", "rss1:pubDate", "atom03:modified",
+                             "dc:date", "dcterms:modified", "atom:updated"]],
         //and others Brief does not use anyway...
-        ['IGNORE', '', ["atom:category", "atom03:category", "category",
-                        "comments", "wfw:commentRss", "dc:language", "dc:format"]],
+        ['IGNORE', '', ["atom:category", "atom03:category", "category", "rss1:category",
+                        "comments", "wfw:commentRss", "rss1:comments",
+                        "dc:language", "dc:format", "xml:lang", "dc:subject",
+                        "enclosure", "dc:identifier"
+                       ]],
         // TODO: should these really be all ignored?
     ],
     AUTHOR_PROPERTIES: [
         ['name', 'text', ["name", "atom:name", "atom03:name"]],
+        ['IGNORE', '', ["atom:uri", "atom:email"]],
     ],
 
     handlers: {
@@ -255,30 +271,42 @@ let FeedFetcher = {
             return props;
         },
 
-        text(node) {
-            for(let child of node.children) {
-                switch(child.nodeType) {
-                    case Node.TEXT_NODE:
-                    case Node.CDATA_SECTION_NODE:
-                        continue;
-                    default:
-                        console.warn('possibly raw html in', node);
-                        break;
+        feed(node) {
+            return this._parseNode(node, this.FEED_PROPERTIES);
+        },
+
+        text(nodeOrAttr) {
+            if(nodeOrAttr.children !== undefined) {
+                for(let child of nodeOrAttr.childNodes) {
+                    switch(child.nodeType) {
+                        case Node.TEXT_NODE:
+                        case Node.CDATA_SECTION_NODE:
+                            continue;
+                        default:
+                            console.warn('possibly raw html in', nodeOrAttr);
+                            break;
+                    }
                 }
+                return nodeOrAttr.textContent.trim()
+            } else {
+                return nodeOrAttr.value.trim()
             }
-            return node.textContent;
         },
 
-        html(node) {
-            return this.handlers.text.call(this, node);
+        html(nodeOrAttr) {
+            return this.handlers.text.call(this, nodeOrAttr);
         },
 
-        lang(node) {
-            return this.handlers.text.call(this, node);
+        lang(nodeOrAttr) {
+            return this.handlers.text.call(this, nodeOrAttr);
         },
 
         author(node) {
-            return this._parseNode(node, this.AUTHOR_PROPERTIES);
+            if(node.children.length > 0) {
+                return this._parseNode(node, this.AUTHOR_PROPERTIES);
+            } else {
+                return this.handlers.text.call(this, node);
+            }
         },
 
         url(node) {
@@ -300,8 +328,8 @@ let FeedFetcher = {
             return null;
         },
 
-        id(node) {
-            return this.handlers.text.call(this, node);
+        id(nodeOrAttr) {
+            return this.handlers.text.call(this, nodeOrAttr);
         },
 
         atomLinkAlternate(node) {
