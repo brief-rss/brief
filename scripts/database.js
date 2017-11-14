@@ -61,7 +61,7 @@ let Database = {
                     keyPath: "id", autoIncrement: true});
                 entries.createIndex("date", "date");
                 entries.createIndex("feedID_date", ["feedID", "date"]);
-                entries.createIndex("primaryHash", "primaryHash"); // used for gradual migration
+                entries.createIndex("primaryHash", "primaryHash"); // sorry, unused
                 entries.createIndex("bookmarkID", "bookmarkID");
                 entries.createIndex("entryURL", "entryURL");
                 entries.createIndex("tagName", "tags", {multiEntry: true});
@@ -74,32 +74,40 @@ let Database = {
             case 20:
                 entries = tx.objectStore('entries');
                 // Enables quick unread filtering
-                entries.deleteIndex("bookmarkID"); // Unused
+                entries.deleteIndex("primaryHash"); // Unused
                 entries.createIndex(
                     'deleted_starred_read_feedID_date',
                     ['deleted', 'starred', 'read', 'feedID', 'date']);
                 entries.createIndex("_v", "_v"); // Used for gradual migration in big databases
                 entries.createIndex("feedID_providedID", ["feedID", "providedID"]);
                 entries.createIndex("feedID_entryURL", ["feedID", "entryURL"]);
-                // Sorry, will have to rewrite everything as boolean keys can't be indexed
+                // TODO: introduce async editing migrations when possible
                 let cursor = entries.openCursor();
                 cursor.onsuccess = ({target}) => {
                     let cursor = target.result;
                     if(cursor) {
                         let value = cursor.value;
-                        value.read = value.read ? 1 : 0;
-                        if(value.deleted === 1) {
-                            value.deleted = 'trashed';
-                        } else if(value.deleted === 2) {
-                            value.deleted = 'deleted';
-                        }
-                        delete value.bookmarked; // Use entry.starred
-                        cursor.update(value);
+                        cursor.update(this._upgradeEntry(value));
                         cursor.continue();
                     }
                 };
             // fallthrough
         }
+    },
+
+    _upgradeEntry(value) {
+        // On next migration: add switch on _v?
+        value.read = value.read ? 1 : 0;
+        value.markedUnreadOnUpdate = value.markedUnreadOnUpdate ? 1 : 0;
+        if(value.deleted === 1) {
+            value.deleted = 'trashed';
+        } else if(value.deleted === 2) {
+            value.deleted = 'deleted';
+        }
+        delete value.bookmarked; // Use entry.starred
+        delete value.primaryHash;
+        value._v = this.DB_VERSION;
+        return value;
     },
 
     ENTRY_FIELDS: [
