@@ -150,15 +150,17 @@ let FeedFetcher = {
         children.push(...node.attributes);
         for(let child of children) {
             let nsPrefix = this._nsPrefix(child.namespaceURI);
-            if(nsPrefix[0] === '[') {
-                console.log('unknown namespace', nsPrefix);
+            if(nsPrefix === 'IGNORE:') {
+                continue;
+            } else if(nsPrefix[0] === '[') {
+                console.log('unknown namespace', nsPrefix, child);
                 continue;
             }
             let nodeKey = nsPrefix + child.localName;
             let destinations = keyMap.get(nodeKey);
             if(destinations === undefined) {
                 let parent = this._nsPrefix(node.namespaceURI) + node.localName;
-                console.log('unknown key', nodeKey, 'in', parent);
+                console.log('unknown key', nodeKey, 'in', node);
                 continue;
             }
             for(let {name, type, array} of destinations) {
@@ -343,6 +345,9 @@ let FeedFetcher = {
 
     _nsPrefix(uri) {
         uri = uri || "";
+        if(this.IGNORED_NAMESPACES[uri]) {
+            return "IGNORE:";
+        }
         if (uri.toLowerCase().indexOf("http://backend.userland.com") == 0) {
             return "";
         }
@@ -375,5 +380,14 @@ let FeedFetcher = {
         "http://www.w3.org/XML/1998/namespace": "xml",
         "http://search.yahoo.com/mrss/": "media",
         "http://search.yahoo.com/mrss": "media",
+    },
+    IGNORED_NAMESPACES: {
+        "http://www.w3.org/2000/xmlns/": "XML namespace definition",
+        "http://purl.org/rss/1.0/modules/slash/": "Slashdot engine specific",
+        "http://purl.org/rss/1.0/modules/syndication/": "Aggregator publishing schedule", // TODO: maybe use it?
+        "http://www.livejournal.org/rss/lj/1.0/": "Livejournal metadata",
+        "http://rssnamespace.org/feedburner/ext/1.0": "Feedburner metadata",
+        "https://www.livejournal.com": "LJ",
+        "com-wordpress:feed-additions:1": "wordpress",
     },
 };
