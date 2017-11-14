@@ -29,6 +29,10 @@ let Database = {
         return this._feeds;
     },
 
+    getFeed(feedID) {
+        return this.feeds.filter(f => f.feedID === feedID)[0];
+    },
+
     async init() {
         if(this._db)
             return;
@@ -160,26 +164,6 @@ let Database = {
         console.log('Done inserting');
     },
 
-    async deleteEntries(entries) {
-        console.log(`Deleting ${entries.length} entries`);
-        let tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
-        for(let entry of entries) {
-            tx.objectStore('revisions').delete(entry);
-            tx.objectStore('entries').delete(entry);
-        }
-        await this._transactionPromise(tx);
-        console.log(`${entries.length} entries deleted`);
-    },
-
-    async clearEntries() {
-        console.log(`Clearing the entries database`);
-        let tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
-        tx.objectStore('revisions').clear();
-        tx.objectStore('entries').clear();
-        await this._transactionPromise(tx);
-        console.log(`Databases cleared`);
-    },
-
     async countEntries() {
         let tx = this._db.transaction(['entries']);
         let request = tx.objectStore('entries').count();
@@ -200,16 +184,18 @@ let Database = {
                 ({feeds} = await browser.storage.sync.get({feeds: []}));
                 console.log(`Brief: ${feeds.length} feeds found in sync storage`);
             }
-            this.saveFeeds(feeds);
+            this.saveFeeds();
         }
 
+        feeds.sort((a, b) => a.rowIndex - b.rowIndex);
         this._feeds = feeds;
     },
 
-    async saveFeeds(feeds) {
+    async saveFeeds() {
         if(this._db === null) {
             return;
         }
+        let feeds = this.feeds;
         let tx = this._db.transaction(['feeds'], 'readwrite');
         tx.objectStore('feeds').clear();
         for(let feed of feeds) {
@@ -218,6 +204,22 @@ let Database = {
         await this._transactionPromise(tx);
         await this._saveFeedBackups(feeds);
         console.log(`Brief: saved feed list with ${feeds.length} feeds`);
+        broadcast('feedlist-updated', {feeds});
+    },
+
+    async modifyFeed(props) {
+        props = Array.isArray(props) ? props : [props];
+        for(let bag of props) {
+            let feed = this.getFeed(bag.feedID);
+            for(let [k, v] of Object.entries(bag)) {
+                if(feed[k] !== undefined && feed[k] === v) {
+                    continue;
+                }
+                feed[k] = v;
+                //TODO: expire entries
+            }
+        }
+        await this.saveFeeds();
     },
 
     async _saveFeedBackups(feeds) {
@@ -254,6 +256,7 @@ let Database = {
         });
     },
 };
+//TODO: database cleanup
 
 
 function Query(filters) {

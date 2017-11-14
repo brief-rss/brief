@@ -1,71 +1,178 @@
 'use strict';
 
-const UPDATE_TIMER_INTERVAL = 60000; // 1 minute
-const FEED_FETCHER_TIMEOUT = 25000; // 25 seconds
-const FAVICON_REFRESH_INTERVAL = 14*24*60*60*1000; // 2 weeks
-
-const FEED_ICON_URL = '/skin/brief-icon-32.png';
 
 
 let FeedUpdater = {
+    UPDATE_TIMER_INTERVAL: 60000, // 1 minute
+    FEED_FETCHER_TIMEOUT: 25000, // 25 seconds
+    FAVICON_REFRESH_INTERVAL: 14*24*60*60*1000, // 2 weeks
+
+    FEED_ICON_URL: '/skin/brief-icon-32.png',
+
     queue: [],
-    backgroundQueue: [],
-    stats: {
-        scheduled: 0,
-        completed: 0,
+    priority: [],
+    underway: [],
+    completed: [],
+
+    get active() {
+        return this.queue.length + this.underway.length > 0;
     },
-    active: false,
+
+    get progress() {
+        let total = this.completed.length + this.underway.length + this.queue.length;
+        if(total === 0) {
+            return 1.0;
+        } else {
+            return this.completed.length / total;
+        }
+    },
 
     async init() {
-        await wait(Prefs.get('update.startupDelay'));
-
         /*spawn*/ this._scheduler();
+
+        registerObservers({
+            'update-all': () => this.updateAllFeeds(),
+            'update-stop': () => this.stopUpdating(),
+            'update-query-status': () => this._broadcastStatus(),
+        });
+
     },
 
-    async updateFeeds(feeds, {background}) {
+    async updateFeeds(feeds, options) {
+        let queueLength = this.queue.length;
+        let {background} = options || {};
         if(!Array.isArray(feeds)) {
             feeds = [feeds];
         }
         feeds = feeds.map(feed => feed.feedID || feed);
-        feeds = feeds.filter(feed => !this.queue.includes(feed));
-        if(background) {
-            let feeds = feeds.filter(feed => !this.backgroundQueue.includes(feed));
-            this.stats.scheduled += feeds.length;
-            this.backgroundQueue.push(...feeds);
-        } else {
-            this.stats.scheduled += feeds.length;
-            this.queue.push(...feeds);
-            let background = this.backgroundQueue.length;
-            this.backgroundQueue = this.backgroundQueue.filter(
-                feed => !feeds.includes(feed));
-            this.stats.scheduled -= background - this.backgroundQueue.length;
+        // Enqueue the feeds that are not underway
+        feeds = feeds.filter(feed => !this.underway.includes(feed));
+        if(feeds.length === 0) {
+            return;
         }
-        if(!this.active) {
+        for(let id of feeds) {
+            if(!background && !this.priority.includes(id)) {
+                this.priority.push(id);
+            }
+            if(!this.queue.includes(id)) {
+                this.queue.push(id);
+                this.completed = this.completed.filter(f => f != id);
+            }
+        }
+        this._broadcastStatus();
+        console.log(`Brief: enqueued ${this.queue.length - queueLength} feeds`)
+
+        if(queueLength === 0) {
             /*spawn*/ this._worker();
         }
     },
 
-    async updateAllFeeds({background}) {
+    async updateAllFeeds(options) {
+        let {background} = options || {};
         let feeds = Database.feeds.filter(f => !f.hidden && !f.isFolder);
         this.updateFeeds(feeds, {background});
     },
 
     async stopUpdating() {
+        this.priority = [];
+        this.queue = [];
+        this._broadcastStatus();
     },
 
     async _scheduler() {
+        await wait(Prefs.get('update.startupDelay'));
+        while(true) {
+            console.log("Brief: scheduler wakeup");
+            let now = Date.now();
+
+            let globalUpdatingEnabled = Prefs.get('update.enableAutoUpdate');
+            // Prefs are in seconds due to legacy
+            let lastGlobalUpdate = Prefs.get('update.lastUpdateTime') * 1000;
+            let nextGlobalUpdate = lastGlobalUpdate + (Prefs.get('update.interval') * 1000);
+
+            let doGlobalUpdate = globalUpdatingEnabled && now > nextGlobalUpdate;
+            if(doGlobalUpdate) {
+                Prefs.set('update.lastUpdateTime', now / 1000);
+                console.log("Brief: global update time");
+            }
+
+            let candidates = [];
+            for(let feed of Database.feeds.filter(f => !f.hidden && !f.isFolder)) {
+                let update;
+                if(feed.updateInterval === 0) {
+                    update = doGlobalUpdate;
+                } else {
+                    update = now > (f.lastUpdated + f.updateInterval);
+                }
+                if(update) {
+                    candidates.push(feed);
+                }
+            }
+            console.log("Brief: scheduling feeds", candidates);
+            this.updateFeeds(candidates, {background: true});
+            await wait(this.UPDATE_TIMER_INTERVAL);
+        }
     },
 
     async _worker() {
-        while(this.queue.length || this.backgroundQueue.length) {
-            break;
+        while(this.queue.length > 0) {
+            // Get a feed for update...
+            let feedID = this.priority.shift();
+            if(feedID === undefined) {
+                feedID = this.queue.shift();
+            } else {
+                this.queue = this.queue.filter(f => f != feedID);
+            }
+            this.underway.push(feedID);
+
+            /*spawn*/ this.update(feedID).then(() => {
+                this.underway = this.underway.filter(f => f !== feedID);
+                this.completed.push(feedID);
+                this._broadcastStatus();
+                if(this.queue.length === 0 && this.underway.length === 0) {
+                    this._finish();
+                }
+            });
+
+            if(this.queue.length === 0) {
+                return;
+            }
+            if(this.priority.length > 0) {
+                await wait(Prefs.get('update.defaultFetchDelay'));
+            } else {
+                await wait(Prefs.get('update.backgroundFetchDelay'));
+            }
         }
+    },
+
+    async update(feedID) {
+        let feed = Database.getFeed(feedID);
+        if(feed === undefined) { // Deleted from DB while in queue?
+            return;
+        }
+        //Do we need to refresh the favicon?
+        let nextFaviconRefresh = feed.lastFaviconRefresh + this.FAVICON_REFRESH_INTERVAL;
+        if(!feed.favicon || Date.now() > nextFaviconRefresh) {
+            /*spawn*/ FaviconFetcher.updateFavicon(feed);
+        }
+
+        let parsedFeed = await wait(4000);//FIXME
+    },
+
+    async _finish() {
+        this.completed = [];
+        //FIXME: notification
+    },
+
+    _broadcastStatus() {
+        broadcast('update-status', {active: this.active, progress: this.progress});
     },
 };
 
 
 let FaviconFetcher = {
     async updateFavicon(feed) {
+        console.log("Brief: fetching favicon for", feed);
         let favicon = await this._fetchFavicon(feed);
         if(!favicon) {
             favicon = 'no-favicon';

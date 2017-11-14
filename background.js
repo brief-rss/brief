@@ -44,6 +44,8 @@ const Brief = {
 
         await Database.init();
 
+        await FeedUpdater.init();
+
         this._updateUI();
     },
 
