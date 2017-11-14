@@ -16,6 +16,9 @@
 // and the same problem with native Promise
 // mb1193394, worked on around Fx58 nightly
 let Database = {
+    // If upping, check migration in both _upgradeSchema and _upgradeEntry/_upgradeEntries
+    DB_VERSION: 30,
+
     _db: null,
     db() {
         return this._db;
@@ -31,12 +34,12 @@ let Database = {
             return;
         let {storage} = await browser.storage.local.get({storage: 'persistent'});
         console.log(`Brief: opening database in ${storage} storage`);
-        let openOptions = {version: 30};
+        let openOptions = {version: this.DB_VERSION};
         if(storage === 'persistent') {
             openOptions.storage = 'persistent';
         }
         let opener = indexedDB.open("brief", openOptions);
-        opener.onupgradeneeded = (event) => this.upgrade(event);
+        opener.onupgradeneeded = (event) => this._upgradeSchema(event);
         this._db = await this._requestPromise(opener);
         this.loadFeeds();
         let entryCount = await this.countEntries();
@@ -44,7 +47,7 @@ let Database = {
         //TODO watch feed list changes
     },
 
-    upgrade(event) {
+    _upgradeSchema(event) {
         console.log(`upgrade from version ${event.oldVersion}`);
         let {result: db, transaction: tx} = event.target;
         let revisions;
@@ -58,7 +61,7 @@ let Database = {
                     keyPath: "id", autoIncrement: true});
                 entries.createIndex("date", "date");
                 entries.createIndex("feedID_date", ["feedID", "date"]);
-                entries.createIndex("primaryHash", "primaryHash"); // TODO: drop/update
+                entries.createIndex("primaryHash", "primaryHash"); // used for gradual migration
                 entries.createIndex("bookmarkID", "bookmarkID");
                 entries.createIndex("entryURL", "entryURL");
                 entries.createIndex("tagName", "tags", {multiEntry: true});
@@ -75,6 +78,9 @@ let Database = {
                 entries.createIndex(
                     'deleted_starred_read_feedID_date',
                     ['deleted', 'starred', 'read', 'feedID', 'date']);
+                entries.createIndex("_v", "_v"); // Used for gradual migration in big databases
+                entries.createIndex("feedID_providedID", ["feedID", "providedID"]);
+                entries.createIndex("feedID_entryURL", ["feedID", "entryURL"]);
                 // Sorry, will have to rewrite everything as boolean keys can't be indexed
                 let cursor = entries.openCursor();
                 cursor.onsuccess = ({target}) => {
