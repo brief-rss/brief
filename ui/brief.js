@@ -22,7 +22,10 @@ var init = async function init() {
 
     Commands.switchViewFilter(Persistence.data.view.filter);
 
-    refreshProgressmeter();
+    registerObservers({
+        'update-status': msg => refreshProgressmeter(msg),
+    });
+    broadcast('update-query-status');
 
     //FIXME: observers
     //.addObserver(FeedList);
@@ -61,9 +64,9 @@ var init = async function init() {
 
     // Initialize event handlers
     document.getElementById('update-button').addEventListener(
-        'click', () => API.updateAllFeeds(), {passive: true});
+        'click', () => broadcast('update-all'), {passive: true});
     document.getElementById('stop-updating-button').addEventListener(
-        'click', () => API.stopUpdating(), {passive: true});
+        'click', () => broadcast('update-stop'), {passive: true});
     document.getElementById('organize-button').addEventListener(
         'click', () => API.openLibrary(), {passive: true});
 
@@ -268,17 +271,11 @@ var Commands = {
 
 }
 
-async function refreshProgressmeter() {
-    //FIXME: refreshProgressmeter
-    return;
-    let {status, scheduled, completed} = await API.getUpdateServiceStatus();
-    if (status != /* FeedUpdateService.NOT_UPDATING */ 0) { // XXX
+async function refreshProgressmeter({active, progress}) {
+    getElement('update-progress').value = progress;
+    if (active) {
         getElement('sidebar-top').dataset.mode = "update";
-
-        if (scheduled > 1)
-            getElement('update-progress').setAttribute('show', true);
-
-        getElement('update-progress').value = 1.0 * completed / scheduled;
+        getElement('update-progress').setAttribute('show', true); //TODO: css?
     }
     else {
         getElement('sidebar-top').dataset.mode = "idle";

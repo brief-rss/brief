@@ -558,7 +558,6 @@ let FeedList = {
 
             case 'brief:feed-updated': {
                 this.tree.updateElement(aData, {loading: false, error: false});
-                refreshProgressmeter();
                 break;
             }
 
@@ -573,11 +572,9 @@ let FeedList = {
             }
 
             case 'brief:feed-update-queued':
-                refreshProgressmeter();
                 break;
 
             case 'brief:feed-update-finished':
-                refreshProgressmeter();
 
                 if (aData == 'cancelled') {
                     for (let feed of this.getAllFeeds()) {
