@@ -14,6 +14,15 @@ function expectedEvent(element, event) {
     });
 }
 
+function xhrPromise(request) {
+    return new Promise((resolve, reject) => {
+        request.onload = () => resolve(request.response);
+        request.onerror = e => reject(e);
+        request.onabort = e => reject(e);
+        request.send();
+    });
+}
+
 // ===== Misc helpers =====
 
 // Iterate nodes in a XPathResult

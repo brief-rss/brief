@@ -64,30 +64,6 @@ let FeedUpdater = {
 };
 
 
-let FeedFetcher = {
-    async fetchFeed(feed) {
-        let response = await Promise.race([
-            fetch(feed.feedURL, {redirect: 'follow', cache: 'no-cache'}),
-            wait(FEED_FETCHER_TIMEOUT),
-        ]);
-        if(!response || !response.ok) {
-            return;
-        }
-        let text = await response.text();
-
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(text, "application/xml");
-        if(doc.documentElement.localName === 'parseerror') {
-            return;
-        }
-
-        // Ok, we've got a feed, is this gonna help us???
-
-
-
-    },
-};
-
 let FaviconFetcher = {
     async updateFavicon(feed) {
         let favicon = await this._fetchFavicon(feed);
@@ -131,14 +107,223 @@ let FaviconFetcher = {
     },
 };
 
-const NAMESPACES = {
-};
 
-const FEED_FORMATS = [
-    {
-        name: '/rss2',
-        signature: 'rss:root',
+let FeedFetcher = {
+    async fetchFeed(feed) {
+        let request = new XMLHttpRequest();
+        request.open('GET', feed.feedURL);
+        request.overrideMimeType('application/xml');
+        //request.setRequestHeader('Cache-control', 'no-cache'); // FIXME: enable when done testing
+        request.responseType = 'document';
+
+        let doc = await Promise.race([
+            xhrPromise(request),
+            wait(FEED_FETCHER_TIMEOUT),
+        ]);
+
+        if(doc.documentElement.localName === 'parseerror') {
+            return;
+        }
+
+        let root = doc.documentElement.querySelector(this.ROOTS) || doc.documentElement;
+        let result = this._parseNode(root, this.FEED_PROPERTIES);
+        result.language = result.language || doc.documentElement.getAttribute('xml:lang');
+        return result;
     },
-    {},
-    {},
-];
+
+    ROOTS: ['channel, *|feed'],
+
+    _parseNode(node, properties) {
+        let props = {};
+        let keyMap = this._buildKeyMap(properties);
+        for(let child of node.children) {
+            let nsPrefix = this._nsPrefix(child.namespaceURI);
+            if(nsPrefix[0] === '[') {
+                console.log('unknown namespace', nsPrefix);
+                continue;
+            }
+            let nodeKey = nsPrefix + child.localName;
+            let destinations = keyMap.get(nodeKey);
+            if(destinations === undefined) {
+                console.log('unknown key', nodeKey);
+                continue;
+            }
+            for(let {name, type, array} of destinations) {
+                if(name === 'IGNORE') {
+                    continue;
+                }
+                let handler = this.handlers[type];
+                if(handler) {
+                    let value = handler.call(this, child);
+                    if(value === undefined || value === null) {
+                        continue;
+                    }
+                    if(array) {
+                        if(props[name] === undefined) {
+                            props[name] = [];
+                        }
+                        props[name].push(value);
+                    } else {
+                        props[name] = value;
+                    }
+                } else {
+                    console.log('missing handler', type);
+                }
+            }
+        }
+        return props;
+    },
+
+    _buildKeyMap(known_properties) {
+        let map = new Map();
+        for(let [name, type, tags] of known_properties) {
+            let array = false;
+            if(name.slice(name.length - 2) === '[]') {
+                name = name.slice(0, name.length - 2);
+                array = true;
+            }
+            for(let src of tags) {
+                if(src.tag !== undefined) {
+                    type = src.type || type;
+                    src = src.tag;
+                }
+                let destinations = map.get(src) || [];
+                destinations.push({name, type, array});
+                map.set(src, destinations);
+            }
+        }
+        return map;
+    },
+
+    FEED_PROPERTIES: [
+        // Name, handler name, list of known direct children with it
+        ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
+        ['subtitle', 'text', ["description", "dc:description", "rss1:description",
+                              "atom03:tagline", "atom:subtitle"]],
+        ['link', 'url', ["link", "rss1:link"]],
+        ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
+        ['items[]', 'entry', ["item", "rss1:item", "atom:entry", "atom03:entry"]],
+        ['generator', 'text', ["generator", "atom03:generator", "atom:generator"]],
+        ['updated', 'date', ["pubDate", "lastBuildDate", "atom03:modified", "dc:date",
+                             "dcterms:modified", "atom:updated"]],
+        ['language', 'lang', ["language"]],
+        //and others Brief does not use anyway...
+        //FIXME: test on RSS1 / Atom1 / Atom03
+        //TODO: enclosures
+        ['IGNORE', '', ["atom:id", "atom03:id", "atom:author", "atom03:author"]],
+    ],
+    ENTRY_PROPERTIES: [
+        ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
+        ['link', 'url', ["link", "rss1:link"]],
+        ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
+        ['id', 'id', ["guid", "rdf:about", "atom03:id", "atom:id"]],
+        ['authors[]', 'author', ["author", "dc:creator", "dc:author",
+                                  "atom03:author", "atom:author"]],
+        //FIXME: _atomLinksToURI
+        ['summary', 'text', ["description", "rss1:description", "dc:description",
+                             "atom03:summary", "atom:summary"]],
+        ['content', 'html', ["content:encoded", "atom03:content", "atom:content"]],
+
+        ['published', 'date', ["pubDate", "atom03:issued", "dcterms:issued", "atom:published"]],
+        ['updated', 'date', ["pubDate", "atom03:modified", "dc:date", "dcterms:modified",
+                             "atom:updated"]],
+        //and others Brief does not use anyway...
+        ['IGNORE', '', ["atom:category", "atom03:category"]],
+    ],
+    AUTHOR_PROPERTIES: [
+        ['name', 'text', ["name", "atom:name", "atom03:name"]],
+    ],
+
+    handlers: {
+        entry(node) {
+            let props = this._parseNode(node, this.ENTRY_PROPERTIES);
+            if(props.link === undefined && props.guid !== undefined) {
+                try {
+                    props.link = new URL(props.guid); // Maybe a permalink as a GUID?
+                } catch(e) { /* not the case */ }
+            }
+            return props;
+        },
+
+        text(node) {
+            return node.textContent;
+        },
+
+        html(node) {
+            return node.textContent;
+        },
+
+        lang(node) {
+            return node.textContent;
+        },
+
+        author(node) {
+            return this._parseNode(node, this.AUTHOR_PROPERTIES);
+        },
+
+        url(node) {
+            try {
+                return new URL(node.textContent);
+            } catch(e) { /* just ignore it */ }
+        },
+
+        date(node) {
+            let text = node.textContent;
+            // Support for Z timezone marker for UTC (mb 682781)
+            let date = new Date(text.replace(/z$/i, "-00:00"));
+            if (!isNaN(date)) {
+                return date.toUTCString();
+            }
+            console.warn('failed to parse date', text)
+            return null;
+        },
+
+        id(node) {
+            return node.textContent;
+        },
+
+        atomLinkAlternate(node) {
+            let rel = node.getAttribute('rel') || 'alternate';
+            let known = ['alternate', 'http://www.iana.org/assignments/relation/alternate'];
+            if(known.includes(rel)) {
+                return node.getAttribute('href') || undefined;
+            }
+        },
+    },
+
+    _nsPrefix(uri) {
+        uri = uri || "";
+        if (uri.toLowerCase().indexOf("http://backend.userland.com") == 0) {
+            return "";
+        }
+        let prefix = this.NAMESPACES[uri];
+        if(prefix === undefined) {
+            prefix = `[${uri}]`;
+        }
+        if(prefix) {
+            return prefix + ":";
+        } else {
+            return "";
+        }
+    },
+
+    NAMESPACES: {
+        "": "",
+        "http://webns.net/mvcb/": "admin",
+        "http://backend.userland.com/rss": "",
+        "http://blogs.law.harvard.edu/tech/rss": "",
+        "http://www.w3.org/2005/Atom": "atom",
+        "http://purl.org/atom/ns#": "atom03",
+        "http://purl.org/rss/1.0/modules/content/": "content",
+        "http://purl.org/dc/elements/1.1/": "dc",
+        "http://purl.org/dc/terms/": "dcterms",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
+        "http://purl.org/rss/1.0/": "rss1",
+        "http://my.netscape.com/rdf/simple/0.9/": "rss1",
+        "http://wellformedweb.org/CommentAPI/": "wfw",
+        "http://purl.org/rss/1.0/modules/wiki/": "wiki",
+        "http://www.w3.org/XML/1998/namespace": "xml",
+        "http://search.yahoo.com/mrss/": "media",
+        "http://search.yahoo.com/mrss": "media",
+    },
+};
