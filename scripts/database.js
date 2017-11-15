@@ -161,9 +161,9 @@ let Database = {
     },
 
     query(filters) {
-        if(!filters)
-            return;
-
+        if(!filters) {
+            filters = {};
+        }
         if(typeof filters == 'number') {
             filters = {entries: [filters]};
         }

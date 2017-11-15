@@ -56,16 +56,16 @@ const Brief = {
     onContext: function({menuItemId, checked}) {
         switch(menuItemId) {
             case 'brief-button-refresh':
-                browser.runtime.sendMessage({id: 'refresh'});
+                Comm.broadcast('update-all');
                 break;
             case 'brief-button-mark-read':
-                browser.runtime.sendMessage({id: 'mark-all-read'});
+                Database.query().markRead(true);
                 break;
             case 'brief-button-show-unread':
                 Prefs.set('showUnreadCounter', checked);
                 break;
             case 'brief-button-options':
-                browser.runtime.sendMessage({id: 'open-options'});
+                browser.runtime.openOptionsPage();
                 break;
         }
     },
@@ -76,7 +76,7 @@ const Brief = {
         browser.contextMenus.update('brief-button-show-unread', {checked: enabled});
         if(enabled) {
             let count = await Database.query({deleted: 0, read: 0}).count();
-            let text = "test";
+            let text = "";
             if(count > 0) {
                 text = count.toString();
                 // We crop the badge manually to leave the least-significant digits
