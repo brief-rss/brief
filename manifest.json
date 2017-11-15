@@ -1,6 +1,8 @@
 {
     "name": "Brief",
     "version": "2.4.0b1+git",
+    "author": "Denis Lisov",
+    "homepage_url": "http://brief.mozdev.org",
     "manifest_version": 2,
     "applications": {
         "gecko": {
@@ -27,6 +29,16 @@
             "64": "icons/brief-icon-64.png"
         },
         "default_title": "Brief"
+    },
+    "page_action": {
+        "default_icon": {
+            "16": "icons/brief-icon-16.png",
+            "32": "icons/brief-icon-32.png",
+            "64": "icons/brief-icon-64.png"
+        },
+        "default_title": "Subscribe",
+        "default_popup": "/ui/subscribe.html",
+        "browser_style": true
     },
     "commands": {
         "_execute_browser_action": {
