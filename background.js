@@ -51,6 +51,7 @@ const Brief = {
 
         this._updateUI();
         // TODO: first run page
+        //FIXME subscribing
     },
 
     onContext: function({menuItemId, checked}) {

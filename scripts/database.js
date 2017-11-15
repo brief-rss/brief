@@ -1,5 +1,6 @@
 'use strict';
 
+//FIXME: expire entries
 
 /**
  * Database design and considerations

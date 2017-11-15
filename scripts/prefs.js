@@ -55,7 +55,7 @@ let Prefs = {
         }
     },
 };
-
+// TODO: split defaults from user prefs
 
 function pref(name, value) {
     Prefs._defaults[name] = value;
