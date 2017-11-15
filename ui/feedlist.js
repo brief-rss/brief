@@ -817,7 +817,7 @@ let DropdownMenus = {
         const handlers = {
             'dropdown-shortcuts': () => Commands.displayShortcuts(),
             'dropdown-import': () => API.opml.importFeeds(),
-            'dropdown-export': () => API.opml.exportFeeds(),
+            'dropdown-export': () => OPML.exportFeeds(),
             'dropdown-options': () => browser.runtime.openOptionsPage(),
             'dropdown-update-feed': () => Comm.callMaster(
                 'update-feeds', {feeds: [FeedList.selectedFeed.feedID]}),
