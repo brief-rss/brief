@@ -202,7 +202,7 @@ var Commands = {
     },
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
-        API.query.bookmarkEntries(aEntry, aNewState);
+        Database.query(aEntry).bookmark(aNewState);
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
