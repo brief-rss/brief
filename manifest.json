@@ -9,7 +9,7 @@
         }
     },
     "default_locale": "en",
-    "permissions": ["<all_urls>", "contextMenus", "bookmarks", "storage", "unlimitedStorage"],
+    "permissions": ["<all_urls>", "contextMenus", "bookmarks", "storage", "unlimitedStorage", "downloads"],
     "background": {
         "scripts": [
             "/scripts/utils.js",
