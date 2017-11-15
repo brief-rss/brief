@@ -222,7 +222,9 @@ let FeedFetcher = {
         let request = new XMLHttpRequest();
         request.open('GET', url);
         request.overrideMimeType('application/xml');
-        //request.setRequestHeader('Cache-control', 'no-cache'); // FIXME: enable when done testing
+        if(!Prefs.get('update.allowCachedResponses')) {
+            request.setRequestHeader('Cache-control', 'no-cache');
+        }
         request.responseType = 'document';
 
         let doc = await Promise.race([
