@@ -59,7 +59,7 @@ function FeedView(aTitle, aQuery) {
 
     document.addEventListener('visibilitychange', this, false);
 
-    Comm.registerObservers({
+    this._observer = Comm.registerObservers({
         'entries-updated': info => this._applyUpdates(info),
     });
 
@@ -348,7 +348,7 @@ FeedView.prototype = {
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
 
-        //FIXME API.removeStorageObserver(this);
+        Comm.dropObservers(this._observer);
     },
 
 

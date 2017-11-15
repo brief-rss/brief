@@ -176,6 +176,14 @@ let Comm = {
         return listener;
     },
 
+    dropObservers(listener) {
+        if(Comm.master) {
+            Comm.observers.delete(listener);
+        } else {
+            browser.runtime.onMessage.removeListener(listener);
+        }
+    },
+
     broadcast(id, payload) {
         Comm._send(Object.assign({}, payload, {id, _type: 'broadcast-tx'}));
     },
