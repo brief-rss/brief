@@ -47,6 +47,7 @@ const Brief = {
         await FeedUpdater.init();
 
         this._updateUI();
+        // TODO: first run page
     },
 
     onContext: function({menuItemId, checked}) {
