@@ -143,24 +143,6 @@ let Database = {
     ],
     REVISION_FIELDS: ['id', 'authors', 'title', 'content', 'updated'],
 
-    _putEntry(origEntry, tx) {
-        let entry = {};
-        let revision = {};
-
-        for(let name of this.ENTRY_FIELDS) {
-            entry[name] = origEntry[name];
-        }
-        entry.revisions = [{id: origEntry.id}]
-        for(let name of this.REVISION_FIELDS) {
-            revision[name] = origEntry[name];
-        }
-        delete entry.bookmarkID;
-        entry.tags = (entry.tags || '').split(', ');
-
-        tx.objectStore('revisions').put(revision);
-        tx.objectStore('entries').put(entry);
-    },
-
     query(filters) {
         if(!filters) {
             filters = {};
@@ -173,16 +155,6 @@ let Database = {
         }
 
         return new Query(filters);
-    },
-
-    async putEntries(entries) {
-        console.log(`Inserting ${entries.length} entries`);
-        let tx = this._db.transaction(['revisions', 'entries'], 'readwrite');
-        for(let entry of entries) {
-            this._putEntry(entry, tx);
-        }
-        await this._transactionPromise(tx);
-        console.log('Done inserting');
     },
 
     async countEntries() {
