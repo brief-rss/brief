@@ -40,8 +40,6 @@ var init = async function init() {
     // FIXME: custom style
 
 
-    await FeedList.updateFeedsCache();
-
     let doc = getElement('feed-view').contentDocument;
     doc.documentElement.setAttribute('lang', navigator.language);
 

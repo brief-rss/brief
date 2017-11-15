@@ -374,12 +374,10 @@ let FeedList = {
     _feedsCache: null,
 
     init() {
+        // TODO: observers should be here
+        this._feedsCache = Database.feeds;
         this.tree.root.addEventListener(
             'change', event => this.onSelect(event), {passive: true});
-    },
-
-    updateFeedsCache: async function FeedList_updateFeedsCache() {
-        this._feedsCache = Database.feeds;
     },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
