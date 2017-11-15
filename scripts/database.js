@@ -284,7 +284,6 @@ let Database = {
         let queryUrl = {feeds: feedID, entryURL: Array.from(entriesByUrl.keys())};
         let allEntries = [];
         // Chain, scan 1: every entry with IDs provided
-        console.log('start');
         await this.query(queryId)._update({
             stores: ['entries', 'revisions'],
             action: (entry, {tx}) => {
@@ -297,7 +296,6 @@ let Database = {
                 allEntries.push(entry);
             },
             then: ({tx}) => {
-                console.log('id done');
                 // Chain, scan 2: URL-only entries
                 this.query(queryUrl)._update({
                     tx,
@@ -313,13 +311,11 @@ let Database = {
                         allEntries.push(entry);
                     },
                     then: ({tx}) => {
-                        console.log('url done')
                         // Chain, part 3: completely new entries
                         let newEntries = Array.concat(
                             Array.from(entriesById.values()),
                             Array.from(entriesByUrl.values()),
                         );
-                        console.log('entries left:', newEntries);
                         for(let entry of newEntries) {
                             this._addEntry(entry, {tx, entries: allEntries});
                         }
@@ -357,11 +353,9 @@ let Database = {
 
         let req = tx.objectStore('revisions').put(revision);
         req.onsuccess = ({target}) => {
-            console.log('rev up!')
             entry.revisions[0].id = target.result;
             let req = tx.objectStore('entries').put(entry);
             req.onsuccess = ({target}) => {
-                console.log('entry up!')
                 entry.id = target.result;
                 entries.push(entry);
             };
