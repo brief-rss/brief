@@ -131,6 +131,7 @@ let Database = {
         }
         delete value.bookmarked; // Use entry.starred
         delete value.primaryHash;
+        delete value.secondaryHash;
         value._v = this.DB_VERSION;
         return value;
     },
@@ -138,7 +139,7 @@ let Database = {
     ENTRY_FIELDS: [
         'id', 'feedID',
         'read', 'markedUnreadOnUpdate', 'starred', 'tags', 'deleted',
-        'providedID', 'entryURL', 'primaryHash', 'secondaryHash',
+        'providedID', 'entryURL',
         'date',
     ],
     REVISION_FIELDS: ['id', 'authors', 'title', 'content', 'updated'],
