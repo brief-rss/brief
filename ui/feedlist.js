@@ -251,7 +251,15 @@ let ViewList = {
         let unreadCount = await Database.query(query).count();
 
         this.tree.updateElement(aItemID, {unreadCount});
-    }
+    },
+
+    async refresh() {
+        await Promise.all([
+            this.refreshItem('all-items-folder'),
+            this.refreshItem('today-folder'),
+            this.refreshItem('starred-folder'),
+        ]);
+    },
 }
 
 
@@ -477,20 +485,18 @@ let FeedList = {
         return "/icons/default-feed-favicon.png";
     },
 
-    rebuild: function FeedList_rebuild(urlToSelect) {
+    rebuild: function FeedList_rebuild(feeds) {
+        if(this._feedsCache) {
+            this.persistFolderState();
+        }
+        this._feedsCache = feeds || Database.feeds;
         let active = (this.tree.selectedItem !== null);
         this.feeds = this.getAllFeeds(true);
 
         let model = this._buildFolderChildren(Prefs.get('homeFolder'));
         this.tree.update(model);
 
-        if(urlToSelect !== undefined && urlToSelect !== null) {
-            let targetFeed = this.feeds.filter(({feedURL}) => feedURL === urlToSelect)[0];
-            if(targetFeed !== undefined) {
-                this.tree.selectedItem = targetFeed.feedID;
-                this.tree.selectedItem.scrollIntoView();
-            }
-        } else if(active && this.tree.selectedItem === null) {
+        if(active && this.tree.selectedItem === null) {
             ViewList.selectedItem = getElement('all-items-folder');
         }
     },
@@ -528,67 +534,6 @@ let FeedList = {
         }
         return nodes;
     },
-
-
-    observe: async function FeedList_observe(aSubject, aTopic, aData) {
-        switch (aTopic) {
-            case 'brief:invalidate-feedlist':
-                await this.updateFeedsCache();
-                ViewList.refreshItem('all-items-folder');
-                ViewList.refreshItem('today-folder');
-                ViewList.refreshItem('starred-folder');
-                this.persistFolderState();
-                this.rebuild();
-                break;
-
-            case 'brief:feed-title-changed':
-            case 'brief:feed-favicon-changed':
-                await this.updateFeedsCache();
-                let feed = this.getFeed(aData);
-                this.tree.updateElement(feed.feedID,
-                    {title: feed.title, icon: this._faviconUrl(feed)});
-                // TODO: should update FeedView and feed view title too(?)
-                break;
-
-            case 'brief:feed-view-mode-changed':
-                await this.updateFeedsCache();
-                if(this.selectedFeed && this.selectedFeed.feedID === aData)
-                    gCurrentView.refresh();
-                break;
-
-            case 'brief:feed-updated': {
-                this.tree.updateElement(aData, {loading: false, error: false});
-                break;
-            }
-
-            case 'brief:feed-loading': {
-                this.tree.updateElement(aData, {loading: true});
-                break;
-            }
-
-            case 'brief:feed-error': {
-                this.tree.updateElement(aData, {error: true});
-                break;
-            }
-
-            case 'brief:feed-update-queued':
-                break;
-
-            case 'brief:feed-update-finished':
-
-                if (aData == 'cancelled') {
-                    for (let feed of this.getAllFeeds()) {
-                        this.tree.updateElement(feed.feedID, {loading: false});
-                    }
-                }
-                break;
-
-            case 'brief:custom-style-changed':
-                window.location.reload(/* bypassCache: */ true);
-                break;
-        }
-    },
-
 
     observeStorage: function FeedList_observeStorage(event, args) {
         let {entryList, tagName, newState} = args;

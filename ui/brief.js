@@ -27,9 +27,18 @@ var init = async function init() {
     });
     Comm.broadcast('update-query-status');
 
-    //FIXME: observers
-    //.addObserver(FeedList);
-    //API.addStorageObserver(FeedList);
+    //FIXME: storage observers
+    Comm.registerObservers({
+        'feedlist-updated': ({feeds}) => {
+            FeedList.rebuild(feeds);
+            ViewList.refresh();
+        },
+    });
+    // TODO: should update FeedView and feed view title too(?) on title change
+    // TODO: loading/error indicators
+    // FIXME: view mode change - refresh current view
+    // FIXME: custom style
+
 
     await FeedList.updateFeedsCache();
 
@@ -70,19 +79,7 @@ var init = async function init() {
     document.getElementById('organize-button').addEventListener(
         'click', () => API.openLibrary(), {passive: true});
 
-    // Are we called to subscribe for a feed?
-    let url = (new URLSearchParams(document.location.search)).get('subscribe');
-    if(url !== null) {
-        window.history.replaceState({}, "",
-            document.location.origin + document.location.pathname);
-        FeedList.rebuild(); // Adding a feed may take some time, so show the other feeds for now.
-        await API.addFeed(url);
-    } else {
-        ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
-        await wait();
-    }
-
-    FeedList.rebuild(url);
+    FeedList.rebuild();
 }
 
 
@@ -113,7 +110,7 @@ var Commands = {
 
     switchViewMode: function cmd_switchViewMode(aMode) {
         if (FeedList.selectedFeed) {
-            API.modifyFeed({
+            Database.modifyFeed({
                 feedID: FeedList.selectedFeed.feedID,
                 viewMode: (aMode === 'headlines')
             });
