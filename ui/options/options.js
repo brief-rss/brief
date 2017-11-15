@@ -10,7 +10,8 @@ async function init() {
     initUpdateIntervalControls();
 
     await Database.init();
-    //TODO: custom style init/events
+
+    StyleEditor.init();
 }
 
 function initUpdateIntervalControls() {
@@ -110,6 +111,27 @@ let Enabler = {
                 node.disabled = !master.checked;
             });
         }
+    },
+};
+
+let StyleEditor = {
+    EXAMPLE_CSS: '/* Example: change font size of item title */\n.title-link {\n    font-size: 15px;\n}',
+
+    editor: null,
+
+    async init() {
+        let {custom_css: style} = await browser.storage.local.get({'custom_css': this.EXAMPLE_CSS});
+        this.editor = document.getElementById('custom-style-textbox');
+        this.editor.value = style;
+
+        this.editor.addEventListener('change', () => this.save());
+    },
+
+    async save() {
+        let style = this.editor.value;
+        await browser.storage.local.set({'custom_css': style});
+
+        Comm.broadcast('style-updated');
     },
 };
 

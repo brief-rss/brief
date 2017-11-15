@@ -34,10 +34,13 @@ var init = async function init() {
             FeedList.refreshFeedTreeitems(feeds);
             //TODO: taglist refresh
         },
+        'style-updated': () => {
+            Commands.applyStyle();
+        },
     });
     // TODO: should update FeedView and feed view title too(?) on title change
     // TODO: loading/error indicators
-    // FIXME: custom style
+    Commands.applyStyle();
 
 
     let doc = getElement('feed-view').contentDocument;
@@ -259,6 +262,15 @@ var Commands = {
                 height: Math.min(window.screen.availHeight, 650),
             });
         }
+    },
+
+    async applyStyle() {
+        let {custom_css: style} = await browser.storage.local.get({'custom_css': ''});
+        let blob = new Blob([style], {type: 'text/css'});
+        let url = URL.createObjectURL(blob);
+        document.getElementById('custom-css').href = url;
+        let content = document.getElementById('feed-view').contentDocument;
+        content.getElementById('custom-css').href = url;
     },
 }
 
