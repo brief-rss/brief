@@ -80,6 +80,8 @@ var init = async function init() {
     document.getElementById('organize-button').addEventListener(
         'click', () => /*TODO: feed organization*/null, {passive: true});
 
+    ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+    await wait();
     FeedList.rebuild();
 }
 
