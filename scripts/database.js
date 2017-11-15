@@ -205,6 +205,7 @@ let Database = {
                 console.log(`Brief: ${feeds.length} feeds found in sync storage`);
             }
             this._feeds = feeds;
+            Comm.broadcast('feedlist-updated', {feeds});
             this.saveFeeds();
         }
 
@@ -225,7 +226,6 @@ let Database = {
         await this._transactionPromise(tx);
         await this._saveFeedBackups(feeds);
         console.log(`Brief: saved feed list with ${feeds.length} feeds`);
-        Comm.broadcast('feedlist-updated', {feeds});
     },
 
     async modifyFeed(props) {
@@ -243,6 +243,8 @@ let Database = {
                 //TODO: expire entries
             }
         }
+        Comm.broadcast('feedlist-updated', {feeds: this.feeds});
+
         await this.saveFeeds();
     },
 
@@ -313,7 +315,7 @@ let Database = {
     },
 };
 //TODO: database cleanup
-//FIXME: bookmark to starred sync
+//TODO: bookmark to starred sync
 
 
 function Query(filters) {

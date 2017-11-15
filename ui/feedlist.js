@@ -487,7 +487,11 @@ let FeedList = {
         if(this._feedsCache) {
             this.persistFolderState();
         }
+        let headlines = gCurrentView && gCurrentView.headlinesMode;
         this._feedsCache = feeds || Database.feeds;
+        if(gCurrentView && headlines !== gCurrentView.headlinesMode) {
+            gCurrentView.refresh();
+        }
         let active = (this.tree.selectedItem !== null);
         this.feeds = this.getAllFeeds(true);
 
