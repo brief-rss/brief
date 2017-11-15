@@ -27,23 +27,11 @@ const API_CALLS = {
     addFeed: ['brief:add-feed', 'async',
         url => FeedUpdateService.addFeed(url)
     ],
-    getUpdateServiceStatus: ['brief:get-update-status', 'async',
-        () => FeedUpdateService.getStatus()
-    ],
     updateFeeds: ['brief:update-feeds', 'noreply',
         feeds => FeedUpdateService.updateFeeds(feeds)
     ],
-    updateAllFeeds: ['brief:update-all-feeds', 'noreply',
-        () => FeedUpdateService.updateAllFeeds()
-    ],
-    stopUpdating: ['brief:stop-updating', 'noreply',
-        () => FeedUpdateService.stopUpdating()
-    ],
 
     // Storage
-    modifyFeed: ['brief:modify-feed', 'async',
-        (properties) => Storage.changeFeedProperties(properties)
-    ],
     deleteFeed: ['brief:delete-feed', 'async',
         (feed) => Storage.deleteFeed(feed)
     ],

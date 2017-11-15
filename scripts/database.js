@@ -48,9 +48,9 @@ let Database = {
         this.loadFeeds();
         let entryCount = await this.countEntries();
         console.log(`Brief: opened database with ${entryCount} entries`);
-        //TODO watch feed list changes
         Comm.registerObservers({
             'feedlist-updated': ({feeds}) => this._feeds = feeds, // Already saved elsewhere
+            'feedlist-modify': ({updates}) => this.modifyFeed(updates),
         });
     },
 
@@ -187,6 +187,7 @@ let Database = {
                 ({feeds} = await browser.storage.sync.get({feeds: []}));
                 console.log(`Brief: ${feeds.length} feeds found in sync storage`);
             }
+            this._feeds = feeds;
             this.saveFeeds();
         }
 
@@ -211,6 +212,9 @@ let Database = {
     },
 
     async modifyFeed(props) {
+        if(!Comm.master) {
+            return Comm.callMaster('feedlist-modify', {updates: props});
+        }
         props = Array.isArray(props) ? props : [props];
         for(let bag of props) {
             let feed = this.getFeed(bag.feedID);
