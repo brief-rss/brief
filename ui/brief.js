@@ -22,10 +22,10 @@ var init = async function init() {
 
     Commands.switchViewFilter(Persistence.data.view.filter);
 
-    registerObservers({
+    Comm.registerObservers({
         'update-status': msg => refreshProgressmeter(msg),
     });
-    broadcast('update-query-status');
+    Comm.broadcast('update-query-status');
 
     //FIXME: observers
     //.addObserver(FeedList);
@@ -64,9 +64,9 @@ var init = async function init() {
 
     // Initialize event handlers
     document.getElementById('update-button').addEventListener(
-        'click', () => broadcast('update-all'), {passive: true});
+        'click', () => Comm.broadcast('update-all'), {passive: true});
     document.getElementById('stop-updating-button').addEventListener(
-        'click', () => broadcast('update-stop'), {passive: true});
+        'click', () => Comm.broadcast('update-stop'), {passive: true});
     document.getElementById('organize-button').addEventListener(
         'click', () => API.openLibrary(), {passive: true});
 

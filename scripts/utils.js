@@ -108,59 +108,71 @@ async function openBackgroundTab(url) {
 }
 
 // ===== Messaging helpers =====
-let NotificationCenter = {
+let Comm = {
     master: false,
     observers: new Set(),
 
-    init() {
+    initMaster() {
         this.master = true;
-        browser.runtime.onMessage.addListener(message => {
-            if(message._notify === 'send') {
-                this._notify(message);
-            }
-        });
+        browser.runtime.onMessage.addListener(message => this._notify(message));
     },
 
-    async _notify(message) {
-        await wait();
-        delete message._notify;
-        message._notify = 'broadcast';
+    _notify(message) {
+        switch(message._type) {
+            case 'broadcast-tx':
+                message._type = 'broadcast';
+                browser.runtime.sendMessage(message).catch(() => undefined);
+                /*spawn*/ this._notifyObservers(message);
+                break;
+            case 'master':
+                return this._notifyObservers(message);
+                break;
+        }
+    },
 
-        browser.runtime.sendMessage(message).catch(() => undefined);
+    async _notifyObservers(message) {
+        await wait();
         for(let listener of this.observers) {
-            listener(message);
+            let reply = listener(message);
+            if(reply !== undefined) {
+                return reply;
+            }
         }
     },
 
     _send(message) {
+        console.log('Comm', message);
         if(this.master) {
-            this._notify(message);
+            return this._notify(message);
         } else {
-            message._notify = 'send';
-            browser.runtime.sendMessage(message);
+            return browser.runtime.sendMessage(message);
         }
     },
-};
 
-function registerObservers(handlers) {
-    let listener = message => {
-        let {id} = message;
-        let handler = handlers[id];
-        if(handler) {
-            return handler(message);
+    registerObservers(handlers) {
+        let listener = message => {
+            let {id, _type} = message;
+            if(_type !== 'broadcast' && (_type !== 'master' || !this.master)) {
+                return;
+            }
+            let handler = handlers[id];
+            if(handler) {
+                return handler(message);
+            }
+        };
+        if(Comm.master) {
+            Comm.observers.add(listener);
+        } else {
+            browser.runtime.onMessage.addListener(listener);
         }
-    };
-    if(NotificationCenter.master) {
-        NotificationCenter.observers.add(listener);
-    } else {
-        browser.runtime.onMessage.addListener(listener);
-    }
-    return listener;
-}
+        return listener;
+    },
 
-function broadcast(topic, payload) {
-    let message = Object.assign({}, payload);
-    message.id = topic;
-    console.log('broadcast', message);
-    NotificationCenter._send(message);
-}
+    broadcast(id, payload) {
+        Comm._send(Object.assign({}, payload, {id, _type: 'broadcast-tx'}));
+    },
+
+    callMaster(id, payload) {
+        return Comm._send(Object.assign({}, payload, {id, _type: 'master'}));
+    },
+};

@@ -8,7 +8,7 @@ const Brief = {
 
     // No deinit required, we'll be forcefully unloaded anyway
     init: async function() {
-        NotificationCenter.init();
+        Comm.initMaster();
 
         browser.browserAction.onClicked.addListener(
             () => browser.tabs.create({url: '/ui/brief.xhtml'}));

@@ -49,6 +49,9 @@ let Database = {
         let entryCount = await this.countEntries();
         console.log(`Brief: opened database with ${entryCount} entries`);
         //TODO watch feed list changes
+        Comm.registerObservers({
+            'feedlist-updated': ({feeds}) => this._feeds = feeds, // Already saved elsewhere
+        });
     },
 
     _upgradeSchema(event) {
@@ -204,7 +207,7 @@ let Database = {
         await this._transactionPromise(tx);
         await this._saveFeedBackups(feeds);
         console.log(`Brief: saved feed list with ${feeds.length} feeds`);
-        broadcast('feedlist-updated', {feeds});
+        Comm.broadcast('feedlist-updated', {feeds});
     },
 
     async modifyFeed(props) {

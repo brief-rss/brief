@@ -30,7 +30,7 @@ let FeedUpdater = {
     async init() {
         /*spawn*/ this._scheduler();
 
-        registerObservers({
+        Comm.registerObservers({
             'update-all': () => this.updateAllFeeds(),
             'update-stop': () => this.stopUpdating(),
             'update-query-status': () => this._broadcastStatus(),
@@ -165,7 +165,7 @@ let FeedUpdater = {
     },
 
     _broadcastStatus() {
-        broadcast('update-status', {active: this.active, progress: this.progress});
+        Comm.broadcast('update-status', {active: this.active, progress: this.progress});
     },
 };
 
