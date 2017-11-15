@@ -27,9 +27,6 @@ const API_CALLS = {
     addFeed: ['brief:add-feed', 'async',
         url => FeedUpdateService.addFeed(url)
     ],
-    updateFeeds: ['brief:update-feeds', 'noreply',
-        feeds => FeedUpdateService.updateFeeds(feeds)
-    ],
 
     // Storage
     deleteFeed: ['brief:delete-feed', 'async',

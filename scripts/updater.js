@@ -32,6 +32,7 @@ let FeedUpdater = {
 
         Comm.registerObservers({
             'update-all': () => this.updateAllFeeds(),
+            'update-feeds': ({feeds}) => this.updateFeeds(feeds),
             'update-stop': () => this.stopUpdating(),
             'update-query-status': () => this._broadcastStatus(),
         });

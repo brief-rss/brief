@@ -258,12 +258,6 @@ var Commands = {
             });
         }
     },
-
-    updateFeed: function cmd_updateFeed(aFeed) {
-        let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        API.updateFeeds([feed.feedID]);
-    },
-
 }
 
 async function refreshProgressmeter({active, progress}) {

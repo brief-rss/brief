@@ -767,7 +767,8 @@ let FeedListContextMenu = {
     build() {
         const handlers = {
             'ctx-mark-feed-read': () => this.markFeedRead(),
-            'ctx-update-feed': () => API.updateFeeds([this.targetFeed.feedID]),
+            'ctx-update-feed': () => Comm.callMaster('update-feeds',
+                                                     {feeds: [this.targetFeed.feedID]}),
             'ctx-open-website': () => Commands.openFeedWebsite(this.targetFeed),
             'ctx-unsubscribe-feed': () => Commands.deleteFeed(this.targetFeed),
             'ctx-empty-feed': () => Commands.emptyFeed(this.targetFeed),
@@ -822,7 +823,7 @@ let FeedListContextMenu = {
         for (let item of FeedList.selectedItem.getElementsByTagName('tree-item'))
             feeds.push(item.dataset.id);
 
-        API.updateFeeds(feeds);
+        Comm.callMaster('update-feeds', {feeds});
     },
 
     emptyFolder: function FolderContextMenu_emptyFolder() {
@@ -853,7 +854,8 @@ let DropdownMenus = {
             'dropdown-import': () => API.opml.importFeeds(),
             'dropdown-export': () => API.opml.exportFeeds(),
             'dropdown-options': () => browser.runtime.openOptionsPage(),
-            'dropdown-update-feed': () => Commands.updateFeed(),
+            'dropdown-update-feed': () => Comm.callMaster(
+                'update-feeds', {feeds: [FeedList.selectedFeed.feedID]}),
             'brief-open-website': () => Commands.openFeedWebsite(),
             'dropdown-empty-feed': () => Commands.emptyFeed(),
             'dropdown-unsubscribe-feed': () => Commands.deleteFeed(),
