@@ -4,7 +4,6 @@ var gCurrentView;
 
 
 var init = async function init() {
-    window.addEventListener('unload', () => unload(), {once: true, passive: true});
     apply_i18n(document);
 
     let feedview_doc = await fetch('feedview.html');
@@ -82,21 +81,16 @@ var init = async function init() {
 }
 
 
-function unload() {
-    Persistence.save();
-
-    gCurrentView.uninit();
-}
-
-
 var Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
         document.body.classList.remove('sidebar');
+        Persistence.save(); // TODO: fix in a more clean way
     },
 
     revealSidebar: function cmd_revealSidebar() {
         document.body.classList.add('sidebar');
+        Persistence.save(); // TODO: fix in a more clean way
     },
 
     markViewRead: function cmd_markViewRead() {
@@ -116,14 +110,20 @@ var Commands = {
             // Refresh will happen from the observer
         }
         else {
-            Persistence.data.view.mode = aMode;
+            if(aMode !== Persistence.data.view.mode) {
+                Persistence.data.view.mode = aMode;
+                Persistence.save();
+            }
             gCurrentView.refresh();
         }
 
     },
 
     switchViewFilter: function cmd_switchViewFilter(aFilter) {
-        Persistence.data.view.filter = aFilter;
+        if(aFilter !== Persistence.data.view.filter) {
+            Persistence.data.view.filter = aFilter;
+            Persistence.save();
+        }
 
         getElement('show-all-entries-checkbox').dataset.checked = (aFilter === 'all');
         getElement('filter-unread-checkbox').dataset.checked = (aFilter === 'unread');
@@ -380,6 +380,9 @@ let SplitterModule = {
                 break;
         }
         event.stopPropagation();
+        if(event.type === 'mouseup') {
+            Persistence.save(); // TODO: fix in a more clean way
+        }
     },
 };
 

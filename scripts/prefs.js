@@ -27,6 +27,7 @@ let Prefs = {
     },
 
     set: async function(name, value) {
+        console.log("Brief: update pref", name, "to", value);
         let prefs = Object.assign({}, this._values);
         prefs[name] = value;
         await browser.storage.local.set({prefs});

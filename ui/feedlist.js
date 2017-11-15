@@ -162,6 +162,7 @@ TreeView.prototype = {
             element.classList.toggle('collapsed');
             aEvent.stopPropagation();
             this._cleanup(); // Move selection
+            Persistence.save(); // TODO: fix in a more clean way
         } else {
             let target = aEvent.currentTarget;
             if(target.nodeName === 'tree-folder-header')
@@ -238,6 +239,7 @@ let ViewList = {
         } else {
             TagList.hide();
         }
+        //TODO: fix initial view saving
 
         let title = this.selectedItem.getElementsByClassName('title')[0].textContent;
         let query = this.getQueryForView(this.selectedItem.id);
