@@ -25,11 +25,16 @@ var init = async function init() {
     });
     Comm.broadcast('update-query-status');
 
-    //FIXME: storage observers
+    //FIXME: bookmark observers
     Comm.registerObservers({
         'feedlist-updated': ({feeds}) => {
-            FeedList.rebuild(feeds);
             ViewList.refresh();
+            FeedList.rebuild(feeds);
+        },
+        'entries-updated': ({feeds}) => {
+            ViewList.refresh();
+            FeedList.refreshFeedTreeitems(feeds);
+            //TODO: taglist refresh
         },
     });
     // TODO: should update FeedView and feed view title too(?) on title change

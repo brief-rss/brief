@@ -533,47 +533,6 @@ let FeedList = {
         return nodes;
     },
 
-    observeStorage: function FeedList_observeStorage(event, args) {
-        let {entryList, tagName, newState} = args;
-        switch(event) {
-            case 'entriesAdded':
-            case 'entriesUpdated':
-                this.refreshFeedTreeitems(entryList.feeds);
-                ViewList.refreshItem('all-items-folder');
-                ViewList.refreshItem('starred-folder');
-                ViewList.refreshItem('today-folder');
-                TagList.refreshTags(entryList.tags);
-                break;
-            case 'entriesDeleted':
-                let entriesRestored = (newState === false);
-                // First handle new/deleted tags
-                TagList.refreshTags(entryList.tags, entriesRestored, !entriesRestored);
-                // fallthrough
-            case 'entriesMarkedRead':
-                wait(250).then(() =>
-                    FeedList.refreshFeedTreeitems(entryList.feeds)
-                )
-
-                wait(500).then(() => {
-                    ViewList.refreshItem('all-items-folder');
-                    ViewList.refreshItem('today-folder');
-                    ViewList.refreshItem('starred-folder');
-                    TagList.refreshTags(entryList.tags);
-                })
-                break;
-            case 'entriesStarred':
-                ViewList.refreshItem('starred-folder');
-                break;
-            case 'entriesTagged':
-                if (ViewList.selectedItem && ViewList.selectedItem.id == 'starred-folder')
-                    TagList.show();
-
-                TagList.refreshTags([tagName], newState, !newState);
-                break;
-        }
-    },
-
-
     persistFolderState: function FeedList_persistFolderState() {
         let closedFolders = '_';
         for (let folder of this.tree.root.getElementsByTagName('tree-folder')) {

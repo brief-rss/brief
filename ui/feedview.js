@@ -59,7 +59,9 @@ function FeedView(aTitle, aQuery) {
 
     document.addEventListener('visibilitychange', this, false);
 
-    //FIXME API.addStorageObserver(this);
+    Comm.registerObservers({
+        'entries-updated': info => this._applyUpdates(info),
+    });
 
     this.document.addEventListener('click', this, true);
     this.document.addEventListener('scroll', this, true);
@@ -423,85 +425,53 @@ FeedView.prototype = {
         }
     },
 
-    observeStorage: function FeedList_observeStorage(event, args) {
+    _applyUpdates({feeds, entries, changes}) {
         if(document.hidden) {
             this._refreshPending = true;
             return;
         }
-        let {entryList, newState, tagName} = args;
-        switch(event) {
-            case 'entriesAdded':
-                this._onEntriesAdded(entryList.entries)
+        let entryList = entries.map(entry => entry.id);
+        if(changes.content === true) {
+                this._onEntriesRemoved(entryList, false, false);
+                this._onEntriesAdded(entryList)
                     .catch(this._ignoreRefresh);
-                break;
-            case 'entriesUpdated':
-                this._onEntriesRemoved(entryList.entries, false, false);
-                this._onEntriesAdded(entryList.entries)
+                return;
+        }
+        if(changes.deleted !== undefined) {
+            if (changes.deleted === this.query.deleted) {
+                this._onEntriesAdded(entryList)
                     .catch(this._ignoreRefresh);
-                break;
-            case 'entriesDeleted':
-                if (newState === this.query.deleted)
-                    this._onEntriesAdded(entryList.entries)
+            } else {
+                this._onEntriesRemoved(entryList, true, true);
+            }
+        } else if(changes.read !== undefined) {
+            if (this.query.read === false) {
+                if(changes.read) {
+                    this._onEntriesRemoved(entryList, true, true);
+                } else {
+                    this._onEntriesAdded(entryList)
+                        .catch(this._ignoreRefresh);
+                }
+            }
+
+            for(let entry of entryList.filter(id => this._loadedEntries.includes(id))) {
+                this.getEntryView(entry).read = changes.read;
+
+                if (Prefs.get('feedview.autoMarkRead') && !changes.read)
+                    this._entriesMarkedUnread.push(entry);
+            }
+        } else if(changes.starred !== undefined) {
+            if (this.query.starred === true) {
+                if (newState)
+                    this._onEntriesAdded(entryList)
                         .catch(this._ignoreRefresh);
                 else
-                    this._onEntriesRemoved(entryList.entries, true, true);
-                break;
-            case 'entriesMarkedRead':
-                if (this.query.read === false) {
-                    if (newState)
-                        this._onEntriesRemoved(entryList.entries, true, true);
-                    else
-                        this._onEntriesAdded(entryList.entries)
-                            .catch(this._ignoreRefresh);
-                }
+                    this._onEntriesRemoved(entryList, true, true);
+            }
 
-                for (let entry of entryList.entries.filter(
-                    id => this._loadedEntries.includes(id)))
-                {
-                    this.getEntryView(entry).read = newState;
-
-                    if (Prefs.get('feedview.autoMarkRead') && !newState)
-                        this._entriesMarkedUnread.push(entry);
-                }
-                break;
-            case 'entriesStarred':
-                if (this.query.starred === true) {
-                    if (newState)
-                        this._onEntriesAdded(entryList.entries)
-                            .catch(this._ignoreRefresh);
-                    else
-                        this._onEntriesRemoved(entryList.entries, true, true);
-                }
-
-                for (let entry of entryList.entries.filter(
-                    id => this._loadedEntries.includes(id)))
-                {
-                    this.getEntryView(entry).starred = newState;
-                }
-                break;
-            case 'entriesTagged':
-                for (let entry of entryList.entries.filter(
-                    id => this._loadedEntries.includes(id)))
-                {
-                    let entryView = this.getEntryView(entry);
-                    let tags = entryView.tags;
-
-                    if (newState)
-                        tags.push(tagName);
-                    else
-                        tags.splice(tags.indexOf(tagName), 1);
-
-                    entryView.tags = tags;
-                }
-
-                if (this.query.tags && this.query.tags[0] === tagName) {
-                    if (newState)
-                        this._onEntriesAdded(entryList.entries)
-                            .catch(this._ignoreRefresh);
-                    else
-                        this._onEntriesRemoved(entryList.entries, true, true);
-                }
-                break;
+            for(let entry of entryList.filter(id => this._loadedEntries.includes(id))) {
+                this.getEntryView(entry).starred = newState;
+            }
         }
     },
 

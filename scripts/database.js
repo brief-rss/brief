@@ -297,6 +297,7 @@ let Database = {
     },
 };
 //TODO: database cleanup
+//FIXME: bookmark to starred sync
 
 
 function Query(filters) {
@@ -509,14 +510,16 @@ Query.prototype = {
     },
 
     async markRead(state) {
-        return await this._update(e => {
-            e.read = state ? 1 : 0;
+        return await this._update({
+            action: e => { e.read = state ? 1 : 0; },
+            notify: {read: state},
         });
     },
 
     async markDeleted(state) {
-        return await this._update(e => {
-            e.deleted = state || 0;
+        return await this._update({
+            action: e => { e.deleted = state || 0; },
+            notify: {deleted: state}
         });
     },
 
@@ -545,19 +548,28 @@ Query.prototype = {
                 entry => browser.bookmarks.search({url: entry.entryURL})
                     .then(bookmarks => {entry, bookmarks})
         ));
-        let actions = new Map();
+        let star = new Set();
+        let unstar = new Set();
         for(let {entry, bookmarks} of groups) {
             let starred = (bookmarks.length > 0) ? 1 : 0;
-            if(starred !== entry.starred) {
-                actions.set(entry.id, starred);
+            if(starred && !entry.starred) {
+                star.add(entry.id);
+            } else if (!starred && entry.starred) {
+                unstar.add(entry.id);
             }
-            Database.query(Array.from(actions.keys()))._update(entry => {
-                entry.starred = actions.get(entry.id);
-            });
         }
+        Database.query(Array.from(star))._update({
+            action: entry => { entry.star = 1; },
+            notify: {star: 1},
+        });
+        Database.query(Array.from(unstar))._update({
+            action: entry => { entry.star = 0; },
+            notify: {star: 0},
+        });
     },
 
-    async _update(func, stores) {
+    async _update({action, stores, notify}) {
+        notify = notify || {};
         if(stores === undefined) {
             stores = ['entries'];
         }
@@ -570,20 +582,29 @@ Query.prototype = {
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
 
+        let feeds = new Set();
+        let entries = [];
+
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         cursors.forEach(c => {
             c.onsuccess = ({target}) => {
                 let cursor = target.result;
                 if(cursor) {
                     let value = cursor.value;
-                    func(value);
+                    action(value);
+                    feeds.add(value.feedID);
+                    entries.push(value);
                     cursor.update(value);
                     cursor.continue();
                 }
             };
         });
-
         await Database._transactionPromise(tx);
+        Comm.broadcast('entries-updated', {
+            feeds: Array.from(feeds),
+            entries: Array.from(entries),
+            changes: notify,
+        });
     },
 
     _filters() {
