@@ -2,8 +2,6 @@
 
 var gCurrentView;
 
-var API = null;
-
 
 var init = async function init() {
     window.addEventListener('unload', () => unload(), {once: true, passive: true});
@@ -152,8 +150,9 @@ var Commands = {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
         let text = browser.i18n.getMessage('confirmFeedDeletionText', feed.title);
 
-        if (window.confirm(text))
-            API.deleteFeed(Number(feed.bookmarkID));
+        if (window.confirm(text)) {
+            Database.deleteFeed(feed);
+        }
     },
 
     restoreTrashed: function cmd_restoreTrashed() {

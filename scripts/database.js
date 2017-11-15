@@ -51,6 +51,7 @@ let Database = {
         Comm.registerObservers({
             'feedlist-updated': ({feeds}) => this._feeds = feeds, // Already saved elsewhere
             'feedlist-modify': ({updates}) => this.modifyFeed(updates),
+            'feedlist-delete': ({feeds}) => this.deleteFeed(feeds),
         });
     },
 
@@ -229,6 +230,18 @@ let Database = {
         await this.saveFeeds();
     },
 
+    async deleteFeed(feeds) {
+        if(!Comm.master) {
+            return Comm.callMaster('feedlist-delete', {feeds});
+        }
+        if(!Array.isArray(feeds)) {
+            feeds = [feeds];
+        }
+        feeds = this._includeChildren(feeds);
+        feeds = feeds.map(f => ({feedID: f.feedID, hidden: Date.now()}));
+        await this.modifyFeed(feeds);
+    },
+
     async _saveFeedBackups(feeds) {
         let minimizedFeeds = [];
         for(let feed of feeds) {
@@ -245,6 +258,26 @@ let Database = {
         let store_local = browser.storage.local.set({feeds});
         let store_sync = browser.storage.sync.set({feeds});
         await Promise.all([store_local, store_sync]);
+    },
+
+    _includeChildren(feeds) {
+        feeds = feeds.map(f => f.feedID || f);
+        let childrenMap = new Map();
+        for(let node of Database.feeds) {
+            let parent = node.parent;
+            let children = childrenMap.get(parent) || [];
+            children.push(node.feedID);
+            childrenMap.set(parent, children);
+        }
+        let nodes = [];
+        let new_nodes = feeds.slice();
+        while(new_nodes.length > 0) {
+            let node = new_nodes.pop();
+            nodes.push(node);
+            let children = childrenMap.get(node) || [];
+            new_nodes.push(...children);
+        }
+        return Database.feeds.filter(f => nodes.includes(f.feedID));
     },
 
     // Note: this is resolved after the transaction is finished(!!!) mb1193394
@@ -566,22 +599,7 @@ Query.prototype = {
         let active_feeds = Database.feeds;
         // Folder list
         if(folders !== undefined) {
-            let childrenMap = new Map();
-            for(let node of Database.feeds) {
-                let parent = node.parent;
-                let children = childrenMap.get(parent) || [];
-                children.push(node.feedID);
-                childrenMap.set(parent, children);
-            }
-            let nodes = [];
-            let new_nodes = folders.slice();
-            while(new_nodes.length > 0) {
-                let node = new_nodes.pop();
-                nodes.push(node);
-                let children = childrenMap.get(node) || [];
-                new_nodes.push(...children);
-            }
-            active_feeds = active_feeds.filter(feed => nodes.includes(feed.feedID));
+            active_feeds = Database._includeChildren(folders);
         }
         // Feed list
         if(feeds !== undefined) {

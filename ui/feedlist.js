@@ -842,7 +842,7 @@ let FeedListContextMenu = {
         let text = browser.i18n.getMessage('confirmFolderDeletionText', feed.title);
 
         if (window.confirm(text))
-            API.deleteFolder(Number(feed.bookmarkID));
+            Database.deleteFeed(feed);
     }
 
 }
