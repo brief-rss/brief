@@ -53,6 +53,22 @@ let Database = {
             'feedlist-modify': ({updates}) => this.modifyFeed(updates),
             'feedlist-delete': ({feeds}) => this.deleteFeed(feeds),
         });
+
+        if(Comm.master) {
+            browser.bookmarks.onCreated.addListener((id, {url}) => {
+                this.query({entryURL: url, starred: 0})._update({
+                    action: e => { e.starred = 1; },
+                    changes: {starred: 1},
+                });
+            });
+            browser.bookmarks.onRemoved.addListener((id, {node: {url}}) => {
+                this.query({entryURL: url, starred: 1})._update({
+                    action: e => { e.starred = 0; },
+                    changes: {starred: 0},
+                });
+            });
+            //TODO: onChanged
+        }
     },
 
     _upgradeSchema(event) {
@@ -342,6 +358,11 @@ Query.prototype = {
     deleted: undefined,
 
     /**
+     * Entry URL for bookmark comparison purposes
+     */
+    entryURL: undefined,
+
+    /**
      * String that must be contained by title, content, authors or tags of the
      * selected entries.
      */
@@ -512,14 +533,14 @@ Query.prototype = {
     async markRead(state) {
         return await this._update({
             action: e => { e.read = state ? 1 : 0; },
-            notify: {read: state},
+            changes: {read: state},
         });
     },
 
     async markDeleted(state) {
         return await this._update({
             action: e => { e.deleted = state || 0; },
-            notify: {deleted: state}
+            changes: {deleted: state}
         });
     },
 
@@ -542,34 +563,8 @@ Query.prototype = {
         await Promise.all(actions);
     },
 
-    async syncStarredFromBookmarks() {
-        let entries = await this.getEntries();
-        let groups = await Promise.all(entries.map(
-                entry => browser.bookmarks.search({url: entry.entryURL})
-                    .then(bookmarks => {entry, bookmarks})
-        ));
-        let star = new Set();
-        let unstar = new Set();
-        for(let {entry, bookmarks} of groups) {
-            let starred = (bookmarks.length > 0) ? 1 : 0;
-            if(starred && !entry.starred) {
-                star.add(entry.id);
-            } else if (!starred && entry.starred) {
-                unstar.add(entry.id);
-            }
-        }
-        Database.query(Array.from(star))._update({
-            action: entry => { entry.star = 1; },
-            notify: {star: 1},
-        });
-        Database.query(Array.from(unstar))._update({
-            action: entry => { entry.star = 0; },
-            notify: {star: 0},
-        });
-    },
-
-    async _update({action, stores, notify}) {
-        notify = notify || {};
+    async _update({action, stores, changes}) {
+        changes = changes || {};
         if(stores === undefined) {
             stores = ['entries'];
         }
@@ -603,7 +598,7 @@ Query.prototype = {
         Comm.broadcast('entries-updated', {
             feeds: Array.from(feeds),
             entries: Array.from(entries),
-            changes: notify,
+            changes,
         });
     },
 
@@ -645,6 +640,7 @@ Query.prototype = {
             starred: this.starred,
             deleted: this.deleted === false ? 0 : this.deleted,
             tags: this.tags,
+            entryURL: this.entryURL,
         };
         filters.fullTextSearch = this.searchString;
 
@@ -671,6 +667,20 @@ Query.prototype = {
             direction = "next";
         }
 
+        let stupidFilter = entry => {
+            let ok = true;
+            for(let [k, v] of Object.entries(filters.entry)) {
+                if(v === undefined) {
+                    continue;
+                }
+                if(!Array.isArray(v)) {
+                    ok = ok && entry[k] === v;
+                } else {
+                    ok = ok && v.includes(entry[k]);
+                }
+            }
+        };
+
         let filterFunction = entry => {
             return (true
                 && (filters.entry.tags === undefined || filters.entry.tags.some(tag => entry.tags.includes(tag)))
@@ -690,9 +700,14 @@ Query.prototype = {
 
         if(filters.entry.id !== undefined) {
             indexName = null;
-            filterFunction = undefined;
-            ranges = filters.entry.id;
-            // TODO: entries should not ignore other filters; not critical (not used with both)
+            filterFunction = stupidFilter;
+            ranges = asArray(filters.entry.id);
+        }
+
+        if(filters.entry.entryURL !== undefined) {
+            indexName = 'entryURL';
+            filterFunction = stupidFilter;
+            ranges = asArray(filters.entry.entryURL);
         }
 
         if(filters.entry.tags === undefined &&

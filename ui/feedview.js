@@ -462,15 +462,16 @@ FeedView.prototype = {
             }
         } else if(changes.starred !== undefined) {
             if (this.query.starred === true) {
-                if (newState)
+                if(changes.starred) {
                     this._onEntriesAdded(entryList)
                         .catch(this._ignoreRefresh);
-                else
+                } else {
                     this._onEntriesRemoved(entryList, true, true);
+                }
             }
 
             for(let entry of entryList.filter(id => this._loadedEntries.includes(id))) {
-                this.getEntryView(entry).starred = newState;
+                this.getEntryView(entry).starred = changes.starred;
             }
         }
     },

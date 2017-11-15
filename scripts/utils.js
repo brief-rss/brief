@@ -36,6 +36,14 @@ function iterSnapshot(result) {
     }
 }
 
+function asArray(v) {
+    if(Array.isArray(v)) {
+        return v;
+    } else {
+        return [v];
+    }
+}
+
 function RelativeDate(aAbsoluteTime) {
     this.currentDate = new Date();
     this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;

@@ -25,7 +25,6 @@ var init = async function init() {
     });
     Comm.broadcast('update-query-status');
 
-    //FIXME: bookmark observers
     Comm.registerObservers({
         'feedlist-updated': ({feeds}) => {
             ViewList.refresh();
