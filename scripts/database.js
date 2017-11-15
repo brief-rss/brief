@@ -233,6 +233,184 @@ let Database = {
         await this.modifyFeed(feeds);
     },
 
+    async pushUpdatedFeed({feed, parsedFeed}) {
+        let entries = this._feedToEntries({feed, parsedFeed});
+        console.log('push', parsedFeed, entries);
+        let modified = Date.now(); // fallback
+        if(parsedFeed.updated) {
+            modified = parseDateValue(parsedFeed.updated);
+        }
+        if(!entries.length || (modified && modified <= feed.dateModified)) {
+            return;
+        }
+        console.log('pushing entries...');
+        await this._pushFeedEntries({feed, entries});
+        let feedUpdates = Object.assign({}, {
+            feedID: feed.feedID,
+            websiteURL: parsedFeed.link ? parsedFeed.link.href : '',
+            subtitle: parsedFeed.subtitle ? parsedFeed.subtitle.text : '',
+            oldestEntryDate: Math.min(entries.map(e => e.date)) || feed.oldestEntryDate,
+            language: parsedFeed.language,
+            lastUpdated: Date.now(),
+            dateModified: modified,
+        });
+        console.log('saving feed...');
+        await this.modifyFeed(feedUpdates);
+    },
+
+    async _pushFeedEntries({feed, entries}) {
+        if(entries.length === 0) {
+            return;
+        }
+        let feedID = feed.feedID;
+        let markUnread = feed.markModifiedEntriesUnread;
+        let entriesById = new Map();
+        let entriesByUrl = new Map();
+        for(let entry of entries) {
+            let {providedID, entryURL} = entry;
+            if(feedID !== entry.feedID) {
+                console.error(feed, entry);
+                throw "pushFeedEntries cannot be used for multiple feeds at a time";
+            }
+            //TODO: this is weird, but I'll keep the old way for now
+            if(providedID) {
+                entriesById.set(providedID, entry);
+            } else {
+                entriesByUrl.set(entryURL, entry);
+            }
+        }
+        let queryId = {feeds: feedID, providedID: Array.from(entriesById.keys())};
+        let queryUrl = {feeds: feedID, entryURL: Array.from(entriesByUrl.keys())};
+        let allEntries = [];
+        // Chain, scan 1: every entry with IDs provided
+        console.log('start');
+        await this.query(queryId)._update({
+            stores: ['entries', 'revisions'],
+            action: (entry, {tx}) => {
+                let update = entriesById.get(entry.providedID);
+                if(update === undefined) {
+                    return;
+                }
+                entriesById.delete(entry.providedID);
+                this._updateEntry(entry, update, {tx, markUnread});
+                allEntries.push(entry);
+            },
+            then: ({tx}) => {
+                console.log('id done');
+                // Chain, scan 2: URL-only entries
+                this.query(queryUrl)._update({
+                    tx,
+                    // changes undefined to avoid duplicate notifications
+                    stores: ['entries', 'revisions'],
+                    action: (entry, {tx}) => {
+                        let update = entriesByUrl.get(entry.entryURL);
+                        entriesByUrl.delete(entry.entryURL);
+                        if(update === undefined) {
+                            return;
+                        }
+                        this._updateEntry(entry, update, {tx, markUnread});
+                        allEntries.push(entry);
+                    },
+                    then: ({tx}) => {
+                        console.log('url done')
+                        // Chain, part 3: completely new entries
+                        let newEntries = Array.concat(
+                            Array.from(entriesById.values()),
+                            Array.from(entriesByUrl.values()),
+                        );
+                        console.log('entries left:', newEntries);
+                        for(let entry of newEntries) {
+                            this._addEntry(entry, {tx, entries: allEntries});
+                        }
+                    },
+                });
+            },
+        });
+        Comm.broadcast('entries-updated', {
+            feeds: [feedID],
+            entries: allEntries,
+            changes: {content: true},
+        });
+    },
+
+    _addEntry(next, {tx, entries}) {
+        let entry = {
+            feedID: next.feedID,
+            providedID: next.providedID,
+            entryURL: next.entryURL,
+            date: next.date || Date.now(),
+            revisions: [{}],
+            tags: [],
+            read: 0,
+            markedUnreadOnUpdate: 0,
+            starred: 0,
+            deleted: 0,
+        };
+
+        let revision = {
+            title: next.title,
+            content: next.content || next.summary,
+            authors: next.authors,
+            updated: next.updated || 0,
+        };
+
+        let req = tx.objectStore('revisions').put(revision);
+        req.onsuccess = ({target}) => {
+            console.log('rev up!')
+            entry.revisions[0].id = target.result;
+            let req = tx.objectStore('entries').put(entry);
+            req.onsuccess = ({target}) => {
+                console.log('entry up!')
+                entry.id = target.result;
+                entries.push(entry);
+            };
+        };
+    },
+
+    //TODO: fix this async horror show with some good abstractions
+    _updateEntry(prev, next, {tx, markUnread}) {
+        // Roughly equivalent to  legacy FeedProcessor.processEntry
+        let revision = prev.revisions[0].id;
+        let req = tx.objectStore('revisions').get(revision);
+        req.onsuccess = ({target}) => {
+            let revision = target.result;
+            if(!revision.updated || revision.updated <= prev.updated) {
+                return;
+            }
+            revision.updated = next.updated;
+            if(markUnread && prev.read) {
+                prev.read = 0;
+                prev.markedUnreadOnUpdate = 1;
+            }
+            revision.title = next.title;
+            revision.content = next.content || next.summary;
+            revision.authors = next.authors;
+            tx.objectStore('entries').put(prev); // Sorry, _update's default save is before
+            tx.objectStore('revisions').put(revision);
+        }
+    },
+
+    _feedToEntries({feed, parsedFeed}) {
+        // Roughly the legacy mapEntryProperties
+        let entries = [];
+        for(let src of (parsedFeed.items || [])) {
+            let authors = (src.authors || []).map(a => a.name).filter(n => n).join(', ');
+            let entry = {
+                feedID: feed.feedID,
+                title: (src.title || '').replace(/<[^>]+>/g, ''), // Strip tags
+                entryURL: src.link.href,
+                summary: src.summary,
+                content: src.content,
+                authors: authors,
+                date: parseDateValue(src.published) || parseDateValue(src.updated) || Date.now(),
+                updated: parseDateValue(src.updated) || Date.now(),
+            };
+
+            entries.push(entry);
+        }
+        return entries;
+    },
+
     async _saveFeedBackups(feeds) {
         let minimizedFeeds = [];
         for(let feed of feeds) {
@@ -282,8 +460,10 @@ let Database = {
     // Note: this is resolved after the transaction is finished(!)
     _transactionPromise(tx) {
         return new Promise((resolve, reject) => {
-            tx.oncomplete = resolve;
-            tx.onerror = reject;
+            let oncomplete = tx.oncomplete;
+            let onerror = tx.onerror;
+            tx.oncomplete = () => { resolve(); if(oncomplete) oncomplete(); };
+            tx.onerror = () => { reject(); if(onerror) onerror(); };
         });
     },
 };
@@ -538,8 +718,7 @@ Query.prototype = {
         await Promise.all(actions);
     },
 
-    async _update({action, stores, changes}) {
-        changes = changes || {};
+    async _update({action, stores, changes, then, tx}) {
         if(stores === undefined) {
             stores = ['entries'];
         }
@@ -548,7 +727,11 @@ Query.prototype = {
         let offset = filters.sort.offset || 0;
         let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
 
-        let tx = Database.db().transaction(stores, 'readwrite');
+        if(tx === undefined) {
+            tx = Database.db().transaction(stores, 'readwrite');
+        } else {
+            //TODO: check the stores are available here
+        }
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
 
@@ -561,20 +744,28 @@ Query.prototype = {
                 let cursor = target.result;
                 if(cursor) {
                     let value = cursor.value;
-                    action(value);
+                    action(value, {tx});
                     feeds.add(value.feedID);
                     entries.push(value);
                     cursor.update(value);
                     cursor.continue();
+                } else {
+                    if(target.then) {
+                        target.then({tx, feeds, entries});
+                    }
                 }
             };
         });
+        cursors[cursors.length - 1].then = then;
         await Database._transactionPromise(tx);
-        Comm.broadcast('entries-updated', {
-            feeds: Array.from(feeds),
-            entries: Array.from(entries),
-            changes,
-        });
+        if(changes) {
+            //TODO: we're missing revision data here
+            Comm.broadcast('entries-updated', {
+                feeds: Array.from(feeds),
+                entries: Array.from(entries),
+                changes,
+            });
+        }
     },
 
     _filters() {
@@ -673,21 +864,40 @@ Query.prototype = {
         let ranges = this._prefixesToRanges(prefixes,
             {min: filters.sort.start, max: filters.sort.end});
 
+        if(filters.entry.tags === undefined &&
+            filters.fullTextSearch === undefined) {
+            filterFunction = undefined;
+        }
+
         if(filters.entry.id !== undefined) {
             indexName = null;
             filterFunction = stupidFilter;
             ranges = asArray(filters.entry.id);
         }
 
-        if(filters.entry.entryURL !== undefined) {
+        // Search by [feedID, entryURL] during insertion
+        if(filters.entry.entryURL && filters.feeds && filters.feeds.length === 1) {
+            indexName = 'feedID_entryURL';
+            filterFunction = stupidFilter;
+            ranges = [[]];
+            ranges = this._expandPrefixes(ranges, filters.feeds);
+            ranges = this._expandPrefixes(ranges, filters.entry.entryURL);
+        }
+
+        // Search by [feedID, providedID] during insertion
+        if(filters.entry.providedID && filters.feeds && filters.feeds.length === 1) {
+            indexName = 'feedID_providedID';
+            filterFunction = stupidFilter;
+            ranges = [[]];
+            ranges = this._expandPrefixes(ranges, filters.feeds);
+            ranges = this._expandPrefixes(ranges, filters.entry.providedID);
+        }
+
+        // Search by [entryURL] for starring
+        if(filters.entry.entryURL) {
             indexName = 'entryURL';
             filterFunction = stupidFilter;
             ranges = asArray(filters.entry.entryURL);
-        }
-
-        if(filters.entry.tags === undefined &&
-            filters.fullTextSearch === undefined) {
-            filterFunction = undefined;
         }
 
         return {indexName, filterFunction, ranges, direction};

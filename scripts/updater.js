@@ -4,7 +4,6 @@
 
 let FeedUpdater = {
     UPDATE_TIMER_INTERVAL: 60000, // 1 minute
-    FEED_FETCHER_TIMEOUT: 25000, // 25 seconds
     FAVICON_REFRESH_INTERVAL: 14*24*60*60*1000, // 2 weeks
 
     FEED_ICON_URL: '/skin/brief-icon-32.png',
@@ -157,7 +156,10 @@ let FeedUpdater = {
             /*spawn*/ FaviconFetcher.updateFavicon(feed);
         }
 
-        let parsedFeed = await wait(4000);//FIXME
+        let parsedFeed = await FeedFetcher.fetchFeed(feed);
+        if(parsedFeed) {
+            await Database.pushUpdatedFeed({feed, parsedFeed});
+        }
     },
 
     async _finish() {
@@ -217,8 +219,10 @@ let FaviconFetcher = {
 
 
 let FeedFetcher = {
+    TIMEOUT: 25000, // 25 seconds
+
     async fetchFeed(feed) {
-        let url = feed.feedURL;
+        let url = feed.feedURL || feed;
         let request = new XMLHttpRequest();
         request.open('GET', url);
         request.overrideMimeType('application/xml');
@@ -229,7 +233,7 @@ let FeedFetcher = {
 
         let doc = await Promise.race([
             xhrPromise(request),
-            wait(FEED_FETCHER_TIMEOUT),
+            wait(this.TIMEOUT),
         ]);
         if(!doc) {
             console.error("failed to fetch", url);
@@ -262,7 +266,7 @@ let FeedFetcher = {
             let nsPrefix = this._nsPrefix(child.namespaceURI);
             if(nsPrefix === 'IGNORE:') {
                 continue;
-            } else if(nsPrefix[0] === '[') {
+            } else if(nsPrefix && nsPrefix[0] === '[') {
                 console.log('unknown namespace', nsPrefix, child);
                 continue;
             }
@@ -447,7 +451,13 @@ let FeedFetcher = {
             let rel = node.getAttribute('rel') || 'alternate';
             let known = ['alternate', 'http://www.iana.org/assignments/relation/alternate'];
             if(known.includes(rel)) {
-                return node.getAttribute('href') || undefined;
+                let link;
+                try {
+                    link = new URL(node.getAttribute('href'));
+                } catch(e) {
+                    console.warn('failed to parse URL', text)
+                }
+                return link;
             }
         },
     },

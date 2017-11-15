@@ -44,6 +44,11 @@ function asArray(v) {
     }
 }
 
+function parseDateValue(date) {
+    // TODO: maybe MIL timezones here?
+    return (new Date(date)).getTime();
+}
+
 function RelativeDate(aAbsoluteTime) {
     this.currentDate = new Date();
     this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;
