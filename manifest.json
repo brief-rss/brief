@@ -12,9 +12,10 @@
     },
     "default_locale": "en",
     "permissions": ["<all_urls>", "contextMenus", "bookmarks",
-        "storage", "unlimitedStorage", "downloads", "tabs"],
+        "storage", "unlimitedStorage", "downloads", "tabs", "notifications"],
     "background": {
         "scripts": [
+            "/scripts/plural-data.js",
             "/scripts/utils.js",
             "/scripts/prefs.js",
             "/scripts/database.js",

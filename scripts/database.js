@@ -299,9 +299,9 @@ let Database = {
             modified = parseDateValue(parsedFeed.updated);
         }
         if(!entries.length || (modified && modified <= feed.dateModified)) {
-            return;
+            return {entries: [], newEntries: []};
         }
-        await this._pushFeedEntries({feed, entries});
+        let newEntries = await this._pushFeedEntries({feed, entries});
         let feedUpdates = Object.assign({}, {
             feedID: feed.feedID,
             websiteURL: parsedFeed.link ? parsedFeed.link.href : '',
@@ -312,6 +312,7 @@ let Database = {
             dateModified: modified,
         });
         await this.modifyFeed(feedUpdates);
+        return newEntries;
     },
 
     async _pushFeedEntries({feed, entries}) {
@@ -338,6 +339,7 @@ let Database = {
         let queryId = {feeds: feedID, providedID: Array.from(entriesById.keys())};
         let queryUrl = {feeds: feedID, entryURL: Array.from(entriesByUrl.keys())};
         let allEntries = [];
+        let newEntries = []; // For update notification
         // Chain, scan 1: every entry with IDs provided
         await this.query(queryId)._update({
             stores: ['entries', 'revisions'],
@@ -367,22 +369,24 @@ let Database = {
                     },
                     then: ({tx}) => {
                         // Chain, part 3: completely new entries
-                        let newEntries = Array.concat(
+                        let remainingEntries = Array.concat(
                             Array.from(entriesById.values()),
                             Array.from(entriesByUrl.values()),
                         );
-                        for(let entry of newEntries) {
-                            this._addEntry(entry, {tx, entries: allEntries});
+                        for(let entry of remainingEntries) {
+                            this._addEntry(entry, {tx, entries: newEntries});
                         }
                     },
                 });
             },
         });
+        allEntries.push(...newEntries);
         Comm.broadcast('entries-updated', {
             feeds: [feedID],
             entries: allEntries,
             changes: {content: true},
         });
+        return {entries: allEntries, newEntries: newEntries};
     },
 
     _addEntry(next, {tx, entries}) {

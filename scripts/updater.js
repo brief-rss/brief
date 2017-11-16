@@ -13,6 +13,8 @@ let FeedUpdater = {
     underway: [],
     completed: [],
 
+    updatedFeeds: new Map(),
+
     get active() {
         return this.queue.length + this.underway.length > 0;
     },
@@ -35,7 +37,9 @@ let FeedUpdater = {
             'update-stop': () => this.stopUpdating(),
             'update-query-status': () => this._broadcastStatus(),
         });
-
+        browser.notifications.onClicked.addListener(() => {
+            browser.tabs.create({url: '/ui/brief.xhtml'});
+        });
     },
 
     async updateFeeds(feeds, options) {
@@ -158,14 +162,66 @@ let FeedUpdater = {
 
         let parsedFeed = await FeedFetcher.fetchFeed(feed);
         if(parsedFeed) {
-            await Database.pushUpdatedFeed({feed, parsedFeed});
+            let pushResults = await Database.pushUpdatedFeed({feed, parsedFeed});
+            console.log(pushResults);
+            let {newEntries} = pushResults;
+            if(newEntries.length > 0) {
+                let entryCount = this.updatedFeeds.get(feedID);
+                if(entryCount === undefined) {
+                    entryCount = 0;
+                }
+                entryCount += newEntries.length;
+                this.updatedFeeds.set(feedID, entryCount);
+            }
         }
     },
 
     async _finish() {
         this.completed = [];
         console.log('Brief: update finished');
-        //FIXME: notification
+
+        let feedCount = this.updatedFeeds.size;
+        let entryCount = Array.from(this.updatedFeeds.values()).reduce((a, b) => a + b, 0);
+        let firstFeed = Array.from(this.updatedFeeds.keys())[0];
+        this.updatedFeeds = new Map();
+
+        if(!Prefs.get('update.showNotification') || feedCount === 0) {
+            return;
+        }
+
+
+        let alertTitle = browser.i18n.getMessage('updateAlertTitle');
+
+        let newForms = browser.i18n.getMessage('updateAlertText_new_pluralForms');
+        let newString = getPluralForm(entryCount, newForms);
+
+        let itemForms = browser.i18n.getMessage('updateAlertText_item_pluralForms');
+        let itemString = getPluralForm(entryCount, itemForms);
+
+        let feedForms = browser.i18n.getMessage('updateAlertText_feed_pluralForms');
+        let feedString = getPluralForm(feedCount, feedForms);
+
+        let alertText;
+
+        if (feedCount == 1) {
+            let feedTitle = Database.getFeed(firstFeed).title;
+            feedTitle = feedTitle.length < 35 ? feedTitle : feedTitle.substr(0, 35) + '\u2026';
+
+            alertText = browser.i18n.getMessage(
+                'updateAlertText_singleFeedMessage', [feedTitle, newString, itemString]);
+            alertText = alertText.replace('#numItems', entryCount);
+        }
+        else {
+            alertText = browser.i18n.getMessage(
+                'updateAlertText_multpleFeedsMessage', [newString, itemString, feedString]);
+            alertText = alertText.replace('#numItems', entryCount)
+                                 .replace('#numFeeds', feedCount);
+        }
+        browser.notifications.create({
+            type: 'basic',
+            title: alertTitle,
+            message: alertText,
+        });
     },
 
     _broadcastStatus() {
