@@ -204,6 +204,62 @@ let Database = {
         }
     },
 
+    async addFeeds(feeds) {
+        feeds = asArray(feeds);
+        for(let feed of feeds) {
+            let {url, title} = feed;
+            //FIXME: folder support
+            let existing = this.feeds.filter(f => !f.isFolder && f.feedURL === url);
+            let active = existing.filter(f => !f.hidden);
+            if(existing.length > 0) {
+                if(active.length === 0) {
+                    console.log("Restoring hidden feed", existing[0]);
+                    this.modifyFeed({feedID: existing[0].feedID, hidden: 0});
+                } else {
+                    console.log("Feed already present", active[0]);
+                }
+                continue;
+            }
+
+            let parent = String(Prefs.get('homeFolder'));
+            let feedID = await hashString(url);
+            console.log(`Need a new feed ${feedID} from`, feed);
+            let parsedFeed = await FeedFetcher.fetchFeed(feed.url);
+            if(!parsedFeed) {
+                console.log('bad luck, failed to fetch', feed.url);
+                continue;
+            }
+            let newFeed = {
+                feedID,
+                feedURL: url,
+                title: parsedFeed.title,
+                rowIndex: Math.max(...this.feeds.map(f => f.rowIndex)) + 1,
+                isFolder: 0,
+                parent,
+                hidden: 0,
+                entryAgeLimit: 0,
+                maxEntries: 0,
+                updateInterval: 0,
+                markModifiedEntriesUnread: 1,
+                omitInUnread: 0,
+                viewMode: 0,
+                favicon: 'no-favicon',
+                lastFaviconRefresh: 0,
+                // These will be filled in when the feed is pushed
+                websiteURL: '',
+                subtitle: '',
+                language: '',
+                dateModified: 0,
+                lastUpdated: 0,
+                oldestEntryDate: 0,
+            };
+            console.log('Creating feed', newFeed);
+            this._feeds.push(newFeed);
+            await this.pushUpdatedFeed({feed: newFeed, parsedFeed}); //...which awaits saveFeeds
+            await FaviconFetcher.updateFavicon(newFeed);
+        }
+    },
+
     async modifyFeed(props) {
         if(!Comm.master) {
             return Comm.callMaster('feedlist-modify', {updates: props});
@@ -782,6 +838,7 @@ Query.prototype = {
         }
         // Feed list
         if(feeds !== undefined) {
+            feeds = asArray(feeds);
             active_feeds = active_feeds.filter(feed => feeds.includes(feed.feedID));
             includeHiddenFeeds = true; //TODO: nonorthogonality
         }

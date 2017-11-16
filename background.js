@@ -46,7 +46,7 @@ const Brief = {
             'feedlist-updated': () => this._updateUI(),
             'entries-updated': () => this._updateUI(), //TODO: there was a debounce here...
             'subscribe-get-feeds': ({windowId}) => this._windowFeeds.get(windowId),
-            'subscribe-add-feed': msg => console.log('subscribe', msg),
+            'subscribe-add-feed': ({feed}) => Database.addFeeds(feed).catch(console.error),
         });
 
         await Database.init();

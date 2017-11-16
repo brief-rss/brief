@@ -49,6 +49,13 @@ function parseDateValue(date) {
     return (new Date(date)).getTime();
 }
 
+async function hashString(str) {
+    let enc = new TextEncoder();
+    let buffer = await crypto.subtle.digest('SHA-1', enc.encode(str));
+    let u8arr = new Uint8Array(buffer);
+    return Array.from(u8arr).map(b => ('00' + b.toString(16)).slice(-2)).join('');
+}
+
 function RelativeDate(aAbsoluteTime) {
     this.currentDate = new Date();
     this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;
