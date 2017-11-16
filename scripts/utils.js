@@ -139,6 +139,9 @@ let Comm = {
     },
 
     _notify(message) {
+        if(this.verbose) {
+            console.log('Comm', message);
+        }
         switch(message._type) {
             case 'broadcast-tx':
                 message._type = 'broadcast';
@@ -162,9 +165,6 @@ let Comm = {
     },
 
     _send(message) {
-        if(this.verbose) {
-            console.log('Comm', message);
-        }
         if(this.master) {
             return this._notify(message);
         } else {
