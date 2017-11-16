@@ -1,3 +1,6 @@
+'use strict';
+
+/*
 Components.utils.import('resource://brief/common.jsm');
 Components.utils.import('resource://brief/Storage.jsm');
 Components.utils.import('resource://gre/modules/Services.jsm');
@@ -147,3 +150,4 @@ function saveChanges() {
 
     return true;
 }
+*/
