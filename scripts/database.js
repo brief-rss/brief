@@ -368,8 +368,11 @@ let Database = {
         let req = tx.objectStore('revisions').get(revision);
         req.onsuccess = ({target}) => {
             let revision = target.result;
-            if(!revision.updated || revision.updated <= prev.updated) {
+            if(!revision.updated || next.updated <= revision.updated) {
                 return;
+            }
+            if(next.updated === undefined && revision.updated) {
+                console.log('missing timestamps in a feed?', next);
             }
             revision.updated = next.updated;
             if(markUnread && prev.read) {
