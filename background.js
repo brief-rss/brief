@@ -60,7 +60,7 @@ const Brief = {
             if(tab.active === false) {
                 return;
             }
-            this.queryFeeds({tabId: id});
+            this.queryFeeds({tabId: id, windowId: tab.windowId});
         });
         browser.tabs.onActivated.addListener((id) => this.queryFeeds(id));
         let activeTabs = await browser.tabs.query({active: true});
