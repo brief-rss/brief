@@ -199,7 +199,9 @@ let Database = {
         }
         await this._transactionPromise(tx);
         await this._saveFeedBackups(feeds);
-        console.log(`Brief: saved feed list with ${feeds.length} feeds`);
+        if(Comm.verbose) {
+            console.log(`Brief: saved feed list with ${feeds.length} feeds`);
+        }
     },
 
     async modifyFeed(props) {
@@ -236,7 +238,6 @@ let Database = {
 
     async pushUpdatedFeed({feed, parsedFeed}) {
         let entries = this._feedToEntries({feed, parsedFeed});
-        console.log('push', parsedFeed, entries);
         let modified = Date.now(); // fallback
         if(parsedFeed.updated) {
             modified = parseDateValue(parsedFeed.updated);
@@ -244,7 +245,6 @@ let Database = {
         if(!entries.length || (modified && modified <= feed.dateModified)) {
             return;
         }
-        console.log('pushing entries...');
         await this._pushFeedEntries({feed, entries});
         let feedUpdates = Object.assign({}, {
             feedID: feed.feedID,
@@ -255,7 +255,6 @@ let Database = {
             lastUpdated: Date.now(),
             dateModified: modified,
         });
-        console.log('saving feed...');
         await this.modifyFeed(feedUpdates);
     },
 

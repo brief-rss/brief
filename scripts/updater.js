@@ -82,7 +82,6 @@ let FeedUpdater = {
     async _scheduler() {
         await wait(Prefs.get('update.startupDelay'));
         while(true) {
-            console.log("Brief: scheduler wakeup");
             let now = Date.now();
 
             let globalUpdatingEnabled = Prefs.get('update.enableAutoUpdate');
@@ -93,7 +92,6 @@ let FeedUpdater = {
             let doGlobalUpdate = globalUpdatingEnabled && now > nextGlobalUpdate;
             if(doGlobalUpdate) {
                 Prefs.set('update.lastUpdateTime', now / 1000);
-                console.log("Brief: global update time");
             }
 
             let candidates = [];
@@ -108,8 +106,10 @@ let FeedUpdater = {
                     candidates.push(feed);
                 }
             }
-            console.log("Brief: scheduling feeds", candidates);
-            this.updateFeeds(candidates, {background: true});
+            if(candidates.length !== 0) {
+                console.log("Brief: scheduling feeds", candidates);
+                this.updateFeeds(candidates, {background: true});
+            }
             await wait(this.UPDATE_TIMER_INTERVAL);
         }
     },
@@ -164,6 +164,7 @@ let FeedUpdater = {
 
     async _finish() {
         this.completed = [];
+        console.log('Brief: update finished');
         //FIXME: notification
     },
 
@@ -175,7 +176,9 @@ let FeedUpdater = {
 
 let FaviconFetcher = {
     async updateFavicon(feed) {
-        console.log("Brief: fetching favicon for", feed);
+        if(Comm.verbose) {
+            console.log("Brief: fetching favicon for", feed);
+        }
         let favicon = await this._fetchFavicon(feed);
         if(!favicon) {
             favicon = 'no-favicon';
@@ -249,6 +252,11 @@ let FeedFetcher = {
         let result = this._parseNode(root, this.FEED_PROPERTIES);
         if(!result || !result.items || !result.items.length > 0) {
             console.warn("failed to find any items in", url);
+        } else {
+            let item = result.items[0];
+            if(!item.published && !item.updated) {
+                console.warn('no timestamps in', item, 'raw', item._node);
+            }
         }
         result.language = result.language || doc.documentElement.getAttribute('xml:lang');
         return result;
@@ -274,7 +282,9 @@ let FeedFetcher = {
             let destinations = keyMap.get(nodeKey);
             if(destinations === undefined) {
                 let parent = this._nsPrefix(node.namespaceURI) + node.localName;
-                console.log('unknown key', nodeKey, 'in', node);
+                if(Comm.verbose) {
+                    console.log('unknown key', nodeKey, 'in', node);
+                }
                 continue;
             }
             for(let {name, type, array} of destinations) {

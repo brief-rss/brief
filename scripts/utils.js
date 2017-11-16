@@ -123,6 +123,7 @@ async function openBackgroundTab(url) {
 // ===== Messaging helpers =====
 let Comm = {
     master: false,
+    verbose: false,
     observers: new Set(),
 
     initMaster() {
@@ -154,7 +155,9 @@ let Comm = {
     },
 
     _send(message) {
-        console.log('Comm', message);
+        if(this.verbose) {
+            console.log('Comm', message);
+        }
         if(this.master) {
             return this._notify(message);
         } else {
