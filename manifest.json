@@ -11,7 +11,8 @@
         }
     },
     "default_locale": "en",
-    "permissions": ["<all_urls>", "contextMenus", "bookmarks", "storage", "unlimitedStorage", "downloads"],
+    "permissions": ["<all_urls>", "contextMenus", "bookmarks",
+        "storage", "unlimitedStorage", "downloads", "tabs"],
     "background": {
         "scripts": [
             "/scripts/utils.js",
@@ -37,7 +38,7 @@
             "64": "icons/brief-icon-64.png"
         },
         "default_title": "Subscribe",
-        "default_popup": "/ui/subscribe.html",
+        "default_popup": "/ui/subscribe/subscribe.xhtml",
         "browser_style": true
     },
     "commands": {

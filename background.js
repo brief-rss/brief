@@ -5,6 +5,8 @@ const Brief = {
     _statusPort: null,
     // Latest status
     _status: null,
+    // Feeds in known windows
+    _windowFeeds: new Map(),
 
     // No deinit required, we'll be forcefully unloaded anyway
     init: async function() {
@@ -43,6 +45,8 @@ const Brief = {
         Comm.registerObservers({
             'feedlist-updated': () => this._updateUI(),
             'entries-updated': () => this._updateUI(), //TODO: there was a debounce here...
+            'subscribe-get-feeds': ({windowId}) => this._windowFeeds.get(windowId),
+            'subscribe-add-feed': msg => console.log('subscribe', msg),
         });
 
         await Database.init();
@@ -51,7 +55,18 @@ const Brief = {
 
         this._updateUI();
         // TODO: first run page
-        //FIXME subscribing
+
+        browser.tabs.onUpdated.addListener((id, change, tab) => {
+            if(tab.active === false) {
+                return;
+            }
+            this.queryFeeds({tabId: id});
+        });
+        browser.tabs.onActivated.addListener((id) => this.queryFeeds(id));
+        let activeTabs = await browser.tabs.query({active: true});
+        for(let tab of activeTabs) {
+            this.queryFeeds({tabId: tab.id, windowId: tab.windowId});
+        }
     },
 
     onContext: function({menuItemId, checked}) {
@@ -69,6 +84,20 @@ const Brief = {
                 browser.runtime.openOptionsPage();
                 break;
         }
+    },
+
+    async queryFeeds({tabId, windowId}) {
+        let replies = await browser.tabs.executeScript(tabId, {
+            file: '/content_scripts/scan-for-feeds.js',
+            runAt: 'document_end',
+        });
+        let feeds = replies[0];
+        if(feeds.length > 0) {
+            browser.pageAction.show(tabId);
+        } else {
+            browser.pageAction.hide(tabId);
+        }
+        this._windowFeeds.set(windowId, feeds);
     },
 
     _updateUI: async function() {

@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+    width: 20em;
+}
+
+span.feed {
+    padding: 0.2em;
+    margin: 0.2em;
+}
+
+span.feed:hover {
+    background-color: #e5e5e5;
+}
