@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="stylesheet" type="text/css" href="/skin/options.css"/>
+
+    <script type="application/x-javascript" src="/scripts/prefs.js"/>
+    <script type="application/x-javascript" src="/scripts/utils.js"/>
+    <script type="application/x-javascript" src="/scripts/i18n.js"/>
+    <script type="application/x-javascript" src="/scripts/database.js"/>
+    <script type="application/x-javascript" src="options-common.js"/>
+    <script type="application/x-javascript" src="feed-properties.js"/>
+</head>
+<body>
+
+
+    <grid class="label-field">
+        <label data-i18n="feedName_label"/>
+        <input type="text" data-pref="title"/>
+        <label data-i18n="feedURL_label"/>
+        <input type="text" data-pref="feedURL" disabled="true"/>
+    </grid>
+    <vbox>
+        <h2 data-i18n="optionsGroupbox_caption"/>
+        <hbox class="line">
+            <label data-i18n="checkUpdatesPerFeedBefore_label"
+                   data-i18n-attrs="accesskey:checkUpdatesPerFeed_accesskey">
+                <input type="checkbox" id="checkForUpdates"
+                       data-pref="update-enabled"/>
+            </label>
+            <input type="number" min="1" id="updateInterval"
+                   data-pref="updateInterval"
+                   data-pref-scale="60000"
+                   data-requires="checkForUpdates"/>
+            <select id="update-time-menulist"
+                    data-requires="checkForUpdates">
+                <option data-i18n="updateIntervalMinutes_label"/>
+                <option data-i18n="updateIntervalHours_label"/>
+                <option data-i18n="updateIntervalDays_label"/>
+            </select>
+        </hbox>
+        <hbox class="line">
+            <label data-i18n="expireEntriesPerFeedBefore_label"
+                   data-i18n-attrs="accesskey:expireEntriesPerFeed_accesskey">
+                <input id="expirationCheckbox" type="checkbox"
+                       data-pref="expire-enabled"/>
+            </label>
+            <input type="number" min="1" id="expirationInterval"
+                   data-pref="entryAgeLimit"
+                   data-requires="expirationCheckbox"/>
+            <label data-i18n="expireEntriesPerFeedAfter_label"/>
+        </hbox>
+        <label data-i18n="updatedEntries_label"
+               data-i18n-attrs="accesskey:updatedEntries_accesskey">
+            <input type="checkbox"
+                   data-pref="markModifiedEntriesUnread"
+                   data-pref-invert="true"/>
+        </label>
+        <label data-i18n="omitInUnread_label"
+               data-i18n-attrs="accesskey:omitInUnread_accesskey">
+            <input type="checkbox" data-pref="omitInUnread"/>
+        </label>
+    </vbox>
+    <hbox id="navigation-line" class="line spaced">
+            <button id="previous-feed"
+                    data-i18n="previousFeed_label"
+                    data-i18n-attrs="accesskey:previousFeed_accesskey"/>
+            <button id="next-feed"
+                    data-i18n="nextFeed_label"
+                    accesskey="nextFeed_accesskey"/>
+    </hbox>
+</body>
+</html>

@@ -1,153 +1,131 @@
 'use strict';
 
-/*
-Components.utils.import('resource://brief/common.jsm');
-Components.utils.import('resource://brief/Storage.jsm');
-Components.utils.import('resource://gre/modules/Services.jsm');
-Components.utils.import('resource://gre/modules/PlacesUtils.jsm');
-//FIXME feed settings
-IMPORT_COMMON(this);
+async function init() {
+    apply_i18n(document);
 
-let gFeed = null;
-let Prefs = Services.prefs.getBranch('extensions.brief.');
+    Enabler.init();
 
-function getElement(aId) document.getElementById(aId);
+    let feedID = (new URLSearchParams(document.location.search)).get('feedID');
+    await Prefs.init();
+    await Database.init();
+    let feed = Database.getFeed(feedID);
 
+    PrefBinder.init({
+        getter: name => {
+            switch(name) {
+                case 'update-enabled':
+                    return (feed.updateInterval > 0);
+                case 'expire-enabled':
+                    return (feed.entryAgeLimit > 0);
+                case 'updateInterval':
+                    feed._updateInterval = (feed.updateInterval ||
+                                            Prefs.get('update.interval') * 1000);
+                    return feed._updateInterval;
+                case 'entryAgeLimit':
+                    feed._entryAgeLimit = (feed.entryAgeLimit ||
+                                           Prefs.get('database.entryExpirationAge'));
+                    return feed._entryAgeLimit;
+                default: return feed[name];
+            }
+        },
+        setter: (name, value) => {
+            switch(name) {
+                case 'update-enabled':
+                    name = 'updateInterval';
+                    if(value) {
+                        value = feed._updateInterval;
+                    } else {
+                        value = 0;
+                    }
+                case 'expire-enabled':
+                    name = 'entryAgeLimit';
+                    if(value) {
+                        value = feed._entryAgeLimit;
+                    } else {
+                        value = 0;
+                    }
+                // 'updateInterval' and 'entryAgeLimit' can't be modified while not active
+            }
+            feed[name] = value;
+            Database.modifyFeed({
+                feedID: feed.feedID,
+                [name]: value
+            });
+        },
+    });
 
-function setupWindow() {
-    if (!gFeed)
-        gFeed = Storage.getFeed(window.arguments[0]);
+    let scaleMenu = document.getElementById('update-time-menulist');
+    let interval = document.getElementById('updateInterval');
 
-    let bundle = getElement('options-bundle');
-    document.title = bundle.getFormattedString('feedSettingsDialogTitle', [gFeed.title]);
+    scaleMenu.addEventListener('change', () => updateScale());
 
-    getElement('feed-name-textbox').value = gFeed.title;
-    getElement('feed-url-textbox').value = gFeed.feedURL;
+    Comm.registerObservers({
+        'feedlist-updated': async ({feeds}) => {
+            await wait();
+            let newFeed = Database.getFeed(feedID);
+            if(newFeed === undefined) {
+                window.close();
+                return;
+            }
+            //TODO: maybe update the fields?
+        }
+    });
 
-    initUpdateIntervalControls();
+    setFeed(feed);
 
-    let expirationCheckbox = getElement('expiration-checkbox');
-    let expirationTextbox = getElement('expiration-textbox');
-    expirationCheckbox.checked = (gFeed.entryAgeLimit > 0);
-    expirationTextbox.disabled = !expirationCheckbox.checked;
-    expirationTextbox.value = gFeed.entryAgeLimit || Prefs.getIntPref('database.entryExpirationAge');
-
-    getElement('updated-entries-checkbox').checked = !gFeed.markModifiedEntriesUnread;
-    getElement('omit-in-unread-checkbox').checked = gFeed.omitInUnread;
-
-    let index = getFeedIndex(gFeed);
-    getElement('next-feed').disabled = (index == Storage.getAllFeeds().length - 1);
-    getElement('previous-feed').disabled = (index == 0);
+    let allFeeds = Database.feeds.filter(f => !f.hidden && !f.isFolder);
+    let index = allFeeds.map(f => f.feedID).indexOf(feedID);
+    document.getElementById('next-feed').disabled = (index == allFeeds.length - 1);
+    document.getElementById('previous-feed').disabled = (index == 0);
+    document.getElementById('next-feed').addEventListener('click', () => {
+        document.location.search = `?feedID=${allFeeds[index+1].feedID}`;
+    });
+    document.getElementById('previous-feed').addEventListener('click', () => {
+        document.location.search = `?feedID=${allFeeds[index-1].feedID}`;
+    });
 }
 
-function showFeed(aDeltaIndex) {
-    saveChanges();
-    gFeed = Storage.getAllFeeds()[getFeedIndex(gFeed) + aDeltaIndex];
-    setupWindow();
+function updateScale() {
+    let scaleMenu = document.getElementById('update-time-menulist');
+    let interval = document.getElementById('updateInterval');
+    let scale = 1;
+    switch (scaleMenu.selectedIndex) {
+        // Fallthrough everywhere: from days
+        case 2: scale *= 24; // to hours
+        case 1: scale *= 60; // to minutes
+        case 0: scale *= 60; // to seconds
+                scale *= 1000; // to milliseconds
+    }
+    PrefBinder.updateScale(interval, scale);
 }
 
-function getFeedIndex(aFeed) {
-    let index = -1;
-    let allFeeds = Storage.getAllFeeds();
-    for (let i = 0; index < allFeeds.length; i++) {
-        if (allFeeds[i].feedID == aFeed.feedID) {
-            index = i;
+function setFeed(feed) {
+    document.title = browser.i18n.getMessage('feedSettingsDialogTitle', feed.title);
+
+    PrefBinder.refresh();
+
+    // Guess interval scale
+    let interval = document.getElementById('updateInterval');
+    let scaleMenu = document.getElementById('update-time-menulist');
+    let value = PrefBinder.getValue(interval);
+    let asDays = value / (1000*60*60*24);
+    let asHours = value / (1000*60*60);
+    let toMinutes = value / (1000*60);
+
+    // Select the largest scale that has an exact value
+    switch (true) {
+        case Math.ceil(asDays) == asDays:
+            scaleMenu.selectedIndex = 2;
             break;
-        }
+        case Math.ceil(asHours) == asHours:
+            scaleMenu.selectedIndex = 1;
+            break;
+        default:
+            scaleMenu.selectedIndex = 0;
+            break;
     }
-    return index;
-}
-
-function initUpdateIntervalControls() {
-    let checkbox = getElement('check-updates-checkbox');
-    let textbox = getElement('check-updates-textbox');
-    let menulist = getElement('update-time-menulist');
-
-    checkbox.checked = (gFeed.updateInterval > 0);
-    textbox.disabled = menulist.disabled = !checkbox.checked;
-
-    let interval = gFeed.updateInterval / 1000 || Prefs.getIntPref('update.interval');
-    let toDays = interval / (60 * 60 * 24);
-    let toHours = interval / (60 * 60);
-    let toMinutes = interval / 60;
-
-    if (Math.ceil(toDays) == toDays) {
-        // The pref value is in seconds. If it is dividable by days then use the
-        // number of days as the textbox value and select Days in the menulist.
-        menulist.selectedIndex = 2;
-        textbox.value = toDays;
-    }
-    else if (Math.ceil(toHours) == toHours) {
-        // Analogically for hours...
-        menulist.selectedIndex = 1;
-        textbox.value = toHours;
-    }
-    else {
-        // Otherwise use minutes, ceiling to the nearest integer if necessary.
-        menulist.selectedIndex = 0;
-        textbox.value = Math.ceil(toMinutes);
-    }
-}
-
-function onExpirationCheckboxCmd(aEvent) {
-    getElement('expiration-textbox').disabled = !aEvent.target.checked;
-}
-
-function onCheckUpdatesCheckboxCmd(aEvent) {
-    let textbox = getElement('check-updates-textbox');
-    let menulist = getElement('update-time-menulist');
-    textbox.disabled = menulist.disabled = !aEvent.target.checked;
+    updateScale();
 }
 
 
-function saveChanges() {
-    let nameTextbox = getElement('feed-name-textbox');
-    if (gFeed.title != nameTextbox.value)
-        PlacesUtils.bookmarks.setItemTitle(gFeed.bookmarkID, nameTextbox.value);
-
-    let properties = {
-        feedID: gFeed.feedID,
-        omitInUnread: getElement('omit-in-unread-checkbox').checked ? 1 : 0,
-        markModifiedEntriesUnread: !getElement('updated-entries-checkbox').checked
-    }
-
-    let expirationCheckbox = getElement('expiration-checkbox');
-    let expirationTextbox = getElement('expiration-textbox');
-    properties.entryAgeLimit = expirationCheckbox.checked && expirationTextbox.value
-                               ? expirationTextbox.value
-                               : 0;
-
-    let checkUpdatesTextbox = getElement('check-updates-textbox');
-    let checkUpdatesMenulist = getElement('update-time-menulist');
-    let checkUpdatesCheckbox = getElement('check-updates-checkbox');
-
-    if (checkUpdatesCheckbox.checked && checkUpdatesTextbox.value) {
-        let textboxValue = checkUpdatesTextbox.value;
-        let intervalInMilliseconds;
-
-        switch (checkUpdatesMenulist.selectedIndex) {
-            case 0:
-                // textbox.value is in minutes
-                intervalInMilliseconds = textboxValue * 1000*60 ;
-                break;
-            case 1:
-                // textbox.value is in hours
-                intervalInMilliseconds = textboxValue * 1000*60*60;
-                break;
-            case 2:
-                // textbox.value is in days
-                intervalInMilliseconds = textboxValue * 1000*60*60*24;
-                break;
-        }
-
-        properties.updateInterval = intervalInMilliseconds;
-    }
-    else {
-        properties.updateInterval = 0;
-    }
-
-    Storage.changeFeedProperties(properties);
-
-    return true;
-}
-*/
+window.addEventListener('load', () => init(), {once: true, passive: true});

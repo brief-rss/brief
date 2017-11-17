@@ -39,3 +39,26 @@ body {
 .spaced {
     justify-content: space-between;
 }
+
+grid.label-field {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-gap: 0.5em;
+}
+
+grid.label-field > label {
+    align-self: center;
+}
+
+grid.label-field > input {
+}
+
+#navigation-line {
+    margin-top: 1.5em;
+}
+
+.section-header {
+    margin-top: 1em;
+    margin-bottom: 0.2em;
+    font-size: 1.1em;
+}

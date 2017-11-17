@@ -31,7 +31,11 @@ let Database = {
     },
 
     getFeed(feedID) {
-        return this.feeds.filter(f => f.feedID === feedID)[0];
+        let feed = this.feeds.filter(f => f.feedID === feedID)[0];
+        if(feed === undefined) {
+            return undefined;
+        }
+        return Object.assign({}, feed);
     },
 
     async init() {
@@ -266,7 +270,7 @@ let Database = {
         }
         props = Array.isArray(props) ? props : [props];
         for(let bag of props) {
-            let feed = this.getFeed(bag.feedID);
+            let feed = this.feeds.filter(f => f.feedID === bag.feedID)[0];
             for(let [k, v] of Object.entries(bag)) {
                 if(feed[k] !== undefined && feed[k] === v) {
                     continue;

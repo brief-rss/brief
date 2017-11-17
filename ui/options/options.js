@@ -60,60 +60,6 @@ function initUpdateIntervalControls() {
 }
 
 
-let PrefBinder = {
-    init() {
-        for(let node of document.querySelectorAll('[data-pref]')) {
-            let name = node.dataset.pref;
-            let scale = () => (node.dataset.prefScale || 1);
-            let value = Prefs.get(name);
-            this._setValue(node, value / scale());
-            node.addEventListener('change', e => {
-                let value = this._getValue(node);
-                if(value !== Prefs.get(name)) {
-                    Prefs.set(name, value * scale());
-                }
-            });
-        }
-
-    },
-
-    updateScale(node, scale) {
-        node.dataset.prefScale = scale;
-        let value = Prefs.get(node.dataset.pref);
-        this._setValue(node, value / scale);
-    },
-
-    _setValue(node, value) {
-        switch(node.type) {
-            case "checkbox":
-                node.checked = value;
-            case "number":
-                node.value = value;
-        }
-    },
-
-    _getValue(node) {
-        switch(node.type) {
-            case "checkbox":
-                return node.checked;
-            case "number":
-                return Number(node.value);
-        }
-    },
-};
-
-let Enabler = {
-    init() {
-        for(let node of document.querySelectorAll('[data-requires]')) {
-            let master = document.getElementById(node.dataset.requires);
-            node.disabled = !master.checked;
-            master.addEventListener('change', e => {
-                node.disabled = !master.checked;
-            });
-        }
-    },
-};
-
 let StyleEditor = {
     EXAMPLE_CSS: '/* Example: change font size of item title */\n.title-link {\n    font-size: 15px;\n}',
 

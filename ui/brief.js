@@ -246,7 +246,13 @@ var Commands = {
 
     showFeedProperties: function cmd_showFeedProperties(aFeed) {
         let feed = aFeed ? aFeed : FeedList.selectedFeed;
-        API.openFeedProperties(feed.feedID);
+
+        browser.windows.create({
+            url: `/ui/options/feed-properties.xhtml?feedID=${feed.feedID}`,
+            type: 'popup',
+            width: 400,
+            height: 300,
+        });
     },
 
     displayShortcuts: async function cmd_displayShortcuts() {
