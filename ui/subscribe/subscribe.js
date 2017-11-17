@@ -15,7 +15,7 @@ async function onload(aEvent) {
         for(let feed of feeds) {
             let node = document.createElement('span');
             node.className ="feed";
-            node.textContent = feed.title;
+            node.textContent = feed.linkTitle;
             node.title = feed.url;
             node.addEventListener('click', () => {
                 Comm.callMaster('subscribe-add-feed', {feed});
