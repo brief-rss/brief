@@ -291,7 +291,7 @@ let FeedFetcher = {
         request.responseType = 'document';
 
         let doc = await Promise.race([
-            xhrPromise(request),
+            xhrPromise(request).catch(() => undefined),
             wait(this.TIMEOUT),
         ]);
         if(!doc) {
