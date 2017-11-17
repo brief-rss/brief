@@ -104,7 +104,7 @@ let FeedUpdater = {
                 if(feed.updateInterval === 0) {
                     update = doGlobalUpdate;
                 } else {
-                    update = now > (f.lastUpdated + f.updateInterval);
+                    update = now > (feed.lastUpdated + feed.updateInterval);
                 }
                 if(update) {
                     candidates.push(feed);
