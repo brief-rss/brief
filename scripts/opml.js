@@ -2,6 +2,50 @@
 // Based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
 
 let OPML = {
+    async importOPML(file) {
+        let reader = new FileReader();
+        reader.readAsText(file); // assumes UTF-8
+        await expectedEvent(reader, 'load');
+        let data = reader.result;
+
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(data, 'application/xml');
+
+        if (doc.documentElement.localName == 'parsererror') {
+            window.alert(browser.i18n.getMessage('invalidFileAlertText'));
+            return;
+        }
+
+        let results = Array.from(doc.getElementsByTagName('body')[0].childNodes)
+            .filter(c => c.nodeName === 'outline')
+            .map(c => this.importNode(c))
+            .filter(c => c !== undefined);
+
+        console.log(results);
+        Database.addFeeds(results);
+    },
+
+    importNode: function(node) {
+        let title = node.getAttribute('text');
+
+        if(node.hasAttribute('xmlUrl') && node.getAttribute('type') !== 'link') {
+            return {
+                title,
+                url: node.getAttribute('xmlUrl'),
+                siteURL: node.getAttribute('htmlUrl'),
+            };
+        }
+
+        if (node.childNodes.length > 0) {
+            return {
+                title,
+                children: Array.from(node.childNodes)
+                    .filter(c => c.nodeName === 'outline')
+                    .map(c => this.importNode(c))
+                    .filter(c => c !== undefined),
+            };
+        }
+    },
 
     async exportFeeds() {
         let data = '';

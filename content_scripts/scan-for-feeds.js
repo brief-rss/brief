@@ -21,7 +21,7 @@
     }
 
     // FIXME: Test for "allowed to link" skipped
-    let feeds = Array.from(links).filter(isFeed).map(l => ({title: l.title, url: l.href}));
+    let feeds = Array.from(links).filter(isFeed).map(l => ({title: l.linkTitle, url: l.href}));
 
     return feeds;
 })()

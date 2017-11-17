@@ -56,6 +56,7 @@ let Database = {
         Comm.registerObservers({
             'feedlist-updated': ({feeds}) => this._feeds = feeds, // Already saved elsewhere
             'feedlist-modify': ({updates}) => this.modifyFeed(updates),
+            'feedlist-add': ({feeds, options}) => this.addFeeds(feeds, options),
             'feedlist-delete': ({feeds}) => this.deleteFeed(feeds),
         });
 
@@ -208,60 +209,87 @@ let Database = {
         }
     },
 
-    async addFeeds(feeds) {
-        feeds = asArray(feeds);
-        for(let feed of feeds) {
-            let {url, title} = feed;
-            //FIXME: folder support
-            let existing = this.feeds.filter(f => !f.isFolder && f.feedURL === url);
-            let active = existing.filter(f => !f.hidden);
-            if(existing.length > 0) {
-                if(active.length === 0) {
-                    console.log("Restoring hidden feed", existing[0]);
-                    this.modifyFeed({feedID: existing[0].feedID, hidden: 0});
-                } else {
-                    console.log("Feed already present", active[0]);
-                }
-                continue;
-            }
-
-            let parent = String(Prefs.get('homeFolder'));
-            let feedID = await hashString(url);
-            console.log(`Need a new feed ${feedID} from`, feed);
-            let parsedFeed = await FeedFetcher.fetchFeed(feed.url);
-            if(!parsedFeed) {
-                console.log('bad luck, failed to fetch', feed.url);
-                continue;
-            }
-            let newFeed = {
-                feedID,
-                feedURL: url,
-                title: parsedFeed.title,
-                rowIndex: Math.max(...this.feeds.map(f => f.rowIndex)) + 1,
-                isFolder: 0,
-                parent,
-                hidden: 0,
-                entryAgeLimit: 0,
-                maxEntries: 0,
-                updateInterval: 0,
-                markModifiedEntriesUnread: 1,
-                omitInUnread: 0,
-                viewMode: 0,
-                favicon: 'no-favicon',
-                lastFaviconRefresh: 0,
-                // These will be filled in when the feed is pushed
-                websiteURL: '',
-                subtitle: '',
-                language: '',
-                dateModified: 0,
-                lastUpdated: 0,
-                oldestEntryDate: 0,
-            };
-            console.log('Creating feed', newFeed);
-            this._feeds.push(newFeed);
-            await this.pushUpdatedFeed({feed: newFeed, parsedFeed}); //...which awaits saveFeeds
-            await FaviconFetcher.updateFavicon(newFeed);
+    async addFeeds(feeds, options) {
+        if(!Comm.master) {
+            return Comm.callMaster('feedlist-add', {feeds, options});
         }
+        let parent = options ? options.parent : String(Prefs.get('homeFolder'));
+        feeds = asArray(feeds);
+
+        for(let feed of feeds) {
+            let feedID = await this._addFeed(feed, {parent});
+            if(feed.children !== undefined) {
+                await this.addFeeds(feed.children, {parent: feedID});
+            }
+        }
+    },
+
+    async _addFeed(feed, {parent}) {
+        let {url, title} = feed;
+        let existing = this.feeds.filter(f => !f.isFolder && f.feedURL === url);
+        let active = existing.filter(f => !f.hidden);
+        if(existing.length > 0) {
+            if(active.length === 0) {
+                console.log("Restoring hidden feed", existing[0]);
+                this.modifyFeed({
+                    feedID: existing[0].feedID,
+                    hidden: 0,
+                    parent,
+                    rowIndex: 'tail',
+                });
+            } else {
+                console.log("Feed already present", active[0]);
+            }
+            return;
+        }
+
+        let feedID;
+        if(url) {
+            feedID = await hashString(url);
+        } else {
+            let folderIds = this.feeds.filter(f => f.isFolder || false).map(f => Number(f.feedID));
+            feedID = String(Math.max(1, ...folderIds) + 1);
+        }
+        console.log(`Need a new node ${feedID} from`, feed);
+        let parsedFeed = null;
+        if(url) {
+            parsedFeed = await FeedFetcher.fetchFeed(url);
+            if(!parsedFeed && !title) {
+                console.log('bad luck, failed to fetch', url);
+                return;
+            }
+        }
+        let newFeed = {
+            feedID,
+            feedURL: url,
+            title: title || parsedFeed.title,
+            rowIndex: Math.max(...this.feeds.map(f => f.rowIndex)) + 1,
+            isFolder: !url,
+            parent,
+            hidden: 0,
+            entryAgeLimit: 0,
+            maxEntries: 0,
+            updateInterval: 0,
+            markModifiedEntriesUnread: 1,
+            omitInUnread: 0,
+            viewMode: 0,
+            favicon: 'no-favicon',
+            lastFaviconRefresh: 0,
+            // These will be filled in when the feed is pushed
+            websiteURL: feed.siteURL || '',
+            subtitle: '',
+            language: '',
+            dateModified: 0,
+            lastUpdated: 0,
+            oldestEntryDate: 0,
+        };
+        console.log('Creating node', newFeed);
+        this._feeds.push(newFeed);
+        if(parsedFeed) {
+            await this.pushUpdatedFeed({feed: newFeed, parsedFeed}); //...which awaits saveFeeds
+        }
+        /*spawn*/ FaviconFetcher.updateFavicon(newFeed).catch(console.error);
+        return feedID;
     },
 
     async modifyFeed(props) {
@@ -269,7 +297,14 @@ let Database = {
             return Comm.callMaster('feedlist-modify', {updates: props});
         }
         props = Array.isArray(props) ? props : [props];
+        let sort = false;
         for(let bag of props) {
+            if(bag.rowIndex !== undefined && bag.rowIndex === 'tail') {
+                bag.rowIndex = this.feeds[this.feeds.length - 1].rowIndex + 1;
+            }
+            if(bag.rowIndex) {
+                sort = true;
+            }
             let feed = this.feeds.filter(f => f.feedID === bag.feedID)[0];
             for(let [k, v] of Object.entries(bag)) {
                 if(feed[k] !== undefined && feed[k] === v) {
@@ -278,6 +313,9 @@ let Database = {
                 feed[k] = v;
                 //TODO: expire entries
             }
+        }
+        if(sort) {
+            this._feeds.sort((a, b) => a.rowIndex - b.rowIndex);
         }
         Comm.broadcast('feedlist-updated', {feeds: this.feeds});
 

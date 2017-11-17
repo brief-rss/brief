@@ -600,6 +600,7 @@ let ContextMenuModule = {
         menu.style.top = top + 'px';
         menu.classList.add('visible');
         menu.parentNode.classList.add('menu-visible');
+        this._currentTarget = null;
     },
 
     _target: function ContextMenu__target({type, currentTarget}) {
@@ -612,7 +613,6 @@ let ContextMenuModule = {
 
     _hide: function ContextMenu__hide(event) {
         this._currentTarget = null;
-        event.preventDefault();
         Array.forEach(document.querySelectorAll('context-menu.visible'), node => {
             node.classList.remove('visible');
             node.parentNode.classList.remove('menu-visible');
@@ -814,9 +814,10 @@ let FeedListContextMenu = {
 
 let DropdownMenus = {
     build() {
+        let opmlInput = document.getElementById('open-opml');
         const handlers = {
             'dropdown-shortcuts': () => Commands.displayShortcuts(),
-            'dropdown-import': () => API.opml.importFeeds(),
+            'dropdown-import': e => opmlInput.click(),
             'dropdown-export': () => OPML.exportFeeds(),
             'dropdown-options': () => browser.runtime.openOptionsPage(),
             'dropdown-update-feed': () => Comm.callMaster(
@@ -832,5 +833,10 @@ let DropdownMenus = {
         for(let id in handlers) {
             document.getElementById(id).addEventListener('click', handlers[id]);
         }
+        opmlInput.addEventListener('change', () => {
+            console.log('Got OPML');
+            let file = opmlInput.files[0];
+            OPML.importOPML(file);
+        });
     },
 }
