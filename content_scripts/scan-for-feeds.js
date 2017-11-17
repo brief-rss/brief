@@ -21,7 +21,7 @@
     ];
 
     //TODO: this is an implementation detail, is there any better way?
-    if(BrowserFeedWriter !== undefined) {
+    if(window.BrowserFeedWriter !== undefined) {
         links = [{rel: 'feed', title: document.title, href: document.location.href}];
         let button = document.getElementById('subscribeButton');
         if(button.dataset.briefHookReady === undefined) {
