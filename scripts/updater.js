@@ -492,9 +492,9 @@ let FeedFetcher = {
 
         url(node) {
             try {
-                return new URL(node.textContent);
+                return new URL(node.textContent, node.baseURI);
             } catch(e) {
-                console.warn('failed to parse URL', text)
+                console.warn('failed to parse URL', node.textContent, 'with base', node.baseURI);
             }
         },
 
