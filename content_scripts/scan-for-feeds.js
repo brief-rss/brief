@@ -44,7 +44,6 @@
             sep.after(briefFallback);
 
             button.addEventListener('click', event => {
-                //FIXME: integrate with the in-page menu
                 let activeUrl = selectBox.selectedOptions[0].getAttribute('webhandlerurl');
                 if(BRIEF_URLS.includes(activeUrl)) {
                     console.log('An old Brief option selected for subscribing, intercepting');
@@ -60,7 +59,7 @@
         }
     }
 
-    // FIXME: Test for "allowed to link" skipped
+    // TODO: Test for "allowed to link" skipped
     let feeds = Array.from(links).filter(isFeed).map(l => ({linkTitle: l.title, url: l.href}));
 
     return feeds;

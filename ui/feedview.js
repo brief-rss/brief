@@ -498,6 +498,7 @@ FeedView.prototype = {
 
             let query = this.getQueryCopy();
             let edgeDate = this.getEntryView(this.lastLoadedEntry).date.getTime();
+            //TODO: this needs refactoring, the load process is a source of problems now
 
             if (query.sortDirection == 'desc')
                 query.startDate = edgeDate;
