@@ -80,6 +80,8 @@ let FeedUpdater = {
     async stopUpdating() {
         this.priority = [];
         this.queue = [];
+        this.underway = [];
+        this._finish();
         this._broadcastStatus();
     },
 
