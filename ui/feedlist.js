@@ -426,6 +426,7 @@ let TagList = {
 let FeedList = {
 
     _feedsCache: null,
+    _built: false,
 
     init() {
         // TODO: observers should be here
@@ -558,7 +559,7 @@ let FeedList = {
     },
 
     rebuild: function FeedList_rebuild(feeds) {
-        if(this._feedsCache) {
+        if(this._built) {
             this.persistFolderState();
         }
         let headlines = gCurrentView && gCurrentView.headlinesMode;
@@ -575,6 +576,7 @@ let FeedList = {
         if(active && this.tree.selectedItem === null) {
             ViewList.selectedItem = getElement('all-items-folder');
         }
+        this._built = true;
     },
 
     /**
