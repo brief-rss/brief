@@ -215,13 +215,23 @@ let Database = {
         }
         let parent = options ? options.parent : String(Prefs.get('homeFolder'));
         feeds = asArray(feeds);
+        let newFeedIds = [];
 
         for(let feed of feeds) {
             let feedID = await this._addFeed(feed, {parent});
+            if(feedID !== undefined) {
+                newFeedIds.push(feedID);
+            }
             if(feed.children !== undefined) {
-                await this.addFeeds(feed.children, {parent: feedID});
+                newFeedIds.push(...await this.addFeeds(
+                    feed.children, {parent: feedID, nested: true}));
             }
         }
+        if(!options || !options.nested) {
+            await Database.saveFeeds();
+            FeedUpdater.updateFeeds(newFeedIds);
+        }
+        return newFeedIds;
     },
 
     async _addFeed(feed, {parent}) {
@@ -237,10 +247,11 @@ let Database = {
                     parent,
                     rowIndex: 'tail',
                 });
+                return feedID;
             } else {
                 console.log("Feed already present", active[0]);
+                return;
             }
-            return;
         }
 
         let feedID;
@@ -251,18 +262,10 @@ let Database = {
             feedID = String(Math.max(1, ...folderIds) + 1);
         }
         console.log(`Need a new node ${feedID} from`, feed);
-        let parsedFeed = null;
-        if(url) {
-            parsedFeed = await FeedFetcher.fetchFeed(url);
-            if(!parsedFeed && !title) {
-                console.log('bad luck, failed to fetch', url);
-                return;
-            }
-        }
         let newFeed = {
             feedID,
             feedURL: url,
-            title: title || parsedFeed.title,
+            title: title || '', // Will be filled in on the next update
             rowIndex: Math.max(...this.feeds.map(f => f.rowIndex)) + 1,
             isFolder: !url,
             parent,
@@ -285,9 +288,6 @@ let Database = {
         };
         console.log('Creating node', newFeed);
         this._feeds.push(newFeed);
-        if(parsedFeed) {
-            await this.pushUpdatedFeed({feed: newFeed, parsedFeed}); //...which awaits saveFeeds
-        }
         /*spawn*/ FaviconFetcher.updateFavicon(newFeed).catch(console.error);
         return feedID;
     },
@@ -346,6 +346,7 @@ let Database = {
         let newEntries = await this._pushFeedEntries({feed, entries});
         let feedUpdates = Object.assign({}, {
             feedID: feed.feedID,
+            title: feed.title || parsedFeed.title,
             websiteURL: parsedFeed.link ? parsedFeed.link.href : '',
             subtitle: parsedFeed.subtitle ? parsedFeed.subtitle.text : '',
             oldestEntryDate: Math.min(entries.map(e => e.date)) || feed.oldestEntryDate,

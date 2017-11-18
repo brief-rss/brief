@@ -543,7 +543,7 @@ let FeedList = {
         };
 
         let unreadCount = await Database.query(query).count();
-        this.tree.updateElement(aFeed.feedID, {title: aFeed.title, unreadCount});
+        this.tree.updateElement(aFeed.feedID, {title: aFeed.title || aFeed.feedURL, unreadCount});
     },
 
     _faviconUrl: function FeedList__faviconUrl(aFeed) {
@@ -586,7 +586,7 @@ let FeedList = {
 
             let item = {
                 id: feed.feedID,
-                title: feed.title,
+                title: feed.title || feed.feedURL, // No title possible before the first fetch
             };
 
 
