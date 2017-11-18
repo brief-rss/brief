@@ -78,6 +78,10 @@ TreeView.prototype = {
                 element : element.querySelector('tree-folder-header');
         target.addEventListener('click', this);
         target.addEventListener('contextmenu', this); // Select before opening the context menu
+        target.addEventListener('dragstart', this);
+        target.addEventListener('dragenter', this);
+        target.addEventListener('dragover', this);
+        target.addEventListener('drop', this);
         if(element.nodeName === 'tree-folder') {
             element.querySelector('.toggle-collapsed').addEventListener('click', this);
         }
@@ -152,22 +156,65 @@ TreeView.prototype = {
         return aId.replace('_', '__').replace(' ', '_');
     },
 
-    handleEvent: function TreeView__handleEvent(aEvent) {
-        if(aEvent.type === 'click' && aEvent.currentTarget.classList.contains('toggle-collapsed')) {
+    handleEvent: function TreeView__handleEvent(event) {
+        let {type, target, dataTransfer} = event;
+        if(type === 'dragstart') {
+            if(target.localName === 'tree-folder-header') {
+                target = target.parentNode;
+            }
+            console.log('drag started');
+            dataTransfer.setData('application/x-moz-node', target);
+            let items = [target, ...target.querySelectorAll('[data-id]')];
+            console.log(items);
+            dataTransfer.setData('application/x-tree-item-list',
+                                 JSON.stringify(items.map(i => i.dataset.id)));
+            dataTransfer.effectAllowed = 'move';
+            dataTransfer.dropEffect = 'move';
+            return;
+        }
+        if(type === 'dragenter' || type === 'dragover') {
+            event.preventDefault();
+            return;
+        }
+        if(type === 'drop') {
+            if(target.localName === 'tree-folder-header') {
+                target = target.parentNode;
+            }
+            console.log('drop');
+            event.preventDefault();
+            let ev = new CustomEvent('move');
+            let list = dataTransfer.getData('application/x-tree-item-list');
+            ev.itemIds = JSON.parse(list);
+            ev.targetId = target.dataset.id;
+            ev.relation = 'before';
+            this.root.dispatchEvent(ev);
+            return;
+        }
+
+        if(event.type === 'click' && event.currentTarget.classList.contains('toggle-collapsed')) {
             // (un)collapse
-            let element = aEvent.currentTarget;
+            let element = event.currentTarget;
             while(element.nodeName !== 'tree-folder') {
                 element = element.parentNode;
             }
             element.classList.toggle('collapsed');
-            aEvent.stopPropagation();
+            event.stopPropagation();
             this._cleanup(); // Move selection
             Persistence.save(); // TODO: fix in a more clean way
-        } else {
-            let target = aEvent.currentTarget;
+        } else if(event.type === 'click' || event.type === 'contextmenu'){
+            let target = event.currentTarget;
             if(target.nodeName === 'tree-folder-header')
                 target = target.parentNode;
             this.selectedItem = target;
+        }
+    },
+
+    organize() {
+        this.root.classList.toggle('organize');
+        let active = this.root.classList.contains('organize');
+
+        for(let node of this.root.querySelectorAll('tree-item, tree-folder-header')) {
+            node.setAttribute('draggable', active);
         }
     },
 };
@@ -380,6 +427,8 @@ let FeedList = {
         this._feedsCache = Database.feeds;
         this.tree.root.addEventListener(
             'change', event => this.onSelect(event), {passive: true});
+        this.tree.root.addEventListener(
+            'move', event => this.onMove(event), {passive: true});
     },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
@@ -439,6 +488,24 @@ let FeedList = {
             query.feeds = [this.selectedFeed.feedID];
 
         gCurrentView = new FeedView(this.selectedFeed.title, query);
+    },
+
+    onMove({targetId, itemIds, relation}) {
+        if(itemIds.includes(targetId)) {
+            return; //TODO: block while dragging?
+        }
+        let parent = Database.getFeed(targetId).parent;
+        let feedIds = [...Database.feeds].map(f => f.feedID).filter(id => !itemIds.includes(id));
+        let targetIndex = feedIds.indexOf(targetId);
+        if(relation === 'after') {
+            targetIndex += 1;
+        }
+        feedIds.splice(targetIndex, 0, ...itemIds);
+        let changes = [{feedID: itemIds[0], parent}];
+        for(let [index, feedID] of feedIds.entries()) {
+            changes.push({feedID, rowIndex: index + 1});
+        }
+        Database.modifyFeed(changes);
     },
 
     /**
@@ -547,7 +614,13 @@ let FeedList = {
         }
 
         FeedList.tree.root.setAttribute('closedFolders', escape(closedFolders));
-    }
+    },
+
+    organize() {
+        this.tree.organize();
+        getElement('organize-button').classList.toggle('organize',
+            this.tree.root.classList.contains('organize'));
+    },
 }
 
 

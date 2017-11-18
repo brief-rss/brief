@@ -78,7 +78,7 @@ var init = async function init() {
     document.getElementById('stop-updating-button').addEventListener(
         'click', () => Comm.broadcast('update-stop'), {passive: true});
     document.getElementById('organize-button').addEventListener(
-        'click', () => /*TODO: feed organization*/null, {passive: true});
+        'click', () => FeedList.organize(), {passive: true});
 
     ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
     await wait();

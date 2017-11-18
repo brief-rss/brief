@@ -322,3 +322,21 @@ context-menu.dropdown-menu {
     margin-left: -22px !important; /* Align (more or less) with the center of the text */
     margin-top: 4px !important;
 }
+
+/* ===== Organize ===== */
+#feed-list.organize,
+#organize-button.organize {
+    background-color: #fcd7bd !important;
+    padding-top: 6px !important; /* TODO: move to a more appropriate place */
+    margin-top: 4px !important;
+}
+
+tree-item:-moz-drag-over,
+tree-folder-header:-moz-drag-over {
+  background-color: #fcd7bd !important;
+}
+
+#feed-list.organize tree-item *,
+#feed-list.organize tree-folder-header * {
+    pointer-events: none;
+}
