@@ -189,6 +189,7 @@ let Database = {
         }
 
         feeds.sort((a, b) => a.rowIndex - b.rowIndex);
+        this._fixParents(feeds);
         this._feeds = feeds;
     },
 
@@ -547,6 +548,15 @@ let Database = {
             new_nodes.push(...children);
         }
         return Database.feeds.filter(f => nodes.includes(f.feedID));
+    },
+
+    _fixParents(feeds) {
+        let feedIds = new Set(feeds.map(f => f.feedID));
+        for(let feed of feeds) {
+            if(!feed.hidden && !feedIds.has(feed.parent)) {
+                feed.parent = Prefs.get('homeFolder');
+            }
+        }
     },
 
     // Note: this is resolved after the transaction is finished(!!!) mb1193394
