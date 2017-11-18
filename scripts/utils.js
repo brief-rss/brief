@@ -145,8 +145,10 @@ let Comm = {
         switch(message._type) {
             case 'broadcast-tx':
                 message._type = 'broadcast';
-                browser.runtime.sendMessage(message).catch(() => undefined);
-                /*spawn*/ this._notifyObservers(message);
+                return Promise.all([
+                    this._notifyObservers(message).catch(() => undefined),
+                    browser.runtime.sendMessage(message).catch(() => undefined),
+                ]).then(([local, remote]) => local !== undefined ? local : remote);
                 break;
             case 'master':
                 return this._notifyObservers(message);
@@ -156,12 +158,14 @@ let Comm = {
 
     async _notifyObservers(message) {
         await wait();
+        let answer = undefined;
         for(let listener of this.observers) {
             let reply = listener(message);
             if(reply !== undefined) {
-                return reply;
+                answer = reply;
             }
         }
+        return answer;
     },
 
     _send(message) {
@@ -200,7 +204,7 @@ let Comm = {
     },
 
     broadcast(id, payload) {
-        Comm._send(Object.assign({}, payload, {id, _type: 'broadcast-tx'}));
+        return Comm._send(Object.assign({}, payload, {id, _type: 'broadcast-tx'}));
     },
 
     callMaster(id, payload) {

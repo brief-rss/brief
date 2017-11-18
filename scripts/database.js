@@ -1,7 +1,5 @@
 'use strict';
 
-//FIXME: expire entries
-
 /**
  * Database design and considerations
  *
@@ -58,6 +56,7 @@ let Database = {
             'feedlist-modify': ({updates}) => this.modifyFeed(updates),
             'feedlist-add': ({feeds, options}) => this.addFeeds(feeds, options),
             'feedlist-delete': ({feeds}) => this.deleteFeed(feeds),
+            'entries-expire': ({feeds}) => this.expireEntries(feeds),
         });
 
         if(Comm.master) {
@@ -335,6 +334,65 @@ let Database = {
         await this.modifyFeed(feeds);
     },
 
+    async expireEntries(feeds) {
+        if(!Comm.master) {
+            return Comm.callMaster('entries-expire', {feeds});
+        }
+        let optionsOpen = await Comm.broadcast('is-options-window-open');
+        if(optionsOpen) {
+            // This could cause data loss while the user has enabled expiration
+            // but not yet configured the limits (remember that options are instant-apply)
+            console.log('Not expiring old entries while options / feed properties are open');
+        }
+        if(!feeds) {
+            feeds = this.feeds;
+        }
+        feeds = asArray(feeds);
+
+        // Count limits are global only
+        if (Prefs.get('database.limitStoredEntries')) {
+            for (let feed of feeds) {
+                let query = new Query({
+                    feeds: [feed.feedID],
+                    deleted: false,
+                    starred: false,
+                    sortOrder: 'date',
+                    offset: Prefs.get('database.maxStoredEntries'),
+                });
+                await query.markDeleted('trashed');
+            }
+        }
+
+        // Age limits
+        // Global default per-feed limit...
+        let feedsWithoutAgeLimit = feeds.filter(f => !f.entryAgeLimit);
+        if (Prefs.get('database.expireEntries') && feedsWithoutAgeLimit.length) {
+            let expirationAge = Prefs.get('database.entryExpirationAge');
+
+            let query = new Query({
+                feeds: feedsWithoutAgeLimit.map(feed => feed.feedID),
+                deleted: false,
+                starred: false,
+                endDate: Date.now() - expirationAge * 86400000,
+            });
+            await query.markDeleted('trashed');
+        }
+
+        // Pre-feed age limit
+        let feedsWithAgeLimit = feeds.filter(f => f.entryAgeLimit);
+        if (feedsWithAgeLimit.length) {
+            for (let feed of feedsWithAgeLimit) {
+                let query = new Query({
+                    feeds: [feed.feedID],
+                    deleted: false,
+                    starred: false,
+                    endDate: Date.now() - feed.entryAgeLimit * 86400000
+                });
+                await query.markDeleted('trashed');
+            }
+        }
+    },
+
     async pushUpdatedFeed({feed, parsedFeed}) {
         let entries = this._feedToEntries({feed, parsedFeed});
         let modified = Date.now(); // fallback
@@ -356,6 +414,7 @@ let Database = {
             dateModified: modified,
         });
         await this.modifyFeed(feedUpdates);
+        await this.expireEntries(feed);
         return newEntries;
     },
 

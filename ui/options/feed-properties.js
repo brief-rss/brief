@@ -68,7 +68,8 @@ async function init() {
                 return;
             }
             //TODO: maybe update the fields?
-        }
+        },
+        'is-options-window-open': async () => true,
     });
 
     setFeed(feed);
@@ -83,6 +84,9 @@ async function init() {
     document.getElementById('previous-feed').addEventListener('click', () => {
         document.location.search = `?feedID=${allFeeds[index-1].feedID}`;
     });
+    window.addEventListener('beforeunload',
+                            () => Database.expireEntries(),
+                            {once: true, passive: true});
 }
 
 function updateScale() {

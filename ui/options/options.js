@@ -2,6 +2,9 @@
 
 async function init() {
     apply_i18n(document);
+    Comm.registerObservers({
+        'is-options-window-open': async () => true,
+    });
 
     await Prefs.init();
     PrefBinder.init();
@@ -57,6 +60,9 @@ function initUpdateIntervalControls() {
             }).markDeleted('deleted').catch(console.error);
         }
     });
+    window.addEventListener('beforeunload',
+                            () => Database.expireEntries(),
+                            {once: true, passive: true});
 }
 
 
