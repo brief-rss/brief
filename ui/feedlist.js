@@ -529,7 +529,7 @@ let FeedList = {
             let folders = [];
             let parentID = feed.parent;
 
-            while (parentID != Prefs.get('homeFolder')) {
+            while (parentID != String(Prefs.get('homeFolder'))) {
                 if (folders.indexOf(parentID) == -1)
                     folders.push(parentID);
                 parentID = this.getFeed(parentID).parent;
@@ -569,7 +569,7 @@ let FeedList = {
         let active = (this.tree.selectedItem !== null);
         this.feeds = this.getAllFeeds(true);
 
-        let model = this._buildFolderChildren(Prefs.get('homeFolder'));
+        let model = this._buildFolderChildren(String(Prefs.get('homeFolder')));
         this.tree.update(model);
 
         if(active && this.tree.selectedItem === null) {

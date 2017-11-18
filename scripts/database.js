@@ -610,10 +610,12 @@ let Database = {
     },
 
     _fixParents(feeds) {
+        let homeId = String(Prefs.get('homeFolder'));
         let feedIds = new Set(feeds.map(f => f.feedID));
+        feedIds.add(homeId);
         for(let feed of feeds) {
             if(!feed.hidden && !feedIds.has(feed.parent)) {
-                feed.parent = Prefs.get('homeFolder');
+                feed.parent = homeId;
             }
         }
     },
