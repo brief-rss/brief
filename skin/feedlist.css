@@ -336,7 +336,7 @@ tree-folder-header:-moz-drag-over {
   background-color: #fcd7bd !important;
 }
 
-#feed-list.organize tree-item *,
-#feed-list.organize tree-folder-header * {
+#feed-list.drag tree-item *,
+#feed-list.drag tree-folder-header * {
     pointer-events: none;
 }

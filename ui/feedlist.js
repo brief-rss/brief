@@ -170,6 +170,7 @@ TreeView.prototype = {
                                  JSON.stringify(items.map(i => i.dataset.id)));
             dataTransfer.effectAllowed = 'move';
             dataTransfer.dropEffect = 'move';
+            this.root.classList.add('drag');
             return;
         }
         if(type === 'dragenter' || type === 'dragover') {
@@ -180,7 +181,6 @@ TreeView.prototype = {
             if(target.localName === 'tree-folder-header') {
                 target = target.parentNode;
             }
-            console.log('drop');
             event.preventDefault();
             let ev = new CustomEvent('move');
             let list = dataTransfer.getData('application/x-tree-item-list');
@@ -188,7 +188,10 @@ TreeView.prototype = {
             ev.targetId = target.dataset.id;
             ev.relation = 'before';
             this.root.dispatchEvent(ev);
+            this.root.classList.remove('drag');
             return;
+        } else if(type === 'dragend') {
+            this.root.classList.remove('drag');
         }
 
         if(event.type === 'click' && event.currentTarget.classList.contains('toggle-collapsed')) {
