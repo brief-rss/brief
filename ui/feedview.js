@@ -61,6 +61,7 @@ function FeedView(aTitle, aQuery) {
 
     this._observer = Comm.registerObservers({
         'entries-updated': info => this._applyUpdates(info),
+        'feedlist-updated': () => this._setEmptyViewMessage(),
     });
 
     this.document.addEventListener('click', this, true);
