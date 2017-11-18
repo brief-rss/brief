@@ -174,7 +174,9 @@ TreeView.prototype = {
             return;
         }
         if(type === 'dragenter' || type === 'dragover') {
-            event.preventDefault();
+            if(dataTransfer.types.includes('application/x-tree-item-list')) {
+                event.preventDefault();
+            }
             return;
         }
         if(type === 'drop') {
