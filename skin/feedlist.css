@@ -19,12 +19,18 @@ tree-folder {
 }
 
 tree-folder.collapsed > tree-item,
-tree-folder.collapsed > tree-folder {
+tree-folder.collapsed > tree-folder,
+tree-folder.collapsed > tree-folder-footer {
     display: none;
 }
 
 tree-folder-header > .toggle-collapsed::-moz-focus-inner {
     border:0;
+}
+
+.drag tree-item *,
+.drag tree-folder-header * {
+    pointer-events: none;
 }
 
 
@@ -75,6 +81,16 @@ tree-item:hover:not(.selected),
 tree-folder:not(.selected) > tree-folder-header:hover {
     border-color: #e5e5e5 !important;
     background-color: #e5e5e5 !important;
+}
+
+tree-item:-moz-drag-over,
+tree-folder-header:-moz-drag-over {
+    background-color: #e5e5e5 !important;
+    border-top-color: #000000 !important;
+}
+
+.organize tree-folder-footer:-moz-drag-over::after {
+    border-style: solid !important;
 }
 
 tree-item > .icon,
@@ -166,19 +182,22 @@ tree-folder.collapsed > tree-folder-header > .toggle-collapsed:hover {
 
 /* Indentation for first level nesting */
 tree-folder > tree-item,
+tree-folder > tree-folder-footer,
 tree-folder > tree-folder > tree-folder-header {
     padding-left: 20px !important;
 }
 
 /* Indentation for second level nesting */
 tree-folder > tree-folder > tree-item,
+tree-folder > tree-folder > tree-folder-footer,
 tree-folder > tree-folder > tree-folder > tree-folder-header {
     padding-left: 40px !important;
 }
 
 /* Indentation for third level nesting */
 tree-folder > tree-folder > tree-folder > tree-item,
-tree-folder > tree-folder > tree-folder > tree-folder > tree-folder-header {
+tree-folder > tree-folder > tree-folder > tree-folder-footer,
+tree-folder > tree-folder > tree-folder > tree-folder > tree-folder-header{
     padding-left: 60px !important;
 }
 
@@ -326,17 +345,24 @@ context-menu.dropdown-menu {
 /* ===== Organize ===== */
 #feed-list.organize,
 #organize-button.organize {
-    background-color: #fcd7bd !important;
+    background-color: #ffe6d4 !important;
+}
+
+#organize-button.organize {
     padding-top: 6px !important; /* TODO: move to a more appropriate place */
     margin-top: 4px !important;
 }
 
-tree-item:-moz-drag-over,
-tree-folder-header:-moz-drag-over {
-  background-color: #fcd7bd !important;
+.organize tree-item,
+.organize tree-item *,
+.organize tree-folder-header,
+.organize tree-folder-header * {
+    cursor: move;
 }
 
-#feed-list.drag tree-item *,
-#feed-list.drag tree-folder-header * {
-    pointer-events: none;
+.organize tree-folder-footer::after {
+    content: "";
+    height: 10px;
+    display: block;
+    border: 1px dashed black !important;
 }

@@ -40,17 +40,20 @@ TreeView.prototype = {
     _updateChildren: function TreeView__updateChildren(aElement, aModel) {
         let knownIds = new Set(aModel.map(node => node.id));
         let next = aElement.children.item(0);
+        const IMPL_ITEMS = ['template', 'tree-folder-header', 'tree-folder-footer'];
         for (let node of aModel) {
             // Skip or delete everything that's not to stay
             while(next !== null && (!next.hasOwnProperty('id') || !knownIds.has(next.id))) {
-                if(next.nodeName !== 'template' && next.nodeName !== 'tree-folder-header') {
+                if(!IMPL_ITEMS.includes(next.nodeName)) {
                     if(next.nodeType !== Node.ELEMENT_NODE) {
-                        next.parentNode.removeChild(next);
+                        // Just ignore them
                     } else {
                         next.classList.add('deleted');
                     }
                 }
-                let current = next;
+                if(next.nodeName === 'tree-folder-footer') {
+                    break;
+                }
                 next = next.nextSibling;
             }
             // Find or create the element
@@ -82,6 +85,12 @@ TreeView.prototype = {
         target.addEventListener('dragenter', this);
         target.addEventListener('dragover', this);
         target.addEventListener('drop', this);
+        let footer = element.querySelector('tree-folder-footer');
+        if(footer) {
+            footer.addEventListener('dragenter', this);
+            footer.addEventListener('dragover', this);
+            footer.addEventListener('drop', this);
+        }
         if(element.nodeName === 'tree-folder') {
             element.querySelector('.toggle-collapsed').addEventListener('click', this);
         }
@@ -180,15 +189,19 @@ TreeView.prototype = {
             return;
         }
         if(type === 'drop') {
-            if(target.localName === 'tree-folder-header') {
-                target = target.parentNode;
+            let targetNode = target;
+            if(['tree-folder-header', 'tree-folder-footer'].includes(target.localName)) {
+                targetNode = target.parentNode;
             }
             event.preventDefault();
             let ev = new CustomEvent('move');
             let list = dataTransfer.getData('application/x-tree-item-list');
             ev.itemIds = JSON.parse(list);
-            ev.targetId = target.dataset.id;
+            ev.targetId = targetNode.dataset.id;
             ev.relation = 'before';
+            if(target.localName === 'tree-folder-footer') {
+                ev.relation = 'into';
+            }
             this.root.dispatchEvent(ev);
             this.root.classList.remove('drag');
             return;
@@ -505,6 +518,12 @@ let FeedList = {
         let targetIndex = feedIds.indexOf(targetId);
         if(relation === 'after') {
             targetIndex += 1;
+        } else if(relation === 'into') {
+            targetIndex = [...Database.feeds]
+                .map(f => [f.parent, f.feedID])
+                .map(ids => ids.includes(targetId))
+                .lastIndexOf(true) + 1;
+            parent = targetId;
         }
         feedIds.splice(targetIndex, 0, ...itemIds);
         let changes = [{feedID: itemIds[0], parent}];
