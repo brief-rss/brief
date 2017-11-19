@@ -77,22 +77,31 @@ TreeView.prototype = {
         }
     },
     _initElement: function TreeView__initElement(element) {
-        let target = element.nodeName !== 'tree-folder' ?
-                element : element.querySelector('tree-folder-header');
-        target.addEventListener('click', this);
-        target.addEventListener('contextmenu', this); // Select before opening the context menu
-        target.addEventListener('dragstart', this);
-        target.addEventListener('dragenter', this);
-        target.addEventListener('dragover', this);
-        target.addEventListener('drop', this);
-        let footer = element.querySelector('tree-folder-footer');
-        if(footer) {
-            footer.addEventListener('dragenter', this);
-            footer.addEventListener('dragover', this);
-            footer.addEventListener('drop', this);
+        let type = element.nodeName;
+        const CHILDREN = ['tree-folder-header', 'tree-folder-footer'];
+        for(let selector of CHILDREN) {
+            for(let node of element.querySelectorAll(selector)) {
+                this._initElement(node);
+            }
         }
-        if(element.nodeName === 'tree-folder') {
-            element.querySelector('.toggle-collapsed').addEventListener('click', this);
+        switch(type) {
+            case 'tree-item':
+            case 'tree-folder-header':
+                element.addEventListener('click', this);
+                // Select before opening the context menu
+                element.addEventListener('contextmenu', this);
+                element.addEventListener('dragstart', this);
+                // Fallthrough
+            case 'tree-folder-footer':
+                element.addEventListener('dragenter', this);
+                element.addEventListener('dragover', this);
+                element.addEventListener('drop', this);
+                break;
+            case 'tree-folder':
+                element.querySelector('.toggle-collapsed').addEventListener('click', this);
+        }
+        for(let node of element.querySelectorAll('.editable')) {
+            node.addEventListener('blur', this);
         }
     },
     updateElement: function TreeView_updateElement(aElement, aModel) {
@@ -128,6 +137,10 @@ TreeView.prototype = {
             element.classList.toggle('collapsed', collapsed);
         if(children !== undefined)
             this._updateChildren(element, children);
+        let footerText = element.querySelector('tree-folder-footer > .title');
+        if(footerText) {
+            footerText.textContent = '';
+        }
     },
     _cleanup: function TreeView__cleanup() {
         // Move the selection
@@ -174,7 +187,6 @@ TreeView.prototype = {
             console.log('drag started');
             dataTransfer.setData('application/x-moz-node', target);
             let items = [target, ...target.querySelectorAll('[data-id]')];
-            console.log(items);
             dataTransfer.setData('application/x-tree-item-list',
                                  JSON.stringify(items.map(i => i.dataset.id)));
             dataTransfer.effectAllowed = 'move';
@@ -189,9 +201,9 @@ TreeView.prototype = {
             return;
         }
         if(type === 'drop') {
-            let targetNode = target;
-            if(['tree-folder-header', 'tree-folder-footer'].includes(target.localName)) {
-                targetNode = target.parentNode;
+            let targetNode = event.currentTarget;
+            if(['tree-folder-header', 'tree-folder-footer'].includes(targetNode.localName)) {
+                targetNode = targetNode.parentNode;
             }
             event.preventDefault();
             let ev = new CustomEvent('move');
@@ -209,6 +221,17 @@ TreeView.prototype = {
             this.root.classList.remove('drag');
         }
 
+        // Title editing finished
+        if(type === 'blur') {
+            //TODO: fix layering violation
+            let item = target.parentNode.parentNode;
+            if(target.parentNode.nodeName === 'tree-folder-footer') {
+                FeedList._append({feedID: item.dataset.id, title: target.textContent});
+            } else {
+                FeedList._rename({feedID: item.dataset.id, title: target.textContent});
+            }
+        }
+
         if(event.type === 'click' && event.currentTarget.classList.contains('toggle-collapsed')) {
             // (un)collapse
             let element = event.currentTarget;
@@ -219,7 +242,10 @@ TreeView.prototype = {
             event.stopPropagation();
             this._cleanup(); // Move selection
             Persistence.save(); // TODO: fix in a more clean way
-        } else if(event.type === 'click' || event.type === 'contextmenu'){
+        } else if(event.type === 'click' || event.type === 'contextmenu') {
+            if(this.root.classList.contains('organize')) {
+                return;
+            }
             let target = event.currentTarget;
             if(target.nodeName === 'tree-folder-header')
                 target = target.parentNode;
@@ -233,6 +259,9 @@ TreeView.prototype = {
 
         for(let node of this.root.querySelectorAll('tree-item, tree-folder-header')) {
             node.setAttribute('draggable', active);
+        }
+        for(let node of this.root.querySelectorAll('.editable')) {
+            node.setAttribute('contenteditable', active);
         }
     },
 };
@@ -644,8 +673,26 @@ let FeedList = {
 
     organize() {
         this.tree.organize();
-        getElement('organize-button').classList.toggle('organize',
-            this.tree.root.classList.contains('organize'));
+        let active = this.tree.root.classList.contains('organize');
+        getElement('organize-button').classList.toggle('organize', active);
+        Shortcuts.mode = active ? 'organize' : 'command';
+    },
+
+    _rename({feedID, title}) {
+        if(title === '') {
+            this.rebuild();
+        }
+        let feed = Database.getFeed(feedID);
+        if(feed.title !== title) {
+            Database.modifyFeed({feedID, title});
+        }
+    },
+
+    _append({feedID, title}) {
+        if(title === '') {
+            this.rebuild();
+        }
+        Database.addFeeds({title, parent: feedID})
     },
 }
 

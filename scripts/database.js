@@ -235,6 +235,7 @@ let Database = {
     },
 
     async _addFeed(feed, {parent}) {
+        parent = feed.parent || parent; // Used for folder creation from Organize mode
         let {url, title} = feed;
         let existing = this.feeds.filter(f => !f.isFolder && f.feedURL === url);
         let active = existing.filter(f => !f.hidden);
