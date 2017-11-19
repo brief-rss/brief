@@ -1,0 +1,649 @@
+{
+  // Messages from amo.dtd
+    "addonSummary": {
+        "message": "Brief прави четенето на RSS емисии толкова лесно и интуитивно, колкото е възможно. Създадено да има точно необходимия набор от възможности, то е колкото мощно, толкова и просто разширение. Емисиите са представени на една интерактивна старница, което позволява да бъдат отмятани и да им се поставят етикети с едно цъкване на мишката."
+    },
+    "addonDescription": {
+        "message": "С лекота отмятайте интересни записи и им поставяйте етикети. Преглеждайте своите емисии по няколко удобни начина - може да прегледате само непрочетените записи или само отметнатите; може да прегледате само една емисия или цяла папка; може да прегледате записите изцяло или само заглавията. Използвайте полето за търсене, за да намирате бързо желаните записи. Позволете уведомленията при поява на нови записи и следете броят им в лентата с инструменти. Настройте външния вид на емисиите, както ви е удобно. Използвайте клавишни комбинации за бърза навигация и управление на записите. И преди всичко, правете го с лекота и интуитивно."
+    },
+
+  // Messages from brief.dtd
+    "searchBox_label": {
+        "message": "Търсене"
+    },
+    "allItemsFolder_label": {
+        "message": "Всички"
+    },
+    "todayFolder_label": {
+        "message": "От днес"
+    },
+    "starredFolder_label": {
+        "message": "Отметнати"
+    },
+    "trashFolder_label": {
+        "message": "Кошче"
+    },
+
+    // Buttons
+    "headlinesCheckbox_tooltip": {
+        "message": "Преглед само на заглавията (F)"
+    },
+    "fullViewCheckbox_tooltip": {
+        "message": "Пълен преглед (G)"
+    },
+    "showAllItems_tooltip": {
+        "message": "Показване на всички (A)"
+    },
+    "filterUnread_tooltip": {
+        "message": "Показване само на непрочетените (D)"
+    },
+    "filterStarred_tooltip": {
+        "message": "Показване само на отметнатите (S)"
+    },
+    "updateButton_label": {
+        "message": "Обновяване"
+    },
+    "updateButton_tooltip": {
+        "message": "Проверка за обновления на всички емисии"
+    },
+    "stopUpdatingButton_label": {
+        "message": "Спиране"
+    },
+    "stopUpdatingButton_tooltip": {
+        "message": "Спиране на проверката за обновления"
+    },
+    "optionsDropdownButton_label": {
+        "message": "Настройки"
+    },
+    "optionsDropdownButton_tooltip": {
+        "message": "Настройки на Brief"
+    },
+    "organizeFeeds_label": {
+        "message": "Организиране"
+    },
+    "organizeFeeds_tooltip": {
+        "message": "Организиране на емисиите"
+    },
+
+    "sidebarSplitter_tooltip": {
+        "message": "Двойно цъкване за скриване на панела"
+    },
+    "revealSidebar_tooltip": {
+        "message": "Показване на панела"
+    },
+    "markViewRead_tooltip": {
+        "message": "Отбелязване на всички като прочетени (Alt + N)"
+    },
+
+    // # Context menu
+    "ctxMarkRead_label": {
+        "message": "Отбелязване като прочетени"
+    },
+    "ctxMarkTagRead_label": {
+        "message": "Отбелязване на записите с етикет като прочетени"
+    },
+    "ctxRefreshFeed_label": {
+        "message": "Обновяване сега"
+    },
+    "ctxRefreshFolder_label": {
+        "message": "Обновяване сега"
+    },
+    "ctxOpenWebsite_label": {
+        "message": "Отваряне на страница"
+    },
+    "ctxUnsubscribeFeed_label": {
+        "message": "Отписване"
+    },
+    "ctxDeleteFolder_label": {
+        "message": "Изтриване на папка"
+    },
+    "ctxDeleteTag_label": {
+        "message": "Изтриване на етикет"
+    },
+    "ctxEmptyFeed_label": {
+        "message": "Изчистване на емисия"
+    },
+    "ctxEmptyFolder_label": {
+        "message": "Изчистване на папка"
+    },
+    "ctxRestoreTrashed_label": {
+        "message": "Възстановяване на всички записи"
+    },
+    "ctxEmptyTrash_label": {
+        "message": "Изчистване на кошче"
+    },
+    "ctxFeedSettings_label": {
+        "message": "Настройки на емисия"
+    },
+
+  // Messages from firstrun.dtd
+    "pageTitle": {
+        "message": "Въведение в Brief"
+    },
+    "thankYou_header": {
+        "message": "Благодаря за инсталирането на Brief"
+    },
+    "howToSubscribe_header": {
+        "message": "Емисиите са най-лесния начин да следите любимите си сайтове!"
+    },
+    "subscribingStep1_description": {
+        "message": "Когато се намирате на страница, която искате да следите, отворете меню <strong>Отметки</strong> и натиснете <strong>Абониране за емисия</strong>."
+    },
+    "subscribingStep2_description": {
+        "message": "Или може да намерите връзка към емисията на самата страница."
+    },
+    "subscribingStep3_description": {
+        "message": "Изберете <strong>Brief</strong> и натиснете <strong>Абониране сега</strong>. Това е!"
+    },
+    "getStartedButton_label": {
+        "message": "Кратко ръководство"
+    },
+
+  // Messages from options.dtd
+    "optionsWindow_title": {
+        "message": "Настройки на Brief"
+    },
+    "mainPane_label": {
+        "message": "Основни"
+    },
+    "refreshGroup_caption": {
+        "message": "Обновление"
+    },
+    "checkForUpdatesBefore_label": {
+        "message": "Проверка на емисиите за обновления на всеки"
+    },
+    "checkForUpdates_accesskey": {
+        "message": "C"
+    },
+    "updateIntervalMinutes_label": {
+        "message": "минути"
+    },
+    "updateIntervalHours_label": {
+        "message": "час(а)"
+    },
+    "updateIntervalDays_label": {
+        "message": "дни"
+    },
+    "showNotification_label": {
+        "message": "Показване на известие при поява на нови записи"
+    },
+    "showNotification_accesskey": {
+        "message": "S"
+    },
+    "readingGroup_caption": {
+        "message": "Четене"
+    },
+    "storingGroup_caption": {
+        "message": "Съхранение"
+    },
+    "expirationBefore_label": {
+        "message": "Изтриване на свалените записи след"
+    },
+    "expirationAfter_label": {
+        "message": "дни"
+    },
+    "expirationCheckbox_accesskey": {
+        "message": "R"
+    },
+    "starredItemsKept_tooltip": {
+        "message": "Отметнатите записи ще бъдат запазени"
+    },
+    "storedEntriesBefore_label": {
+        "message": "Запазване на не повече от"
+    },
+    "storedEntriesAfter_label": {
+        "message": "последни записа във всяка емисия"
+    },
+    "storedEntriesCheckbox_accesskey": {
+        "message": "n"
+    },
+    "clearAllEntriesButton_label": {
+        "message": "Изтриване на всички записи…"
+    },
+    "clearAllEntriesButton_accesskey": {
+        "message": "a"
+    },
+    "showUnreadCounter_label": {
+        "message": "Показване на броя на непрочетените записи в иконата на Brief"
+    },
+    "showUnreadCounter_accesskey": {
+        "message": "w"
+    },
+    "sortUnreadViewOldestFirst_label": {
+        "message": "Показване на най-старите в началото на списъка с непрочетените записи"
+    },
+    "sortUnreadViewOldestFirst_accesskey": {
+        "message": "o"
+    },
+    "autoMarkRead_label": {
+        "message": "Автоматично отбелязване на записите като прочетени след преглеждане"
+    },
+    "autoMarkRead_accesskey": {
+        "message": "M"
+    },
+    "editStyleDescription_label": {
+        "message": "Настройка на външния вид на Brief"
+    },
+    "editStyleButton_label": {
+        "message": "Персонализиране"
+    },
+    "editStyleButton_accesskey": {
+        "message": "u"
+    },
+    "styleEditor_title": {
+        "message": "Редактиране на потребитерски стил"
+    },
+    "seeCustomizationTips_label": {
+        "message": "Информация за настройката на външния вид с помощта на CSS"
+    },
+    "seeCustomizationTips_url": {
+        "message": "http://brief.mozdev.org/customize.html"
+    },
+    "feedName_label": {
+        "message": "Наименование"
+    },
+    "feedURL_label": {
+        "message": "Адрес"
+    },
+    "optionsGroupbox_caption": {
+        "message": "Настройка на емисия"
+    },
+    "checkUpdatesPerFeedBefore_label": {
+        "message": "Проверка за обновления на всеки"
+    },
+    "checkUpdatesPerFeed_accesskey": {
+        "message": "C"
+    },
+    "expireEntriesPerFeedBefore_label": {
+        "message": "Изтриване на свалените записи след"
+    },
+    "expireEntriesPerFeed_accesskey": {
+        "message": "R"
+    },
+    "expireEntriesPerFeedAfter_label": {
+        "message": "дни"
+    },
+    "updatedEntries_label": {
+        "message": "Променените записи да не се отбелязват като непрочетени"
+    },
+    "updatedEntries_accesskey": {
+        "message": "D"
+    },
+    "omitInUnread_label": {
+        "message": "Изключване на тази емисия от преглед в „От днес“ и „Всички“"
+    },
+    "omitInUnread_accesskey": {
+        "message": "O"
+    },
+    "previousFeed_label": {
+        "message": "&lt; Предишна"
+    },
+    "previousFeed_accesskey": {
+        "message": "P"
+    },
+    "nextFeed_label": {
+        "message": "Следваща &gt;"
+    },
+    "nextFeed_accesskey": {
+        "message": "N"
+    },
+
+  // Messages from overlay.dtd
+    // Toolbar button context menu
+    "briefCtxRefreshFeeds_label": {
+        "message": "Обновяване на емисиите сега"
+    },
+    "briefCtxMarkFeedsAsRead_label": {
+        "message": "Отбелязване на всички емисии като прочетени"
+    },
+    "briefCtxShowUnreadCounter_label": {
+        "message": "Показване на броя на непрочетените записи"
+    },
+    "briefCtxShowOptions_label": {
+        "message": "Настройки"
+    },
+
+    // Options panel
+    "briefShowShortcutsMenuitem_label": {
+        "message": "Клавишни комбинации"
+    },
+    "briefImportMenuitem_label": {
+        "message": "Внасяне на емисии…"
+    },
+    "briefExportMenuitem_label": {
+        "message": "Изнасяне на емисии…"
+    },
+    "briefOpenOptionsMenuitem_label": {
+        "message": "Настройки"
+    },
+
+    // Context options panels
+    "briefRefreshFeed_label": {
+        "message": "Обновяване сега"
+    },
+    "briefOpenWebsite_label": {
+        "message": "Отваряне на страница"
+    },
+    "briefUnsubscribeFeed_label": {
+        "message": "Отписване"
+    },
+    "briefEmptyFeed_label": {
+        "message": "Изчистване на емисия"
+    },
+    "briefFeedSettings_label": {
+        "message": "Настройка на емисия"
+    },
+    "briefRestoreTrashed_label": {
+        "message": "Възстановяване на всички записи"
+    },
+    "briefEmptyTrash_label": {
+        "message": "Изчистване на кошчето"
+    },
+
+  // Messages from shortcuts.dtd
+    "shortcutsPage_title": {
+        "message": "Brief - клавишни комбинации"
+    },
+    "or": {
+        "message": "или"
+    },
+
+    "navigation_header": {
+        "message": "Навигация"
+    },
+    "space_key": {
+        "message": "Space"
+    },
+    "shiftSpace_key": {
+        "message": "Shift + Space"
+    },
+    "nextItem": {
+        "message": "Преминаване към следващ запис"
+    },
+    "previousItem": {
+        "message": "Връщане към предишен запис"
+    },
+    "scrollDownByScreen": {
+        "message": "Превъртане надолу с една височина на екрана"
+    },
+    "scrollUpByScreen": {
+        "message": "Превъртане нагоре с една височина на екрана"
+    },
+    "enter_key": {
+        "message": "Enter"
+    },
+    "openEntry": {
+        "message": "Отваряне на текущия запис"
+    },
+    "showItem": {
+        "message": "Показване/скриване на текущия запис (при преглед само на заглавията)"
+    },
+
+    "entries_header": {
+        "message": "Записи"
+    },
+    "markCurrentItemRead": {
+        "message": "Отбелязване на текущия запис като прочетен/непрочетен"
+    },
+    "markVisibleRead": {
+        "message": "Отбелязване на всички записи на екрана като прочетени"
+    },
+    "altN_key": {
+        "message": "Alt + N"
+    },
+    "markAllRead": {
+        "message": "Отбелязване на всички записи като прочетени"
+    },
+    "starItem": {
+        "message": "Отмятане на текущия запис"
+    },
+    "moveToTrash": {
+        "message": "Преместване на текущия запис в кошчето"
+    },
+
+    "view_header": {
+        "message": "Изглед"
+    },
+    "showAll": {
+        "message": "Показване на всички записи"
+    },
+    "showStarred": {
+        "message": "Показване на отметнатите записи"
+    },
+    "showUnread": {
+        "message": "Показване на непрочетените записи"
+    },
+    "headlinesView": {
+        "message": "Преглед само на заглавията"
+    },
+    "fullView": {
+        "message": "Пълен преглед"
+    },
+
+    "general_header": {
+        "message": "Общи"
+    },
+    "ctrlAltD_key": {
+        "message": "Ctrl + Shift + D"
+    },
+    "cmdAltD_key": {
+        "message": "Cmd + Shift + D"
+    },
+    "openBrief": {
+        "message": "Отваряне на Brief"
+    },
+    "focusSearchbar": {
+        "message": "Преместване на фокуса в полето за търсене"
+    },
+    "displayShortcuts": {
+        "message": "Показване на списъка с клавишните комбинации"
+    },
+
+  // Messages from brief.properties
+    // IMPORTANT LOCALIZATION NOTE!
+    // Pick the appropriate plural rule for your language. This will determine how many
+    // plural forms of a word you will need to provide and in what order.
+    // See: https://www.unicode.org/cldr/charts/29/supplemental/language_plural_rules.html
+    "pluralRule": {
+        "message": "one;other"
+    },
+
+    "extensions_brief@mozdev_org_description": {
+        "message": "Разширение за четене на емисии."
+    },
+
+    "defaultFeedsFolderName": {
+        "message": "Абонаменти"
+    },
+    "searchResults": {
+        "message": "Резултати от търсене на: $1"
+    },
+
+    "entryWasUpdated": {
+        "message": "(обновен)"
+    },
+    "markEntryAsUnreadTooltip": {
+        "message": "Отбелязване на записа като непрочетен"
+    },
+    "markEntryAsReadTooltip": {
+        "message": "Отбелязване на записа като прочетен"
+    },
+    "deleteEntryTooltip": {
+        "message": "Преместване на записа в кошчето"
+    },
+    "restoreEntryTooltip": {
+        "message": "Възстановяване на записа от кошчето"
+    },
+    "bookmarkEntryTooltip": {
+        "message": "Отмятане на запис"
+    },
+    "editBookmarkTooltip": {
+        "message": "Редактиране на отметка"
+    },
+
+    "noFeeds": {
+        "message": "Все още няма добавена нито една емисия."
+    },
+    "noFeedsAdvice": {
+        "message": "Вижте как да го направите!"
+    },
+    "noUnreadEntries": {
+        "message": "Няма непрочетени записи"
+    },
+    "noStarredEntries": {
+        "message": "Няма отметнати записи"
+    },
+    "trashIsEmpty": {
+        "message": "Кошчето е чисто"
+    },
+    "noEntriesFound": {
+        "message": "Няма намерени записи"
+    },
+    "noEntries": {
+        "message": "Няма записи"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "minute_pluralForms": {
+        "message": "минута;минути"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "hour_pluralForms": {
+        "message": "час;часа"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "day_pluralForms": {
+        "message": "ден;дни"
+    },
+
+    // $1 - plural form of "minute" or "hour"
+    // e.g. "25 minutes ago" or "1 hour ago"
+    "entryDate_ago": {
+        "message": "преди #number $1"
+    },
+
+    "entryDate_justNow": {
+        "message": "Току що"
+    },
+    "entryDate_today": {
+        "message": "Днес"
+    },
+    "entryDate_yesterday": {
+        "message": "Вчера"
+    },
+    "lastUpdated_rightNow": {
+        "message": "Емисиите току що бяха обновени."
+    },
+
+    // $1 - plural form of "minute", "hour", or "day"
+    // e.g. "Feeds were last updated 30 minutes ago", "Feeds were last updated 1 hour ago"
+    "lastUpdated_ago": {
+        "message": "Емисиите бяха последно обновени преди #number $1"
+    },
+
+    "lastUpdated_today": {
+        "message": "Емисиите бяха последно обновени днес в $1"
+    },
+    "lastUpdated_yesterday": {
+        "message": "Емисиите бяха последно обновени вчера в $1"
+    },
+    "lastUpdated_fullDate": {
+        "message": "Емисиите бяха последно обновени $1"
+    },
+    "noUnreadFeedsTooltip": {
+        "message": "Няма непрочетени емисии."
+    },
+    "updateAlertTitle": {
+        "message": "Емисиите са обновени"
+    },
+
+    // $1 - plural form of "new"
+    // $2 - plural form of "item"
+    // $3 - plural form of "feed"
+    // e.g. "5 new items in 2 feeds" or "3 new items in 1 feed"
+    "updateAlertText_multpleFeedsMessage": {
+        "message": "#numItems $1 $2 в #numFeeds $3"
+    },
+
+    // $1 - feed name
+    // $2 - plural form of "new"
+    // $3 - plural form of "item"
+    // e.g. ""BBC News" [newline] 5 new items"
+    "updateAlertText_singleFeedMessage": {
+        "message": "$1\n#numItems $2 $3"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_new_pluralForms": {
+        "message": "нов;нови"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_item_pluralForms": {
+        "message": "запис;записи"
+    },
+
+    // Provide plural forms according to your language's plural rule (see the note at the top).
+    "updateAlertText_feed_pluralForms": {
+        "message": "емисия;емисии"
+    },
+
+    // TODO: Unused
+    "confirmFeedDeletionTitle": {
+        "message": "Отписване от емисия"
+    },
+    "confirmFeedDeletionText": {
+        "message": "Сигурни ли сте, че искате да се отпишете от \"$1\"?"
+    },
+    // TODO: Unused
+    "confirmFolderDeletionTitle": {
+        "message": "Изтриване на папка"
+    },
+    "confirmFolderDeletionText": {
+        "message": "Сигурни ли сте, че искате да изтриете папката \"$1\" и всички емисии, които съдържа?"
+    },
+    // TODO: Unused
+    "confirmTagDeletionTitle": {
+        "message": "Изтриване на етикет"
+    },
+    "confirmTagDeletionText": {
+        "message": "Сигурни ли сте, че искате да изтриете етикета \"$1\"?"
+    },
+
+  // Messages from options.properties
+    "confirmClearAllEntriesTitle": {
+        "message": "Изтриване на записи"
+    },
+    "confirmClearAllEntriesText": {
+        "message": "Сигурни ли сте, че искате да изтриете всички записи?"
+    },
+    "confirmClearAllEntriesCheckbox": {
+        "message": "Запазване на отметнатите записи"
+    },
+    "feedSettingsDialogTitle": {
+        "message": "Настройки за \"$1\""
+    },
+    "selectFile": {
+        "message": "Изберете OPML файл за внасяне"
+    },
+    "saveAs": {
+        "message": "Запазване като…"
+    },
+    "allFiles": {
+        "message": "Всички файлове"
+    },
+    "OPMLFiles": {
+        "message": "OPML файлове"
+    },
+    "XMLFiles": {
+        "message": "XML файлове"
+    },
+    "invalidFileAlertTitle": {
+        "message": "Неуспешно внасяне на емисии"
+    },
+    "invalidFileAlertText": {
+        "message": "Brief не може да внесе емисиите заради невалиден файлов формат. XML файлът не е добре оформен."
+    }
+}
