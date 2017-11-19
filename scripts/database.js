@@ -213,6 +213,9 @@ let Database = {
         if(!Comm.master) {
             return Comm.callMaster('feedlist-add', {feeds, options});
         }
+        if(Comm.verbose) {
+            console.log('addFeeds', feeds, options);
+        }
         let parent = options ? options.parent : String(Prefs.get('homeFolder'));
         feeds = asArray(feeds);
         let newFeedIds = [];
@@ -235,10 +238,16 @@ let Database = {
     },
 
     async _addFeed(feed, {parent}) {
+        if(Comm.verbose) {
+            console.log('_addFeed', feed, parent);
+        }
         parent = feed.parent || parent; // Used for folder creation from Organize mode
         let {url, title} = feed;
         let existing = this.feeds.filter(f => !f.isFolder && f.feedURL === url);
         let active = existing.filter(f => !f.hidden);
+        if(Comm.verbose) {
+            console.log('_addFeed search', existing, active);
+        }
         if(existing.length > 0) {
             if(active.length === 0) {
                 console.log("Restoring hidden feed", existing[0]);
