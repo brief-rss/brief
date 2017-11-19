@@ -979,6 +979,7 @@ Query.prototype = {
             deleted: this.deleted === false ? 0 : this.deleted,
             tags: this.tags,
             entryURL: this.entryURL,
+            feedID: filters.feeds,
         };
         filters.fullTextSearch = this.searchString;
 
