@@ -363,6 +363,7 @@ let Database = {
         feeds = asArray(feeds);
 
         // Count limits are global only
+        //FIXME: can't use markDeleted directly as _update does not support offset/limit
         if (Prefs.get('database.limitStoredEntries')) {
             for (let feed of feeds) {
                 let query = new Query({
@@ -372,7 +373,8 @@ let Database = {
                     sortOrder: 'date',
                     offset: Prefs.get('database.maxStoredEntries'),
                 });
-                await query.markDeleted('trashed');
+                let ids = await query.getIds();
+                await this.query(ids).markDeleted('trashed');
             }
         }
 
@@ -908,6 +910,10 @@ Query.prototype = {
         }
         let filters = this._filters();
         let {indexName, filterFunction, ranges} = this._searchEngine(filters);
+        if(filters.sort.offset || filters.sort.limit) {
+            // FIXME: offset/limit
+            throw "_update does not support offset/limit!";
+        }
         let offset = filters.sort.offset || 0;
         let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
 
