@@ -211,7 +211,7 @@ TreeView.prototype = {
             ev.itemIds = JSON.parse(list);
             ev.targetId = targetNode.dataset.id;
             ev.relation = 'before';
-            if(target.localName === 'tree-folder-footer') {
+            if(event.currentTarget.localName === 'tree-folder-footer') {
                 ev.relation = 'into';
             }
             this.root.dispatchEvent(ev);
