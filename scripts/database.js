@@ -257,7 +257,7 @@ let Database = {
                     parent,
                     rowIndex: 'tail',
                 });
-                return feedID;
+                return existing[0].feedID;
             } else {
                 console.log("Feed already present", active[0]);
                 return;
