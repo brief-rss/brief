@@ -929,6 +929,11 @@ Query.prototype = {
         let entries = [];
 
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
+        if(cursors.length === 0) {
+            then && then();
+            await Database._transactionPromise(tx);
+            return;
+        }
         cursors.forEach(c => {
             c.onsuccess = ({target}) => {
                 let cursor = target.result;
