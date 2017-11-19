@@ -353,6 +353,9 @@ let Database = {
             // This could cause data loss while the user has enabled expiration
             // but not yet configured the limits (remember that options are instant-apply)
             console.log('Not expiring old entries while options / feed properties are open');
+            return;
+        } else {
+            console.log('Expiring entries');
         }
         if(!feeds) {
             feeds = this.feeds;
