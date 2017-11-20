@@ -35,6 +35,7 @@ TreeView.prototype = {
 
     update: function TreeView_update(aModel) {
         this._updateChildren(this.root, aModel);
+        this._cascadeState();
         this._cleanup();
     },
     _updateChildren: function TreeView__updateChildren(aElement, aModel) {
@@ -255,6 +256,11 @@ TreeView.prototype = {
 
     organize() {
         this.root.classList.toggle('organize');
+        this._cascadeState();
+    },
+
+    // Sync attributes that (like `contenteditable`) needs to be cascaded from classes by hand
+    _cascadeState() {
         let active = this.root.classList.contains('organize');
 
         for(let node of this.root.querySelectorAll('tree-item, tree-folder-header')) {
@@ -262,6 +268,9 @@ TreeView.prototype = {
         }
         for(let node of this.root.querySelectorAll('.editable')) {
             node.setAttribute('contenteditable', active);
+        }
+        for(let node of this.root.querySelectorAll('tree-folder-footer .editable')) {
+            node.textContent = '';
         }
     },
 };
