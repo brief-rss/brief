@@ -56,7 +56,8 @@ tree-folder-header > .system-icon {
 }
 
 tree-item > .title,
-tree-folder-header > .title {
+tree-folder-header > .title,
+tree-folder-footer > .title {
     flex-shrink: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -109,7 +110,8 @@ tree-item[data-error="true"]:not([data-loading="true"]) > .system-icon {
 }
 
 tree-item > .title,
-tree-folder-header > .title {
+tree-folder-header > .title,
+tree-folder-footer > .title {
     font-size: 13px !important;
     color: #454545 !important;
 }
@@ -360,9 +362,21 @@ context-menu.dropdown-menu {
     cursor: move;
 }
 
-.organize tree-folder-footer::after {
-    content: "";
-    height: 10px;
+tree-box:not(.organize) tree-folder-footer {
+    display: none;
+}
+
+.organize tree-folder-footer span.title {
     display: block;
     border: 1px dashed black !important;
+}
+
+label.title[contenteditable="true"] {
+    font-style: italic;
+    background: #ffffff !important;
+    cursor: text;
+}
+
+label.title[contenteditable="true"]:empty::after {
+    content: "...";
 }

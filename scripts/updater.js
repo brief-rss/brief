@@ -48,6 +48,7 @@ let FeedUpdater = {
         if(!Array.isArray(feeds)) {
             feeds = [feeds];
         }
+        //TODO: process folders recursively
         feeds = feeds.map(feed => feed.feedID || feed);
         // Enqueue the feeds that are not underway
         feeds = feeds.filter(feed => !this.underway.includes(feed));

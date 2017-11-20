@@ -213,6 +213,9 @@ let Database = {
         if(!Comm.master) {
             return Comm.callMaster('feedlist-add', {feeds, options});
         }
+        if(Comm.verbose) {
+            console.log('addFeeds', feeds, options);
+        }
         let parent = options ? options.parent : String(Prefs.get('homeFolder'));
         feeds = asArray(feeds);
         let newFeedIds = [];
@@ -235,9 +238,16 @@ let Database = {
     },
 
     async _addFeed(feed, {parent}) {
+        if(Comm.verbose) {
+            console.log('_addFeed', feed, parent);
+        }
+        parent = feed.parent || parent; // Used for folder creation from Organize mode
         let {url, title} = feed;
         let existing = this.feeds.filter(f => !f.isFolder && f.feedURL === url);
         let active = existing.filter(f => !f.hidden);
+        if(Comm.verbose) {
+            console.log('_addFeed search', existing, active);
+        }
         if(existing.length > 0) {
             if(active.length === 0) {
                 console.log("Restoring hidden feed", existing[0]);
@@ -247,7 +257,7 @@ let Database = {
                     parent,
                     rowIndex: 'tail',
                 });
-                return feedID;
+                return existing[0].feedID;
             } else {
                 console.log("Feed already present", active[0]);
                 return;
@@ -343,6 +353,9 @@ let Database = {
             // This could cause data loss while the user has enabled expiration
             // but not yet configured the limits (remember that options are instant-apply)
             console.log('Not expiring old entries while options / feed properties are open');
+            return;
+        } else {
+            console.log('Expiring entries');
         }
         if(!feeds) {
             feeds = this.feeds;
@@ -350,6 +363,7 @@ let Database = {
         feeds = asArray(feeds);
 
         // Count limits are global only
+        //FIXME: can't use markDeleted directly as _update does not support offset/limit
         if (Prefs.get('database.limitStoredEntries')) {
             for (let feed of feeds) {
                 let query = new Query({
@@ -359,7 +373,8 @@ let Database = {
                     sortOrder: 'date',
                     offset: Prefs.get('database.maxStoredEntries'),
                 });
-                await query.markDeleted('trashed');
+                let ids = await query.getIds();
+                await this.query(ids).markDeleted('trashed');
             }
         }
 
@@ -895,6 +910,10 @@ Query.prototype = {
         }
         let filters = this._filters();
         let {indexName, filterFunction, ranges} = this._searchEngine(filters);
+        if(filters.sort.offset || filters.sort.limit) {
+            // FIXME: offset/limit
+            throw "_update does not support offset/limit!";
+        }
         let offset = filters.sort.offset || 0;
         let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
 
@@ -910,6 +929,11 @@ Query.prototype = {
         let entries = [];
 
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
+        if(cursors.length === 0) {
+            then && then();
+            await Database._transactionPromise(tx);
+            return;
+        }
         cursors.forEach(c => {
             c.onsuccess = ({target}) => {
                 let cursor = target.result;
