@@ -550,7 +550,7 @@ let Database = {
                 return;
             }
             if(next.updated === undefined && revision.updated) {
-                console.log('missing timestamps in a feed?', next);
+                console.warn('missing timestamps in a feed?', next);
             }
             revision.updated = next.updated;
             if(markUnread && prev.read) {

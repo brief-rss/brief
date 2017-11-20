@@ -21,7 +21,9 @@ let OPML = {
             .map(c => this.importNode(c))
             .filter(c => c !== undefined);
 
-        console.log(results);
+        if(Comm.verbose) {
+            console.log(results);
+        }
         Database.addFeeds(results);
     },
 

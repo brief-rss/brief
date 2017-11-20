@@ -258,7 +258,6 @@ var Commands = {
     displayShortcuts: async function cmd_displayShortcuts() {
         let windows = await browser.windows.getAll({windowTypes: ['popup']});
         // Compat: fixed in Firefox 58
-        console.log(windows);
         windows = windows.filter(w => w.type === 'popup' && w.title.includes("Brief"));
         if(windows.length > 0) {
             browser.windows.update(windows[0].id, {focused: true});

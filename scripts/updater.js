@@ -166,7 +166,6 @@ let FeedUpdater = {
         let parsedFeed = await FeedFetcher.fetchFeed(feed);
         if(parsedFeed) {
             let pushResults = await Database.pushUpdatedFeed({feed, parsedFeed});
-            console.log(pushResults);
             let {newEntries} = pushResults;
             if(newEntries.length > 0) {
                 let entryCount = this.updatedFeeds.get(feedID);
@@ -334,7 +333,9 @@ let FeedFetcher = {
             if(nsPrefix === 'IGNORE:') {
                 continue;
             } else if(nsPrefix && nsPrefix[0] === '[') {
-                console.log('unknown namespace', nsPrefix, child);
+                if(Comm.verbose) {
+                    console.log('unknown namespace', nsPrefix, child);
+                }
                 continue;
             }
             let nodeKey = nsPrefix + child.localName;
@@ -369,7 +370,7 @@ let FeedFetcher = {
                         props[name] = value;
                     }
                 } else {
-                    console.log('missing handler', type);
+                    console.error('missing handler', type);
                 }
             }
         }

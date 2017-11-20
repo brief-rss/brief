@@ -185,7 +185,6 @@ TreeView.prototype = {
             if(target.localName === 'tree-folder-header') {
                 target = target.parentNode;
             }
-            console.log('drag started');
             dataTransfer.setData('application/x-moz-node', target);
             let items = [target, ...target.querySelectorAll('[data-id]')];
             dataTransfer.setData('application/x-tree-item-list',
