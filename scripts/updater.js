@@ -132,14 +132,16 @@ let FeedUpdater = {
             }
             this.underway.push(feedID);
 
-            /*spawn*/ this.update(feedID).then(() => {
-                this.underway = this.underway.filter(f => f !== feedID);
-                this.completed.push(feedID);
-                this._broadcastStatus();
-                if(this.queue.length === 0 && this.underway.length === 0) {
-                    this._finish();
-                }
-            });
+            /*spawn*/ this.update(feedID)
+                .catch(err => console.error('Brief: fetch error', err))
+                .then(() => {
+                    this.underway = this.underway.filter(f => f !== feedID);
+                    this.completed.push(feedID);
+                    this._broadcastStatus();
+                    if(this.queue.length === 0 && this.underway.length === 0) {
+                        this._finish();
+                    }
+                });
 
             if(this.queue.length === 0) {
                 return;
