@@ -7,7 +7,8 @@ tree-box {
 }
 
 tree-item,
-tree-folder-header {
+tree-folder-header,
+tree-folder-footer {
     flex-shrink: 0;
     display: flex;
 }
@@ -85,7 +86,8 @@ tree-folder:not(.selected) > tree-folder-header:hover {
 }
 
 tree-item:-moz-drag-over,
-tree-folder-header:-moz-drag-over {
+tree-folder-header:-moz-drag-over,
+tree-folder-footer:-moz-drag-over {
     background-color: #e5e5e5 !important;
     border-top-color: #000000 !important;
 }
@@ -145,6 +147,10 @@ tree-folder:last-child {
 tree-folder-header {
     padding: 2px 1px 2px 5px !important;
     border: 1px solid transparent !important; /* Placeholder for selection border */
+}
+
+tree-folder-footer {
+    border: 1px solid transparent !important;
 }
 
 tree-folder-header > .toggle-collapsed {

@@ -551,21 +551,44 @@ let FeedList = {
         if(itemIds.includes(targetId)) {
             return; //TODO: block while dragging?
         }
-        let parent = Database.getFeed(targetId).parent;
-        let feedIds = [...Database.feeds].map(f => f.feedID).filter(id => !itemIds.includes(id));
-        let targetIndex = feedIds.indexOf(targetId);
-        if(relation === 'after') {
-            targetIndex += 1;
-        } else if(relation === 'into') {
-            targetIndex = [...Database.feeds]
-                .map(f => [f.parent, f.feedID])
-                .map(ids => ids.includes(targetId))
-                .lastIndexOf(true) + 1;
-            parent = targetId;
+        let others = [...Database.feeds].filter(feed => !itemIds.includes(feed.feedID));
+        let otherIds = others.map(f => f.feedID);
+
+        let parent;
+        let position;
+        switch(relation) { // FIXME test - still wrong
+            case 'before':
+                parent = Database.getFeed(targetId).parent;
+                position = otherIds.indexOf(targetId);
+                break;
+            case 'after':
+                parent = Database.getFeed(targetId).parent;
+                position = otherIds.indexOf(targetId) + 1;
+                break;
+            case 'into':
+                parent = targetId || String(Prefs.get('homeFolder'));
+                if(!targetId) {
+                    // Insertion into root folder
+                    position = others.length;
+                } else {
+                    let ancestor = parent;
+                    let parentIndex = otherIds.indexOf(parent);
+                    // Walk up the tree
+                    position = -1;
+                    while(position === -1) {
+                        ancestor = Database.getFeed(ancestor).parent;
+                        position = others.map(f => f.parent).indexOf(ancestor, parentIndex + 1);
+                        if(ancestor === String(Prefs.get('homeFolder')) && position === -1) {
+                            // Insertion into end
+                            position = others.length;
+                        }
+                    }
+                }
+                break;
         }
-        feedIds.splice(targetIndex, 0, ...itemIds);
+        otherIds.splice(position, 0, ...itemIds);
         let changes = [{feedID: itemIds[0], parent}];
-        for(let [index, feedID] of feedIds.entries()) {
+        for(let [index, feedID] of otherIds.entries()) {
             changes.push({feedID, rowIndex: index + 1});
         }
         Database.modifyFeed(changes);
