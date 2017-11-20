@@ -3,6 +3,7 @@ import {Prefs} from "/modules/prefs.js";
 import {FeedUpdater} from "/modules/updater.js";
 import * as RequestMonitor from "/modules/request-monitor.js";
 import {Comm, debounced} from "/modules/utils.js";
+import {Ticker} from "/modules/ticker.js";
 
 
 const Brief = {
@@ -220,6 +221,7 @@ const Brief = {
     },
 
     _updateUI: async function() {
+        Ticker.renderExternal();
 
         let enabled = Prefs.get('showUnreadCounter');
         browser.contextMenus.update('brief-button-show-unread', {checked: enabled});
