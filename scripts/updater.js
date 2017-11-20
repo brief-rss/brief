@@ -502,7 +502,7 @@ let FeedFetcher = {
         },
 
         date(node) {
-            let text = node.textContent;
+            let text = node.textContent.trim();
             // Support for Z timezone marker for UTC (mb 682781)
             let date = new Date(text.replace(/z$/i, "-00:00"));
             if (!isNaN(date)) {
