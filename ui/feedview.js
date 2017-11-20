@@ -961,7 +961,7 @@ function EntryView(aFeedView, aEntryData) {
         this._getElement('feed-icon').src = favicon;
 
         wait().then(() => {
-            this._getElement('content').innerHTML = this.revision.content;
+            this._getElement('content').innerHTML = this.revision.content || "";
 
             if (this.feedView.query.searchString)
                 this._highlightSearchTerms(this._getElement('headline-title'));
