@@ -1042,6 +1042,7 @@ Query.prototype = {
                     ok = ok && v.includes(entry[k]);
                 }
             }
+            return ok;
         };
 
         let filterFunction = entry => {
