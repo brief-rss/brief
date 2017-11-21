@@ -511,7 +511,7 @@ let FeedFetcher = {
             if (!isNaN(date)) {
                 return date.toUTCString();
             }
-            console.warn('failed to parse date', text)
+            console.warn('failed to parse date', text);
             return null;
         },
 
