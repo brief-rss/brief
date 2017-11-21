@@ -523,11 +523,12 @@ let FeedFetcher = {
             let rel = node.getAttribute('rel') || 'alternate';
             let known = ['alternate', 'http://www.iana.org/assignments/relation/alternate'];
             if(known.includes(rel)) {
+                let text = node.getAttribute('href');
                 let link;
                 try {
-                    link = new URL(node.getAttribute('href'));
+                    link = new URL(text, node.baseURI);
                 } catch(e) {
-                    console.warn('failed to parse URL', text)
+                    console.warn('failed to parse URL', text, 'with base', node.baseURI);
                 }
                 return link;
             }
