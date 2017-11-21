@@ -1065,7 +1065,9 @@ Query.prototype = {
             {min: filters.sort.start, max: filters.sort.end});
 
         if(filters.entry.tags === undefined &&
-            filters.fullTextSearch === undefined) {
+            filters.fullTextSearch === undefined &&
+            filters.entry.id === undefined &&
+            filters.entry.entryURL === undefined) {
             filterFunction = undefined;
         }
 
