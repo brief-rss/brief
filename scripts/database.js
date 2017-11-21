@@ -939,10 +939,12 @@ Query.prototype = {
                 let cursor = target.result;
                 if(cursor) {
                     let value = cursor.value;
-                    action(value, {tx});
-                    feeds.add(value.feedID);
-                    entries.push(value);
-                    cursor.update(value);
+                    if(filterFunction === undefined || filterFunction(value)) {
+                        action(value, {tx});
+                        feeds.add(value.feedID);
+                        entries.push(value);
+                        cursor.update(value);
+                    }
                     cursor.continue();
                 } else {
                     if(target.then) {
