@@ -1094,7 +1094,7 @@ Query.prototype = {
         }
 
         // Search by [entryURL] for starring
-        if(filters.entry.entryURL && !filters.feeds) {
+        if(filters.entry.entryURL) {
             indexName = 'entryURL';
             filterFunction = stupidFilter;
             ranges = asArray(filters.entry.entryURL);
