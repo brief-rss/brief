@@ -969,7 +969,7 @@ function EntryView(aFeedView, aEntryData) {
     }
     else {
         let contentElement = this._getElement('content');
-        contentElement.innerHTML = this.revision.content;
+        contentElement.innerHTML = this.revision.content || "";
         contentElement.setAttribute('dir', this.textDirection);
 
         if (this.feedView.query.searchString) {
