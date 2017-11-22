@@ -239,15 +239,15 @@ let FaviconFetcher = {
         if(Comm.verbose) {
             console.log("Brief: fetching favicon for", feed);
         }
-        let favicon = await this._fetchFavicon(feed);
-        if(!favicon) {
-            favicon = 'no-favicon';
-        }
-        await Database.modifyFeed({
+        let updatedFeed = {
             feedID: feed.feedID,
-            lastFaviconRefresh: Date.now(),
-            favicon
-        });
+            lastFaviconRefresh: Date.now()
+        };
+        let favicon = await this._fetchFavicon(feed);
+        if(favicon) {
+            updatedFeed.favicon = favicon;
+        }
+        await Database.modifyFeed(updatedFeed);
     },
     async _fetchFavicon(feed) {
         if (!feed.websiteURL) {
