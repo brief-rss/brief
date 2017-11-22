@@ -87,6 +87,10 @@ async function init() {
     window.addEventListener('beforeunload',
                             () => Database.expireEntries(),
                             {once: true, passive: true});
+
+    // Workaround for mozilla bug 1408446
+    let {id, height} = await browser.windows.getCurrent();
+    await browser.windows.update(id, {height: height + 1});
 }
 
 function updateScale() {
