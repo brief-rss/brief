@@ -1013,7 +1013,11 @@ Query.prototype = {
         if(this.sortOrder !== undefined && this.sortOrder !== 'date') {
             throw `Invalid sort order: ${this.sortOrder}`
         }
+        if((this.startDate || this.endDate) && this.sortOrder !== 'date') {
+            console.error('cannot filter on date when not sorting on date');
+        }
         filters.sort = {
+            field: this.sortOrder,
             direction: this.sortDirection,
             limit: this.limit,
             offset: this.offset,

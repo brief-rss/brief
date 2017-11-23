@@ -309,6 +309,7 @@ let ViewList = {
                 };
             case 'today-folder':
                 return {
+                    sortOrder: 'date',
                     startDate: new Date().setHours(0, 0, 0, 0),
                     includeFeedsExcludedFromGlobalViews: false,
                     deleted: false
