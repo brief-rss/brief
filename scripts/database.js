@@ -73,6 +73,7 @@ let Database = {
                 });
             });
             //TODO: onChanged
+            //FIXME: removed one of multiple not working
         }
     },
 
@@ -1010,14 +1011,20 @@ Query.prototype = {
         filters.fullTextSearch = this.searchString;
 
         // Sorting and limiting...
-        if(this.sortOrder !== undefined && this.sortOrder !== 'date') {
-            throw `Invalid sort order: ${this.sortOrder}`
+        let sortOrder = this.sortOrder;
+        if(sortOrder !== undefined && sortOrder !== 'date') {
+            throw `Invalid sort order: ${sortOrder}`
         }
-        if((this.startDate || this.endDate) && this.sortOrder !== 'date') {
-            console.error('cannot filter on date when not sorting on date');
+        if((this.startDate || this.endDate) && sortOrder !== 'date') {
+            if(sortOrder === undefined) {
+                sortOrder = 'date';
+            } else {
+                console.trace();
+                throw 'cannot filter on date when not sorting on date';
+            }
         }
         filters.sort = {
-            field: this.sortOrder,
+            field: sortOrder,
             direction: this.sortDirection,
             limit: this.limit,
             offset: this.offset,
@@ -1028,90 +1035,136 @@ Query.prototype = {
         return filters;
     },
 
+    // Brief-specific heuristics
+    _guessIndexToUse({filters}) {
+        // TODO: anything better than these heuristics?
+        if(filters.entry.id !== undefined) {
+            return 'id'; // Will be decoded to "no index, use primary key"
+        }
+
+        // Search by [feedID, entryURL] during insertion
+        if(filters.entry.entryURL && filters.feeds && filters.feeds.length === 1) {
+            return ['feedID', 'entryURL'];
+        }
+
+        // Search by [feedID, providedID] during insertion
+        if(filters.entry.providedID && filters.feeds && filters.feeds.length === 1) {
+            return ['feedID', 'providedID'];
+        }
+
+        // Search by [entryURL] for starring
+        if(filters.entry.entryURL) {
+            return 'entryURL';
+        }
+        return ['deleted', 'starred', 'read', 'feedID', 'date']; // Hardcoded default
+    },
+
+    // Brief-specific data
+    _possibleValues(field) {
+        switch(field) {
+            case 'deleted': return [0, 'trashed', 'deleted'];
+            case 'starred': return [0, 1];
+            case 'read': return [0, 1];
+            default: return;
+        }
+    },
+
+    _directFilter({template, indexedFields}) {
+        let reference = {};
+        let callback = undefined;
+
+        let primitiveFilter = entry => {
+            for(let [k, v] of Object.entries(reference)) {
+                if(!v.includes(entry[k])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        for(let [k, v] of Object.entries(template)) {
+            if(v === undefined) { // Not a real filter criterion
+                continue;
+            }
+            if(indexedFields.includes(k)) { // Ensured automatically by the bounds
+                continue;
+            }
+            // Ok, we'll need to actually filter on it
+            callback = primitiveFilter;
+            if(Array.isArray(v)) {
+                reference[k] = v;
+            } else {
+                reference[k] = [v];
+            }
+        }
+        return callback;
+    },
+
     _searchEngine(filters) {
-        // And now
-        let indexName = 'deleted_starred_read_feedID_date'; // TODO: hardcoded
+        let indexPath = this._guessIndexToUse({filters});
+        let unwrap;
+        if(Array.isArray(indexPath)) {
+            unwrap = false;
+        } else {
+            indexPath = [indexPath];
+            unwrap = true;
+        }
+
         let direction = "prev";
         if(filters.sort.direction === 'asc') {
             direction = "next";
         }
 
-        let stupidFilter = entry => {
-            let ok = true;
-            for(let [k, v] of Object.entries(filters.entry)) {
-                if(v === undefined) {
-                    continue;
-                }
-                if(!Array.isArray(v)) {
-                    ok = ok && entry[k] === v;
-                } else {
-                    ok = ok && v.includes(entry[k]);
-                }
-            }
-            return ok;
-        };
-
-        let filterFunction = entry => {
-            return (true
-                && (filters.entry.tags === undefined || filters.entry.tags.some(tag => entry.tags.includes(tag)))
-                && (filters.fullTextSearch === undefined || this._ftsMatches(entry, filters.fullTextSearch))
-            );
-        };
-
-        let prefixes = [[]];
-        // Extract the common prefixes
-        prefixes = this._expandPrefixes(prefixes, filters.entry.deleted, [0, 'trashed', 'deleted']);
-        prefixes = this._expandPrefixes(prefixes, filters.entry.starred, [0, 1]);
-        prefixes = this._expandPrefixes(prefixes, filters.entry.read, [0, 1]);
-        prefixes = this._expandPrefixes(prefixes, filters.feeds); // Always present
-
-        let ranges = this._prefixesToRanges(prefixes,
-            {min: filters.sort.start, max: filters.sort.end});
-
-        if(filters.entry.tags === undefined &&
-            filters.fullTextSearch === undefined &&
-            filters.entry.id === undefined &&
-            filters.entry.entryURL === undefined) {
-            filterFunction = undefined;
-        }
-
-        if(filters.entry.id !== undefined) {
+        let indexName = indexPath.join('_');
+        if(indexName === 'id') {
             indexName = null;
-            filterFunction = stupidFilter;
-            ranges = asArray(filters.entry.id);
         }
 
-        // Search by [feedID, entryURL] during insertion
-        if(filters.entry.entryURL && filters.feeds && filters.feeds.length === 1) {
-            indexName = 'feedID_entryURL';
-            filterFunction = stupidFilter;
-            ranges = [[]];
-            ranges = this._expandPrefixes(ranges, filters.feeds);
-            ranges = this._expandPrefixes(ranges, filters.entry.entryURL);
+        // What fields off the index we can use at all?
+        let optionSets = indexPath.map(name => ({name, values: filters.entry[name]}));
+        while(optionSets.length && optionSets[optionSets.length - 1].values === undefined) {
+            let set = optionSets[optionSets.length - 1];
+            if(set.name === filters.sort.field) {
+                set.range = [filters.sort.start, filters.sort.end];
+                break;
+            }
+            optionSets.pop();
+        }
+        let valueSets = optionSets.map(({name, values}) => {
+            return (values !== undefined) ? values : this._possibleValues(name);
+        });
+
+        // Build the ranges for cursors
+        let indexedFields = [];
+        let prefixes = [[]];
+        let rangeOptions = {unwrap, min: undefined, max: undefined};
+        for(let {name, range, values} of optionSets) {
+            indexedFields.push(name);
+            if(range) {
+                rangeOptions.min = range[0];
+                rangeOptions.max = range[1];
+                break;
+            } else {
+                prefixes = this._expandPrefixes(prefixes, values, this._possibleValues(name));
+            }
+        }
+        let ranges = this._prefixesToRanges(prefixes, rangeOptions);
+
+        if(filters.sort.field && !indexedFields.includes(filters.sort.field)) {
+            throw "The sort field MUST be index-based!";
         }
 
-        // Search by [feedID, providedID] during insertion
-        if(filters.entry.providedID && filters.feeds && filters.feeds.length === 1) {
-            indexName = 'feedID_providedID';
-            filterFunction = stupidFilter;
-            ranges = [[]];
-            ranges = this._expandPrefixes(ranges, filters.feeds);
-            ranges = this._expandPrefixes(ranges, filters.entry.providedID);
-        }
-
-        // Search by [entryURL] for starring
-        if(filters.entry.entryURL) {
-            indexName = 'entryURL';
-            filterFunction = stupidFilter;
-            ranges = asArray(filters.entry.entryURL);
-        }
-
+        // Filter on everything an index cannot get
+        let filterFunction = this._directFilter({template: filters.entry, indexedFields});
         return {indexName, filterFunction, ranges, direction};
     },
 
     _expandPrefixes(prefixes, requirement, possibleValues) {
         if(requirement === undefined) {
             requirement = possibleValues;
+        }
+        if(requirement === undefined) {
+            throw "cannot expand prefixes without requirement and possibleValues"
         }
         if(requirement === false) {
             requirement = 0;
@@ -1130,8 +1183,15 @@ Query.prototype = {
         return newPrefixes;
     },
 
-    _prefixesToRanges(prefixes, {min, max}) {
+    _prefixesToRanges(prefixes, {unwrap, min, max}) {
         return prefixes.map(prefix => {
+            if(unwrap) {
+                if(prefix.length) {
+                    return prefix[0];
+                } else {
+                    return IDBKeyRange.bound(min, max);
+                }
+            }
             let lower = prefix;
             if(min !== undefined) {
                 lower = Array.concat(prefix, [min])
@@ -1141,6 +1201,9 @@ Query.prototype = {
                 bound = max;
             }
             let upper = Array.concat(prefix, [bound]);
+            if(lower.length === 0) {
+                lower = Number('-Infinity');
+            }
             return IDBKeyRange.bound(lower, upper);
         });
     },
