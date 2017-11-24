@@ -565,6 +565,8 @@ let Database = {
             tx.objectStore('entries').put(prev); // Sorry, _update's default save is before
             tx.objectStore('revisions').put(revision);
         }
+        // May be missing due to a Brief<2.5.3:2.5 issue
+        prev.providedID = prev.providedID || next.providedID;
     },
 
     _feedToEntries({feed, parsedFeed}) {
