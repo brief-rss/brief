@@ -448,15 +448,12 @@ let Database = {
                 console.error(feed, entry);
                 throw "pushFeedEntries cannot be used for multiple feeds at a time";
             }
-            //TODO: this is weird, but I'll keep the old way for now
             if(providedID) {
                 entriesById.set(providedID, entry);
-            } else {
-                entriesByUrl.set(entryURL, entry);
             }
+            entriesByUrl.set(entryURL, entry);
         }
         let queryId = {feeds: feedID, providedID: Array.from(entriesById.keys())};
-        let queryUrl = {feeds: feedID, entryURL: Array.from(entriesByUrl.keys())};
         let allEntries = [];
         let newEntries = []; // For update notification
         // Chain, scan 1: every entry with IDs provided
@@ -468,10 +465,12 @@ let Database = {
                     return;
                 }
                 entriesById.delete(entry.providedID);
+                entriesByUrl.delete(entry.entryURL);
                 this._updateEntry(entry, update, {tx, markUnread});
                 allEntries.push(entry);
             },
             then: ({tx}) => {
+                let queryUrl = {feeds: feedID, entryURL: Array.from(entriesByUrl.keys())};
                 // Chain, scan 2: URL-only entries
                 this.query(queryUrl)._update({
                     tx,
@@ -479,19 +478,21 @@ let Database = {
                     stores: ['entries', 'revisions'],
                     action: (entry, {tx}) => {
                         let update = entriesByUrl.get(entry.entryURL);
-                        entriesByUrl.delete(entry.entryURL);
-                        if(update === undefined) {
+                        if(!update) {
                             return;
                         }
+                        if(update.providedID && entry.providedID) {
+                            console.assert(update.providedID !== entry.providedID,
+                                           'should match dy ID');
+                            return;
+                        }
+                        entriesByUrl.delete(entry.entryURL);
                         this._updateEntry(entry, update, {tx, markUnread});
                         allEntries.push(entry);
                     },
                     then: ({tx}) => {
                         // Chain, part 3: completely new entries
-                        let remainingEntries = Array.concat(
-                            Array.from(entriesById.values()),
-                            Array.from(entriesByUrl.values()),
-                        );
+                        let remainingEntries = Array.from(entriesByUrl.values());
                         for(let entry of remainingEntries) {
                             this._addEntry(entry, {tx, entries: newEntries});
                         }
