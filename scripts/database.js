@@ -699,6 +699,9 @@ Query.prototype = {
      */
     deleted: undefined,
 
+    // For insertion search
+    providedID: undefined,
+
     /**
      * Entry URL for bookmark comparison purposes
      */
@@ -931,7 +934,7 @@ Query.prototype = {
 
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         if(cursors.length === 0) {
-            then && then();
+            then && then({tx, feeds, entries});
             await Database._transactionPromise(tx);
             return;
         }
@@ -1001,6 +1004,7 @@ Query.prototype = {
         // Entry-based filters
         filters.entry = {
             id: this.entries,
+            providedID: this.providedID,
             read: this.read !== undefined ? +this.read : undefined,
             starred: this.starred,
             deleted: this.deleted === false ? 0 : this.deleted,
