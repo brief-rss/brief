@@ -588,6 +588,15 @@ let Database = {
 
             entries.push(entry);
         }
+        let ids = entries.map(e => e.providedID).filter(i => i);
+        if(ids.length !== (new Set(ids)).size) {
+            console.error('feed has duplicate item IDs', feed, parsedFeed);
+        }
+        let urls = entries.map(e => e.entryURL).filter(u => u);
+        if(urls.length !== (new Set(urls)).size) {
+            // Note: this seems to be legal in RSS, but Brief does not support it yet
+            console.error('feed has duplicate item URLs', feed, parsedFeed);
+        }
         return entries;
     },
 
