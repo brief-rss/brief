@@ -573,6 +573,7 @@ let Database = {
             let authors = (src.authors || []).map(a => a.name).filter(n => n).join(', ');
             let entry = {
                 feedID: feed.feedID,
+                providedID: src.id,
                 title: (src.title || '').replace(/<[^>]+>/g, ''), // Strip tags
                 entryURL: src.link.href,
                 summary: src.summary,
