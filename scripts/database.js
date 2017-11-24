@@ -760,6 +760,7 @@ Query.prototype = {
         let tx = Database.db().transaction(['entries'], 'readonly');
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
+        Comm.verbose && console.log('DB count - filter presense', filterFunction !== undefined);
         if(filterFunction) {
             let cursors = ranges.map(r => index.openCursor(r));
             cursors.forEach(c => {
@@ -825,6 +826,7 @@ Query.prototype = {
         let index = indexName ? store.index(indexName) : store;
 
         let cursors = ranges.map(r => index.openCursor(r, direction));
+        Comm.verbose && console.log('DB _getMap');
         let result = this._mergeAndCollect(
             {cursors, filterFunction, sortKey, offset, limit, extractor, tx});
 
@@ -868,6 +870,9 @@ Query.prototype = {
                         }
                         pending += 1;
                         cursors[next].continue();
+                    } else {
+                        Comm.verbose && console.log(
+                            '_mergeAndCollect total callbacks:', totalCallbacks);
                     }
                 }
             };
@@ -932,6 +937,7 @@ Query.prototype = {
         let feeds = new Set();
         let entries = [];
 
+        Comm.verbose && console.log('DB _update');
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         if(cursors.length === 0) {
             then && then({tx, feeds, entries});
