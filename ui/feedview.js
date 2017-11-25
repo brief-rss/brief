@@ -512,8 +512,6 @@ FeedView.prototype = {
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
                 let query = {
-                    sortOrder: this.query.sortOrder,
-                    sortDirection: this.query.sortDirection,
                     entries: newEntries
                 };
 
