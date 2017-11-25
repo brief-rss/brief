@@ -648,8 +648,10 @@ let Database = {
                 feed.rowIndex = idx + 1;
             }
         }
+        // Initial sort is needed as the IndexedDB order is by feedID, not rowIndex
         feeds.sort((a, b) => a.rowIndex - b.rowIndex);
 
+        // Build all the children lists keeping relative order
         let parents = new Map();
         let fullFeeds = new Map();
         for(let feed of feeds) {
@@ -659,6 +661,7 @@ let Database = {
             parents.set(parent, children);
             fullFeeds.set(feed.feedID, feed);
         }
+        // Now flatten the main tree starting from the root
         let homeId = String(Prefs.get('homeFolder'));
         function flattenChildren(parents, id) {
             let list = []
