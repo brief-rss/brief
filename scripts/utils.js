@@ -95,11 +95,6 @@ RelativeDate.prototype = {
 
 
 function getPluralForm(number, forms) {
-    /*
-    let pluralRule = Services.strings.createBundle('chrome://brief/locale/brief.properties')
-                                 .GetStringFromName('pluralRule');
-    let getPluralForm = PluralForm.makeGetter(pluralRule)[0];
-    */
     let knownForms = browser.i18n.getMessage('pluralRule').split(';');
     let form;
     if(Intl.PluralRules !== undefined) {
