@@ -309,6 +309,7 @@ let Database = {
         if(!Comm.master) {
             return Comm.callMaster('feedlist-modify', {updates: props});
         }
+        Comm.verbose && console.log('modifyFeed', props);
         props = Array.isArray(props) ? props : [props];
         let sort = false;
         for(let bag of props) {
