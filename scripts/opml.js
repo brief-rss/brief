@@ -100,6 +100,7 @@ let OPML = {
         let characters = [
             {find : '&', replace : '&amp;'},
             {find : '"', replace : '&quot;'},
+            {find : "'", replace : '&apos;'},
             {find : '<', replace : '&lt;'},
             {find : '>', replace : '&gt;'}
         ]
