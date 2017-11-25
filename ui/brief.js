@@ -7,7 +7,9 @@ var init = async function init() {
     apply_i18n(document);
 
     let feedview_doc = await fetch('feedview.html');
-    getElement('feed-view').setAttribute('srcdoc', await feedview_doc.text());
+    let contentIframe = getElement('feed-view');
+    contentIframe.setAttribute('srcdoc', await feedview_doc.text());
+    let contentLoaded = expectedEvent(contentIframe, 'load');
 
     await Prefs.init();
     PrefObserver.init();
@@ -40,10 +42,12 @@ var init = async function init() {
     });
     // TODO: should update FeedView and feed view title too(?) on title change
     // TODO: loading/error indicators
+
+    await contentLoaded;
+
     Commands.applyStyle();
 
-
-    let doc = getElement('feed-view').contentDocument;
+    let doc = contentIframe.contentDocument;
     doc.documentElement.setAttribute('lang', navigator.language);
 
     ViewList.init();
