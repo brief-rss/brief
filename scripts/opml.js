@@ -28,7 +28,8 @@ let OPML = {
     },
 
     importNode: function(node) {
-        let title = node.getAttribute('text');
+        // The standard requires 'text' to be always present, but sometimes that's not the case
+        let title = node.getAttribute('text') || node.getAttribute('title');
 
         if(node.hasAttribute('xmlUrl') && node.getAttribute('type') !== 'link') {
             return {
