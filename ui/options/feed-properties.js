@@ -37,6 +37,7 @@ async function init() {
                     } else {
                         value = 0;
                     }
+                    break;
                 case 'expire-enabled':
                     name = 'entryAgeLimit';
                     if(value) {
@@ -44,6 +45,7 @@ async function init() {
                     } else {
                         value = 0;
                     }
+                    break;
                 // 'updateInterval' and 'entryAgeLimit' can't be modified while not active
             }
             feed[name] = value;
