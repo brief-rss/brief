@@ -3,8 +3,6 @@
 async function init() {
     apply_i18n(document);
 
-    Enabler.init();
-
     let feedID = (new URLSearchParams(document.location.search)).get('feedID');
     await Prefs.init();
     await Database.init();
@@ -89,6 +87,8 @@ async function init() {
     window.addEventListener('beforeunload',
                             () => Database.expireEntries(),
                             {once: true, passive: true});
+
+    Enabler.init();
 
     // Workaround for mozilla bug 1408446
     let {id, height} = await browser.windows.getCurrent();
