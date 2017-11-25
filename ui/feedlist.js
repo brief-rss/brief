@@ -556,7 +556,7 @@ let FeedList = {
 
         let parent;
         let position;
-        switch(relation) { // FIXME test - still wrong
+        switch(relation) {
             case 'before':
                 parent = Database.getFeed(targetId).parent;
                 position = otherIds.indexOf(targetId);
