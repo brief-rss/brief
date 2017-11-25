@@ -18,7 +18,7 @@ const HEADLINES_LOAD_STEP_SIZE = 25;
 // Magic exception for aborting callbacks on refresh
 const REFRESH_ABORT = 'brief:refresh-abort-callbacks';
 
-const TUTORIAL_URL = "chrome://brief/content/firstrun.xhtml?tutorial";
+const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
 
 /**
  * Manages the display of feed content.

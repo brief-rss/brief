@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html SYSTEM "chrome://brief/locale/firstrun.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>&pageTitle;</title>
+    <title data-i18n="pageTitle"/>
     <link rel="stylesheet" href="/skin/firstrun.css"/>
     <link rel="icon" href="/skin/feed-icon-16x16.png" type="image/png"/>
-    <script type="text/javascript">
-        window.addEventListener('DOMContentLoaded', event => {
-            if (document.documentURI.match('tutorial')) {
-                document.getElementById('header').style.display = 'none';
-                document.getElementById('open-brief').style.display = 'none';
-            }
-        }, false);
-    </script>
+
+    <script type="application/x-javascript" src="/scripts/utils.js"/>
+    <script type="application/x-javascript" src="/scripts/i18n.js"/>
+    <script type="application/x-javascript" src="firstrun.js"/>
 </head>
 
 <body>
@@ -24,8 +20,8 @@
              src="/skin/brief-icon-64x64.png"
              alt="Brief logo"/>
         <div id="intro">
-            <h1 id="thank-you">&thankYou.header;</h1>
-            <h2 id="subheader">&howToSubscribe.header;</h2>
+            <h1 id="thank-you" data-i18n="thankYou_header"/>
+            <h2 id="subheader" data-i18n="howToSubscribe_header"/>
         </div>
     </div>
 
@@ -35,7 +31,8 @@
             <img class="screenshot"
                  src="/skin/firstrun-step-1.png"
                  alt="Subscribing to feeds - step 1"/>
-            <p class="step-description">&subscribingStep1.description;</p>
+            <p class="step-description"
+               data-i18n="subscribingStep1_description" data-i18n-allow-markup="true"/>
         </div>
 
         <img class="arrow-next" src="/skin/arrow-next.png"/>
@@ -44,7 +41,8 @@
             <img class="screenshot"
                  src="/skin/firstrun-step-2.png"
                  alt="Subscribing to feeds - step 2"/>
-            <p class="step-description">&subscribingStep2.description;</p>
+            <p class="step-description"
+               data-i18n="subscribingStep2_description" data-i18n-allow-markup="true"/>
         </div>
 
         <img class="arrow-next" src="/skin/arrow-next.png"/>
@@ -53,14 +51,13 @@
             <img class="screenshot"
                  src="/skin/firstrun-step-3.png"
                  alt="Subscribing to feeds - step 3"/>
-            <p class="step-description">&subscribingStep3.description;</p>
+            <p class="step-description"
+               data-i18n="subscribingStep3_description" data-i18n-allow-markup="true"/>
         </div>
 
     </div>
 
-    <a id="open-brief" href="chrome://brief/content/brief.xhtml">
-        &getStartedButton.label;
-    </a>
+    <a id="open-brief" href="/ui/brief.xhtml" data-i18n="getStartedButton_label"/>
 
 </div>
 </body>
