@@ -915,10 +915,15 @@ Query.prototype = {
                 if(state && bookmarks.length == 0) {
                     let revision = entry.revisions[entry.revisions.length - 1];
                     return browser.bookmarks.create({url: entry.entryURL, title: revision.title});
-                }
-                if(!state && bookmarks.length > 0) {
+                } else if(!state && bookmarks.length > 0) {
                     return Promise.all(bookmarks.map(b =>
                         browser.bookmarks.remove(b.id)));
+                } else {
+                    // Database does not match bookmarks - correct database directly
+                    this._update({
+                        action: e => { e.starred = state ? 1 : 0; },
+                        changes: { starred: state ? 1 : 0 },
+                    });
                 }
             });
             actions.push(promise);
