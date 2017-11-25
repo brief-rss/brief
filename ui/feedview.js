@@ -127,7 +127,7 @@ FeedView.prototype = {
 
     getEntryIndex: function(aEntry) { return this._loadedEntries.indexOf(aEntry) },
 
-    getEntryView:  function(aEntry) { return this._entryViews[this.getEntryIndex(aEntry)] },
+    getEntryView:  function(aEntry) { return this._entryViews.get(aEntry) },
 
     isEntryLoaded: function(aEntry) { return this.getEntryIndex(aEntry) !== -1 },
 
@@ -295,7 +295,7 @@ FeedView.prototype = {
 
         // Iterate starting from the last entry, because the scroll position is
         // likely to be closer to the end than to the beginning of the page.
-        let entries = this._entryViews;
+        let entries = this._loadedEntries.map(id => this.getEntryView(id)).filter(ev => !!ev);
         for (let i = entries.length - 1; i >= 0; i--) {
             if ((entries[i].offsetTop <= middleLine) && (!entries[i + 1] || entries[i + 1].offsetTop > middleLine))
                 return entries[i].id;
@@ -320,7 +320,7 @@ FeedView.prototype = {
     markVisibleEntriesRead: function FeedView_markVisibleEntriesRead() {
         let winTop = this.window.pageYOffset;
         let winBottom = winTop + this.window.innerHeight;
-        let entries = this._entryViews;
+        let entries = this._loadedEntries.map(id => this.getEntryView(id)).filter(ev => !!ev);
 
         let entriesToMark = [];
 
@@ -582,7 +582,7 @@ FeedView.prototype = {
             this._refreshGuard(removed).then(() => {
                 let index = this.getEntryIndex(entry);
                 this._loadedEntries.splice(index, 1);
-                this._entryViews.splice(index, 1);
+                this._entryViews.delete(entry);
 
                 // The item may have been selected since animation started
                 if (this.selectedEntry == entry) {
@@ -626,7 +626,7 @@ FeedView.prototype = {
         this._loading = false;
         this._allEntriesLoaded = false;
         this._loadedEntries = [];
-        this._entryViews = [];
+        this._entryViews = new Map();
 
         this.document.body.classList.remove('headlines-view');
         this.document.body.classList.remove('multiple-feeds');
@@ -776,7 +776,11 @@ FeedView.prototype = {
     _insertEntry: function FeedView__insertEntry(aEntryData, aPosition) {
         let entryView = new EntryView(this, aEntryData);
 
-        let nextEntryView = this._entryViews[aPosition];
+        let nextEntryView = (this._loadedEntries
+            .slice(aPosition + 1)
+            .map(e => this.getEntryView(e))
+            .filter(ev => !!ev)[0]
+        ) || null;
         let nextElem = nextEntryView ? nextEntryView.container : null;
 
         if (this.headlinesMode) {
@@ -795,7 +799,7 @@ FeedView.prototype = {
 
         this.feedContent.insertBefore(entryView.container, nextElem);
 
-        this._entryViews.splice(aPosition, 0, entryView);
+        this._entryViews.set(entryView.id, entryView);
     },
 
     _setEmptyViewMessage: function FeedView__setEmptyViewMessage() {
