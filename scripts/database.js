@@ -277,7 +277,7 @@ let Database = {
             feedID,
             feedURL: url,
             title: title || '', // Will be filled in on the next update
-            rowIndex: Math.max(...this.feeds.map(f => f.rowIndex)) + 1,
+            rowIndex: Math.max(0, ...this.feeds.map(f => f.rowIndex)) + 1,
             isFolder: !url,
             parent,
             hidden: 0,
