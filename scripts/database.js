@@ -188,8 +188,7 @@ let Database = {
             this.saveFeeds();
         }
 
-        feeds.sort((a, b) => a.rowIndex - b.rowIndex);
-        this._fixParents(feeds);
+        feeds = this._reindex(feeds);
         this._feeds = feeds;
     },
 
@@ -197,7 +196,8 @@ let Database = {
         if(this._db === null) {
             return;
         }
-        let feeds = this.feeds;
+        let feeds = Array.from(this.feeds);
+        feeds.sort((a, b) => a.rowIndex - b.rowIndex); // Fallback, should be already sorted
         let tx = this._db.transaction(['feeds'], 'readwrite');
         tx.objectStore('feeds').clear();
         for(let feed of feeds) {
@@ -641,15 +641,48 @@ let Database = {
         return Database.feeds.filter(f => nodes.includes(f.feedID));
     },
 
-    _fixParents(feeds) {
-        let homeId = String(Prefs.get('homeFolder'));
-        let feedIds = new Set(feeds.map(f => f.feedID));
-        feedIds.add(homeId);
-        for(let feed of feeds) {
-            if(!feed.hidden && !feedIds.has(feed.parent)) {
-                feed.parent = homeId;
+    _reindex(feeds) {
+        // Fix possible negative rowIndex values after a Brief 2.5 bug
+        for(let [idx, feed] of feeds) {
+            if(!(feed.rowIndex > 0)) {
+                feed.rowIndex = idx + 1;
             }
         }
+        feeds.sort((a, b) => a.rowIndex - b.rowIndex);
+
+        let parents = new Map();
+        let fullFeeds = new Map();
+        for(let feed of feeds) {
+            let parent = feed.parent;
+            let children = parents.get(parent) || [];
+            children.push(feed.feedID);
+            parents.set(parent, children);
+            fullFeeds.set(feed.feedID, feed);
+        }
+        let homeId = String(Prefs.get('homeFolder'));
+        function flattenChildren(parents, id) {
+            let list = []
+            let children = parents.get(id) || [];
+            for(let child of children) {
+                children.push(...flattenChildren(parents, child));
+            }
+            return children;
+        }
+        let tree = flattenChildren(parents, homeId);
+        let treeSet = new Set(tree);
+        tree = tree.map(f => fullFeeds.get(f));
+        // Ok, this is the most weird part: do we have anything not part of the tree (cycles, etc.)?
+        for(let orphan of feeds.filter(f => !treeSet.has(f.feedID))) {
+            orphan.parent = homeId;
+            orphan.hidden = 1;
+            tree.push(orphan);
+        }
+        // Finally reindex all feeds
+        for(let [idx, feed] of tree) {
+            feed.rowIndex = idx + 1;
+        }
+
+        return tree;
     },
 
     // Note: this is resolved after the transaction is finished(!!!) mb1193394
