@@ -4,7 +4,11 @@
 function apply_i18n(doc) {
     for(let node of document.querySelectorAll('[data-i18n]')) {
         let text = browser.i18n.getMessage(node.dataset.i18n) || node.dataset.i18n;
-        node.appendChild(document.createTextNode(replaceEntities(text)));
+        if(node.dataset.i18nAllowMarkup !== undefined) {
+            node.insertAdjacentHTML('beforeend', text);
+        } else {
+            node.insertAdjacentText('beforeend', replaceEntities(text));
+        }
     }
     for(let node of document.querySelectorAll('[data-i18n-attrs]')) {
         for(let substitution of node.dataset.i18nAttrs.split(/\s+/g)) {
