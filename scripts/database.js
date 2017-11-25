@@ -643,7 +643,7 @@ let Database = {
 
     _reindex(feeds) {
         // Fix possible negative rowIndex values after a Brief 2.5 bug
-        for(let [idx, feed] of feeds) {
+        for(let [idx, feed] of feeds.entries()) {
             if(!(feed.rowIndex > 0)) {
                 feed.rowIndex = idx + 1;
             }
@@ -664,12 +664,12 @@ let Database = {
         // Now flatten the main tree starting from the root
         let homeId = String(Prefs.get('homeFolder'));
         function flattenChildren(parents, id) {
-            let list = []
+            let list = [];
             let children = parents.get(id) || [];
             for(let child of children) {
-                children.push(...flattenChildren(parents, child));
+                list.push(child, ...flattenChildren(parents, child));
             }
-            return children;
+            return list;
         }
         let tree = flattenChildren(parents, homeId);
         let treeSet = new Set(tree);
@@ -681,7 +681,7 @@ let Database = {
             tree.push(orphan);
         }
         // Finally reindex all feeds
-        for(let [idx, feed] of tree) {
+        for(let [idx, feed] of tree.entries()) {
             feed.rowIndex = idx + 1;
         }
 
