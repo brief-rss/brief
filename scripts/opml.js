@@ -62,8 +62,8 @@ let OPML = {
         let feeds = Database.feeds.filter(f => !f.hidden);
         // The feeds are already correctly sorted
         let parents = [String(Prefs.get('homeFolder'))]; //It's not in the list
+        let indent = () => '\t'.repeat(parents.length + 1);
         for(let node of feeds) {
-            let indent = () => '\t'.repeat(parents.length + 1);
             while(parents[parents.length - 1] !== node.parent) {
                 parents.pop();
                 data += `${indent()}</outline>\n`;
@@ -82,6 +82,10 @@ let OPML = {
                 data += `${indent()}<outline text="${title}" type="rss" version="RSS"` +
                         ` htmlUrl="${siteURL}" xmlUrl="${feedURL}"/>\n`;
             }
+        }
+        while(parents.length > 1) {
+            parents.pop();
+            data += `${indent()}</outline>\n`;
         }
 
         data += '\t</body>\n';
