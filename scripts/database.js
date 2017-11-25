@@ -299,7 +299,9 @@ let Database = {
         };
         console.log('Creating node', newFeed);
         this._feeds.push(newFeed);
-        /*spawn*/ FaviconFetcher.updateFavicon(newFeed).catch(console.error);
+        if(feed.siteURL) { // Otherwise on first update
+            /*spawn*/ FaviconFetcher.updateFavicon(newFeed).catch(console.error);
+        }
         return feedID;
     },
 

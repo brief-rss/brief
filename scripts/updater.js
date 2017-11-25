@@ -159,11 +159,6 @@ let FeedUpdater = {
         if(feed === undefined) { // Deleted from DB while in queue?
             return;
         }
-        //Do we need to refresh the favicon?
-        let nextFaviconRefresh = feed.lastFaviconRefresh + this.FAVICON_REFRESH_INTERVAL;
-        if(!feed.favicon || Date.now() > nextFaviconRefresh) {
-            /*spawn*/ FaviconFetcher.updateFavicon(feed);
-        }
 
         let parsedFeed = await FeedFetcher.fetchFeed(feed);
         if(parsedFeed) {
@@ -177,6 +172,13 @@ let FeedUpdater = {
                 entryCount += newEntries.length;
                 this.updatedFeeds.set(feedID, entryCount);
             }
+        }
+
+        //Do we need to refresh the favicon?
+        let nextFaviconRefresh = feed.lastFaviconRefresh + this.FAVICON_REFRESH_INTERVAL;
+        feed = Database.getFeed(feedID); // Updated websiteURL
+        if(!feed.favicon || feed.favicon === 'no-favicon' || Date.now() > nextFaviconRefresh) {
+            /*spawn*/ FaviconFetcher.updateFavicon(feed);
         }
     },
 
