@@ -423,6 +423,7 @@ let FeedFetcher = {
     ],
     ENTRY_PROPERTIES: [
         ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
+        ['link', 'permaLink', ["guid", "rss1:guid"]],
         ['link', 'url', ["link", "rss1:link"]],
         ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
         ['id', 'id', ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]],
@@ -452,11 +453,6 @@ let FeedFetcher = {
     handlers: {
         entry(node) {
             let props = this._parseNode(node, this.ENTRY_PROPERTIES);
-            if(props.link === undefined && props.guid !== undefined) {
-                try {
-                    props.link = new URL(props.guid); // Maybe a permalink as a GUID?
-                } catch(e) { /* not the case */ }
-            }
             return props;
         },
 
@@ -533,6 +529,17 @@ let FeedFetcher = {
                     console.warn('failed to parse URL', text, 'with base', node.baseURI);
                 }
                 return link;
+            }
+        },
+
+        permaLink(node) {
+            let isPermaLink = node.getAttribute('isPermaLink');
+            if(!isPermaLink || isPermaLink.toLowerCase() !== 'false') {
+                try {
+                    return new URL(node.textContent);
+                } catch(e) {
+                    console.warn('failed to parse absolute URL from GUID', node.textContent);
+                }
             }
         },
     },
