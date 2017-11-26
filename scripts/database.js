@@ -413,8 +413,9 @@ let Database = {
     },
 
     async pushUpdatedFeed({feed, parsedFeed}) {
-        let entries = this._feedToEntries({feed, parsedFeed});
-        let modified = Date.now(); // fallback
+        let now = Date.now();
+        let entries = this._feedToEntries({feed, parsedFeed, now});
+        let modified = now; // fallback
         if(parsedFeed.updated) {
             modified = parseDateValue(parsedFeed.updated);
         }
@@ -572,7 +573,7 @@ let Database = {
         prev.providedID = prev.providedID || next.providedID;
     },
 
-    _feedToEntries({feed, parsedFeed}) {
+    _feedToEntries({feed, parsedFeed, now}) {
         // Roughly the legacy mapEntryProperties
         let entries = [];
         for(let src of (parsedFeed.items || [])) {
@@ -585,8 +586,8 @@ let Database = {
                 summary: src.summary,
                 content: src.content,
                 authors: authors,
-                date: parseDateValue(src.published) || parseDateValue(src.updated) || Date.now(),
-                updated: parseDateValue(src.updated) || Date.now(),
+                date: parseDateValue(src.published) || parseDateValue(src.updated) || now,
+                updated: parseDateValue(src.updated) || now,
             };
 
             entries.push(entry);
