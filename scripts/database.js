@@ -600,6 +600,9 @@ let Database = {
             // Note: this seems to be legal in RSS, but Brief does not support it yet
             console.error('feed has duplicate item URLs', feed, parsedFeed);
         }
+        // In a feed the entries are traditionally ordered newest to oldest,
+        // but the optimal insertion order is chronological to match IDs growth
+        entries.reverse();
         return entries;
     },
 
