@@ -299,6 +299,7 @@ let Database = {
         };
         console.log('Creating node', newFeed);
         this._feeds.push(newFeed);
+        this._feeds = this._reindex(this._feeds);
         if(feed.siteURL) { // Otherwise on first update
             /*spawn*/ FaviconFetcher.updateFavicon(newFeed).catch(console.error);
         }
@@ -311,13 +312,13 @@ let Database = {
         }
         Comm.verbose && console.log('modifyFeed', props);
         props = Array.isArray(props) ? props : [props];
-        let sort = false;
+        let reindex = false;
         for(let bag of props) {
             if(bag.rowIndex !== undefined && bag.rowIndex === 'tail') {
                 bag.rowIndex = this.feeds[this.feeds.length - 1].rowIndex + 1;
             }
             if(bag.rowIndex) {
-                sort = true;
+                reindex = true;
             }
             let feed = this.feeds.filter(f => f.feedID === bag.feedID)[0];
             for(let [k, v] of Object.entries(bag)) {
@@ -328,8 +329,8 @@ let Database = {
                 //TODO: expire entries
             }
         }
-        if(sort) {
-            this._feeds.sort((a, b) => a.rowIndex - b.rowIndex);
+        if(reindex) {
+            this._feeds = this._reindex(this._feeds);
         }
         Comm.broadcast('feedlist-updated', {feeds: this.feeds});
 
