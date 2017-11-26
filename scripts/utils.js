@@ -46,6 +46,9 @@ function asArray(v) {
 
 function parseDateValue(date) {
     // TODO: maybe MIL timezones here?
+    if(!date) {
+        return;
+    }
     return (new Date(date)).getTime();
 }
 
