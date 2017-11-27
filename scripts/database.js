@@ -457,7 +457,11 @@ let Database = {
             if(providedID) {
                 entriesById.set(providedID, entry);
             }
-            entriesByUrl.set(entryURL, entry);
+            if(entryURL) {
+                let array = entriesByUrl.get(entryURL) || [];
+                array.push(entry);
+                entriesByUrl.set(entryURL, array);
+            }
         }
         let queryId = {feeds: feedID, providedID: Array.from(entriesById.keys())};
         let allEntries = [];
@@ -483,16 +487,15 @@ let Database = {
                     // changes undefined to avoid duplicate notifications
                     stores: ['entries', 'revisions'],
                     action: (entry, {tx}) => {
-                        let update = entriesByUrl.get(entry.entryURL);
-                        if(!update) {
+                        let updateArray = entriesByUrl.get(entry.entryURL) || [];
+                        updateArray = updateArray.filter(e => !found.has(e));
+                        if(entry.providedID) { // If there's an ID, it's already known to mismatch
+                            updateArray = updateArray.filter(e => !e.providedID);
+                        }
+                        if(!updateArray.length) {
                             return;
                         }
-                        if(update.providedID && entry.providedID) {
-                            console.assert(update.providedID !== entry.providedID,
-                                           'should match dy ID');
-                            return;
-                        }
-                        entriesByUrl.delete(entry.entryURL);
+                        let update = updateArray.pop();
                         found.add(update);
                         this._updateEntry(entry, update, {tx, markUnread});
                         allEntries.push(entry);
