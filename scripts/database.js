@@ -445,7 +445,7 @@ let Database = {
         }
         let feedID = feed.feedID;
         let markUnread = feed.markModifiedEntriesUnread;
-        let entriesById = new Map();
+        let entriesById = new Map(); // providedID, if present, *must* be unique
         let entriesByUrl = new Map();
         let found = new Set();
         for(let entry of entries) {
