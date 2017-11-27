@@ -447,6 +447,7 @@ let Database = {
         let markUnread = feed.markModifiedEntriesUnread;
         let entriesById = new Map();
         let entriesByUrl = new Map();
+        let found = new Set();
         for(let entry of entries) {
             let {providedID, entryURL} = entry;
             if(feedID !== entry.feedID) {
@@ -469,7 +470,7 @@ let Database = {
                 if(update === undefined) {
                     return;
                 }
-                entriesById.delete(entry.providedID);
+                found.add(update);
                 entriesByUrl.delete(entry.entryURL);
                 this._updateEntry(entry, update, {tx, markUnread});
                 allEntries.push(entry);
@@ -492,12 +493,13 @@ let Database = {
                             return;
                         }
                         entriesByUrl.delete(entry.entryURL);
+                        found.add(update);
                         this._updateEntry(entry, update, {tx, markUnread});
                         allEntries.push(entry);
                     },
                     then: ({tx}) => {
                         // Chain, part 3: completely new entries
-                        let remainingEntries = Array.from(entriesByUrl.values());
+                        let remainingEntries = entries.filter(e => !found.has(e));
                         for(let entry of remainingEntries) {
                             this._addEntry(entry, {tx, entries: newEntries});
                         }
