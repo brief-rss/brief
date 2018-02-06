@@ -374,7 +374,7 @@ let FaviconFetcher = {
             return;
         }
 
-        if(doc.documentElement.localName === 'parseerror') {
+        if(doc.documentElement.localName === 'parseerror' || doc.querySelector === null) {
             if(Comm.verbose) {
                 console.log(
                     "Brief: when attempting to locate favicon for ",
