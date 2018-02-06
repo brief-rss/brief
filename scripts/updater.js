@@ -384,7 +384,7 @@ let FaviconFetcher = {
             }
             return;
         }
-        linkElements = doc.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
+        let linkElements = doc.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
         if(!linkElements) {
             if(Comm.verbose) { 
                 console.log(
