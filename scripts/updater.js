@@ -237,6 +237,7 @@ let FeedUpdater = {
 
 
 let FaviconFetcher = {
+    TIMEOUT: 25000,
     async updateFavicon(feed) {
         if(Comm.verbose) {
             console.log("Brief: fetching favicon for", feed);
@@ -245,13 +246,18 @@ let FaviconFetcher = {
             feedID: feed.feedID,
             lastFaviconRefresh: Date.now()
         };
-        let favicon = await this._fetchFavicon(feed);
-        if(favicon) {
-            updatedFeed.favicon = favicon;
+        let faviconHardcodedURL = await this._fetchFaviconHardcodedURL(feed);
+        if(faviconHardcodedURL) {
+            updatedFeed.favicon = faviconHardcodedURL;
+        } else {
+            let faviconWebsiteURL = await this._fetchFaviconWebsiteURL(feed);
+            if(faviconWebsiteURL) {
+                updatedFeed.favicon = faviconWebsiteURL;
+            }
         }
         await Database.modifyFeed(updatedFeed);
     },
-    async _fetchFavicon(feed) {
+    async _fetchFaviconHardcodedURL(feed) {
         if (!feed.websiteURL) {
             return;
         }
@@ -259,15 +265,86 @@ let FaviconFetcher = {
         // Use websiteURL instead of feedURL for resolving the favicon URL,
         // because many websites use services like Feedburner for generating their
         // feeds and we would get the Feedburner's favicon instead.
-        let faviconUrl = new URL('/favicon.ico', feed.websiteURL);
+        let faviconURL = new URL('/favicon.ico', feed.websiteURL);
 
-        let response = await fetch(faviconUrl, {redirect: 'follow'});
-
-        if(!response.ok) {
+        let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
+        return favicon;
+    },
+    async _fetchFaviconWebsiteURL(feed) {
+        if (!feed.websiteURL) {
             return;
         }
+        let url = feed.websiteURL;
+        let websiteRequest = new XMLHttpRequest();
+        websiteRequest.open('GET', url);
+        websiteRequest.responseType = 'document';
+
+        let doc = await Promise.race([
+            xhrPromise(websiteRequest).catch(() => undefined),
+            wait(this.TIMEOUT),
+        ]);
+        if(!doc) {
+            if(Comm.verbose) { 
+                console.log(
+                    "Brief: when attempting to locate favicon for ",
+                    feed,
+                    ", failed to fetch feed web site at ",
+                    url);
+            }
+            return;
+        }
+
+        if(doc.documentElement.localName === 'parseerror') {
+            if(Comm.verbose) {
+                console.log(
+                    "Brief: when attempting to locate favicon for ",
+                    feed,
+                    ", failed to parse web site at ",
+                    url);
+            }
+            return;
+        }
+        let faviconURL = new URL(
+            doc.head.querySelector("link[rel='icon']").getAttribute("href"),
+            feed.websiteURL);
+        if(!faviconURL) {
+            if(Comm.verbose) {
+                console.log(
+                    "Brief: when attempting to locate favicon for ",
+                    feed,
+                    ", no favicon locations were found in the web site at ",
+                    url);
+            }
+            return;
+        }
+
+        let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
+        return favicon;
+
+    },
+    async _fetchFaviconFromURL(feed, faviconURL) {
+        let response = await fetch(faviconURL, {redirect: 'follow'});
+
+        if(!response.ok) {
+            if(Comm.verbose) {
+                console.log(
+                    "Brief: failed to resolve favicon for feed ",
+                    feed,
+                    " at",
+                    faviconURL);
+            }
+            return;
+        }
+
         let blob = await response.blob();
         if(blob.size === 0) {
+            if(Comm.verbose) {
+                console.log(
+                    "Brief: no response body when fetching favicon for feed ",
+                    feed,
+                    " at ",
+                    faviconURL);
+            }
             return;
         }
 
