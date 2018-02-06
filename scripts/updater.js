@@ -374,7 +374,7 @@ let FaviconFetcher = {
             return;
         }
 
-        if(doc.documentElement.localName === 'parseerror' || doc.querySelector === null) {
+        if(doc.documentElement.localName === 'parseerror') {
             if(Comm.verbose) {
                 console.log(
                     "Brief: when attempting to locate favicon for ",
@@ -384,9 +384,19 @@ let FaviconFetcher = {
             }
             return;
         }
-        let faviconURL = new URL(
-            doc.querySelector('link[rel="icon"], link[rel="shortcut icon"]').getAttribute("href"),
-            feed.websiteURL);
+        linkElements = doc.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
+        if(!linkElements) {
+            if(Comm.verbose) { 
+                console.log(
+                    "Brief: when attempting to locate favicon for ",
+                    feed.title,
+                    ", found no related link elements at ",
+                    url.href);
+            }
+            return;
+        }
+        let faviconURL = new URL(linkElements.getAttribute("href"),feed.websiteURL);
+            
         if(!faviconURL) {
             if(Comm.verbose) {
                 console.log(
