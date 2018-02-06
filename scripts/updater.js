@@ -246,6 +246,10 @@ let FaviconFetcher = {
             feedID: feed.feedID,
             lastFaviconRefresh: Date.now()
         };
+        // Try, in order, to get a favicon from
+        // 1. favicon.ico relative to the website URL
+        // 2. the image specified in the document at the web site 
+        // 3. the image specified in the document at the web site origin
         let faviconHardcodedURL = await this._fetchFaviconHardcodedURL(feed);
         if(faviconHardcodedURL) {
             updatedFeed.favicon = faviconHardcodedURL;
@@ -253,6 +257,11 @@ let FaviconFetcher = {
             let faviconWebsiteURL = await this._fetchFaviconWebsiteURL(feed);
             if(faviconWebsiteURL) {
                 updatedFeed.favicon = faviconWebsiteURL;
+            } else {
+                let faviconOriginURL = await this._fetchFaviconOriginURL(feed);
+                if(faviconOriginURL) {
+                    updatedFeed.favicon = faviconOriginURL;
+                }
             }
         }
         await Database.modifyFeed(updatedFeed);
@@ -283,40 +292,34 @@ let FaviconFetcher = {
             xhrPromise(websiteRequest).catch(() => undefined),
             wait(this.TIMEOUT),
         ]);
-        if(!doc) {
-            if(Comm.verbose) { 
-                console.log(
-                    "Brief: when attempting to locate favicon for ",
-                    feed,
-                    ", failed to fetch feed web site at ",
-                    url);
-            }
-            return;
-        }
 
-        if(doc.documentElement.localName === 'parseerror') {
-            if(Comm.verbose) {
-                console.log(
-                    "Brief: when attempting to locate favicon for ",
-                    feed,
-                    ", failed to parse web site at ",
-                    url);
-            }
+        faviconURL = _getFaviconURLFromDoc(doc);
+        if (!faviconURL) {
+            return;
+        };
+
+        let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
+        return favicon;
+
+    },
+    async _fetchFaviconOriginURL(feed) {
+        if (!feed.websiteURL) {
             return;
         }
-        let faviconURL = new URL(
-            doc.head.querySelector('link[rel="icon"], link[rel="shortcut icon"]').getAttribute("href"),
-            feed.websiteURL);
-        if(!faviconURL) {
-            if(Comm.verbose) {
-                console.log(
-                    "Brief: when attempting to locate favicon for ",
-                    feed,
-                    ", no favicon locations were found in the web site at ",
-                    url);
-            }
+        let url = feed.websiteURL.origin;
+        let websiteRequest = new XMLHttpRequest();
+        websiteRequest.open('GET', url);
+        websiteRequest.responseType = 'document';
+
+        let doc = await Promise.race([
+            xhrPromise(websiteRequest).catch(() => undefined),
+            wait(this.TIMEOUT),
+        ]);
+
+        faviconURL = _getFaviconURLFromDoc(doc);
+        if (!faviconURL) {
             return;
-        }
+        };
 
         let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
         return favicon;
@@ -356,6 +359,46 @@ let FaviconFetcher = {
         });
 
         return favicon;
+    },
+
+    _getFaviconURLFromDoc(doc) {
+        if(!doc) {
+            if(Comm.verbose) { 
+                console.log(
+                    "Brief: when attempting to locate favicon for ",
+                    feed,
+                    ", failed to fetch feed web site at ",
+                    url);
+            }
+            return;
+        }
+
+        if(doc.documentElement.localName === 'parseerror') {
+            if(Comm.verbose) {
+                console.log(
+                    "Brief: when attempting to locate favicon for ",
+                    feed,
+                    ", failed to parse web site at ",
+                    url);
+            }
+            return;
+        }
+        let faviconURL = new URL(
+            doc.head.querySelector('link[rel="icon"], link[rel="shortcut icon"]').getAttribute("href"),
+            feed.websiteURL);
+        if(!faviconURL) {
+            if(Comm.verbose) {
+                console.log(
+                    "Brief: when attempting to locate favicon for ",
+                    feed,
+                    ", no favicon locations were found in the web site at ",
+                    url);
+            }
+            return;
+        }
+
+        return faviconURL;
+
     },
 };
 
