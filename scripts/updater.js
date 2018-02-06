@@ -307,7 +307,8 @@ let FaviconFetcher = {
         if (!feed.websiteURL) {
             return;
         }
-        let url = new URL(feed.websiteURL.origin);
+        let websiteUrl = new URL(feed.websiteURL);
+        let url = websiteUrl.origin;
         let websiteRequest = new XMLHttpRequest();
         websiteRequest.open('GET', url);
         websiteRequest.responseType = 'document';
