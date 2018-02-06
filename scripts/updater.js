@@ -305,7 +305,7 @@ let FaviconFetcher = {
             return;
         }
         let faviconURL = new URL(
-            doc.head.querySelector("link[rel='icon']").getAttribute("href"),
+            doc.head.querySelector("link[rel~='icon']").getAttribute("href"),
             feed.websiteURL);
         if(!faviconURL) {
             if(Comm.verbose) {
