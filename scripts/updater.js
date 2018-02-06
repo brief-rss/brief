@@ -294,7 +294,7 @@ let FaviconFetcher = {
             wait(this.TIMEOUT),
         ]);
 
-        let faviconURL = this._getFaviconURLFromDoc(feed, url, doc);
+        let faviconURL = this._getFaviconURLFromDoc(feed, doc);
         if (!faviconURL) {
             return;
         };
@@ -317,7 +317,7 @@ let FaviconFetcher = {
             wait(this.TIMEOUT),
         ]);
 
-        let faviconURL = this._getFaviconURLFromDoc(feed, url, doc);
+        let faviconURL = this._getFaviconURLFromDoc(feed, doc);
         if (!faviconURL) {
             return;
         };
@@ -362,14 +362,13 @@ let FaviconFetcher = {
         return favicon;
     },
 
-    _getFaviconURLFromDoc(feed, url, doc) {
+    _getFaviconURLFromDoc(feed, doc) {
         if(!doc) {
             if(Comm.verbose) { 
                 console.log(
                     "Brief: when attempting to locate favicon for ",
                     feed.title,
-                    ", failed to fetch feed web site at ",
-                    url.href);
+                    ", failed to fetch feed web site");
             }
             return;
         }
@@ -379,8 +378,7 @@ let FaviconFetcher = {
                 console.log(
                     "Brief: when attempting to locate favicon for ",
                     feed.title,
-                    ", failed to parse web site at ",
-                    url.href);
+                    ", failed to parse web site");
             }
             return;
         }
@@ -390,8 +388,7 @@ let FaviconFetcher = {
                 console.log(
                     "Brief: when attempting to locate favicon for ",
                     feed.title,
-                    ", found no related link elements in website ",
-                    url.href);
+                    ", found no related link elements in web site");
             }
             return;
         }
@@ -402,8 +399,7 @@ let FaviconFetcher = {
                 console.log(
                     "Brief: when attempting to locate favicon for ",
                     feed.title,
-                    ", no favicon locations were found in the web site at ",
-                    url.href);
+                    ", no favicon locations were found in the web site");
             }
             return;
         }
