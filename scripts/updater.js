@@ -287,6 +287,7 @@ let FaviconFetcher = {
         let websiteRequest = new XMLHttpRequest();
         websiteRequest.open('GET', url);
         websiteRequest.responseType = 'document';
+        websiteRequest.overrideMimeType('text/html');
 
         let doc = await Promise.race([
             xhrPromise(websiteRequest).catch(() => undefined),
@@ -332,9 +333,9 @@ let FaviconFetcher = {
             if(Comm.verbose) {
                 console.log(
                     "Brief: failed to resolve favicon for feed ",
-                    feed,
+                    feed.title,
                     " at",
-                    faviconURL);
+                    faviconURL.href);
             }
             return;
         }
@@ -344,9 +345,9 @@ let FaviconFetcher = {
             if(Comm.verbose) {
                 console.log(
                     "Brief: no response body when fetching favicon for feed ",
-                    feed,
+                    feed.title,
                     " at ",
-                    faviconURL);
+                    faviconURL.href);
             }
             return;
         }
@@ -366,9 +367,9 @@ let FaviconFetcher = {
             if(Comm.verbose) { 
                 console.log(
                     "Brief: when attempting to locate favicon for ",
-                    feed,
+                    feed.title,
                     ", failed to fetch feed web site at ",
-                    url);
+                    url.href);
             }
             return;
         }
@@ -377,9 +378,9 @@ let FaviconFetcher = {
             if(Comm.verbose) {
                 console.log(
                     "Brief: when attempting to locate favicon for ",
-                    feed,
+                    feed.title,
                     ", failed to parse web site at ",
-                    url);
+                    url.href);
             }
             return;
         }
@@ -390,9 +391,9 @@ let FaviconFetcher = {
             if(Comm.verbose) {
                 console.log(
                     "Brief: when attempting to locate favicon for ",
-                    feed,
+                    feed.title,
                     ", no favicon locations were found in the web site at ",
-                    url);
+                    url.href);
             }
             return;
         }
