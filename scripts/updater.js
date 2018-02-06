@@ -294,7 +294,7 @@ let FaviconFetcher = {
             wait(this.TIMEOUT),
         ]);
 
-        let faviconURL = this._getFaviconURLFromDoc(feed, doc);
+        let faviconURL = this._getFaviconURLFromDoc(feed, url, doc);
         if (!faviconURL) {
             return;
         };
@@ -317,7 +317,7 @@ let FaviconFetcher = {
             wait(this.TIMEOUT),
         ]);
 
-        let faviconURL = this._getFaviconURLFromDoc(feed, doc);
+        let faviconURL = this._getFaviconURLFromDoc(feed, url, doc);
         if (!faviconURL) {
             return;
         };
@@ -362,7 +362,7 @@ let FaviconFetcher = {
         return favicon;
     },
 
-    _getFaviconURLFromDoc(feed, doc) {
+    _getFaviconURLFromDoc(feed, url, doc) {
         if(!doc) {
             if(Comm.verbose) { 
                 console.log(
@@ -390,7 +390,7 @@ let FaviconFetcher = {
                 console.log(
                     "Brief: when attempting to locate favicon for ",
                     feed.title,
-                    ", found no related link elements at ",
+                    ", found no related link elements in website ",
                     url.href);
             }
             return;
