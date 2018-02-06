@@ -293,7 +293,7 @@ let FaviconFetcher = {
             wait(this.TIMEOUT),
         ]);
 
-        faviconURL = _getFaviconURLFromDoc(doc);
+        let faviconURL = this._getFaviconURLFromDoc(feed, doc);
         if (!faviconURL) {
             return;
         };
@@ -316,7 +316,7 @@ let FaviconFetcher = {
             wait(this.TIMEOUT),
         ]);
 
-        faviconURL = _getFaviconURLFromDoc(doc);
+        let faviconURL = this._getFaviconURLFromDoc(feed, doc);
         if (!faviconURL) {
             return;
         };
@@ -361,7 +361,7 @@ let FaviconFetcher = {
         return favicon;
     },
 
-    _getFaviconURLFromDoc(doc) {
+    _getFaviconURLFromDoc(feed, doc) {
         if(!doc) {
             if(Comm.verbose) { 
                 console.log(
