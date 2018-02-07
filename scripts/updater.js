@@ -238,6 +238,7 @@ let FeedUpdater = {
 
 let FaviconFetcher = {
     TIMEOUT: 25000,
+
     async updateFavicon(feed) {
         if(Comm.verbose) {
             console.log("Brief: fetching favicon for", feed);
@@ -266,6 +267,7 @@ let FaviconFetcher = {
         }
         await Database.modifyFeed(updatedFeed);
     },
+
     async _fetchFaviconHardcodedURL(feed) {
         if (!feed.websiteURL) {
             return;
@@ -283,16 +285,9 @@ let FaviconFetcher = {
         if (!feed.websiteURL) {
             return;
         }
-        let url = feed.websiteURL;
-        let websiteRequest = new XMLHttpRequest();
-        websiteRequest.open('GET', url);
-        websiteRequest.responseType = 'document';
-        websiteRequest.overrideMimeType('text/html');
 
-        let doc = await Promise.race([
-            xhrPromise(websiteRequest).catch(() => undefined),
-            wait(this.TIMEOUT),
-        ]);
+        let url = feed.websiteURL;
+        let doc = await this._fetchDocFromURL(url);
 
         let faviconURL = this._getFaviconURLFromDoc(feed, doc);
         if (!faviconURL) {
@@ -308,15 +303,9 @@ let FaviconFetcher = {
             return;
         }
         let websiteUrl = new URL(feed.websiteURL);
-        let url = websiteUrl.origin;
-        let websiteRequest = new XMLHttpRequest();
-        websiteRequest.open('GET', url);
-        websiteRequest.responseType = 'document';
 
-        let doc = await Promise.race([
-            xhrPromise(websiteRequest).catch(() => undefined),
-            wait(this.TIMEOUT),
-        ]);
+        let url = websiteUrl.origin;
+        let doc = await this._fetchDocFromURL(url);
 
         let faviconURL = this._getFaviconURLFromDoc(feed, doc);
         if (!faviconURL) {
@@ -327,6 +316,22 @@ let FaviconFetcher = {
         return favicon;
 
     },
+
+    async _fetchDocFromURL(url) {
+        if (!url) {
+            return;
+        }
+        let websiteRequest = new XMLHttpRequest();
+        websiteRequest.open('GET', url);
+        websiteRequest.responseType = 'document';
+
+        let doc = await Promise.race([
+            xhrPromise(websiteRequest).catch(() => undefined),
+            wait(this.TIMEOUT),
+        ]);
+        return doc;
+    },
+
     async _fetchFaviconFromURL(feed, faviconURL) {
         let response = await fetch(faviconURL, {redirect: 'follow'});
 
@@ -362,7 +367,6 @@ let FaviconFetcher = {
 
         return favicon;
     },
-
     _getFaviconURLFromDoc(feed, doc) {
         if(!doc) {
             if(Comm.verbose) { 
