@@ -328,6 +328,7 @@ let FeedFetcher = {
 
     _parseNode(node, properties) {
         let props = {};
+        let propPrios = new Map();
         let keyMap = this._buildKeyMap(properties);
         //TODO: handle attributes
         let children = Array.from(node.children);
@@ -351,7 +352,7 @@ let FeedFetcher = {
                 }
                 continue;
             }
-            for(let {name, type, array} of destinations) {
+            for(let {name, type, array, prio} of destinations) {
                 if(name === 'IGNORE') {
                     continue;
                 }
@@ -371,6 +372,11 @@ let FeedFetcher = {
                         }
                         props[name].push(value);
                     } else {
+                        let prevPrio = propPrios.get(name) || 1000;
+                        if(prio >= prevPrio) {
+                            continue;
+                        }
+                        propPrios.set(name, prio);
                         props[name] = value;
                     }
                 } else {
@@ -383,20 +389,25 @@ let FeedFetcher = {
 
     _buildKeyMap(known_properties) {
         let map = new Map();
+        let prios = new Map();
         for(let [name, type, tags] of known_properties) {
             let array = false;
             if(name.slice(name.length - 2) === '[]') {
                 name = name.slice(0, name.length - 2);
                 array = true;
             }
+            let prio = prios.get(name) || 1;
+
             for(let src of tags) {
                 if(src.tag !== undefined) {
                     type = src.type || type;
                     src = src.tag;
                 }
                 let destinations = map.get(src) || [];
-                destinations.push({name, type, array});
+                destinations.push({name, type, array, prio});
                 map.set(src, destinations);
+                prio += 1;
+                prios.set(name, prio);
             }
         }
         return map;
@@ -423,9 +434,9 @@ let FeedFetcher = {
     ],
     ENTRY_PROPERTIES: [
         ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
-        ['link', 'permaLink', ["guid", "rss1:guid"]],
         ['link', 'url', ["link", "rss1:link"]],
         ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
+        ['link', 'permaLink', ["guid", "rss1:guid"]],
         ['id', 'id', ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]],
         ['authors[]', 'author', ["author", "rss1:author", "dc:creator", "dc:author",
                                   "atom03:author", "atom:author"]],

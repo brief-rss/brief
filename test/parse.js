@@ -16,6 +16,7 @@ T.runTests({
 
         let item = feed.items[0];
         T.assert_eq(item.title, "ITEM_TITLE");
+        T.assert_eq(item.link.href, "https://rss.example/item");
         T.assert_eq(item.summary, "ITEM_SUMMARY");
         T.assert_eq(item.authors[0], "AUTHOR");
         T.assert_eq(item.published, "Mon, 01 Jan 2018 08:00:00 GMT");
