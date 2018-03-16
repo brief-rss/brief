@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- https://www.gimp.org/feeds/rss.xml -->
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+<channel>
+    <title>FEED_TITLE</title>
+    <link>https://rss.example/site</link>
+    <description>FEED_SUBTITLE</description>
+    <atom:link href="https://rss.example/feed" rel="self"/>
+    <lastBuildDate>Mon, 01 Jan 2018 12:00:00 -0000</lastBuildDate>
+    <item>
+        <title>ITEM_TITLE</title>
+        <link>https://rss.example/item</link>
+        <description>ITEM_SUMMARY</description>
+        <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">AUTHOR</dc:creator>
+        <pubDate>Mon, 01 Jan 2018 08:00:00 -0000</pubDate>
+        <guid>tag:id</guid>
+    </item>
+</channel>
+</rss>
+
