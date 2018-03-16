@@ -23,7 +23,11 @@ let Prefs = {
     },
 
     get: function(name) {
-        return this._values[name];
+        let value = this._values[name];
+        if(value === undefined) {
+            value = this._defaults[name];
+        }
+        return value;
     },
 
     set: async function(name, value) {
@@ -82,6 +86,7 @@ pref("update.defaultFetchDelay", 2000);
 pref("update.backgroundFetchDelay", 4000);
 pref("update.startupDelay", 35000);
 pref("update.suppressSecurityDialogs", true);
+pref("update.allowCachedResponses", false); // Testing only (avoid load on upstream servers)
 
 pref("database.expireEntries", false);
 pref("database.entryExpirationAge", 60);
