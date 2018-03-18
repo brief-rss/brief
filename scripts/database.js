@@ -5,7 +5,7 @@
  *
  * 1. Revision table.
  * Item content, as fetched from the server, is stored as a `revision`.
- * Revisions are immutable. For now there's only one revision per entry,
+ * Revisions are intended to be immutable. For now there's only one revision per entry,
  * but this may change in the future.
  *
  * 2. Entry table.
@@ -13,7 +13,7 @@
  */
 // IndexedDB does not play nice with `async` (transaction ends before execution restarts)
 // and the same problem with native Promise
-// mb1193394, worked on around Fx58 nightly
+// mb1193394, fixed in Firefox 60
 let Database = {
     // If upping, check migration in both _upgradeSchema and _upgradeEntry/_upgradeEntries
     DB_VERSION: 30,
