@@ -7,18 +7,18 @@ const T = {
             if(result !== undefined && result.then !== undefined) {
                 await result;
             }
-            console.info(`  ${name}: success`);
+            console.log(`PASS ${name}`);
         } catch(e) {
-            console.error(`  ${name}: error -- `, e);
+            console.error(`FAIL ${name}:`, e);
         }
     },
 
-    runTests: async function(tests) {
-        console.log("Starting test suite...");
+    runTests: async function(name, tests) {
+        console.group(`Test suite: ${name}`);
         for (let name in tests) {
             await T.runTest(name, tests[name]);
         }
-        console.log("Test suite finished");
+        console.groupEnd();
     },
 
     assert: function(value) {
