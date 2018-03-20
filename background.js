@@ -12,6 +12,21 @@ const Brief = {
     init: async function() {
         Comm.initMaster();
 
+        browser.runtime.onInstalled.addListener(async ({temporary}) => {
+            if(temporary) { // `web-ext run` or equivalent
+                Comm.verbose = true;
+                const TEST_INDEX = browser.runtime.getURL('/test/index.xhtml');
+                let tabs = await browser.tabs.query({url: TEST_INDEX});
+                if(tabs.length === 0) {
+                    browser.tabs.create({url: TEST_INDEX});
+                } else {
+                    for(let {id} of tabs) {
+                        browser.tabs.reload(id);
+                    }
+                }
+            }
+        });
+
         browser.browserAction.onClicked.addListener(
             () => browser.tabs.create({url: '/ui/brief.xhtml'}));
         browser.browserAction.setBadgeBackgroundColor({color: 'grey'});
