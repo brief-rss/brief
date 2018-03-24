@@ -150,7 +150,7 @@ let Database = {
     REVISION_FIELDS: ['id', 'authors', 'title', 'content', 'updated'],
 
     query(filters) {
-        if(!filters) {
+        if(filters === undefined) {
             filters = {};
         }
         if(typeof filters == 'number') {
