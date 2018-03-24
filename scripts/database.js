@@ -61,12 +61,18 @@ let Database = {
 
         if(Comm.master) {
             browser.bookmarks.onCreated.addListener((id, {url}) => {
+                if(url === undefined) {
+                    return;
+                }
                 this.query({entryURL: url, starred: 0})._update({
                     action: e => { e.starred = 1; },
                     changes: {starred: 1},
                 });
             });
             browser.bookmarks.onRemoved.addListener((id, {node: {url}}) => {
+                if(url === undefined) {
+                    return;
+                }
                 this.query({entryURL: url, starred: 1})._update({
                     action: e => { e.starred = 0; },
                     changes: {starred: 0},
