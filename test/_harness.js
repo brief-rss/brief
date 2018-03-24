@@ -29,6 +29,7 @@ const T = {
 
     assert_eq: function(left, right) {
         if(left !== right) {
+            console.error('assertion sides:', left, right);
             throw `assertion failed: ${left} === ${right}`;
         }
     },
