@@ -39,6 +39,7 @@ let Database = {
     async init() {
         if(this._db)
             return;
+        // Open current DB
         let {storage} = await browser.storage.local.get({storage: 'persistent'});
         let {db} = await this._open({
             storage,
@@ -49,6 +50,8 @@ let Database = {
         await this.loadFeeds();
         let entryCount = await this.countEntries();
         console.log(`Brief: opened database with ${entryCount} entries`);
+
+        // Register all needed observers
         Comm.registerObservers({
             'feedlist-updated': ({feeds}) => this._feeds = feeds, // Already saved elsewhere
             'feedlist-modify': ({updates}) => this.modifyFeed(updates),
@@ -120,11 +123,16 @@ let Database = {
     },
 
     _upgradeSchema(event) {
-        console.log(`upgrade from version ${event.oldVersion}`);
+        let {oldVersion} = event;
+        if(oldVersion === 0) {
+            console.log(`Creating the database`);
+        } else {
+            console.log(`Upgrading from version ${event.oldVersion}`);
+        }
         let {result: db, transaction: tx} = event.target;
         let revisions;
         let entries;
-        switch(event.oldVersion) {
+        switch(oldVersion) {
             case 0:
                 revisions = db.createObjectStore("revisions", {
                     keyPath: "id", autoIncrement: true});
@@ -864,7 +872,10 @@ Query.prototype = {
         let tx = Database.db().transaction(['entries'], 'readonly');
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
-        Comm.verbose && console.log('DB count - filter presense', filterFunction !== undefined);
+        Comm.verbose && console.log('Query.count(...)');
+        if(filterFunction !== undefined) {
+            console.warn("DB count with filter(s):", this);
+        }
         if(filterFunction) {
             let cursors = ranges.map(r => index.openCursor(r));
             cursors.forEach(c => {
