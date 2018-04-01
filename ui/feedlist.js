@@ -713,6 +713,7 @@ let FeedList = {
     _rename({feedID, title}) {
         if(title === '') {
             this.rebuild();
+            return;
         }
         let feed = Database.getFeed(feedID);
         if(feed.title !== title) {
@@ -723,6 +724,7 @@ let FeedList = {
     _append({feedID, title}) {
         if(title === '') {
             this.rebuild();
+            return;
         }
         Database.addFeeds({title, parent: feedID})
     },
