@@ -40,15 +40,13 @@ let Database = {
         if(this._db)
             return;
         let {storage} = await browser.storage.local.get({storage: 'persistent'});
-        console.log(`Brief: opening database in ${storage} storage`);
-        let openOptions = {version: this.DB_VERSION};
-        if(storage === 'persistent') {
-            openOptions.storage = 'persistent';
-        }
-        let opener = indexedDB.open("brief", openOptions);
-        opener.onupgradeneeded = (event) => this._upgradeSchema(event);
-        this._db = await this._requestPromise(opener);
-        this.loadFeeds();
+        let {db} = await this._open({
+            storage,
+            version: this.DB_VERSION,
+            upgrade: this._upgradeSchema,
+        });
+        this._db = db;
+        await this.loadFeeds();
         let entryCount = await this.countEntries();
         console.log(`Brief: opened database with ${entryCount} entries`);
         Comm.registerObservers({
@@ -81,6 +79,44 @@ let Database = {
             //TODO: onChanged
             //FIXME: removed one of multiple not working
         }
+    },
+
+    async _open({name="brief", version=undefined, storage="default", upgrade=null}) {
+        let description = `database in ${storage} storage`;
+        let canUpgrade = (upgrade !== null);
+        console.log(`Brief: opening ${description}${ canUpgrade ? " with upgrade" : "" }`);
+        let openOptions = version;
+        if(storage === 'persistent') {
+            openOptions = {
+                storage: 'persistent',
+                version,
+            };
+        }
+        let db;
+        let upgradeFrom;
+        let opener = indexedDB.open(name, openOptions);
+        if(upgrade !== null) {
+            opener.onupgradeneeded = (event) => upgrade(event);
+        } else {
+            opener.onupgradeneeded = ({target: {transaction: tx}, oldVersion}) => {
+                upgradeFrom = oldVersion;
+                tx.abort();
+            };
+        }
+        try {
+            db = await this._requestPromise(opener);
+        } catch(e) {
+            if(e.name === "AbortError" && !canUpgrade) {
+                if(upgradeFrom === 0) {
+                    console.info(`Found no ${description}`);
+                } else {
+                    console.info(`The ${description} needs upgrade, aborting`);
+                }
+            }
+            return null;
+        }
+        console.log(`Brief: opened ${description}`);
+        return {db};
     },
 
     _upgradeSchema(event) {
