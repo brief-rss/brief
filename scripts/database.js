@@ -107,7 +107,7 @@ let Database = {
             };
         }
         try {
-            db = await this._requestPromise(opener);
+            db = await DbUtil.requestPromise(opener);
         } catch(e) {
             if(e.name === "AbortError" && !canUpgrade) {
                 if(upgradeFrom === 0) {
@@ -216,13 +216,13 @@ let Database = {
     async countEntries() {
         let tx = this._db.transaction(['entries']);
         let request = tx.objectStore('entries').count();
-        return await this._requestPromise(request);
+        return await DbUtil.requestPromise(request);
     },
 
     async loadFeeds() {
         let tx = this._db.transaction(['feeds']);
         let request = tx.objectStore('feeds').getAll();
-        let feeds = await this._requestPromise(request);
+        let feeds = await DbUtil.requestPromise(request);
         console.log(`Brief: ${feeds.length} feeds in database`);
 
         if(feeds.length === 0) {
@@ -253,7 +253,7 @@ let Database = {
         for(let feed of feeds) {
             tx.objectStore('feeds').put(feed);
         }
-        await this._transactionPromise(tx);
+        await DbUtil.transactionPromise(tx);
         await this._saveFeedBackups(feeds);
         if(Comm.verbose) {
             console.log(`Brief: saved feed list with ${feeds.length} feeds`);
@@ -747,24 +747,6 @@ let Database = {
 
         return tree;
     },
-
-    // Note: this is resolved after the transaction is finished(!!!) mb1193394
-    _requestPromise(req) {
-        return new Promise((resolve, reject) => {
-            req.onsuccess = (event) => resolve(event.target.result);
-            req.onerror = (event) => reject(event.target.error);
-        });
-    },
-
-    // Note: this is resolved after the transaction is finished(!)
-    _transactionPromise(tx) {
-        return new Promise((resolve, reject) => {
-            let oncomplete = tx.oncomplete;
-            let onerror = tx.onerror;
-            tx.oncomplete = () => { resolve(); if(oncomplete) oncomplete(); };
-            tx.onerror = () => { reject(); if(onerror) onerror(); };
-        });
-    },
 };
 //TODO: database cleanup
 //TODO: bookmark to starred sync
@@ -890,11 +872,11 @@ Query.prototype = {
                     }
                 };
             });
-            await Database._transactionPromise(tx);
+            await DbUtil.transactionPromise(tx);
             console.log(`Brief: count with ${totalCallbacks} callbacks due to`, filters);
         } else {
             let requests = ranges.map(r => index.count(r));
-            let promises = requests.map(r => Database._requestPromise(r));
+            let promises = requests.map(r => DbUtil.requestPromise(r));
             let counts = await Promise.all(promises);
             answer = counts.reduce((a, b) => a + b, 0);
         }
@@ -945,7 +927,7 @@ Query.prototype = {
         let result = this._mergeAndCollect(
             {cursors, filterFunction, sortKey, offset, limit, extractor, tx});
 
-        await Database._transactionPromise(tx);
+        await DbUtil.transactionPromise(tx);
 
         return result;
     },
@@ -1061,7 +1043,7 @@ Query.prototype = {
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         if(cursors.length === 0) {
             then && then({tx, feeds, entries});
-            await Database._transactionPromise(tx);
+            await DbUtil.transactionPromise(tx);
             return;
         }
         cursors.forEach(c => {
@@ -1084,7 +1066,7 @@ Query.prototype = {
             };
         });
         cursors[cursors.length - 1].then = then;
-        await Database._transactionPromise(tx);
+        await DbUtil.transactionPromise(tx);
         if(changes) {
             //TODO: we're missing revision data here
             Comm.broadcast('entries-updated', {
@@ -1340,5 +1322,25 @@ Query.prototype = {
 
     _ftsMatches(entry, string) {
         return true;//TODO: restore FTS
+    },
+};
+
+const DbUtil = {
+    // Note: this is resolved after the transaction is finished(!!!) mb1193394
+    requestPromise(req) {
+        return new Promise((resolve, reject) => {
+            req.onsuccess = (event) => resolve(event.target.result);
+            req.onerror = (event) => reject(event.target.error);
+        });
+    },
+
+    // Note: this is resolved after the transaction is finished(!)
+    transactionPromise(tx) {
+        return new Promise((resolve, reject) => {
+            let oncomplete = tx.oncomplete;
+            let onerror = tx.onerror;
+            tx.oncomplete = () => { resolve(); if(oncomplete) oncomplete(); };
+            tx.onerror = () => { reject(); if(onerror) onerror(); };
+        });
     },
 };
