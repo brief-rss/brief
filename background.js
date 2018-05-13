@@ -75,12 +75,22 @@ const Brief = {
             if(tab.active === false) {
                 return;
             }
-            this.queryFeeds({tabId: id, windowId: tab.windowId});
+            this.queryFeeds({
+                tabId: id,
+                url: tab.url,
+                title: tab.title,
+                windowId: tab.windowId,
+            });
         });
-        browser.tabs.onActivated.addListener((id) => this.queryFeeds(id));
+        browser.tabs.onActivated.addListener((ids) => this.queryFeeds(ids));
         let activeTabs = await browser.tabs.query({active: true});
         for(let tab of activeTabs) {
-            this.queryFeeds({tabId: tab.id, windowId: tab.windowId});
+            this.queryFeeds({
+                tabId: tab.id,
+                url: tab.url,
+                title: tab.title,
+                windowId: tab.windowId,
+            });
         }
     },
 
@@ -101,11 +111,51 @@ const Brief = {
         }
     },
 
-    async queryFeeds({tabId, windowId}) {
-        let replies = await browser.tabs.executeScript(tabId, {
-            file: '/content_scripts/scan-for-feeds.js',
-            runAt: 'document_end',
-        });
+    // Should match `extensions.webextensions.restrictedDomains` pref
+    RESTRICTED_DOMAINS: new Set([
+        "accounts-static.cdn.mozilla.net",
+        "accounts.firefox.com",
+        "addons.cdn.mozilla.net",
+        "addons.mozilla.org",
+        "api.accounts.firefox.com",
+        "content.cdn.mozilla.net",
+        "content.cdn.mozilla.net",
+        "discovery.addons.mozilla.org",
+        "input.mozilla.org",
+        "install.mozilla.org",
+        "oauth.accounts.firefox.com",
+        "profile.accounts.firefox.com",
+        "support.mozilla.org",
+        "sync.services.mozilla.com",
+        "testpilot.firefox.com",
+    ]),
+
+    async queryFeeds({tabId, url, title, windowId}) {
+        let replies;
+        try {
+            replies = await browser.tabs.executeScript(tabId, {
+                file: '/content_scripts/scan-for-feeds.js',
+                runAt: 'document_end',
+            });
+        } catch(ex) {
+            if(ex.message === 'Missing host permission for the tab') {
+                // There are two known cases: AMO and feed preview pages
+                if(url === undefined) {
+                    ({url, title} = await browser.tabs.get(tabId));
+                }
+                let parsedUrl = new URL(url);
+                if(url === undefined || parsedUrl.protocol === 'about:') {
+                    // Ok, looks like there's nothing Brief can do
+                    // (feeds from AMO cannot be fetched)
+                } else if(Brief.RESTRICTED_DOMAINS.has(parsedUrl.host)) {
+                    // FIXME: maybe try fetching them as `restricted.domain.com.`?
+                } else {
+                    replies = [[{url, linkTitle: title}]];
+                }
+            } else {
+                throw ex;
+            }
+        }
         let feeds = replies[0];
         if(feeds.length > 0) {
             browser.pageAction.show(tabId);
