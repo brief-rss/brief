@@ -10,13 +10,22 @@
  *
  * 2. Entry table.
  * An entry is an item from a feed.
+ *
+ * 3. Migration architecture
+ * Migrations in the database are partially-async. Index creation and other global schema changes
+ * happen synchronously in `_upgradeSchema`, while modification of individual entries
+ * is performed asynchronously in a worker task.
+ *
+ * The entry and revision upgrade code can be called multiple times for the same entry
+ * (once for the upgrade and possibly other times while reading it before the upgrade),
+ * thus it must not have side effects.
  */
 // IndexedDB does not play nice with `async` (transaction ends before execution restarts)
 // and the same problem with native Promise
 // mb1193394, fixed in Firefox 60
 let Database = {
     // If upping, check migration in both _upgradeSchema and _upgradeEntry/_upgradeEntries
-    DB_VERSION: 30,
+    DB_VERSION: 40,
 
     _db: null,
     db() {
@@ -171,6 +180,9 @@ let Database = {
                         cursor.continue();
                     }
                 };
+            // fallthrough
+            case 30:
+                db.createObjectStore("migrations", {keyPath: "name"});
             // fallthrough
         }
     },
@@ -1357,6 +1369,191 @@ Query.prototype = {
     },
 };
 
+/**
+ * This module performs the migration from the source database to the target one.
+ * Normally this is "persistent" to "default".
+ *
+ * A migration is identified with a migration descriptor stored in the target database.
+ * The descriptor stores information about the migration progress to allow resuming it
+ * after a browser restart.
+ */
+let Migrator = {
+    BATCH_SIZE: 1000, // Must be >1 for `advance` to work
+    /// Collect all source information needed to initialize the migration in the target database
+    async studySource({db}) {
+        if(db.version > 30) {
+            // The migrator has an unchecked assumption that may be violated in later versions
+            // It assumes that no revision is linked to from more than one entry
+            // (or even multiple times from one entry) to avoid both old-to-new ID map and
+            // the possibility of reserved ID range overflowing
+            throw "Migration from DB with version > 30 not supported yet";
+        }
+        let tx = db.transaction(['entries', 'revisions', 'feeds']);
+        // Enqueue all the queries
+        let entryCount = tx.objectStore('entries').count();
+        let revisionCount = tx.objectStore('revisions').count();
+
+        let feeds = tx.objectStore('feeds').getAll();
+
+        // Now wait and build the final result
+        await DbUtil.requestPromise(feeds);
+        return {
+            name: 'persistent',
+            db,
+            feeds: feeds.result,
+            count: {
+                entries: entryCount.result,
+                revisions: revisionCount.result,
+            },
+        };
+    },
+
+    /// Initialize the migration in the target database
+    /// Step 1: collect information from the target database
+    /*async*/ startMigration({db, tx, source, upgrade}) {
+        console.log("Brief: starting migration from", source);
+        let targets = tx.objectStore('migrations').getAll(source.name);
+        let lastEntry = tx.objectStore('entries').openKeyCursor(null, 'prev');
+        let lastRevision = tx.objectStore('revisions').openKeyCursor(null, 'prev');
+        let feeds = tx.objectStore('feeds').getAll();
+        feeds.onsuccess = () => {
+            this._startMigration({
+                db, tx, source, upgrade,
+                targets: targets.result,
+                feeds: feeds.result,
+                last: {
+                    entry: lastEntry.result && lastEntry.result.key || 0,
+                    revision: lastRevision.result && lastRevision.result.key || 0,
+                },
+            });
+        };
+    },
+
+    /// Step 2: all information is available, start the migration
+    /*async*/ _startMigration({db, tx, source, upgrade, targets, feeds, last}) {
+        let descriptor;
+        if(targets.length > 0) {
+            if(targets.length > 1) {
+                throw `Brief: duplicate migration markers for ${source.name}`;
+            }
+            descriptor = targets[0];
+            let {processedEntries, count} = descriptor;
+            if(processedEntries === count.entries) {
+                // Everything already transferred and presumably already flushed
+                indexedDB.deleteDatabase(source.db.name);
+                return;
+            }
+        } else {
+            //TODO: merge old and new feed lists
+            if(feeds.length > 0) {
+                throw `Brief: migration into already-used database not yet supported`;
+            } else {
+                for(let feed of source.feeds) {
+                    tx.objectStore('feeds').put(feed);
+                }
+            }
+            let maxEntry = last.entry + source.count.entries;
+            let maxRevision = last.revision + source.count.revisions;
+            descriptor = {
+                name: source.name,
+                count: source.count,
+                processedEntries: 0,
+                lastTransferredEntry: null,
+                rangeTop: {
+                    entries: maxEntry,
+                    revisions: maxRevision,
+                },
+            };
+            // The following entry is needed to bump the key generator only
+            tx.objectStore('entries').put({id: maxEntry});
+            tx.objectStore('entries').delete(maxEntry);
+            tx.objectStore('migrations').add(descriptor);
+        }
+        /*spawn*/ this._runMigration({db, source, upgrade, descriptor});
+    },
+
+    async _runMigration({db, source, upgrade, descriptor}) {
+        while(true) {
+            let {lastTransferredEntry, processedEntries, count, rangeTop} = descriptor;
+            let remainingEntryCount = count.entries - processedEntries;
+            if(remainingEntryCount <= 0) {
+                // The old DB will be deleted on the next startup
+                return;
+            }
+            let range;
+            if(lastTransferredEntry !== null) {
+                range = IDBKeyRange.upperBound(lastTransferredEntry, /*exclude:*/ true);
+            } else {
+                range = null;
+            }
+
+            let entries = await this._fetchNextBatch({source, range});
+
+            if(entries.length === 0) {
+                throw "Migration: expected more entries but none found";
+            }
+            lastTransferredEntry = entries[0].id; // Ordered older to newer
+            processedEntries += entries.length;
+            entries = entries.map(e => upgrade(e)).filter(e => e !== null);
+
+            // The "store" transaction
+            let tx = db.transaction(['migrations', 'entries', 'revisions'], 'readwrite');
+            for(let entry of entries) {
+                //TODO: this should work like push to find duplicates
+            }
+            // TODO: this should be async tail, not sync one
+            descriptor = { ...descriptor, lastTransferredEntry, processedEntries, rangeTop};
+            tx.objectStore('migrations').put(descriptor);
+        }
+    },
+
+    /**
+     * This is a specialized version of Query.getEntries(), which should be faster
+     * for this specific use case (a single range with no filter) as it does not
+     * need a per-entry IDB callback. Query.getEntries is not worth optimizing
+     * for this use case as it never arises (either read+unread or starred+unstarred
+     * is already multiple ranges).
+     */
+    /*async*/ _fetchNextBatch({source, range, count=this.BATCH_SIZE}) {
+        let tx = source.db.transaction(['entries', 'revisions']);
+        let entries = [];
+
+        // Find the correct range for batch and fetch it
+        let cursor = tx.objectStore('entries').openCursor(range, 'prev');
+        cursor.onsuccess = ({target: {result}}) => {
+            if(result === null) {
+                throw "Migration: entries not found";
+            }
+            let start = result.key;
+            result.advance(count - 1);
+            cursor.onsuccess = ({target: {result}}) => {
+                let range
+                if(result === null) {
+                    range = IDBKeyRange.upperBound(start);
+                } else {
+                    range = IDBKeyRange.bound(result.key, start);
+                }
+                let batch = tx.objectStore('entries').getAll(range);
+                batch.onsuccess = ({target: {result}}) => _entriesFetched(result);
+                batch.onerror = console.error;
+            }
+        };
+        function _entriesFetched(batch) {
+            entries = batch;
+            let revisions = Array.concat.apply([], entries.map(e => e.revisions.map(r => r.id)));
+            revisions = revisions.map(r => tx.objectStore('revisions').get(r));
+            revisions[revisions.length - 1].onsuccess = () => {
+                let revs = new Map(revisions.map(({result}) => [result.id, result]));
+                for(let entry of entries) {
+                    entry.revisions = entry.revisions.map(r => revs.get(r.id));
+                }
+            }
+        }
+        return DbUtil.transactionPromise(tx).then(() => entries);
+    },
+};
+
+/// Misc utilities for working with databases
 const DbUtil = {
     // Note: this is resolved after the transaction is finished(!!!) mb1193394
     requestPromise(req) {
