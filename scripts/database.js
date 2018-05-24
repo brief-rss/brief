@@ -493,6 +493,9 @@ let Database = {
         if(entries.length === 0) {
             return;
         }
+        if(Comm.verbose) {
+            console.log("Pushing entries:", entries, "to", feed);
+        }
         let feedID = feed.feedID;
         let markUnread = feed.markModifiedEntriesUnread;
         let entriesById = new Map(); // providedID, if present, *must* be unique
