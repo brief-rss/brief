@@ -555,7 +555,6 @@ let Database = {
                     return;
                 }
                 found.add(update);
-                entriesByUrl.delete(entry.entryURL);
                 if(ignoreUpdates) {
                     return;
                 }
