@@ -574,6 +574,7 @@ let Database = {
 
     _addEntry(next, {tx, entries}) {
         let entry = {
+            _v: this.DB_VERSION,
             feedID: next.feedID,
             providedID: next.providedID,
             entryURL: next.entryURL,
