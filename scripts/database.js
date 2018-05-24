@@ -503,7 +503,7 @@ let Database = {
         return newEntries;
     },
 
-    async _pushFeedEntries({feed, entries}) {
+    async _pushFeedEntries({feed, entries, ignoreUpdates=false, tx=undefined}) {
         if(entries.length === 0) {
             return;
         }
@@ -535,6 +535,7 @@ let Database = {
         let newEntries = []; // For update notification
         // Chain, scan 1: every entry with IDs provided
         await this.query(queryId)._update({
+            tx,
             stores: ['entries', 'revisions'],
             action: (entry, {tx}) => {
                 let update = entriesById.get(entry.providedID);
@@ -543,6 +544,9 @@ let Database = {
                 }
                 found.add(update);
                 entriesByUrl.delete(entry.entryURL);
+                if(ignoreUpdates) {
+                    return;
+                }
                 this._updateEntry(entry, update, {tx, markUnread});
                 allEntries.push(entry);
             },
@@ -564,6 +568,9 @@ let Database = {
                         }
                         let update = updateArray.pop();
                         found.add(update);
+                        if(ignoreUpdates) {
+                            return;
+                        }
                         this._updateEntry(entry, update, {tx, markUnread});
                         allEntries.push(entry);
                     },
@@ -630,7 +637,6 @@ let Database = {
 
     //TODO: fix this async horror show with some good abstractions
     _updateEntry(prev, next, {tx, markUnread}) {
-        // Roughly equivalent to  legacy FeedProcessor.processEntry
         let revision = prev.revisions[0].id;
         let req = tx.objectStore('revisions').get(revision);
         req.onsuccess = ({target}) => {
@@ -777,7 +783,6 @@ let Database = {
 };
 //TODO: database cleanup
 //TODO: bookmark to starred sync
-
 
 function Query(filters) {
     Object.assign(this, filters);
