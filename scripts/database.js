@@ -1496,14 +1496,30 @@ let Migrator = {
             processedEntries += entries.length;
             entries = entries.map(e => upgrade(e)).filter(e => e !== null);
 
+            let entriesByFeed = new Map();
+            for(let [idx, entry] of entries.entries()) {
+                entry.id = rangeTop.entries - processedEntries + idx + 1;
+                let array = entriesByFeed.get(entry.feedID) || [];
+                array.push(entry);
+                entriesByFeed.set(entry.feedID, array);
+            }
             // The "store" transaction
             let tx = db.transaction(['migrations', 'entries', 'revisions'], 'readwrite');
-            for(let entry of entries) {
-                //TODO: this should work like push to find duplicates
+            for(let [feedID, array] of entriesByFeed.entries()) {
+                Database._pushFeedEntries({
+                    tx,
+                    entries: array,
+                    feed: Database.getFeed(feedID),
+                    // These entries are probably older than anything already in the DB
+                    ignoreUpdates: true,
+                });
             }
-            // TODO: this should be async tail, not sync one
+            // In the same transaction
             descriptor = { ...descriptor, lastTransferredEntry, processedEntries, rangeTop};
             tx.objectStore('migrations').put(descriptor);
+
+            await DbUtil.transactionPromise(tx);
+            console.log("Chunk saved.");
         }
     },
 
