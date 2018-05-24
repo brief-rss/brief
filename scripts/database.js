@@ -176,17 +176,31 @@ let Database = {
     },
 
     _upgradeEntry(value) {
-        // On next migration: add switch on _v?
-        value.read = value.read ? 1 : 0;
-        value.markedUnreadOnUpdate = value.markedUnreadOnUpdate ? 1 : 0;
-        if(value.deleted === 1) {
-            value.deleted = 'trashed';
-        } else if(value.deleted === 2) {
-            value.deleted = 'deleted';
+        switch(value._v || undefined) {
+            case this.DB_VERSION:
+                return value;
+            case undefined:
+                // Booleans not indexed by IndexedDB
+                value.read = value.read ? 1 : 0;
+                value.markedUnreadOnUpdate = value.markedUnreadOnUpdate ? 1 : 0;
+                // More self-describing values
+                if(value.deleted === 1) {
+                    value.deleted = 'trashed';
+                } else if(value.deleted === 2) {
+                    value.deleted = 'deleted';
+                }
+                delete value.bookmarked; // Use entry.starred
+                delete value.primaryHash;
+                delete value.secondaryHash;
+            // fallthrough
+            case 0:
+            case 10:
+            case 20:
+            case 30:
+                // next migration
+            // fallthrough
         }
-        delete value.bookmarked; // Use entry.starred
-        delete value.primaryHash;
-        delete value.secondaryHash;
+        //TODO: upgrade all revisions too, if needed
         value._v = this.DB_VERSION;
         return value;
     },
