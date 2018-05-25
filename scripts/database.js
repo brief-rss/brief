@@ -603,10 +603,10 @@ let Database = {
             entry = this._entryFromItem(entry);
         }
 
-        let req = tx.objectStore('revisions').put(entry.revisions[0]);
+        let req = tx.objectStore('revisions').add(entry.revisions[0]);
         req.onsuccess = ({target}) => {
             entry.revisions[0] = {id: target.result};
-            let req = tx.objectStore('entries').put(entry);
+            let req = tx.objectStore('entries').add(entry);
             req.onsuccess = ({target}) => {
                 entry.id = target.result;
                 entries.push(entry);
