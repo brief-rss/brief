@@ -26,13 +26,14 @@ var init = async function init() {
     });
     Comm.broadcast('update-query-status');
 
+    let refreshView = debounced(100, () => ViewList.refresh());
     Comm.registerObservers({
         'feedlist-updated': ({feeds}) => {
-            ViewList.refresh();
+            refreshView();
             FeedList.rebuild(feeds);
         },
         'entries-updated': ({feeds}) => {
-            ViewList.refresh();
+            refreshView();
             FeedList.refreshFeedTreeitems(feeds);
             //TODO: taglist refresh
         },
