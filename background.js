@@ -59,7 +59,7 @@ const Brief = {
         Prefs.addObserver('showUnreadCounter', () => this._updateUI());
         Comm.registerObservers({
             'feedlist-updated': () => this._updateUI(),
-            'entries-updated': () => this._updateUI(), //TODO: there was a debounce here...
+            'entries-updated': debounced(100, () => this._updateUI()),
             'subscribe-get-feeds': ({windowId}) => this._windowFeeds.get(windowId),
             'subscribe-add-feed': ({feed}) => Database.addFeeds(feed).catch(console.error),
         });

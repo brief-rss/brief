@@ -25,6 +25,21 @@ function xhrPromise(request) {
 
 // ===== Misc helpers =====
 
+function debounced(delay, callback) {
+    let active = false;
+
+    return async () => {
+        if(active === true) {
+            return;
+        }
+        active = true;
+        wait(delay).then(() => {
+            active = false;
+            callback();
+        })
+    }
+}
+
 // Iterate nodes in a XPathResult
 function iterSnapshot(result) {
     return {
