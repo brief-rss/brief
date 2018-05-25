@@ -25,6 +25,8 @@
 // mb1193394, fixed in Firefox 60
 let Database = {
     // If upping, check migration in both _upgradeSchema and _upgradeEntry/_upgradeEntries
+    // Note that the Migrator has `assert !(db.version > 30)`
+    // and the migration is started from the upgrade path only
     DB_VERSION: 40,
 
     _db: null,
@@ -45,16 +47,42 @@ let Database = {
         return Object.assign({}, feed);
     },
 
+    /**
+     * Initialize the DB and start migration job if needed.
+     *
+     * Note that the previous DB version can be either in `default` or in `persistent` storage
+     * (Brief 2.4 on ESR 52 used `default` as `persistent` did not work; in other cases
+     * 2.4 to 2.5.5 used to use `persistent`).
+     */
     async init() {
         if(this._db)
             return;
-        // Open current DB
-        let {storage} = await browser.storage.local.get({storage: 'persistent'});
-        let {db} = await this._open({
-            storage,
+
+        let upgrade = null;
+        if(Comm.master) {
+            // Open the persistent DB, if present
+            let prev = null;
+            let prevDb = await this._open({
+                storage: 'persistent',
+            });
+            if(prevDb && prevDb.version > 0) {
+                prev = await Migrator.studySource({db: prevDb});
+                console.log(
+                    `Brief: prev database has ${prev.feeds.length} feeds and ` +
+                    `${prev.count.entries} entries`
+                );
+            }
+
+            // Upgrades and migrations on master only
+            upgrade = (event) => this._upgradeWithMigration({event, prev});
+        }
+
+        // Open the current (default) DB
+        let db = await this._open({
             version: this.DB_VERSION,
-            upgrade: this._upgradeSchema,
+            upgrade,
         });
+        navigator.storage.persist();
         this._db = db;
         await this.loadFeeds();
         let entryCount = await this.countEntries();
@@ -128,10 +156,18 @@ let Database = {
             return null;
         }
         console.log(`Brief: opened ${description}`);
-        return {db};
+        return db;
     },
 
-    _upgradeSchema(event) {
+    _upgradeWithMigration({event, prev}) {
+        this._upgradeSchema({event});
+        let {result: db, transaction: tx} = event.target;
+        if(prev !== null) {
+            Migrator.startMigration({db, tx, source: prev, upgrade: v => this._upgradeEntry(v)});
+        }
+    },
+
+    _upgradeSchema({event}) {
         let {oldVersion} = event;
         if(oldVersion === 0) {
             console.log(`Creating the database`);
