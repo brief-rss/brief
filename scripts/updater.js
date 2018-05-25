@@ -302,7 +302,7 @@ let FaviconFetcher = {
         if (!feed.websiteURL) {
             return;
         }
-        let url = URL(feed.websiteURL).origin;
+        let url = new URL(feed.websiteURL).origin;
         let doc = await this._fetchDocFromURL(url);
 
         let faviconURL = this._getFaviconURLFromDoc(feed, doc);
