@@ -572,21 +572,7 @@ let Database = {
         return {entries: allEntries, newEntries: newEntries};
     },
 
-    _addEntry(next, {tx, entries}) {
-        let entry = {
-            _v: this.DB_VERSION,
-            feedID: next.feedID,
-            providedID: next.providedID,
-            entryURL: next.entryURL,
-            date: next.date || Date.now(),
-            revisions: [{}],
-            tags: [],
-            read: 0,
-            markedUnreadOnUpdate: 0,
-            starred: 0,
-            deleted: 0,
-        };
-
+    _entryFromItem(next) {
         let revision = {
             title: next.title,
             content: next.content || next.summary,
@@ -594,9 +580,32 @@ let Database = {
             updated: next.updated || 0,
         };
 
-        let req = tx.objectStore('revisions').put(revision);
+        let entry = {
+            _v: this.DB_VERSION,
+            feedID: next.feedID,
+            providedID: next.providedID,
+            entryURL: next.entryURL,
+            date: next.date || Date.now(),
+            revisions: [revision],
+            tags: [],
+            read: 0,
+            markedUnreadOnUpdate: 0,
+            starred: 0,
+            deleted: 0,
+        };
+        return entry;
+    },
+
+    _addEntry(next, {tx, entries}) {
+        // Single-revision only for now
+        let entry = next;
+        if(entry.revisions === undefined) {
+            entry = this._entryFromItem(entry);
+        }
+
+        let req = tx.objectStore('revisions').put(entry.revisions[0]);
         req.onsuccess = ({target}) => {
-            entry.revisions[0].id = target.result;
+            entry.revisions[0] = {id: target.result};
             let req = tx.objectStore('entries').put(entry);
             req.onsuccess = ({target}) => {
                 entry.id = target.result;
