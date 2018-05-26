@@ -1543,6 +1543,7 @@ let Migrator = {
 
     async _runMigration({db, source, upgrade, descriptor}) {
         while(true) {
+            let start = performance.now();
             let {lastTransferredEntry, processedEntries, count, rangeTop} = descriptor;
             let remainingEntryCount = count.entries - processedEntries;
             if(remainingEntryCount <= 0) {
@@ -1581,7 +1582,10 @@ let Migrator = {
             tx.objectStore('migrations').put(descriptor);
 
             await DbUtil.transactionPromise(tx);
-            console.log("Chunk saved.");
+            console.log(
+                `Chunk ${processedEntries / this.BATCH_SIZE} / ` +
+                `${count.entries / this.BATCH_SIZE}` +
+                ` processed in ${performance.now() - start} ms`);
         }
     },
 
