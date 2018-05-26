@@ -186,7 +186,6 @@ let Database = {
                     keyPath: "id", autoIncrement: true});
                 entries.createIndex("date", "date");
                 entries.createIndex("feedID_date", ["feedID", "date"]);
-                entries.createIndex("primaryHash", "primaryHash"); // sorry, unused
                 entries.createIndex("bookmarkID", "bookmarkID");
                 entries.createIndex("entryURL", "entryURL");
                 entries.createIndex("tagName", "tags", {multiEntry: true});
@@ -199,13 +198,10 @@ let Database = {
             case 20:
                 entries = tx.objectStore('entries');
                 // Enables quick unread filtering
-                entries.deleteIndex("primaryHash"); // Unused
                 entries.createIndex(
                     'deleted_starred_read_feedID_date',
                     ['deleted', 'starred', 'read', 'feedID', 'date']);
                 entries.createIndex("_v", "_v"); // Used for gradual migration in big databases
-                entries.createIndex("feedID_providedID", ["feedID", "providedID"]);
-                entries.createIndex("feedID_entryURL", ["feedID", "entryURL"]);
                 // TODO: introduce async editing migrations when possible
                 let cursor = entries.openCursor();
                 cursor.onsuccess = ({target}) => {
@@ -219,7 +215,18 @@ let Database = {
             // fallthrough
             case 30:
                 db.createObjectStore("migrations", {keyPath: "name"});
+                entries = tx.objectStore('entries');
+                entries.createIndex(
+                    "feedID_providedID_entryURL",
+                    ["feedID", "providedID", "entryURL"]
+                );
             // fallthrough
+        }
+        for(let index of ["primaryHash", "feedID_providedID", "feedID_entryURL"]) {
+            let entries = tx.objectStore('entries');
+            if(entries.indexNames.contains(index)) {
+                entries.deleteIndex(index);
+            }
         }
     },
 
@@ -245,6 +252,7 @@ let Database = {
             case 10:
             case 20:
             case 30:
+                value.providedID = value.providedID || "";
                 // next migration
             // fallthrough
         }
@@ -631,7 +639,11 @@ let Database = {
                 }
 
 
-                let queryUrl = {feeds: feedID, entryURL: Array.from(entriesByUrl.keys())};
+                let queryUrl = {
+                    feeds: feedID,
+                    providedID: "",
+                    entryURL: Array.from(entriesByUrl.keys()),
+                };
                 // Chain, scan 2: URL-only entries
                 this.query(queryUrl)._update({
                     tx,
@@ -640,9 +652,6 @@ let Database = {
                     action: (entry, {tx}) => {
                         let updateArray = entriesByUrl.get(entry.entryURL) || [];
                         updateArray = updateArray.filter(e => !found.has(e));
-                        if(entry.providedID) { // If there's an ID, it's already known to mismatch
-                            updateArray = updateArray.filter(e => !e.providedID);
-                        }
                         if(!updateArray.length) {
                             return;
                         }
@@ -679,7 +688,7 @@ let Database = {
         let entry = {
             _v: this.DB_VERSION,
             feedID: next.feedID,
-            providedID: next.providedID,
+            providedID: next.providedID || "",
             entryURL: next.entryURL,
             date: next.date || Date.now(),
             revisions: [revision],
@@ -1261,14 +1270,11 @@ Query.prototype = {
             return 'id'; // Will be decoded to "no index, use primary key"
         }
 
-        // Search by [feedID, entryURL] during insertion
-        if(filters.entry.entryURL && filters.feeds && filters.feeds.length === 1) {
-            return ['feedID', 'entryURL'];
-        }
-
-        // Search by [feedID, providedID] during insertion
-        if(filters.entry.providedID && filters.feeds && filters.feeds.length === 1) {
-            return ['feedID', 'providedID'];
+        let singleFeed = filters.feeds && filters.feeds.length === 1;
+        // Search by [feedID, providedID, entryURL] during insertion
+        // providedID will be "" for entry-URL-and-no-providedID search
+        if(singleFeed && filters.entry.providedID !== undefined) {
+            return ['feedID', 'providedID', 'entryURL'];
         }
 
         // Search by [entryURL] for starring
@@ -1585,6 +1591,8 @@ let Migrator = {
      * need a per-entry IDB callback. Query.getEntries is not worth optimizing
      * for this use case as it never arises (either read+unread or starred+unstarred
      * is already multiple ranges).
+     *
+     * Note that it has to work with any old DB versions as it's run before upgrade.
      */
     /*async*/ _fetchNextBatch({source, range, count=this.BATCH_SIZE}) {
         let tx = source.db.transaction(['entries', 'revisions']);
