@@ -130,8 +130,17 @@ const Brief = {
         "testpilot.firefox.com",
     ]),
 
+    BRIEF_SUBSCRIBE: new RegExp(
+        "(chrome://brief/content/brief\\.(xul|xhtml)\\?subscribe=|brief://subscribe/)(.*)"),
+
     async queryFeeds({tabId, url, title, windowId}) {
         let replies;
+        let matchSubscribe = this.BRIEF_SUBSCRIBE.exec(url);
+        if(matchSubscribe) {
+            let url = decodeURIComponent(matchSubscribe.pop());
+            Database.addFeeds({url});
+            browser.tabs.update({url: '/ui/brief.xhtml'});
+        }
         try {
             replies = await browser.tabs.executeScript(tabId, {
                 file: '/content_scripts/scan-for-feeds.js',
