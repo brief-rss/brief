@@ -59,9 +59,9 @@ let Database = {
             return;
 
         let upgrade = null;
+        let prev = null;
         if(Comm.master) {
             // Open the persistent DB, if present
-            let prev = null;
             let prevDb = await this._open({
                 storage: 'persistent',
             });
@@ -119,6 +119,14 @@ let Database = {
             //TODO: onChanged
             //FIXME: removed one of multiple not working
         }
+
+        if(prev) {
+            /*spawn*/ Migrator.runMigration({
+                db,
+                source: prev,
+                upgrade: v => this._upgradeEntry(v),
+            });
+        }
     },
 
     async _open({name="brief", version=undefined, storage="default", upgrade=null}) {
@@ -163,7 +171,7 @@ let Database = {
         this._upgradeSchema({event});
         let {result: db, transaction: tx} = event.target;
         if(prev !== null) {
-            Migrator.startMigration({db, tx, source: prev, upgrade: v => this._upgradeEntry(v)});
+            Migrator.startMigration({tx, source: prev});
         }
     },
 
@@ -1479,7 +1487,7 @@ let Migrator = {
 
     /// Initialize the migration in the target database
     /// Step 1: collect information from the target database
-    /*async*/ startMigration({db, tx, source, upgrade}) {
+    /*async*/ startMigration({tx, source}) {
         console.log("Brief: starting migration from", source);
         let targets = tx.objectStore('migrations').getAll(source.name);
         let lastEntry = tx.objectStore('entries').openKeyCursor(null, 'prev');
@@ -1487,7 +1495,7 @@ let Migrator = {
         let feeds = tx.objectStore('feeds').getAll();
         feeds.onsuccess = () => {
             this._startMigration({
-                db, tx, source, upgrade,
+                tx, source,
                 targets: targets.result,
                 feeds: feeds.result,
                 last: {
@@ -1499,19 +1507,13 @@ let Migrator = {
     },
 
     /// Step 2: all information is available, start the migration
-    /*async*/ _startMigration({db, tx, source, upgrade, targets, feeds, last}) {
+    /*async*/ _startMigration({tx, source, targets, feeds, last}) {
         let descriptor;
         if(targets.length > 0) {
             if(targets.length > 1) {
                 throw `Brief: duplicate migration markers for ${source.name}`;
             }
             descriptor = targets[0];
-            let {processedEntries, count} = descriptor;
-            if(processedEntries === count.entries) {
-                // Everything already transferred and presumably already flushed
-                indexedDB.deleteDatabase(source.db.name);
-                return;
-            }
         } else {
             //TODO: merge old and new feed lists
             if(feeds.length > 0) {
@@ -1538,10 +1540,20 @@ let Migrator = {
             tx.objectStore('entries').delete(maxEntry);
             tx.objectStore('migrations').add(descriptor);
         }
-        /*spawn*/ this._runMigration({db, source, upgrade, descriptor});
     },
 
-    async _runMigration({db, source, upgrade, descriptor}) {
+    async runMigration({db, source, upgrade}) {
+        let descriptor = await DbUtil.requestPromise(
+            db.transaction('migrations').objectStore('migrations').get(source.name)
+        );
+
+        let {processedEntries, count} = descriptor;
+        if(processedEntries === count.entries) {
+            // Everything already transferred and presumably already flushed
+            console.info("Migration already done, dropping the old database");
+            indexedDB.deleteDatabase(source.db.name, {storage: 'persistent'});
+            return;
+        }
         while(true) {
             let start = performance.now();
             let {lastTransferredEntry, processedEntries, count, rangeTop} = descriptor;
