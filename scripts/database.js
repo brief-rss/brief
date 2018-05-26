@@ -535,7 +535,7 @@ let Database = {
         if(!entries.length || (modified && modified <= feed.dateModified)) {
             return {entries: [], newEntries: []};
         }
-        let newEntries = await this._pushFeedEntries({feed, entries});
+        let newEntries = await this._pushEntries({feed, entries});
         let feedUpdates = Object.assign({}, {
             feedID: feed.feedID,
             title: feed.title || parsedFeed.title,
@@ -551,13 +551,43 @@ let Database = {
         return newEntries;
     },
 
-    async _pushFeedEntries({feed, entries, ignoreUpdates=false, tx=undefined}) {
+    async _pushEntries({entries, ignoreUpdates=false, tx=undefined}) {
         if(entries.length === 0) {
             return;
         }
         if(Comm.verbose) {
-            console.log("Pushing entries:", entries, "to", feed);
+            console.log("Pushing entries:", entries);
         }
+
+        let entriesByFeed = new Map();
+        for(let entry of entries) {
+            let array = entriesByFeed.get(entry.feedID) || [];
+            array.push(entry);
+            entriesByFeed.set(entry.feedID, array);
+        }
+        let promises = [];
+        for(let [feedID, array] of entriesByFeed.entries()) {
+            promises.push(this._pushFeedEntries({
+                tx,
+                entries: array,
+                feed: this.getFeed(feedID),
+                ignoreUpdates,
+            }));
+        }
+        let returns = await Promise.all(promises);
+        let allEntries = Array.concat(...returns.map(r => r.entries));
+        Comm.broadcast('entries-updated', {
+            feeds: Array.from(entriesByFeed.keys()),
+            entries: allEntries,
+            changes: {content: true},
+        });
+        return {
+            entries: allEntries,
+            newEntries: Array.concat(...returns.map(r => r.newEntries)),
+        };
+    },
+
+    async _pushFeedEntries({feed, entries, ignoreUpdates=false, tx=undefined}) {
         let feedID = feed.feedID;
         let markUnread = feed.markModifiedEntriesUnread;
         let entriesById = new Map(); // providedID, if present, *must* be unique
@@ -632,11 +662,6 @@ let Database = {
             },
         });
         allEntries.push(...newEntries);
-        Comm.broadcast('entries-updated', {
-            feeds: [feedID],
-            entries: allEntries,
-            changes: {content: true},
-        });
         return {entries: allEntries, newEntries: newEntries};
     },
 
@@ -1531,26 +1556,19 @@ let Migrator = {
             processedEntries += entries.length;
             entries = entries.map(e => upgrade(e)).filter(e => e !== null);
 
-            let entriesByFeed = new Map();
             for(let [idx, entry] of entries.entries()) {
                 entry.id = rangeTop.entries - processedEntries + idx + 1;
-                let array = entriesByFeed.get(entry.feedID) || [];
-                array.push(entry);
-                entriesByFeed.set(entry.feedID, array);
             }
             // The "store" transaction
             let tx = db.transaction(['migrations', 'entries', 'revisions'], 'readwrite');
-            for(let [feedID, array] of entriesByFeed.entries()) {
-                Database._pushFeedEntries({
-                    tx,
-                    entries: array,
-                    feed: Database.getFeed(feedID),
-                    // These entries are probably older than anything already in the DB
-                    ignoreUpdates: true,
-                });
-            }
+            Database._pushEntries({
+                tx,
+                entries,
+                // These entries are probably older than anything already in the DB
+                ignoreUpdates: true,
+            });
             // In the same transaction
-            descriptor = { ...descriptor, lastTransferredEntry, processedEntries, rangeTop};
+            descriptor = { ...descriptor, lastTransferredEntry, processedEntries};
             tx.objectStore('migrations').put(descriptor);
 
             await DbUtil.transactionPromise(tx);
