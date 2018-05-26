@@ -134,7 +134,7 @@ const Brief = {
         "(chrome://brief/content/brief\\.(xul|xhtml)\\?subscribe=|brief://subscribe/)(.*)"),
 
     async queryFeeds({tabId, url, title, windowId}) {
-        let replies;
+        let replies = [[]];
         let matchSubscribe = this.BRIEF_SUBSCRIBE.exec(url);
         if(matchSubscribe) {
             let url = decodeURIComponent(matchSubscribe.pop());
