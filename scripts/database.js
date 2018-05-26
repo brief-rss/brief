@@ -590,24 +590,16 @@ let Database = {
     async _pushFeedEntries({feed, entries, ignoreUpdates=false, tx=undefined}) {
         let feedID = feed.feedID;
         let markUnread = feed.markModifiedEntriesUnread;
-        let entriesById = new Map(); // providedID, if present, *must* be unique
-        let entriesByUrl = new Map();
         let found = new Set();
         for(let entry of entries) {
-            let {providedID, entryURL} = entry;
             if(feedID !== entry.feedID) {
                 console.error(feed, entry);
                 throw "pushFeedEntries cannot be used for multiple feeds at a time";
             }
-            if(providedID) {
-                entriesById.set(providedID, entry);
-            }
-            if(entryURL) {
-                let array = entriesByUrl.get(entryURL) || [];
-                array.push(entry);
-                entriesByUrl.set(entryURL, array);
-            }
         }
+        // providedID, if present, *must* be unique
+        let entriesById = new Map(entries.map(e => [e.providedID, e]));
+
         let queryId = {feeds: feedID, providedID: Array.from(entriesById.keys())};
         let allEntries = [];
         let newEntries = []; // For update notification
@@ -628,6 +620,17 @@ let Database = {
                 allEntries.push(entry);
             },
             then: ({tx}) => {
+                let entriesByUrl = new Map();
+                for(let entry of entries.filter(e => !found.has(e))) {
+                    let {entryURL} = entry;
+                    if(entryURL) {
+                        let array = entriesByUrl.get(entryURL) || [];
+                        array.push(entry);
+                        entriesByUrl.set(entryURL, array);
+                    }
+                }
+
+
                 let queryUrl = {feeds: feedID, entryURL: Array.from(entriesByUrl.keys())};
                 // Chain, scan 2: URL-only entries
                 this.query(queryUrl)._update({
