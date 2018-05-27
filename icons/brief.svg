@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   width="64"
+   height="64"
+   viewBox="0 0 64 64"
+   version="1.1">
+  <defs>
+    <style type="text/css">
+      #pulsing:target ~ #brief-icon { animation: pulse 1s ease-in-out infinite alternate; }
+      @keyframes pulse {
+        from { opacity: 1.0; }
+        to { opacity: 0.0; }
+      }
+    </style>
+  </defs>
+  <g id="pulsing"/>
+  <g id="brief-icon"
+     style="display:inline"
+     transform="translate(-57.150002,-49.879168)">
+    <circle
+       style="fill:#ff6901;fill-opacity:1;stroke:none"
+       cx="68.062126"
+       cy="102.96705"
+       r="10.912123" />
+    <path
+       style="fill:#ff6900;fill-opacity:1;fill-rule:evenodd;stroke:none"
+       d="M 59.009996,73.950741 C 80.710243,81.390825 91.002358,94.782975 98.070437,112.01917 104.87,81.52159 84.306281,68.122672 59.009996,73.950741 Z"/>
+    <path
+       style="fill:#ff6900;fill-opacity:1;fill-rule:evenodd;stroke:none"
+       d="M 65.954077,52.870503 C 94.970402,61.054597 112.0826,85.482874 118.53067,104.08308 131.30282,63.28662 94.722402,42.330384 65.954077,52.870503 Z"/>
+  </g>
+</svg>
