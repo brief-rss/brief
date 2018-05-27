@@ -33,11 +33,7 @@
         "default_title": "Brief"
     },
     "page_action": {
-        "default_icon": {
-            "16": "icons/brief-icon-16.png",
-            "32": "icons/brief-icon-32.png",
-            "64": "icons/brief-icon-64.png"
-        },
+        "default_icon": "icons/brief.svg",
         "default_title": "Subscribe",
         "default_popup": "/ui/subscribe/subscribe.xhtml",
         "browser_style": true

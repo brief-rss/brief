@@ -141,6 +141,7 @@ const Brief = {
             Database.addFeeds({url});
             browser.tabs.update({url: '/ui/brief.xhtml'});
         }
+        let path = null;
         try {
             replies = await browser.tabs.executeScript(tabId, {
                 file: '/content_scripts/scan-for-feeds.js',
@@ -148,7 +149,7 @@ const Brief = {
             });
         } catch(ex) {
             if(ex.message === 'Missing host permission for the tab') {
-                // There are two known cases: AMO and feed preview pages
+                // There are a few known cases: about:, restricted (AMO) and feed preview pages
                 if(url === undefined) {
                     ({url, title} = await browser.tabs.get(tabId));
                 }
@@ -159,7 +160,9 @@ const Brief = {
                 } else if(Brief.RESTRICTED_DOMAINS.has(parsedUrl.host)) {
                     // FIXME: maybe try fetching them as `restricted.domain.com.`?
                 } else {
+                    // Assume this is a feed preview/subscribe page
                     replies = [[{url, linkTitle: title}]];
+                    path = '/icons/brief.svg#pulsing';
                 }
             } else {
                 throw ex;
@@ -168,6 +171,7 @@ const Brief = {
         let feeds = replies[0];
         if(feeds.length > 0) {
             browser.pageAction.show(tabId);
+            browser.pageAction.setIcon({path, tabId});
         } else {
             browser.pageAction.hide(tabId);
         }
