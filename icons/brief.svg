@@ -10,7 +10,7 @@
       #pulsing:target ~ #brief-icon { animation: pulse 1s ease-in-out infinite alternate; }
       @keyframes pulse {
         from { opacity: 1.0; }
-        to { opacity: 0.0; }
+        to { opacity: 0.2; }
       }
     </style>
   </defs>
