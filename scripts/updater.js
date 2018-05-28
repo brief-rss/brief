@@ -293,7 +293,7 @@ export let FaviconFetcher = {
         let faviconURL = this._getFaviconURLFromDoc(feed, doc);
         if (!faviconURL) {
             return;
-        };
+        }
 
         let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
         return favicon;
@@ -309,7 +309,7 @@ export let FaviconFetcher = {
         let faviconURL = this._getFaviconURLFromDoc(feed, doc);
         if (!faviconURL) {
             return;
-        };
+        }
 
         let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
         return favicon;

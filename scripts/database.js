@@ -881,7 +881,7 @@ export let Database = {
 
 function Query(filters) {
     Object.assign(this, filters);
-};
+}
 
 Query.prototype = {
 
