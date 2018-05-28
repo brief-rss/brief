@@ -15,7 +15,6 @@
         "storage", "unlimitedStorage", "downloads", "tabs", "notifications"],
     "background": {
         "scripts": [
-            "/scripts/plural-data.js",
             "/scripts/utils.js",
             "/scripts/prefs.js",
             "/scripts/database.js",
