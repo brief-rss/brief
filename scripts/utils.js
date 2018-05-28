@@ -156,10 +156,8 @@ let Comm = {
                     this._notifyObservers(message).catch(() => undefined),
                     browser.runtime.sendMessage(message).catch(() => undefined),
                 ]).then(([local, remote]) => local !== undefined ? local : remote);
-                break;
             case 'master':
                 return this._notifyObservers(message);
-                break;
         }
     },
 

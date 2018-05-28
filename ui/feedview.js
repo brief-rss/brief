@@ -1246,24 +1246,19 @@ EntryView.prototype = {
             switch (true) {
                 case relativeDate.deltaDaySteps === 0:
                     return Strings['entryDate_today'];
-                    break;
 
                 case relativeDate.deltaDaySteps === 1:
                     return Strings['entryDate_yesterday'];
-                    break;
 
                 case relativeDate.deltaDaySteps < 7:
                     return this.date.toLocaleDateString(lang, {weekday: 'long'});
-                    break;
 
                 case relativeDate.deltaYearSteps === 0:
                     return this.date.toLocaleDateString(lang, {month: 'long', day: 'numeric'});
-                    break;
 
                 default:
                     return this.date.toLocaleDateString(lang, {
                         year: 'numeric', month: 'long', day: 'numeric'});
-                    break;
             }
         }
         else {
