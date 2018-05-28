@@ -1,6 +1,4 @@
-'use strict';
-
-let Prefs = {
+export let Prefs = {
     // Message channel
     _port: null,
     // Current pref values

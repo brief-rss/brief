@@ -1,4 +1,12 @@
-'use strict';
+import {Database} from "/scripts/database.js";
+import {Prefs} from "/scripts/prefs.js";
+import {OPML} from "/scripts/opml.js";
+import {Comm} from "/scripts/utils.js";
+import {Commands, Persistence, Shortcuts, getElement} from "./brief.js";
+import {FeedView} from "./feedview.js";
+
+
+export var gCurrentView;
 
 // An almost generic TreeView component. Some custom structure is inlined in _updateElement
 function TreeView(aElementOrId) {
@@ -274,7 +282,7 @@ TreeView.prototype = {
     },
 };
 
-let ViewList = {
+export let ViewList = {
     get tree() {
         delete this.tree;
         return this.tree = new TreeView('view-list');
@@ -368,7 +376,7 @@ let ViewList = {
 }
 
 
-let TagList = {
+export let TagList = {
 
     ready: false,
 
@@ -474,7 +482,7 @@ let TagList = {
 }
 
 
-let FeedList = {
+export let FeedList = {
 
     _feedsCache: null,
     _built: false,
@@ -732,7 +740,7 @@ let FeedList = {
 
 
 // Custom menu handler to avoid Firefox default items on the Brief context menu
-let ContextMenuModule = {
+export let ContextMenuModule = {
     _observer: null,
     _currentTarget: null,
 
@@ -833,7 +841,7 @@ let ContextMenuModule = {
 };
 
 
-let ViewListContextMenu = {
+export let ViewListContextMenu = {
     build() {
         const handlers = {
             'ctx-mark-special-folder-read': () => this.markFolderRead(),
@@ -874,7 +882,7 @@ let ViewListContextMenu = {
 }
 
 
-let TagListContextMenu = {
+export let TagListContextMenu = {
     build() {
         const handlers = {
             'ctx-mark-tag-read': () => this.markTagRead(),
@@ -908,7 +916,7 @@ let TagListContextMenu = {
 }
 
 
-let FeedListContextMenu = {
+export let FeedListContextMenu = {
     build() {
         const handlers = {
             'ctx-mark-feed-read': () => this.markFeedRead(),
@@ -992,7 +1000,7 @@ let FeedListContextMenu = {
 
 }
 
-let DropdownMenus = {
+export let DropdownMenus = {
     build() {
         let opmlInput = document.getElementById('open-opml');
         const handlers = {

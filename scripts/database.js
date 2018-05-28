@@ -1,4 +1,7 @@
-'use strict';
+import {Prefs} from "/scripts/prefs.js";
+import {FeedUpdater, FaviconFetcher} from "/scripts/updater.js";
+import {Comm, parseDateValue, asArray, hashString} from "/scripts/utils.js";
+
 
 /**
  * Database design and considerations
@@ -23,7 +26,7 @@
 // IndexedDB does not play nice with `async` (transaction ends before execution restarts)
 // and the same problem with native Promise
 // mb1193394, fixed in Firefox 60
-let Database = {
+export let Database = {
     // If upping, check migration in both _upgradeSchema and _upgradeEntry/_upgradeEntries
     // Note that the Migrator has `assert !(db.version > 30)`
     // and the migration is started from the upgrade path only

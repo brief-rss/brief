@@ -1,4 +1,12 @@
-'use strict';
+import {Database} from "/scripts/database.js";
+import {Prefs} from "/scripts/prefs.js";
+import {
+    Comm, expectedEvent, wait, openBackgroundTab, iterSnapshot, getPluralForm, RelativeDate
+} from "/scripts/utils.js";
+import {Commands, Persistence, getElement} from "./brief.js";
+import {gCurrentView, FeedList} from "./feedlist.js";
+
+
 // Minimal number of window heights worth of entries loaded ahead of the
 // current scrolling position at any given time.
 const MIN_LOADED_WINDOW_HEIGHTS = 1;
@@ -28,7 +36,7 @@ const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
  * @param aQuery
  *        Query that selects entries contained by the view.
  */
-function FeedView(aTitle, aQuery) {
+export function FeedView(aTitle, aQuery) {
     this.title = aTitle;
     this._fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
 
@@ -1376,7 +1384,8 @@ async function showElement(aElement, aAnimate) {
 }
 
 
-Object.defineProperty(this, 'Strings', {
+/* global Strings */
+Object.defineProperty(window, 'Strings', {
     get: () => {
         let cachedStringsList = [
             'entryDate_justNow',
@@ -1397,8 +1406,8 @@ Object.defineProperty(this, 'Strings', {
         for (let stringName of cachedStringsList)
             obj[stringName] = browser.i18n.getMessage(stringName);
 
-        delete this.Strings;
-        return this.Strings = obj;
+        delete window.Strings;
+        return window.Strings = obj;
     },
     configurable: true
 });

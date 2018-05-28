@@ -1,4 +1,4 @@
-'use strict';
+import {apply_i18n} from "/scripts/i18n.js";
 
 async function onload(aEvent) {
     apply_i18n(document);

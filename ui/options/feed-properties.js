@@ -1,4 +1,9 @@
-'use strict';
+import {Database} from "/scripts/database.js";
+import {apply_i18n} from "/scripts/i18n.js";
+import {Prefs} from "/scripts/prefs.js";
+import {Comm, wait} from "/scripts/utils.js";
+import {PrefBinder, Enabler} from "./options-common.js";
+
 
 async function init() {
     apply_i18n(document);

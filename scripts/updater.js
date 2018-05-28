@@ -1,8 +1,9 @@
-'use strict';
+import {Database} from "/scripts/database.js";
+import {Prefs} from "/scripts/prefs.js";
+import {Comm, wait, xhrPromise, getPluralForm} from "/scripts/utils.js";
 
 
-
-let FeedUpdater = {
+export let FeedUpdater = {
     UPDATE_TIMER_INTERVAL: 60000, // 1 minute
     FAVICON_REFRESH_INTERVAL: 14*24*60*60*1000, // 2 weeks
 
@@ -236,7 +237,7 @@ let FeedUpdater = {
 };
 
 
-let FaviconFetcher = {
+export let FaviconFetcher = {
     TIMEOUT: 25000,
 
     async updateFavicon(feed) {
@@ -413,7 +414,7 @@ let FaviconFetcher = {
 };
 
 
-let FeedFetcher = {
+export let FeedFetcher = {
     TIMEOUT: 25000, // 25 seconds
 
     async fetchFeed(feed) {

@@ -1,6 +1,13 @@
-'use strict';
-
-var gCurrentView;
+import {Database} from "/scripts/database.js";
+import {apply_i18n} from "/scripts/i18n.js";
+import {Prefs} from "/scripts/prefs.js";
+import {Comm, expectedEvent, wait, debounced, openBackgroundTab} from "/scripts/utils.js";
+import {
+    FeedList, ViewList, TagList, DropdownMenus,
+    ViewListContextMenu, TagListContextMenu, FeedListContextMenu,
+    ContextMenuModule,
+    gCurrentView
+} from "./feedlist.js";
 
 
 var init = async function init() {
@@ -91,7 +98,7 @@ var init = async function init() {
 }
 
 
-var Commands = {
+export var Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
         document.body.classList.remove('sidebar');
@@ -410,7 +417,7 @@ let SplitterModule = {
     },
 };
 
-let Persistence = {
+export let Persistence = {
     data: null,
 
     init: async function Persistence_init() {
@@ -449,7 +456,7 @@ let Persistence = {
     },
 };
 
-let Shortcuts = {
+export let Shortcuts = {
     mode: 'command',
 
     init: function Shortcuts_init() {
@@ -524,7 +531,7 @@ let Shortcuts = {
 
 // ------- Utility functions --------
 
-function getElement(aId) { return document.getElementById(aId); }
+export function getElement(aId) { return document.getElementById(aId); }
 
 // ===== Init =====
 window.addEventListener('load', () => init(), {once: true, passive: true});

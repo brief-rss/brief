@@ -1,4 +1,5 @@
-'use strict';
+import {Database} from "/scripts/database.js";
+import {T} from "./_harness.js";
 
 
 T.runTests('query', {

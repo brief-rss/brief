@@ -1,4 +1,8 @@
-'use strict';
+import {Database} from "/scripts/database.js";
+import {Prefs} from "/scripts/prefs.js";
+import {FeedUpdater} from "/scripts/updater.js";
+import {Comm, debounced} from "/scripts/utils.js";
+
 
 const Brief = {
     // Port for receiving status updates

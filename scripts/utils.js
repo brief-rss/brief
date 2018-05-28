@@ -1,20 +1,18 @@
-'use strict';
-
 // ===== Promise utilities =====
 
 // Adapt setTimeout for Promises
-function wait(delay) {
+export function wait(delay) {
     return new Promise(resolve => setTimeout(() => resolve(), delay));
 }
 
 // Wait for a specific event (for example, 'transitionend')
-function expectedEvent(element, event) {
+export function expectedEvent(element, event) {
     return new Promise((resolve, reject) => {
         element.addEventListener(event, resolve, {once: true, passive: true});
     });
 }
 
-function xhrPromise(request) {
+export function xhrPromise(request) {
     return new Promise((resolve, reject) => {
         request.onload = () => resolve(request.response);
         request.onerror = e => reject(e);
@@ -25,7 +23,7 @@ function xhrPromise(request) {
 
 // ===== Misc helpers =====
 
-function debounced(delay, callback) {
+export function debounced(delay, callback) {
     let active = false;
 
     return async () => {
@@ -41,7 +39,7 @@ function debounced(delay, callback) {
 }
 
 // Iterate nodes in a XPathResult
-function iterSnapshot(result) {
+export function iterSnapshot(result) {
     return {
         [Symbol.iterator]: function*() {
             for(let i = 0; i < result.snapshotLength; i++){
@@ -51,7 +49,7 @@ function iterSnapshot(result) {
     }
 }
 
-function asArray(v) {
+export function asArray(v) {
     if(Array.isArray(v)) {
         return v;
     } else {
@@ -59,7 +57,7 @@ function asArray(v) {
     }
 }
 
-function parseDateValue(date) {
+export function parseDateValue(date) {
     // TODO: maybe MIL timezones here?
     if(!date) {
         return;
@@ -67,14 +65,14 @@ function parseDateValue(date) {
     return (new Date(date)).getTime();
 }
 
-async function hashString(str) {
+export async function hashString(str) {
     let enc = new TextEncoder();
     let buffer = await crypto.subtle.digest('SHA-1', enc.encode(str));
     let u8arr = new Uint8Array(buffer);
     return Array.from(u8arr).map(b => ('00' + b.toString(16)).slice(-2)).join('');
 }
 
-function RelativeDate(aAbsoluteTime) {
+export function RelativeDate(aAbsoluteTime) {
     this.currentDate = new Date();
     this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;
 
@@ -112,7 +110,7 @@ RelativeDate.prototype = {
 }
 
 
-function getPluralForm(number, forms) {
+export function getPluralForm(number, forms) {
     let knownForms = browser.i18n.getMessage('pluralRule').split(';');
     let rules = new Intl.PluralRules();
     let form = rules.select(number);
@@ -120,7 +118,7 @@ function getPluralForm(number, forms) {
 }
 
 
-async function openBackgroundTab(url) {
+export async function openBackgroundTab(url) {
     let tab = await browser.tabs.getCurrent();
     try {
         await browser.tabs.create({active: false, url: url, openerTabId: tab.id})
@@ -135,7 +133,7 @@ async function openBackgroundTab(url) {
 }
 
 // ===== Messaging helpers =====
-let Comm = {
+export let Comm = {
     master: false,
     verbose: false,
     observers: new Set(),

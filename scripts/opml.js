@@ -1,7 +1,10 @@
-'use strict';
 // Based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
+import {Database} from "/scripts/database.js";
+import {Prefs} from "/scripts/prefs.js";
+import {Comm, expectedEvent} from "/scripts/utils.js";
 
-let OPML = {
+
+export let OPML = {
     async importOPML(file) {
         let reader = new FileReader();
         reader.readAsText(file); // assumes UTF-8

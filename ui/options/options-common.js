@@ -1,6 +1,7 @@
-'use strict';
+import {Prefs} from "/scripts/prefs.js";
 
-let PrefBinder = {
+
+export let PrefBinder = {
     init(options) {
         if(options) {
             this.getter = options.getter;
@@ -92,7 +93,7 @@ let PrefBinder = {
     },
 };
 
-let Enabler = {
+export let Enabler = {
     init() {
         for(let node of document.querySelectorAll('[data-requires]')) {
             let master = document.getElementById(node.dataset.requires);

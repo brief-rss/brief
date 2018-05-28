@@ -1,6 +1,4 @@
-'use strict';
-
-const T = {
+export const T = {
     runTest: async function(name, fun) {
         try {
             let result = fun();

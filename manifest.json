@@ -14,13 +14,7 @@
     "permissions": ["<all_urls>", "contextMenus", "bookmarks",
         "storage", "unlimitedStorage", "downloads", "tabs", "notifications"],
     "background": {
-        "scripts": [
-            "/scripts/utils.js",
-            "/scripts/prefs.js",
-            "/scripts/database.js",
-            "/scripts/updater.js",
-            "background.js"
-        ]
+        "page": "background.xhtml"
     },
     "browser_action": {
         "browser_style": true,

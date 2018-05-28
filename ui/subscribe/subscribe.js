@@ -1,4 +1,5 @@
-'use strict';
+import {Comm} from "/scripts/utils.js";
+
 
 async function onload(aEvent) {
     let {id: windowId} = await browser.windows.getCurrent();

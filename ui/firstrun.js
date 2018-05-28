@@ -1,3 +1,6 @@
+import {apply_i18n} from "/scripts/i18n.js";
+
+
 async function init() {
     apply_i18n(document);
     if (document.documentURI.match('tutorial')) {
