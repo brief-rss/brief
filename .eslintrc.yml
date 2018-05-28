@@ -9,6 +9,8 @@ parserOptions:
   sourceType: module
   ecmaVersion: 2018
 rules:
+
+  # Style
   indent:
     - warn
     - 4
@@ -19,14 +21,18 @@ rules:
   semi:
     - error
     - always
-  no-console:
-    - off
+
+  # Additional control
   import/no-cycle: warn
   import/first: warn
   # Would be nice to enforce order, but after resolution they are all relative
   import/order:
     - warn
     - newlines-between: never
+
+  # Allowed
+  no-console: off
+
 settings:
   import/resolver:
     babel-plugin-root-import:
