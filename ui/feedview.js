@@ -1317,7 +1317,7 @@ EntryView.prototype = {
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
-        for (let term of this.feedView.query.searchString.match(/[^\s:\*"-]+/g)) {
+        for (let term of this.feedView.query.searchString.match(/[^\s:*"-]+/g)) {
             let baseNode = this.feedView.document.createElement('span');
             baseNode.className = 'search-highlight';
             baseNode.textContent = term;
