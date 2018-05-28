@@ -202,7 +202,7 @@ export let Database = {
                 entries.createIndex("tagName", "tags", {multiEntry: true});
             // fallthrough
             case 10:
-                let feeds = db.createObjectStore("feeds", {
+                db.createObjectStore("feeds", {
                     keyPath: "feedID", autoIncrement: true});
                 // No indices needed - the feed list is always loaded to memory
             // fallthrough
@@ -213,16 +213,6 @@ export let Database = {
                     'deleted_starred_read_feedID_date',
                     ['deleted', 'starred', 'read', 'feedID', 'date']);
                 entries.createIndex("_v", "_v"); // Used for gradual migration in big databases
-                // TODO: introduce async editing migrations when possible
-                let cursor = entries.openCursor();
-                cursor.onsuccess = ({target}) => {
-                    let cursor = target.result;
-                    if(cursor) {
-                        let value = cursor.value;
-                        cursor.update(this._upgradeEntry(value));
-                        cursor.continue();
-                    }
-                };
             // fallthrough
             case 30:
                 db.createObjectStore("migrations", {keyPath: "name"});
@@ -239,6 +229,16 @@ export let Database = {
                 entries.deleteIndex(index);
             }
         }
+        // TODO: introduce async editing migrations when possible
+        let cursor = tx.objectStore('entries').openCursor();
+        cursor.onsuccess = ({target}) => {
+            let cursor = target.result;
+            if(cursor) {
+                let value = cursor.value;
+                cursor.update(this._upgradeEntry(value));
+                cursor.continue();
+            }
+        };
     },
 
     _upgradeEntry(value) {

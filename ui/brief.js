@@ -406,8 +406,10 @@ let SplitterModule = {
                 this._active = null;
                 // Fallthrough for the final update
             case 'mousemove':
-                let current_offset = event.screenX - target.getBoundingClientRect().right;
-                target.style.width = (target.offsetWidth + (current_offset - offset)) + 'px';
+                {
+                    let current_offset = event.screenX - target.getBoundingClientRect().right;
+                    target.style.width = (target.offsetWidth + (current_offset - offset)) + 'px';
+                }
                 break;
         }
         event.stopPropagation();

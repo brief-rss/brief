@@ -369,9 +369,10 @@ FeedView.prototype = {
 
         switch (aEvent.type) {
 
-            // Click listener must be attached to the document, not the entry container,
-            // in order to catch middle-clicks.
-            case 'click':
+        // Click listener must be attached to the document, not the entry container,
+        // in order to catch middle-clicks.
+        case 'click':
+            {
                 // The tutorial link needs to be opened from a privileged context
                 if (aEvent.target.getAttribute("href") == TUTORIAL_URL &&
                     (aEvent.button == 0 || aEvent.button == 1)) {
@@ -393,9 +394,11 @@ FeedView.prototype = {
 
                 if (target)
                     this.getEntryView(parseInt(target.id)).onClick(aEvent);
-                break;
+            }
+            break;
 
-            case 'scroll':
+        case 'scroll':
+            {
                 this._autoMarkRead();
 
                 let position = this.window.pageYOffset;
@@ -417,20 +420,21 @@ FeedView.prototype = {
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
-                break;
+            }
+            break;
 
-            case 'resize':
-                if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
-                    this._fillWindow(WINDOW_HEIGHTS_LOAD)
-                        .catch(this._ignoreRefresh);
-                break;
+        case 'resize':
+            if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                this._fillWindow(WINDOW_HEIGHTS_LOAD)
+                    .catch(this._ignoreRefresh);
+            break;
 
-            case 'visibilitychange':
-                if (this._refreshPending && !document.hidden) {
-                    this.refresh();
-                    this._refreshPending = false;
-                }
-                break;
+        case 'visibilitychange':
+            if (this._refreshPending && !document.hidden) {
+                this.refresh();
+                this._refreshPending = false;
+            }
+            break;
         }
     },
 
@@ -1274,12 +1278,14 @@ EntryView.prototype = {
                 case relativeDate.deltaMinutes === 0:
                     return Strings['entryDate_justNow'];
 
+                // eslint-disable-next-line no-case-declarations
                 case relativeDate.deltaHours === 0:
                     let minuteForm = getPluralForm(relativeDate.deltaMinutes,
                                                    Strings['minute_pluralForms']);
                     return browser.i18n.getMessage('entryDate_ago', minuteForm)
                                    .replace('#number', relativeDate.deltaMinutes);
 
+                // eslint-disable-next-line no-case-declarations
                 case relativeDate.deltaHours <= 12:
                     let hourForm = getPluralForm(relativeDate.deltaHours,
                                                  Strings['hour_pluralForms']);
