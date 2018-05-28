@@ -1,0 +1,39 @@
+env:
+  browser: true
+  es6: true
+  webextensions: true
+extends:
+  - eslint:recommended
+  - plugin:import/recommended
+parserOptions:
+  sourceType: module
+  ecmaVersion: 2018
+rules:
+  indent:
+    - off
+    - 4
+  linebreak-style:
+    - error
+    - unix
+  semi:
+    - off
+    - always
+  no-console:
+    - off
+  import/no-cycle: warn
+  import/first: warn
+  # Would be nice to enforce order, but after resolution they are all relative
+  import/order:
+    - warn
+    - newlines-between: never
+  # For now
+  no-unused-vars: off
+  no-case-declarations: off
+  no-useless-escape: off
+  no-fallthrough: off
+  no-extra-semi: off
+  no-constant-condition: off
+settings:
+  import/resolver:
+    babel-plugin-root-import:
+      rootPathPrefix: "/"
