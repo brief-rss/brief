@@ -751,7 +751,7 @@ export let Database = {
             revision.authors = next.authors;
             tx.objectStore('entries').put(prev); // Sorry, _update's default save is before
             tx.objectStore('revisions').put(revision);
-        }
+        };
         // May be missing due to a Brief<2.5.3:2.5 issue
         prev.providedID = prev.providedID || next.providedID;
     },
@@ -1248,7 +1248,7 @@ Query.prototype = {
         // Sorting and limiting...
         let sortOrder = this.sortOrder;
         if(sortOrder !== undefined && sortOrder !== 'date') {
-            throw `Invalid sort order: ${sortOrder}`
+            throw `Invalid sort order: ${sortOrder}`;
         }
         if((this.startDate || this.endDate) && sortOrder !== 'date') {
             if(sortOrder === undefined) {
@@ -1312,7 +1312,7 @@ Query.prototype = {
                 }
             }
             return true;
-        }
+        };
 
         for(let [k, v] of Object.entries(template)) {
             if(v === undefined) { // Not a real filter criterion
@@ -1393,7 +1393,7 @@ Query.prototype = {
             requirement = possibleValues;
         }
         if(requirement === undefined) {
-            throw "cannot expand prefixes without requirement and possibleValues"
+            throw "cannot expand prefixes without requirement and possibleValues";
         }
         if(requirement === false) {
             requirement = 0;
@@ -1423,7 +1423,7 @@ Query.prototype = {
             }
             let lower = prefix;
             if(min !== undefined) {
-                lower = Array.concat(prefix, [min])
+                lower = Array.concat(prefix, [min]);
             }
             let bound = [];
             if(max !== undefined) {
@@ -1617,7 +1617,7 @@ let Migrator = {
             let start = result.key;
             result.advance(count - 1);
             cursor.onsuccess = ({target: {result}}) => {
-                let range
+                let range;
                 if(result === null) {
                     range = IDBKeyRange.upperBound(start);
                 } else {
@@ -1626,7 +1626,7 @@ let Migrator = {
                 let batch = tx.objectStore('entries').getAll(range);
                 batch.onsuccess = ({target: {result}}) => _entriesFetched(result);
                 batch.onerror = console.error;
-            }
+            };
         };
         function _entriesFetched(batch) {
             entries = batch;
@@ -1637,7 +1637,7 @@ let Migrator = {
                 for(let entry of entries) {
                     entry.revisions = entry.revisions.map(r => revs.get(r.id));
                 }
-            }
+            };
         }
         return DbUtil.transactionPromise(tx).then(() => entries);
     },

@@ -66,7 +66,7 @@ export let FeedUpdater = {
             }
         }
         this._broadcastStatus();
-        console.log(`Brief: enqueued ${this.queue.length - queueLength} feeds`)
+        console.log(`Brief: enqueued ${this.queue.length - queueLength} feeds`);
 
         if(queueLength === 0) {
             /*spawn*/ this._worker();
@@ -613,9 +613,9 @@ export let FeedFetcher = {
                             break;
                     }
                 }
-                return nodeOrAttr.textContent.trim()
+                return nodeOrAttr.textContent.trim();
             } else {
-                return nodeOrAttr.value.trim()
+                return nodeOrAttr.value.trim();
             }
         },
 

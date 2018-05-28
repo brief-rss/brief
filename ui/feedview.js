@@ -95,7 +95,7 @@ FeedView.prototype = {
         return viewMode == 1;
     },
 
-    get selectedEntry() { return this.__selectedEntry || null },
+    get selectedEntry() { return this.__selectedEntry || null; },
 
     // Ordered list of EntryView objects of entries that have been loaded.
     entryViews: [],
@@ -124,22 +124,22 @@ FeedView.prototype = {
     _fixedStarred: false,
 
 
-    get browser() { return getElement('feed-view') },
+    get browser() { return getElement('feed-view'); },
 
-    get document() { return this.browser.contentDocument },
+    get document() { return this.browser.contentDocument; },
 
-    get window() { return this.document.defaultView },
+    get window() { return this.document.defaultView; },
 
-    get feedContent() { return this.document.getElementById('feed-content') },
+    get feedContent() { return this.document.getElementById('feed-content'); },
 
 
-    getEntryIndex: function(aEntry) { return this._loadedEntries.indexOf(aEntry) },
+    getEntryIndex: function(aEntry) { return this._loadedEntries.indexOf(aEntry); },
 
-    getEntryView:  function(aEntry) { return this._entryViews.get(aEntry) },
+    getEntryView:  function(aEntry) { return this._entryViews.get(aEntry); },
 
-    isEntryLoaded: function(aEntry) { return this.getEntryIndex(aEntry) !== -1 },
+    isEntryLoaded: function(aEntry) { return this.getEntryIndex(aEntry) !== -1; },
 
-    get lastLoadedEntry() { return this._loadedEntries[this._loadedEntries.length - 1] },
+    get lastLoadedEntry() { return this._loadedEntries[this._loadedEntries.length - 1]; },
 
 
     // Query that selects all entries contained by the view.
@@ -291,7 +291,7 @@ FeedView.prototype = {
         }
 
         // The current selection is not acceptable
-        this.selectEntry(this.getEntryInScreenCenter())
+        this.selectEntry(this.getEntryInScreenCenter());
     },
 
     // Return the entry element closest to the middle of the screen.
@@ -407,12 +407,12 @@ FeedView.prototype = {
                     return;
 
                 getElement('feed-view-header').classList.toggle(
-                    'border', position > 0)
+                    'border', position > 0);
 
                 clearTimeout(this._scrollSelectionTimeout);
                 let callback = this._callbackRefreshGuard(() =>
                     this.clampSelection({lastDelta: position - prevPosition})
-                )
+                );
                 this._scrollSelectionTimeout = setTimeout(callback, 50);
 
                 this._prevPosition = position;
@@ -543,7 +543,7 @@ FeedView.prototype = {
             if (this._allEntriesLoaded) {
                 let entryList = await Database.query(this.query).getIds();
                 if(aAddedEntries.some(id => entryList.includes(id)))
-                    this.refresh()
+                    this.refresh();
             }
             else {
                 this.refresh();
@@ -686,7 +686,7 @@ FeedView.prototype = {
                 this.selectEntry(lastSelectedEntry, true);
             else
                 this.selectEntry(this._loadedEntries[0], false);
-        }).catch(this._ignoreRefresh)
+        }).catch(this._ignoreRefresh);
     },
 
 
@@ -867,7 +867,7 @@ FeedView.prototype = {
                 else
                     throw REFRESH_ABORT;
             }
-        )
+        );
     },
 
     _ignoreRefresh: function FeedView__ignoreRefresh(error) {
@@ -886,13 +886,13 @@ FeedView.prototype = {
         };
     }
 
-}
+};
 
 
 
 const DEFAULT_FAVICON_URL = browser.extension.getURL('/icons/default-feed-favicon.png');
 const RTL_LANGUAGE_CODES = ['ar', 'arc', 'dv', 'fa', 'ha', 'he', 'khw',
-                            'ks', 'ku', 'ps', 'syr', 'ur', 'yi' ]
+                            'ks', 'ku', 'ps', 'syr', 'ur', 'yi' ];
 
 
 function EntryView(aFeedView, aEntryData) {
@@ -979,7 +979,7 @@ function EntryView(aFeedView, aEntryData) {
 
             if (this.feedView.query.searchString)
                 this._highlightSearchTerms(this._getElement('headline-title'));
-        })
+        });
     }
     else {
         let contentElement = this._getElement('content');
@@ -992,7 +992,7 @@ function EntryView(aFeedView, aEntryData) {
                     this._highlightSearchTerms(this._getElement(elem));
 
                 this._searchTermsHighlighted = true;
-            })
+            });
         }
     }
 }
@@ -1033,7 +1033,7 @@ EntryView.prototype = {
         return this.__starred;
     },
     set starred(aValue) {
-        let button = this._getElement('bookmark-button')
+        let button = this._getElement('bookmark-button');
 
         if (aValue) {
             this.container.classList.add('starred');
@@ -1149,7 +1149,7 @@ EntryView.prototype = {
                 if (entryBottom > screenBottom)
                     this.feedView.scrollToEntry(this.id, false, true);
             }
-        })
+        });
 
 
         if (this.feedView.query.searchString && !this._searchTermsHighlighted) {
@@ -1349,7 +1349,7 @@ EntryView.prototype = {
         }
     }
 
-}
+};
 
 
 async function hideElement(aElement, aAnimate) {
@@ -1406,7 +1406,7 @@ Object.defineProperty(window, 'Strings', {
             'restoreEntryTooltip',
             'bookmarkEntryTooltip',
             'editBookmarkTooltip',
-        ]
+        ];
 
         let obj = {};
         for (let stringName of cachedStringsList)

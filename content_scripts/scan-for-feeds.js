@@ -19,4 +19,4 @@
     let feeds = Array.from(links).filter(isFeed).map(l => ({linkTitle: l.title, url: l.href}));
 
     return feeds;
-})()
+})();

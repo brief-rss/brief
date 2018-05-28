@@ -16,7 +16,7 @@ rules:
     - error
     - unix
   semi:
-    - off
+    - error
     - always
   no-console:
     - off

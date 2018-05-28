@@ -95,7 +95,7 @@ var init = async function init() {
     ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
     await wait();
     FeedList.rebuild();
-}
+};
 
 
 export var Commands = {
@@ -176,7 +176,7 @@ export var Commands = {
     },
 
     restoreTrashed: function cmd_restoreTrashed() {
-        ViewList.getQueryForView('trash-folder')
+        ViewList.getQueryForView('trash-folder');
         Database.query(ViewList.getQueryForView('trash-folder')).markDeleted(false);
     },
 
@@ -291,7 +291,7 @@ export var Commands = {
         let content = document.getElementById('feed-view').contentDocument;
         content.getElementById('custom-css').href = url;
     },
-}
+};
 
 async function refreshProgressmeter({active, progress}) {
     getElement('update-progress').value = progress;

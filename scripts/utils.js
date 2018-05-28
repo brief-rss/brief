@@ -34,8 +34,8 @@ export function debounced(delay, callback) {
         wait(delay).then(() => {
             active = false;
             callback();
-        })
-    }
+        });
+    };
 }
 
 // Iterate nodes in a XPathResult
@@ -46,7 +46,7 @@ export function iterSnapshot(result) {
                 yield result.snapshotItem(i);
             }
         }
-    }
+    };
 }
 
 export function asArray(v) {
@@ -82,16 +82,16 @@ export function RelativeDate(aAbsoluteTime) {
 
 RelativeDate.prototype = {
 
-    get deltaMinutes() { return this._getDelta(60000) },
-    get deltaMinuteSteps() { return this._getSteps(60000) },
+    get deltaMinutes() { return this._getDelta(60000); },
+    get deltaMinuteSteps() { return this._getSteps(60000); },
 
-    get deltaHours() { return this._getDelta(3600000) },
-    get deltaHourSteps() { return this._getSteps(3600000) },
+    get deltaHours() { return this._getDelta(3600000); },
+    get deltaHourSteps() { return this._getSteps(3600000); },
 
-    get deltaDays() { return this._getDelta(86400000) },
-    get deltaDaySteps() { return this._getSteps(86400000) }, //Unexact due to timezones
+    get deltaDays() { return this._getDelta(86400000); },
+    get deltaDaySteps() { return this._getSteps(86400000); }, //Unexact due to timezones
 
-    get deltaYears() { return this._getDelta(31536000000) },
+    get deltaYears() { return this._getDelta(31536000000); },
     get deltaYearSteps() {
         return (this.currentDate.getFullYear() -
                 this.targetDate.getFullYear());
@@ -107,7 +107,7 @@ RelativeDate.prototype = {
         return Math.floor((this.currentTime - this.targetTime) / aDivisor);
     }
 
-}
+};
 
 
 export function getPluralForm(number, forms) {
@@ -121,11 +121,11 @@ export function getPluralForm(number, forms) {
 export async function openBackgroundTab(url) {
     let tab = await browser.tabs.getCurrent();
     try {
-        await browser.tabs.create({active: false, url: url, openerTabId: tab.id})
+        await browser.tabs.create({active: false, url: url, openerTabId: tab.id});
     }
     catch(e) {
         if(e.message.includes("openerTabId")) {
-            await browser.tabs.create({active: false, url: url})
+            await browser.tabs.create({active: false, url: url});
         } else {
             throw e;
         }

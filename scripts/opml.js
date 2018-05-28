@@ -107,7 +107,7 @@ export let OPML = {
             {find : "'", replace : '&apos;'},
             {find : '<', replace : '&lt;'},
             {find : '>', replace : '&gt;'}
-        ]
+        ];
 
         for (let ch of characters)
             str = str.replace(new RegExp(ch.find, 'g'), ch.replace);
@@ -115,4 +115,4 @@ export let OPML = {
         return str;
     }
 
-}
+};

@@ -16,7 +16,7 @@ function TreeView(aElementOrId) {
     this._selectedElement = null;
     Array.forEach(this.root.children, node => {
         this._initElement(node);
-    })
+    });
 }
 
 TreeView.prototype = {
@@ -373,7 +373,7 @@ export let ViewList = {
             this.refreshItem('starred-folder'),
         ]);
     },
-}
+};
 
 
 export let TagList = {
@@ -414,7 +414,7 @@ export let TagList = {
     onSelect: function TagList_onSelect() {
         if (!this.selectedItem) {
             if(!FeedList.selectedItem && !ViewList.selectedItem)
-                ViewList.selectedItem = getElement('starred-folder')
+                ViewList.selectedItem = getElement('starred-folder');
             return;
         }
 
@@ -424,7 +424,7 @@ export let TagList = {
         let query = {
             deleted: false,
             tags: [this.selectedItem.dataset.id]
-        }
+        };
 
         gCurrentView = new FeedView(this.selectedItem.dataset.id, query);
     },
@@ -479,7 +479,7 @@ export let TagList = {
         this.tree.updateElement(aTagName, {unreadCount});
     }
 
-}
+};
 
 
 export let FeedList = {
@@ -498,16 +498,16 @@ export let FeedList = {
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
         if(this._feedsCache === null)
-            throw "FeedList: getAllFeeds called while cache is not ready"
+            throw "FeedList: getAllFeeds called while cache is not ready";
 
         return this._feedsCache.filter(
             f => (!f.isFolder || includeFolders) && (!f.hidden || includeHidden)
-        )
+        );
     },
 
     getFeed: function FeedList_getFeed(feedID) {
         if(this._feedsCache === null)
-            throw "FeedList: getFeed called while cache is not ready"
+            throw "FeedList: getFeed called while cache is not ready";
 
         for (let feed of this._feedsCache) {
             if (feed.feedID == feedID)
@@ -537,7 +537,7 @@ export let FeedList = {
     onSelect: function FeedList_onSelect() {
         if (!this.selectedItem) {
             if(!TagList.selectedItem && !ViewList.selectedItem)
-                ViewList.selectedItem = getElement('all-items-folder')
+                ViewList.selectedItem = getElement('all-items-folder');
             return;
         }
 
@@ -734,9 +734,9 @@ export let FeedList = {
             this.rebuild();
             return;
         }
-        Database.addFeeds({title, parent: feedID})
+        Database.addFeeds({title, parent: feedID});
     },
-}
+};
 
 
 // Custom menu handler to avoid Firefox default items on the Brief context menu
@@ -879,7 +879,7 @@ export let ViewListContextMenu = {
         Database.query(query).markDeleted('trashed');
     }
 
-}
+};
 
 
 export let TagListContextMenu = {
@@ -913,7 +913,7 @@ export let TagListContextMenu = {
         //TODO: restore tag list functionality
     }
 
-}
+};
 
 
 export let FeedListContextMenu = {
@@ -997,7 +997,7 @@ export let FeedListContextMenu = {
             Database.deleteFeed(feed);
     }
 
-}
+};
 
 export let DropdownMenus = {
     build() {
@@ -1026,4 +1026,4 @@ export let DropdownMenus = {
             OPML.importOPML(file);
         });
     },
-}
+};
