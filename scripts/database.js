@@ -172,7 +172,7 @@ export let Database = {
 
     _upgradeWithMigration({event, prev}) {
         this._upgradeSchema({event});
-        let {result: db, transaction: tx} = event.target;
+        let {transaction: tx} = event.target;
         if(prev !== null) {
             Migrator.startMigration({tx, source: prev});
         }
@@ -186,11 +186,10 @@ export let Database = {
             console.log(`Upgrading from version ${event.oldVersion}`);
         }
         let {result: db, transaction: tx} = event.target;
-        let revisions;
         let entries;
         switch(oldVersion) {
             case 0:
-                revisions = db.createObjectStore("revisions", {
+                db.createObjectStore("revisions", {
                     keyPath: "id", autoIncrement: true});
                 // There could be a full-text index here, but let's avoid this
                 entries = db.createObjectStore("entries", {
@@ -1062,7 +1061,6 @@ Query.prototype = {
     /*async*/ _mergeAndCollect({cursors, filterFunction, sortKey, offset, limit, extractor, tx}) {
         let totalCallbacks = 0;
         extractor = extractor || (v => v);
-        let queue = Array(cursors.length);
         let pending = cursors.length;
         let result = [];
         if(cursors.length === 0) {
@@ -1152,8 +1150,6 @@ Query.prototype = {
             // FIXME: offset/limit
             throw "_update does not support offset/limit!";
         }
-        let offset = filters.sort.offset || 0;
-        let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
 
         if(tx === undefined) {
             tx = Database.db().transaction(stores, 'readwrite');
@@ -1366,9 +1362,6 @@ Query.prototype = {
             }
             optionSets.pop();
         }
-        let valueSets = optionSets.map(({name, values}) => {
-            return (values !== undefined) ? values : this._possibleValues(name);
-        });
 
         // Build the ranges for cursors
         let indexedFields = [];
@@ -1444,7 +1437,7 @@ Query.prototype = {
         });
     },
 
-    _ftsMatches(entry, string) {
+    _ftsMatches(entry, string) { // eslint-disable-line no-unused-vars
         return true;//TODO: restore FTS
     },
 };

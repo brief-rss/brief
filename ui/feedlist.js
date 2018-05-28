@@ -338,7 +338,7 @@ export let ViewList = {
         this.tree.selectedItem = null;
     },
 
-    onSelect: function ViewList_onSelect(aEvent) {
+    onSelect: function ViewList_onSelect() {
         if (!this.selectedItem)
             return;
 
@@ -411,7 +411,7 @@ export let TagList = {
         this.tree.selectedItem = null;
     },
 
-    onSelect: function TagList_onSelect(aEvent) {
+    onSelect: function TagList_onSelect() {
         if (!this.selectedItem) {
             if(!FeedList.selectedItem && !ViewList.selectedItem)
                 ViewList.selectedItem = getElement('starred-folder')
@@ -534,7 +534,7 @@ export let FeedList = {
         this.tree.selectedItem = null;
     },
 
-    onSelect: function FeedList_onSelect(aEvent) {
+    onSelect: function FeedList_onSelect() {
         if (!this.selectedItem) {
             if(!TagList.selectedItem && !ViewList.selectedItem)
                 ViewList.selectedItem = getElement('all-items-folder')
@@ -745,7 +745,7 @@ export let ContextMenuModule = {
     _currentTarget: null,
 
     init: function ContextMenu_init() {
-        this._observer = new MutationObserver((records, observer) => this._observeMutations(records));
+        this._observer = new MutationObserver((records) => this._observeMutations(records));
         this._observer.observe(document, {subtree: true,
             childList: true, attributes: true, attributeFilter: ['contextmenu', 'data-dropdown']});
 
@@ -799,7 +799,7 @@ export let ContextMenuModule = {
             this._currentTarget = currentTarget;
     },
 
-    _hide: function ContextMenu__hide(event) {
+    _hide: function ContextMenu__hide() {
         this._currentTarget = null;
         Array.forEach(document.querySelectorAll('context-menu.visible'), node => {
             node.classList.remove('visible');
@@ -989,7 +989,6 @@ export let FeedListContextMenu = {
     },
 
     deleteFolder: function FolderContextMenu_deleteFolder() {
-        let item = FeedList.selectedItem;
         let feed = FeedList.selectedFeed;
 
         let text = browser.i18n.getMessage('confirmFolderDeletionText', feed.title);
@@ -1005,7 +1004,7 @@ export let DropdownMenus = {
         let opmlInput = document.getElementById('open-opml');
         const handlers = {
             'dropdown-shortcuts': () => Commands.displayShortcuts(),
-            'dropdown-import': e => opmlInput.click(),
+            'dropdown-import': () => opmlInput.click(),
             'dropdown-export': () => OPML.exportFeeds(),
             'dropdown-options': () => browser.runtime.openOptionsPage(),
             'dropdown-update-feed': () => Comm.callMaster(

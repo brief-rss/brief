@@ -12,9 +12,7 @@ export let PrefBinder = {
         }
 
         for(let node of document.querySelectorAll('[data-pref]')) {
-            let name = node.dataset.pref;
-            let scale = () => (node.dataset.prefScale || 1);
-            node.addEventListener('change', e => this.saveValue(node));
+            node.addEventListener('change', () => this.saveValue(node));
         }
         this.refresh();
     },
@@ -98,7 +96,7 @@ export let Enabler = {
         for(let node of document.querySelectorAll('[data-requires]')) {
             let master = document.getElementById(node.dataset.requires);
             node.disabled = !master.checked;
-            master.addEventListener('change', e => {
+            master.addEventListener('change', () => {
                 node.disabled = !master.checked;
             });
         }

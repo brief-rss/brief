@@ -26,8 +26,6 @@ rules:
   import/order:
     - warn
     - newlines-between: never
-  # For now
-  no-unused-vars: off
 settings:
   import/resolver:
     babel-plugin-root-import:

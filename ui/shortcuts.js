@@ -1,6 +1,7 @@
 import {apply_i18n} from "/scripts/i18n.js";
 
-async function onload(aEvent) {
+
+async function onload() {
     apply_i18n(document);
     var elems = window.navigator.platform.match('Mac')
                 ? document.getElementsByClassName('noMac')

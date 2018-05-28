@@ -438,7 +438,7 @@ FeedView.prototype = {
         }
     },
 
-    _applyUpdates({feeds, entries, changes}) {
+    _applyUpdates({entries, changes}) {
         if(document.hidden) {
             this._refreshPending = true;
             return;
@@ -1109,7 +1109,7 @@ EntryView.prototype = {
         }
     },
 
-    collapse: function EntryView_collapse(aAnimate) {
+    collapse: function EntryView_collapse() {
         if (this.collapsed)
             return;
 

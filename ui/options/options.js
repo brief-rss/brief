@@ -39,7 +39,6 @@ function initUpdateIntervalControls() {
     let value = Prefs.get(interval.dataset.pref);
     let asDays = value / (60*60*24);
     let asHours = value / (60*60);
-    let toMinutes = value / 60;
 
     // Select the largest scale that has an exact value
     switch (true) {

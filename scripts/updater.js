@@ -477,7 +477,6 @@ export let FeedFetcher = {
             let nodeKey = nsPrefix + child.localName;
             let destinations = keyMap.get(nodeKey);
             if(destinations === undefined) {
-                let parent = this._nsPrefix(node.namespaceURI) + node.localName;
                 if(Comm.verbose) {
                     console.log('unknown key', nodeKey, 'in', node);
                 }

@@ -60,12 +60,11 @@ async function init() {
     });
 
     let scaleMenu = document.getElementById('update-time-menulist');
-    let interval = document.getElementById('updateInterval');
 
     scaleMenu.addEventListener('change', () => updateScale());
 
     Comm.registerObservers({
-        'feedlist-updated': async ({feeds}) => {
+        'feedlist-updated': async () => {
             await wait();
             let newFeed = Database.getFeed(feedID);
             if(newFeed === undefined) {
@@ -124,7 +123,6 @@ function setFeed(feed) {
     let value = PrefBinder.getValue(interval);
     let asDays = value / (1000*60*60*24);
     let asHours = value / (1000*60*60);
-    let toMinutes = value / (1000*60);
 
     // Select the largest scale that has an exact value
     switch (true) {

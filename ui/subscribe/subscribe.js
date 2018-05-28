@@ -1,7 +1,7 @@
 import {Comm} from "/scripts/utils.js";
 
 
-async function onload(aEvent) {
+async function onload() {
     let {id: windowId} = await browser.windows.getCurrent();
 
     let feeds = await Comm.callMaster('subscribe-get-feeds', {windowId});
