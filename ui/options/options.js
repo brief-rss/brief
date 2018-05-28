@@ -29,10 +29,9 @@ function initUpdateIntervalControls() {
     scaleMenu.addEventListener('change', () => {
         let scale = 1;
         switch (scaleMenu.selectedIndex) {
-            // Fallthrough everywhere: from days
-            case 2: scale *= 24; // to hours
-            case 1: scale *= 60; // to minutes
-            case 0: scale *= 60; // to seconds
+            case 2: scale *= 24; // days to hours and fallthrough
+            case 1: scale *= 60; // hours to minutes and fallthrough
+            case 0: scale *= 60; // minutes to seconds
         }
         PrefBinder.updateScale(interval, scale);
     });

@@ -105,11 +105,10 @@ function updateScale() {
     let interval = document.getElementById('updateInterval');
     let scale = 1;
     switch (scaleMenu.selectedIndex) {
-        // Fallthrough everywhere: from days
-        case 2: scale *= 24; // to hours
-        case 1: scale *= 60; // to minutes
-        case 0: scale *= 60; // to seconds
-                scale *= 1000; // to milliseconds
+        case 2: scale *= 24; // days to hours and fallthrough
+        case 1: scale *= 60; // hours to minutes and fallthrough
+        case 0: scale *= 60; // minutes to seconds and
+                scale *= 1000; // seconds to milliseconds
     }
     PrefBinder.updateScale(interval, scale);
 }
