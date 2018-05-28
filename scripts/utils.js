@@ -114,14 +114,8 @@ RelativeDate.prototype = {
 
 function getPluralForm(number, forms) {
     let knownForms = browser.i18n.getMessage('pluralRule').split(';');
-    let form;
-    if(Intl.PluralRules !== undefined) {
-        let rules = new Intl.PluralRules();
-        form = rules.select(number);
-    } else {
-        let lang = browser.i18n.getUILanguage().replace(/-.*/, '');
-        form = pluralRulesDb.cardinal[lang](number);
-    }
+    let rules = new Intl.PluralRules();
+    let form = rules.select(number);
     return forms.split(';')[knownForms.indexOf(form)];
 }
 
