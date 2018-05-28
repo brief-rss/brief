@@ -89,7 +89,7 @@ export let FeedUpdater = {
 
     async _scheduler() {
         await wait(Prefs.get('update.startupDelay'));
-        while(true) {
+        while(true) { // eslint-disable-line no-constant-condition
             let now = Date.now();
 
             let globalUpdatingEnabled = Prefs.get('update.enableAutoUpdate');

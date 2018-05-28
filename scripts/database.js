@@ -1557,14 +1557,10 @@ let Migrator = {
             indexedDB.deleteDatabase(source.db.name, {storage: 'persistent'});
             return;
         }
-        while(true) {
+        while(descriptor.count.entries > descriptor.processedEntries) {
             let start = performance.now();
             let {lastTransferredEntry, processedEntries, count, rangeTop} = descriptor;
-            let remainingEntryCount = count.entries - processedEntries;
-            if(remainingEntryCount <= 0) {
-                // The old DB will be deleted on the next startup
-                return;
-            }
+
             let range;
             if(lastTransferredEntry !== null) {
                 range = IDBKeyRange.upperBound(lastTransferredEntry, /*exclude:*/ true);
@@ -1602,6 +1598,8 @@ let Migrator = {
                 `${count.entries / this.BATCH_SIZE}` +
                 ` processed in ${performance.now() - start} ms`);
         }
+        // The old DB will be deleted on the next startup
+        // Not deleting it now to ensure the transactions get down to disk
     },
 
     /**

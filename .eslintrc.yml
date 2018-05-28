@@ -29,7 +29,6 @@ rules:
   # For now
   no-unused-vars: off
   no-case-declarations: off
-  no-constant-condition: off
 settings:
   import/resolver:
     babel-plugin-root-import:
