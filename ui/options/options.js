@@ -63,9 +63,11 @@ function initUpdateIntervalControls() {
             }).markDeleted('deleted').catch(console.error);
         }
     });
-    window.addEventListener('beforeunload',
-                            () => Database.expireEntries(),
-                            {once: true, passive: true});
+    window.addEventListener(
+        'beforeunload',
+        () => Database.expireEntries(),
+        {once: true, passive: true}
+    );
 }
 
 

@@ -195,8 +195,8 @@ TreeView.prototype = {
             }
             dataTransfer.setData('application/x-moz-node', target);
             let items = [target, ...target.querySelectorAll('[data-id]')];
-            dataTransfer.setData('application/x-tree-item-list',
-                                 JSON.stringify(items.map(i => i.dataset.id)));
+            dataTransfer.setData(
+                'application/x-tree-item-list', JSON.stringify(items.map(i => i.dataset.id)));
             dataTransfer.effectAllowed = 'move';
             dataTransfer.dropEffect = 'move';
             this.root.classList.add('drag');
@@ -920,8 +920,8 @@ export let FeedListContextMenu = {
     build() {
         const handlers = {
             'ctx-mark-feed-read': () => this.markFeedRead(),
-            'ctx-update-feed': () => Comm.callMaster('update-feeds',
-                                                     {feeds: [this.targetFeed.feedID]}),
+            'ctx-update-feed': () => Comm.callMaster(
+                'update-feeds', {feeds: [this.targetFeed.feedID]}),
             'ctx-open-website': () => Commands.openFeedWebsite(this.targetFeed),
             'ctx-unsubscribe-feed': () => Commands.deleteFeed(this.targetFeed),
             'ctx-empty-feed': () => Commands.emptyFeed(this.targetFeed),

@@ -95,7 +95,7 @@ RelativeDate.prototype = {
     get deltaYearSteps() {
         return (this.currentDate.getFullYear() -
                 this.targetDate.getFullYear());
-     },
+    },
 
     _getSteps: function RelativeDate__getSteps(aDivisor) {
         let current = Math.ceil(this.currentTime / aDivisor);

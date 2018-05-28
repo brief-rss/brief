@@ -221,8 +221,9 @@ export let FeedUpdater = {
         else {
             alertText = browser.i18n.getMessage(
                 'updateAlertText_multpleFeedsMessage', [newString, itemString, feedString]);
-            alertText = alertText.replace('#numItems', entryCount)
-                                 .replace('#numFeeds', feedCount);
+            alertText = alertText
+                .replace('#numItems', entryCount)
+                .replace('#numFeeds', feedCount);
         }
         browser.notifications.create({
             type: 'basic',
@@ -546,21 +547,26 @@ export let FeedFetcher = {
     FEED_PROPERTIES: [
         // Name, handler name, list of known direct children with it
         ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
-        ['subtitle', 'text', ["description", "dc:description", "rss1:description",
-                              "atom03:tagline", "atom:subtitle"]],
+        ['subtitle', 'text', [
+            "description", "dc:description", "rss1:description", "atom03:tagline", "atom:subtitle"
+        ]],
         ['link', 'url', ["link", "rss1:link"]],
         ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
         ['items[]', 'entry', ["item", "rss1:item", "atom:entry", "atom03:entry"]],
         ['generator', 'text', ["generator", "rss1:generator", "atom03:generator", "atom:generator"]],
-        ['updated', 'date', ["pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date",
-                             "dcterms:modified", "atom:updated"]],
+        ['updated', 'date', [
+            "pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date",
+            "dcterms:modified", "atom:updated"
+        ]],
         ['language', 'lang', ["language", "rss1:language", "xml:lang"]],
 
         ['{merge}', 'feed', ["rss1:channel"]],
         //and others Brief does not use anyway...
         //TODO: enclosures
-        ['IGNORE', '', ["atom:id", "atom03:id", "atom:author", "atom03:author",
-                        "category", "atom:category", "rss1:items"]],
+        ['IGNORE', '', [
+            "atom:id", "atom03:id", "atom:author", "atom03:author",
+            "category", "atom:category", "rss1:items"
+        ]],
     ],
     ENTRY_PROPERTIES: [
         ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
@@ -568,22 +574,28 @@ export let FeedFetcher = {
         ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
         ['link', 'permaLink', ["guid", "rss1:guid"]],
         ['id', 'id', ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]],
-        ['authors[]', 'author', ["author", "rss1:author", "dc:creator", "dc:author",
-                                  "atom03:author", "atom:author"]],
-        ['summary', 'text', ["description", "rss1:description", "dc:description",
-                             "atom03:summary", "atom:summary"]],
+        ['authors[]', 'author', [
+            "author", "rss1:author", "dc:creator", "dc:author", "atom03:author", "atom:author"
+        ]],
+        ['summary', 'text', [
+            "description", "rss1:description", "dc:description",
+            "atom03:summary", "atom:summary"
+        ]],
         ['content', 'html', ["content:encoded", "atom03:content", "atom:content"]],
-
-        ['published', 'date', ["pubDate", "rss1:pubDate",
-                               "atom03:issued", "dcterms:issued", "atom:published"]],
-        ['updated', 'date', ["pubDate", "rss1:pubDate", "atom03:modified",
-                             "dc:date", "dcterms:modified", "atom:updated"]],
+        ['published', 'date', [
+            "pubDate", "rss1:pubDate", "atom03:issued", "dcterms:issued", "atom:published"
+        ]],
+        ['updated', 'date', [
+            "pubDate", "rss1:pubDate", "atom03:modified",
+            "dc:date", "dcterms:modified", "atom:updated"
+        ]],
         //and others Brief does not use anyway...
-        ['IGNORE', '', ["atom:category", "atom03:category", "category", "rss1:category",
-                        "comments", "wfw:commentRss", "rss1:comments",
-                        "dc:language", "dc:format", "xml:lang", "dc:subject",
-                        "enclosure", "dc:identifier"
-                       ]],
+        ['IGNORE', '', [
+            "atom:category", "atom03:category", "category", "rss1:category",
+            "comments", "wfw:commentRss", "rss1:comments",
+            "dc:language", "dc:format", "xml:lang", "dc:subject",
+            "enclosure", "dc:identifier"
+        ]],
         // TODO: should these really be all ignored?
     ],
     AUTHOR_PROPERTIES: [

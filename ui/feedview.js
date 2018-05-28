@@ -369,72 +369,72 @@ FeedView.prototype = {
 
         switch (aEvent.type) {
 
-        // Click listener must be attached to the document, not the entry container,
-        // in order to catch middle-clicks.
-        case 'click':
-            {
-                // The tutorial link needs to be opened from a privileged context
-                if (aEvent.target.getAttribute("href") == TUTORIAL_URL &&
-                    (aEvent.button == 0 || aEvent.button == 1)) {
+            // Click listener must be attached to the document, not the entry container,
+            // in order to catch middle-clicks.
+            case 'click':
+                {
+                    // The tutorial link needs to be opened from a privileged context
+                    if (aEvent.target.getAttribute("href") == TUTORIAL_URL &&
+                        (aEvent.button == 0 || aEvent.button == 1)) {
 
-                    window.open(TUTORIAL_URL);
-                    aEvent.preventDefault();
-                    break;
+                        window.open(TUTORIAL_URL);
+                        aEvent.preventDefault();
+                        break;
+                    }
+                    // Clicks inside the article but outside any child are ignored
+                    // so that clicking in the wide margins does not cause actions
+                    let node = aEvent.target.parentNode;
+                    let target = null;
+                    while (node) {
+                        if (node.classList && node.classList.contains('entry'))
+                            target = node;
+
+                        node = node.parentNode;
+                    }
+
+                    if (target)
+                        this.getEntryView(parseInt(target.id)).onClick(aEvent);
                 }
-                // Clicks inside the article but outside any child are ignored
-                // so that clicking in the wide margins does not cause actions
-                let node = aEvent.target.parentNode;
-                let target = null;
-                while (node) {
-                    if (node.classList && node.classList.contains('entry'))
-                        target = node;
+                break;
 
-                    node = node.parentNode;
+            case 'scroll':
+                {
+                    this._autoMarkRead();
+
+                    let position = this.window.pageYOffset;
+                    let prevPosition = this._prevPosition;
+                    if(position === prevPosition)
+                        return;
+
+                    getElement('feed-view-header').classList.toggle(
+                        'border', position > 0);
+
+                    clearTimeout(this._scrollSelectionTimeout);
+                    let callback = this._callbackRefreshGuard(() =>
+                        this.clampSelection({lastDelta: position - prevPosition})
+                    );
+                    this._scrollSelectionTimeout = setTimeout(callback, 50);
+
+                    this._prevPosition = position;
+
+                    if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                        this._fillWindow(WINDOW_HEIGHTS_LOAD)
+                            .catch(this._ignoreRefresh);
                 }
+                break;
 
-                if (target)
-                    this.getEntryView(parseInt(target.id)).onClick(aEvent);
-            }
-            break;
-
-        case 'scroll':
-            {
-                this._autoMarkRead();
-
-                let position = this.window.pageYOffset;
-                let prevPosition = this._prevPosition;
-                if(position === prevPosition)
-                    return;
-
-                getElement('feed-view-header').classList.toggle(
-                    'border', position > 0);
-
-                clearTimeout(this._scrollSelectionTimeout);
-                let callback = this._callbackRefreshGuard(() =>
-                    this.clampSelection({lastDelta: position - prevPosition})
-                );
-                this._scrollSelectionTimeout = setTimeout(callback, 50);
-
-                this._prevPosition = position;
-
+            case 'resize':
                 if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
-            }
-            break;
+                break;
 
-        case 'resize':
-            if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
-                this._fillWindow(WINDOW_HEIGHTS_LOAD)
-                    .catch(this._ignoreRefresh);
-            break;
-
-        case 'visibilitychange':
-            if (this._refreshPending && !document.hidden) {
-                this.refresh();
-                this._refreshPending = false;
-            }
-            break;
+            case 'visibilitychange':
+                if (this._refreshPending && !document.hidden) {
+                    this.refresh();
+                    this._refreshPending = false;
+                }
+                break;
         }
     },
 
@@ -445,10 +445,10 @@ FeedView.prototype = {
         }
         let entryList = entries.map(entry => entry.id);
         if(changes.content === true) {
-                this._onEntriesRemoved(entryList, false, false);
-                this._onEntriesAdded(entryList)
-                    .catch(this._ignoreRefresh);
-                return;
+            this._onEntriesRemoved(entryList, false, false);
+            this._onEntriesAdded(entryList)
+                .catch(this._ignoreRefresh);
+            return;
         }
         if(changes.deleted !== undefined) {
             if (changes.deleted === this.query.deleted) {
@@ -561,8 +561,7 @@ FeedView.prototype = {
      * @param aLoadNewEntries
      *        Load new entries to fill the screen.
      */
-    _onEntriesRemoved: function FeedView__onEntriesRemoved(aRemovedEntries, aAnimate,
-                                                           aLoadNewEntries) {
+    _onEntriesRemoved: function(aRemovedEntries, aAnimate, aLoadNewEntries) {
         let containedEntries = aRemovedEntries.filter(this.isEntryLoaded, this);
         if (!containedEntries.length)
             return;
@@ -572,7 +571,7 @@ FeedView.prototype = {
         let selectedEntryIndex = -1;
 
         let indices = containedEntries.map(this.getEntryIndex, this)
-                                      .sort((a, b) => a - b);
+            .sort((a, b) => a - b);
 
         // Iterate starting from the last entry to avoid changing
         // positions of consecutive entries.
@@ -701,8 +700,9 @@ FeedView.prototype = {
      */
     _fillWindow: async function FeedView__fillWindow(aWindowHeights) {
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
-            let stepSize = this.headlinesMode ? HEADLINES_LOAD_STEP_SIZE
-                                              : LOAD_STEP_SIZE;
+            let stepSize = this.headlinesMode
+                ? HEADLINES_LOAD_STEP_SIZE
+                : LOAD_STEP_SIZE;
             do {
                 let loaded = await this._refreshGuard(this._loadEntries(stepSize));
                 if(!loaded) {
@@ -891,8 +891,8 @@ FeedView.prototype = {
 
 
 const DEFAULT_FAVICON_URL = browser.extension.getURL('/icons/default-feed-favicon.png');
-const RTL_LANGUAGE_CODES = ['ar', 'arc', 'dv', 'fa', 'ha', 'he', 'khw',
-                            'ks', 'ku', 'ps', 'syr', 'ur', 'yi' ];
+const RTL_LANGUAGE_CODES = [
+    'ar', 'arc', 'dv', 'fa', 'ha', 'he', 'khw', 'ks', 'ku', 'ps', 'syr', 'ur', 'yi' ];
 
 
 function EntryView(aFeedView, aEntryData) {
@@ -970,8 +970,9 @@ function EntryView(aFeedView, aEntryData) {
 
         this._getElement('headline-feed-name').textContent = feed.title;
 
-        let favicon = (feed.favicon && feed.favicon != 'no-favicon') ? feed.favicon
-                                                                     : DEFAULT_FAVICON_URL;
+        let favicon = (feed.favicon && feed.favicon != 'no-favicon')
+            ? feed.favicon
+            : DEFAULT_FAVICON_URL;
         this._getElement('feed-icon').src = favicon;
 
         wait().then(() => {
@@ -1242,7 +1243,6 @@ EntryView.prototype = {
             default:
                 if (aEvent.button == 0 && this.collapsed)
                     this.expand(true);
-
         }
     },
 
@@ -1269,8 +1269,8 @@ EntryView.prototype = {
                     return this.date.toLocaleDateString(lang, {month: 'long', day: 'numeric'});
 
                 default:
-                    return this.date.toLocaleDateString(lang, {
-                        year: 'numeric', month: 'long', day: 'numeric'});
+                    return this.date.toLocaleDateString(
+                        lang, {year: 'numeric', month: 'long', day: 'numeric'});
             }
         }
         else {
@@ -1280,17 +1280,17 @@ EntryView.prototype = {
 
                 // eslint-disable-next-line no-case-declarations
                 case relativeDate.deltaHours === 0:
-                    let minuteForm = getPluralForm(relativeDate.deltaMinutes,
-                                                   Strings['minute_pluralForms']);
+                    let minuteForm = getPluralForm(
+                        relativeDate.deltaMinutes, Strings['minute_pluralForms']);
                     return browser.i18n.getMessage('entryDate_ago', minuteForm)
-                                   .replace('#number', relativeDate.deltaMinutes);
+                        .replace('#number', relativeDate.deltaMinutes);
 
                 // eslint-disable-next-line no-case-declarations
                 case relativeDate.deltaHours <= 12:
-                    let hourForm = getPluralForm(relativeDate.deltaHours,
-                                                 Strings['hour_pluralForms']);
+                    let hourForm = getPluralForm(
+                        relativeDate.deltaHours, Strings['hour_pluralForms']);
                     return browser.i18n.getMessage('entryDate_ago', hourForm)
-                                   .replace('#number', relativeDate.deltaHours);
+                        .replace('#number', relativeDate.deltaHours);
 
                 case relativeDate.deltaDaySteps === 0:
                     return Strings['entryDate_today'] + ', ' +
@@ -1309,13 +1309,14 @@ EntryView.prototype = {
 
                 case relativeDate.deltaYearSteps === 0:
                     return this.date.toLocaleDateString(lang,
-                            {month: 'short', day: 'numeric'}) + ', ' +
+                        {month: 'short', day: 'numeric'}) + ', ' +
                         this.date.toLocaleTimeString(lang,
                             {hour: 'numeric', minute: 'numeric'});
 
                 default:
-                    return this.date.toLocaleDateString(lang,
-                            {year: 'numeric', month: 'short', day: 'numeric'}) + ', ' +
+                    return this.date.toLocaleDateString(
+                        lang,
+                        {year: 'numeric', month: 'short', day: 'numeric'}) + ', ' +
                         this.date.toLocaleTimeString(lang,
                             {hour: 'numeric', minute: 'numeric'});
             }

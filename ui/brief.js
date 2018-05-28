@@ -365,8 +365,8 @@ let PrefObserver = {
     init() {
         Prefs.addObserver('feedview.autoMarkRead', () => gCurrentView._autoMarkRead());
         Prefs.addObserver('feedview.sortUnreadViewOldestFirst', () => {
-                if (gCurrentView.query.read === false)
-                    gCurrentView.refresh();
+            if (gCurrentView.query.read === false)
+                gCurrentView.refresh();
         });
     },
 };

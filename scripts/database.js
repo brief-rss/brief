@@ -961,7 +961,7 @@ Query.prototype = {
      */
     includeHiddenFeeds: false,
 
-     /**
+    /**
      * Include feeds that the user marked as excluded from global views.
      */
     includeFeedsExcludedFromGlobalViews: true,

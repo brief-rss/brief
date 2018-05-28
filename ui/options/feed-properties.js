@@ -26,7 +26,7 @@ async function init() {
                     return feed._updateInterval;
                 case 'entryAgeLimit':
                     feed._entryAgeLimit = (feed.entryAgeLimit ||
-                                           Prefs.get('database.entryExpirationAge'));
+                                            Prefs.get('database.entryExpirationAge'));
                     return feed._entryAgeLimit;
                 default: return feed[name];
             }
@@ -88,9 +88,11 @@ async function init() {
     document.getElementById('previous-feed').addEventListener('click', () => {
         document.location.search = `?feedID=${allFeeds[index-1].feedID}`;
     });
-    window.addEventListener('beforeunload',
-                            () => Database.expireEntries(),
-                            {once: true, passive: true});
+    window.addEventListener(
+        'beforeunload',
+        () => Database.expireEntries(),
+        {once: true, passive: true}
+    );
 
     Enabler.init();
 
@@ -106,8 +108,9 @@ function updateScale() {
     switch (scaleMenu.selectedIndex) {
         case 2: scale *= 24; // days to hours and fallthrough
         case 1: scale *= 60; // hours to minutes and fallthrough
-        case 0: scale *= 60; // minutes to seconds and
-                scale *= 1000; // seconds to milliseconds
+        case 0:
+            scale *= 60; // minutes to seconds and
+            scale *= 1000; // seconds to milliseconds
     }
     PrefBinder.updateScale(interval, scale);
 }
