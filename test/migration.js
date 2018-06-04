@@ -63,7 +63,7 @@ T.runTests('mergeFeeds', {
     },
     sameButDifferentId: () => {
         verify(
-            [FEED_A],
+            [FEED_A, FOLDER_A],
             [{...FEED_A, feedID: 'aaa'}],
             {feeds: [{...FEED_A, feedID: 'aaa'}], feedMap: {a: 'aaa', aaa: 'aaa'}}
         );
