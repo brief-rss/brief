@@ -1453,7 +1453,7 @@ Query.prototype = {
  * The descriptor stores information about the migration progress to allow resuming it
  * after a browser restart.
  */
-let Migrator = {
+export let Migrator = {
     BATCH_SIZE: 1000, // Must be >1 for `advance` to work
     /// Collect all source information needed to initialize the migration in the target database
     async studySource({db}) {
