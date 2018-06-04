@@ -1514,13 +1514,13 @@ export let Migrator = {
             }
             descriptor = targets[0];
         } else {
-            //TODO: merge old and new feed lists
-            if(feeds.length > 0) {
-                throw `Brief: migration into already-used database not yet supported`;
-            } else {
-                for(let feed of source.feeds) {
-                    tx.objectStore('feeds').put(feed);
-                }
+            let {feeds: mergedFeeds, feedMap} = Migrator.mergeFeeds({
+                src: source.feeds,
+                dst: feeds,
+            });
+            tx.objectStore('feeds').clear();
+            for(let feed of mergedFeeds) {
+                tx.objectStore('feeds').put(feed);
             }
             let maxEntry = last.entry + source.count.entries;
             let maxRevision = last.revision + source.count.revisions;
@@ -1529,6 +1529,7 @@ export let Migrator = {
                 count: source.count,
                 processedEntries: 0,
                 lastTransferredEntry: null,
+                feedMap: Array.from(feedMap),
                 rangeTop: {
                     entries: maxEntry,
                     revisions: maxRevision,
@@ -1712,7 +1713,8 @@ export let Migrator = {
             db.transaction('migrations').objectStore('migrations').get(source.name)
         );
 
-        let {processedEntries, count} = descriptor;
+        let {processedEntries, feedMap, count} = descriptor;
+        feedMap = new Map(feedMap);
         if(processedEntries === count.entries) {
             // Everything already transferred and presumably already flushed
             console.info("Migration already done, dropping the old database");
@@ -1740,6 +1742,7 @@ export let Migrator = {
             entries = entries.map(e => upgrade(e)).filter(e => e !== null);
 
             for(let [idx, entry] of entries.entries()) {
+                entry.feedID = feedMap.get(entry.feedID) || entry.feedID;
                 entry.id = rangeTop.entries - processedEntries + idx + 1;
             }
             // The "store" transaction
