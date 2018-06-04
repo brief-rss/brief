@@ -1541,6 +1541,172 @@ let Migrator = {
         }
     },
 
+    /// Merge feeds from the migration source with the ones already present in the database
+    ///
+    /// Outputs a new feed list and a feedID mapping from src to dst
+    mergeFeeds({src, dst}) {
+        // Unify feed IDs in both sources
+        let feedMap = _buildIdMap({src, dst});
+        let sourceMap = _reverseIdMap(feedMap);
+
+        // Starting from here, the `src` vs `dst` difference does not matter, only "older-newer"
+        let srcDate = Math.max(...src.map(({lastUpdated=0}) => lastUpdated));
+        let dstDate = Math.max(...dst.map(({lastUpdated=0}) => lastUpdated));
+        let [main, extras] = srcDate > dstDate
+            ? [src, dst]
+            : [dst, src];
+
+        let extrasIndex = new Map(extras.map(f => [f.feedID, f]));
+        // Copy the structure from `main` while merging the modifications from `extras`
+        // to the existing feeds
+        let feeds = main.map(f => {
+            let {isFolder} = f;
+            if(isFolder === 1) {
+                return {...f};
+            } else {
+                let feedID = feedMap.get(f.feedID);
+                let ids = sourceMap.get(feedID) || [];
+                let candidates = Array.concat(
+                    [f],
+                    ids.map(f => extrasIndex.get(f)).filter(f => f !== undefined),
+                );
+                return _mergeFeedVersions(candidates, {
+                    parent: f.parent,
+                    feedID,
+                });
+            }
+        });
+
+        let feedsIndex = new Map(feeds.map(f => [f.feedID, f]));
+        // The only case for a feed in `extras` that's missing from `main`
+        // is if these two data stores have been used independently for some time.
+        // This may have been caused by losing access to the old one.
+        // Let's assume that the user wants to keep all feeds,
+        // but can fix the folder structure themselves for now.
+        // FIXME: if this code will be used for Sync, folders need to be inferred correctly
+        // Maybe add unique random folder IDs?
+        let rootFolder = _guessRoot(feeds);
+        let newFeeds = _trimFeedList({
+            feeds: extras,
+            drop: f => feedsIndex.has(feedMap.get(f.feedID)),
+        });
+
+        let folderIdMap = _buildReindexFoldersMap({
+            feeds: newFeeds,
+            usedIds: feeds.map(f => f.feedID),
+        });
+        let indexOffset = Math.max(...feeds.map(f => f.rowIndex)); // No +1, they are 1-based
+
+        for(let feed of newFeeds) {
+            feeds.push({
+                ...feed,
+                feedID: folderIdMap.get(feed.feedID) || feed.feedID,
+                parent: folderIdMap.get(feed.parent) || rootFolder,
+
+                rowIndex: feed.rowIndex + indexOffset,
+            });
+        }
+
+        // The feed rowIndex will be reindexed again when the feed list is loaded
+        return {feeds, feedMap};
+
+        /// Build mapping from old feed (not folder) IDs to new ones for both `src` and `dst`
+        function _buildIdMap({src, dst}) {
+            src = src.filter(f => f.isFolder === 0);
+            dst = dst.filter(f => f.isFolder === 0);
+            let feedMap = new Map();
+            // For feeds from `dst` this must be identity as the entries are not migrated
+            for(let {feedID} of dst) {
+                feedMap.set(feedID, feedID);
+            }
+            // Build the index for URL matches
+            let urlIndex = new Map(dst.map(f => [f.feedURL, f.feedID]));
+            // For feeds from `src` this may be an ID-match or a URL-match
+            for(let {feedID, feedURL} of src) {
+                let targetID = feedMap.get(feedID) || urlIndex.get(feedURL);
+                feedMap.set(feedID, targetID || feedID);
+            }
+            return feedMap;
+        }
+
+        /// Convert the map of `ID->newID` into `newID->[...oldIDs]`
+        function _reverseIdMap(map) {
+            let rev = new Map();
+            for(let [oldID, newID] of map.entries()) {
+                let candidates = rev.get(newID) || [];
+                candidates.push(oldID);
+                rev.set(newID, candidates);
+            }
+            return rev;
+        }
+
+        /// Merge all known versions of a feed into one, hidden if last hidden after last updated
+        function _mergeFeedVersions(array, overrides={}) {
+            array = Array.from(array).sort((f, s) => f.lastUpdated - s.lastUpdated);
+            let lastHidden = Math.max(...array.map(f => f.hidden));
+            let lastUpdated = Math.max(...array.map(f => f.hidden ? 0 : f.lastUpdated));
+            return Object.assign(
+                {},
+                ...array,
+                {
+                    hidden: lastHidden > lastUpdated ? lastHidden : 0,
+                },
+                overrides,
+            );
+        }
+
+        // Guess the root folder ID: it is the (presumably, only) missing but referenced folder
+        function _guessRoot(feeds) {
+            let parents = new Map();
+            for(let {parent} of feeds) {
+                parents.set(
+                    parent,
+                    1 + (parents.get(parent) || 0),
+                );
+            }
+            for(let {feedID} of feeds.filter(f => f.isFolder === 1)) {
+                parents.delete(feedID);
+            }
+            if(parents.size > 1) {
+                console.warn("More than one possible root folders:", parents);
+            }
+            let candidates = Array.from(parents.entries()).map(([id, count]) => [count, id]).sort();
+            if(candidates.length === 0) {
+                return undefined;
+            }
+            return candidates[candidates.length - 1][1];
+        }
+
+        // Keep only feeds (except those dropped) and their ancestors
+        function _trimFeedList({feeds, drop}) {
+            let feedsIndex = new Map(feeds.map(f => [f.feedID, f]));
+            let keep = new Set();
+            for(let feed of feeds.filter(f => f.isFolder === 0 && !drop(f))) {
+                let {feedID} = feed;
+                while(feedID !== undefined) {
+                    keep.add(feedID);
+                    feedID = (feedsIndex.get(feedID) || {parent: undefined}).parent;
+                }
+            }
+            return feeds.filter(f => keep.has(f.feedID));
+        }
+
+        // Build folder ID map if some folders intersect with ones already present
+        function _buildReindexFoldersMap({feeds, usedIds}) {
+            let usedSet = new Set(usedIds);
+            let map = new Map();
+            for(let {feedID: orig} of feeds) {
+                let cur = orig;
+                while(usedSet.has(cur)) {
+                    cur = (Number(cur) + 1).toString();
+                }
+                map.set(orig, cur);
+                usedSet.add(cur);
+            }
+            return map;
+        }
+    },
+
     async runMigration({db, source, upgrade}) {
         let descriptor = await DbUtil.requestPromise(
             db.transaction('migrations').objectStore('migrations').get(source.name)
