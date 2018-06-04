@@ -616,7 +616,10 @@ let Database = {
         // providedID, if present, *must* be unique
         let entriesById = new Map(entries.map(e => [e.providedID, e]));
 
-        let queryId = {feeds: feedID, providedID: Array.from(entriesById.keys())};
+        let queryId = {
+            feeds: feedID,
+            providedID: Array.from(entriesById.keys()).filter(k => k !== undefined && k !== null)
+        };
         let allEntries = [];
         let newEntries = []; // For update notification
         // Chain, scan 1: every entry with IDs provided
