@@ -1,0 +1,4 @@
+# export-ignore is used to ensure `git archive` does not put them into the XPI
+test/ export-ignore
+.git* export-ignore
+.eslintrc.yml export-ignore
