@@ -14,7 +14,6 @@ const FEED_A = {
 const FEED_B = {
     feedID: 'b',
     lastUpdated: 0,
-    isFolder: 0,
     feedURL: 'http://b.b',
     hidden: 0,
     parent: null,
