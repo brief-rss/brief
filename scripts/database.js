@@ -1565,7 +1565,7 @@ let Migrator = {
         // to the existing feeds
         let feeds = main.map(f => {
             let {isFolder} = f;
-            if(isFolder === 1) {
+            if(isFolder) {
                 return {...f};
             } else {
                 let feedID = feedMap.get(f.feedID);
@@ -1616,8 +1616,8 @@ let Migrator = {
 
         /// Build mapping from old feed (not folder) IDs to new ones for both `src` and `dst`
         function _buildIdMap({src, dst}) {
-            src = src.filter(f => f.isFolder === 0);
-            dst = dst.filter(f => f.isFolder === 0);
+            src = src.filter(f => !f.isFolder);
+            dst = dst.filter(f => !f.isFolder);
             let feedMap = new Map();
             // For feeds from `dst` this must be identity as the entries are not migrated
             for(let {feedID} of dst) {
@@ -1668,7 +1668,7 @@ let Migrator = {
                     1 + (parents.get(parent) || 0),
                 );
             }
-            for(let {feedID} of feeds.filter(f => f.isFolder === 1)) {
+            for(let {feedID} of feeds.filter(f => !!f.isFolder)) {
                 parents.delete(feedID);
             }
             if(parents.size > 1) {
@@ -1685,7 +1685,7 @@ let Migrator = {
         function _trimFeedList({feeds, drop}) {
             let feedsIndex = new Map(feeds.map(f => [f.feedID, f]));
             let keep = new Set();
-            for(let feed of feeds.filter(f => f.isFolder === 0 && !drop(f))) {
+            for(let feed of feeds.filter(f => !f.isFolder && !drop(f))) {
                 let {feedID} = feed;
                 while(feedID !== undefined) {
                     keep.add(feedID);
