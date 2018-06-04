@@ -843,16 +843,20 @@ export let Database = {
 
         // Build all the children lists keeping relative order
         let parents = new Map();
-        let fullFeeds = new Map();
+        let fullFeeds = new Map(feeds.map(f => [f.feedID, f]));
+        let homeId = String(Prefs.get('homeFolder'));
         for(let feed of feeds) {
             let parent = feed.parent;
+            if(!fullFeeds.has(parent) && parent !== homeId) {
+                console.warn("Reparenting to root", feed);
+                parent = homeId;
+                feed.parent = parent;
+            }
             let children = parents.get(parent) || [];
             children.push(feed.feedID);
             parents.set(parent, children);
-            fullFeeds.set(feed.feedID, feed);
         }
         // Now flatten the main tree starting from the root
-        let homeId = String(Prefs.get('homeFolder'));
         function flattenChildren(parents, id) {
             let list = [];
             let children = parents.get(id) || [];
@@ -866,8 +870,8 @@ export let Database = {
         tree = tree.map(f => fullFeeds.get(f));
         // Ok, this is the most weird part: do we have anything not part of the tree (cycles, etc.)?
         for(let orphan of feeds.filter(f => !treeSet.has(f.feedID))) {
+            console.warn("Reparenting cycle to root(!!)", orphan);
             orphan.parent = homeId;
-            orphan.hidden = 1;
             tree.push(orphan);
         }
         // Finally reindex all feeds
