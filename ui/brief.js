@@ -537,3 +537,8 @@ export function getElement(aId) { return document.getElementById(aId); }
 
 // ===== Init =====
 window.addEventListener('load', () => init(), {once: true, passive: true});
+
+// Debugging hooks
+window.Comm = Comm;
+window.Database = Database;
+window.Prefs = Prefs;

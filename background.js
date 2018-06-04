@@ -301,3 +301,8 @@ const Brief = {
 };
 
 Brief.init();
+
+// Debugging hooks
+window.Comm = Comm;
+window.Database = Database;
+window.Prefs = Prefs;
