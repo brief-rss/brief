@@ -1,3 +1,5 @@
+let queue = Promise.resolve();
+
 export const T = {
     runTest: async function(name, fun) {
         try {
@@ -12,6 +14,12 @@ export const T = {
     },
 
     runTests: async function(name, tests) {
+        let promise = queue.then(() => T._runTests(name, tests)).catch(console.error);
+        queue = promise;
+        await promise;
+    },
+
+    _runTests: async function(name, tests) {
         console.group(`Test suite: ${name}`);
         for (let name in tests) {
             await T.runTest(name, tests[name]);
