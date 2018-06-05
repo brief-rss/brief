@@ -163,6 +163,8 @@ export let Database = {
                 } else {
                     console.info(`The ${description} needs upgrade, aborting`);
                 }
+            } else {
+                console.error("Error opening database:", e.name, e.message);
             }
             return null;
         }
