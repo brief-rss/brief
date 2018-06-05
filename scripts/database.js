@@ -754,7 +754,7 @@ let Database = {
             tx.objectStore('revisions').put(revision);
         }
         // May be missing due to a Brief<2.5.3:2.5 issue
-        prev.providedID = prev.providedID || next.providedID;
+        prev.providedID = prev.providedID || next.providedID || "";
     },
 
     _feedToEntries({feed, parsedFeed, now}) {
