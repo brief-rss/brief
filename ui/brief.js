@@ -10,7 +10,7 @@ import {
 } from "./feedlist.js";
 
 
-var init = async function init() {
+async function init() {
     apply_i18n(document);
 
     let feedview_doc = await fetch('feedview.html');
@@ -95,10 +95,10 @@ var init = async function init() {
     ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
     await wait();
     FeedList.rebuild();
-};
+}
 
 
-export var Commands = {
+export let Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
         document.body.classList.remove('sidebar');

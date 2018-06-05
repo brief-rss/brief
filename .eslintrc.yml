@@ -21,6 +21,7 @@ rules:
   semi:
     - error
     - always
+  no-var: error
 
   # Additional control
   import/no-cycle: warn

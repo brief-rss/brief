@@ -87,11 +87,10 @@ FeedView.prototype = {
 
     get headlinesMode() {
         let feedIDs = this.query.feeds || this.query.folders;
-        if (feedIDs && feedIDs.length == 1)
-            var viewMode = FeedList.getFeed(feedIDs[0]).viewMode;
-        else
-            viewMode = (Persistence.data.view.mode === 'headlines');
-
+        let viewMode = (Persistence.data.view.mode === 'headlines');
+        if (feedIDs && feedIDs.length == 1) {
+            viewMode = FeedList.getFeed(feedIDs[0]).viewMode;
+        }
         return viewMode == 1;
     },
 

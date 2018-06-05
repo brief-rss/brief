@@ -3,7 +3,7 @@ import {apply_i18n} from "/scripts/i18n.js";
 
 async function onload() {
     apply_i18n(document);
-    var elems = window.navigator.platform.match('Mac')
+    let elems = window.navigator.platform.match('Mac')
         ? document.getElementsByClassName('noMac')
         : document.getElementsByClassName('onlyMac');
 

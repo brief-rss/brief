@@ -6,7 +6,7 @@ import {Commands, Persistence, Shortcuts, getElement} from "./brief.js";
 import {FeedView} from "./feedview.js";
 
 
-export var gCurrentView;
+export let gCurrentView;
 
 // An almost generic TreeView component. Some custom structure is inlined in _updateElement
 function TreeView(aElementOrId) {
