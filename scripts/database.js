@@ -763,7 +763,7 @@ let Database = {
                 feedID: feed.feedID,
                 providedID: src.id,
                 title: (src.title || '').replace(/<[^>]+>/g, ''), // Strip tags
-                entryURL: src.link.href,
+                entryURL: src.link ? src.link.href : '',
                 summary: src.summary,
                 content: src.content,
                 authors: authors,
