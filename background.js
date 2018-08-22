@@ -149,15 +149,15 @@ const Brief = {
             });
         } catch(ex) {
             if(ex.message === 'Missing host permission for the tab') {
-                // There are a few known cases: about:, restricted (AMO) and feed preview pages
+                // There are a few known cases: about:/view-source:, restricted (AMO) and feed preview pages
                 if(url === undefined) {
                     ({url, title} = await browser.tabs.get(tabId));
                 }
-                let parsedUrl = new URL(url);
-                if(url === undefined || parsedUrl.protocol === 'about:') {
+                let {protocol, host} = new URL(url);
+                if(url === undefined || !(protocol === 'http:' || protocol === 'https:')) {
                     // Ok, looks like there's nothing Brief can do
                     // (feeds from AMO cannot be fetched)
-                } else if(Brief.RESTRICTED_DOMAINS.has(parsedUrl.host)) {
+                } else if(Brief.RESTRICTED_DOMAINS.has(host)) {
                     // FIXME: maybe try fetching them as `restricted.domain.com.`?
                 } else {
                     // Assume this is a feed preview/subscribe page
