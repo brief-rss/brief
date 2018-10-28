@@ -31,6 +31,11 @@ const Brief = {
             () => browser.tabs.create({url: '/ui/brief.xhtml'}));
         browser.browserAction.setBadgeBackgroundColor({color: 'grey'});
 
+        if(typeof browser.browserAction.setBadgeTextColor === "function")
+        {  
+           browser.browserAction.setBadgeTextColor({color: "#F8F8F8"});
+        } 
+
         browser.contextMenus.create({
             id: "brief-button-refresh",
             title: browser.i18n.getMessage("briefCtxRefreshFeeds_label"),
