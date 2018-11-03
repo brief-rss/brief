@@ -76,10 +76,10 @@ let OPML = {
             let title = this.cleanXMLText(node.title);
             if(node.isFolder) {
                 data += `${indent()}<outline text="${title}">\n`;
-                parents.push(node.feedID);
+                parents.push(node.feedID||"");
             } else {
-                let feedURL = this.cleanXMLText(node.feedURL);
-                let siteURL = this.cleanXMLText(node.websiteURL);
+                let feedURL = this.cleanXMLText(node.feedURL||"");
+                let siteURL = this.cleanXMLText(node.websiteURL||"");
                 data += `${indent()}<outline text="${title}" type="rss" version="RSS"` +
                         ` htmlUrl="${siteURL}" xmlUrl="${feedURL}"/>\n`;
             }
@@ -98,6 +98,9 @@ let OPML = {
     },
 
     cleanXMLText: function(str) {
+        if(str==null) {
+            return "";
+        }
         let characters = [
             {find : '&', replace : '&amp;'},
             {find : '"', replace : '&quot;'},
