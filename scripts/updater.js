@@ -443,6 +443,7 @@ export let FeedFetcher = {
         }
 
         let root = doc.querySelector(this.ROOTS);
+        // XXX: root can be null
         let result = this._parseNode(root, this.FEED_PROPERTIES);
         if(!result || !result.items || !result.items.length > 0) {
             console.warn("failed to find any items in", url);
