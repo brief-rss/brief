@@ -456,7 +456,7 @@ export let FeedFetcher = {
         return result;
     },
 
-    ROOTS: ['RDF, channel, *|feed'],
+    ROOTS: "RDF, channel, *|feed", // See also related ROOTS in scan-for-feeds.js
 
     _parseNode(node, properties) {
         let props = {};
