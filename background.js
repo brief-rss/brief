@@ -145,7 +145,6 @@ const Brief = {
             Database.addFeeds({url});
             browser.tabs.update({url: '/ui/brief.xhtml'});
         }
-        let path = null;
         try {
             replies = await browser.tabs.executeScript(tabId, {
                 file: '/content_scripts/scan-for-feeds.js',
@@ -167,8 +166,7 @@ const Brief = {
                     // Heuristics: looks like the PDF viewer, probably not a feed, ignore
                 } else {
                     // Assume this is a feed preview/subscribe page
-                    replies = [[{url, linkTitle: title}]];
-                    path = '/icons/brief.svg#pulsing';
+                    replies = [[{url, linkTitle: title, kind: 'self'}]];
                 }
             } else {
                 throw ex;
@@ -177,6 +175,10 @@ const Brief = {
         let feeds = replies[0];
         if(feeds.length > 0) {
             browser.pageAction.show(tabId);
+            let path = null;
+            if(feeds[0].kind === 'self') {
+                path = '/icons/brief.svg#pulsing';
+            }
             browser.pageAction.setIcon({path, tabId});
         } else {
             browser.pageAction.hide(tabId);

@@ -5,7 +5,7 @@
     let links = document.querySelectorAll(
         'link[rel~=feed], link[rel~=alternate]:not([rel~=stylesheet])');
 
-    function isFeed(link) {
+    function isFeedLink(link) {
         if(link.rel.match(/\bfeed\b/)) {
             return true;
         }
@@ -16,7 +16,9 @@
     }
 
     // TODO: Test for "allowed to link" skipped
-    let feeds = Array.from(links).filter(isFeed).map(l => ({linkTitle: l.title, url: l.href}));
+    let feeds = Array.from(links).filter(isFeedLink).map(
+        l => ({linkTitle: l.title, url: l.href, kind: 'link'})
+    );
 
     return feeds;
 })();
