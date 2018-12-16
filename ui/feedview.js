@@ -1277,19 +1277,19 @@ EntryView.prototype = {
                 case relativeDate.deltaMinutes === 0:
                     return Strings['entryDate_justNow'];
 
-                // eslint-disable-next-line no-case-declarations
-                case relativeDate.deltaHours === 0:
+                case relativeDate.deltaHours === 0: {
                     let minuteForm = getPluralForm(
                         relativeDate.deltaMinutes, Strings['minute_pluralForms']);
                     return browser.i18n.getMessage('entryDate_ago', minuteForm)
                         .replace('#number', relativeDate.deltaMinutes);
+                }
 
-                // eslint-disable-next-line no-case-declarations
-                case relativeDate.deltaHours <= 12:
+                case relativeDate.deltaHours <= 12: {
                     let hourForm = getPluralForm(
                         relativeDate.deltaHours, Strings['hour_pluralForms']);
                     return browser.i18n.getMessage('entryDate_ago', hourForm)
                         .replace('#number', relativeDate.deltaHours);
+                }
 
                 case relativeDate.deltaDaySteps === 0:
                     return Strings['entryDate_today'] + ', ' +
