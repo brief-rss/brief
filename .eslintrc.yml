@@ -2,6 +2,8 @@ env:
   browser: true
   es6: true
   webextensions: true
+plugins:
+  - import
 extends:
   - eslint:recommended
   - plugin:import/recommended
