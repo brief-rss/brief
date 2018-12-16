@@ -163,6 +163,8 @@ const Brief = {
                     // (feeds from AMO cannot be fetched)
                 } else if(Brief.RESTRICTED_DOMAINS.has(host)) {
                     // FIXME: maybe try fetching them as `restricted.domain.com.`?
+                } else if(/\.pdf$/.test(title)) {
+                    // Heuristics: looks like the PDF viewer, probably not a feed, ignore
                 } else {
                     // Assume this is a feed preview/subscribe page
                     replies = [[{url, linkTitle: title}]];
