@@ -3,10 +3,10 @@ env:
   es6: true
   webextensions: true
 plugins:
-  - import
+  #- import
 extends:
   - eslint:recommended
-  - plugin:import/recommended
+  #- plugin:import/recommended
 parserOptions:
   sourceType: module
   ecmaVersion: 2018
@@ -27,12 +27,12 @@ rules:
   no-sequences: error
 
   # Additional control
-  import/no-cycle: warn
-  import/first: warn
+  #import/no-cycle: warn
+  #import/first: warn
   # Would be nice to enforce order, but after resolution they are all relative
-  import/order:
-    - warn
-    - newlines-between: never
+  #import/order:
+  #  - warn
+  #  - newlines-between: never
 
   # Allowed
   no-console: off
