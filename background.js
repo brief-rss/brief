@@ -153,11 +153,11 @@ const Brief = {
                 if(url === undefined) {
                     ({url, title} = await browser.tabs.get(tabId));
                 }
-                let parsedUrl = new URL(url);
-                if(url === undefined || parsedUrl.protocol === 'about:') {
+                let {host, protocol} = new URL(url);
+                if(url === undefined || protocol === 'about:' || protocol === 'view-source:') {
                     // Ok, looks like there's nothing Brief can do
                     // (feeds from AMO cannot be fetched)
-                } else if(Brief.RESTRICTED_DOMAINS.has(parsedUrl.host)) {
+                } else if(Brief.RESTRICTED_DOMAINS.has(host)) {
                     // FIXME: maybe try fetching them as `restricted.domain.com.`?
                 } else {
                     // Assume this is a feed preview/subscribe page
