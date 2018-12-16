@@ -21,7 +21,9 @@ const Brief = {
                 Comm.verbose = true;
                 const TEST_INDEX = browser.runtime.getURL('/test/index.xhtml');
                 let tabs = await browser.tabs.query({url: TEST_INDEX});
-                if(tabs.length === 0) {
+                let debugging = (await browser.tabs.query({}))
+                    .some(({url}) => url === 'about:debugging');
+                if(tabs.length === 0 && !debugging) {
                     browser.tabs.create({url: TEST_INDEX});
                 } else {
                     for(let {id} of tabs) {
