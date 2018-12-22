@@ -7,7 +7,7 @@
     "applications": {
         "gecko": {
             "id": "brief@mozdev.org",
-            "strict_min_version": "57.0"
+            "strict_min_version": "58.0"
         }
     },
     "default_locale": "en",
