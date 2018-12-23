@@ -39,5 +39,5 @@ rules:
 
 settings:
   import/resolver:
-    babel-plugin-root-import:
-      rootPathPrefix: "/"
+    babel-root-slash-import:
+      debug: false
