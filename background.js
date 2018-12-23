@@ -35,7 +35,7 @@ const Brief = {
 
         browser.browserAction.onClicked.addListener(
             () => browser.tabs.create({url: '/ui/brief.xhtml'}));
-        browser.browserAction.setBadgeBackgroundColor({color: 'grey'});
+        browser.browserAction.setBadgeBackgroundColor({color: '#666666'});
 
         browser.contextMenus.create({
             id: "brief-button-refresh",
