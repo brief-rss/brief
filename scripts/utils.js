@@ -119,7 +119,7 @@ export function getPluralForm(number, forms) {
 
 
 export async function openBackgroundTab(url) {
-    let tab = await browser.tabs.getCurrent();
+    let [tab] = await browser.tabs.query({active: true, currentWindow: true});
     try {
         await browser.tabs.create({active: false, url: url, openerTabId: tab.id});
     }

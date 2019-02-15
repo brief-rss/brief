@@ -63,6 +63,7 @@ const Brief = {
         await Prefs.init({master: true});
 
         Prefs.addObserver('showUnreadCounter', () => this._updateUI());
+        Prefs.addObserver('openInPopup', () => this._updateUI());
         Comm.registerObservers({
             'feedlist-updated': () => this._updateUI(),
             'entries-updated': debounced(100, () => this._updateUI()),
@@ -191,6 +192,7 @@ const Brief = {
     _updateUI: async function() {
 
         let enabled = Prefs.get('showUnreadCounter');
+        let isPopup = Prefs.get('openInPopup');
         browser.contextMenus.update('brief-button-show-unread', {checked: enabled});
         if(enabled) {
             let count = await Database.query({
@@ -209,6 +211,7 @@ const Brief = {
         } else {
             browser.browserAction.setBadgeText({text: ""});
         }
+        browser.browserAction.setPopup({popup: isPopup ? '/ui/brief.xhtml' : ''});
         //TODO: return tooltip
         /*
             _updateStatus: async function Brief__updateStatus() {

@@ -239,6 +239,9 @@
     "seeCustomizationTips_url": {
         "message": "http://brief.mozdev.org/customize.html"
     },
+    "openInPopup_label": {
+        "message": "Open Brief in a popup"
+    },
     "feedName_label": {
         "message": "Name"
     },

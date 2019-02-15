@@ -66,6 +66,7 @@ function pref(name, value) {
 // The actual prefs
 pref("homeFolder", -1);
 pref("showUnreadCounter", true);
+pref("openInPopup", false);
 pref("firstRun", true);
 pref("lastVersion", "0");
 pref("assumeStandardKeys", true);

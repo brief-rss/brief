@@ -112,6 +112,7 @@ body.sidebar #reveal-sidebar-button {
 #sidebar {
     background-color: #f2f2f2 !important;
     min-width: 250px !important;
+    min-height: 600px !important;
 }
 
 #sidebar-splitter,
