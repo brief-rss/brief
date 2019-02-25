@@ -2,6 +2,8 @@ RSS reader extension for Firefox
 
 http://brief.mozdev.org
 
+[Mozilla Firefox Addons page](https://addons.mozilla.org/firefox/addon/brief/)
+
 # Contributors
 
 ## Creator
