@@ -15,10 +15,11 @@ async function onload() {
     await browser.windows.update(id, {height: height + 1});
 }
 
-function onKeypress(aEvent) {
-    if (aEvent.keyCode == aEvent.DOM_VK_ESCAPE)
+function onKeyup({key}) {
+    if (key == "Escape") {
         window.close();
+    }
 }
 
 window.addEventListener('load', onload, false);
-document.addEventListener('keypress', onKeypress, false);
+document.addEventListener('keyup', onKeyup, false);
