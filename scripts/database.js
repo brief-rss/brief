@@ -770,13 +770,15 @@ export let Database = {
                 feedID: feed.feedID,
                 providedID: src.id,
                 title: (src.title || '').replace(/<[^>]+>/g, ''), // Strip tags
-                entryURL: src.link.href,
                 summary: src.summary,
                 content: src.content,
                 authors: authors,
                 date: parseDateValue(src.published) || parseDateValue(src.updated) || now,
                 updated: parseDateValue(src.updated) || now,
             };
+            if(src.link !== undefined) {
+                entry.entryURL = src.link.href;
+            }
 
             entries.push(entry);
         }
