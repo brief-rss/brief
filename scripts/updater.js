@@ -132,6 +132,7 @@ export let FeedUpdater = {
                 this.queue = this.queue.filter(f => f != feedID);
             }
             this.underway.push(feedID);
+            this._broadcastStatus();
 
             /*spawn*/ this.update(feedID)
                 .catch(err => console.error('Brief: fetch error', err))
@@ -233,7 +234,11 @@ export let FeedUpdater = {
     },
 
     _broadcastStatus() {
-        Comm.broadcast('update-status', {active: this.active, progress: this.progress});
+        Comm.broadcast('update-status', {
+            active: this.active,
+            progress: this.progress,
+            underway: this.underway,
+        });
     },
 };
 
