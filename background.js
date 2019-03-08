@@ -11,6 +11,10 @@ const Brief = {
     _status: null,
     // Feeds in known windows
     _windowFeeds: new Map(),
+    // Hooks for debugging
+    prefs: Prefs,
+    db: Database,
+    comm: Comm,
 
     // No deinit required, we'll be forcefully unloaded anyway
     init: async function() {
@@ -308,7 +312,5 @@ const Brief = {
 
 Brief.init();
 
-// Debugging hooks
-window.Comm = Comm;
-window.Database = Database;
-window.Prefs = Prefs;
+// Debugging hook
+window.Brief = Brief;
