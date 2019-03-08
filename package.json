@@ -3,6 +3,6 @@
   "devDependencies": {
     "eslint": "^5.15.0",
     "eslint-import-resolver-babel-root-slash-import": "^1.0.6",
-    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-import": "^2.16.0"
   }
 }
