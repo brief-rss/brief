@@ -1,5 +1,5 @@
-import {FeedFetcher} from "/scripts/updater.js";
-import {parseDateValue} from "/scripts/utils.js";
+import {FeedFetcher} from "/modules/updater.js";
+import {parseDateValue} from "/modules/utils.js";
 import {T} from "./_harness.js";
 
 

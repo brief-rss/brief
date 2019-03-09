@@ -1,7 +1,7 @@
-import {Database} from "/scripts/database.js";
-import {Prefs} from "/scripts/prefs.js";
-import * as OPML from "/scripts/opml.js";
-import {Comm} from "/scripts/utils.js";
+import {Database} from "/modules/database.js";
+import {Prefs} from "/modules/prefs.js";
+import * as OPML from "/modules/opml.js";
+import {Comm} from "/modules/utils.js";
 import {Commands, Persistence, Shortcuts, getElement} from "./brief.js";
 import {FeedView} from "./feedview.js";
 

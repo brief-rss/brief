@@ -14,7 +14,7 @@
         }
         // contentType - Firefox was checking only
         // TEXT_HTML, APPLICATION_OCTET_STREAM and XML-mentioning ones
-        const ROOTS = "rss:root, feed:root, RDF:root"; // Also see ROOTS in scripts/updater.js
+        const ROOTS = "rss:root, feed:root, RDF:root"; // Also see ROOTS in modules/updater.js
         let root = document.querySelector(ROOTS);
         if(root !== null) {
             if(root.localName == "RDF") {

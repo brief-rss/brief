@@ -1,7 +1,7 @@
-import {Database} from "/scripts/database.js";
-import {apply_i18n} from "/scripts/i18n.js";
-import {Prefs} from "/scripts/prefs.js";
-import {Comm, wait} from "/scripts/utils.js";
+import {Database} from "/modules/database.js";
+import {apply_i18n} from "/modules/i18n.js";
+import {Prefs} from "/modules/prefs.js";
+import {Comm, wait} from "/modules/utils.js";
 import {PrefBinder, Enabler} from "./options-common.js";
 
 

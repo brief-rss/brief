@@ -1,4 +1,4 @@
-import {apply_i18n} from "/scripts/i18n.js";
+import {apply_i18n} from "/modules/i18n.js";
 
 
 async function init() {

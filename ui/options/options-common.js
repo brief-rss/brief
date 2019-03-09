@@ -1,4 +1,4 @@
-import {Prefs} from "/scripts/prefs.js";
+import {Prefs} from "/modules/prefs.js";
 
 
 export let PrefBinder = {

@@ -1,7 +1,7 @@
-import {Database} from "/scripts/database.js";
-import {Prefs} from "/scripts/prefs.js";
-import {FeedUpdater} from "/scripts/updater.js";
-import {Comm, debounced} from "/scripts/utils.js";
+import {Database} from "/modules/database.js";
+import {Prefs} from "/modules/prefs.js";
+import {FeedUpdater} from "/modules/updater.js";
+import {Comm, debounced} from "/modules/utils.js";
 
 
 const Brief = {

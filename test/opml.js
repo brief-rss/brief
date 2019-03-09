@@ -1,5 +1,5 @@
 import {T} from "./_harness.js";
-import {parse, serialize} from "/scripts/opml.js";
+import {parse, serialize} from "/modules/opml.js";
 
 T.runTests('OPML', {
     parser: () => {

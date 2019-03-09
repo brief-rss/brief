@@ -1,4 +1,4 @@
-import {Migrator} from "/scripts/database.js";
+import {Migrator} from "/modules/database.js";
 import {T} from "./_harness.js";
 
 const FEED_A = {

@@ -1,4 +1,4 @@
-import {Database} from "/scripts/database.js";
+import {Database} from "/modules/database.js";
 import {T} from "./_harness.js";
 
 

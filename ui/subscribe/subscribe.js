@@ -1,4 +1,4 @@
-import {Comm} from "/scripts/utils.js";
+import {Comm} from "/modules/utils.js";
 
 
 async function onload() {
