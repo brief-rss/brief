@@ -1,5 +1,5 @@
 import {T} from "./_harness.js";
-import {parse} from "/scripts/opml.js";
+import {parse, serialize} from "/scripts/opml.js";
 
 T.runTests('OPML', {
     parser: () => {
@@ -20,5 +20,11 @@ T.runTests('OPML', {
         T.assert_eq(results[0].children, undefined);
         T.assert_eq(results[1].url, undefined);
         T.assert_eq(results[1].children.length, 1);
+    },
+    serializer: () => {
+        const data = [
+            {parent: "0", isFolder: false, title: "feed", feedURL: "https://brief.example/feed1"}
+        ];
+        serialize(data);
     },
 });

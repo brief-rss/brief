@@ -59,7 +59,7 @@ function importNode(node) {
     }
 }
 
-export async function exportFeeds() {
+export function serialize(feeds) {
     let data = '';
     data += '<?xml version="1.0" encoding="UTF-8"?>\n';
     data += '<opml version="1.0">\n';
@@ -69,7 +69,6 @@ export async function exportFeeds() {
     data += '\t</head>\n';
     data += '\t<body>\n';
 
-    let feeds = Database.feeds.filter(f => !f.hidden);
     // The feeds are assumed to be sorted in tree order
     let parents = [feeds[0].parent]; //It's not in the list
     let indent = () => '\t'.repeat(parents.length + 1);
@@ -99,6 +98,12 @@ export async function exportFeeds() {
 
     data += '\t</body>\n';
     data += '</opml>';
+    return data;
+}
+
+export async function exportFeeds() {
+    let data = serialize(Database.feeds.filter(f => !f.hidden));
+
     let blob = new Blob([data], {type: 'text/xml'});
     let url = URL.createObjectURL(blob);
 
