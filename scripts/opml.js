@@ -1,6 +1,5 @@
 // Originally based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
 import {Database} from "/scripts/database.js";
-import {Prefs} from "/scripts/prefs.js";
 import {Comm, expectedEvent} from "/scripts/utils.js";
 
 
@@ -72,7 +71,7 @@ export async function exportFeeds() {
 
     let feeds = Database.feeds.filter(f => !f.hidden);
     // The feeds are assumed to be sorted in tree order
-    let parents = [String(Prefs.get('homeFolder'))]; //It's not in the list
+    let parents = [feeds[0].parent]; //It's not in the list
     let indent = () => '\t'.repeat(parents.length + 1);
     for(let node of feeds) {
         while(parents[parents.length - 1] !== node.parent) {
