@@ -87,10 +87,9 @@ export async function exportFeeds() {
             data += `${indent()}<outline text="${title}">\n`;
             parents.push(node.feedID);
         } else {
-            let feedURL = cleanXMLText(node.feedURL);
-            let siteURL = cleanXMLText(node.websiteURL);
             data += `${indent()}<outline text="${title}" type="rss" version="RSS"` +
-                    ` htmlUrl="${siteURL}" xmlUrl="${feedURL}"/>\n`;
+                    (node.websiteURL != null ? ` htmlUrl="${cleanXMLText(node.websiteURL)}"` : "") +
+                    ` xmlUrl="${cleanXMLText(node.feedURL)}"/>\n`;
         }
     }
     while(parents.length > 1) {
