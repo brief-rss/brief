@@ -2,6 +2,18 @@ RSS reader extension for Firefox
 
 http://brief.mozdev.org
 
+# Permissions
+
+Brief requires the following permissions:
+
+- `<all_urls>` ("Access your data for all websites") to check the feeds you subscribe to
+- `storage`/`unlimitedStorage` ("Store unlimited amount of client-side data") to store the items from your feeds
+- `bookmarks` ("Read and modify bookmarks") to bookmark starred items and star your bookmarks
+- `notifications` ("Display notifications to you") to tell you about new items found
+- `contextMenus` (not displayed) to provide the Brief button context menu
+- `tabs` ("Access browser tabs") to see subscribing via old subscription/preview pages
+- `downloads ("Download files and read and modify the browser's download history") to be able to export feed list and (not implemented yet) backup the database
+
 # Contributors
 
 ## Creator
