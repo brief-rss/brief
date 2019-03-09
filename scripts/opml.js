@@ -1,6 +1,6 @@
 // Originally based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
-import {Database} from "/scripts/database.js";
-import {Comm, expectedEvent} from "/scripts/utils.js";
+import {Database} from "./database.js";
+import {Comm, expectedEvent} from "./utils.js";
 
 
 export async function importOPML(file) {

@@ -1,6 +1,6 @@
-import {Database} from "/scripts/database.js";
-import {Prefs} from "/scripts/prefs.js";
-import {Comm, wait, xhrPromise, getPluralForm} from "/scripts/utils.js";
+import {Database} from "./database.js";
+import {Prefs} from "./prefs.js";
+import {Comm, wait, xhrPromise, getPluralForm} from "./utils.js";
 
 
 export let FeedUpdater = {

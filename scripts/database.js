@@ -1,6 +1,6 @@
-import {Prefs} from "/scripts/prefs.js";
-import {FeedUpdater, FaviconFetcher} from "/scripts/updater.js";
-import {Comm, parseDateValue, asArray, hashString} from "/scripts/utils.js";
+import {Prefs} from "./prefs.js";
+import {FeedUpdater, FaviconFetcher} from "./updater.js";
+import {Comm, parseDateValue, asArray, hashString} from "./utils.js";
 
 
 /**
