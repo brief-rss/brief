@@ -27,4 +27,5 @@ T.runTests('OPML', {
         ];
         serialize(data);
     },
+    // TODO: add a test for roundtripping the data (not easy due to list/tree format mismatch)
 });
