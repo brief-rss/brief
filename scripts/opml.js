@@ -1,4 +1,4 @@
-// Based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
+// Originally based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
 import {Database} from "/scripts/database.js";
 import {Prefs} from "/scripts/prefs.js";
 import {Comm, expectedEvent} from "/scripts/utils.js";
@@ -8,25 +8,33 @@ export async function importOPML(file) {
     let reader = new FileReader();
     reader.readAsText(file); // assumes UTF-8
     await expectedEvent(reader, 'load');
-    let data = reader.result;
+    let results;
 
-    let parser = new DOMParser();
-    let doc = parser.parseFromString(data, 'application/xml');
-
-    if (doc.documentElement.localName == 'parsererror') {
+    try {
+        results = parse(reader.result);
+    } catch(e) {
         window.alert(browser.i18n.getMessage('invalidFileAlertText'));
         return;
     }
-
-    let results = Array.from(doc.getElementsByTagName('body')[0].childNodes)
-        .filter(c => c.nodeName === 'outline')
-        .map(c => importNode(c))
-        .filter(c => c !== undefined);
 
     if(Comm.verbose) {
         console.log(results);
     }
     Database.addFeeds(results);
+}
+
+export function parse(text) {
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(text, 'application/xml');
+
+    if (doc.documentElement.localName == 'parsererror') {
+        throw new Error("OPML failed to parse as XML");
+    }
+
+    return Array.from(doc.getElementsByTagName('body')[0].childNodes)
+        .filter(c => c.nodeName === 'outline')
+        .map(c => importNode(c))
+        .filter(c => c !== undefined);
 }
 
 function importNode(node) {
@@ -63,7 +71,7 @@ export async function exportFeeds() {
     data += '\t<body>\n';
 
     let feeds = Database.feeds.filter(f => !f.hidden);
-    // The feeds are already correctly sorted
+    // The feeds are assumed to be sorted in tree order
     let parents = [String(Prefs.get('homeFolder'))]; //It's not in the list
     let indent = () => '\t'.repeat(parents.length + 1);
     for(let node of feeds) {
