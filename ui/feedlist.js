@@ -357,7 +357,7 @@ export let ViewList = {
 
         let title = this.selectedItem.getElementsByClassName('title')[0].textContent;
         let query = this.getQueryForView(this.selectedItem.id);
-        gCurrentView = new FeedView(title, query);
+        gCurrentView = new FeedView({title, query, db: Database});
     },
 
     refreshItem: async function ViewList_refreshItem(aItemID) {
@@ -429,7 +429,7 @@ export let TagList = {
             tags: [this.selectedItem.dataset.id]
         };
 
-        gCurrentView = new FeedView(this.selectedItem.dataset.id, query);
+        gCurrentView = new FeedView({title: this.selectedItem.dataset.id, query, db: Database});
     },
 
     /**
@@ -555,7 +555,7 @@ export let FeedList = {
         else
             query.feeds = [this.selectedFeed.feedID];
 
-        gCurrentView = new FeedView(this.selectedFeed.title, query);
+        gCurrentView = new FeedView({title: this.selectedFeed.title, query, db: Database});
     },
 
     onMove({targetId, itemIds, relation}) {

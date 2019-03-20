@@ -1,4 +1,3 @@
-import {Database} from "/modules/database.js";
 import {Prefs} from "/modules/prefs.js";
 import {
     Comm, expectedEvent, wait, openBackgroundTab, iterSnapshot, getPluralForm, RelativeDate,
@@ -32,20 +31,23 @@ const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
 /**
  * Manages the display of feed content.
  *
- * @param aTitle
+ * @param title
  *        Title of the view which will be shown in the header.
- * @param aQuery
+ * @param query
  *        Query that selects entries contained by the view.
+ * @param db
+ *        The database handle (or `null` for in-memory entry lists)
  */
-export function FeedView(aTitle, aQuery) {
-    this.title = aTitle;
-    this._fixedStarred = aQuery.starred !== undefined || aQuery.tags !== undefined;
+export function FeedView({title, query, db=null}) {
+    this.title = title;
+    this.db = db;
+    this._fixedStarred = query.starred !== undefined || query.tags !== undefined;
 
     for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
         getElement(id).hidden = this._fixedStarred; //TODO: move to CSS
 
-    aQuery.sortOrder = 'date';
-    this.__query = aQuery;
+    query.sortOrder = 'date';
+    this.__query = query;
 
     this._entriesMarkedUnread = [];
 
@@ -326,6 +328,9 @@ FeedView.prototype = {
     _entriesMarkedUnread: [],
 
     markVisibleEntriesRead: function FeedView_markVisibleEntriesRead() {
+        if(this.db === null) {
+            return;
+        }
         let winTop = this.window.pageYOffset;
         let winBottom = winTop + this.window.innerHeight;
         let entries = this._loadedEntries.map(id => this.getEntryView(id)).filter(ev => !!ev);
@@ -347,7 +352,7 @@ FeedView.prototype = {
         }
 
         if (entriesToMark.length)
-            Database.query(entriesToMark).markRead(true);
+            this.db.query(entriesToMark).markRead(true);
     },
 
 
@@ -497,6 +502,9 @@ FeedView.prototype = {
      *        Array of IDs of entries.
      */
     _onEntriesAdded: async function FeedView__onEntriesAdded(aAddedEntries) {
+        if(this.db === null) {
+            return;
+        }
         // The simplest way would be to query the current list of all entries in the view
         // and intersect it with the list of added ones. However, this is expansive for
         // large views and we try to avoid it.
@@ -519,7 +527,7 @@ FeedView.prototype = {
                 query.endDate = edgeDate;
 
             this._loadedEntries = Array.from(await this._refreshGuard(
-                Database.query(query).getIds()));
+                this.db.query(query).getIds()));
 
             let newEntries = aAddedEntries.filter(this.isEntryLoaded, this);
             if (newEntries.length) {
@@ -527,7 +535,7 @@ FeedView.prototype = {
                     entries: newEntries
                 };
 
-                for (let entry of await this._refreshGuard(Database.query(query).getEntries()))
+                for (let entry of await this._refreshGuard(this.db.query(query).getEntries()))
                     this._insertEntry(entry, this.getEntryIndex(entry.id));
 
                 this._setEmptyViewMessage();
@@ -541,7 +549,7 @@ FeedView.prototype = {
         // Otherwise, just blow it all away and refresh from scratch.
         else {
             if (this._allEntriesLoaded) {
-                let entryList = await Database.query(this.query).getIds();
+                let entryList = await this.db.query(this.query).getIds();
                 if(aAddedEntries.some(id => entryList.includes(id)))
                     this.refresh();
             }
@@ -699,6 +707,9 @@ FeedView.prototype = {
      * @returns Promise<null>
      */
     _fillWindow: async function FeedView__fillWindow(aWindowHeights) {
+        if(this.db === null) {
+            return;
+        }
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = this.headlinesMode
                 ? HEADLINES_LOAD_STEP_SIZE
@@ -754,7 +765,7 @@ FeedView.prototype = {
         dateQuery.startDate = rangeStartDate;
         dateQuery.limit = aCount;
 
-        let dates = await this._refreshGuard(Database.query(dateQuery).getValuesOf('date'));
+        let dates = await this._refreshGuard(this.db.query(dateQuery).getValuesOf('date'));
         if (dates.length) {
             let query = this.getQueryCopy();
             if (query.sortDirection == 'desc') {
@@ -766,7 +777,7 @@ FeedView.prototype = {
                 query.endDate = dates[dates.length - 1];
             }
 
-            let loadedEntries = await this._refreshGuard(Database.query(query).getEntries());
+            let loadedEntries = await this._refreshGuard(this.db.query(query).getEntries());
             for (let entry of loadedEntries) {
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
@@ -1219,12 +1230,15 @@ EntryView.prototype = {
                 break;
 
             case 'star':
+                if(this.feedView.db === null) {
+                    return;
+                }
                 if (this.starred) {
-                    Database.query(this.id).bookmark(false);
+                    this.feedView.db.query(this.id).bookmark(false);
                     // TODO: restore bookmark editing
                 }
                 else {
-                    Database.query(this.id).bookmark(true);
+                    this.feedView.db.query(this.id).bookmark(true);
                 }
                 break;
 
