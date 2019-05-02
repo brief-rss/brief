@@ -32,6 +32,22 @@
                data-i18n-attrs="accesskey:showNotification_accesskey">
             <input type="checkbox" data-pref="update.showNotification"/>
         </label>
+        <hbox class="line">
+            <label data-i18n="defaultFetchDelayBefore_label"/>
+            <input type="number" min="0" id="defaultFetchDelay"
+                data-pref="update.defaultFetchDelay"
+                data-pref-scale="1000"
+                data-i18n-attrs="accesskey:defaultFetchDelay_accesskey"/>
+            <label data-i18n="defaultFetchDelayAfter_label"/>
+        </hbox>
+        <hbox class="line">
+            <label data-i18n="backgroundFetchDelayBefore_label"/>
+            <input type="number" min="0" id="backgroundFetchDelay"
+                data-pref="update.backgroundFetchDelay"
+                data-pref-scale="1000"
+                data-i18n-attrs="accesskey:backgroundFetchDelay_accesskey"/>
+            <label data-i18n="backgroundFetchDelayAfter_label"/>
+        </hbox>
     </div>
     <div align="stretch">
         <h2 data-i18n="readingGroup_caption"/>

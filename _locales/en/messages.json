@@ -287,6 +287,24 @@
     "nextFeed_accesskey": {
         "message": "N"
     },
+    "defaultFetchDelayBefore_label": {
+        "message": "Wait"
+    },
+    "defaultFetchDelayAfter_label": {
+        "message": "seconds between individual feed syncs"
+    },
+    "defaultFetchDelay_accesskey": {
+        "message": "F"
+    },
+    "backgroundFetchDelayBefore_label": {
+        "message": "Wait"
+    },
+    "backgroundFetchDelayAfter_label": {
+        "message": "seconds between individual feed syncs when in background"
+    },
+    "backgroundFetchDelay_accesskey": {
+        "message": "B"
+    },
 
   // Messages from overlay.dtd
     // Toolbar button context menu
