@@ -114,6 +114,14 @@ export let Commands = {
         Database.query(gCurrentView.query).markRead(true);
     },
 
+    openCurrentView: async function cmd_openCurrentView() {
+        const entries = await Database.query(gCurrentView.query).getEntries();
+        this.markViewRead();
+        for (let entry of entries) {
+            openBackgroundTab(entry.entryURL);
+        }
+    },
+
     markVisibleEntriesRead: function cmd_markVisibleEntriesRead() {
         gCurrentView.markVisibleEntriesRead();
     },
@@ -339,6 +347,7 @@ let FeedViewHeader = {
         Searchbar.init();
         const handlers = {
             'mark-view-read': event => this.markRead(event),
+            'open-current-view': () => Commands.openCurrentView(),
             'headlines-checkbox': () => Commands.switchViewMode('headlines'),
             'full-view-checkbox': () => Commands.switchViewMode('full'),
             'show-all-entries-checkbox': () => Commands.switchViewFilter('all'),
@@ -499,6 +508,7 @@ export let Shortcuts = {
             case 'm': Commands.toggleSelectedEntryRead(); break;
             case 'n': Commands.markVisibleEntriesRead(); break;
             case 'Alt+n': Commands.markViewRead(); break;
+            case 'o': Commands.openCurrentView(); break;
             case 't': Commands.deleteOrRestoreSelectedEntry(); break;
             case 'b': Commands.toggleSelectedEntryStarred(); break;
             case 'h': Commands.toggleSelectedEntryCollapsed(); break;
