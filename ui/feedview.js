@@ -444,6 +444,10 @@ FeedView.prototype = {
     },
 
     _applyUpdates({entries, changes}) {
+        // No updates shall be followed in no-database mode
+        if(this.db === null) {
+            return;
+        }
         if(document.hidden) {
             this._refreshPending = true;
             return;
