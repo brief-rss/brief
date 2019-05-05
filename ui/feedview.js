@@ -97,8 +97,8 @@ FeedView.prototype = {
 
     get selectedEntry() { return this.__selectedEntry || null; },
 
-    // Ordered list of EntryView objects of entries that have been loaded.
-    entryViews: [],
+    // A mapping from ids to EntryView objects
+    _entryViews: new Map(),
 
     // Ordered list of IDs of entries that have been loaded.
     _loadedEntries: [],
