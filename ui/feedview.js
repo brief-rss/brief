@@ -645,7 +645,7 @@ FeedView.prototype = {
 
         // Clear DOM content.
         this.document.body.removeChild(this.feedContent);
-        let content = this.document.createElement('div');
+        let content = this.document.createElement('main');
         content.id = 'feed-content';
         this.document.body.appendChild(content);
 
