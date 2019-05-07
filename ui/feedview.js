@@ -4,7 +4,7 @@ import {
     getElement
 } from "/modules/utils.js";
 import {Commands, Persistence} from "./brief.js";
-import {gCurrentView, FeedList} from "./feedlist.js";
+import {FeedList} from "./feedlist.js";
 
 
 // Minimal number of window heights worth of entries loaded ahead of the
@@ -51,8 +51,7 @@ export function FeedView({title, query, db=null}) {
 
     this._entriesMarkedUnread = [];
 
-    if (gCurrentView)
-        gCurrentView.uninit();
+    this.document.dispatchEvent(new Event('detach-feedview'));
 
     let button = getElement('view-title-button');
     if(this.query.feeds && this.query.feeds.length == 1) {
@@ -77,6 +76,8 @@ export function FeedView({title, query, db=null}) {
 
     this.document.addEventListener('click', this, true);
     this.document.addEventListener('scroll', this, true);
+
+    this.document.addEventListener('detach-feedview', this);
 
     this.refresh();
 }
@@ -357,10 +358,13 @@ FeedView.prototype = {
 
 
     uninit: function FeedView_uninit() {
+        this.viewID = null;
+
         document.removeEventListener('visibilitychange', this, false);
         this.window.removeEventListener('resize', this, false);
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
+        this.document.removeEventListener('detach-feedview', this);
 
         Comm.dropObservers(this._observer);
     },
@@ -439,6 +443,9 @@ FeedView.prototype = {
                     this.refresh();
                     this._refreshPending = false;
                 }
+                break;
+            case 'detach-feedview':
+                this.uninit();
                 break;
         }
     },
@@ -877,7 +884,7 @@ FeedView.prototype = {
 
         return aWrappedPromise.then(
             value => {
-                if (this.viewID == oldViewID && this == gCurrentView)
+                if (this.viewID == oldViewID)
                     return value;
                 else
                     throw REFRESH_ABORT;
@@ -896,7 +903,7 @@ FeedView.prototype = {
         let oldViewID = this.viewID;
 
         return () => {
-            if (this.viewID == oldViewID && this == gCurrentView)
+            if (this.viewID == oldViewID)
                 aWrappedFunction.apply(undefined, arguments);
         };
     }
