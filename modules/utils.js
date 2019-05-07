@@ -23,6 +23,8 @@ export function xhrPromise(request) {
 
 // ===== Misc helpers =====
 
+export function getElement(aId) { return document.getElementById(aId); }
+
 export function debounced(delay, callback) {
     let active = false;
 

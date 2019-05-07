@@ -1,9 +1,10 @@
 import {Database} from "/modules/database.js";
 import {Prefs} from "/modules/prefs.js";
 import {
-    Comm, expectedEvent, wait, openBackgroundTab, iterSnapshot, getPluralForm, RelativeDate
+    Comm, expectedEvent, wait, openBackgroundTab, iterSnapshot, getPluralForm, RelativeDate,
+    getElement
 } from "/modules/utils.js";
-import {Commands, Persistence, getElement} from "./brief.js";
+import {Commands, Persistence} from "./brief.js";
 import {gCurrentView, FeedList} from "./feedlist.js";
 
 

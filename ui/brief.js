@@ -1,7 +1,9 @@
 import {Database} from "/modules/database.js";
 import {apply_i18n} from "/modules/i18n.js";
 import {Prefs} from "/modules/prefs.js";
-import {Comm, expectedEvent, wait, debounced, openBackgroundTab} from "/modules/utils.js";
+import {
+    Comm, expectedEvent, wait, debounced, openBackgroundTab, getElement
+} from "/modules/utils.js";
 import {
     FeedList, ViewList, TagList, DropdownMenus,
     ViewListContextMenu, TagListContextMenu, FeedListContextMenu,
@@ -530,10 +532,6 @@ export let Shortcuts = {
     },
 };
 
-
-// ------- Utility functions --------
-
-export function getElement(aId) { return document.getElementById(aId); }
 
 // ===== Init =====
 window.addEventListener('load', () => init(), {once: true, passive: true});
