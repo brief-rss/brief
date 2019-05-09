@@ -210,3 +210,8 @@ body.sidebar #reveal-sidebar-button {
 #main-pane {
     flex-basis: 350px;
 }
+
+/* Avoid FOUC when loading */
+body.loading {
+    display: none;
+}

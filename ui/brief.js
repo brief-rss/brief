@@ -18,15 +18,22 @@ async function init() {
     let feedview_doc = await fetch('feedview.html');
     let contentIframe = getElement('feed-view');
     contentIframe.setAttribute('srcdoc', await feedview_doc.text());
-    let contentLoaded = expectedEvent(contentIframe, 'load');
+    await expectedEvent(contentIframe, 'load');
 
+    // Restore local persistence
     await Prefs.init();
+    await Persistence.init();
+    getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);
+    getElement('tag-list').style.width = Persistence.data.tagList.width;
+    getElement('sidebar').style.width = Persistence.data.sidebar.width;
+    document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
+
+    // Allow first meaningful paint
+    document.body.classList.remove("loading");
+
     PrefObserver.init();
 
     await Database.init();
-
-    // Restore local persistence
-    await Persistence.init();
 
     Commands.switchViewFilter(Persistence.data.view.filter);
 
@@ -53,8 +60,6 @@ async function init() {
     // TODO: should update FeedView and feed view title too(?) on title change
     // TODO: loading/error indicators
 
-    await contentLoaded;
-
     Commands.applyStyle();
 
     let doc = contentIframe.contentDocument;
@@ -80,11 +85,6 @@ async function init() {
     FeedViewHeader.init();
 
     Shortcuts.init();
-
-    getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);
-    getElement('tag-list').style.width = Persistence.data.tagList.width;
-    getElement('sidebar').style.width = Persistence.data.sidebar.width;
-    document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
 
     // Initialize event handlers
     document.getElementById('update-button').addEventListener(
