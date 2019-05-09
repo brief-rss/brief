@@ -101,6 +101,28 @@
     background-position: 0 -44px !important;
 }
 
+#open-current-view {
+    background-image: url(/icons/mark-view-read.png) !important;
+}
+
+.view-button,
+#open-current-view {
+    height: 22px !important;
+    width: 22px !important;
+    background-position: 0 0 !important;
+}
+
+.view-button:hover,
+#open-current-view:hover {
+    background-position: 0 -22px !important;
+}
+
+.view-button:hover:active,
+#open-current-view:hover:active,
+.view-button[data-checked=true] {
+    background-position: 0 -44px !important;
+}
+
 #headlines-checkbox {
     background-image: url(/icons/view-headlines.png) !important;
 }

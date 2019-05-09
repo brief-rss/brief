@@ -74,6 +74,10 @@
     "markViewRead_tooltip": {
         "message": "Mark all items as read (Alt + N)"
     },
+    "openCurrentView_tooltip": {
+        "message": "Open all listed items in new tabs (O)"
+    },
+
 
     // # Context menu
     "ctxMarkRead_label": {
