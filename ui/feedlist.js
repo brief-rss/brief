@@ -50,7 +50,7 @@ TreeView.prototype = {
         let knownIds = new Set(aModel.map(node => node.id));
         let next = aElement.children.item(0);
         const IMPL_ITEMS = ['template', 'tree-folder-header', 'tree-folder-footer'];
-        for (let node of aModel) {
+        for (let node of [...aModel, null]) {
             // Skip or delete everything that's not to stay
             while(next !== null && (!next.hasOwnProperty('id') || !knownIds.has(next.id))) {
                 if(!IMPL_ITEMS.includes(next.nodeName)) {
@@ -64,6 +64,9 @@ TreeView.prototype = {
                     break;
                 }
                 next = next.nextSibling;
+            }
+            if(node === null) {
+                break;
             }
             // Find or create the element
             let element = this._resolveElement(this._mangleId(node.id));
