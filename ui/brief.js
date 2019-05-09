@@ -534,7 +534,8 @@ export let Shortcuts = {
 
 
 // ===== Init =====
-window.addEventListener('load', () => init(), {once: true, passive: true});
+// ES6 modules are executed after DOM parsing is complete by default
+init();
 
 // Debugging hooks
 window.Comm = Comm;
