@@ -4,7 +4,6 @@ import {
     getElement
 } from "/modules/utils.js";
 import {Commands, Persistence} from "./brief.js";
-import {FeedList} from "./feedlist.js";
 
 
 // Minimal number of window heights worth of entries loaded ahead of the
@@ -37,10 +36,21 @@ const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
  *        Query that selects entries contained by the view.
  * @param db
  *        The database handle (or `null` for in-memory entry lists)
+ * @param feeds
+ *        The feed list to be used if not using `db`
  */
-export function FeedView({title, query, db=null}) {
+export function FeedView({title, query, db=null, feeds=null}) {
     this.title = title;
     this.db = db;
+
+    if(db !== null) {
+        this._feeds = db.feeds;
+    } else if(feeds !== null) {
+        this._feeds = feeds;
+    } else {
+        throw new Error("FeedView has no way to access feed list");
+    }
+
     this._fixedStarred = query.starred !== undefined || query.tags !== undefined;
 
     for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
@@ -71,7 +81,16 @@ export function FeedView({title, query, db=null}) {
 
     this._observer = Comm.registerObservers({
         'entries-updated': info => this._applyUpdates(info),
-        'feedlist-updated': () => this._setEmptyViewMessage(),
+        'feedlist-updated': ({feeds}) => {
+            this._setEmptyViewMessage();
+            if(this.db !== null) {
+                let headlines = this.headlinesMode;
+                this._feeds = feeds;
+                if(headlines !== this.headlinesMode) {
+                    this.refresh();
+                }
+            }
+        },
     });
 
     this.document.addEventListener('click', this, true);
@@ -93,7 +112,7 @@ FeedView.prototype = {
         let feedIDs = this.query.feeds || this.query.folders;
         let viewMode = (Persistence.data.view.mode === 'headlines');
         if (feedIDs && feedIDs.length == 1) {
-            viewMode = FeedList.getFeed(feedIDs[0]).viewMode;
+            viewMode = this.getFeed(feedIDs[0]).viewMode;
         }
         return viewMode == 1;
     },
@@ -126,6 +145,9 @@ FeedView.prototype = {
     // Indicates if a filter paramater is fixed and cannot be toggled by the user.
     _fixedStarred: false,
 
+    // Feed list cache
+    _feeds: null,
+
 
     get browser() { return getElement('feed-view'); },
 
@@ -157,6 +179,18 @@ FeedView.prototype = {
             this.__query.sortDirection = 'desc';
 
         return this.__query;
+    },
+
+    get feeds() {
+        return this._feeds;
+    },
+
+    getFeed(feedID) {
+        let feed = this.feeds.find(f => f.feedID === feedID);
+        if(feed === undefined) {
+            return undefined;
+        }
+        return Object.assign({}, feed);
     },
 
     /**
@@ -843,7 +877,7 @@ FeedView.prototype = {
 
         let mainMessage, secondaryMessage;
 
-        if (!FeedList.getAllFeeds().length) {
+        if (!this.feeds.length) {
             mainMessage = browser.i18n.getMessage('noFeeds');
             secondaryMessage = '<a href="' + TUTORIAL_URL + '" target="_blank">'
                                + browser.i18n.getMessage('noFeedsAdvice') + '</a>';
@@ -944,7 +978,7 @@ function EntryView(aFeedView, aEntryData) {
         this.container.classList.add('trashed');
     }
 
-    let feed = FeedList.getFeed(aEntryData.feedID);
+    let feed = this.feedView.getFeed(aEntryData.feedID);
 
     // Set xml:base attribute to resolve relative URIs against the feed's URI.
     this.container.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'base', feed.feedURL);
@@ -1222,7 +1256,7 @@ EntryView.prototype = {
                 return;
             }
             else if (anchor.hasAttribute('href')) {
-                let feedURL = FeedList.getFeed(this.feedID).feedURL;
+                let feedURL = this.feedView.getFeed(this.feedID).feedURL;
                 let linkURI = new URL(anchor.getAttribute('href'), feedURL);
                 openBackgroundTab(linkURI.href);
 
