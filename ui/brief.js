@@ -249,7 +249,7 @@ export let Commands = {
     openEntryLink: function cmd_openEntryLink(aEntry) {
         let entryView = gCurrentView.getEntryView(aEntry);
 
-        let baseURI = new URL(FeedList.getFeed(entryView.feedID).feedURL);
+        let baseURI = new URL(gCurrentView.getFeed(entryView.feedID).feedURL);
         let linkURI = new URL(entryView.entryURL, baseURI);
 
         openBackgroundTab(linkURI.href);
