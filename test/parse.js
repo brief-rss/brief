@@ -1,4 +1,4 @@
-import {FeedFetcher} from "/modules/updater.js";
+import {fetchFeed} from "/modules/feed-fetcher.js";
 import {parseDateValue} from "/modules/utils.js";
 import {T} from "./_harness.js";
 
@@ -11,7 +11,7 @@ T.runTests('parse', {
         );
     },
     snippetGimp: async () => {
-        let feed = await FeedFetcher.fetchFeed("snippets/gimp.xml");
+        let feed = await fetchFeed("snippets/gimp.xml");
         T.assert_eq(feed.title, "FEED_TITLE");
         T.assert_eq(feed.updated, "Mon, 01 Jan 2018 12:00:00 GMT");
         T.assert_eq(feed.link.href, "https://rss.example/site");
