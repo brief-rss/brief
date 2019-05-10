@@ -1,5 +1,4 @@
 import {Prefs} from "./prefs.js";
-import {FeedUpdater} from "./updater.js";
 import {updateFavicon} from "./favicon-fetcher.js";
 import {Comm, parseDateValue, asArray, hashString} from "./utils.js";
 
@@ -366,7 +365,7 @@ export let Database = {
         }
         if(!options || !options.nested) {
             await Database.saveFeeds();
-            FeedUpdater.updateFeeds(newFeedIds);
+            Comm.broadcast('update-feeds', {feeds: newFeedIds});
         }
         return newFeedIds;
     },
