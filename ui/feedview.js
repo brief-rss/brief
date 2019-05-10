@@ -39,7 +39,7 @@ const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
  * @param feeds
  *        The feed list to be used if not using `db`
  */
-export function FeedView({title, query, db=null, feeds=null}) {
+export function FeedView({title, query={}, entries=null, db=null, feeds=null}) {
     this.title = title;
     this.db = db;
 
@@ -47,6 +47,7 @@ export function FeedView({title, query, db=null, feeds=null}) {
         this._feeds = db.feeds;
     } else if(feeds !== null) {
         this._feeds = feeds;
+        this.document.body.classList.add("preview");
     } else {
         throw new Error("FeedView has no way to access feed list");
     }
@@ -99,6 +100,10 @@ export function FeedView({title, query, db=null, feeds=null}) {
 
     this.document.addEventListener('detach-feedview', this);
 
+    if(entries !== null) {
+        this._fixedEntries = entries;
+    }
+
     this.refresh();
 }
 
@@ -148,6 +153,9 @@ FeedView.prototype = {
 
     // Feed list cache
     _feeds: null,
+
+    // Fixed entry list if not using a query
+    _fixedEntries: null,
 
 
     get browser() { return getElement('feed-view'); },
@@ -760,9 +768,6 @@ FeedView.prototype = {
      * @returns Promise<null>
      */
     _fillWindow: async function FeedView__fillWindow(aWindowHeights) {
-        if(this.db === null) {
-            return;
-        }
         if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
             let stepSize = this.headlinesMode
                 ? HEADLINES_LOAD_STEP_SIZE
@@ -800,6 +805,18 @@ FeedView.prototype = {
      *          of entries that were loaded.
      */
     _loadEntries: async function FeedView__loadEntries(aCount) {
+        if(this._fixedEntries !== null) {
+            for (let entry of this._fixedEntries) {
+                this._insertEntry(entry, this._loadedEntries.length);
+                this._loadedEntries.push(entry.id);
+            }
+            this._allEntriesLoaded = true;
+            return;
+        }
+        if(this.db === null) {
+            return;
+        }
+
         this._loading = true;
 
         let dateQuery = this.getQueryCopy();
