@@ -76,7 +76,7 @@ const Brief = {
 
         await Database.init();
 
-        await FeedUpdater.init();
+        await FeedUpdater.init({db: Database});
 
         this._updateUI();
         // TODO: first run page

@@ -1,4 +1,3 @@
-import {Database} from "./database.js";
 import {Prefs} from "./prefs.js";
 import {Comm, wait, getPluralForm} from "./utils.js";
 import {fetchFeed} from "./feed-fetcher.js";
@@ -18,6 +17,8 @@ export let FeedUpdater = {
 
     updatedFeeds: new Map(),
 
+    db: null,
+
     get active() {
         return this.queue.length + this.underway.length > 0;
     },
@@ -31,7 +32,8 @@ export let FeedUpdater = {
         }
     },
 
-    async init() {
+    async init({db}) {
+        this.db = db;
         /*spawn*/ this._scheduler();
 
         Comm.registerObservers({
@@ -77,7 +79,7 @@ export let FeedUpdater = {
 
     async updateAllFeeds(options) {
         let {background} = options || {};
-        let feeds = Database.feeds.filter(f => !f.hidden && !f.isFolder);
+        let feeds = this.db.feeds.filter(f => !f.hidden && !f.isFolder);
         this.updateFeeds(feeds, {background});
     },
 
@@ -105,7 +107,7 @@ export let FeedUpdater = {
             }
 
             let candidates = [];
-            for(let feed of Database.feeds.filter(f => !f.hidden && !f.isFolder)) {
+            for(let feed of this.db.feeds.filter(f => !f.hidden && !f.isFolder)) {
                 let update;
                 if(feed.updateInterval === 0) {
                     update = doGlobalUpdate;
@@ -159,14 +161,14 @@ export let FeedUpdater = {
     },
 
     async update(feedID) {
-        let feed = Database.getFeed(feedID);
+        let feed = this.db.getFeed(feedID);
         if(feed === undefined) { // Deleted from DB while in queue?
             return;
         }
 
         let parsedFeed = await fetchFeed(feed);
         if(parsedFeed) {
-            let pushResults = await Database.pushUpdatedFeed({feed, parsedFeed});
+            let pushResults = await this.db.pushUpdatedFeed({feed, parsedFeed});
             let {newEntries} = pushResults;
             if(newEntries.length > 0) {
                 let entryCount = this.updatedFeeds.get(feedID);
@@ -180,9 +182,9 @@ export let FeedUpdater = {
 
         //Do we need to refresh the favicon?
         let nextFaviconRefresh = feed.lastFaviconRefresh + this.FAVICON_REFRESH_INTERVAL;
-        feed = Database.getFeed(feedID); // Updated websiteURL
+        feed = this.db.getFeed(feedID); // Updated websiteURL
         if(!feed.favicon || feed.favicon === 'no-favicon' || Date.now() > nextFaviconRefresh) {
-            /*spawn*/ updateFavicon({feed, db: Database});
+            /*spawn*/ updateFavicon({feed, db: this.db});
         }
     },
 
@@ -214,7 +216,7 @@ export let FeedUpdater = {
         let alertText;
 
         if (feedCount == 1) {
-            let feedTitle = Database.getFeed(firstFeed).title;
+            let feedTitle = this.db.getFeed(firstFeed).title;
             feedTitle = feedTitle.length < 35 ? feedTitle : feedTitle.substr(0, 35) + '\u2026';
 
             alertText = browser.i18n.getMessage(
