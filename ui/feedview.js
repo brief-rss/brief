@@ -93,6 +93,7 @@ export function FeedView({title, query, db=null, feeds=null}) {
         },
     });
 
+    this.document.addEventListener('auxclick', this, true);
     this.document.addEventListener('click', this, true);
     this.document.addEventListener('scroll', this, true);
 
@@ -396,6 +397,7 @@ FeedView.prototype = {
 
         document.removeEventListener('visibilitychange', this, false);
         this.window.removeEventListener('resize', this, false);
+        this.document.removeEventListener('auxclick', this, true);
         this.document.removeEventListener('click', this, true);
         this.document.removeEventListener('scroll', this, true);
         this.document.removeEventListener('detach-feedview', this);
@@ -415,6 +417,12 @@ FeedView.prototype = {
             // Click listener must be attached to the document, not the entry container,
             // in order to catch middle-clicks.
             case 'click':
+                if(aEvent.button !== 0) {
+                    aEvent.preventDefault();
+                    return;
+                }
+                // fallthrough
+            case 'auxclick':
                 {
                     // The tutorial link needs to be opened from a privileged context
                     if (aEvent.target.getAttribute("href") == TUTORIAL_URL &&
