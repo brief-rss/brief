@@ -215,3 +215,16 @@ body.sidebar #reveal-sidebar-button {
 body.loading {
     display: none;
 }
+
+/* Preview mode */
+body.preview #sidebar,
+body.preview #sidebar-splitter,
+body.preview #reveal-sidebar-button {
+    display: none;
+}
+
+body.preview #searchbar,
+body.preview button.filter-button,
+body.preview #mark-view-read {
+    display: none;
+}
