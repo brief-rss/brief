@@ -1,7 +1,8 @@
 import {Database} from "./database.js";
 import {Prefs} from "./prefs.js";
-import {Comm, wait, xhrPromise, getPluralForm} from "./utils.js";
+import {Comm, wait, getPluralForm} from "./utils.js";
 import {fetchFeed} from "./feed-fetcher.js";
+import {updateFavicon} from "./favicon-fetcher.js";
 
 
 export let FeedUpdater = {
@@ -181,7 +182,7 @@ export let FeedUpdater = {
         let nextFaviconRefresh = feed.lastFaviconRefresh + this.FAVICON_REFRESH_INTERVAL;
         feed = Database.getFeed(feedID); // Updated websiteURL
         if(!feed.favicon || feed.favicon === 'no-favicon' || Date.now() > nextFaviconRefresh) {
-            /*spawn*/ FaviconFetcher.updateFavicon(feed);
+            /*spawn*/ updateFavicon({feed, db: Database});
         }
     },
 
@@ -240,182 +241,5 @@ export let FeedUpdater = {
             progress: this.progress,
             underway: this.underway,
         });
-    },
-};
-
-
-export let FaviconFetcher = {
-    TIMEOUT: 25000,
-
-    async updateFavicon(feed) {
-        if(Comm.verbose) {
-            console.log("Brief: fetching favicon for", feed);
-        }
-        let updatedFeed = {
-            feedID: feed.feedID,
-            lastFaviconRefresh: Date.now()
-        };
-        // Try, in order, to get a favicon from
-        // 1. favicon.ico relative to the website URL
-        // 2. the image specified in the document at the web site 
-        // 3. the image specified in the document at the web site origin
-        let faviconHardcodedURL = await this._fetchFaviconHardcodedURL(feed);
-        if(faviconHardcodedURL) {
-            updatedFeed.favicon = faviconHardcodedURL;
-        } else {
-            let faviconWebsiteURL = await this._fetchFaviconWebsiteURL(feed);
-            if(faviconWebsiteURL) {
-                updatedFeed.favicon = faviconWebsiteURL;
-            } else {
-                let faviconOriginURL = await this._fetchFaviconOriginURL(feed);
-                if(faviconOriginURL) {
-                    updatedFeed.favicon = faviconOriginURL;
-                }
-            }
-        }
-        await Database.modifyFeed(updatedFeed);
-    },
-
-    async _fetchFaviconHardcodedURL(feed) {
-        if (!feed.websiteURL) {
-            return;
-        }
-
-        // Use websiteURL instead of feedURL for resolving the favicon URL,
-        // because many websites use services like Feedburner for generating their
-        // feeds and we would get the Feedburner's favicon instead.
-        let faviconURL = new URL('/favicon.ico', feed.websiteURL);
-
-        let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
-        return favicon;
-    },
-    async _fetchFaviconWebsiteURL(feed) {
-        if (!feed.websiteURL) {
-            return;
-        }
-
-        let url = feed.websiteURL;
-        let doc = await this._fetchDocFromURL(url);
-
-        let faviconURL = this._getFaviconURLFromDoc(feed, doc);
-        if (!faviconURL) {
-            return;
-        }
-
-        let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
-        return favicon;
-
-    },
-    async _fetchFaviconOriginURL(feed) {
-        if (!feed.websiteURL) {
-            return;
-        }
-        let url = new URL(feed.websiteURL).origin;
-        let doc = await this._fetchDocFromURL(url);
-
-        let faviconURL = this._getFaviconURLFromDoc(feed, doc);
-        if (!faviconURL) {
-            return;
-        }
-
-        let favicon = await this._fetchFaviconFromURL(feed, faviconURL);
-        return favicon;
-
-    },
-
-    async _fetchDocFromURL(url) {
-        if (!url) {
-            return;
-        }
-        let websiteRequest = new XMLHttpRequest();
-        websiteRequest.open('GET', url);
-        websiteRequest.responseType = 'document';
-
-        let doc = await Promise.race([
-            xhrPromise(websiteRequest).catch(() => undefined),
-            wait(this.TIMEOUT),
-        ]);
-        return doc;
-    },
-
-    async _fetchFaviconFromURL(feed, faviconURL) {
-        let response = await fetch(faviconURL, {redirect: 'follow'});
-
-        if(!response.ok) {
-            if(Comm.verbose) {
-                console.log(
-                    "Brief: failed to resolve favicon for feed ",
-                    feed.title,
-                    " at",
-                    faviconURL.href);
-            }
-            return;
-        }
-
-        let blob = await response.blob();
-        if(blob.size === 0) {
-            if(Comm.verbose) {
-                console.log(
-                    "Brief: no response body when fetching favicon for feed ",
-                    feed.title,
-                    " at ",
-                    faviconURL.href);
-            }
-            return;
-        }
-
-        let reader = new FileReader();
-        let favicon = await new Promise((resolve, reject) => {
-            reader.onload = e => resolve(e.target.result);
-            reader.onerror = e => reject(e);
-            reader.readAsDataURL(blob);
-        });
-
-        return favicon;
-    },
-    _getFaviconURLFromDoc(feed, doc) {
-        if(!doc) {
-            if(Comm.verbose) { 
-                console.log(
-                    "Brief: when attempting to locate favicon for ",
-                    feed.title,
-                    ", failed to fetch feed web site");
-            }
-            return;
-        }
-
-        if(doc.documentElement.localName === 'parseerror') {
-            if(Comm.verbose) {
-                console.log(
-                    "Brief: when attempting to locate favicon for ",
-                    feed.title,
-                    ", failed to parse web site");
-            }
-            return;
-        }
-        let linkElements = doc.querySelector('link[rel="icon"], link[rel="shortcut icon"]');
-        if(!linkElements) {
-            if(Comm.verbose) { 
-                console.log(
-                    "Brief: when attempting to locate favicon for ",
-                    feed.title,
-                    ", found no related link elements in web site");
-            }
-            return;
-        }
-        let faviconURL = new URL(linkElements.getAttribute("href"),feed.websiteURL);
-            
-        if(!faviconURL) {
-            if(Comm.verbose) {
-                console.log(
-                    "Brief: when attempting to locate favicon for ",
-                    feed.title,
-                    ", no favicon locations were found in the web site");
-            }
-            return;
-        }
-
-        return faviconURL;
-
     },
 };

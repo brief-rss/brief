@@ -1,5 +1,6 @@
 import {Prefs} from "./prefs.js";
-import {FeedUpdater, FaviconFetcher} from "./updater.js";
+import {FeedUpdater} from "./updater.js";
+import {updateFavicon} from "./favicon-fetcher.js";
 import {Comm, parseDateValue, asArray, hashString} from "./utils.js";
 
 
@@ -433,7 +434,7 @@ export let Database = {
         this._feeds.push(newFeed);
         this._feeds = this._reindex(this._feeds);
         if(feed.siteURL) { // Otherwise on first update
-            /*spawn*/ FaviconFetcher.updateFavicon(newFeed).catch(console.error);
+            /*spawn*/ updateFavicon({feed: newFeed, db: this}).catch(console.error);
         }
         return feedID;
     },
