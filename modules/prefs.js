@@ -1,3 +1,7 @@
+// Preferences are simple string-keyed values.
+//
+// Note that they are compared for equality and that `undefined` is not a valid value.
+// Pref modification checks the name against a whitelist of known prefs.
 export let Prefs = {
     // Message channel
     _port: null,
@@ -30,6 +34,9 @@ export let Prefs = {
 
     set: async function(name, value) {
         console.log("Brief: update pref", name, "to", value);
+        if(this._defaults[name] === undefined) {
+            throw new Error(`Brief: pref ${name} does not exist`);
+        }
         let prefs = Object.assign({}, this._values);
         prefs[name] = value;
         await browser.storage.local.set({prefs});
