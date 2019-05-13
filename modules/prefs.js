@@ -20,7 +20,7 @@ export let Prefs = {
             this._merge(pref_changes.newValue);
         });
 
-        let {prefs} = await browser.storage.local.get({prefs: this._defaults});
+        let {prefs} = await browser.storage.local.get({prefs: {}});
         this._values = prefs;
     },
 
@@ -32,14 +32,18 @@ export let Prefs = {
         return value;
     },
 
-    set: async function(name, value) {
-        console.log("Brief: update pref", name, "to", value);
+    set: async function(name, value, actionName='update') {
         if(this._defaults[name] === undefined) {
             throw new Error(`Brief: pref ${name} does not exist`);
         }
+        console.log(`Brief: ${actionName} pref ${name} to ${value}`);
         let prefs = Object.assign({}, this._values);
         prefs[name] = value;
         await browser.storage.local.set({prefs});
+    },
+
+    reset: async function(name) {
+        await this.set(name, undefined, 'reset');
     },
 
     addObserver: function(name, observer) {
@@ -52,8 +56,13 @@ export let Prefs = {
 
     _merge: function(prefs) {
         for(let [k, v] of Object.entries(prefs)) {
-            if(this._values[k] !== undefined && this._values[k] === v)
+            let oldValue = this.get(k);
+            if(v === undefined) {
+                v = this._defaults[k];
+            }
+            if(oldValue === v) {
                 continue;
+            }
             this._values[k] = v;
 
             // Notify observers
