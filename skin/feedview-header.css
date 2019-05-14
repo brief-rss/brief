@@ -144,6 +144,12 @@
     margin-left: 11px !important;
 }
 
+.starred-only #show-all-entries-checkbox,
+.starred-only #filter-unread-checkbox,
+.starred-only #filter-starred-checkbox {
+    display: none;
+}
+
 
 
 #searchbar {

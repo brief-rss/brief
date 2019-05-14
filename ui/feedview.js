@@ -53,9 +53,7 @@ export function FeedView({title, query={}, entries=null, db=null, feeds=null}) {
     }
 
     this._fixedStarred = query.starred !== undefined || query.tags !== undefined;
-
-    for (let id of ['show-all-entries-checkbox', 'filter-unread-checkbox', 'filter-starred-checkbox'])
-        getElement(id).hidden = this._fixedStarred; //TODO: move to CSS
+    document.getElementById('feed-view-header').classList.toggle('starred-only', this._fixedStarred);
 
     query.sortOrder = 'date';
     this.__query = query;
