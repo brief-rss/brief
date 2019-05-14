@@ -22,6 +22,7 @@ export let Prefs = {
 
         let {prefs} = await browser.storage.local.get({prefs: {}});
         this._values = prefs;
+        await this._migrateOffDefaults();
     },
 
     get: function(name) {
@@ -72,6 +73,19 @@ export let Prefs = {
             }
         }
     },
+
+    // Brief 2.5.* used to have all defaults copied to _values, so all values looked user-set
+    _migrateOffDefaults: async function() {
+        if(this.get("_pref.split-defaults") === true) {
+            return;
+        }
+        for(let [k, v] of Object.entries(this._values)) {
+            if(v === this._defaults[k]) {
+                delete this._values[k];
+            }
+        }
+        await this.set("_pref.split-defaults", true);
+    },
 };
 // TODO: split defaults from user prefs
 
@@ -108,3 +122,6 @@ pref("database.limitStoredEntries", false);
 pref("database.maxStoredEntries", 100);
 pref("database.lastPurgeTime", 0);
 pref("database.keepStarredWhenClearing", true);
+
+// Technical pref for migration off defaults
+pref("_pref.split-defaults", false);
