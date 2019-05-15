@@ -362,6 +362,7 @@ export let ViewList = {
             query,
             db: Database,
             filter: Persistence.data.view.filter,
+            mode: Persistence.data.view.mode,
         });
     },
 
@@ -439,6 +440,7 @@ export let TagList = {
             query,
             db: Database,
             filter: Persistence.data.view.filter,
+            mode: Persistence.data.view.mode,
         });
     },
 
@@ -570,6 +572,7 @@ export let FeedList = {
             query,
             db: Database,
             filter: Persistence.data.view.filter,
+            mode: Persistence.data.view.mode,
         });
     },
 

@@ -3,7 +3,7 @@ import {
     Comm, expectedEvent, wait, openBackgroundTab, iterSnapshot, getPluralForm, RelativeDate,
     getElement
 } from "/modules/utils.js";
-import {Commands, Persistence} from "./brief.js";
+import {Commands} from "./brief.js";
 
 
 // Minimal number of window heights worth of entries loaded ahead of the
@@ -39,10 +39,13 @@ const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
  * @param feeds
  *        The feed list to be used if not using `db`
  */
-export function FeedView({title, filter='all', query={}, entries=null, db=null, feeds=null}) {
+export function FeedView({
+    title, filter='all', mode='full', query={}, entries=null, db=null, feeds=null,
+}) {
     this.title = title;
     this.db = db;
     this._filter = filter;
+    this._defaultViewMode = mode;
 
     if(db !== null) {
         this._feeds = db.feeds;
@@ -115,7 +118,7 @@ FeedView.prototype = {
 
     get headlinesMode() {
         let feedIDs = this.query.feeds || this.query.folders;
-        let viewMode = (Persistence.data.view.mode === 'headlines');
+        let viewMode = (this._defaultViewMode === 'headlines');
         if (feedIDs && feedIDs.length == 1) {
             viewMode = this.getFeed(feedIDs[0]).viewMode;
         }
@@ -159,6 +162,9 @@ FeedView.prototype = {
     // Additional filtering mode (unread / starred / all)
     _filter: 'all',
 
+    // Default view mode (full / headlines)
+    _defaultViewMode: 'full',
+
 
     get browser() { return getElement('feed-view'); },
 
@@ -196,6 +202,14 @@ FeedView.prototype = {
         let oldFilter = this._filter;
         this._filter = filter;
         if(filter !== oldFilter) {
+            this.refresh();
+        }
+    },
+
+    setDefaultViewMode(mode) {
+        let prev = this.headlinesMode;
+        this._defaultViewMode = mode;
+        if(this.headlinesMode !== prev) {
             this.refresh();
         }
     },

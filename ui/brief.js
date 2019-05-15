@@ -127,13 +127,12 @@ export let Commands = {
                 viewMode: (aMode === 'headlines')
             });
             // Refresh will happen from the observer
-        }
-        else {
-            if(aMode !== Persistence.data.view.mode) {
-                Persistence.data.view.mode = aMode;
-                Persistence.save();
+        } else {
+            Persistence.data.view.mode = aMode;
+            Persistence.save();
+            if(gCurrentView !== undefined) {
+                gCurrentView.setDefaultViewMode(aMode);
             }
-            gCurrentView.refresh();
         }
 
     },
