@@ -3,7 +3,6 @@ import {
     Comm, expectedEvent, wait, openBackgroundTab, iterSnapshot, getPluralForm, RelativeDate,
     getElement
 } from "/modules/utils.js";
-import {Commands} from "./brief.js";
 
 
 // Minimal number of window heights worth of entries loaded ahead of the
@@ -1242,7 +1241,7 @@ EntryView.prototype = {
                 return;
 
             if (Prefs.get('feedview.autoMarkRead') && this.feedView.query.read !== false)
-                Commands.markEntryRead(this.id, true);
+                this.markEntryRead(true);
 
             if (this.selected) {
                 let entryBottom = this.offsetTop + this.height;
@@ -1296,7 +1295,7 @@ EntryView.prototype = {
                 aEvent.stopPropagation();
 
             if (anchor.getAttribute('command') == 'open') {
-                Commands.openEntryLink(this.id);
+                this.openEntryLink();
 
                 return;
             }
@@ -1312,11 +1311,11 @@ EntryView.prototype = {
         let command = aEvent.target.getAttribute('command');
 
         if (aEvent.detail == 2 && Prefs.get('feedview.doubleClickMarks') && !command)
-            Commands.markEntryRead(this.id, !this.read);
+            this.markEntryRead(!this.read);
 
         switch (command) {
             case 'switchRead':
-                Commands.markEntryRead(this.id, !this.read);
+                this.markEntryRead(!this.read);
                 break;
 
             case 'star':
@@ -1333,11 +1332,11 @@ EntryView.prototype = {
                 break;
 
             case 'delete':
-                Commands.deleteEntry(this.id);
+                this.deleteEntry();
                 break;
 
             case 'restore':
-                Commands.restoreEntry(this.id);
+                this.restoreEntry();
                 break;
 
             case 'collapse':
@@ -1452,7 +1451,36 @@ EntryView.prototype = {
                 node.replaceWith(...output);
             }
         }
-    }
+    },
+
+    // TODO: refactor into FeedViewModel/FeedEntryModel after they're split off
+    deleteEntry() {
+        if(this.feedView.db) {
+            this.feedView.db.query(this.id).markDeleted('trashed');
+        }
+    },
+
+    restoreEntry() {
+        if(this.feedView.db) {
+            this.feedView.db.query(this.id).markDeleted(false);
+        }
+    },
+
+    markEntryRead(state) {
+        if(this.feedView.db) {
+            this.feedView.db.query(this.id).markRead(state);
+        }
+    },
+
+    openEntryLink() {
+        let baseURI = new URL(this.feedView.getFeed(this.feedID).feedURL);
+        let linkURI = new URL(this.entryURL, baseURI);
+
+        openBackgroundTab(linkURI.href);
+
+        if (!this.read)
+            this.markEntryRead(true);
+    },
 
 };
 

@@ -195,7 +195,7 @@ export let Commands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        Database.query(aEntry).markRead(aNewState);
+        gCurrentView.getEntryView(aEntry).markRead(aNewState);
     },
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
@@ -208,11 +208,11 @@ export let Commands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        Database.query(aEntry).markDeleted('trashed');
+        gCurrentView.getEntryView(aEntry).markDeleted('trashed');
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        Database.query(aEntry).markDeleted(false);
+        gCurrentView.getEntryView(aEntry).markDeleted(false);
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
@@ -247,15 +247,7 @@ export let Commands = {
     },
 
     openEntryLink: function cmd_openEntryLink(aEntry) {
-        let entryView = gCurrentView.getEntryView(aEntry);
-
-        let baseURI = new URL(gCurrentView.getFeed(entryView.feedID).feedURL);
-        let linkURI = new URL(entryView.entryURL, baseURI);
-
-        openBackgroundTab(linkURI.href);
-
-        if (!entryView.read)
-            Database.query(aEntry).markRead(true);
+        gCurrentView.getEntryView(aEntry).openEntryLink();
     },
 
     showFeedProperties: function cmd_showFeedProperties(aFeed) {
