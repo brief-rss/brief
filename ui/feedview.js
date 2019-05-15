@@ -691,13 +691,11 @@ FeedView.prototype = {
                     this.__selectedEntry = null;
                 }
 
-                if (this.headlinesMode) {
-                    let dayHeader = this.document.getElementById('day' + entryView.day);
+                let dayHeader = this.document.getElementById('day' + entryView.day);
 
-                    // They day header may have been already removed by another callback.
-                    if (dayHeader && (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1'))
-                        this.feedContent.removeChild(dayHeader);
-                }
+                // They day header may have been already removed by another callback.
+                if (dayHeader && (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1'))
+                    this.feedContent.removeChild(dayHeader);
 
                 if (++removedCount == indices.length) {
                     if (aLoadNewEntries && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
@@ -898,18 +896,16 @@ FeedView.prototype = {
         ) || null;
         let nextElem = nextEntryView ? nextEntryView.container : null;
 
-        if (this.headlinesMode) {
-            if (nextEntryView && entryView.day > nextEntryView.day)
-                nextElem = nextElem.previousSibling;
+        if (nextEntryView && entryView.day > nextEntryView.day)
+            nextElem = nextElem.previousSibling;
 
-            if (!this.document.getElementById('day' + entryView.day)) {
-                let dayHeader = this.document.createElement('H1');
-                dayHeader.id = 'day' + entryView.day;
-                dayHeader.className = 'day-header';
-                dayHeader.textContent = entryView.getDateString(true);
+        if (!this.document.getElementById('day' + entryView.day)) {
+            let dayHeader = this.document.createElement('H1');
+            dayHeader.id = 'day' + entryView.day;
+            dayHeader.className = 'day-header';
+            dayHeader.textContent = entryView.getDateString(true);
 
-                this.feedContent.insertBefore(dayHeader, nextElem);
-            }
+            this.feedContent.insertBefore(dayHeader, nextElem);
         }
 
         this.feedContent.insertBefore(entryView.container, nextElem);

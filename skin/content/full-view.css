@@ -1,3 +1,7 @@
+body:not(.headlines-view) .day-header {
+    display: none;
+}
+
 article.entry.full > .headline-container {
     display: none;
 }
