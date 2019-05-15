@@ -39,9 +39,10 @@ const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
  * @param feeds
  *        The feed list to be used if not using `db`
  */
-export function FeedView({title, query={}, entries=null, db=null, feeds=null}) {
+export function FeedView({title, filter='all', query={}, entries=null, db=null, feeds=null}) {
     this.title = title;
     this.db = db;
+    this._filter = filter;
 
     if(db !== null) {
         this._feeds = db.feeds;
@@ -155,6 +156,9 @@ FeedView.prototype = {
     // Fixed entry list if not using a query
     _fixedEntries: null,
 
+    // Additional filtering mode (unread / starred / all)
+    _filter: 'all',
+
 
     get browser() { return getElement('feed-view'); },
 
@@ -176,9 +180,9 @@ FeedView.prototype = {
 
     // Query that selects all entries contained by the view.
     get query() {
-        this.__query.read = (Persistence.data.view.filter === 'unread') ? false : undefined;
+        this.__query.read = (this._filter === 'unread') ? false : undefined;
         if (!this._fixedStarred)
-            this.__query.starred = (Persistence.data.view.filter === 'starred') ? true : undefined;
+            this.__query.starred = (this._filter === 'starred') ? true : undefined;
 
         if (this.__query.read === false && Prefs.get('feedview.sortUnreadViewOldestFirst'))
             this.__query.sortDirection = 'asc';
@@ -186,6 +190,14 @@ FeedView.prototype = {
             this.__query.sortDirection = 'desc';
 
         return this.__query;
+    },
+
+    setFilter(filter) {
+        let oldFilter = this._filter;
+        this._filter = filter;
+        if(filter !== oldFilter) {
+            this.refresh();
+        }
     },
 
     get feeds() {

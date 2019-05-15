@@ -148,8 +148,9 @@ export let Commands = {
         getElement('filter-unread-checkbox').dataset.checked = (aFilter === 'unread');
         getElement('filter-starred-checkbox').dataset.checked = (aFilter === 'starred');
 
-        if(gCurrentView !== undefined)
-            gCurrentView.refresh();
+        if(gCurrentView !== undefined) {
+            gCurrentView.setFilter(aFilter);
+        }
     },
 
     openFeedWebsite: function cmd_openWebsite(aFeed) {
