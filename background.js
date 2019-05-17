@@ -90,6 +90,7 @@ const Brief = {
                 url: tab.url,
                 title: tab.title,
                 windowId: tab.windowId,
+                status: tab.status,
             });
         });
         browser.tabs.onActivated.addListener((ids) => this.queryFeeds(ids));
@@ -100,6 +101,7 @@ const Brief = {
                 url: tab.url,
                 title: tab.title,
                 windowId: tab.windowId,
+                status: tab.status,
             });
         }
     },
@@ -143,7 +145,7 @@ const Brief = {
     BRIEF_SUBSCRIBE: new RegExp(
         "(chrome://brief/content/brief\\.(xul|xhtml)\\?subscribe=|brief://subscribe/)(.*)"),
 
-    async queryFeeds({tabId, url, title, windowId}) {
+    async queryFeeds({windowId, tabId, url, title, status}) {
         let replies = [[]];
         let matchSubscribe = this.BRIEF_SUBSCRIBE.exec(url);
         if(matchSubscribe) {
@@ -160,7 +162,7 @@ const Brief = {
             if(ex.message === 'Missing host permission for the tab') {
                 // There are a few known cases: about:, restricted (AMO) and feed preview pages
                 if(url === undefined) {
-                    ({url, title} = await browser.tabs.get(tabId));
+                    ({url, title, status} = await browser.tabs.get(tabId));
                 }
                 let {host, protocol} = new URL(url);
                 if(url === undefined || protocol === 'about:' || protocol === 'view-source:') {
@@ -170,6 +172,8 @@ const Brief = {
                     // FIXME: maybe try fetching them as `restricted.domain.com.`?
                 } else if(/\.pdf$/.test(title)) {
                     // Heuristics: looks like the PDF viewer, probably not a feed, ignore
+                } else if(status === 'loading') {
+                    // Intermediate states during loading cause this message too
                 } else {
                     // Assume this is a feed preview/subscribe page
                     replies = [[{url, linkTitle: title, kind: 'self'}]];
