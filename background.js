@@ -17,6 +17,10 @@ const Brief = {
     db: Database,
     comm: Comm,
 
+    // Use Firefox built-in feed previews instead of Brief's
+    // (cannot make the transition smooth otherwise - no access to the feed preview)
+    _firefoxPreviewWorkaround: false,
+
     // No deinit required, we'll be forcefully unloaded anyway
     init: async function() {
         Comm.initMaster();
@@ -64,7 +68,15 @@ const Brief = {
             contexts: ["browser_action"]
         });
         browser.contextMenus.onClicked.addListener(info => this.onContext(info));
-        RequestMonitor.init();
+
+        let browserInfo = await browser.runtime.getBrowserInfo();
+        let baseVersion = browserInfo.version.split('.')[0];
+        if(Number(baseVersion) < 64) { // Early Firefox 64 nightlies have previews too
+            this._firefoxPreviewWorkaround = true;
+            console.log("Enabling Firefox built-in feed preview detection");
+        } else {
+            RequestMonitor.init();
+        }
 
         await Prefs.init({master: true});
 
@@ -178,8 +190,10 @@ const Brief = {
                     // Intermediate states during loading cause this message too
                 } else {
                     // Assume this is a feed preview/subscribe page
-                    // Note: Firefox 64 no longer supports feed previews, so this is for 60ESR only
-                    replies = [[{url, linkTitle: title, kind: 'self'}]];
+                    // Note: Firefox 64+ no longer supports feed previews, so this is for 60ESR only
+                    if(this._firefoxPreviewWorkaround) {
+                        replies = [[{url, linkTitle: title, kind: 'self'}]];
+                    }
                 }
             } else {
                 throw ex;
@@ -187,7 +201,8 @@ const Brief = {
         }
         let feeds = replies[0];
         if(feeds.length > 0) {
-            if(feeds[0].kind === 'self') {
+            // Redirecting from the Firefox preview mode looks just ugly, let's keep it the old way
+            if(feeds[0].kind === 'self' && !this._firefoxPreviewWorkaround) {
                 let target = encodeURIComponent(feeds[0].url);
                 let previewUrl = "/ui/brief.xhtml?preview=" + target;
                 browser.tabs.update(tabId, {url: previewUrl, loadReplace: true});
