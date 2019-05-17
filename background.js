@@ -176,6 +176,7 @@ const Brief = {
                     // Intermediate states during loading cause this message too
                 } else {
                     // Assume this is a feed preview/subscribe page
+                    // Note: Firefox 64 no longer supports feed previews, so this is for 60ESR only
                     replies = [[{url, linkTitle: title, kind: 'self'}]];
                 }
             } else {
