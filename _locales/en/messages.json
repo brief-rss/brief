@@ -25,6 +25,9 @@
     },
 
     // Buttons
+    "subscribeButton_label": {
+        "message": "Subscribe to this feed"
+    },
     "headlinesCheckbox_tooltip": {
         "message": "View headlines (F)"
     },

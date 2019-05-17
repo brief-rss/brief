@@ -1,4 +1,5 @@
 import {Database} from "/modules/database.js";
+import {fetchFeed} from "/modules/feed-fetcher.js";
 import {apply_i18n} from "/modules/i18n.js";
 import {Prefs} from "/modules/prefs.js";
 import {
@@ -8,13 +9,15 @@ import {
     FeedList, ViewList, TagList, DropdownMenus,
     ViewListContextMenu, TagListContextMenu, FeedListContextMenu,
     ContextMenuModule,
-    gCurrentView
+    gCurrentView, setCurrentView
 } from "./feedlist.js";
+import {FeedView} from "./feedview.js";
 
 
 async function init() {
     apply_i18n(document);
 
+    let previewURL = new URLSearchParams(document.location.search).get("preview");
     let feedview_doc = await fetch('feedview.html');
     let contentIframe = getElement('feed-view');
     contentIframe.setAttribute('srcdoc', await feedview_doc.text());
@@ -29,6 +32,9 @@ async function init() {
     document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
 
     // Allow first meaningful paint
+    if(previewURL !== null) {
+        document.body.classList.add("preview");
+    }
     document.body.classList.remove("loading");
 
     PrefObserver.init();
@@ -93,8 +99,41 @@ async function init() {
         'click', () => Comm.broadcast('update-stop'), {passive: true});
     document.getElementById('organize-button').addEventListener(
         'click', () => FeedList.organize(), {passive: true});
+    document.getElementById('subscribe-button').addEventListener(
+        'click', () => Database.addFeeds({url: previewURL}), {passive: true});
 
-    ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+    if(previewURL === null) {
+        ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+    } else {
+        let parsedFeed = await fetchFeed(previewURL);
+        let feed = Object.assign({}, {
+            feedID: "PREVIEW",
+            feedURL: previewURL,
+            title: parsedFeed.title,
+            websiteURL: parsedFeed.link ? parsedFeed.link.href : '',
+            subtitle: parsedFeed.subtitle ? parsedFeed.subtitle.text : '',
+            language: parsedFeed.language,
+            //FIXME: favicon missing
+        });
+        let entries = Database._feedToEntries({
+            feed,
+            parsedFeed,
+            now: Date.now(),
+        });
+        entries.reverse();
+        entries = entries.map(e => Database._entryFromItem(e));
+        for(let [i, e] of entries.entries()) {
+            e.id = i;
+        }
+
+        setCurrentView(new FeedView({
+            title: parsedFeed.title,
+            feeds: [feed],
+            entries,
+            filter: 'all',
+            mode: 'full',
+        }));
+    }
     await wait();
     FeedList.rebuild();
 }

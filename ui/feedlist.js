@@ -8,6 +8,10 @@ import {FeedView} from "./feedview.js";
 
 export let gCurrentView;
 
+export function setCurrentView(view) {
+    gCurrentView = view;
+}
+
 // An almost generic TreeView component. Some custom structure is inlined in _updateElement
 function TreeView(aElementOrId) {
     this.root = this._resolveElement(aElementOrId, "");
