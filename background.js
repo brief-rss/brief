@@ -185,6 +185,11 @@ const Brief = {
         }
         let feeds = replies[0];
         if(feeds.length > 0) {
+            if(feeds[0].kind === 'self') {
+                let target = encodeURIComponent(feeds[0].url);
+                let previewUrl = "/ui/brief.xhtml?preview=" + target;
+                browser.tabs.update(tabId, {url: previewUrl, loadReplace: true});
+            }
             browser.pageAction.show(tabId);
             let path = null;
             if(feeds[0].kind === 'self') {
