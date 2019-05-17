@@ -1,6 +1,7 @@
 import {Database} from "/modules/database.js";
 import {Prefs} from "/modules/prefs.js";
 import {FeedUpdater} from "/modules/updater.js";
+import * as RequestMonitor from "/modules/request-monitor.js";
 import {Comm, debounced} from "/modules/utils.js";
 
 
@@ -63,6 +64,7 @@ const Brief = {
             contexts: ["browser_action"]
         });
         browser.contextMenus.onClicked.addListener(info => this.onContext(info));
+        RequestMonitor.init();
 
         await Prefs.init({master: true});
 

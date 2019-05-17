@@ -12,7 +12,8 @@
     },
     "default_locale": "en",
     "permissions": ["<all_urls>", "contextMenus", "bookmarks",
-        "storage", "unlimitedStorage", "downloads", "tabs", "notifications"],
+        "storage", "unlimitedStorage", "downloads", "tabs", "notifications",
+        "webRequest", "webRequestBlocking"],
     "background": {
         "page": "background.xhtml"
     },

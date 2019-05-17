@@ -12,7 +12,8 @@ Brief requires the following permissions:
 - `notifications` ("Display notifications to you") to tell you about new items found
 - `contextMenus` (not displayed) to provide the Brief button context menu
 - `tabs` ("Access browser tabs") to see subscribing via old subscription/preview pages
-- `downloads ("Download files and read and modify the browser's download history") to be able to export feed list and (not implemented yet) backup the database
+- `downloads` ("Download files and read and modify the browser's download history") to be able to export feed list and (not implemented yet) backup the database
+- `webRequest` and `webRequestBlocking` (not displayed) to intercept the feed requests correctly and activate the feed preview mode instead of the download prompt
 
 # Contributors
 
