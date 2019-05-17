@@ -31,6 +31,8 @@
     if(isFeedPage()) {
         let TITLE = "RDF > *|title, channel > *|title, *|feed > *|title";
         let linkTitle = document.querySelector(TITLE).textContent || "";
+        let html = document.createElementNS("http://www.w3.org/1999/xhtml", "html");
+        document.documentElement.replaceWith(html);
         return [{linkTitle, url: document.location.href, kind: 'self'}];
     }
 
