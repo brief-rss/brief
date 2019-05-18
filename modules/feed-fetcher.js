@@ -28,7 +28,11 @@ export async function fetchFeed(feed) {
     }
 
     let root = doc.querySelector(ROOTS);
-    // XXX: root can be null
+    if(root === null) {
+        console.error("feed root element not found", url);
+        return;
+    }
+
     let result = parseNode(root, FEED_PROPERTIES);
     if(!result || !result.items || !result.items.length > 0) {
         console.warn("failed to find any items in", url);
