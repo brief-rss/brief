@@ -234,7 +234,7 @@ export let Commands = {
     },
 
     markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
-        gCurrentView.getEntryView(aEntry).markRead(aNewState);
+        gCurrentView.getEntryView(aEntry).markEntryRead(aNewState);
     },
 
     deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
@@ -247,11 +247,11 @@ export let Commands = {
     },
 
     deleteEntry: function cmd_deleteEntry(aEntry) {
-        gCurrentView.getEntryView(aEntry).markDeleted('trashed');
+        gCurrentView.getEntryView(aEntry).deleteEntry();
     },
 
     restoreEntry: function cmd_restoreEntry(aEntry) {
-        gCurrentView.getEntryView(aEntry).markDeleted(false);
+        gCurrentView.getEntryView(aEntry).restoreEntry();
     },
 
     toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
