@@ -493,8 +493,8 @@ export let Persistence = {
 
 export let Shortcuts = {
     init: function Shortcuts_init() {
-        document.addEventListener('keypress', this, {capture: true});
-        getElement('feed-view').contentDocument.addEventListener('keypress', this, {capture: true});
+        document.addEventListener('keydown', this, {capture: true});
+        getElement('feed-view').contentDocument.addEventListener('keydown', this, {capture: true});
     },
 
     handleEvent: function Shortcuts_handleEvents(event) {
