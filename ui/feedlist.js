@@ -512,6 +512,8 @@ export let FeedList = {
             'change', event => this.onSelect(event), {passive: true});
         this.tree.root.addEventListener(
             'move', event => this.onMove(event), {passive: true});
+        this.tree.root.addEventListener(
+            'keydown', event => this.onKeyDown(event), {capture: true});
     },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
@@ -737,7 +739,21 @@ export let FeedList = {
         this.tree.organize();
         let active = this.tree.root.classList.contains('organize');
         getElement('organize-button').classList.toggle('organize', active);
-        Shortcuts.mode = active ? 'organize' : 'command';
+    },
+
+    onKeyDown(event) {
+        if(this.tree.root.classList.contains('organize')) {
+            if(event.key === 'Enter') {
+                event.preventDefault();
+                event.stopPropagation();
+                document.activeElement.blur();
+            }
+            if(event.key === 'Escape') {
+                event.preventDefault();
+                event.stopPropagation();
+                FeedList.rebuild();
+            }
+        }
     },
 
     _rename({feedID, title}) {

@@ -492,8 +492,6 @@ export let Persistence = {
 };
 
 export let Shortcuts = {
-    mode: 'command',
-
     init: function Shortcuts_init() {
         document.addEventListener('keypress', this, {capture: true});
         getElement('feed-view').contentDocument.addEventListener('keypress', this, {capture: true});
@@ -501,7 +499,8 @@ export let Shortcuts = {
 
     handleEvent: function Shortcuts_handleEvents(event) {
         let target = event.target;
-        if(target.nodeName === 'input' || target.nodeName === 'textarea')
+        let isInput = target.nodeName === 'input' || target.nodeName === 'textarea';
+        if(isInput || target.isContentEditable)
             return;
         let description = (
             (event.ctrlKey ? 'Ctrl+' : '') +
@@ -510,19 +509,7 @@ export let Shortcuts = {
             (event.shiftKey ? 'Shift+' : '') +
             event.key
         );
-        if(this.mode === 'organize') {
-            if(description.includes('Enter')) {
-                event.preventDefault();
-                event.stopPropagation();
-                document.activeElement.blur();
-            }
-            if(description.includes('Escape')) {
-                event.preventDefault();
-                event.stopPropagation();
-                FeedList.rebuild();
-            }
-            return;
-        }
+
         switch(description) {
             case 'j': gCurrentView.selectNextEntry(); break;
             case 'k': gCurrentView.selectPrevEntry(); break;
