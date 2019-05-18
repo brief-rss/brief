@@ -32,6 +32,10 @@ hbox.line > * {
     margin-right: 0.5em;
 }
 
+hbox.high {
+    line-height: 2em;
+}
+
 body {
     width: -moz-max-content;
 }
