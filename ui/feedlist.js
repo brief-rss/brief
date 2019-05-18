@@ -188,8 +188,7 @@ TreeView.prototype = {
             return aElementOrId;
         }
     },
-    // HTML5 id must not contain spaces
-    // XXX: XHTML5?!!
+    // (X)HTML5 id must not contain spaces
     _mangleId: function(aId) {
         return aId.replace('_', '__').replace(' ', '_');
     },
