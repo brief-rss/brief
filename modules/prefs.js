@@ -1,3 +1,5 @@
+import {Comm} from "/modules/utils.js";
+
 // Preferences are simple string-keyed values.
 //
 // Note that they are compared for equality and that `undefined` is not a valid value.
@@ -19,6 +21,9 @@ export let Prefs = {
                 return;
             this._merge(pref_changes.newValue);
         });
+        Comm.registerObservers({
+            'set-pref': ({name, value, actionName}) => this.set(name, value, actionName),
+        });
 
         let {prefs} = await browser.storage.local.get({prefs: {}});
         this._values = prefs;
@@ -34,13 +39,15 @@ export let Prefs = {
     },
 
     set: async function(name, value, actionName='update') {
+        if(!Comm.master) {
+            return Comm.callMaster('set-pref', {name, value, actionName});
+        }
         if(this._defaults[name] === undefined) {
             throw new Error(`Brief: pref ${name} does not exist`);
         }
         console.log(`Brief: ${actionName} pref ${name} to ${value}`);
-        let prefs = Object.assign({}, this._values);
-        prefs[name] = value;
-        await browser.storage.local.set({prefs});
+        this._values[name] = value;
+        await browser.storage.local.set({prefs: this._values});
     },
 
     reset: async function(name) {
@@ -87,7 +94,6 @@ export let Prefs = {
         await this.set("_pref.split-defaults", true);
     },
 };
-// TODO: split defaults from user prefs
 
 function pref(name, value) {
     Prefs._defaults[name] = value;
