@@ -96,9 +96,14 @@ async function init() {
 
     Enabler.init();
 
-    // Workaround for mozilla bug 1408446
-    let {id, height} = await browser.windows.getCurrent();
-    await browser.windows.update(id, {height: height + 1});
+    // Workaround for mozilla bug 1408446 (Firefox before 62 / non-OOP) and size correctly
+    let {id, height, width} = await browser.windows.getCurrent();
+    let html = document.documentElement;
+    console.log(html.scrollHeight, html.offsetHeight);
+    await browser.windows.update(id, {
+        height: height + html.scrollHeight - window.innerHeight,
+        width: width + html.scrollWidth - window.innerWidth,
+    });
 }
 
 function updateScale() {

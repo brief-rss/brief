@@ -32,7 +32,7 @@ hbox.line > * {
     margin-right: 0.5em;
 }
 
-body {
+html, body {
     width: -moz-max-content;
 }
 
