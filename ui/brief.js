@@ -58,6 +58,7 @@ async function init() {
         'feedlist-updated': ({feeds}) => {
             refreshView();
             FeedList.rebuild(feeds);
+            updatePreviewMode();
         },
         'entries-updated': ({feeds}) => {
             refreshView();
@@ -110,7 +111,10 @@ async function init() {
     if(previewURL === null) {
         ViewList.selectedItem = getElement(Prefs.get('ui.startView') || 'all-items-folder');
     } else {
+        updatePreviewMode();
         let parsedFeed = await fetchFeed(previewURL);
+        document.title = browser.i18n.getMessage("previewTitle", parsedFeed.title);
+
         let feed = Object.assign({}, {
             feedID: "PREVIEW",
             feedURL: previewURL,
@@ -138,10 +142,15 @@ async function init() {
             filter: 'all',
             mode: 'full',
         }));
-        document.title = browser.i18n.getMessage("previewTitle", parsedFeed.title);
     }
     await wait();
     FeedList.rebuild();
+}
+
+function updatePreviewMode() {
+    let previewURL = new URLSearchParams(document.location.search).get("preview");
+    let knownURLs = Database.feeds.filter(f => f.hidden === 0).map(f => f.feedURL);
+    document.body.classList.toggle('known-feed', knownURLs.includes(previewURL));
 }
 
 

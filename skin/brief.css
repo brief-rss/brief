@@ -247,6 +247,18 @@ body:not(.preview) .preview {
     text-decoration: none;
 }
 
+body:not(.known-feed) #subscribe-button::after {
+    content: attr(data-preview);
+}
+
+body.known-feed #subscribe-button {
+    pointer-events: none;
+}
+
+body.known-feed #subscribe-button::after {
+    content: attr(data-preview-known);
+}
+
 #subscribe-button:hover {
     color: #ff6800 !important;
     box-shadow: 0px 0px 1px 0px #ff6800 !important;

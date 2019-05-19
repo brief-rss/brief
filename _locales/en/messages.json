@@ -28,6 +28,9 @@
     },
 
     // Buttons
+    "subscribeButton_knownFeed_label": {
+        "message": "Already subscribed to this feed"
+    },
     "subscribeButton_label": {
         "message": "Subscribe to this feed"
     },
