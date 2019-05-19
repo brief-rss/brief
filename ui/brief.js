@@ -138,6 +138,7 @@ async function init() {
             filter: 'all',
             mode: 'full',
         }));
+        document.title = browser.i18n.getMessage("previewTitle", parsedFeed.title);
     }
     await wait();
     FeedList.rebuild();

@@ -23,6 +23,9 @@
     "trashFolder_label": {
         "message": "Trash"
     },
+    "previewTitle": {
+        "message": "$1 [Feed Preview - Brief]"
+    },
 
     // Buttons
     "subscribeButton_label": {
