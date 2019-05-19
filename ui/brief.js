@@ -1,5 +1,6 @@
 import {Database} from "/modules/database.js";
 import {fetchFeed} from "/modules/feed-fetcher.js";
+import {fetchFaviconAsURL} from "/modules/favicon-fetcher.js";
 import {apply_i18n} from "/modules/i18n.js";
 import {Prefs} from "/modules/prefs.js";
 import {
@@ -122,8 +123,12 @@ async function init() {
             websiteURL: parsedFeed.link ? parsedFeed.link.href : '',
             subtitle: parsedFeed.subtitle ? parsedFeed.subtitle.text : '',
             language: parsedFeed.language,
-            //FIXME: favicon missing
         });
+        if(feed.websiteURL !== '') {
+            fetchFaviconAsURL(feed).then(icon => {
+                document.getElementById('favicon').href = icon;
+            });
+        }
         let entries = Database._feedToEntries({
             feed,
             parsedFeed,

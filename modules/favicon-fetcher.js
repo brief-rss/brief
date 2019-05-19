@@ -14,7 +14,7 @@ export async function updateFavicon({feed, db}) {
     await db.modifyFeed(updatedFeed);
 }
 
-async function fetchFaviconAsURL(feed) {
+export async function fetchFaviconAsURL(feed) {
     // Try, in order, to get a favicon from
     // 1. favicon.ico relative to the website URL
     // 2. the image specified in the document at the web site
