@@ -27,8 +27,8 @@ rules:
   no-sequences: error
 
   # Additional control
-  import/no-cycle: warn
-  import/first: warn
+  import/no-cycle: error
+  import/first: error
   # Would be nice to enforce order, but after resolution they are all relative
   #import/order:
   #  - warn

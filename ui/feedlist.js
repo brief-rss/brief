@@ -1,8 +1,7 @@
 import {Database} from "/modules/database.js";
 import {Prefs} from "/modules/prefs.js";
 import * as OPML from "/modules/opml.js";
-import {Comm, getElement} from "/modules/utils.js";
-import {Commands} from "./brief.js";
+import {Comm, getElement, openBackgroundTab} from "/modules/utils.js";
 import {FeedView} from "./feedview.js";
 
 
@@ -1064,5 +1063,188 @@ export let DropdownMenus = {
             let file = opmlInput.files[0];
             OPML.importOPML(file);
         });
+    },
+};
+
+export let Commands = {
+
+    hideSidebar: function cmd_hideSidebar() {
+        document.body.classList.remove('sidebar');
+        /*spawn*/ Prefs.set('ui.sidebar.hidden', true);
+    },
+
+    revealSidebar: function cmd_revealSidebar() {
+        document.body.classList.add('sidebar');
+        /*spawn*/ Prefs.set('ui.sidebar.hidden', false);
+    },
+
+    markViewRead: function cmd_markViewRead() {
+        Database.query(gCurrentView.query).markRead(true);
+    },
+
+    markVisibleEntriesRead: function cmd_markVisibleEntriesRead() {
+        gCurrentView.markVisibleEntriesRead();
+    },
+
+    switchViewMode: function cmd_switchViewMode(aMode) {
+        if (FeedList.selectedFeed) {
+            Database.modifyFeed({
+                feedID: FeedList.selectedFeed.feedID,
+                viewMode: (aMode === 'headlines')
+            });
+            // Refresh will happen from the observer
+        } else {
+            /*spawn*/ Prefs.set('ui.view.mode', aMode);
+            if(gCurrentView !== undefined) {
+                gCurrentView.setDefaultViewMode(aMode);
+            }
+        }
+
+    },
+
+    switchViewFilter: function cmd_switchViewFilter(aFilter) {
+        Prefs.set('ui.view.filter', aFilter);
+
+        getElement('show-all-entries-checkbox').dataset.checked = (aFilter === 'all');
+        getElement('filter-unread-checkbox').dataset.checked = (aFilter === 'unread');
+        getElement('filter-starred-checkbox').dataset.checked = (aFilter === 'starred');
+
+        if(gCurrentView !== undefined) {
+            gCurrentView.setFilter(aFilter);
+        }
+    },
+
+    openFeedWebsite: function cmd_openWebsite(aFeed) {
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
+        let url = feed.websiteURL || (new URL(feed.feedURL).origin);
+        openBackgroundTab(url);
+    },
+
+    emptyFeed: function cmd_emptyFeed(aFeed) {
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
+        let query = {
+            deleted: false,
+            starred: false,
+            feeds: [feed.feedID]
+        };
+        Database.query(query).markDeleted('trashed');
+    },
+
+    deleteFeed: function cmd_deleteFeed(aFeed) {
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
+        let text = browser.i18n.getMessage('confirmFeedDeletionText', feed.title);
+
+        if (window.confirm(text)) {
+            Database.deleteFeed(feed);
+        }
+    },
+
+    restoreTrashed: function cmd_restoreTrashed() {
+        ViewList.getQueryForView('trash-folder');
+        Database.query(ViewList.getQueryForView('trash-folder')).markDeleted(false);
+    },
+
+    emptyTrash: function cmd_emptyTrash() {
+        Database.query(ViewList.getQueryForView('trash-folder')).markDeleted('deleted');
+    },
+
+    toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
+        let entry = gCurrentView.selectedEntry;
+        if (entry) {
+            let newState = !gCurrentView.getEntryView(entry).read;
+            Commands.markEntryRead(entry, newState);
+        }
+    },
+
+    markEntryRead: function cmd_markEntryRead(aEntry, aNewState) {
+        gCurrentView.getEntryView(aEntry).markEntryRead(aNewState);
+    },
+
+    deleteOrRestoreSelectedEntry: function cmd_deleteOrRestoreSelectedEntry() {
+        if (gCurrentView.selectedEntry) {
+            if (gCurrentView.query.deleted === 'trashed')
+                Commands.restoreEntry(gCurrentView.selectedEntry);
+            else
+                Commands.deleteEntry(gCurrentView.selectedEntry);
+        }
+    },
+
+    deleteEntry: function cmd_deleteEntry(aEntry) {
+        gCurrentView.getEntryView(aEntry).deleteEntry();
+    },
+
+    restoreEntry: function cmd_restoreEntry(aEntry) {
+        gCurrentView.getEntryView(aEntry).restoreEntry();
+    },
+
+    toggleSelectedEntryStarred: function cmd_toggleSelectedEntryStarred() {
+        let entry = gCurrentView.selectedEntry;
+        if (entry) {
+            let newState = !gCurrentView.getEntryView(entry).starred;
+            Commands.starEntry(entry, newState);
+        }
+    },
+
+    starEntry: function cmd_starEntry(aEntry, aNewState) {
+        Database.query(aEntry).bookmark(aNewState);
+    },
+
+    toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {
+        if (!gCurrentView.headlinesMode || !gCurrentView.selectedEntry)
+            return;
+
+        let entryView = gCurrentView.getEntryView(gCurrentView.selectedEntry);
+        if (entryView.collapsed)
+            entryView.expand(true);
+        else
+            entryView.collapse(true);
+    },
+
+
+    openSelectedEntryLink: function cmd_openSelectedEntryLink() {
+        if (!gCurrentView.selectedEntry)
+            return;
+
+        Commands.openEntryLink(gCurrentView.selectedEntry);
+    },
+
+    openEntryLink: function cmd_openEntryLink(aEntry) {
+        gCurrentView.getEntryView(aEntry).openEntryLink();
+    },
+
+    showFeedProperties: function cmd_showFeedProperties(aFeed) {
+        let feed = aFeed ? aFeed : FeedList.selectedFeed;
+
+        browser.windows.create({
+            url: `/ui/options/feed-properties.xhtml?feedID=${feed.feedID}`,
+            type: 'popup',
+            width: 400,
+            height: 300,
+        });
+    },
+
+    displayShortcuts: async function cmd_displayShortcuts() {
+        let windows = await browser.windows.getAll({windowTypes: ['popup']});
+        // Compat: fixed in Firefox 58
+        windows = windows.filter(w => w.type === 'popup' && w.title.includes("Brief"));
+        if(windows.length > 0) {
+            browser.windows.update(windows[0].id, {focused: true});
+        } else {
+            browser.windows.create({
+                url: '/ui/keyboard-shortcuts.xhtml',
+                type: 'popup',
+                width: 500,
+                height: Math.min(window.screen.availHeight, 650),
+            });
+        }
+    },
+
+    async applyStyle() {
+        let {custom_css: style} = await browser.storage.local.get({'custom_css': ''});
+        let blob = new Blob([style], {type: 'text/css'});
+        let url = URL.createObjectURL(blob);
+        document.getElementById('custom-css').href = url;
+        let content = document.getElementById('feed-view').contentDocument;
+        content.getElementById('custom-css').href = url;
     },
 };
