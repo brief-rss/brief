@@ -1,8 +1,31 @@
-RSS reader extension for Firefox
+# Overview
 
-http://brief.mozdev.org
+Brief is an RSS reader extension for Firefox that attempts to make reading news feeds
+(RSS/Atom for now) easy and intuitive. Your feeds should be available when you need them
+and just work without forcing you to change every option in the world.
 
-# Permissions
+Brief is Free Software licensed under [MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
+
+## Links and resources
+
+Brief is published [on addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/brief/).
+
+The official support and feedback channels are:
+- [the Brief's channel on Gitter](https://gitter.im/brief-rss/Lobby),
+- [the Brief topic on discourse.mozilla.org](https://discourse.mozilla.org/t/support-brief/6514),
+- issues on the [main repository](https://github.com/brief-rss/brief).
+
+For power users and people who want to contribute there are also:
+- [testing versions released on Github](https://github.com/brief-rss/brief/releases),
+- [the Brief development channel on Gitter](https://gitter.im/brief-rss/brief),
+- issues and pull requests on the [main repository](https://github.com/brief-rss/brief).
+
+If you want to help translate Brief into a language you know,
+you can submit translation changes as pull requests manually
+or use the [Web Extension Translator](https://lusito.github.io/web-ext-translator/?gh=https://github.com/brief-rss/brief/tree/master)
+to help you with the messages file format.
+
+## Required permissions
 
 Brief requires the following permissions:
 
@@ -15,7 +38,7 @@ Brief requires the following permissions:
 - `downloads` ("Download files and read and modify the browser's download history") to be able to export feed list and (not implemented yet) backup the database
 - `webRequest` and `webRequestBlocking` (not displayed) to intercept the feed requests correctly and activate the feed preview mode instead of the download prompt
 
-# Contributors
+# Old-time contributors
 
 ## Creator
 
