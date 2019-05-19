@@ -516,7 +516,7 @@ export let FeedList = {
         this.tree.root.addEventListener(
             'keydown', event => this.onKeyDown(event), {capture: true});
         this.tree.root.addEventListener(
-            'toggle-collapsed', event => this.persistFolderState());
+            'toggle-collapsed', () => this.persistFolderState());
     },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
