@@ -2,7 +2,7 @@ import {Database} from "/modules/database.js";
 import {Prefs} from "/modules/prefs.js";
 import * as OPML from "/modules/opml.js";
 import {Comm, getElement} from "/modules/utils.js";
-import {Commands, Persistence} from "./brief.js";
+import {Commands} from "./brief.js";
 import {FeedView} from "./feedview.js";
 
 
@@ -255,7 +255,7 @@ TreeView.prototype = {
             element.classList.toggle('collapsed');
             event.stopPropagation();
             this._cleanup(); // Move selection
-            Persistence.save(); // TODO: fix in a more clean way
+            element.dispatchEvent(new Event('toggle-collapsed', {bubbles: true}));
         } else if(event.type === 'click' || event.type === 'contextmenu') {
             if(this.root.classList.contains('organize')) {
                 return;
@@ -356,7 +356,9 @@ export let ViewList = {
         } else {
             TagList.hide();
         }
-        //TODO: fix initial view saving
+        if(this.selectedItem.id === 'today-folder' || this.selectedItem.id === 'all-items-folder') {
+            /*spawn*/ Prefs.set('ui.startView', this.selectedItem.id);
+        }
 
         let title = this.selectedItem.getElementsByClassName('title')[0].textContent;
         let query = this.getQueryForView(this.selectedItem.id);
@@ -364,8 +366,8 @@ export let ViewList = {
             title,
             query,
             db: Database,
-            filter: Persistence.data.view.filter,
-            mode: Persistence.data.view.mode,
+            filter: Prefs.get('ui.view.filter'),
+            mode: Prefs.get('ui.view.mode'),
         });
     },
 
@@ -442,8 +444,8 @@ export let TagList = {
             title: this.selectedItem.dataset.id,
             query,
             db: Database,
-            filter: Persistence.data.view.filter,
-            mode: Persistence.data.view.mode,
+            filter: Prefs.get('ui.view.filter'),
+            mode: Prefs.get('ui.view.mode'),
         });
     },
 
@@ -514,6 +516,8 @@ export let FeedList = {
             'move', event => this.onMove(event), {passive: true});
         this.tree.root.addEventListener(
             'keydown', event => this.onKeyDown(event), {capture: true});
+        this.tree.root.addEventListener(
+            'toggle-collapsed', event => this.persistFolderState());
     },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
@@ -576,8 +580,8 @@ export let FeedList = {
             title: this.selectedFeed.title,
             query,
             db: Database,
-            filter: Persistence.data.view.filter,
-            mode: Persistence.data.view.mode,
+            filter: Prefs.get('ui.view.filter'),
+            mode: Prefs.get('ui.view.mode'),
         });
     },
 
@@ -673,10 +677,6 @@ export let FeedList = {
     },
 
     rebuild: function FeedList_rebuild(feeds) {
-        if(this._built) {
-            this.persistFolderState();
-        }
-
         this._feedsCache = feeds || Database.feeds;
 
         let active = (this.tree.selectedItem !== null);
@@ -733,6 +733,7 @@ export let FeedList = {
         }
 
         FeedList.tree.root.setAttribute('closedFolders', escape(closedFolders));
+        Prefs.set('ui.closedFolders', escape(closedFolders));
     },
 
     organize() {

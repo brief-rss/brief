@@ -25,11 +25,15 @@ async function init() {
 
     // Restore local persistence
     await Prefs.init();
-    await Persistence.init();
-    getElement('feed-list').setAttribute("closedFolders", Persistence.data.closedFolders);
-    getElement('tag-list').style.width = Persistence.data.tagList.width;
-    getElement('sidebar').style.width = Persistence.data.sidebar.width;
-    document.body.classList.toggle('sidebar', !Persistence.data.sidebar.hidden);
+    await Persistence.migrate();
+    getElement('feed-list').setAttribute("closedFolders", Prefs.get('ui.closedFolders'));
+    getElement('tag-list').style.width = Prefs.get('ui.tagList.width');
+    getElement('tag-list').addEventListener(
+        'resize-complete', ({target}) => Prefs.set('ui.tagList.width', target.style.width));
+    getElement('sidebar').style.width = Prefs.get('ui.sidebar.width');
+    getElement('sidebar').addEventListener(
+        'resize-complete', ({target}) => Prefs.set('ui.sidebar.width', target.style.width));
+    document.body.classList.toggle('sidebar', !Prefs.get('ui.sidebar.hidden'));
 
     // Allow first meaningful paint
     if(previewURL !== null) {
@@ -41,7 +45,7 @@ async function init() {
 
     await Database.init();
 
-    Commands.switchViewFilter(Persistence.data.view.filter);
+    Commands.switchViewFilter(Prefs.get('ui.view.filter'));
 
     Comm.registerObservers({
         'update-status': msg => refreshProgressmeter(msg),
@@ -103,7 +107,7 @@ async function init() {
         'click', () => Database.addFeeds({url: previewURL}), {passive: true});
 
     if(previewURL === null) {
-        ViewList.selectedItem = getElement(Persistence.data.startView || 'all-items-folder');
+        ViewList.selectedItem = getElement(Prefs.get('ui.startView') || 'all-items-folder');
     } else {
         let parsedFeed = await fetchFeed(previewURL);
         let feed = Object.assign({}, {
@@ -143,12 +147,12 @@ export let Commands = {
 
     hideSidebar: function cmd_hideSidebar() {
         document.body.classList.remove('sidebar');
-        Persistence.save(); // TODO: fix in a more clean way
+        /*spawn*/ Prefs.set('ui.sidebar.hidden', true);
     },
 
     revealSidebar: function cmd_revealSidebar() {
         document.body.classList.add('sidebar');
-        Persistence.save(); // TODO: fix in a more clean way
+        /*spawn*/ Prefs.set('ui.sidebar.hidden', false);
     },
 
     markViewRead: function cmd_markViewRead() {
@@ -167,8 +171,7 @@ export let Commands = {
             });
             // Refresh will happen from the observer
         } else {
-            Persistence.data.view.mode = aMode;
-            Persistence.save();
+            /*spawn*/ Prefs.set('ui.view.mode', aMode);
             if(gCurrentView !== undefined) {
                 gCurrentView.setDefaultViewMode(aMode);
             }
@@ -177,10 +180,7 @@ export let Commands = {
     },
 
     switchViewFilter: function cmd_switchViewFilter(aFilter) {
-        if(aFilter !== Persistence.data.view.filter) {
-            Persistence.data.view.filter = aFilter;
-            Persistence.save();
-        }
+        Prefs.set('ui.view.filter', aFilter);
 
         getElement('show-all-entries-checkbox').dataset.checked = (aFilter === 'all');
         getElement('filter-unread-checkbox').dataset.checked = (aFilter === 'unread');
@@ -447,47 +447,27 @@ let SplitterModule = {
         }
         event.stopPropagation();
         if(event.type === 'mouseup') {
-            Persistence.save(); // TODO: fix in a more clean way
+            target.dispatchEvent(new Event('resize-complete'));
         }
     },
 };
 
 export let Persistence = {
-    data: null,
-
-    init: async function Persistence_init() {
+    async migrate() {
         let data = Prefs.get('pagePersist');
         if(data !== "") {
-            this.data = JSON.parse(data);
-        } else {
-            this.data = {
-                startView: 'today-folder',
-                closedFolders: '_',
-                tagList: {width: '200px'},
-                sidebar: {width: '400px', hidden: false},
-                view: {mode: 'full', filter: 'all'},
-            };
-            this.save();
+            data = JSON.parse(data);
+            await Promise.all([
+                Prefs.set('ui.startView', data.startView),
+                Prefs.set('ui.closedFolders', data.closedFolders),
+                Prefs.set('ui.tagList.width', data.tagList.width),
+                Prefs.set('ui.sidebar.width', data.sidebar.width),
+                Prefs.set('ui.sidebar.hidden', data.sidebar.hidden),
+                Prefs.set('ui.view.mode', data.view.mode),
+                Prefs.set('ui.view.filter', data.view.filter),
+            ]);
+            await Prefs.reset('pagePersist');
         }
-        window.addEventListener('beforeunload', () => this.save(), {once: true, passive: true});
-    },
-
-    save: function Persistence_save() {
-        this._collect();
-        Prefs.set('pagePersist', JSON.stringify(this.data));
-    },
-
-    _collect: function Persistence__collect() {
-        let id = ViewList.selectedItem && ViewList.selectedItem.id;
-        if(id === 'today-folder' || id === 'all-items-folder')
-            this.data.startView = id;
-
-        FeedList.persistFolderState();
-        this.data.closedFolders = getElement('feed-list').getAttribute('closedFolders');
-
-        this.data.tagList.width = getElement('tag-list').style.width;
-        this.data.sidebar.width = getElement('sidebar').style.width;
-        this.data.sidebar.hidden = !document.body.classList.contains('sidebar');
     },
 };
 

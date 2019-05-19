@@ -129,5 +129,14 @@ pref("database.maxStoredEntries", 100);
 pref("database.lastPurgeTime", 0);
 pref("database.keepStarredWhenClearing", true);
 
+// UI-controlled prefs (ex Persistence ex XUL persist)
+pref("ui.startView", "today-folder");
+pref("ui.closedFolders", "_");
+pref("ui.tagList.width", "200px");
+pref("ui.sidebar.width", "400px");
+pref("ui.sidebar.hidden", false);
+pref("ui.view.mode", "full");
+pref("ui.view.filter", "all");
+
 // Technical pref for migration off defaults
 pref("_pref.split-defaults", false);
