@@ -24,6 +24,8 @@ If you want to help translate Brief into a language you know,
 you can submit translation changes as pull requests manually
 or use the [Web Extension Translator](https://lusito.github.io/web-ext-translator/?gh=https://github.com/brief-rss/brief/tree/master)
 to help you with the messages file format.
+There's a [separate Gitter room](https://gitter.im/brief-rss/localization)
+for announcements about localization-related matters (new strings and other matters).
 
 ## Required permissions
 
