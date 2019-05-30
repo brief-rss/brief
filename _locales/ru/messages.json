@@ -24,15 +24,15 @@
         "message": "Корзина"
     },
     "previewTitle": {
-        "message": "$1 [Предпросмотр в Brief]",
+        "message": "$1 [Предпросмотр в Brief]"
     },
 
     // Buttons
     "subscribeButton_knownFeed_label": {
-        "message": "Вы уже подписаны на эту ленту",
+        "message": "Вы уже подписаны на эту ленту"
     },
     "subscribeButton_label": {
-        "message": "Подписаться на ленту новостей",
+        "message": "Подписаться на ленту новостей"
     },
     "headlinesCheckbox_tooltip": {
         "message": "Режим просмотра заголовков (F)"
