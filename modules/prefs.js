@@ -131,8 +131,8 @@ old_pref("update.interval", 3600);
 old_pref("update.lastUpdateTime", 0);
 old_pref("update.enableAutoUpdate", true);
 old_pref("update.showNotification", true);
-old_pref("update.defaultFetchDelay", 2000);
-old_pref("update.backgroundFetchDelay", 4000);
+pref("update.defaultFetchDelay", 500, {defaultEquivalent: 2000});
+pref("update.backgroundFetchDelay", 1000, {defaultEquivalent: 4000});
 old_pref("update.startupDelay", 35000);
 old_pref("update.suppressSecurityDialogs", true);
 old_pref("update.allowCachedResponses", false); // Testing only (avoid load on upstream servers)
