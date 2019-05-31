@@ -1176,7 +1176,7 @@ Query.prototype = {
         Comm.verbose && console.log('DB _update');
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         if(cursors.length === 0) {
-            then && then({tx, feeds, entries});
+            then && then({tx});
             await DbUtil.transactionPromise(tx);
             return;
         }
@@ -1194,7 +1194,7 @@ Query.prototype = {
                     cursor.continue();
                 } else {
                     if(target.then) {
-                        target.then({tx, feeds, entries});
+                        target.then({tx});
                     }
                 }
             };
