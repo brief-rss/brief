@@ -1209,7 +1209,7 @@ Query.prototype = {
         });
         cursors[cursors.length - 1].resolve = resolve;
         await DbUtil.transactionPromise(tx);
-        if(changes) {
+        if(changes && entries.length > 0) {
             //TODO: we're missing revision data here
             Comm.broadcast('entries-updated', {
                 feeds: Array.from(feeds),
