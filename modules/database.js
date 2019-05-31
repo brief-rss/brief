@@ -1837,8 +1837,8 @@ const DbUtil = {
         return new Promise((resolve, reject) => {
             let oncomplete = tx.oncomplete;
             let onerror = tx.onerror;
-            tx.oncomplete = () => { resolve(); if(oncomplete) oncomplete(); };
-            tx.onerror = () => { reject(); if(onerror) onerror(); };
+            tx.oncomplete = () => { if(oncomplete) oncomplete(); resolve(); };
+            tx.onerror = () => { if(onerror) onerror(); reject(); };
         });
     },
 };
