@@ -775,6 +775,7 @@ export let Database = {
                 authors: authors,
                 date: parseDateValue(src.published) || parseDateValue(src.updated) || now,
                 updated: parseDateValue(src.updated) || now,
+                entryURL: '', // Must be a valid IndexedDB key value
             };
             if(src.link !== undefined) {
                 entry.entryURL = src.link.href;
