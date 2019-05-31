@@ -626,6 +626,10 @@ export let Database = {
         };
         let allEntries = [];
         let newEntries = []; // For update notification
+
+        if(tx === undefined) {
+            tx = Database.db().transaction(['entries', 'revisions'], 'readwrite');
+        }
         // Chain, scan 1: every entry with IDs provided
         await this.query(queryId)._update({
             tx,
@@ -641,7 +645,7 @@ export let Database = {
                 }
                 this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
             },
-            then: ({tx}) => {
+            then: () => {
                 let entriesByUrl = new Map();
                 for(let entry of entries.filter(e => !found.has(e))) {
                     let {entryURL} = entry;
@@ -676,7 +680,7 @@ export let Database = {
                         }
                         this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
                     },
-                    then: ({tx}) => {
+                    then: () => {
                         // Chain, part 3: completely new entries
                         let remainingEntries = entries.filter(e => !found.has(e));
                         for(let entry of remainingEntries) {
@@ -1176,7 +1180,7 @@ Query.prototype = {
         Comm.verbose && console.log('DB _update');
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         if(cursors.length === 0) {
-            then && then({tx});
+            then && then();
             await DbUtil.transactionPromise(tx);
             return;
         }
@@ -1194,7 +1198,7 @@ Query.prototype = {
                     cursor.continue();
                 } else {
                     if(target.then) {
-                        target.then({tx});
+                        target.then();
                     }
                 }
             };
