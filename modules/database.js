@@ -1183,31 +1183,31 @@ Query.prototype = {
 
         Comm.verbose && console.log('DB _update');
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
-        if(cursors.length === 0) {
+        let activeCursors = cursors.length;
+        if(activeCursors === 0) {
             resolve();
-            await DbUtil.transactionPromise(tx);
-            return;
+        } else {
+            cursors.forEach(c => {
+                c.onsuccess = ({target}) => {
+                    let cursor = target.result;
+                    if(cursor) {
+                        let value = cursor.value;
+                        if(filterFunction === undefined || filterFunction(value)) {
+                            action(value, {tx});
+                            feeds.add(value.feedID);
+                            entries.push(value);
+                            cursor.update(value);
+                        }
+                        cursor.continue();
+                    } else {
+                        activeCursors -= 1;
+                        if(activeCursors === 0) {
+                            resolve();
+                        }
+                    }
+                };
+            });
         }
-        cursors.forEach(c => {
-            c.onsuccess = ({target}) => {
-                let cursor = target.result;
-                if(cursor) {
-                    let value = cursor.value;
-                    if(filterFunction === undefined || filterFunction(value)) {
-                        action(value, {tx});
-                        feeds.add(value.feedID);
-                        entries.push(value);
-                        cursor.update(value);
-                    }
-                    cursor.continue();
-                } else {
-                    if(target.resolve) {
-                        target.resolve();
-                    }
-                }
-            };
-        });
-        cursors[cursors.length - 1].resolve = resolve;
         await DbUtil.transactionPromise(tx);
         if(changes && entries.length > 0) {
             //TODO: we're missing revision data here
