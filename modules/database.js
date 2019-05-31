@@ -1824,7 +1824,6 @@ export let Migrator = {
 
 /// Misc utilities for working with databases
 const DbUtil = {
-    // Note: this is resolved after the transaction is finished(!!!) mb1193394
     requestPromise(req) {
         return new Promise((resolve, reject) => {
             req.onsuccess = (event) => resolve(event.target.result);
