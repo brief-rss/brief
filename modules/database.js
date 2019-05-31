@@ -23,9 +23,6 @@ import {Comm, parseDateValue, asArray, hashString} from "./utils.js";
  * (once for the upgrade and possibly other times while reading it before the upgrade),
  * thus it must not have side effects.
  */
-// IndexedDB does not play nice with `async` (transaction ends before execution restarts)
-// and the same problem with native Promise
-// mb1193394, fixed in Firefox 60
 export let Database = {
     // If upping, check migration in both _upgradeSchema and _upgradeEntry/_upgradeEntries
     // Note that the Migrator has `assert !(db.version > 30)`
@@ -630,10 +627,9 @@ export let Database = {
         if(tx === undefined) {
             tx = Database.db().transaction(['entries', 'revisions'], 'readwrite');
         }
-        // Chain, scan 1: every entry with IDs provided
+        // Scan 1: every entry with IDs provided
         await this.query(queryId)._update({
             tx,
-            stores: ['entries', 'revisions'],
             action: (entry, {tx}) => {
                 let update = entriesById.get(entry.providedID);
                 if(update === undefined) {
@@ -645,51 +641,51 @@ export let Database = {
                 }
                 this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
             },
-            then: () => {
-                let entriesByUrl = new Map();
-                for(let entry of entries.filter(e => !found.has(e))) {
-                    let {entryURL} = entry;
-                    if(entryURL) {
-                        let array = entriesByUrl.get(entryURL) || [];
-                        array.push(entry);
-                        entriesByUrl.set(entryURL, array);
-                    }
-                }
-
-
-                let queryUrl = {
-                    feeds: feedID,
-                    providedID: "",
-                    entryURL: Array.from(entriesByUrl.keys()),
-                };
-                // Chain, scan 2: URL-only entries
-                this.query(queryUrl)._update({
-                    tx,
-                    // changes undefined to avoid duplicate notifications
-                    stores: ['entries', 'revisions'],
-                    action: (entry, {tx}) => {
-                        let updateArray = entriesByUrl.get(entry.entryURL) || [];
-                        updateArray = updateArray.filter(e => !found.has(e));
-                        if(!updateArray.length) {
-                            return;
-                        }
-                        let update = updateArray.pop();
-                        found.add(update);
-                        if(ignoreUpdates) {
-                            return;
-                        }
-                        this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
-                    },
-                    then: () => {
-                        // Chain, part 3: completely new entries
-                        let remainingEntries = entries.filter(e => !found.has(e));
-                        for(let entry of remainingEntries) {
-                            this._addEntry(entry, {tx, entries: newEntries});
-                        }
-                    },
-                });
-            },
+            wait: 'callbacks',
         });
+
+        let entriesByUrl = new Map();
+        for(let entry of entries.filter(e => !found.has(e))) {
+            let {entryURL} = entry;
+            if(entryURL) {
+                let array = entriesByUrl.get(entryURL) || [];
+                array.push(entry);
+                entriesByUrl.set(entryURL, array);
+            }
+        }
+
+        let queryUrl = {
+            feeds: feedID,
+            providedID: "",
+            entryURL: Array.from(entriesByUrl.keys()),
+        };
+        // Scan 2: URL-only entries
+        await this.query(queryUrl)._update({
+            tx,
+            // changes undefined to avoid duplicate notifications
+            action: (entry, {tx}) => {
+                let updateArray = entriesByUrl.get(entry.entryURL) || [];
+                updateArray = updateArray.filter(e => !found.has(e));
+                if(!updateArray.length) {
+                    return;
+                }
+                let update = updateArray.pop();
+                found.add(update);
+                if(ignoreUpdates) {
+                    return;
+                }
+                this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
+            },
+            wait: 'callbacks',
+        });
+        // Part 3: completely new entries
+        let remainingEntries = entries.filter(e => !found.has(e));
+        for(let entry of remainingEntries) {
+            this._addEntry(entry, {tx, entries: newEntries});
+        }
+
+        await DbUtil.transactionPromise(tx);
+
         allEntries.push(...newEntries);
         return {entries: allEntries, newEntries: newEntries};
     },
