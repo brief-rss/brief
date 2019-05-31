@@ -1177,10 +1177,14 @@ Query.prototype = {
         let feeds = new Set();
         let entries = [];
 
+        // Wait for all callbacks
+        let resolve;
+        let callbackPromise = new Promise(r => resolve = r).then(then);
+
         Comm.verbose && console.log('DB _update');
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         if(cursors.length === 0) {
-            then && then();
+            resolve();
             await DbUtil.transactionPromise(tx);
             return;
         }
@@ -1197,13 +1201,13 @@ Query.prototype = {
                     }
                     cursor.continue();
                 } else {
-                    if(target.then) {
-                        target.then();
+                    if(target.resolve) {
+                        target.resolve();
                     }
                 }
             };
         });
-        cursors[cursors.length - 1].then = then;
+        cursors[cursors.length - 1].resolve = resolve;
         await DbUtil.transactionPromise(tx);
         if(changes) {
             //TODO: we're missing revision data here
