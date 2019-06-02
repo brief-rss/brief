@@ -178,7 +178,7 @@ export let FeedUpdater = {
                 entryCount += newEntries.length;
                 this.updatedFeeds.set(feedID, entryCount);
             }
-        } else {
+        } else if (!feed.error) {
             this.db.modifyFeed({feedID: feedID, error: true});
         }
 
