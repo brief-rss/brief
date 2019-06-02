@@ -178,6 +178,8 @@ export let FeedUpdater = {
                 entryCount += newEntries.length;
                 this.updatedFeeds.set(feedID, entryCount);
             }
+        } else {
+            this.db.modifyFeed({feedID: feedID, error: true});
         }
 
         //Do we need to refresh the favicon?

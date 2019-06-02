@@ -147,7 +147,7 @@ TreeView.prototype = {
         if(loading !== undefined)
             element.dataset.loading = loading;
         if(error !== undefined)
-            element.dataset.error = error;
+            element.classList.toggle('error', error);
         if(collapsed !== undefined)
             element.classList.toggle('collapsed', collapsed);
         if(children !== undefined)
@@ -666,7 +666,11 @@ export let FeedList = {
         };
 
         let unreadCount = await Database.query(query).count();
-        this.tree.updateElement(aFeed.feedID, {title: aFeed.title || aFeed.feedURL, unreadCount});
+        this.tree.updateElement(aFeed.feedID, {
+            title: aFeed.title || aFeed.feedURL,
+            unreadCount,
+            error: aFeed.error,
+        });
     },
 
     _faviconUrl: function FeedList__faviconUrl(aFeed) {

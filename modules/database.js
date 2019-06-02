@@ -553,6 +553,10 @@ export let Database = {
             modified = parseDateValue(parsedFeed.updated);
         }
         if(!entries.length || (modified && modified <= feed.dateModified)) {
+            await this.modifyFeed({
+                feedID: feed.feedID,
+                error: false,
+            });
             return {entries: [], newEntries: []};
         }
         let newEntries = await this._pushEntries({feed, entries});
@@ -565,6 +569,7 @@ export let Database = {
             language: parsedFeed.language,
             lastUpdated: Date.now(),
             dateModified: modified,
+            error: false,
         });
         await this.modifyFeed(feedUpdates);
         await this.expireEntries(feed);

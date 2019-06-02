@@ -39,8 +39,9 @@ tree-folder-header > .toggle-collapsed::-moz-focus-inner {
 
 tree-folder:not(.unread) > tree-folder-header > .unread-count,
 tree-folder:not(.collapsed) > tree-folder-header > .unread-count,
-tree-item:not(.unread) > .unread-count {
-    visibility: hidden;
+tree-item:not(.unread) > .unread-count,
+tree-item:not(.error) > .error-status {
+    display: none;
 }
 
 tree-item[data-loading="true"] > .icon,
@@ -122,13 +123,21 @@ tree-folder-header > .title {
     font-weight: bold !important;
 }
 
-.unread-count {
+.unread-count,
+.error-status {
     min-width: 2em !important;
     margin-left: auto !important;
     text-align: center;
     font-size: 13px !important;
     font-weight: bold !important;
+}
+
+.unread-count {
     color: #539bcf !important;
+}
+
+.error-status {
+    color: #cf6f53;
 }
 
 tree-folder {
