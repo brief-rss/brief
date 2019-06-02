@@ -68,7 +68,7 @@ export let Database = {
             let prevDb = await this._open({
                 storage: 'persistent',
             });
-            if(prevDb && prevDb.version > 0) {
+            if(prevDb && prevDb.version >= 10) {
                 prev = await Migrator.studySource({db: prevDb});
                 console.log(
                     `Brief: prev database has ${prev.feeds.length} feeds and ` +
