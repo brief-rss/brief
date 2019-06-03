@@ -148,6 +148,7 @@ TreeView.prototype = {
             element.dataset.loading = loading;
         if(error !== undefined)
             element.classList.toggle('error', error);
+            element.title = error ? browser.i18n.getMessage('feedError_tooltip') : '';
         if(collapsed !== undefined)
             element.classList.toggle('collapsed', collapsed);
         if(children !== undefined)
