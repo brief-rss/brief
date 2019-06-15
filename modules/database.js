@@ -639,8 +639,7 @@ export let Database = {
                 if(ignoreUpdates) {
                     return;
                 }
-                this._updateEntry(entry, update, {tx, markUnread});
-                allEntries.push(entry);
+                this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
             },
             then: ({tx}) => {
                 let entriesByUrl = new Map();
@@ -675,8 +674,7 @@ export let Database = {
                         if(ignoreUpdates) {
                             return;
                         }
-                        this._updateEntry(entry, update, {tx, markUnread});
-                        allEntries.push(entry);
+                        this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
                     },
                     then: ({tx}) => {
                         // Chain, part 3: completely new entries
@@ -735,7 +733,7 @@ export let Database = {
     },
 
     //TODO: fix this async horror show with some good abstractions
-    _updateEntry(prev, next, {tx, markUnread}) {
+    _updateEntry(prev, next, {tx, markUnread, entries}) {
         let revision = prev.revisions[0].id;
         let req = tx.objectStore('revisions').get(revision);
         req.onsuccess = ({target}) => {
@@ -756,6 +754,7 @@ export let Database = {
             revision.authors = next.authors;
             tx.objectStore('entries').put(prev); // Sorry, _update's default save is before
             tx.objectStore('revisions').put(revision);
+            entries.push(prev);
         };
         // May be missing due to a Brief<2.5.3:2.5 issue
         prev.providedID = prev.providedID || next.providedID || "";
