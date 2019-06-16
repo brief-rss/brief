@@ -1151,7 +1151,7 @@ Query.prototype = {
         await Promise.all(actions);
     },
 
-    async _update({action, stores, changes, then, tx, wait='transaction'}) {
+    async _update({action, stores, changes, tx, wait='transaction'}) {
         if(stores === undefined) {
             stores = ['entries'];
         }
@@ -1175,7 +1175,7 @@ Query.prototype = {
 
         // Wait for all callbacks
         let resolve;
-        let callbackPromise = new Promise(r => resolve = r).then(then);
+        let callbackPromise = new Promise(r => resolve = r);
 
         Comm.verbose && console.log('DB _update');
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
