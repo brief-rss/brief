@@ -1156,33 +1156,21 @@ Query.prototype = {
         await Promise.all(actions);
     },
 
-    async _update({action, stores, changes, tx, wait='transaction'}) {
-        if(stores === undefined) {
-            stores = ['entries'];
-        }
+    async _forEach({action, tx}) {
         let filters = this._filters();
         let {indexName, filterFunction, ranges} = this._searchEngine(filters);
         if(filters.sort.offset || filters.sort.limit) {
             // FIXME: offset/limit
-            throw "_update does not support offset/limit!";
+            throw "_forEach does not support offset/limit!";
         }
 
-        if(tx === undefined) {
-            tx = Database.db().transaction(stores, 'readwrite');
-        } else {
-            //TODO: check the stores are available here
-        }
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
-
-        let feeds = new Set();
-        let entries = [];
 
         // Wait for all callbacks
         let resolve;
         let callbackPromise = new Promise(r => resolve = r);
 
-        Comm.verbose && console.log('DB _update');
         let cursors = ranges.map(r => index.openCursor(r, "prev"));
         let activeCursors = cursors.length;
         if(activeCursors === 0) {
@@ -1194,10 +1182,7 @@ Query.prototype = {
                     if(cursor) {
                         let value = cursor.value;
                         if(filterFunction === undefined || filterFunction(value)) {
-                            action(value, {tx});
-                            feeds.add(value.feedID);
-                            entries.push(value);
-                            cursor.update(value);
+                            action(value, {tx, cursor});
                         }
                         cursor.continue();
                     } else {
@@ -1209,6 +1194,34 @@ Query.prototype = {
                 };
             });
         }
+        await callbackPromise;
+    },
+
+    async _update({action, stores, changes, tx, wait='transaction'}) {
+        if(stores === undefined) {
+            stores = ['entries'];
+        }
+
+        if(tx === undefined) {
+            tx = Database.db().transaction(stores, 'readwrite');
+        } else {
+            //TODO: check the stores are available here
+        }
+
+        let feeds = new Set();
+        let entries = [];
+
+        Comm.verbose && console.log('DB _update');
+        await this._forEach({
+            tx,
+            action: (value, {tx, cursor}) => {
+                action(value, {tx});
+                feeds.add(value.feedID);
+                entries.push(value);
+                cursor.update(value);
+            },
+        });
+
         let txPromise = DbUtil.transactionPromise(tx);
         if(changes) {
             txPromise = txPromise.then(() => {
@@ -1225,7 +1238,7 @@ Query.prototype = {
         if(wait === 'transaction') {
             await txPromise;
         } else if(wait === 'callbacks') {
-            await callbackPromise;
+            // Already waited for that!
         } else {
             throw new Error(`_update: unknown wait mode ${wait}`);
         }
