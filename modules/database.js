@@ -628,6 +628,7 @@ export let Database = {
             tx = Database.db().transaction(['entries', 'revisions'], 'readwrite');
         }
         // Scan 1: every entry with IDs provided
+        console.debug('_pushFeedEntries: search by ID...');
         await this.query(queryId)._update({
             tx,
             action: (entry, {tx}) => {
@@ -660,6 +661,7 @@ export let Database = {
             entryURL: Array.from(entriesByUrl.keys()),
         };
         // Scan 2: URL-only entries
+        console.debug('_pushFeedEntries: search by URL...');
         await this.query(queryUrl)._update({
             tx,
             // changes undefined to avoid duplicate notifications
@@ -678,13 +680,16 @@ export let Database = {
             },
             wait: 'callbacks',
         });
+        console.debug('_pushFeedEntries: insert new entries...');
         // Part 3: completely new entries
         let remainingEntries = entries.filter(e => !found.has(e));
         for(let entry of remainingEntries) {
             this._addEntry(entry, {tx, entries: newEntries});
         }
 
+        console.debug('_pushFeedEntries: wait for transaction completion...');
         await DbUtil.transactionPromise(tx);
+        console.debug('_pushFeedEntries: finished.');
 
         allEntries.push(...newEntries);
         return {entries: allEntries, newEntries: newEntries};
