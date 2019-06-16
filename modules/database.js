@@ -1195,16 +1195,8 @@ Query.prototype = {
         await callbackPromise;
     },
 
-    async _update({action, stores, changes, tx, wait='transaction'}) {
-        if(stores === undefined) {
-            stores = ['entries'];
-        }
-
-        if(tx === undefined) {
-            tx = Database.db().transaction(stores, 'readwrite');
-        } else {
-            //TODO: check the stores are available here
-        }
+    async _update({action, changes, stores=['entries']}) {
+        let tx = Database.db().transaction(stores, 'readwrite');
 
         let feeds = new Set();
         let entries = [];
@@ -1220,25 +1212,16 @@ Query.prototype = {
             },
         });
 
-        let txPromise = DbUtil.transactionPromise(tx);
+        await DbUtil.transactionPromise(tx);
         if(changes) {
-            txPromise = txPromise.then(() => {
-                if(entries.length > 0) {
-                    //TODO: we're missing revision data here
-                    Comm.broadcast('entries-updated', {
-                        feeds: Array.from(feeds),
-                        entries: Array.from(entries),
-                        changes,
-                    });
-                }
-            });
-        }
-        if(wait === 'transaction') {
-            await txPromise;
-        } else if(wait === 'callbacks') {
-            // Already waited for that!
-        } else {
-            throw new Error(`_update: unknown wait mode ${wait}`);
+            if(entries.length > 0) {
+                //TODO: we're missing revision data here
+                Comm.broadcast('entries-updated', {
+                    feeds: Array.from(feeds),
+                    entries: Array.from(entries),
+                    changes,
+                });
+            }
         }
     },
 
