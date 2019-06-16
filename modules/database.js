@@ -629,7 +629,7 @@ export let Database = {
         }
         // Scan 1: every entry with IDs provided
         console.debug('_pushFeedEntries: search by ID...');
-        await this.query(queryId)._update({
+        await this.query(queryId)._forEach({
             tx,
             action: (entry, {tx}) => {
                 let update = entriesById.get(entry.providedID);
@@ -642,7 +642,6 @@ export let Database = {
                 }
                 this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
             },
-            wait: 'callbacks',
         });
 
         let entriesByUrl = new Map();
@@ -662,7 +661,7 @@ export let Database = {
         };
         // Scan 2: URL-only entries
         console.debug('_pushFeedEntries: search by URL...');
-        await this.query(queryUrl)._update({
+        await this.query(queryUrl)._forEach({
             tx,
             // changes undefined to avoid duplicate notifications
             action: (entry, {tx}) => {
@@ -678,7 +677,6 @@ export let Database = {
                 }
                 this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
             },
-            wait: 'callbacks',
         });
         console.debug('_pushFeedEntries: insert new entries...');
         // Part 3: completely new entries
@@ -757,7 +755,7 @@ export let Database = {
             revision.title = next.title;
             revision.content = next.content || next.summary;
             revision.authors = next.authors;
-            tx.objectStore('entries').put(prev); // Sorry, _update's default save is before
+            tx.objectStore('entries').put(prev);
             tx.objectStore('revisions').put(revision);
             entries.push(prev);
         };
