@@ -595,7 +595,7 @@ export let Database = {
             }));
         }
         let returns = await Promise.all(promises);
-        let allEntries = Array.concat(...returns.map(r => r.entries));
+        let allEntries = [].concat(...returns.map(r => r.entries));
         Comm.broadcast('entries-updated', {
             feeds: Array.from(entriesByFeed.keys()),
             entries: allEntries,
@@ -603,7 +603,7 @@ export let Database = {
         });
         return {
             entries: allEntries,
-            newEntries: Array.concat(...returns.map(r => r.newEntries)),
+            newEntries: [].concat(...returns.map(r => r.newEntries)),
         };
     },
 
@@ -1417,7 +1417,7 @@ Query.prototype = {
         let newPrefixes = [];
         for(let old of prefixes) {
             for(let value of requirement) {
-                newPrefixes.push(Array.concat(old, [value]));
+                newPrefixes.push(old.concat([value]));
             }
         }
         return newPrefixes;
@@ -1434,13 +1434,13 @@ Query.prototype = {
             }
             let lower = prefix;
             if(min !== undefined) {
-                lower = Array.concat(prefix, [min]);
+                lower = prefix.concat([min]);
             }
             let bound = [];
             if(max !== undefined) {
                 bound = max;
             }
-            let upper = Array.concat(prefix, [bound]);
+            let upper = prefix.concat([bound]);
             if(lower.length === 0) {
                 lower = Number('-Infinity');
             }
@@ -1575,8 +1575,7 @@ export let Migrator = {
             } else {
                 let feedID = feedMap.get(f.feedID);
                 let ids = sourceMap.get(feedID) || [];
-                let candidates = Array.concat(
-                    [f],
+                let candidates = [f].concat(
                     ids.map(f => extrasIndex.get(f)).filter(f => f !== undefined),
                 );
                 return _mergeFeedVersions(candidates, {
@@ -1810,7 +1809,7 @@ export let Migrator = {
         };
         function _entriesFetched(batch) {
             entries = batch;
-            let revisions = Array.concat.apply([], entries.map(e => e.revisions.map(r => r.id)));
+            let revisions = [].concat(...entries.map(e => e.revisions.map(r => r.id)));
             revisions = revisions.map(r => tx.objectStore('revisions').get(r));
             revisions[revisions.length - 1].onsuccess = () => {
                 let revs = new Map(revisions.map(({result}) => [result.id, result]));
