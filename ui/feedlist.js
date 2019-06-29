@@ -17,7 +17,7 @@ function TreeView(aElementOrId) {
     this.prefix = this.root.classList.contains('unprefixed') ? "" : this.root.id + "__";
     this.template = this.root.querySelector('template');
     this._selectedElement = null;
-    Array.forEach(this.root.children, node => {
+    Array.from(this.root.children).forEach(node => {
         this._initElement(node);
     });
 }
@@ -175,8 +175,9 @@ TreeView.prototype = {
         if(this.selectedItem !== next_selection)
             this.selectedItem = next_selection;
         //And then purge
-        Array.forEach(this.root.querySelectorAll('tree-item.deleted, tree-folder.deleted'),
-            node => node.parentNode.removeChild(node));
+        Array.from(this.root.querySelectorAll('tree-item.deleted, tree-folder.deleted')).forEach(
+            node => node.parentNode.removeChild(node),
+        );
     },
 
     _resolveElement: function TreeView__resolveElement(aElementOrId, aPrefix) {
@@ -839,7 +840,7 @@ export let ContextMenuModule = {
 
     _hide: function ContextMenu__hide() {
         this._currentTarget = null;
-        Array.forEach(document.querySelectorAll('context-menu.visible'), node => {
+        Array.from(document.querySelectorAll('context-menu.visible')).forEach(node => {
             node.classList.remove('visible');
             node.parentNode.classList.remove('menu-visible');
         });
