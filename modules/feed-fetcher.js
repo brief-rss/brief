@@ -167,11 +167,11 @@ const ENTRY_PROPERTIES = [
     ['authors[]', 'author', [
         "author", "rss1:author", "dc:creator", "dc:author", "atom03:author", "atom:author"
     ]],
-    ['summary', 'text', [
+    ['summary', 'text_or_xhtml', [
         "description", "rss1:description", "dc:description",
         "atom03:summary", "atom:summary"
     ]],
-    ['content', 'html', ["content:encoded", "atom03:content", "atom:content"]],
+    ['content', 'text_or_xhtml', ["content:encoded", "atom03:content", "atom:content"]],
     ['published', 'date', [
         "pubDate", "rss1:pubDate", "atom03:issued", "dcterms:issued", "atom:published"
     ]],
@@ -221,8 +221,29 @@ const HANDLERS = {
         }
     },
 
-    html(nodeOrAttr) {
-        return HANDLERS.text(nodeOrAttr);
+    text_or_xhtml(node) {
+        let type = node.getAttribute('type');
+        switch(type) {
+            case 'xhtml': {
+                let children = Array.from(node.childNodes).filter(n => !isWhitespaceOrComment(n));
+                if(children.length === 1 && children[0].localName === 'div') {
+                    return children[0].innerHTML;
+                } else {
+                    console.error('type="xhtml" structure violated in', node);
+                    return node.innerHTML;
+                }
+            }
+            //TODO Atom spec also allows text/* (handled below), XML media types (direct)
+            // and other media types (base64), but I've never seen these used in a feed
+            case 'text': // fallthrough
+            case 'html': // fallthrough
+            case null:
+                // TODO "MUST NOT contain child elements" (Atom 1.0) - consider validating
+                return HANDLERS.text(node);
+            default:
+                console.warn('Unknown content type in a feed', type);
+                return HANDLERS.text(node);
+        }
     },
 
     lang(nodeOrAttr) {
@@ -286,6 +307,18 @@ const HANDLERS = {
         }
     },
 };
+
+function isWhitespaceOrComment(node) {
+    switch(node.nodeType) {
+        case Node.TEXT_NODE: // fallthrough
+        case Node.CDATA_SECTION_NODE:
+            return node.textContent.trim() === '';
+        case Node.COMMENT_NODE:
+            return true;
+        default:
+            return false;
+    }
+}
 
 function nsPrefix(uri) {
     uri = uri || "";
