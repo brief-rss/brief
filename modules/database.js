@@ -220,6 +220,7 @@ export let Database = {
                     ["feedID", "providedID", "entryURL"]
                 );
             // fallthrough
+            // TODO: validate entries for undefined entryURL
         }
         for(let index of ["primaryHash", "feedID_providedID", "feedID_entryURL"]) {
             let entries = tx.objectStore('entries');
@@ -1164,6 +1165,9 @@ Query.prototype = {
 
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
+
+        // It's possible to win 10-15% speed for the "many tiny cursors" scenario
+        // by trying getAll first, but not worth the extra code
 
         // Wait for all callbacks
         let resolve;
