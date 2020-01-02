@@ -35,9 +35,6 @@ rules:
   #  - warn
   #  - newlines-between: never
 
-  # Allowed
-  no-console: off
-
 settings:
   import/resolver:
     babel-root-slash-import:

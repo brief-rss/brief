@@ -55,7 +55,10 @@ TreeView.prototype = {
         const IMPL_ITEMS = ['template', 'tree-folder-header', 'tree-folder-footer'];
         for (let node of [...aModel, null]) {
             // Skip or delete everything that's not to stay
-            while(next !== null && (!next.hasOwnProperty('id') || !knownIds.has(next.id))) {
+            while(next !== null) {
+                if(Object.prototype.hasOwnProperty.call(next, 'id') && knownIds.has(next.id)) {
+                    break; // Found the next known item
+                }
                 if(!IMPL_ITEMS.includes(next.nodeName)) {
                     if(next.nodeType !== Node.ELEMENT_NODE) {
                         // Just ignore them

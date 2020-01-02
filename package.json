@@ -1,10 +1,10 @@
 {
   "private": true,
   "devDependencies": {
-    "eslint": "^5.15.0",
+    "eslint": "^6.8.0",
     "eslint-import-resolver-babel-root-slash-import": "^1.0.6",
     "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-json": "^1.4.0"
+    "eslint-plugin-json": "^2.0.1"
   },
   "scripts": {
     "lint": "eslint . --ext .json --ext .js"
