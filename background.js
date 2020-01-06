@@ -195,8 +195,13 @@ const Brief = {
                         replies = [[{url, linkTitle: title, kind: 'self'}]];
                     }
                 }
+            } else if(ex.message === 'No matching message handler') {
+                // Happens during tab restore / history navigation (transient states?)
+            } else if(ex.message === 'Message manager disconnected') {
+                // Happens during redirect-to-feed (transient states?)
             } else {
-                throw ex;
+                console.warn("Ignoring unknown error scanning tab for feeds", ex);
+                replies = [[]];
             }
         }
         let feeds = replies[0];
