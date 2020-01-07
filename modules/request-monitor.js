@@ -43,6 +43,9 @@ const SNIFF_WINDOW = 512; // Matches the legacy Firefox feed sniffer window
 
 
 function checkHeaders({requestId, tabId, url, responseHeaders}) {
+    if(tabId === browser.tabs.TAB_ID_NONE) {
+        return; // This is not a real tab, so not redirecting anything
+    }
     let contentType = responseHeaders
         .filter(h => h.name.toLowerCase() == 'Content-Type'.toLowerCase())
         .filter(h => h.value !== undefined)
