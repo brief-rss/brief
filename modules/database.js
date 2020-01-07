@@ -347,33 +347,52 @@ export let Database = {
         if(Comm.verbose) {
             console.log('addFeeds', feeds, options);
         }
-        let parent = options ? options.parent : String(Prefs.get('homeFolder'));
         feeds = asArray(feeds);
+        await Promise.all(feeds.map(feed => this._hashFeedUrls(feed)));
+        console.log('hashed', feeds);
+
+        let newFeedIds = this._addFeeds(feeds, options);
+        this._feeds = this._reindex(this._feeds);
+
+        Comm.broadcast('feedlist-updated', {feeds: this.feeds});
+        await Database.saveFeeds();
+        Comm.broadcast('update-feeds', {feeds: newFeedIds});
+
+        return newFeedIds;
+    },
+
+    _addFeeds(feeds, options) {
+        let parent = options ? options.parent : String(Prefs.get('homeFolder'));
         let newFeedIds = [];
 
         for(let feed of feeds) {
-            let feedID = await this._addFeed(feed, {parent});
+            let feedID = this._addFeed(feed, {parent});
             if(feedID !== undefined) {
                 newFeedIds.push(feedID);
             }
             if(feed.children !== undefined) {
-                newFeedIds.push(...await this.addFeeds(
-                    feed.children, {parent: feedID, nested: true}));
+                newFeedIds.push(...this._addFeeds(feed.children, {parent: feedID}));
             }
-        }
-        if(!options || !options.nested) {
-            await Database.saveFeeds();
-            Comm.broadcast('update-feeds', {feeds: newFeedIds});
         }
         return newFeedIds;
     },
 
-    async _addFeed(feed, {parent}) {
+    async _hashFeedUrls(feed) {
+        let {url, children} = feed;
+        if(url) {
+            feed.urlHash = await hashString(url);
+        }
+        if(children) {
+            await Promise.all(children.map(child => this._hashFeedUrls(child)));
+        }
+    },
+
+    _addFeed(feed, {parent}) {
         if(Comm.verbose) {
             console.log('_addFeed', feed, parent);
         }
         parent = feed.parent || parent; // Used for folder creation from Organize mode
-        let {url, title} = feed;
+        let {url, urlHash, title} = feed;
         let existing = this.feeds.filter(f => !f.isFolder && f.feedURL === url);
         let active = existing.filter(f => !f.hidden);
         if(Comm.verbose) {
@@ -397,7 +416,7 @@ export let Database = {
 
         let feedID;
         if(url) {
-            feedID = await hashString(url);
+            feedID = urlHash;
         } else {
             let folderIds = this.feeds.filter(f => f.isFolder || false).map(f => Number(f.feedID));
             feedID = String(Math.max(1, ...folderIds) + 1);
@@ -429,7 +448,6 @@ export let Database = {
         };
         console.log('Creating node', newFeed);
         this._feeds.push(newFeed);
-        this._feeds = this._reindex(this._feeds);
         if(feed.siteURL) { // Otherwise on first update
             /*spawn*/ updateFavicon({feed: newFeed, db: this}).catch(console.error);
         }
