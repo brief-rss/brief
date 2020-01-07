@@ -3,7 +3,7 @@ import {tryGetXmlRootName} from "./xml-sniffer.js";
 export function init() {
     console.debug("Initializing the feed request monitor");
     browser.webRequest.onHeadersReceived.addListener(
-        headerCheck,
+        checkHeaders,
         {types: ["main_frame"], urls: ["http://*/*", "https://*/*"]},
         ["responseHeaders", "blocking"],
     );
@@ -42,7 +42,7 @@ const FEED_ROOT_TAGS = ['rss', 'feed', 'rdf:RDF'];
 const SNIFF_WINDOW = 512; // Matches the legacy Firefox feed sniffer window
 
 
-function headerCheck({requestId, tabId, url, responseHeaders}) {
+function checkHeaders({requestId, tabId, url, responseHeaders}) {
     let contentType = responseHeaders
         .filter(h => h.name.toLowerCase() == 'Content-Type'.toLowerCase())
         .filter(h => h.value !== undefined)
