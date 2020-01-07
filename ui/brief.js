@@ -44,7 +44,7 @@ async function init() {
 
     PrefObserver.init();
 
-    await Database.init();
+    let db = await Database.init();
 
     Commands.switchViewFilter(Prefs.get('ui.view.filter'));
 
@@ -58,7 +58,7 @@ async function init() {
         'feedlist-updated': ({feeds}) => {
             refreshView();
             FeedList.rebuild(feeds);
-            updatePreviewMode();
+            updatePreviewMode(db.feeds);
         },
         'entries-updated': ({feeds}) => {
             refreshView();
@@ -77,9 +77,9 @@ async function init() {
     let doc = contentIframe.contentDocument;
     doc.documentElement.setAttribute('lang', navigator.language);
 
-    ViewList.init(Database);
-    FeedList.init(Database);
-    TagList.init(Database);
+    ViewList.init(db);
+    FeedList.init(db);
+    TagList.init(db);
 
     SplitterModule.init();
     document.getElementById('sidebar-splitter').addEventListener(
@@ -103,12 +103,12 @@ async function init() {
     document.getElementById('organize-button').addEventListener(
         'click', () => FeedList.organize(), {passive: true});
     document.getElementById('subscribe-button').addEventListener(
-        'click', () => Database.addFeeds({url: previewURL}), {passive: true});
+        'click', () => db.addFeeds({url: previewURL}), {passive: true});
 
     if(previewURL === null) {
         ViewList.selectedItem = getElement(Prefs.get('ui.startView') || 'all-items-folder');
     } else {
-        updatePreviewMode();
+        updatePreviewMode(db.feeds);
         let parsedFeed = await fetchFeed(previewURL);
         document.title = browser.i18n.getMessage("previewTitle", parsedFeed.title);
 
@@ -148,9 +148,9 @@ async function init() {
     FeedList.rebuild();
 }
 
-function updatePreviewMode() {
+function updatePreviewMode(feeds) {
     let previewURL = new URLSearchParams(document.location.search).get("preview");
-    let knownURLs = Database.feeds.filter(f => f.hidden === 0).map(f => f.feedURL);
+    let knownURLs = feeds.filter(f => f.hidden === 0).map(f => f.feedURL);
     document.body.classList.toggle('known-feed', knownURLs.includes(previewURL));
 }
 

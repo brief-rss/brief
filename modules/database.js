@@ -56,7 +56,7 @@ export let Database = {
      */
     async init() {
         if(this._db)
-            return;
+            return this;
 
         let upgrade = null;
         let prev = null;
@@ -127,6 +127,7 @@ export let Database = {
                 upgrade: v => this._upgradeEntry(v),
             });
         }
+        return this;
     },
 
     async _open({name="brief", version=undefined, storage="default", upgrade=null}) {
