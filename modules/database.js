@@ -426,6 +426,8 @@ export let Database = {
             dateModified: 0,
             lastUpdated: 0,
             oldestEntryDate: 0,
+            lastFetched: 0,
+            error: false,
         };
         console.log('Creating node', newFeed);
         this._feeds.push(newFeed);
@@ -551,6 +553,11 @@ export let Database = {
             modified = parseDateValue(parsedFeed.updated);
         }
         if(!entries.length || (modified && modified <= feed.dateModified)) {
+            await this.modifyFeed({
+                feedID: feed.feedID,
+                lastFetched: now,
+                error: false,
+            });
             return {entries: [], newEntries: []};
         }
         let newEntries = await this._pushEntries({feed, entries});
@@ -561,8 +568,10 @@ export let Database = {
             subtitle: parsedFeed.subtitle ? parsedFeed.subtitle.text : '',
             oldestEntryDate: Math.min(entries.map(e => e.date)) || feed.oldestEntryDate,
             language: parsedFeed.language,
-            lastUpdated: Date.now(),
+            lastUpdated: now,
             dateModified: modified,
+            lastFetched: now,
+            error: false,
         });
         await this.modifyFeed(feedUpdates);
         await this.expireEntries(feed);

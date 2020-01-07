@@ -122,6 +122,10 @@ tree-folder-header > .title {
     font-weight: bold !important;
 }
 
+tree-item.error > .title {
+    color: #B23628 !important;
+}
+
 .unread-count {
     min-width: 2em !important;
     margin-left: auto !important;

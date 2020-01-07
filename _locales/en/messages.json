@@ -26,6 +26,9 @@
     "previewTitle": {
         "message": "$1 [Feed Preview - Brief]"
     },
+    "feedError_tooltip": {
+        "message": "Failed to fetch feed"
+    },
 
     // Buttons
     "subscribeButton_knownFeed_label": {

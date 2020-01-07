@@ -71,7 +71,6 @@ async function init() {
         },
     });
     // TODO: should update FeedView and feed view title too(?) on title change
-    // TODO: loading/error indicators
 
     Commands.applyStyle();
 
