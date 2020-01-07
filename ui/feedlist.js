@@ -1,4 +1,3 @@
-import {Database} from "/modules/database.js";
 import {Prefs} from "/modules/prefs.js";
 import * as OPML from "/modules/opml.js";
 import {Comm, getElement, openBackgroundTab} from "/modules/utils.js";
@@ -292,6 +291,8 @@ TreeView.prototype = {
 };
 
 export let ViewList = {
+    db: null,
+
     get tree() {
         delete this.tree;
         return this.tree = new TreeView('view-list');
@@ -306,7 +307,8 @@ export let ViewList = {
         return aItem;
     },
 
-    init: function ViewList_init() {
+    init: function ViewList_init(db) {
+        this.db = db;
         this.tree.root.addEventListener(
             'change', event => this.onSelect(event), {passive: true});
 
@@ -370,7 +372,7 @@ export let ViewList = {
         gCurrentView = new FeedView({
             title,
             query,
-            db: Database,
+            db: this.db,
             filter: Prefs.get('ui.view.filter'),
             mode: Prefs.get('ui.view.mode'),
         });
@@ -380,7 +382,7 @@ export let ViewList = {
         let query = this.getQueryForView(aItemID);
         query.read = false;
 
-        let unreadCount = await Database.query(query).count();
+        let unreadCount = await this.db.query(query).count();
 
         this.tree.updateElement(aItemID, {unreadCount});
     },
@@ -396,12 +398,14 @@ export let ViewList = {
 
 
 export let TagList = {
+    db: null,
 
     ready: false,
 
     tags: null,
 
-    init() {
+    init(db) {
+        this.db = db;
         this.tree.root.addEventListener(
             'change', event => this.onSelect(event), {passive: true});
 
@@ -450,7 +454,7 @@ export let TagList = {
         gCurrentView = new FeedView({
             title: this.selectedItem.dataset.id,
             query,
-            db: Database,
+            db: this.db,
             filter: Prefs.get('ui.view.filter'),
             mode: Prefs.get('ui.view.mode'),
         });
@@ -502,7 +506,7 @@ export let TagList = {
             tags: [aTagName],
             read: false
         };
-        let unreadCount = await Database.query(query).count();
+        let unreadCount = await this.db.query(query).count();
         this.tree.updateElement(aTagName, {unreadCount});
     }
 
@@ -511,12 +515,14 @@ export let TagList = {
 
 export let FeedList = {
 
+    db: null,
     _feedsCache: null,
     _built: false,
 
-    init() {
+    init(db) {
+        this.db = db;
         // TODO: observers should be here
-        this._feedsCache = Database.feeds;
+        this._feedsCache = this.db.feeds;
         this.tree.root.addEventListener(
             'change', event => this.onSelect(event), {passive: true});
         this.tree.root.addEventListener(
@@ -588,7 +594,7 @@ export let FeedList = {
         gCurrentView = new FeedView({
             title: this.selectedFeed.title,
             query,
-            db: Database,
+            db: this.db,
             filter: Prefs.get('ui.view.filter'),
             mode: Prefs.get('ui.view.mode'),
         });
@@ -598,18 +604,18 @@ export let FeedList = {
         if(itemIds.includes(targetId)) {
             return; //TODO: block while dragging?
         }
-        let others = [...Database.feeds].filter(feed => !itemIds.includes(feed.feedID));
+        let others = [...this.db.feeds].filter(feed => !itemIds.includes(feed.feedID));
         let otherIds = others.map(f => f.feedID);
 
         let parent;
         let position;
         switch(relation) {
             case 'before':
-                parent = Database.getFeed(targetId).parent;
+                parent = this.db.getFeed(targetId).parent;
                 position = otherIds.indexOf(targetId);
                 break;
             case 'after':
-                parent = Database.getFeed(targetId).parent;
+                parent = this.db.getFeed(targetId).parent;
                 position = otherIds.indexOf(targetId) + 1;
                 break;
             case 'into':
@@ -623,7 +629,7 @@ export let FeedList = {
                     // Walk up the tree
                     position = -1;
                     while(position === -1) {
-                        ancestor = Database.getFeed(ancestor).parent;
+                        ancestor = this.db.getFeed(ancestor).parent;
                         position = others.map(f => f.parent).indexOf(ancestor, parentIndex + 1);
                         if(ancestor === String(Prefs.get('homeFolder')) && position === -1) {
                             // Insertion into end
@@ -638,7 +644,7 @@ export let FeedList = {
         for(let [index, feedID] of otherIds.entries()) {
             changes.push({feedID, rowIndex: index + 1});
         }
-        Database.modifyFeed(changes);
+        this.db.modifyFeed(changes);
     },
 
     /**
@@ -675,7 +681,7 @@ export let FeedList = {
             read: false
         };
 
-        let unreadCount = await Database.query(query).count();
+        let unreadCount = await this.db.query(query).count();
         this.tree.updateElement(aFeed.feedID, {title: aFeed.title || aFeed.feedURL, unreadCount});
     },
 
@@ -686,7 +692,7 @@ export let FeedList = {
     },
 
     rebuild: function FeedList_rebuild(feeds) {
-        this._feedsCache = feeds || Database.feeds;
+        this._feedsCache = feeds || this.db.feeds;
 
         let active = (this.tree.selectedItem !== null);
         this.feeds = this.getAllFeeds(true);
@@ -771,9 +777,9 @@ export let FeedList = {
             this.rebuild();
             return;
         }
-        let feed = Database.getFeed(feedID);
+        let feed = this.db.getFeed(feedID);
         if(feed.title !== title) {
-            Database.modifyFeed({feedID, title});
+            this.db.modifyFeed({feedID, title});
         }
     },
 
@@ -782,7 +788,7 @@ export let FeedList = {
             this.rebuild();
             return;
         }
-        Database.addFeeds({title, parent: feedID});
+        this.db.addFeeds({title, parent: feedID});
     },
 };
 
@@ -918,13 +924,13 @@ export let ViewListContextMenu = {
     },
 
     markFolderRead: function ViewListContextMenu_markFolderRead() {
-        Database.query(ViewList.getQueryForView(this.targetItem.id)).markRead(true);
+        ViewList.db.query(ViewList.getQueryForView(this.targetItem.id)).markRead(true);
     },
 
     emptyTodayFolder: function ViewListContextMenu_emptyTodayFolder() {
         let query = ViewList.getQueryForView('today-folder');
         query.starred = false;
-        Database.query(query).markDeleted('trashed');
+        ViewList.db.query(query).markDeleted('trashed');
     }
 
 };
@@ -947,7 +953,7 @@ export let TagListContextMenu = {
             deleted: false,
             tags: [TagList.selectedItem.dataset.id]
         };
-        Database.query(query).markRead(true);
+        TagList.db.query(query).markRead(true);
     },
 
     deleteTag: async function TagListContextMenu_deleteTag() {
@@ -1008,7 +1014,7 @@ export let FeedListContextMenu = {
             feeds: [this.targetFeed.feedID],
             deleted: false
         };
-        Database.query(query).markRead(true);
+        FeedList.db.query(query).markRead(true);
     },
 
     markFolderRead: function FolderContextMenu_markFolderRead() {
@@ -1016,7 +1022,7 @@ export let FeedListContextMenu = {
             deleted: false,
             folders: [FeedList.selectedFeed.feedID]
         };
-        Database.query(query).markRead(true);
+        FeedList.db.query(query).markRead(true);
     },
 
     updateFolder: function FolderContextMenu_updateFolder() {
@@ -1033,7 +1039,7 @@ export let FeedListContextMenu = {
             starred: false,
             folders: [FeedList.selectedFeed.feedID]
         };
-        Database.query(query).markDeleted('trashed');
+        FeedList.db.query(query).markDeleted('trashed');
     },
 
     deleteFolder: function FolderContextMenu_deleteFolder() {
@@ -1042,7 +1048,7 @@ export let FeedListContextMenu = {
         let text = browser.i18n.getMessage('confirmFolderDeletionText', feed.title);
 
         if (window.confirm(text))
-            Database.deleteFeed(feed);
+            FeedList.db.deleteFeed(feed);
     }
 
 };
@@ -1089,7 +1095,7 @@ export let Commands = {
     },
 
     markViewRead: function cmd_markViewRead() {
-        Database.query(gCurrentView.query).markRead(true);
+        gCurrentView.db.query(gCurrentView.query).markRead(true);
     },
 
     markVisibleEntriesRead: function cmd_markVisibleEntriesRead() {
@@ -1098,7 +1104,7 @@ export let Commands = {
 
     switchViewMode: function cmd_switchViewMode(aMode) {
         if (FeedList.selectedFeed) {
-            Database.modifyFeed({
+            FeedList.db.modifyFeed({
                 feedID: FeedList.selectedFeed.feedID,
                 viewMode: (aMode === 'headlines')
             });
@@ -1137,7 +1143,7 @@ export let Commands = {
             starred: false,
             feeds: [feed.feedID]
         };
-        Database.query(query).markDeleted('trashed');
+        FeedList.db.query(query).markDeleted('trashed');
     },
 
     deleteFeed: function cmd_deleteFeed(aFeed) {
@@ -1145,17 +1151,16 @@ export let Commands = {
         let text = browser.i18n.getMessage('confirmFeedDeletionText', feed.title);
 
         if (window.confirm(text)) {
-            Database.deleteFeed(feed);
+            FeedList.db.deleteFeed(feed);
         }
     },
 
     restoreTrashed: function cmd_restoreTrashed() {
-        ViewList.getQueryForView('trash-folder');
-        Database.query(ViewList.getQueryForView('trash-folder')).markDeleted(false);
+        ViewList.db.query(ViewList.getQueryForView('trash-folder')).markDeleted(false);
     },
 
     emptyTrash: function cmd_emptyTrash() {
-        Database.query(ViewList.getQueryForView('trash-folder')).markDeleted('deleted');
+        ViewList.db.query(ViewList.getQueryForView('trash-folder')).markDeleted('deleted');
     },
 
     toggleSelectedEntryRead: function cmd_toggleSelectedEntryRead() {
@@ -1196,7 +1201,7 @@ export let Commands = {
     },
 
     starEntry: function cmd_starEntry(aEntry, aNewState) {
-        Database.query(aEntry).bookmark(aNewState);
+        gCurrentView.db.query(aEntry).bookmark(aNewState);
     },
 
     toggleSelectedEntryCollapsed: function cmd_toggleSelectedEntryCollapsed() {

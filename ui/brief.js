@@ -77,9 +77,9 @@ async function init() {
     let doc = contentIframe.contentDocument;
     doc.documentElement.setAttribute('lang', navigator.language);
 
-    ViewList.init();
-    FeedList.init();
-    TagList.init();
+    ViewList.init(Database);
+    FeedList.init(Database);
+    TagList.init(Database);
 
     SplitterModule.init();
     document.getElementById('sidebar-splitter').addEventListener(
