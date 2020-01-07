@@ -8,7 +8,6 @@ import {
 } from "/modules/utils.js";
 import {
     FeedList, ViewList, TagList, DropdownMenus,
-    ViewListContextMenu, TagListContextMenu, FeedListContextMenu,
     ContextMenuModule,
     gCurrentView, setCurrentView,
     Commands,
@@ -90,9 +89,6 @@ async function init() {
 
     ContextMenuModule.init();
 
-    ViewListContextMenu.build();
-    TagListContextMenu.build();
-    FeedListContextMenu.build();
     DropdownMenus.build();
 
     FeedViewHeader.init();

@@ -315,6 +315,8 @@ export let ViewList = {
         this.refreshItem('all-items-folder');
         this.refreshItem('today-folder');
         this.refreshItem('starred-folder');
+
+        ViewListContextMenu.build();
     },
 
     getQueryForView: function(aViewID) {
@@ -402,6 +404,8 @@ export let TagList = {
     init() {
         this.tree.root.addEventListener(
             'change', event => this.onSelect(event), {passive: true});
+
+        TagListContextMenu.build();
     },
 
     get selectedItem() {
@@ -521,6 +525,8 @@ export let FeedList = {
             'keydown', event => this.onKeyDown(event), {capture: true});
         this.tree.root.addEventListener(
             'toggle-collapsed', () => this.persistFolderState());
+
+        FeedListContextMenu.build();
     },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
