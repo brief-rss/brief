@@ -894,7 +894,7 @@ export let ViewListContextMenu = {
         const handlers = {
             'ctx-mark-special-folder-read': () => this.markFolderRead(),
             'ctx-restore-trashed': () => Commands.restoreTrashed(),
-            'ctx-empty-today-folder': () => this.emptyUnreadFolder(),
+            'ctx-empty-today-folder': () => this.emptyTodayFolder(),
             'ctx-empty-trash': () => Commands.emptyTrash(),
         };
 
