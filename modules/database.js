@@ -88,16 +88,20 @@ export let Database = {
         let entryCount = await this.countEntries();
         console.log(`Brief: opened database with ${entryCount} entries`);
 
-        // Register all needed observers
+        // Register the common observer
         Comm.registerObservers({
             'feedlist-updated': ({feeds}) => this._feeds = feeds, // Already saved elsewhere
-            'feedlist-modify': ({updates}) => this.modifyFeed(updates),
-            'feedlist-add': ({feeds, options}) => this.addFeeds(feeds, options),
-            'feedlist-delete': ({feeds}) => this.deleteFeed(feeds),
-            'entries-expire': ({feeds}) => this.expireEntries(feeds),
         });
 
         if(Comm.master) {
+            // Register master-only observers
+            Comm.registerObservers({
+                'feedlist-modify': ({updates}) => this.modifyFeed(updates),
+                'feedlist-add': ({feeds, options}) => this.addFeeds(feeds, options),
+                'feedlist-delete': ({feeds}) => this.deleteFeed(feeds),
+                'entries-expire': ({feeds}) => this.expireEntries(feeds),
+            });
+
             browser.bookmarks.onCreated.addListener((id, {url}) => {
                 if(url === undefined) {
                     return;
