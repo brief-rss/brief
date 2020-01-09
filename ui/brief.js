@@ -42,7 +42,11 @@ async function init() {
     }
     document.body.classList.remove("loading");
 
-    PrefObserver.init();
+    Prefs.addObserver('feedview.autoMarkRead', () => gCurrentView._autoMarkRead());
+    Prefs.addObserver('feedview.sortUnreadViewOldestFirst', () => {
+        if (gCurrentView.query.read === false)
+            gCurrentView.refresh();
+    });
 
     let db = await Database.init();
 
@@ -221,17 +225,6 @@ let FeedViewHeader = {
     },
 };
 
-
-// Preferences observer.
-let PrefObserver = {
-    init() {
-        Prefs.addObserver('feedview.autoMarkRead', () => gCurrentView._autoMarkRead());
-        Prefs.addObserver('feedview.sortUnreadViewOldestFirst', () => {
-            if (gCurrentView.query.read === false)
-                gCurrentView.refresh();
-        });
-    },
-};
 
 /* Supports draggable splitters */
 let SplitterModule = {
