@@ -39,6 +39,11 @@ export let Database = {
         return this._feeds;
     },
 
+    /// Request feeds
+    async getMasterFeeds() {
+        return Comm.callMaster('feedlist-get');
+    },
+
     getFeed(feedID) {
         let feed = this.feeds.filter(f => f.feedID === feedID)[0];
         if(feed === undefined) {
@@ -99,6 +104,7 @@ export let Database = {
                 'feedlist-modify': ({updates}) => this.modifyFeed(updates),
                 'feedlist-add': ({feeds, options}) => this.addFeeds(feeds, options),
                 'feedlist-delete': ({feeds}) => this.deleteFeed(feeds),
+                'feedlist-get': () => this._feeds,
                 'entries-expire': ({feeds}) => this.expireEntries(feeds),
             });
 

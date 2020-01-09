@@ -48,8 +48,6 @@ async function init() {
             gCurrentView.refresh();
     });
 
-    let db = await Database.init();
-
     Commands.switchViewFilter(Prefs.get('ui.view.filter'));
 
     Comm.registerObservers({
@@ -68,10 +66,6 @@ async function init() {
 
     let doc = contentIframe.contentDocument;
     doc.documentElement.setAttribute('lang', navigator.language);
-
-    ViewList.init(db);
-    FeedList.init(db);
-    TagList.init(db);
 
     SplitterModule.init();
     document.getElementById('sidebar-splitter').addEventListener(
@@ -95,12 +89,19 @@ async function init() {
     document.getElementById('organize-button').addEventListener(
         'click', () => FeedList.organize(), {passive: true});
     document.getElementById('subscribe-button').addEventListener(
-        'click', () => db.addFeeds({url: previewURL}), {passive: true});
+        'click', () => Database.addFeeds({url: previewURL}), {passive: true});
 
     if(previewURL === null) {
+        let db = await Database.init();
+        ViewList.init(db);
+        FeedList.init(db);
+        TagList.init(db);
         ViewList.selectedItem = getElement(Prefs.get('ui.startView') || 'all-items-folder');
+        await wait();
+        FeedList.rebuild();
     } else {
-        updatePreviewMode(db.feeds);
+        let knownFeeds = await Database.getMasterFeeds();
+        updatePreviewMode(knownFeeds);
         let parsedFeed = await fetchFeed(previewURL);
         document.title = browser.i18n.getMessage("previewTitle", parsedFeed.title);
 
@@ -136,8 +137,6 @@ async function init() {
             mode: 'full',
         }));
     }
-    await wait();
-    FeedList.rebuild();
 }
 
 function updatePreviewMode(feeds) {
