@@ -1,6 +1,6 @@
 import {Prefs} from "/modules/prefs.js";
 import * as OPML from "/modules/opml.js";
-import {Comm, getElement, openBackgroundTab} from "/modules/utils.js";
+import {Comm, debounced, getElement, openBackgroundTab} from "/modules/utils.js";
 import {FeedView} from "./feedview.js";
 
 
@@ -314,6 +314,12 @@ export let ViewList = {
 
         this.deselect();
 
+        let refreshView = debounced(100, () => this.refresh());
+        Comm.registerObservers({
+            'feedlist-updated': refreshView,
+            'entries-updated': refreshView,
+        });
+
         this.refreshItem('all-items-folder');
         this.refreshItem('today-folder');
         this.refreshItem('starred-folder');
@@ -531,6 +537,11 @@ export let FeedList = {
             'keydown', event => this.onKeyDown(event), {capture: true});
         this.tree.root.addEventListener(
             'toggle-collapsed', () => this.persistFolderState());
+
+        Comm.registerObservers({
+            'feedlist-updated': ({feeds}) => this.rebuild(feeds),
+            'entries-updated': ({feeds}) => this.refreshFeedTreeitems(feeds),
+        });
 
         FeedListContextMenu.build();
     },

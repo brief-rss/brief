@@ -4,7 +4,7 @@ import {fetchFaviconAsURL} from "/modules/favicon-fetcher.js";
 import {apply_i18n} from "/modules/i18n.js";
 import {Prefs} from "/modules/prefs.js";
 import {
-    Comm, expectedEvent, wait, debounced, getElement
+    Comm, expectedEvent, wait, getElement
 } from "/modules/utils.js";
 import {
     FeedList, ViewList, TagList, DropdownMenus,
@@ -57,21 +57,9 @@ async function init() {
     });
     Comm.broadcast('update-query-status');
 
-    let refreshView = debounced(100, () => ViewList.refresh());
     Comm.registerObservers({
-        'feedlist-updated': ({feeds}) => {
-            refreshView();
-            FeedList.rebuild(feeds);
-            updatePreviewMode(db.feeds);
-        },
-        'entries-updated': ({feeds}) => {
-            refreshView();
-            FeedList.refreshFeedTreeitems(feeds);
-            //TODO: taglist refresh
-        },
-        'style-updated': () => {
-            Commands.applyStyle();
-        },
+        'feedlist-updated': ({feeds}) => updatePreviewMode(feeds),
+        'style-updated': () => Commands.applyStyle(),
     });
     // TODO: should update FeedView and feed view title too(?) on title change
     // TODO: loading/error indicators
