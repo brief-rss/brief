@@ -9,7 +9,7 @@ export function apply_i18n(doc) {
         }
     }
     for(let node of doc.querySelectorAll('[data-i18n-attrs]')) {
-        for(let substitution of node.dataset.i18nAttrs.split(/\s+/g)) {
+        for(let substitution of node.dataset.i18nAttrs.trim().split(/\s+/g)) {
             let [attr, text] = substitution.split(':');
             text = browser.i18n.getMessage(text) || text;
             node.setAttribute(attr, replaceEntities(text));
