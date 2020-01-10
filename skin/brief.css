@@ -247,8 +247,12 @@ body:not(.preview) .preview {
     text-decoration: none;
 }
 
-body:not(.known-feed) #subscribe-button::after {
+body #subscribe-button::after {
     content: attr(data-preview);
+}
+
+body.incognito #subscribe-button::after {
+    content: attr(data-preview-incognito);
 }
 
 body.known-feed #subscribe-button::after {

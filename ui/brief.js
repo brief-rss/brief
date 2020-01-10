@@ -100,6 +100,13 @@ async function init() {
         await wait();
         FeedList.rebuild();
     } else {
+        // Intentionally do not support subscribing from Private Browsing or containers
+        // because doing this without correct fetch setup is a privacy leak
+        if(await browser.runtime.getBackgroundPage() === null) {
+            console.log("Incognito / container detected, disabling subscription");
+            document.body.classList.add('incognito');
+            document.getElementById('subscribe-button').disabled = true;
+        }
         let knownFeeds = await Database.getMasterFeeds();
         updatePreviewMode(knownFeeds);
         let parsedFeed = await fetchFeed(previewURL);
@@ -144,7 +151,8 @@ function updatePreviewMode(feeds) {
     let knownURLs = feeds.filter(f => f.hidden === 0).map(f => f.feedURL);
     let isKnown = knownURLs.includes(previewURL);
     document.body.classList.toggle('known-feed', isKnown);
-    document.getElementById('subscribe-button').disabled = isKnown;
+    let disable = isKnown || document.body.classList.contains('incognito');
+    document.getElementById('subscribe-button').disabled = disable;
 }
 
 
