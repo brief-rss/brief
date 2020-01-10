@@ -1,14 +1,13 @@
-import {Prefs} from "./prefs.js";
 import {Comm, wait, xhrPromise} from "./utils.js";
 
 const DEFAULT_TIMEOUT = 25000; // Default fetch timeout
 
-export async function fetchFeed(feed) {
+export async function fetchFeed(feed, {allow_cached = false} = {}) {
     let url = feed.feedURL || feed;
     let request = new XMLHttpRequest();
     request.open('GET', url);
     request.overrideMimeType('application/xml');
-    if(!Prefs.get('update.allowCachedResponses')) {
+    if(!allow_cached) {
         request.setRequestHeader('Cache-control', 'no-cache');
     }
     request.responseType = 'document';

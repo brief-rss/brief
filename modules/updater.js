@@ -166,7 +166,8 @@ export let FeedUpdater = {
             return;
         }
 
-        let parsedFeed = await fetchFeed(feed);
+        let allow_cached = Prefs.get('update.allowCachedResponses');
+        let parsedFeed = await fetchFeed(feed, {allow_cached});
         if(parsedFeed) {
             let pushResults = await this.db.pushUpdatedFeed({feed, parsedFeed});
             let {newEntries} = pushResults;
