@@ -142,7 +142,9 @@ async function init() {
 function updatePreviewMode(feeds) {
     let previewURL = new URLSearchParams(document.location.search).get("preview");
     let knownURLs = feeds.filter(f => f.hidden === 0).map(f => f.feedURL);
-    document.body.classList.toggle('known-feed', knownURLs.includes(previewURL));
+    let isKnown = knownURLs.includes(previewURL);
+    document.body.classList.toggle('known-feed', isKnown);
+    document.getElementById('subscribe-button').disabled = isKnown;
 }
 
 
