@@ -5,6 +5,10 @@ export function wait(delay) {
     return new Promise(resolve => setTimeout(() => resolve(), delay));
 }
 
+function microtask() {
+    return null; // `await` always enqueues a microtask to resume in
+}
+
 // Wait for a specific event (for example, 'transitionend')
 export function expectedEvent(element, event) {
     return new Promise((resolve) => {
@@ -162,7 +166,7 @@ export let Comm = {
     },
 
     async _notifyObservers(message) {
-        await wait();
+        await microtask();
         let answer = undefined;
         for(let listener of this.observers) {
             let reply = listener(message);
