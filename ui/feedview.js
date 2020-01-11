@@ -306,40 +306,28 @@ FeedView.prototype = {
             targetPosition = (entryView.offsetTop + entryView.height) - win.innerHeight;
         }
 
-        this.scroll(targetPosition, aSmooth);
+        this.scrollTo({
+            top: targetPosition,
+            behavior: aSmooth ? 'smooth' : 'instant',
+        });
     },
 
     // Scroll down by the height of the viewport.
     scrollDownByScreen: function FeedView_scrollDownByScreen() {
-        this.scroll(this.window.pageYOffset + this.window.innerHeight - 20, true);
+        this.window.scrollTo({
+            top: this.window.pageYOffset + this.window.innerHeight - 20,
+            behavior: 'smooth',
+        });
     },
 
     // See scrollUpByScreen.
     scrollUpByScreen: function FeedView_scrollUpByScreen() {
-        this.scroll(this.window.pageYOffset - this.window.innerHeight + 20, true);
+        this.window.scrollTo({
+            top: this.window.pageYOffset - this.window.innerHeight + 20,
+            behavior: 'smooth',
+        });
     },
 
-    /**
-     * Scrolls smoothly to the given position
-     *
-     * @param aTargetPosition
-     *        Y coordinate with which to line up the top edge of the viewport.
-     * @param aSmooth
-     *        Set to TRUE to scroll smoothly, FALSE to jump directly to the
-     *        target position.
-     */
-    scroll: function FeedView_scroll(aTargetPosition, aSmooth) {
-        // Clamp the target position.
-        let targetPosition = Math.max(aTargetPosition, 0);
-        targetPosition = Math.min(targetPosition, this.window.scrollMaxY);
-
-        if (targetPosition == this.window.pageYOffset)
-            return;
-
-        let behavior = aSmooth ? 'smooth' : 'instant';
-
-        this.window.scrollTo({top: targetPosition, behavior});
-    },
 
     /**
      * Keep the selected item iff the last scroll was towards it and it's visible.
@@ -731,7 +719,7 @@ FeedView.prototype = {
         this.document.body.classList.remove('multiple-feeds');
 
         // Manually reset the scroll position, otherwise weird stuff happens.
-        this.scroll(0, false);
+        this.window.scrollTo({top: 0});
         this._prevPosition = 0;
 
         // Clear DOM content.
