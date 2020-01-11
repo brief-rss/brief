@@ -273,13 +273,13 @@
         "message": "k"
     },
     "previousFeed_label": {
-        "message": "&lt; Předchozí"
+        "message": "< Předchozí"
     },
     "previousFeed_accesskey": {
         "message": "P"
     },
     "nextFeed_label": {
-        "message": "Následující &gt;"
+        "message": "Následující >"
     },
     "nextFeed_accesskey": {
         "message": "N"

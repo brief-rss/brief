@@ -273,13 +273,13 @@
         "message": "O"
     },
     "previousFeed_label": {
-        "message": "&lt; Precedent"
+        "message": "< Precedent"
     },
     "previousFeed_accesskey": {
         "message": "P"
     },
     "nextFeed_label": {
-        "message": "Următor &gt;"
+        "message": "Următor >"
     },
     "nextFeed_accesskey": {
         "message": "U"

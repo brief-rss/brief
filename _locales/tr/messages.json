@@ -273,13 +273,13 @@
         "message": "O"
     },
     "previousFeed_label": {
-        "message": "&lt; Önceki"
+        "message": "< Önceki"
     },
     "previousFeed_accesskey": {
         "message": "Ö"
     },
     "nextFeed_label": {
-        "message": "Sonraki &gt;"
+        "message": "Sonraki >"
     },
     "nextFeed_accesskey": {
         "message": "S"

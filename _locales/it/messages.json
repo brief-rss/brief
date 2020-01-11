@@ -4,7 +4,7 @@
         "message": "Brief rende la lettura dei feed RSS facile ed intuitiva! Creata per avere esattamente il giusto set di caratteristiche,  potente e semplice allo stesso tempo. I feed vengono presentati in maniera continua ed interattiva cos permettendo di mettere feed fra i segnalibri oppure aggiungere etichette con semplici clic"
     },
     "addonDescription": {
-        "message": "Brief permette di integrare nella barra laterale del browser un lettore di feed. Semplice da utilizzare, permette con estrema facilit di mettere feed fra i segnalibri ed aggiungere etichette.  possibile visualizzare sia i feed non ancora letti che quelli messi fra i segnalibri, visualizzare un singolo feed oppure un&apos;intera cartella, cos come un elemento per intero o la sola intestazione!  possibile trovare rapidamente una parte di news tramite la relativa barra di ricerca, ricevere una notifica per ogni nuovo elemento disponibile e tracciare il relativo numero tramite la barra di stato. È infine possibile personalizzare la visualizzazione dei feed e utilizzare scorciatoie da tastiera per navigare pi rapidamente attraverso le varie news"
+        "message": "Brief permette di integrare nella barra laterale del browser un lettore di feed. Semplice da utilizzare, permette con estrema facilit di mettere feed fra i segnalibri ed aggiungere etichette.  possibile visualizzare sia i feed non ancora letti che quelli messi fra i segnalibri, visualizzare un singolo feed oppure un'intera cartella, cos come un elemento per intero o la sola intestazione!  possibile trovare rapidamente una parte di news tramite la relativa barra di ricerca, ricevere una notifica per ogni nuovo elemento disponibile e tracciare il relativo numero tramite la barra di stato. È infine possibile personalizzare la visualizzazione dei feed e utilizzare scorciatoie da tastiera per navigare pi rapidamente attraverso le varie news"
     },
 
   // Messages from brief.dtd
@@ -273,13 +273,13 @@
         "message": "d"
     },
     "previousFeed_label": {
-        "message": "&lt; Precedente"
+        "message": "< Precedente"
     },
     "previousFeed_accesskey": {
         "message": "P"
     },
     "nextFeed_label": {
-        "message": "Successivo &gt;"
+        "message": "Successivo >"
     },
     "nextFeed_accesskey": {
         "message": "u"

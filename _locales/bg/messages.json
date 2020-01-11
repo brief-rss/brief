@@ -276,13 +276,13 @@
         "message": "O"
     },
     "previousFeed_label": {
-        "message": "&lt; Предишна"
+        "message": "< Предишна"
     },
     "previousFeed_accesskey": {
         "message": "P"
     },
     "nextFeed_label": {
-        "message": "Следваща &gt;"
+        "message": "Следваща >"
     },
     "nextFeed_accesskey": {
         "message": "N"

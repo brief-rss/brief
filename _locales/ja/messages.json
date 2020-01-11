@@ -273,13 +273,13 @@
         "message": "O"
     },
     "previousFeed_label": {
-        "message": "&lt; 前"
+        "message": "< 前"
     },
     "previousFeed_accesskey": {
         "message": "P"
     },
     "nextFeed_label": {
-        "message": "次 &gt;"
+        "message": "次 >"
     },
     "nextFeed_accesskey": {
         "message": "N"

@@ -273,13 +273,13 @@
         "message": "v"
     },
     "previousFeed_label": {
-        "message": "&lt; Nazaj"
+        "message": "< Nazaj"
     },
     "previousFeed_accesskey": {
         "message": "z"
     },
     "nextFeed_label": {
-        "message": "Naprej &gt;"
+        "message": "Naprej >"
     },
     "nextFeed_accesskey": {
         "message": "r"

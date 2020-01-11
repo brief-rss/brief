@@ -273,13 +273,13 @@
         "message": "O"
     },
     "previousFeed_label": {
-        "message": "&lt; Vorheriger"
+        "message": "< Vorheriger"
     },
     "previousFeed_accesskey": {
         "message": "V"
     },
     "nextFeed_label": {
-        "message": "Nächster &gt;"
+        "message": "Nächster >"
     },
     "nextFeed_accesskey": {
         "message": "N"
