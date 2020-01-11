@@ -487,14 +487,14 @@ FeedView.prototype = {
 
                     this._prevPosition = position;
 
-                    if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                    if (this.shouldLoadMore(MIN_LOADED_WINDOW_HEIGHTS))
                         this._fillWindow(WINDOW_HEIGHTS_LOAD)
                             .catch(this._ignoreRefresh);
                 }
                 break;
 
             case 'resize':
-                if (!this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                if (this.shouldLoadMore(MIN_LOADED_WINDOW_HEIGHTS))
                     this._fillWindow(WINDOW_HEIGHTS_LOAD)
                         .catch(this._ignoreRefresh);
                 break;
@@ -688,7 +688,7 @@ FeedView.prototype = {
                     this.feedContent.removeChild(dayHeader);
 
                 if (++removedCount == indices.length) {
-                    if (aLoadNewEntries && !this.enoughEntriesPreloaded(MIN_LOADED_WINDOW_HEIGHTS))
+                    if (aLoadNewEntries && this.shouldLoadMore(MIN_LOADED_WINDOW_HEIGHTS))
                         this._fillWindow(WINDOW_HEIGHTS_LOAD).then(afterEntriesRemoved.bind(this));
                     else
                         afterEntriesRemoved.call(this);
@@ -780,7 +780,7 @@ FeedView.prototype = {
      * @returns Promise<null>
      */
     _fillWindow: async function FeedView__fillWindow(aWindowHeights) {
-        if (!this._loading && !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights)) {
+        if (!this._loading && this.shouldLoadMore(aWindowHeights)) {
             let stepSize = this.headlinesMode
                 ? HEADLINES_LOAD_STEP_SIZE
                 : LOAD_STEP_SIZE;
@@ -789,7 +789,7 @@ FeedView.prototype = {
                 if(!loaded) {
                     break;
                 }
-            } while(!this.enoughEntriesPreloaded(aWindowHeights));
+            } while(this.shouldLoadMore(aWindowHeights));
         }
     },
 
@@ -804,6 +804,13 @@ FeedView.prototype = {
                (this.window.scrollMaxY - this.window.pageYOffset >
                 this.window.innerHeight * aWindowHeights)
                && this.getEntryInScreenCenter() != this.lastLoadedEntry;
+    },
+
+    /**
+     * Checks if more entries should be loaded
+     */
+    shouldLoadMore(aWindowHeights) {
+        return !this._allEntriesLoaded && !this.enoughEntriesPreloaded(aWindowHeights);
     },
 
     /**
