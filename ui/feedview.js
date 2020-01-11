@@ -642,6 +642,9 @@ FeedView.prototype = {
      *        Load new entries to fill the screen.
      */
     _onEntriesRemoved: function(aRemovedEntries, aAnimate, aLoadNewEntries) {
+        if(this.db === null) {
+            return;
+        }
         let containedEntries = aRemovedEntries.filter(this.isEntryLoaded, this);
         if (!containedEntries.length)
             return;
