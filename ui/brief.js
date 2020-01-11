@@ -16,16 +16,17 @@ import {FeedView} from "./feedview.js";
 
 
 async function init() {
+    // Start everything that can be done async, starting with the longest
+    let contentIframePromise = loadContentIframe();
+    let previewURL = new URLSearchParams(document.location.search).get("preview");
+    let parsedFeedPromise = (previewURL !== null) ? fetchFeed(previewURL) : null;
+    let prefsPromise = Prefs.init();
+    let knownFeedsPromise = Database.getMasterFeeds();
+
     apply_i18n(document);
 
-    let previewURL = new URLSearchParams(document.location.search).get("preview");
-    let feedview_doc = await fetch('feedview.html');
-    let contentIframe = getElement('feed-view');
-    contentIframe.setAttribute('srcdoc', await feedview_doc.text());
-    await expectedEvent(contentIframe, 'load');
-
     // Restore local persistence
-    await Prefs.init();
+    await prefsPromise;
     await Persistence.migrate();
     getElement('feed-list').setAttribute("closedFolders", Prefs.get('ui.closedFolders'));
     getElement('tag-list').style.width = Prefs.get('ui.tagList.width');
@@ -36,6 +37,7 @@ async function init() {
         'resize-complete', ({target}) => Prefs.set('ui.sidebar.width', target.style.width));
     document.body.classList.toggle('sidebar', !Prefs.get('ui.sidebar.hidden'));
 
+    let contentIframe = await contentIframePromise;
     // Allow first meaningful paint
     if(previewURL !== null) {
         document.body.classList.add("preview");
@@ -107,9 +109,9 @@ async function init() {
             document.body.classList.add('incognito');
             document.getElementById('subscribe-button').disabled = true;
         }
-        let knownFeeds = await Database.getMasterFeeds();
+        let knownFeeds = await knownFeedsPromise;
         updatePreviewMode(knownFeeds);
-        let parsedFeed = await fetchFeed(previewURL);
+        let parsedFeed = await parsedFeedPromise;
         document.title = browser.i18n.getMessage("previewTitle", parsedFeed.title);
 
         let feed = Object.assign({}, {
@@ -144,6 +146,15 @@ async function init() {
             mode: 'full',
         }));
     }
+}
+
+
+async function loadContentIframe() {
+    let feedview_doc = await fetch('feedview.html');
+    let contentIframe = getElement('feed-view');
+    contentIframe.setAttribute('srcdoc', await feedview_doc.text());
+    await expectedEvent(contentIframe, 'load');
+    return contentIframe;
 }
 
 function updatePreviewMode(feeds) {
