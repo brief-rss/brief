@@ -1047,13 +1047,13 @@ function EntryView(aFeedView, aEntryData) {
 
     let lang = navigator.language;
     this._getElement('date').textContent = this.getDateString();
-    this._getElement('date').setAttribute('title', this.date.toLocaleString(lang));
+    this._getElement('date').setAttribute('title', this.formatters.datetime.format(this.date));
 
     if (aEntryData.markedUnreadOnUpdate) {
         this.container.classList.add('updated');
         this._getElement('updated-label').textContent = Strings.entryWasUpdated;
 
-        let dateString = new Date(this.revision.updated).toLocaleString(lang);
+        let dateString = this.formatters.datetime.format(new Date(this.revision.updated));
         this._getElement('updated-label').setAttribute('title', dateString);
     }
 
@@ -1366,14 +1366,13 @@ EntryView.prototype = {
                     return Strings['entryDate_yesterday'];
 
                 case relativeDate.deltaDaySteps < 7:
-                    return this.date.toLocaleDateString(lang, {weekday: 'long'});
+                    return this.formatters.weekday.format(this.date);
 
                 case relativeDate.deltaYearSteps === 0:
-                    return this.date.toLocaleDateString(lang, {month: 'long', day: 'numeric'});
+                    return this.formatters.date_md.format(this.date);
 
                 default:
-                    return this.date.toLocaleDateString(
-                        lang, {year: 'numeric', month: 'long', day: 'numeric'});
+                    return this.formatters.date_ymd.format(this.date);
             }
         }
         else {
@@ -1397,31 +1396,23 @@ EntryView.prototype = {
 
                 case relativeDate.deltaDaySteps === 0:
                     return Strings['entryDate_today'] + ', ' +
-                        this.date.toLocaleTimeString(lang,
-                            {hour: 'numeric', minute: 'numeric'});
+                        this.formatters.time.format(this.date);
 
                 case relativeDate.deltaDaySteps === 1:
                     return Strings['entryDate_yesterday'] + ', ' +
-                        this.date.toLocaleTimeString(lang,
-                            {hour: 'numeric', minute: 'numeric'});
+                        this.formatters.time.format(this.date);
 
                 case relativeDate.deltaDaySteps < 5:
-                    return this.date.toLocaleDateString(lang, {weekday: 'long'}) + ', ' +
-                        this.date.toLocaleTimeString(lang,
-                            {hour: 'numeric', minute: 'numeric'});
+                    return this.formatters.weekday.format(this.date) + ', ' +
+                        this.formatters.time.format(this.date);
 
                 case relativeDate.deltaYearSteps === 0:
-                    return this.date.toLocaleDateString(lang,
-                        {month: 'short', day: 'numeric'}) + ', ' +
-                        this.date.toLocaleTimeString(lang,
-                            {hour: 'numeric', minute: 'numeric'});
+                    return this.formatters.date_md.format(this.date) + ', ' +
+                        this.formatters.time.format(this.date);
 
                 default:
-                    return this.date.toLocaleDateString(
-                        lang,
-                        {year: 'numeric', month: 'short', day: 'numeric'}) + ', ' +
-                        this.date.toLocaleTimeString(lang,
-                            {hour: 'numeric', minute: 'numeric'});
+                    return this.formatters.date_md.format(this.date) + ', ' +
+                        this.formatters.time.format(this.date);
             }
         }
     },
@@ -1480,6 +1471,21 @@ EntryView.prototype = {
 
         if (!this.read)
             this.markEntryRead(true);
+    },
+
+
+    formatters: {
+        time: new Intl.DateTimeFormat(navigator.language, {hour: 'numeric', minute: 'numeric'}),
+        datetime: new Intl.DateTimeFormat(
+            navigator.language,
+            {
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: 'numeric', minute: 'numeric', second: 'numeric',
+            }),
+        weekday: new Intl.DateTimeFormat(navigator.language, {weekday: 'long'}),
+        date_md: new Intl.DateTimeFormat(navigator.language, {month: 'long', day: 'numeric'}),
+        date_ymd: new Intl.DateTimeFormat(
+            navigator.language, {year: 'numeric', month: 'long', day: 'numeric'}),
     },
 
 };
