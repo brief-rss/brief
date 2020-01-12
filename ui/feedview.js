@@ -1043,7 +1043,6 @@ function EntryView(aFeedView, aEntryData) {
     this._getElement('feed-name').innerHTML = feed.title;
     this._getElement('authors').innerHTML = this.revision.authors;
 
-    let lang = navigator.language;
     this._getElement('date').textContent = this.getDateString();
     this._getElement('date').setAttribute('title', this.formatters.datetime.format(this.date));
 
@@ -1353,7 +1352,6 @@ EntryView.prototype = {
 
     getDateString: function EntryView_getDateString(aOnlyDatePart) {
         let relativeDate = new RelativeDate(this.date.getTime());
-        let lang = navigator.language;
 
         if (aOnlyDatePart) {
             switch (true) {
