@@ -818,6 +818,18 @@ export let Database = {
         let ids = entries.map(e => e.providedID).filter(i => i);
         if(ids.length !== (new Set(ids)).size) {
             console.error('feed has duplicate item IDs', feed, parsedFeed);
+            let seenIds = new Set()
+            entries = entries.filter(e => {
+              // Keep entries that don't have providedID
+              if(!e.providedID) {
+                return true;
+              } else if(seenIds.has(e.providedID)) {
+                return false;
+              } else {
+                seenIds.add(e.providedID);
+                return true;
+              }
+            });
         }
         let urls = entries.map(e => e.entryURL).filter(u => u);
         if(urls.length !== (new Set(urls)).size) {
