@@ -29,11 +29,11 @@ const Brief = {
             if(temporary) { // `web-ext run` or equivalent
                 Comm.verbose = true;
                 const TEST_INDEX = browser.runtime.getURL('/test/index.xhtml');
-                let tabs = await browser.tabs.query({url: TEST_INDEX});
+                var tabs = await browser.tabs.query({url: TEST_INDEX});
                 let debugging = (await browser.tabs.query({}))
                     .some(({url}) => url === 'about:debugging');
                 if(tabs.length === 0 && !debugging) {
-                    browser.tabs.create({url: TEST_INDEX});
+                        browser.tabs.create({url: TEST_INDEX});
                 } else {
                     for(let {id} of tabs) {
                         browser.tabs.reload(id);
