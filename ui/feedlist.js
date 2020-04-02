@@ -55,7 +55,7 @@ TreeView.prototype = {
         for (let node of [...aModel, null]) {
             // Skip or delete everything that's not to stay
             while(next !== null) {
-                if(Object.prototype.hasOwnProperty.call(next, 'id') && knownIds.has(next.id)) {
+                if(next.dataset && next.dataset.id && knownIds.has(next.dataset.id)) {
                     break; // Found the next known item
                 }
                 if(!IMPL_ITEMS.includes(next.nodeName)) {
