@@ -16,6 +16,7 @@ function TreeView(aElementOrId) {
     this.prefix = this.root.classList.contains('unprefixed') ? "" : this.root.id + "__";
     this.template = this.root.querySelector('template');
     this._selectedElement = null;
+    this._elementModelCache = new WeakMap();
     Array.from(this.root.children).forEach(node => {
         this._initElement(node);
     });
@@ -128,6 +129,8 @@ TreeView.prototype = {
     _updateElement: function TreeView__updateElement(aElement, aModel) {
         const {id, title, icon, unreadCount, loading, error, collapsed, children} = aModel;
         let element = this._resolveElement(aElement);
+        const oldModel = this._elementModelCache.get(element);
+        this._elementModelCache.set(element, {...oldModel, ...aModel});
 
         const isFolder = (element.nodeName === "tree-folder");
         console.assert(element.nodeName === 'tree-folder' || children === undefined,
@@ -140,8 +143,9 @@ TreeView.prototype = {
         }
         if(title !== undefined)
             row.querySelector('.title').textContent = title;
-        if(icon !== undefined)
+        if(icon !== undefined && (oldModel === undefined || icon !== oldModel.icon)) {
             row.querySelector('.icon').src = icon;
+        }
         if(unreadCount !== undefined) {
             row.querySelector('.unread-count').textContent = unreadCount;
             element.classList.toggle('unread', (unreadCount > 0));
