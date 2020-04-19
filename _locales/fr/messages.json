@@ -23,7 +23,19 @@
     "trashFolder_label": {
         "message": "Corbeille"
     },
+    "previewTitle": {
+        "message": "$1 [Aperçu du flux - Brief]"
+    },
     // Buttons
+    "subscribeButton_incognito_label": {
+        "message": "Abonnement impossible en navigation privée"
+    },
+    "subscribeButton_knownFeed_label": {
+        "message": "Déjà abonné à ce flux"
+    },
+    "subscribeButton_label": {
+        "message": "S'abonner à ce flux"
+    },
     "headlinesCheckbox_tooltip": {
         "message": "Afficher uniquement les titres (F)"
     },
