@@ -74,6 +74,9 @@ function checkHeaders({requestId, tabId, url, responseHeaders}) {
 }
 
 function checkContent(buffers, {encoding, url, tabId}) {
+    if(buffers.length === 0) {
+        return;
+    }
     let decoder;
     try {
         decoder = new TextDecoder(encoding, {fatal: true});
