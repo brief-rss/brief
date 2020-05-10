@@ -201,8 +201,11 @@ const Brief = {
                 // Happens during redirect-to-feed (transient states?)
             } else {
                 console.warn("Ignoring unknown error scanning tab for feeds", ex);
-                replies = [[]];
             }
+        }
+        // Default: fallback to "this is not a feed page"
+        if(replies === undefined) {
+            replies = [[]];
         }
         let feeds = replies[0];
         if(feeds.length > 0) {
