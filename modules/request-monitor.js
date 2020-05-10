@@ -1,4 +1,4 @@
-import {tryGetXmlRootName} from "./xml-sniffer.js";
+import {SNIFF_WINDOW, sniffedToBeFeed} from "./xml-sniffer.js";
 
 export function init() {
     console.debug("Initializing the feed request monitor");
@@ -37,9 +37,6 @@ const MAYBE_FEED_TYPES = [
     'text/xml',
     // and anything with `+xml` as a special case
 ];
-
-const FEED_ROOT_TAGS = ['rss', 'feed', 'rdf:RDF'];
-const SNIFF_WINDOW = 512; // Matches the legacy Firefox feed sniffer window
 
 
 function checkHeaders({requestId, tabId, url, responseHeaders}) {
@@ -98,13 +95,7 @@ function checkContent(buffers, {encoding, url, tabId}) {
         {stream: true},
     );
 
-    let rootTag = tryGetXmlRootName(text);
-
-    if(FEED_ROOT_TAGS.includes(rootTag)) {
-        if(rootTag === 'rdf:RDF' && !text.includes("http://purl.org/rss/1.0/")) {
-            // This RDF is probably not a feed, skipping it
-            return;
-        }
+    if(sniffedToBeFeed(text)) {
         console.log('feed detected, redirecting to preview page for', url);
         let previewUrl = "/ui/brief.xhtml?preview=" + encodeURIComponent(url);
         browser.tabs.update(tabId, {url: previewUrl, loadReplace: true});
