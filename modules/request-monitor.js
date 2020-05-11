@@ -77,30 +77,32 @@ function checkContent(buffers, {encoding, url, tabId}) {
     if(buffers.length === 0) {
         return;
     }
-    let decoder;
+
+    let text;
     try {
-        decoder = new TextDecoder(encoding, {fatal: true});
+        text = parseBuffers({buffers, encoding, length: SNIFF_WINDOW});
     } catch(e) {
-        return; // Invalid encoding, cannot decode the feed for checking
+        return; // Fallback: not a feed
     }
-    let text = "";
-    let bytesRemaining = SNIFF_WINDOW;
-    for(let buffer of buffers.slice(0, -1)) {
-        try {
-            text += decoder.decode(buffer, {stream: true});
-        } catch(e) {
-            return; // Byte stream invalid for the encoding specified
-        }
-        bytesRemaining -= buffer.byteLength;
-    }
-    text += decoder.decode(
-        buffers[buffers.length - 1].slice(0, bytesRemaining),
-        {stream: true},
-    );
 
     if(sniffedToBeFeed(text)) {
         console.log('feed detected, redirecting to preview page for', url);
         let previewUrl = "/ui/brief.xhtml?preview=" + encodeURIComponent(url);
         browser.tabs.update(tabId, {url: previewUrl, loadReplace: true});
     }
+}
+
+function parseBuffers({buffers, encoding, length}) {
+    let decoder = new TextDecoder(encoding, {fatal: true}); // Throws: invalid encoding
+    let text = "";
+    let bytesRemaining = length;
+    for(let buffer of buffers.slice(0, -1)) {
+        text += decoder.decode(buffer, {stream: true}); // Throws: failure decoding
+        bytesRemaining -= buffer.byteLength;
+    }
+    text += decoder.decode(
+        buffers[buffers.length - 1].slice(0, bytesRemaining),
+        {stream: true},
+    ); // Throws: error decoding
+    return text;
 }
