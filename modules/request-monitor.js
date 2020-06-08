@@ -1,12 +1,41 @@
 import {SNIFF_WINDOW, sniffedToBeFeed} from "./xml-sniffer.js";
 
-export function init() {
+
+export async function init() {
     console.debug("Initializing the feed request monitor");
+    await initRedirectCache();
     browser.webRequest.onHeadersReceived.addListener(
         checkHeaders,
         {types: ["main_frame"], urls: ["http://*/*", "https://*/*"]},
         ["responseHeaders", "blocking"],
     );
+}
+
+// The purpose of the redirect cache is to avoid installing the stream filter after a redirect
+// on the Firefox versions 72 to 76 (bug 1590898 to bug 1597159) where it's known
+// to break redirects altogether.
+const REDIRECT_CACHE_CLEAR_INTERVAL = 3600 * 1000;
+let CANNOT_FILTER_AFTER_REDIRECT = false; // will be initialized in `init`
+let SKIP_AFTER_REDIRECT = new Set();
+let SKIP_AFTER_REDIRECT_SEEN = new Set();
+async function initRedirectCache() {
+    let browserInfo = await browser.runtime.getBrowserInfo();
+    let baseVersion = Number(browserInfo.version.split('.')[0]);
+    if(baseVersion >= 72 && baseVersion < 77) { // ...and some 77 nightlies...
+        CANNOT_FILTER_AFTER_REDIRECT = true;
+        setInterval(clearRedirectCache, REDIRECT_CACHE_CLEAR_INTERVAL);
+        console.log("Activating workaround for filters breaking redirects");
+    }
+}
+function clearRedirectCache() {
+    for(let id of SKIP_AFTER_REDIRECT_SEEN) {
+        SKIP_AFTER_REDIRECT.delete(id);
+        SKIP_AFTER_REDIRECT_SEEN.delete(id);
+    }
+    for(let id of SKIP_AFTER_REDIRECT) {
+        SKIP_AFTER_REDIRECT_SEEN.add(id);
+    }
+    console.debug("Brief: cleared redirect cache");
 }
 
 function parseContentType(value) {
@@ -38,11 +67,22 @@ const MAYBE_FEED_TYPES = [
     // and anything with `+xml` as a special case
 ];
 
-
 function checkHeaders({requestId, tabId, url, responseHeaders}) {
     if(tabId === browser.tabs.TAB_ID_NONE) {
         return; // This is not a real tab, so not redirecting anything
     }
+    if(responseHeaders.filter(h => h.name.toLowerCase() == 'Location'.toLowerCase()).length > 0) {
+        console.debug(`request ${requestId}: redirect observed`);
+        if(CANNOT_FILTER_AFTER_REDIRECT) {
+            SKIP_AFTER_REDIRECT.add(requestId);
+        }
+        return; // This is a redirect, checking its body makes no sense.
+    }
+    if(SKIP_AFTER_REDIRECT.has(requestId)) {
+        console.debug(`request ${requestId}: skipping (post-redirect filter workaround)`);
+        return;
+    }
+
     let contentType = responseHeaders
         .filter(h => h.name.toLowerCase() == 'Content-Type'.toLowerCase())
         .filter(h => h.value !== undefined)

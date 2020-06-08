@@ -75,7 +75,7 @@ const Brief = {
             this._firefoxPreviewWorkaround = true;
             console.log("Enabling Firefox built-in feed preview detection");
         } else {
-            RequestMonitor.init();
+            /*spawn*/ RequestMonitor.init();
         }
 
         await Prefs.init({master: true});
