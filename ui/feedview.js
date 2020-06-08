@@ -306,7 +306,7 @@ FeedView.prototype = {
             targetPosition = (entryView.offsetTop + entryView.height) - win.innerHeight;
         }
 
-        this.scrollTo({
+        this.window.scrollTo({
             top: targetPosition,
             behavior: aSmooth ? 'smooth' : 'instant',
         });
