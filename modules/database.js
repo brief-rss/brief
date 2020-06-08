@@ -858,7 +858,9 @@ export let Database = {
         }
         feeds = minimizedFeeds;
         let store_local = browser.storage.local.set({feeds});
-        let store_sync = browser.storage.sync.set({feeds});
+        let store_sync = browser.storage.sync.set({feeds}).catch(error => {
+            console.warn("Brief failed to save feedlist to storage.sync:", error);
+        });
         await Promise.all([store_local, store_sync]);
     },
 
