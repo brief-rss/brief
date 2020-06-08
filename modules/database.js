@@ -460,7 +460,9 @@ export let Database = {
         console.log('Creating node', newFeed);
         this._feeds.push(newFeed);
         if(feed.siteURL) { // Otherwise on first update
-            /*spawn*/ updateFavicon({feed: newFeed, db: this}).catch(console.error);
+            /*spawn*/ updateFavicon({feed: newFeed, db: this}).catch(error => {
+                console.warn(`Brief failed to fetch favicon for ${feed.feedURL}:`, error);
+            });
         }
         return feedID;
     },
