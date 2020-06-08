@@ -185,7 +185,9 @@ export let FeedUpdater = {
         let nextFaviconRefresh = feed.lastFaviconRefresh + this.FAVICON_REFRESH_INTERVAL;
         feed = this.db.getFeed(feedID); // Updated websiteURL
         if(!feed.favicon || feed.favicon === 'no-favicon' || Date.now() > nextFaviconRefresh) {
-            /*spawn*/ updateFavicon({feed, db: this.db});
+            /*spawn*/ updateFavicon({feed, db: this.db}).catch(error => {
+                console.warn(`Brief failed to update favicon for ${feed.feedURL}:`, error);
+            });
         }
     },
 

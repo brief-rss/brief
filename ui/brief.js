@@ -125,6 +125,8 @@ async function init() {
         if(feed.websiteURL !== '') {
             fetchFaviconAsURL(feed).then(icon => {
                 document.getElementById('favicon').href = icon;
+            }).catch(error => {
+                console.warn(`Brief failed to fetch favicon for ${previewURL}:`, error);
             });
         }
         let entries = Database._feedToEntries({
