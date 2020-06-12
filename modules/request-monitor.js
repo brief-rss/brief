@@ -1,3 +1,4 @@
+import {Prefs} from "./prefs.js";
 import {SNIFF_WINDOW, sniffedToBeFeed} from "./xml-sniffer.js";
 
 
@@ -67,7 +68,7 @@ const MAYBE_FEED_TYPES = [
     // and anything with `+xml` as a special case
 ];
 
-function checkHeaders({requestId, tabId, url, responseHeaders}) {
+async function checkHeaders({requestId, tabId, url, responseHeaders}) {
     if(tabId === browser.tabs.TAB_ID_NONE) {
         return; // This is not a real tab, so not redirecting anything
     }
@@ -94,6 +95,12 @@ function checkHeaders({requestId, tabId, url, responseHeaders}) {
         return {cancel: true};
     }
     if(MAYBE_FEED_TYPES.includes(mime) || mime.includes('+xml')) {
+        if(!Prefs.ready()) {
+            await Prefs.init();
+        }
+        if(!Prefs.get("monitor.sniffer")) {
+            return;
+        }
         let filter = browser.webRequest.filterResponseData(requestId);
         let chunks = [];
 
