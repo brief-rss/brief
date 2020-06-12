@@ -124,7 +124,7 @@ function old_pref(name, value) {
     pref(name, value, {defaultEquivalent: value});
 }
 
-// The actual old_prefs
+// The actual old_prefs and new prefs
 old_pref("homeFolder", -1);
 old_pref("showUnreadCounter", true);
 old_pref("firstRun", true);
@@ -153,6 +153,8 @@ old_pref("database.limitStoredEntries", false);
 old_pref("database.maxStoredEntries", 100);
 old_pref("database.lastPurgeTime", 0);
 old_pref("database.keepStarredWhenClearing", true);
+
+pref("monitor.sniffer", false);
 
 // UI-controlled prefs (ex Persistence ex XUL persist)
 pref("ui.startView", "today-folder");
