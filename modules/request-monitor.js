@@ -106,11 +106,18 @@ async function checkHeaders({requestId, tabId, url, responseHeaders}) {
 
         filter.ondata = ({data}) => {
             filter.write(data);
+            if(chunks === null) {
+                return;
+            }
             chunks.push(data);
             let totalBytes = chunks.map(c => c.byteLength).reduce((a, b) => a + b, 0);
             if(totalBytes >= SNIFF_WINDOW) {
                 checkContent(chunks, {encoding, url, tabId});
-                filter.disconnect();
+                if(Prefs.get("monitor.sniffer.disconnect")) {
+                    filter.disconnect();
+                } else {
+                    chunks = null;
+                }
             }
         };
         filter.onstop = () => {
@@ -121,7 +128,7 @@ async function checkHeaders({requestId, tabId, url, responseHeaders}) {
 }
 
 function checkContent(buffers, {encoding, url, tabId}) {
-    if(buffers.length === 0) {
+    if(buffers === null || buffers.length === 0) {
         return;
     }
 

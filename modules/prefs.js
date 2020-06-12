@@ -155,6 +155,7 @@ old_pref("database.lastPurgeTime", 0);
 old_pref("database.keepStarredWhenClearing", true);
 
 pref("monitor.sniffer", false);
+pref("monitor.sniffer.disconnect", true);
 
 // UI-controlled prefs (ex Persistence ex XUL persist)
 pref("ui.startView", "today-folder");
