@@ -8,7 +8,7 @@ export let Prefs = {
     // Message channel
     _port: null,
     // Current pref values
-    _values: {},
+    _values: null,
     // Set of our observers
     _observers: new Set(),
     // Defaults
@@ -18,6 +18,9 @@ export let Prefs = {
     _defaultEquivalent: {},
 
     init: async function() {
+        if(this.ready()) {
+            return;
+        }
         browser.storage.onChanged.addListener((changes, area) => {
             let pref_changes = changes.prefs;
             if(area !== 'local' || pref_changes === undefined)
@@ -33,7 +36,14 @@ export let Prefs = {
         await this._migrateOffDefaults();
     },
 
+    ready: function() {
+        return this._values !== null;
+    },
+
     get: function(name) {
+        if(!this.ready()) {
+            throw new Exception(`pref "${name} accessed before Prefs initialization"`);
+        }
         let value = this._values[name];
         if(value === undefined) {
             value = this._defaults[name];
