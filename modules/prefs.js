@@ -42,7 +42,7 @@ export let Prefs = {
 
     get: function(name) {
         if(!this.ready()) {
-            throw new Exception(`pref "${name} accessed before Prefs initialization"`);
+            throw new Error(`pref "${name} accessed before Prefs initialization"`);
         }
         let value = this._values[name];
         if(value === undefined) {
