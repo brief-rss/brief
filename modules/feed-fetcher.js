@@ -33,7 +33,7 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
     }
 
     let result = parseNode(root, FEED_PROPERTIES);
-    if(!result || !result.items || !result.items.length > 0) {
+    if(!result || !result.items || !(result.items.length > 0)) {
         console.warn("failed to find any items in", url);
     } else {
         let item = result.items[0];
