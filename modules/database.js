@@ -591,7 +591,7 @@ export let Database = {
             title: feed.title || parsedFeed.title,
             websiteURL: parsedFeed.link ? parsedFeed.link.href : '',
             subtitle: parsedFeed.subtitle ? parsedFeed.subtitle.text : '',
-            oldestEntryDate: Math.min(entries.map(e => e.date)) || feed.oldestEntryDate,
+            oldestEntryDate: Math.min(...entries.map(e => e.date)) || feed.oldestEntryDate,
             language: parsedFeed.language,
             lastUpdated: Date.now(),
             dateModified: modified,
