@@ -350,4 +350,5 @@ const Brief = {
 Brief.init();
 
 // Debugging hook
+// @ts-ignore
 window.Brief = Brief;

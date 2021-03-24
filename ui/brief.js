@@ -376,6 +376,9 @@ export let Shortcuts = {
 init();
 
 // Debugging hooks
+// @ts-ignore
 window.Comm = Comm;
+// @ts-ignore
 window.Database = Database;
+// @ts-ignore
 window.Prefs = Prefs;
