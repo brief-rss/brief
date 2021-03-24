@@ -1216,6 +1216,7 @@ Query.prototype = {
         // by trying getAll first, but not worth the extra code
 
         // Wait for all callbacks
+        /** @type function */
         let resolve;
         let callbackPromise = new Promise(r => resolve = r);
 

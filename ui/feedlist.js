@@ -645,6 +645,7 @@ export let FeedList = {
                 break;
         }
         otherIds.splice(position, 0, ...itemIds);
+        /** @type {{feedID, parent?, rowIndex?}[]} */
         let changes = [{feedID: itemIds[0], parent}];
         for(let [index, feedID] of otherIds.entries()) {
             changes.push({feedID, rowIndex: index + 1});
