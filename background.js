@@ -170,10 +170,10 @@ const Brief = {
             browser.tabs.update({url: '/ui/brief.xhtml'});
         }
         try {
-            replies = await browser.tabs.executeScript(tabId, {
+            replies = /** @type {{kind, url}[][]} */(await browser.tabs.executeScript(tabId, {
                 file: '/content_scripts/scan-for-feeds.js',
                 runAt: 'document_end',
-            });
+            }));
         } catch(ex) {
             if(ex.message === 'Missing host permission for the tab') {
                 // There are a few known cases: about:, restricted (AMO) and feed preview pages
