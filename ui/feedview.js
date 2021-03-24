@@ -797,8 +797,8 @@ FeedView.prototype = {
      */
     enoughEntriesPreloaded: function FeedView__enoughEntriesPreloaded(aWindowHeights) {
         return this._loadedEntries.length > 0 &&
-               (this.window.scrollMaxY - this.window.pageYOffset >
-                this.window.innerHeight * aWindowHeights)
+               (this.document.body.scrollHeight - this.window.pageYOffset  >
+                this.window.innerHeight * (aWindowHeights + 1))
                && this.getEntryInScreenCenter() != this.lastLoadedEntry;
     },
 
