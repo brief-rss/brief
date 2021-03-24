@@ -177,7 +177,7 @@ async function refreshProgressmeter({active, progress}) {
     element.value = progress;
     if (active) {
         getElement('sidebar-top').dataset.mode = "update";
-        element.setAttribute('show', true); //TODO: css?
+        element.setAttribute('show', "true"); //TODO: css?
     }
     else {
         getElement('sidebar-top').dataset.mode = "idle";

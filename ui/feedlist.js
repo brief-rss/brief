@@ -1136,9 +1136,9 @@ export let Commands = {
     switchViewFilter: function cmd_switchViewFilter(aFilter) {
         Prefs.set('ui.view.filter', aFilter);
 
-        getElement('show-all-entries-checkbox').dataset.checked = (aFilter === 'all');
-        getElement('filter-unread-checkbox').dataset.checked = (aFilter === 'unread');
-        getElement('filter-starred-checkbox').dataset.checked = (aFilter === 'starred');
+        getElement('show-all-entries-checkbox').dataset.checked = (aFilter === 'all').toString();
+        getElement('filter-unread-checkbox').dataset.checked = (aFilter === 'unread').toString();
+        getElement('filter-starred-checkbox').dataset.checked = (aFilter === 'starred').toString();
 
         if(gCurrentView !== undefined) {
             gCurrentView.setFilter(aFilter);
