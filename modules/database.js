@@ -1015,6 +1015,8 @@ Query.prototype = {
      */
     sortDirection: 'desc',
 
+    sortOrder: undefined,
+
     /**
      * Include hidden feeds i.e. the ones whose Live Bookmarks are no longer
      * to be found in Brief's home folder. This attribute is ignored if
@@ -1181,16 +1183,16 @@ Query.prototype = {
         let entries = await this.getEntries();
         let actions = [];
         for(let entry of entries) {
-            let promise = browser.bookmarks.search({url: entry.entryURL}).then(bookmarks => {
+            let promise = browser.bookmarks.search({url: entry.entryURL}).then(async bookmarks => {
                 if(state && bookmarks.length == 0) {
                     let revision = entry.revisions[entry.revisions.length - 1];
-                    return browser.bookmarks.create({url: entry.entryURL, title: revision.title});
+                    await browser.bookmarks.create({url: entry.entryURL, title: revision.title}).then(() => {});
                 } else if(!state && bookmarks.length > 0) {
-                    return Promise.all(bookmarks.map(b =>
+                    await Promise.all(bookmarks.map(b =>
                         browser.bookmarks.remove(b.id)));
                 } else {
                     // Database does not match bookmarks - correct database directly
-                    return Database.query(entry.id)._update({
+                    await Database.query(entry.id)._update({
                         action: e => { e.starred = state ? 1 : 0; },
                         changes: { starred: state ? 1 : 0 },
                     });
@@ -1309,10 +1311,11 @@ Query.prototype = {
         filters.feeds = active_feeds.map(feed => feed.feedID);
 
         // Entry-based filters
+        let read = this.read;
         filters.entry = {
             id: this.entries,
             providedID: this.providedID,
-            read: this.read !== undefined ? +this.read : undefined,
+            read: read !== undefined ? +read : undefined,
             starred: this.starred,
             deleted: this.deleted === false ? 0 : this.deleted,
             tags: this.tags,
