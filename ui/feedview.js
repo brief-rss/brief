@@ -303,7 +303,7 @@ FeedView.prototype = {
 
         this.window.scrollTo({
             top: targetPosition,
-            behavior: aSmooth ? 'smooth' : 'instant',
+            behavior: aSmooth ? 'smooth' : 'auto', // FIXME: is 'auto' correct as 'instant'?
         });
     },
 
