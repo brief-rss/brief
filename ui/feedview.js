@@ -28,6 +28,7 @@ const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
 
 /**
  * Manages the display of feed content.
+ * @param {{title, filter?, mode, query?, entries?, db?, feeds?}} arg
  */
 export function FeedView({
     title, filter='all', mode='full', query={}, entries=null, db=null, feeds=null,
@@ -1517,6 +1518,7 @@ async function showElement(aElement, aAnimate) {
 
 /** @type {Object.<string, string>} */
 const Strings = new Proxy({}, {
+    /** @param {string} prop */
     get(target, prop) {
         if(target[prop] === undefined) {
             target[prop] = browser.i18n.getMessage(prop);
