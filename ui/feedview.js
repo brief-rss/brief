@@ -28,15 +28,6 @@ const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
 
 /**
  * Manages the display of feed content.
- *
- * @param title
- *        Title of the view which will be shown in the header.
- * @param query
- *        Query that selects entries contained by the view.
- * @param db
- *        The database handle (or `null` for in-memory entry lists)
- * @param feeds
- *        The feed list to be used if not using `db`
  */
 export function FeedView({
     title, filter='all', mode='full', query={}, entries=null, db=null, feeds=null,
