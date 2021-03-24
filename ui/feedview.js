@@ -114,6 +114,7 @@ FeedView.prototype = {
 
     get headlinesMode() {
         let feedIDs = this.query.feeds || this.query.folders;
+        /** @type {boolean | Number} */
         let viewMode = (this._defaultViewMode === 'headlines');
         if (feedIDs && feedIDs.length == 1) {
             viewMode = this.getFeed(feedIDs[0]).viewMode;
