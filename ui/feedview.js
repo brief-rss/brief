@@ -1056,7 +1056,7 @@ function EntryView(aFeedView, aEntryData) {
     }
 
     if (this.headline) {
-        this.collapse(false);
+        this.collapse();
 
         if (aEntryData.entryURL)
             this._getElement('headline-link').setAttribute('href', aEntryData.entryURL);
@@ -1333,7 +1333,7 @@ EntryView.prototype = {
                 break;
 
             case 'collapse':
-                this.collapse(true);
+                this.collapse();
                 break;
 
             default:

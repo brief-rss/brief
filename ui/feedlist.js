@@ -311,7 +311,7 @@ export let ViewList = {
     init(db) {
         this.db = db;
         this.tree.root.addEventListener(
-            'change', event => this.onSelect(event), {passive: true});
+            'change', () => this.onSelect(), {passive: true});
 
         this.deselect();
 
@@ -414,7 +414,7 @@ export let TagList = {
     init(db) {
         this.db = db;
         this.tree.root.addEventListener(
-            'change', event => this.onSelect(event), {passive: true});
+            'change', () => this.onSelect(), {passive: true});
 
         TagListContextMenu.build();
     },
@@ -531,7 +531,7 @@ export let FeedList = {
         // TODO: observers should be here
         this._feedsCache = this.db.feeds;
         this.tree.root.addEventListener(
-            'change', event => this.onSelect(event), {passive: true});
+            'change', () => this.onSelect(), {passive: true});
         this.tree.root.addEventListener(
             'move', event => this.onMove(event), {passive: true});
         this.tree.root.addEventListener(
@@ -817,7 +817,7 @@ export let ContextMenuModule = {
 
         this._initSubtrees([document.documentElement]);
 
-        document.addEventListener('blur', event => this._hide(event));
+        document.addEventListener('blur', () => this._hide());
         document.addEventListener('contextmenu', event => this.show(event));
         document.addEventListener('click', event => this.show(event));
     },

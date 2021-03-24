@@ -78,7 +78,7 @@ const Brief = {
             /*spawn*/ RequestMonitor.init();
         }
 
-        await Prefs.init({master: true});
+        await Prefs.init();
 
         Prefs.addObserver('showUnreadCounter', () => this._updateUI());
         Comm.registerObservers({
