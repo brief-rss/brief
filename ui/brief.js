@@ -31,10 +31,12 @@ async function init() {
     getElement('feed-list').setAttribute("closedFolders", Prefs.get('ui.closedFolders'));
     getElement('tag-list').style.width = Prefs.get('ui.tagList.width');
     getElement('tag-list').addEventListener(
-        'resize-complete', ({target}) => Prefs.set('ui.tagList.width', target.style.width));
+        'resize-complete', ({target}) =>
+            Prefs.set('ui.tagList.width', (/** @type HTMLElement */(target)).style.width));
     getElement('sidebar').style.width = Prefs.get('ui.sidebar.width');
     getElement('sidebar').addEventListener(
-        'resize-complete', ({target}) => Prefs.set('ui.sidebar.width', target.style.width));
+        'resize-complete', ({target}) =>
+            Prefs.set('ui.sidebar.width', (/** @type HTMLElement */(target)).style.width));
     document.body.classList.toggle('sidebar', !Prefs.get('ui.sidebar.hidden'));
 
     let contentIframe = await contentIframePromise;
@@ -66,6 +68,7 @@ async function init() {
 
     Commands.applyStyle();
 
+    // TODO consider moving iframe init to view init
     let doc = contentIframe.contentDocument;
     doc.documentElement.setAttribute('lang', navigator.language);
 
@@ -81,7 +84,7 @@ async function init() {
 
     FeedViewHeader.init();
 
-    Shortcuts.init();
+    Shortcuts.init({contentDocument: doc});
 
     // Initialize event handlers
     document.getElementById('update-button').addEventListener(
@@ -107,7 +110,7 @@ async function init() {
         if(await browser.runtime.getBackgroundPage() === null) {
             console.log("Incognito / container detected, disabling subscription");
             document.body.classList.add('incognito');
-            document.getElementById('subscribe-button').disabled = true;
+            (/** @type {HTMLButtonElement} */(document.getElementById('subscribe-button'))).disabled = true;
         }
         let knownFeeds = await knownFeedsPromise;
         updatePreviewMode(knownFeeds);
@@ -124,7 +127,7 @@ async function init() {
         });
         if(feed.websiteURL !== '') {
             fetchFaviconAsURL(feed).then(icon => {
-                document.getElementById('favicon').href = icon;
+                (/** @type HTMLLinkElement */ (document.getElementById('favicon'))).href = icon;
             }).catch(error => {
                 console.warn(`Brief failed to fetch favicon for ${previewURL}:`, error);
             });
@@ -153,7 +156,7 @@ async function init() {
 
 async function loadContentIframe() {
     let feedview_doc = await fetch('feedview.html');
-    let contentIframe = getElement('feed-view');
+    let contentIframe = /** @type HTMLIFrameElement */ (getElement('feed-view'));
     contentIframe.setAttribute('srcdoc', await feedview_doc.text());
     await expectedEvent(contentIframe, 'load');
     return contentIframe;
@@ -165,31 +168,36 @@ function updatePreviewMode(feeds) {
     let isKnown = knownURLs.includes(previewURL);
     document.body.classList.toggle('known-feed', isKnown);
     let disable = isKnown || document.body.classList.contains('incognito');
-    document.getElementById('subscribe-button').disabled = disable;
+    (/** @type {HTMLButtonElement} */(document.getElementById('subscribe-button'))).disabled = disable;
 }
 
 
 async function refreshProgressmeter({active, progress}) {
-    getElement('update-progress').value = progress;
+    let element = /** @type HTMLProgressElement */ (getElement('update-progress'));
+    element.value = progress;
     if (active) {
         getElement('sidebar-top').dataset.mode = "update";
-        getElement('update-progress').setAttribute('show', true); //TODO: css?
+        element.setAttribute('show', true); //TODO: css?
     }
     else {
         getElement('sidebar-top').dataset.mode = "idle";
-        getElement('update-progress').removeAttribute('show');
+        element.removeAttribute('show');
     }
 }
 
 let Searchbar = {
     init() {
-        let searchbar = getElement('searchbar');
+        let searchbar = this.element();
         searchbar.addEventListener('input', () => this.onInput());
         searchbar.addEventListener('blur', () => this.onBlur());
     },
 
+    element() {
+        return /** @type HTMLInputElement */ (getElement('searchbar'));
+    },
+
     onInput() {
-        let searchbar = getElement('searchbar');
+        let searchbar = this.element();
 
         if (searchbar.value)
             gCurrentView.titleOverride = browser.i18n.getMessage('searchResults', searchbar.value);
@@ -201,7 +209,7 @@ let Searchbar = {
     },
 
     onBlur() {
-        let searchbar = getElement('searchbar');
+        let searchbar = this.element();
         if (!searchbar.value && gCurrentView.query.searchString) {
             gCurrentView.titleOverride = '';
             gCurrentView.query.searchString = searchbar.value;
@@ -304,9 +312,9 @@ export let Persistence = {
 };
 
 export let Shortcuts = {
-    init: function Shortcuts_init() {
+    init: function Shortcuts_init({contentDocument}) {
         document.addEventListener('keydown', this, {capture: true});
-        getElement('feed-view').contentDocument.addEventListener('keydown', this, {capture: true});
+        contentDocument.addEventListener('keydown', this, {capture: true});
     },
 
     handleEvent: function Shortcuts_handleEvents(event) {

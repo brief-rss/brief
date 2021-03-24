@@ -774,7 +774,7 @@ export let FeedList = {
             if(event.key === 'Enter') {
                 event.preventDefault();
                 event.stopPropagation();
-                document.activeElement.blur();
+                (/** @type HTMLElement */(document.activeElement)).blur();
             }
             if(event.key === 'Escape') {
                 event.preventDefault();
@@ -869,7 +869,8 @@ export let ContextMenuModule = {
         this._currentTarget = null;
         Array.from(document.querySelectorAll('context-menu.visible')).forEach(node => {
             node.classList.remove('visible');
-            node.parentNode.classList.remove('menu-visible');
+            let container = /** @type Element */ (node.parentNode);
+            container.classList.remove('menu-visible');
         });
     },
 
@@ -1017,7 +1018,9 @@ export let FeedListContextMenu = {
 
         if(!folder) {
             this.targetFeed = FeedList.getFeed(FeedList.selectedItem.dataset.id);
-            document.getElementById('ctx-open-website').disabled = !this.targetFeed.websiteURL;
+            // FIXME at the moment this is a noop anyway, no one checks that disabled
+            //let openWebsite = /** @type HTMLElement */ (document.getElementById('ctx-open-website'));
+            //openWebsite.disabled = !this.targetFeed.websiteURL;
         }
     },
 
@@ -1067,7 +1070,7 @@ export let FeedListContextMenu = {
 
 export let DropdownMenus = {
     build() {
-        let opmlInput = document.getElementById('open-opml');
+        let opmlInput = /** @type HTMLInputElement */ (document.getElementById('open-opml'));
         const handlers = {
             'dropdown-shortcuts': () => Commands.displayShortcuts(),
             'dropdown-import': () => opmlInput.click(),
@@ -1270,8 +1273,7 @@ export let Commands = {
         let {custom_css: style} = await browser.storage.local.get({'custom_css': ''});
         let blob = new Blob([style], {type: 'text/css'});
         let url = URL.createObjectURL(blob);
-        document.getElementById('custom-css').href = url;
-        let content = document.getElementById('feed-view').contentDocument;
-        content.getElementById('custom-css').href = url;
+        (/** @type HTMLLinkElement */ (document.getElementById('custom-css'))).href = url;
+        gCurrentView.document.getElementById('custom-css').href = url;
     },
 };

@@ -77,7 +77,7 @@ export function FeedView({
     getElement('feed-view-header').removeAttribute('border');
 
     if (!this.query.searchString)
-        getElement('searchbar').value = '';
+        (/** @type HTMLInputElement */(getElement('searchbar'))).value = '';
 
     document.addEventListener('visibilitychange', this, false);
 
@@ -165,7 +165,7 @@ FeedView.prototype = {
     _defaultViewMode: 'full',
 
 
-    get browser() { return getElement('feed-view'); },
+    get browser() { return /** @type HTMLIFrameElement */ (getElement('feed-view')); },
 
     get document() { return this.browser.contentDocument; },
 
@@ -684,7 +684,8 @@ FeedView.prototype = {
                 let dayHeader = this.document.getElementById('day' + entryView.day);
 
                 // They day header may have been already removed by another callback.
-                if (dayHeader && (!dayHeader.nextSibling || dayHeader.nextSibling.tagName == 'H1'))
+                let nextSibling = /** @type HTMLElement? */(dayHeader.nextSibling);
+                if (dayHeader && (! nextSibling || nextSibling.tagName == 'H1'))
                     this.feedContent.removeChild(dayHeader);
 
                 if (++removedCount == indices.length) {
