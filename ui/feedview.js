@@ -95,8 +95,11 @@ export function FeedView({
 
     this.document.addEventListener('detach-feedview', this);
 
+    // Fixed entry list if not using a query
     if(entries !== null) {
         this._fixedEntries = entries;
+    } else {
+        this._fixedEntries = null;
     }
 
     this.refresh();
@@ -148,9 +151,6 @@ FeedView.prototype = {
 
     // Feed list cache
     _feeds: null,
-
-    // Fixed entry list if not using a query
-    _fixedEntries: null,
 
     // Additional filtering mode (unread / starred / all)
     _filter: 'all',
