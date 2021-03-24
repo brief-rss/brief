@@ -3,3 +3,4 @@ test/ export-ignore
 .git* export-ignore
 .eslintrc.yml export-ignore
 package.json export-ignore
+tsconfig.json export-ignore
