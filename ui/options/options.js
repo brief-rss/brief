@@ -23,7 +23,7 @@ async function init() {
 }
 
 function initUpdateIntervalControls() {
-    let scaleMenu = document.getElementById('update-time-menulist');
+    let scaleMenu = /** @type {HTMLSelectElement} */ (document.getElementById('update-time-menulist'));
     let interval = document.getElementById('updateInterval');
 
     scaleMenu.addEventListener('change', () => {

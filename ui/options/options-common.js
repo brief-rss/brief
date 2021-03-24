@@ -19,7 +19,7 @@ export let PrefBinder = {
 
     refresh() {
         for(let node of document.querySelectorAll('[data-pref]')) {
-            let name = node.dataset.pref;
+            let name = (/** @type {HTMLElement} */(node)).dataset.pref;
             let value = this.getter(name);
             this._setValue(node, value);
         }
@@ -93,8 +93,9 @@ export let PrefBinder = {
 
 export let Enabler = {
     init() {
-        for(let node of document.querySelectorAll('[data-requires]')) {
-            let master = document.getElementById(node.dataset.requires);
+        for(let candidate of document.querySelectorAll('[data-requires]')) {
+            let node = /** @type {HTMLInputElement | HTMLSelectElement} */ (candidate);
+            let master = /** @type {HTMLInputElement} */(document.getElementById(node.dataset.requires));
             node.disabled = !master.checked;
             master.addEventListener('change', () => {
                 node.disabled = !master.checked;

@@ -7,8 +7,9 @@ async function onload() {
         ? document.getElementsByClassName('noMac')
         : document.getElementsByClassName('onlyMac');
 
-    for (let i = 0; i < elems.length; i++)
-        elems[i].style.display = 'none';
+    for (let i = 0; i < elems.length; i++) {
+        (/** @type HTMLElement */ (elems[i])).style.display = 'none';
+    }
 
     // Workaround for mozilla bug 1408446
     let {id, height} = await browser.windows.getCurrent();

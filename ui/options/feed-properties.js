@@ -80,12 +80,14 @@ async function init() {
 
     let allFeeds = Database.feeds.filter(f => !f.hidden && !f.isFolder);
     let index = allFeeds.map(f => f.feedID).indexOf(feedID);
-    document.getElementById('next-feed').disabled = (index == allFeeds.length - 1);
-    document.getElementById('previous-feed').disabled = (index == 0);
-    document.getElementById('next-feed').addEventListener('click', () => {
+    let nextButton = /** @type {HTMLButtonElement} */(document.getElementById('next-feed'));
+    nextButton.disabled = (index == allFeeds.length - 1);
+    nextButton.addEventListener('click', () => {
         document.location.search = `?feedID=${allFeeds[index+1].feedID}`;
     });
-    document.getElementById('previous-feed').addEventListener('click', () => {
+    let prevButton = /** @type {HTMLButtonElement} */(document.getElementById('previous-feed'));
+    prevButton.disabled = (index == 0);
+    prevButton.addEventListener('click', () => {
         document.location.search = `?feedID=${allFeeds[index-1].feedID}`;
     });
     window.addEventListener(
@@ -107,7 +109,7 @@ async function init() {
 }
 
 function updateScale() {
-    let scaleMenu = document.getElementById('update-time-menulist');
+    let scaleMenu = /** @type {HTMLSelectElement} */ (document.getElementById('update-time-menulist'));
     let interval = document.getElementById('updateInterval');
     let scale = 1;
     switch (scaleMenu.selectedIndex) {
@@ -127,7 +129,7 @@ function setFeed(feed) {
 
     // Guess interval scale
     let interval = document.getElementById('updateInterval');
-    let scaleMenu = document.getElementById('update-time-menulist');
+    let scaleMenu = /** @type {HTMLSelectElement} */ (document.getElementById('update-time-menulist'));
     let value = PrefBinder.getValue(interval);
     let asDays = value / (1000*60*60*24);
     let asHours = value / (1000*60*60);
