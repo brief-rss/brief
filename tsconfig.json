@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+	"checkJs": true,
+	"noEmit": true,
+	"target": "es6",
+	"lib": ["es6", "dom"]
+    },
+    "include": ["modules", "ui", "background.js"]
+}
