@@ -294,11 +294,7 @@ TreeView.prototype = {
 
 export let ViewList = {
     db: null,
-
-    get tree() {
-        delete this.tree;
-        return this.tree = new TreeView('view-list');
-    },
+    tree: null,
 
     get selectedItem() {
         return this.tree.selectedItem;
@@ -310,6 +306,7 @@ export let ViewList = {
 
     init(db) {
         this.db = db;
+        this.tree = new TreeView('view-list');
         this.tree.root.addEventListener(
             'change', () => this.onSelect(), {passive: true});
 
@@ -406,6 +403,7 @@ export let ViewList = {
 
 export let TagList = {
     db: null,
+    tree: null,
 
     ready: false,
 
@@ -413,6 +411,7 @@ export let TagList = {
 
     init(db) {
         this.db = db;
+        this.tree = new TreeView('tag-list');
         this.tree.root.addEventListener(
             'change', () => this.onSelect(), {passive: true});
 
@@ -421,11 +420,6 @@ export let TagList = {
 
     get selectedItem() {
         return this.tree.selectedItem;
-    },
-
-    get tree() {
-        delete this.tree;
-        return this.tree = new TreeView('tag-list');
     },
 
     show: async function TagList_show() {
@@ -523,11 +517,13 @@ export let TagList = {
 export let FeedList = {
 
     db: null,
+    tree: null,
     _feedsCache: null,
     _built: false,
 
     init(db) {
         this.db = db;
+        this.tree = new TreeView('feed-list');
         // TODO: observers should be here
         this._feedsCache = this.db.feeds;
         this.tree.root.addEventListener(
@@ -566,11 +562,6 @@ export let FeedList = {
         }
 
         return null;
-    },
-
-    get tree() {
-        delete this.tree;
-        return this.tree = new TreeView('feed-list');
     },
 
     get selectedItem() {
@@ -909,7 +900,9 @@ export let ContextMenuModule = {
 
 
 export let ViewListContextMenu = {
+    menu: null,
     build() {
+        this.menu = document.getElementById('view-list-context-menu');
         const handlers = {
             'ctx-mark-special-folder-read': () => this.markFolderRead(),
             'ctx-restore-trashed': () => Commands.restoreTrashed(),
@@ -922,11 +915,6 @@ export let ViewListContextMenu = {
         }
         document.getElementById('view-list-context-menu')
             .addEventListener('show', () => this.prepare());
-    },
-
-    get menu() {
-        delete this.menu;
-        return this.menu = document.getElementById('view-list-context-menu');
     },
 
     targetItem: null,
@@ -984,7 +972,9 @@ export let TagListContextMenu = {
 
 
 export let FeedListContextMenu = {
+    menu: null,
     build() {
+        this.menu = document.getElementById('feed-list-context-menu');
         const handlers = {
             'ctx-mark-feed-read': () => this.markFeedRead(),
             'ctx-update-feed': () => Comm.callMaster(
@@ -1004,15 +994,10 @@ export let FeedListContextMenu = {
             document.getElementById(id).addEventListener('click', handlers[id]);
         }
         document.getElementById('feed-list-context-menu')
-            .addEventListener('show', () => this.init());
+            .addEventListener('show', () => this.prepare());
     },
 
-    get menu() {
-        delete this.menu;
-        return this.menu = document.getElementById('feed-list-context-menu');
-    },
-
-    init() {
+    prepare() {
         let folder = FeedList.selectedItem.nodeName === 'tree-folder';
         this.menu.classList.toggle('folder', folder);
 
