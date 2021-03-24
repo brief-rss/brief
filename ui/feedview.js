@@ -39,6 +39,8 @@ export function FeedView({
     this._viewID = null;
     this.__selectedEntry = null;
     this._markVisibleTimeout = null;
+    // Autoselect timeout ID for clearTimeout
+    this._scrollSelectionTimeout = null;
 
     if(db !== null) {
         this._feeds = db.feeds;
@@ -142,8 +144,6 @@ FeedView.prototype = {
     // have been loaded, but it is false if there *could* be more.
     _allEntriesLoaded: false,
 
-    // Autoselect timeout ID for clearTimeout
-    _scrollSelectionTimeout: null,
     // Position before the next scroll event to determine its direction
     _prevPosition: 0,
 
