@@ -40,8 +40,6 @@ TreeView.prototype = {
         }
         let event = new Event("change", {bubbles: true, cancelable: false});
         this.root.dispatchEvent(event);
-
-        return aElementOrId;
     },
 
     update: function TreeView_update(aModel) {
@@ -308,7 +306,6 @@ export let ViewList = {
 
     set selectedItem(aItem) {
         this.tree.selectedItem = aItem;
-        return aItem;
     },
 
     init: function ViewList_init(db) {
