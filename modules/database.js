@@ -1428,7 +1428,7 @@ Query.prototype = {
         }
 
         // What fields off the index we can use at all?
-        let optionSets = indexPath.map(name => ({name, values: filters.entry[name]}));
+        let optionSets = indexPath.map(name => ({name, values: filters.entry[name], range: null}));
         while(optionSets.length && optionSets[optionSets.length - 1].values === undefined) {
             let set = optionSets[optionSets.length - 1];
             if(set.name === filters.sort.field) {
