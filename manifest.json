@@ -11,7 +11,7 @@
         }
     },
     "default_locale": "en",
-    "permissions": ["<all_urls>", "contextMenus", "bookmarks",
+    "permissions": ["<all_urls>", "menus", "bookmarks",
         "storage", "unlimitedStorage", "downloads", "tabs", "notifications",
         "webRequest", "webRequestBlocking"],
     "background": {

@@ -46,28 +46,28 @@ const Brief = {
             () => browser.tabs.create({url: '/ui/brief.xhtml'}));
         browser.browserAction.setBadgeBackgroundColor({color: '#666666'});
 
-        browser.contextMenus.create({
+        browser.menus.create({
             id: "brief-button-refresh",
             title: browser.i18n.getMessage("briefCtxRefreshFeeds_label"),
             contexts: ["browser_action"]
         });
-        browser.contextMenus.create({
+        browser.menus.create({
             id: "brief-button-mark-read",
             title: browser.i18n.getMessage("briefCtxMarkFeedsAsRead_label"),
             contexts: ["browser_action"]
         });
-        browser.contextMenus.create({
+        browser.menus.create({
             id: "brief-button-show-unread",
             type: "checkbox",
             title: browser.i18n.getMessage("briefCtxShowUnreadCounter_label"),
             contexts: ["browser_action"]
         });
-        browser.contextMenus.create({
+        browser.menus.create({
             id: "brief-button-options",
             title: browser.i18n.getMessage("briefCtxShowOptions_label"),
             contexts: ["browser_action"]
         });
-        browser.contextMenus.onClicked.addListener(info => this.onContext(info));
+        browser.menus.onClicked.addListener(info => this.onContext(info));
 
         let browserInfo = await browser.runtime.getBrowserInfo();
         let baseVersion = browserInfo.version.split('.')[0];
@@ -230,7 +230,7 @@ const Brief = {
     _updateUI: async function() {
 
         let enabled = Prefs.get('showUnreadCounter');
-        browser.contextMenus.update('brief-button-show-unread', {checked: enabled});
+        browser.menus.update('brief-button-show-unread', {checked: enabled});
         if(enabled) {
             let count = await Database.query({
                 deleted: 0,
