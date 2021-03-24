@@ -45,6 +45,9 @@ export function FeedView({
     this.db = db;
     this._filter = filter;
     this._defaultViewMode = mode;
+    this._viewID = null;
+    this.__selectedEntry = null;
+    this._markVisibleTimeout = null;
 
     if(db !== null) {
         this._feeds = db.feeds;
@@ -412,7 +415,7 @@ FeedView.prototype = {
 
 
     uninit: function FeedView_uninit() {
-        this.viewID = null;
+        this._viewID = null;
 
         document.removeEventListener('visibilitychange', this, false);
         this.window.removeEventListener('resize', this, false);
@@ -711,7 +714,7 @@ FeedView.prototype = {
      * Refreshes the feed view. Removes the old content and builds the new one.
      */
     refresh: function FeedView_refresh() {
-        this.viewID = Math.floor(Math.random() * 1000000);
+        this._viewID = Math.floor(Math.random() * 1000000);
 
         // Reset view state.
         this._loading = false;
@@ -957,11 +960,11 @@ FeedView.prototype = {
      * stop execution.
      */
     _refreshGuard: function FeedView__refreshGuard(aWrappedPromise) {
-        let oldViewID = this.viewID;
+        let oldViewID = this._viewID;
 
         return aWrappedPromise.then(
             value => {
-                if (this.viewID == oldViewID)
+                if (this._viewID == oldViewID)
                     return value;
                 else
                     throw REFRESH_ABORT;
@@ -977,10 +980,10 @@ FeedView.prototype = {
     },
 
     _callbackRefreshGuard: function FeedView__callbackRefreshGuard(aWrappedFunction) {
-        let oldViewID = this.viewID;
+        let oldViewID = this._viewID;
 
         return () => {
-            if (this.viewID == oldViewID)
+            if (this._viewID == oldViewID)
                 aWrappedFunction.apply(undefined, arguments);
         };
     }
