@@ -1519,31 +1519,12 @@ async function showElement(aElement, aAnimate) {
     }
 }
 
-
-/* global Strings */
-Object.defineProperty(window, 'Strings', {
-    get: () => {
-        let cachedStringsList = [
-            'entryDate_justNow',
-            'minute_pluralForms',
-            'hour_pluralForms',
-            'entryDate_today',
-            'entryDate_yesterday',
-            'entryWasUpdated',
-            'markEntryAsUnreadTooltip',
-            'markEntryAsReadTooltip',
-            'deleteEntryTooltip',
-            'restoreEntryTooltip',
-            'bookmarkEntryTooltip',
-            'editBookmarkTooltip',
-        ];
-
-        let obj = {};
-        for (let stringName of cachedStringsList)
-            obj[stringName] = browser.i18n.getMessage(stringName);
-
-        delete window.Strings;
-        return window.Strings = obj;
-    },
-    configurable: true
+/** @type any */
+const Strings = new Proxy({}, {
+    get(target, prop) {
+        if(target[prop] === undefined) {
+            target[prop] = browser.i18n.getMessage(prop);
+        }
+        return target[prop];
+    }
 });
