@@ -224,14 +224,16 @@ TreeView.prototype = {
                 targetNode = targetNode.parentNode;
             }
             event.preventDefault();
-            let ev = new CustomEvent('move');
             let list = dataTransfer.getData('application/x-tree-item-list');
-            ev.itemIds = JSON.parse(list);
-            ev.targetId = targetNode.dataset.id;
-            ev.relation = 'before';
+            let relation = 'before';
             if(event.currentTarget.localName === 'tree-folder-footer') {
-                ev.relation = 'into';
+                relation = 'into';
             }
+            let ev = new CustomEvent('move', {detail: {
+                itemIds: JSON.parse(list),
+                targetId: targetNode.dataset.id,
+                relation,
+            }});
             this.root.dispatchEvent(ev);
             this.root.classList.remove('drag');
             return;
@@ -529,7 +531,7 @@ export let FeedList = {
         this.tree.root.addEventListener(
             'change', () => this.onSelect(), {passive: true});
         this.tree.root.addEventListener(
-            'move', event => this.onMove(event), {passive: true});
+            'move', event => this.onMove(event.detail), {passive: true});
         this.tree.root.addEventListener(
             'keydown', event => this.onKeyDown(event), {capture: true});
         this.tree.root.addEventListener(
