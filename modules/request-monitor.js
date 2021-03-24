@@ -68,7 +68,8 @@ const MAYBE_FEED_TYPES = [
     // and anything with `+xml` as a special case
 ];
 
-async function checkHeaders({requestId, tabId, url, responseHeaders}) {
+// Headers are formally optional, but always present because of 'responseHeaders' requirement
+async function checkHeaders({requestId, tabId, url, responseHeaders=null}) {
     if(tabId === browser.tabs.TAB_ID_NONE) {
         return; // This is not a real tab, so not redirecting anything
     }
