@@ -1523,7 +1523,7 @@ async function showElement(aElement, aAnimate) {
     }
 }
 
-/** @type any */
+/** @type {Object.<string, string>} */
 const Strings = new Proxy({}, {
     get(target, prop) {
         if(target[prop] === undefined) {
