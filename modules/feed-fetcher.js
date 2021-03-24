@@ -269,7 +269,7 @@ const HANDLERS = {
         let text = node.textContent.trim();
         // Support for Z timezone marker for UTC (mb 682781)
         let date = new Date(text.replace(/z$/i, "-00:00"));
-        if (!isNaN(date)) {
+        if (!isNaN(date.getTime())) {
             return date.toUTCString();
         }
         console.warn('failed to parse date', text);
