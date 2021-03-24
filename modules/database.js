@@ -157,6 +157,7 @@ export let Database = {
         if(upgrade !== null) {
             opener.onupgradeneeded = (event) => upgrade(event);
         } else {
+            // @ts-ignore Types do not know about transaction (what its target is)
             opener.onupgradeneeded = ({target: {transaction: tx}, oldVersion}) => {
                 upgradeFrom = oldVersion;
                 tx.abort();
@@ -1788,6 +1789,7 @@ export let Migrator = {
         if(processedEntries === count.entries) {
             // Everything already transferred and presumably already flushed
             console.info("Migration already done, dropping the old database");
+            // @ts-ignore Types do not know the storage option
             indexedDB.deleteDatabase(source.db.name, {storage: 'persistent'});
             return;
         }
