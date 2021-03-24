@@ -585,7 +585,7 @@ export let Database = {
         if(!entries.length || (modified && modified <= feed.dateModified)) {
             return {entries: [], newEntries: []};
         }
-        let newEntries = await this._pushEntries({feed, entries});
+        let newEntries = await this._pushEntries({entries});
         let feedUpdates = Object.assign({}, {
             feedID: feed.feedID,
             title: feed.title || parsedFeed.title,
