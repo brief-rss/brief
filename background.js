@@ -121,7 +121,7 @@ const Brief = {
         }
     },
 
-    onContext: function({menuItemId, checked}) {
+    onContext: function({menuItemId, checked=null}) {
         switch(menuItemId) {
             case 'brief-button-refresh':
                 Comm.broadcast('update-all');
@@ -160,7 +160,7 @@ const Brief = {
     BRIEF_SUBSCRIBE: new RegExp(
         "(chrome://brief/content/brief\\.(xul|xhtml)\\?subscribe=|brief://subscribe/)(.*)"),
 
-    async queryFeeds({windowId, tabId, url, title, status}) {
+    async queryFeeds({windowId, tabId, url=undefined, title=undefined, status=undefined}) {
         let replies = [[]];
         let matchSubscribe = this.BRIEF_SUBSCRIBE.exec(url);
         if(matchSubscribe) {
