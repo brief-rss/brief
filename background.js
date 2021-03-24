@@ -25,6 +25,7 @@ const Brief = {
     async init() {
         Comm.initMaster();
 
+        // @ts-ignore Types do not know about the temporary flag
         browser.runtime.onInstalled.addListener(async ({temporary}) => {
             if(temporary) { // `web-ext run` or equivalent
                 Comm.verbose = true;
@@ -165,6 +166,7 @@ const Brief = {
         if(matchSubscribe) {
             let url = decodeURIComponent(matchSubscribe.pop());
             Database.addFeeds({url});
+            // @ts-ignore Types do not know that the tab ID is optional
             browser.tabs.update({url: '/ui/brief.xhtml'});
         }
         try {
