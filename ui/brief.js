@@ -138,15 +138,15 @@ async function init() {
             now: Date.now(),
         });
         entries.reverse();
-        entries = entries.map(e => Database._entryFromItem(e));
-        for(let [i, e] of entries.entries()) {
+        let dbEntries = entries.map(e => Database._entryFromItem(e));
+        for(let [i, e] of dbEntries.entries()) {
             e.id = i;
         }
 
         setCurrentView(new FeedView({
             title: parsedFeed.title,
             feeds: [feed],
-            entries,
+            entries: dbEntries,
             filter: 'all',
             mode: 'full',
         }));
