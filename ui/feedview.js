@@ -1371,14 +1371,14 @@ EntryView.prototype = {
                     let minuteForm = getPluralForm(
                         relativeDate.deltaMinutes, Strings['minute_pluralForms']);
                     return browser.i18n.getMessage('entryDate_ago', minuteForm)
-                        .replace('#number', relativeDate.deltaMinutes);
+                        .replace('#number', relativeDate.deltaMinutes.toString());
                 }
 
                 case relativeDate.deltaHours <= 12: {
                     let hourForm = getPluralForm(
                         relativeDate.deltaHours, Strings['hour_pluralForms']);
                     return browser.i18n.getMessage('entryDate_ago', hourForm)
-                        .replace('#number', relativeDate.deltaHours);
+                        .replace('#number', relativeDate.deltaHours.toString());
                 }
 
                 case relativeDate.deltaDaySteps === 0:

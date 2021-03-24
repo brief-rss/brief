@@ -231,7 +231,7 @@ export let FeedUpdater = {
                 'updateAlertText_multpleFeedsMessage', [newString, itemString, feedString]);
             alertText = alertText
                 .replace('#numItems', entryCount)
-                .replace('#numFeeds', feedCount);
+                .replace('#numFeeds', feedCount.toString());
         }
         browser.notifications.create({
             type: 'basic',
