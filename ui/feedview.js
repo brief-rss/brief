@@ -738,8 +738,8 @@ FeedView.prototype = {
         // Prevent the message from briefly showing up before entries are loaded.
         this.document.getElementById('message-box').style.display = 'none';
 
-        getElement('full-view-checkbox').dataset.checked = !this.headlinesMode;
-        getElement('headlines-checkbox').dataset.checked = this.headlinesMode;
+        getElement('full-view-checkbox').dataset.checked = (!this.headlinesMode).toString();
+        getElement('headlines-checkbox').dataset.checked = this.headlinesMode.toString();
 
         getElement('view-title-label').textContent = this.titleOverride || this.title;
 
