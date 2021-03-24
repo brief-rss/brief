@@ -17,7 +17,7 @@ export let Prefs = {
     // When splitting default and user prefs these values are considered default
     _defaultEquivalent: {},
 
-    init: async function() {
+    async init() {
         if(this.ready()) {
             return;
         }

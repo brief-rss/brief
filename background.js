@@ -22,7 +22,7 @@ const Brief = {
     _firefoxPreviewWorkaround: false,
 
     // No deinit required, we'll be forcefully unloaded anyway
-    init: async function() {
+    async init() {
         Comm.initMaster();
 
         browser.runtime.onInstalled.addListener(async ({temporary}) => {

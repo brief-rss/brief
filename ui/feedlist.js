@@ -308,7 +308,7 @@ export let ViewList = {
         this.tree.selectedItem = aItem;
     },
 
-    init: function ViewList_init(db) {
+    init(db) {
         this.db = db;
         this.tree.root.addEventListener(
             'change', event => this.onSelect(event), {passive: true});
@@ -490,7 +490,7 @@ export let TagList = {
         }
     },
 
-    _rebuild: async function TagList__rebuild() {
+    async _rebuild() {
         let tagList = []; //TODO: restore tag list
 
         if(this.tags !== tagList) {
@@ -703,7 +703,7 @@ export let FeedList = {
         return "/icons/default-feed-favicon.png";
     },
 
-    rebuild: function FeedList_rebuild(feeds) {
+    rebuild(feeds) {
         this._feedsCache = feeds || this.db.feeds;
 
         let active = (this.tree.selectedItem !== null);
@@ -810,7 +810,7 @@ export let ContextMenuModule = {
     _observer: null,
     _currentTarget: null,
 
-    init: function ContextMenu_init() {
+    init() {
         this._observer = new MutationObserver((records) => this._observeMutations(records));
         this._observer.observe(document, {subtree: true,
             childList: true, attributes: true, attributeFilter: ['contextmenu', 'data-dropdown']});
@@ -920,7 +920,7 @@ export let ViewListContextMenu = {
             document.getElementById(id).addEventListener('click', handlers[id]);
         }
         document.getElementById('view-list-context-menu')
-            .addEventListener('show', () => this.init());
+            .addEventListener('show', () => this.prepare());
     },
 
     get menu() {
@@ -930,7 +930,7 @@ export let ViewListContextMenu = {
 
     targetItem: null,
 
-    init: function ViewListContextMenu_init() {
+    prepare() {
         this.targetItem = ViewList.selectedItem;
         this.menu.dataset.target = this.targetItem.id;
     },
@@ -1011,7 +1011,7 @@ export let FeedListContextMenu = {
         return this.menu = document.getElementById('feed-list-context-menu');
     },
 
-    init: function FeedContextMenu_init() {
+    init() {
         let folder = FeedList.selectedItem.nodeName === 'tree-folder';
         this.menu.classList.toggle('folder', folder);
 
