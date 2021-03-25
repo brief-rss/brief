@@ -9,6 +9,8 @@
     "web-ext-types": "^3.2.1"
   },
   "scripts": {
-    "lint": "eslint . --ext .json --ext .js"
+    "eslint": "eslint . --ext .json --ext .js",
+    "tsc": "tsc",
+    "lint": "tsc ; eslint . --ext .json --ext .js"
   }
 }
