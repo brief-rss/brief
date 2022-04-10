@@ -817,10 +817,10 @@ export let ContextMenuModule = {
     },
 
     show: function ContextMenu__show(event) {
-        if(this._currentTarget === null || event.defaultPrevented)
+        if(ContextMenuModule._currentTarget === null || event.defaultPrevented)
             return;
         event.preventDefault();
-        let target = this._currentTarget;
+        let target = ContextMenuModule._currentTarget;
         let show_dropdown = (event.type !== 'contextmenu');
         let attribute = show_dropdown ? 'data-dropdown' : 'contextmenu';
         let menu = target.getAttribute(attribute);
@@ -848,19 +848,19 @@ export let ContextMenuModule = {
         menu.style.top = top + 'px';
         menu.classList.add('visible');
         menu.parentNode.classList.add('menu-visible');
-        this._currentTarget = null;
+        ContextMenuModule._currentTarget = null;
     },
 
     _target: function ContextMenu__target({type, currentTarget}) {
-        if(this._currentTarget !== null)
+        if(ContextMenuModule._currentTarget !== null)
             return;
         let attribute_name = (type === 'click') ? 'data-dropdown' : 'contextmenu';
         if(currentTarget.hasAttribute(attribute_name))
-            this._currentTarget = currentTarget;
+            ContextMenuModule._currentTarget = currentTarget;
     },
 
     _hide: function ContextMenu__hide() {
-        this._currentTarget = null;
+        ContextMenuModule._currentTarget = null;
         Array.from(document.querySelectorAll('context-menu.visible')).forEach(node => {
             node.classList.remove('visible');
             let container = /** @type Element */ (node.parentNode);

@@ -263,20 +263,20 @@ let SplitterModule = {
         splitter.setCapture(); // Auto-released on mouseup
         let target = splitter.previousElementSibling;
         let offset = event.screenX - target.getBoundingClientRect().right;
-        this._active = {splitter, target, offset};
+        SplitterModule._active = {splitter, target, offset};
         event.preventDefault();
         event.stopPropagation();
     },
 
     handleEvent: function Splitter_handleEvent(event) {
-        if(this._active === null)
+        if(SplitterModule._active === null)
             return;
-        let {splitter, target, offset} = this._active;
+        let {splitter, target, offset} = SplitterModule._active;
         switch (event.type) {
             case 'mouseup':
                 splitter.removeEventListener('mousemove', this);
                 splitter.removeEventListener('mouseup', this);
-                this._active = null;
+                SplitterModule._active = null;
                 // Fallthrough for the final update
             case 'mousemove':
                 {
