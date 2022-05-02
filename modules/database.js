@@ -950,6 +950,39 @@ export let Database = {
             let request2 = tx.objectStore('revisions').delete(id);
             DbUtil.requestPromise(request2);
         }
+    },
+
+    async cleanupHiddenFeeds() {
+
+        var transaction = this._db.transaction(['feeds'], 'readonly');
+        var objectStore = transaction.objectStore('feeds');
+
+        const request = objectStore.getAll();
+        request.onsuccess = async ()=> {
+            const feeds = request.result;
+
+            for (let feed of feeds) {
+                if (feed.hidden == 0) {
+                    continue;
+                }
+                let query = new Query({
+                    feeds: [feed.feedID],
+                });
+                let ids = await query.getIds();
+                for(const id of ids.values()) {
+                    let tx = this.db().transaction(['entries', 'revisions'], 'readwrite');
+                    let request = tx.objectStore('entries').delete(id);
+                    DbUtil.requestPromise(request);
+        
+                    let request2 = tx.objectStore('revisions').delete(id);
+                    DbUtil.requestPromise(request2);
+                }
+
+                let tx = this.db().transaction(['feeds'], 'readwrite');
+                let request = tx.objectStore('feeds').delete(feed.feedID);
+                DbUtil.requestPromise(request);
+            }
+        }
     }
 };
 //TODO: bookmark to starred sync
