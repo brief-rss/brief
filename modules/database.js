@@ -68,12 +68,15 @@ export let Database = {
             let prevDb = await this._open({
                 storage: 'persistent',
             });
+            // Version 1 may be a glitch
             if(prevDb && prevDb.version >= 10) {
                 prev = await Migrator.studySource({db: prevDb});
-                console.log(
-                    `Brief: prev database has ${prev.feeds.length} feeds and ` +
-                    `${prev.count.entries} entries`
-                );
+                if(prev !== null) {
+                    console.log(
+                        `Brief: prev database has ${prev.feeds.length} feeds and ` +
+                        `${prev.count.entries} entries`
+                    );
+                }
             }
 
             // Upgrades and migrations on master only
@@ -1470,7 +1473,9 @@ export let Migrator = {
             // It assumes that no revision is linked to from more than one entry
             // (or even multiple times from one entry) to avoid both old-to-new ID map and
             // the possibility of reserved ID range overflowing
-            throw "Migration from DB with version > 30 not supported yet";
+            // However, version >30 aren't expected to be migrated ever
+            // but can be seen here when `storage` is ignored in Firefox 104+
+            return null;
         }
         let tx = db.transaction(['entries', 'revisions', 'feeds']);
         // Enqueue all the queries
