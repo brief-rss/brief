@@ -1266,6 +1266,6 @@ export let Commands = {
         (/** @type HTMLLinkElement */ (document.getElementById('custom-css'))).href = url;
         // Child window style
         let frame = /** @type HTMLIFrameElement */ (document.getElementById('feed-view'));
-        frame.contentDocument.getElementById('custom-css').href = url;
+        (/** @type HTMLLinkElement */ (frame.contentDocument.getElementById('custom-css'))).href = url;
     },
 };
