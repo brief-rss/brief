@@ -1261,7 +1261,11 @@ export let Commands = {
         let {custom_css: style} = await browser.storage.local.get({'custom_css': ''});
         let blob = new Blob([style], {type: 'text/css'});
         let url = URL.createObjectURL(blob);
+        // TODO: consider going via FeedView again when it becomes initialized faster
+        // Parent window style
         (/** @type HTMLLinkElement */ (document.getElementById('custom-css'))).href = url;
-        gCurrentView.document.getElementById('custom-css').href = url;
+        // Child window style
+        let frame = /** @type HTMLIFrameElement */ (document.getElementById('feed-view'));
+        frame.contentDocument.getElementById('custom-css').href = url;
     },
 };
