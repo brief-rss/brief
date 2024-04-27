@@ -12,6 +12,6 @@
   "scripts": {
     "eslint": "eslint . --ext .json --ext .js",
     "tsc": "tsc",
-    "lint": "tsc ; eslint . --ext .json --ext .js"
+    "lint": "tsc ; RET=$? ;  eslint . --ext .json --ext .js && exit $RET"
   }
 }
