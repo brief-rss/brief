@@ -120,20 +120,12 @@ export let Database = {
         return this;
     },
 
-    async _open({name="brief", version=undefined, storage="default", upgrade=null}) {
-        let description = `database in ${storage} storage`;
+    async _open({name="brief", version=undefined, upgrade=null}) {
         let canUpgrade = (upgrade !== null);
-        console.log(`Brief: opening ${description}${ canUpgrade ? " with upgrade" : "" }`);
-        let openOptions = version;
-        if(storage === 'persistent') {
-            openOptions = {
-                storage: 'persistent',
-                version,
-            };
-        }
+        console.log(`Brief: opening database${ canUpgrade ? " with upgrade" : "" }`);
         let db;
         let upgradeFrom;
-        let opener = indexedDB.open(name, openOptions);
+        let opener = indexedDB.open(name, version);
         if(upgrade !== null) {
             opener.onupgradeneeded = (event) => upgrade(event);
         } else {
@@ -148,16 +140,16 @@ export let Database = {
         } catch(e) {
             if(e.name === "AbortError" && !canUpgrade) {
                 if(upgradeFrom === 0) {
-                    console.info(`Found no ${description}`);
+                    console.info(`Found no database`);
                 } else {
-                    console.info(`The ${description} needs upgrade, aborting`);
+                    console.info(`The database needs upgrade, aborting`);
                 }
             } else {
                 console.error("Error opening database:", e.name, e.message);
             }
             return null;
         }
-        console.log(`Brief: opened ${description}`);
+        console.log(`Brief: opened database`);
         return db;
     },
 
