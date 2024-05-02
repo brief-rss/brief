@@ -1138,6 +1138,7 @@ EntryView.prototype = {
             this.container.classList.remove('starred');
             button.setAttribute('title', Strings.bookmarkEntryTooltip);
         }
+        this.__starred = aValue;
     },
 
 
@@ -1146,6 +1147,7 @@ EntryView.prototype = {
     },
     set tags(aValue) {
         this._getElement('tags').textContent = aValue.sort().join(', ');
+        this.__tags = aValue;
     },
 
 
