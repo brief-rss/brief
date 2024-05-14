@@ -1,6 +1,10 @@
 // ===== Promise utilities =====
 
-// Adapt setTimeout for Promises
+/**
+ * Adapt setTimeout for Promises
+ * @param {number} [delay]
+ * @returns {Promise<>}
+ */
 export function wait(delay) {
     return new Promise(resolve => setTimeout(() => resolve(), delay));
 }
@@ -9,13 +13,20 @@ function microtask() {
     return null; // `await` always enqueues a microtask to resume in
 }
 
-// Wait for a specific event (for example, 'transitionend')
+/**
+ * Wait for a specific event (for example, 'transitionend')
+ * @param {EventTarget} element
+ * @param {string} event
+ */
 export function expectedEvent(element, event) {
     return new Promise((resolve) => {
         element.addEventListener(event, resolve, {once: true, passive: true});
     });
 }
 
+/**
+ * @param {XMLHttpRequest} request
+ */
 export function xhrPromise(request) {
     return new Promise((resolve, reject) => {
         request.onload = () => resolve(request.response);
@@ -27,7 +38,11 @@ export function xhrPromise(request) {
 
 // ===== Misc helpers =====
 
-export function getElement(aId) { return document.getElementById(aId); }
+/**
+ * @param {string} id
+ * @returns {HTMLElement | null}
+ */
+export function getElement(id) { return document.getElementById(id); }
 
 export function debounced(delay, callback) {
     let active = false;
@@ -44,7 +59,10 @@ export function debounced(delay, callback) {
     };
 }
 
-// Iterate nodes in a XPathResult
+/**
+ * Iterate nodes in a XPathResult
+ * @param {XPathResult} result
+ */
 export function iterSnapshot(result) {
     return {
         [Symbol.iterator]: function*() {

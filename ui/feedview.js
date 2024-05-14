@@ -1420,7 +1420,7 @@ EntryView.prototype = {
                 XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
                 null /* result to reuse */
             );
-            for(let node of iterSnapshot(nodes)) {
+            for(let node of /** @type {Iterable<Text>} */(iterSnapshot(nodes))) {
                 let substrings = node.textContent.split(term);
                 let output = [];
                 for(let substring of substrings) {
