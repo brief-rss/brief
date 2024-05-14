@@ -1129,6 +1129,7 @@ Query.prototype = {
         return result; // This will be ready by the end of transaction
     },
 
+    /** @param {boolean} state */
     async markRead(state) {
         return await this._update({
             action: e => { e.read = state ? 1 : 0; },
@@ -1136,6 +1137,10 @@ Query.prototype = {
         });
     },
 
+    /**
+     * @param {boolean | 'trashed' | 'deleted'} state
+     * FIXME should reduce the number of options, this is not nice
+     */
     async markDeleted(state) {
         return await this._update({
             action: e => { e.deleted = state || 0; },
@@ -1143,6 +1148,7 @@ Query.prototype = {
         });
     },
 
+    /** @param {boolean} state */
     async bookmark(state) {
         let entries = await this.getEntries();
         let actions = [];

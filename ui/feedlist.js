@@ -294,6 +294,7 @@ TreeView.prototype = {
 };
 
 export let ViewList = {
+    /** @type {Database | null} */
     db: null,
     tree: null,
 
@@ -401,8 +402,12 @@ export let ViewList = {
     },
 };
 
+/**
+ * @typedef {import("/modules/database.js").Database} Database
+ */
 
 export let TagList = {
+    /** @type {Database | null} */
     db: null,
     tree: null,
 
@@ -517,6 +522,7 @@ export let TagList = {
 
 export let FeedList = {
 
+    /** @type {Database | null} */
     db: null,
     tree: null,
     _feedsCache: null,
