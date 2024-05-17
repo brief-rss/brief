@@ -5,10 +5,13 @@ env:
 plugins:
   - import
   - json
+  - '@typescript-eslint'
 extends:
   - eslint:recommended
+  - 'plugin:@typescript-eslint/recommended'
   #- plugin:json/recommended
   #- plugin:import/recommended
+parser: '@typescript-eslint/parser'
 parserOptions:
   sourceType: module
   ecmaVersion: 2018
@@ -27,6 +30,8 @@ rules:
     - always
   no-var: error
   no-sequences: error
+
+  '@typescript-eslint/no-unused-vars': [error, {argsIgnorePattern: "^_"}]
 
   # Additional control
   import/no-cycle: error

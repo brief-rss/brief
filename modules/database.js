@@ -129,7 +129,7 @@ export let Database = {
         if(upgrade !== null) {
             opener.onupgradeneeded = (event) => upgrade(event);
         } else {
-            // @ts-ignore Types do not know about transaction (what its target is)
+            // @ts-expect-error Types do not know about transaction (what its target is)
             opener.onupgradeneeded = ({target: {transaction: tx}, oldVersion}) => {
                 upgradeFrom = oldVersion;
                 tx.abort();
@@ -1486,7 +1486,7 @@ Query.prototype = {
         });
     },
 
-    _ftsMatches(entry, string) { // eslint-disable-line no-unused-vars
+    _ftsMatches(_entry, _string) {
         return true;//TODO: restore FTS
     },
 };

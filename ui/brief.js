@@ -376,9 +376,9 @@ export let Shortcuts = {
 init();
 
 // Debugging hooks
-// @ts-ignore
+// @ts-expect-error Adding a custom global variable on Window
 window.Comm = Comm;
-// @ts-ignore
+// @ts-expect-error Adding a custom global variable on Window
 window.Database = Database;
-// @ts-ignore
+// @ts-expect-error Adding a custom global variable on Window
 window.Prefs = Prefs;

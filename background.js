@@ -25,7 +25,7 @@ const Brief = {
     async init() {
         Comm.initMaster();
 
-        // @ts-ignore Types do not know about the temporary flag
+        // @ts-expect-error Types do not know about the temporary flag
         browser.runtime.onInstalled.addListener(async ({temporary}) => {
             if(temporary) { // `web-ext run` or equivalent
                 Comm.verbose = true;
@@ -166,7 +166,7 @@ const Brief = {
         if(matchSubscribe) {
             let url = decodeURIComponent(matchSubscribe.pop());
             Database.addFeeds({url});
-            // @ts-ignore Types do not know that the tab ID is optional
+            // @ts-expect-error Types do not know that the tab ID is optional
             browser.tabs.update({url: '/ui/brief.xhtml'});
         }
         try {
@@ -350,5 +350,5 @@ const Brief = {
 Brief.init();
 
 // Debugging hook
-// @ts-ignore
+// @ts-expect-error Adding a custom global variable on Window
 window.Brief = Brief;
