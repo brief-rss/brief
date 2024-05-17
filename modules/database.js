@@ -1156,7 +1156,7 @@ Query.prototype = {
             let promise = browser.bookmarks.search({url: entry.entryURL}).then(async bookmarks => {
                 if(state && bookmarks.length == 0) {
                     let revision = entry.revisions[entry.revisions.length - 1];
-                    await browser.bookmarks.create({url: entry.entryURL, title: revision.title}).then(() => {});
+                    await browser.bookmarks.create({url: entry.entryURL, title: revision.title});
                 } else if(!state && bookmarks.length > 0) {
                     await Promise.all(bookmarks.map(b =>
                         browser.bookmarks.remove(b.id)));

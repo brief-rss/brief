@@ -9,9 +9,10 @@ plugins:
 extends:
   - eslint:recommended
   - 'plugin:@typescript-eslint/recommended'
+  # TODO - 'plugin:@typescript-eslint/strict'
+  - 'plugin:@typescript-eslint/stylistic'
   #- plugin:json/recommended
   #- plugin:import/recommended
-parser: '@typescript-eslint/parser'
 parserOptions:
   sourceType: module
   ecmaVersion: 2018
