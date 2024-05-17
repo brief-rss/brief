@@ -2,6 +2,11 @@ body {
     margin: 0;
 }
 
+body.platform-mac .noMac,
+body:not(.platform-mac) .onlyMac {
+    display: none;
+}
+
 #shortcuts-table {
     font-size: 12px;
     font-family: "Lucida Grande", Verdana, sans-serif;
