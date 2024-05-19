@@ -4,3 +4,4 @@ test/ export-ignore
 .eslintrc.yml export-ignore
 package.json export-ignore
 tsconfig.json export-ignore
+tsconfig-strict.json export-ignore
