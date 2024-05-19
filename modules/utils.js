@@ -3,12 +3,13 @@
 /**
  * Adapt setTimeout for Promises
  * @param {number} [delay]
- * @returns {Promise<>}
+ * @returns {Promise<void>}
  */
 export function wait(delay) {
     return new Promise(resolve => setTimeout(() => resolve(), delay));
 }
 
+/** @return {null} */
 function microtask() {
     return null; // `await` always enqueues a microtask to resume in
 }
@@ -73,6 +74,11 @@ export function iterSnapshot(result) {
     };
 }
 
+/**
+ * @template T
+ * @param {[T] | T} v
+ * @returns {[T]}
+ */
 export function asArray(v) {
     if(Array.isArray(v)) {
         return v;
@@ -81,6 +87,7 @@ export function asArray(v) {
     }
 }
 
+/** @param {string} date */
 export function parseDateValue(date) {
     // TODO: maybe MIL timezones here?
     if(!date) {
@@ -89,6 +96,7 @@ export function parseDateValue(date) {
     return (new Date(date)).getTime();
 }
 
+/** @param {string} str */
 export async function hashString(str) {
     let enc = new TextEncoder();
     let buffer = await crypto.subtle.digest('SHA-1', enc.encode(str));
@@ -96,6 +104,7 @@ export async function hashString(str) {
     return Array.from(u8arr).map(b => ('00' + b.toString(16)).slice(-2)).join('');
 }
 
+/** @param {number} aAbsoluteTime */
 export function RelativeDate(aAbsoluteTime) {
     this.currentDate = new Date();
     this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;
@@ -121,19 +130,24 @@ RelativeDate.prototype = {
                 this.targetDate.getFullYear());
     },
 
+    /** @param {number} aDivisor */
     _getSteps: function RelativeDate__getSteps(aDivisor) {
         let current = Math.ceil(this.currentTime / aDivisor);
         let target = Math.ceil(this.targetTime / aDivisor);
         return current - target;
     },
 
+    /** @param {number} aDivisor */
     _getDelta: function RelativeDate__getDelta(aDivisor) {
         return Math.floor((this.currentTime - this.targetTime) / aDivisor);
     }
 
 };
 
-
+/**
+ * @param {number} number
+ * @param {string} forms
+ */
 export function getPluralForm(number, forms) {
     let knownForms = browser.i18n.getMessage('pluralRule').split(';');
     let rules = new Intl.PluralRules();
@@ -141,7 +155,7 @@ export function getPluralForm(number, forms) {
     return forms.split(';')[knownForms.indexOf(form)];
 }
 
-
+/** @param {string} url */
 export async function openBackgroundTab(url) {
     let tab = await browser.tabs.getCurrent();
     try {
