@@ -38,6 +38,7 @@ export let Prefs = {
         return this._values !== null;
     },
 
+    /** @param {string} name */
     get: function(name) {
         if(!this.ready()) {
             throw new Error(`pref "${name} accessed before Prefs initialization"`);
@@ -49,6 +50,10 @@ export let Prefs = {
         return value;
     },
 
+    /**
+     * @param {string} name
+     * @param {string} actionName
+     */
     set: async function(name, value, actionName='update') {
         if(!Comm.master) {
             return Comm.callMaster('set-pref', {name, value, actionName});
@@ -61,14 +66,17 @@ export let Prefs = {
         await browser.storage.local.set({prefs: this._values});
     },
 
+    /** @param {string} name */
     reset: async function(name) {
         await this.set(name, undefined, 'reset');
     },
 
+    /** @param {string} name */
     addObserver: function(name, observer) {
         this._observers.add({name, observer});
     },
 
+    /** @param {string} name */
     removeObserver: function(name, observer) {
         this._observers.delete({name, observer});
     },
@@ -106,6 +114,7 @@ export let Prefs = {
     },
 };
 
+/** @param {string} name */
 function pref(name, value, extra) {
     Prefs._defaults[name] = value;
     if(extra !== undefined) {
@@ -118,6 +127,7 @@ function pref(name, value, extra) {
 
 // Do not use, upgrade to explicit when the value needs to change
 // Exists to avoid duplication of defaults for the pre-split prefs
+/** @param {string} name */
 function old_pref(name, value) {
     pref(name, value, {defaultEquivalent: value});
 }
