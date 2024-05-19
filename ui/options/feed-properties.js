@@ -12,6 +12,10 @@ async function init() {
     await Prefs.init();
     await Database.init();
     let feed = Database.getFeed(feedID);
+    let extra = {
+        _updateInterval: feed.updateInterval || Prefs.get('update.interval') * 1000,
+        _entryAgeLimit: feed.entryAgeLimit || Prefs.get('database.entryExpirationAge'),
+    };
 
     PrefBinder.init({
         getter: name => {
@@ -21,13 +25,13 @@ async function init() {
                 case 'expire-enabled':
                     return (feed.entryAgeLimit > 0);
                 case 'updateInterval':
-                    feed._updateInterval = (feed.updateInterval ||
+                    extra._updateInterval = (feed.updateInterval ||
                                             Prefs.get('update.interval') * 1000);
-                    return feed._updateInterval;
+                    return extra._updateInterval;
                 case 'entryAgeLimit':
-                    feed._entryAgeLimit = (feed.entryAgeLimit ||
+                    extra._entryAgeLimit = (feed.entryAgeLimit ||
                                             Prefs.get('database.entryExpirationAge'));
-                    return feed._entryAgeLimit;
+                    return extra._entryAgeLimit;
                 default: return feed[name];
             }
         },
@@ -36,7 +40,7 @@ async function init() {
                 case 'update-enabled':
                     name = 'updateInterval';
                     if(value) {
-                        value = feed._updateInterval;
+                        value = extra._updateInterval;
                     } else {
                         value = 0;
                     }
@@ -44,7 +48,7 @@ async function init() {
                 case 'expire-enabled':
                     name = 'entryAgeLimit';
                     if(value) {
-                        value = feed._entryAgeLimit;
+                        value = extra._entryAgeLimit;
                     } else {
                         value = 0;
                     }

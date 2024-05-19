@@ -404,6 +404,7 @@ export let ViewList = {
 
 /**
  * @typedef {import("/modules/database.js").Database} Database
+ * @typedef {import("/modules/database.js").Feed} Feed
  */
 
 export let TagList = {
@@ -525,6 +526,7 @@ export let FeedList = {
     /** @type {Database | null} */
     db: null,
     tree: null,
+    /** @type {Feed[]} */
     _feedsCache: null,
     _built: false,
 

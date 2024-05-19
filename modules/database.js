@@ -34,6 +34,7 @@ export let Database = {
         return this._db;
     },
 
+    /** @type {Feed[]} */
     _feeds: [],
     get feeds() {
         return this._feeds;
@@ -44,6 +45,7 @@ export let Database = {
         return Comm.callMaster('feedlist-get');
     },
 
+    /** @returns {Feed} feed */
     getFeed(feedID) {
         let feed = this.feeds.filter(f => f.feedID === feedID)[0];
         if(feed === undefined) {
@@ -601,6 +603,9 @@ export let Database = {
         };
     },
 
+    /**
+     * @param {{feed: Feed, entries: any[], ignoreUpdates: boolean, tx: IDBTransaction?}} feed
+     */
     async _pushFeedEntries({feed, entries, ignoreUpdates=false, tx=undefined}) {
         let feedID = feed.feedID;
         let markUnread = feed.markModifiedEntriesUnread;
@@ -902,6 +907,24 @@ export let Database = {
 };
 //TODO: database cleanup
 //TODO: bookmark to starred sync
+
+/**
+ * @typedef {Object} Feed
+ * @property {string} feedID
+ * @property {string} feedURL
+ * @property {string} title
+ * @property {string} parent
+ * @property {boolean} isFolder
+ *
+ * @property {number} rowIndex
+ * @property {number} hidden
+ * @property {number} updateInterval
+ * @property {number} entryAgeLimit
+ * @property {number} omitInUnread // or might be boolean?
+ * @property {number | boolean} markModifiedEntriesUnread
+ *
+ * TODO add other properties, see newFeed in _addFeed
+ */
 
 function Query(filters) {
     Object.assign(this, filters);
