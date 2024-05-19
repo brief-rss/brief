@@ -5,8 +5,6 @@ import {Comm} from "/modules/utils.js";
 // Note that they are compared for equality and that `undefined` is not a valid value.
 // Pref modification checks the name against a whitelist of known prefs.
 export let Prefs = {
-    // Message channel
-    _port: null,
     // Current pref values
     _values: null,
     // Set of our observers
