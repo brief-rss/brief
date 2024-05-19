@@ -294,9 +294,9 @@ let SplitterModule = {
 
 export let Persistence = {
     async migrate() {
-        let data = Prefs.get('pagePersist');
-        if(data !== "") {
-            data = JSON.parse(data);
+        let raw = Prefs.get('pagePersist');
+        if(raw !== "") {
+            let data = JSON.parse(raw);
             await Promise.all([
                 Prefs.set('ui.startView', data.startView),
                 Prefs.set('ui.closedFolders', data.closedFolders),
