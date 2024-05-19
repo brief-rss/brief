@@ -12,7 +12,8 @@ extends:
   # TODO - 'plugin:@typescript-eslint/strict'
   - 'plugin:@typescript-eslint/stylistic'
   #- plugin:json/recommended
-  #- plugin:import/recommended
+  - plugin:import/recommended
+  - plugin:import/typescript
 parserOptions:
   sourceType: module
   ecmaVersion: 2018
@@ -43,8 +44,6 @@ rules:
   #  - newlines-between: never
 
   "json/*": [error, allowComments]
-
 settings:
   import/resolver:
-    babel-root-slash-import:
-      debug: false
+    typescript: true
