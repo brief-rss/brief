@@ -912,6 +912,7 @@ export let Database = {
  * @typedef {Object} Feed
  * @property {string} feedID
  * @property {string} feedURL
+ * @property {string} websiteURL
  * @property {string} title
  * @property {string} parent
  * @property {boolean} isFolder

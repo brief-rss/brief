@@ -2,7 +2,23 @@
 import {Database} from "./database.js";
 import {Comm, expectedEvent} from "./utils.js";
 
+/**
+ * @typedef {import("/modules/database.js").Feed} Feed
+ */
 
+/**
+ * @typedef {{url: string, siteURL: string, title: string}} ImportedFeed
+ *
+ * @typedef {object} ImportedFolder
+ * @property {string} title
+ * @property {ImportedNode[]} children
+ *
+ * @typedef {ImportedFeed | ImportedFolder} ImportedNode
+ */
+
+/**
+ * @param {File} file
+ */
 export async function importOPML(file) {
     let reader = new FileReader();
     reader.readAsText(file); // assumes UTF-8
@@ -10,7 +26,7 @@ export async function importOPML(file) {
     let results;
 
     try {
-        results = parse(reader.result);
+        results = parse(/** @type {string} */(reader.result));
     } catch(e) {
         window.alert(browser.i18n.getMessage('invalidFileAlertText'));
         return;
@@ -22,6 +38,9 @@ export async function importOPML(file) {
     Database.addFeeds(results);
 }
 
+/**
+ * @param {string} text
+ */
 export function parse(text) {
     let parser = new DOMParser();
     let doc = parser.parseFromString(text, 'application/xml');
@@ -30,12 +49,16 @@ export function parse(text) {
         throw new Error("OPML failed to parse as XML");
     }
 
-    return Array.from(doc.getElementsByTagName('body')[0].childNodes)
+    return Array.from(doc.getElementsByTagName('body')[0].children)
         .filter(c => c.nodeName === 'outline')
         .map(c => importNode(c))
         .filter(c => c !== undefined);
 }
 
+/**
+ * @param {Element} node
+ * @return {ImportedNode}
+ */
 function importNode(node) {
     // The standard requires 'text' to be always present, but sometimes that's not the case
     let title = node.getAttribute('text') || node.getAttribute('title');
@@ -51,7 +74,7 @@ function importNode(node) {
     if (node.childNodes.length > 0) {
         return {
             title,
-            children: Array.from(node.childNodes)
+            children: Array.from(node.children)
                 .filter(c => c.nodeName === 'outline')
                 .map(c => importNode(c))
                 .filter(c => c !== undefined),
@@ -59,6 +82,9 @@ function importNode(node) {
     }
 }
 
+/**
+ * @param {Feed[]} feeds
+ */
 export function serialize(feeds) {
     let data = '';
     data += '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -110,6 +136,7 @@ export async function exportFeeds() {
     await browser.downloads.download({url, filename: 'feedlist.opml', saveAs: true});
 }
 
+/** @param {string} str */
 function cleanXMLText(str) {
     let characters = [
         {find : '&', replace : '&amp;'},
