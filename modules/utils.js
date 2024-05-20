@@ -45,6 +45,10 @@ export function xhrPromise(request) {
  */
 export function getElement(id) { return document.getElementById(id); }
 
+/**
+ * @param {number} delay
+ * @param {() => void} callback
+ */
 export function debounced(delay, callback) {
     let active = false;
 
@@ -244,10 +248,12 @@ export let Comm = {
         }
     },
 
+    /** @param {string} id */
     broadcast(id, payload) {
         return Comm._send(Object.assign({}, payload, {id, _type: 'broadcast-tx'}));
     },
 
+    /** @param {string} id */
     callMaster(id, payload) {
         return Comm._send(Object.assign({}, payload, {id, _type: 'master'}));
     },
