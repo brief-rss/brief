@@ -108,45 +108,43 @@ export async function hashString(str) {
     return Array.from(u8arr).map(b => ('00' + b.toString(16)).slice(-2)).join('');
 }
 
-/** @param {number} aAbsoluteTime */
-export function RelativeDate(aAbsoluteTime) {
-    this.currentDate = new Date();
-    this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;
+export class RelativeDate {
+    /** @param {number} aAbsoluteTime */
+    constructor(aAbsoluteTime) {
+        this.currentDate = new Date();
+        this.currentTime = this.currentDate.getTime() - this.currentDate.getTimezoneOffset() * 60000;
 
-    this.targetDate = new Date(aAbsoluteTime);
-    this.targetTime = this.targetDate.getTime() - this.targetDate.getTimezoneOffset() * 60000;
-}
+        this.targetDate = new Date(aAbsoluteTime);
+        this.targetTime = this.targetDate.getTime() - this.targetDate.getTimezoneOffset() * 60000;
+    }
 
-RelativeDate.prototype = {
+    get deltaMinutes() { return this._getDelta(60000); }
+    get deltaMinuteSteps() { return this._getSteps(60000); }
 
-    get deltaMinutes() { return this._getDelta(60000); },
-    get deltaMinuteSteps() { return this._getSteps(60000); },
+    get deltaHours() { return this._getDelta(3600000); }
+    get deltaHourSteps() { return this._getSteps(3600000); }
 
-    get deltaHours() { return this._getDelta(3600000); },
-    get deltaHourSteps() { return this._getSteps(3600000); },
+    get deltaDays() { return this._getDelta(86400000); }
+    get deltaDaySteps() { return this._getSteps(86400000); } //Unexact due to timezones
 
-    get deltaDays() { return this._getDelta(86400000); },
-    get deltaDaySteps() { return this._getSteps(86400000); }, //Unexact due to timezones
-
-    get deltaYears() { return this._getDelta(31536000000); },
+    get deltaYears() { return this._getDelta(31536000000); }
     get deltaYearSteps() {
         return (this.currentDate.getFullYear() -
                 this.targetDate.getFullYear());
-    },
+    }
 
     /** @param {number} aDivisor */
-    _getSteps: function RelativeDate__getSteps(aDivisor) {
+    _getSteps(aDivisor) {
         let current = Math.ceil(this.currentTime / aDivisor);
         let target = Math.ceil(this.targetTime / aDivisor);
         return current - target;
-    },
-
-    /** @param {number} aDivisor */
-    _getDelta: function RelativeDate__getDelta(aDivisor) {
-        return Math.floor((this.currentTime - this.targetTime) / aDivisor);
     }
 
-};
+    /** @param {number} aDivisor */
+    _getDelta(aDivisor) {
+        return Math.floor((this.currentTime - this.targetTime) / aDivisor);
+    }
+}
 
 /**
  * @param {number} number
