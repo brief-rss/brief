@@ -76,11 +76,6 @@ export let Prefs = {
         this._observers.add({name, observer});
     },
 
-    /** @param {string} name */
-    removeObserver: function(name, observer) {
-        this._observers.delete({name, observer});
-    },
-
     _merge: function(prefs) {
         for(let [k, v] of Object.entries(prefs)) {
             let oldValue = this.get(k);
