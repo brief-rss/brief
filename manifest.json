@@ -2,7 +2,7 @@
     "name": "Brief",
     "version": "2.7.2",
     "author": "Denis Lisov",
-    "homepage_url": "http://brief.mozdev.org",
+    "homepage_url": "https://github.com/brief-rss/brief",
     "manifest_version": 2,
     "applications": {
         "gecko": {
