@@ -76,7 +76,11 @@ export let Database = {
             version: this.DB_VERSION,
             upgrade,
         });
-        navigator.storage.persist();
+        navigator.storage.persisted().then(status => {
+            if(status !== true) {
+                navigator.storage.persist();
+            }
+        });
         this._db = db;
         await this.loadFeeds();
         let entryCount = await this.countEntries();
