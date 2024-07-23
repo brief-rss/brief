@@ -91,7 +91,10 @@ export function asArray(v) {
     }
 }
 
-/** @param {string} date */
+/**
+ * @param {string} date
+ * @returns {number}
+ */
 export function parseDateValue(date) {
     // TODO: maybe MIL timezones here?
     if(!date) {

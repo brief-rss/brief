@@ -917,18 +917,26 @@ export let Database = {
  * @property {string} feedID
  * @property {string} feedURL
  * @property {string} websiteURL
+ * @property {string} language
  * @property {string} title
+ * @property {string} subtitle
  * @property {string} parent
+ * @property {string} favicon
  * @property {boolean} isFolder
  *
  * @property {number} rowIndex
  * @property {number} hidden
  * @property {number} updateInterval
  * @property {number} entryAgeLimit
+ * @property {number} maxEntries // unused at the moment
  * @property {number} omitInUnread // or might be boolean?
  * @property {number | boolean} markModifiedEntriesUnread
+ * @property {number | boolean} viewMode
  *
- * TODO add other properties, see newFeed in _addFeed
+ * @property {number} dateModified
+ * @property {number} lastUpdated
+ * @property {number} oldestEntryDate
+ * @property {number} lastFaviconRefresh
  */
 
 function Query(filters) {
