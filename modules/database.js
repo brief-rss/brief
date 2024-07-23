@@ -387,7 +387,7 @@ export let Database = {
                     feedID: existing[0].feedID,
                     hidden: 0,
                     parent,
-                    rowIndex: 'tail',
+                    rowIndex: Number.POSITIVE_INFINITY,
                 });
                 return existing[0].feedID;
             } else {
@@ -438,6 +438,11 @@ export let Database = {
         return feedID;
     },
 
+    /**
+     * @typedef {Pick<Feed, 'feedID'> & Partial<Feed>} FeedUpdate
+     *
+     * @param {FeedUpdate | [FeedUpdate]} props (array used only from onMove for reindex)
+     */
     async modifyFeed(props) {
         if(!Comm.master) {
             return Comm.callMaster('feedlist-modify', {updates: props});
@@ -446,7 +451,7 @@ export let Database = {
         props = Array.isArray(props) ? props : [props];
         let reindex = false;
         for(let bag of props) {
-            if(bag.rowIndex !== undefined && bag.rowIndex === 'tail') {
+            if(bag.rowIndex === Number.POSITIVE_INFINITY) {
                 bag.rowIndex = this.feeds[this.feeds.length - 1].rowIndex + 1;
             }
             if(bag.rowIndex) {
