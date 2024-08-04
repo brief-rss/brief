@@ -75,12 +75,12 @@ const Brief = {
             'feedlist-updated': () => this._updateUI(),
             'entries-updated': debounced(100, () => this._updateUI()),
             'subscribe-get-feeds': ({windowId}) => this._windowFeeds.get(windowId),
-            'subscribe-add-feed': ({feed}) => Database.addFeeds(feed).catch(console.error),
+            'subscribe-add-feed': ({feed}) => this.db.addFeeds(feed).catch(console.error),
         });
 
         await Database.init();
 
-        await FeedUpdater.init({db: Database});
+        await FeedUpdater.init({db: this.db});
 
         this._updateUI();
         // TODO: first run page
@@ -116,7 +116,7 @@ const Brief = {
                 Comm.broadcast('update-all');
                 break;
             case 'brief-button-mark-read':
-                Database.query().markRead(true);
+                this.db.query().markRead(true);
                 break;
             case 'brief-button-show-unread':
                 Prefs.set('showUnreadCounter', checked);
@@ -154,7 +154,7 @@ const Brief = {
         let matchSubscribe = this.BRIEF_SUBSCRIBE.exec(url);
         if(matchSubscribe) {
             let url = decodeURIComponent(matchSubscribe.pop());
-            Database.addFeeds({url});
+            this.db.addFeeds({url});
             // @ts-expect-error Types do not know that the tab ID is optional
             browser.tabs.update({url: '/ui/brief.xhtml'});
         }
@@ -218,7 +218,7 @@ const Brief = {
         let enabled = Prefs.get('showUnreadCounter');
         browser.menus.update('brief-button-show-unread', {checked: enabled});
         if(enabled) {
-            let count = await Database.query({
+            let count = await this.db.query({
                 deleted: 0,
                 read: 0,
                 includeFeedsExcludedFromGlobalViews: 0,
