@@ -179,13 +179,15 @@ export async function openBackgroundTab(url) {
 export let Comm = {
     master: false,
     verbose: false,
+    /** @type {Set<(message: any) => any>} */
     observers: new Set(),
 
     initMaster() {
         this.master = true;
-        browser.runtime.onMessage.addListener(message => this._notify(message));
+        browser.runtime.onMessage.addListener(/** @param {any} message */ message => this._notify(message));
     },
 
+    /** @param {any} message */
     _notify(message) {
         if(this.verbose) {
             console.log('Comm', message);
@@ -202,6 +204,7 @@ export let Comm = {
         }
     },
 
+    /** @param {any} message */
     async _notifyObservers(message) {
         await microtask();
         let answer = undefined;
@@ -214,6 +217,7 @@ export let Comm = {
         return answer;
     },
 
+    /** @param {any} message */
     _send(message) {
         if(this.master) {
             return this._notify(message);
@@ -223,6 +227,7 @@ export let Comm = {
     },
 
     registerObservers(handlers) {
+        /** @type {(message: any) => any} */
         let listener = message => {
             let {id, _type} = message;
             if(_type !== 'broadcast' && (_type !== 'master' || !this.master)) {
@@ -241,6 +246,7 @@ export let Comm = {
         return listener;
     },
 
+    /** @param {(message: any) => any} listener */
     dropObservers(listener) {
         if(Comm.master) {
             Comm.observers.delete(listener);
@@ -249,12 +255,18 @@ export let Comm = {
         }
     },
 
-    /** @param {string} id */
+    /**
+     * @param {string} id
+     * @param {any} payload
+     */
     broadcast(id, payload) {
         return Comm._send(Object.assign({}, payload, {id, _type: 'broadcast-tx'}));
     },
 
-    /** @param {string} id */
+    /**
+     * @param {string} id
+     * @param {any} payload
+     */
     callMaster(id, payload) {
         return Comm._send(Object.assign({}, payload, {id, _type: 'master'}));
     },
