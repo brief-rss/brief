@@ -164,6 +164,7 @@ const Brief = {
                 runAt: 'document_end',
             }));
         } catch(ex) {
+            console.debug("executeScript error:", ex);
             if(ex.message === 'Missing host permission for the tab') {
                 // There are a few known cases: about:, restricted (AMO) and feed preview pages
                 if(url === undefined) {
@@ -192,7 +193,7 @@ const Brief = {
         if(replies === undefined) {
             replies = [[]];
         }
-        let feeds = replies[0];
+        let feeds = replies[0] || []; // Firefox bug 1639529: some built-in pages return undefined
         if(feeds.length > 0) {
             // Redirecting from the Firefox preview mode looks just ugly, let's keep it the old way
             if(feeds[0].kind === 'self') {
