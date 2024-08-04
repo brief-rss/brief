@@ -1,24 +1,26 @@
+import {Prefs} from "/modules/prefs.js";
 import {Database} from "/modules/database.js";
 import {wait} from "/modules/utils.js";
 
 const COUNT = 5000;
 
 async function databaseUpdate() {
-    await Database.init();
-    let oldDb = Database._db;
-    Database._db = await Database._open({
+    await Prefs.init();
+    let db = await Database.init();
+    let oldDb = db._db;
+    db._db = await db._open({
         name: "benchmark",
         version: this.DB_VERSION,
-        upgrade: (event) => Database._upgradeWithMigration({event, prev: null}),
+        upgrade: (event) => db._upgradeSchema({event}),
     });
-    await Database.loadFeeds();
+    await db.loadFeeds();
 
-    await Database.addFeeds({
+    await db.addFeeds({
         url: 'https://127.12.34.56/',
         title: 'BENCHMARK',
     });
     await wait(200);
-    let feed = Database.feeds[0];
+    let feed = db.feeds[0];
     let parsedFeed = {
         language: 'en',
         items: Array.from(new Array(COUNT).keys()).map(i => ({
@@ -43,27 +45,27 @@ async function databaseUpdate() {
     let start;
     start = performance.now();
     console.log('starting insert');
-    await Database.pushUpdatedFeed({feed, parsedFeed});
+    await db.pushUpdatedFeed({feed, parsedFeed});
     console.log(`insert done in ${performance.now() - start} ms`); // 1114
     start = performance.now();
-    await Database.pushUpdatedFeed({feed, parsedFeed});
+    await db.pushUpdatedFeed({feed, parsedFeed});
     console.log(`link update done in ${performance.now() - start} ms`); // 2222
     start = performance.now();
-    await Database.pushUpdatedFeed({feed, parsedFeed: parsedFeedWithId});
+    await db.pushUpdatedFeed({feed, parsedFeed: parsedFeedWithId});
     console.log(`link update to id done in ${performance.now() - start} ms`); // 2421
     start = performance.now();
-    await Database.pushUpdatedFeed({feed, parsedFeed: parsedFeedWithId});
+    await db.pushUpdatedFeed({feed, parsedFeed: parsedFeedWithId});
     console.log(`id update done in ${performance.now() - start} ms`); // 2157
     start = performance.now();
-    await Database.pushUpdatedFeed({feed, parsedFeed: parsedFeedNext});
+    await db.pushUpdatedFeed({feed, parsedFeed: parsedFeedNext});
     console.log(`next insert done in ${performance.now() - start} ms`); // 1348
     start = performance.now();
-    await Database.query({}).markRead(true);
+    await db.query({}).markRead(true);
     console.log(`mark read done in ${performance.now() - start} ms`); // 1348
 
     console.log("done, restoring original");
-    Database._db = oldDb;
-    await Database.loadFeeds();
+    db._db = oldDb;
+    await db.loadFeeds();
     await indexedDB.deleteDatabase("benchmark");
 }
 /* On battery:
