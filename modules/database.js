@@ -937,99 +937,102 @@ export let Database = {
  * @property {number} lastFaviconRefresh
  */
 
-/**
- * @param {Database} db
- * @param {any} filters FIXME
- */
-function Query(db, filters) {
-    this._db = db;
-    Object.assign(this, filters);
-}
-
-Query.prototype = {
+class Query {
     /**
      * Array of IDs of entries to be selected.
      */
-    entries: undefined,
+    entries = undefined;
 
     /**
      * Array of IDs of feeds containing the entries to be selected.
      */
-    feeds: undefined,
+    feeds = undefined;
 
     /**
      * Array of IDs of folders containing the entries to be selected.
      */
-    folders: undefined,
+    folders = undefined;
 
     /**
      * Array of tags which selected entries must have.
      */
-    tags: undefined,
+    tags = undefined;
 
     /**
      * Read state of entries to be selected.
      */
-    read: undefined,
+    read = undefined;
 
     /**
      * Starred state of entries to be selected.
      */
-    starred: undefined,
+    starred = undefined;
 
     /**
      * Deleted state of entries to be selected. See constants in StorageInternal.
      */
-    deleted: undefined,
+    deleted = undefined;
 
     // For insertion search
-    providedID: undefined,
+    providedID = undefined;
 
     /**
      * Entry URL for bookmark comparison purposes
      */
-    entryURL: undefined,
+    entryURL = undefined;
 
     /**
      * String that must be contained by title, content, authors or tags of the
      * selected entries.
      */
-    searchString: undefined,
+    searchString = undefined;
 
     /**
      * Date range for the selected entries.
      */
-    startDate: undefined,
-    endDate: undefined,
+    startDate = undefined;
+    endDate = undefined;
 
     /**
      * Maximum number of entries to be selected.
      */
-    limit: undefined,
+    limit = undefined;
 
     /**
      * Specifies how many result entries to skip at the beggining of the result set.
      */
-    offset: 0,
+    offset = 0;
 
     /**
      * Direction in which to sort the results (order is always 'date').
      */
-    sortDirection: 'desc',
+    sortDirection = 'desc';
 
-    sortOrder: undefined,
+    sortOrder = undefined;
 
     /**
      * Include hidden feeds i.e. the ones whose Live Bookmarks are no longer
      * to be found in Brief's home folder. This attribute is ignored if
      * the list of feeds is explicitly specified by Query.feeds.
      */
-    includeHiddenFeeds: false,
+    includeHiddenFeeds = false;
 
     /**
      * Include feeds that the user marked as excluded from global views.
      */
-    includeFeedsExcludedFromGlobalViews: true,
+    includeFeedsExcludedFromGlobalViews = true;
+
+    /** @type {Database} */
+    _db;
+
+    /**
+    * @param {Database} db
+    * @param {any} filters FIXME
+    */
+    constructor(db, filters) {
+        this._db = db;
+        Object.assign(this, filters);
+    }
 
     async count() {
         let filters = this._filters();
@@ -1072,15 +1075,15 @@ Query.prototype = {
             answer = counts.reduce((a, b) => a + b, 0);
         }
         return answer;
-    },
+    }
 
     async getIds() {
         return await this._getMap(e => e.id);
-    },
+    }
 
     async getValuesOf(name) {
         return await this._getMap(e => e[name]);
-    },
+    }
 
     async getEntries() {
         return await this._getMap((e, tx) => {
@@ -1092,7 +1095,7 @@ Query.prototype = {
             }
             return e;
         }, ['entries', 'revisions']);
-    },
+    }
 
     async _getMap(extractor, stores) {
         if(stores === undefined) {
@@ -1121,7 +1124,7 @@ Query.prototype = {
         await DbUtil.transactionPromise(tx);
 
         return result;
-    },
+    }
 
     /*async*/ _mergeAndCollect({cursors, filterFunction, sortKey, offset, limit, extractor, tx}) {
         let totalCallbacks = 0;
@@ -1165,7 +1168,7 @@ Query.prototype = {
             };
         }
         return result; // This will be ready by the end of transaction
-    },
+    }
 
     /** @param {boolean} state */
     async markRead(state) {
@@ -1173,7 +1176,7 @@ Query.prototype = {
             action: e => { e.read = state ? 1 : 0; },
             changes: {read: state},
         });
-    },
+    }
 
     /**
      * @param {boolean | 'trashed' | 'deleted'} state
@@ -1184,7 +1187,7 @@ Query.prototype = {
             action: e => { e.deleted = state || 0; },
             changes: {deleted: state}
         });
-    },
+    }
 
     /** @param {boolean} state */
     async bookmark(state) {
@@ -1209,7 +1212,7 @@ Query.prototype = {
             actions.push(promise);
         }
         await Promise.all(actions);
-    },
+    }
 
     async _forEach({action, tx}) {
         let filters = this._filters();
@@ -1254,7 +1257,7 @@ Query.prototype = {
             });
         }
         await callbackPromise;
-    },
+    }
 
     async _update({action, changes, stores=['entries']}) {
         let tx = this._db.db().transaction(stores, 'readwrite');
@@ -1284,7 +1287,7 @@ Query.prototype = {
                 });
             }
         }
-    },
+    }
 
     _filters() {
         let filters = {};
@@ -1355,7 +1358,7 @@ Query.prototype = {
         };
 
         return filters;
-    },
+    }
 
     // Brief-specific heuristics
     _guessIndexToUse({filters}) {
@@ -1376,7 +1379,7 @@ Query.prototype = {
             return 'entryURL';
         }
         return ['deleted', 'starred', 'read', 'feedID', 'date']; // Hardcoded default
-    },
+    }
 
     // Brief-specific data
     _possibleValues(field) {
@@ -1386,7 +1389,7 @@ Query.prototype = {
             case 'read': return [0, 1];
             default: return;
         }
-    },
+    }
 
     _directFilter({template, indexedFields}) {
         let reference = {};
@@ -1417,7 +1420,7 @@ Query.prototype = {
             }
         }
         return callback;
-    },
+    }
 
     _searchEngine(filters) {
         let indexPath = this._guessIndexToUse({filters});
@@ -1473,7 +1476,7 @@ Query.prototype = {
         // Filter on everything an index cannot get
         let filterFunction = this._directFilter({template: filters.entry, indexedFields});
         return {indexName, filterFunction, ranges, direction};
-    },
+    }
 
     _expandPrefixes(prefixes, requirement, possibleValues) {
         if(requirement === undefined) {
@@ -1497,7 +1500,7 @@ Query.prototype = {
             }
         }
         return newPrefixes;
-    },
+    }
 
     _prefixesToRanges(prefixes, {unwrap, min, max}) {
         return prefixes.map(prefix => {
@@ -1522,12 +1525,12 @@ Query.prototype = {
             }
             return IDBKeyRange.bound(lower, upper);
         });
-    },
+    }
 
     _ftsMatches(_entry, _string) {
         return true;//TODO: restore FTS
-    },
-};
+    }
+}
 
 /// Misc utilities for working with databases
 const DbUtil = {
