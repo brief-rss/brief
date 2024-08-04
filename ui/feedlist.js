@@ -1069,7 +1069,7 @@ export let DropdownMenus = {
         const handlers = {
             'dropdown-shortcuts': () => Commands.displayShortcuts(),
             'dropdown-import': () => opmlInput.click(),
-            'dropdown-export': () => OPML.exportFeeds(),
+            'dropdown-export': () => OPML.exportFeeds(FeedList.db.feeds),
             'dropdown-options': () => browser.runtime.openOptionsPage(),
             'dropdown-update-feed': () => Comm.callMaster(
                 'update-feeds', {feeds: [FeedList.selectedFeed.feedID]}),
@@ -1084,10 +1084,10 @@ export let DropdownMenus = {
         for(let id in handlers) {
             document.getElementById(id).addEventListener('click', handlers[id]);
         }
-        opmlInput.addEventListener('change', () => {
+        opmlInput.addEventListener('change', async () => {
             console.log('Got OPML');
             let file = opmlInput.files[0];
-            OPML.importOPML(file);
+            FeedList.db.addFeeds(await OPML.parseOPMLFile(file));
         });
     },
 };

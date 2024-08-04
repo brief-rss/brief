@@ -1,5 +1,4 @@
 // Originally based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
-import {Database} from "./database.js";
 import {Comm, expectedEvent} from "./utils.js";
 
 /**
@@ -19,7 +18,7 @@ import {Comm, expectedEvent} from "./utils.js";
 /**
  * @param {File} file
  */
-export async function importOPML(file) {
+export async function parseOPMLFile(file) {
     let reader = new FileReader();
     reader.readAsText(file); // assumes UTF-8
     await expectedEvent(reader, 'load');
@@ -35,7 +34,7 @@ export async function importOPML(file) {
     if(Comm.verbose) {
         console.log(results);
     }
-    Database.addFeeds(results);
+    return results;
 }
 
 /**
@@ -127,8 +126,8 @@ export function serialize(feeds) {
     return data;
 }
 
-export async function exportFeeds() {
-    let data = serialize(Database.feeds.filter(f => !f.hidden));
+export async function exportFeeds(feeds) {
+    let data = serialize(feeds.filter(f => !f.hidden));
 
     let blob = new Blob([data], {type: 'text/xml'});
     let url = URL.createObjectURL(blob);
