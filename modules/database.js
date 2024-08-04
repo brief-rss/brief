@@ -272,7 +272,7 @@ export let Database = {
             filters = {entries: filters};
         }
 
-        return new Query(filters);
+        return new Query(this, filters);
     },
 
     async countEntries() {
@@ -337,7 +337,7 @@ export let Database = {
         this._feeds = this._reindex(this._feeds);
 
         Comm.broadcast('feedlist-updated', {feeds: this.feeds});
-        await Database.saveFeeds();
+        await this.saveFeeds();
         Comm.broadcast('update-feeds', {feeds: newFeedIds});
 
         return newFeedIds;
@@ -635,7 +635,7 @@ export let Database = {
         let newEntries = []; // For update notification
 
         if(tx === undefined) {
-            tx = Database.db().transaction(['entries', 'revisions'], 'readwrite');
+            tx = this._db.transaction(['entries', 'revisions'], 'readwrite');
         }
         // Scan 1: every entry with IDs provided
         console.debug('_pushFeedEntries: search by ID...');
@@ -839,7 +839,7 @@ export let Database = {
     _includeChildren(feeds) {
         feeds = feeds.map(f => f.feedID || f);
         let childrenMap = new Map();
-        for(let node of Database.feeds) {
+        for(let node of this.feeds) {
             let parent = node.parent;
             let children = childrenMap.get(parent) || [];
             children.push(node.feedID);
@@ -853,7 +853,7 @@ export let Database = {
             let children = childrenMap.get(node) || [];
             new_nodes.push(...children);
         }
-        return Database.feeds.filter(f => nodes.includes(f.feedID));
+        return this.feeds.filter(f => nodes.includes(f.feedID));
     },
 
     _reindex(feeds) {
@@ -937,12 +937,16 @@ export let Database = {
  * @property {number} lastFaviconRefresh
  */
 
-function Query(filters) {
+/**
+ * @param {Database} db
+ * @param {any} filters FIXME
+ */
+function Query(db, filters) {
+    this._db = db;
     Object.assign(this, filters);
 }
 
 Query.prototype = {
-
     /**
      * Array of IDs of entries to be selected.
      */
@@ -1038,7 +1042,7 @@ Query.prototype = {
 
         let answer = 0;
         let totalCallbacks = 0;
-        let tx = Database.db().transaction(['entries'], 'readonly');
+        let tx = this._db.db().transaction(['entries'], 'readonly');
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
         Comm.verbose && console.log('Query.count(...)');
@@ -1105,7 +1109,7 @@ Query.prototype = {
         let offset = filters.sort.offset || 0;
         let limit = filters.sort.limit !== undefined ? filters.sort.limit : Number('Infinity');
 
-        let tx = Database.db().transaction(stores, 'readonly');
+        let tx = this._db.db().transaction(stores, 'readonly');
         let store = tx.objectStore('entries');
         let index = indexName ? store.index(indexName) : store;
 
@@ -1196,7 +1200,7 @@ Query.prototype = {
                         browser.bookmarks.remove(b.id)));
                 } else {
                     // Database does not match bookmarks - correct database directly
-                    await Database.query(entry.id)._update({
+                    await this._db.query(entry.id)._update({
                         action: e => { e.starred = state ? 1 : 0; },
                         changes: { starred: state ? 1 : 0 },
                     });
@@ -1253,7 +1257,7 @@ Query.prototype = {
     },
 
     async _update({action, changes, stores=['entries']}) {
-        let tx = Database.db().transaction(stores, 'readwrite');
+        let tx = this._db.db().transaction(stores, 'readwrite');
 
         let feeds = new Set();
         let entries = [];
@@ -1292,10 +1296,10 @@ Query.prototype = {
             includeHiddenFeeds,
             includeFeedsExcludedFromGlobalViews,
         } = this;
-        let active_feeds = Database.feeds;
+        let active_feeds = this._db.feeds;
         // Folder list
         if(folders !== undefined) {
-            active_feeds = Database._includeChildren(folders);
+            active_feeds = this._db._includeChildren(folders);
         }
         // Feed list
         if(feeds !== undefined) {
