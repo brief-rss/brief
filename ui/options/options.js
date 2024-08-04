@@ -17,9 +17,23 @@ async function init() {
 
     initUpdateIntervalControls();
 
-    await Database.init();
+    let db = await Database.init();
 
-    StyleEditor.init();
+    /* spawn */ StyleEditor.init();
+
+    document.getElementById('clear-all-entries').addEventListener('click', async () => {
+        if (window.confirm(browser.i18n.getMessage('confirmClearAllEntriesText'))) {
+            await db.query({
+                starred: Prefs.get('database.keepStarredWhenClearing') ? 0 : undefined,
+                includeHiddenFeeds: true
+            }).markDeleted('deleted').catch(console.error);
+        }
+    });
+    window.addEventListener(
+        'beforeunload',
+        () => db.expireEntries(),
+        {once: true, passive: true}
+    );
 }
 
 function initUpdateIntervalControls() {
@@ -54,20 +68,6 @@ function initUpdateIntervalControls() {
     }
     let event = new Event("change", {bubbles: true, cancelable: false});
     scaleMenu.dispatchEvent(event);
-
-    document.getElementById('clear-all-entries').addEventListener('click', async () => {
-        if (window.confirm(browser.i18n.getMessage('confirmClearAllEntriesText'))) {
-            await Database.query({
-                starred: Prefs.get('database.keepStarredWhenClearing') ? 0 : undefined,
-                includeHiddenFeeds: true
-            }).markDeleted('deleted').catch(console.error);
-        }
-    });
-    window.addEventListener(
-        'beforeunload',
-        () => Database.expireEntries(),
-        {once: true, passive: true}
-    );
 }
 
 

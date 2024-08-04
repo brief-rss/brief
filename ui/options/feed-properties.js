@@ -10,8 +10,8 @@ async function init() {
 
     let feedID = (new URLSearchParams(document.location.search)).get('feedID');
     await Prefs.init();
-    await Database.init();
-    let feed = Database.getFeed(feedID);
+    let db = await Database.init();
+    let feed = db.getFeed(feedID);
     let extra = {
         _updateInterval: feed.updateInterval || Prefs.get('update.interval') * 1000,
         _entryAgeLimit: feed.entryAgeLimit || Prefs.get('database.entryExpirationAge'),
@@ -56,7 +56,7 @@ async function init() {
                 // 'updateInterval' and 'entryAgeLimit' can't be modified while not active
             }
             feed[name] = value;
-            Database.modifyFeed({
+            db.modifyFeed({
                 feedID: feed.feedID,
                 [name]: value
             });
@@ -70,7 +70,7 @@ async function init() {
     Comm.registerObservers({
         'feedlist-updated': async () => {
             await wait();
-            let newFeed = Database.getFeed(feedID);
+            let newFeed = db.getFeed(feedID);
             if(newFeed === undefined) {
                 window.close();
                 return;
@@ -82,7 +82,7 @@ async function init() {
 
     setFeed(feed);
 
-    let allFeeds = Database.feeds.filter(f => !f.hidden && !f.isFolder);
+    let allFeeds = db.feeds.filter(f => !f.hidden && !f.isFolder);
     let index = allFeeds.map(f => f.feedID).indexOf(feedID);
     let nextButton = /** @type {HTMLButtonElement} */(document.getElementById('next-feed'));
     nextButton.disabled = (index == allFeeds.length - 1);
@@ -96,7 +96,7 @@ async function init() {
     });
     window.addEventListener(
         'beforeunload',
-        () => Database.expireEntries(),
+        () => db.expireEntries(),
         {once: true, passive: true}
     );
 
