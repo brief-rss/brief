@@ -576,7 +576,7 @@ export let Database = {
         return newEntries;
     },
 
-    async _pushEntries({entries, ignoreUpdates=false, tx=undefined}) {
+    async _pushEntries({entries, tx=undefined}) {
         if(entries.length === 0) {
             return;
         }
@@ -596,7 +596,6 @@ export let Database = {
                 tx,
                 entries: array,
                 feed: this.getFeed(feedID),
-                ignoreUpdates,
             }));
         }
         let returns = await Promise.all(promises);
@@ -613,9 +612,9 @@ export let Database = {
     },
 
     /**
-     * @param {{feed: Feed, entries: any[], ignoreUpdates: boolean, tx: IDBTransaction?}} feed
+     * @param {{feed: Feed, entries: any[], tx: IDBTransaction?}} feed
      */
-    async _pushFeedEntries({feed, entries, ignoreUpdates=false, tx=undefined}) {
+    async _pushFeedEntries({feed, entries, tx}) {
         let feedID = feed.feedID;
         let markUnread = feed.markModifiedEntriesUnread;
         let found = new Set();
@@ -648,9 +647,6 @@ export let Database = {
                     return;
                 }
                 found.add(update);
-                if(ignoreUpdates) {
-                    return;
-                }
                 this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
             },
         });
@@ -683,9 +679,6 @@ export let Database = {
                 }
                 let update = updateArray.pop();
                 found.add(update);
-                if(ignoreUpdates) {
-                    return;
-                }
                 this._updateEntry(entry, update, {tx, markUnread, entries: allEntries});
             },
         });
