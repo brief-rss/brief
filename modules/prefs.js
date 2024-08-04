@@ -63,6 +63,8 @@ export let Prefs = {
         }
         console.log(`Brief: ${actionName} pref ${name} to ${value}`);
         this._values[name] = value;
+        console.log(this._observers);
+        this._notifyObservers({name, value});
         await browser.storage.local.set({prefs: this._values});
     },
 
@@ -87,11 +89,14 @@ export let Prefs = {
             }
             this._values[k] = v;
 
-            // Notify observers
-            for(let {name, observer} of this._observers) {
-                if(k.startsWith(name))
-                    observer({name: k, value: v});
-            }
+            this._notifyObservers({name: k, value: v});
+        }
+    },
+
+    _notifyObservers({name, value}) {
+        for(let {name: scope, observer} of this._observers) {
+            if(name.startsWith(scope))
+                observer({name, value});
         }
     },
 
