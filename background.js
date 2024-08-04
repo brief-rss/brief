@@ -313,7 +313,7 @@ const Brief = {
 
                 let rows = [];
 
-                let feeds_query = new Query({
+                let feeds_query = this.db.query({
                     deleted: false,
                     read: false,
                     sortOrder: 'library',
@@ -331,7 +331,7 @@ const Brief = {
                     if(feedName.length > 24)
                         feedName = feedName.substring(0, 24) + "...";
 
-                    let query = new Query({
+                    let query = this.db.query({
                         deleted: false,
                         feeds: [feed],
                         read: false

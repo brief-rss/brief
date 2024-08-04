@@ -508,7 +508,7 @@ export let Database = {
         //FIXME: can't use markDeleted directly as _update does not support offset/limit
         if (Prefs.get('database.limitStoredEntries')) {
             for (let feed of feeds) {
-                let query = new Query({
+                let query = this.query({
                     feeds: [feed.feedID],
                     deleted: false,
                     starred: false,
@@ -526,7 +526,7 @@ export let Database = {
         if (Prefs.get('database.expireEntries') && feedsWithoutAgeLimit.length) {
             let expirationAge = Prefs.get('database.entryExpirationAge');
 
-            let query = new Query({
+            let query = this.query({
                 feeds: feedsWithoutAgeLimit.map(feed => feed.feedID),
                 deleted: false,
                 starred: false,
@@ -539,7 +539,7 @@ export let Database = {
         let feedsWithAgeLimit = feeds.filter(f => f.entryAgeLimit);
         if (feedsWithAgeLimit.length) {
             for (let feed of feedsWithAgeLimit) {
-                let query = new Query({
+                let query = this.query({
                     feeds: [feed.feedID],
                     deleted: false,
                     starred: false,
