@@ -94,7 +94,7 @@ async function init() {
     document.getElementById('organize-button').addEventListener(
         'click', () => FeedList.organize(), {passive: true});
     document.getElementById('subscribe-button').addEventListener(
-        'click', () => Database.addFeeds({url: previewURL}), {passive: true});
+        'click', () => Database.remoteAddFeeds({url: previewURL}), {passive: true});
 
     if(previewURL === null) {
         let db = await Database.init();

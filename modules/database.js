@@ -23,27 +23,27 @@ import {Comm, parseDateValue, asArray, hashString} from "./utils.js";
  * (once for the upgrade and possibly other times while reading it before the upgrade),
  * thus it must not have side effects.
  */
-export let Database = {
+export class Database {
     // If upping, check migration in both _upgradeSchema and _upgradeEntry/_upgradeEntries
     // Note that the Migrator has `assert !(db.version > 30)`
     // and the migration is started from the upgrade path only
-    DB_VERSION: 40,
+    static DB_VERSION = 40;
 
-    _db: null,
+    _db;
     db() {
         return this._db;
-    },
+    }
 
     /** @type {Feed[]} */
-    _feeds: [],
+    _feeds;
     get feeds() {
         return this._feeds;
-    },
+    }
 
     /// Request feeds
-    async getMasterFeeds() {
+    static async getMasterFeeds() {
         return Comm.callMaster('feedlist-get');
-    },
+    }
 
     /** @returns {Feed} feed */
     getFeed(feedID) {
@@ -52,7 +52,7 @@ export let Database = {
             return undefined;
         }
         return Object.assign({}, feed);
-    },
+    }
 
     /**
      * Initialize the DB and start migration job if needed.
@@ -61,10 +61,7 @@ export let Database = {
      * (Brief 2.4 on ESR 52 used `default` as `persistent` did not work; in other cases
      * 2.4 to 2.5.5 used to use `persistent`).
      */
-    async init() {
-        if(this._db)
-            return this;
-
+    static async init() {
         let upgrade = null;
         if(Comm.master) {
             // Upgrades happen on master only
@@ -72,7 +69,7 @@ export let Database = {
         }
 
         // Open the current (default) DB
-        let db = await this._open({
+        let idb = await this._open({
             version: this.DB_VERSION,
             upgrade,
         });
@@ -81,10 +78,33 @@ export let Database = {
                 navigator.storage.persist();
             }
         });
-        this._db = db;
-        await this.loadFeeds();
-        let entryCount = await this.countEntries();
-        console.log(`Brief: opened database with ${entryCount} entries`);
+        let feeds = await Database._loadFeeds(idb);
+        let needToSave = false;
+
+        if(feeds.length === 0) {
+            console.log(`Brief: the database looks empty, testing backups`);
+            ({feeds} = await browser.storage.local.get({feeds: []}));
+            console.log(`Brief: ${feeds.length} feeds found in local storage`);
+            if(feeds.length === 0) {
+                ({feeds} = await browser.storage.sync.get({feeds: []}));
+                console.log(`Brief: ${feeds.length} feeds found in sync storage`);
+            }
+            needToSave = true;
+        }
+
+        let db = new Database(idb, feeds);
+
+        if(needToSave) {
+            db.saveFeeds();
+        }
+
+        return db;
+    }
+    constructor(idb, feeds) {
+        this._db = idb;
+        this._feeds = this._reindex(feeds);
+        this.countEntries().then(entryCount =>
+            console.log(`Brief: opened database with ${entryCount} entries`));
 
         // Register the common observer
         Comm.registerObservers({
@@ -122,11 +142,9 @@ export let Database = {
             //TODO: onChanged
             //FIXME: removed one of multiple not working
         }
+    }
 
-        return this;
-    },
-
-    async _open({name="brief", version=undefined, upgrade=null}) {
+    static async _open({name="brief", version=undefined, upgrade=null}) {
         let canUpgrade = (upgrade !== null);
         console.log(`Brief: opening database${ canUpgrade ? " with upgrade" : "" }`);
         let db;
@@ -157,9 +175,9 @@ export let Database = {
         }
         console.log(`Brief: opened database`);
         return db;
-    },
+    }
 
-    _upgradeSchema({event}) {
+    static _upgradeSchema({event}) {
         let {oldVersion} = event;
         if(oldVersion === 0) {
             console.log(`Creating the database`);
@@ -220,9 +238,9 @@ export let Database = {
                 cursor.continue();
             }
         };
-    },
+    }
 
-    _upgradeEntry(value) {
+    static _upgradeEntry(value) {
         switch(value._v || undefined) {
             case this.DB_VERSION:
                 return value;
@@ -251,15 +269,15 @@ export let Database = {
         //TODO: upgrade all revisions too, if needed
         value._v = this.DB_VERSION;
         return value;
-    },
+    }
 
-    ENTRY_FIELDS: [
+    static ENTRY_FIELDS = [
         'id', 'feedID',
         'read', 'markedUnreadOnUpdate', 'starred', 'tags', 'deleted',
         'providedID', 'entryURL',
         'date',
-    ],
-    REVISION_FIELDS: ['id', 'authors', 'title', 'content', 'updated'],
+    ];
+    static REVISION_FIELDS = ['id', 'authors', 'title', 'content', 'updated'];
 
     query(filters) {
         if(filters === undefined) {
@@ -273,36 +291,21 @@ export let Database = {
         }
 
         return new Query(this, filters);
-    },
+    }
 
     async countEntries() {
         let tx = this._db.transaction(['entries']);
         let request = tx.objectStore('entries').count();
         return await DbUtil.requestPromise(request);
-    },
+    }
 
-    async loadFeeds() {
-        let tx = this._db.transaction(['feeds']);
+    static async _loadFeeds(db) {
+        let tx = db.transaction(['feeds']);
         let request = tx.objectStore('feeds').getAll();
         let feeds = await DbUtil.requestPromise(request);
         console.log(`Brief: ${feeds.length} feeds in database`);
-
-        if(feeds.length === 0) {
-            console.log(`Brief: the database looks empty, testing backups`);
-            ({feeds} = await browser.storage.local.get({feeds: []}));
-            console.log(`Brief: ${feeds.length} feeds found in local storage`);
-            if(feeds.length === 0) {
-                ({feeds} = await browser.storage.sync.get({feeds: []}));
-                console.log(`Brief: ${feeds.length} feeds found in sync storage`);
-            }
-            this._feeds = feeds;
-            Comm.broadcast('feedlist-updated', {feeds});
-            this.saveFeeds();
-        }
-
-        feeds = this._reindex(feeds);
-        this._feeds = feeds;
-    },
+        return feeds;
+    }
 
     async saveFeeds() {
         if(this._db === null) {
@@ -320,7 +323,7 @@ export let Database = {
         if(Comm.verbose) {
             console.log(`Brief: saved feed list with ${feeds.length} feeds`);
         }
-    },
+    }
 
     async addFeeds(feeds, options) {
         if(!Comm.master) {
@@ -330,7 +333,7 @@ export let Database = {
             console.log('addFeeds', feeds, options);
         }
         feeds = asArray(feeds);
-        await Promise.all(feeds.map(feed => this._hashFeedUrls(feed)));
+        await Promise.all(feeds.map(feed => Database._hashFeedUrls(feed)));
         console.log('hashed', feeds);
 
         let newFeedIds = this._addFeeds(feeds, options);
@@ -341,7 +344,11 @@ export let Database = {
         Comm.broadcast('update-feeds', {feeds: newFeedIds});
 
         return newFeedIds;
-    },
+    }
+
+    static async remoteAddFeeds(feeds, options) {
+        return Comm.callMaster('feedlist-add', {feeds, options});
+    }
 
     _addFeeds(feeds, options) {
         let parent = options ? options.parent : String(Prefs.get('homeFolder'));
@@ -357,9 +364,9 @@ export let Database = {
             }
         }
         return newFeedIds;
-    },
+    }
 
-    async _hashFeedUrls(feed) {
+    static async _hashFeedUrls(feed) {
         let {url, children} = feed;
         if(url) {
             feed.urlHash = await hashString(url);
@@ -367,7 +374,7 @@ export let Database = {
         if(children) {
             await Promise.all(children.map(child => this._hashFeedUrls(child)));
         }
-    },
+    }
 
     _addFeed(feed, {parent}) {
         if(Comm.verbose) {
@@ -436,12 +443,12 @@ export let Database = {
             });
         }
         return feedID;
-    },
+    }
 
     /**
      * @typedef {Pick<Feed, 'feedID'> & Partial<Feed>} FeedUpdate
      *
-     * @param {FeedUpdate | [FeedUpdate]} props (array used only from onMove for reindex)
+     * @param {FeedUpdate | FeedUpdate[]} props (array used only from onMove for reindex)
      */
     async modifyFeed(props) {
         if(!Comm.master) {
@@ -472,7 +479,7 @@ export let Database = {
         Comm.broadcast('feedlist-updated', {feeds: this.feeds});
 
         await this.saveFeeds();
-    },
+    }
 
     async deleteFeed(feeds) {
         if(!Comm.master) {
@@ -484,7 +491,7 @@ export let Database = {
         feeds = this._includeChildren(feeds);
         feeds = feeds.map(f => ({feedID: f.feedID, hidden: Date.now()}));
         await this.modifyFeed(feeds);
-    },
+    }
 
     async expireEntries(feeds) {
         if(!Comm.master) {
@@ -548,11 +555,11 @@ export let Database = {
                 await query.markDeleted('trashed');
             }
         }
-    },
+    }
 
     async pushUpdatedFeed({feed, parsedFeed}) {
         let now = Date.now();
-        let entries = this._feedToEntries({feed, parsedFeed, now});
+        let entries = Database._feedToEntries({feed, parsedFeed, now});
         let modified = now; // fallback
         if(parsedFeed.updated) {
             modified = parseDateValue(parsedFeed.updated);
@@ -574,7 +581,7 @@ export let Database = {
         await this.modifyFeed(feedUpdates);
         await this.expireEntries(feed);
         return newEntries;
-    },
+    }
 
     async _pushEntries({entries, tx=undefined}) {
         if(entries.length === 0) {
@@ -609,7 +616,7 @@ export let Database = {
             entries: allEntries,
             newEntries: [].concat(...returns.map(r => r.newEntries)),
         };
-    },
+    }
 
     /**
      * @param {{feed: Feed, entries: any[], tx: IDBTransaction?}} feed
@@ -695,9 +702,9 @@ export let Database = {
 
         allEntries.push(...newEntries);
         return {entries: allEntries, newEntries: newEntries};
-    },
+    }
 
-    _entryFromItem(next) {
+    static _entryFromItem(next) {
         let revision = {
             title: next.title,
             content: next.content || next.summary,
@@ -706,7 +713,7 @@ export let Database = {
         };
 
         let entry = {
-            _v: this.DB_VERSION,
+            _v: Database.DB_VERSION,
             feedID: next.feedID,
             providedID: next.providedID || "",
             entryURL: next.entryURL,
@@ -719,13 +726,13 @@ export let Database = {
             deleted: 0,
         };
         return entry;
-    },
+    }
 
     _addEntry(next, {tx, entries}) {
         // Single-revision only for now
         let entry = next;
         if(entry.revisions === undefined) {
-            entry = this._entryFromItem(entry);
+            entry = Database._entryFromItem(entry);
         }
 
         let req = tx.objectStore('revisions').add(entry.revisions[0]);
@@ -737,7 +744,7 @@ export let Database = {
                 entries.push(entry);
             };
         };
-    },
+    }
 
     //TODO: fix this async horror show with some good abstractions
     _updateEntry(prev, next, {tx, markUnread, entries}) {
@@ -765,9 +772,9 @@ export let Database = {
         };
         // May be missing due to a Brief<2.5.3:2.5 issue
         prev.providedID = prev.providedID || next.providedID || "";
-    },
+    }
 
-    _feedToEntries({feed, parsedFeed, now}) {
+    static _feedToEntries({feed, parsedFeed, now}) {
         // Roughly the legacy mapEntryProperties
         let entries = [];
         for(let src of (parsedFeed.items || [])) {
@@ -814,7 +821,7 @@ export let Database = {
         // but the optimal insertion order is chronological to match IDs growth
         entries.reverse();
         return entries;
-    },
+    }
 
     async _saveFeedBackups(feeds) {
         let minimizedFeeds = [];
@@ -834,7 +841,7 @@ export let Database = {
             console.warn("Brief failed to save feedlist to storage.sync:", error);
         });
         await Promise.all([store_local, store_sync]);
-    },
+    }
 
     _includeChildren(feeds) {
         feeds = feeds.map(f => f.feedID || f);
@@ -854,7 +861,7 @@ export let Database = {
             new_nodes.push(...children);
         }
         return this.feeds.filter(f => nodes.includes(f.feedID));
-    },
+    }
 
     _reindex(feeds) {
         // Fix possible negative rowIndex values after a Brief 2.5 bug
@@ -905,8 +912,8 @@ export let Database = {
         }
 
         return tree;
-    },
-};
+    }
+}
 //TODO: database cleanup
 //TODO: bookmark to starred sync
 

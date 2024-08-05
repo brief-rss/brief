@@ -14,7 +14,7 @@ const Brief = {
     _windowFeeds: new Map(),
     // Hooks for debugging
     prefs: Prefs,
-    db: Database,
+    db: null,
     comm: Comm,
 
     // No deinit required, we'll be forcefully unloaded anyway
@@ -78,7 +78,7 @@ const Brief = {
             'subscribe-add-feed': ({feed}) => this.db.addFeeds(feed).catch(console.error),
         });
 
-        await Database.init();
+        this.db = await Database.init();
 
         await FeedUpdater.init({db: this.db});
 
