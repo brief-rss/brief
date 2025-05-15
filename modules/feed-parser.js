@@ -1,6 +1,35 @@
 import {Comm} from "./utils.js";
 
 /**
+ * @typedef {object} Author
+ * @property {string} name
+ */
+
+/**
+ * @typedef {object} Entry
+ * @property {string} title
+ * @property {URL} link
+ * @property {string} id
+ * @property {Author[]} authors
+ * @property {string} summary
+ * @property {string} content
+ * @property {string} published
+ * @property {string} updated
+ * TODO should I use Date for the above, maybe?
+ */
+
+/**
+ * @typedef {object} Feed
+ * @property {string} title
+ * @property {string} subtitle
+ * @property {URL} link
+ * @property {Entry[]} items
+ * @property {string} generator
+ * @property {string} updated
+ * @property {string} language
+ */
+
+/**
  * @param {Document} doc
  * @param {URL} url
  */
@@ -90,6 +119,7 @@ class NodeChildrenIndex {
 const HANDLERS = {
     /**
      * @param {Element} node
+     * @returns {Entry}
      */
     entry(node) {
         let index = new NodeChildrenIndex(node);
@@ -114,6 +144,10 @@ const HANDLERS = {
         return result;
     },
 
+    /**
+     * @param {Element} node
+     * @returns {Feed}
+     */
     feed(node) {
         let index = new NodeChildrenIndex(node);
         let result = {
