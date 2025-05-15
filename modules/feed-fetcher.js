@@ -34,7 +34,7 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
     } else {
         let item = result.items[0];
         if(!item.published && !item.updated) {
-            console.warn('no timestamps in', item, 'raw', item._node);
+            console.warn('no timestamps in', item);
         }
     }
     return result;
