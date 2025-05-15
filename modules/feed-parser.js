@@ -18,6 +18,14 @@ export function parseFeed(doc, url) {
 
 const ROOTS = "RDF, channel, *|feed"; // See also related ROOTS in scan-for-feeds.js
 
+/**
+ * @param {Element | Attr} node
+ */
+function nodeShortName(node) {
+    let namespace = nsPrefix(node.namespaceURI);
+    return namespace + node.localName;
+}
+
 function parseNode(node, properties) {
     let props = {};
     let propPrios = new Map();
@@ -104,7 +112,103 @@ function buildKeyMap(known_properties) {
     return map;
 }
 
+function assertDeepEqual(o1, o2) {
+    let co1 = Object.fromEntries(Object.entries(o1).filter(([_key, value]) => value !== undefined).sort());
+    let co2 = Object.fromEntries(Object.entries(o2).filter(([_key, value]) => value !== undefined).sort());
+    let jco1 = JSON.stringify(co1);
+    let jco2 = JSON.stringify(co2);
+    if(jco1 !== jco2) {
+        console.error("difference", jco1, jco2);
+    }
+}
+
+class NodeChildrenIndex {
+    /**
+     * @param {Element} node
+     */
+    constructor(node) {
+        this.index = new Map();
+        for(let c of [...node.children, ...node.attributes]) {
+            let name = nodeShortName(c);
+            let arr = this.index.get(name) || [];
+            arr.push(c);
+            this.index.set(name, arr);
+        }
+        this.used = new Set();
+    }
+    /**
+     * @template T
+     * @param {(node: Element | Attr) => T} handler
+     * @param {string[]} candidates
+     */
+    getValue(handler, candidates) {
+        // Working according to priority here, collisions may be fine in some cases
+        let nodes = candidates.flatMap(name => {
+            this.used.add(name);
+            return this.index.get(name) ?? [];
+        });
+        for(let node of nodes) {
+            let value = handler(node);
+            if(value != null) {
+                return value;
+            }
+        }
+    }
+
+    /**
+     * @template T
+     * @param {(node: Element | Attr) => T} handler
+     * @param {string[]} candidates
+     */
+    getAllValues(handler, candidates) {
+        // Working according to priority here, collisions may be fine in some cases
+        let nodes = candidates.flatMap(name => {
+            this.used.add(name);
+            return this.index.get(name) ?? [];
+        });
+        return nodes.map(handler);
+    }
+
+    /**
+     * @param {string[]} names
+     */
+    reportUnusedExcept(names) {
+        if(Comm.verbose) {
+            for(let key of this.index.keys()) {
+                if(!this.used.has(key) && !names.includes(key)) {
+                    console.log('unknown child', key);
+                }
+            }
+        }
+    }
+}
+
 const HANDLERS = {
+    /**
+     * @param {Element} node
+     */
+    parseEntry(node) {
+        let index = new NodeChildrenIndex(node);
+        let result = {
+            title: index.getValue(HANDLERS.text, ["title", "rss1:title", "atom03:title", "atom:title"]),
+            link: index.getValue(HANDLERS.url, ["link", "rss1:link"])
+                ?? index.getValue(HANDLERS.atomLinkAlternate, ["atom:link", "atom03:link"])
+                ?? index.getValue(HANDLERS.permaLink, ["guid", "rss1:guid"]),
+            id: index.getValue(HANDLERS.id, ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]),
+            authors: index.getAllValues(HANDLERS.author, ["author", "rss1:author", "dc:creator", "dc:author", "atom03:author", "atom:author"]),
+            summary: index.getValue(HANDLERS.text_or_xhtml, ["description", "rss1:description", "dc:description", "atom03:summary", "atom:summary"]),
+            content: index.getValue(HANDLERS.text_or_xhtml, ["content:encoded", "atom03:content", "atom:content"]),
+            published: index.getValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "atom03:issued", "dcterms:issued", "atom:published"]),
+            updated: index.getValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "atom03:modified", "dc:date", "dcterms:modified", "atom:updated"]),
+        };
+        index.reportUnusedExcept([
+            "atom:category", "atom03:category", "category", "rss1:category",
+            "comments", "wfw:commentRss", "rss1:comments",
+            "dc:language", "dc:format", "xml:lang", "dc:subject",
+            "enclosure", "dc:identifier"
+        ]);
+        return result;
+    },
     entry(node) {
         const ENTRY_PROPERTIES = [
             ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
@@ -137,7 +241,26 @@ const HANDLERS = {
             // TODO: should these really be all ignored?
         ];
         let props = parseNode(node, ENTRY_PROPERTIES);
+        let alt = HANDLERS.parseEntry(node);
+        assertDeepEqual(alt, {authors: [], ...props});
         return props;
+    },
+
+    parseFeed(node) {
+        let index = new NodeChildrenIndex(node);
+        let result = {
+            title: index.getValue(HANDLERS.text, ["title", "rss1:title", "atom03:title", "atom:title"]),
+            subtitle: index.getValue(HANDLERS.text, ["description", "dc:description", "rss1:description", "atom03:tagline", "atom:subtitle"]),
+            link: index.getValue(HANDLERS.url, ["link", "rss1:link"])
+                ?? index.getValue(HANDLERS.atomLinkAlternate, ["atom:link", "atom03:link"]),
+            items: index.getAllValues(HANDLERS.entry, ["item", "rss1:item", "atom:entry", "atom03:entry"]),
+            generator: index.getValue(HANDLERS.text, ["generator", "rss1:generator", "atom03:generator", "atom:generator"]),
+            updated: index.getValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date", "dcterms:modified", "atom:updated"]),
+            language: index.getValue(HANDLERS.lang, ["language", "rss1:language", "xml:lang"]),
+            ...index.getValue(HANDLERS.feed, ["rss1:channel"]),
+        };
+        index.reportUnusedExcept(["atom:id", "atom03:id", "atom:author", "atom03:author", "category", "atom:category", "rss1:items"]);
+        return result;
     },
 
     feed(node) {
@@ -165,7 +288,10 @@ const HANDLERS = {
                 "category", "atom:category", "rss1:items"
             ]],
         ];
-        return parseNode(node, FEED_PROPERTIES);
+        let props = parseNode(node, FEED_PROPERTIES);
+        let alt = HANDLERS.parseFeed(node);
+        assertDeepEqual(alt, {items: [], ...props});
+        return props;
     },
 
     text(nodeOrAttr) {
@@ -215,7 +341,19 @@ const HANDLERS = {
         return HANDLERS.text(nodeOrAttr);
     },
 
-    author(node) {
+    parseAuthor(node) {
+        if(node.children.length == 0) {
+            return HANDLERS.text(node);
+        }
+        let index = new NodeChildrenIndex(node);
+        let result = {
+            name: index.getValue(HANDLERS.text, ["name", "atom:name", "atom03:name"]),
+        };
+        index.reportUnusedExcept(["atom:uri", "atom:email"]);
+        return result;
+    },
+
+    legacyAuthor(node) {
         const AUTHOR_PROPERTIES = [
             ['name', 'text', ["name", "atom:name", "atom03:name"]],
             ['IGNORE', '', ["atom:uri", "atom:email"]],
@@ -225,6 +363,13 @@ const HANDLERS = {
         } else {
             return HANDLERS.text(node);
         }
+    },
+
+    author(node) {
+        let props = HANDLERS.legacyAuthor(node);
+        let alt = HANDLERS.parseAuthor(node);
+        assertDeepEqual(alt, props);
+        return props;
     },
 
     url(node) {
