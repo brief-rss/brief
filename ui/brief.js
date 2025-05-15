@@ -122,7 +122,7 @@ async function init() {
             feedURL: previewURL,
             title: parsedFeed.title,
             websiteURL: parsedFeed.link ? parsedFeed.link.href : '',
-            subtitle: parsedFeed.subtitle ? parsedFeed.subtitle.text : '',
+            subtitle: parsedFeed.subtitle ? parsedFeed.subtitle : '',
             language: parsedFeed.language,
         });
         if(feed.websiteURL !== '') {
