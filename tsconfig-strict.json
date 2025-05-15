@@ -6,8 +6,8 @@
         "allowJs": true,
 	"checkJs": true,
 	"noEmit": true,
-	"target": "es6",
-	"lib": ["es2018", "dom", "dom.iterable"],
+	"target": "es2019",
+	"lib": ["es2019", "dom", "dom.iterable"],
 	"baseUrl": ".",
 	"paths": {
 	    "/*": ["*"]
