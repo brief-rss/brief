@@ -10,7 +10,7 @@ import {Comm} from "./utils.js";
  * @property {string} title
  * @property {URL} link
  * @property {string} id
- * @property {Author[]} authors
+ * @property {(Author | string)[]} authors // FIXME
  * @property {string} summary
  * @property {string} content
  * @property {string} published
@@ -165,6 +165,10 @@ const HANDLERS = {
         return result;
     },
 
+    /**
+     * @param {Element | Attr } nodeOrAttr
+     * @returns {string}
+     */
     text(nodeOrAttr) {
         if(nodeOrAttr.children !== undefined) {
             for(let child of nodeOrAttr.childNodes) {
@@ -183,6 +187,10 @@ const HANDLERS = {
         }
     },
 
+    /**
+     * @param {Element} node
+     * @returns {string}
+     */
     text_or_xhtml(node) {
         let type = node.getAttribute('type');
         switch(type) {
@@ -208,10 +216,18 @@ const HANDLERS = {
         }
     },
 
+    /**
+     * @param {Element | Attr } nodeOrAttr
+     * @returns {string}
+     */
     lang(nodeOrAttr) {
         return HANDLERS.text(nodeOrAttr);
     },
 
+    /**
+     * @param {Element} node
+     * @returns {Author | string}
+     */
     author(node) {
         if(node.children.length == 0) {
             return HANDLERS.text(node);
@@ -224,6 +240,10 @@ const HANDLERS = {
         return result;
     },
 
+    /**
+     * @param {Element} node
+     * @returns {URL}
+     */
     url(node) {
         try {
             return new URL(node.textContent, node.baseURI);
@@ -232,6 +252,10 @@ const HANDLERS = {
         }
     },
 
+    /**
+     * @param {Element} node
+     * @returns {string}
+     */
     date(node) {
         let text = node.textContent.trim();
         // Support for Z timezone marker for UTC (mb 682781)
@@ -243,10 +267,18 @@ const HANDLERS = {
         return null;
     },
 
+    /**
+     * @param {Element | Attr } nodeOrAttr
+     * @returns {string}
+     */
     id(nodeOrAttr) {
         return HANDLERS.text(nodeOrAttr);
     },
 
+    /**
+     * @param {Element} node
+     * @returns {URL}
+     */
     atomLinkAlternate(node) {
         let rel = node.getAttribute('rel') || 'alternate';
         let known = ['alternate', 'http://www.iana.org/assignments/relation/alternate'];
@@ -262,6 +294,10 @@ const HANDLERS = {
         }
     },
 
+    /**
+     * @param {Element} node
+     * @returns {URL}
+     */
     permaLink(node) {
         let isPermaLink = node.getAttribute('isPermaLink');
         if(!isPermaLink || isPermaLink.toLowerCase() !== 'false') {
@@ -274,6 +310,9 @@ const HANDLERS = {
     },
 };
 
+/**
+ * @param {Node} node
+ */
 function isWhitespaceOrComment(node) {
     switch(node.nodeType) {
         case Node.TEXT_NODE: // fallthrough
@@ -286,6 +325,9 @@ function isWhitespaceOrComment(node) {
     }
 }
 
+/**
+ * @param {string} uri
+ */
 function nsPrefix(uri) {
     uri = uri || "";
     if(IGNORED_NAMESPACES[uri]) {
@@ -305,6 +347,9 @@ function nsPrefix(uri) {
     }
 }
 
+/**
+ * @type {Object.<string, string>}
+ */
 const NAMESPACES = {
     "": "",
     "http://webns.net/mvcb/": "admin",
@@ -324,6 +369,9 @@ const NAMESPACES = {
     "http://search.yahoo.com/mrss/": "media",
     "http://search.yahoo.com/mrss": "media",
 };
+/**
+ * @type {Object.<string, string>}
+ */
 const IGNORED_NAMESPACES = {
     "http://www.w3.org/2000/xmlns/": "XML namespace definition",
     "http://purl.org/rss/1.0/modules/slash/": "Slashdot engine specific",
