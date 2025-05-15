@@ -170,7 +170,7 @@ const HANDLERS = {
      * @returns {string}
      */
     text(nodeOrAttr) {
-        if(nodeOrAttr.children !== undefined) {
+        if(nodeOrAttr instanceof Element) {
             for(let child of nodeOrAttr.childNodes) {
                 switch(child.nodeType) {
                     case Node.TEXT_NODE:
@@ -196,7 +196,7 @@ const HANDLERS = {
         switch(type) {
             case 'xhtml': {
                 let children = Array.from(node.childNodes).filter(n => !isWhitespaceOrComment(n));
-                if(children.length === 1 && children[0].localName === 'div') {
+                if(children.length === 1 && children[0] instanceof Element && children[0].localName === 'div') {
                     return children[0].innerHTML;
                 } else {
                     console.error('type="xhtml" structure violated in', node);
