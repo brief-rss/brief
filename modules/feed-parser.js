@@ -1,5 +1,9 @@
 import {Comm} from "./utils.js";
 
+/**
+ * @param {Document} doc
+ * @param {URL} url
+ */
 export function parseFeed(doc, url) {
     let root = doc.querySelector(ROOTS);
     if(root === null) {
@@ -7,7 +11,7 @@ export function parseFeed(doc, url) {
         return;
     }
 
-    let result = parseNode(root, FEED_PROPERTIES);
+    let result = HANDLERS.feed(root);
     result.language = result.language || doc.documentElement.getAttribute('xml:lang');
     return result;
 }
@@ -100,72 +104,67 @@ function buildKeyMap(known_properties) {
     return map;
 }
 
-const FEED_PROPERTIES = [
-    // Name, handler name, list of known direct children with it
-    ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
-    ['subtitle', 'text', [
-        "description", "dc:description", "rss1:description", "atom03:tagline", "atom:subtitle"
-    ]],
-    ['link', 'url', ["link", "rss1:link"]],
-    ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
-    ['items[]', 'entry', ["item", "rss1:item", "atom:entry", "atom03:entry"]],
-    ['generator', 'text', ["generator", "rss1:generator", "atom03:generator", "atom:generator"]],
-    ['updated', 'date', [
-        "pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date",
-        "dcterms:modified", "atom:updated"
-    ]],
-    ['language', 'lang', ["language", "rss1:language", "xml:lang"]],
-
-    ['{merge}', 'feed', ["rss1:channel"]],
-    //and others Brief does not use anyway...
-    //TODO: enclosures
-    ['IGNORE', '', [
-        "atom:id", "atom03:id", "atom:author", "atom03:author",
-        "category", "atom:category", "rss1:items"
-    ]],
-];
-const ENTRY_PROPERTIES = [
-    ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
-    ['link', 'url', ["link", "rss1:link"]],
-    ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
-    ['link', 'permaLink', ["guid", "rss1:guid"]],
-    ['id', 'id', ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]],
-    ['authors[]', 'author', [
-        "author", "rss1:author", "dc:creator", "dc:author", "atom03:author", "atom:author"
-    ]],
-    ['summary', 'text_or_xhtml', [
-        "description", "rss1:description", "dc:description",
-        "atom03:summary", "atom:summary"
-    ]],
-    ['content', 'text_or_xhtml', ["content:encoded", "atom03:content", "atom:content"]],
-    ['published', 'date', [
-        "pubDate", "rss1:pubDate", "atom03:issued", "dcterms:issued", "atom:published"
-    ]],
-    ['updated', 'date', [
-        "pubDate", "rss1:pubDate", "atom03:modified",
-        "dc:date", "dcterms:modified", "atom:updated"
-    ]],
-    //and others Brief does not use anyway...
-    ['IGNORE', '', [
-        "atom:category", "atom03:category", "category", "rss1:category",
-        "comments", "wfw:commentRss", "rss1:comments",
-        "dc:language", "dc:format", "xml:lang", "dc:subject",
-        "enclosure", "dc:identifier"
-    ]],
-    // TODO: should these really be all ignored?
-];
-const AUTHOR_PROPERTIES = [
-    ['name', 'text', ["name", "atom:name", "atom03:name"]],
-    ['IGNORE', '', ["atom:uri", "atom:email"]],
-];
-
 const HANDLERS = {
     entry(node) {
+        const ENTRY_PROPERTIES = [
+            ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
+            ['link', 'url', ["link", "rss1:link"]],
+            ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
+            ['link', 'permaLink', ["guid", "rss1:guid"]],
+            ['id', 'id', ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]],
+            ['authors[]', 'author', [
+                "author", "rss1:author", "dc:creator", "dc:author", "atom03:author", "atom:author"
+            ]],
+            ['summary', 'text_or_xhtml', [
+                "description", "rss1:description", "dc:description",
+                "atom03:summary", "atom:summary"
+            ]],
+            ['content', 'text_or_xhtml', ["content:encoded", "atom03:content", "atom:content"]],
+            ['published', 'date', [
+                "pubDate", "rss1:pubDate", "atom03:issued", "dcterms:issued", "atom:published"
+            ]],
+            ['updated', 'date', [
+                "pubDate", "rss1:pubDate", "atom03:modified",
+                "dc:date", "dcterms:modified", "atom:updated"
+            ]],
+            //and others Brief does not use anyway...
+            ['IGNORE', '', [
+                "atom:category", "atom03:category", "category", "rss1:category",
+                "comments", "wfw:commentRss", "rss1:comments",
+                "dc:language", "dc:format", "xml:lang", "dc:subject",
+                "enclosure", "dc:identifier"
+            ]],
+            // TODO: should these really be all ignored?
+        ];
         let props = parseNode(node, ENTRY_PROPERTIES);
         return props;
     },
 
     feed(node) {
+        const FEED_PROPERTIES = [
+            // Name, handler name, list of known direct children with it
+            ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
+            ['subtitle', 'text', [
+                "description", "dc:description", "rss1:description", "atom03:tagline", "atom:subtitle"
+            ]],
+            ['link', 'url', ["link", "rss1:link"]],
+            ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
+            ['items[]', 'entry', ["item", "rss1:item", "atom:entry", "atom03:entry"]],
+            ['generator', 'text', ["generator", "rss1:generator", "atom03:generator", "atom:generator"]],
+            ['updated', 'date', [
+                "pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date",
+                "dcterms:modified", "atom:updated"
+            ]],
+            ['language', 'lang', ["language", "rss1:language", "xml:lang"]],
+
+            ['{merge}', 'feed', ["rss1:channel"]],
+            //and others Brief does not use anyway...
+            //TODO: enclosures
+            ['IGNORE', '', [
+                "atom:id", "atom03:id", "atom:author", "atom03:author",
+                "category", "atom:category", "rss1:items"
+            ]],
+        ];
         return parseNode(node, FEED_PROPERTIES);
     },
 
@@ -217,6 +216,10 @@ const HANDLERS = {
     },
 
     author(node) {
+        const AUTHOR_PROPERTIES = [
+            ['name', 'text', ["name", "atom:name", "atom03:name"]],
+            ['IGNORE', '', ["atom:uri", "atom:email"]],
+        ];
         if(node.children.length > 0) {
             return parseNode(node, AUTHOR_PROPERTIES);
         } else {
