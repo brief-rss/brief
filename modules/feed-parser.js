@@ -26,102 +26,6 @@ function nodeShortName(node) {
     return namespace + node.localName;
 }
 
-function parseNode(node, properties) {
-    let props = {};
-    let propPrios = new Map();
-    let keyMap = buildKeyMap(properties);
-    //TODO: handle attributes
-    let children = Array.from(node.children);
-    children.push(...node.attributes);
-    for(let child of children) {
-        let namespace = nsPrefix(child.namespaceURI);
-        if(namespace === 'IGNORE:') {
-            continue;
-        } else if(namespace && namespace[0] === '[') {
-            if(Comm.verbose) {
-                console.log('unknown namespace', namespace, child);
-            }
-            continue;
-        }
-        let nodeKey = namespace + child.localName;
-        let destinations = keyMap.get(nodeKey);
-        if(destinations === undefined) {
-            if(Comm.verbose) {
-                console.log('unknown key', nodeKey, 'in', node);
-            }
-            continue;
-        }
-        for(let {name, type, array, prio} of destinations) {
-            if(name === 'IGNORE') {
-                continue;
-            }
-            let handler = HANDLERS[type];
-            if(handler) {
-                let value = handler(child);
-                if(value === undefined || value === null) {
-                    continue;
-                }
-                if(name === '{merge}') {
-                    Object.assign(props, value);
-                    continue;
-                }
-                if(array) {
-                    if(props[name] === undefined) {
-                        props[name] = [];
-                    }
-                    props[name].push(value);
-                } else {
-                    let prevPrio = propPrios.get(name) || 1000;
-                    if(prio >= prevPrio) {
-                        continue;
-                    }
-                    propPrios.set(name, prio);
-                    props[name] = value;
-                }
-            } else {
-                console.error('missing handler', type);
-            }
-        }
-    }
-    return props;
-}
-
-function buildKeyMap(known_properties) {
-    let map = new Map();
-    let prios = new Map();
-    for(let [name, type, tags] of known_properties) {
-        let array = false;
-        if(name.slice(name.length - 2) === '[]') {
-            name = name.slice(0, name.length - 2);
-            array = true;
-        }
-        let prio = prios.get(name) || 1;
-
-        for(let src of tags) {
-            if(src.tag !== undefined) {
-                type = src.type || type;
-                src = src.tag;
-            }
-            let destinations = map.get(src) || [];
-            destinations.push({name, type, array, prio});
-            map.set(src, destinations);
-            prio += 1;
-            prios.set(name, prio);
-        }
-    }
-    return map;
-}
-
-function assertDeepEqual(o1, o2) {
-    let co1 = Object.fromEntries(Object.entries(o1).filter(([_key, value]) => value !== undefined).sort());
-    let co2 = Object.fromEntries(Object.entries(o2).filter(([_key, value]) => value !== undefined).sort());
-    let jco1 = JSON.stringify(co1);
-    let jco2 = JSON.stringify(co2);
-    if(jco1 !== jco2) {
-        console.error("difference", jco1, jco2);
-    }
-}
-
 class NodeChildrenIndex {
     /**
      * @param {Element} node
@@ -187,7 +91,7 @@ const HANDLERS = {
     /**
      * @param {Element} node
      */
-    parseEntry(node) {
+    entry(node) {
         let index = new NodeChildrenIndex(node);
         let result = {
             title: index.getValue(HANDLERS.text, ["title", "rss1:title", "atom03:title", "atom:title"]),
@@ -209,44 +113,8 @@ const HANDLERS = {
         ]);
         return result;
     },
-    entry(node) {
-        const ENTRY_PROPERTIES = [
-            ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
-            ['link', 'url', ["link", "rss1:link"]],
-            ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
-            ['link', 'permaLink', ["guid", "rss1:guid"]],
-            ['id', 'id', ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]],
-            ['authors[]', 'author', [
-                "author", "rss1:author", "dc:creator", "dc:author", "atom03:author", "atom:author"
-            ]],
-            ['summary', 'text_or_xhtml', [
-                "description", "rss1:description", "dc:description",
-                "atom03:summary", "atom:summary"
-            ]],
-            ['content', 'text_or_xhtml', ["content:encoded", "atom03:content", "atom:content"]],
-            ['published', 'date', [
-                "pubDate", "rss1:pubDate", "atom03:issued", "dcterms:issued", "atom:published"
-            ]],
-            ['updated', 'date', [
-                "pubDate", "rss1:pubDate", "atom03:modified",
-                "dc:date", "dcterms:modified", "atom:updated"
-            ]],
-            //and others Brief does not use anyway...
-            ['IGNORE', '', [
-                "atom:category", "atom03:category", "category", "rss1:category",
-                "comments", "wfw:commentRss", "rss1:comments",
-                "dc:language", "dc:format", "xml:lang", "dc:subject",
-                "enclosure", "dc:identifier"
-            ]],
-            // TODO: should these really be all ignored?
-        ];
-        let props = parseNode(node, ENTRY_PROPERTIES);
-        let alt = HANDLERS.parseEntry(node);
-        assertDeepEqual(alt, {authors: [], ...props});
-        return props;
-    },
 
-    parseFeed(node) {
+    feed(node) {
         let index = new NodeChildrenIndex(node);
         let result = {
             title: index.getValue(HANDLERS.text, ["title", "rss1:title", "atom03:title", "atom:title"]),
@@ -261,37 +129,6 @@ const HANDLERS = {
         };
         index.reportUnusedExcept(["atom:id", "atom03:id", "atom:author", "atom03:author", "category", "atom:category", "rss1:items"]);
         return result;
-    },
-
-    feed(node) {
-        const FEED_PROPERTIES = [
-            // Name, handler name, list of known direct children with it
-            ['title', 'text', ["title", "rss1:title", "atom03:title", "atom:title"]],
-            ['subtitle', 'text', [
-                "description", "dc:description", "rss1:description", "atom03:tagline", "atom:subtitle"
-            ]],
-            ['link', 'url', ["link", "rss1:link"]],
-            ['link', 'atomLinkAlternate', ["atom:link", "atom03:link"]],
-            ['items[]', 'entry', ["item", "rss1:item", "atom:entry", "atom03:entry"]],
-            ['generator', 'text', ["generator", "rss1:generator", "atom03:generator", "atom:generator"]],
-            ['updated', 'date', [
-                "pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date",
-                "dcterms:modified", "atom:updated"
-            ]],
-            ['language', 'lang', ["language", "rss1:language", "xml:lang"]],
-
-            ['{merge}', 'feed', ["rss1:channel"]],
-            //and others Brief does not use anyway...
-            //TODO: enclosures
-            ['IGNORE', '', [
-                "atom:id", "atom03:id", "atom:author", "atom03:author",
-                "category", "atom:category", "rss1:items"
-            ]],
-        ];
-        let props = parseNode(node, FEED_PROPERTIES);
-        let alt = HANDLERS.parseFeed(node);
-        assertDeepEqual(alt, {items: [], ...props});
-        return props;
     },
 
     text(nodeOrAttr) {
@@ -341,7 +178,7 @@ const HANDLERS = {
         return HANDLERS.text(nodeOrAttr);
     },
 
-    parseAuthor(node) {
+    author(node) {
         if(node.children.length == 0) {
             return HANDLERS.text(node);
         }
@@ -351,25 +188,6 @@ const HANDLERS = {
         };
         index.reportUnusedExcept(["atom:uri", "atom:email"]);
         return result;
-    },
-
-    legacyAuthor(node) {
-        const AUTHOR_PROPERTIES = [
-            ['name', 'text', ["name", "atom:name", "atom03:name"]],
-            ['IGNORE', '', ["atom:uri", "atom:email"]],
-        ];
-        if(node.children.length > 0) {
-            return parseNode(node, AUTHOR_PROPERTIES);
-        } else {
-            return HANDLERS.text(node);
-        }
-    },
-
-    author(node) {
-        let props = HANDLERS.legacyAuthor(node);
-        let alt = HANDLERS.parseAuthor(node);
-        assertDeepEqual(alt, props);
-        return props;
     },
 
     url(node) {
