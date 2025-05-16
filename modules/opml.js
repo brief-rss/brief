@@ -1,3 +1,4 @@
+//@ts-strict
 // Originally based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
 import {Comm} from "./utils.js";
 
@@ -6,10 +7,10 @@ import {Comm} from "./utils.js";
  */
 
 /**
- * @typedef {{url: string, siteURL: string, title: string}} ImportedFeed
+ * @typedef {{url: string, siteURL: string?, title: string?}} ImportedFeed
  *
  * @typedef {object} ImportedFolder
- * @property {string} title
+ * @property {string?} title
  * @property {ImportedNode[]} children
  *
  * @typedef {ImportedFeed | ImportedFolder} ImportedNode
@@ -54,16 +55,17 @@ export function parse(text) {
 
 /**
  * @param {Element} node
- * @return {ImportedNode}
+ * @return {ImportedNode?}
  */
 function importNode(node) {
     // The standard requires 'text' to be always present, but sometimes that's not the case
     let title = node.getAttribute('text') || node.getAttribute('title');
 
-    if(node.hasAttribute('xmlUrl') && node.getAttribute('type') !== 'link') {
+    let url = node.getAttribute('xmlUrl');
+    if(url !== null && node.getAttribute('type') !== 'link') {
         return {
             title,
-            url: node.getAttribute('xmlUrl'),
+            url,
             siteURL: node.getAttribute('htmlUrl'),
         };
     }
@@ -74,13 +76,15 @@ function importNode(node) {
             children: Array.from(node.children)
                 .filter(c => c.nodeName === 'outline')
                 .map(c => importNode(c))
-                .filter(c => c !== undefined),
+                .filter(c => c != null),
         };
     }
+    return null;
 }
 
 /**
  * @param {Feed[]} feeds
+ * @returns {string}
  */
 export function serialize(feeds) {
     let data = '';
@@ -100,8 +104,7 @@ export function serialize(feeds) {
             parents.pop();
             data += `${indent()}</outline>\n`;
             if(parents.length === 0) {
-                console.error("incorrect database");
-                return;
+                throw new Error("Feed's parent not found during feedlist export");
             }
         }
         let title = cleanXMLText(node.title);
@@ -124,6 +127,9 @@ export function serialize(feeds) {
     return data;
 }
 
+/**
+ * @param {Feed[]} feeds
+ */
 export async function exportFeeds(feeds) {
     let data = serialize(feeds.filter(f => !f.hidden));
 
