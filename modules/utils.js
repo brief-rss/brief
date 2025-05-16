@@ -1,3 +1,4 @@
+//@ts-strict
 // ===== Promise utilities =====
 
 /**
@@ -93,12 +94,12 @@ export function asArray(v) {
 
 /**
  * @param {string} date
- * @returns {number}
+ * @returns {number?}
  */
 export function parseDateValue(date) {
     // TODO: maybe MIL timezones here?
     if(!date) {
-        return;
+        return null;
     }
     return (new Date(date)).getTime();
 }
@@ -166,7 +167,7 @@ export async function openBackgroundTab(url) {
     try {
         await browser.tabs.create({active: false, url: url, openerTabId: tab.id});
     }
-    catch(e) {
+    catch(/** @type {any} */e) { // FIXME any better way?
         if(e.message.includes("openerTabId")) {
             await browser.tabs.create({active: false, url: url});
         } else {
@@ -226,6 +227,7 @@ export let Comm = {
         }
     },
 
+    /** @param {any} handlers */
     registerObservers(handlers) {
         /** @type {(message: any) => any} */
         let listener = message => {
