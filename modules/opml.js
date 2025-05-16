@@ -1,5 +1,5 @@
 // Originally based on code by Christopher Finke, "OPML Support" extension. Used with permisson.
-import {Comm, expectedEvent} from "./utils.js";
+import {Comm} from "./utils.js";
 
 /**
  * @typedef {import("/modules/database.js").Feed} Feed
@@ -19,13 +19,11 @@ import {Comm, expectedEvent} from "./utils.js";
  * @param {File} file
  */
 export async function parseOPMLFile(file) {
-    let reader = new FileReader();
-    reader.readAsText(file); // assumes UTF-8
-    await expectedEvent(reader, 'load');
     let results;
+    let text = await file.text();
 
     try {
-        results = parse(/** @type {string} */(reader.result));
+        results = parse(text);
     } catch(e) {
         window.alert(browser.i18n.getMessage('invalidFileAlertText'));
         return;
