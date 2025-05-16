@@ -1,3 +1,4 @@
+//@ts-strict
 import {Comm} from "./utils.js";
 
 /**

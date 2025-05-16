@@ -8,6 +8,7 @@
     "typescript": "^5.3.3",
     "typescript-eslint": "^7.9.0",
     "typescript-language-server": "^4.3.4",
+    "typescript-strict-plugin": "^2.4.4",
     "web-ext": "^8.0.0",
     "web-ext-types": "^3.2.1"
   },

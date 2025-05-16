@@ -1,15 +1,22 @@
 {
     "compilerOptions": {
         "allowJs": true,
-	"checkJs": true,
-	"noEmit": true,
-	"target": "es2019",
-	"lib": ["es2019", "dom", "dom.iterable"],
-	"baseUrl": ".",
-	"paths": {
-	    "/*": ["*"]
-	},
-	"typeRoots": ["node_modules/web-ext-types"]
+        "checkJs": true,
+        "noEmit": true,
+        "target": "es2019",
+        "lib": ["es2019", "dom", "dom.iterable"],
+        "baseUrl": ".",
+        "paths": {
+            "/*": ["*"]
+        },
+        "typeRoots": ["node_modules/web-ext-types"],
+        "plugins": [
+            {
+                "name": "typescript-strict-plugin",
+                "excludePattern": ["**"]
+                //"exclude": ["modules", "ui", "background.js"]
+            }
+        ]
     },
     "include": ["modules", "ui", "background.js"]
 }
