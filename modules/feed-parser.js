@@ -329,7 +329,7 @@ function isWhitespaceOrComment(node) {
 }
 
 /**
- * @param {string} uri
+ * @param {string?} uri
  */
 function nsPrefix(uri) {
     uri = uri || "";
