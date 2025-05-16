@@ -23,9 +23,9 @@ import {Comm} from "./utils.js";
 
 /**
  * @typedef {object} Feed
- * @property {string} title
+ * @property {string?} title
  * @property {string?} subtitle
- * @property {URL} link
+ * @property {URL?} link
  * @property {Entry[]} items
  * @property {string?} generator
  * @property {string?} updated
