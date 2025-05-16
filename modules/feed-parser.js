@@ -184,7 +184,7 @@ const HANDLERS = {
                         break;
                 }
             }
-            return nodeOrAttr.textContent.trim();
+            return (nodeOrAttr.textContent ?? "").trim();
         } else {
             return nodeOrAttr.value.trim();
         }
@@ -260,7 +260,7 @@ const HANDLERS = {
      * @returns {string}
      */
     date(node) {
-        let text = node.textContent.trim();
+        let text = (node.textContent ?? "").trim();
         // Support for Z timezone marker for UTC (mb 682781)
         let date = new Date(text.replace(/z$/i, "-00:00"));
         if (!isNaN(date.getTime())) {
@@ -305,7 +305,7 @@ const HANDLERS = {
         let isPermaLink = node.getAttribute('isPermaLink');
         if(!isPermaLink || isPermaLink.toLowerCase() !== 'false') {
             try {
-                return new URL(node.textContent);
+                return new URL(node.textContent ?? "");
             } catch(e) {
                 console.warn('failed to parse absolute URL from GUID', node.textContent);
             }
@@ -320,7 +320,7 @@ function isWhitespaceOrComment(node) {
     switch(node.nodeType) {
         case Node.TEXT_NODE: // fallthrough
         case Node.CDATA_SECTION_NODE:
-            return node.textContent.trim() === '';
+            return (node.textContent ?? "").trim() === '';
         case Node.COMMENT_NODE:
             return true;
         default:
