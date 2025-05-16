@@ -242,18 +242,20 @@ const HANDLERS = {
 
     /**
      * @param {Element} node
-     * @returns {Author | string}
+     * @returns {(Author | string)?}
      */
     author(node) {
         if(node.children.length == 0) {
             return HANDLERS.text(node);
         }
         let index = new NodeChildrenIndex(node);
-        let result = {
-            name: index.getValue(HANDLERS.text, ["name", "atom:name", "atom03:name"]),
-        };
+        let name = index.getValue(HANDLERS.text, ["name", "atom:name", "atom03:name"]);
         index.reportUnusedExcept(["atom:uri", "atom:email"]);
-        return result;
+        if(name === null) {
+            return null;
+        } else {
+            return { name: name };
+        }
     },
 
     /**
