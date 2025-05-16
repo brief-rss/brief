@@ -7,27 +7,29 @@ import {Comm} from "./utils.js";
  */
 
 /**
+ * All elements are optional because RSS 2.0 says: "All elements of an item are optional, however at least one of title or description must be present."
+ *
  * @typedef {object} Entry
- * @property {string} title
- * @property {URL} link
- * @property {string} id
- * @property {(Author | string)[]} authors // FIXME
- * @property {string} summary
- * @property {string} content
- * @property {string} published
- * @property {string} updated
+ * @property {string?} title
+ * @property {URL?} link
+ * @property {string?} id
+ * @property {(Author | string)[]?} authors // FIXME
+ * @property {string?} summary
+ * @property {string?} content
+ * @property {string?} published
+ * @property {string?} updated
  * TODO should I use Date for the above, maybe?
  */
 
 /**
  * @typedef {object} Feed
  * @property {string} title
- * @property {string} subtitle
+ * @property {string?} subtitle
  * @property {URL} link
  * @property {Entry[]} items
- * @property {string} generator
- * @property {string} updated
- * @property {string} language
+ * @property {string?} generator
+ * @property {string?} updated
+ * @property {string?} language
  */
 
 /**
