@@ -778,7 +778,7 @@ export class Database {
         // Roughly the legacy mapEntryProperties
         let entries = [];
         for(let src of (parsedFeed.items || [])) {
-            let authors = (src.authors || []).map(a => a.name).filter(n => n).join(', ');
+            let authors = (src.authors || []).map(a => a.name).filter(n => n).join(', '); // FIXME authors can contain plain strings which will be lost
             let entry = {
                 feedID: feed.feedID,
                 providedID: src.id,
