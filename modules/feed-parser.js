@@ -262,7 +262,9 @@ const HANDLERS = {
      */
     url(node) {
         try {
-            return new URL(node.textContent, node.baseURI);
+            if(node.textContent != null) {
+                return new URL(node.textContent, node.baseURI);
+            }
         } catch(e) {
             console.warn('failed to parse URL', node.textContent, 'with base', node.baseURI);
         }
