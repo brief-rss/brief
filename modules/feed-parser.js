@@ -244,8 +244,8 @@ const HANDLERS = {
     },
 
     /**
-     * @param {Element} node
-     * @returns {URL}
+     * @param {Element | Attr} node
+     * @returns {URL?}
      */
     url(node) {
         try {
@@ -253,11 +253,12 @@ const HANDLERS = {
         } catch(e) {
             console.warn('failed to parse URL', node.textContent, 'with base', node.baseURI);
         }
+        return null;
     },
 
     /**
      * @param {Element} node
-     * @returns {string}
+     * @returns {string?}
      */
     date(node) {
         let text = (node.textContent ?? "").trim();
@@ -280,14 +281,17 @@ const HANDLERS = {
 
     /**
      * @param {Element} node
-     * @returns {URL}
+     * @returns {URL?}
      */
     atomLinkAlternate(node) {
         let rel = node.getAttribute('rel') || 'alternate';
         let known = ['alternate', 'http://www.iana.org/assignments/relation/alternate'];
         if(known.includes(rel)) {
             let text = node.getAttribute('href');
-            let link;
+            if(text === null) {
+                return null;
+            }
+            let link = null;
             try {
                 link = new URL(text, node.baseURI);
             } catch(e) {
@@ -295,11 +299,12 @@ const HANDLERS = {
             }
             return link;
         }
+        return null;
     },
 
     /**
      * @param {Element} node
-     * @returns {URL}
+     * @returns {URL?}
      */
     permaLink(node) {
         let isPermaLink = node.getAttribute('isPermaLink');
@@ -310,6 +315,7 @@ const HANDLERS = {
                 console.warn('failed to parse absolute URL from GUID', node.textContent);
             }
         }
+        return null;
     },
 };
 
