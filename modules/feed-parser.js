@@ -74,8 +74,9 @@ class NodeChildrenIndex {
     }
     /**
      * @template T
-     * @param {(node: Element | Attr) => T} handler
+     * @param {(node: Element | Attr) => T?} handler
      * @param {string[]} candidates
+     * @returns {T?}
      */
     getValue(handler, candidates) {
         // Working according to priority here, collisions may be fine in some cases
@@ -89,20 +90,32 @@ class NodeChildrenIndex {
                 return value;
             }
         }
+        return null;
     }
 
     /**
      * @template T
-     * @param {(node: Element | Attr) => T} handler
+     * @param {(node: Element) => T?} handler
      * @param {string[]} candidates
+     * @returns {T?}
      */
-    getAllValues(handler, candidates) {
+    getElementValue(handler, candidates) {
+        return this.getValue(elem => elem instanceof Element ? handler(elem) : null, candidates);
+    }
+
+    /**
+     * @template T
+     * @param {(node: Element) => T?} handler
+     * @param {string[]} candidates
+     * @returns {T[]}
+     */
+    getAllElementValues(handler, candidates) {
         // Working according to priority here, collisions may be fine in some cases
         let nodes = candidates.flatMap(name => {
             this.used.add(name);
             return this.index.get(name) ?? [];
         });
-        return nodes.map(handler);
+        return nodes.map(handler).filter(v => v !== null);
     }
 
     /**
@@ -128,15 +141,15 @@ const HANDLERS = {
         let index = new NodeChildrenIndex(node);
         let result = {
             title: index.getValue(HANDLERS.text, ["title", "rss1:title", "atom03:title", "atom:title"]),
-            link: index.getValue(HANDLERS.url, ["link", "rss1:link"])
-                ?? index.getValue(HANDLERS.atomLinkAlternate, ["atom:link", "atom03:link"])
-                ?? index.getValue(HANDLERS.permaLink, ["guid", "rss1:guid"]),
+            link: index.getElementValue(HANDLERS.url, ["link", "rss1:link"])
+                ?? index.getElementValue(HANDLERS.atomLinkAlternate, ["atom:link", "atom03:link"])
+                ?? index.getElementValue(HANDLERS.permaLink, ["guid", "rss1:guid"]),
             id: index.getValue(HANDLERS.id, ["guid", "rss1:guid", "rdf:about", "atom03:id", "atom:id"]),
-            authors: index.getAllValues(HANDLERS.author, ["author", "rss1:author", "dc:creator", "dc:author", "atom03:author", "atom:author"]),
-            summary: index.getValue(HANDLERS.text_or_xhtml, ["description", "rss1:description", "dc:description", "atom03:summary", "atom:summary"]),
-            content: index.getValue(HANDLERS.text_or_xhtml, ["content:encoded", "atom03:content", "atom:content"]),
-            published: index.getValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "atom03:issued", "dcterms:issued", "atom:published"]),
-            updated: index.getValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "atom03:modified", "dc:date", "dcterms:modified", "atom:updated"]),
+            authors: index.getAllElementValues(HANDLERS.author, ["author", "rss1:author", "dc:creator", "dc:author", "atom03:author", "atom:author"]),
+            summary: index.getElementValue(HANDLERS.text_or_xhtml, ["description", "rss1:description", "dc:description", "atom03:summary", "atom:summary"]),
+            content: index.getElementValue(HANDLERS.text_or_xhtml, ["content:encoded", "atom03:content", "atom:content"]),
+            published: index.getElementValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "atom03:issued", "dcterms:issued", "atom:published"]),
+            updated: index.getElementValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "atom03:modified", "dc:date", "dcterms:modified", "atom:updated"]),
         };
         index.reportUnusedExcept([
             "atom:category", "atom03:category", "category", "rss1:category",
@@ -157,12 +170,12 @@ const HANDLERS = {
             title: index.getValue(HANDLERS.text, ["title", "rss1:title", "atom03:title", "atom:title"]),
             subtitle: index.getValue(HANDLERS.text, ["description", "dc:description", "rss1:description", "atom03:tagline", "atom:subtitle"]),
             link: index.getValue(HANDLERS.url, ["link", "rss1:link"])
-                ?? index.getValue(HANDLERS.atomLinkAlternate, ["atom:link", "atom03:link"]),
-            items: index.getAllValues(HANDLERS.entry, ["item", "rss1:item", "atom:entry", "atom03:entry"]),
-            generator: index.getValue(HANDLERS.text, ["generator", "rss1:generator", "atom03:generator", "atom:generator"]),
-            updated: index.getValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date", "dcterms:modified", "atom:updated"]),
-            language: index.getValue(HANDLERS.lang, ["language", "rss1:language", "xml:lang"]),
-            ...index.getValue(HANDLERS.feed, ["rss1:channel"]),
+                ?? index.getElementValue(HANDLERS.atomLinkAlternate, ["atom:link", "atom03:link"]),
+            items: index.getAllElementValues(HANDLERS.entry, ["item", "rss1:item", "atom:entry", "atom03:entry"]),
+            generator: index.getElementValue(HANDLERS.text, ["generator", "rss1:generator", "atom03:generator", "atom:generator"]),
+            updated: index.getElementValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date", "dcterms:modified", "atom:updated"]),
+            language: index.getElementValue(HANDLERS.lang, ["language", "rss1:language", "xml:lang"]),
+            ...index.getElementValue(HANDLERS.feed, ["rss1:channel"]),
         };
         index.reportUnusedExcept(["atom:id", "atom03:id", "atom:author", "atom03:author", "category", "atom:category", "rss1:items"]);
         return result;
