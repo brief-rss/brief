@@ -1,3 +1,4 @@
+//@ts-strict
 import {Prefs} from "./prefs.js";
 import {SNIFF_WINDOW, sniffedToBeFeed} from "./xml-sniffer.js";
 
@@ -39,6 +40,7 @@ function clearRedirectCache() {
     console.debug("Brief: cleared redirect cache");
 }
 
+/** @param {string | null | undefined} value */
 function parseContentType(value) {
     if(value === undefined || value === null) {
         return {mime: 'application/octet-stream', encoding: 'utf-8'};
@@ -68,8 +70,14 @@ const MAYBE_FEED_TYPES = [
     // and anything with `+xml` as a special case
 ];
 
-// Headers are formally optional, but always present because of 'responseHeaders' requirement
-async function checkHeaders({requestId, tabId, url, responseHeaders=null}) {
+/**
+ * @param {{requestId: string, tabId: number, url: string, responseHeaders?: {name: string, value?: string}[]}} params
+ */
+async function checkHeaders({requestId, tabId, url, responseHeaders}) {
+    if(responseHeaders == null) {
+        // Headers are formally optional, but always present because of 'responseHeaders' requirement
+        throw new Error("Impossible: `responseHeaders` requirement ignored");
+    }
     if(tabId === browser.tabs.TAB_ID_NONE) {
         return; // This is not a real tab, so not redirecting anything
     }
@@ -103,6 +111,7 @@ async function checkHeaders({requestId, tabId, url, responseHeaders=null}) {
             return;
         }
         let filter = browser.webRequest.filterResponseData(requestId);
+        /** @type {ArrayBuffer[]?} */
         let chunks = [];
 
         filter.ondata = ({data}) => {
@@ -128,6 +137,10 @@ async function checkHeaders({requestId, tabId, url, responseHeaders=null}) {
     }
 }
 
+/**
+ * @param {ArrayBuffer[]?} buffers
+ * @param {{encoding: string, url: string, tabId: number}} _
+ */
 function checkContent(buffers, {encoding, url, tabId}) {
     if(buffers === null || buffers.length === 0) {
         return;
@@ -147,6 +160,9 @@ function checkContent(buffers, {encoding, url, tabId}) {
     }
 }
 
+/**
+ * @param {{buffers: ArrayBuffer[], encoding: string, length: number}} _
+ */
 function parseBuffers({buffers, encoding, length}) {
     let decoder = new TextDecoder(encoding, {fatal: true}); // Throws: invalid encoding
     let text = "";
