@@ -1,4 +1,5 @@
 'use strict';
+//@ts-strict
 
 /*
  * Implementation notes
@@ -57,6 +58,7 @@ const PROLOG = raw`${XML_DECL}${MISC_ITEM}*(?:${DOCTYPE}${MISC_ITEM}*)?`;
 
 const PROLOG_RE = new RegExp(raw`^${PROLOG}`);
 
+/** @param {string} text */
 function tryGetXmlRootName(text) {
     let match = PROLOG_RE.exec(text);
     if(match !== null) {
@@ -79,10 +81,11 @@ const FEED_ROOT_TAGS = ['rss', 'feed', 'rdf:RDF'];
 const RDF_NS_PURL = 'http://purl.org/rss/1.0/';
 const RDF_NS_W3 = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 
+/** @param {string} text */
 export function sniffedToBeFeed(text) {
     let rootTag = tryGetXmlRootName(text);
 
-    if(FEED_ROOT_TAGS.includes(rootTag)) {
+    if(rootTag !== null && FEED_ROOT_TAGS.includes(rootTag)) {
         if(rootTag === 'rdf:RDF') {
             // Requires two namespace URIs to be present too
             return text.includes(RDF_NS_PURL) && text.includes(RDF_NS_W3);
