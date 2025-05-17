@@ -1,7 +1,15 @@
+//@ts-strict
 import {Comm, wait, xhrPromise} from "./utils.js";
 
 const DEFAULT_TIMEOUT = 25000;
 
+/**
+ * @typedef {import("/modules/database.js").Database} Database
+ */
+
+/**
+ * @param {{feed: {feedID: string, favicon: string}, db: Database}} _
+ */
 export async function updateFavicon({feed, db}) {
     if(Comm.verbose) {
         console.log("Brief: fetching favicon for", feed);
@@ -14,6 +22,9 @@ export async function updateFavicon({feed, db}) {
     await db.modifyFeed(updatedFeed);
 }
 
+/**
+ * @param {{feedID: string, websiteURL?: string}} feed
+ */
 export async function fetchFaviconAsURL(feed) {
     // Try, in order, to get a favicon from
     // 1. favicon.ico relative to the website URL
@@ -35,6 +46,9 @@ export async function fetchFaviconAsURL(feed) {
     }
 }
 
+/**
+ * @param {{feedID: string, websiteURL?: string?, title?: string?}} feed
+ */
 async function fetchFaviconHardcodedURL(feed) {
     if (!feed.websiteURL) {
         return;
@@ -49,6 +63,9 @@ async function fetchFaviconHardcodedURL(feed) {
     return favicon;
 }
 
+/**
+ * @param {{feedID: string, websiteURL?: string, title?: string?}} feed
+ */
 async function fetchFaviconWebsiteURL(feed) {
     if (!feed.websiteURL) {
         return;
@@ -67,6 +84,9 @@ async function fetchFaviconWebsiteURL(feed) {
 
 }
 
+/**
+ * @param {{feedID: string, websiteURL?: string, title?: string?}} feed
+ */
 async function fetchFaviconOriginURL(feed) {
     if (!feed.websiteURL) {
         return;
@@ -84,6 +104,7 @@ async function fetchFaviconOriginURL(feed) {
 
 }
 
+/** @param {string?} url */
 async function fetchDocFromURL(url) {
     if (!url) {
         return;
@@ -99,6 +120,10 @@ async function fetchDocFromURL(url) {
     return doc;
 }
 
+/**
+ * @param {{title?: string?}} feed
+ * @param {URL} faviconURL
+ */
 async function fetchFaviconFromURL(feed, faviconURL) {
     let response = await fetch(faviconURL, {redirect: 'follow'});
 
@@ -127,13 +152,18 @@ async function fetchFaviconFromURL(feed, faviconURL) {
 
     let reader = new FileReader();
     let favicon = await new Promise((resolve, reject) => {
-        reader.onload = e => resolve(e.target.result);
+        reader.onload = () => resolve(reader.result);
         reader.onerror = e => reject(e);
         reader.readAsDataURL(blob);
     });
 
     return favicon;
 }
+
+/**
+ * @param {{title?: string?, websiteURL?: string}} feed
+ * @param {Document} doc
+ */
 
 function getFaviconURLFromDoc(feed, doc) {
     if(!doc) {
@@ -165,7 +195,8 @@ function getFaviconURLFromDoc(feed, doc) {
         }
         return;
     }
-    let faviconURL = new URL(linkElements.getAttribute("href"),feed.websiteURL);
+    let href = linkElements.getAttribute("href");
+    let faviconURL = href ? new URL(href, feed.websiteURL) : null;
 
     if(!faviconURL) {
         if(Comm.verbose) {
