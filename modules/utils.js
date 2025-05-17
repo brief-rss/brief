@@ -10,9 +10,9 @@ export function wait(delay) {
     return new Promise(resolve => setTimeout(() => resolve(), delay));
 }
 
-/** @return {null} */
+/** @return {Promise<null>} */
 function microtask() {
-    return null; // `await` always enqueues a microtask to resume in
+    return Promise.resolve(null); // `await` always enqueues a microtask to resume in
 }
 
 /**
