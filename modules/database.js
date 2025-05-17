@@ -557,6 +557,9 @@ export class Database {
         }
     }
 
+    /**
+     * @returns {Promise<{entries: any[], newEntries: any[]}>}
+     */
     async pushUpdatedFeed({feed, parsedFeed}) {
         let now = Date.now();
         let entries = Database._feedToEntries({feed, parsedFeed, now});

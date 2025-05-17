@@ -1,8 +1,13 @@
+//@ts-strict
 import {Prefs} from "./prefs.js";
 import {Comm, wait, getPluralForm} from "./utils.js";
 import {fetchFeed} from "./feed-fetcher.js";
 import {updateFavicon} from "./favicon-fetcher.js";
 
+/**
+ * @typedef {import("/modules/database.js").Feed} Feed
+ * @typedef {import("/modules/database.js").Database} Database
+ */
 
 export let FeedUpdater = {
     UPDATE_TIMER_INTERVAL: 60000, // 1 minute
@@ -10,14 +15,26 @@ export let FeedUpdater = {
 
     FEED_ICON_URL: '/skin/brief-icon-32.png',
 
+    /** @type {string[]} */
     queue: [],
+    /** @type {string[]} */
     priority: [],
+    /** @type {string[]} */
     underway: [],
+    /** @type {string[]} */
     completed: [],
 
     updatedFeeds: new Map(),
 
-    db: null,
+    /** @type Database? */
+    _db: null,
+
+    get db() {
+        if(!this._db) {
+            throw new Error("Updater used before initialization");
+        }
+        return this._db;
+    },
 
     get active() {
         return this.queue.length + this.underway.length > 0;
@@ -32,8 +49,9 @@ export let FeedUpdater = {
         }
     },
 
+    /** @param {{db: Database}} arg */
     async init({db}) {
-        this.db = db;
+        this._db = db;
         /*spawn*/ this._scheduler();
 
         Comm.registerObservers({
@@ -47,20 +65,24 @@ export let FeedUpdater = {
         });
     },
 
-    async updateFeeds(feeds, options) {
+    /**
+     * @param {(string | Feed)[]} feeds
+     * @param {{background: boolean?}} options
+     */
+    async updateFeeds(feeds, options={background: false}) {
         let queueLength = this.queue.length;
-        let {background} = options || {};
+        let {background} = options;
         if(!Array.isArray(feeds)) {
             feeds = [feeds];
         }
         //TODO: process folders recursively
-        feeds = feeds.map(feed => feed.feedID || feed);
+        let feedIds = feeds.map(feed => typeof feed === 'string' ? feed : feed.feedID);
         // Enqueue the feeds that are not underway
-        feeds = feeds.filter(feed => !this.underway.includes(feed));
-        if(feeds.length === 0) {
+        feedIds = feedIds.filter(feed => !this.underway.includes(feed));
+        if(feedIds.length === 0) {
             return;
         }
-        for(let id of feeds) {
+        for(let id of feedIds) {
             if(!background && !this.priority.includes(id)) {
                 this.priority.push(id);
             }
@@ -77,8 +99,11 @@ export let FeedUpdater = {
         }
     },
 
-    async updateAllFeeds(options) {
-        let {background} = options || {};
+    /**
+     * @param {{background: boolean?}} options
+     */
+    async updateAllFeeds(options={background: false}) {
+        let {background} = options;
         let feeds = this.db.feeds.filter(f => !f.hidden && !f.isFolder);
         this.updateFeeds(feeds, {background});
     },
@@ -135,6 +160,9 @@ export let FeedUpdater = {
             } else {
                 this.queue = this.queue.filter(f => f != feedID);
             }
+            if(feedID === undefined) {
+                throw new Error("Impossible: non-empty queue is empty");
+            }
             this.underway.push(feedID);
             this._broadcastStatus();
 
@@ -160,6 +188,7 @@ export let FeedUpdater = {
         }
     },
 
+    /** @param {string} feedID */
     async update(feedID) {
         let feed = this.db.getFeed(feedID);
         if(feed === undefined) { // Deleted from DB while in queue?
