@@ -1,10 +1,14 @@
+//@ts-strict
 import {parseFeed} from "./feed-parser.js";
 import {wait, xhrPromise} from "./utils.js";
 
 const DEFAULT_TIMEOUT = 25000; // Default fetch timeout
 
+/**
+ * @param {URL | string | {feedURL: URL | string}} feed
+ */
 export async function fetchFeed(feed, {allow_cached = false} = {}) {
-    let url = feed.feedURL || feed;
+    let url = ((typeof feed === 'string') || (feed instanceof URL))  ? feed: feed.feedURL;
     let request = new XMLHttpRequest();
     request.open('GET', url);
     request.overrideMimeType('application/xml');
@@ -27,7 +31,7 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
         return;
     }
 
-    let result = parseFeed(doc, url);
+    let result = parseFeed(doc, new URL(url));
 
     if(!result || !result.items || !(result.items.length > 0)) {
         console.warn("failed to find any items in", url);
