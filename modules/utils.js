@@ -202,6 +202,8 @@ export let Comm = {
                 ]).then(([local, remote]) => local !== undefined ? local : remote);
             case 'master':
                 return this._notifyObservers(message);
+            default:
+                throw new Error("Unknown Comm message direction");
         }
     },
 
@@ -227,17 +229,20 @@ export let Comm = {
         }
     },
 
-    /** @param {any} handlers */
+    /**
+     * @param {Partial<HandlerTypes>} handlers
+     */
     registerObservers(handlers) {
         /** @type {(message: any) => any} */
         let listener = message => {
-            let {id, _type} = message;
+            let {id, _type, payload} = /** @type {{_type: string, id: keyof HandlerTypes, payload: any}} */(message);
             if(_type !== 'broadcast' && (_type !== 'master' || !this.master)) {
                 return;
             }
+            /** @type {any} */
             let handler = handlers[id];
             if(handler) {
-                return handler(message);
+                return handler(...payload);
             }
         };
         if(Comm.master) {
@@ -258,18 +263,44 @@ export let Comm = {
     },
 
     /**
-     * @param {string} id
-     * @param {any} payload
+     * @template {keyof HandlerTypes} ID
+     * @param {ID} id
+     * @param {Parameters<HandlerTypes[ID]>} payload
+     * @returns {Promise<ReturnType<HandlerTypes[ID]>?>}
      */
-    broadcast(id, payload) {
-        return Comm._send(Object.assign({}, payload, {id, _type: 'broadcast-tx'}));
+    broadcast(id, ...payload) {
+        return Comm._send({id, payload, _type: 'broadcast-tx'});
     },
 
     /**
-     * @param {string} id
-     * @param {any} payload
+     * @template {keyof HandlerTypes} ID
+     * @param {ID} id
+     * @param {Parameters<HandlerTypes[ID]>} payload
+     * @returns {Promise<ReturnType<HandlerTypes[ID]>>}
      */
-    callMaster(id, payload) {
-        return Comm._send(Object.assign({}, payload, {id, _type: 'master'}));
+    callMaster(id, ...payload) {
+        return Comm._send({id, payload, _type: 'master'});
     },
 };
+
+/**
+ * FIXME get rid of `any` here
+ * @typedef {object} HandlerTypes
+ * @property {(arg: {feeds: any}) => void} entries-expire
+ * @property {(arg: {feeds: any, entries: any, changes: any}) => void} entries-updated
+ * @property {(arg: {feeds: any, options: any}) => void} feedlist-add
+ * @property {(arg: {feeds: any}) => void} feedlist-delete
+ * @property {() => any[]} feedlist-get
+ * @property {(arg: {updates: any}) => void} feedlist-modify
+ * @property {(arg: {feeds: any}) => void} feedlist-updated
+ * @property {() => Promise<boolean>} is-options-window-open
+ * @property {(arg: {name: string, value: string | boolean | number, actionName: any}) => void} set-pref
+ * @property {() => void} style-updated
+ * @property {(arg: {feed: {url: string}}) => (string[])} subscribe-add-feed
+ * @property {(arg: {windowId: number}) => ({url: string?, linkTitle: string?}[])} subscribe-get-feeds
+ * @property {() => void} update-all
+ * @property {(arg: {feeds: any}) => void} update-feeds
+ * @property {() => void} update-query-status
+ * @property {(arg: {active: boolean, underway: any[], progress: number}) => void} update-status
+ * @property {() => void} update-stop
+ */
