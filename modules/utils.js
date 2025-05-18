@@ -301,6 +301,6 @@ export let Comm = {
  * @property {() => void} update-all
  * @property {(arg: {feeds: string[]}) => void} update-feeds
  * @property {() => void} update-query-status
- * @property {(arg: {active: boolean, underway: any[], progress: number}) => void} update-status
+ * @property {(arg: {active: boolean, underway: string[], progress: number}) => void} update-status
  * @property {() => void} update-stop
  */
