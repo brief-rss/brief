@@ -9,7 +9,7 @@ import {Comm} from "./utils.js";
 /**
  * All elements are optional because RSS 2.0 says: "All elements of an item are optional, however at least one of title or description must be present."
  *
- * @typedef {object} Entry
+ * @typedef {object} ParsedEntry
  * @property {string?} title
  * @property {URL?} link
  * @property {string?} id
@@ -22,11 +22,11 @@ import {Comm} from "./utils.js";
  */
 
 /**
- * @typedef {object} Feed
+ * @typedef {object} ParsedFeed
  * @property {string?} title
  * @property {string?} subtitle
  * @property {URL?} link
- * @property {Entry[]} items
+ * @property {ParsedEntry[]} items
  * @property {string?} generator
  * @property {string?} updated
  * @property {string?} language
@@ -135,7 +135,7 @@ class NodeChildrenIndex {
 const HANDLERS = {
     /**
      * @param {Element} node
-     * @returns {Entry}
+     * @returns {ParsedEntry}
      */
     entry(node) {
         let index = new NodeChildrenIndex(node);
@@ -162,7 +162,7 @@ const HANDLERS = {
 
     /**
      * @param {Element} node
-     * @returns {Feed}
+     * @returns {ParsedFeed}
      */
     feed(node) {
         let index = new NodeChildrenIndex(node);
