@@ -2,6 +2,9 @@ import {Prefs} from "./prefs.js";
 import {updateFavicon} from "./favicon-fetcher.js";
 import {Comm, parseDateValue, asArray, hashString} from "./utils.js";
 
+/**
+ * @typedef {import("/modules/feed-parser.js").ParsedFeed} ParsedFeed
+ */
 
 /**
  * Database design and considerations
@@ -45,7 +48,10 @@ export class Database {
         return Comm.callMaster('feedlist-get');
     }
 
-    /** @returns {Feed} feed */
+    /**
+     * @param {string} feedID
+     * @returns {Feed} feed
+     */
     getFeed(feedID) {
         let feed = this.feeds.filter(f => f.feedID === feedID)[0];
         if(feed === undefined) {
@@ -62,6 +68,7 @@ export class Database {
      * 2.4 to 2.5.5 used to use `persistent`).
      */
     static async init() {
+        /** @type {((ev: IDBVersionChangeEvent) => void)?} */
         let upgrade = null;
         if(Comm.master) {
             // Upgrades happen on master only
@@ -100,6 +107,10 @@ export class Database {
 
         return db;
     }
+    /**
+     * @param {IDBDatabase} idb
+     * @param {Feed[]} feeds
+     */
     constructor(idb, feeds) {
         this._db = idb;
         this._feeds = this._reindex(feeds);
@@ -121,7 +132,7 @@ export class Database {
                 'entries-expire': ({feeds}) => this.expireEntries(feeds),
             });
 
-            browser.bookmarks.onCreated.addListener((id, {url}) => {
+            browser.bookmarks.onCreated.addListener((_id, {url}) => {
                 if(url === undefined) {
                     return;
                 }
@@ -130,7 +141,7 @@ export class Database {
                     changes: {starred: 1},
                 });
             });
-            browser.bookmarks.onRemoved.addListener((id, {node: {url}}) => {
+            browser.bookmarks.onRemoved.addListener((_id, {node: {url}}) => {
                 if(url === undefined) {
                     return;
                 }
@@ -299,6 +310,7 @@ export class Database {
         return await DbUtil.requestPromise(request);
     }
 
+    /** @param {IDBDatabase} db */
     static async _loadFeeds(db) {
         let tx = db.transaction(['feeds']);
         let request = tx.objectStore('feeds').getAll();
@@ -411,6 +423,7 @@ export class Database {
             feedID = String(Math.max(1, ...folderIds) + 1);
         }
         console.log(`Need a new node ${feedID} from`, feed);
+        /** @type {Feed} */
         let newFeed = {
             feedID,
             feedURL: url,
@@ -446,8 +459,6 @@ export class Database {
     }
 
     /**
-     * @typedef {Pick<Feed, 'feedID'> & Partial<Feed>} FeedUpdate
-     *
      * @param {FeedUpdate | FeedUpdate[]} props (array used only from onMove for reindex)
      */
     async modifyFeed(props) {
@@ -481,6 +492,9 @@ export class Database {
         await this.saveFeeds();
     }
 
+    /**
+     * @param {Feed | Feed[]} feeds
+     */
     async deleteFeed(feeds) {
         if(!Comm.master) {
             return Comm.callMaster('feedlist-delete', {feeds});
@@ -489,8 +503,8 @@ export class Database {
             feeds = [feeds];
         }
         feeds = this._includeChildren(feeds);
-        feeds = feeds.map(f => ({feedID: f.feedID, hidden: Date.now()}));
-        await this.modifyFeed(feeds);
+        let updates = feeds.map(f => ({feedID: f.feedID, hidden: Date.now()}));
+        await this.modifyFeed(updates);
     }
 
     async expireEntries(feeds) {
@@ -945,7 +959,10 @@ export class Database {
  * @property {number} lastUpdated
  * @property {number} oldestEntryDate
  * @property {number} lastFaviconRefresh
+ *
+ * @typedef {Pick<Feed, 'feedID'> & Partial<Feed>} FeedUpdate
  */
+
 
 class Query {
     /**
@@ -1442,6 +1459,7 @@ class Query {
             unwrap = true;
         }
 
+        /** @type {IDBCursorDirection} */
         let direction = "prev";
         if(filters.sort.direction === 'asc') {
             direction = "next";

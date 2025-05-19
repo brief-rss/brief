@@ -81,8 +81,8 @@ export function iterSnapshot(result) {
 
 /**
  * @template T
- * @param {[T] | T} v
- * @returns {[T]}
+ * @param {T[] | T} v
+ * @returns {T[]}
  */
 export function asArray(v) {
     if(Array.isArray(v)) {
@@ -284,15 +284,20 @@ export let Comm = {
 };
 
 /**
+ * @typedef {import("/modules/database.js").Feed} Feed
+ * @typedef {import("/modules/database.js").FeedUpdate} FeedUpdate
+ */
+
+/**
  * FIXME get rid of `any` here
  * @typedef {object} HandlerTypes
  * @property {(arg: {feeds: any}) => void} entries-expire
  * @property {(arg: {feeds: any, entries: any, changes: any}) => void} entries-updated
  * @property {(arg: {feeds: any, options: any}) => void} feedlist-add
- * @property {(arg: {feeds: any}) => void} feedlist-delete
- * @property {() => any[]} feedlist-get
- * @property {(arg: {updates: any}) => void} feedlist-modify
- * @property {(arg: {feeds: any}) => void} feedlist-updated
+ * @property {(arg: {feeds: Feed | Feed[]}) => void} feedlist-delete
+ * @property {() => Feed[]} feedlist-get
+ * @property {(arg: {updates: (FeedUpdate | FeedUpdate[])}) => void} feedlist-modify
+ * @property {(arg: {feeds: Feed[]}) => void} feedlist-updated
  * @property {() => Promise<boolean>} is-options-window-open
  * @property {(arg: {name: string, value: string | boolean | number, actionName: any}) => void} set-pref
  * @property {() => void} style-updated

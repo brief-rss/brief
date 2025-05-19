@@ -27,6 +27,10 @@ const REFRESH_ABORT = 'brief:refresh-abort-callbacks';
 const TUTORIAL_URL = "/ui/firstrun.xhtml?tutorial";
 
 /**
+ * @typedef {import("/modules/database.js").Feed} Feed
+ */
+
+/**
  * Manages the display of feed content.
  * @param {{title, filter?, mode, query?, entries?, db?, feeds?}} arg
  */
@@ -42,6 +46,11 @@ export function FeedView({
     this._markVisibleTimeout = null;
     // Autoselect timeout ID for clearTimeout
     this._scrollSelectionTimeout = null;
+    /**
+     * Feed list cache
+     * @type {Feed[]?}
+     */
+    this._feeds = null;
 
     if(db !== null) {
         this._feeds = db.feeds;
@@ -150,9 +159,6 @@ FeedView.prototype = {
 
     // Indicates if a filter paramater is fixed and cannot be toggled by the user.
     _fixedStarred: false,
-
-    // Feed list cache
-    _feeds: null,
 
     // Additional filtering mode (unread / starred / all)
     _filter: 'all',

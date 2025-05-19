@@ -983,6 +983,8 @@ export let TagListContextMenu = {
 
 export let FeedListContextMenu = {
     menu: null,
+    /** @type {Feed?} */
+    targetFeed: null,
     build() {
         this.menu = document.getElementById('feed-list-context-menu');
         const handlers = {
