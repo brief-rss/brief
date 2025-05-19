@@ -1562,20 +1562,24 @@ class Query {
 
 /// Misc utilities for working with databases
 const DbUtil = {
+    /** @param {IDBRequest} req */
     requestPromise(req) {
         return new Promise((resolve, reject) => {
-            req.onsuccess = (event) => resolve(event.target.result);
-            req.onerror = (event) => reject(event.target.error);
+            req.onsuccess = (_event) => resolve(req.result);
+            req.onerror = (_event) => reject(req.error);
         });
     },
 
-    // Note: this is resolved after the transaction is finished(!)
+    /**
+     * Note: this is resolved after the transaction is finished(!)
+     * @param {IDBTransaction} tx
+     */
     transactionPromise(tx) {
         return new Promise((resolve, reject) => {
             let oncomplete = tx.oncomplete;
             let onerror = tx.onerror;
-            tx.oncomplete = () => { if(oncomplete) oncomplete(); resolve(); };
-            tx.onerror = () => { if(onerror) onerror(); reject(); };
+            tx.oncomplete = (ev) => { if(oncomplete) oncomplete.call(tx, ev); resolve(tx); };
+            tx.onerror = (ev) => { if(onerror) onerror.call(tx, ev); reject(); };
         });
     },
 };
