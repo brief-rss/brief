@@ -52,7 +52,7 @@ export let Prefs = {
 
     /**
      * @param {string} name
-     * @param {string} actionName
+     * @param {'update' | 'reset'} actionName
      */
     set: async function(name, value, actionName='update') {
         if(!Comm.master) {

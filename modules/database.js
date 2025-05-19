@@ -50,7 +50,7 @@ export class Database {
 
     /**
      * @param {string} feedID
-     * @returns {Feed} feed
+     * @returns {Feed | undefined} feed
      */
     getFeed(feedID) {
         let feed = this.feeds.filter(f => f.feedID === feedID)[0];
@@ -507,7 +507,10 @@ export class Database {
         await this.modifyFeed(updates);
     }
 
-    async expireEntries(feeds) {
+    /**
+     * @param {Feed | Feed[] | null} feeds
+     */
+    async expireEntries(feeds=null) {
         if(!Comm.master) {
             return Comm.callMaster('entries-expire', {feeds});
         }
@@ -600,7 +603,7 @@ export class Database {
         return newEntries;
     }
 
-    async _pushEntries({entries, tx=undefined}) {
+    async _pushEntries({entries, tx=null}) {
         if(entries.length === 0) {
             return;
         }

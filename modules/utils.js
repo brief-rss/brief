@@ -291,7 +291,7 @@ export let Comm = {
 /**
  * FIXME get rid of `any` here
  * @typedef {object} HandlerTypes
- * @property {(arg: {feeds: any}) => void} entries-expire
+ * @property {(arg: {feeds: Feed | Feed[] | null}) => void} entries-expire
  * @property {(arg: {feeds: any, entries: any, changes: any}) => void} entries-updated
  * @property {(arg: {feeds: any, options: any}) => void} feedlist-add
  * @property {(arg: {feeds: Feed | Feed[]}) => void} feedlist-delete
@@ -299,7 +299,7 @@ export let Comm = {
  * @property {(arg: {updates: (FeedUpdate | FeedUpdate[])}) => void} feedlist-modify
  * @property {(arg: {feeds: Feed[]}) => void} feedlist-updated
  * @property {() => Promise<boolean>} is-options-window-open
- * @property {(arg: {name: string, value: string | boolean | number, actionName: any}) => void} set-pref
+ * @property {(arg: {name: string, value: string | boolean | number, actionName: 'update' | 'reset'}) => void} set-pref
  * @property {() => void} style-updated
  * @property {(arg: {feed: {url: string}}) => (string[])} subscribe-add-feed
  * @property {(arg: {windowId: number}) => ({url: string?, linkTitle: string?}[])} subscribe-get-feeds
