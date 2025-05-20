@@ -213,6 +213,9 @@ export let FeedUpdater = {
         //Do we need to refresh the favicon?
         let nextFaviconRefresh = feed.lastFaviconRefresh + this.FAVICON_REFRESH_INTERVAL;
         feed = this.db.getFeed(feedID); // Updated websiteURL
+        if(feed === undefined) { // Deleted from DB while in queue?
+            return;
+        }
         if(!feed.favicon || feed.favicon === 'no-favicon' || Date.now() > nextFaviconRefresh) {
             /*spawn*/ updateFavicon({feed, db: this.db}).catch(error => {
                 console.warn(`Brief failed to update favicon for ${feed.feedURL}:`, error);
@@ -248,7 +251,11 @@ export let FeedUpdater = {
         let alertText;
 
         if (feedCount == 1) {
-            let feedTitle = this.db.getFeed(firstFeed).title;
+            let feed = this.db.getFeed(firstFeed);
+            if(feed === undefined) { // Deleted from DB during update?
+                return;
+            }
+            let feedTitle = feed.title;
             feedTitle = feedTitle.length < 35 ? feedTitle : feedTitle.substr(0, 35) + '\u2026';
 
             alertText = browser.i18n.getMessage(
