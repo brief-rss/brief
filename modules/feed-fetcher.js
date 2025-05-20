@@ -29,20 +29,20 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
             rqst.open('GET', url);
             rqst.overrideMimeType('application/xml');
             if(!allow_cached) {
-		rqst.setRequestHeader('Cache-control', 'no-cache');
-	    }
-	    rqst.responseType = 'text';
-	    let text = await Promise.race([
-		xhrPromise(rqst).catch(() => undefined),
-		wait(DEFAULT_TIMEOUT),
-	    ]);
-	    const parser = new DOMParser();
-	    doc = parser.parseFromString(cleanEntities(text), 'application/xml');
-	}
-	else {
+                rqst.setRequestHeader('Cache-control', 'no-cache');
+            }
+            rqst.responseType = 'text';
+            let text = await Promise.race([
+                xhrPromise(rqst).catch(() => undefined),
+                wait(DEFAULT_TIMEOUT),
+            ]);
+            const parser = new DOMParser();
+            doc = parser.parseFromString(cleanEntities(text), 'application/xml');
+        }
+        else {
             console.error("failed to fetch", url);
             return;
-	}
+        }
     }
 
     if(doc.documentElement.localName === 'parseerror') {
