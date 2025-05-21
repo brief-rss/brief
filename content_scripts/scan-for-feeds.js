@@ -39,7 +39,7 @@
     // Ok, not a feed page itself, any links to feeds?
     // Inspired by Firefox's getFeedsInfo in `browser/base/content/content.js`
     let links = document.querySelectorAll(
-        'link[rel~=feed], link[rel~=alternate]:not([rel~=stylesheet]), a[href$="rss"]');
+        'link[rel~=feed], link[rel~=alternate]:not([rel~=stylesheet]), a[href$=".rss"]');
 
     function isFeedLink(link) {
         if(link.rel.match(/\bfeed\b/)) {
@@ -48,15 +48,14 @@
         if(link.type.match(/^\s*application\/(rss|atom)\+xml(\s*;.*)?$/i)) {
             return true;
         }
+        if (link.href.endsWith(".rss") && new URL(link.href, window.location.href).origin === window.location.origin) {
+            return true;
+        }
         return false;
     }
 
-    function isRssHref(link) {
-        return link.href.split('.').pop() === 'rss';
-    }
-
     // TODO: Test for "allowed to link" skipped
-    let feeds = Array.from(links).filter((l) => isFeedLink(l) || isRssHref(l)).map(
+    let feeds = Array.from(links).filter((l) => isFeedLink(l)).map(
         l => ({linkTitle: l.title, url: l.href, kind: 'link'})
     );
 
