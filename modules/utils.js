@@ -176,6 +176,23 @@ export async function openBackgroundTab(url) {
     }
 }
 
+/**
+ * @param {string} txt
+ * @return {string}
+ */
+export function cleanEntities(txt) {
+    let characters = [
+        {find : "&ndash;", replace : "&#8211;"},
+        {find : "&mdash;", replace : "&#8212;"},
+        {find : "&ucirc;", replace : "&#251;"},
+        {find : "&ouml;", replace : "&#246;"}
+    ];
+    for (let ch of characters) {
+        txt = txt.replace(new RegExp(ch.find, 'g'), ch.replace);
+    }
+    return txt;
+}
+
 // ===== Messaging helpers =====
 export let Comm = {
     master: false,
