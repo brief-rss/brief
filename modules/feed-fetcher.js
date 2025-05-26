@@ -15,37 +15,18 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
     if(!allow_cached) {
         request.setRequestHeader('Cache-control', 'no-cache');
     }
-    request.responseType = 'document';
+    request.responseType = '';
 
     let doc = await Promise.race([
         xhrPromise(request).catch(() => undefined),
         wait(DEFAULT_TIMEOUT),
     ]);
 
-    if(!doc) {
-        if (request.status == 200) {
-            // Retry the request but parsing the response by hand cleaning named entities.
-            let rqst = new XMLHttpRequest();
-            rqst.open('GET', url);
-            rqst.overrideMimeType('application/xml');
-            if(!allow_cached) {
-                rqst.setRequestHeader('Cache-control', 'no-cache');
-            }
-            rqst.responseType = 'text';
-            let text = await Promise.race([
-                xhrPromise(rqst).catch(() => undefined),
-                wait(DEFAULT_TIMEOUT),
-            ]);
-            const parser = new DOMParser();
-            doc = parser.parseFromString(cleanEntities(text), 'application/xml');
-        }
-        else {
-            console.error("failed to fetch", url);
-            return;
-        }
+    if(!doc && request.status === 200) {
+        doc = cleanEntities(request.responseText);
     }
 
-    if(doc.documentElement.localName === 'parseerror') {
+    if(!doc || doc.documentElement.localName === 'parsererror') {
         console.error("failed to parse as XML", url);
         return;
     }
@@ -62,4 +43,3 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
     }
     return result;
 }
-

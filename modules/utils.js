@@ -31,7 +31,7 @@ export function expectedEvent(element, event) {
  */
 export function xhrPromise(request) {
     return new Promise((resolve, reject) => {
-        request.onload = () => resolve(request.response);
+        request.onload = () => resolve(request.responseXML);
         request.onerror = e => reject(e);
         request.onabort = e => reject(e);
         request.send();
@@ -178,19 +178,12 @@ export async function openBackgroundTab(url) {
 
 /**
  * @param {string} txt
- * @return {string}
+ * return {XMLDocument}
  */
 export function cleanEntities(txt) {
-    let characters = [
-        {find : "&ndash;", replace : "&#8211;"},
-        {find : "&mdash;", replace : "&#8212;"},
-        {find : "&ucirc;", replace : "&#251;"},
-        {find : "&ouml;", replace : "&#246;"}
-    ];
-    for (let ch of characters) {
-        txt = txt.replace(new RegExp(ch.find, 'g'), ch.replace);
-    }
-    return txt;
+    const doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
+    let savetxt = txt.replace(/<!DOCTYPE[^>]*>/, doctype);
+    return new DOMParser().parseFromString(savetxt, 'application/xml');
 }
 
 // ===== Messaging helpers =====
