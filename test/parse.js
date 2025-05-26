@@ -25,4 +25,17 @@ T.runTests('parse', {
         T.assert_eq(item.published, "Mon, 01 Jan 2018 08:00:00 GMT");
         T.assert_eq(item.id, "tag:id");
     },
+    async snippetRss091NetscapeWithEntities() {
+        let feed = await fetchFeed(new URL("snippets/rss-0.91-netscape-with-entities.xml", document.location.href));
+        T.assert_eq(feed.title, "Scripting News\u{2014}example");
+        T.assert_eq(feed.updated, "Thu, 08 Jul 1999 07:00:00 GMT");
+        T.assert_eq(feed.link.href, "http://www.scripting.com/");
+        T.assert_eq(feed.subtitle, "News and commentary from the cross-platform scripting community.");
+
+        let item = feed.items[0];
+        T.assert_eq(item.title, "stuff");
+        T.assert_eq(item.link.href, "http://bar/");
+        T.assert_eq(item.summary, "This is an article about some stuff");
+        T.assert_eq(item.id, null);
+    },
 });
