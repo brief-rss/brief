@@ -661,7 +661,7 @@ export class Database {
         let allEntries = [];
         let newEntries = []; // For update notification
 
-        if(tx === undefined) {
+        if(tx == null) {
             tx = this._db.transaction(['entries', 'revisions'], 'readwrite');
         }
         // Scan 1: every entry with IDs provided
