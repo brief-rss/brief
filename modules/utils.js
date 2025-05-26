@@ -178,19 +178,21 @@ export async function openBackgroundTab(url) {
 
 /**
  *
- * Some old rss files use DOCTYPE elements that point to currently inexistent links to old versions of the DTD.
+ * 1. Some old rss files use DOCTYPE elements that point to currently inexistent links to old versions of the DTD.
  * e.g.: <!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "http://my.netscape.com/publish/formats/rss-0.91.dtd">
  * This may cause some issues as those rss file may contain named entities that cannot be resolved against the DTD file.
  * We can solve this by replacing the doctype element with one that includes all HTML named entities.
  * This is a superset of the named entities declared in the 0.91 dtd, which may be an issue.
  *
+ * 2. Some server software generates XML with leading whitespace before the XML declaration which is incorrect by spec, but easy to fix.
+ *
  * @param {string} txt
  * return {XMLDocument}
  */
-export function parseXmlWithXhtmlEntities(txt) {
+export function parseXmlWithWorkarounds(txt) {
     const doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
     let savetxt = txt.replace(/<!DOCTYPE[^>]*>/, doctype);
-    return new DOMParser().parseFromString(savetxt, 'application/xml');
+    return new DOMParser().parseFromString(savetxt.trim(), 'application/xml');
 }
 
 // ===== Messaging helpers =====
