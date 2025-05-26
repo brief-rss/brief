@@ -1,6 +1,6 @@
 //@ts-strict
 import {parseFeed} from "./feed-parser.js";
-import {wait, xhrPromise} from "./utils.js";
+import {wait, xhrPromise, cleanEntities} from "./utils.js";
 
 const DEFAULT_TIMEOUT = 25000; // Default fetch timeout
 
@@ -15,18 +15,18 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
     if(!allow_cached) {
         request.setRequestHeader('Cache-control', 'no-cache');
     }
-    request.responseType = 'document';
+    request.responseType = '';
 
     let doc = await Promise.race([
         xhrPromise(request).catch(() => undefined),
         wait(DEFAULT_TIMEOUT),
     ]);
-    if(!doc) {
-        console.error("failed to fetch", url);
-        return;
+
+    if(!doc && request.status === 200) {
+        doc = cleanEntities(request.responseText);
     }
 
-    if(doc.documentElement.localName === 'parseerror') {
+    if(!doc || doc.documentElement.localName === 'parsererror') {
         console.error("failed to parse as XML", url);
         return;
     }
@@ -43,4 +43,3 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
     }
     return result;
 }
-
