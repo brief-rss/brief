@@ -187,7 +187,7 @@ export async function openBackgroundTab(url) {
  * @param {string} txt
  * return {XMLDocument}
  */
-export function cleanEntities(txt) {
+export function parseXmlWithXhtmlEntities(txt) {
     const doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
     let savetxt = txt.replace(/<!DOCTYPE[^>]*>/, doctype);
     return new DOMParser().parseFromString(savetxt, 'application/xml');

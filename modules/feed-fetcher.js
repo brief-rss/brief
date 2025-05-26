@@ -1,6 +1,6 @@
 //@ts-strict
 import {parseFeed} from "./feed-parser.js";
-import {wait, xhrPromise, cleanEntities} from "./utils.js";
+import {wait, xhrPromise, parseXmlWithXhtmlEntities} from "./utils.js";
 
 const DEFAULT_TIMEOUT = 25000; // Default fetch timeout
 
@@ -23,7 +23,7 @@ export async function fetchFeed(feed, {allow_cached = false} = {}) {
     ]);
 
     if(!doc && request.status === 200) {
-        doc = cleanEntities(request.responseText);
+        doc = parseXmlWithXhtmlEntities(request.responseText);
     }
 
     if(!doc || doc.documentElement.localName === 'parsererror') {
