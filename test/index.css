@@ -1,0 +1,21 @@
+#results {
+    font-weight: bold;
+}
+.test-result {
+    margin-block: 0;
+}
+[data-status=good] {
+    color: green;
+}
+[data-status=bad] {
+    color: red;
+}
+.error-details {
+    font-weight: normal;
+    margin-block: 0;
+    margin-left: 1em;
+}
+
+details > p, details > details {
+    margin-left: 1em;
+}
