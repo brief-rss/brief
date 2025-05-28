@@ -9,8 +9,6 @@ export let Prefs = {
     _values: null,
     // Set of our observers
     _observers: new Set(),
-    // Defaults
-    _defaults: {},
 
     async init() {
         if(this.ready()) {
@@ -41,7 +39,7 @@ export let Prefs = {
         }
         let value = this._values[name];
         if(value === undefined) {
-            value = this._defaults[name];
+            value = PREF_DEFAULTS[name];
         }
         return value;
     },
@@ -54,7 +52,7 @@ export let Prefs = {
         if(!Comm.master) {
             return Comm.callMaster('set-pref', {name, value, actionName});
         }
-        if(this._defaults[name] === undefined) {
+        if(PREF_DEFAULTS[name] === undefined) {
             throw new Error(`Brief: pref ${name} does not exist`);
         }
         console.log(`Brief: ${actionName} pref ${name} to ${value}`);
@@ -78,7 +76,7 @@ export let Prefs = {
         for(let [k, v] of Object.entries(prefs)) {
             let oldValue = this.get(k);
             if(v === undefined) {
-                v = this._defaults[k];
+                v = PREF_DEFAULTS[k];
             }
             if(oldValue === v) {
                 continue;
@@ -97,52 +95,49 @@ export let Prefs = {
     },
 };
 
-/** @param {string} name */
-function pref(name, value) {
-    Prefs._defaults[name] = value;
-}
-
 // The default pref values
-pref("homeFolder", -1);
-pref("showUnreadCounter", true);
-pref("firstRun", true);
-pref("lastVersion", "0");
-pref("assumeStandardKeys", true);
-pref("showFavicons", true);
-pref("pagePersist", ""); // Temporary storage for ex-XUL-persist attributes
+const PREF_DEFAULTS = {
+    "homeFolder": -1,
+    "showUnreadCounter": true,
+    "firstRun": true,
+    "lastVersion": "0",
+    "assumeStandardKeys": true,
+    "showFavicons": true,
+    "pagePersist": "", // Temporary storage for ex-XUL-persist attributes
 
-pref("feedview.doubleClickMarks", true);
-pref("feedview.autoMarkRead", false);
-pref("feedview.sortUnreadViewOldestFirst", false);
+    "feedview.doubleClickMarks": true,
+    "feedview.autoMarkRead": false,
+    "feedview.sortUnreadViewOldestFirst": false,
 
-pref("update.interval", 3600);
-pref("update.lastUpdateTime", 0);
-pref("update.enableAutoUpdate", true);
-pref("update.showNotification", true);
-pref("update.defaultFetchDelay", 500);
-pref("update.backgroundFetchDelay", 1000);
-pref("update.startupDelay", 35000);
-pref("update.suppressSecurityDialogs", true);
-pref("update.allowCachedResponses", false); // Testing only (avoid load on upstream servers)
+    "update.interval": 3600,
+    "update.lastUpdateTime": 0,
+    "update.enableAutoUpdate": true,
+    "update.showNotification": true,
+    "update.defaultFetchDelay": 500,
+    "update.backgroundFetchDelay": 1000,
+    "update.startupDelay": 35000,
+    "update.suppressSecurityDialogs": true,
+    "update.allowCachedResponses": false, // Testing only (avoid load on upstream servers)
 
-pref("database.expireEntries", false);
-pref("database.entryExpirationAge", 60);
-pref("database.limitStoredEntries", false);
-pref("database.maxStoredEntries", 100);
-pref("database.lastPurgeTime", 0);
-pref("database.keepStarredWhenClearing", true);
+    "database.expireEntries": false,
+    "database.entryExpirationAge": 60,
+    "database.limitStoredEntries": false,
+    "database.maxStoredEntries": 100,
+    "database.lastPurgeTime": 0,
+    "database.keepStarredWhenClearing": true,
 
-pref("monitor.sniffer", false);
-pref("monitor.sniffer.disconnect", true);
+    "monitor.sniffer": false,
+    "monitor.sniffer.disconnect": true,
 
-// UI-controlled prefs (ex Persistence ex XUL persist)
-pref("ui.startView", "today-folder");
-pref("ui.closedFolders", "_");
-pref("ui.tagList.width", "200px");
-pref("ui.sidebar.width", "400px");
-pref("ui.sidebar.hidden", false);
-pref("ui.view.mode", "full");
-pref("ui.view.filter", "all");
+    // UI-controlled prefs (ex Persistence ex XUL persist)
+    "ui.startView": "today-folder",
+    "ui.closedFolders": "_",
+    "ui.tagList.width": "200px",
+    "ui.sidebar.width": "400px",
+    "ui.sidebar.hidden": false,
+    "ui.view.mode": "full",
+    "ui.view.filter": "all",
 
-// Technical pref for migration off defaults
-pref("_pref.split-defaults", false);
+    // Technical pref for migration off defaults
+    "_pref.split-defaults": false,
+};
