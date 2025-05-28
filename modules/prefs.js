@@ -11,9 +11,6 @@ export let Prefs = {
     _observers: new Set(),
     // Defaults
     _defaults: {},
-    // Defaults as of Brief 2.5.9 (user-ve-default split)
-    // When splitting default and user prefs these values are considered default
-    _defaultEquivalent: {},
 
     async init() {
         if(this.ready()) {
@@ -31,7 +28,6 @@ export let Prefs = {
 
         let {prefs} = await browser.storage.local.get({prefs: {}});
         this._values = prefs;
-        await this._migrateOffDefaults();
     },
 
     ready: function() {
@@ -99,68 +95,42 @@ export let Prefs = {
                 observer({name, value});
         }
     },
-
-    // Brief 2.5.* used to have all defaults copied to _values, so all values looked user-set
-    _migrateOffDefaults: async function() {
-        if(this.get("_pref.split-defaults") === true) {
-            return;
-        }
-        for(let [k, v] of Object.entries(this._values)) {
-            if(v === this._defaultEquivalent[k]) {
-                delete this._values[k];
-            }
-        }
-        await this.set("_pref.split-defaults", true);
-    },
 };
 
 /** @param {string} name */
-function pref(name, value, extra) {
+function pref(name, value) {
     Prefs._defaults[name] = value;
-    if(extra !== undefined) {
-        let {defaultEquivalent} = extra;
-        if(defaultEquivalent !== undefined) {
-            Prefs._defaultEquivalent[name] = defaultEquivalent;
-        }
-    }
 }
 
-// Do not use, upgrade to explicit when the value needs to change
-// Exists to avoid duplication of defaults for the pre-split prefs
-/** @param {string} name */
-function old_pref(name, value) {
-    pref(name, value, {defaultEquivalent: value});
-}
+// The default pref values
+pref("homeFolder", -1);
+pref("showUnreadCounter", true);
+pref("firstRun", true);
+pref("lastVersion", "0");
+pref("assumeStandardKeys", true);
+pref("showFavicons", true);
+pref("pagePersist", ""); // Temporary storage for ex-XUL-persist attributes
 
-// The actual old_prefs and new prefs
-old_pref("homeFolder", -1);
-old_pref("showUnreadCounter", true);
-old_pref("firstRun", true);
-old_pref("lastVersion", "0");
-old_pref("assumeStandardKeys", true);
-old_pref("showFavicons", true);
-old_pref("pagePersist", ""); // Temporary storage for ex-XUL-persist attributes
+pref("feedview.doubleClickMarks", true);
+pref("feedview.autoMarkRead", false);
+pref("feedview.sortUnreadViewOldestFirst", false);
 
-old_pref("feedview.doubleClickMarks", true);
-old_pref("feedview.autoMarkRead", false);
-old_pref("feedview.sortUnreadViewOldestFirst", false);
+pref("update.interval", 3600);
+pref("update.lastUpdateTime", 0);
+pref("update.enableAutoUpdate", true);
+pref("update.showNotification", true);
+pref("update.defaultFetchDelay", 500);
+pref("update.backgroundFetchDelay", 1000);
+pref("update.startupDelay", 35000);
+pref("update.suppressSecurityDialogs", true);
+pref("update.allowCachedResponses", false); // Testing only (avoid load on upstream servers)
 
-old_pref("update.interval", 3600);
-old_pref("update.lastUpdateTime", 0);
-old_pref("update.enableAutoUpdate", true);
-old_pref("update.showNotification", true);
-pref("update.defaultFetchDelay", 500, {defaultEquivalent: 2000});
-pref("update.backgroundFetchDelay", 1000, {defaultEquivalent: 4000});
-old_pref("update.startupDelay", 35000);
-old_pref("update.suppressSecurityDialogs", true);
-old_pref("update.allowCachedResponses", false); // Testing only (avoid load on upstream servers)
-
-old_pref("database.expireEntries", false);
-old_pref("database.entryExpirationAge", 60);
-old_pref("database.limitStoredEntries", false);
-old_pref("database.maxStoredEntries", 100);
-old_pref("database.lastPurgeTime", 0);
-old_pref("database.keepStarredWhenClearing", true);
+pref("database.expireEntries", false);
+pref("database.entryExpirationAge", 60);
+pref("database.limitStoredEntries", false);
+pref("database.maxStoredEntries", 100);
+pref("database.lastPurgeTime", 0);
+pref("database.keepStarredWhenClearing", true);
 
 pref("monitor.sniffer", false);
 pref("monitor.sniffer.disconnect", true);
