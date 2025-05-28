@@ -305,6 +305,7 @@ export let Comm = {
 /**
  * @typedef {import("/modules/database.js").Feed} Feed
  * @typedef {import("/modules/database.js").FeedUpdate} FeedUpdate
+ * @typedef {import("/modules/prefs.js").PrefNamesValues} PrefNamesValues
  */
 
 /**
@@ -318,7 +319,7 @@ export let Comm = {
  * @property {(arg: {updates: (FeedUpdate | FeedUpdate[])}) => void} feedlist-modify
  * @property {(arg: {feeds: Feed[]}) => void} feedlist-updated
  * @property {() => Promise<boolean>} is-options-window-open
- * @property {(arg: {name: string, value: string | boolean | number, actionName: 'update' | 'reset'}) => void} set-pref
+ * @property {(arg: PrefNamesValues & { actionName: 'update' | 'reset'}) => void} set-pref
  * @property {() => void} style-updated
  * @property {(arg: {feed: {url: string}}) => (string[])} subscribe-add-feed
  * @property {(arg: {windowId: number}) => ({url: string?, linkTitle: string?}[])} subscribe-get-feeds

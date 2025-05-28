@@ -39,20 +39,24 @@ export let Prefs = {
         }
         let value = this._values[name];
         if(value === undefined) {
-            value = PREF_DEFAULTS[name];
+            value = KNOWN_PREFS[name];
         }
         return value;
     },
 
     /**
-     * @param {string} name
+     * @template {keyof KNOWN_PREFS} K
+     * @param {K} name
+     * @param {KNOWN_PREFS[K]} value
      * @param {'update' | 'reset'} actionName
      */
     set: async function(name, value, actionName='update') {
         if(!Comm.master) {
+            //@ts-expect-error TS is not smart enough to propagate the relation between types
+            // from function args to this call
             return Comm.callMaster('set-pref', {name, value, actionName});
         }
-        if(PREF_DEFAULTS[name] === undefined) {
+        if(KNOWN_PREFS[name] === undefined) {
             throw new Error(`Brief: pref ${name} does not exist`);
         }
         console.log(`Brief: ${actionName} pref ${name} to ${value}`);
@@ -62,7 +66,7 @@ export let Prefs = {
         await browser.storage.local.set({prefs: this._values});
     },
 
-    /** @param {string} name */
+    /** @param {keyof KNOWN_PREFS} name */
     reset: async function(name) {
         await this.set(name, undefined, 'reset');
     },
@@ -76,7 +80,7 @@ export let Prefs = {
         for(let [k, v] of Object.entries(prefs)) {
             let oldValue = this.get(k);
             if(v === undefined) {
-                v = PREF_DEFAULTS[k];
+                v = KNOWN_PREFS[k];
             }
             if(oldValue === v) {
                 continue;
@@ -95,8 +99,15 @@ export let Prefs = {
     },
 };
 
+/**
+ * @template {keyof KNOWN_PREFS} K
+ * @typedef {{ [P in K]: { name: P, value: KNOWN_PREFS[P] } }[K] } PrefNameValue
+ */
+/** @typedef {PrefNameValue<keyof KNOWN_PREFS>} PrefNamesValues */
+
+
 // The default pref values
-const PREF_DEFAULTS = {
+const KNOWN_PREFS = {
     "homeFolder": -1,
     "showUnreadCounter": true,
     "firstRun": true,
