@@ -32,7 +32,11 @@ export let Prefs = {
         return this._values !== null;
     },
 
-    /** @param {string} name */
+    /**
+     * @template {keyof KNOWN_PREFS} K
+     * @param {K} name
+     * @returns {KNOWN_PREFS[K]}
+     */
     get: function(name) {
         if(!this.ready()) {
             throw new Error(`pref "${name} accessed before Prefs initialization"`);
@@ -76,8 +80,10 @@ export let Prefs = {
         this._observers.add({name, observer});
     },
 
+    /** @param {Partial<KNOWN_PREFS>} prefs */
     _merge: function(prefs) {
-        for(let [k, v] of Object.entries(prefs)) {
+        for(let [ks, v] of Object.entries(prefs)) {
+            let k = /** @type {keyof KNOWN_PREFS} */(ks);
             let oldValue = this.get(k);
             if(v === undefined) {
                 v = KNOWN_PREFS[k];

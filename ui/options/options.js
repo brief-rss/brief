@@ -50,7 +50,7 @@ function initUpdateIntervalControls() {
         PrefBinder.updateScale(interval, scale);
     });
 
-    let value = Prefs.get(interval.dataset.pref);
+    let value = Prefs.get("update.interval"); // FIXME this duplication exists for type safety
     let asDays = value / (60*60*24);
     let asHours = value / (60*60);
 
