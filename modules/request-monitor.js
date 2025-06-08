@@ -1,5 +1,6 @@
 //@ts-strict
 import {Prefs} from "./prefs.js";
+import {previewUrl} from "./utils.js";
 import {SNIFF_WINDOW, sniffedToBeFeed} from "./xml-sniffer.js";
 
 
@@ -99,8 +100,7 @@ async function checkHeaders({requestId, tabId, url, responseHeaders}) {
         .map(h => h.value)[0];
     let {mime, encoding} = parseContentType(contentType);
     if(KNOWN_FEED_TYPES.includes(mime)) {
-        let previewUrl = "/ui/brief.xhtml?preview=" + encodeURIComponent(url);
-        browser.tabs.update(tabId, {url: previewUrl}); // No loadReplace: still on old page
+        browser.tabs.update(tabId, {url: previewUrl(url)}); // No loadReplace: still on old page
         return {cancel: true};
     }
     if(MAYBE_FEED_TYPES.includes(mime) || mime.includes('+xml')) {
@@ -155,8 +155,7 @@ function checkContent(buffers, {encoding, url, tabId}) {
 
     if(sniffedToBeFeed(text)) {
         console.log('feed detected, redirecting to preview page for', url);
-        let previewUrl = "/ui/brief.xhtml?preview=" + encodeURIComponent(url);
-        browser.tabs.update(tabId, {url: previewUrl, loadReplace: true});
+        browser.tabs.update(tabId, {url: previewUrl(url), loadReplace: true});
     }
 }
 

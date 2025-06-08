@@ -177,6 +177,15 @@ export async function openBackgroundTab(url) {
 }
 
 /**
+ * @param {string} url
+ * @returns {string}
+ */
+export function previewUrl(url) {
+    return `/ui/brief.xhtml?preview=${encodeURIComponent(url)}`;
+}
+
+
+/**
  *
  * 1. Some old rss files use DOCTYPE elements that point to currently inexistent links to old versions of the DTD.
  * e.g.: <!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "http://my.netscape.com/publish/formats/rss-0.91.dtd">

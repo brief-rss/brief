@@ -2,7 +2,7 @@ import {Database} from "/modules/database.js";
 import {Prefs} from "/modules/prefs.js";
 import {FeedUpdater} from "/modules/updater.js";
 import * as RequestMonitor from "/modules/request-monitor.js";
-import {Comm, debounced} from "/modules/utils.js";
+import {Comm, debounced, previewUrl} from "/modules/utils.js";
 
 
 const Brief = {
@@ -197,9 +197,7 @@ const Brief = {
         if(feeds.length > 0) {
             // Redirecting from the Firefox preview mode looks just ugly, let's keep it the old way
             if(feeds[0].kind === 'self') {
-                let target = encodeURIComponent(feeds[0].url);
-                let previewUrl = "/ui/brief.xhtml?preview=" + target;
-                browser.tabs.update(tabId, {url: previewUrl, loadReplace: true});
+                browser.tabs.update(tabId, {url: previewUrl(feeds[0].url), loadReplace: true});
             }
             browser.pageAction.show(tabId);
             let path = null;
