@@ -28,6 +28,12 @@ async function onload() {
             }
             window.close();
         });
+        node.addEventListener('auxclick', ev => {
+            if(ev.button != 1) {
+                return;
+            }
+            browser.tabs.create({windowId, active: false, openerTabId: tabId, url: previewUrl(feed.url)});
+        });
         document.body.appendChild(node);
     }
 }
