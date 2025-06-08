@@ -1407,7 +1407,7 @@ EntryView.prototype = {
                         this.formatters.time.format(this.date);
 
                 default:
-                    return this.formatters.date_md.format(this.date) + ', ' +
+                    return this.formatters.date_ymd.format(this.date) + ', ' +
                         this.formatters.time.format(this.date);
             }
         }
