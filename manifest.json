@@ -4,7 +4,7 @@
     "author": "Denis Lisov",
     "homepage_url": "https://github.com/brief-rss/brief",
     "manifest_version": 2,
-    "applications": {
+    "browser_specific_settings": {
         "gecko": {
             "id": "brief@mozdev.org",
             "strict_min_version": "78.0"
