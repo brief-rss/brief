@@ -115,6 +115,7 @@ async function init() {
         let knownFeeds = await knownFeedsPromise;
         updatePreviewMode(knownFeeds);
         let parsedFeed = await parsedFeedPromise;
+        console.debug(parsedFeed);
         document.title = browser.i18n.getMessage("previewTitle", parsedFeed.title);
 
         let feed = Object.assign({}, {
