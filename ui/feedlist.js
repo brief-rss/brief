@@ -574,7 +574,7 @@ export let FeedList = {
     },
 
     get selectedItem() {
-        return this.tree.selectedItem;
+        return this.tree?.selectedItem;
     },
 
     get selectedFeed() {
