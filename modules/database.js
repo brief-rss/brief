@@ -810,7 +810,7 @@ export class Database {
                 updated: parseDateValue(src.updated) || now,
                 entryURL: '', // Must be a valid IndexedDB key value
             };
-            if(src.link !== undefined) {
+            if(src.link != null) {
                 entry.entryURL = src.link.href;
             }
 

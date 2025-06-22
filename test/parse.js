@@ -1,3 +1,4 @@
+import {Database} from "/modules/database.js";
 import {fetchFeed} from "/modules/feed-fetcher.js";
 import {parseDateValue} from "/modules/utils.js";
 import {T} from "./_harness.js";
@@ -24,6 +25,7 @@ T.runTests('parse', {
         T.assert_eq(item.authors[0], "AUTHOR");
         T.assert_eq(item.published, "Mon, 01 Jan 2018 08:00:00 GMT");
         T.assert_eq(item.id, "tag:id");
+        Database._feedToEntries({feed: {feedID: "feedid"}, parsedFeed: feed, now: Date.now()});
     },
     async snippetRss091NetscapeWithEntities() {
         let feed = await fetchFeed(new URL("snippets/rss-0.91-netscape-with-entities.xml", document.location.href));
@@ -37,5 +39,6 @@ T.runTests('parse', {
         T.assert_eq(item.link.href, "http://bar/");
         T.assert_eq(item.summary, "This is an article about some stuff");
         T.assert_eq(item.id, null);
+        Database._feedToEntries({feed: {feedID: "feedid"}, parsedFeed: feed, now: Date.now()});
     },
 });

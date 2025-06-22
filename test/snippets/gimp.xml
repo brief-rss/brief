@@ -15,6 +15,14 @@
         <pubDate>Mon, 01 Jan 2018 08:00:00 -0000</pubDate>
         <guid>tag:id</guid>
     </item>
+    <item>
+        <title>ITEM2_TITLE</title>
+        <!-- no link here -->
+        <description>ITEM2_SUMMARY</description>
+        <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">AUTHOR</dc:creator>
+        <pubDate>Mon, 01 Jan 2019 08:00:00 -0000</pubDate>
+        <guid isPermaLink="false">tag:id2</guid>
+    </item>
 </channel>
 </rss>
 
