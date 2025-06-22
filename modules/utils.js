@@ -93,7 +93,7 @@ export function asArray(v) {
 }
 
 /**
- * @param {string} date
+ * @param {string?} date
  * @returns {number?}
  */
 export function parseDateValue(date) {

@@ -794,11 +794,17 @@ export class Database {
         prev.providedID = prev.providedID || next.providedID || "";
     }
 
+    /**
+     * @param {{feed: {feedID: string}, parsedFeed: ParsedFeed, now: Number}} _
+     */
     static _feedToEntries({feed, parsedFeed, now}) {
         // Roughly the legacy mapEntryProperties
         let entries = [];
         for(let src of (parsedFeed.items || [])) {
-            let authors = (src.authors || []).map(a => a.name).filter(n => n).join(', '); // FIXME authors can contain plain strings which will be lost
+            let authors = (src.authors || [])
+                .map(a => typeof a === 'string' ? a : a.name)
+                .filter(n => n)
+                .join(', ');
             let entry = {
                 feedID: feed.feedID,
                 providedID: src.id,
