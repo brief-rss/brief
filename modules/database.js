@@ -580,11 +580,10 @@ export class Database {
     async pushUpdatedFeed({feed, parsedFeed}) {
         let now = Date.now();
         let entries = Database._feedToEntries({feed, parsedFeed, now});
-        let modified = now; // fallback
-        if(parsedFeed.updated) {
-            modified = parseDateValue(parsedFeed.updated);
-        }
+        let modified = parseDateValue(parsedFeed.updated) || now; // fallback
+
         if(!entries.length || (modified && modified <= feed.dateModified)) {
+            await this.modifyFeed({feedID: feed.feedID, lastUpdated: Date.now()});
             return {entries: [], newEntries: []};
         }
         let newEntries = await this._pushEntries({entries});
