@@ -41,4 +41,20 @@ T.runTests('parse', {
         T.assert_eq(item.id, null);
         Database._feedToEntries({feed: {feedID: "feedid"}, parsedFeed: feed, now: Date.now()});
     },
+    async snippetDsa() {
+        let feed = await fetchFeed(new URL("snippets/rdf-from-dsa.xml", document.location.href));
+        console.log(feed);
+        T.assert_eq(feed.title, "Debian Security");
+        T.assert_eq(feed.updated, "Sun, 28 Sep 2025 07:33:01 GMT");
+        T.assert_eq(feed.link.href, "https://www.debian.org/security/dsa.rdf");
+        T.assert_eq(feed.subtitle, "Debian Security Advisories");
+
+        T.assert(feed.items.length > 0);
+        let item = feed.items[0];
+        T.assert_eq(item.title, "DSA-6012-1 nncp - security update");
+        T.assert_eq(item.link.href, "https://lists.debian.org/debian-security-announce/2025/msg00177.html");
+        T.assert_eq(item.summary, '<a href="https://security-tracker.debian.org/tracker/DSA-6012-1">https://security-tracker.debian.org/tracker/DSA-6012-1</a>');
+        T.assert_eq(item.published, null);
+        T.assert_eq(item.id, "https://lists.debian.org/debian-security-announce/2025/msg00177.html");
+    },
 });

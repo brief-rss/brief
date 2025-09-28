@@ -166,7 +166,7 @@ const HANDLERS = {
      */
     feed(node) {
         let index = new NodeChildrenIndex(node);
-        let result = {
+        let feed = {
             title: index.getValue(HANDLERS.text, ["title", "rss1:title", "atom03:title", "atom:title"]),
             subtitle: index.getValue(HANDLERS.text, ["description", "dc:description", "rss1:description", "atom03:tagline", "atom:subtitle"]),
             link: index.getValue(HANDLERS.url, ["link", "rss1:link"])
@@ -175,10 +175,22 @@ const HANDLERS = {
             generator: index.getElementValue(HANDLERS.text, ["generator", "rss1:generator", "atom03:generator", "atom:generator"]),
             updated: index.getElementValue(HANDLERS.date, ["pubDate", "rss1:pubDate", "lastBuildDate", "atom03:modified", "dc:date", "dcterms:modified", "atom:updated"]),
             language: index.getElementValue(HANDLERS.lang, ["language", "rss1:language", "xml:lang"]),
-            ...index.getElementValue(HANDLERS.feed, ["rss1:channel"]),
         };
+        // TODO: should split this into a separate parser, need to check standards
+        let channelMeta = index.getElementValue(HANDLERS.feed, ["rss1:channel"]);
         index.reportUnusedExcept(["atom:id", "atom03:id", "atom:author", "atom03:author", "category", "atom:category", "rss1:items"]);
-        return result;
+        if(channelMeta !== null) {
+            feed = {
+                title: feed.title ?? channelMeta.title,
+                subtitle: feed.subtitle ?? channelMeta.subtitle,
+                link: feed.link ?? channelMeta.link,
+                items: feed.items ?? channelMeta.items,
+                generator: feed.generator ?? channelMeta.generator,
+                updated: feed.updated ?? channelMeta.updated,
+                language: feed.language ?? channelMeta.language,
+            };
+        }
+        return feed;
     },
 
     /**
