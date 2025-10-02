@@ -855,7 +855,11 @@ FeedView.prototype = {
 
         dateQuery.endDate = rangeEndDate;
         dateQuery.startDate = rangeStartDate;
-        dateQuery.limit = aCount;
+        if (dateQuery.searchString) {
+            dateQuery.searchString = dateQuery.searchString.toUpperCase();
+        } else {
+            dateQuery.limit = aCount;
+        }
 
         let dates = await this._refreshGuard(this.db.query(dateQuery).getValuesOf('date'));
         if (dates.length) {
@@ -871,6 +875,15 @@ FeedView.prototype = {
 
             let loadedEntries = await this._refreshGuard(this.db.query(query).getEntries());
             for (let entry of loadedEntries) {
+                if (dateQuery.searchString &&
+                    !(
+                        (entry.revisions[0]['title'] && entry.revisions[0]['title'].toUpperCase().indexOf(dateQuery.searchString) !== -1)
+                        || (entry.revisions[0]['content'] && entry.revisions[0]['content'].toUpperCase().indexOf(dateQuery.searchString) !== -1)
+                        || (entry.revisions[0]['authors'] && entry.revisions[0]['authors'].toUpperCase().indexOf(dateQuery.searchString) !== -1)
+                    )
+                ) {
+                    continue;
+                }
                 this._insertEntry(entry, this._loadedEntries.length);
                 this._loadedEntries.push(entry.id);
             }
@@ -1414,6 +1427,9 @@ EntryView.prototype = {
     },
 
     _highlightSearchTerms: function EntryView__highlightSearchTerms(aElement) {
+        if (aElement === undefined) {
+            return;
+        }
         for (let term of this.feedView.query.searchString.match(/[^\s:*"-]+/g)) {
             let baseNode = this.feedView.document.createElement('span');
             baseNode.className = 'search-highlight';
