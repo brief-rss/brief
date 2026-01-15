@@ -89,11 +89,11 @@ export function FeedView({
 
     this._observer = Comm.registerObservers({
         'entries-updated': info => this._applyUpdates(info),
-        'feedlist-updated': ({feeds}) => {
+        'feedlist-updated': () => {
             this._setEmptyViewMessage();
             if(this.db !== null) {
                 let headlines = this.headlinesMode;
-                this._feeds = feeds;
+                this._feeds = this.db.feeds;
                 if(headlines !== this.headlinesMode) {
                     this.refresh();
                 }
