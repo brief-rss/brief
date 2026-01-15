@@ -68,7 +68,7 @@ const Brief = {
         });
         browser.menus.onClicked.addListener(info => this.onContext(info));
 
-        /*spawn*/ RequestMonitor.init();
+        RequestMonitor.init();
 
         await Prefs.init();
 
