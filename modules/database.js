@@ -319,14 +319,20 @@ export class Database {
         return feeds;
     }
 
-    async saveFeeds() {
+    /**
+     * @param {Feed[]} [feeds]
+     */
+    async saveFeeds(feeds) {
         if(this._db === null) {
             return;
         }
-        let feeds = Array.from(this.feeds);
-        feeds.sort((a, b) => a.rowIndex - b.rowIndex); // Fallback, should be already sorted
+        let full = feeds === undefined;
         let tx = this._db.transaction(['feeds'], 'readwrite');
-        tx.objectStore('feeds').clear();
+        if(full) {
+            feeds = Array.from(this.feeds);
+            feeds.sort((a, b) => a.rowIndex - b.rowIndex); // Fallback, should be already sorted
+            tx.objectStore('feeds').clear();
+        }
         for(let feed of feeds) {
             tx.objectStore('feeds').put(feed);
         }
@@ -468,6 +474,7 @@ export class Database {
         Comm.verbose && console.log('modifyFeed', props);
         props = Array.isArray(props) ? props : [props];
         let reindex = false;
+        let updatedFeeds = [];
         for(let bag of props) {
             if(bag.rowIndex === Number.POSITIVE_INFINITY) {
                 bag.rowIndex = this.feeds[this.feeds.length - 1].rowIndex + 1;
@@ -483,13 +490,14 @@ export class Database {
                 feed[k] = v;
                 //TODO: expire entries
             }
+            updatedFeeds.push(feed);
         }
         if(reindex) {
             this._feeds = this._reindex(this._feeds);
         }
         Comm.broadcast('feedlist-updated', {feeds: this.feeds});
 
-        await this.saveFeeds();
+        await this.saveFeeds(reindex ? undefined : updatedFeeds);
     }
 
     /**
