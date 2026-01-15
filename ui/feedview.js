@@ -92,7 +92,7 @@ export function FeedView({
         'feedlist-updated': () => {
             this._setEmptyViewMessage();
             if(this.db !== null) {
-                let headlines = this.headlinesMode;
+                let headlines = this.document.body.classList.contains('headlines-view');
                 this._feeds = this.db.feeds;
                 if(headlines !== this.headlinesMode) {
                     this.refresh();
@@ -208,7 +208,7 @@ FeedView.prototype = {
     },
 
     setDefaultViewMode(mode) {
-        let prev = this.headlinesMode;
+        let prev = this.document.body.classList.contains('headlines-view');
         this._defaultViewMode = mode;
         if(this.headlinesMode !== prev) {
             this.refresh();
