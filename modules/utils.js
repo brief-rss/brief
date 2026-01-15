@@ -321,7 +321,7 @@ export let Comm = {
  * FIXME get rid of `any` here
  * @typedef {object} HandlerTypes
  * @property {(arg: {feeds: Feed | Feed[] | null}) => void} entries-expire
- * @property {(arg: {feeds: any, entries: any, changes: any}) => void} entries-updated
+ * @property {(arg: {feeds: string[], entries: any, changes: any}) => void} entries-updated
  * @property {(arg: {feeds: any, options: any}) => void} feedlist-add
  * @property {(arg: {feeds: Feed | Feed[]}) => void} feedlist-delete
  * @property {() => Feed[]} feedlist-get
