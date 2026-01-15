@@ -526,15 +526,15 @@ export let FeedList = {
     /** @type {Database | null} */
     db: null,
     tree: null,
-    /** @type {Feed[]} */
-    _feedsCache: null,
     _built: false,
 
+    /**
+     * @param {Database} db
+     */
     init(db) {
         this.db = db;
         this.tree = new TreeView('feed-list');
         // TODO: observers should be here
-        this._feedsCache = this.db.feeds;
         this.tree.root.addEventListener(
             'change', () => this.onSelect(), {passive: true});
         this.tree.root.addEventListener(
@@ -545,7 +545,7 @@ export let FeedList = {
             'toggle-collapsed', () => this.persistFolderState());
 
         Comm.registerObservers({
-            'feedlist-updated': ({feeds}) => this.rebuild(feeds),
+            'feedlist-updated': () => this.rebuild(),
             'entries-updated': ({feeds}) => this.refreshFeedTreeitems(feeds),
         });
 
@@ -553,24 +553,19 @@ export let FeedList = {
     },
 
     getAllFeeds: function FeedList_getAllFeeds(includeFolders, includeHidden) {
-        if(this._feedsCache === null)
+        if(this.db === null)
             throw "FeedList: getAllFeeds called while cache is not ready";
 
-        return this._feedsCache.filter(
+        return this.db.feeds.filter(
             f => (!f.isFolder || includeFolders) && (!f.hidden || includeHidden)
         );
     },
 
     getFeed: function FeedList_getFeed(feedID) {
-        if(this._feedsCache === null)
+        if(this.db === null)
             throw "FeedList: getFeed called while cache is not ready";
 
-        for (let feed of this._feedsCache) {
-            if (feed.feedID == feedID)
-                return feed;
-        }
-
-        return null;
+        return this.db.getFeed(feedID) || null;
     },
 
     get selectedItem() {
@@ -704,10 +699,9 @@ export let FeedList = {
         return "/icons/default-feed-favicon.png";
     },
 
-    rebuild(feeds) {
-        this._feedsCache = feeds || this.db.feeds;
-
+    rebuild() {
         let active = (this.tree.selectedItem !== null);
+        // Our observers are registered later so the Database cache is up to date
         this.feeds = this.getAllFeeds(true);
 
         let model = this._buildFolderChildren(String(Prefs.get('homeFolder')));
