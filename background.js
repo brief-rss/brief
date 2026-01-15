@@ -1,4 +1,4 @@
-import {Database} from "/modules/database.js";
+import {Database, PerFeedCountTracker} from "/modules/database.js";
 import {Prefs} from "/modules/prefs.js";
 import {FeedUpdater} from "/modules/updater.js";
 import * as RequestMonitor from "/modules/request-monitor.js";
@@ -12,6 +12,8 @@ const Brief = {
     _status: null,
     // Feeds in known windows
     _windowFeeds: new Map(),
+    // Total count tracker
+    _tracker: null,
     // Hooks for debugging
     prefs: Prefs,
     db: null,
@@ -70,6 +72,13 @@ const Brief = {
 
         await Prefs.init();
 
+        this.db = await Database.init();
+        this._tracker = new PerFeedCountTracker(this.db, {
+            deleted: false,
+            read: false,
+            includeFeedsExcludedFromGlobalViews: false,
+        });
+
         Prefs.addObserver('showUnreadCounter', () => this._updateUI());
         Comm.registerObservers({
             'feedlist-updated': () => this._updateUI(),
@@ -77,8 +86,6 @@ const Brief = {
             'subscribe-get-feeds': ({windowId}) => this._windowFeeds.get(windowId),
             'subscribe-add-feed': ({feed}) => this.db.addFeeds(feed).catch(console.error),
         });
-
-        this.db = await Database.init();
 
         await FeedUpdater.init({db: this.db});
 
@@ -216,11 +223,7 @@ const Brief = {
         let enabled = Prefs.get('showUnreadCounter');
         browser.menus.update('brief-button-show-unread', {checked: enabled});
         if(enabled) {
-            let count = await this.db.query({
-                deleted: 0,
-                read: 0,
-                includeFeedsExcludedFromGlobalViews: 0,
-            }).count();
+            let count = await this._tracker.getTotalCount();
             let text = "";
             if(count > 0) {
                 text = count.toString();

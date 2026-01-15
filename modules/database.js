@@ -1582,10 +1582,10 @@ export class PerFeedCountTracker {
     /**
      * @param {Database} db
      */
-    constructor(db) {
+    constructor(db, query={deleted: false, read: false}) {
         this._db = db;
         this._cachedCounts = new Map();
-        this._query = { deleted: false, read: false };
+        this._query = query;
         Comm.registerObservers({
             'feedlist-updated': ({feedUpdates}) => this._invalidate(feedUpdates.map(f => f.feedID)),
             'entries-updated': ({feeds}) => this._invalidate(feeds),
@@ -1595,6 +1595,12 @@ export class PerFeedCountTracker {
     /** @param {string} feedID */
     async getCount(feedID) {
         let feeds = this._db._includeChildren([feedID]).filter(f => !f.isFolder).map(f => f.feedID);
+        let counts = await Promise.all(feeds.map(id => this._getFeedCount(id)));
+        return counts.reduce((a, c) => a + c, 0);
+    }
+
+    async getTotalCount() {
+        let feeds = this._db.feeds.filter(f => !f.isFolder).map(f => f.feedID);
         let counts = await Promise.all(feeds.map(id => this._getFeedCount(id)));
         return counts.reduce((a, c) => a + c, 0);
     }
