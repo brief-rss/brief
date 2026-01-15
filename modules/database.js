@@ -877,8 +877,9 @@ export class Database {
         await Promise.all([store_local, store_sync]);
     }
 
+    /** @param {(string | Feed)[]} feeds */
     _includeChildren(feeds) {
-        feeds = feeds.map(f => f.feedID || f);
+        feeds = feeds.map(f => typeof f === 'string' ? f : f.feedID);
         let childrenMap = new Map();
         for(let node of this.feeds) {
             let parent = node.parent;
@@ -1574,6 +1575,53 @@ class Query {
 
     _ftsMatches(_entry, _string) {
         return true;//TODO: restore FTS
+    }
+}
+
+export class PerFeedCountTracker {
+    /**
+     * @param {Database} db
+     */
+    constructor(db) {
+        this._db = db;
+        this._cachedCounts = new Map();
+        this._query = { deleted: false, read: false };
+        Comm.registerObservers({
+            'feedlist-updated': ({feedUpdates}) => this._invalidate(feedUpdates.map(f => f.feedID)),
+            'entries-updated': ({feeds}) => this._invalidate(feeds),
+        });
+    }
+
+    /** @param {string} feedID */
+    async getCount(feedID) {
+        let feeds = this._db._includeChildren([feedID]).filter(f => !f.isFolder).map(f => f.feedID);
+        let counts = await Promise.all(feeds.map(id => this._getFeedCount(id)));
+        return counts.reduce((a, c) => a + c, 0);
+    }
+
+    /** @param {string} feedID */
+    async _getFeedCount(feedID) {
+        let cached = this._cachedCounts.get(feedID);
+        if(cached !== undefined) {
+            return cached;
+        }
+        let calculated = await this._queryDatabase(feedID);
+        this._cachedCounts.set(feedID, calculated);
+        return calculated;
+    }
+
+    /** @param {string[]} feedIDs */
+    _invalidate(feedIDs) {
+        for(let feedID of feedIDs) {
+            this._cachedCounts.delete(feedID);
+        }
+    }
+
+    /** @param {string} feedID */
+    async _queryDatabase(feedID) {
+        let query = { feeds: [feedID], ...this._query };
+
+        return await this._db.query(query).count();
     }
 }
 

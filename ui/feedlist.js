@@ -1,5 +1,6 @@
 import {Prefs} from "/modules/prefs.js";
 import * as OPML from "/modules/opml.js";
+import {PerFeedCountTracker} from "/modules/database.js";
 import {Comm, debounced, getElement, openBackgroundTab} from "/modules/utils.js";
 import {FeedView} from "./feedview.js";
 
@@ -527,6 +528,7 @@ export let FeedList = {
     db: null,
     tree: null,
     _built: false,
+    _tracker: null,
 
     /**
      * @param {Database} db
@@ -543,6 +545,7 @@ export let FeedList = {
             'keydown', event => this.onKeyDown(event), {capture: true});
         this.tree.root.addEventListener(
             'toggle-collapsed', () => this.persistFolderState());
+        this._tracker = new PerFeedCountTracker(db);
 
         Comm.registerObservers({
             'feedlist-updated': () => this.rebuild(),
@@ -682,14 +685,7 @@ export let FeedList = {
     },
 
     _refreshLabel: async function FeedList__refreshLabel(aFeed) {
-        let query = {
-            deleted: false,
-            folders: aFeed.isFolder ? [aFeed.feedID] : undefined,
-            feeds: aFeed.isFolder ? undefined : [aFeed.feedID],
-            read: false
-        };
-
-        let unreadCount = await this.db.query(query).count();
+        let unreadCount = await this._tracker.getCount(aFeed.feedID);
         this.tree.updateElement(aFeed.feedID, {title: aFeed.title || aFeed.feedURL, unreadCount});
     },
 
