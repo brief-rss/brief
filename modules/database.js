@@ -1594,13 +1594,15 @@ export class PerFeedCountTracker {
 
     /** @param {string} feedID */
     async getCount(feedID) {
-        let feeds = this._db._includeChildren([feedID]).filter(f => !f.isFolder).map(f => f.feedID);
+        let feeds = this._db._includeChildren([feedID])
+            .filter(f => !f.isFolder && f.hidden === 0).map(f => f.feedID);
         let counts = await Promise.all(feeds.map(id => this._getFeedCount(id)));
         return counts.reduce((a, c) => a + c, 0);
     }
 
     async getTotalCount() {
-        let feeds = this._db.feeds.filter(f => !f.isFolder).map(f => f.feedID);
+        let feeds = this._db.feeds
+            .filter(f => !f.isFolder && f.hidden === 0).map(f => f.feedID);
         let counts = await Promise.all(feeds.map(id => this._getFeedCount(id)));
         return counts.reduce((a, c) => a + c, 0);
     }
