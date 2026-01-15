@@ -298,6 +298,7 @@ export let ViewList = {
     /** @type {Database | null} */
     db: null,
     tree: null,
+    _trackers: {},
 
     get selectedItem() {
         return this.tree.selectedItem;
@@ -388,8 +389,13 @@ export let ViewList = {
     refreshItem: async function ViewList_refreshItem(aItemID) {
         let query = this.getQueryForView(aItemID);
         query.read = false;
+        if(this._trackers[aItemID] === undefined) {
+            this._trackers[aItemID] = new PerFeedCountTracker(this.db, query);
+        } else {
+            this._trackers[aItemID].updateQuery(query);
+        }
 
-        let unreadCount = await this.db.query(query).count();
+        let unreadCount = await this._trackers[aItemID].getTotalCount();
 
         this.tree.updateElement(aItemID, {unreadCount});
     },

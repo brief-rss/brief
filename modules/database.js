@@ -1581,6 +1581,7 @@ class Query {
 export class PerFeedCountTracker {
     /**
      * @param {Database} db
+     * @param {any} query
      */
     constructor(db, query={deleted: false, read: false}) {
         this._db = db;
@@ -1605,6 +1606,14 @@ export class PerFeedCountTracker {
             .filter(f => !f.isFolder && f.hidden === 0).map(f => f.feedID);
         let counts = await Promise.all(feeds.map(id => this._getFeedCount(id)));
         return counts.reduce((a, c) => a + c, 0);
+    }
+
+    /** @param {any} query */
+    updateQuery(query) {
+        if(JSON.stringify(this._query) !== JSON.stringify(query)) {
+            this._query = query;
+            this._cachedCounts.clear();
+        }
     }
 
     /** @param {string} feedID */
