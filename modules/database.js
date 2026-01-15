@@ -119,7 +119,7 @@ export class Database {
 
         // Register the common observer
         Comm.registerObservers({
-            'feedlist-updated': ({feeds}) => this._feeds = feeds, // Already saved elsewhere
+            'feedlist-updated': ({feedUpdates}) => mergeFeedListUpdates(this._feeds, feedUpdates),
         });
 
         if(Comm.master) {
@@ -357,7 +357,7 @@ export class Database {
         let newFeedIds = this._addFeeds(feeds, options);
         this._feeds = this._reindex(this._feeds);
 
-        Comm.broadcast('feedlist-updated', {feeds: this.feeds});
+        Comm.broadcast('feedlist-updated', {feedUpdates: this.feeds});
         await this.saveFeeds();
         Comm.broadcast('update-feeds', {feeds: newFeedIds});
 
@@ -494,8 +494,9 @@ export class Database {
         }
         if(reindex) {
             this._feeds = this._reindex(this._feeds);
+            updatedFeeds = this._feeds;
         }
-        Comm.broadcast('feedlist-updated', {feeds: this.feeds});
+        Comm.broadcast('feedlist-updated', {feedUpdates: updatedFeeds});
 
         await this.saveFeeds(reindex ? undefined : updatedFeeds);
     }
@@ -1574,6 +1575,23 @@ class Query {
     _ftsMatches(_entry, _string) {
         return true;//TODO: restore FTS
     }
+}
+
+/**
+ * @param {Feed[]} list
+ * @param {Feed[]} updates
+ */
+function mergeFeedListUpdates(list, updates) {
+    let indexById = new Map(list.map((feed, idx) => [feed.feedID, idx]));
+    for(let feed of updates) {
+        let index = indexById.get(feed.feedID);
+        if(index === undefined) {
+            list.push(feed);
+        } else {
+            list[index] = feed;
+        }
+    }
+    list.sort((a, b) => a.rowIndex - b.rowIndex);
 }
 
 /// Misc utilities for working with databases

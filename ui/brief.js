@@ -14,6 +14,9 @@ import {
 } from "./feedlist.js";
 import {FeedView} from "./feedview.js";
 
+/**
+ * @typedef {import("/modules/database.js").Feed} Feed
+ */
 
 async function init() {
     // Start everything that can be done async, starting with the longest
@@ -60,7 +63,7 @@ async function init() {
     Comm.broadcast('update-query-status');
 
     Comm.registerObservers({
-        'feedlist-updated': ({feeds}) => updatePreviewMode(feeds),
+        'feedlist-updated': ({feedUpdates}) => updatePreviewMode(feedUpdates),
         'style-updated': () => Commands.applyStyle(),
     });
     // TODO: should update FeedView and feed view title too(?) on title change
@@ -163,13 +166,22 @@ async function loadContentIframe() {
     return contentIframe;
 }
 
-function updatePreviewMode(feeds) {
+/**
+ * @param {Feed[]} feedUpdates
+ */
+function updatePreviewMode(feedUpdates) {
     let previewURL = new URLSearchParams(document.location.search).get("preview");
-    let knownURLs = feeds.filter(f => f.hidden === 0).map(f => f.feedURL);
-    let isKnown = knownURLs.includes(previewURL);
-    document.body.classList.toggle('known-feed', isKnown);
-    let disable = isKnown || document.body.classList.contains('incognito');
-    (/** @type {HTMLButtonElement} */(document.getElementById('subscribe-button'))).disabled = disable;
+    let listedFeed = feedUpdates.find(f => f.feedURL === previewURL);
+    let inIncognito = document.body.classList.contains('incognito');
+    let disable = inIncognito;
+    if(listedFeed !== undefined) {
+        let isKnown = listedFeed.hidden === 0;
+        document.body.classList.toggle('known-feed', isKnown);
+        disable ||= isKnown;
+    }
+    if(inIncognito || listedFeed !== undefined) {
+        (/** @type {HTMLButtonElement} */(document.getElementById('subscribe-button'))).disabled = disable;
+    }
 }
 
 
