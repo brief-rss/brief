@@ -364,10 +364,6 @@ export class Database {
         return newFeedIds;
     }
 
-    static async remoteAddFeeds(feeds, options) {
-        return Comm.callMaster('feedlist-add', {feeds, options});
-    }
-
     _addFeeds(feeds, options) {
         let parent = options ? options.parent : String(Prefs.get('homeFolder'));
         let newFeedIds = [];
