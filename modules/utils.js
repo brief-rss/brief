@@ -315,6 +315,7 @@ export let Comm = {
  * @typedef {import("/modules/database.js").Feed} Feed
  * @typedef {import("/modules/database.js").FeedUpdate} FeedUpdate
  * @typedef {import("/modules/prefs.js").PrefNamesValues} PrefNamesValues
+ * @typedef {import("/modules/opml.js").ImportedNode} ImportedNode
  */
 
 /**
@@ -322,7 +323,7 @@ export let Comm = {
  * @typedef {object} HandlerTypes
  * @property {(arg: {feeds: Feed | Feed[] | null}) => void} entries-expire
  * @property {(arg: {feeds: string[], entries: any, changes: any}) => void} entries-updated
- * @property {(arg: {feeds: any, options: any}) => void} feedlist-add
+ * @property {(arg: {feeds: ImportedNode[], options?: {parent: string}}) => void} feedlist-add
  * @property {(arg: {feeds: Feed | Feed[]}) => void} feedlist-delete
  * @property {() => Feed[]} feedlist-get
  * @property {(arg: {updates: (FeedUpdate | FeedUpdate[])}) => void} feedlist-modify

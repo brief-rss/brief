@@ -4,6 +4,7 @@ import {Comm, parseDateValue, asArray, hashString} from "./utils.js";
 
 /**
  * @typedef {import("/modules/feed-parser.js").ParsedFeed} ParsedFeed
+ * @typedef {import("/modules/opml.js").ImportedNode} ImportedNode
  */
 
 /**
@@ -343,14 +344,18 @@ export class Database {
         }
     }
 
+    /**
+     * @param {ImportedNode | ImportedNode[]} feeds
+     * @param {{parent: string}} [options]
+     */
     async addFeeds(feeds, options) {
+        feeds = asArray(feeds);
         if(!Comm.master) {
             return Comm.callMaster('feedlist-add', {feeds, options});
         }
         if(Comm.verbose) {
             console.log('addFeeds', feeds, options);
         }
-        feeds = asArray(feeds);
         await Promise.all(feeds.map(feed => Database._hashFeedUrls(feed)));
         console.log('hashed', feeds);
 
@@ -364,6 +369,9 @@ export class Database {
         return newFeedIds;
     }
 
+    /**
+     * @param {{parent: string}} [options]
+     */
     _addFeeds(feeds, options) {
         let parent = options ? options.parent : String(Prefs.get('homeFolder'));
         let newFeedIds = [];

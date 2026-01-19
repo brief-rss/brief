@@ -797,7 +797,7 @@ export let FeedList = {
             this.rebuild();
             return;
         }
-        this.db.addFeeds({title, parent: feedID});
+        this.db.addFeeds({title, children: []}, {parent: feedID});
     },
 };
 
