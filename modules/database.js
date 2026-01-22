@@ -139,7 +139,7 @@ export class Database {
                 }
                 this.query({entryURL: url, starred: 0})._update({
                     action: e => { e.starred = 1; },
-                    changes: {starred: 1},
+                    changes: {starred: true},
                 });
             });
             browser.bookmarks.onRemoved.addListener((_id, {node: {url}}) => {
@@ -148,7 +148,7 @@ export class Database {
                 }
                 this.query({entryURL: url, starred: 1})._update({
                     action: e => { e.starred = 0; },
-                    changes: {starred: 0},
+                    changes: {starred: false},
                 });
             });
             //TODO: onChanged
@@ -983,6 +983,12 @@ export class Database {
  * @property {number} lastFaviconRefresh
  *
  * @typedef {Pick<Feed, 'feedID'> & Partial<Feed>} FeedUpdate
+ *
+ * @typedef {Object} EntryChanges
+ * @property {boolean} [content]
+ * @property {boolean} [starred]
+ * @property {boolean} [read]
+ * @property {false | 'deleted' | 'trashed'} [deleted]
  */
 
 
@@ -1228,7 +1234,7 @@ class Query {
     }
 
     /**
-     * @param {boolean | 'trashed' | 'deleted'} state
+     * @param {false | 'trashed' | 'deleted'} state
      * FIXME should reduce the number of options, this is not nice
      */
     async markDeleted(state) {
@@ -1254,7 +1260,7 @@ class Query {
                     // Database does not match bookmarks - correct database directly
                     await this._db.query(entry.id)._update({
                         action: e => { e.starred = state ? 1 : 0; },
-                        changes: { starred: state ? 1 : 0 },
+                        changes: { starred: state },
                     });
                 }
             });
@@ -1308,6 +1314,9 @@ class Query {
         await callbackPromise;
     }
 
+    /**
+     * @param {{action: any, changes: EntryChanges, stores?: string[]}} _
+     */
     async _update({action, changes, stores=['entries']}) {
         let tx = this._db.db().transaction(stores, 'readwrite');
 
